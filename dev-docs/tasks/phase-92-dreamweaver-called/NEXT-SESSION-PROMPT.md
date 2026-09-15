@@ -1,57 +1,65 @@
 # Phase 92 — next session
 
-**Written 2026-09-15 at the end of s2 (CHR-002).** Branch `cline-dev`. Phase commits: `2225624e1`
-(scoping + CHR-001 + rulings), `0a4c53e24` (ratchet), `9706a1a81` (the type scale), then this
-handoff's docs commit.
+**Written 2026-09-15 at the end of s3 (CHR-003).** Branch `cline-dev`. Phase commits so far:
+`2225624e1` (scoping, CHR-001, rulings), `0a4c53e24` + `9706a1a81` (CHR-002), `f25d5816f` (radii and
+shadows), `57512511d` (fonts), `965ce9cbb` (`PrimaryButton` border), then this handoff's docs commit.
 
 ## The board, from the task files
 
 | id | state |
 |---|---|
-| CHR-001 the before picture | ✅ committed **without its 14 PNGs** (Richard's ruling; they are on this disk only, sha256 in `manifest.json`) |
-| CHR-002 the type scale | ✅ built, AC1–5 ✅ (§6.2). **Awaits Richard's look** at `verdicts/CHR-002/2026-09-15/` |
-| CHR-003 … CHR-011 | ⬜ none built |
-| R1 | ✅ ruled as proposed, **≤ 6** sizes, graded on the **visible text-bearing** count |
+| CHR-001 the before picture | ✅ committed without its PNGs (ruling; sha256 in `manifest.json`) |
+| CHR-002 the type scale | ✅ **Richard looked in the dev editor, s3: "Looks good."** The three §6.1 calls (12.5 → 12, `body` at 12, widened scope) stand |
+| CHR-003 one radius, one shadow, one box model | ✅ built s3, AC1–4 ✅, AC5 in §6.3. Not yet looked at by Richard — the verdicts are in `verdicts/CHR-003/2026-09-15/` |
+| CHR-004 … CHR-011 | ⬜ none built |
+| R1 | ✅ ruled |
 | R2–R8 | proposed, not ruled (README §4) |
-| C3 (guest sees internal KPIs) | ruled "hide from guests", **filed on P75's board** (`TASKS.md`, "Ruled 2026-09-15"); not ours |
 
 ## First job
 
-1. **Show Richard CHR-002's before/after**, one message, and ask for the look:
-   Templates 6 → **5** text sizes, Group panel 7 → **2**, both themes. Three calls he may overrule,
-   all in CHR-002 §6.1: **12.5 → 12** (not 13); **`body` stays 12** (§3.3 said 13); scope widened to
-   `styles/propertyeditor/` and three `style.css` rules, because the panel's 9px lived there.
-2. **Then build CHR-003** (one radius, one shadow, box-sizing, dead fonts). No ruling named.
-   🔴 Re-read every row of its §2 **at HEAD** first — they are a sweep's readings.
-3. If CHR-003 turns out to need a ruling, build **CHR-007** (Ports → row descriptors): no ruling,
-   behaviour-identical, pinned by the existing panel specs.
-4. **CHR-004 is now unblocked by dependency** (CHR-002 ✅) but names **R3** — ask before building it.
+1. **Build CHR-007** (Ports → row descriptors). No ruling, behaviour-identical, pinned by the existing
+   panel specs as characterisation. 🔴 Re-read every `·` row of README §3 it builds on **at HEAD** —
+   CHR-003's §2 was wrong four ways (§6.1 there).
+2. **CHR-004 names R3** — ask Richard before building it. CHR-003 found that `border-sweep/` pins
+   which token an edge uses, not radii, so nothing from CHR-003 is waiting in it.
+3. Offer Richard CHR-003's look when it is convenient (Projects and Templates, both themes, in
+   `verdicts/CHR-003/2026-09-15/`); do not block CHR-007 on it.
 
-🔴 Do not farm the 8 `test:ci` reds below. Do not re-take the before picture.
+🔴 Do not farm the P88 `test:ci` reds. Do not re-take the before picture.
 
-## `test:ci` is not at "floor 4" any more — read by NAME
+## `test:ci`
 
-`9706a1a81`, seed 39393: **`2984 specs, 8 failures`**, none CHR-002's. AIX-006's four were fixed in
-`4ce67963a`. The eight are **P88's**: SUB-006 ×3 + SUB-011 ×3 (`nonexistent-port` on fixtures, GAM-019
-`4bb438165`) and NDA-017 ×2 (Expression's `evaluateAtLoad`, GAM-001/002/003 `89e533625`). GAM-019's own
-file says its `test:ci` run is still owed. A reading of 8 with a **different** name is a regression.
+**`965ce9cbb`, seed 39393, cache cleared, run alone: `2984 specs, 8 failures`** — the same eight by
+name as at `9706a1a81` (CHR-003 §6.3 AC5): `SUB-006` ×3, `SUB-011` ×3, `NDA-017` ×2, all P88's. One
+`NDA-017` is "Text Input has no checkbox port", the other Expression's static inputs. **A reading
+with a different name is a regression; compare by name, never by count.** When P88 repairs those
+fixtures the floor becomes 0.
 
-## How to re-measure (any ratchet, CHR-011)
+## How to drive the chrome (CHR-003's recipe, cheapest that works)
 
-- **Static:** `npm run type` (baseline 727; the three CHR-001 scopes read 0 / 0 / 0). Lower with
-  `npm run type:baseline` in a commit of its own.
-- **Rendered:** `verdicts/CHR-001/2026-09-15/capture.js` + `measure.js`, **unchanged**, per CHR-002
-  §6.2 AC1: fresh `cp -R` fixtures, a seeded `NOODL_USER_DATA_DIR` profile, `NOODLPORT=8674`,
-  `NOODL_REMOTE_DEBUG_PORT=9333`, then `window.resizeTo` to **1368×781** before `capture.js`.
-  🔴 A task that changes chrome needs **its own build** (dev stack), not the packaged app.
-  Check App `nodes.json` md5 before/after (`4373f147…`).
+- One dev stack, launched from `packages/noodl-editor` with `npm run start` (never sweeps a peer):
+  `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 NOODL_USER_DATA_DIR=<scratch>/profile`, the profile
+  seeded with `firstRunLegal.json`, `editorSettings.json` and a `recently_opened_project.json` that
+  points at **fresh `cp -R` copies** of `Landing page test V2` and `Reading Shelf` from
+  `~/vscode_projects/NodeGX test projects/`. App `nodes.json` md5 `4373f147…` before and after.
+- 🔴 **Resize after every reload**: `window.resizeTo(outerWidth + (1368-innerWidth), outerHeight +
+  (781-innerHeight))`, then check `innerHeight`. A reload resets to 900 and `capture.js`'s canvas
+  coordinate then misses the Group.
+- Light theme without a second stack: `document.documentElement.setAttribute('data-theme','light')`
+  after load (what `ThemeManager.ts:175` does); check each shot's `renderedTheme` in the manifest.
+- **Stop it by process group** (the Electron with `--user-data-dir=…/profile` → its pgid → `kill
+  -TERM -pgid`, then `-KILL`, then its crashpad handler). Ports 9333 / 8674 / 8080 free after.
 
-## Traps (details in CHR-002 §6.4, CHR-001 §6.5)
+## Traps (details in CHR-003 §6.5, CHR-002 §6.4)
 
-- 🔴 **`npm run dev:debug` sweeps peers' `drive-deployed.js` servers** (it killed the one on 8765 in
-  s2). **Dry-run the sweep first**; if a peer is named, launch with `packages/noodl-editor`
-  `npm run start` (never sweeps) and stop with `kill -KILL` of the watchdog, then each process group.
-- The dev window opens at 1368×**900**; `Browser.getWindowForTarget` does not exist in Electron.
-- A click inside the open node picker inserts a node and autosaves. Hovering the Design-mode
-  preview leaves its tooltip up.
-- zsh does not split an unquoted `$VAR` list: `for p in $SET` iterates once.
+- 🔴 **Richard, s3: "Stop sucking up the entire CPU."** Jest beside a renderer rebuild (a 73 MB bundle,
+  160s) took the load to 20. One heavy job at a time; tear the stack down between drives; run
+  `test:ci` alone.
+- 🔴 A probe element inside a `display: flex` row stretches to the row — `align-items: flex-start`.
+  A tie between two arms grades nothing without an arm that must differ.
+- 🔴 Parallel Bash calls share one working directory; a `cd` in one breaks relative paths in the
+  others. Absolute paths.
+- 🔴 A repo grep for a token counts the built `index.bundle.js` copies (5–6× inflation). Count source.
+- `npm run dev:debug` sweeps peers' `drive-deployed.js` servers — use `npm run start` in the package.
+- A click inside the open node picker inserts a node and autosaves; `capture.js` leaves the picker
+  open at the end (`picker closed: false`) — reload before driving anything else.

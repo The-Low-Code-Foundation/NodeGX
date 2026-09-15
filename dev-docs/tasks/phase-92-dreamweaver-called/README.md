@@ -1,7 +1,7 @@
 # Phase 92 — Dreamweaver called
 
 **Scoped:** 2026-09-15, from a measured audit of the installed **0.2.4** and `cline-dev` HEAD `e740727f8`.
-**Status: 🟡 CHR-001 ✅ and CHR-002 ✅ built 2026-09-15 (PNGs kept local by ruling; CHR-002 awaits Richard's look), R1 ruled, R2–R8 still unruled. Next: CHR-003, then CHR-007.** **Prefix: `CHR`** (chrome).
+**Status: 🟡 CHR-001 ✅, CHR-002 ✅ (Richard's look: "looks good", 2026-09-15 s3), CHR-003 ✅ built 2026-09-15 s3 (AC5 `test:ci` reading in CHR-003 §6.3). PNGs kept local by ruling. R1 ruled, R2–R8 still unruled. Next: CHR-007 (no ruling), then CHR-004 once R3 is ruled.** **Prefix: `CHR`** (chrome).
 **The baseline is [`verdicts/CHR-001/2026-09-15/`](./verdicts/CHR-001/2026-09-15/) — read CHR-001 §6 before any ratchet;
 it corrects two §3 rows below (the hint prints 6×, not 7×; the Templates "10 sizes" counts off-screen elements).**
 
@@ -77,8 +77,8 @@ sweep, not re-read — **re-read before building on it.**
 | · | Projects grid is fixed `repeat(3,1fr)` with a 224px sidebar; other tabs full-bleed at 32px | `Projects.module.scss:8-37`; `LauncherPage.module.scss:6` |
 | · | `style.css` (1,651 lines, statically linked): `body{font-size:12px}`, `*:focus{outline:none}`, element font reset, 20 `@font-face` of which 1 is live, 7 `!important` | `noodl-editor/src/assets/css/style.css:33-176, 183-307` |
 | · | `index.html` preloads five Inter TTFs; the UI face is the system stack | `editor/index.html:6-14`; `fonts.css:20` |
-| · | No global `box-sizing`; `PrimaryButton` documents the inset-ring workaround | `PrimaryButton.module.scss:59-62` |
-| · | Token file: 4 files, 576 properties, light theme 112 overrides, `--font-size-*` 8 steps, radii incl. mock-derived 5/7/10 (PAR-001), 13 shadows with 35 consumers total | `noodl-core-ui/src/styles/custom-properties/` |
+| ✔ | ~~No global `box-sizing`~~ — **wrong: F20 set `border-box` globally on 2026-07-28** (`style.css:5-30`). `PrimaryButton`'s inset ring was built on the stale claim; CHR-003 made it a border | CHR-003 §6.1 |
+| ✔ | Token file: 4 files, `--font-size-*` re-pointed by CHR-002; radii 5/7/10 (PAR-001) **deleted by CHR-003** (41 source sites); shadows now **4** (`card`, `card-hover`, `float`, `toast`) — the "13 shadows, 35 consumers" reading was 12 names and 30 source sites | `noodl-core-ui/src/styles/custom-properties/`; CHR-003 §6.1 |
 | · | **28 tests parse CSS/SCSS text**; 7 assert property-panel/sidebar class names; `LauncherButton.module.scss:54-58` names the test that reddens on a one-step hover change | `tests-unit/border-sweep/*`, `fb-017/groupHeading.test.tsx`, `property-editor/portHint.test.ts:123`, `fb-018/bindingChipRows.test.tsx:121`, `leg-005/nodeCommentRow.test.ts:47` |
 | · | Property panel: 158 files / 23,284 LOC; 4 shells + 3 abstract bases + **38 row classes** extend `ListenableView`; **39 files call `createRoot`** | `views/panels/propertyeditor/**` |
 | · | Port→widget: 37 predicates, 40 branches, one 283-line method | `DataTypes/Ports.ts:790-1072` |
@@ -118,7 +118,7 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
 |---|---|---|---|
 | [CHR-001](./CHR-001-THE-BEFORE-PICTURE.md) | The before picture: the screenshot corpus on both surfaces at HEAD, and the four numbers every later ratchet starts from | audit | — |
 | [CHR-002](./CHR-002-THE-TYPE-SCALE.md) ✅ | Five sizes + display, tokenised, and a `font-size` ratchet on the model of the hex ratchet (948 → 727); the two surfaces converted (R1). Templates 6 → **5** sizes, Group panel 7 → **2**, both themes. `body` kept at 12 as a token (§6.1) | audit §1 | CHR-001 |
-| [CHR-003](./CHR-003-ONE-RADIUS-ONE-SHADOW-ONE-BOX-MODEL.md) | Radii 5/7/10 retired, two shadows, a global `box-sizing`, the inset-ring workaround deleted, 19 dead `@font-face` and five preloads dropped | audit "small stuff" | CHR-001 |
+| [CHR-003](./CHR-003-ONE-RADIUS-ONE-SHADOW-ONE-BOX-MODEL.md) ✅ | Radii 5/7/10 deleted (Projects 9 → **4** radii, Templates 5 → **4**), four shadows, the inset ring now a border (geometry identical), 19 dead `@font-face` and five preloads dropped (boot loads Bricolage only). The global `box-sizing` already existed (F20) | audit "small stuff" | CHR-001 |
 | [CHR-004](./CHR-004-THE-GATES-MEASURE-THE-SCALE-NOT-THE-FILLS.md) | The 28 CSS-text tests become gates on rendered contrast and on the scale; class-name assertions become behaviour or `data-*` (R3) | audit §3 | CHR-002 |
 
 ### Track A — the launcher
