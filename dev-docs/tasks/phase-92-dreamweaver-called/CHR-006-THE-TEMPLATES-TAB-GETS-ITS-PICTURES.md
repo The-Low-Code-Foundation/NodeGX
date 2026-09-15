@@ -157,3 +157,19 @@ Rig: `next dev -p 3399` on a scratch DB with `0029`; the five community template
 failures`**, EXIT=1, `tests/test-results.json` written 19:25:58 (the same second the run ended — fresh). **The same
 eight by name as s4 and s5:** `SUB-011` ×3 (expression parameters stay silent), `SUB-006` ×3 (false-positive corpus,
 v2 loader), `NDA-017` ×2 (family table vs shipped catalog). None touch the launcher or the shelf. **At the floor.**
+
+### 6.7 Richard's rulings and AC4 live — 2026-09-15, after s6
+
+**Rulings (Richard, on the §6.3 shots):**
+1. **CHR-006: WORTHY.** Track A's surface closes. (CHR-005 and CHR-003: "fine". The Community tab "still looks like shit" — a new task, CHR-012. "The font change is nice.")
+2. **Which two are big:** pictured cards first, as built — "fine for now".
+3. **AC2:** **the editor's screenshot wins.** The seed stays as built (it fills the thumbnail until the first capture), and the card showing the editor's capture after creation is the ruled behaviour, not a defect. AC2 closes.
+4. **AC4:** deploy and publish approved.
+
+**AC4, done and read back over real TLS:**
+- `ops/deploy.sh 49.12.102.195` from `nodegx-community` clean at `f39d20f`: **DEPLOY_EXIT=0**; live stamp before `ade0d28`, after `f39d20f`; `already applied: 28`, `applied: 0029_chr006_template_picture_and_eyebrow.sql`; neighbours `nodegx.io`, `nexus.digitalbricks.io`, `digitalbricks.io` **200 → 200**; off-site backup 577,076 bytes / 57 tables encrypted; outbox 0 queued.
+- **Not a republish** — `set-live-template-cards.sh` (this directory) sets only `eyebrow`, `thumbnail`, `thumbnail_type` on the four published rows over the ssh tunnel. Reason: `templates/rocket-school` held another session's uncommitted edits, and `publish-project-template.ts` would have shipped them as the payload. **CARDS_EXIT=0.**
+- Control before: `https://community.nodegx.io/api/v1/community/templates` listed all five with `eyebrow: null, thumbnail: null` (the new build answering, no card yet).
+- After: `rocket-school` `Game · ages 8–12`, `todo-list` `Productivity`, `pixel-dungeon` `Game`, `story-engine` `Interactive story`, each with `…/thumbnail?v=2`; `members-area` `null`/`null`. **Versions (v2) and file counts (112 / 30 / 34 / 274 / 100) unchanged** — no payload moved.
+- Each thumbnail: **HTTP 200 `image/webp`** — 15,844 / 36,308 / 18,054 / 24,224 bytes; the live Todo list bytes **`cmp`-identical** to `audit/demos/todo-list.webp`; `members-area/thumbnail` **404** (the control).
+- ⚠️ A released 0.2.4 editor ignores the two new fields; the pictures reach people with the next editor build that carries `c4fbcde10`.
