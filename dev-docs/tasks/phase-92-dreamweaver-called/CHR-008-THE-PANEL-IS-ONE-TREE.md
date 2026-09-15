@@ -106,3 +106,87 @@ wears `.sidebar-panel` too — file it if it needs the same treatment.
   with a drive — they are the ones where "already React inside" is least true.
 - ⚠️ `Select` inside a `Modal` closes the modal; a `Select` inside the popup layer may do the same
   to a popout. Drive a `PopoutGroup` with an enum before declaring §3.6 done.
+
+## 6. Built — s8 (2026-09-15), slice 1: R8 (§3.3, AC1), uncommitted
+
+**Why this slice first.** Richard on s1–s4: *"everything in the tasks up to now still looks like shit"*; the
+lesson filed after s4 is to put a visible surface in front of him early rather than sequence every foundation.
+§3.3 (R8) is the one part of this task a person sees, and it does not need the 38 row classes converted: the
+decision is data (CHR-007's descriptors) and the drawing is two small changes at the seam that already exists.
+§3.1, §3.2, §3.4–§3.8 are **not built**.
+
+### 6.1 What changed
+
+- **`propertyeditor/model/groupGate.ts`** (new, import-free but types) — `groupGatesFor(rows)` answers which groups
+  draw ONE line: every gate-decorated row in the group switched off by the **same** port under the **same**
+  condition, **≥ 2** of them; rows with `tab` / `parent` / `popout` do not count (`renderParams` never decorated
+  them). Sentence `<labels> apply once <condition>.` when `turnOn`, `… apply when …` otherwise.
+- **`PortGateReason`** gains optional `condition` (the phrase after "applies when") and `turnOn` (one clause,
+  `<boolean port> = true` — an enum, `!=`, `NOT SET`, `= false` or several clauses is not a single press). Both set
+  by `reasonsForGatedPorts`; the per-row `sentence` FB-021 pins is unchanged.
+- **`applyPortGate`** takes `quiet`: dimmed and inert as before, **no sentence, no link**, the sentence kept as the
+  row's `title`; the dead-wire line is still drawn (a fact about that row's wiring).
+- **`PropertyGroups.tsx`** — `GroupGateLine` (hook-free, exported): the sentence and one verb reusing
+  `.property-port-gate-link`, `stopPropagation` so the click cannot fold the group; drawn under the heading while
+  the group is expanded. `PropertyGroupModel.gate`.
+- **`Ports.ts`** — `renderGroups` computes `groupGatesFor(this.rowDescriptors())` once; `renderParams(views,
+  groupGates)` draws covered rows quiet; `groupGateLine()` maps `turnOn` → `Turn on` =
+  `this.setParameter(gatePort, true)` (the undoable write every row uses), otherwise `Show <control>` =
+  `focusGatePort`.
+- **`propertyeditor.css`** — `.property-group-gate`, FB-021's notice rule spoken once.
+
+### 6.2 Specs and their arms
+
+- `tests-unit/chr-008/groupGate.test.ts` — rows rebuilt from the shipped catalog exactly as CHR-007's spec does:
+  Group, Shadow off → **one** Box Shadow line covering the six ports, `turnOn`, sentence names the switch once;
+  reverted arm (Shadow on) → no line; refusals (two switches, two conditions, one row, tab/parent/popout rows, no
+  condition); enum reads "when"; `= false` is not `turnOn`.
+- `tests-unit/chr-008/groupGateRender.test.tsx` — a quiet row: dimmed + `aria-disabled`, **no** sentence and link
+  **beside a control row that has both**, title kept, dead wire still drawn; the line: one sentence, one verb, the
+  verb acts and stops propagation.
+- **Mutants** (`<s8 scratch>/chr008/mutants.sh`, backup → mutate → jest → restore → `cmp`): A — drop the shared-gate
+  refusal → **3 red**; B — a quiet row appends its sentence → **1 red**; C — `turnOn` without `= 'true'` → **1 red**.
+  All three restored byte-identical; unmutated **23 / 23**.
+
+### 6.3 Readings (2026-09-15, tree `2c5c31fa2` + CHR-012 pass 3 + this slice)
+
+- Full `tests-unit` **442 / 442 suites, 7,310 tests** (includes CHR-007's characterisation, unchanged, and every
+  `fb-017` / `fb-018` / `fb-021` / `leg-005` assertion). `tsc -p packages/noodl-editor --noEmit` **EXIT=0**;
+  `type` / `colors` / `tokens:css` / `icons:css` **EXIT=0**. `test:ci` seed 39393: **`2984 specs, 8 failures`**, the
+  floor's eight by full name, 0 new.
+
+### 6.4 The drive (AC1) — `verdicts/CHR-008/2026-09-15/`
+
+Dev stack (`npm run dev`, `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333`, scratch profile), a **copy** of
+`templates/story-engine` (`diff -rq` identical before opening; the drive refuses any other directory), `/Story/Passage`
+→ the Group `psWrap` ("One passage", Shadow Enabled unset), selected by id. `gate.js`, one connection, 1368×900,
+the verb pressed by a trusted `Input.dispatchMouseEvent` after `elementFromPoint` said it was reachable. EXIT=0.
+
+| state | lines in Box Shadow | row sentences in it | dimmed rows | `boxShadowEnabled` |
+|---|---|---|---|---|
+| dark, Shadow off | **1** — *"Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on."* + `Turn on` | **0** | **6** (each keeps its sentence as `title`) | unset |
+| dark, after `Turn on` | **0** | 0 | **0** | **`true`** |
+| dark, after undo | **1** | 0 | 6 | unset |
+| light, Shadow off | 1 | 0 | 6 | unset |
+
+Shots: `chr008-group-shadow-off-{dark,light}.png`, `chr008-group-shadow-turned-on-dark.png`,
+`chr008-group-shadow-undone-dark.png`. Read with the images open: one amber-ruled line under the heading, the verb
+beside it, six greyed rows under a live switch; after the press the rows are ordinary rows and Shadow Enabled
+carries its set-dot. CHR-001 counted the per-row sentence **6×** under this switch at HEAD.
+
+**What the same panel shows beyond Box Shadow** (measured, one eval on the open panel): `Scroll To Index` also gets
+a line (two rows, one condition). `Scroll` keeps **five** per-row sentences — its rows share the switch
+(`flexDirection`) but not the condition, which is §3.3's fallback working as specified. `Dimensions`, `Layout`,
+`File Drop`, `Pointer Events`, `Scroll To Element` have one gated row each and keep their one sentence. 10
+row sentences remain on the panel.
+
+⚠️ **Recorded, not built:** `Scroll`'s sentences say `Show Layout` when the switch a person needs is `Enable
+Scroll` — FB-021's `gatePortName` is the condition's *first* clause. A group line would inherit that; a better
+target is the clause that is currently false.
+⚠️ Element count **1,126** and inline-styled **250–251** on this Group are unchanged — that is AC4, §3.1's work.
+
+### 6.5 Owed on this task
+
+1. **Richard's look** at the four shots (R8 is his ruling; the wording *"apply once … is on"* is proposed, not ruled).
+2. §3.1 (one tree, 38 row classes), §3.2 (decorators as props), §3.4 (identity — AC2, AC5), §3.5, §3.6, §3.8; AC3,
+   AC4, AC6's blink check. `test:ci` at the floor.

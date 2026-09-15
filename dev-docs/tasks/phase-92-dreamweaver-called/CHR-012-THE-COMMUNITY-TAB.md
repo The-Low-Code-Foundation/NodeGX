@@ -138,7 +138,7 @@ words; CHR-005's rendered-contrast pass unchanged.
   link — classification, not a second style.
 - jest after pass 2 (`fb-013`, `nat-005`, `fb-002`, `rel-019`, `nat-001`): **14 / 14 suites, 480 / 480**, EXIT=0.
 
-### 7.5 Owed
+### 7.5 Owed (as written at the end of s7 — see §7.6 for what s8 did with it)
 
 1. **Richard's look** at `prod-signed-out-v2/` (and pass 1 at 700×500) — the close.
 2. **AC1's signed-in view**, against a local platform seeded lopsided. Prepared, not run: scratch DB
@@ -152,3 +152,55 @@ words; CHR-005's rendered-contrast pass unchanged.
 5. Not this task, recorded: the segmented room strip's active fill (1.17 / 1.10) is CHR-004/CHR-005's pre-existing
    row; `health` is computed and read by nothing (R9 — where we read it is unbuilt); the thread / profile panes are
    still cards.
+
+### 7.6 s8 (2026-09-15) — the signed-in view, what it found, pass 3, the rail
+
+**The signed-in drive found what two signed-out passes could not.** Local platform (`nodegx-community` `f39d20f`,
+`next dev -p 3399`, scratch DB `chr012_community` re-seeded, EXIT=0), `COMMUNITY_URL` swapped to `localhost:3399`
+(bundle confirmed carrying it), editor on a copy of `profile-signed-in` — head read `@ada-builds · 105 points ·
+2 badges`, platform log `GET /api/v1/me 200`.
+
+- `local-signed-in/` — 20 shots, EXIT=0. Title x120 y84 (1368) / x20 y137 (700) as signed out; 0 past the right
+  edge; R9 words 0; page sizes **5** (11, 12, 13, 15, 26). 🔴 **Two bespoke buttons, both invisible to a guest:**
+  Chat's composer verb `Say something` (`.ReplySubmit`) and People's `Take me off /people` (`.AcceptButton`) —
+  outlined 3px boxes, "other" 1/1 in Chat and People. AC2 was false for every signed-in person.
+
+**Pass 3 — one button vocabulary on the write surfaces too.** Every `.ReplySubmit`, `.AcceptButton` and
+`.PostEditQuiet` in `components/community` is now `PrimaryButton` `Small`: the verbs (`Say something`, `Reply`,
+`Post answer`, `List me on /people`) `Cta`; `Take me off /people`, `Accept this answer`, the edit's `Save` `Muted`;
+`Edit`, `Remove`, `Cancel` `Text`. 12 sites in `CommunityChatView`, `CommunityListingCard`, `CommunityThreadView`;
+the three rules deleted from `Community.module.scss` (0 left). `data-test`: `community-reply-submit`,
+`community-accept`, `community-post-save|cancel|edit|remove`, `community-listing-ask|withdraw`.
+Still raw `<button>`s, recorded not built: `LinkButton`, `PullButton`, the row buttons, `CommunityProfileView`'s four.
+
+- Specs re-pointed per R3, every behavioural assertion kept: `fb-013/chat-composer-render` and
+  `nat-007/thread-write-render` find the verb by `byTestId` (new, `support/renderElements.ts`) and read its words with
+  `text()` — `PrimaryButton` puts the label in a child `<span>`, so `ownText` on the `<button>` is `''`;
+  `rel-015/listing-render` reads `text(b)` (6 sites). 🔴 `PrimaryButton` imports `Icon` ⇒ FLD-017's stub added to
+  **15** specs that reach the community package (`fb-002`×2, `fb-013`×2, `nat-007`×4, `nat-008`×2, `rel-015`×2,
+  `tut-004`, `fb-007/capture-upload`, `nat-009/rfpboardview`) — the last two through `models/community/threadview`,
+  found only by the full `tests-unit` run.
+- `local-signed-in-v3/` (Chat, People × 2 sizes × 2 themes) — 8 shots, EXIT=0: **"other" 0/0 in all 8**;
+  `PrimaryButton` 3 controls / 2 styles (the head's two `Text` + the room's verb).
+- `local-signed-out/` (same platform, session file parked, head `Reading as a guest · Sign in`) — 20 shots, EXIT=0:
+  "other" 0/0 in all 20; `PrimaryButton` 3 / 2; sizes page 5, content 3–4; R9 words 0.
+- `rail/` (`rail.js`, the rail's Community panel on an open project copy, signed in) — 2 shots, EXIT=0: panel 378 wide;
+  **chip 28px, both chips on one 300px row, no overflow, 0 past the panel edge**; sizes 11/12/13; `PrimaryButton` 2/1;
+  "other" 5/1 = the panel header's `IconButton`s (mode controls + refresh), not a text button. The rail's section
+  bands (`Discussions`, `Tutorials`) are the `Panel` density's own and were not touched.
+- `COMMUNITY_URL` reverted: `git diff` on `communityorigin.ts` **0 lines**.
+
+**Readings (2026-09-15, tree `2c5c31fa2` + this change):** full `tests-unit` **442 / 442 suites, 7,310 tests**
+(first run 440 + 2 failed-to-run on `Icon`, fixed, re-run 2/2 58/58); `tsc -p packages/noodl-editor --noEmit`
+**EXIT=0**; `type` / `colors` / `tokens:css` / `icons:css` **EXIT=0**; `type:baseline` core-ui **124 → 123**
+(`Community.module.scss` 4 → 3; the two uncommitted stylesheets it absorbed are both this session's, by mtime).
+`test:ci` (seed 39393, `.webpack-cache` cleared, no stack): **`2984 specs, 8 failures`** — the recorded floor's eight by
+full name (SUB-006 ×3, SUB-011 ×3, NDA-017 ×2), 0 new; tree also carried the P88 peer's uncommitted `noodl-mcp` /
+`nodegx-backend` / `noodl-runtime` / `validation/*.ts`.
+
+### 7.7 Owed now
+
+1. **Richard's look** — `local-signed-in-v3/`, `local-signed-out/`, `rail/`, beside `prod-signed-out-v2/`. The close.
+2. `test:ci` at the floor by name.
+3. Recorded, not this task: the thread and profile panes' remaining raw buttons (§7.6); the segmented room strip's
+   active fill (CHR-004); `health` read by nothing (R9).
