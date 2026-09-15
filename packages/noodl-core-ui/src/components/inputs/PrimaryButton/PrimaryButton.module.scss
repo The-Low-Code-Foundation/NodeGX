@@ -56,14 +56,19 @@
   // button read as a line of text rather than as a control, everywhere, in both
   // themes. The ring is what makes it a control; see `--theme-color-border-control`.
   //
-  // An inset shadow rather than `border`, deliberately: nothing in this repo sets
-  // a global `box-sizing`, so a 1px border would grow all 143 call sites by 2px
-  // in each dimension — the trap `BasePanel.module.scss` already records. An
-  // inset ring paints on the same edge and costs no layout.
+  // A real border (CHR-003). This used to be an inset `box-shadow` ring, on the
+  // stated ground that nothing set a global `box-sizing` — but `style.css` has
+  // set `border-box` on everything since F20 (2026-07-28). Under border-box a
+  // `min-height` holds the box, but a small button's content is taller than its
+  // 28px minimum, so the border would still add 2px; the padding gives the pixel
+  // back, and every size renders at exactly the height the ring had. As a border
+  // it also survives `:disabled`'s `box-shadow: none !important`, which the ring
+  // needed restating against.
   &.is-variant-muted,
   &.is-variant-muted-on-low-bg {
     color: var(--theme-color-fg-default);
-    box-shadow: inset 0 0 0 1px var(--theme-color-border-control);
+    border: 1px solid var(--theme-color-border-control);
+    padding: calc(var(--spacing-button-padding-y) - 1px) calc(var(--spacing-button-padding-x) - 1px);
 
     path {
       fill: var(--theme-color-fg-default);
@@ -132,14 +137,9 @@
     }
   }
 
-  // The rule above kills the CTA drop shadow on a disabled button, and would take
-  // the muted ring with it — leaving `Save policy` to vanish for as long as it
-  // reads `Saving…`, which is the one moment a user is looking at it. Restate it,
-  // dimmed by the inherited 0.5 opacity rather than by a second colour.
-  &:disabled.is-variant-muted,
-  &:disabled.is-variant-muted-on-low-bg {
-    box-shadow: inset 0 0 0 1px var(--theme-color-border-control) !important;
-  }
+  // The rule above kills the CTA drop shadow on a disabled button. The muted
+  // variants' edge is a border, so it survives — `Save policy` stays a control
+  // while it reads `Saving…`, dimmed by the inherited 0.5 opacity.
 
   &:focus-visible {
     outline: 2px solid var(--theme-color-focus-ring);
