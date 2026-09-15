@@ -89,6 +89,10 @@ jobs:
       # tracked per package (noodl-editor, noodl-core-ui) so a drop in one
       # can never mask a silent rise in the other.
       - run: npm run colors
+      # Same shape for raw px font sizes (CHR-002): the chrome has a type scale
+      # (R1, phase 92: 11/12/13/15/20 + 26) as --font-size-* tokens, and a
+      # `font-size` or `font:` shorthand in px is a size that scale cannot reach.
+      - run: npm run type
       # Not a ratchet — a gate at zero (UIX-011). An SVG referenced from CSS via
       # url() renders as its own document and cannot inherit the theme colour,
       # so it silently breaks the light theme. There is no legacy tail left to
