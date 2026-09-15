@@ -48,6 +48,12 @@ from the board itself, and in phase 82.
    to nexus-1 from `main` will carry C5 with it** — and with `NODEGX_MODERATORS` unset the hide route
    would 404 for everybody, Richard included. **Set the var in the same act, or not at all.**
 
+### ⬜ Ruled 2026-09-15, filed from phase 92 — owner: phase 75
+
+| row | disposition | why |
+|---|---|---|
+| **FB-013 · guest health tiles** | ⬜ **OPEN, ruled, no rulings outstanding** | Phase 92's before picture (CHR-001 §6.4 **C3**, `verdicts/CHR-001/2026-09-15/launcher-community-*.png`) found the Community tab's "How the community is doing" tiles showing a **signed-out guest** internal KPIs: `2 of 30 threads`, `0 of 3 consecutive weeks with a call`, `(n=0, 2 unreplied), target under 24h`, with "no replies yet" at a display size. **Richard ruled: hide the tiles from a signed-out reader; members still see them; the words do not change.** 🔴 Keep the words: P67 D21's readout is graded on them (P82 REL-019 left them unchanged for that reason). Where: `noodl-core-ui/src/preview/launcher/Launcher/views/Community.tsx`, gated on the same signed-in state the head's `Sign in` door already reads. Not chrome, so no CHR task owns it |
+
 
 ## Tier 0 — verify, then quick wins (no rulings needed)
 

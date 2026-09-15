@@ -1,7 +1,7 @@
 # Phase 92 — Dreamweaver called
 
 **Scoped:** 2026-09-15, from a measured audit of the installed **0.2.4** and `cline-dev` HEAD `e740727f8`.
-**Status: 🟡 CHR-001 captured and committed 2026-09-15 (PNGs kept local by ruling), CHR-002 building, R1 ruled, R2–R8 still unruled.** **Prefix: `CHR`** (chrome).
+**Status: 🟡 CHR-001 ✅ and CHR-002 ✅ built 2026-09-15 (PNGs kept local by ruling; CHR-002 awaits Richard's look), R1 ruled, R2–R8 still unruled. Next: CHR-003, then CHR-007.** **Prefix: `CHR`** (chrome).
 **The baseline is [`verdicts/CHR-001/2026-09-15/`](./verdicts/CHR-001/2026-09-15/) — read CHR-001 §6 before any ratchet;
 it corrects two §3 rows below (the hint prints 6×, not 7×; the Templates "10 sizes" counts off-screen elements).**
 
@@ -117,7 +117,7 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
 | id | task | source | depends on |
 |---|---|---|---|
 | [CHR-001](./CHR-001-THE-BEFORE-PICTURE.md) | The before picture: the screenshot corpus on both surfaces at HEAD, and the four numbers every later ratchet starts from | audit | — |
-| [CHR-002](./CHR-002-THE-TYPE-SCALE.md) | Five sizes, tokenised, and a `font-size` ratchet on the model of the hex ratchet; `body{font-size:12px}` gone; the two surfaces converted (R1) | audit §1 | CHR-001 |
+| [CHR-002](./CHR-002-THE-TYPE-SCALE.md) ✅ | Five sizes + display, tokenised, and a `font-size` ratchet on the model of the hex ratchet (948 → 727); the two surfaces converted (R1). Templates 6 → **5** sizes, Group panel 7 → **2**, both themes. `body` kept at 12 as a token (§6.1) | audit §1 | CHR-001 |
 | [CHR-003](./CHR-003-ONE-RADIUS-ONE-SHADOW-ONE-BOX-MODEL.md) | Radii 5/7/10 retired, two shadows, a global `box-sizing`, the inset-ring workaround deleted, 19 dead `@font-face` and five preloads dropped | audit "small stuff" | CHR-001 |
 | [CHR-004](./CHR-004-THE-GATES-MEASURE-THE-SCALE-NOT-THE-FILLS.md) | The 28 CSS-text tests become gates on rendered contrast and on the scale; class-name assertions become behaviour or `data-*` (R3) | audit §3 | CHR-002 |
 
