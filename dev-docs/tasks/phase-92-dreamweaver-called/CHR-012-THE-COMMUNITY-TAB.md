@@ -36,12 +36,14 @@ Read with the picture open. ✔ = read off the shot or re-read at HEAD `c4fbcde1
 
 Out: the community platform's own web pages; what the Bench/Chat data is.
 
-## 4. Rulings to ask before building
+## 4. Rulings
 
-| # | question | proposal |
+✅ **Both ruled by Richard on 2026-09-15 (s7), as proposed.**
+
+| # | question | ruling |
 |---|---|---|
-| R9 | Does "How the community is doing" stay on the user's screen? | **No** — it is D21's launch-health readout for us. Move it to the platform's admin side or a debug view; the tab shows activity, not targets |
-| R10 | Guest banner: a card, or a line in the page head? | **A line** in the head, `Sign in` as the one primary action |
+| R9 | Does "How the community is doing" stay on the user's screen? | ✅ **No.** It is D21's launch-health readout for us, not user content. The tab shows activity only. ⚠️ This reverses D21's *"keeps it visible rather than behind a click"* (`views/Community.tsx:724-725`) for the launcher; the reading is still computed (`mirrorview.healthFrom`) and where we read it instead is not built here |
+| R10 | Guest banner: a card, or a line in the page head? | ✅ **A line** in the page head (`LauncherPage` `actions`), `Sign in` as the one primary action; Refresh and the browser door become quiet text buttons |
 
 ## 5. Acceptance criteria
 
@@ -57,3 +59,96 @@ Out: the community platform's own web pages; what the Bench/Chat data is.
 - 🔴 `views/Community.tsx:735` records that the health wording is graded by D21's readout — find that grader before changing a word (R9).
 - 🔴 Anything the tab's body renders under `tests-unit` must be hook-free, and a spec reaching `PrimaryButton` needs FLD-017's `Icon` `jest.mock`.
 - ⚠️ P86 and P72 own what the community surfaces *do*; this task owns how they look.
+
+## 7. Built — s7 (2026-09-15), uncommitted
+
+### 7.1 What changed
+
+- **Head (R10):** the `bg-2` identity card is gone. `views/Community.tsx` hands `LauncherPage` an `actions` group
+  (`.Who`, still `data-test="community-head"`): Refresh and "Open community.nodegx.io" as `PrimaryButton` `Text`
+  `Small` (the door carries an inline external glyph), a hairline, a 24px avatar, the handle or "Reading as a guest"
+  with points · badges beside it, and — for a guest with a wired door — `Sign in` as `PrimaryButton` `Small`.
+  `.PrimaryButton` / `.GhostButton`-in-the-head / `.OutlineButton` / `.HeadIdentity` / `.HeadActions` deleted
+  (`.GhostButton` survives: `CommunityChatView` still uses it, P75 surface).
+- **Tab strip:** moved into `LauncherPage`'s `toolbar` (the slot Templates' chips use); `.Tabs` wrapper deleted.
+- **Health readout (R9):** not rendered. `health` stays on `CommunityMirrorView` and `mirrorview.healthFrom` still
+  computes it — ⚠️ nothing reads it now; where we read it instead is not built. `.Health*` rules deleted.
+- **One chip:** `CommunityFilterPill` is an adapter over `Chip variant=Filter` (Bench, People, Chat — both
+  densities). `.FilterPill` / `.FilterCount` / `.FilterPillMark` deleted. `Chip`'s ✓ is now `aria-hidden`
+  (FB-002's rule, which `Chip` did not carry — Templates and Learning gain it too).
+- **Content, not containers:** `SectionCard` deleted from the tab and from `CommunitySection`. On the page density
+  rows are ruled lines (`border-default` under each, the list bleeds one 12px gutter so text aligns with the lead),
+  hover `bg-1`; the loading / empty / unreachable states sit in a dashed well; controls lose the card gutter.
+  ⚠️ The **rail** (`Panel` density) is touched by exactly two things: the pill is now `Chip` (28px tall, not the old
+  18px box) and `.ChipRow[role='group']` sets `gap 8px; margin 0 0 12px` in both densities. Not driven yet.
+- Not changed: the thread / chat-thread / profile panes (`.Thread.is-density-page` is still a card).
+
+### 7.2 Specs re-pointed (R3) — every behavioural assertion kept
+
+- `rel-019/community-head-render` — head assertions unchanged; **new** AC2 row (every head button carries
+  `is-size-small`, 3 signed out / 2 signed in); the "readout as tiles" block became **R9's absence** (seven readout
+  phrases absent, with and without a median, beside a Bench row and the handle that drew).
+- `nat-005/launcher-community-render` — the health block became R9's absence with the thread title as control;
+  "the two page buttons" found by label inside `community-head` instead of `.GhostButton`/`.OutlineButton`.
+- `fb-006/launcher-community-tabs-render` — `SectionCard === 2` → one `Section` and zero `SectionCard` per room;
+  "4 of 30 threads" dropped from the chrome row.
+- `fb-002/bench-filter-render`, `nat-008/people-render` — `FilterPill` class → `is-variant-filter`.
+- `fb-002/filter-pill-state` — rewritten against `Chip.module.scss`: the selected edge ≥ 3:1 against BOTH real
+  grounds (launcher `.ContentArea`, rail `BasePanel .Root`) and against its own wash **composited** over each.
+  🔴 First run graded `primary-bg` (an `rgba` wash) as opaque and scored the edge 1:1 against itself — an instrument
+  artefact, not a chip defect (`themeTokens.parseColorAlpha` names exactly this).
+- `nat-001/palette-contrast` — the launcher Community rows re-grounded `bg-1`→`bg-0`, hover `bg-2`→`bg-1`, three
+  rows removed with what they graded, two added (`PrimaryButton` Text at rest / hover). `DISTINCT_PAIRINGS` 48 → 51,
+  counted off the table at HEAD and after (+4 −1, named at the constant).
+- `Icon` stub (FLD-017) added to five specs that import the tab: `rel-019`, `nat-005`, `fb-006`, `nat-008`,
+  `nat-007/thread-render`.
+
+### 7.3 Readings (2026-09-15, tree `675f12f9d` + this change)
+
+- jest over the 32 suites importing a changed module: first run **4 red** (2 failed to run on `Icon`, the pairing
+  count, the opaque-wash artefact) → **32 / 32 suites, 887 / 887, EXIT=0**.
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**; `type` / `colors` / `tokens:css` / `icons:css` **all EXIT=0**.
+- `type:baseline` lowered: `noodl-core-ui` 127 → **124**, the only moved entry `Community.module.scss` 7 → 4.
+
+### 7.4 The drive — `verdicts/CHR-012/2026-09-15/` (dev stack, production community, SIGNED OUT)
+
+Stack: `npm run start` with `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 NOODL_USER_DATA_DIR=<scratch>/profile`
+(`firstRunLegal.json` only), bundle confirmed carrying the change before each drive. Instrument `drive.js`: every
+room × window size × theme; controls **by kind**; visible text-bearing font sizes (page and content area); the R9
+words; CHR-005's rendered-contrast pass unchanged.
+
+**Pass 1 — `prod-signed-out/`, 20 shots (5 rooms × 1368×900, 700×500 × dark, light), EXIT=0:**
+- Title at **x120 y84** (1368) and **x20 y137** (700) — CHR-005's positions on every other tab. Sideways scroll
+  `false` and past-the-right-edge **0** in all 20.
+- **AC3:** R9's words (`How the community is doing`, `of 30 threads`, `consecutive weeks`, `median first reply`,
+  `n=`, `target under`) found **0** times in all 20.
+- **AC2 sizes:** visible text-bearing sizes on the page **5** (11, 12, 13, 15, 26), inside the content **3–4**.
+- **AC2 controls:** `PrimaryButton` 3 controls / 2 styles (Text ×2, CTA); filter chip 2 styles (resting / selected);
+  segmented room tabs 2. 🔴 **Two findings, both fixed in pass 2:** Chat's river still drew `.GhostButton`
+  ("Open — no replies yet", one "other" control, and 9px right of the text column); and the row rules ran
+  **108 → 1252** against a **120 → 1240** column (the list bled its hover gutter into its lines).
+- Contrast: `boundaryUnder3` **1** in every shot = the segmented room strip's active fill (1.17); `textUnder45`
+  **5 in dark, 0 in light** = the same strip read by the button's own `color` rather than its `Text` child. Both are
+  CHR-005 §6.3's pre-existing / instrument rows, not this task's.
+
+**Pass 2 — `prod-signed-out-v2/`, 6 shots (Bench, Chat, Replays × 1368×900 × both themes), EXIT=0:**
+- Row and message rules are pseudo-elements inset by the gutter; the hover fill still bleeds. Shot: rules **120 → 1240**.
+- Chat's verb is `.LinkButton` (the retry link's style, `.GhostButton` deleted — its last user), on the text column,
+  text **5.45:1** light. The drive still counts it as "other" because its classifier names only `RetryButton` as a
+  link — classification, not a second style.
+- jest after pass 2 (`fb-013`, `nat-005`, `fb-002`, `rel-019`, `nat-001`): **14 / 14 suites, 480 / 480**, EXIT=0.
+
+### 7.5 Owed
+
+1. **Richard's look** at `prod-signed-out-v2/` (and pass 1 at 700×500) — the close.
+2. **AC1's signed-in view**, against a local platform seeded lopsided. Prepared, not run: scratch DB
+   `chr012_community` created (not seeded); `<scratch>/profile-signed-in` holds `firstRunLegal.json` and
+   `nodegx.community.session.json` = `{"token":"dev-session-ada","handle":"ada-builds"}` — ✅ `scripts/seed.mjs`
+   inserts that session hash itself, so nothing needs minting. Production's `COMMUNITY_URL` backed up before any swap.
+   The seed gives the Bench 3 threads (1 solved, 2 waiting) and **no chat** — the genuinely empty room.
+3. **700×500 after pass 2**, and **the rail panel** — the chip there is now 28px tall and `.ChipRow[role='group']`
+   spaces it; not driven.
+4. `test:ci` at the floor by name (AC5) — not run this session.
+5. Not this task, recorded: the segmented room strip's active fill (1.17 / 1.10) is CHR-004/CHR-005's pre-existing
+   row; `health` is computed and read by nothing (R9 — where we read it is unbuilt); the thread / profile panes are
+   still cards.

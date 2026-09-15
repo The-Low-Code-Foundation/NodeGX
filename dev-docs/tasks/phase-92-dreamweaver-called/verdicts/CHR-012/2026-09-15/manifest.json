@@ -1,0 +1,158 @@
+{
+  "task": "CHR-012",
+  "date": "2026-09-15",
+  "build": "dev stack (npm run start, NOODLPORT 8674, CDP 9333, scratch profile) on cline-dev 675f12f9d + the uncommitted CHR-012 tree",
+  "community": "production community.nodegx.io, signed out",
+  "instrument": "drive.js — rooms x sizes x themes; controls by kind; visible text-bearing font sizes; R9 words; CHR-005 rendered contrast",
+  "passes": {
+    "prod-signed-out": "pass 1, 20 shots, before the inset rules and LinkButton",
+    "prod-signed-out-v2": "pass 2, 6 shots at 1368x900"
+  },
+  "notes": "PNGs are gitignored by ruling (.gitignore); hashes recorded here.",
+  "shots": [
+    {
+      "file": "prod-signed-out/prod-signed-out-community-bench-1368x900-dark-top.png",
+      "sha256": "e05f37c4f4294270a3aa549e8cce72825f5a9fe7a4bb2b9ade41afe38d4cb699"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-bench-1368x900-light-top.png",
+      "sha256": "27e517e79ef51d986744c0c1d7f8cdd87c6f828fd77ca6a83e6609c6bc7d1022"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-bench-700x500-dark-bottom.png",
+      "sha256": "965e6eb30f6772058c73952fc19127bbd8f3f7d3d04edd0aa2d6b92da9141c26"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-bench-700x500-dark-top.png",
+      "sha256": "a63452de5f7daeb37ea3be8146b41bf966fa7eef6484695153a07b94e06dd35a"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-bench-700x500-light-bottom.png",
+      "sha256": "e6aa621bfdeb8674c7f7da0a2a04a6ec3fd97527dad36bc15346259c9bdc492b"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-bench-700x500-light-top.png",
+      "sha256": "1470288be0152d76da6982102339fd05b4033e2d24b34be5075f5a88aa1fcc14"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-chat-1368x900-dark-top.png",
+      "sha256": "37dc4b4600fea05425b612654882fd02916fd14318d9d6ba937faa7b26d91a1d"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-chat-1368x900-light-top.png",
+      "sha256": "c76e088d9c7aa208ffa85b859698facfc691255991209ddb99991fb93b663ec7"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-chat-700x500-dark-bottom.png",
+      "sha256": "31d565da56ebd91b3a284ffdded698bda50a07fc44e0302502e4cc59a76cfd24"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-chat-700x500-dark-top.png",
+      "sha256": "c22fb868c5de74e63ff7964a74a7433b0ac5022cdcdffa7502b1ffe0002c3802"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-chat-700x500-light-bottom.png",
+      "sha256": "6b79a08762082e9f8d64c98e627e6ee76c16e46b41f842d3a6ec3cf83c074f84"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-chat-700x500-light-top.png",
+      "sha256": "4b24e5b3b890aa796ee661b181801a181d4511fa65e34ccf4ba039d5663715db"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-people-1368x900-dark-top.png",
+      "sha256": "328bb45d006c84d58c0d0c4a3b1edbf8ca26d8768f99ec8326053d0169395807"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-people-1368x900-light-top.png",
+      "sha256": "d530fcb293743e7e6d2e84532ce7c2e5891ac3f7e6818b6a8301c856d36ebf1b"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-people-700x500-dark-bottom.png",
+      "sha256": "8dd0e311e05f65c3a0fc5a152515af2d57976228493fad982c0e9860e0588266"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-people-700x500-dark-top.png",
+      "sha256": "5b564de255ca0dd4490b78716cfef17e9ff922bce36862a1b785f1ea474e9283"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-people-700x500-light-bottom.png",
+      "sha256": "aeed0706950172355fbc17ab61014e9634c7ebc4b689d1c7da1e96090be1b800"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-people-700x500-light-top.png",
+      "sha256": "24a925605f409a26c6f40703190e79ce720e7910d1cf5de9aae89f0d88f16e76"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-replays-1368x900-dark-top.png",
+      "sha256": "9ad82291bbf6ac822c03a1a47644f00692307cc56d3ee6e2fb81116d463df8ef"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-replays-1368x900-light-top.png",
+      "sha256": "d47013c30408ca5c2c0c32db156078a122cbcd69a3d3dd27945aca6def8e5dc9"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-replays-700x500-dark-bottom.png",
+      "sha256": "ee0ad19b0bba14d026e53d35c9117d6b4d822280529688d17a15bf124fa93dfc"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-replays-700x500-dark-top.png",
+      "sha256": "8879d0dd2693bdd62c7b9373cc4909287b44e26827b36b6886607aa8f43bf560"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-replays-700x500-light-bottom.png",
+      "sha256": "9193e395652e1638f7a66d31b92c03322f64ba846927d576e4836f99fb9d19bc"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-replays-700x500-light-top.png",
+      "sha256": "f55f3212ed4c3188ebc41889b8dd19d05fed9ab9cf6992d68d6173db135082bd"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-tutorials-1368x900-dark-top.png",
+      "sha256": "07c8d20576fea5ecb74f753fc046afd1f4169f1e84993d2fa5cd8efbbcd8c52f"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-tutorials-1368x900-light-top.png",
+      "sha256": "64a0b2abad9a49ad04771e6c02396ac35853b3d946bd43095f70c313f9d69bdc"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-tutorials-700x500-dark-bottom.png",
+      "sha256": "9f46ce817b3f6b439da1d68ec1162e2f6142ecc5b93645f67ff78a63107e2bc8"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-tutorials-700x500-dark-top.png",
+      "sha256": "45d3b6248bbc61fe13d341531ac2a7962ffc688a9c72283d639ed23e3386c464"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-tutorials-700x500-light-bottom.png",
+      "sha256": "11f316561e235d2057281f821e67ed97d5064a3fc53a695c9dacd65813c075d7"
+    },
+    {
+      "file": "prod-signed-out/prod-signed-out-community-tutorials-700x500-light-top.png",
+      "sha256": "dcc8243d4b95fff9a108ad4a5a9b1b2a89b26bba539aeab4a66f210160b6ab4e"
+    },
+    {
+      "file": "prod-signed-out-v2/v2-community-bench-1368x900-dark-top.png",
+      "sha256": "e59914b999cfa5b870b90c1275fefa2b3e20d32b81cf28eeca655c6594ef9a55"
+    },
+    {
+      "file": "prod-signed-out-v2/v2-community-bench-1368x900-light-top.png",
+      "sha256": "ccf747627072003971f52c54fd4e3a7e2a6232fb7cc63dcf63f81c842ec0834e"
+    },
+    {
+      "file": "prod-signed-out-v2/v2-community-chat-1368x900-dark-top.png",
+      "sha256": "ec0f28e4ebca139d604e0e3a33e4fc5635560f4f09f04a3cd27d3fc1f60804be"
+    },
+    {
+      "file": "prod-signed-out-v2/v2-community-chat-1368x900-light-top.png",
+      "sha256": "cc9a9e1e682a3ff55529a242275ed0330490543fb3c2528222414ddebc3ad2ac"
+    },
+    {
+      "file": "prod-signed-out-v2/v2-community-replays-1368x900-dark-top.png",
+      "sha256": "c6e4d497b4102ec456255aad628446ca9d856f12443ea81cd24a51358baf5b10"
+    },
+    {
+      "file": "prod-signed-out-v2/v2-community-replays-1368x900-light-top.png",
+      "sha256": "5f31d779e21d855335ccad8efee93e2501eb378ce18436bf5cc25e97997c74e6"
+    }
+  ]
+}
