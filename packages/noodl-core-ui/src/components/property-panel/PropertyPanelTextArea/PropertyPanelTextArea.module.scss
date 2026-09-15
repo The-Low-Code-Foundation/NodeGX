@@ -10,7 +10,7 @@
   padding: 5.5px 9px;
   width: 100%;
   box-sizing: border-box;
-  font-size: 12.5px;
+  font-size: var(--font-size-sm);
   line-height: 1.4;
   resize: none;
   // Replaces the legacy jquery.autosize behaviour (Chromium >= 123).

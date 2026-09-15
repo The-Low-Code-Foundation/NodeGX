@@ -182,7 +182,7 @@ html {
 
 body {
   margin: 0px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   cursor: default;
   width: 100vw;
   height: 100vh;
@@ -304,6 +304,16 @@ a:hover {
 
 button {
   cursor: pointer;
+}
+
+/* CHR-002: Chromium gives an unstyled control its own 13.333px font. Every
+   control that forgot to set a size showed that eleventh size; it inherits
+   the surrounding text now, so its size comes from the type scale. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 .unselectable {
@@ -1396,7 +1406,7 @@ div.lesson-content::-webkit-scrollbar-thumb {
 /* MARGIN / PADDING section tags */
 .marginpadding-tag {
   color: var(--theme-color-fg-muted);
-  font: 600 9.5px var(--font-family);
+  font: 600 var(--font-size-xs) var(--font-family);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   pointer-events: none;
@@ -1408,7 +1418,7 @@ div.lesson-content::-webkit-scrollbar-thumb {
   box-sizing: border-box;
   width: 40px;
   color: var(--theme-color-fg-highlight);
-  font: 11px ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+  font: var(--font-size-sm) ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
   text-align: center;
   background-color: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);

@@ -24,7 +24,7 @@
 
 .Badge {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--theme-color-primary);
   padding: 2px 4px;
@@ -40,7 +40,7 @@
   border: none;
   outline: none;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default);
   padding: 0;
   min-width: 0;

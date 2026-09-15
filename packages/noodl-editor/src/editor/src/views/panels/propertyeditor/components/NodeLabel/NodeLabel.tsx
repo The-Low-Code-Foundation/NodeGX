@@ -310,7 +310,7 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
               value={label}
               UNSAFE_textStyle={{
                 color: 'var(--theme-color-fg-highlight)',
-                fontSize: '14.5px',
+                fontSize: 'var(--font-size-lg)',
                 fontWeight: 'var(--font-weight-semibold)' as TSFixme
               }}
               onChange={(e) => setLabel(e.target.value)}

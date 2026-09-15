@@ -40,7 +40,7 @@
   text-align: center;
   color: var(--theme-color-fg-muted);
   padding: 48px 0;
-  font-size: 13px;
+  font-size: var(--font-size-md);
 }
 
 /* First-launch welcome empty state */
@@ -56,7 +56,7 @@
 
 .WelcomeTitle {
   font-family: var(--font-family-display);
-  font-size: 24px;
+  font-size: var(--font-size-display);
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--theme-color-fg-highlight);
@@ -65,7 +65,7 @@
 
 .WelcomeBody {
   color: var(--theme-color-fg-muted);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   margin: 0;
 }
@@ -111,7 +111,7 @@
 }
 
 .FolderPickerTitle {
-  font-size: 16px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   margin: 0 0 var(--spacing-3) 0;
@@ -136,7 +136,7 @@
   border-radius: var(--radius-7);
   color: var(--theme-color-fg-highlight);
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   cursor: pointer;
 
   &:hover {

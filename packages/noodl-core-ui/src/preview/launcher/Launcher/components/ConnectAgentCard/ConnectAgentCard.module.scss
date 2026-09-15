@@ -48,7 +48,7 @@
 
 .Title {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
@@ -57,7 +57,7 @@
 
 .Text {
   color: var(--theme-color-fg-muted);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   margin: 0;
 }
@@ -81,14 +81,14 @@
 
 .SuccessMessage {
   color: var(--theme-color-fg-highlight);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   margin: 0;
 }
 
 .FailureMessage {
   color: var(--theme-color-fg-highlight);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   margin: 0;
 }
@@ -96,7 +96,7 @@
 /* Secondary, but still AA — this is where "how to remove it" lives, which nobody may miss. */
 .Aside {
   color: var(--theme-color-fg-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   margin: 0;
   overflow-wrap: anywhere;
@@ -104,7 +104,7 @@
 
 .Code {
   font-family: var(--font-family-code);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-default);
   background: var(--theme-color-bg-3);
   border-radius: 3px;
@@ -115,7 +115,7 @@
 .Command {
   box-sizing: border-box;
   font-family: var(--font-family-code);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
   color: var(--theme-color-fg-default);
   background: var(--theme-color-bg-3);

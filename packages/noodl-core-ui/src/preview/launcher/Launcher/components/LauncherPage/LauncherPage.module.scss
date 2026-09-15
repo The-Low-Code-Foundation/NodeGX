@@ -16,7 +16,7 @@
 .Title {
   font-family: var(--font-family-display);
   font-weight: 600;
-  font-size: 24px;
+  font-size: var(--font-size-display);
   letter-spacing: -0.015em;
   margin: 0;
   color: var(--theme-color-fg-highlight);

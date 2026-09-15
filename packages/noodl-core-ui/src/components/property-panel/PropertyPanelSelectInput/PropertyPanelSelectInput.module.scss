@@ -59,7 +59,7 @@
 .Option {
   padding: 5.5px 9px;
   border-radius: var(--radius-default);
-  font-size: 12.5px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default);
   cursor: pointer;
 
@@ -83,7 +83,7 @@
   }
 
   &.has-small-text {
-    font-size: 10px;
+    font-size: var(--font-size-xs);
     padding-left: length.$property-panel-small-xy-padding;
     padding-right: length.$property-panel-small-xy-padding;
     text-align: center;

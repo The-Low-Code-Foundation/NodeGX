@@ -180,7 +180,7 @@
 
 .queryeditor-property-label {
   color: var(--theme-color-fg-default-shy);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: bold;
 }
 
@@ -236,7 +236,7 @@
 
 .queryeditor-header {
   display: flex;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default-shy);
   margin-left: 5px;
   margin-bottom: 8px;

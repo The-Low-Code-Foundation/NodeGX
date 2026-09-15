@@ -52,7 +52,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   background-color: var(--theme-color-bg-3);
   padding: 2px 0;
   font-weight: 600;

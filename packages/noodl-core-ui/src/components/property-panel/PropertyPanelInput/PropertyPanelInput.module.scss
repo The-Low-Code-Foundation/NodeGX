@@ -15,7 +15,7 @@
 .Label {
   font-family: var(--font-family);
   color: var(--theme-color-fg-default);
-  font-size: 12.5px;
+  font-size: var(--font-size-sm);
   line-height: 1.35;
   width: 37%;
   flex-grow: 0;

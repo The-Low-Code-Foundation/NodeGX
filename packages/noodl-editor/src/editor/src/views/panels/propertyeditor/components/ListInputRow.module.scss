@@ -35,7 +35,7 @@
   margin: 4px 0 2px;
   padding: 4px 8px;
   border-radius: 3px;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
   color: var(--theme-color-fg-default);
   background-color: var(--theme-color-danger-bg);

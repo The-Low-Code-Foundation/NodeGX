@@ -17,13 +17,13 @@
 
 .Intro {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   color: var(--theme-color-fg-default-shy);
 }
 
 .Message {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   white-space: pre-wrap;
   padding: var(--spacing-3) var(--spacing-4);
@@ -64,7 +64,7 @@
     h4,
     h5,
     h6 {
-      font-size: 13px;
+      font-size: var(--font-size-md);
       line-height: 1.6;
       margin: var(--spacing-2) 0 var(--spacing-1) 0;
 
@@ -75,7 +75,7 @@
 
     p,
     li {
-      font-size: 13px;
+      font-size: var(--font-size-md);
       line-height: 1.6;
     }
 
@@ -98,7 +98,7 @@
 }
 
 .Error {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   padding: var(--spacing-3) var(--spacing-4);
   border-radius: var(--radius-default);
@@ -115,7 +115,7 @@
 
 .Outline-title {
   display: block;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -126,7 +126,7 @@
 .Outline-list {
   margin: 0;
   padding-left: var(--spacing-4);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-default);
 }
@@ -142,7 +142,7 @@
   min-width: 0;
   resize: vertical;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.5;
   padding: var(--spacing-2) var(--spacing-3);
   color: var(--theme-color-fg-default);
@@ -163,7 +163,7 @@
 .Composer-send {
   flex: 0 0 auto;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   padding: var(--spacing-2) var(--spacing-4);
   color: var(--theme-color-fg-on-primary, var(--theme-color-fg-default));
@@ -180,7 +180,7 @@
 
 .Exit {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-default-shy);
 }

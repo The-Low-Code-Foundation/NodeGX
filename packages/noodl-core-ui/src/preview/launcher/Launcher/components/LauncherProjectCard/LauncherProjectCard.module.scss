@@ -67,7 +67,7 @@
   bottom: -26px;
   font-family: var(--font-family-display);
   font-weight: 600;
-  font-size: 96px;
+  font-size: var(--font-size-card-initial);
   line-height: 1;
   color: var(--base-color-white-transparent-16);
   user-select: none;
@@ -128,7 +128,7 @@
 
 .Name {
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: var(--font-size-md);
   color: var(--theme-color-fg-highlight);
   white-space: nowrap;
   overflow: hidden;
@@ -141,7 +141,7 @@
   gap: 6px;
   flex-wrap: wrap;
   color: var(--theme-color-fg-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 
   /* Mock chip radius is 5px; the shared Chip ships radius-sm (2px). Scoped
      override rather than editing the editor-wide Chip component (PAR-001). */

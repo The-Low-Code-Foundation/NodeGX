@@ -8,7 +8,7 @@
 .Button {
   font-family: var(--font-family);
   color: var(--theme-color-fg-default);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   text-align: center;
   background-color: var(--theme-color-bg-3);
   padding: length.$property-panel-input-padding;

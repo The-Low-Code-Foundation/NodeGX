@@ -136,7 +136,7 @@ export function NumberUnitInput({
                 width: 40,
                 flexShrink: 0,
                 textAlign: 'center',
-                fontSize: 10,
+                fontSize: 'var(--font-size-xs)',
                 lineHeight: '28px',
                 color: 'var(--theme-color-fg-default)',
                 userSelect: 'none'

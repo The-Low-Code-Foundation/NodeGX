@@ -264,7 +264,7 @@ $_sidebar-hover-enter-offset: 250ms;
   padding: 2px 5px;
   border-radius: 8px;
   background-color: var(--theme-color-secondary-bright);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   font-family: var(--font-family);
   color: var(--theme-color-on-secondary);

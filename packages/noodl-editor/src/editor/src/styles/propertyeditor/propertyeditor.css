@@ -190,7 +190,7 @@
   resize: vertical;
   padding-top: 10px;
   min-height: 35px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .property-input-textarea:focus {
@@ -239,7 +239,7 @@
   text-align: left;
   cursor: pointer;
   color: var(--theme-color-fg-muted);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -264,7 +264,7 @@
   flex-shrink: 0;
   display: inline-block;
   width: 8px;
-  font-size: 9px;
+  font-size: var(--font-size-xs);
   line-height: 1;
   color: var(--theme-color-fg-default-shy);
   transform: rotate(-90deg);
@@ -289,7 +289,7 @@
   border-radius: 7px;
   background-color: var(--theme-color-bg-3);
   color: var(--theme-color-fg-default);
-  font-size: 9px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.03em;
   text-transform: none;
 }
@@ -383,13 +383,13 @@
 
 .property-filter-empty-title {
   color: var(--theme-color-fg-default);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
 }
 
 .property-filter-empty-hint {
   color: var(--theme-color-fg-muted);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
 }
 
@@ -426,7 +426,7 @@
   width: fit-content;
   max-width: 100%;
   font-family: var(--font-family);
-  font-size: 14.5px;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--theme-color-fg-highlight);
   line-height: 20px;
@@ -469,7 +469,7 @@
   align-items: center;
   gap: 5px;
   font-family: var(--font-family);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -494,7 +494,7 @@
   display: block;
   margin-top: 4px;
   font-family: var(--font-family);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -544,7 +544,7 @@
   display: block;
   color: var(--theme-color-fg-default-shy);
   font-family: var(--font-family);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -572,7 +572,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-default);
   font-family: var(--font-family);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 17px;
   letter-spacing: normal;
   white-space: pre-wrap;
@@ -718,13 +718,13 @@
 }
 
 .property-schema-notice-title {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .property-schema-notice-message {
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   opacity: 0.85;
 }
 
@@ -744,7 +744,7 @@
   border-radius: 2px;
   background: transparent;
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   text-align: center;
   cursor: pointer;
 }
@@ -768,7 +768,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-warning);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   opacity: 0.85;
 }
@@ -792,7 +792,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-notice);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   opacity: 0.85;
 }
@@ -828,7 +828,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-notice);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   opacity: 0.85;
 }
@@ -843,7 +843,7 @@
   border: 0;
   background: none;
   color: var(--theme-color-primary);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   font-family: inherit;
   cursor: pointer;
@@ -869,7 +869,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-warning);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
 }
 

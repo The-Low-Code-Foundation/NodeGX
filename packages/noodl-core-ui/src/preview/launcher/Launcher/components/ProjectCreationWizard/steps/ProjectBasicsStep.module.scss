@@ -26,7 +26,7 @@
 }
 
 .PathText {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   color: var(--theme-color-fg-default-shy);
   line-height: 1.4;
 }

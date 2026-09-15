@@ -52,7 +52,7 @@
 
 .Title {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
@@ -61,7 +61,7 @@
 
 .Text {
   color: var(--theme-color-fg-muted);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.6;
   margin: 0;
 }
@@ -70,7 +70,7 @@
    sentence a reader must not miss on this particular card. */
 .Aside {
   color: var(--theme-color-fg-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   margin: 0;
   overflow-wrap: anywhere;
@@ -95,7 +95,7 @@
 .Code {
   box-sizing: border-box;
   font-family: var(--font-family-code);
-  font-size: 18px;
+  font-size: var(--font-size-xl);
   letter-spacing: 0.18em;
   line-height: 1.4;
   color: var(--theme-color-fg-highlight);
@@ -125,7 +125,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--theme-color-avatar-fg);
   background: var(--theme-color-avatar-gradient);
@@ -150,7 +150,7 @@
 }
 
 .Handle {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   overflow-wrap: anywhere;
@@ -158,7 +158,7 @@
 
 .Failure {
   color: var(--theme-color-fg-highlight);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   margin: 0;
 }

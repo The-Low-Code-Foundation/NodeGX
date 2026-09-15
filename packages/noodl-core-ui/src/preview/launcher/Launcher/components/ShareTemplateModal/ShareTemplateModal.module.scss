@@ -29,7 +29,7 @@
 
 .Label {
   color: var(--theme-color-fg-default-contrast);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
@@ -98,12 +98,12 @@
 .WithheldPath {
   color: var(--theme-color-fg-default-contrast);
   font-family: var(--font-family-code);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }
 
 .WithheldWhy {
   color: var(--theme-color-fg-default-shy);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }
 
 /* ---------- footer ---------- */
@@ -195,5 +195,5 @@
 }
 
 .ChoiceLabel {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }

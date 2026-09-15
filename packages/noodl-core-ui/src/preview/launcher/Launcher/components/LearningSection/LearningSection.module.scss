@@ -20,7 +20,7 @@
 
 .Title {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
@@ -28,7 +28,7 @@
 }
 
 .Count {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-muted);
 }
 
@@ -37,7 +37,7 @@
 }
 
 .Empty {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-muted);
   margin: 0;
@@ -48,7 +48,7 @@
 
   code {
     font-family: var(--font-family-code);
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     padding: 1px 4px;
     border-radius: 3px;
     background: var(--theme-color-bg-3);
@@ -92,7 +92,7 @@
 }
 
 .CardTitle {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   margin: 0;
@@ -101,7 +101,7 @@
 
 .Provenance {
   flex: none;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
   padding: 2px 7px;
   border-radius: var(--radius-7);
@@ -111,7 +111,7 @@
 }
 
 .CardBody {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   color: var(--theme-color-fg-muted);
   margin: 0;
@@ -134,7 +134,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
 }
 
@@ -147,13 +147,13 @@
 }
 
 .Score {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default);
   margin: 0;
 }
 
 .Feedback {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   color: var(--theme-color-fg-default);
   margin: 0;
@@ -164,14 +164,14 @@
 
 /* Not-run is not failure. Muted, never the danger colour. */
 .Muted {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
   color: var(--theme-color-fg-muted);
   margin: 0;
 }
 
 .Warning {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   color: var(--theme-color-fg-default);
   margin: 0;
@@ -188,7 +188,7 @@
 .Primary,
 .Ghost {
   font-family: var(--font-family);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   line-height: 1.2;
   border-radius: var(--radius-7);
@@ -238,7 +238,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   background: var(--theme-color-bg-3);
   color: var(--theme-color-fg-muted);
@@ -259,13 +259,13 @@
 }
 
 .Chapter {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
   letter-spacing: 0.01em;
 }
 
 .NextUpChip {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   padding: 2px 7px;
   border-radius: var(--radius-7);
@@ -288,7 +288,7 @@
 }
 
 .NextUpEyebrow {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -297,14 +297,14 @@
 
 .NextUpTitle {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
 }
 
 .NextUpBody {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.55;
   color: var(--theme-color-fg-default);
   max-width: 70ch;
@@ -324,7 +324,7 @@
   align-items: center;
   gap: 6px;
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   padding: 5px 10px;
   border-radius: var(--radius-7);
   border: 1px solid var(--theme-color-border-control);
@@ -350,7 +350,7 @@
 }
 
 .FilterCount {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--theme-color-fg-muted);
   font-variant-numeric: tabular-nums;

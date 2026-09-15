@@ -12,7 +12,7 @@
   background: var(--theme-color-bg-1);
   border-top: 1px solid var(--theme-color-border-default);
   color: var(--theme-color-fg-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .Link {
@@ -37,6 +37,6 @@
 
 .Version {
   font-family: var(--font-family-code);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
 }

@@ -4,7 +4,7 @@
 }
 
 .StylePresetStep-hint {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   color: var(--theme-color-fg-default-shy);
   margin: 0 0 var(--spacing-4) 0;
   line-height: 1.5;

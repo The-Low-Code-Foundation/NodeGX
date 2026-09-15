@@ -99,7 +99,7 @@
   color: var(--theme-color-primary);
   padding: 8px 12px;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   border-bottom: 1px solid var(--theme-color-primary-25);
 }
@@ -110,7 +110,7 @@
   border: none;
   padding: 4px 12px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -136,7 +136,7 @@
 
 .FilterGroupCombinatorLabel {
   text-align: center;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--theme-color-fg-default-shy);
   text-transform: uppercase;
@@ -148,7 +148,7 @@
   padding: 16px;
   text-align: center;
   color: var(--theme-color-fg-default-shy);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-style: italic;
 }
 
@@ -222,7 +222,7 @@
 
 .FilterConditionBetweenLabel {
   color: var(--theme-color-fg-default-shy);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   padding: 0 4px;
 }
 
@@ -272,7 +272,7 @@
   flex: 1;
   min-width: 0;
   font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
 
   input {
@@ -289,7 +289,7 @@
 .FilterConditionCaveat {
   margin-top: 4px;
   padding-left: 26px;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
   color: var(--theme-color-notice);
 }
@@ -318,7 +318,7 @@
   margin: 0;
   padding: 12px;
   font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-default);
   overflow-x: auto;
   white-space: pre-wrap;
@@ -332,7 +332,7 @@
   min-height: 150px;
   padding: 12px;
   font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-default);
   background-color: var(--theme-color-bg-1);
   border: none;
@@ -346,7 +346,7 @@
 
 .ByobFilterBuilderJsonError {
   color: var(--theme-color-danger);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 // Filter Builder Button (compact property panel view)

@@ -40,7 +40,7 @@
 }
 
 .Title {
-  font-size: 18px;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   color: var(--theme-color-fg-default);
   margin: 0;
@@ -48,7 +48,7 @@
 }
 
 .StepLabel {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default-shy);
   font-weight: 500;
   letter-spacing: 0.03em;

@@ -3,7 +3,7 @@
 .Root {
   font-family: var(--font-family);
   color: var(--theme-color-fg-default);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   display: flex;
 }
 

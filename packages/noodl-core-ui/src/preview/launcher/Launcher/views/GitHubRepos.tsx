@@ -61,7 +61,7 @@ function GitHubRepoCard({ repo, onClone, isCloning }: GitHubRepoCardProps) {
           {repo.private && (
             <span
               style={{
-                fontSize: '10px',
+                fontSize: 'var(--font-size-xs)',
                 padding: '2px 6px',
                 backgroundColor: 'var(--theme-color-secondary-highlight)',
                 borderRadius: 'var(--radius-small)',
@@ -74,7 +74,7 @@ function GitHubRepoCard({ repo, onClone, isCloning }: GitHubRepoCardProps) {
           {repo.isNoodlProject && (
             <span
               style={{
-                fontSize: '10px',
+                fontSize: 'var(--font-size-xs)',
                 padding: '2px 6px',
                 backgroundColor: 'var(--theme-color-primary)',
                 borderRadius: 'var(--radius-small)',
@@ -85,13 +85,13 @@ function GitHubRepoCard({ repo, onClone, isCloning }: GitHubRepoCardProps) {
             </span>
           )}
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--theme-color-fg-default-shy)' }}>
+        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--theme-color-fg-default-shy)' }}>
           {repo.full_name} • Updated {updatedAt}
         </div>
         {repo.description && (
           <div
             style={{
-              fontSize: '12px',
+              fontSize: 'var(--font-size-sm)',
               color: 'var(--theme-color-fg-default-shy)',
               marginTop: '4px',
               overflow: 'hidden',
@@ -142,7 +142,7 @@ function OrgSection({ org, children }: { org: GitHubOrgWithRepos; children: Reac
       >
         <img src={org.avatar_url} alt={org.login} style={{ width: 24, height: 24, borderRadius: '4px' }} />
         <span style={{ fontWeight: 600, flex: 1, textAlign: 'left' }}>{org.login}</span>
-        <span style={{ fontSize: '12px', color: 'var(--theme-color-fg-default-shy)' }}>
+        <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--theme-color-fg-default-shy)' }}>
           {noodlProjectCount} {noodlProjectCount === 1 ? 'project' : 'projects'}
         </span>
         <Icon icon={isExpanded ? IconName.CaretDown : IconName.CaretRight} />
@@ -170,7 +170,7 @@ function EmptyState() {
       <div style={{ fontSize: '48px' }}>
         <Icon icon={IconName.FolderOpen} />
       </div>
-      <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--theme-color-fg-default)', marginTop: '16px' }}>
+      <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 600, color: 'var(--theme-color-fg-default)', marginTop: '16px' }}>
         No Noodl Projects Found
       </h3>
       <p
@@ -206,7 +206,7 @@ function ConnectGitHubPrompt({ onConnect }: { onConnect: () => void }) {
       <div style={{ fontSize: '48px' }}>
         <Icon icon={IconName.CloudFunction} />
       </div>
-      <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--theme-color-fg-default)', marginTop: '16px' }}>
+      <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 600, color: 'var(--theme-color-fg-default)', marginTop: '16px' }}>
         Connect GitHub
       </h3>
       <p
@@ -382,7 +382,7 @@ export function GitHubRepos({}: GitHubReposProps) {
               padding: '8px 12px',
               backgroundColor: 'var(--theme-color-bg-2)',
               borderRadius: 'var(--radius-default)',
-              fontSize: '12px',
+              fontSize: 'var(--font-size-sm)',
               color: 'var(--theme-color-fg-default-shy)'
             }}
           >

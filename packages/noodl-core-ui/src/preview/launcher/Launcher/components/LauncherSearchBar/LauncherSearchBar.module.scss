@@ -40,7 +40,7 @@
   flex: 1;
   min-width: 0;
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   color: var(--theme-color-fg-highlight);
 
   &::placeholder {
@@ -50,7 +50,7 @@
 
 .Kbd {
   font-family: var(--font-family-code);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   background: var(--theme-color-bg-3);
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-default);
@@ -91,7 +91,7 @@
   background: none;
   outline: none;
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 500;
   color: var(--theme-color-fg-default);
   cursor: pointer;
