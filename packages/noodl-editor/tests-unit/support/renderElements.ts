@@ -120,6 +120,14 @@ export function byClass(node: RenderedNode | null, className: string): RenderedN
 }
 
 /**
+ * Nodes carrying a given `data-test` — CHR-012 / R3: a control is found by what it is for, not by the
+ * class a stylesheet happens to give it. `PrimaryButton` passes `testId` through as `data-test`.
+ */
+export function byTestId(node: RenderedNode | null, testId: string): RenderedNode[] {
+  return walk(node).filter((n) => n.props['data-test'] === testId);
+}
+
+/**
  * Source with its comments removed, for any check that greps a `.tsx` for a forbidden construct.
  *
  * 🔴 **A comment satisfies a naive grep, and this repo has been bitten by it twice.** NAT-005's

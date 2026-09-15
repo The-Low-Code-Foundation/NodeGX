@@ -523,45 +523,6 @@
   }
 }
 
-/*
-  The one FILLED control on this screen, and the only one in `components/community`.
-
-  🔴 Posting an answer is the verb the phase is named after; drawing it in the same quiet outline
-  as "pull this fragment" and "try again" would make the primary action of the surface the third
-  most visible thing on it. `on-primary` over `primary` is already graded and is ground-
-  independent, so the fill costs the PAIRS table nothing.
-*/
-.ReplySubmit {
-  background: var(--theme-color-primary);
-  border: 1px solid var(--theme-color-primary);
-  border-radius: 3px;
-  padding: var(--spacing-1-5) var(--spacing-3);
-  font: inherit;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--theme-color-fg-on-primary);
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: var(--theme-color-primary-hover);
-    border-color: var(--theme-color-primary-hover);
-  }
-
-  /* ⚠️ Disabled loses the FILL, not just the ink. A filled button at reduced opacity still reads
-     as the loudest thing on the screen, so a person keeps clicking it. */
-  &:disabled {
-    cursor: default;
-    background: none;
-    border-color: var(--theme-color-border-control);
-    color: var(--theme-color-fg-disabled);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 2px;
-  }
-}
-
 .ReplyBlocked {
   margin: 0;
   color: var(--theme-color-fg-default-shy);
@@ -597,36 +558,6 @@
   flex-wrap: wrap;
   gap: var(--spacing-2);
   margin-top: var(--spacing-2-5);
-}
-
-/*
-  ⚠️ Outlined, not filled — deliberately quieter than `.ReplySubmit`. Accepting is a verb only the
-  asker ever sees, and only until one answer is accepted; the composer's verb is on every thread
-  for everybody. Two filled buttons on one screen is two primary actions, which is none.
-*/
-.AcceptButton {
-  background: none;
-  border: 1px solid var(--theme-color-border-control);
-  border-radius: 3px;
-  padding: var(--spacing-1) var(--spacing-2-5);
-  font: inherit;
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  color: var(--theme-color-fg-accent);
-
-  &:hover:not(:disabled) {
-    background: var(--theme-color-bg-2);
-  }
-
-  &:disabled {
-    cursor: default;
-    color: var(--theme-color-fg-disabled);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 2px;
-  }
 }
 
 .AcceptError {
@@ -1274,34 +1205,14 @@
  * FB-001 — the author's own verbs on their own post.
  *
  * 🔴 Declares no colour of its own beyond the roles this file already uses: the quiet verbs
- * take the same muted ink as `PostWhen`, and Save reuses `AcceptButton` outright rather than
- * introducing a second affirmative button style to this panel.
+ * are `PrimaryButton` `Text`, and Save is `PrimaryButton` `Muted` (CHR-012) — no button style of this
+ * panel's own.
  */
 .PostEditRow {
   display: flex;
   gap: 8px;
   align-items: center;
   margin-top: 8px;
-}
-
-.PostEditQuiet {
-  background: none;
-  border: 1px solid var(--theme-color-bg-3);
-  border-radius: 2px;
-  padding: 3px 8px;
-  color: var(--theme-color-fg-default);
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.PostEditQuiet:hover {
-  color: var(--theme-color-fg-highlight);
-  border-color: var(--theme-color-primary);
-}
-
-.PostEditQuiet:disabled {
-  cursor: default;
-  opacity: 0.6;
 }
 
 .PostEditor {

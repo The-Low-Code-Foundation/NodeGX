@@ -27,6 +27,8 @@
 
 import React from 'react';
 
+import { PrimaryButton, PrimaryButtonSize, PrimaryButtonVariant } from '@noodl-core-ui/components/inputs/PrimaryButton';
+
 import { FilterPill } from './CommunityFilterPill';
 import { CommunityDensity } from './CommunityRow';
 import { CommunityPostBody } from './CommunityPostBody';
@@ -237,14 +239,13 @@ function ChatStarter({ composer }: { composer: CommunityChatComposerBox }) {
       />
 
       <div className={css['ReplyActions']}>
-        <button
-          type="button"
-          className={css['ReplySubmit']}
+        <PrimaryButton
+          label={composer.submitLabel}
+          size={PrimaryButtonSize.Small}
+          testId="community-reply-submit"
           onClick={composer.onSubmit}
-          disabled={!composer.canSubmit || composer.busy}
-        >
-          {composer.submitLabel}
-        </button>
+          isDisabled={!composer.canSubmit || composer.busy}
+        />
         {composer.blockedReason && <p className={css['ReplyBlocked']}>{composer.blockedReason}</p>}
       </div>
 
@@ -412,14 +413,13 @@ export function CommunityChatThread({
               />
 
               <div className={css['ReplyActions']}>
-                <button
-                  type="button"
-                  className={css['ReplySubmit']}
+                <PrimaryButton
+                  label={reply.submitLabel}
+                  size={PrimaryButtonSize.Small}
+                  testId="community-reply-submit"
                   onClick={reply.onSubmit}
-                  disabled={!reply.canSubmit || reply.busy}
-                >
-                  {reply.submitLabel}
-                </button>
+                  isDisabled={!reply.canSubmit || reply.busy}
+                />
                 {reply.blockedReason && <p className={css['ReplyBlocked']}>{reply.blockedReason}</p>}
               </div>
 

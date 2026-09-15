@@ -35,6 +35,8 @@
 
 import React from 'react';
 
+import { PrimaryButton, PrimaryButtonSize, PrimaryButtonVariant } from '@noodl-core-ui/components/inputs/PrimaryButton';
+
 import { CommunityDensity } from './CommunityRow';
 import { CommunityPostBody } from './CommunityPostBody';
 import css from './Community.module.scss';
@@ -418,22 +420,22 @@ function Post({
             <p className={css['PostEditorBlocked']}>{post.edit.composer.blockedReason}</p>
           )}
           <div className={css['PostEditRow']}>
-            <button
-              type="button"
-              className={css['AcceptButton']}
+            <PrimaryButton
+              label={post.edit.composer.saveLabel}
+              variant={PrimaryButtonVariant.Muted}
+              size={PrimaryButtonSize.Small}
+              testId="community-post-save"
               onClick={post.edit.composer.onSave}
-              disabled={!post.edit.composer.canSave || post.edit.composer.busy}
-            >
-              {post.edit.composer.saveLabel}
-            </button>
-            <button
-              type="button"
-              className={css['PostEditQuiet']}
+              isDisabled={!post.edit.composer.canSave || post.edit.composer.busy}
+            />
+            <PrimaryButton
+              label="Cancel"
+              variant={PrimaryButtonVariant.Text}
+              size={PrimaryButtonSize.Small}
+              testId="community-post-cancel"
               onClick={post.edit.composer.onCancel}
-              disabled={post.edit.composer.busy}
-            >
-              Cancel
-            </button>
+              isDisabled={post.edit.composer.busy}
+            />
           </div>
         </div>
       ) : (
@@ -451,14 +453,14 @@ function Post({
           the words it refers to is how somebody accepts the answer above the one they read. */}
       {post.accept && (
         <div className={css['PostAccept']}>
-          <button
-            type="button"
-            className={css['AcceptButton']}
+          <PrimaryButton
+            label={post.accept.busy ? post.accept.busyLabel : post.accept.label}
+            variant={PrimaryButtonVariant.Muted}
+            size={PrimaryButtonSize.Small}
+            testId="community-accept"
             onClick={post.accept.onAccept}
-            disabled={post.accept.busy}
-          >
-            {post.accept.busy ? post.accept.busyLabel : post.accept.label}
-          </button>
+            isDisabled={post.accept.busy}
+          />
           {/* ⚠️ The platform's own refusal, beside the verb that earned it. `role="alert"` because
               a person who clicked and saw nothing change has no other way to learn it failed. */}
           {post.accept.error && (
@@ -475,18 +477,22 @@ function Post({
           the verbs then, and an "Edit" button beside them would be a third thing to press. */}
       {post.edit && !post.edit.composer && (
         <div className={css['PostEditRow']}>
-          <button type="button" className={css['PostEditQuiet']} onClick={post.edit.onEdit}>
-            {post.edit.editLabel}
-          </button>
+          <PrimaryButton
+            label={post.edit.editLabel}
+            variant={PrimaryButtonVariant.Text}
+            size={PrimaryButtonSize.Small}
+            testId="community-post-edit"
+            onClick={post.edit.onEdit}
+          />
           {post.edit.remove && (
-            <button
-              type="button"
-              className={css['PostEditQuiet']}
+            <PrimaryButton
+              label={post.edit.remove.busy ? post.edit.remove.busyLabel : post.edit.remove.label}
+              variant={PrimaryButtonVariant.Text}
+              size={PrimaryButtonSize.Small}
+              testId="community-post-remove"
               onClick={post.edit.remove.onRemove}
-              disabled={post.edit.remove.busy}
-            >
-              {post.edit.remove.busy ? post.edit.remove.busyLabel : post.edit.remove.label}
-            </button>
+              isDisabled={post.edit.remove.busy}
+            />
           )}
         </div>
       )}
@@ -647,14 +653,13 @@ export function CommunityThreadView({
           />
 
           <div className={css['ReplyActions']}>
-            <button
-              type="button"
-              className={css['ReplySubmit']}
+            <PrimaryButton
+              label={reply.submitLabel}
+              size={PrimaryButtonSize.Small}
+              testId="community-reply-submit"
               onClick={reply.onSubmit}
-              disabled={!reply.canSubmit || reply.busy}
-            >
-              {reply.submitLabel}
-            </button>
+              isDisabled={!reply.canSubmit || reply.busy}
+            />
             {reply.blockedReason && <p className={css['ReplyBlocked']}>{reply.blockedReason}</p>}
           </div>
 

@@ -14,9 +14,9 @@
     "packages/noodl-editor/src/editor/src/views/panels/propertyeditor": 0,
     "packages/noodl-core-ui/src/components/property-panel": 0
   },
-  "commit": "675f12f9d",
+  "commit": "2c5c31fa2",
   "max": {
-    "noodl-core-ui": 124,
+    "noodl-core-ui": 123,
     "noodl-editor": 599
   },
   "byFile": {
@@ -31,7 +31,7 @@
     "packages/noodl-core-ui/src/components/code-editor/JavaScriptEditor.module.scss": 7,
     "packages/noodl-core-ui/src/components/common/EditorNode/EditorNode.module.scss": 1,
     "packages/noodl-core-ui/src/components/common/Markdown/Markdown.module.scss": 2,
-    "packages/noodl-core-ui/src/components/community/Community.module.scss": 4,
+    "packages/noodl-core-ui/src/components/community/Community.module.scss": 3,
     "packages/noodl-core-ui/src/components/inputs/ActionButton/ActionButton.module.scss": 2,
     "packages/noodl-core-ui/src/components/inputs/Checkbox/Checkbox.module.scss": 1,
     "packages/noodl-core-ui/src/components/inputs/ExternalLink/ExternalLink.module.scss": 1,

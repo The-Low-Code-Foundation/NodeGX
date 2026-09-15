@@ -1,0 +1,335 @@
+{
+  "room": "chat",
+  "theme": "light",
+  "size": "700x500",
+  "geometry": {
+    "viewport": [
+      700,
+      500
+    ],
+    "theme": "light",
+    "title": {
+      "x": 20,
+      "y": 137,
+      "w": 652,
+      "h": 29
+    },
+    "titleText": "Community",
+    "actions": {
+      "x": 20,
+      "y": 178,
+      "w": 533,
+      "h": 30
+    },
+    "toolbar": {
+      "x": 20,
+      "y": 228,
+      "w": 652,
+      "h": 33
+    },
+    "column": {
+      "x": 20,
+      "y": 137,
+      "w": 652,
+      "h": 366
+    },
+    "contentBottom": 503,
+    "scrolls": true,
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "PrimaryButton": {
+      "count": 3,
+      "distinct": 2,
+      "styles": {
+        "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+          "Refresh",
+          "Open community.nodegx.io"
+        ],
+        "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+          "Sign in"
+        ]
+      }
+    },
+    "filter chip": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {}
+    },
+    "room tab": {
+      "count": 5,
+      "distinct": 2,
+      "styles": {
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+          "Bench",
+          "Tutorials",
+          "Replays",
+          "People"
+        ],
+        "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+          "Chat"
+        ]
+      }
+    },
+    "row": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {}
+    },
+    "retry link": {
+      "count": 1,
+      "distinct": 1,
+      "styles": {
+        "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(14, 92, 202)": [
+          "Say something on the web"
+        ]
+      }
+    },
+    "other": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {},
+      "classes": []
+    }
+  },
+  "type": {
+    "page": {
+      "distinct": 5,
+      "sizes": {
+        "11px": {
+          "n": 1,
+          "e": [
+            "NodeGX 0.2.4"
+          ]
+        },
+        "12px": {
+          "n": 12,
+          "e": [
+            "Connect GitHub",
+            "Refresh",
+            "Open community.nodegx.io"
+          ]
+        },
+        "13px": {
+          "n": 10,
+          "e": [
+            "Projects",
+            "Community",
+            "Learning"
+          ]
+        },
+        "15px": {
+          "n": 1,
+          "e": [
+            "NodeGX"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    },
+    "content": {
+      "distinct": 3,
+      "sizes": {
+        "12px": {
+          "n": 8,
+          "e": [
+            "Refresh",
+            "Open community.nodegx.io",
+            "Sign in"
+          ]
+        },
+        "13px": {
+          "n": 5,
+          "e": [
+            "Reading as a guest",
+            "Everything anyone is say",
+            "You are not signed in to"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    }
+  },
+  "targetWords": {
+    "chars": 496,
+    "found": []
+  },
+  "contrast": {
+    "controls": 9,
+    "boundaryUnder3": [
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      }
+    ],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Refresh",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Open community.nodegx.io",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Sign in",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 4.03,
+        "textOnly": false,
+        "boundary": 4.03,
+        "text": 4.57
+      },
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      },
+      {
+        "label": "Tutorials",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Say something on the web",
+        "cls": "Community-module__RetryButton--WBANu",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 5.45
+      }
+    ]
+  },
+  "typeAtBottom": {
+    "page": {
+      "distinct": 5,
+      "sizes": {
+        "11px": {
+          "n": 1,
+          "e": [
+            "NodeGX 0.2.4"
+          ]
+        },
+        "12px": {
+          "n": 12,
+          "e": [
+            "Connect GitHub",
+            "Refresh",
+            "Open community.nodegx.io"
+          ]
+        },
+        "13px": {
+          "n": 10,
+          "e": [
+            "Projects",
+            "Community",
+            "Learning"
+          ]
+        },
+        "15px": {
+          "n": 1,
+          "e": [
+            "NodeGX"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    },
+    "content": {
+      "distinct": 3,
+      "sizes": {
+        "12px": {
+          "n": 8,
+          "e": [
+            "Refresh",
+            "Open community.nodegx.io",
+            "Sign in"
+          ]
+        },
+        "13px": {
+          "n": 5,
+          "e": [
+            "Reading as a guest",
+            "Everything anyone is say",
+            "You are not signed in to"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    }
+  }
+}

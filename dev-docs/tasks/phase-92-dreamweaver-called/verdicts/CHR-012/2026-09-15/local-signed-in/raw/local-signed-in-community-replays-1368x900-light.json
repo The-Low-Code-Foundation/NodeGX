@@ -1,0 +1,282 @@
+{
+  "room": "replays",
+  "theme": "light",
+  "size": "1368x900",
+  "geometry": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "light",
+    "title": {
+      "x": 120,
+      "y": 84,
+      "w": 549,
+      "h": 29
+    },
+    "titleText": "Community",
+    "actions": {
+      "x": 693,
+      "y": 84,
+      "w": 547,
+      "h": 30
+    },
+    "toolbar": {
+      "x": 120,
+      "y": 134,
+      "w": 1120,
+      "h": 33
+    },
+    "column": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 417
+    },
+    "contentBottom": 501,
+    "scrolls": false,
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "PrimaryButton": {
+      "count": 2,
+      "distinct": 1,
+      "styles": {
+        "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+          "Refresh",
+          "Open community.nodegx.io"
+        ]
+      }
+    },
+    "filter chip": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {}
+    },
+    "room tab": {
+      "count": 5,
+      "distinct": 2,
+      "styles": {
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+          "Bench",
+          "Chat",
+          "Tutorials",
+          "People"
+        ],
+        "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+          "Replays"
+        ]
+      }
+    },
+    "row": {
+      "count": 3,
+      "distinct": 1,
+      "styles": {
+        "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+          "Community call — the nod",
+          "Community call — logic w",
+          "Community call — shippin"
+        ]
+      }
+    },
+    "retry link": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {}
+    },
+    "other": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {},
+      "classes": []
+    }
+  },
+  "type": {
+    "page": {
+      "distinct": 5,
+      "sizes": {
+        "11px": {
+          "n": 2,
+          "e": [
+            "AD",
+            "NodeGX 0.2.4"
+          ]
+        },
+        "12px": {
+          "n": 19,
+          "e": [
+            "Connect GitHub",
+            "Refresh",
+            "Open community.nodegx.io"
+          ]
+        },
+        "13px": {
+          "n": 10,
+          "e": [
+            "Projects",
+            "Community",
+            "Learning"
+          ]
+        },
+        "15px": {
+          "n": 1,
+          "e": [
+            "NodeGX"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    },
+    "content": {
+      "distinct": 4,
+      "sizes": {
+        "11px": {
+          "n": 1,
+          "e": [
+            "AD"
+          ]
+        },
+        "12px": {
+          "n": 15,
+          "e": [
+            "Refresh",
+            "Open community.nodegx.io",
+            "105 points · 2 badges"
+          ]
+        },
+        "13px": {
+          "n": 5,
+          "e": [
+            "@ada-builds",
+            "Recordings of the weekly",
+            "Community call — the nod"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    }
+  },
+  "targetWords": {
+    "chars": 547,
+    "found": []
+  },
+  "contrast": {
+    "controls": 10,
+    "boundaryUnder3": [
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      }
+    ],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Refresh",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Open community.nodegx.io",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Tutorials",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      },
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Community call — the node yo",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Community call — logic witho",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Community call — shipping a ",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      }
+    ]
+  }
+}

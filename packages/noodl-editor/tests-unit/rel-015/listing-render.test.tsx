@@ -17,6 +17,14 @@
  *
  * @module noodl-editor/tests-unit/rel-015/listing-render
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import {
@@ -61,7 +69,7 @@ describe('the listing card — the three states that can ask', () => {
     'offers the ask, with a bio box, from %s',
     (status) => {
       const drawn = card({ state: ready(status, status === 'declined' ? 'Say what you build.' : null) });
-      expect(buttons(drawn).map((b) => b.ownText)).toContain('List me on /people');
+      expect(buttons(drawn).map((b) => text(b))).toContain('List me on /people');
       expect(walk(drawn).some((n) => n.type === 'textarea')).toBe(true);
     }
   );
@@ -75,7 +83,7 @@ describe('the listing card — the three states that can ask', () => {
   it('shows the decline reason as text, and still offers a way back', () => {
     const drawn = card({ state: ready('declined', 'Please say what you build.') });
     expect(text(drawn)).toContain('Please say what you build.');
-    expect(buttons(drawn).map((b) => b.ownText)).toContain('List me on /people');
+    expect(buttons(drawn).map((b) => text(b))).toContain('List me on /people');
 
     // The known-drawing control: the same card WITHOUT a note draws no reason, so the assertion
     // above is about the note and not about the word appearing somewhere in the component.
@@ -99,7 +107,7 @@ describe('the listing card — the three states that can ask', () => {
 
   it('offers withdrawal — and only withdrawal — once there is something to withdraw', () => {
     for (const status of ['pending', 'approved'] as const) {
-      const labels = buttons(card({ state: ready(status) })).map((b) => b.ownText);
+      const labels = buttons(card({ state: ready(status) })).map((b) => text(b));
       expect(labels).toContain('Take me off /people');
       expect(labels).not.toContain('List me on /people');
     }
@@ -117,13 +125,13 @@ describe('the listing card — what it refuses, and whether it says why', () => 
    */
   it('will not ask on an empty bio, and says so rather than just greying out', () => {
     const empty = card({ bio: '   ' });
-    const ask = buttons(empty).find((b) => String(b.ownText).startsWith('List me'));
+    const ask = buttons(empty).find((b) => text(b).startsWith('List me'));
     expect(ask?.props.disabled).toBe(true);
     expect(text(empty)).toContain('Write a line first');
 
     // The pair: one field different, and both go the other way.
     const filled = card({ bio: 'Builds rota tools for care homes.' });
-    const enabled = buttons(filled).find((b) => String(b.ownText).startsWith('List me'));
+    const enabled = buttons(filled).find((b) => text(b).startsWith('List me'));
     expect(enabled?.props.disabled).toBe(false);
     expect(text(filled)).not.toContain('Write a line first');
   });
@@ -149,7 +157,7 @@ describe('the listing card — loading and error', () => {
   it('draws a retry only for the error, and the error message with it', () => {
     const failed = card({ state: { kind: 'error', message: 'Could not check whether you are listed.' } });
     expect(text(failed)).toContain('Could not check whether you are listed.');
-    expect(buttons(failed).map((b) => b.ownText)).toContain('Try again');
+    expect(buttons(failed).map((b) => text(b))).toContain('Try again');
 
     // 🔴 The control the module note demands: loading is NOT an error, draws no retry, and — this
     // is the half that matters — draws something, so "no Try again" is about the state rather

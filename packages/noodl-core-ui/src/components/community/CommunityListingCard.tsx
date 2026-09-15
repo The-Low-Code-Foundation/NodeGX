@@ -44,6 +44,8 @@
 
 import React from 'react';
 
+import { PrimaryButton, PrimaryButtonSize, PrimaryButtonVariant } from '@noodl-core-ui/components/inputs/PrimaryButton';
+
 import css from './Community.module.scss';
 
 /**
@@ -189,20 +191,24 @@ export function CommunityListingCard({
 
       <div className={css['ReplyActions']}>
         {canAsk ? (
-          <button
-            className={css['ReplySubmit']}
-            type="button"
-            disabled={busy || bio.trim() === ''}
+          <PrimaryButton
+            label={busy ? 'Asking…' : 'List me on /people'}
+            size={PrimaryButtonSize.Small}
+            testId="community-listing-ask"
+            isDisabled={busy || bio.trim() === ''}
             onClick={onRequest}
-          >
-            {busy ? 'Asking…' : 'List me on /people'}
-          </button>
+          />
         ) : (
-          /* ⚠️ Outlined and not filled, on `.AcceptButton`'s reasoning: taking yourself off is a
-             verb a listed person needs available and should not be the loudest thing on screen. */
-          <button className={css['AcceptButton']} type="button" disabled={busy} onClick={onWithdraw}>
-            {busy ? 'Withdrawing…' : 'Take me off /people'}
-          </button>
+          /* ⚠️ Muted and not filled: taking yourself off is a verb a listed person needs available and
+             should not be the loudest thing on screen. CHR-012 — `PrimaryButton`, the tab's one button. */
+          <PrimaryButton
+            label={busy ? 'Withdrawing…' : 'Take me off /people'}
+            variant={PrimaryButtonVariant.Muted}
+            size={PrimaryButtonSize.Small}
+            testId="community-listing-withdraw"
+            isDisabled={busy}
+            onClick={onWithdraw}
+          />
         )}
       </div>
 

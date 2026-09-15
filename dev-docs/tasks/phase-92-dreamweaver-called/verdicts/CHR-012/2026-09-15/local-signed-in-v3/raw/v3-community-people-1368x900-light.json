@@ -1,0 +1,433 @@
+{
+  "room": "people",
+  "theme": "light",
+  "size": "1368x900",
+  "geometry": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "light",
+    "title": {
+      "x": 120,
+      "y": 84,
+      "w": 549,
+      "h": 29
+    },
+    "titleText": "Community",
+    "actions": {
+      "x": 693,
+      "y": 84,
+      "w": 547,
+      "h": 30
+    },
+    "toolbar": {
+      "x": 120,
+      "y": 134,
+      "w": 1120,
+      "h": 33
+    },
+    "column": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 947
+    },
+    "contentBottom": 1031,
+    "scrolls": true,
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "PrimaryButton": {
+      "count": 3,
+      "distinct": 2,
+      "styles": {
+        "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+          "Refresh",
+          "Open community.nodegx.io"
+        ],
+        "6px | 12px | 500 | rgb(242, 244, 246) | 1px solid rgb(122, 134, 145)": [
+          "Take me off /people"
+        ]
+      }
+    },
+    "filter chip": {
+      "count": 2,
+      "distinct": 1,
+      "styles": {
+        "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+          "Available for work4",
+          "Offers coaching2"
+        ]
+      }
+    },
+    "room tab": {
+      "count": 5,
+      "distinct": 2,
+      "styles": {
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+          "Bench",
+          "Chat",
+          "Tutorials",
+          "Replays"
+        ],
+        "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+          "People"
+        ]
+      }
+    },
+    "row": {
+      "count": 6,
+      "distinct": 1,
+      "styles": {
+        "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+          "Tom Reilly, tom-teaches",
+          "Ada Osei, ada-builds",
+          "Priya Raman, priya-plans",
+          "Mo Adeyemi, mo-makes",
+          "Sam Okafor, sam-solves",
+          "Nia Patel, nia-new"
+        ]
+      }
+    },
+    "retry link": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {}
+    },
+    "other": {
+      "count": 0,
+      "distinct": 0,
+      "styles": {},
+      "classes": []
+    }
+  },
+  "type": {
+    "page": {
+      "distinct": 5,
+      "sizes": {
+        "11px": {
+          "n": 21,
+          "e": [
+            "AD",
+            "Search names, handles, b",
+            "4"
+          ]
+        },
+        "12px": {
+          "n": 31,
+          "e": [
+            "Connect GitHub",
+            "Refresh",
+            "Open community.nodegx.io"
+          ]
+        },
+        "13px": {
+          "n": 12,
+          "e": [
+            "Projects",
+            "Community",
+            "Learning"
+          ]
+        },
+        "15px": {
+          "n": 1,
+          "e": [
+            "NodeGX"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    },
+    "content": {
+      "distinct": 4,
+      "sizes": {
+        "11px": {
+          "n": 20,
+          "e": [
+            "AD",
+            "Search names, handles, b",
+            "4"
+          ]
+        },
+        "12px": {
+          "n": 27,
+          "e": [
+            "Refresh",
+            "Open community.nodegx.io",
+            "105 points · 2 badges"
+          ]
+        },
+        "13px": {
+          "n": 7,
+          "e": [
+            "@ada-builds",
+            "Who else is building wit",
+            "Tom Reilly"
+          ]
+        },
+        "26px": {
+          "n": 1,
+          "e": [
+            "Community"
+          ]
+        }
+      }
+    }
+  },
+  "targetWords": {
+    "chars": 1555,
+    "found": []
+  },
+  "contrast": {
+    "controls": 17,
+    "boundaryUnder3": [
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      }
+    ],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Refresh",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Open community.nodegx.io",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Tutorials",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      },
+      {
+        "label": "Take me off /people",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.03,
+        "edgeOnFill": 3.37,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.8
+      },
+      {
+        "label": "",
+        "cls": "Community-module__SearchInput--eMtdG",
+        "disabled": false,
+        "fillOnGround": 1.03,
+        "edgeOnFill": 3.37,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.8
+      },
+      {
+        "label": "Available for work4",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.28,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.61
+      },
+      {
+        "label": "Offers coaching2",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.28,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.61
+      },
+      {
+        "label": "Tom Reilly, tom-teaches",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Ada Osei, ada-builds",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Priya Raman, priya-plans",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Mo Adeyemi, mo-makes",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Sam Okafor, sam-solves",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Nia Patel, nia-new",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      }
+    ]
+  },
+  "typeAtBottom": {
+    "page": {
+      "distinct": 4,
+      "sizes": {
+        "11px": {
+          "n": 27,
+          "e": [
+            "Search names, handles, b",
+            "4",
+            "2"
+          ]
+        },
+        "12px": {
+          "n": 26,
+          "e": [
+            "Connect GitHub",
+            "You are listed on /peopl",
+            "Take me off /people"
+          ]
+        },
+        "13px": {
+          "n": 11,
+          "e": [
+            "Projects",
+            "Community",
+            "Learning"
+          ]
+        },
+        "15px": {
+          "n": 1,
+          "e": [
+            "NodeGX"
+          ]
+        }
+      }
+    },
+    "content": {
+      "distinct": 3,
+      "sizes": {
+        "11px": {
+          "n": 26,
+          "e": [
+            "Search names, handles, b",
+            "4",
+            "2"
+          ]
+        },
+        "12px": {
+          "n": 22,
+          "e": [
+            "You are listed on /peopl",
+            "Take me off /people",
+            "Available for work4"
+          ]
+        },
+        "13px": {
+          "n": 6,
+          "e": [
+            "Tom Reilly",
+            "Ada Osei",
+            "Priya Raman"
+          ]
+        }
+      }
+    }
+  }
+}
