@@ -1,0 +1,351 @@
+{
+  "tab": "Community",
+  "theme": "dark",
+  "size": "700x500",
+  "geometry": {
+    "viewport": [
+      700,
+      500
+    ],
+    "theme": "dark",
+    "title": {
+      "x": 20,
+      "y": 137,
+      "w": 652,
+      "h": 29
+    },
+    "titleText": "Community",
+    "toolbar": null,
+    "column": {
+      "x": 20,
+      "y": 137,
+      "w": 652,
+      "h": 567
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 700,
+      "h": 105
+    },
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "kinds": {
+      "header tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": [
+            "Projects",
+            "Learning",
+            "Templates",
+            "GitHub"
+          ],
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": [
+            "Community"
+          ]
+        }
+      },
+      "PrimaryButton": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": [
+            "Connect GitHub"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "card": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 12,
+        "distinct": 9,
+        "styles": {
+          "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Settings"
+          ],
+          "4px | 13px | 600 | rgb(77, 163, 255) | 1px solid rgb(77, 163, 255)": [
+            "Sign in"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 1px solid rgba(0, 0, 0, 0)": [
+            "Refresh"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Open community.nodegx.io"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Bench"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Chat",
+            "Tutorials",
+            "Replays",
+            "People"
+          ],
+          "3px | 11px | 400 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Solved 1"
+          ],
+          "3px | 11px | 400 | rgb(51, 62, 77) | 1px solid rgb(77, 163, 255)": [
+            "Waiting for an answer 1✓"
+          ],
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Help with a Text node3 w"
+          ]
+        }
+      }
+    },
+    "radii": {
+      "50%": 4,
+      "6px": 5,
+      "4px": 11,
+      "3px": 2,
+      "12px": 3
+    }
+  },
+  "contrast": {
+    "controls": 18,
+    "boundaryUnder3": [
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.17,
+        "textOnly": false,
+        "boundary": 1.17,
+        "text": 1.43
+      }
+    ],
+    "textUnder45": [
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.17,
+        "textOnly": false,
+        "boundary": 1.17,
+        "text": 1.43
+      },
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "Tutorials",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      }
+    ],
+    "rows": [
+      {
+        "label": "Projects",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Community",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 14.71
+      },
+      {
+        "label": "Learning",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Templates",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "GitHub",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Connect GitHub",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.17,
+        "edgeOnFill": 3.57,
+        "edgeOnGround": 4.17,
+        "textOnly": false,
+        "boundary": 3.57,
+        "text": 9.82
+      },
+      {
+        "label": "Settings",
+        "cls": "LauncherHeader-module__SettingsButton--GVqlZ",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 11.47
+      },
+      {
+        "label": "Sign in",
+        "cls": "Community-module__PrimaryButton--KOOJG",
+        "disabled": false,
+        "fillOnGround": 4.8,
+        "edgeOnFill": 1,
+        "edgeOnGround": 4.8,
+        "textOnly": false,
+        "boundary": 4.8,
+        "text": 6.94
+      },
+      {
+        "label": "Refresh",
+        "cls": "Community-module__GhostButton--oP89L",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.91
+      },
+      {
+        "label": "Open community.nodegx.io",
+        "cls": "Community-module__OutlineButton--kKZ9A",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.57,
+        "edgeOnGround": 3.57,
+        "textOnly": false,
+        "boundary": 3.57,
+        "text": 9.82
+      },
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.17,
+        "textOnly": false,
+        "boundary": 1.17,
+        "text": 1.43
+      },
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "Tutorials",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 1.67
+      },
+      {
+        "label": "Solved 1",
+        "cls": "Community-module__FilterPill--v9sid",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.17,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 9.24
+      },
+      {
+        "label": "Waiting for an answer 1✓",
+        "cls": "Community-module__FilterPill--v9sid",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "edgeOnFill": 4.13,
+        "edgeOnGround": 5.6,
+        "textOnly": false,
+        "boundary": 4.13,
+        "text": 8.46
+      },
+      {
+        "label": "Help with a Text node3 weeks",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 11.47
+      }
+    ]
+  }
+}

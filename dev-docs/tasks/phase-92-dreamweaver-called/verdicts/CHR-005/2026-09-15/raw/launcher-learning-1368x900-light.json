@@ -1,0 +1,441 @@
+{
+  "tab": "Learning",
+  "theme": "light",
+  "size": "1368x900",
+  "geometry": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "light",
+    "title": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 29
+    },
+    "titleText": "Learning",
+    "toolbar": null,
+    "column": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 1115
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 1368,
+      "h": 52
+    },
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "kinds": {
+      "header tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(89, 98, 110)": [
+            "Projects",
+            "Community",
+            "Templates",
+            "GitHub"
+          ],
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(24, 33, 43)": [
+            "Learning"
+          ]
+        }
+      },
+      "PrimaryButton": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 500 | rgb(242, 244, 246) | 1px solid rgb(122, 134, 145)": [
+            "Connect GitHub"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(21, 112, 239, 0.09) | 1px solid rgb(21, 112, 239)": [
+            "All9✓"
+          ],
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "The spine8",
+            "Standalone1"
+          ]
+        }
+      },
+      "card": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 23,
+        "distinct": 5,
+        "styles": {
+          "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Settings"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Installed lessons"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Your path"
+          ],
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgba(0, 0, 0, 0)": [
+            "Install a lesson…",
+            "Reset",
+            "Reset",
+            "Reset",
+            "Reset",
+            "Reset",
+            "Reset",
+            "Reset",
+            "Reset",
+            "Reset"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 1px solid rgba(0, 0, 0, 0)": [
+            "Start here",
+            "Start",
+            "Start",
+            "Start",
+            "Start",
+            "Start",
+            "Start",
+            "Start",
+            "Start",
+            "Start"
+          ]
+        }
+      }
+    },
+    "radii": {
+      "50%": 11,
+      "6px": 31,
+      "4px": 5,
+      "12px": 10,
+      "9999px": 4,
+      "2px": 9
+    }
+  },
+  "contrast": {
+    "controls": 32,
+    "boundaryUnder3": [
+      {
+        "label": "Installed lessons",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      }
+    ],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Projects",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Community",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Learning",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 16.26
+      },
+      {
+        "label": "Templates",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "GitHub",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Connect GitHub",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "edgeOnFill": 3.37,
+        "edgeOnGround": 3.72,
+        "textOnly": false,
+        "boundary": 3.37,
+        "text": 6.8
+      },
+      {
+        "label": "Settings",
+        "cls": "LauncherHeader-module__SettingsButton--GVqlZ",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Installed lessons",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      },
+      {
+        "label": "Your path",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Install a lesson…",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "Start here",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "All9✓",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1.12,
+        "edgeOnFill": 3.6,
+        "edgeOnGround": 4.03,
+        "textOnly": false,
+        "boundary": 3.6,
+        "text": 12.82
+      },
+      {
+        "label": "The spine8",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.28,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.61
+      },
+      {
+        "label": "Standalone1",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.28,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.61
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Start",
+        "cls": "LearningSection-module__Primary--pONRs",
+        "disabled": false,
+        "fillOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 4.57,
+        "text": 4.57
+      },
+      {
+        "label": "Reset",
+        "cls": "LearningSection-module__Ghost--sUVX_",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      }
+    ]
+  }
+}

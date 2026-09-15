@@ -1,0 +1,105 @@
+{
+  "task": "CHR-005",
+  "date": "2026-09-15",
+  "build": "dev stack (npm run start) on cline-dev b2b5c230b + the uncommitted CHR-005 tree",
+  "instrument": "drive.js (4 tabs x 1368x900, 700x500 via Emulation.setDeviceMetricsOverride, DPR 1 x dark/light via data-theme), arms.js (AC4); CHR-001 measure.js run unchanged on Templates",
+  "profiles": "drive + arm mock: six copied projects (five real thumbURIs, one blanked); arm empty: zero recent projects",
+  "notes": "arm-* screenshots are at the window size, DPR 2 (no emulation). PNGs are gitignored by ruling (.gitignore:265); hashes recorded here.",
+  "shots": [
+    {
+      "file": "arm-empty-profile-projects.png",
+      "kind": "arm",
+      "sha256": "0ef2b70f208fff664542160b83783d93dabbd07b43c652cda6a5c5d6ba59c1a9"
+    },
+    {
+      "file": "arm-mock-flag-off-projects.png",
+      "kind": "arm",
+      "sha256": "f98b1d93617392a14c514aca5d343b1dcc7ea9b6ba6b770ffc39f4513469bd12"
+    },
+    {
+      "file": "arm-mock-flag-on-projects.png",
+      "kind": "arm",
+      "sha256": "dae60cfb3ace6ee8c95a780b891f30c11e21a5c21ea737362e2fb6237dea364d"
+    },
+    {
+      "file": "launcher-community-1368x900-dark.png",
+      "kind": "drive",
+      "sha256": "ddae73caef5056af297109fea95541d9477b4b5f07c96555dd609dddbfe0a972"
+    },
+    {
+      "file": "launcher-community-1368x900-light.png",
+      "kind": "drive",
+      "sha256": "ec043e959cb3e02ff9691b56a078a73d8a601c343b3b2b965a1034c53cc399c7"
+    },
+    {
+      "file": "launcher-community-700x500-dark.png",
+      "kind": "drive",
+      "sha256": "6d49ec2f3486c1ff4ece092e0b2f92c67b9009189bbd6f3315992698d102846e"
+    },
+    {
+      "file": "launcher-community-700x500-light.png",
+      "kind": "drive",
+      "sha256": "a75e24320ac7b1a235afa4fb30c0be470dd6ad0240cbf60cbd8c4d1e67bd52c6"
+    },
+    {
+      "file": "launcher-learning-1368x900-dark.png",
+      "kind": "drive",
+      "sha256": "bb14b627e8977b079c8cccbf43ab4653783d6fafbac51703ca21ef429e420c57"
+    },
+    {
+      "file": "launcher-learning-1368x900-light.png",
+      "kind": "drive",
+      "sha256": "ec6f14db2c52b2e7776a1fceeb223f84885c9133b0dc1e428b5741cc52285968"
+    },
+    {
+      "file": "launcher-learning-700x500-dark.png",
+      "kind": "drive",
+      "sha256": "76b691010ad25cacf4acd3948f3d11e60bd8a72d24b705c2b0ca93280e26c0e5"
+    },
+    {
+      "file": "launcher-learning-700x500-light.png",
+      "kind": "drive",
+      "sha256": "f28708daec1295a66381aea583ea96075793e6e9ca4877c972dde569a5625dd8"
+    },
+    {
+      "file": "launcher-projects-1368x900-dark.png",
+      "kind": "drive",
+      "sha256": "745573353ac44ae696c8f29ab92321cfa02c2719a7db3055af0b1bdbdbbc411b"
+    },
+    {
+      "file": "launcher-projects-1368x900-light.png",
+      "kind": "drive",
+      "sha256": "d6a233cb4e461419d719cd6c3bc01f74421373e0d8de60d9750147a49b2d96a6"
+    },
+    {
+      "file": "launcher-projects-700x500-dark.png",
+      "kind": "drive",
+      "sha256": "9f5d3be103c7633bc3d297adf6f5050622bb0c0d48295ed963eb56ed66ec1e04"
+    },
+    {
+      "file": "launcher-projects-700x500-light.png",
+      "kind": "drive",
+      "sha256": "89aa4151a0767cd0d8294028545abc4bd951abe23470591d2fc7fd8eb193b7cb"
+    },
+    {
+      "file": "launcher-templates-1368x900-dark.png",
+      "kind": "drive",
+      "sha256": "4521426833729503785bbac38f1494e836fa414142c55321f27592f046b91771"
+    },
+    {
+      "file": "launcher-templates-1368x900-light.png",
+      "kind": "drive",
+      "sha256": "28b2905c41b341c7eb73426107023d638dd90b30dedd83e828eac7d0558f6cfa"
+    },
+    {
+      "file": "launcher-templates-700x500-dark.png",
+      "kind": "drive",
+      "sha256": "e4467a8b35733410596f8f2bfe643d574646be89b0e964ba8eeaecf33ab084b8"
+    },
+    {
+      "file": "launcher-templates-700x500-light.png",
+      "kind": "drive",
+      "sha256": "6fa86a75244d899679ce5edc3d4dbd80c56f4b0aa9c4e88aae8131e9f36d7423"
+    }
+  ]
+}

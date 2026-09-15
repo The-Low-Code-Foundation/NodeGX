@@ -1,0 +1,488 @@
+{
+  "tab": "Projects",
+  "theme": "dark",
+  "size": "1368x900",
+  "geometry": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "dark",
+    "title": {
+      "x": 120,
+      "y": 84,
+      "w": 865,
+      "h": 29
+    },
+    "titleText": "Projects",
+    "toolbar": {
+      "x": 120,
+      "y": 178,
+      "w": 1120,
+      "h": 36
+    },
+    "column": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 1046
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 1368,
+      "h": 52
+    },
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "kinds": {
+      "header tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": [
+            "Projects"
+          ],
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": [
+            "Community",
+            "Learning",
+            "Templates",
+            "GitHub"
+          ]
+        }
+      },
+      "PrimaryButton": {
+        "count": 6,
+        "distinct": 3,
+        "styles": {
+          "6px | 12px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": [
+            "Connect GitHub"
+          ],
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Open project…",
+            "Copy the command instead"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "New project",
+            "Connect Claude Code",
+            "Sign in to NodeGX"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "card": {
+        "count": 6,
+        "distinct": 1,
+        "styles": {
+          "12px | 13px | 400 | rgb(33, 41, 50) | 1px solid rgb(125, 138, 152)": [
+            "Rocket SchoolEdited 4 ho",
+            "Llib024-shelf-driveEdite",
+            "Landing page test V2Edit",
+            "Pixel dungeonEdited 3 da",
+            "Reading ShelfEdited 5 da",
+            "Deadline DeskEdited 5 da"
+          ]
+        }
+      },
+      "other": {
+        "count": 10,
+        "distinct": 5,
+        "styles": {
+          "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Settings"
+          ],
+          "6px | 13px | 500 | rgba(77, 163, 255, 0.13) | 0px none rgb(77, 163, 255)": [
+            "All projects6"
+          ],
+          "6px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Uncategorized6"
+          ],
+          "6px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": [
+            "New folder"
+          ],
+          "6px | 13px | 400 | rgb(51, 62, 77) | 0px none rgb(196, 206, 219)": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      }
+    },
+    "radii": {
+      "50%": 3,
+      "6px": 17,
+      "4px": 10,
+      "12px": 8,
+      "8px": 1
+    }
+  },
+  "contrast": {
+    "controls": 30,
+    "boundaryUnder3": [
+      {
+        "label": "All projects6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1.23,
+        "textOnly": false,
+        "boundary": 1.23,
+        "text": 5.29
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      }
+    ],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Projects",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 14.71
+      },
+      {
+        "label": "Community",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Learning",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Templates",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "GitHub",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Connect GitHub",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.17,
+        "edgeOnFill": 3.57,
+        "edgeOnGround": 4.17,
+        "textOnly": false,
+        "boundary": 3.57,
+        "text": 9.82
+      },
+      {
+        "label": "Settings",
+        "cls": "LauncherHeader-module__SettingsButton--GVqlZ",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 11.47
+      },
+      {
+        "label": "Open project…",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 13.37
+      },
+      {
+        "label": "New project",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 6.53,
+        "textOnly": false,
+        "boundary": 6.53,
+        "text": 6.94
+      },
+      {
+        "label": "⌘K",
+        "cls": "LauncherSearchBar-module__Search--I24Ib",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 9.24
+      },
+      {
+        "label": "Search projects",
+        "cls": "LauncherSearchBar-module__SearchInput--zRY2M",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 14.71
+      },
+      {
+        "label": "All projectsOnly local proje",
+        "cls": "LauncherSearchBar-module__Select--OXILr",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "All projects6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1.23,
+        "textOnly": false,
+        "boundary": 1.23,
+        "text": 5.29
+      },
+      {
+        "label": "Uncategorized6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 13.37
+      },
+      {
+        "label": "New folder",
+        "cls": "FolderTree-module__NewFolderButton--B2MPm",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 10.77
+      },
+      {
+        "label": "Connect Claude Code",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 4.8,
+        "textOnly": false,
+        "boundary": 4.8,
+        "text": 6.94
+      },
+      {
+        "label": "Copy the command instead",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.82
+      },
+      {
+        "label": "Sign in to NodeGX",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 4.8,
+        "textOnly": false,
+        "boundary": 4.8,
+        "text": 6.94
+      },
+      {
+        "label": "Rocket SchoolEdited 4 hours ",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "Llib024-shelf-driveEdited 3 ",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "Landing page test V2Edited 3",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "Pixel dungeonEdited 3 days a",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "Reading ShelfEdited 5 days a",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      },
+      {
+        "label": "Deadline DeskEdited 5 days a",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "textOnly": false,
+        "boundary": 1.36,
+        "text": 6.81
+      }
+    ]
+  }
+}

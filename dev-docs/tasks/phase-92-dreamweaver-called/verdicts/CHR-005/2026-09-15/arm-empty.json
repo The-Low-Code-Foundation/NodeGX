@@ -1,0 +1,10 @@
+{
+  "emptyProfile": {
+    "cards": [],
+    "kittenImages": 0,
+    "welcome": true,
+    "agentCard": true,
+    "title": "Projects",
+    "flag": "false"
+  }
+}

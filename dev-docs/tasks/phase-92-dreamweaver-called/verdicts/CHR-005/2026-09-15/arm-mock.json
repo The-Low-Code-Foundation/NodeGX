@@ -1,0 +1,30 @@
+{
+  "flagOn": {
+    "cards": [
+      "My first project",
+      "External git project with push but no pull",
+      "External git project with local changes",
+      "Git project with all notifications"
+    ],
+    "kittenImages": 0,
+    "welcome": false,
+    "agentCard": true,
+    "title": "Projects",
+    "flag": "true"
+  },
+  "flagOff": {
+    "cards": [
+      "Rocket School",
+      "lib024-shelf-drive",
+      "Landing page test V2",
+      "Pixel dungeon",
+      "Reading Shelf",
+      "Deadline Desk"
+    ],
+    "kittenImages": 0,
+    "welcome": false,
+    "agentCard": true,
+    "title": "Projects",
+    "flag": "false"
+  }
+}

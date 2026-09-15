@@ -1,0 +1,305 @@
+{
+  "tab": "Community",
+  "theme": "light",
+  "size": "700x500",
+  "geometry": {
+    "viewport": [
+      700,
+      500
+    ],
+    "theme": "light",
+    "title": {
+      "x": 20,
+      "y": 137,
+      "w": 652,
+      "h": 29
+    },
+    "titleText": "Community",
+    "toolbar": null,
+    "column": {
+      "x": 20,
+      "y": 137,
+      "w": 652,
+      "h": 567
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 700,
+      "h": 105
+    },
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "kinds": {
+      "header tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(89, 98, 110)": [
+            "Projects",
+            "Learning",
+            "Templates",
+            "GitHub"
+          ],
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(24, 33, 43)": [
+            "Community"
+          ]
+        }
+      },
+      "PrimaryButton": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 500 | rgb(242, 244, 246) | 1px solid rgb(122, 134, 145)": [
+            "Connect GitHub"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "card": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 12,
+        "distinct": 9,
+        "styles": {
+          "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Settings"
+          ],
+          "4px | 13px | 600 | rgb(21, 112, 239) | 1px solid rgb(21, 112, 239)": [
+            "Sign in"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 1px solid rgba(0, 0, 0, 0)": [
+            "Refresh"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "Open community.nodegx.io"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Bench"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Chat",
+            "Tutorials",
+            "Replays",
+            "People"
+          ],
+          "3px | 11px | 400 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "Solved 1"
+          ],
+          "3px | 11px | 400 | rgb(229, 233, 237) | 1px solid rgb(21, 112, 239)": [
+            "Waiting for an answer 1✓"
+          ],
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Help with a Text node3 w"
+          ]
+        }
+      }
+    },
+    "radii": {
+      "50%": 4,
+      "6px": 5,
+      "4px": 11,
+      "3px": 2,
+      "12px": 3
+    }
+  },
+  "contrast": {
+    "controls": 18,
+    "boundaryUnder3": [
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      }
+    ],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Projects",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Community",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 16.26
+      },
+      {
+        "label": "Learning",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Templates",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "GitHub",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Connect GitHub",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "edgeOnFill": 3.37,
+        "edgeOnGround": 3.72,
+        "textOnly": false,
+        "boundary": 3.37,
+        "text": 6.8
+      },
+      {
+        "label": "Settings",
+        "cls": "LauncherHeader-module__SettingsButton--GVqlZ",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Sign in",
+        "cls": "Community-module__PrimaryButton--KOOJG",
+        "disabled": false,
+        "fillOnGround": 4.14,
+        "edgeOnFill": 1,
+        "edgeOnGround": 4.14,
+        "textOnly": false,
+        "boundary": 4.14,
+        "text": 4.57
+      },
+      {
+        "label": "Refresh",
+        "cls": "Community-module__GhostButton--oP89L",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 5.61
+      },
+      {
+        "label": "Open community.nodegx.io",
+        "cls": "Community-module__OutlineButton--kKZ9A",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.37,
+        "edgeOnGround": 3.37,
+        "textOnly": false,
+        "boundary": 3.37,
+        "text": 6.8
+      },
+      {
+        "label": "Bench",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "textOnly": false,
+        "boundary": 1.1,
+        "text": 21
+      },
+      {
+        "label": "Chat",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Tutorials",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Replays",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "People",
+        "cls": "Tabs-module__Button--rruzp",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 19.05
+      },
+      {
+        "label": "Solved 1",
+        "cls": "Community-module__FilterPill--v9sid",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.72,
+        "textOnly": false,
+        "boundary": 3.72,
+        "text": 6.18
+      },
+      {
+        "label": "Waiting for an answer 1✓",
+        "cls": "Community-module__FilterPill--v9sid",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "edgeOnFill": 3.74,
+        "edgeOnGround": 4.57,
+        "textOnly": false,
+        "boundary": 3.74,
+        "text": 6.14
+      },
+      {
+        "label": "Help with a Text node3 weeks",
+        "cls": "Community-module__Row--WS1o4",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      }
+    ]
+  }
+}

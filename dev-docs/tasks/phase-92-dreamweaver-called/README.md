@@ -1,7 +1,7 @@
 # Phase 92 — Dreamweaver called
 
 **Scoped:** 2026-09-15, from a measured audit of the installed **0.2.4** and `cline-dev` HEAD `e740727f8`.
-**Status: 🟡 CHR-001 ✅, CHR-002 ✅ (Richard's look: "looks good", 2026-09-15 s3), CHR-003 ✅ built 2026-09-15 s3 (AC5 `test:ci` reading in CHR-003 §6.3), CHR-007 ✅ built 2026-09-15 s4 (20/20 panels identical before/after; AC4's `_portsHash` clause declined, CHR-007 §6.2). PNGs kept local by ruling. **R1–R8 all ruled 2026-09-15** (R6 a trial, R7 against the proposal — §4). Richard on s1–s4: *"everything in the tasks up to now still looks like shit"* — nothing visible has changed yet. Next: CHR-005, then CHR-006.** **Prefix: `CHR`** (chrome).
+**Status: 🟡 CHR-001 ✅, CHR-002 ✅ (Richard's look: "looks good", 2026-09-15 s3), CHR-003 ✅ built 2026-09-15 s3 (AC5 `test:ci` reading in CHR-003 §6.3), CHR-007 ✅ built 2026-09-15 s4 (20/20 panels identical before/after; AC4's `_portsHash` clause declined, CHR-007 §6.2). PNGs kept local by ruling. **R1–R8 all ruled 2026-09-15** (R6 a trial, R7 against the proposal — §4). Richard on s1–s4: *"everything in the tasks up to now still looks like shit"* — nothing visible has changed yet. **CHR-005 ✅ built 2026-09-15 s5 — the first visible surface: one page, one card, one button, one chip on all four launcher tabs; title at the same x/y on all four at 1368 and at 700 (CHR-005 §6.3). Awaits Richard's look at `verdicts/CHR-005/2026-09-15/`.** Next: CHR-006 (the pictures).** **Prefix: `CHR`** (chrome).
 **The baseline is [`verdicts/CHR-001/2026-09-15/`](./verdicts/CHR-001/2026-09-15/) — read CHR-001 §6 before any ratchet;
 it corrects two §3 rows below (the hint prints 6×, not 7×; the Templates "10 sizes" counts off-screen elements).**
 
@@ -140,7 +140,7 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
 
 | id | task | source | depends on |
 |---|---|---|---|
-| [CHR-005](./CHR-005-ONE-LAUNCHER-PAGE.md) | One `LauncherPage` scaffold: 1120px column, one title, one toolbar, one `Tabs`, one button, one chip, one card; `LauncherButton` and the two ad-hoc tab arrays deleted; `MOCK_PROJECTS` off (R2, R5) | mockup | CHR-002, CHR-003, CHR-004 |
+| [CHR-005](./CHR-005-ONE-LAUNCHER-PAGE.md) ✅ | One `LauncherPage` (1120 column), one `LauncherCard`, one filter `Chip`, `PrimaryButton` only (`LauncherButton` deleted, R2), `MOCK_PROJECTS` off. Drive: title at the same x/y on all four tabs at 1368 and 700, nothing clipped, both themes; AC4 both arms. The tab arrays were already data (§6.1). §3.8 inline styles unbuilt. **Awaits Richard's look** | mockup | CHR-002, CHR-003 (CHR-004 was not needed first) |
 | [CHR-006](./CHR-006-THE-TEMPLATES-TAB-GETS-ITS-PICTURES.md) | Templates is the homepage grid: 2 + 3, real shots, mono eyebrow, one sentence, `Use this template →`, a backend tag (R4) | mockup | CHR-005 |
 
 ### Track B — the property panel
