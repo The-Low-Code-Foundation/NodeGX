@@ -98,3 +98,65 @@ Out: how rows render (CHR-008). Any visual change at all. `PopoutGroup` (it buil
 - ⚠️ The `focusGatePort` retry (`Ports.ts:398-419`) exists because React commits asynchronously
   after a forced re-render. With descriptors it can target a row by `key` — do not delete the
   retry until CHR-008 gives it a `ref` to target instead.
+
+## 6. What was built (2026-09-15, s4)
+
+Commits: `e3bafda8d` (the characterisation, committed alone and before the refactor), `c6f24e1f0` (the
+refactor and the two retargeted specs), then this write-up. Evidence: [`verdicts/CHR-007/2026-09-15/`](./verdicts/CHR-007/2026-09-15/)
+— `before.json` (20 panels on `e2352b60c`), `after.json` (the same 20 on the refactored build), and the
+instrument, `panelFingerprint.js` + `compare.js`; panel PNGs local, per the CHR-001 ruling.
+
+**Built:** `propertyeditor/model/widgets.ts` (the dispatch as an ordered table, `WIDGET_RULES`, and
+`widgetForPort`), `propertyeditor/model/describeRows.ts` (rows as data), `models/nodelibrary/portTypeName.ts`
+(`nameForPortType`, import-free; `NodeLibrary.nameForPortType` and `getEditType` delegate).
+`Ports.viewClassForPort` is a 3-line lookup through `Ports.WIDGET_CLASSES`; `Ports.rowDescriptors()`
+feeds `renderParams`, which reads description, capability gate, switched-off reason and connection off
+the descriptor.
+
+### 6.1 §2 re-read at HEAD — what was wrong
+
+| §2 / §3 / §4 said | HEAD | consequence |
+|---|---|---|
+| The four decorators are in `propertyeditor/utils/` and `propertyeditor/capability-gating/`, "551 LOC that read a row's DOM after it renders" | They are in **`src/editor/src/utils/`** (`portGate`, `portHint`, `portDescription`, `capability-gating/portDecoration`), 551 LOC is right — but **none decides anything from the DOM**. `renderParams` computed every input from port objects and the decorators only *wrap* the element. The DOM reads left are `portHint`'s idempotent note removal and `portDescription`'s "a `title` is already set" check | AC4's third clause was mostly true already. What moved is where the inputs are computed (a descriptor), not what the decorators read |
+| "six sites clear `_portsHash`" | **five** (`:142, :205, :410, :744, :756`) | — |
+| AC3: gates `by: 'shadowEnabled'` | The Group's switch is **`boxShadowEnabled`** (catalog `dynamicPorts`: `boxShadowEnabled = true` gates six ports) | Spec uses the real name |
+| AC3 reverted arm: gates read `on: true` | **Impossible from what the panel draws.** `partitionGatedPorts` marks a port only while its condition switches it OFF; a port whose condition holds carries nothing, in the model and on screen | Descriptor field is `switchedOff?: PortGateReason`; the reverted arm asserts it is **absent** |
+| §3.1 `groupKey` = "the node type's group *slot*" | **No slot exists.** A port declares only the English `group` string (catalog: 1,982 inputs, keys `name, displayName, group, plug, type, …`), and `propertyPanelViewState.ts:8-15` argues the group name is "the right key, not a fallback" | §3.5 (tiers and expansion keyed on `groupKey`, with a migration) is **not built**: a key derived from the label *is* the label, and a migration would map every name to itself. A real slot needs a declaration field on 176 node types — out of a behaviour-identical task |
+| §3.4 `TabGroup` rows get a `name` | Giving `TabGroup` a `name` would make `renderParams` gate it, look up its description and count it in the activity badge **as if it were a port** — a visible change | **Not built.** Descriptors are per port and carry `tab`; `portNamesForView` already reaches tab ports |
+| §3.6 characterisation "for every node type in the library" | `Ports.ts` cannot load in plain jest (`capability-gating` and `schemahandler` → `projectmodel` → `bugtracker` touches the platform at import), and the catalog **drops `tab`, `popout` and `parent`** | Characterisation runs over the catalog (176 types, 1,982 inputs) with every `Ports.ts` import stubbed, plus 43 synthetic ports for branches the catalog never reaches. Tab folding and popouts are graded by AC1's drive only |
+| AC1's four nodes: Group, a Function, a Query Records, a Columns | Neither drive fixture has a Query Records node; `JavaScriptFunction` fell outside the first 20 types | The 20 driven: Group, Columns, Text, Icon, Slider, Button, Static Array, Expression, And, States, Delay, Repeater, Variable, Array Filter, four Form Fields components, Is valid email, FilterPill |
+
+### 6.2 Decisions this task had to make
+
+| decision | chosen | why |
+|---|---|---|
+| Keep the dispatch's sharp edges | **Kept verbatim**: `type: null` throws (`typeof null === 'object'`); `marginPaddingComp` on a non-number still beats `BasicType` | Behaviour-identical is the task. Both are pinned in the snapshot (`"null type": "<throws TypeError>"`) so a later fix is a visible, deliberate diff |
+| The `_portsHash` clears (AC4 "≤ 1") | **Not consolidated.** The five stay | Folding them into one `invalidate()` would satisfy the grep and change nothing the hash sees — a gate with a hole shaped like the defect. Each clear exists for a state the hash cannot see (expansion, undone *values*, a schema outcome); putting values in the hash rebuilds rows under a focused field (FB-017). CHR-008's keyed tree is what removes the need |
+| Hash from descriptors (§3.3) | **Not done.** The hash stays over the port objects | A descriptor omits `type`, so a dynamic enum whose options change would stop re-rendering |
+| `fb-018` / `fb-022` parsed `Ports.ts`'s `if/else` chain as text | Retargeted: `fb-022` reads `WIDGET_RULES` **for real**; `fb-018` reads `Ports.WIDGET_CLASSES` as text (the file cannot load) and checks its keys against `WIDGET_RULES` both ways | Both old regexes matched only `if (isOf…()) return X;` — **the two early `editorType` returns were never in either population**. Found by the retarget, not by reading |
+| The two Logic Builder rows in `CONNECTED_ROW_POLICY` | `exception`, both | Both ports are `allowEditOnly` in the catalog — no wire can drive them; `LogicBuilderHiddenType` renders `display: none` |
+| `scrubPolicy.isClaimedByAnEarlierRow` | Asks the registry, for `number`/`dimension` ports only; pin renamed `WIDGETS_AHEAD_OF_NUMERIC` and gains the two Logic Builder widgets | Its doc said only `marginPaddingComp` can steal a number port. False in principle: a `number` declaring `editorType: 'logic-builder-workspace'` renders the Logic Builder row (snapshot row `editorType workspace on a number`). No shipped port has that shape; over the mixins it still reads exactly 8 |
+
+### 6.3 Acceptance criteria
+
+| AC | reading | state |
+|---|---|---|
+| 1 (person) | 20 panels selected by id through `__nodeGraphEditor` (no canvas coordinates) on a fresh copy of `Landing page test V2`, reading element count, inline-styled count, leaf-text order and a sha256 of the panel's `outerHTML` with ids and React ids normalised. **Stability control first:** a second run on the same `e2352b60c` build reads **20/20 identical**. **After**, on a rebuilt stack from the refactored source with the fixture and profile reset: **20/20 identical to before** — every hash, count and label order. The 20 include both decorations `renderParams` owns: Group's six switched-off Box Shadow rows and tabbed corners, Slider's thumb/track tabs. Fixture `App/nodes.json` md5 `4373f147…` unchanged throughout | ✅ |
+| 2 | `tests-unit/chr-007/widgetDispatch.test.ts`, snapshot written **before any source change** at `e2352b60c`; after the refactor **8/8, file unchanged**. Covers all 176 catalog types (asserted against the catalog's count) + 43 synthetic ports. **Mutant** (`identifier` above `textArea`): red on two synthetic rows. 🔴 The catalog arm stayed **green** on that mutant — no shipped port has both `multiline` and `identifierOf`, so the synthetic corpus is load-bearing | ✅ |
+| 3 | `tests-unit/chr-007/describeRows.test.ts` **15/15**, no DOM, ports built through the real `evaluateDynamicPortsCondition` → `reasonsForGatedPorts` → `partitionGatedPorts`: six Box Shadow rows `switchedOff` by `boxShadowEnabled`, the switch itself ungated, reverted arm (`boxShadowEnabled: true`) no marks | ✅ (with §6.1's two corrections) |
+| 4 | `viewClassForPort` **3 lines** ✅. `grep -c "_portsHash = undefined"` reads **5** ❌ by decision (§6.2). Decorators take descriptor fields ✅; `portHint`'s in-place `querySelector` stays (FB-017's live refresh) | 🟡 |
+| 5 | jest over `property-editor/`, `fb-017/`, `fb-018/`, `fb-021/`, `fb-022/`, `leg-005/`, `rel-014/`, `chr-007/`, `cn-014`, `cn-015`: **28 suites, 475 tests green**. `tsc -p packages/noodl-editor --noEmit` **0 errors** (control: all eight changed files in its 2,928-file list). Retarget mutants: `fb-022` pin red on a reordered rule; `fb-018` both directions red on a dropped class. **`test:ci`**, `e2352b60c` + this working tree, `.webpack-cache` cleared, run alone, `NOODL_SPEC_SEED=39393`: **`2984 specs, 8 failures`**, fresh `test-results.json` (16:47:59, the run's own finish) — **the same eight by full name** as CHR-003 §6.3 (`SUB-006` ×3, `SUB-011` ×3, `NDA-017` ×2, all P88's). `tests/nodegraph/propertyeditor.js`, which calls `viewClassForPort` directly, is green | ✅ |
+
+### 6.4 Traps this session paid for
+
+- 🔴 **A throw during jest collection fails the suite TO RUN** (`Tests: 0 total`). The first
+  characterisation run died on `type: null` before recording anything. Record throws per row.
+- 🔴 **zsh does not word-split an unquoted `$VAR`**: eight suite paths reached jest as one pattern,
+  "No tests found", exit 1 — indistinguishable by exit code from a red. Use an array.
+- 🔴 **A text-parsing gate cannot see a branch its regex does not match.** Both `fb-018` and `fb-022`
+  had graded a population missing two dispatched classes since they were written.
+- ⚠️ `window.__nodeGraphEditor` + `getActiveComponent().owner.getComponentWithName()` +
+  `findNodeWithId()` + `selectNode()` selects any node by id with no canvas coordinates — the drive
+  script is `verdicts/CHR-007/2026-09-15/panelFingerprint.js`.
+- ⚠️ A fingerprint diff needs a same-build control first; without it a drifting hash would read as a
+  regression (or its absence as a pass).
