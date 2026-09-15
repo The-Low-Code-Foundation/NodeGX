@@ -1,8 +1,8 @@
 # Phase 92 — next session
 
-**Written 2026-09-15 at the end of s8 (CHR-012 pass 3 + CHR-008 slice 1).** Branch `cline-dev`. Phase commits:
+**Written 2026-09-15 at the end of s9 (CHR-008 slice 2: §3.4 identity).** Branch `cline-dev`. Phase commits:
 `git log -- dev-docs/tasks/phase-92-dreamweaver-called`. The platform half is `~/vscode_projects/nodegx-community`
-(separate repo, no remote), deployed at `f39d20f` — s8 changed nothing there.
+(separate repo, no remote), deployed at `f39d20f` — s9 changed nothing there.
 
 ⚠️ `~/.claude/next-session-state/…json` holds a **P88 peer's** handoff; this file is the phase's.
 
@@ -16,76 +16,84 @@
 | CHR-005 one launcher page | ✅ Richard: "fine" |
 | CHR-006 the Templates tab gets its pictures | ✅ WORTHY |
 | CHR-007 the rows become descriptors | ✅ built s4, invisible by design |
-| CHR-012 the Community tab | ✅ **closed as passable** (Richard, after s8: "worthy or passable … another stab another time") |
-| **CHR-008 the panel is one tree** | 🟡 **slice 1 built s8: R8** — one line per group with ≥2 switched-off rows; Richard's condition (no repeated sentence on successive rows) gated over the catalog and driven; §3.1/3.2/3.4–3.8 not built (§6) |
+| CHR-012 the Community tab | ✅ closed as passable (Richard, after s8) |
+| **CHR-008 the panel is one tree** | 🟡 **slice 1 (s8): R8** one line per switched-off group, Richard's condition gated. **Slice 2 (s9): §3.4 identity** — a node click no longer blanks the panel (§7). §3.1/3.2/3.5–3.8 not built |
 | CHR-004, 009, 010, 011 | ⬜ not built |
-
-**The look page:** https://claude.ai/artifact/MdKjHQTFEhkoLAR4i3MPZt (screenshots + rendered readings).
 
 ## First job
 
-1. **Commit state:** s8 is committed — `8867c406f` (CHR-012 pass 3), `d37db75a5` (CHR-008 R8), `20f5bdeff` (docs),
-   `806263cce` (the one-line rule + catalog gate, after Richard's condition), then the post-ruling docs commit.
-   Verdict PNGs stay local by ruling (gitignored).
-2. Nothing of Richard's is pending on this phase's built work. Go straight to Track B below.
+1. **Commit state:** s9 is committed — `7fd6c5300` (code + `tests-unit/chr-008/panelIdentity.test.ts`) and the docs
+   commit after it (task file, README, this file, `identity.js`, the five `identity-results.json`). Logs and PNGs stay
+   local (gitignored). The P88 peer's `validation/{authoredCandidate,responsiveArrangement}.ts` were left uncommitted.
+2. Nothing of Richard's is pending on built work. Go to the list below.
 
-## Then, in order (Track B)
+## Then, in order
 
-1. **CHR-008 §3.4 identity (AC2, AC5)** — `sidebarmodel.tsx:76-86` `createPanel` returns a new arrow fn per selection;
-   `SidePanel.tsx:84-101` force-recreates on `nodeSelected`; `index.tsx:35` `rememberedTab` and
-   `propertyPanelViewState` are module state because of it. Smallest person-visible next step: the panel stops
-   remounting, AC2 drivable, AC5's reverted arm is one line.
-2. **CHR-008 §3.1/§3.2** — rows as siblings in one tree; the four decorators (`portDescription`, `portDecoration`,
-   `portGate`, `portHint`) become `PropertyRow` props. R8's `groupGatesFor` already reads descriptors, so it moves
-   with them. Convert `ColorType`, `CurveType`, `CodeEditorType` last, each its own commit and drive.
-3. CHR-004 — smaller than scoped; `drive.js` `CONTRAST` prototypes R3's gate.
+1. **CHR-008 §3.5 focus — measure first, with a control that fires.** s9's arm B (type in Width, change Height on the
+   model) graded nothing on BOTH builds: `Ports.bindModel` hears `parametersChanged` only for hints, so no row
+   re-renders. Find a change that does re-render the rows while an input is focused — undo of a sibling
+   (`modelParameterUndo` clears `_portsHash` and rebuilds every row) is the obvious one — and read focus + caret +
+   attribute mutations on the next tick. If focus is lost there, that is §3.5's person-visible defect; if not, record it.
+2. **CHR-008 §3.1/§3.2** — rows as siblings in one tree; the four decorators become `PropertyRow` props; R8's
+   `groupGatesFor` already reads descriptors. `ColorType`, `CurveType`, `CodeEditorType` last, each its own commit + drive.
+3. CHR-004 — smaller than scoped; CHR-005's `drive.js` `CONTRAST` prototypes R3's gate.
 4. CHR-006 remainders (no ruling): plural chip labels; pictures for `site-builder` / `members-area`.
 
 ## Still Richard's
 
-1. ~~CHR-012's look~~ ✅ **closed as passable** (after s8); another pass later. R8's wording ✅ *"fine as long as we don't
-   have another 'same error repeated on 5 lines successively' problem"* — see the census in CHR-008 §6.
-2. CHR-007 declined AC4's "≤ 1 `_portsHash = undefined`" (CHR-007 §6.2) — do not quietly revisit.
-3. R6 final only on his look at CHR-009's screenshots; R7's marker-on-the-tab detail is proposed, not ruled.
-4. The Projects tab's two full-width cards (BST-003 / UNI-001) — ask before moving them.
-5. `members-area`'s live summary is lowercase and fragmentary (P86/P78 data).
-6. ~~Where D21's health readout is read instead~~ ✅ **ruled "Nowhere"** (after s8). `mirrorview.healthFrom` still
-   computes it and nothing reads it — the ruling's state, not a gap; do not build a reader.
+1. CHR-007 declined AC4's "≤ 1 `_portsHash = undefined`" (CHR-007 §6.2) — do not quietly revisit.
+2. R6 final only on his look at CHR-009's screenshots; R7's marker-on-the-tab detail is proposed, not ruled.
+3. The Projects tab's two full-width cards (BST-003 / UNI-001) — ask before moving them.
+4. `members-area`'s live summary is lowercase and fragmentary (P86/P78 data).
+5. Optional, not blocking: s9 changes no pixel at rest — clicking between nodes no longer flashes a blank panel and
+   then jumps. If he wants to feel it, it is in the next dev build.
 
-## What s8 settled, including where the handoff was wrong
+## What s9 settled, including where the handoff and the task file were wrong
 
-- 🔴 **The handoff's "prepared" signed-in drive found a defect, not a formality.** Signed in, Chat's `Say something`
-  and People's `Take me off /people` were bespoke outlined buttons — AC2 was false for every signed-in person while
-  two signed-out passes read clean. Now every write verb in `components/community` is `PrimaryButton` (12 sites).
-- 🔴 `PrimaryButton` imports `Icon` ⇒ **15 specs** needed FLD-017's stub; two (`fb-007/capture-upload`,
-  `nat-009/rfpboardview`) reach it through `models/community/threadview` and surfaced only in the **full**
-  `tests-unit` run, not the "specs importing the changed module" run.
-- `PrimaryButton`'s label is in a child `<span>`: a spec reading `ownText` on the `<button>` gets `''`. Use `text(node)`;
-  find controls with `byTestId` (new in `support/renderElements.ts`).
-- The rail's buttons are unlabelled `DIV`s with `data-test="<panel id>-panel"` (`community-panel`), not aria-labels.
-- R8's rule, measured on a real Group: `Box Shadow` 6 → 1; `Scroll To Index` also gets a line; `Scroll` keeps five
-  per-row sentences (same switch, different conditions — the specified fallback). ⚠️ FB-021 names the condition's
-  FIRST clause, so `Scroll` says `Show Layout` where `Enable Scroll` is the switch that matters — recorded.
-- `.font-size-baseline.json` lowered core-ui 124 → 123 (only `Community.module.scss` moved).
+- 🔴 **CHR-008's AC2 and AC5 rested on a false premise.** Measured on the **installed 0.2.4** before building: a Group
+  reselect REPLACES the panel element, yet scroll 900, Width 240 and all 19 expanded groups come back — FB-017's
+  view-state map does it. "Reverted identity ⇒ scroll lost" could never go red. The handoff's "AC5's reverted arm is
+  one line" was right about the line and wrong about what it would show.
+- **What the remount actually cost: a blink.** One reselect on 0.2.4: blank from 47 ms, rows at scroll 0 at 85 ms, jump
+  to 900 at 115 ms — **8** in-between frames (sibling), **4** (via the Page Router).
+- **The cause is one idiom:** `SidePanel` did `React.createElement(getPanelComponent(id))`, making the factory — a new
+  arrow per selection — the element's *type*. Now `component()`, with `key` = panel id for a `followsSelection` panel and a
+  per-creation key for the rest (their remount kept: `PortEditor` and the backend surfaces read `model` once).
+- `PropertyEditor` builds the next node's view off screen, swaps when its rows exist (≤ 8 frames), disposes the previous
+  view (whose scroll listener would otherwise write the new node's offsets under the old id — they share the scroller
+  now), restores scroll in the same flush, and shows the header for the node whose rows are shown.
+- Not built, on purpose (CHR-008 §7.6): keying by `componentInstanceId + nodeId` (that IS a remount per selection); a
+  sidebar context for `rememberedTab`/view state (nothing measured asks for it).
+- The handoff's "`SidePanel.tsx:84-101` force-recreates on `nodeSelected`" was accurate; it is gone.
 
-## Readings taken (2026-09-15, s8, tree `2c5c31fa2` + s8's uncommitted work)
+## Readings taken (2026-09-15, s9, tree `65a3bd984` + s9's uncommitted work + the P88 peer's uncommitted files)
 
-- Full `tests-unit` **442 / 442 suites, 7,310 tests**; chr-008 specs **23 / 23**; mutants A/B/C **3 / 1 / 1 red**, restored `cmp`-identical.
-- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**; `type` / `colors` / `tokens:css` / `icons:css` **EXIT=0**.
-- Drives, all EXIT=0: CHR-012 `local-signed-in/` 20, `local-signed-in-v3/` 8, `local-signed-out/` 20, `rail/` 2; CHR-008 `gate.js` (press + undo, both themes).
-- `test:ci` (seed 39393, `.webpack-cache` cleared, no stack, pageout delta 26/5s): **`Jasmine: 2984 specs, 8 failures`**, fresh `test-results.json` 22:30:58 — **the floor's eight by full name**
-(SUB-006 ×3, SUB-011 ×3, NDA-017 `⚠️ records that Text Input has no checkbox port…` + `pins Expression's static inputs…`), 0 new. Graded tree included the P88 peer's uncommitted `nodegx-backend`, `noodl-mcp`, `noodl-runtime` and `validation/{authoredCandidate,responsiveArrangement}.ts`.
+- Drives, all EXIT=0, `verdicts/CHR-008/2026-09-15/identity.js`: installed 0.2.4 **8 / 4** in-between frames
+  (`identity-0.2.4-r3/`); this build on the dev stack **0 / 0**, panel root kept (`identity-fixed/`); reverted arm R1
+  (per-creation key for `PropertyEditor`, renderer reloaded) **8 / 4** (`identity-reverted-R1/`). Scroll/Width restored
+  in all three.
+- jest `chr-008` + `chr-007` + `nat-012` + `fb-017` **15 / 15 suites, 205 tests**; mutants A (always a new key) **1 red**,
+  B (no key) **1 red**, restored `cmp`-identical. Full `tests-unit` **444 / 444 suites, 7,324 tests**, EXIT=0.
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0** (after fixing one stray `}` of mine that the first run caught).
+- `test:ci` (seed 25271, `.webpack-cache` cleared, no stack): **`Jasmine: 2984 specs, 8 failures`**, fresh
+  `tests/test-results.json` 23:47:42 — **the floor's eight by full name** (SUB-011 ×3, NDA-017 `⚠️ records that Text Input
+  has no checkbox port…` + `pins Expression's static inputs…`, SUB-006 ×3), 0 new. `tests/nodegraph/propertyeditor.js`
+  imports the changed `propertyeditor/index` and is green.
 
 ## Traps
 
-- 🔴 One heavy job at a time; tear the stack down (listener pids, then `lsof -sTCP:LISTEN` reads 0). 🔴 s8's first
-  teardown killed `lerna exec`/`npm run start` **by name** — all were its own, but walk the PPID chain from your
-  launcher instead.
-- 🔴 zsh: `npx jest $DIRS` with a space-separated variable passes ONE pattern ("No tests found", exit 1). Use `${=DIRS}`.
+- 🔴 One heavy job at a time. A dev-stack rebuild after one file edit took **93–195 s** at ~180% CPU here; a VM on this
+  machine holds ~3.7 cores. Tear the stack down (`npm run dev:stop` after checking every dev Electron's
+  `--user-data-dir` is yours) BEFORE restoring a mutated file, or the restore costs another rebuild.
+- 🔴 **A TS-always-truthy mutant does not compile under webpack** (`'X' && …`): `.logs/dev.log` says "Reload prevented"
+  and the renderer keeps the old code — the arm grades nothing. Use `[value, 'MARKER'][0]` and confirm the marker in
+  `localhost:8080/src/editor/index.bundle.js`, then `Page.reload`.
+- ✅ **The installed app is a no-compile instrument** when `git log vX..HEAD -- <files>` is empty for the code under test:
+  `env -u ELECTRON_RUN_AS_NODE -u NODE_OPTIONS NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 /Applications/NodeGX.app/Contents/MacOS/NodeGX --user-data-dir=<scratch>/fresh`;
+  `window.__nodeGraphEditor` IS reachable there (the module registry is not).
+- 🔴 A frame-count metric's "start" must be snapped IN the eval that makes the selection — the first animation frame
+  after the call can already be the blank one (the first two drafts under-counted, `identity-0.2.4/`, `-r2/`).
+- 🔴 zsh: `npx jest $DIRS` with a space-separated variable is ONE pattern — use `${=DIRS}`. No `timeout` binary on macOS.
 - 🔴 Anything `CommunityTab` / `TemplatesTabBody` renders must be hook-free; anything reaching `PrimaryButton` needs the `Icon` stub.
-- 🔴 A peer's untracked `tests-unit/validation/gam-022-*.test.ts` and `scripts/devtools/drive-gam014-kit-root.js`, and
-  `templates/todo-list.security.json`, are not this phase's — never commit them.
-- Local platform recipe (worked s8): `DATABASE_URL=postgres://richardosborne@127.0.0.1:5432/chr012_community npx tsx scripts/seed.mjs`
-  (drops `public` — scratch DB only), `next dev -p 3399`, swap `COMMUNITY_URL`, profile with
-  `nodegx.community.session.json` = `{"token":"dev-session-ada","handle":"ada-builds"}`; park that file + reload for
-  signed out. Revert the URL and prove `git diff` = 0.
+- 🔴 A peer's untracked `tests-unit/validation/gam-022-*.test.ts`, `scripts/devtools/drive-gam014-kit-root.js`, and
+  `templates/todo-list.security.json` are not this phase's — never commit them.

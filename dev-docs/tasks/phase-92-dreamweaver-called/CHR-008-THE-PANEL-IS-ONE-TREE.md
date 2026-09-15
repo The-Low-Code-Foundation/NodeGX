@@ -84,6 +84,9 @@ wears `.sidebar-panel` too — file it if it needs the same treatment.
    elements **≤ 30** (was 250). The numbers go in the task file beside the before.
 5. **Reverted arm** for the remount: with `createPanel` restored to returning a new function,
    AC2's scroll position is lost — proving identity was the cause and not the view-state map.
+   ⚠️ **s9 measured this premise false (§7.1):** AC2's round trip already passed on 0.2.4 *with* the remount,
+   because FB-017's view-state map restores scroll, Width and expansion. What the remount costs is the blink — so
+   the arm that means something is: identity reverted ⇒ the in-between frames come back (§7.4: 0 → 8 / 4).
 6. CHR-007's characterisation spec green unchanged (same rows, same order, same widgets); every
    `fb-017`/`fb-018`/`leg-005`/`property-editor` behavioural assertion green; `test:ci` at the
    floor; the `MutationObserver` blink check from [[cdp-keys-need-focus-emulation-on-the-same-connection]]'s
@@ -231,8 +234,114 @@ only when Enable Icon is on."* + `Turn on` over 7 dimmed rows (the census's ×7)
 `test:ci` **not re-run** for this change: 0 Jasmine specs import the gate modules, and the per-row sentences
 `ModelProxy` stamps are byte-identical (`fb-021` green).
 
-### 6.6 Owed on this task
+### 6.6 Owed on this task (as written after s8 — superseded by §7.6)
 
 1. **Richard's look** at the four shots (R8 is his ruling; the wording *"apply once … is on"* is proposed, not ruled).
 2. §3.1 (one tree, 38 row classes), §3.2 (decorators as props), §3.4 (identity — AC2, AC5), §3.5, §3.6, §3.8; AC3,
    AC4, AC6's blink check. `test:ci` at the floor.
+
+## 7. Built — s9 (2026-09-15), slice 2: identity (§3.4), uncommitted
+
+### 7.1 Measured first — and the task file was wrong about what identity buys
+
+AC2 and AC5 were written on the premise that the remount is what loses the panel's place. **It is not, and has not
+been since FB-017.** `verdicts/CHR-008/2026-09-15/identity.js`, run against the **installed 0.2.4** (a second
+instance on private ports, no compile — `sidebarmodel.tsx`, `SidePanel.tsx`, `propertyeditor/index.tsx` and
+`propertyPanelViewState.ts` are unchanged `v0.2.4..HEAD`, and FB-017's scroll restore `879f2f4c8` is inside `v0.2.4`),
+on a copy of `templates/story-engine`, Group `psWrap`:
+
+| round trip | panel element after | scroll | Width | expanded groups |
+|---|---|---|---|---|
+| A: type `240`, wheel to 900, select `psTitle`, select `psWrap` | **replaced** (old one disconnected) | **900** | **240** | same 19 |
+| A2: the same through the Page Router (`/App` `app_router`) | **replaced** | **900** | **240** | same 19 |
+
+So AC2's round trip **already passed** with the remount in place, and AC5's reverted arm ("with `createPanel`
+restored, AC2's scroll position is lost") **cannot go red** — the view-state map, not identity, is what restores it.
+
+What the remount *does* cost is the blink the person sentence names. Sampled on every animation frame and every DOM
+mutation batch from the selection call (one reselect, 0.2.4): old panel at 2 ms → **blank from 47 ms** → rows at
+**scroll 0** at 85 ms → **jump to 900 at 115 ms**. Counted as frames painted in a state that is neither the node being
+left nor the node arrived at: **8** (A) and **4** (A2).
+
+⚠️ AC2's focus half (arm B) is **vacuous on both builds**: a parameter changed on the model does not re-render any row
+(`bindModel` hears `parametersChanged` only for hints), so there is nothing that could take the focus. It needs a
+change that does re-render — undo is one — and belongs to §3.5. Recorded, not graded.
+
+### 7.2 What changed
+
+- **`sidebarmodel.tsx`** — `SidebarItem.followsSelection`; `createPanel` puts a `key` on the element: the panel id
+  for a `followsSelection` panel, a per-creation key for every other panel (their remount, kept on purpose — `PortEditor`
+  and the backend surfaces read state once from `model`).
+- **`SidePanel.tsx`** — the four `React.createElement(component)` are `component()`. Handed to `createElement`, the
+  factory *was the element's type* and is a new arrow per selection, so React threw the panel away on every click. The
+  `nodeSelected` force-recreate is gone (`activeChanged` already rebuilds a transient panel's element).
+- **`router.setup.ts`** — `PropertyEditor` is `followsSelection`.
+- **`propertyeditor/index.tsx`** — a new node's `PropertyEditorView` is built and drawn **off screen** while the previous
+  node's view stays up, and swapped in once its rows exist (`hasDrawnRows`: the ports root has children and no row host
+  is empty; capped at 8 frames). The swap effect runs after `Frame` has placed the element, in the same flush: the
+  previous view is **disposed** and the new one restores its offset. The header, comment and tabs read the node whose
+  rows are **shown**, so the label cannot change frames before the rows do. `NodeLabel`, `NodeComment`, `PortsTab` and
+  `AiChat` are keyed by node (they read the node once on mount and were only correct because of the remount); `Tabs` is
+  keyed by whether `AI Chat` exists (it throws when its active id leaves the list). `rememberedTab` stays module state —
+  it now only carries the choice across that re-key.
+- **`Ports.ts`** — `restoreScroll()` (synchronous, for the swap); `dispose()` also detaches the scroll listener, because
+  the next node's view now scrolls the **same** `ScrollArea` and a listener left behind would write that node's offsets
+  under this node's id.
+- By reading, not measured: before this, no `PropertyEditorView` was ever disposed on a selection change, so every
+  visited node's `Ports` kept its model listeners. They are disposed on swap now. The view's other roots (variants,
+  visual states, element style) are still not unmounted — as before.
+
+### 7.3 Specs and arms
+
+- `tests-unit/chr-008/panelIdentity.test.ts` (4) — two nodes → one type, one key, the node still arrives; control: a
+  non-following panel gets a new key per selection; one creation = one identity (`SidePanel` builds the element twice);
+  a rail panel keeps its identity across switching away and back.
+- Mutants (backup → mutate → jest → restore → `cmp`): **A** key always per-creation → **1 red**; **B** no key → **1 red**
+  (the control). Both restored identical; unmutated 4 / 4. ⚠️ The spec grades the model half only; `SidePanel` calling
+  the factory is graded by the drive's reverted arm.
+
+### 7.4 The drive — the fix, and its reverted arm, on one instrument
+
+Dev stack (`npm run dev:debug`, `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333`, scratch profile), the same copy, the
+bundle confirmed carrying the change before each run:
+
+| build | A in-between frames | A2 in-between frames | panel root kept | scroll / Width after |
+|---|---|---|---|---|
+| installed 0.2.4 (control) | **8** (blank, then rows at 0) | **4** | no | 900 / 240 |
+| **this build** | **0** | **0** | **yes** | 900 / 240 |
+| **reverted arm R1** — `PropertyEditor` given a per-creation key, renderer reloaded | **8** (no editor element) | **4** | no | 900 / 240 |
+
+R1 reproduces the 0.2.4 counts exactly on the build that reads 0 without it: identity is the cause of the blink, and
+state survives either way. ⚠️ R1's first form (`'CHR008R1' && …`) did not compile (TS: always truthy), webpack refused
+the reload, and it graded nothing — replaced by a compiling form, not counted. **Not measured:** whether the off-screen
+wait is needed on top of identity (an arm with `setInstance` immediate) — skipped to spare a third ~95–195 s rebuild on a
+loaded machine. Results: `identity-0.2.4-r3/`, `identity-fixed/`, `identity-reverted-R1/` (`identity-results.json`,
+`identity.log`, before/after panel shots); `identity-0.2.4/` and `-r2/` are the metric's first two drafts (the first
+frame after the selection call can already be blank, so "first state" must be snapped before the call).
+
+### 7.5 Readings (2026-09-15, tree `65a3bd984` + this slice + the P88 peer's uncommitted files)
+
+- jest `chr-008` + `chr-007` + `nat-012` + `fb-017` **15 / 15 suites, 205 tests**; full `tests-unit` **444 / 444 suites,
+  7,324 tests**, EXIT=0 (s8's 443 / 7,320 plus this slice's one suite and four tests).
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**.
+- `test:ci` seed 25271, `.webpack-cache` cleared, no stack: **`2984 specs, 8 failures`**, fresh `tests/test-results.json`
+  23:47:42 — the floor's eight by full name (SUB-011 ×3, NDA-017 ×2, SUB-006 ×3), 0 new. The Jasmine
+  `tests/nodegraph/propertyeditor.js` imports the changed `propertyeditor/index` and is green.
+
+### 7.6 Not built in §3.4, and why
+
+- **Keyed by `componentInstanceId + nodeId`** (as §3.4 was written) — **deliberately not.** A node-keyed panel is a
+  remount per selection, which is the measured cost itself. The panel is keyed by its id; the node is a prop; the
+  per-node children are keyed individually.
+- **`rememberedTab` and the view-state maps into a sidebar context** — not built. Nothing measured asks for it: the tab
+  now lives in `Tabs` across ordinary clicks (module state only bridges the `AI Chat` re-key), and the scroll map is
+  per node and must outlive a node's view, which a panel-lifetime context would not improve.
+- **§3.5 focus** — AC2's arm B graded nothing on either build (§7.1). A firing control (undo of a sibling while Width
+  is focused) comes first.
+
+### 7.7 Owed on this task
+
+1. §3.1 (one tree, 38 row classes), §3.2 (decorators as props), §3.5 (focus, with a firing control), §3.6, §3.8; AC3,
+   AC4, AC6's blink check.
+2. Richard's look at s8's R8 shots is not pending (his condition was met and gated, §6.5); nothing in s9 changes a
+   pixel at rest — the change is the absence of the in-between frames.
