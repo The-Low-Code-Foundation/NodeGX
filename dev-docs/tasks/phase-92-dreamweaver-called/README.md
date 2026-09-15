@@ -1,7 +1,7 @@
 # Phase 92 — Dreamweaver called
 
 **Scoped:** 2026-09-15, from a measured audit of the installed **0.2.4** and `cline-dev` HEAD `e740727f8`.
-**Status: 🟡 CHR-001 ✅, CHR-002 ✅ (Richard's look: "looks good", 2026-09-15 s3), CHR-003 ✅ built 2026-09-15 s3 (AC5 `test:ci` reading in CHR-003 §6.3), CHR-007 ✅ built 2026-09-15 s4 (20/20 panels identical before/after; AC4's `_portsHash` clause declined, CHR-007 §6.2). PNGs kept local by ruling. R1 ruled, R2–R8 still unruled — every remaining task names one. Next: rulings R3 and R8 from Richard; CHR-008's no-ruling half meanwhile.** **Prefix: `CHR`** (chrome).
+**Status: 🟡 CHR-001 ✅, CHR-002 ✅ (Richard's look: "looks good", 2026-09-15 s3), CHR-003 ✅ built 2026-09-15 s3 (AC5 `test:ci` reading in CHR-003 §6.3), CHR-007 ✅ built 2026-09-15 s4 (20/20 panels identical before/after; AC4's `_portsHash` clause declined, CHR-007 §6.2). PNGs kept local by ruling. **R1–R8 all ruled 2026-09-15** (R6 a trial, R7 against the proposal — §4). Richard on s1–s4: *"everything in the tasks up to now still looks like shit"* — nothing visible has changed yet. Next: CHR-005, then CHR-006.** **Prefix: `CHR`** (chrome).
 **The baseline is [`verdicts/CHR-001/2026-09-15/`](./verdicts/CHR-001/2026-09-15/) — read CHR-001 §6 before any ratchet;
 it corrects two §3 rows below (the hint prints 6×, not 7×; the Templates "10 sizes" counts off-screen elements).**
 
@@ -92,9 +92,22 @@ sweep, not re-read — **re-read before building on it.**
 | · | `RAIL_WIDTH = 52` duplicated in CSS; components/PropertyEditor/PortEditor share one stored width | `useSidePanelLayout.tsx:22, 200-214`; `SideNavigation.module.scss` |
 | · | Prior phases: P23 (tokens, ✅), P24 PAR-004 polish pass (📋 never started), P25 side panel (✅, F20 open), P39 POL-018 deferred, Storybook does not start | `phase-23-visual-refresh/`, `phase-24-mock-parity/`, `phase-25-side-panel/`, [[storybook-does-not-start-in-this-repo]] |
 
-## 4. Rulings — proposed at scoping, not ruled
+## 4. Rulings
 
-🔴 **Ask Richard before building the task that names it.** A proposal is not a ruling.
+✅ **All eight ruled by Richard on 2026-09-15** (R1 in s2, R2–R8 after s4). R6 is ruled as a **trial**
+and R7 was ruled **against the proposal** — read their rows before building CHR-009.
+
+| # | ruling (2026-09-15) | task |
+|---|---|---|
+| R2 | ✅ **As proposed.** `PrimaryButton` gains `size="sm"`; `LauncherButton` is deleted | CHR-005 |
+| R3 | ✅ **As proposed.** Contrast stays a hard gate on the rendered control (≥ 3:1 against its parent, NAT-001); no test names the token that delivers it or asserts a class name it does not click. May be done inside CHR-005 wherever a pinned test actually reddens | CHR-004 |
+| R4 | ✅ **As proposed, with the fallback.** `thumbnail` in the community shelf registry entry, serving the homepage shots; a template with none gets a headless render of its home page at install | CHR-006 |
+| R5 | ✅ **As proposed.** Projects use the Templates card with the captured `thumbURI`; the gradient-and-initial placeholder only for a project never opened. ⚠️ `thumbURI` quality not yet looked at — check real ones first | CHR-005 |
+| R6 | 🟡 **Trial, not final.** Fixed 116px label column at the default 328px panel, ellipsis + tooltip. Richard: *"we need to see it (text cut off often?)"*. **Estimate s4** (catalog label lengths at 6–6.8px/char, 108px of text): **4–10% of rows cut** (68–176 of 1,771), mostly `Transform Origin X/Y`, `Block Pointer Events`, `Pointer Events Mode`, `Treat Unchanged as`, `Repeater Component`. **CHR-009 must show Richard screenshots and a rendered count of truncated labels (both themes) before this is final** | CHR-009 |
+| R7 | ✅ **Against the proposal: option B.** The comment **moves out of the panel top into a tab beside `Ports`** (Richard: *"next to ports?"*). Today the strip is `AI Chat` (only with an assistant), `Properties`, `Ports`, and the comment row sits above it (`propertyeditor/index.tsx:197`). LEG-005 made that row unconditional so a node with no comment still shows that comments exist; a tab that is always there keeps that. ⚠️ Proposed detail, not ruled: the tab shows a marker once a comment is written, so a note is never silently hidden. **This moves P75's feature** — the §6 collision note is superseded, and `leg-005/nodeCommentRow` pins its current placement | CHR-009 |
+| R8 | ✅ **As proposed.** One line per switched-off group + `Turn on`; rows dimmed, not hidden | CHR-008 |
+
+<details><summary>The proposals as written at scoping (R1–R8)</summary>
 
 | # | question | proposal | task |
 |---|---|---|---|
@@ -106,6 +119,8 @@ sweep, not re-read — **re-read before building on it.**
 | R6 | Panel label column | **Fixed 116px** at the default 328px panel, not 37%; a label that does not fit is ellipsised with a tooltip. Percent columns re-flow every row on every resize and never line up with the segmented controls | CHR-009 |
 | R7 | The Comment box | **Stays**, above the tabs, as a dashed placeholder until written — it is P75's feature and this phase does not move it | CHR-009 |
 | R8 | Gating a switched-off group | **One line per group** ("Offset, blur, spread, inset and colour apply once Shadow is on" + `Turn on`), rows dimmed, not hidden — hidden rows are how people fail to find a property | CHR-008 |
+
+</details>
 
 ## 5. Tasks
 
@@ -151,7 +166,9 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
   glyph *usage*, not glyph *drawing*.
 - **P72 NAT-001 / NAT-002** own the contrast ruling. CHR-004 keeps the ruling and changes only what
   the tests pin. The `palette-contrast.spec.ts` numbers are not to be relaxed.
-- **P75** owns the Comment box and the property-panel hints (`FB-017`, `FB-018`). CHR-008 re-homes
+- **P75** owns the Comment box (LEG-005) and the property-panel hints (`FB-017`, `FB-018`). **R7 (2026-09-15)
+  moves the Comment box into a tab beside `Ports` in CHR-009** — a ruled change to P75's placement, not a
+  collision to avoid; `leg-005/nodeCommentRow` gets re-pinned there. CHR-008 re-homes
   `portHint`/`portGate` logic as props; the *behaviour* those tasks specified is kept and their specs
   are the characterisation.
 - **P81** is about the pages the product builds, not its chrome. Its verdict protocol is borrowed;

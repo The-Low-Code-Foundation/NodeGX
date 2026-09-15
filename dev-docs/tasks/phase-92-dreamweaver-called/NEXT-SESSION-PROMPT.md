@@ -14,30 +14,40 @@ alone), `c6f24e1f0` (the CHR-007 refactor), and this handoff's docs commit.
 | CHR-003 one radius, one shadow, one box model | ✅ built s3. **Not yet looked at by Richard** — `verdicts/CHR-003/2026-09-15/` |
 | CHR-007 the rows become descriptors | ✅ built s4 — CHR-007 §6. Nothing visible changed, by design; 20/20 panels identical |
 | CHR-004, 005, 006, 008, 009, 010, 011 | ⬜ not built |
-| R1 | ✅ ruled |
-| R2–R8 | proposed, not ruled (README §4). **Every unbuilt task names one** except CHR-010, which depends on CHR-008 |
+| R1–R8 | ✅ **all ruled 2026-09-15** — README §4. R6 is a **trial** (needs Richard's look + a rendered truncation count); R7 went **against** the proposal (the comment becomes a tab beside `Ports`) |
 
-## Decisions that are Richard's — ask, do not resolve
+## Richard, after s4 — what he said, and what it changes
 
-1. **R3** (CHR-004): do the gates keep contrast as a hard gate on the rendered control, with no gate
-   naming the token that delivers it?
-2. **R8** (CHR-008): a switched-off group says so **once** ("… apply once Shadow is on" + `Turn on`),
-   rows dimmed, not hidden?
-3. R2 / R5 (CHR-005), R4 (CHR-006), R6 / R7 (CHR-009) — needed before Track A and the panel design.
-4. CHR-003's look (Projects and Templates, both themes) — offer it; it blocks nothing.
-5. **CHR-007 declined AC4's "≤ 1 `_portsHash = undefined`"** (§6.2): folding five clears into one
-   method would pass the grep and change nothing the hash sees. Tell Richard; do not quietly revisit.
+> "I'm assuming so far we haven't reached the mockup level of quality, just font and surface level
+> stuff? Cuz everything in the tasks up to now still looks like shit"
+
+He is right, and the order is why: CHR-002/003 were consistency passes and CHR-007 was invisible by
+design. **Three sessions have produced nothing that looks different.** The launcher never needed
+CHR-004 or CHR-007 first. **So Track A goes next** — the first screenshot that can be judged against
+the mockup is the point of the next session.
+
+## Still Richard's
+
+1. CHR-003's look — offer it; it blocks nothing.
+2. **CHR-007 declined AC4's "≤ 1 `_portsHash = undefined`"** (CHR-007 §6.2) — told Richard in s4;
+   do not quietly revisit.
+3. R6 becomes final only on his look at CHR-009's screenshots.
+4. R7's marker-on-the-tab detail was proposed, not ruled.
 
 ## First job
 
-1. Ask R3 and R8 (one message, with the proposals from README §4).
-2. **Build CHR-008's no-ruling half** meanwhile: rows as siblings in one React tree from
-   `Ports.rowDescriptors()`, the four decorators as props on one `PropertyRow`, the panel keyed by node
-   id so a reselect stops remounting. The group-level gating line is the R8 half — leave it until
-   ruled. 🔴 Re-read CHR-008 §2 at HEAD first: CHR-007's §2 was wrong six ways (CHR-007 §6.1).
-3. CHR-008 inherits two things CHR-007 measured and left: `focusGatePort`'s retry wants a `ref`
-   (CHR-007 §5), and the five hash clears exist because the hash cannot see expansion or undone
-   *values* — a keyed tree is what makes them unnecessary.
+1. **Build CHR-005** (one `LauncherPage`: 1120px column, one title, one toolbar, one `Tabs`, one
+   button, one chip, one card; `LauncherButton` deleted per R2; Projects on the Templates card per R5;
+   `MOCK_PROJECTS` off). 🔴 Re-read CHR-005 §2 at HEAD first — the last two task files were wrong four
+   and six ways. 🔴 Look at a few real `thumbURI`s before designing around them (R5's caveat).
+2. **R3 is done inside CHR-005, not before it:** when a CSS-text test reddens, replace the pin with a
+   rendered-contrast or behaviour assertion; do not bump the literal, and do not retune tests nothing
+   reddened.
+3. Then **CHR-006** (Templates grid with real shots; R4 registry `thumbnail` + install-time render
+   fallback). End each with screenshots in `verdicts/<task>/<date>/` and **ask Richard to look**.
+4. Track B afterwards: CHR-008 (R8 ruled — the whole task is unblocked), then CHR-009 (R6 trial, R7
+   tab). CHR-008 inherits from CHR-007: `focusGatePort`'s retry wants a `ref`, and the five hash
+   clears exist because the hash cannot see expansion or undone values.
 
 🔴 Do not farm the P88 `test:ci` reds. Do not re-take the before picture.
 
