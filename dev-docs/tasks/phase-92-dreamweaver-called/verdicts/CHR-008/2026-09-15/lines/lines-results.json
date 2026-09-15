@@ -1,0 +1,230 @@
+{
+  "group-dark": [
+    {
+      "group": "Dimensions",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Height applies when Size Mode is Explicit or Content Width, or is not set.Show Size Mode"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Layout",
+      "expanded": "true",
+      "lines": [
+        "Align Content and Horizontal Gap apply when Multi Line Wrap is On or On Reverse.Show Multi Line Wrap"
+      ],
+      "own": [],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Box Shadow",
+      "expanded": "true",
+      "lines": [
+        "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+      ],
+      "own": [],
+      "dimmed": 6,
+      "printed": 1
+    },
+    {
+      "group": "Scroll",
+      "expanded": "true",
+      "lines": [
+        "Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is not None and Enable Scroll is on.Show Enable Scroll"
+      ],
+      "own": [],
+      "dimmed": 5,
+      "printed": 1
+    },
+    {
+      "group": "File Drop",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Accepted file types applies when Accept File Drops is on.Show Accept File Drops"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Pointer Events",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Pointer Events Enabled applies when Pointer Events Mode is Explicit.Show Pointer Events Mode"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Scroll To Element",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Scroll To Element - Duration applies when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Scroll To Index",
+      "expanded": "true",
+      "lines": [
+        "Scroll To Index - Index and Scroll To Index - Duration apply when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+      ],
+      "own": [],
+      "dimmed": 2,
+      "printed": 1
+    }
+  ],
+  "group-light": [
+    {
+      "group": "Dimensions",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Height applies when Size Mode is Explicit or Content Width, or is not set.Show Size Mode"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Layout",
+      "expanded": "true",
+      "lines": [
+        "Align Content and Horizontal Gap apply when Multi Line Wrap is On or On Reverse.Show Multi Line Wrap"
+      ],
+      "own": [],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Box Shadow",
+      "expanded": "true",
+      "lines": [
+        "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+      ],
+      "own": [],
+      "dimmed": 6,
+      "printed": 1
+    },
+    {
+      "group": "Scroll",
+      "expanded": "true",
+      "lines": [
+        "Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is not None and Enable Scroll is on.Show Enable Scroll"
+      ],
+      "own": [],
+      "dimmed": 5,
+      "printed": 1
+    },
+    {
+      "group": "File Drop",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Accepted file types applies when Accept File Drops is on.Show Accept File Drops"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Pointer Events",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Pointer Events Enabled applies when Pointer Events Mode is Explicit.Show Pointer Events Mode"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Scroll To Element",
+      "expanded": "true",
+      "lines": [],
+      "own": [
+        "Scroll To Element - Duration applies when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+      ],
+      "dimmed": 1,
+      "printed": 1
+    },
+    {
+      "group": "Scroll To Index",
+      "expanded": "true",
+      "lines": [
+        "Scroll To Index - Index and Scroll To Index - Duration apply when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+      ],
+      "own": [],
+      "dimmed": 2,
+      "printed": 1
+    }
+  ],
+  "button-dark": [
+    {
+      "group": "Icon",
+      "expanded": "true",
+      "lines": [
+        "Type, Image Source, Icon Source, Spacing, Placement, Size and Color apply only when Enable Icon is on.Turn on"
+      ],
+      "own": [],
+      "dimmed": 7,
+      "printed": 1
+    },
+    {
+      "group": "Dimensions",
+      "expanded": "true",
+      "lines": [
+        "Width and Height apply when Size Mode is Explicit.Show Size Mode"
+      ],
+      "own": [],
+      "dimmed": 2,
+      "printed": 1
+    },
+    {
+      "group": "Box Shadow",
+      "expanded": "true",
+      "lines": [
+        "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+      ],
+      "own": [],
+      "dimmed": 6,
+      "printed": 1
+    }
+  ],
+  "button-light": [
+    {
+      "group": "Icon",
+      "expanded": "true",
+      "lines": [
+        "Type, Image Source, Icon Source, Spacing, Placement, Size and Color apply only when Enable Icon is on.Turn on"
+      ],
+      "own": [],
+      "dimmed": 7,
+      "printed": 1
+    },
+    {
+      "group": "Dimensions",
+      "expanded": "true",
+      "lines": [
+        "Width and Height apply when Size Mode is Explicit.Show Size Mode"
+      ],
+      "own": [],
+      "dimmed": 2,
+      "printed": 1
+    },
+    {
+      "group": "Box Shadow",
+      "expanded": "true",
+      "lines": [
+        "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+      ],
+      "own": [],
+      "dimmed": 6,
+      "printed": 1
+    }
+  ]
+}
