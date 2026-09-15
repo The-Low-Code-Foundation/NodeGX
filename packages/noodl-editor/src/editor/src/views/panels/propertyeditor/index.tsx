@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { SidebarModel } from '@noodl-models/sidebar';
@@ -24,15 +24,27 @@ const TAB_PORTS = 'Ports';
 /**
  * FH-020: which tab is open, remembered per *panel* rather than per node.
  *
- * It has to be module state, not `useState`. `SidebarModel.createPanel` builds a
- * brand-new function component on every node selection and `SidePanel` re-creates
- * the element from it, so the element *type* changes identity and React unmounts
- * and remounts this component every time you click a different node. A tab that
- * resets on every click is a tab nobody keeps open — and keeping it open is the
- * whole point of the "pathway helper" job, where you click a chip to travel to
- * the connected node and want to land on its ports.
+ * Written when the panel was remounted on every node selection. CHR-008 §3.4 keeps it
+ * mounted, so `Tabs` holds the choice itself across ordinary clicks — but the strip is
+ * rebuilt (re-keyed below) whenever `AI Chat` appears or disappears, and this is what
+ * carries the choice over that rebuild. Keeping `Ports` open while travelling from
+ * node to node is the whole point of the "pathway helper" job.
  */
 let rememberedTab: string = TAB_PROPERTIES;
+
+/**
+ * CHR-008 §3.4 — how many frames a newly selected node's rows get to draw off screen
+ * before the panel shows them anyway. On 0.2.4 the remount took from 47 ms (blank) to
+ * 115 ms (rows at the remembered offset); past this limit a node is shown as it is
+ * rather than not at all.
+ */
+const REVEAL_FRAME_LIMIT = 8;
+
+/** Whether a view's rows exist: its ports root has rendered and no row is still an empty host. */
+function hasDrawnRows(view: PropertyEditorView): boolean {
+  const ports: HTMLElement | undefined = view.portsView?.el;
+  return Boolean(ports && ports.childElementCount > 0 && !ports.querySelector('.properties > :empty'));
+}
 
 export function NodeGraphNodeRename(model: NodeGraphNode, newname: string) {
   model.setLabel(newname, { undo: true, label: 'change label' });
@@ -57,11 +69,26 @@ export interface PropertyEditorProps {
 export function PropertyEditor(props: PropertyEditorProps) {
   const [group] = useState({});
   const [instance, setInstance] = useState<PropertyEditorView>(null);
+  const shown = useRef<PropertyEditorView>(null);
 
   useEffect(() => {
+    // CHR-008 §3.4: this component stays mounted when the selection moves (`followsSelection`), so
+    // a new node arrives as a new `model`. Its view is built and drawn OFF screen while the previous
+    // node's view stays up, and swapped in once its rows exist — the panel goes from one node
+    // straight to the next instead of blank, then rows at the top, then a jump.
     const instance = new PropertyEditorView(props);
     instance.render();
-    setInstance(instance);
+
+    let revealed = false;
+    let frames = 0;
+    let handle = requestAnimationFrame(function reveal() {
+      if (!hasDrawnRows(instance) && ++frames < REVEAL_FRAME_LIMIT) {
+        handle = requestAnimationFrame(reveal);
+        return;
+      }
+      revealed = true;
+      setInstance(instance);
+    });
 
     SidebarModel.instance.on(
       SidebarModelEvent.receivedCommand,
@@ -84,11 +111,29 @@ export function PropertyEditor(props: PropertyEditorProps) {
     );
 
     return function () {
+      cancelAnimationFrame(handle);
       SidebarModel.instance.off(group);
+      // Selected past before it was ever shown: nothing else will dispose it.
+      if (!revealed) instance.dispose();
     };
-  }, [props.model]); // FIX: Update when model changes!
+  }, [props.model]);
 
-  const aiAssistant = props.model?.metadata?.AiAssistant;
+  useEffect(() => {
+    if (!instance) return;
+    // Runs after `Frame` (a child) has put `instance.el` in place, in the same flush: the previous
+    // view lets go of the shared scroller, then this one restores its node's offset — before paint.
+    const previous = shown.current;
+    shown.current = instance;
+    if (previous && previous !== instance) previous.dispose();
+    instance.portsView?.restoreScroll();
+  }, [instance]);
+
+  useEffect(() => () => shown.current?.dispose(), []);
+
+  // The header and the tabs follow the node whose rows are SHOWN, so the label cannot change a few
+  // frames before the rows under it do.
+  const model: NodeGraphNode = instance?.model ?? props.model;
+  const aiAssistant = model?.metadata?.AiAssistant;
 
   /*
    * PNL-005: the property editor gets the shared `PanelHeader`, like every other
@@ -113,7 +158,7 @@ export function PropertyEditor(props: PropertyEditorProps) {
       UNSAFE_style={{ backgroundColor: 'var(--theme-color-bg-1)' }}
       UNSAFE_content_style={{ paddingInline: 0, paddingTop: 0 }}
     >
-      <PropertyEditorTabs {...props} instance={instance} hasAiAssistant={Boolean(aiAssistant)} />
+      <PropertyEditorTabs {...props} model={model} instance={instance} hasAiAssistant={Boolean(aiAssistant)} />
     </BasePanel>
   );
 }
@@ -142,15 +187,20 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
     },
     {
       label: TAB_PORTS,
-      content: <PortsTab model={props.model} />
+      content: <PortsTab key={props.model?.id} model={props.model} />
     }
   ];
 
+  // CHR-008 §3.4: the React children below are keyed by node. They read the node once when they
+  // mount (`NodeLabel`'s label state and `[]` listener, `AiChat`'s context) and were only ever
+  // correct because the whole panel used to be remounted per selection. The `Frame` is NOT keyed —
+  // it is what must stay put.
   if (props.hasAiAssistant) {
     tabs.unshift({
       label: TAB_AI_CHAT,
       content: (
         <AiChat
+          key={props.model?.id}
           model={props.model}
           onUpdated={() => {
             // Update the property panel values
@@ -178,7 +228,9 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
         backgroundColor: 'var(--theme-color-bg-1)'
       }}
     >
-      {Boolean(props.model) && <NodeLabel model={props.model} showHelp={!props.hasAiAssistant} />}
+      {Boolean(props.model) && (
+        <NodeLabel key={props.model.id} model={props.model} showHelp={!props.hasAiAssistant} />
+      )}
 
       {/*
        * LEG-005: the comment row, between the header and the tab strip.
@@ -194,9 +246,12 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
        * the context menu again with more pixels — which is the entire finding
        * (L12) this task was written from.
        */}
-      {Boolean(props.model) && <NodeComment model={props.model} />}
+      {Boolean(props.model) && <NodeComment key={props.model.id} model={props.model} />}
 
+      {/* Re-keyed only when `AI Chat` comes or goes: `Tabs` looks its active id up in the current
+          list and throws on a miss, and `initialActiveTab` is read once. */}
       <Tabs
+        key={props.hasAiAssistant ? 'with-ai-chat' : 'without-ai-chat'}
         variant={TabsVariant.Sidebar}
         tabs={tabs}
         initialActiveTab={initialActiveTab}

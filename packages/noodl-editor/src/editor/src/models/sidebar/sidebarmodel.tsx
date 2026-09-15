@@ -26,6 +26,18 @@ export interface SidebarItem<TProps = Record<string, unknown>> {
    */
   transient?: boolean;
 
+  /**
+   * CHR-008 §3.4: the panel stays mounted when the selection moves to another node, and receives
+   * the new node as a prop instead of being built again.
+   *
+   * Every other panel is remounted per creation, exactly as before — they were written for that
+   * (state read once from `model`, subscriptions with `[]` deps), and nothing measured asks them to
+   * change.
+   *
+   * Default: false
+   */
+  followsSelection?: boolean;
+
   placement?: 'top' | 'bottom';
 
   /**
@@ -73,6 +85,20 @@ function getNodePanelName(nodeModel: NodeGraphNode): { id: string; args?: TSFixm
   return { id: 'PropertyEditor' };
 }
 
+let panelCreations = 0;
+
+/**
+ * The element factory for a panel.
+ *
+ * 🔴 CHR-008 §3.4: the factory is CALLED to make the element (`SidePanel` does `factory()`), so the
+ * element's type is the registered `item.panel` — one function for the life of the editor. It used
+ * to be handed to `React.createElement` as the component type itself, and since this arrow is new
+ * on every selection React saw a new type and threw the whole panel away on every click: measured
+ * on 0.2.4, a Group reselect painted a blank panel from 47 ms and the rows at scroll 0 until 115 ms.
+ *
+ * Identity is now the `key`: stable for a `followsSelection` panel, and new per creation for every
+ * other panel — which is the remount they had before, kept on purpose.
+ */
 function createPanel(type: string, args: { [key: string]: unknown }): () => React.ReactElement {
   const items = SidebarModel.instance.getItems();
 
@@ -81,8 +107,8 @@ function createPanel(type: string, args: { [key: string]: unknown }): () => Reac
     throw new Error(`Panel not found. (${type})`);
   }
 
-  // eslint-disable-next-line react/display-name
-  return () => React.createElement(item.panel, { ...args, ...(item.panelProps || {}) });
+  const key = item.followsSelection ? item.id : `${item.id}#${++panelCreations}`;
+  return () => React.createElement(item.panel, { key, ...args, ...(item.panelProps || {}) });
 }
 
 const getExperimentalSettingsKey = (item: SidebarItem) => `experimental.panel.${item.id}`;

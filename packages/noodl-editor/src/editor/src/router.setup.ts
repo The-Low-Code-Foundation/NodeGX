@@ -79,6 +79,8 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
 
   SidebarModel.instance.register({
     transient: true,
+    // CHR-008 §3.4: kept mounted across selections, so a node click does not blank the panel.
+    followsSelection: true,
     id: 'PropertyEditor',
     name: 'Properties',
     // @ts-expect-error

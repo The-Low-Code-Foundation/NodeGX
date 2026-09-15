@@ -226,6 +226,15 @@ export class Ports extends View {
 
     this.views.forEach((v) => v.dispose && v.dispose());
 
+    // CHR-008 §3.4: the Properties panel is no longer remounted per selection, so the next node's view
+    // scrolls the SAME `ScrollArea`. A listener left here would record that node's offsets under this
+    // node's id.
+    if (this._scrollTrackedEl && this._onScroll) {
+      this._scrollTrackedEl.removeEventListener('scroll', this._onScroll);
+    }
+    this._scrollTrackedEl = undefined;
+    this._onScroll = undefined;
+
     if (this.root) {
       this.root.unmount();
       this.root = null;
@@ -518,6 +527,20 @@ export class Ports extends View {
       },
       attempt === 0 ? 0 : 50
     );
+  }
+
+  /**
+   * CHR-008 §3.4 — put the panel where this node was left, now, in the caller's task.
+   *
+   * For the moment a kept-mounted panel swaps one node's view for the next: called in the same task
+   * as the swap, the first frame that shows this node's rows shows them at its offset. `settleScroll`
+   * stays for every other render; this only removes the frames it used to leave at the old offset.
+   */
+  restoreScroll(): void {
+    this.bindScrollTracking();
+    const target = this.scrollContainer();
+    if (!target || isFilterActive(this._filterQuery)) return;
+    target.scrollTop = propertyPanelViewState.getScroll(this.nodeId());
   }
 
   /**

@@ -38,12 +38,15 @@ export function SidePanel() {
     // Add the first panel
     const currentPanelId = SidebarModel.instance.ActiveId;
 
+    // CHR-008 §3.4: every `React.createElement(component)` here is now `component()`. The factory
+    // makes the element; handed to `createElement` it BECAME the element's type, and it is a new
+    // function per selection — so the Properties panel was remounted on every node click.
     setPanels((prev) => {
       const component = SidebarModel.instance.getPanelComponent(currentPanelId);
       if (component) {
         return {
           ...prev,
-          [currentPanelId]: React.createElement(component)
+          [currentPanelId]: component()
         };
       }
       return prev;
@@ -66,7 +69,7 @@ export function SidePanel() {
             if (component) {
               return {
                 ...prev,
-                [panelId]: React.createElement(component)
+                [panelId]: component()
               };
             }
             return prev;
@@ -78,27 +81,9 @@ export function SidePanel() {
       group
     );
 
-    // ---
-    // Listen for node selection changes to force PropertyEditor recreation
-    // This ensures the panel updates when switching between different nodes
-    SidebarModel.instance.on(
-      SidebarModelEvent.nodeSelected,
-      () => {
-        const panelId = 'PropertyEditor';
-        setPanels((prev) => {
-          const component = SidebarModel.instance.getPanelComponent(panelId);
-          if (component) {
-            // Force recreation with new node props - MUST return new object for React to detect change
-            return {
-              ...prev,
-              [panelId]: React.createElement(component)
-            };
-          }
-          return prev;
-        });
-      },
-      group
-    );
+    // CHR-008 §3.4: the `nodeSelected` listener that force-recreated the PropertyEditor is gone.
+    // `switchToNode` always raises `activeChanged` for it (it is transient), which already builds
+    // the element above with the new node — the second build only existed to beat the remount.
 
     // ---
     // Support Hot reload on all panels
@@ -110,7 +95,7 @@ export function SidePanel() {
         const component = SidebarModel.instance.getPanelComponent(currentPanelId);
 
         setPanels({
-          [currentPanelId]: React.createElement(component)
+          [currentPanelId]: component()
         });
 
         setActiveId(currentPanelId);
@@ -477,7 +462,7 @@ export function SidePanel() {
                         const component = SidebarModel.instance.getPanelComponent(currentPanelId);
 
                         setPanels({
-                          [currentPanelId]: React.createElement(component)
+                          [currentPanelId]: component()
                         });
 
                         setActiveId(currentPanelId);
