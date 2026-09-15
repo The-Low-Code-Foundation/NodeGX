@@ -1,6 +1,6 @@
-import useParsedHref from '@noodl-hooks/useParsedHref';
+import { parseHref } from '@noodl-hooks/useParsedHref';
 import classNames from 'classnames';
-import React, { FocusEventHandler, MouseEventHandler, useMemo } from 'react';
+import React, { FocusEventHandler, MouseEventHandler } from 'react';
 import { platform } from '@noodl/platform';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
@@ -14,7 +14,9 @@ export enum PrimaryButtonVariant {
   Muted = 'muted',
   MutedOnLowBg = 'muted-on-low-bg',
   Ghost = 'ghost',
-  Danger = 'danger'
+  Danger = 'danger',
+  /** CHR-005 — a label with no fill and no edge until hovered ("Open project…"). The launcher's third button. */
+  Text = 'text'
 }
 
 export enum PrimaryButtonSize {
@@ -28,6 +30,11 @@ export interface PrimaryButtonProps extends UnsafeStyleProps {
   size?: PrimaryButtonSize;
   href?: string;
   icon?: IconName;
+  /**
+   * CHR-005 — an inline SVG drawn before the label, for a surface that must render without webpack
+   * (`Icon` reads `require.context`). Ignored when `icon` is set.
+   */
+  glyph?: React.ReactNode;
 
   isDisabled?: boolean;
   isLoading?: boolean;
@@ -55,6 +62,7 @@ export function PrimaryButton({
   size = PrimaryButtonSize.Default,
   href,
   icon,
+  glyph,
 
   isDisabled,
   isLoading,
@@ -78,20 +86,13 @@ export function PrimaryButton({
   UNSAFE_className,
   UNSAFE_style
 }: PrimaryButtonProps) {
-  const activityColor = useMemo(() => {
-    switch (variant) {
-      case PrimaryButtonVariant.Cta:
-        return ActivityIndicatorColor.Dark;
-      case PrimaryButtonVariant.Muted:
-        return ActivityIndicatorColor.Light;
-      case PrimaryButtonVariant.Danger:
-        return ActivityIndicatorColor.Dark;
-      default:
-        return ActivityIndicatorColor.Dark;
-    }
-  }, [variant]);
+  // 🔴 HOOK-FREE since CHR-005. The launcher's Templates body renders this under
+  // `tests-unit/support/renderElements`, which calls components with no React dispatcher; a
+  // `useMemo` here made every spec of that body throw instead of grade. Both values are cheap.
+  const activityColor =
+    variant === PrimaryButtonVariant.Muted ? ActivityIndicatorColor.Light : ActivityIndicatorColor.Dark;
 
-  const parsedHref = useParsedHref(href);
+  const parsedHref = parseHref(href);
 
   return (
     <button
@@ -128,6 +129,7 @@ export function PrimaryButton({
             UNSAFE_className={css['Icon']}
           />
         )}
+        {!icon && glyph && <span className={css['Glyph']}>{glyph}</span>}
         {label}
       </span>
       {/*

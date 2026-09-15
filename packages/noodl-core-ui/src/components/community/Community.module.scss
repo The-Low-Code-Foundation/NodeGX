@@ -1555,7 +1555,7 @@
   justify-content: flex-end;
 }
 
-/* The launcher's primary — `LauncherButton`'s fill, so "Sign in" here is the "Sign in" there. */
+/* The launcher's primary — `PrimaryButton`'s CTA fill, so "Sign in" here is the "Sign in" there. */
 .PrimaryButton {
   background: var(--theme-color-primary);
   color: var(--theme-color-on-primary);

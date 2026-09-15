@@ -321,16 +321,19 @@ export function Launcher({
 
   const [activePageId, setActivePageId] = usePersistentTab(defaultTab);
 
-  // Mock data toggle state with localStorage persistence
+  // Mock data toggle state with localStorage persistence.
+  //
+  // CHR-005 — OFF unless asked for. It used to default ON whenever no `projects` prop arrived, so a
+  // host that had not wired projects (Storybook, any build without `ProjectsPage`) drew four
+  // placekitten cards as if they were somebody's work. ⚠️ The editor was never on that branch —
+  // `ProjectsPage` always passes an array, empty until the list loads — so its empty state was
+  // already real; what changes is every other host. The flag stays for development:
+  // `localStorage['launcher:useMockData'] = 'true'`.
   const [useMockData, setUseMockData] = useState<boolean>(() => {
-    // Default to mock if no projects provided, otherwise check localStorage
-    if (!projects) return true;
-
     try {
-      const stored = localStorage.getItem('launcher:useMockData');
-      return stored === 'true';
+      return localStorage.getItem('launcher:useMockData') === 'true';
     } catch {
-      return false; // Default to real data if provided
+      return false;
     }
   });
 
@@ -366,7 +369,7 @@ export function Launcher({
 
   // Determine which projects to use and if toggle should be available
   const hasRealProjects = Boolean(projects && projects.length > 0);
-  const activeProjects = useMockData ? MOCK_PROJECTS : projects || MOCK_PROJECTS;
+  const activeProjects = useMockData ? MOCK_PROJECTS : projects ?? [];
 
   // Update URL when tab changes (for deep linking support).
   //

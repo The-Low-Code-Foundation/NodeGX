@@ -34,6 +34,7 @@ import {
   LearnerPathSection,
   installedStepsFrom
 } from '@noodl-core-ui/preview/launcher/Launcher/components/LearnerPathSection';
+import { LauncherPage } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherPage';
 import { LearningSection, type LearningFilter } from '@noodl-core-ui/preview/launcher/Launcher/components/LearningSection';
 import { useLauncherContext } from '@noodl-core-ui/preview/launcher/Launcher/LauncherContext';
 import { learningTabs, type LearningTabId } from '@noodl-core-ui/preview/launcher/Launcher/views/learningTabs';
@@ -41,6 +42,9 @@ import { learningTabs, type LearningTabId } from '@noodl-core-ui/preview/launche
 import css from './Learning.module.scss';
 
 export interface LearningViewProps {}
+
+const LEDE =
+  'Lessons installed on this machine. Each one is a project: open it, change it, and reset it when you want a fresh copy.';
 
 const TAB_LABEL: Record<LearningTabId, string> = {
   lessons: 'Installed lessons',
@@ -96,9 +100,9 @@ export function Learning({}: LearningViewProps) {
       onOpen={onOpenLearningLesson}
       onReset={onResetLearningLesson}
       onInstall={onInstallLearningLesson}
-      // The tab label already says "Installed lessons"; with no strip, the
-      // section's own heading is the only thing naming the page.
-      showTitle={!hasPathTab}
+      // CHR-005: the page title names the page now, on every launcher tab, so the
+      // section's own "Learning" heading would say it twice.
+      showTitle={false}
       filter={filter}
       onFilterChange={setFilter}
     />
@@ -107,11 +111,15 @@ export function Learning({}: LearningViewProps) {
   if (!hasPathTab) {
     // One surface, no strip: a tab strip with a single tab is a label
     // impersonating a control.
-    return <div className={css['Root']}>{shelf}</div>;
+    return (
+      <LauncherPage title="Learning" lede={LEDE}>
+        {shelf}
+      </LauncherPage>
+    );
   }
 
   return (
-    <div className={css['Root']}>
+    <LauncherPage title="Learning" lede={LEDE}>
       <Tabs
         /*
           🔴 Segmented, not `Text`. The text variant paints its root
@@ -164,6 +172,6 @@ export function Learning({}: LearningViewProps) {
             )
         }))}
       />
-    </div>
+    </LauncherPage>
   );
 }

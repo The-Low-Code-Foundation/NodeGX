@@ -88,7 +88,9 @@ describe('the shelf, drawn', () => {
 
   it('offers only the filters that would show something, each with its count', () => {
     const pills = byTest(tree, 'learning-filter-');
-    expect(pills.map((p) => text(p))).toEqual(['All 5', 'The spine 3', 'Standalone 2', 'In progress 1', 'Completed 1']);
+    // CHR-005: these are the launcher's one filter `Chip` now, so the pressed pill carries the ✓
+    // the Templates tab's has carried since FB-002.
+    expect(pills.map((p) => text(p))).toEqual(['All 5 ✓', 'The spine 3', 'Standalone 2', 'In progress 1', 'Completed 1']);
     expect(pills.map((p) => p.props['aria-pressed'])).toEqual([true, false, false, false, false]);
   });
 

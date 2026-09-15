@@ -1,15 +1,9 @@
 /**
  * Learning view — the tab wrapper around D5's Learning section.
  *
- * Padding matches LauncherPage.module.scss's `.Root` so the tab sits on the
- * same margins as Projects and Templates. There is no `LauncherPage` head row
- * here on purpose: `LearningSection` draws its own heading, lesson count and
- * install button, and a page title above it would render "Learning" twice.
+ * CHR-005: the page, its padding and its title are `LauncherPage`, as on every launcher tab. The
+ * section's own heading is switched off in `Learning.tsx` so "Learning" is not said twice.
  */
-
-.Root {
-  padding: 28px 32px 20px;
-}
 
 /**
  * FB-004's tab strip.

@@ -8,9 +8,10 @@ import {
   COMMUNITY_SIGN_OUT_LABEL
 } from '@noodl-core-ui/constants/communityCopy';
 import {
-  LauncherButton,
-  LauncherButtonVariant
-} from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherButton';
+  PrimaryButton,
+  PrimaryButtonSize,
+  PrimaryButtonVariant
+} from '@noodl-core-ui/components/inputs/PrimaryButton';
 
 import css from './CommunityAccountCard.module.scss';
 
@@ -124,9 +125,10 @@ export function CommunityAccountCard({
             </span>
           </div>
 
-          <LauncherButton
+          <PrimaryButton
             label={COMMUNITY_SIGN_OUT_LABEL}
-            variant={LauncherButtonVariant.Secondary}
+            variant={PrimaryButtonVariant.Muted}
+            size={PrimaryButtonSize.Small}
             onClick={onSignOut}
             testId="community-account-signout"
           />
@@ -159,8 +161,9 @@ export function CommunityAccountCard({
             </div>
           ) : (
             <div className={css['Actions']}>
-              <LauncherButton
+              <PrimaryButton
                 label={state.phase === 'starting' ? 'Starting…' : COMMUNITY_SIGN_IN_LABEL}
+                size={PrimaryButtonSize.Small}
                 isDisabled={isBusy}
                 onClick={onSignIn}
                 testId="community-account-signin"

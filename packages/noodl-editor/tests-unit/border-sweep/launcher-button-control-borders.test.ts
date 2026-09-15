@@ -16,7 +16,7 @@ import { ThemeName, tokenContrast } from '../support/themeTokens';
  * 🔴 THREE FINDINGS THIS FAMILY ADDED, each with a row that reddens at a number:
  *
  * 1. A SHARED CONTROL HAS MANY GROUNDS, AND THE SWEEP'S TABLE SHAPE COULD NOT SAY SO. Every
- *    earlier slice mapped one control to one ground. `LauncherButton .is-secondary` is placed on
+ *    earlier slice mapped one control to one ground. The launcher's own button (`.is-secondary`) was placed on
  *    THREE surfaces — `LauncherHeader` (bg-1), `CommunityAccountCard` (bg-2) and the Projects
  *    folder-picker footer (bg-2) — and a fix is only correct if it clears on the WORST of them.
  *    Reading one call site would have measured a real number about the wrong question.
@@ -28,7 +28,7 @@ import { ThemeName, tokenContrast } from '../support/themeTokens';
  *    sides of the edge, not just the fill.
  *
  * 3. THIS IS THE FIRST FAMILY WHOSE STATES NEED BOTH DISCOVERY MECHANISMS IN ONE SPEC.
- *    `LauncherButton` nests its states with `&:hover`, as the code-editor family did;
+ *    The launcher's own button nested its states with `&:hover`, as the code-editor family did;
  *    `ShareTemplateModal` writes them as TOP-LEVEL rules (`.ChoiceItem:hover`), as the bench did.
  *    A reader with only one of the two is silently blind to half the states in this file — see
  *    `statesOf` below, and the mutant that proves it.
@@ -38,11 +38,19 @@ import { ThemeName, tokenContrast } from '../support/themeTokens';
  * its own fill and its grounds out of the `.scss` files, so a revert fails at a NUMBER.
  */
 
+/*
+ * CHR-005 (2026-09-15): the launcher's own button component is DELETED (R2). Its consumers draw `PrimaryButton`, whose
+ * muted variant carries the same `border-control` edge. Its rows went with it rather than being
+ * re-pointed: `PrimaryButton` nests its variants under `.Root` (`&.is-variant-muted`), which this
+ * file's top-level reader cannot address, and R3 rules that the replacement is a RENDERED-contrast
+ * reading rather than another CSS-text pin — taken on the launcher's tabs in `verdicts/CHR-005/`.
+ * Finding 3's nested spelling is now witnessed on the titlebar's `.Tab`.
+ */
+
 const CORE = path.resolve(__dirname, '../../../noodl-core-ui/src');
 const LAUNCHER = `${CORE}/preview/launcher/Launcher`;
 
 const FILES = {
-  launcherButton: `${LAUNCHER}/components/LauncherButton/LauncherButton.module.scss`,
   header: `${LAUNCHER}/components/LauncherHeader/LauncherHeader.module.scss`,
   communityCard: `${LAUNCHER}/components/CommunityAccountCard/CommunityAccountCard.module.scss`,
   projects: `${LAUNCHER}/views/Projects.module.scss`,
@@ -247,21 +255,6 @@ const CONTROLS: {
   grounds: { file: FileKey; selector: string; token: string; what: string }[];
 }[] = [
   {
-    name: 'LauncherButton .is-secondary (one SHARED button, three grounds)',
-    file: 'launcherButton',
-    selectors: ['.Root', '.is-secondary'],
-    grounds: [
-      { file: 'header', selector: '.Root', token: '--theme-color-bg-1', what: 'the launcher titlebar' },
-      { file: 'communityCard', selector: '.Root', token: '--theme-color-bg-2', what: 'the community card' },
-      {
-        file: 'projects',
-        selector: '.FolderPickerDialog',
-        token: '--theme-color-bg-2',
-        what: "the folder picker's footer"
-      }
-    ]
-  },
-  {
     name: 'ShareTemplateModal .ChoiceItem (grounded on bg-4, where border-control FAILS)',
     file: 'shareModal',
     selectors: ['.ChoiceItem'],
@@ -365,8 +358,8 @@ describe.each(['dark', 'light'] as ThemeName[])('the launcher button family in %
     // FINDING 3, asserted rather than trusted. If `statesOf` ever loses either mechanism, the
     // state rows above keep passing on the states they can still see, which is the quietest
     // possible failure. This row names one state of each spelling and insists it is found.
-    const nested = statesOf('launcherButton', ['.Root', '.is-secondary']).map((s) => s.selector);
-    expect(nested).toContain(':hover:not(:disabled)');
+    const nested = statesOf('header', ['.Tab']).map((s) => s.selector);
+    expect(nested).toContain(':hover');
 
     const topLevel = statesOf('shareModal', ['.ChoiceItem']).map((s) => s.selector);
     expect(topLevel).toContain(':hover');

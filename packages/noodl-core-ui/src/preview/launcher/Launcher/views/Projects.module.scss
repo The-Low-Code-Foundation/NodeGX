@@ -1,39 +1,44 @@
 /**
- * Projects view - mock layout styling (PAR-001)
+ * Projects — CHR-005. The page, its head and its toolbar are `LauncherPage`; this file lays out
+ * what sits inside the column: the folder rail beside the cards, and the states that replace them.
  *
- * 224px bg-1 sidebar (padding 16px 10px) + main column; the main column's
- * 28/32/20 padding and head row live in LauncherPage.
+ * 🔴 THE RAIL IS INSIDE THE COLUMN. It was a 224px bg-1 panel against the window's left edge, which
+ * is why Projects was the one tab whose title did not line up with the other three. Recorded
+ * choice (CHR-005 §3.1): a rail rather than a `Select` in the toolbar — the tree also creates,
+ * renames and deletes folders, and a select can do none of that. Below 900px it moves above the
+ * cards instead of squeezing them.
  */
 
-.Root {
-  display: flex;
-  height: 100%;
-  overflow: hidden;
+.Layout {
+  display: grid;
+  grid-template-columns: 188px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--spacing-7);
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-4);
+  }
 }
 
 .Sidebar {
-  width: 224px;
-  flex: none;
-  background: var(--theme-color-bg-1);
+  min-width: 0;
+  padding-right: var(--spacing-3);
   border-right: 1px solid var(--theme-color-border-default);
-  padding: 16px 10px;
-  overflow: hidden;
+
+  @media (max-width: 900px) {
+    padding-right: 0;
+    padding-bottom: var(--spacing-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--theme-color-border-default);
+  }
 }
 
 .Main {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
   min-width: 0;
-  overflow-y: auto;
-}
-
-.Grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  // FIX-003 opt-out: the cards are click/double-click targets — opening a
-  // project must not select its name. Scoped to the grid, NOT the launcher
-  // root: the scoping chat lives in the same window and must stay selectable.
-  user-select: none;
 }
 
 .NoResults {
@@ -46,7 +51,7 @@
 /* First-launch welcome empty state */
 .Welcome {
   max-width: 520px;
-  margin: 48px auto 0;
+  margin: var(--spacing-8) auto 0;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -54,11 +59,11 @@
   gap: var(--spacing-4);
 }
 
+// Not the display face: the page title above it is the one place the launcher uses that (CHR-005).
 .WelcomeTitle {
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-display);
+  font-size: var(--font-size-xl);
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
   margin: 0;
 }

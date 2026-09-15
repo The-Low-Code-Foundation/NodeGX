@@ -1,17 +1,18 @@
 /**
  * GitHubConnectButton
  *
- * The titlebar's `Connect GitHub` action — a SECONDARY button (bg-2, border-2)
- * with the 15px GitHub mark, per the launcher mock (PAR-001). Initiates the
- * GitHub OAuth flow.
+ * The titlebar's `Connect GitHub` action — the muted (secondary) button with the 15px GitHub
+ * mark. Initiates the GitHub OAuth flow. CHR-005 / R2: `PrimaryButton`, not the launcher-local
+ * button that was deleted.
  */
 
 import React from 'react';
 
 import {
-  LauncherButton,
-  LauncherButtonVariant
-} from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherButton';
+  PrimaryButton,
+  PrimaryButtonSize,
+  PrimaryButtonVariant
+} from '@noodl-core-ui/components/inputs/PrimaryButton';
 
 export interface GitHubConnectButtonProps {
   onConnect: () => void;
@@ -26,10 +27,11 @@ const GitHubMark = (
 
 export function GitHubConnectButton({ onConnect, isConnecting = false }: GitHubConnectButtonProps) {
   return (
-    <LauncherButton
+    <PrimaryButton
       label={isConnecting ? 'Connecting…' : 'Connect GitHub'}
-      variant={LauncherButtonVariant.Secondary}
-      icon={GitHubMark}
+      variant={PrimaryButtonVariant.Muted}
+      size={PrimaryButtonSize.Small}
+      glyph={GitHubMark}
       isDisabled={isConnecting}
       onClick={onConnect}
     />

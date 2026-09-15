@@ -62,7 +62,8 @@ const LAUNCHER = `${CORE}/preview/launcher/Launcher`;
 const FILES = {
   folderTree: `${LAUNCHER}/components/FolderTree/FolderTree.module.scss`,
   folderTreeItem: `${LAUNCHER}/components/FolderTreeItem/FolderTreeItem.module.scss`,
-  projects: `${LAUNCHER}/views/Projects.module.scss`
+  projects: `${LAUNCHER}/views/Projects.module.scss`,
+  launcher: `${LAUNCHER}/Launcher.module.scss`
 } as const;
 
 type FileKey = keyof typeof FILES;
@@ -228,14 +229,20 @@ function statesOf(file: FileKey, selectors: string[]): { selector: string; bodie
 type Ground = { file: FileKey; selector: string; token: string; what: string };
 
 /**
- * The 224px sidebar the tree fills. Read out of the VIEW rather than this component — `FolderTree`
- * paints nothing at its root, so its controls are seen against whatever placed it.
+ * The ground the tree sits on. Read out of what PLACES it — `FolderTree` paints nothing at its
+ * root, so its controls are seen against whatever holds it.
+ *
+ * 🔴 CHR-005 (2026-09-15) MOVED THAT GROUND. The tree used to fill a 224px bg-1 sidebar against the
+ * window edge; it is now a rail inside the page column and the rail paints nothing, so these inputs
+ * sit on the launcher's content area (bg-0) — the ground every other Projects control is already
+ * measured against in `launcher-control-borders`. Re-pointed to where the inputs ARE, rather than
+ * the rail repainted bg-1 to keep the old pin true.
  */
 const SIDEBAR: Ground = {
-  file: 'projects',
-  selector: '.Sidebar',
-  token: '--theme-color-bg-1',
-  what: 'the projects sidebar (bg-1)'
+  file: 'launcher',
+  selector: '.ContentArea',
+  token: '--theme-color-bg-0',
+  what: 'the launcher page the folder rail sits on (bg-0)'
 };
 
 /**
@@ -450,7 +457,8 @@ describe.each(['dark', 'light'] as ThemeName[])('the folder tree family in %s', 
     // sidebar (bg-1, 1.27 light), the dialog (bg-2, 1.15 light) and the cancel button's own fill
     // (bg-3, 1.08 dark). Copying any single earlier file's bound reads a correct value as a defect.
     const grounds: { token: string; bound: number; what: string }[] = [
-      { token: groundOf('projects', '.Sidebar'), bound: 1.4, what: 'the sidebar (bg-1)' },
+      // CHR-005: the rail's ground is the page (bg-0) now — `launcher-control-borders`' bound for it.
+      { token: groundOf('launcher', '.ContentArea'), bound: 1.5, what: 'the page the rail sits on (bg-0)' },
       { token: groundOf('folderTree', '.DeleteConfirmationDialog'), bound: 1.2, what: 'the dialog (bg-2)' },
       { token: groundOf('folderTree', '.DeleteConfirmationCancelButton'), bound: 1.2, what: "the cancel button's fill (bg-3)" }
     ];

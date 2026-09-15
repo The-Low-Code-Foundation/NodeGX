@@ -14,9 +14,9 @@
     "packages/noodl-editor/src/editor/src/views/panels/propertyeditor": 0,
     "packages/noodl-core-ui/src/components/property-panel": 0
   },
-  "commit": "0a4c53e24",
+  "commit": "b2b5c230b",
   "max": {
-    "noodl-core-ui": 128,
+    "noodl-core-ui": 127,
     "noodl-editor": 599
   },
   "byFile": {
@@ -29,7 +29,6 @@
     "packages/noodl-core-ui/src/components/code-editor/CodeHistory/CodeHistoryDiffModal.module.scss": 5,
     "packages/noodl-core-ui/src/components/code-editor/CodeHistory/CodeHistoryDropdown.module.scss": 8,
     "packages/noodl-core-ui/src/components/code-editor/JavaScriptEditor.module.scss": 7,
-    "packages/noodl-core-ui/src/components/common/Chip/Chip.module.scss": 1,
     "packages/noodl-core-ui/src/components/common/EditorNode/EditorNode.module.scss": 1,
     "packages/noodl-core-ui/src/components/common/Markdown/Markdown.module.scss": 2,
     "packages/noodl-core-ui/src/components/community/Community.module.scss": 7,

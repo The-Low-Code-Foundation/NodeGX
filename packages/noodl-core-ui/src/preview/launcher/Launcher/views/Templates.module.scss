@@ -1,29 +1,10 @@
 /**
  * REL-013 — the Templates tab.
  *
- * The card and pill tokens are deliberately the same ones `TemplateStep.module.scss` reasoned
- * its way to (POL-016's `border-control` for anything that is a control, the active state carried
- * by border AND text rather than fill alone) — this is the same shelf on a second surface, and
- * two shelves that look different are two shelves.
- *
- * ⚠️ Not `@extend`ed or imported from that file: it is scoped to a fixed-height modal panel
- * (`.TemplateList` there caps at 320px so the wizard's footer cannot be pushed off the bottom),
- * and a full launcher page has no such cap. Sharing the rules would drag that cap onto a page
- * that should scroll with the window.
+ * CHR-005: the page, toolbar, search box, filter pills and cards are the launcher's shared ones
+ * (`LauncherPage`, `LauncherSearchField`, `Chip` filter, `LauncherCard`). What is left here is the
+ * tab's own states — loading, the short-shelf notice, and the empty and unreadable panels.
  */
-
-.TemplatesTab {
-  display: flex;
-  flex-direction: column;
-}
-
-.TemplatesTab-hint {
-  font-size: var(--font-size-md);
-  color: var(--theme-color-fg-default-shy);
-  margin: 0 0 var(--spacing-4) 0;
-  line-height: 1.5;
-  max-width: 60ch;
-}
 
 .TemplatesTab-status {
   font-size: var(--font-size-md);
@@ -37,7 +18,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-2);
-  margin-bottom: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
   line-height: 1.5;
@@ -76,13 +57,12 @@
   gap: var(--spacing-3);
   max-width: 62ch;
   padding: var(--spacing-5) var(--spacing-5);
-  background-color: var(--theme-color-bg-2);
+  background-color: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-xl);
 }
 
 .TemplatesTab-emptyTitle {
-  font-family: var(--font-family-display);
   font-size: var(--font-size-lg);
   font-weight: 600;
   line-height: 1.3;
@@ -106,149 +86,8 @@
 
 // ─── Narrowing the shelf ──────────────────────────────────────────────────────
 
-.TemplatesTab-filter {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-  margin-bottom: var(--spacing-3);
-}
-
-.TemplatesTab-search {
-  width: 100%;
-  max-width: 420px;
-  box-sizing: border-box;
-  padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-md);
-  font-family: inherit;
-  color: var(--theme-color-fg-default);
-  background-color: var(--theme-color-bg-2);
-  border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-md);
-
-  &::placeholder {
-    color: var(--theme-color-fg-default-shy);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 1px;
-  }
-}
-
 .TemplatesTab-facets {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-2);
-}
-
-.TemplatesTab-pill {
-  font-size: var(--font-size-xs);
-  font-family: inherit;
-  color: var(--theme-color-fg-default);
-  background-color: var(--theme-color-bg-2);
-  border: 2px solid var(--theme-color-border-control);
-  border-radius: var(--radius-full);
-  padding: 2px var(--spacing-2);
-  cursor: pointer;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: var(--theme-color-primary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 2px;
-  }
-
-  &--active {
-    border-color: var(--theme-color-primary);
-    background-color: var(--theme-color-bg-3);
-  }
-}
-
-// ─── The rows ─────────────────────────────────────────────────────────────────
-
-.TemplateList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  // ⚠️ No `max-height`. This is a page, not a modal body — see the file header.
-}
-
-.TemplateCard {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-1);
-  width: 100%;
-  padding: var(--spacing-3) var(--spacing-4);
-  text-align: left;
-  cursor: pointer;
-  background-color: var(--theme-color-bg-3);
-  // `border-control` and 2px, for `TemplateStep.module.scss`'s measured reason: this is a button,
-  // 1.4.11 asks 3:1 of its boundary, and the fill step alone is 1.085:1 in light.
-  border: 2px solid var(--theme-color-border-control);
-  border-radius: var(--radius-default);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-
-  &:hover {
-    border-color: var(--theme-color-primary);
-    background-color: var(--theme-color-bg-2);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 2px;
-  }
-}
-
-.TemplateCard-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-3);
-  width: 100%;
-}
-
-.TemplateCard-title {
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--theme-color-fg-default);
-  line-height: 1.3;
-}
-
-// 🔴 ALWAYS DRAWN, not revealed on hover. What a card does is not a thing to hide behind a
-// pointer: it is the only text on the row saying that clicking it starts a project.
-.TemplateCard-action {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  white-space: nowrap;
-  color: var(--theme-color-primary);
-}
-
-.TemplateCard-description {
-  font-size: var(--font-size-md);
-  color: var(--theme-color-fg-default-shy);
-  line-height: 1.5;
-}
-
-.TemplateCard-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-2);
-  margin-top: var(--spacing-1);
-}
-
-.TemplateCard-tag {
-  font-size: var(--font-size-xs);
-  color: var(--theme-color-fg-default-shy);
-  background-color: var(--theme-color-bg-2);
-  border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-default);
-  padding: 1px var(--spacing-2);
+  gap: 6px;
 }

@@ -1,34 +1,68 @@
 /**
- * LauncherPage - main-column scaffold styling (PAR-001, mock-normative)
+ * LauncherPage — CHR-005. One column, one head, one toolbar; see `LauncherPage.tsx`.
+ *
+ * Side padding drops 32 → 20 below 760px, so a window near its 600px minimum (`main.js`) still
+ * has room for a 280px card.
  */
 
 .Root {
-  padding: 28px 32px 20px;
+  padding-block: var(--spacing-8) var(--spacing-12);
+  padding-inline: var(--spacing-8);
+
+  @media (max-width: 760px) {
+    padding-inline: var(--spacing-5);
+  }
 }
 
-.HeadRow {
+.Column {
+  max-width: 1120px;
+  margin-inline: auto;
+}
+
+.Head {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3) var(--spacing-6);
+  margin-bottom: var(--spacing-5);
+}
+
+.HeadText {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .Title {
-  font-family: var(--font-family-display);
-  font-weight: 600;
-  font-size: var(--font-size-display);
-  letter-spacing: -0.015em;
   margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   color: var(--theme-color-fg-highlight);
   text-wrap: balance;
 }
 
-.Spacer {
-  flex: 1;
+.Lede {
+  margin: var(--spacing-1-5) 0 0;
+  max-width: 62ch;
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--theme-color-fg-muted);
 }
 
 .Actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-2);
+}
+
+.Toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2-5);
+  margin-bottom: var(--spacing-5);
 }

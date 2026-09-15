@@ -1,76 +1,51 @@
 /**
- * LauncherProjectCard - card-grid card styling (UIX-006)
+ * LauncherProjectCard — CHR-005: what a PROJECT adds to the one card (`LauncherCard`), which owns
+ * the box, the edge and the type. Here: the picture, and the footer's chips and menu.
  */
 
+// FIX-003 opt-out: a card is a click/double-click target, and opening a project must not select its
+// name. On the card rather than the launcher root, so the scoping chat in the same window stays
+// selectable.
 .Card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  text-align: left;
-  background: var(--theme-color-bg-1);
-  /* POL-016 control tone, not the divider: this is a role="button" and 1.4.11 asks
-     that a reader can identify it. bg-1 fill on the bg-0 content area, so the edge
-     measures 4.17 dark / 3.72 light on the card and 4.86 / 3.28 on the ground. */
-  border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  cursor: pointer;
-
-  @media (prefers-reduced-motion: no-preference) {
-    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    /* `border-strong` is one of NAT-003's three DIVIDER tones (1.74 / 1.53 here), so
-       leaving it would have dropped the edge 4.17 -> 1.74 exactly while the pointer
-       is on the card. `primary` is what the sibling `.TemplateCard:hover` already
-       uses for the same object: 5.60 / 4.57 on the fill.
-
-       ⚠️ DELETING this line instead — the node picker's remedy — measures fine and
-       was rejected on purpose: this hover does not move the fill at all, so the
-       resting tone is simply inherited at 4.17 / 3.72. Two reasons not to. The rule
-       lists `border-color` in its own `transition` above, so a deletion leaves a
-       declared transition animating nothing; and a hover whose job is to lift the
-       card should not be the one state with no edge change. A fourth case for the
-       sweep's up/down rule, and a new direction: the fill is STATIONARY. */
-    border-color: var(--theme-color-primary);
-    box-shadow: var(--shadow-card-hover);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-focus-ring);
-    outline-offset: 2px;
-  }
+  user-select: none;
 }
 
-/* ---------- thumbnail ---------- */
-.Thumb {
-  position: relative;
-  aspect-ratio: 16 / 9.2;
-  overflow: hidden;
+/* ---------- picture: a capture, fitted to the width (see `ProjectPicture`) ---------- */
+.Capture {
+  position: absolute;
+  inset: 0;
   background: var(--theme-color-bg-2);
 }
 
-.ThumbImage {
+.CaptureImage {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
 }
 
-/* Deterministic placeholder art: name-hash gradient + ghosted initial. */
-.Ghost {
-  /* Mock: absolute right -8px / bottom -26px, Bricolage 600 96px, white @16%. */
+/* ---------- picture: a project never opened ---------- */
+.Placeholder {
   position: absolute;
-  right: -8px;
-  bottom: -26px;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--spacing-4);
+}
+
+// On the scale (CHR-002 AC5): the display size, in a tile — not the 96px ghost it replaced.
+.Initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   font-family: var(--font-family-display);
+  font-size: var(--font-size-display);
   font-weight: 600;
-  font-size: var(--font-size-card-initial);
   line-height: 1;
-  color: var(--base-color-white-transparent-16);
-  user-select: none;
+  color: var(--base-color-white);
+  background: var(--base-color-white-transparent-16);
+  border-radius: var(--radius-lg);
 }
 
 /* Five gradient buckets keyed to the node-category hues (UIX-005 palette). */
@@ -110,48 +85,19 @@
   );
 }
 
-/* ---------- meta ---------- */
-.Meta {
+/* ---------- footer ---------- */
+.Chips {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px 13px;
-}
-
-.Info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.Name {
-  font-weight: 600;
-  font-size: var(--font-size-md);
-  color: var(--theme-color-fg-highlight);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.Sub {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   flex-wrap: wrap;
-  color: var(--theme-color-fg-muted);
-  font-size: var(--font-size-sm);
-}
-
-.Edited {
-  color: var(--theme-color-fg-muted);
+  gap: var(--spacing-1-5);
+  min-width: 0;
 }
 
 /* Mock kebab: 26px hit target, radius 6, fg-3 -> fg-1 on bg-3 hover. The
    trigger inside is the shared ContextMenu IconButton; shape it from here. */
 .Kebab {
   flex: none;
+  margin-left: auto;
 
   :global(button) {
     width: 26px;

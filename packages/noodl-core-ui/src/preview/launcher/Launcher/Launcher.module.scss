@@ -21,6 +21,11 @@
   overflow-x: hidden;
   background: var(--theme-color-bg-0);
 
+  /* CHR-005 — reserve the scrollbar's width on every tab. Without it a page short enough not to
+     scroll (Community) centred its column 4px right of the tabs that do, so the title moved as you
+     switched tabs (drive, 2026-09-15: x 124 vs 120). */
+  scrollbar-gutter: stable;
+
   /* Smooth scrolling */
   scroll-behavior: smooth;
 

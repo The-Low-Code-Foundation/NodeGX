@@ -2,14 +2,16 @@
  * LauncherSearchBar - mock toolbar-row styling (PAR-001)
  */
 
+/* CHR-005: this row now sits in `LauncherPage`'s toolbar slot, which owns the spacing under it. */
 .Root {
   display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 22px;
 }
 
 .Search {
-  flex: 1;
+  flex: 1 1 260px;
   max-width: 380px;
   display: flex;
   align-items: center;

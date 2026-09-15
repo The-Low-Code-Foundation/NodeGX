@@ -3,7 +3,7 @@
   align-items: center;
   gap: 4px;
   font-family: var(--font-family);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.02em;
   border-radius: var(--radius-default);
@@ -45,4 +45,57 @@
 .is-variant-success {
   background-color: var(--theme-color-success-bg);
   color: var(--theme-color-success);
+}
+
+/*
+ * CHR-005 — the one filter pill. It is a control, so its resting edge is POL-016's control tone
+ * rather than a divider; selected moves the edge, the fill and the text colour together and adds a
+ * ✓ (FB-002).
+ */
+.is-variant-filter {
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--theme-color-border-control);
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+
+  &:hover {
+    background-color: var(--theme-color-bg-2);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  // ⚠️ The LABEL stays a foreground tone, not `primary`. Primary text on the primary wash measured
+  // 3.6:1 rendered in light (CHR-005 drive) — under 4.5 for 12px. Edge, wash and ✓ carry the state.
+  &.is-selected {
+    border-color: var(--theme-color-primary);
+    background-color: var(--theme-color-primary-bg);
+    color: var(--theme-color-fg-highlight);
+  }
+}
+
+.Count {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-fg-muted);
+
+  .is-selected & {
+    color: inherit;
+  }
+}
+
+.Check {
+  font-size: var(--font-size-xs);
 }

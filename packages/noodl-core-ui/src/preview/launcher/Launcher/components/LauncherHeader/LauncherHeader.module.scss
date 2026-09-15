@@ -53,7 +53,6 @@
   align-items: stretch;
   -webkit-app-region: no-drag;
 }
-
 .Tab {
   position: relative;
   display: flex;
@@ -215,5 +214,43 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+  }
+}
+
+/* CHR-005 — the window's minimum is 600px (`main.js`) and this bar used to clip there: the tabs
+   and the actions ran off the right edge. Below 900px the tabs tighten; below 760px the actions
+   wrap onto a second row rather than clip. Restyled, not restructured — `.Lights` and
+   `.WindowControls` are unchanged (CHR-005 trap 1). ⚠️ LAST in the file on purpose: these override
+   rules of equal specificity above, and an earlier position would lose to them. */
+@media (max-width: 900px) {
+  .Root {
+    gap: 8px;
+  }
+
+  .Tabs {
+    gap: 0;
+    margin-left: 8px;
+  }
+
+  .Tab {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 760px) {
+  .Root {
+    flex-wrap: wrap;
+    height: auto;
+  }
+
+  .Lights,
+  .Wordmark,
+  .Tabs {
+    height: 52px;
+  }
+
+  .Actions {
+    height: 44px;
+    margin-left: auto;
   }
 }

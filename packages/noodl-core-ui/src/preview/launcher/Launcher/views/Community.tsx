@@ -78,7 +78,6 @@ import type {
 } from '@noodl-core-ui/components/community';
 import css from '@noodl-core-ui/components/community/Community.module.scss';
 import { TabStrip, TabsVariant } from '@noodl-core-ui/components/layout/Tabs';
-import tabsCss from '@noodl-core-ui/components/layout/Tabs/Tabs.module.scss';
 import { LauncherPage } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherPage';
 import { useLauncherContext } from '@noodl-core-ui/preview/launcher/Launcher/LauncherContext';
 import { communityTabs, type CommunityTabId } from '@noodl-core-ui/preview/launcher/Launcher/views/communityTabs';
@@ -541,14 +540,16 @@ export function CommunityTab({
 
       {!alone && (
         /*
-          ⚠️ The variant class is on this wrapper and `Tabs`' `.Root` is not, on purpose: `.Root`
-          is `height: 100%; overflow: hidden`, which is the layout a full-height tabbed surface
-          wants and the opposite of what this page wants — here the page scrolls and the strip is
-          just the first thing in it. FB-006 loosened the variant selectors in `Tabs.module.scss`
-          so a strip can be styled without inheriting that box.
+          ⚠️ No `Tabs` root here, on purpose: `.Root` is `height: 100%; overflow: hidden`, which is
+          the layout a full-height tabbed surface wants and the opposite of what this page wants —
+          here the page scrolls and the strip is just the first thing in it. FB-006 loosened the
+          variant selectors so a strip can be styled without that box, and CHR-005's
+          `hasVariantScope` lets the strip carry its own variant class, so this view no longer
+          imports another component's stylesheet to find it.
         */
-        <div className={classNames(tabsCss[TabsVariant.Segmented], css['Tabs'])}>
+        <div className={css['Tabs']}>
           <TabStrip
+            hasVariantScope
             variant={TabsVariant.Segmented}
             activeTabId={plan.active?.id ?? ''}
             tabs={plan.tabs.map((tab) => ({ id: tab.id, label: tab.label, testId: `community-tab-${tab.id}` }))}

@@ -1,0 +1,207 @@
+/**
+ * LauncherCard — CHR-005, the one launcher card. See `LauncherCard.tsx`.
+ *
+ * The card's edge keeps the tones `LauncherProjectCard` measured (POL-016): it is a `role="button"`,
+ * so the resting edge is the CONTROL tone — 4.17 dark / 3.72 light on its bg-1 fill, 4.86 / 3.28 on
+ * the bg-0 page — and the hover moves it to `primary` (5.60 / 4.57) rather than to a divider.
+ * `tests-unit/border-sweep/launcher-control-borders` reads `.Card` from this file.
+ */
+
+.Grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.Item {
+  display: flex;
+  min-width: 0;
+
+  > * {
+    flex: 1;
+  }
+}
+
+.Card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  background: var(--theme-color-bg-1);
+  border: 1px solid var(--theme-color-border-control);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--theme-color-primary);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+.Picture {
+  position: relative;
+  flex: none;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--theme-color-bg-2);
+  border-bottom: 1px solid var(--theme-color-border-default);
+}
+
+.Body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+  min-width: 0;
+  padding: var(--spacing-3-5) var(--spacing-4) var(--spacing-4);
+}
+
+.Eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--theme-color-primary);
+
+  // The ringed dot the homepage's eyebrow carries. An outline rather than a spread shadow: it is a
+  // ring, not elevation, and the chrome keeps four shadows (CHR-003).
+  &::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--theme-color-primary);
+    outline: 3px solid var(--theme-color-primary-bg);
+  }
+}
+
+.Title {
+  margin: var(--spacing-0-5) 0 0;
+  overflow: hidden;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--theme-color-fg-highlight);
+}
+
+.Description {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--theme-color-fg-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.Footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  min-width: 0;
+  margin-top: auto;
+  padding-top: var(--spacing-2-5);
+}
+
+.Action {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--theme-color-primary);
+}
+
+.Tag {
+  padding: 4px 7px;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--theme-color-fg-muted);
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-default);
+}
+
+// ─── The picture a card draws with no image yet ──────────────────────────────
+
+.Wireframe {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--theme-color-bg-2), var(--theme-color-bg-1));
+}
+
+.WireframePage {
+  position: absolute;
+  top: 16%;
+  left: 14%;
+  width: 72%;
+  height: 68%;
+  border: 1px dashed var(--theme-color-border-default);
+  border-radius: var(--radius-lg);
+
+  i {
+    position: absolute;
+    display: block;
+    background: var(--theme-color-bg-3);
+    border-radius: var(--radius-sm);
+  }
+}
+
+.WireframeNav {
+  top: 9%;
+  right: 6%;
+  left: 6%;
+  height: 7%;
+}
+
+.WireframeHeading {
+  top: 28%;
+  left: 6%;
+  width: 46%;
+  height: 11%;
+}
+
+.WireframeLine {
+  top: 46%;
+  left: 6%;
+  width: 64%;
+  height: 5%;
+}
+
+.WireframeLineShort {
+  top: 56%;
+  left: 6%;
+  width: 40%;
+  height: 5%;
+}
+
+.WireframeBlock {
+  top: 70%;
+  right: 6%;
+  bottom: 9%;
+  left: 6%;
+}

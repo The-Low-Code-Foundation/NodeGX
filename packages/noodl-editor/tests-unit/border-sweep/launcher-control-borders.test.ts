@@ -50,7 +50,8 @@ const LAUNCHER = path.resolve(__dirname, '../../../noodl-core-ui/src/preview/lau
 const FILES = {
   launcher: `${LAUNCHER}/Launcher.module.scss`,
   projects: `${LAUNCHER}/views/Projects.module.scss`,
-  card: `${LAUNCHER}/components/LauncherProjectCard/LauncherProjectCard.module.scss`,
+  // CHR-005: a project is drawn on the launcher's ONE card now, and the card's box lives there.
+  card: `${LAUNCHER}/components/LauncherCard/LauncherCard.module.scss`,
   searchBar: `${LAUNCHER}/components/LauncherSearchBar/LauncherSearchBar.module.scss`
 } as const;
 
@@ -220,7 +221,7 @@ const CONTROLS: {
   ground: { file: FileKey; selector: string; token: string };
 }[] = [
   {
-    name: 'LauncherProjectCard .Card',
+    name: 'LauncherCard .Card (projects and templates, CHR-005)',
     file: 'card',
     selector: '.Card',
     ground: { file: 'launcher', selector: '.ContentArea', token: '--theme-color-bg-0' }

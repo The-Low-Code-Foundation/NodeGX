@@ -1,6 +1,10 @@
 import React from 'react';
 
-import { LauncherButton, LauncherButtonVariant } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherButton';
+import {
+  PrimaryButton,
+  PrimaryButtonSize,
+  PrimaryButtonVariant
+} from '@noodl-core-ui/components/inputs/PrimaryButton';
 
 import css from './ConnectAgentCard.module.scss';
 
@@ -101,16 +105,18 @@ export function ConnectAgentCard({
         </div>
       ) : (
         <div className={css['Actions']}>
-          <LauncherButton
+          <PrimaryButton
             label={isBusy ? 'Connecting…' : 'Connect Claude Code'}
+            size={PrimaryButtonSize.Small}
             isDisabled={isBusy}
             onClick={onConnect}
             testId="connect-agent-connect"
           />
           {result?.command && (
-            <LauncherButton
+            <PrimaryButton
               label={isCopied ? 'Copied' : 'Copy the command instead'}
-              variant={LauncherButtonVariant.Ghost}
+              variant={PrimaryButtonVariant.Text}
+              size={PrimaryButtonSize.Small}
               onClick={onCopyCommand}
               testId="connect-agent-copy"
             />

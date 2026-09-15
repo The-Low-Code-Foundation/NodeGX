@@ -111,6 +111,19 @@
     }
   }
 
+  // CHR-005 — the launcher's quiet action, which was its deleted local button's ghost. No fill and no edge
+  // until hovered: it is identified by its words, like a link, so it never stands alone as the
+  // only way forward on a surface.
+  &.is-variant-text {
+    color: var(--theme-color-fg-default);
+    background-color: transparent;
+
+    &:hover {
+      color: var(--theme-color-fg-highlight);
+      background-color: var(--theme-color-bg-3);
+    }
+  }
+
   &.is-variant-danger {
     color: var(--theme-color-bg-1);
     background-color: var(--theme-color-danger);
@@ -198,6 +211,15 @@
   // Deploy tray, for one). Opt the stroked set back out; `color` still drives it.
   svg[stroke='currentColor'] path {
     fill: none;
+  }
+}
+
+.Glyph {
+  display: inline-flex;
+  margin-right: 6px;
+
+  svg {
+    display: block;
   }
 }
 

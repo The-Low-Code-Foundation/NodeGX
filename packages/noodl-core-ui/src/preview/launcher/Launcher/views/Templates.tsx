@@ -4,10 +4,10 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * ## 🔴 THIS TAB WAS REACHABLE AND EMPTY-BY-CONSTRUCTION FOR ITS WHOLE LIFE
  *
- * Until this row it rendered one hardcoded sentence — *"Project templates will be displayed
- * here. This feature is coming soon!"* — and imported no registry at all. `views/Projects.tsx`
- * has linked here since POL-002 (`setActivePageId('templates')` on the first-launch welcome), so
- * the very first thing a new user was offered was a promise with nothing behind it.
+ * Until this row it rendered one hardcoded sentence — the old promise that templates would appear
+ * later — and imported no registry at all. `views/Projects.tsx` has linked here since POL-002
+ * (`setActivePageId('templates')` on the first-launch welcome), so the very first thing a new user
+ * was offered was a promise with nothing behind it.
  *
  * ═══════════════════════════════════════════════════════════════════════════════
  * ## 🔴 ONE SHELF, TWO SURFACES — AND THE ROWS ARRIVE AS PROPS
@@ -18,11 +18,11 @@
  * `ProjectsPage`. ⚠️ A second instance would double every community request and let two surfaces
  * show two different lists; the gate that keeps it to one is `shouldFetchTemplates`.
  *
- * ⚠️ **This file must never install, create or fetch anything.** Choosing a row calls
+ * ⚠️ **This file must never install, create or fetch anything.** Choosing a card calls
  * `onUseTemplate`, which opens the create wizard already on `'template'` mode with that URL — so
- * creation stays on the one route `handleCreateProjectConfirm` owns, the route that reads
- * `needsBackend` off the chosen row (SBR-001). A create path from here that skipped it would
- * re-enter that defect by a new door.
+ * creation stays on the one route `handleCreateProjectConfirm` owns, the route that reads the
+ * backend flag off the chosen row (SBR-001). A create path from here that skipped it would re-enter
+ * that defect by a new door.
  *
  * ═══════════════════════════════════════════════════════════════════════════════
  * ## 🔴 ZERO ROWS IS STILL REACHABLE HERE, AND IT MUST READ AS AN ANSWER
@@ -46,11 +46,14 @@
  * the shelf is bare when the community is down.
  *
  * ═══════════════════════════════════════════════════════════════════════════════
- * ## ⚠️ NO THUMBNAILS. THE ROW IS A TITLE, A CATEGORY AND A SENTENCE.
+ * ## ⚠️ ONE CARD, AND NO IMAGE IN IT YET (CHR-005)
  *
- * `PlatformTemplateProvider` ships `iconURL: ''` deliberately — there is no thumbnail column on
- * the platform and there is no plan for one. A card designed around an image that is never coming
- * is a card that looks broken on every row it ever draws.
+ * The rows are the launcher's one card (`LauncherCard`, R5), the same object a project is drawn
+ * as. Its picture slot draws `LauncherCardWireframe`, because no shelf entry carries a picture:
+ * `PlatformTemplateProvider` ships `iconURL: ''`. That was a ruling here ("no thumbnails, the row
+ * is a title, a category and a sentence") and it predated the five demo shots on nodegx.io.
+ * R4 (2026-09-15) reverses it — the shelf entry gains `thumbnail` — and CHR-006 builds that. Until
+ * then the slot must never guess at an image.
  *
  * ═══════════════════════════════════════════════════════════════════════════════
  * ## 🔴 THE FILTER IS THE WIZARD'S, NOT A SECOND ONE
@@ -60,19 +63,33 @@
  * how a pill's count stops meaning the rows behind it"* — which is exactly what
  * `ProjectCreationWizard/index.ts` exported it for.
  *
- * ⚠️ **`TemplatesTabBody` is HOOK-FREE, and that is not style.** `tests-unit/support/
- * renderElements` evaluates a React element tree by *calling* function components with React's
- * dispatcher null, so any hook throws there. `views/Community.tsx` and `TemplateStepBody` split
- * the same way for the same reason: the alternative is a spec reduced to grepping this file's
- * source, which passes just as happily on code nothing renders.
+ * ⚠️ **`TemplatesTabBody` is HOOK-FREE, and that is not style** — nor is anything it renders.
+ * `tests-unit/support/renderElements` evaluates a React element tree by *calling* function
+ * components with React's dispatcher null, so any hook throws there. `views/Community.tsx` and
+ * `TemplateStepBody` split the same way for the same reason: the alternative is a spec reduced to
+ * grepping this file's source, which passes just as happily on code nothing renders. CHR-005 made
+ * `PrimaryButton` hook-free and split `LauncherSearchField` out of the search bar for this.
  *
  * @module noodl-core-ui/preview/launcher
  */
 
 import React from 'react';
 
-import { LauncherButton, LauncherButtonVariant } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherButton';
+import { Chip, ChipVariant } from '@noodl-core-ui/components/common/Chip';
+import {
+  PrimaryButton,
+  PrimaryButtonSize,
+  PrimaryButtonVariant
+} from '@noodl-core-ui/components/inputs/PrimaryButton';
+import {
+  LauncherCard,
+  LauncherCardAction,
+  LauncherCardGrid,
+  LauncherCardTag,
+  LauncherCardWireframe
+} from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherCard/LauncherCard';
 import { LauncherPage } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherPage';
+import { LauncherSearchField } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherSearchBar/LauncherSearchField';
 // 🔴 THE DEEP PATHS, NOT THE PACKAGE INDEX, AND IT IS NOT A STYLE CHOICE.
 // `components/ProjectCreationWizard/index.ts` re-exports the wizard COMPONENT, which drags in
 // `TextInput`, `Markdown` and `PresetSelector`. `tests-unit`'s plain-Node runner cannot load
@@ -92,6 +109,8 @@ import { useLauncherContext } from '@noodl-core-ui/preview/launcher/Launcher/Lau
 
 import css from './Templates.module.scss';
 
+const LEDE = 'A template is a project that is already built. Start from one and change anything in it afterwards.';
+
 export interface TemplatesTabBodyProps {
   /**
    * The shelf, as the host read it.
@@ -102,7 +121,7 @@ export interface TemplatesTabBodyProps {
    * no host hook, and the tab then says so rather than claiming an empty shelf on no evidence.
    */
   gallery?: TemplateGalleryState;
-  /** Start a project from this row. The host opens the create wizard on it — see the header. */
+  /** Start a project from this card. The host opens the create wizard on it — see the header. */
   onUseTemplate?: (templateUrl: string) => void;
   /** The launcher's ordinary "new project" route, offered where the shelf has nothing on it. */
   onCreateProject?: () => void;
@@ -123,10 +142,8 @@ export function TemplatesTabBody({
 }: TemplatesTabBodyProps) {
   if (!gallery) {
     return (
-      <LauncherPage title="Templates">
-        <p className={css['TemplatesTab-status']}>
-          Templates are not available in this build.
-        </p>
+      <LauncherPage title="Templates" lede={LEDE}>
+        <p className={css['TemplatesTab-status']}>Templates are not available in this build.</p>
       </LauncherPage>
     );
   }
@@ -141,145 +158,145 @@ export function TemplatesTabBody({
   const { rows, categories } = filterTemplates(gallery.items, filter);
   const filtering = isFilterActive(filter);
   const clear = () => onFilterChange?.(EMPTY_TEMPLATE_FILTER);
+  const hasRows = !isLoading && !isEmpty;
 
   return (
-    <LauncherPage title="Templates">
-      <div className={css['TemplatesTab']}>
-        <p className={css['TemplatesTab-hint']}>
-          A template is a project that is already built. Start from one and change anything in it
-          afterwards.
-        </p>
-
-        {/* The short-shelf notice, drawn BESIDE rows whenever there are any. With no rows at all
-            it is the whole screen instead — see `isUnreadable` below. */}
-        {gallery.partial && !isEmpty && (
-          <div className={css['TemplatesTab-notice']} role="status">
-            <span>{gallery.partial}</span>
-            {gallery.onRetry && (
-              <button className={css['TemplatesTab-retry']} type="button" onClick={gallery.onRetry}>
-                Try again
-              </button>
-            )}
-          </div>
-        )}
-
-        {isLoading ? (
-          <p className={css['TemplatesTab-status']}>Looking for templates…</p>
-        ) : isUnreadable ? (
-          <div className={css['TemplatesTab-empty']} role="status">
-            <h2 className={css['TemplatesTab-emptyTitle']}>Templates could not be loaded</h2>
-            {/* The host's sentence, not ours: it names WHICH source went quiet. */}
-            <p className={css['TemplatesTab-emptyBody']}>{gallery.partial}</p>
-            <div className={css['TemplatesTab-emptyActions']}>
-              {gallery.onRetry && <LauncherButton label="Try again" onClick={gallery.onRetry} />}
-              {onCreateProject && (
-                <LauncherButton
-                  label="New project"
-                  variant={LauncherButtonVariant.Ghost}
-                  onClick={onCreateProject}
-                />
-              )}
-            </div>
-          </div>
-        ) : isEmpty ? (
-          /* 🔴 AC4 — THE SHIPPED STATE. Every word here is chosen so that a bare shelf reads as an
-             answer rather than as a failure: it says what a template is, that there are none yet,
-             that more are coming, and it hands over the thing you came here to do anyway. */
-          <div className={css['TemplatesTab-empty']} role="status">
-            <h2 className={css['TemplatesTab-emptyTitle']}>No templates published yet</h2>
-            <p className={css['TemplatesTab-emptyBody']}>
-              Nothing has gone wrong — the shelf is simply bare for this release. As templates are
-              published they show up here, and starting a project from one is a single click.
-            </p>
-            <div className={css['TemplatesTab-emptyActions']}>
-              {onCreateProject && <LauncherButton label="New project" onClick={onCreateProject} />}
-              {gallery.onRetry && (
-                <LauncherButton
-                  label="Check again"
-                  variant={LauncherButtonVariant.Ghost}
-                  onClick={gallery.onRetry}
-                />
-              )}
-            </div>
-          </div>
-        ) : (
+    <LauncherPage
+      title="Templates"
+      lede={LEDE}
+      // The empty and unreadable panels carry their own "New project"; a second one up here would
+      // put two buttons with one job on the same screen.
+      actions={
+        hasRows && onCreateProject ? (
+          <PrimaryButton
+            label="Start blank"
+            variant={PrimaryButtonVariant.Muted}
+            size={PrimaryButtonSize.Small}
+            onClick={onCreateProject}
+          />
+        ) : undefined
+      }
+      toolbar={
+        hasRows && onFilterChange ? (
           <>
-            {onFilterChange && (
-              <div className={css['TemplatesTab-filter']}>
-                <input
-                  className={css['TemplatesTab-search']}
-                  type="search"
-                  value={filter.query}
-                  placeholder="Search templates"
-                  aria-label="Search templates"
-                  onChange={(e) => onFilterChange({ ...filter, query: e.target.value })}
+            <LauncherSearchField
+              value={filter.query}
+              placeholder="Search templates"
+              onChange={(query) => onFilterChange({ ...filter, query })}
+            />
+            <div className={css['TemplatesTab-facets']} role="group" aria-label="Filter by category">
+              {categories.map((facet) => (
+                <Chip
+                  key={facet.value ?? '*'}
+                  variant={ChipVariant.Filter}
+                  label={facet.label}
+                  count={facet.count}
+                  isSelected={facet.active}
+                  onClick={() => onFilterChange({ ...filter, category: facet.active ? null : facet.value })}
                 />
-                <div className={css['TemplatesTab-facets']} role="group" aria-label="Filter by category">
-                  {categories.map((facet) => (
-                    <button
-                      key={facet.value ?? '*'}
-                      type="button"
-                      className={`${css['TemplatesTab-pill']} ${
-                        facet.active ? css['TemplatesTab-pill--active'] : ''
-                      }`}
-                      aria-pressed={facet.active}
-                      onClick={() => onFilterChange({ ...filter, category: facet.active ? null : facet.value })}
-                    >
-                      {/* The count is INSIDE the label and the active pill says so in text —
-                          FB-002 shipped a selected pill at 1.16:1 and a state carried only by
-                          fill is a state somebody cannot see. */}
-                      {facet.label} ({facet.count}){facet.active ? ' ✓' : ''}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {rows.length === 0 ? (
-              // 🔴 NOT the empty-shelf sentence. "There are no templates" is our fault; "nothing
-              // here matches what you typed" is one button away from being fixed by the reader.
-              <p className={css['TemplatesTab-status']}>
-                No templates match {filtering ? 'that search' : 'this list'}.{' '}
-                {onFilterChange && (
-                  <button className={css['TemplatesTab-retry']} type="button" onClick={clear}>
-                    Clear filters
-                  </button>
-                )}
-              </p>
-            ) : (
-              <ul className={css['TemplateList']}>
-                {rows.map((item) => (
-                  <li key={item.url}>
-                    {/* ⚠️ NO `aria-pressed`. In the wizard this card is a toggle that records a
-                        choice; here it is the button that starts the creation, and a state the
-                        markup does not have is worse than none. */}
-                    <button
-                      type="button"
-                      className={css['TemplateCard']}
-                      onClick={() => onUseTemplate?.(item.url)}
-                    >
-                      <span className={css['TemplateCard-head']}>
-                        <span className={css['TemplateCard-title']}>{item.title}</span>
-                        <span className={css['TemplateCard-action']}>Use this template →</span>
-                      </span>
-                      <span className={css['TemplateCard-description']}>{item.description}</span>
-                      <span className={css['TemplateCard-meta']}>
-                        {/* 🔴 The LABEL, not the slug — the category vocabulary is the platform's
-                            (`starter`, `data-app`), which is right for a CHECK constraint and
-                            wrong for a card. */}
-                        {item.category && (
-                          <span className={css['TemplateCard-tag']}>{categoryLabel(item.category)}</span>
-                        )}
-                        {item.origin && <span className={css['TemplateCard-tag']}>{item.origin}</span>}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+              ))}
+            </div>
           </>
-        )}
-      </div>
+        ) : undefined
+      }
+    >
+      {/* The short-shelf notice, drawn BESIDE rows whenever there are any. With no rows at all
+          it is the whole screen instead — see `isUnreadable` below. */}
+      {gallery.partial && !isEmpty && (
+        <div className={css['TemplatesTab-notice']} role="status">
+          <span>{gallery.partial}</span>
+          {gallery.onRetry && (
+            <button className={css['TemplatesTab-retry']} type="button" onClick={gallery.onRetry}>
+              Try again
+            </button>
+          )}
+        </div>
+      )}
+
+      {isLoading ? (
+        <p className={css['TemplatesTab-status']}>Looking for templates…</p>
+      ) : isUnreadable ? (
+        <div className={css['TemplatesTab-empty']} role="status">
+          <h2 className={css['TemplatesTab-emptyTitle']}>Templates could not be loaded</h2>
+          {/* The host's sentence, not ours: it names WHICH source went quiet. */}
+          <p className={css['TemplatesTab-emptyBody']}>{gallery.partial}</p>
+          <div className={css['TemplatesTab-emptyActions']}>
+            {gallery.onRetry && (
+              <PrimaryButton label="Try again" size={PrimaryButtonSize.Small} onClick={gallery.onRetry} />
+            )}
+            {onCreateProject && (
+              <PrimaryButton
+                label="New project"
+                variant={PrimaryButtonVariant.Text}
+                size={PrimaryButtonSize.Small}
+                onClick={onCreateProject}
+              />
+            )}
+          </div>
+        </div>
+      ) : isEmpty ? (
+        /* 🔴 AC4 — THE SHIPPED STATE. Every word here is chosen so that a bare shelf reads as an
+           answer rather than as a failure: it says what a template is, that there are none yet,
+           that more are coming, and it hands over the thing you came here to do anyway. */
+        <div className={css['TemplatesTab-empty']} role="status">
+          <h2 className={css['TemplatesTab-emptyTitle']}>No templates published yet</h2>
+          <p className={css['TemplatesTab-emptyBody']}>
+            Nothing has gone wrong — the shelf is simply bare for this release. As templates are
+            published they show up here, and starting a project from one is a single click.
+          </p>
+          <div className={css['TemplatesTab-emptyActions']}>
+            {onCreateProject && (
+              <PrimaryButton label="New project" size={PrimaryButtonSize.Small} onClick={onCreateProject} />
+            )}
+            {gallery.onRetry && (
+              <PrimaryButton
+                label="Check again"
+                variant={PrimaryButtonVariant.Text}
+                size={PrimaryButtonSize.Small}
+                onClick={gallery.onRetry}
+              />
+            )}
+          </div>
+        </div>
+      ) : rows.length === 0 ? (
+        // 🔴 NOT the empty-shelf sentence. "There are no templates" is our fault; "nothing
+        // here matches what you typed" is one button away from being fixed by the reader.
+        <p className={css['TemplatesTab-status']}>
+          No templates match {filtering ? 'that search' : 'this list'}.{' '}
+          {onFilterChange && (
+            <button className={css['TemplatesTab-retry']} type="button" onClick={clear}>
+              Clear filters
+            </button>
+          )}
+        </p>
+      ) : (
+        <LauncherCardGrid>
+          {rows.map((item) => (
+            // ⚠️ NO `aria-pressed`. In the wizard this card is a toggle that records a choice; here
+            // it is the control that starts the creation, and a state the markup does not have is
+            // worse than none.
+            <LauncherCard
+              key={item.url}
+              testId="template-card"
+              onClick={() => onUseTemplate?.(item.url)}
+              picture={<LauncherCardWireframe />}
+              // 🔴 The LABEL, not the slug — the category vocabulary is the platform's (`starter`,
+              // `data-app`), which is right for a CHECK constraint and wrong for a card.
+              eyebrow={item.category ? categoryLabel(item.category) : undefined}
+              title={item.title}
+              description={item.description}
+              footer={
+                <>
+                  {/* 🔴 ALWAYS DRAWN, not revealed on hover: it is the only text on the card saying
+                      that clicking it starts a project. */}
+                  <LauncherCardAction>Use this template →</LauncherCardAction>
+                  {item.origin && <LauncherCardTag>{item.origin}</LauncherCardTag>}
+                </>
+              }
+            />
+          ))}
+        </LauncherCardGrid>
+      )}
     </LauncherPage>
   );
 }
