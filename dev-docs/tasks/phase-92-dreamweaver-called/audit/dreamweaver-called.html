@@ -1,0 +1,433 @@
+<title>Dreamweaver Called</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&display=swap">
+<style>
+:root{
+  --ground:#f3f5f8; --panel:#ffffff; --panel-2:#eaeef3; --line:#d7dde6; --line-soft:#e6eaf0;
+  --ink:#141a22; --ink-soft:#4b5665; --ink-faint:#7b8694;
+  --accent:#2a7de1; --accent-wash:rgba(42,125,225,.10);
+  --shipped:#e04a3a; --shipped-wash:rgba(224,74,58,.10);
+  --site:#0b8f81; --site-wash:rgba(11,143,129,.10);
+  --amber:#b9772a; --amber-wash:rgba(185,119,42,.12);
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --display:"Bricolage Grotesque",var(--sans);
+  --shadow:0 1px 2px rgba(20,26,34,.05),0 10px 28px -14px rgba(20,26,34,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0e1116; --panel:#151a21; --panel-2:#1c232c; --line:#262e39; --line-soft:#1f2630;
+    --ink:#e7ecf2; --ink-soft:#a9b4c1; --ink-faint:#74808e;
+    --accent:#4da3ff; --accent-wash:rgba(77,163,255,.14);
+    --shipped:#ff6b5b; --shipped-wash:rgba(255,107,91,.14);
+    --site:#2dd4bf; --site-wash:rgba(45,212,191,.12);
+    --amber:#e0a458; --amber-wash:rgba(224,164,88,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 32px -16px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0e1116; --panel:#151a21; --panel-2:#1c232c; --line:#262e39; --line-soft:#1f2630;
+  --ink:#e7ecf2; --ink-soft:#a9b4c1; --ink-faint:#74808e;
+  --accent:#4da3ff; --accent-wash:rgba(77,163,255,.14);
+  --shipped:#ff6b5b; --shipped-wash:rgba(255,107,91,.14);
+  --site:#2dd4bf; --site-wash:rgba(45,212,191,.12);
+  --amber:#e0a458; --amber-wash:rgba(224,164,88,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 32px -16px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.6 var(--sans);padding-block:0 96px;padding-inline:20px;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+.wrap{max-width:860px;margin:0 auto}
+.wide{max-width:1240px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);letter-spacing:-0.015em;text-wrap:balance;margin:0}
+h1{font-size:clamp(36px,5.2vw,54px);line-height:1.02;font-weight:700}
+h2{font-size:28px;line-height:1.15;font-weight:600;margin-top:64px}
+h3{font-size:19px;line-height:1.25;font-weight:600;margin-top:32px}
+p{margin:14px 0}
+.lede{font-size:19px;line-height:1.5;color:var(--ink-soft);max-width:62ch}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px}
+.eyebrow.shipped{color:var(--shipped)} .eyebrow.site{color:var(--site)} .eyebrow.proposed{color:var(--accent)}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--panel-2);padding:1px 5px;border-radius:4px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:12.5px/1.5 var(--mono);color:var(--ink-faint);margin-top:22px}
+.meta b{color:var(--ink-soft);font-weight:500}
+header{padding-block:56px 8px}
+figure{margin:0}
+figcaption{font-size:13px;color:var(--ink-faint);margin-top:8px;line-height:1.45}
+.shot{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0f1318;box-shadow:var(--shadow)}
+.shot img{display:block;width:100%;height:auto}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+@media (max-width:760px){.pair{grid-template-columns:1fr}}
+.callout{border-left:3px solid var(--accent);background:var(--accent-wash);padding:12px 16px;border-radius:0 8px 8px 0;margin:20px 0}
+.callout.shipped{border-color:var(--shipped);background:var(--shipped-wash)}
+.callout.amber{border-color:var(--amber);background:var(--amber-wash)}
+.callout p{margin:6px 0}
+ul.tight{padding-left:20px;margin:10px 0}
+ul.tight li{margin:6px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line-soft)}
+th{font:600 11px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{font-family:var(--mono);font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;word-break:break-all}
+.tablewrap{overflow-x:auto}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font:600 26px/1.1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.4}
+.kpi.bad b{color:var(--shipped)} .kpi.good b{color:var(--site)}
+.plan{counter-reset:step;margin:22px 0;padding:0;list-style:none}
+.plan li{position:relative;padding:16px 0 16px 56px;border-top:1px solid var(--line-soft)}
+.plan li::before{counter-increment:step;content:"F" counter(step);position:absolute;left:0;top:16px;font:600 13px/1 var(--mono);color:var(--accent);background:var(--accent-wash);padding:8px 9px;border-radius:6px}
+.plan h4{margin:0 0 6px;font-size:16px;font-weight:600}
+.plan p{margin:6px 0;font-size:15px;color:var(--ink-soft)}
+.plan .cost{font:12px/1 var(--mono);color:var(--ink-faint);margin-top:8px;display:block}
+.sizes{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;margin:10px 0}
+.sizes span{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:2px 8px;font-family:var(--mono);line-height:1.4}
+.note{font-size:13.5px;color:var(--ink-faint)}
+
+/* ------- scaled mock frames ------- */
+.frame{position:relative;width:100%;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);background:#0f1318}
+.frame>.stage{position:absolute;left:0;top:0;transform-origin:0 0}
+
+/* ======= LAUNCHER MOCK (fixed dark, it depicts the editor) ======= */
+.L{--bg0:#0f1318;--bg1:#151a21;--bg2:#1b2129;--bg3:#232a34;--ln:#262e39;--ln2:#2e3742;--fg:#e6ebf1;--fg2:#aab4c0;--fg3:#7a8593;--pri:#4da3ff;--pri-w:rgba(77,163,255,.14);
+  width:1368px;height:1080px;background:var(--bg0);color:var(--fg);font:13px/1.45 var(--sans);position:relative;overflow:hidden}
+.L .top{height:52px;display:flex;align-items:center;padding:0 20px 0 20px;border-bottom:1px solid var(--ln);background:var(--bg1)}
+.L .lights{width:120px}
+.L .brand{display:flex;align-items:center;gap:8px;font:600 15px var(--display);margin-right:36px}
+.L .brand i{width:8px;height:8px;border-radius:50%;background:#ff5a47;display:inline-block}
+.L .tabs{display:flex;gap:4px;height:100%}
+.L .tabs span{display:flex;align-items:center;padding:0 12px;color:var(--fg2);font-weight:500;position:relative}
+.L .tabs span.on{color:var(--fg)}
+.L .tabs span.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--pri)}
+.L .top .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.L .btn{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:7px;font-weight:600;font-size:13px;border:1px solid var(--ln2);background:var(--bg2);color:var(--fg)}
+.L .btn.pri{background:var(--pri);border-color:var(--pri);color:#0b1320}
+.L .btn.ghost{background:transparent;border-color:transparent;color:var(--fg2)}
+.L .avatar{width:24px;height:24px;border-radius:50%;background:#6c7cff}
+.L .content{padding:32px 0 0;height:calc(1080px - 52px - 40px);overflow:hidden}
+.L .col{width:1120px;margin:0 auto}
+.L .pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px}
+.L h1{font:600 26px/1.1 var(--display);letter-spacing:-.015em;margin:0 0 6px}
+.L .lede{font-size:14px;color:var(--fg2);margin:0;max-width:62ch}
+.L .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+.L .search{display:flex;align-items:center;gap:9px;height:34px;width:300px;padding:0 12px;border:1px solid var(--ln2);border-radius:8px;background:var(--bg1);color:var(--fg3)}
+.L .search svg{flex:none}
+.L .chips{display:flex;gap:6px}
+.L .chip{height:28px;display:inline-flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid var(--ln2);color:var(--fg2);font-size:12.5px;font-weight:500}
+.L .chip.on{background:var(--pri-w);border-color:transparent;color:var(--pri)}
+.L .chip small{font-family:var(--mono);font-size:11px;color:var(--fg3)}
+.L .chip.on small{color:var(--pri)}
+.L .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.L .card{grid-column:span 2;background:var(--bg1);border:1px solid var(--ln);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.L .card.big{grid-column:span 3}
+.L .card .pic{aspect-ratio:16/9;background:#10151b;border-bottom:1px solid var(--ln);overflow:hidden;position:relative}
+.L .card .pic img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.L .card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.L .port{font:600 10.5px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--pri);display:flex;align-items:center;gap:7px}
+.L .port::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--pri);box-shadow:0 0 0 3px var(--pri-w)}
+.L .card h3{margin:2px 0 0;font:600 15px/1.25 var(--sans);letter-spacing:-.005em}
+.L .card p{margin:0;font-size:13px;line-height:1.5;color:var(--fg2)}
+.L .card .foot{margin-top:auto;padding-top:10px;display:flex;align-items:center;justify-content:space-between}
+.L .card .go{font-weight:600;color:var(--pri);font-size:13px}
+.L .tag{font:500 11px/1 var(--mono);color:var(--fg3);border:1px solid var(--ln2);padding:4px 7px;border-radius:5px}
+.L .wire{position:absolute;inset:0;background:
+  linear-gradient(135deg,#1a2230 0%,#12181f 100%)}
+.L .wire .ph{position:absolute;left:14%;top:18%;width:72%;height:64%;border:1px dashed #33404f;border-radius:8px}
+.L .wire .ph i{position:absolute;background:#243040;border-radius:3px}
+.L .foot-bar{position:absolute;left:0;right:0;bottom:0;height:40px;border-top:1px solid var(--ln);background:var(--bg1);display:flex;align-items:center;padding:0 20px;gap:16px;color:var(--fg2);font-size:12.5px}
+.L .foot-bar .v{margin-left:auto;font-family:var(--mono);color:var(--fg3)}
+
+/* ======= PROPERTY PANEL MOCK (fixed dark) ======= */
+.P{--bg0:#0f1318;--bg1:#151a21;--bg2:#1b2129;--bg3:#222a34;--ln:#262e39;--ln2:#303946;--fg:#e6ebf1;--fg2:#aab4c0;--fg3:#7a8593;--pri:#4da3ff;--pri-w:rgba(77,163,255,.14);
+  width:328px;background:var(--bg1);color:var(--fg);font:12.5px/1.4 var(--sans);border-right:1px solid var(--ln);display:flex;flex-direction:column;height:860px;overflow:hidden}
+.P .head{padding:12px 14px 0}
+.P .titlebar{display:flex;align-items:center;gap:8px;height:28px}
+.P .titlebar .t{font-weight:600;font-size:13px}
+.P .titlebar .ic{margin-left:auto;display:flex;gap:2px}
+.P .titlebar .ic i{width:24px;height:24px;border-radius:5px;display:inline-block;background:transparent;position:relative}
+.P .titlebar .ic i::before{content:"";position:absolute;inset:8px;border:1.5px solid var(--fg3);border-radius:2px}
+.P .node{display:flex;align-items:center;gap:10px;margin:10px 0 12px}
+.P .node .glyph{width:28px;height:28px;border-radius:7px;background:var(--pri-w);display:grid;place-items:center}
+.P .node .glyph b{width:12px;height:12px;border:1.5px solid var(--pri);border-radius:2px;display:block}
+.P .node .n{font:600 15px/1.15 var(--sans);letter-spacing:-.005em}
+.P .node .k{font:500 10.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);margin-top:4px}
+.P .node .more{margin-left:auto;color:var(--fg3);font-size:16px;letter-spacing:1px}
+.P .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg0);border:1px solid var(--ln);border-radius:7px;padding:2px;gap:2px;margin-bottom:10px}
+.P .seg span{text-align:center;padding:5px 0;border-radius:5px;color:var(--fg2);font-weight:500}
+.P .seg span.on{background:var(--bg3);color:var(--fg)}
+.P .search{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border:1px solid var(--ln);border-radius:7px;background:var(--bg0);color:var(--fg3);margin:0 14px 6px}
+.P .search .k{margin-left:auto;font:11px var(--mono);color:var(--fg3);border:1px solid var(--ln2);border-radius:4px;padding:1px 5px}
+.P .scroll{overflow:hidden;flex:1;padding-bottom:20px}
+.P section{padding:6px 14px 10px;border-top:1px solid var(--ln)}
+.P section h5{display:flex;align-items:center;gap:8px;margin:0;height:30px;font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
+.P section h5 svg{flex:none;color:var(--fg3)}
+.P section h5 .cnt{margin-left:auto;color:var(--fg3);font-weight:500;letter-spacing:0}
+.P .row{display:grid;grid-template-columns:8px 116px 1fr;align-items:center;gap:0 8px;min-height:30px}
+.P .row .dot{width:6px;height:6px;border-radius:50%;border:1.5px solid var(--ln2);justify-self:center}
+.P .row .dot.on{background:var(--pri);border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-w)}
+.P .row label{color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.P .ctl{display:flex;gap:6px;align-items:center;min-width:0}
+.P .in{height:26px;display:flex;align-items:center;gap:6px;padding:0 8px;border:1px solid var(--ln);border-radius:6px;background:var(--bg0);font-variant-numeric:tabular-nums;min-width:0;flex:1}
+.P .in.num{font-family:var(--mono);font-size:12px}
+.P .in .u{margin-left:auto;color:var(--fg3);font-family:var(--mono);font-size:11px}
+.P .in.sel::after{content:"";width:6px;height:6px;border-right:1.5px solid var(--fg3);border-bottom:1.5px solid var(--fg3);transform:rotate(45deg) translateY(-2px);margin-left:auto}
+.P .in.sw{flex:none;width:auto;height:auto;border:0;background:transparent;padding:0}
+.P .toggle{width:30px;height:18px;border-radius:999px;background:var(--pri);position:relative;display:inline-block}
+.P .toggle::after{content:"";position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.P .toggle.off{background:var(--ln2)} .P .toggle.off::after{right:auto;left:2px;background:#9aa5b3}
+.P .iconseg{display:inline-grid;grid-auto-flow:column;gap:2px;background:var(--bg0);border:1px solid var(--ln);border-radius:6px;padding:2px}
+.P .iconseg i{width:24px;height:22px;border-radius:4px;display:grid;place-items:center}
+.P .iconseg i.on{background:var(--bg3)}
+.P .iconseg i svg{color:var(--fg2)} .P .iconseg i.on svg{color:var(--fg)}
+.P .two{display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:3}
+.P .two .in .l{color:var(--fg3);font-family:var(--mono);font-size:11px}
+.P .gated{grid-column:1/-1;display:flex;gap:8px;align-items:center;margin:4px 0 2px;padding:8px 10px;border-radius:6px;background:var(--bg2);color:var(--fg2);font-size:12px}
+.P .gated a{color:var(--pri);text-decoration:none;font-weight:600;margin-left:auto;white-space:nowrap}
+.P .muted{opacity:.45}
+.P .comment{margin:0 14px 10px;padding:8px 10px;border:1px dashed var(--ln2);border-radius:6px;color:var(--fg3);font-size:12px}
+.P .adv{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--ln);color:var(--fg3);font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.panels{display:grid;grid-template-columns:384px 328px;gap:24px;justify-content:center;align-items:start;margin-top:20px}
+@media (max-width:800px){.panels{grid-template-columns:1fr;justify-items:center}}
+.panels .shot{width:384px;max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:13px;color:var(--ink-soft);margin:10px 0 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Audit · launcher &amp; property panel · NodeGX 0.2.4 as installed</p>
+  <h1>Dreamweaver Called</h1>
+  <p class="lede">Why the launcher and the property panel look ten years older than the homepage, what in the codebase actually holds them there, and two mockups of where they could go once those things are moved.</p>
+  <div class="meta">
+    <span><b>measured</b> /Applications/NodeGX.app 0.2.4, second instance on private ports, dark theme</span>
+    <span><b>source</b> cline-dev @ e740727f8</span>
+    <span><b>date</b> 2026-09-15</span>
+    <span><b>changed</b> nothing — this is a read</span>
+  </div>
+</header>
+
+<h2>The gap, side by side</h2>
+<p>Same five apps. Left: the homepage's Demos section, from the local <code>nodegx-web</code> build (the deployed site is one commit behind and doesn't have it yet). Right: the launcher's Templates tab, as shipped.</p>
+</div>
+<div class="wide">
+<div class="pair">
+  <figure><p class="eyebrow site">nodegx.io · demos</p><div class="shot"><img src="demos-section.png" alt="The homepage Demos section: five template cards with real screenshots in a 2+3 grid, teal eyebrows, one card style"></div><figcaption>A 1120px column, one card style, a 16:10 screenshot, a mono eyebrow, a title, a sentence, a link. Radius 14, one shadow.</figcaption></figure>
+  <figure><p class="eyebrow shipped">launcher · templates tab</p><div class="shot"><img src="templates-current.png" alt="The launcher Templates tab: full-width text rows with no images, square outlined filter chips, mixed capitalisation"></div><figcaption>Rows stretched to 1,300px, no image, four chip styles on one screen (<code>All (7) ✓</code> outlined, grey tags, blue text-link), <code>Site</code> capitalised and <code>game</code> not.</figcaption></figure>
+</div>
+</div>
+<div class="wrap">
+
+<h2>The short answer</h2>
+<div class="callout">
+<p><b>It's not the old Noodl CSS.</b> The colour system is the cleanest part of the codebase: zero hex in the launcher, zero in the panel CSS, gated in CI. The two surfaces look dated for four reasons that have nothing to do with jQuery, and every one of them is something a session bumps into and routes around rather than fixes:</p>
+<ul class="tight">
+<li><b>There is no type scale.</b> Ten distinct font sizes on one launcher tab; ten in one property panel column. 141 <code>font-size</code> declarations in the launcher, 0 of them tokenised. Hierarchy can't exist at ten sizes in a 328px column.</li>
+<li><b>Nothing is shared.</b> Three tab implementations, two button components (seven computed button styles on the Templates tab), seven border radii, and each launcher tab is laid out as its own app — no content column, no max-width, no breakpoint, at a 600px window minimum.</li>
+<li><b>The look was never designed — it was mock-parity'd, then gated.</b> The chrome converges on three static HTML mocks a Claude session drew in July (phase 23). ~30 stylesheet comments cite them as the source of truth, and 28 tests parse the CSS text and pin specific fills, token names and class names. Every visual change reddens a test that encodes a previous session's taste as a fact.</li>
+<li><b>The property panel is React trapped in 45 imperative shells.</b> Every row is its own <code>createRoot</code>. The whole panel is destroyed and rebuilt on every click. Four hand-written functions decorate each row's DOM element after render. The rows can't see each other, so nothing can align, group, virtualise or gate as a set — which is why the same "applies when Shadow Enabled is on" hint is printed seven times under one switch.</li>
+</ul>
+</div>
+
+<h2>The part that isn't the problem</h2>
+<p>Worth killing the hypothesis properly, because it's where a session would otherwise spend its first two hours.</p>
+<div class="kpis">
+  <div class="kpi good"><b>0</b><span>hex literals in the launcher's 28 stylesheets (3, all in comments)</span></div>
+  <div class="kpi good"><b>0</b><span>hex in the property panel's 7 legacy CSS files</span></div>
+  <div class="kpi good"><b>0</b><span><code>.html</code> templates, <code>bindView</code>, <code>this.$()</code> — the jQuery View base class was deleted</span></div>
+  <div class="kpi good"><b>1</b><span>token file, 576 properties, light + dark, held by a hex ratchet and a <code>var()</code> gate that both pass today</span></div>
+</div>
+<p>The token system (<code>noodl-core-ui/src/styles/custom-properties/</code>) is one file per concern, has a real light theme (112 overrides), and is consumed 4,247 times. <code>scripts/hex-color-ratchet.js</code> reports <code>16 / 16 ✓</code>, <code>scripts/css-token-check.js</code> reports every <code>var()</code> in 324 stylesheets resolves. Phase 23 did that work and it stuck. So "old Noodl leftovers" is the wrong frame: what's old is the <em>shape</em> of the panel code and the <em>absence</em> of a scale, not the palette.</p>
+
+<h2>What actually constrains it</h2>
+
+<h3>1 · No type scale</h3>
+<p>Measured live on the installed build (computed <code>font-size</code> of every element):</p>
+<p class="note">Launcher, Templates tab — 146 elements:</p>
+<div class="sizes"><span>10px</span><span>11px</span><span>12px</span><span>13px</span><span>13.33px</span><span>14px</span><span>15px</span><span>17px</span><span>20px</span><span>24px</span></div>
+<p class="note">Property panel, one <code>Group</code> node — 1,125 elements:</p>
+<div class="sizes"><span>9px</span><span>9.5px</span><span>10px</span><span>10.5px</span><span>11px</span><span>11.5px</span><span>12px</span><span>12.5px</span><span>13.33px</span><span>14px</span></div>
+<p>That <code>13.333px</code> is Chromium's default for an unstyled <code>&lt;button&gt;</code>/<code>&lt;input&gt;</code> leaking through. The half-pixel steps (9.5, 10.5, 11.5) are individual sessions fine-tuning one control at a time with no ladder to land on. The token file <em>has</em> an 8-step scale (<code>--font-size-*</code>, base 12.5, md 13) and says "do not hardcode px sizes" (<code>fonts.css:35</code>); the launcher's 141 <code>font-size</code> declarations use it 0 times. Underneath, <code>assets/css/style.css:183</code> sets <code>body { font-size: 12px }</code> and the launcher overrides it to 13px.</p>
+
+<h3>2 · Nothing is shared</h3>
+<div class="tablewrap"><table>
+<tr><th>Thing</th><th class="num">Count</th><th>Where</th></tr>
+<tr><td>Tab implementations in the launcher</td><td class="num">3</td><td>bespoke header buttons with <code>aria-current</code>; shared <code>Tabs</code> (Learning, Community); ad-hoc arrays<span class="path">LauncherHeader.tsx:37-122 · views/Learning.tsx:32 · views/communityTabs.ts</span></td></tr>
+<tr><td>Button components</td><td class="num">2</td><td><code>LauncherButton</code> (6 files) and <code>PrimaryButton</code> (10 files), different padding, radius and size<span class="path">components/LauncherButton · noodl-core-ui inputs/PrimaryButton</span></td></tr>
+<tr><td>Distinct computed button styles on one tab</td><td class="num">7</td><td>19 buttons on the Templates tab, measured (radius × size × weight × fill × border)</td></tr>
+<tr><td>Border radii in use on one tab</td><td class="num">7</td><td>2, 3, 4, 7, 8px, 50%, 100% — the token file carries 12 including mock-derived odd values 5/7/10 tagged PAR-001</td></tr>
+<tr><td>Content max-width</td><td class="num">none</td><td>Projects: 224px sidebar + fixed <code>repeat(3,1fr)</code>. Templates/Community/Learning: full bleed, 32px padding. Homepage: 820/1120px columns.<span class="path">Projects.module.scss:29-37 · LauncherPage.module.scss:6</span></td></tr>
+<tr><td><code>@media</code> queries across 28 launcher stylesheets</td><td class="num">1</td><td><code>prefers-reduced-motion</code>. Window minimum is 600px.</td></tr>
+<tr><td>Template thumbnails</td><td class="num">0</td><td>By ruling, not by constraint: <code>Templates.tsx:49-53</code> — "NO THUMBNAILS. THE ROW IS A TITLE, A CATEGORY AND A SENTENCE." The five 1200×750 shots exist in <code>nodegx-web/site/demos/</code>.</td></tr>
+<tr><td>Global stylesheet under everything</td><td class="num">1,651 lines</td><td><code>style.css</code>, statically linked: <code>body 12px</code>, <code>*:focus { outline:none }</code>, element-selector font reset, <code>html/body</code> background that the launcher then overrides<span class="path">noodl-editor/src/assets/css/style.css:183-307</span></td></tr>
+</table></div>
+<p>The consequence for a session: there is no place to make a decision once. Change the chip radius and you change it in the launcher's chip override (<code>LauncherProjectCard.module.scss:146</code>), not in <code>Chip</code>. Change the button and you have to pick which of two. Change the page width and there is no page.</p>
+
+<h3>3 · The look was mock-parity'd, then gated</h3>
+<p>Phase 23 ("the NodeGX look", July) produced three static mocks — <code>nodegx-launcher-mock.html</code>, <code>nodegx-editor-mock.html</code>, <code>nodegx-node-picker-mock.html</code> — and phase 24 ("mock parity") made the app match them pixel by pixel. Those mocks were drawn by a Claude session, not by a designer, and they are now the reference: <code>LauncherPage.tsx:3-5</code> reads "Mock anatomy: padding 28px 32px 20px…", and ~30 more stylesheet headers defer to the same file.</p>
+<p>Then the tests locked it. <b>28 unit tests open <code>.css</code>/<code>.scss</code> files from disk and assert on the text.</b> The <code>border-sweep/</code> suite pins which token a control's fill uses and computes contrast across the package boundary; <code>LauncherButton.module.scss:54-58</code> names its own test: <i>"reddens if the hover fill is ever moved one step further to <code>bg-4</code>."</i> Seven tests assert on property-panel class names (<code>property-row</code>, <code>property-group-chevron</code>, <code>sidebar-panel-dark-input</code>, <code>.sidebar-panel</code> by name in <code>style.css</code>).</p>
+<div class="callout amber">
+<p><b>This is the constraint that's specific to how Claude works here.</b> Every visual pass (P23, P24, P25, P39, FIX-028) ran as tasks with acceptance criteria and gates. The gates measure what's measurable — contrast ratio, hex count, token resolution — and none of them measure hierarchy, rhythm or whether the thing looks like 2026. So each session optimised the measurable, shipped something <em>correct</em> (AA contrast, zero hex, all tokens) and left it ugly, and the next session inherited a red-on-change test suite that treats the ugly as load-bearing. The memory file already names this pattern: <i>"correct ≠ usable — 4th repeat."</i></p>
+</div>
+
+<h3>4 · The property panel: React in 45 shells</h3>
+<p>The jQuery layer is gone, but its lifecycle survived. <code>PropertyEditor</code>, <code>Ports</code>, <code>TabGroup</code>, <code>PopoutGroup</code> and all 38 row classes extend a 36-line event shim, own a raw <code>div</code>, and each mount their own React root into it. <b>39 files call <code>createRoot</code>.</b> The path from the sidebar to a text field crosses React → imperative → React → imperative → React.</p>
+<div class="kpis">
+  <div class="kpi bad"><b>1,125</b><span>DOM elements rendered for one Group node's panel</span></div>
+  <div class="kpi bad"><b>250</b><span>of them carry an inline <code>style</code> attribute</span></div>
+  <div class="kpi bad"><b>9</b><span>distinct background fills in one column</span></div>
+  <div class="kpi bad"><b>40</b><span>branches of <code>if/else</code> mapping port type → widget class, in one 283-line method</span></div>
+</div>
+<p>What that architecture costs, each with a scar in the code:</p>
+<ul class="tight">
+<li><b>Rows can't see each other.</b> Gating, hints, descriptions and capability badges are applied by four functions that wrap each row's DOM element after the fact (<code>portGate.ts</code>, <code>portHint.ts</code>, <code>portDescription.ts</code>, <code>portDecoration.ts</code>, 551 lines). A gate that knows only its own row prints "Offset X applies when Shadow Enabled is on. Show Shadow Enabled" — and then does it again for Offset Y, Blur, Spread, Inset and Colour. Seven copies, visible in the screenshot below.</li>
+<li><b>The panel is thrown away on every click.</b> <code>SidebarModel.createPanel</code> returns a new arrow function per selection, so React sees a new component type and remounts everything. Three pieces of state have escaped to module scope to survive it (<code>index.tsx:35</code>, <code>propertyPanelViewState.ts:36-41</code>).</li>
+<li><b>Re-render is gated by a JSON hash</b> that six call sites must remember to clear (<code>Ports.ts:143,205,410,744,756</code>), and re-rendering steals focus from the field being typed in — so changes are patched into the live DOM in place instead (<code>Ports.ts:363-377</code>).</li>
+<li><b>Layout is keyed to English strings.</b> Groups are the node definition's <code>group</code> text; the basic/advanced split is a hardcoded table of 27 group names (<code>propertyPanelTiers.ts:91-127</code>); expansion state persists by group name across all node types. Rename a group and users lose their preference.</li>
+<li><b>Label geometry is duplicated across packages</b> — <code>noodl-core-ui</code>'s <code>PropertyPanelInput.module.scss:76</code> restyles itself under <code>:global(.sidebar-property-editor)</code> to 37%/62px/160px, and <code>propertyeditor.css:107-114</code> repeats the numbers for the rows that aren't React inputs.</li>
+<li><b>Two icon systems in one column.</b> 22 Font Awesome glyphs in 12 property-panel files — the only reason the 32KB FA stylesheet is still linked. The disclosure chevron is a literal text <code>▾</code> because importing <code>Icon</code> breaks the test runner (<code>PropertyGroups.tsx:100-102</code>).</li>
+<li><b>Scroll, sticky and z-index are all workarounds:</b> a 5-attempt retry to find the scroll container (<code>Ports.ts:486-500</code>), <code>z-index: 1000</code> set on <code>focusin</code> and cleared 500ms after <code>focusout</code> so dropdowns escape clipping (<code>Ports.ts:762-771</code>), and sticky filtering that depends on exactly two ancestors having <code>overflow: visible</code>.</li>
+</ul>
+<p>The rail itself (<code>SideNavigation</code>) is fine: React, tokenised, 52px, 11 default icons. Its one oddity is that panel order is a float registry (<code>order: 4.6, 4.7, 8.8, 9.5</code>) rather than a list. The ugliness is the content of the panel, not the strip.</p>
+
+<h3>And the small stuff</h3>
+<div class="tablewrap"><table>
+<tr><th>Thing</th><th>Evidence</th></tr>
+<tr><td>Dead fonts on every boot</td><td>20 <code>@font-face</code> in <code>style.css</code> (OpenSans ×8, Inter ×10, Poppins, Bricolage); 1 is live. Five Inter TTFs are still <code>preload</code>ed in <code>index.html:10-14</code>. The UI face is the system stack.</td></tr>
+<tr><td>Font Awesome 4.7</td><td>Linked for 32 usages editor-wide; 0 in the launcher, 0 in the rail, 22 in the property panel.</td></tr>
+<tr><td>No <code>box-sizing</code> reset</td><td><code>PrimaryButton.module.scss:59-62</code> documents it and works around it with an inset box-shadow ring at 143 call sites.</td></tr>
+<tr><td>Mock projects default on</td><td><code>Launcher.tsx:149-225</code> ships <code>MOCK_PROJECTS</code> with placekitten URLs behind a <code>localStorage</code> flag, on when no projects are passed.</td></tr>
+<tr><td>Docs that point at deleted directories</td><td><code>dev-docs/reference/UI-STYLING-GUIDE.md:18-34</code> names a token directory removed in UIX-001; <code>DESIGN-TOKENS.md</code> quotes pre-FIX-028 hex values. The backend admin (<code>nodegx-backend/src/admin/ui/styles.css:14-42</code>) carries a hand-copied palette that has already drifted.</td></tr>
+<tr><td>Storybook doesn't start</td><td>99 stories in <code>noodl-core-ui</code> can't be opened, which is how components get tuned one screenshot at a time instead of side by side.</td></tr>
+</table></div>
+
+<h2>How to unfuck it</h2>
+<p>Ordered so each step removes a constraint the next one would otherwise hit. F1–F3 are foundations and are boring; they are also the reason every previous polish pass got absorbed. F4 and F5 are the two surfaces. Nothing here touches the palette.</p>
+<ol class="plan">
+<li><h4>Declare the type scale and ratchet it</h4><p>Five sizes for chrome — 11 / 12 / 13 / 15 / 20 — as the existing <code>--font-size-*</code> tokens, plus a display size for page titles. Delete <code>body { font-size: 12px }</code>. Add <code>scripts/font-size-ratchet.js</code> on the exact model of the hex ratchet: count raw-px <code>font-size</code> literals, baseline today's number, only go down. Fix the two surfaces first (~180 declarations).</p><span class="cost">~1 session · unlocks everything below</span></li>
+<li><h4>One radius, one shadow, one box model</h4><p>Retire radii 5/7/10 from <code>spacing.css</code>; controls 6, cards 12, pills full. One <code>--shadow-card</code>, one <code>--shadow-float</code> (the other 11 shadow tokens have 35 consumers between them). Add a global <code>box-sizing: border-box</code> and delete the 143-site inset-ring workaround. Drop 19 dead <code>@font-face</code> blocks and the five preloads.</p><span class="cost">~1 session</span></li>
+<li><h4>Retune the gates so they measure the scale, not the fills</h4><p>Convert the <code>border-sweep/</code> and class-name tests from "token X in file Y" to "rendered control has ≥ 3:1 against its parent" and "every font-size is on the scale". Keep contrast as a gate — it was Richard's ruling — but stop pinning <em>which</em> fill delivers it. Until this happens, any visual change is a fight with 28 tests.</p><span class="cost">~1 session · the one nobody wants to do and the one that matters</span></li>
+<li><h4>One launcher page scaffold, then the Templates tab</h4><p><code>LauncherPage</code> becomes a real page: 1120px column, one title style, one toolbar (search + pill chips), one card. Delete <code>LauncherButton</code> in favour of <code>PrimaryButton</code> with a size prop; delete the two ad-hoc tab arrays in favour of <code>Tabs</code>. Then Templates gets the homepage grid with the five shots (they are already in <code>nodegx-web</code>; the template registry needs a <code>thumbnail</code> field the launcher currently sets to <code>''</code>). Projects gets the same card with the thumbnail it already captures (<code>thumbURI</code>).</p><span class="cost">~2 sessions · the mockup below is the spec</span></li>
+<li><h4>Turn the property rows into one React tree</h4><p><code>Ports</code> stops being a view and becomes a pure function: port list → row descriptors <code>{ name, group, widget, gate, hint, description, connected }</code>. The 40-branch <code>if/else</code> becomes a registry <code>Map&lt;predicate, Component&gt;</code>. The four DOM decorators become props on a single <code>PropertyRow</code>. The 38 row classes are already React inside — each is a 30–100 line shell around a component that already exists. Key the panel by node id so it stops remounting. Once rows are siblings in one tree, the panel gets a shared label column, group-level gating (one line per switched-off group), stable focus and free virtualisation.</p><span class="cost">~3 sessions · 23k LOC directory but mechanical; the P25 side-panel work that never reached the rows</span></li>
+<li><h4>Then the panel design</h4><p>Only after F5 is the panel a thing you can design. The mockup below assumes it: a two-column grid, units inside the field, the connection dot as a gutter mark, compact dimension pairs, a real chevron, twelve-and-a-half-pixel labels and nothing else.</p><span class="cost">~1 session</span></li>
+</ol>
+
+<h2>Mockups</h2>
+<p>Both are live HTML at the editor's real pixel size (the launcher frame is scaled to fit this column). They keep the palette, the top bar and the rail exactly as shipped — the point is what a type scale, one card and one grid do on their own.</p>
+</div>
+
+<div class="wide">
+<p class="eyebrow proposed" style="margin-top:28px">Launcher · Templates tab · proposed · 1368 × 1080</p>
+<div class="frame" data-w="1368" data-h="1080"><div class="stage">
+<div class="L">
+  <div class="top">
+    <div class="lights"></div>
+    <div class="brand"><i></i>NodeGX</div>
+    <div class="tabs"><span>Projects</span><span>Community</span><span>Learning</span><span class="on">Templates</span><span>GitHub</span></div>
+    <div class="right"><span class="btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.3 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8.6-.2 1.3-.3 2-.3s1.4.1 2 .3c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.7-3.7 3.9.3.3.6.8.6 1.5v2.2c0 .2.1.5.6.4C13.7 14.5 16 11.5 16 8c0-4.4-3.6-8-8-8z"/></svg>Connect GitHub</span><span class="btn ghost">⚙</span><span class="avatar"></span></div>
+  </div>
+  <div class="content"><div class="col">
+    <div class="pagehead">
+      <div><h1>Templates</h1><p class="lede">A template is a project that is already built. Start from one and change anything in it afterwards — every one of these also runs as a demo on nodegx.io.</p></div>
+      <span class="btn">Start blank</span>
+    </div>
+    <div class="toolbar">
+      <div class="search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>Search templates<span style="margin-left:auto;font:11px var(--mono)">⌘K</span></div>
+      <div class="chips"><span class="chip on">All <small>7</small></span><span class="chip">Games <small>3</small></span><span class="chip">Sites <small>2</small></span><span class="chip">Data apps <small>1</small></span><span class="chip">Starter <small>1</small></span></div>
+    </div>
+    <div class="grid">
+      <div class="card big"><div class="pic"><img src="demos/rocket-school.webp" alt=""></div><div class="body"><span class="port">Game · ages 8–12</span><h3>Rocket School</h3><p>Maths and typing practice in English and French: four games, 62 skills from CE2 to 6e, and progress kept in the browser.</p><div class="foot"><span class="go">Use this template →</span><span class="tag">no backend</span></div></div></div>
+      <div class="card big"><div class="pic"><img src="demos/todo-list.webp" alt=""></div><div class="body"><span class="port">Data app</span><h3>Todo list</h3><p>One list in the order you will do things, with deadlines, next actions and a history nothing is deleted from.</p><div class="foot"><span class="go">Use this template →</span><span class="tag">needs a backend</span></div></div></div>
+      <div class="card"><div class="pic"><img src="demos/pixel-dungeon.webp" alt=""></div><div class="body"><span class="port">Game</span><h3>Pixel dungeon</h3><p>A turn-based dungeon played with the arrow keys. The five rooms are one list in one node, so a sixth room is one more entry.</p><div class="foot"><span class="go">Use this template →</span><span class="tag">no backend</span></div></div></div>
+      <div class="card"><div class="pic"><img src="demos/story-engine.webp" alt=""></div><div class="body"><span class="port">Interactive story</span><h3>Story engine</h3><p>A branching story where choices hand you things and some only appear once you carry them. The whole story is one list you can rewrite.</p><div class="foot"><span class="go">Use this template →</span><span class="tag">no backend</span></div></div></div>
+      <div class="card"><div class="pic"><img src="demos/business-landing-page.webp" alt=""></div><div class="body"><span class="port">Site · 3 pages</span><h3>Landing pages</h3><p>A freelancer's, a local business's and a product launch's. A sticky nav, filterable work, a price switch and a contact form that checks itself.</p><div class="foot"><span class="go">Use this template →</span><span class="tag">no backend</span></div></div></div>
+    </div>
+  </div></div>
+  <div class="foot-bar"><span>Documentation</span><span>YouTube</span><span>Discord</span><span class="v">NodeGX 0.2.4</span></div>
+</div>
+</div></div>
+<p class="note" style="max-width:860px;margin:10px auto 0">Site Builder and the Members' area would sit in a second row below the fold in the same card; a template without a screenshot yet gets a rendered thumbnail from the project's own home page, which <code>render-report</code> can already produce headlessly. Nothing in this frame is a new colour, font or component beyond one card and one chip.</p>
+
+<p class="eyebrow proposed" style="margin-top:44px">Property panel · Group node · shipped vs proposed · 328px, 1:1</p>
+<div class="panels">
+  <figure><div class="shot"><img src="props-current-top.png" alt="The shipped property panel for a Group node: comment box, Properties/Ports tabs, style variant row, Neutral state, filter, General, Dimensions with four resizing icons, Layout"></div><figcaption><b>Shipped.</b> Seven vertical zones before the first property; three input heights on one row; the resizing segment has four icons and a stray dot; unit and mode are separate boxes.</figcaption></figure>
+  <figure>
+  <div class="P">
+    <div class="head">
+      <div class="titlebar"><span class="t">Properties</span><span class="ic"><i></i><i></i><i></i></span></div>
+      <div class="node"><span class="glyph"><b></b></span><div><div class="n">Group</div><div class="k">Visual · UI elements</div></div><span class="more">···</span></div>
+      <div class="seg"><span class="on">Properties</span><span>Ports</span></div>
+    </div>
+    <div class="search"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>Filter properties<span class="k">/</span></div>
+    <div class="comment">Why it's this way — a constraint, a rule, a decision</div>
+    <div class="scroll">
+      <section>
+        <h5><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2.5 4 2.5 2.5L7.5 4"/></svg>General</h5>
+        <div class="row"><span class="dot"></span><label>Mounted</label><div class="ctl"><span class="in sw"><span class="toggle"></span></span></div></div>
+        <div class="row"><span class="dot"></span><label>Variant</label><div class="ctl"><span class="in sel">Neutral</span></div></div>
+        <div class="row"><span class="dot"></span><label>State</label><div class="ctl"><span class="in sel">Default</span></div></div>
+      </section>
+      <section>
+        <h5><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2.5 4 2.5 2.5L7.5 4"/></svg>Dimensions</h5>
+        <div class="row"><span class="dot on"></span><label>Width</label><div class="ctl"><span class="in num">100<span class="u">%</span></span><span class="iconseg"><i class="on"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M3 3.5 1 6l2 2.5M9 3.5 11 6l-2 2.5"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="8" height="6" rx="1"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2v8M10 2v8M4 6h4"/></svg></i></span></div></div>
+        <div class="row"><span class="dot on"></span><label>Height</label><div class="ctl"><span class="in num">100<span class="u">%</span></span><span class="iconseg"><i class="on"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M3.5 3 6 1l2.5 2M3.5 9 6 11l2.5-2"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="6" height="8" rx="1"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h8M2 10h8M6 4v4"/></svg></i></span></div></div>
+        <div class="row"><span class="dot"></span><label>Min · Max width</label><div class="two"><span class="in num"><span class="l">min</span><span class="u">—</span></span><span class="in num"><span class="l">max</span><span class="u">—</span></span></div></div>
+      </section>
+      <section>
+        <h5><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2.5 4 2.5 2.5L7.5 4"/></svg>Layout</h5>
+        <div class="row"><span class="dot"></span><label>Position</label><div class="ctl"><span class="in sel">In layout</span></div></div>
+        <div class="row"><span class="dot"></span><label>Direction</label><div class="ctl"><span class="iconseg"><i class="on"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M3 8l3 3 3-3"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M8 3l3 3-3 3"/></svg></i></span><span class="in sel" style="flex:1">Wrap off</span></div></div>
+        <div class="row"><span class="dot"></span><label>Align</label><div class="ctl"><span class="iconseg"><i class="on"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 1v10M4 3h4v2H4zM4 7h6v2H4z"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M3.5 3h5v2h-5zM2 7h8v2H2z"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 1v10M4 3h4v2H4zM2 7h6v2H2z"/></svg></i><i><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h10M1 11h10M4 3.5h4v5H4z"/></svg></i></span></div></div>
+        <div class="row"><span class="dot"></span><label>Gap</label><div class="two"><span class="in num"><span class="l">↕</span>0<span class="u">px</span></span><span class="in num"><span class="l">↔</span>0<span class="u">px</span></span></div></div>
+        <div class="row"><span class="dot"></span><label>Padding</label><div class="two"><span class="in num"><span class="l">↕</span>0<span class="u">px</span></span><span class="in num"><span class="l">↔</span>0<span class="u">px</span></span></div></div>
+      </section>
+      <section>
+        <h5><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2.5 4 2.5 2.5L7.5 4"/></svg>Box shadow</h5>
+        <div class="row"><span class="dot"></span><label>Shadow</label><div class="ctl"><span class="in sw"><span class="toggle off"></span></span></div></div>
+        <div class="gated"><span>Offset, blur, spread, inset and colour apply once Shadow is on.</span><a>Turn on</a></div>
+        <div class="row muted"><span class="dot"></span><label>Offset</label><div class="two"><span class="in num"><span class="l">x</span>0<span class="u">px</span></span><span class="in num"><span class="l">y</span>0<span class="u">px</span></span></div></div>
+        <div class="row muted"><span class="dot"></span><label>Blur · Spread</label><div class="two"><span class="in num">5<span class="u">px</span></span><span class="in num">2<span class="u">px</span></span></div></div>
+        <div class="row muted"><span class="dot"></span><label>Colour</label><div class="ctl"><span class="in num"><span style="width:12px;height:12px;border-radius:3px;background:#000;border:1px solid #444;display:inline-block"></span>#000000<span class="u">40%</span></span></div></div>
+      </section>
+      <div class="adv"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 2.5 2.5 2.5L4 7.5"/></svg>Advanced CSS <span style="margin-left:auto;letter-spacing:0;font-weight:500">3</span></div>
+    </div>
+  </div>
+  <figcaption><b>Proposed.</b> One label column at 116px, one 26px control height, units inside the field, the connection state as a gutter dot, a real chevron, paired values on one row, and the Shadow group gated once — one sentence and a button — instead of six times. Two font sizes (12.5 body, 11 mono labels).</figcaption>
+  </figure>
+</div>
+<div class="legend"><span><i style="background:#4da3ff"></i>connected port (gutter dot filled)</span><span><i style="background:#1b2129;border:1px solid #303946"></i>gated group, rows dimmed, one action</span></div>
+</div>
+
+<div class="wrap">
+<p style="margin-top:36px">The shipped panel below the fold, for the record — this is the seven-times hint:</p>
+<div class="shot" style="max-width:384px"><img src="props-current-bottom.png" alt="The shipped panel scrolled to Box Shadow: six disabled rows, each followed by 'applies when Shadow Enabled is on. Show Shadow Enabled'"></div>
+
+<h2>What good already looks like, inside the same app</h2>
+<p>The node picker (UIX-013) was rebuilt as one React tree with one card, one search, one category rail, and it reads as current. It's the existence proof that the palette and the fonts are fine — the difference between it and the property panel is F1, F2 and F5.</p>
+<div class="shot"><img src="editor-04-nodepicker.png" alt="The node picker: a modal with a category rail, uniform node cards in a grid, and a docs pane — visibly consistent"></div>
+
+<h2>What this doesn't cover</h2>
+<ul class="tight">
+<li>Measured the installed 0.2.4 in dark theme only; light theme not driven.</li>
+<li>Screenshots are from a second NodeGX instance on private ports with a throwaway profile; Richard's running instance and profile were not touched. The instance was torn down after the drive.</li>
+<li>Source line numbers are from <code>cline-dev</code> at <code>e740727f8</code>; the 0.2.4 binary may be a few commits either side.</li>
+<li>The mockups are HTML in this page, not code in the repo. Nothing was changed, committed or specced. The plan's session estimates are guesses from file counts, not measured.</li>
+<li>The homepage Demos section is in <code>nodegx-web</code> at HEAD <code>1474084</code> and is <b>not yet deployed</b> — the live nodegx.io skips from "agents" to "Three real applications".</li>
+</ul>
+</div>
+
+<script>
+(function(){
+  var frames=document.querySelectorAll('.frame');
+  function fit(){
+    frames.forEach(function(f){
+      var w=+f.dataset.w,h=+f.dataset.h,s=Math.min(1,f.clientWidth/w);
+      var st=f.querySelector('.stage');st.style.transform='scale('+s+')';st.style.width=w+'px';st.style.height=h+'px';
+      f.style.height=Math.round(h*s)+'px';
+    });
+  }
+  fit();
+  if(window.ResizeObserver){var ro=new ResizeObserver(fit);frames.forEach(function(f){ro.observe(f)});}
+  else window.addEventListener('resize',fit);
+})();
+</script>

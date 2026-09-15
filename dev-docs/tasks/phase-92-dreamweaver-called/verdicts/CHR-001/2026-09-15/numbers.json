@@ -1,0 +1,62 @@
+{
+  "task": "CHR-001",
+  "date": "2026-09-15",
+  "head": "e740727f8a0bbcfc1ab4b80d04732deaeeb084c6",
+  "build": {
+    "kind": "packaged",
+    "app": "/Applications/NodeGX.app 0.2.4",
+    "appAsarMd5": "a955833778706e785ee994186d40029a",
+    "appAsarMtime": "2026-09-12T09:10:14",
+    "viewerBundleInAsar": { "path": "/src/external/viewer/noodl.viewer.js", "bytes": 1567179, "md5": "732533b8aa01cb1415e407d6e9a47b0f" },
+    "checkoutViewerBundle": { "path": "packages/noodl-editor/src/external/viewer/noodl.viewer.js", "bytes": 1571141, "mtime": "2026-09-14T21:26", "md5": "5df0b0755eb7d242499b147bec6af337", "note": "differs from the packaged one; the preview is not a measured surface here" },
+    "whyPackagedStandsForHead": "git diff v0.2.4..HEAD (44 commits) touches 0 files under noodl-core-ui/src/components, noodl-core-ui/src/styles, views/panels/propertyeditor, noodl-editor/src/assets/css or editor/index.html, and 1 file under preview/launcher (Launcher/components/ProjectCreationWizard/steps/templateFilter.ts, the new-project wizard, which is not photographed). The other src changes are validation/, AI prompts and landing-pages.content.json."
+  },
+  "viewport": {
+    "requested": [1368, 900],
+    "measured": [1368, 781],
+    "devicePixelRatio": 2,
+    "why": "the display is 1440x900 with availHeight 781; Electron clamps the 1368x900 default window to it. The audit's own shots were 1368x900. Both themes were taken at 781, so the pair is comparable; CHR-011 must use the same box."
+  },
+  "method": {
+    "eval": "measure.js in this directory, run by capture.js over one CDP connection",
+    "auditMethod": "every element under the root, no visibility filter. Reproduces the audit exactly on the Templates tab over body: 146-147 elements, 10 font sizes, radii 2px 3px 4px 7px 8px 50% 100%",
+    "visible": "elements with a non-empty client rect and visibility != hidden",
+    "textBearing": "visible elements with a direct non-whitespace text node - what a person reads",
+    "ratchetNote": "the audit's 10 on Templates includes elements that are not on screen (10px, 15px, 20px). A ratchet that counts them can be moved by deleting hidden markup; CHR-002 should ratchet the visible or text-bearing count and say which."
+  },
+  "headline": {
+    "templatesTabFontSizes": { "audit": 10, "auditMethod": 10, "visible": 8, "textBearing": 6, "values": ["10px", "11px", "12px", "13px", "13.3333px", "14px", "15px", "17px", "20px", "24px"] },
+    "groupPanelFontSizes": { "audit": 10, "auditMethod": 10, "visible": 10, "textBearing": 7, "values": ["9px", "9.5px", "10px", "10.5px", "11px", "11.5px", "12px", "12.5px", "13.3333px", "14px"] },
+    "templatesTabButtonStyles": { "audit": 7, "measured": 7, "buttons": 19, "key": "radius | font-size | weight | fill | border" },
+    "groupPanelElements": { "audit": 1125, "measured": 1126 },
+    "groupPanelInlineStyled": { "audit": 250, "measured": 250 },
+    "templatesTabRadii": { "audit": 7, "auditMethod": 7, "visible": 5 },
+    "groupPanelRadii": { "audit": 5, "auditMethod": 5, "visible": 5 },
+    "groupPanelFills": { "audit": 9, "dark": 10, "light": 9 },
+    "shadowGateHints": { "audit": 7, "measured": 6, "note": "Offset X, Offset Y, Blur Radius, Spread Radius, Inset, Shadow Color - 6 text matches and 6 'Go to Shadow Enabled' buttons, both themes" },
+    "templatesTabRows": { "audit": 7, "measured": 7, "rows": ["Site Builder", "Landing Pages", "Todo list", "Story engine", "Pixel dungeon", "Rocket School", "Members' area"] }
+  },
+  "surfaces": {
+    "note": "identical in dark and light except where shown; full per-surface tallies are in raw/measured-<theme>.json",
+    "launcher-projects": { "elements": 168, "inlineStyled": 8, "fontSizes": { "auditMethod": 13, "visible": 11, "textBearing": 10 }, "radii": { "auditMethod": 10, "visible": 9 }, "buttons": 19, "buttonStyles": 11 },
+    "launcher-community": { "elements": 129, "inlineStyled": 6, "fontSizes": { "auditMethod": 11, "visible": 10, "textBearing": 8 }, "radii": { "auditMethod": 8, "visible": 6 }, "buttons": 18, "buttonStyles": 12 },
+    "launcher-learning": { "elements": 240, "inlineStyled": 15, "fontSizes": { "auditMethod": 9, "visible": 7, "textBearing": 6 }, "radii": { "auditMethod": 8, "visible": 6 }, "buttons": 32, "buttonStyles": 10 },
+    "launcher-templates": { "elements": 147, "inlineStyled": 6, "fontSizes": { "auditMethod": 10, "visible": 8, "textBearing": 6 }, "radii": { "auditMethod": 7, "visible": 5 }, "buttons": 19, "buttonStyles": 7 },
+    "editor-group-panel": { "root": ".sidebar-property-editor", "elements": 1126, "visible": 663, "inlineStyled": 250, "fontSizes": { "auditMethod": 10, "visible": 10, "textBearing": 7 }, "radii": { "auditMethod": 5, "visible": 5 }, "fills": { "dark": 10, "light": 9 }, "buttons": 23, "buttonStyles": 4 },
+    "editor-nodepicker": { "root": "body (picker open over the editor)", "elements": 3192, "inlineStyled": 339, "fontSizes": { "auditMethod": 17, "visible": 16, "textBearing": 11 }, "radii": { "auditMethod": 11, "visible": 10 }, "buttons": 225, "buttonStyles": 26, "note": "whole window, so it includes the panel and chrome behind the modal; not a picker-only number" }
+  },
+  "static": {
+    "method": "find <dir> -type f (.scss .css .ts .tsx .js .jsx, excluding *.test.* *.spec.* *.stories.*) | xargs -0 grep -aoE <pattern> | wc -l - occurrences, not lines",
+    "fontSizeDeclarations": {
+      "noodl-core-ui/src/preview/launcher": { "rawPx": 141, "var": 0, "all": 141, "jsxNumericFontSize": 12 },
+      "noodl-editor/src/editor/src/views/panels/propertyeditor": { "rawPx": 32, "var": 15, "all": 48, "jsxNumericFontSize": 3 },
+      "noodl-core-ui/src/components/property-panel": { "rawPx": 15, "var": 0, "all": 15, "jsxNumericFontSize": 0 }
+    },
+    "fontAwesomeClassUses": {
+      "editorWide": { "occurrences": 36, "files": 17, "scope": "packages/noodl-editor/src/editor, .ts .tsx .js .jsx .html, excluding *.bundle.js, external/ and tests", "audit": 32 },
+      "propertyeditor": { "occurrences": 22, "files": 12, "audit": "22 in 12 files" }
+    },
+    "createRootUnderPropertyeditor": { "files": 38, "calls": 46, "audit": "39 files" },
+    "propertyeditorTree": { "files": 158, "lines": 24455, "audit": "158 files / 23,284 LOC" }
+  }
+}
