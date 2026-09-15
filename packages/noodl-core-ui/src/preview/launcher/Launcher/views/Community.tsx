@@ -77,6 +77,11 @@ import type {
   CommunityThreadState
 } from '@noodl-core-ui/components/community';
 import css from '@noodl-core-ui/components/community/Community.module.scss';
+import {
+  PrimaryButton,
+  PrimaryButtonSize,
+  PrimaryButtonVariant
+} from '@noodl-core-ui/components/inputs/PrimaryButton';
 import { TabStrip, TabsVariant } from '@noodl-core-ui/components/layout/Tabs';
 import { LauncherPage } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherPage';
 import { useLauncherContext } from '@noodl-core-ui/preview/launcher/Launcher/LauncherContext';
@@ -158,6 +163,12 @@ export type CommunityMirrorView =
        * one call, so a count cannot disagree with what clicking it gives you.
        */
       bench: CommunityBenchViewModel;
+      /**
+       * 🔴 CHR-012 R9 (Richard, 2026-09-15) — computed, and **not drawn on the launcher**. D21's
+       * readout is a launch target written for us (`of 30 threads`, `n=`, `target under 24h`); the
+       * tab shows the person reading it activity, not our thresholds. Where we read it instead is
+       * not built (CHR-012 §6).
+       */
       health: CommunityHealthReading | null;
     };
 
@@ -373,11 +384,31 @@ export interface LauncherCommunityHostState {
  * acceptance criterion being revised on the word of the person it was written for, and it is named
  * here so a later session does not read a one-section page as a regression.
  *
- * ⚠️ **The chrome is deliberately outside the tabs**: who you are, refresh, the health readout and
- * the browser door frame *the place*, not one room in it. The lead sentence is the opposite — it
+ * ⚠️ **The chrome is deliberately outside the tabs**: who you are, refresh and the browser door
+ * frame *the place*, not one room in it. CHR-012 put them in `LauncherPage`'s head (R10) and took
+ * D21's health readout off the page (R9). The lead sentence is the opposite — it
  * moved INTO each tab, because AC1 asks that the first screen of each one says what it is for, and
  * a single page-level sentence would say it for Bench and lie for People.
  */
+/**
+ * CHR-012 — the browser door's mark. Inline, because this tab is graded without webpack and `Icon`
+ * reads `require.context`.
+ */
+const EXTERNAL_GLYPH = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M7 17 17 7M9 7h8v8" />
+  </svg>
+);
+
 export function CommunityTab({
   view,
   isRefreshing,
@@ -465,27 +496,24 @@ export function CommunityTab({
   }
 
   /*
-    2026-09-06 — the head is an identity card, not a status line.
+    🔴 CHR-012 R10 (Richard, 2026-09-15) — who you are is a LINE in the page head, not a card.
 
-    Richard, on the launcher: *"it still looks like shit compared to the rest of the launcher"*.
-    The Projects tab draws the account as a card with the same 28px avatar the header uses; this
-    page drew `@handle · 0 points` as 13px muted text with "Refresh" floating at the far right. Same
-    person, two pages, two languages — NAT-005's whole complaint, one page over. The head now uses
-    the account card's shape: avatar, handle, a line under it, and the actions in a row.
+    2026-09-06 drew the head as the account card's box so the two pages read as one object. On
+    CHR-005's launcher page that made the top of this tab a full-width banner holding three buttons
+    in three styles, above the tab strip. Every other tab puts its verbs in `LauncherPage`'s
+    `actions`, so this one does: the two quiet doors, a hairline, who you are, and — for a guest —
+    the one primary action. `community-head` stays on the group the specs read.
   */
   const handle = view.viewer ? view.viewer.handle : null;
   const signedOut = view.viewer === false;
-  const who = view.viewer === null ? '…' : signedOut ? 'Reading as a guest' : handle ? `@${handle}` : 'Signed in';
-  const whoLine =
-    view.viewer === null
-      ? 'Checking who you are'
-      : signedOut
-        ? 'Sign in to ask on the Bench, reply, and chat. Reading needs no account.'
-        : view.standing
-          ? `${view.standing.points} ${view.standing.points === 1 ? 'point' : 'points'} · ${view.standing.badges} ${
-              view.standing.badges === 1 ? 'badge' : 'badges'
-            }`
-          : 'Signed in to the NodeGX community';
+  const who =
+    view.viewer === null ? 'Checking who you are…' : signedOut ? 'Reading as a guest' : handle ? `@${handle}` : 'Signed in';
+  const standing =
+    view.viewer && view.standing
+      ? `${view.standing.points} ${view.standing.points === 1 ? 'point' : 'points'} · ${view.standing.badges} ${
+          view.standing.badges === 1 ? 'badge' : 'badges'
+        }`
+      : null;
   const initials = handle ? handle.slice(0, 2).toUpperCase() : null;
 
   /**
@@ -504,50 +532,55 @@ export function CommunityTab({
   // instead. Same rule as the Learning tab's, and the same reason.
   const alone = plan.tabs.length < 2;
 
-  return (
-    <LauncherPage title="Community">
-      <div className={css['Head']} data-test="community-head">
-        <div className={css['HeadIdentity']}>
-          <span className={classNames(css['HeadAvatar'], !initials && css['is-anonymous'])} aria-hidden="true">
-            {initials ?? (
-              // The neutral glyph the account card uses for a session with no handle — never
-              // invented initials (PAR-001).
-              <svg width="14" height="14" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" />
-              </svg>
-            )}
-          </span>
-          <div className={css['HeadText']}>
-            <span className={css['HeadHandle']}>{who}</span>
-            <span className={css['HeadLine']}>{whoLine}</span>
-          </div>
-        </div>
-        <div className={css['HeadActions']}>
-          {signedOut && onSignIn && (
-            <button type="button" className={css['PrimaryButton']} onClick={onSignIn} data-test="community-sign-in">
-              Sign in
-            </button>
-          )}
-          <button type="button" className={css['GhostButton']} onClick={onRefresh} disabled={isRefreshing}>
-            {isRefreshing ? 'Refreshing…' : 'Refresh'}
-          </button>
-          <button type="button" className={css['OutlineButton']} onClick={() => onOpenCommunity?.()}>
-            Open community.nodegx.io
-          </button>
-        </div>
-      </div>
+  const actions = (
+    <div className={css['Who']} data-test="community-head">
+      <PrimaryButton
+        label={isRefreshing ? 'Refreshing…' : 'Refresh'}
+        variant={PrimaryButtonVariant.Text}
+        size={PrimaryButtonSize.Small}
+        isDisabled={isRefreshing}
+        onClick={onRefresh}
+      />
+      <PrimaryButton
+        label="Open community.nodegx.io"
+        variant={PrimaryButtonVariant.Text}
+        size={PrimaryButtonSize.Small}
+        glyph={EXTERNAL_GLYPH}
+        onClick={() => onOpenCommunity?.()}
+      />
+      <span className={css['WhoDivider']} aria-hidden="true" />
+      <span className={classNames(css['HeadAvatar'], !initials && css['is-anonymous'])} aria-hidden="true">
+        {initials ?? (
+          // The neutral glyph the account card uses for a session with no handle — never
+          // invented initials (PAR-001).
+          <svg width="12" height="12" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" />
+          </svg>
+        )}
+      </span>
+      <span className={css['WhoText']}>
+        <span className={css['HeadHandle']}>{who}</span>
+        {standing && <span className={css['HeadLine']}>{standing}</span>}
+      </span>
+      {signedOut && onSignIn && (
+        <PrimaryButton label="Sign in" size={PrimaryButtonSize.Small} testId="community-sign-in" onClick={onSignIn} />
+      )}
+    </div>
+  );
 
-      {!alone && (
-        /*
-          ⚠️ No `Tabs` root here, on purpose: `.Root` is `height: 100%; overflow: hidden`, which is
-          the layout a full-height tabbed surface wants and the opposite of what this page wants —
-          here the page scrolls and the strip is just the first thing in it. FB-006 loosened the
-          variant selectors so a strip can be styled without that box, and CHR-005's
-          `hasVariantScope` lets the strip carry its own variant class, so this view no longer
-          imports another component's stylesheet to find it.
-        */
-        <div className={css['Tabs']}>
+  return (
+    <LauncherPage
+      title="Community"
+      actions={actions}
+      toolbar={
+        alone ? undefined : (
+          /*
+            ⚠️ No `Tabs` root here, on purpose: `.Root` is `height: 100%; overflow: hidden`, the
+            layout a full-height tabbed surface wants. Here the page scrolls and the strip is its
+            toolbar — the slot Templates' chips sit in (CHR-012). `hasVariantScope` lets the strip
+            carry its own variant class, so this view imports no other component's stylesheet.
+          */
           <TabStrip
             hasVariantScope
             variant={TabsVariant.Segmented}
@@ -555,16 +588,16 @@ export function CommunityTab({
             tabs={plan.tabs.map((tab) => ({ id: tab.id, label: tab.label, testId: `community-tab-${tab.id}` }))}
             onSelect={(tab) => onSelectTab?.(tab.id as CommunityTabId)}
           />
-        </div>
-      )}
-
+        )
+      }
+    >
       {/* AC1 — the first screen of each tab says what THIS tab is for. */}
       {plan.active && <p className={css['Lead']}>{plan.active.lead}</p>}
 
       {plan.active?.id === 'bench' && (
         /*
-          🔴 FB-002 — the card is drawn here rather than through `CommunitySection`, for the
-          reason the People tab below gives in full: the filter pills belong INSIDE the card and
+          🔴 FB-002 — the section is drawn here rather than through `CommunitySection`, for the
+          reason the People tab below gives in full: the filter pills belong inside the section,
           above the rows, and `CommunitySection` renders the body itself. The count it would have
           drawn is `view.bench.summary`, which says "3 of 12 questions" — a more honest number on
           a filtered list than a bare item count.
@@ -573,46 +606,42 @@ export function CommunityTab({
           `CommunityBenchView` so that the rail panel draws exactly the same list.
         */
         <section className={css['Section']}>
-          <div className={css['SectionCard']}>
-            {alone && (
-              <div className={css['SectionHead']}>
-                <h3 className={css['SectionTitle']}>Bench</h3>
-              </div>
-            )}
-            <CommunityBenchView
-              view={view.bench}
-              onSelectFilter={(key) => onSelectBenchFilter?.(key)}
-              onOpenThread={(threadId) => onOpenThread?.(threadId)}
-              onRetry={onRefresh}
-            />
-          </div>
+          {alone && (
+            <div className={css['SectionHead']}>
+              <h3 className={css['SectionTitle']}>Bench</h3>
+            </div>
+          )}
+          <CommunityBenchView
+            view={view.bench}
+            onSelectFilter={(key) => onSelectBenchFilter?.(key)}
+            onOpenThread={(threadId) => onOpenThread?.(threadId)}
+            onRetry={onRefresh}
+          />
         </section>
       )}
 
       {plan.active?.id === 'chat' && chat && (
         /*
-          🔴 The card is drawn here rather than through `CommunitySection`, for the Bench's
-          reason: the channel pills belong INSIDE the card and above the rows, and
+          🔴 The section is drawn here rather than through `CommunitySection`, for the Bench's
+          reason: the channel pills belong inside the section, above the rows, and
           `CommunitySection` renders the body itself. The count it would draw is a bare item
           count; `view.summary` says "1 of 4 conversations", which is the honest number on a
           list something is narrowing.
         */
         <section className={css['Section']}>
-          <div className={css['SectionCard']}>
-            {alone && (
-              <div className={css['SectionHead']}>
-                <h3 className={css['SectionTitle']}>Chat</h3>
-              </div>
-            )}
-            <CommunityChatView
-              view={chat.view}
-              onSelectChannel={chat.onSelectChannel}
-              onOpenThread={chat.onOpenThread}
-              onRetry={chat.onRetry}
-              onOpenLink={chat.onOpenLink}
-              composer={chat.composer}
-            />
-          </div>
+          {alone && (
+            <div className={css['SectionHead']}>
+              <h3 className={css['SectionTitle']}>Chat</h3>
+            </div>
+          )}
+          <CommunityChatView
+            view={chat.view}
+            onSelectChannel={chat.onSelectChannel}
+            onOpenThread={chat.onOpenThread}
+            onRetry={chat.onRetry}
+            onOpenLink={chat.onOpenLink}
+            composer={chat.composer}
+          />
         </section>
       )}
 
@@ -675,95 +704,49 @@ export function CommunityTab({
         why the pane type documents it rather than this line deciding it. The `people &&` here is
         the type narrowing, not a second decision — `plan` already made it.
 
-        ⚠️ It keeps the card the other sections use so that the search box, the pills and the four
-        states arrive inside the same frame the rest of the tab uses — a directory that looked like
-        a different page would be the second design language NAT-005 exists to prevent.
+        ⚠️ It draws on the page like the other sections (CHR-012), so that the search box, the pills
+        and the four states arrive in the same frame the rest of the tab uses — a directory that
+        looked like a different page would be the second design language NAT-005 exists to prevent.
       */}
       {plan.active?.id === 'people' && people && (
         <section className={css['Section']}>
-          <div className={css['SectionCard']}>
-            {alone && (
-              <div className={css['SectionHead']}>
-                <h3 className={css['SectionTitle']}>People</h3>
-              </div>
-            )}
-            {/* ⚠️ The card is drawn here rather than through `CommunitySection` because the search
-                box and the filter pills belong INSIDE the card and above the rows, and
-                `CommunitySection` renders the body itself. The count that component would have
-                drawn is `directory.summary`, which says "2 of 11 people" — a more honest number on
-                a filtered list than a bare item count. */}
-            {/*
-              🔴 REL-015 §1 — ABOVE the directory, and above the SEARCH BOX. The one thing a
-              member who is not in this list wants is a way into it, and a control placed after
-              fifty rows is a control found by the people who least need it. ⚠️ `people.listing`
-              absent or null draws nothing at all — see the pane type, which owns that
-              distinction rather than this line deciding it.
-            */}
-            {people.listing && (
-              <CommunityListingCard
-                state={people.listing.state}
-                bio={people.listing.bio}
-                busy={people.listing.busy}
-                onBioChange={people.listing.onBioChange}
-                onRequest={people.listing.onRequest}
-                onWithdraw={people.listing.onWithdraw}
-                onRetry={people.listing.onRetry}
-              />
-            )}
-            <CommunityDirectoryView
-              view={people.directory}
-              onQueryChange={people.onQueryChange}
-              onToggleFilter={people.onToggleFilter}
-              onOpenPerson={people.onOpenPerson}
-              onRetry={people.onRetry}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* ⚠️ Page chrome, not a tab's content: the health of the place is not the health of the
-          room you happen to be standing in, and D21 keeps it visible rather than behind a click. */}
-      {view.health && (
-        <section className={css['Section']}>
-          <div className={css['SectionCard']}>
+          {alone && (
             <div className={css['SectionHead']}>
-              <h3 className={css['SectionTitle']}>How the community is doing</h3>
+              <h3 className={css['SectionTitle']}>People</h3>
             </div>
-            {/*
-              Three tiles rather than three sentences: the number is the thing, and a number in a
-              paragraph is a number nobody sees. ⚠️ The WORDS are unchanged — "4 of 30 threads",
-              "(n=3, 1 unreplied)", "target under 24h" — because D21's readout is graded on them,
-              and because a value with no `required` beside it is the threshold-by-rounding D16
-              warned about. Only the typography moved.
-            */}
-            <ul className={css['HealthTiles']}>
-              <li className={css['HealthTile']}>
-                <span className={css['HealthValue']}>{view.health.threads.value}</span>
-                <span className={css['HealthLabel']}>of {view.health.threads.required} threads</span>
-              </li>
-              <li className={css['HealthTile']}>
-                <span className={css['HealthValue']}>{view.health.weeksWithCall.value}</span>
-                <span className={css['HealthLabel']}>
-                  of {view.health.weeksWithCall.required} consecutive weeks with a call
-                </span>
-              </li>
-              <li className={css['HealthTile']}>
-                <span className={css['HealthValue']}>
-                  {view.health.reply.medianHours === null
-                    ? 'no replies yet'
-                    : `${view.health.reply.medianHours.toFixed(1)}h`}
-                </span>
-                <span className={css['HealthLabel']}>
-                  {view.health.reply.medianHours === null ? '' : 'median first reply '}(n={view.health.reply.n}
-                  {view.health.reply.unreplied > 0 ? `, ${view.health.reply.unreplied} unreplied` : ''}), target
-                  under {view.health.reply.requiredBelowHours}h
-                </span>
-              </li>
-            </ul>
-          </div>
+          )}
+          {/* ⚠️ The section is drawn here rather than through `CommunitySection` because the search
+              box and the filter pills belong inside the section, above the rows, and
+              `CommunitySection` renders the body itself. The count that component would have
+              drawn is `directory.summary`, which says "2 of 11 people" — a more honest number on
+              a filtered list than a bare item count. */}
+          {/*
+            🔴 REL-015 §1 — ABOVE the directory, and above the SEARCH BOX. The one thing a
+            member who is not in this list wants is a way into it, and a control placed after
+            fifty rows is a control found by the people who least need it. ⚠️ `people.listing`
+            absent or null draws nothing at all — see the pane type, which owns that
+            distinction rather than this line deciding it.
+          */}
+          {people.listing && (
+            <CommunityListingCard
+              state={people.listing.state}
+              bio={people.listing.bio}
+              busy={people.listing.busy}
+              onBioChange={people.listing.onBioChange}
+              onRequest={people.listing.onRequest}
+              onWithdraw={people.listing.onWithdraw}
+              onRetry={people.listing.onRetry}
+            />
+          )}
+          <CommunityDirectoryView
+            view={people.directory}
+            onQueryChange={people.onQueryChange}
+            onToggleFilter={people.onToggleFilter}
+            onOpenPerson={people.onOpenPerson}
+            onRetry={people.onRetry}
+          />
         </section>
       )}
-
     </LauncherPage>
   );
 }

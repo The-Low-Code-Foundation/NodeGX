@@ -53,8 +53,14 @@ export function Chip({ label, variant = ChipVariant.Neutral, icon, testId, count
         {label}
         {count !== undefined && <span className={css['Count']}>{count}</span>}
         {/* FB-002: the selected pill says so in TEXT as well as in fill, edge and colour — a
-            selected state carried by fill alone shipped once at 1.16:1. */}
-        {isSelected && <span className={css['Check']}>✓</span>}
+            selected state carried by fill alone shipped once at 1.16:1. ⚠️ The mark is
+            `aria-hidden`: `aria-pressed` already says it, and a ✓ in the accessible name announces
+            "Solved 3 ✓, pressed" (CHR-012, carried over from `CommunityFilterPill`). */}
+        {isSelected && (
+          <span className={css['Check']} aria-hidden="true">
+            ✓
+          </span>
+        )}
       </button>
     );
   }

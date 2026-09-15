@@ -280,20 +280,43 @@ describe('AC2 — rows draw the metadata the old UI threw away', () => {
   });
 });
 
-// ── The readout D21 left behind ───────────────────────────────────────────────────────────
+// ── The readout D21 left behind — and CHR-012 R9 took off the page ────────────────────────
 
-describe('the health reading is still a readout and still carries its n', () => {
+/**
+ * ⚠️ `Icon` is replaced, and only `Icon` — FLD-017's stub. CHR-012 made the tab's head buttons the
+ * shared `PrimaryButton`, which imports `Icon`, whose module calls webpack's `require.context` at
+ * import time: without this the suite fails TO RUN. `jest.mock` is hoisted above the imports.
+ */
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
+/*
+  🔴 CHR-012 R9 (Richard, 2026-09-15) REVERSED this block's claim. It asserted that D21's readout was
+  on the tab and carried its `required` and its `n`; Richard ruled that the readout is a launch target
+  written for us, not content for the person reading the tab. The view model still carries the
+  reading (`HEALTH` is in `shown()`), so every absence below is of words the host DID supply, and the
+  thread title beside them is the known-drawing control.
+*/
+describe('CHR-012 R9 — the health reading is not drawn on the tab', () => {
   const tree = draw(shown());
 
-  it('🔴 every component shows its required, and the median shows the n it came from', () => {
-    const all = text(tree);
-    expect(all).toContain('4 of 30 threads');
-    expect(all).toContain('1 of 3 consecutive weeks with a call');
-    expect(all).toContain('(n=3, 1 unreplied)');
-    expect(all).toContain('target under 24h');
+  it('🔴 CONTROL: the same draw carries the Bench rows, and the view carried a reading', () => {
+    expect(text(tree)).toContain('Why does my For Each render one row?');
+    expect(shown()).toMatchObject({ health: HEALTH });
   });
 
-  it('⚠️ and is not drawn as progress towards a threshold that no longer gates anything', () => {
+  it('🔴 no target, no required and no n= reach the page', () => {
+    const all = text(tree);
+    for (const words of ['of 30 threads', 'consecutive weeks with a call', 'n=', 'target under', 'How the community is doing']) {
+      expect([words, all.includes(words)]).toEqual([words, false]);
+    }
+  });
+
+  it('⚠️ and nothing draws it as progress towards a threshold either', () => {
     expect(walk(tree).some((n) => n.type === 'progress')).toBe(false);
     expect(walk(tree).some((n) => String(n.props.role ?? '') === 'progressbar')).toBe(false);
   });
@@ -357,9 +380,15 @@ describe('a row is operable without a mouse', () => {
 
   it('and so are the retry link and the two page buttons', () => {
     const unreachable = draw(shown({ bench: benchFrom({ outcome: 'unreachable', status: 0, detail: 'ETIMEDOUT' }) }));
-    for (const cls of ['RetryButton', 'GhostButton', 'OutlineButton']) {
-      const found = byClass(unreachable, cls);
-      expect([cls, found.length > 0, found.every((n) => n.type === 'button')]).toEqual([cls, true, true]);
+    const retry = byClass(unreachable, 'RetryButton');
+    expect([retry.length, retry.every((n) => n.type === 'button')]).toEqual([1, true]);
+    // ⚠️ CHR-012 — the two page buttons were `.GhostButton` and `.OutlineButton`, bespoke to this
+    // tab; they are the shared `PrimaryButton` now, so they are found by what they SAY inside the
+    // head rather than by a class name this page no longer owns.
+    const head = walk(unreachable).filter((n) => n.props['data-test'] === 'community-head')[0];
+    const doors = walk(head).filter((n) => n.type === 'button');
+    for (const label of ['Refresh', 'Open community.nodegx.io']) {
+      expect([label, doors.some((door) => text(door).includes(label))]).toEqual([label, true]);
     }
   });
 });

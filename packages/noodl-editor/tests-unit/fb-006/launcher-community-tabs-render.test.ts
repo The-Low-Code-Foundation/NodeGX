@@ -11,6 +11,19 @@
  *
  * @module noodl-editor/tests-unit/fb-006/launcher-community-tabs-render
  */
+
+/**
+ * ⚠️ `Icon` is replaced, and only `Icon` — FLD-017's stub. CHR-012 made the tab's head buttons the
+ * shared `PrimaryButton`, which imports `Icon`, and `Icon.tsx` calls webpack's `require.context` at
+ * import time: without this the suite fails TO RUN. No button here passes an `icon`.
+ */
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -159,8 +172,13 @@ describe('🔴 AC1 — no tab renders another tab’s content', () => {
     // ⚠️ `mounted`, not `visible` — this editor's conditional UI rule. A `keepTabsAlive` strip
     // would satisfy every assertion above while still rendering the "big list that will one day
     // be unmanageable" Richard asked us to stop rendering.
-    for (const tab of ['bench', 'tutorials', 'replays'] as CommunityTabId[]) {
-      expect(byClass(on(tab), 'SectionCard').length).toBe(2); // the tab's own + the health readout
+    //
+    // 🔴 CHR-012 (2026-09-15) changed what is counted: this read `SectionCard === 2` (the tab's own
+    // card + the health readout's). R9 took the readout off the page and the section no longer
+    // sits in a card, so the claim is now made over the SECTION — exactly one per tab — with the
+    // card count beside it at zero.
+    for (const tab of ['bench', 'tutorials', 'replays', 'people'] as CommunityTabId[]) {
+      expect([tab, byClass(on(tab), 'Section').length, byClass(on(tab), 'SectionCard').length]).toEqual([tab, 1, 0]);
     }
   });
 });
@@ -168,12 +186,13 @@ describe('🔴 AC1 — no tab renders another tab’s content', () => {
 // ── The chrome frames the place, not the room ─────────────────────────────────────────────
 
 describe('the page chrome survives every tab', () => {
-  it('who you are, refresh, the health readout and the browser door are on all four', () => {
+  it('who you are, refresh and the browser door are on all four', () => {
+    // ⚠️ CHR-012 R9 — the health readout was part of this chrome and is not any more; its absence
+    // is graded in `rel-019/community-head-render`, beside a control that drew.
     for (const tab of ['bench', 'tutorials', 'replays', 'people'] as CommunityTabId[]) {
       const all = text(on(tab));
       expect(all).toContain('@rosborne');
       expect(all).toContain('Refresh');
-      expect(all).toContain('4 of 30 threads');
       expect(all).toContain('Open community.nodegx.io');
     }
   });

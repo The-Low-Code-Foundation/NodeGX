@@ -10,6 +10,18 @@
  *
  * @module noodl-editor/tests-unit/nat-008/people-render
  */
+/**
+ * ⚠️ `Icon` is replaced, and only `Icon` — FLD-017's stub. This file imports `CommunityTab`, whose
+ * head is the shared `PrimaryButton` since CHR-012; `PrimaryButton` imports `Icon`, and `Icon.tsx`
+ * calls webpack's `require.context` at import time, so without this the suite fails TO RUN.
+ */
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import {
@@ -149,7 +161,8 @@ describe('NAT-008 — the directory draws', () => {
         {...directoryProps(directory({ filters: [{ key: 'work', label: 'Available for work', count: 2, active: true }] }))}
       />
     );
-    const pill = byClass(tree, 'FilterPill')[0];
+    // CHR-012 — the pill is the launcher's `Chip variant=Filter` now.
+    const pill = byClass(tree, 'is-variant-filter')[0];
     expect(pill.props['aria-pressed']).toBe(true);
     expect(text(pill as never)).toContain('2');
   });

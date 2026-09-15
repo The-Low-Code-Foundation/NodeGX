@@ -32,7 +32,7 @@ import React from 'react';
 import css from './Community.module.scss';
 
 export enum CommunityDensity {
-  /** The launcher tab: a card on the `bg-0` canvas. */
+  /** The launcher tab: rows on the `bg-0` canvas (CHR-012 took the card away). */
   Page = 'page',
   /** The editor's rail panel: no card, inheriting `BasePanel`'s `bg-2`. */
   Panel = 'panel'

@@ -143,7 +143,7 @@ describe('FB-002 — the Bench filter reaches the screen', () => {
   });
 
   describe('🔴 the pills', () => {
-    const pills = byClass(draw(forumOf(MIXED)), 'FilterPill');
+    const pills = byClass(draw(forumOf(MIXED)), 'is-variant-filter');
 
     it('there are exactly two, labelled as the web Bench labels them', () => {
       expect(pills.length).toBe(2);
@@ -164,13 +164,13 @@ describe('FB-002 — the Bench filter reaches the screen', () => {
     });
 
     it('and it moves with the selection', () => {
-      const onSolved = byClass(draw(forumOf(MIXED), 'solved'), 'FilterPill');
+      const onSolved = byClass(draw(forumOf(MIXED), 'solved'), 'is-variant-filter');
       expect(onSolved.map((pill) => pill.props['aria-pressed'])).toEqual([true, false]);
     });
 
     it('🔴 clicking one asks the host for THAT key', () => {
       const asked: string[] = [];
-      const clicked = byClass(draw(forumOf(MIXED), 'waiting', { onSelectFilter: (key) => asked.push(key) }), 'FilterPill');
+      const clicked = byClass(draw(forumOf(MIXED), 'waiting', { onSelectFilter: (key) => asked.push(key) }), 'is-variant-filter');
       for (const pill of clicked) (pill.props.onClick as () => void)();
       expect(asked).toEqual(['solved', 'waiting']);
     });
@@ -178,9 +178,9 @@ describe('FB-002 — the Bench filter reaches the screen', () => {
     it('⚠️ no pills at all over a list nobody has — in all three non-`items` states', () => {
       // A control that cannot do anything, drawn as though it could, and it would push out the
       // sentence saying what the Bench is for.
-      expect(byClass(draw(undefined), 'FilterPill').length).toBe(0);
-      expect(byClass(draw(forumOf([])), 'FilterPill').length).toBe(0);
-      expect(byClass(draw({ outcome: 'unreachable', status: null, detail: 'ETIMEDOUT' }), 'FilterPill').length).toBe(0);
+      expect(byClass(draw(undefined), 'is-variant-filter').length).toBe(0);
+      expect(byClass(draw(forumOf([])), 'is-variant-filter').length).toBe(0);
+      expect(byClass(draw({ outcome: 'unreachable', status: null, detail: 'ETIMEDOUT' }), 'is-variant-filter').length).toBe(0);
     });
   });
 

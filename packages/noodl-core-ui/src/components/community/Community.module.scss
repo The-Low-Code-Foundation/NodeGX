@@ -4,7 +4,7 @@
  * 🔴 **Two surfaces, one stylesheet, and that is the point.** The launcher tab and the editor's
  * rail panel drew the same four states and the same three lists out of two separate piles of
  * inline `style` objects. Whatever was fixed on one did not reach the other. `Page` is the
- * launcher's density (a card on the `bg-0` canvas) and `Panel` is the rail's (no card of its own,
+ * launcher's density (rows on the `bg-0` canvas since CHR-012) and `Panel` is the rail's (no card of its own,
  * inheriting `BasePanel`'s `bg-2`, exactly where `ListItem` left the rows).
  *
  * ⚠️ **Every fg×bg pairing below has a row in NAT-001's PAIRS table** and is graded at 4.5:1 in
@@ -12,35 +12,27 @@
  * — which is AC6, and is why the hover grounds are named rather than left to `bg-hover`'s wash.
  */
 
-/* ── The card a section sits in, on the launcher's canvas ──────────────────────────────── */
+/* ── A section on the launcher's page ──────────────────────────────────────────────────── */
 
+/*
+  🔴 CHR-012 (2026-09-15) — a section is CONTENT ON THE PAGE, not a card on it.
+
+  NAT-005 put every section in a `bg-1` card with a `border-default` edge; with a head card and a
+  health card beside it the tab read as a settings form, and Richard ruled it "still looks like
+  shit" beside Templates. The launcher's other tabs draw on the `bg-0` canvas and so does this one:
+  rows are lines with a rule under each, and the three quiet states sit in a dashed well so an empty
+  tab has a shape. ⚠️ The page-density pairings in NAT-001's PAIRS table moved to `bg-0` / `bg-1`
+  with it. The rail (`Panel`) is unchanged.
+*/
 .Section {
   margin-bottom: var(--spacing-6);
-}
-
-.SectionCard {
-  /*
-    🔴 The FILL is what makes this card visible, and the border is the smaller half.
-
-    NAT-003 opened the elevation ramp: `bg-0`→`bg-1` was 1.06:1 — a card that dissolved into the
-    canvas — and measures 1.16 dark / 1.13 light now, clearing that task's stated bar of
-    1.15/1.09. Measured against this same `bg-0` ground, `border-subtle` is **1.29 dark but 1.03
-    light** — in light it is less of a line than the fill step beside it, i.e. nothing. So the
-    edge is `border-default` (1.46 / 1.12), which is the smaller contributor in light and the
-    sharper one in dark. ⚠️ A card here that dropped the fill and kept a subtle border would
-    look correct in dark and have no edge at all in light.
-  */
-  background: var(--theme-color-bg-1);
-  border: 1px solid var(--theme-color-border-default);
-  border-radius: 6px;
-  overflow: hidden;
 }
 
 .SectionHead {
   display: flex;
   align-items: baseline;
   gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-3-5) var(--spacing-2);
+  padding: 0 0 var(--spacing-2);
 }
 
 .SectionTitle {
@@ -61,8 +53,13 @@
 /* ── The four states ───────────────────────────────────────────────────────────────────── */
 
 .Body {
+  /* CHR-012 — on the page the loading, empty and unreachable states sit in a dashed well: a quiet
+     tab is a shape with words in it, not one sentence stranded at the top of a tall page. The dash
+     is decoration and is not graded; the words inside are (NAT-001, on `bg-0`). */
   &.is-density-page {
-    padding: 0 var(--spacing-3-5) var(--spacing-3);
+    padding: var(--spacing-6) var(--spacing-5);
+    border: 1px dashed var(--theme-color-border-default);
+    border-radius: var(--radius-xl);
   }
 
   &.is-density-panel {
@@ -72,9 +69,25 @@
 
 /* `items` draws rows and no padding of its own — the rows carry it, so a row's hover reaches
    the full width of the card rather than stopping short of a gutter. */
+/* CHR-012 — on the page the rows bleed one gutter past the column, so a row's TEXT lines up with the
+   lead and the chips above it while its hover fill has room either side. 🔴 The RULES do not bleed:
+   they are drawn inset by that same gutter (`::before` here, `::after` on each row), so every line on
+   the page stops at the column edge. The first drive measured bordered rows running 108→1252 against
+   a 120→1240 column, which read as a list slightly wider than the page it sits on. */
 .Rows {
   &.is-density-page {
-    padding: 0 0 var(--spacing-1-5);
+    position: relative;
+    margin: 0 calc(var(--spacing-3) * -1);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--spacing-3);
+      right: var(--spacing-3);
+      height: 1px;
+      background: var(--theme-color-border-default);
+    }
   }
 }
 
@@ -143,7 +156,11 @@
   padding-left: var(--spacing-2-5);
 }
 
-.RetryButton {
+/* CHR-012 — `.LinkButton` is the chat river's "Open — 2 replies" verb. It was `.GhostButton`, the
+   last bespoke button style on the tab (the drive's one "other" control); a verb that opens
+   something in place is this link's job exactly, and it now sits on the text column. */
+.RetryButton,
+.LinkButton {
   background: none;
   border: none;
   padding: 0;
@@ -174,8 +191,21 @@
   cursor: pointer;
   color: inherit;
 
+  /* CHR-012 — a line in a list on the page: a rule under it, inset to the column (see `.Rows`), and
+     no card around it. */
   &.is-density-page {
-    padding: var(--spacing-2) var(--spacing-3-5);
+    position: relative;
+    padding: var(--spacing-2-5) var(--spacing-3);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: var(--spacing-3);
+      right: var(--spacing-3);
+      height: 1px;
+      background: var(--theme-color-border-default);
+    }
   }
 
   &.is-density-panel {
@@ -186,7 +216,7 @@
      without knowing what is underneath — see the `over` column in NAT-001's table and the row
      that refuses to score a wash with no opaque surface named. */
   &.is-density-page:hover {
-    background: var(--theme-color-bg-2);
+    background: var(--theme-color-bg-1);
   }
 
   &.is-density-panel:hover {
@@ -257,24 +287,6 @@
   }
 }
 
-/* ── FB-006's tab strip ────────────────────────────────────────────────────────────────── */
-
-/**
- * The wrapper carries `Tabs.module.scss`'s **variant** class and not its `.Root`.
- *
- * `.Root` is `height: 100%; overflow: hidden` — right for a full-height tabbed surface, wrong for
- * a page that scrolls as one column with a head above the strip and a health readout below it. So
- * FB-006 loosened the variant selectors there (`.is-variant-segmented .Button` rather than
- * `.Root.is-variant-segmented .Button`) and this element supplies the ancestor.
- *
- * ⚠️ Inline-flex so the segmented track is as wide as its labels rather than the column: the
- * pill-in-a-track reads as a control at label width and as a header bar at full width.
- */
-.Tabs {
-  display: inline-flex;
-  margin-bottom: var(--spacing-4);
-}
-
 /* ── The lead paragraph: what this place is for ────────────────────────────────────────── */
 
 .Lead {
@@ -285,97 +297,38 @@
   color: var(--theme-color-fg-default);
 }
 
-/* ── The launcher tab's own chrome ─────────────────────────────────────────────────────── */
+/* ── CHR-012 R10 — who you are, as a line in the page head ─────────────────────────────── */
 
-.Head {
-  box-sizing: border-box;
+/*
+  The group `LauncherPage` puts beside the title: Refresh and the browser door as quiet text
+  buttons, a hairline, then the avatar, the handle and — for a guest — `Sign in`. It was a `bg-2`
+  card holding three bespoke buttons until 2026-09-15; every button in it is `PrimaryButton` now.
+*/
+.Who {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   flex-wrap: wrap;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-4);
-  /* The account card's box (`CommunityAccountCard` `.is-row`), so the two read as one object. */
-  padding: var(--spacing-4);
-  background: var(--theme-color-bg-2);
-  border: 1px solid var(--theme-color-border-default);
-  border-radius: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.WhoDivider {
+  align-self: stretch;
+  width: 1px;
+  margin: var(--spacing-1);
+  background: var(--theme-color-border-default);
+}
+
+.WhoText {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  min-width: 0;
 }
 
 .HeadLine {
-  font-size: var(--font-size-md);
-  line-height: 1.5;
-  color: var(--theme-color-fg-default-shy);
-}
-
-.GhostButton {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: var(--spacing-1) var(--spacing-2);
-  font: inherit;
-  font-size: var(--font-size-md);
-  cursor: pointer;
-  color: var(--theme-color-fg-default-shy);
-
-  &:hover:not(:disabled) {
-    background: var(--theme-color-bg-1);
-    color: var(--theme-color-fg-default);
-  }
-
-  &:disabled {
-    cursor: default;
-    color: var(--theme-color-fg-disabled);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 1px;
-  }
-}
-
-.OutlineButton {
-  background: none;
-  /* POL-016's control boundary. NAT-002 replaced `bg-3` here — an ELEVATION step used as a
-     control edge, 1.32:1 dark and 1.01:1 light on this ground, so the only thing saying "this is
-     a button" was invisible. `border-control` measures 4.17/3.72 on `bg-1` and clears 1.4.11. */
-  border: 1px solid var(--theme-color-border-control);
-  border-radius: 4px;
-  padding: var(--spacing-2) var(--spacing-3);
-  font: inherit;
-  font-size: var(--font-size-md);
-  cursor: pointer;
-  color: var(--theme-color-fg-default);
-
-  &:hover {
-    background: var(--theme-color-bg-1);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 2px;
-  }
-}
-
-/* ── The health readout ────────────────────────────────────────────────────────────────── */
-
-.HealthList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  padding: 0 var(--spacing-3-5) var(--spacing-3);
-  margin: 0;
-  list-style: none;
-}
-
-/*
-  🔴 A readout, NOT a gate — D21 reversed D16 on 2026-08-19 and nothing may branch on these
-  numbers. ⚠️ Do not draw them as a progress bar towards their `required`: the threshold stopped
-  being a gate, and drawing it as one puts it back. They are sentences, deliberately.
-*/
-.HealthLine {
-  font-size: var(--font-size-base);
-  line-height: 1.5;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default-shy);
   font-variant-numeric: tabular-nums;
 }
@@ -1073,11 +1026,13 @@
 .ChipRow,
 .DirectorySummary,
 .DirectoryBound {
+  /* CHR-012 — no card on the page, so no card gutter to match: the controls sit on the column edge,
+     under the lead. */
   .Directory.is-density-page &,
   .Bench.is-density-page &,
   .Chat.is-density-page & {
-    padding-left: var(--spacing-3-5);
-    padding-right: var(--spacing-3-5);
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .Directory.is-density-panel &,
@@ -1110,8 +1065,8 @@
 }
 
 .Chat.is-density-page > .ThreadReply {
-  padding-left: var(--spacing-3-5);
-  padding-right: var(--spacing-3-5);
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .Chat.is-density-panel > .ThreadReply {
@@ -1150,56 +1105,15 @@
 }
 
 /*
-  A filter pill. ⚠️ `aria-pressed` carries the state; the fill is the same information for people
-  who can see it, and neither stands alone.
+  🔴 CHR-012 — a filter bar is a row of `Chip variant=Filter`, the launcher's one filter pill (the
+  Templates and Learning tabs draw it too). `CommunityFilterPill` adapts the three surfaces' pill
+  model to it; the selected edge, wash and ✓ live in `Chip.module.scss` and are graded against this
+  surface's grounds in `fb-002/filter-pill-state`. ⚠️ `[role='group']` because `.ChipRow` also names
+  the skill chips inside a person row, which keep the small gap above.
 */
-.FilterPill {
-  display: inline-block;
-  padding: 1px var(--spacing-1-5);
-  border-radius: 3px;
-  border: 1px solid var(--theme-color-border-control);
-  background: none;
-  color: var(--theme-color-fg-default-shy);
-  font: inherit;
-  font-size: var(--font-size-xs);
-  line-height: 1.5;
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-primary);
-    outline-offset: 1px;
-  }
-
-  /*
-    🔴 The selected state is on the BORDER, and the fill is no longer load-bearing.
-
-    This rule used to change `background` and `color` only, which measured **1.36:1** for the
-    active fill against the panel — every label legible, and which pill was on invisible. The
-    border clears 3:1 on BOTH of its sides in BOTH themes (5.60/4.13 dark, 4.57/3.74 light);
-    see `CommunityFilterPill.tsx` for the table and for why the `✓` is there as well.
-
-    ⚠️ `border-color` and not `border` — the width must stay 1px in both states, or activating a
-    filter reflows the row and the list reads as jumping.
-  */
-  &.is-active {
-    border-color: var(--theme-color-primary);
-    background: var(--theme-color-bg-3);
-    color: var(--theme-color-fg-default);
-  }
-}
-
-.FilterCount {
-  color: var(--theme-color-fg-default-shy);
-}
-
-/*
-  ⚠️ The `✓` on a selected pill. Colour is not allowed to be the only carrier of a state (WCAG
-  1.4.1), so the selection is said in text as well as drawn on the border. It is `aria-hidden` at
-  the markup — `aria-pressed` already tells a screen reader this.
-*/
-.FilterPillMark {
-  margin-left: var(--spacing-1);
-  color: var(--theme-color-fg-default);
+.ChipRow[role='group'] {
+  gap: var(--spacing-2);
+  margin: 0 0 var(--spacing-3);
 }
 
 .DirectorySummary {
@@ -1439,8 +1353,21 @@
   display: block;
   border-bottom: 1px solid var(--theme-color-bg-3);
 
+  /* CHR-012 — the river's rules are inset to the column like the rows' (see `.Rows`). */
   &.is-density-page {
-    padding: var(--spacing-2) var(--spacing-3-5);
+    position: relative;
+    padding: var(--spacing-2-5) var(--spacing-3);
+    border-bottom: none;
+
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: var(--spacing-3);
+      right: var(--spacing-3);
+      height: 1px;
+      background: var(--theme-color-bg-3);
+    }
   }
 
   &.is-density-panel {
@@ -1492,48 +1419,25 @@
   border-bottom: 1px solid var(--theme-color-border-default);
 }
 
-/* ── 2026-09-06 — the head as an identity card, the readout as tiles, the media rows ────── */
-
-/*
-  Richard: *"it still looks like shit compared to the rest of the launcher"*. The Projects tab
-  draws the account as a card — avatar, handle, a line, the action on the right — and this page
-  drew the same person as a muted 13px string with "Refresh" floating at the far edge. One
-  launcher, one language: the head borrows the account card's exact shape (`CommunityAccountCard`
-  `.is-row`), so a reader recognises the object before reading it.
-
-  ⚠️ `.Head` keeps its name because two specs walk this tree by class; only its box changed.
-*/
-.HeadIdentity {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.HeadText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+/* ── The avatar and handle in the head line, and the media rows ─────────────────────────── */
 
 .HeadHandle {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   overflow-wrap: anywhere;
 }
 
-/* The same 28px round gradient the header and the account card use — one avatar shape. */
+/* The header's round gradient avatar at the head line's size — one avatar shape. */
 .HeadAvatar {
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--theme-color-avatar-fg);
   background: var(--theme-color-avatar-gradient);
@@ -1545,78 +1449,6 @@
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-}
-
-.HeadActions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-/* The launcher's primary — `PrimaryButton`'s CTA fill, so "Sign in" here is the "Sign in" there. */
-.PrimaryButton {
-  background: var(--theme-color-primary);
-  color: var(--theme-color-on-primary);
-  border: 1px solid var(--theme-color-primary);
-  border-radius: 4px;
-  padding: var(--spacing-2) var(--spacing-3);
-  font: inherit;
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: var(--theme-color-primary-highlight);
-    border-color: var(--theme-color-primary-highlight);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-focus-ring);
-    outline-offset: 2px;
-  }
-}
-
-/*
-  The health readout as three tiles. The number is the thing a person scans for, and three
-  sentences of body text hide three numbers. Each tile is value-over-label; the label carries the
-  `required` beside it so the threshold is still visible on approach (D21).
-*/
-.HealthTiles {
-  list-style: none;
-  margin: 0;
-  padding: 0 var(--spacing-3-5) var(--spacing-3-5);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--spacing-3);
-}
-
-.HealthTile {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  padding: var(--spacing-3);
-  background: var(--theme-color-bg-2);
-  border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-xl);
-}
-
-.HealthValue {
-  font-family: var(--font-family-display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.2;
-  color: var(--theme-color-fg-highlight);
-  font-variant-numeric: tabular-nums;
-}
-
-.HealthLabel {
-  font-size: var(--font-size-sm);
-  line-height: 1.45;
-  color: var(--theme-color-fg-default-shy);
 }
 
 /*

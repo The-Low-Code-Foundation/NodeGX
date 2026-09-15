@@ -163,9 +163,10 @@ function ChatMessageRow({
 
       {onOpenThread && (
         <div className={css['MessageFoot']}>
+          {/* CHR-012 — a link-style verb, not a second button style on the tab (see `.LinkButton`). */}
           <button
             type="button"
-            className={css['GhostButton']}
+            className={css['LinkButton']}
             data-test={`community-chat-open-${row.id}`}
             onClick={() => onOpenThread(row.id)}
           >
