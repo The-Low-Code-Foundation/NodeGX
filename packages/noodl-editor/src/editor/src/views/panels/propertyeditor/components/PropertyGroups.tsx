@@ -13,6 +13,21 @@ export interface PropertyGroupModel {
    * group is collapsed, so nothing folded away is doing something invisible.
    */
   activeCount?: number;
+  /**
+   * CHR-008 (R8): the one line a switched-off group draws instead of a sentence under every row — see
+   * `model/groupGate.ts` for when a group gets one.
+   */
+  gate?: GroupGateLineProps;
+}
+
+export interface GroupGateLineProps {
+  /** `Offset X, Offset Y and Color apply once Shadow Enabled is on.` */
+  sentence: string;
+  /** `Turn on`, or `Show <control>` where one press has no single meaning. */
+  actionLabel: string;
+  onAction: () => void;
+  /** The gating port, for `data-test`. */
+  gatePortName: string;
 }
 
 export interface PropertyGroupsProps {
@@ -127,6 +142,32 @@ export function NoMatchesNotice({ query }: { query: string }) {
   );
 }
 
+/**
+ * CHR-008 (R8) — one sentence and one verb for a group whose rows one switch turned off.
+ *
+ * Hook-free and exported for the `tests-unit` runner, like {@link GroupHeading}. The verb reuses FB-021's
+ * `property-port-gate-link` so the panel keeps one way of drawing "go and switch it on".
+ */
+export function GroupGateLine({ sentence, actionLabel, onAction, gatePortName }: GroupGateLineProps) {
+  return (
+    <div className="property-group-gate" data-test={`group-gate-${gatePortName}`}>
+      <span>{sentence}</span>
+      <button
+        type="button"
+        className="property-port-gate-link"
+        data-test={`group-gate-action-${gatePortName}`}
+        onClick={(event) => {
+          // The line sits inside the group; the click must not reach anything that folds it.
+          event.stopPropagation();
+          onAction();
+        }}
+      >
+        {actionLabel}
+      </button>
+    </div>
+  );
+}
+
 function Group({
   group,
   onToggleGroup
@@ -142,6 +183,8 @@ function Group({
         activeCount={group.activeCount}
         onToggle={(next) => onToggleGroup && onToggleGroup(group.name, next)}
       />
+
+      {group.gate && group.isExpanded && <GroupGateLine {...group.gate} />}
 
       <RowHost els={group.els} className={classNames('properties', !group.isExpanded && 'hidden')} />
     </div>

@@ -128,6 +128,20 @@ export interface PortGateReason {
   gateLabel: string;
   /** `Width applies when Size Mode is Explicit or Content Height.` */
   sentence: string;
+  /**
+   * CHR-008 (R8): the part of {@link sentence} after "applies when" — `Size Mode is Explicit or Content
+   * Height` — so a group whose rows share it can say it once (`groupGate.ts`). Optional because a reason
+   * built anywhere but {@link reasonsForGatedPorts} may not carry it, and `groupGate.ts` then refuses to
+   * summarise rather than guess.
+   */
+  condition?: string;
+  /**
+   * CHR-008 (R8): the condition is one clause, `<boolean port> = true`, so one press sets the gate port to
+   * `true` and every row it switched off comes back. Anything else — an enum, `!=`, `NOT SET`, several
+   * clauses — has no single value to set, and the panel does not choose one for the author. Absent reads
+   * as `false`.
+   */
+  turnOn?: boolean;
 }
 
 /** The `conditionalports/*` group shape, as `nodelibraryexport` writes it. */
@@ -393,12 +407,20 @@ export function reasonsForGatedPorts(
             .join(', ')}${last.elided ? ',' : ''} ${parsed.connective} ${last.text}`;
 
     const gatePortName = usable[0].param;
+    const gatePort = byName.get(gatePortName);
+    const gateType = gatePort ? gatePort.type : undefined;
+    const isBooleanGate =
+      gateType === 'boolean' || (typeof gateType === 'object' && gateType !== null && (gateType as { name?: string }).name === 'boolean');
 
     reasons.set(portName, {
       portName,
       gatePortName,
-      gateLabel: labelForPort(byName.get(gatePortName), gatePortName),
-      sentence: `${labelForPort(byName.get(portName), portName)} applies when ${joined}.`
+      gateLabel: labelForPort(gatePort, gatePortName),
+      sentence: `${labelForPort(byName.get(portName), portName)} applies when ${joined}.`,
+      condition: joined,
+      // CHR-008 (R8). Sound after the undeclared-disjunct drop above: what is left is `<port> = true` OR
+      // clauses that can never be true, so setting the port to `true` is exactly what switches the row on.
+      turnOn: isBooleanGate && usable.length === 1 && usable[0].op === '=' && usable[0].value === 'true'
     });
   }
 

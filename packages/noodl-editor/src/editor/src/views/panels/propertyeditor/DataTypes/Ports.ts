@@ -32,6 +32,7 @@ import { hintsForNode, HINTABLE_PORTS, HINT_INPUT_PARAMETERS } from '../property
 import { ADVANCED_CSS_GROUP, countActivePorts, orderPropertyGroups } from '../propertyPanelTiers';
 import { propertyPanelViewState } from '../propertyPanelViewState';
 import { describeRows, type RowDescriptor, type RowPortLike } from '../model/describeRows';
+import { groupGatesFor, type GroupGate } from '../model/groupGate';
 import { widgetForPort, type WidgetId } from '../model/widgets';
 import { AlignToolsType } from './AlignTools/AlignToolsType';
 import { BasicType } from './BasicType';
@@ -434,8 +435,12 @@ export class Ports extends View {
     });
   }
 
-  /** Render a group's views (and their child views) and collect their elements. */
-  renderParams(views): TSFixme[] {
+  /**
+   * Render a group's views (and their child views) and collect their elements.
+   *
+   * CHR-008 (R8): a row a group line already speaks for (`groupGates`) is drawn quiet — dimmed, no sentence.
+   */
+  renderParams(views, groupGates?: Map<string, GroupGate>): TSFixme[] {
     const els = [];
     const target = this.capabilityTarget();
 
@@ -466,9 +471,13 @@ export class Ports extends View {
       // FB-021 — a port a `dynamicports` condition has switched off. `applyPortConditionsFilterForNode`
       // remains the only thing that decides; the descriptor carries what it decided.
       const switchedOff: PortGateReason | undefined = row && row.switchedOff;
+      // CHR-008 (R8): the group's one line already says why — the row is dimmed and says nothing itself.
+      const groupGate = row && groupGates ? groupGates.get(row.group) : undefined;
+      const quiet = Boolean(groupGate && groupGate.portNames.indexOf(row.name) !== -1);
       const gated = applyPortGate(decorated as TSFixme, switchedOff, {
         isConnected: Boolean(row && row.connected),
-        onFocusGate: switchedOff ? () => this.focusGatePort(switchedOff.gatePortName) : undefined
+        onFocusGate: switchedOff && !quiet ? () => this.focusGatePort(switchedOff.gatePortName) : undefined,
+        quiet
       });
       // FB-017 AC4. Last, so the note sits under the gate's reason rather than inside the
       // dimmed control — and keyed by `portNamesForView`, because the corner-radius ports
@@ -706,13 +715,18 @@ export class Ports extends View {
     // group name rather than by a per-port `tier` field.
     const { basic, advanced } = orderPropertyGroups(groups);
 
+    // CHR-008 (R8): which groups say "switched off" once instead of under every row. Read off the same
+    // descriptors `renderParams` draws, so a quiet row and its group's line cannot disagree.
+    const groupGates = groupGatesFor(this.rowDescriptors());
+
     const toModel = (g): PropertyGroupModel => ({
       name: g.name,
       isExpanded: this.isGroupExpanded(g.name),
       // AC2: a collapsed group still reports how much of it is live, so folding CSS away
       // cannot become a new hiding place for FB-018's confusion.
       activeCount: this.countActiveInGroup(g),
-      els: this.renderParams(g.views)
+      els: this.renderParams(g.views, groupGates),
+      gate: this.groupGateLine(groupGates.get(g.name))
     });
 
     const notice = this.schemaNotice();
@@ -788,6 +802,22 @@ export class Ports extends View {
     }
 
     this.renderGroups();
+  }
+  /**
+   * CHR-008 (R8): what a group line says and does. `Turn on` sets the gate port to `true` through the same
+   * undoable write every row uses; the port list then changes (the gate marks go), `ModelProxy` raises
+   * `instancePortsChanged`, and the panel redraws with the rows live and no line.
+   */
+  private groupGateLine(gate: GroupGate | undefined): PropertyGroupModel['gate'] {
+    if (!gate) return undefined;
+    return {
+      sentence: gate.sentence,
+      gatePortName: gate.gatePortName,
+      actionLabel: gate.turnOn ? 'Turn on' : `Show ${gate.gateLabel}`,
+      onAction: gate.turnOn
+        ? () => this.setParameter(gate.gatePortName, true)
+        : () => this.focusGatePort(gate.gatePortName)
+    };
   }
   setParameterEx(name, newvalue, oldvalue, skipundo) {
     this.model.setParameter(name, newvalue, {

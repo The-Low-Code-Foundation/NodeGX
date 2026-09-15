@@ -74,6 +74,12 @@ export interface PortGateOptions {
   isConnected?: boolean;
   /** Travel to the gating control. Omitted → no button is drawn rather than a dead one. */
   onFocusGate?: () => void;
+  /**
+   * CHR-008 (R8): the group this row sits in already says why, once, above its rows — so the row is dimmed
+   * and inert but draws no sentence and no link of its own. The dead-wire line is still drawn: it is a fact
+   * about THIS row's wiring, and a group line cannot carry it.
+   */
+  quiet?: boolean;
   createElement?: (tag: string) => TSFixme;
 }
 
@@ -118,7 +124,11 @@ export function applyPortGate(
   sentence.title = reason.sentence;
   block.appendChild(sentence);
 
-  if (options.onFocusGate) {
+  // CHR-008 (R8): the group's one line speaks for this row. The row stays dimmed and inert above.
+  if (options.quiet) {
+    // The sentence still names the row for a pointer that rests on it — as a tooltip, never on screen.
+    wrapper.title = reason.sentence;
+  } else if (options.onFocusGate) {
     const link = createElement('button');
     link.className = GATED_PORT_LINK_CLASS;
     link.setAttribute('data-test', `gate-link-${reason.portName}`);
@@ -134,7 +144,7 @@ export function applyPortGate(
     block.appendChild(link);
   }
 
-  wrapper.appendChild(block);
+  if (!options.quiet) wrapper.appendChild(block);
 
   if (options.isConnected) {
     const dead = createElement('div');
