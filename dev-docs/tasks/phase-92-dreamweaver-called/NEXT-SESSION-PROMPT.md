@@ -16,18 +16,18 @@
 | CHR-005 one launcher page | ✅ Richard: "fine" |
 | CHR-006 the Templates tab gets its pictures | ✅ WORTHY |
 | CHR-007 the rows become descriptors | ✅ built s4, invisible by design |
-| **CHR-012 the Community tab** | 🟡 **pass 3 built s8** — signed in, signed out (local), rail all driven; **awaits Richard's look** (§7.6–7.7) |
-| **CHR-008 the panel is one tree** | 🟡 **slice 1 built s8: R8** (one line per switched-off group + `Turn on`), driven both themes; §3.1/3.2/3.4–3.8 not built (§6) |
+| CHR-012 the Community tab | ✅ **closed as passable** (Richard, after s8: "worthy or passable … another stab another time") |
+| **CHR-008 the panel is one tree** | 🟡 **slice 1 built s8: R8** — one line per group with ≥2 switched-off rows; Richard's condition (no repeated sentence on successive rows) gated over the catalog and driven; §3.1/3.2/3.4–3.8 not built (§6) |
 | CHR-004, 009, 010, 011 | ⬜ not built |
 
-**The look page for both:** https://claude.ai/artifact/MdKjHQTFEhkoLAR4i3MPZt (screenshots + rendered readings).
+**The look page:** https://claude.ai/artifact/MdKjHQTFEhkoLAR4i3MPZt (screenshots + rendered readings).
 
 ## First job
 
-1. **If Richard has not looked:** put the look page in front of him. His word closes CHR-012 and rules on R8's
-   wording (*"… apply once Shadow Enabled is on."* is proposed). If he asks for changes, they scope the next pass.
-2. **Commit state:** s8 is committed — `8867c406f` (CHR-012 pass 3), `d37db75a5` (CHR-008 R8), then the docs commit.
+1. **Commit state:** s8 is committed — `8867c406f` (CHR-012 pass 3), `d37db75a5` (CHR-008 R8), `20f5bdeff` (docs),
+   `806263cce` (the one-line rule + catalog gate, after Richard's condition), then the post-ruling docs commit.
    Verdict PNGs stay local by ruling (gitignored).
+2. Nothing of Richard's is pending on this phase's built work. Go straight to Track B below.
 
 ## Then, in order (Track B)
 
@@ -43,12 +43,14 @@
 
 ## Still Richard's
 
-1. **CHR-012's look; R8's wording** (above).
+1. ~~CHR-012's look~~ ✅ **closed as passable** (after s8); another pass later. R8's wording ✅ *"fine as long as we don't
+   have another 'same error repeated on 5 lines successively' problem"* — see the census in CHR-008 §6.
 2. CHR-007 declined AC4's "≤ 1 `_portsHash = undefined`" (CHR-007 §6.2) — do not quietly revisit.
 3. R6 final only on his look at CHR-009's screenshots; R7's marker-on-the-tab detail is proposed, not ruled.
 4. The Projects tab's two full-width cards (BST-003 / UNI-001) — ask before moving them.
 5. `members-area`'s live summary is lowercase and fragmentary (P86/P78 data).
-6. R9 moved D21's health readout off the launcher; **where we read it instead** is unbuilt and unscoped.
+6. ~~Where D21's health readout is read instead~~ ✅ **ruled "Nowhere"** (after s8). `mirrorview.healthFrom` still
+   computes it and nothing reads it — the ruling's state, not a gap; do not build a reader.
 
 ## What s8 settled, including where the handoff was wrong
 

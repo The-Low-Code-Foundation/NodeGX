@@ -185,7 +185,53 @@ Scroll` — FB-021's `gatePortName` is the condition's *first* clause. A group l
 target is the clause that is currently false.
 ⚠️ Element count **1,126** and inline-styled **250–251** on this Group are unchanged — that is AC4, §3.1's work.
 
-### 6.5 Owed on this task
+### 6.5 Richard's condition on R8, and the rule it changed (after s8, same day)
+
+> *"That's fine as long as we don't have another 'same error repeated on 5 lines successively' problem."*
+
+**It was not met.** The panel §6.4 drove still printed five `Scroll` sentences on consecutive rows, and a census
+over the shipped catalog (every node type at its defaults) found **13 groups** printing gate sentences on adjacent
+rows: `Icon` ×7 (Button, Options, Text Input), `Scroll` ×5, `Border Style` ×10 (Group, Image, Label, Video,
+Button, Text Input, Range thumb/track), `Image › Dimensions`. §3.3's "mixed gates fall back to per-row" is the
+cause, so it is **superseded by the ruling**: a group with two or more switched-off rows prints **exactly one line**.
+
+`groupGate.ts` now words that line in order of preference, from clauses `reasonsForGatedPorts` carries
+(`PortGateReason.clauses` / `connective`, labelled; worded through the one exported `phraseCondition` so a row's
+sentence and a group line cannot word a clause two ways — FB-021's per-row sentences are byte-identical):
+
+1. same condition on every row → *"… apply once Shadow Enabled is on."* + `Turn on`;
+2. AND conditions sharing clauses (necessary for every row) → *"… apply only when Enable Icon is on."* — `Turn on`
+   when the shared part is one boolean clause; `Show …` travels to a shared boolean switch when there is one
+   (`Scroll` → `Enable Scroll`, not `Layout`);
+3. OR conditions sharing clauses (sufficient for every row) → *"Border Color and Border Width apply when Border
+   Style is Solid, Dashed or Dotted."*;
+4. nothing shared → *"… are switched off by Size Mode and Layout."*
+
+Row labels and control labels are de-duplicated (five sides' `Border Color` is one `Border Color`). Every covered
+row keeps its exact sentence as its tooltip.
+
+**The gate:** `tests-unit/chr-008/repeatedSentences.test.ts` — every catalog node at defaults **and with each boolean
+input switched on in turn** (the second level: `Enable Icon` on, then `Type` decides): **no group prints more than one
+gate sentence**, beside a control that the population holds the three families by name, and that a group with
+several switched-off rows is never silent. ⚠️ The catalog drops `tab`, so it can only over-count the panel.
+**Arms:** D2 — the first build's rule (identical conditions only) → **10 red**; E — no label de-duplication →
+**2 red**; both restored `cmp`-identical. (A first D arm did not compile and graded nothing — replaced, not counted.)
+**Readings:** `chr-008` + `chr-007` + `fb-021` **9 / 9 suites, 116 tests**; full `tests-unit` **443 / 443 suites,
+7,320 tests**, EXIT=0; `tsc -p packages/noodl-editor --noEmit` **EXIT=0**.
+
+**Driven** (`verdicts/CHR-008/2026-09-15/lines.js`, same scratch copy, both themes, bundle confirmed carrying
+`apply only when`): **most gate texts printed in any one group: 1.** On the Group `psWrap` — `Scroll` one line
+*"Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is
+not None and Enable Scroll is on."* + `Show Enable Scroll` over 5 dimmed rows (was 5 sentences); `Layout` one line by
+rule 3 (*"Align Content and Horizontal Gap apply when Multi Line Wrap is On or On Reverse."*); `Box Shadow` unchanged.
+On the Button `paPlay` — `Icon` one line *"Type, Image Source, Icon Source, Spacing, Placement, Size and Color apply
+only when Enable Icon is on."* + `Turn on` over 7 dimmed rows (the census's ×7); `Dimensions` one line. Shots
+`lines/lines-button-icon-{dark,light}.png`, `lines/lines-group-*`. ⚠️ The `scroll` shot framed the top of the panel
+(Dimensions, Layout), not the Scroll group — the reading above is the DOM's.
+`test:ci` **not re-run** for this change: 0 Jasmine specs import the gate modules, and the per-row sentences
+`ModelProxy` stamps are byte-identical (`fb-021` green).
+
+### 6.6 Owed on this task
 
 1. **Richard's look** at the four shots (R8 is his ruling; the wording *"apply once … is on"* is proposed, not ruled).
 2. §3.1 (one tree, 38 row classes), §3.2 (decorators as props), §3.4 (identity — AC2, AC5), §3.5, §3.6, §3.8; AC3,

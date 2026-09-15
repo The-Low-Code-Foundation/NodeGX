@@ -1,5 +1,10 @@
 # CHR-012 — The Community tab
 
+✅ **CLOSED 2026-09-15 (after s8), Richard: *"it's either worthy or passable, you can close it for now and we'll take
+another stab another time."*** Closed as passable, not as WORTHY — a later pass is expected; §7.7's recorded remainders
+are where it starts. **R9 follow-up ruled the same day: the health readout is read *"Nowhere"*** — `mirrorview.healthFrom`
+still computes `health` and nothing reads it; that is the ruling's state, not a gap.
+
 Scoped 2026-09-15 at the end of s6, from Richard's look at CHR-005's shots.
 
 > "005 and 003 are fine but the community tab still looks like shit, the font change is nice."
