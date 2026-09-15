@@ -1,31 +1,3 @@
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 200;
-  src: url('../assets/fonts/Inter/Inter-Light.ttf');
-}
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  src: url('../assets/fonts/Inter/Inter-Regular.ttf');
-}
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  src: url('../assets/fonts/Inter/Inter-Bold.ttf');
-}
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  src: url('../assets/fonts/Inter/Inter-SemiBold.ttf');
-}
-
 /* Display face (wordmark + large headings only) — see custom-properties/fonts.css */
 @font-face {
   font-family: 'Bricolage Grotesque';

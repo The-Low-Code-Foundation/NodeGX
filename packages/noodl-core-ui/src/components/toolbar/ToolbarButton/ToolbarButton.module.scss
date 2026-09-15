@@ -22,9 +22,7 @@
 .Text {
   /* Color is slightly different in the popout */
   color: var(--theme-color-fg-muted);
-
-  /* TODO: Bug there Text doesnt have a font family */
-  font-family: 'OpenSans';
+  font-family: var(--font-family);
 
   &.actionable {
     color: var(--theme-color-fg-default) !important;
