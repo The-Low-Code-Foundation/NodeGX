@@ -373,14 +373,32 @@ export type TemplateSummary = {
    * one direction that matters.
    */
   attestedLicence: string | null;
+  /** CHR-006 (`0029`) — the category as the card reads it. `null` from an older platform or a publisher who gave none. */
+  eyebrow: string | null;
+  /**
+   * CHR-006 — the card's picture as an **absolute URL on the community origin**, or `null`.
+   *
+   * 🔴 **THE PLATFORM SENDS A PATH AND ONLY A TEMPLATE-THUMBNAIL PATH IS BELIEVED.** This value
+   * becomes an `<img src>` in the launcher, so a row that named any other origin, or any other
+   * route, would be the shelf deciding what the editor fetches. Anything but
+   * `/api/v1/community/templates/<slug>/thumbnail…` reads as `null`, and the card draws its
+   * wireframe — the same card an older platform gets.
+   */
+  thumbnail: string | null;
   updatedAt: string;
 };
 
-function readTemplateSummary(raw: unknown): TemplateSummary | null {
+const TEMPLATE_THUMBNAIL_PATH = /^\/api\/v1\/community\/templates\/[a-z0-9-]+\/thumbnail(\?v=\d+)?$/;
+
+/** Exported so a spec grades the refusal without a fetch. `origin` is the client's `baseUrl`. */
+export function readTemplateSummary(raw: unknown, origin = ''): TemplateSummary | null {
   if (!raw || typeof raw !== 'object') return null;
   const r = raw as Record<string, unknown>;
   if (typeof r.slug !== 'string' || typeof r.title !== 'string') return null;
   return {
+    eyebrow: typeof r.eyebrow === 'string' && r.eyebrow.trim() !== '' ? r.eyebrow : null,
+    thumbnail:
+      typeof r.thumbnail === 'string' && TEMPLATE_THUMBNAIL_PATH.test(r.thumbnail) ? `${origin}${r.thumbnail}` : null,
     slug: r.slug,
     title: r.title,
     // ⚠️ `''` and not `null`, unlike `TutorialSummary.summary`. This one is drawn as the
@@ -2163,7 +2181,8 @@ export class CommunityApiClient {
 
     const items: TemplateSummary[] = [];
     for (const entry of raw) {
-      const row = readTemplateSummary(entry);
+      // CHR-006: the origin, so a picture path becomes a URL on the server that sent it.
+      const row = readTemplateSummary(entry, this.baseUrl);
       if (row) items.push(row);
     }
     return { outcome: 'ok', value: { items, page: readPageInfo(read.value?.page, items.length) } };

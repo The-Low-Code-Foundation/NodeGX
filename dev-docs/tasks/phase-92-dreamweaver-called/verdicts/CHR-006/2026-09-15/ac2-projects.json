@@ -1,0 +1,30 @@
+{
+  "dark": [
+    {
+      "title": "chr006-todo",
+      "img": {
+        "prefix": "data:image/png;base64,iV",
+        "loaded": true,
+        "natural": [
+          1263,
+          400
+        ]
+      },
+      "placeholder": false
+    }
+  ],
+  "light": [
+    {
+      "title": "chr006-todo",
+      "img": {
+        "prefix": "data:image/png;base64,iV",
+        "loaded": true,
+        "natural": [
+          1263,
+          400
+        ]
+      },
+      "placeholder": false
+    }
+  ]
+}

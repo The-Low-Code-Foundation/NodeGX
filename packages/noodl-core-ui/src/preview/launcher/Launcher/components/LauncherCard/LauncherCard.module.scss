@@ -16,6 +16,42 @@
   list-style: none;
 }
 
+// CHR-006 — the homepage's Demos grid (`nodegx-web/site/index.html` `.demos`): six tracks, two
+// cards of three, then rows of three cards of two.
+.Grid--feature {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  > .Item {
+    grid-column: span 2;
+  }
+
+  > .Item:nth-child(-n + 2) {
+    grid-column: span 3;
+  }
+
+  // A last row of TWO (7, 10, 13… cards) halves the row instead of leaving a card-sized hole.
+  // Rows after the first start at the 3rd, 6th, 9th… card, so the row-start is `3n`.
+  > .Item:nth-child(3n):nth-last-child(2),
+  > .Item:nth-child(3n):nth-last-child(2) + .Item {
+    grid-column: span 3;
+  }
+
+  @media (max-width: 1000px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    > .Item,
+    > .Item:nth-child(-n + 2),
+    > .Item:nth-child(3n):nth-last-child(2),
+    > .Item:nth-child(3n):nth-last-child(2) + .Item {
+      grid-column: span 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .Item {
   display: flex;
   min-width: 0;
@@ -23,6 +59,24 @@
   > * {
     flex: 1;
   }
+}
+
+.Shot {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.Tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-1-5);
+  min-width: 0;
 }
 
 .Card {

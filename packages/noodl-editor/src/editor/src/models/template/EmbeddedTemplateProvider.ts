@@ -132,6 +132,7 @@ export class EmbeddedTemplateProvider implements ITemplateProvider {
         desc: template.description,
         category: template.category,
         iconURL: template.thumbnail || '',
+        ...(template.eyebrow ? { eyebrow: template.eyebrow } : {}),
         projectURL: `embedded://${id}`,
         needsBackend: templateNeedsBackend(template)
       });

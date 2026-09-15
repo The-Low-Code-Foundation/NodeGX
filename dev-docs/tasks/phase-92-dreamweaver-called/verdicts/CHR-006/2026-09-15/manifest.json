@@ -1,0 +1,90 @@
+{
+  "task": "CHR-006",
+  "date": "2026-09-15",
+  "build": "dev stack (npm run start) on cline-dev 19a24dfd7 + the uncommitted CHR-006 tree; COMMUNITY_URL pointed at a local nodegx-community (next dev :3399, scratch DB, 0029 applied) for the drive only, reverted after (git diff 0 lines)",
+  "shelf": "local: 5 community templates published from OpenNoodl/templates with the live summaries; rocket-school, pixel-dungeon, story-engine, todo-list carry the homepage shots + eyebrows, members-area deliberately neither. Built in: landing-pages (bundled shot), site-builder (none).",
+  "instrument": "drive.js (Templates x 1368x900, 900x700 x dark/light x top/bottom), ac2.js + ac2-projects.js (create from Todo list, read recently_opened_project.json, then the Projects card), drive.js --prefix=arm-unreachable- with the platform stopped",
+  "notes": "PNGs gitignored by ruling; hashes here. The drive state field unreadable:true in arm-unreachable-* is a regex artefact (the partial notice contains \"could not be loaded\"); the screen is the PARTIAL state.",
+  "shots": [
+    {
+      "file": "ac2-after-create.png",
+      "kind": "ac2",
+      "sha256": "b09aca3e1090d6e797ca722c526998471f84c217be6600d027535c4060f11adc"
+    },
+    {
+      "file": "ac2-projects-1368x900-dark.png",
+      "kind": "ac2",
+      "sha256": "d8a6bd26eaf77abcf64885c2ad6102c2430e51c2ae50c297cc0f9a53e535ed1e"
+    },
+    {
+      "file": "ac2-projects-1368x900-light.png",
+      "kind": "ac2",
+      "sha256": "4a93a64a41d3d445eb9d80b60a2718507fecee2debad91ade11173ce8a4de73d"
+    },
+    {
+      "file": "ac2-wizard.png",
+      "kind": "ac2",
+      "sha256": "4d74ccd405ffcff8d5091c7cc2331fba0a6b3ca15bd8b83c8e1e9c56230789a8"
+    },
+    {
+      "file": "arm-unreachable-templates-1368x900-dark-bottom.png",
+      "kind": "arm",
+      "sha256": "f77d11d1a0588d30cc45a0adc366793b1691d7e21cb7cb63138efd39175337f1"
+    },
+    {
+      "file": "arm-unreachable-templates-1368x900-dark-top.png",
+      "kind": "arm",
+      "sha256": "f77d11d1a0588d30cc45a0adc366793b1691d7e21cb7cb63138efd39175337f1"
+    },
+    {
+      "file": "arm-unreachable-templates-1368x900-light-bottom.png",
+      "kind": "arm",
+      "sha256": "90ffb632e7e5516aa22d4ddea5f7cbe7ecfe5dc236b921cd4fce9d367f978430"
+    },
+    {
+      "file": "arm-unreachable-templates-1368x900-light-top.png",
+      "kind": "arm",
+      "sha256": "a13de094dd822f661303c1dc90e28267a229f8e68c3213280856aecfb6585607"
+    },
+    {
+      "file": "templates-1368x900-dark-bottom.png",
+      "kind": "drive",
+      "sha256": "5e29bf88a1e28073022e25b980315dcb34fb0b671d8aa04689dae5661a043f18"
+    },
+    {
+      "file": "templates-1368x900-dark-top.png",
+      "kind": "drive",
+      "sha256": "f97bfaa8857dc632a78c1cfc845e4dcd6e8402e6c7e6b8354aefff7444a2899b"
+    },
+    {
+      "file": "templates-1368x900-light-bottom.png",
+      "kind": "drive",
+      "sha256": "fb5df66893ee4ed4622b3cf1dc419ee10a54badb8879b2bf61da86e2f62ee9ab"
+    },
+    {
+      "file": "templates-1368x900-light-top.png",
+      "kind": "drive",
+      "sha256": "216f9827600cda68b99b0b36464da0fcbd5dbc7ca9a55d8a07ca1c331a5977c4"
+    },
+    {
+      "file": "templates-900x700-dark-bottom.png",
+      "kind": "drive",
+      "sha256": "53935bc2778a03a536fc52ad06b0e1b33f67363daacde0350f57aed810d2708f"
+    },
+    {
+      "file": "templates-900x700-dark-top.png",
+      "kind": "drive",
+      "sha256": "eefc489331814d8eaae344aaacb509bde719f2932bf632e152a9008ae9c86713"
+    },
+    {
+      "file": "templates-900x700-light-bottom.png",
+      "kind": "drive",
+      "sha256": "6c10bbcc762306e0877ab755ac544396ee0890d409867162106285c5bebc3c7e"
+    },
+    {
+      "file": "templates-900x700-light-top.png",
+      "kind": "drive",
+      "sha256": "a6a8348f69558df29e17c0df0203dec653b3705145d3dc04d16de2cb87b69ace"
+    }
+  ]
+}

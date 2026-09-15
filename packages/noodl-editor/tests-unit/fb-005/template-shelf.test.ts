@@ -25,7 +25,12 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import { CommunityApiClient, readBundlePayload, type Read } from '@noodl-models/community/communityapi';
+import {
+  CommunityApiClient,
+  readBundlePayload,
+  readTemplateSummary,
+  type Read
+} from '@noodl-models/community/communityapi';
 import { createProjectFromTemplate, type CreateFromTemplateDeps } from '@noodl-models/template/createFromTemplate';
 import {
   PlatformTemplateProvider,
@@ -98,6 +103,8 @@ describe('templateItemFor', () => {
     // what the platform stores for those. A third-party template carries the licence its
     // submitter attested.
     attestedLicence: null,
+    eyebrow: null,
+    thumbnail: null,
     updatedAt: '2026-08-26T00:00:00.000Z'
   };
 
@@ -119,8 +126,46 @@ describe('templateItemFor', () => {
     });
   });
 
-  it('carries no thumbnail URL, because the platform has no column for one', () => {
+  it('carries no thumbnail URL for a row with no picture — the card draws its wireframe', () => {
     expect(templateItemFor(row).iconURL).toBe('');
+    expect(templateItemFor(row)).not.toHaveProperty('eyebrow');
+  });
+
+  it('CHR-006 — carries the shelf’s picture and eyebrow when the row has them', () => {
+    const src = 'https://community.nodegx.io/api/v1/community/templates/starter-crm/thumbnail?v=3';
+    const item = templateItemFor({ ...row, thumbnail: src, eyebrow: 'Data app · CRM' });
+    expect(item.iconURL).toBe(src);
+    expect(item.eyebrow).toBe('Data app · CRM');
+  });
+});
+
+describe('CHR-006 — readTemplateSummary believes only the platform’s own thumbnail route', () => {
+  const ORIGIN = 'https://community.nodegx.io';
+  const raw = (thumbnail: unknown) => ({ slug: 'todo-list', title: 'Todo list', thumbnail });
+
+  it('turns the route’s path into a URL on the origin that sent it', () => {
+    expect(readTemplateSummary(raw('/api/v1/community/templates/todo-list/thumbnail?v=2'), ORIGIN)?.thumbnail).toBe(
+      `${ORIGIN}/api/v1/community/templates/todo-list/thumbnail?v=2`
+    );
+  });
+
+  it('🔴 refuses any other origin, route or scheme — the shelf does not decide what the editor fetches', () => {
+    for (const hostile of [
+      'https://evil.example/x.webp',
+      '//evil.example/api/v1/community/templates/a/thumbnail',
+      '/api/v1/me',
+      '/api/v1/community/templates/../../me/thumbnail',
+      'data:image/png;base64,AAAA',
+      42
+    ]) {
+      expect(readTemplateSummary(raw(hostile), ORIGIN)?.thumbnail).toBeNull();
+    }
+  });
+
+  it('an older platform that sends neither field reads as two nulls', () => {
+    const row = readTemplateSummary({ slug: 'a', title: 'A' }, ORIGIN);
+    expect(row?.thumbnail).toBeNull();
+    expect(row?.eyebrow).toBeNull();
   });
 });
 
@@ -221,6 +266,8 @@ describe('PlatformTemplateProvider.list', () => {
                 version: 1,
                 fileCount: 2,
                 attestedLicence: null,
+                eyebrow: null,
+                thumbnail: null,
                 updatedAt: ''
               }
             ]
@@ -617,6 +664,9 @@ describe('CommunityApiClient.templates', () => {
       // that into `null` rather than `undefined`. Both mean "no third-party attestation to show",
       // which is why the two are safe to conflate here and nowhere that decides visibility.
       attestedLicence: null,
+      // CHR-006 — the same older platform sends no picture and no eyebrow: two nulls, the wireframe.
+      eyebrow: null,
+      thumbnail: null,
       updatedAt: 'z'
     });
   });

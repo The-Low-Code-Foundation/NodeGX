@@ -62,6 +62,7 @@ import { attachLearningLesson } from '../../models/learninglesson';
 import { LessonsProjectsModel } from '../../models/LessonsProjectModel';
 import LessonTemplatesModel from '../../models/lessontemplatesmodel';
 import { getCloudServices, projectFromDirectory, setCloudServices } from '../../models/projectmodel.editor';
+import { seedTemplateThumbnail } from '../../models/template/seedTemplateThumbnail';
 import { ensureTemplateBackend } from '../../models/templatebackend';
 import { ProjectDocsModel } from '../../models/ProjectDocs/ProjectDocsModel';
 import type { ProjectModel } from '../../models/projectmodel';
@@ -1140,6 +1141,10 @@ export function ProjectsPage(props: ProjectsPageProps) {
         mode === 'template' &&
         projectTemplates.items.find((item) => item.url === templateUrl)?.needsBackend === true;
 
+      // CHR-006 AC2 — the chosen row's picture, read at the same moment for the same reason.
+      const templateThumbnail =
+        mode === 'template' ? projectTemplates.items.find((item) => item.url === templateUrl)?.thumbnail : undefined;
+
       // Store the chosen preset — StyleTokensModel will consume it on editor startup.
       //
       // 🔴 FB-005 T3. Template mode never visits the preset step, so `presetId` is the untouched
@@ -1170,6 +1175,12 @@ export function ProjectsPage(props: ProjectsPageProps) {
               ToastLayer.showError('Could not create project');
               return;
             }
+
+            // CHR-006 AC2 — not awaited: a picture never holds the editor's door, and the seed
+            // never throws. It persists through `LocalProjectsModel`'s `thumbnailChanged` binding.
+            void seedTemplateThumbnail(project, templateThumbnail).then((outcome) => {
+              if (templateThumbnail) console.log(`[CHR-006] template picture: ${outcome}`);
+            });
 
             if (templateNeedsBackend) {
               // Awaited before the route, like `finishScopedProject` below: the

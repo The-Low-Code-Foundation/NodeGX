@@ -85,7 +85,9 @@ import {
   LauncherCard,
   LauncherCardAction,
   LauncherCardGrid,
+  LauncherCardShot,
   LauncherCardTag,
+  LauncherCardTags,
   LauncherCardWireframe
 } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherCard/LauncherCard';
 import { LauncherPage } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherPage';
@@ -270,8 +272,12 @@ export function TemplatesTabBody({
           )}
         </p>
       ) : (
-        <LauncherCardGrid>
-          {rows.map((item) => (
+        <LauncherCardGrid layout="feature">
+          {/* CHR-006 — cards WITH a picture first, each half in shelf order. The first two cards
+              are drawn big, and a big wireframe is the least informative card on the page.
+              ⚠️ A display order only: the filter, its counts and the shelf are untouched. Which
+              two are big is Richard's to rule (task §3.4); this is the default until he does. */}
+          {[...rows.filter((r) => r.thumbnail), ...rows.filter((r) => !r.thumbnail)].map((item) => (
             // ⚠️ NO `aria-pressed`. In the wizard this card is a toggle that records a choice; here
             // it is the control that starts the creation, and a state the markup does not have is
             // worse than none.
@@ -279,10 +285,13 @@ export function TemplatesTabBody({
               key={item.url}
               testId="template-card"
               onClick={() => onUseTemplate?.(item.url)}
-              picture={<LauncherCardWireframe />}
-              // 🔴 The LABEL, not the slug — the category vocabulary is the platform's (`starter`,
-              // `data-app`), which is right for a CHECK constraint and wrong for a card.
-              eyebrow={item.category ? categoryLabel(item.category) : undefined}
+              // 🔴 The shelf's picture or the wireframe, and nothing in between: the slot never
+              // guesses at an image (see the header).
+              picture={item.thumbnail ? <LauncherCardShot src={item.thumbnail} /> : <LauncherCardWireframe />}
+              // The shelf's own line when it wrote one (`Game · ages 8–12`). Otherwise 🔴 the LABEL,
+              // not the slug — the category vocabulary is the platform's (`starter`, `data-app`),
+              // right for a CHECK constraint and wrong for a card.
+              eyebrow={item.eyebrow ?? (item.category ? categoryLabel(item.category) : undefined)}
               title={item.title}
               description={item.description}
               footer={
@@ -290,7 +299,12 @@ export function TemplatesTabBody({
                   {/* 🔴 ALWAYS DRAWN, not revealed on hover: it is the only text on the card saying
                       that clicking it starts a project. */}
                   <LauncherCardAction>Use this template →</LauncherCardAction>
-                  {item.origin && <LauncherCardTag>{item.origin}</LauncherCardTag>}
+                  {(item.backendLabel || item.origin) && (
+                    <LauncherCardTags>
+                      {item.backendLabel && <LauncherCardTag>{item.backendLabel}</LauncherCardTag>}
+                      {item.origin && <LauncherCardTag>{item.origin}</LauncherCardTag>}
+                    </LauncherCardTags>
+                  )}
                 </>
               }
             />

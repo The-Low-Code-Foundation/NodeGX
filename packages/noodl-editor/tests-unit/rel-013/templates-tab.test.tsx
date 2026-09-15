@@ -219,10 +219,40 @@ describe('REL-013 AC1 — the tab draws the registry\u2019s rows', () => {
     expect(words).toContain('Built in');
   });
 
-  it('⚠️ draws no image element at all — there is no thumbnail column and there never will be', () => {
-    // Trap 4. `PlatformTemplateProvider` ships `iconURL: ''` deliberately.
+  // CHR-006 (R4, 2026-09-15) reversed Trap 4: the shelf entry carries a picture now. What survives of
+  // the trap is the half that was always the point — a row with NO picture draws no image at all.
+  it('⚠️ a row with no thumbnail draws no image element — the wireframe, never a guessed picture', () => {
     const tree = render(<TemplatesTabBody gallery={shelfOf(row())} />);
     expect(walk(tree).filter((n) => n.type === 'img').length).toBe(0);
+  });
+
+  it('🔴 …and the KNOWN-FIRING CONTROL: a row WITH a thumbnail draws exactly that image, once', () => {
+    const src = 'https://community.nodegx.io/api/v1/community/templates/todo-list/thumbnail?v=2';
+    const tree = render(<TemplatesTabBody gallery={shelfOf(row({ thumbnail: src }))} />);
+    const images = walk(tree).filter((n) => n.type === 'img');
+    expect(images.map((n) => n.props.src)).toEqual([src]);
+  });
+
+  it('draws the shelf’s eyebrow when it wrote one, and the category label when it did not', () => {
+    const written = text(render(<TemplatesTabBody gallery={shelfOf(row({ eyebrow: 'Game · ages 8–12' }))} />));
+    expect(written).toContain('Game · ages 8–12');
+    expect(written).not.toContain('Data app');
+    const fallback = text(render(<TemplatesTabBody gallery={shelfOf(row())} />));
+    expect(fallback).toContain('Data app');
+  });
+
+  it('draws the backend tag the host worded, and none when the host could not say', () => {
+    expect(text(render(<TemplatesTabBody gallery={shelfOf(row({ backendLabel: 'No backend' }))} />))).toContain(
+      'No backend'
+    );
+    const unsaid = text(render(<TemplatesTabBody gallery={shelfOf(row())} />));
+    expect(unsaid).not.toContain('No backend');
+    expect(unsaid).not.toContain('Needs a backend');
+  });
+
+  it('lays the cards out as the homepage’s feature grid', () => {
+    const tree = render(<TemplatesTabBody gallery={shelfOf(row(), row({ url: 'community://b' }))} />);
+    expect(walk(tree).some((n) => n.type === 'ul' && n.props['data-layout'] === 'feature')).toBe(true);
   });
 
   it('says on every row what clicking it does', () => {

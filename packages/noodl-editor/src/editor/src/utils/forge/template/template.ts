@@ -1,7 +1,10 @@
 export interface TemplateListFilter {}
 
 export interface TemplateItem {
+  /** The card's picture (CHR-006). `''` when the provider has none — the card draws a wireframe. */
   iconURL: string;
+  /** CHR-006 — the category as the card should read it. `undefined` falls back to the category's label. */
+  eyebrow?: string;
   title: string;
   desc: string;
   category: string;

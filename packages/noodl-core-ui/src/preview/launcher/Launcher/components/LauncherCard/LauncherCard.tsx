@@ -72,13 +72,26 @@ export function LauncherCard({
   );
 }
 
+export type LauncherCardGridLayout = 'fill' | 'feature';
+
 /**
- * The grid every card sits in: as many 280px-or-wider columns as fit, so the page is one column at
- * the window's 600px minimum and four at 1368. A list, so a screen reader hears how many there are.
+ * The grid every card sits in. A list, so a screen reader hears how many there are.
+ *
+ * - `fill` (Projects): as many 280px-or-wider columns as fit — one column at the window's 600px
+ *   minimum, four at 1368.
+ * - `feature` (Templates, CHR-006): nodegx.io's Demos section — six tracks, the first two cards
+ *   span three, the rest two, and a last row of two splits the row in halves rather than leaving a
+ *   hole. Two columns below 1000px, one below 640px.
  */
-export function LauncherCardGrid({ children }: { children?: React.ReactNode }) {
+export function LauncherCardGrid({
+  children,
+  layout = 'fill'
+}: {
+  children?: React.ReactNode;
+  layout?: LauncherCardGridLayout;
+}) {
   return (
-    <ul className={css['Grid']}>
+    <ul className={classNames(css['Grid'], layout === 'feature' && css['Grid--feature'])} data-layout={layout}>
       {React.Children.map(children, (child) => (child ? <li className={css['Item']}>{child}</li> : null))}
     </ul>
   );
@@ -92,6 +105,40 @@ export function LauncherCardAction({ children }: { children?: React.ReactNode })
 /** A quiet mono tag in the footer ("Built in"). Not a control. */
 export function LauncherCardTag({ children }: { children?: React.ReactNode }) {
   return <span className={css['Tag']}>{children}</span>;
+}
+
+/** The footer's tags, kept together at the right and wrapping under each other before they crush the action. */
+export function LauncherCardTags({ children }: { children?: React.ReactNode }) {
+  return <span className={css['Tags']}>{children}</span>;
+}
+
+/**
+ * CHR-006 — a card's picture from a URL (a template's shot on the shelf).
+ *
+ * The wireframe is drawn UNDER the image, so a picture that fails to load reveals the same card a
+ * template with no picture gets — and `onError` hides the broken-image glyph. No state: this is
+ * rendered by `TemplatesTabBody`, which must stay hook-free.
+ *
+ * ⚠️ `object-position: top center` (in the stylesheet) is load-bearing: the homepage's shots were
+ * cropped for it, and `center` shows the middle of a page, which reads as random.
+ */
+export function LauncherCardShot({ src }: { src: string }) {
+  return (
+    <>
+      <LauncherCardWireframe />
+      <img
+        className={css['Shot']}
+        src={src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        onError={(event) => {
+          event.currentTarget.hidden = true;
+        }}
+      />
+    </>
+  );
 }
 
 /**

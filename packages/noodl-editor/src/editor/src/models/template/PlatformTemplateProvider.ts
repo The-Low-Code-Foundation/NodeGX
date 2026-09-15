@@ -73,9 +73,11 @@ export function templateItemFor(row: TemplateSummary): TemplateItem {
     title: row.title,
     desc: row.summary,
     category: row.category,
-    // ⚠️ No thumbnail column exists on the platform (T2's stated omission), so this is empty
-    // rather than a URL to somewhere. A card draws a title, a category and a file count.
-    iconURL: '',
+    // CHR-006 (R4, 2026-09-15) reversed T2's omission: `0029` gives the shelf a picture. The reader
+    // has already refused any value that is not the platform's own thumbnail route, so this is
+    // either that URL or `''` — and `''` is the wireframe, exactly what an older platform draws.
+    iconURL: row.thumbnail ?? '',
+    ...(row.eyebrow ? { eyebrow: row.eyebrow } : {}),
     projectURL: `${COMMUNITY_TEMPLATE_SCHEME}${row.slug}`
   };
 }

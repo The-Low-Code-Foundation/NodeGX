@@ -53,7 +53,14 @@ export function galleryFromListing(listing: TemplateListing): {
     description: item.desc,
     category: item.category,
     origin: ORIGIN_LABELS[provider] ?? provider,
-    needsBackend: item.needsBackend
+    needsBackend: item.needsBackend,
+    // CHR-006. `''` is a provider with no picture, and it must reach the card as no picture.
+    thumbnail: item.iconURL || undefined,
+    eyebrow: item.eyebrow,
+    // ⚠️ The words for the card's tag, from the SAME flag creation reads — see
+    // `TemplateChoice.backendLabel` for why the tab gets words and not the flag. A community row
+    // cannot say (`needsBackend` is `undefined` there), so it gets no tag rather than a wrong one.
+    backendLabel: item.needsBackend === undefined ? undefined : item.needsBackend ? 'Needs a backend' : 'No backend'
   }));
 
   if (listing.failures.length === 0) return { items };
