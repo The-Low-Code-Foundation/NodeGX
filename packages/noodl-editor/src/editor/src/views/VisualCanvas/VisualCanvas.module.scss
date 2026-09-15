@@ -130,7 +130,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--theme-color-primary);
   background-color: var(--theme-color-bg-2);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-float);
 
   /* It explains the click; it must never eat the next one. */
   pointer-events: none;
@@ -326,7 +326,7 @@
      border-radius never alter the layout box, so the JS-driven preview size
      and canvas-fit math are untouched. */
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm), 0 0 0 1px var(--theme-color-border-default);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--theme-color-border-default);
 }
 
 .Crashed {

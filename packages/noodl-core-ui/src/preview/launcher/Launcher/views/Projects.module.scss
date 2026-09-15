@@ -102,11 +102,11 @@
   position: relative;
   background-color: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-10);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-6);
   min-width: 400px;
   max-width: 500px;
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
   z-index: 1001;
 }
 
@@ -133,7 +133,7 @@
   /* A <button>, so POL-016's control tone rather than the divider: 3.08 dark /
      3.05 light on its own bg-3 fill, 3.57 / 3.37 on the bg-2 dialog behind it. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
   color: var(--theme-color-fg-highlight);
   font-family: var(--font-family);
   font-size: var(--font-size-md);

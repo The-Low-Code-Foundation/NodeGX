@@ -231,7 +231,7 @@
 .popup-layer-toast {
   position: absolute;
   background-color: var(--theme-color-bg-4);
-  border-radius: 3px;
+  border-radius: var(--radius-default);
   border: 1px solid var(--theme-color-border-strong);
   padding: 5px;
   color: var(--theme-color-fg-highlight);
@@ -259,7 +259,7 @@
 .popup-layer-dragger {
   position: absolute;
   background-color: var(--theme-color-bg-4);
-  border-radius: 3px;
+  border-radius: var(--radius-default);
   border: 1px solid var(--theme-color-border-strong);
   color: var(--theme-color-fg-highlight);
   font-size: 12px;
@@ -279,7 +279,7 @@
   box-sizing: border-box;
   font-weight: bold;
   background-color: var(--popup-layer-tooltip-background-color);
-  border-radius: 2px;
+  border-radius: var(--radius-default);
   border-color: var(--popup-layer-tooltip-border-color);
   border-width: 1px;
   padding: 12px 16px;

@@ -1486,7 +1486,7 @@ div.lesson-content::-webkit-scrollbar-thumb {
   background-color: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-strong);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
 }
 
 /* -------------------------------------------------------------------

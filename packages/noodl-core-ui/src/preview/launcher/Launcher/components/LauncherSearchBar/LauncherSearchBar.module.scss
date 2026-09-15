@@ -20,7 +20,7 @@
      `.TemplateFilter-search`, `NodePickerSearchBar .Field` and `.NameField`.
      4.17 dark / 3.72 light on its own fill, 4.86 / 3.28 on the bg-0 content area. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 8px 12px;
   color: var(--theme-color-fg-muted);
 
@@ -68,7 +68,7 @@
   background: var(--theme-color-bg-1);
   /* Wraps a native <select>; same treatment and same measurements as `.Search`. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 8px 12px;
   color: var(--theme-color-fg-default);
   font-weight: 500;

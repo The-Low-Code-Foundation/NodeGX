@@ -17,7 +17,7 @@ const PILL_STYLE: React.CSSProperties = {
   borderRadius: 'var(--radius-lg)',
   backgroundColor: 'var(--surface-raised)',
   border: '1px solid var(--border)',
-  boxShadow: 'var(--shadow-lg)',
+  boxShadow: 'var(--shadow-toast)',
   cursor: 'pointer',
   maxWidth: '320px'
 };

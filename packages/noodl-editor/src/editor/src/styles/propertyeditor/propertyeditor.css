@@ -131,7 +131,7 @@
   z-index: 10;
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
   overflow: hidden;
   background-color: var(--theme-color-bg-1);
 }

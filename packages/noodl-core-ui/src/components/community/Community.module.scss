@@ -1600,7 +1600,7 @@
   padding: var(--spacing-3);
   background: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-xl);
 }
 
 .HealthValue {
@@ -1641,7 +1641,7 @@
   position: relative;
   width: 112px;
   aspect-ratio: 16 / 9;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   display: flex;
   align-items: center;

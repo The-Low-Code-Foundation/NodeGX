@@ -30,7 +30,7 @@
   &.is-variant-cta {
     color: var(--theme-color-on-primary);
     background-color: var(--theme-color-primary);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-card);
 
     path {
       fill: var(--theme-color-on-primary);
@@ -38,7 +38,7 @@
 
     &:hover:not(:disabled) {
       background-color: var(--theme-color-primary-highlight);
-      box-shadow: var(--shadow-default);
+      box-shadow: var(--shadow-card);
       transform: translateY(-1px);
     }
 

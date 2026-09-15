@@ -12,7 +12,7 @@
      that a reader can identify it. bg-1 fill on the bg-0 content area, so the edge
      measures 4.17 dark / 3.72 light on the card and 4.86 / 3.28 on the ground. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-10);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   cursor: pointer;
 
@@ -142,12 +142,6 @@
   flex-wrap: wrap;
   color: var(--theme-color-fg-muted);
   font-size: var(--font-size-sm);
-
-  /* Mock chip radius is 5px; the shared Chip ships radius-sm (2px). Scoped
-     override rather than editing the editor-wide Chip component (PAR-001). */
-  > *:not(.Edited) {
-    border-radius: var(--radius-5);
-  }
 }
 
 .Edited {

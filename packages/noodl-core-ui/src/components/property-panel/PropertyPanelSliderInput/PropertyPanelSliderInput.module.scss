@@ -37,7 +37,7 @@
     -webkit-appearance: none;
     background-color: var(--theme-color-bg-1);
     border: 1.5px solid var(--theme-color-primary);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-card);
   }
 
   @mixin track {

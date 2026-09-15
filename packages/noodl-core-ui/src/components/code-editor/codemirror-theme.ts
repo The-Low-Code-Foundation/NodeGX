@@ -184,7 +184,7 @@ export function createOpenNoodlTheme(isDark: boolean = currentThemeIsDark()): Ex
         backgroundColor: 'var(--theme-color-bg-3)',
         border: '1px solid var(--theme-color-border-default)',
         borderRadius: '6px',
-        boxShadow: 'var(--shadow-md)',
+        boxShadow: 'var(--shadow-float)',
         overflow: 'hidden',
         fontFamily: "var(--theme-font-mono, 'Monaco', 'Menlo', 'Courier New', monospace)",
         fontSize: '13px'
@@ -301,7 +301,7 @@ export function createOpenNoodlTheme(isDark: boolean = currentThemeIsDark()): Ex
         color: 'var(--theme-color-fg-default)',
         fontSize: '12px',
         maxWidth: '400px',
-        boxShadow: 'var(--shadow-default)'
+        boxShadow: 'var(--shadow-card)'
       },
 
       '.cm-tooltip-lint': {
