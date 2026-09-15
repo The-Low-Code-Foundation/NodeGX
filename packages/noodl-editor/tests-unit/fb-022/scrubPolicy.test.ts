@@ -13,15 +13,15 @@
  * ## 🔴 The precedence pin, which is the real content of this file
  *
  * "Is this a number port" and "does this port render a number field" are different questions,
- * and the second is decided by an ordered `if/else if` chain in `Ports.viewClassForPort`. The
- * margin and padding ports are `{ name: 'number', units: ['px','%'] }` — indistinguishable
- * from Width to a naive check — and they are claimed four branches earlier by
- * `isOfMarginPaddingType`, landing in a widget that already has its own drag.
+ * and the second is decided by the ordered dispatch table, `WIDGET_RULES` (CHR-007; it was an
+ * `if/else if` chain in `Ports.viewClassForPort`). The margin and padding ports are
+ * `{ name: 'number', units: ['px','%'] }` — indistinguishable from Width to a naive check — and
+ * they are claimed earlier by `marginPadding`, landing in a widget that already has its own drag.
  *
- * So the prefix of that chain is **parsed out of the real file** and compared against the
- * literal in `scrubPolicy.ts`. A predicate inserted above the numeric branches fails this
- * suite rather than quietly starting to steal number ports from the policy. That is the
- * difference between having read the list once and being told when it changes.
+ * So the prefix of that table is **read from the registry itself** and compared against the
+ * literal in `scrubPolicy.ts`. A rule inserted above the numeric rows fails this suite rather
+ * than quietly starting to steal number ports from the policy. That is the difference between
+ * having read the list once and being told when it changes.
  *
  * ⚠️ What this cannot see: that a scrub binding reaches an `<input>`, that the drag feels
  * right, or that the value lands in the project. Those are the other three spec files and the
@@ -32,18 +32,17 @@ import * as path from 'path';
 
 import SharedPorts from '../../../noodl-viewer-react/src/node-shared-port-definitions';
 import {
-  PREDICATES_AHEAD_OF_NUMERIC,
+  WIDGETS_AHEAD_OF_NUMERIC,
   isClaimedByAnEarlierRow,
   portTypeName,
   scrubSpecForPortType,
   scrubStartValue
 } from '../../src/editor/src/views/panels/propertyeditor/DataTypes/scrubPolicy';
+import { WIDGET_RULES } from '../../src/editor/src/views/panels/propertyeditor/model/widgets';
 
 // `addDimensions` reads `Noodl.deployed` to decide whether to attach tooltips; `true` skips
 // them, which is the cheaper half and changes no port's type. Same setup as portWireShape.
 (globalThis as { Noodl?: unknown }).Noodl = { deployed: true };
-
-const PORTS_TS = path.join(__dirname, '../../src/editor/src/views/panels/propertyeditor/DataTypes/Ports.ts');
 
 interface CatalogPort {
   name: string;
@@ -83,11 +82,16 @@ const CATALOG: CatalogPort[] = (() => {
   return all;
 })();
 
-/** The ordered predicate names in `Ports.getTypeView`'s dispatch chain, from the real file. */
+/**
+ * The widgets the dispatch tries, in order — `WIDGET_RULES` itself, since CHR-007.
+ *
+ * This used to be parsed out of `Ports.ts`'s `if/else if` chain, and that parse had a hole: its
+ * regex never matched the two early `editorType` returns, so the Logic Builder rows were ahead of
+ * the numeric branches without being in the pinned prefix. The registry is read directly now —
+ * it imports nothing — so the order graded is the order the panel runs.
+ */
 function dispatchPredicateOrder(): string[] {
-  const source = fs.readFileSync(PORTS_TS, 'utf8');
-  const matches = source.match(/(?:if|else if)\s*\((isOf\w+)\(\)\)\s*return\s+\w+;/g) || [];
-  return matches.map((m) => /\((isOf\w+)\(\)\)/.exec(m)[1]);
+  return WIDGET_RULES.map((rule) => rule.widget);
 }
 
 describe('FB-022 AC4 — the corpus is real', () => {
@@ -107,30 +111,30 @@ describe('FB-022 AC4 — the corpus is real', () => {
 });
 
 describe('FB-022 AC4 — the dispatch prefix is pinned, not remembered', () => {
-  it('parses a plausible chain out of Ports.ts', () => {
+  it('reads a plausible order out of the registry', () => {
     const order = dispatchPredicateOrder();
     expect(order.length).toBeGreaterThan(25);
-    expect(order).toContain('isOfNumberWithUnitsType');
-    expect(order).toContain('isOfDimensionType');
-    expect(order).toContain('isOfBasicType');
+    expect(order).toContain('numberWithUnits');
+    expect(order).toContain('dimension');
+    expect(order).toContain('basic');
   });
 
-  // 🔴 THE ARM THAT MATTERS. If somebody inserts a predicate above the numeric branches, this
-  // goes red — and it goes red *here*, beside the comment explaining why the policy has an
-  // exclusion at all, rather than silently in the editor six months later.
-  it('matches the pinned list of predicates that run before the numeric rows', () => {
+  // 🔴 THE ARM THAT MATTERS. If somebody inserts a rule above the numeric rows, this goes red —
+  // and it goes red *here*, beside the comment explaining why the policy has an exclusion at
+  // all, rather than silently in the editor six months later.
+  it('matches the pinned list of widgets tried before the numeric rows', () => {
     const order = dispatchPredicateOrder();
-    const prefix = order.slice(0, order.indexOf('isOfNumberWithUnitsType'));
-    expect(prefix).toEqual([...PREDICATES_AHEAD_OF_NUMERIC]);
+    const prefix = order.slice(0, order.indexOf('numberWithUnits'));
+    expect(prefix).toEqual([...WIDGETS_AHEAD_OF_NUMERIC]);
   });
 
-  // The three numeric branches must still be in the chain at all, and `isOfBasicType` must
-  // still come after `isOfDimensionType` — otherwise a dimension port would render as a plain
-  // number field and the policy's step-from-unit would be describing a row that is not there.
-  it('keeps the three numeric branches in the order the policy assumes', () => {
+  // The three numeric rows must still be in the table at all, and `basic` must still come after
+  // `dimension` — otherwise a dimension port would render as a plain number field and the
+  // policy's step-from-unit would be describing a row that is not there.
+  it('keeps the three numeric rows in the order the policy assumes', () => {
     const order = dispatchPredicateOrder();
-    expect(order.indexOf('isOfNumberWithUnitsType')).toBeLessThan(order.indexOf('isOfDimensionType'));
-    expect(order.indexOf('isOfDimensionType')).toBeLessThan(order.indexOf('isOfBasicType'));
+    expect(order.indexOf('numberWithUnits')).toBeLessThan(order.indexOf('dimension'));
+    expect(order.indexOf('dimension')).toBeLessThan(order.indexOf('basic'));
   });
 });
 

@@ -1,8 +1,7 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
-import { NodeLibrary } from '@noodl-models/nodelibrary';
-import { GATED_PORT_REASON_KEY, type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
+import { type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
 import { capabilityProbes, gateForPort, resolveGateTarget, type GateTarget } from '@noodl-utils/capability-gating';
 import { decoratePortElement } from '@noodl-utils/capability-gating/portDecoration';
 import { describePortElement } from '@noodl-utils/portDescription';
@@ -18,8 +17,6 @@ import {
 } from '@noodl-utils/schemaFieldNotice';
 import SchemaHandler from '@noodl-utils/schemahandler';
 
-import { listPortTypeFor } from '@noodl-core-ui/components/json-editor/utils/listValueCodec';
-
 import View from '../../../../../../shared/ListenableView';
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
 import PopupLayer from '../../../popuplayer';
@@ -34,7 +31,8 @@ import { countFilterableRows, filterGroups, isFilterActive, shouldOfferFilter } 
 import { hintsForNode, HINTABLE_PORTS, HINT_INPUT_PARAMETERS } from '../propertyPanelHints';
 import { ADVANCED_CSS_GROUP, countActivePorts, orderPropertyGroups } from '../propertyPanelTiers';
 import { propertyPanelViewState } from '../propertyPanelViewState';
-import { getEditType } from '../utils';
+import { describeRows, type RowDescriptor, type RowPortLike } from '../model/describeRows';
+import { widgetForPort, type WidgetId } from '../model/widgets';
 import { AlignToolsType } from './AlignTools/AlignToolsType';
 import { BasicType } from './BasicType';
 import { BooleanType } from './BooleanType';
@@ -418,18 +416,34 @@ export class Ports extends View {
     }, 1);
   }
 
+  /**
+   * CHR-007: the panel's rows as data — what `renderParams` draws, answerable without a DOM.
+   *
+   * Every probe is the one `renderParams` used to call inline, so the descriptor is not a second
+   * opinion: `gateForPort` against the backend resolved once, and `isPortConnected` through the same
+   * `ModelProxy` the rows get. The switched-off reason is read off the port, where
+   * `ModelProxy.getPorts` put it.
+   */
+  rowDescriptors(target: GateTarget = this.capabilityTarget()): RowDescriptor[] {
+    const typeName = this.model.type && (this.model.type.name || this.model.type.localName);
+
+    return describeRows({
+      ports: this._getPorts() as readonly RowPortLike[],
+      capabilityGate: (portName) => (typeName ? gateForPort(typeName, portName, target) : undefined),
+      isConnected: (portName) => Boolean(this.model.isPortConnected(portName))
+    });
+  }
+
   /** Render a group's views (and their child views) and collect their elements. */
   renderParams(views): TSFixme[] {
     const els = [];
     const target = this.capabilityTarget();
-    const typeName = this.model.type && (this.model.type.name || this.model.type.localName);
 
-    // ERG-004 §7.7 item 2: the port objects, so a row can be given its own
-    // `description`. Looked up by name rather than read off the view, because
-    // only some `fromPort` implementations keep a `.port` reference — the same
-    // reason the decoration below is a wrapper and not a prop.
-    const portsByName = new Map<string, TSFixme>();
-    for (const port of this._getPorts()) portsByName.set(port.name, port);
+    // CHR-007: every decoration below is read off the row's descriptor. Looked up by the view's
+    // `name`, which only a port row carries — `TabGroup` and `PopoutGroup` set `group` and never
+    // `name` — so a descriptor exists for exactly the views the old per-view lookups reached.
+    const rows = new Map<string, RowDescriptor>();
+    for (const row of this.rowDescriptors(target)) rows.set(row.name, row);
 
     // FB-017 AC4: computed once per group render rather than per row — every row on one node
     // resolves against the same node state, and the answer is an empty map in the normal case.
@@ -439,23 +453,21 @@ export class Ports extends View {
       const v = views[j];
       v.childViews && v.childViews.forEach((v) => v.render()); // Render any child views first
 
+      const row = v.name ? rows.get(v.name) : undefined;
+
       // BCN-010: the one place every row's element passes through, whatever
       // class produced it. See `portDecoration.ts` for why the gate is a wrapper
       // here rather than two props on twenty-nine row classes. ERG-004's
       // description hangs off the same seam, for the same reason — see
       // `portDescription.ts`.
-      const el = describePortElement(v.render(), v.name ? portsByName.get(v.name) : undefined);
-      const gate = typeName && v.name ? gateForPort(typeName, v.name, target) : undefined;
-      const decorated = gate ? decoratePortElement(el, gate, target, v.name) : el;
-      // FB-021 — a port a `dynamicports` condition has switched off. The reason travels on the
-      // port object itself (`ModelProxy.getPorts` put it there), so this is a lookup and not a
-      // second evaluation of the condition: `applyPortConditionsFilterForNode` remains the only
-      // thing that decides, and this only draws what it decided.
-      const switchedOff: PortGateReason | undefined = v.name
-        ? (portsByName.get(v.name) || {})[GATED_PORT_REASON_KEY]
-        : undefined;
+      const el = describePortElement(v.render(), row);
+      const gate = row && row.capabilityGate;
+      const decorated = gate ? decoratePortElement(el, gate as TSFixme, target, v.name) : el;
+      // FB-021 — a port a `dynamicports` condition has switched off. `applyPortConditionsFilterForNode`
+      // remains the only thing that decides; the descriptor carries what it decided.
+      const switchedOff: PortGateReason | undefined = row && row.switchedOff;
       const gated = applyPortGate(decorated as TSFixme, switchedOff, {
-        isConnected: Boolean(v.name && this.model.isPortConnected(v.name)),
+        isConnected: Boolean(row && row.connected),
         onFocusGate: switchedOff ? () => this.focusGatePort(switchedOff.gatePortName) : undefined
       });
       // FB-017 AC4. Last, so the note sits under the gate's reason rather than inside the
@@ -787,288 +799,55 @@ export class Ports extends View {
   setParameter(name, newvalue) {
     this.model.setParameter(name, newvalue, { undo: true, label: 'edit parameter' });
   }
+  /**
+   * CHR-007: which row class a port gets. The decision is `widgetForPort` (`model/widgets.ts`), an
+   * ordered table that needs no DOM; this only maps its answer to a class. BCN-003b's two filter
+   * ports share `byobFilter`.
+   */
+  private static readonly WIDGET_CLASSES: Record<WidgetId, TSFixme> = {
+    logicBuilderWorkspace: LogicBuilderWorkspaceType,
+    logicBuilderHidden: LogicBuilderHiddenType,
+    alignTools: AlignToolsType,
+    sizeMode: SizeModeType,
+    enum: EnumType,
+    color: ColorType,
+    boolean: BooleanType,
+    textArea: TextAreaType,
+    codeEditor: CodeEditorType,
+    listValue: ListValueType,
+    marginPadding: MarginPaddingType,
+    numberWithUnits: NumberWithUnits,
+    dimension: Dimension,
+    identifier: IdentifierType,
+    basic: BasicType,
+    image: ImageType,
+    icon: IconType,
+    font: FontType,
+    textStyle: TextStyleType,
+    component: ComponentType,
+    sourceCode: SourceCodeType,
+    stringList: StringListType,
+    resizing: ResizingType,
+    variable: VariableType,
+    curve: CurveType,
+    byobFilter: ByobFilterType,
+    querySorting: QuerySortingType,
+    pages: PagesType,
+    propList: PropListType,
+    workflowCondition: WorkflowConditionType,
+    workflowCases: WorkflowCasesType,
+    workflowValue: WorkflowValueType,
+    workflowParams: WorkflowParamsType,
+    workflowTransform: WorkflowTransformType,
+    workflowValidate: WorkflowValidateType,
+    workflowBackoff: WorkflowBackoffType,
+    workflowTriggerInfo: WorkflowTriggerInfoType,
+    workflowFunctionRef: WorkflowFunctionRefType
+  };
+
   viewClassForPort(p) {
-    const type = getEditType(p);
-
-    // Check for custom editorType
-    if (typeof type === 'object' && type.editorType === 'logic-builder-workspace') {
-      return LogicBuilderWorkspaceType;
-    }
-
-    // Hidden type for internal Logic Builder parameters (renders nothing)
-    if (typeof type === 'object' && type.editorType === 'logic-builder-hidden') {
-      return LogicBuilderHiddenType;
-    }
-
-    // Align tools types
-    function isOfAlignToolsType() {
-      return NodeLibrary.nameForPortType(type) === 'enum' && typeof type === 'object' && type.alignComp !== undefined;
-    }
-
-    // Size mode types
-    function isOfSizeModeType() {
-      return NodeLibrary.nameForPortType(type) === 'enum' && typeof type === 'object' && type.sizeComp === 'mode';
-    }
-
-    // Enum types
-    function isOfEnumType() {
-      return NodeLibrary.nameForPortType(type) === 'enum' && typeof type === 'object' && type.enums;
-    }
-
-    // Color types
-    function isOfColorType() {
-      return NodeLibrary.nameForPortType(type) === 'color';
-    }
-
-    // Boolean types
-    function isOfBooleanType() {
-      return NodeLibrary.nameForPortType(type) === 'boolean';
-    }
-
-    // Basic types
-    function isOfBasicType() {
-      const name = NodeLibrary.nameForPortType(type);
-      return name === 'string' || name === 'number';
-    }
-
-    /**
-     * ## Which string ports get `fx` — POL-011, decided rather than inherited
-     *
-     * A `string` port can reach four different views, and until POL-011 **only
-     * `BasicType` had heard of expressions**. So Button's `label` offered `fx`
-     * and the Text node's `text` did not, purely because the latter is declared
-     * `multiline` and multiline had its own view. That was never a decision.
-     *
-     * It is one now, per route:
-     *
-     * | Route | `fx` | Why |
-     * |---|---|---|
-     * | `BasicType` — plain `string`/`number` | **yes** | the original, unchanged |
-     * | `TextAreaType` — `multiline` | **yes** | the reported gap; the literal is multiline, the expression is one line |
-     * | `CodeEditorType` — `codeeditor` | **no** | the value already *is* code; an expression producing code is a second language in one field, and nothing asked for it |
-     * | `IdentifierType` — `identifierOf` | **no** | a name chosen from a set the project holds. An expression could name something that does not exist, and the picker could not show it. Same reasoning as `EnumType` |
-     *
-     * The two `no`s are structural rather than a flag: neither view renders
-     * `PropertyPanelInput`, so neither can offer the toggle — `CodeEditorType`
-     * is its own editor and `IdentifierType` is a `PickerTypeView`. A
-     * `supportsExpression: false` on them would be a prop nothing reads. The
-     * decision is recorded here, at the one place that routes them.
-     */
-    function isOfTextAreaType() {
-      return NodeLibrary.nameForPortType(type) === 'string' && typeof type === 'object' && type.multiline;
-    }
-
-    // Is of code editor type
-    function isOfCodeEditorType() {
-      return NodeLibrary.nameForPortType(type) === 'string' && typeof type === 'object' && type.codeeditor;
-    }
-
-    // Array- and object-typed ports both edit as a literal.
-    //
-    // Without the object branch `viewClassForPort` returned undefined and `_getPorts`
-    // filtered the row out altogether, so an object-typed input was connection-only with
-    // nothing on screen to say why — you could not give a Global Store its starting shape
-    // or an SSE call its headers without wiring a Function node whose whole body was a
-    // literal. `Node.setInputValue` parses a string arriving on either type.
-    //
-    // ERG-003: both now route to `ListValueType` (the shared `JSONEditor`) rather than to
-    // `CodeEditorType`, so they gain a visual builder. The stored form is unchanged, and
-    // `listPortTypeFor` is the one definition of "is this a list-shaped port" — the catalog
-    // test derives its expectation from the same function, so the set of ports the shared
-    // editor covers cannot drift from the set it is claimed to cover.
-    function isOfListValueType() {
-      const t = listPortTypeFor(type);
-      // ⚠️ `stringlist` and `proplist` have their own row types and are deliberately absent.
-      // `optionslist` (§3, Richard 2026-09-04) joins the shared editor because its whole point is
-      // the visual list builder — the codec decides how a row is spelled, this only decides which
-      // editor opens.
-      return t === 'array' || t === 'object' || t === 'optionslist';
-    }
-
-    // Image ref type
-    function isOfImageType() {
-      return NodeLibrary.nameForPortType(type) === 'image';
-    }
-
-    // Icon ref type
-    function isOfIconType() {
-      return NodeLibrary.nameForPortType(type) === 'icon';
-    }
-
-    // Font ref type
-    function isOfFontType() {
-      return NodeLibrary.nameForPortType(type) === 'font';
-    }
-
-    // Text style type
-    function isOfTextStyleType() {
-      return NodeLibrary.nameForPortType(type) === 'textStyle';
-    }
-
-    // Component reference type
-    function isOfComponentType() {
-      return NodeLibrary.nameForPortType(type) === 'component';
-    }
-
-    // Number with units
-    function isOfNumberWithUnitsType() {
-      return NodeLibrary.nameForPortType(type) === 'number' && type.units !== undefined;
-    }
-
-    // Dimension type (number, unit dropdown and special boolean for fixed dimension)
-    function isOfDimensionType() {
-      return NodeLibrary.nameForPortType(type) === 'dimension';
-    }
-
-    // Is source code file
-    function isOfSourceCodeFileType() {
-      return NodeLibrary.nameForPortType(type) === 'source';
-    }
-
-    // Is string list type
-    function isOfStringListType() {
-      return NodeLibrary.nameForPortType(type) === 'stringlist';
-    }
-
-    // Is margin padding type
-    function isOfMarginPaddingType() {
-      //  return NodeLibrary.nameForPortType(type) === 'margins' || NodeLibrary.nameForPortType(type) === 'padding';
-      return type && type.marginPaddingComp !== undefined;
-    }
-
-    // Is of resizing type
-    function isOfResizingType() {
-      return NodeLibrary.nameForPortType(type) === 'resizing';
-    }
-
-    // Is of variable type
-    function isOfVariableType() {
-      return NodeLibrary.nameForPortType(type) === 'variable';
-    }
-
-    // Is of identifier
-    function isOfIdentifierType() {
-      return NodeLibrary.nameForPortType(type) === 'string' && typeof type === 'object' && type.identifierOf;
-    }
-
-    // Is of curve
-    function isOfCurveType() {
-      return NodeLibrary.nameForPortType(type) === 'curve';
-    }
-
-    // Is of query
-    function isOfQueryFilterType() {
-      return NodeLibrary.nameForPortType(type) === 'query-filter';
-    }
-
-    function isOfQuerySortingType() {
-      return NodeLibrary.nameForPortType(type) === 'query-sorting';
-    }
-
-    function isOfByobFilterType() {
-      return NodeLibrary.nameForPortType(type) === 'byob-filter';
-    }
-
-    // Is of pages type
-    function isOfPagesType() {
-      return NodeLibrary.nameForPortType(type) === 'pages';
-    }
-
-    // Is of proplist
-    // WFA-004: workflow step params. Three more port types beside the thirty
-    // above — the registry's intended extension point.
-    function isOfWorkflowConditionType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-condition';
-    }
-
-    function isOfWorkflowCasesType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-cases';
-    }
-
-    function isOfWorkflowValueType() {
-      const name = NodeLibrary.nameForPortType(type);
-      return name === 'workflow-value' || name === 'workflow-path';
-    }
-
-    // CWF-001: `call-function`'s param mapping — a dictionary of author-chosen
-    // names, each holding one of the values above.
-    function isOfWorkflowParamsType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-params';
-    }
-
-    // CWF-004: a transform's `output` — one row per field of the object the
-    // step produces, each row a value or one operation from the served table.
-    function isOfWorkflowTransformType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-transform';
-    }
-
-    // CWF-004 slice 2: a validate step's `rules` — one row per thing that must
-    // be true, each a path assertion or a condition.
-    function isOfWorkflowValidateType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-validate';
-    }
-
-    // CWF-005: an attempt count that shows the delay sequence it implies.
-    function isOfWorkflowBackoffType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-backoff';
-    }
-
-    // WFA-005: a read-only fact about a trigger — a backend object drawn on the
-    // canvas as an entry node. A row, not a control.
-    function isOfWorkflowTriggerInfoType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-trigger-info';
-    }
-
-    // WFA-006: the cloud function a step calls. A name, plus what it resolves to
-    // in the project and on the backend — which are two different questions.
-    function isOfWorkflowFunctionRefType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-function-ref';
-    }
-
-    function isOfPropListType() {
-      return NodeLibrary.nameForPortType(type) === 'proplist';
-    }
-
-    if (isOfAlignToolsType()) return AlignToolsType;
-    else if (isOfSizeModeType()) return SizeModeType;
-    else if (isOfEnumType()) return EnumType;
-    else if (isOfColorType()) return ColorType;
-    else if (isOfBooleanType()) return BooleanType;
-    else if (isOfTextAreaType()) return TextAreaType;
-    else if (isOfCodeEditorType()) return CodeEditorType;
-    else if (isOfListValueType()) return ListValueType;
-    else if (isOfMarginPaddingType()) return MarginPaddingType;
-    else if (isOfNumberWithUnitsType()) return NumberWithUnits;
-    else if (isOfDimensionType()) return Dimension;
-    else if (isOfIdentifierType()) return IdentifierType;
-    else if (isOfBasicType()) return BasicType;
-    else if (isOfImageType()) return ImageType;
-    else if (isOfIconType()) return IconType;
-    else if (isOfFontType()) return FontType;
-    else if (isOfTextStyleType()) return TextStyleType;
-    else if (isOfComponentType()) return ComponentType;
-    else if (isOfSourceCodeFileType()) return SourceCodeType;
-    else if (isOfStringListType()) return StringListType;
-    else if (isOfResizingType()) return ResizingType;
-    else if (isOfVariableType()) return VariableType;
-    else if (isOfCurveType()) return CurveType;
-    // BCN-003b: both filter ports render the one builder. `QueryFilterType` and
-    // the `QueryEditor` filter components it rendered are deleted, not
-    // deprecated — a second builder for one idea is what this task retired.
-    else if (isOfQueryFilterType()) return ByobFilterType;
-    else if (isOfQuerySortingType()) return QuerySortingType;
-    else if (isOfByobFilterType()) return ByobFilterType;
-    else if (isOfPagesType()) return PagesType;
-    else if (isOfPropListType()) return PropListType;
-    else if (isOfWorkflowConditionType()) return WorkflowConditionType;
-    else if (isOfWorkflowCasesType()) return WorkflowCasesType;
-    else if (isOfWorkflowValueType()) return WorkflowValueType;
-    else if (isOfWorkflowParamsType()) return WorkflowParamsType;
-    else if (isOfWorkflowTransformType()) return WorkflowTransformType;
-    else if (isOfWorkflowValidateType()) return WorkflowValidateType;
-    else if (isOfWorkflowBackoffType()) return WorkflowBackoffType;
-    else if (isOfWorkflowTriggerInfoType()) return WorkflowTriggerInfoType;
-    else if (isOfWorkflowFunctionRefType()) return WorkflowFunctionRefType;
+    const widget = widgetForPort(p);
+    return widget === undefined ? undefined : Ports.WIDGET_CLASSES[widget];
   }
   _getPorts(): readonly Port[] {
     let ports = this.model.getPorts('input');

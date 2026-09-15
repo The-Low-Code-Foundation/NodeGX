@@ -51,9 +51,10 @@ export type ConnectedRowPolicy =
   | { kind: 'deferred'; reason: string };
 
 /**
- * Keyed by the class names the `Ports.ts` dispatch chain returns. The test parses that
- * chain out of the real file rather than taking a list from here, so this table is graded
- * against the code that actually decides which row a port gets.
+ * Keyed by the class names `Ports.WIDGET_CLASSES` maps the dispatch to (CHR-007). The test
+ * reads that map out of the real file, and checks it against `WIDGET_RULES`, rather than taking
+ * a list from here — so this table is graded against the code that actually decides which row a
+ * port gets.
  */
 export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
   // ── chips ────────────────────────────────────────────────────────────────
@@ -97,6 +98,20 @@ export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
     reason:
       'The box-model editor edits four sides as four ports in one control. Same reason as ' +
       'AlignToolsType: no single port for a chip to be about. FB-016 owns this control.'
+  },
+  // CHR-007: dispatched all along, and invisible to the old chain parse — both are early
+  // `editorType` returns the regex never matched.
+  LogicBuilderWorkspaceType: {
+    kind: 'exception',
+    reason:
+      'Its port (`Logic Builder.workspace`) is declared `allowEditOnly`, so no connection can ' +
+      'drive it: there is no connected state for a chip to show. The row opens the workspace editor.'
+  },
+  LogicBuilderHiddenType: {
+    kind: 'exception',
+    reason:
+      'Renders nothing (`display: none`) for an internal, `allowEditOnly` parameter ' +
+      '(`Logic Builder.generatedCode`) — there is no row to put a chip on and no wire that can reach it.'
   },
 
   // ── deferred: one port, bespoke editor ───────────────────────────────────

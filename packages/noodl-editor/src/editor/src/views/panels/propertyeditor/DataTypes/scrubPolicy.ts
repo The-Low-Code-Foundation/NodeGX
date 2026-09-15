@@ -14,64 +14,76 @@
  * ## 🔴 The precedence trap, which is real and cost a rewrite
  *
  * "Is this a number port" is **not** the same question as "does this port render a number
- * field". `Ports.viewClassForPort` is an ordered `if/else if` chain, and a predicate earlier
- * in it takes the port before the numeric branches ever run. The margin and padding ports are
- * exactly this: they are `{ name: 'number', units: ['px','%'] }` — indistinguishable from
- * Width to a naive check — and they are claimed by `isOfMarginPaddingType`, four branches
- * earlier, because they carry `marginPaddingComp`. They render inside the margin/padding box
- * widget, which **already has its own drag** (POL-012), so a scrub binding built for them
- * would be a second gesture on a control that is not there.
+ * field". The dispatch (`model/widgets.ts`, `WIDGET_RULES`) is an ordered table, and a rule
+ * earlier in it takes the port before the numeric rows are ever tried. The margin and padding
+ * ports are exactly this: they are `{ name: 'number', units: ['px','%'] }` — indistinguishable
+ * from Width to a naive check — and they are claimed by `marginPadding`, earlier in the table,
+ * because they carry `marginPaddingComp`. They render inside the margin/padding box widget,
+ * which **already has its own drag** (POL-012), so a scrub binding built for them would be a
+ * second gesture on a control that is not there.
  *
- * Every predicate ahead of the numeric branches was read to find that one, and the reading is
- * pinned in {@link PREDICATES_AHEAD_OF_NUMERIC} rather than trusted to stay true: the sweep
- * beside this file re-derives the real prefix out of `Ports.ts` and fails when it grows, so a
- * predicate inserted above `isOfNumberWithUnitsType` cannot quietly start stealing number
- * ports from the scrub policy. That is the difference between having checked a list once and
- * being told when the list changes.
+ * CHR-007 made the table data, so the exclusion is now asked of the table itself rather than
+ * restated: see {@link isClaimedByAnEarlierRow}. The prefix is still pinned in
+ * {@link WIDGETS_AHEAD_OF_NUMERIC}, and the sweep beside this file compares it with the real
+ * order, so a rule inserted above `numberWithUnits` is a red rather than a silent change.
  *
- * ## What this module deliberately restates
- *
- * `nameForPortType` is `typeof type === 'string' ? type : type.name` — four tokens of
- * `NodeLibrary`, a class that reaches `window.NodeLibraryData`. It is restated here, the way
- * `portTypes.ts` restates `canCastPortType`, so that nothing in this file imports the editor
- * and the whole policy is gradeable in the plain-Node runner against the real shipped
- * catalog. If that rule changes, this is the twin that has to change with it.
+ * ⚠️ The pin used to be parsed out of `Ports.ts`'s `if/else if` chain, and that parse missed the
+ * two early `editorType` returns. One of them *can* claim a number port — a `number` declaring
+ * `editorType: 'logic-builder-workspace'` renders the Logic Builder row — so the old "only
+ * `marginPaddingComp` can steal a number" was false in principle. No shipped port has that shape.
  */
 import { scrubStepForUnit } from '@noodl-core-ui/components/property-panel/scrub';
 
-/** `NodeLibrary.nameForPortType`, restated. See the module note. */
+import { nameForPortType } from '@noodl-models/nodelibrary/portTypeName';
+
+import { widgetForPort, type WidgetId } from '../model/widgets';
+
+/** `NodeLibrary.nameForPortType` — now the one import-free definition, not a restated twin. */
 export function portTypeName(type: unknown): string | undefined {
-  if (!type) return undefined;
-  return typeof type === 'string' ? type : (type as { name?: string }).name;
+  return nameForPortType(type as Parameters<typeof nameForPortType>[0]);
 }
 
 /**
- * The predicates `Ports.viewClassForPort` runs **before** it reaches `isOfNumberWithUnitsType`.
+ * The widgets the dispatch tries **before** it reaches `numberWithUnits`.
  *
- * Pinned as a literal on purpose: a list derived from the file it constrains grows silently to
- * match it and can never fail. `scrubPolicy.test.ts` compares this against the real chain.
+ * Pinned as a literal on purpose: a list derived from the table it constrains grows silently to
+ * match it and can never fail. `scrubPolicy.test.ts` compares this against `WIDGET_RULES`.
  */
-export const PREDICATES_AHEAD_OF_NUMERIC: readonly string[] = [
-  'isOfAlignToolsType',
-  'isOfSizeModeType',
-  'isOfEnumType',
-  'isOfColorType',
-  'isOfBooleanType',
-  'isOfTextAreaType',
-  'isOfCodeEditorType',
-  'isOfListValueType',
-  'isOfMarginPaddingType'
+export const WIDGETS_AHEAD_OF_NUMERIC: readonly WidgetId[] = [
+  'logicBuilderWorkspace',
+  'logicBuilderHidden',
+  'alignTools',
+  'sizeMode',
+  'enum',
+  'color',
+  'boolean',
+  'textArea',
+  'codeEditor',
+  'listValue',
+  'marginPadding'
 ];
 
+/** The rows a scrub is for. */
+const NUMERIC_WIDGETS: ReadonlySet<WidgetId> = new Set<WidgetId>(['numberWithUnits', 'dimension', 'basic']);
+
 /**
- * The one predicate in {@link PREDICATES_AHEAD_OF_NUMERIC} that can match a `number` port.
+ * Whether a rule ahead of the numeric rows takes this **numeric** port — asked of the dispatch,
+ * not restated.
  *
- * The other eight test a different type name (`enum`, `color`, `boolean`, `string`,
- * `array`/`object`) and cannot. This is the exclusion, stated as a property of the port so
- * that it reads the same way the dispatch does.
+ * 🔴 Only a `number` or `dimension` port can be "claimed earlier"; for any other type the question
+ * does not arise, and the answer is `false`. Asking the table about every port would call every
+ * enum, colour and boolean "claimed" (40 of the shared mixins' ports, measured) — true of the
+ * dispatch, and meaningless for a policy about number fields. Over the shipped mixins this reads
+ * exactly the eight margin and padding ports, as the old `marginPaddingComp` check did.
+ *
+ * @param type the port's **edit** type, as {@link scrubSpecForPortType} receives it.
  */
 export function isClaimedByAnEarlierRow(type: unknown): boolean {
-  return typeof type === 'object' && type !== null && (type as { marginPaddingComp?: unknown }).marginPaddingComp !== undefined;
+  const name = portTypeName(type);
+  if (name !== 'number' && name !== 'dimension') return false;
+
+  const widget = widgetForPort({ type });
+  return widget !== undefined && !NUMERIC_WIDGETS.has(widget);
 }
 
 export interface ScrubSpec {

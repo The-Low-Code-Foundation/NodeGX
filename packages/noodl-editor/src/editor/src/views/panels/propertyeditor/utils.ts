@@ -2,8 +2,11 @@ import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphC
 
 import { ParameterValueResolver } from '@noodl-utils/ParameterValueResolver';
 
+import { editTypeOf } from './model/widgets';
+
+/** The type a port is edited as — `editAsType` when it declares one. CHR-007 moved the body beside the dispatch. */
 export function getEditType(p) {
-  return p.type?.editAsType ? p.type.editAsType : p.type;
+  return editTypeOf(p);
 }
 
 /* ----------------------------------------------------------------------------

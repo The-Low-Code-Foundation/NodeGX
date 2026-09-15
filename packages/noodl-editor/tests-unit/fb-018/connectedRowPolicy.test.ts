@@ -1,12 +1,20 @@
 /**
  * FB-018 AC2 — every property row class either chips or has a recorded reason.
  *
- * 🔴 THE POPULATION COMES FROM `Ports.ts`, NOT FROM THE TABLE UNDER TEST. The dispatch
- * chain at the bottom of `Ports.getTypeView` is what actually decides which row class a
- * port gets, so it is parsed out of the real file here. A sweep that took its list of
- * classes from `connectedRowPolicy.ts` would be checking that file against itself and
- * would pass forever — including on the exact failure this task exists to prevent, which
- * is a row class nobody thought about.
+ * 🔴 THE POPULATION COMES FROM `Ports.ts`, NOT FROM THE TABLE UNDER TEST. `Ports.WIDGET_CLASSES`
+ * is what actually decides which row class a port gets, so it is parsed out of the real file
+ * here. A sweep that took its list of classes from `connectedRowPolicy.ts` would be checking
+ * that file against itself and would pass forever — including on the exact failure this task
+ * exists to prevent, which is a row class nobody thought about.
+ *
+ * CHR-007 turned the old `if (isOf…()) return X;` chain into a registry, and retargeting this
+ * parse found a hole the old one had: its regex never matched the two early `editorType`
+ * returns, so `LogicBuilderWorkspaceType` and `LogicBuilderHiddenType` were dispatched and never
+ * in the population. The map is also checked against `WIDGET_RULES` in both directions — a widget
+ * the dispatch can return with no class, or a class no rule can reach, is a red here.
+ *
+ * `Ports.ts` itself cannot load in this runner (it reaches the project model), which is why the
+ * map is read as text. `WIDGET_RULES` imports nothing, so it is read for real.
  *
  * ⚠️ WHAT THIS FILE DOES NOT DO. It grades the RECORD, not the RENDERING. A `chip` entry
  * here passing proves somebody wrote `chip`; `bindingChipRows.test.tsx` is what renders
@@ -21,29 +29,44 @@ import {
   CONNECTED_ROW_POLICY,
   DEFERRED_ROW_CLASSES
 } from '../../src/editor/src/views/panels/propertyeditor/DataTypes/connectedRowPolicy';
+import { WIDGET_RULES } from '../../src/editor/src/views/panels/propertyeditor/model/widgets';
 
 const PORTS_TS = path.join(
   __dirname,
   '../../src/editor/src/views/panels/propertyeditor/DataTypes/Ports.ts'
 );
 
+/** `Ports.WIDGET_CLASSES`, read out of the real file: widget id → row class name. */
+function widgetClassMap(): Record<string, string> {
+  const source = fs.readFileSync(PORTS_TS, 'utf8');
+  const block = /WIDGET_CLASSES:\s*Record<WidgetId,\s*TSFixme>\s*=\s*\{([\s\S]*?)\n\s*\};/.exec(source);
+  const map: Record<string, string> = {};
+  if (!block) return map;
+  for (const m of block[1].matchAll(/^\s*(\w+):\s*(\w+),?\s*$/gm)) map[m[1]] = m[2];
+  return map;
+}
+
 /**
- * The class names `getTypeView`'s dispatch chain can return.
+ * The class names the dispatch can return.
  *
- * ⚠️ `ByobFilterType` is returned by two different branches (the query filter port and the
- * byob filter port both render the one builder — BCN-003b), so the raw match list is
- * longer than the set. Deduplicating is correct; asserting on the raw length would break
- * the next time two port shapes share a row, which is a thing this codebase does on
- * purpose.
+ * ⚠️ Deduplicated: two widgets may share a row class, which this codebase does on purpose, and
+ * asserting on the raw length would break the day it happens again.
  */
 function dispatchedRowClasses(): string[] {
-  const source = fs.readFileSync(PORTS_TS, 'utf8');
-  const matches = source.match(/(?:if|else if)\s*\(isOf\w+\(\)\)\s*return\s+(\w+);/g) || [];
-  const names = matches.map((m) => /return\s+(\w+);/.exec(m)[1]);
-  return Array.from(new Set(names)).sort();
+  return Array.from(new Set(Object.values(widgetClassMap()))).sort();
 }
 
 describe('FB-018 — the connected-row policy covers every row class', () => {
+  // The population is only as good as the map it is read from. A widget the registry can return
+  // with no class would be a port with no row; a class no rule reaches is dead weight that would
+  // still demand a policy entry. Both directions, against the registry itself.
+  it('maps exactly the widgets the registry can return', () => {
+    const mapped = Object.keys(widgetClassMap()).sort();
+    const ruled = Array.from(new Set(WIDGET_RULES.map((rule) => rule.widget))).sort();
+    expect(ruled.length).toBeGreaterThan(25);
+    expect(mapped).toEqual(ruled);
+  });
+
   // A parser that silently matched nothing would make every "no missing rows" assertion
   // below pass on an empty set. So the population is checked for plausibility first, and
   // for a landmark that must be in it: `Dimension` is the row the task was filed about.
