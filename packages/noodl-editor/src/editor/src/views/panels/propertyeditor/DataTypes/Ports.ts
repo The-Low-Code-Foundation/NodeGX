@@ -601,6 +601,44 @@ export class Ports extends View {
   }
 
   /**
+   * FB-017 AC4's notes, applied once the rows they attach to are in the DOM — CHR-008 §3.2.
+   *
+   * 🔴 **A bare `setTimeout(0)` here drew nothing on a fresh selection, and only there.** Measured
+   * (`verdicts/CHR-008/2026-09-16/`): typing a radius drew the note; selecting away and back with the
+   * radius still set drew none, and a frame-by-frame trace of the reselect showed the marked rows
+   * arriving at **t = 60 ms** — long after a `setTimeout(0)` had already run and queried
+   * `[data-hint-ports]` against a panel with no rows in it yet. The live path worked precisely because
+   * its rows were committed by an earlier render. Half a feature, and invisible to every spec.
+   *
+   * So this retries on the same bounded pattern — and for the same reason — as {@link settleScroll}
+   * directly below: React commits asynchronously, and the first render of a newly selected node runs
+   * before the panel is mounted at all.
+   *
+   * ⚠️ `applyPortHint` stays the ONE thing that draws a note, in both paths. Drawing it from
+   * `PropertyRow` instead would put React and `refreshHints` in charge of the same DOM node — and
+   * `applyPortHint` removes any note it finds before adding one, which is not a thing to do to a child
+   * React owns. The row is marked declaratively; the note is written in place, which is what lets a
+   * hint change while a field is focused without rebuilding the row (§8: a rebuild costs the caret).
+   */
+  settleHints(attempt = 0): void {
+    setTimeout(
+      () => {
+        if (!this.el) return;
+
+        // Nothing marked yet means React has not committed these rows — not that there is nothing to
+        // say. A node with no hintable ports falls through the attempts and applies harmlessly.
+        if (this.el.querySelectorAll(`[${HINT_PORTS_ATTRIBUTE}]`).length === 0 && attempt < SCROLL_BIND_ATTEMPTS) {
+          this.settleHints(attempt + 1);
+          return;
+        }
+
+        this.refreshHints();
+      },
+      attempt === 0 ? 0 : 50
+    );
+  }
+
+  /**
    * CHR-008 §3.4 — put the panel where this node was left, now, in the caller's task.
    *
    * For the moment a kept-mounted panel swaps one node's view for the next: called in the same task
@@ -872,13 +910,8 @@ export class Ports extends View {
     //React commits asynchronously, so this has to wait for the rows to be in the DOM.
     this.settleScroll(scrollTop);
 
-    // CHR-008 §3.2 — the structural notes, drawn onto the rows React has just committed.
-    //
-    // `PropertyRow` marks each row with `data-hint-ports`; `applyPortHint` still draws the note
-    // itself, in place, because that is what lets `refreshHints` update one while a field is
-    // focused without rebuilding the row (FB-017's whole reason, and §8 measured what a rebuild
-    // costs). Deferred for the same reason `settleScroll` is: React has not committed yet.
-    setTimeout(() => this.refreshHints(), 0);
+    // CHR-008 §3.2 — the structural notes, once React has actually committed the rows.
+    this.settleHints();
   }
   render() {
     this._portsHash = undefined; // Clear cache

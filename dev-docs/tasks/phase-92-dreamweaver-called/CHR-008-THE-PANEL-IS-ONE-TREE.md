@@ -453,16 +453,65 @@ it reddens. A non-compiling arm grades nothing, and a delimiter that occurs in t
 
 ### 9.5 Owed, and what this slice deliberately does NOT do
 
-1. **The drive.** Not yet taken — a jsdom spec is not a look (§7 of the phase README).
-   `verdicts/CHR-008/2026-09-16/census.js` is written and takes the panel's census (groups, rows, gate
-   wrappers, R8's gate texts verbatim, elements, inline styles, font sizes) on a Group and a Button in both
-   themes. **The packaged 0.2.4 is the BEFORE arm**; the dev stack is the after. `identity.js` (in-between
-   frames still 0 / 0) and `focus.js` should be re-run beside it. `test:ci` not re-run either.
-2. **§3.5 is not fixed by this slice, and must not be reported as fixed.** A rebuild still tears the rows
-   down, so §8's undo arm still loses the caret. The cure is the *widgets* holding their values in React
-   state (§3.1's row conversion), which is what lets a re-render reconcile instead of rebuild.
-3. **AC3 and AC4 move the wrong way first, by design.** No widget is converted yet, so `createRoot` still
-   reads 39, and `.property-panel-row` + `.property-row-control` add **two elements per row** — CHR-001's
-   1,126 will rise before it falls. Each converted widget removes its own `createRoot` *and* its host.
-4. The structural hint is still a post-render pass (§9.1's note and `PropertyRow`'s header): converting it
-   now would trade FB-017's in-place refresh for the rebuild §8 measured costs the caret.
+1. **§3.5 is not fixed by this slice, and must not be reported as fixed.** A rebuild still tears the rows
+   down, so §8's undo arm still loses the caret — re-driven on this build and unchanged (§9.6). The cure is
+   the *widgets* holding their values in React state (§3.1's row conversion), which is what lets a
+   re-render reconcile instead of rebuild.
+2. **AC3 and AC4 move the wrong way first, by design.** No widget is converted yet, so `createRoot` still
+   reads 39, and `.property-panel-row` + `.property-row-control` add **two elements per row** — measured,
+   CHR-001's 1,126 → **1,241**. Each converted widget removes its own `createRoot` *and* its host.
+3. The structural hint is still drawn by `applyPortHint` rather than by React, deliberately — see §9.6's
+   ⚠️, and `settleHints`'s note. Putting React in charge of a node `refreshHints` also removes is the
+   worse bug.
+4. **A true before/after census was not taken.** The packaged 0.2.4 is *not* a clean before arm for this
+   slice: s8's R8 and s9's identity work sit between it and HEAD, which is why its `gateReasons` reads 18
+   against this build's 4. A real before arm needs a dev rebuild at `32e216f55`.
+
+### 9.6 The drive — and the regression it caught after the code was already committed
+
+🔴 **The first commit of this slice (`627f1a0cc`) shipped a half-broken FB-017 AC4.** jest was green,
+`tsc` was green, and the feature was drawing nothing on one of its two paths. This is why the phase rule
+says a jsdom spec is not a look.
+
+Dev stack (`npm run dev:debug`, `NOODLPORT=8674`, `NOODL_REMOTE_DEBUG_PORT=9333`, scratch profile), a copy
+of `templates/story-engine`, bundle confirmed carrying the change before each run. Scripts and results:
+`verdicts/CHR-008/2026-09-16/` — `census.js`, `hint.js`, `hintwhy.js`, `open.js`.
+
+**What the hint drive found** (`hint-after/`), on Group `psWrap` (3 children, unclipped, radius 40):
+
+| path | hint notes drawn | |
+|---|---|---|
+| live — type `40` into Corner Radius | **1**, row not rebuilt | ✅ |
+| render — select away, select back, radius still 40 | **0** | 🔴 the note is gone |
+
+**Why**, from a frame-by-frame trace of the reselect (`hintwhy.js`): the marked rows arrive at
+**t = 60 ms**, and `renderGroups` had scheduled its hint pass as a bare `setTimeout(0)` — which fires
+*before* React commits, queries `[data-hint-ports]` against a panel with no rows in it, and does nothing.
+The live path worked precisely because its rows were committed by an earlier render. A control arm ruled
+out the other candidate: re-rendering the same node (a group toggle) kept the note at 1 throughout, so
+React was never wiping it.
+
+**The fix** is `Ports.settleHints()` — the same bounded retry, for the same reason, as `settleScroll`
+directly below it, whose comment already records that the first render of a newly selected node runs
+before the panel is mounted. ⚠️ `applyPortHint` stays the **one** thing that draws a note in both paths:
+drawing it from `PropertyRow` would put React and `refreshHints` in charge of the same DOM node, and
+`applyPortHint` removes any note it finds before adding one.
+
+**Re-driven after the fix** (`hint-fixed/`), all three FB-017 AC4 states: live **1**, render **1**,
+condition cleared (radius → 0) **0**.
+
+**The rest of the drive, all EXIT=0:**
+- **Census** (`census-after/`, Group `psWrap`, both themes): 19 groups, 83 rows, 18 gate wrappers,
+  inline-styled **250** (unchanged), font sizes **2** (11 / 12), 63 `.property-panel-row` each with a
+  **filled** control host (`emptyControlHosts: 0`), elements **1,241**. R8 intact: **at most one gate text
+  per group**, Box Shadow's line and verb unchanged.
+- **Identity** (`identity-after/`): in-between frames **0** on both arms — s9's blink fix survives this
+  slice, which was a real risk because `hasDrawnRows` now sees a wrapper rather than a bare row.
+- **Focus** (`focus-after/`): unchanged from §8 — undo rebuilds (220 mutations), the focused input goes
+  disconnected, `activeElement` lands on `BODY`, caret `null`; the floor arm keeps focus and caret at 2.
+
+### 9.7 Readings after the fix (2026-09-16)
+
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**; full `tests-unit` **445 / 445 suites, 7,345 tests**,
+  EXIT=0. ⚠️ §9.4's identical numbers were taken *before* `settleHints` and did not cover the shipped code
+  — no spec in this repo can see the commit-timing defect the drive found, which is the point.
