@@ -47,6 +47,8 @@ export class VisualStates extends React.Component<VisualStatesProps, State> {
   onVisualStateClicked(state) {
     this.props.onVisualStateChanged(state);
     this.setState({
+      // Closed here: the list used to sit inside the toggle, and the click bubbling to it closed it.
+      showStatesSelector: false,
       selectedVisualState: state,
       visualStateTransitions: this.props.model.getPossibleTransitionsForState(state.name)
     });
@@ -107,31 +109,34 @@ export class VisualStates extends React.Component<VisualStatesProps, State> {
 
   render() {
     return (
+      // CHR-009 §2: `State` as a row in the panel's label column (was "Neutral state ⇕" on a 50px bar).
       <div
-        className="variants-section property-editor-visual-states"
-        style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
-        ref={(el) => { this.popupAnchor = el; }}
+        className="variants-section property-editor-visual-states panel-head-row"
+        style={{ position: 'relative' }}
+        ref={(el) => {
+          this.popupAnchor = el;
+        }}
       >
-        <div className="variants-name-section" onClick={this.onCurrentStateClicked.bind(this)}>
-          <label>{this.state.selectedVisualState.label} state</label>
-          <div className="variants-pick-icon">
-            <Icon icon={IconName.CaretDownUp} UNSAFE_style={{ width: 10, height: 12 }} />
-          </div>
+        <span className="panel-head-row-label">State</span>
+        <button type="button" className="panel-head-row-field" onClick={this.onCurrentStateClicked.bind(this)}>
+          <span className="panel-head-row-value">{this.state.selectedVisualState.label}</span>
+          <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
+        </button>
 
-          {this.state.showStatesSelector ? (
-            <div
-              className="visual-states-popup"
-              style={{ position: 'absolute', zIndex: '10', top: '20px', right: '70px' }}
-            >
-              {this.renderVisualStates()}
-            </div>
-          ) : null}
-        </div>
+        {/* A sibling of the field, not inside it: a <button> may not hold the list. */}
+        {this.state.showStatesSelector ? (
+          <div
+            className="visual-states-popup"
+            style={{ position: 'absolute', zIndex: '10', top: '30px', left: '140px' }}
+          >
+            {this.renderVisualStates()}
+          </div>
+        ) : null}
 
         {this.state.visualStateTransitions.length > 0 ? (
-          <div className="variants-button" onClick={this.onTransitionsClicked.bind(this)}>
+          <button type="button" className="panel-head-row-action" onClick={this.onTransitionsClicked.bind(this)}>
             Transitions
-          </div>
+          </button>
         ) : null}
       </div>
     );

@@ -85,32 +85,28 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
 
     if (this.state.variant === undefined || this.state.variant.name === undefined) {
       //No variant
+      // CHR-009 §2: a row in the panel's label column — `Variant`, then a field at the control
+      // height — instead of a 50px bar reading "Add style variant" with a FontAwesome plus.
       content = (
-        <div className="variants-section">
-          <div className="variants-name-section" onClick={this.onPickVariant.bind(this)}>
-            <label>Add style variant</label>
-            <div className="variants-add-icon">
-              <i className="fa fa-plus" style={{ color: 'white' }} />
-            </div>
-          </div>
+        <div className="variants-section panel-head-row">
+          <span className="panel-head-row-label">Variant</span>
+          <button type="button" className="panel-head-row-field" onClick={this.onPickVariant.bind(this)}>
+            <span className="panel-head-row-value is-placeholder">Add style variant</span>
+            <Icon icon={IconName.Plus} UNSAFE_className="panel-head-row-glyph" />
+          </button>
         </div>
       );
     } else if (this.state.variant !== undefined && this.state.variant.name !== undefined && !this.state.editMode) {
       //Variant
       content = (
-        <div className="variants-section">
-          <div className="variants-name-section" onClick={this.onPickVariant.bind(this)}>
-            <label>{this.state.variant.name}</label>
-            <div className="variants-pick-icon">
-              <Icon icon={IconName.CaretDownUp} UNSAFE_style={{ width: 10, height: 12 }} />
-            </div>
-          </div>
-          <button
-            className="variants-button"
-            style={{ marginLeft: '10px', width: '78px' }}
-            onClick={this.onEditVariant.bind(this)}
-          >
-            Edit variant
+        <div className="variants-section panel-head-row">
+          <span className="panel-head-row-label">Variant</span>
+          <button type="button" className="panel-head-row-field" onClick={this.onPickVariant.bind(this)}>
+            <span className="panel-head-row-value">{this.state.variant.name}</span>
+            <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
+          </button>
+          <button type="button" className="panel-head-row-action" onClick={this.onEditVariant.bind(this)}>
+            Edit
           </button>
         </div>
       );
@@ -134,7 +130,12 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
     }
 
     return (
-      <div className="variants-editor" ref={(el) => { this.popupAnchor = el; }}>
+      <div
+        className="variants-editor"
+        ref={(el) => {
+          this.popupAnchor = el;
+        }}
+      >
         {content}
       </div>
     );

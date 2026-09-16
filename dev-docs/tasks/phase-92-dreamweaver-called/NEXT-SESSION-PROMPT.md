@@ -1,11 +1,11 @@
 # Phase 92 — next session
 
-**Written 2026-09-16 at the end of s12 (CHR-009 slice 1: the row geometry — built, driven, committed).**
+**Written 2026-09-16 at the end of s13 (CHR-009 slice 2: the head — built, driven, committed).**
 Branch `cline-dev`. Phase commits: `git log -- dev-docs/tasks/phase-92-dreamweaver-called`. The platform
 half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
-⚠️ A **P88 peer** works in this checkout (`validation/*`, `noodl-mcp/*`, `templates/rocket-school/*` are
-theirs). Never commit their files; commit by pathspec.
+⚠️ A **P88 peer** works in this checkout (`validation/*`, `noodl-mcp/*`, `templates/rocket-school/*`, `library/*`,
+`nodegx-backend/*` are theirs). Never commit their files; commit by pathspec.
 
 ## The board, re-derived from the task files
 
@@ -14,53 +14,60 @@ theirs). Never commit their files; commit by pathspec.
 | CHR-001, 002, 003, 005, 006, 012 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 **slice 1 built s12 (§6)** — label column, section header, number+unit field. **Awaits Richard's look** |
+| **CHR-009 the panel designed** | 🟡 slice 1 rows (s12, Richard: *"I literally don't see the difference"*), **slice 2 the head (s13, §7) — awaits his look** |
 | CHR-004, 010, 011 | ⬜ |
 
-## First job: Richard's look at slice 1 (a pixel changed this time)
+## First job: Richard's look at slice 2
 
-Put these side by side for him (PNGs are local/gitignored by ruling):
-- before: `verdicts/CHR-001/2026-09-15/editor-group-panel-top-{dark,light}.png` (installed 0.2.4)
-- after: `verdicts/CHR-009/2026-09-16/after/props-group-top-{dark,light}.png`
+Same rig, same node, same crop — put them side by side (PNGs are local/gitignored by ruling):
+- before (slice 1): `verdicts/CHR-009/2026-09-16/after/props-group-top-{dark,light}.png`
+- after (slice 2): `verdicts/CHR-009/2026-09-16/head/props-group-top-{dark,light}.png`
+- the marker: `head/props-group-top-dark-marker.png`; the Comment tab: `head/comment-tab-dark.png`;
+  a Function node: `head/other-node-dark.png`
 
-Ask him two things: **is the direction right**, and **R6** — the 116px column cuts 4 of 59 Group labels
-(`Background Gradient`, `Scroll To Element - Duration`, `Scroll To Index - Index/Duration`), with a tooltip.
-Keep the trial, or not?
+The first property row starts ≈171px higher. Ask him:
+1. **Direction right?** (node row with glyph tile + mono eyebrow; segmented tabs; Variant/State as rows; 30px filter)
+2. **R7 as built** — `Comment` is a tab beside Ports, with a dot once a comment exists. The dot was *proposed, not
+   ruled*; it is built. Keep it?
+3. **R6** still a trial (4/59 Group labels cut at 116px) — keep or not?
+4. The mockup's `···` menu in place of the three icon buttons (help / rename / delete) — NOT built. Want it?
 
-## Then, in order (CHR-009 §6.5)
+## Then, in order
 
-1. **The head** — the biggest visible change left: seven zones → title row, node row (glyph tile, name,
-   mono eyebrow), segmented `Properties | Ports`, filter with `/` hint. R7 = the comment becomes a TAB beside
-   Ports (moves P75's feature; `leg-005/nodeCommentRow` pins today's placement). `propertyeditor/index.tsx`.
-2. **One control height**: `PropertyPanelSelectInput` (Position/Layout, 28px) and legacy `.property-value`
-   rows to 26 — AC2's last open clause on the Group.
+1. **§3.4 proper** — `Variant`/`State` INSIDE General, under the filter. Today they sit above the filter because
+   `Ports` renders the filter and General is a `Ports` group. Two ways: let `Ports` host the two rows at the top of
+   General, or move the filter out of `Ports` into the head above the `ScrollArea` (it would no longer need FB-017's
+   sticky — measure that before deleting anything).
+2. **One control height**: `PropertyPanelSelectInput` (Position/Layout, 28px) and legacy `.property-value` → 26 (AC2).
 3. The gutter connection dot (AC3) replacing the `●` after the label; paired Gap/Padding rows (AC4).
 4. The resizing segment (four icons + stray dot → per-axis mode segment); colour field; Advanced CSS footer.
+5. Small: the comment field overshoots the tab strip's right edge by ~4px inside the Comment tab; Escape does not
+   close the Variant picker (not compared against HEAD — check before calling it a regression).
 
-## Traps (s12)
+## Traps (s12–s13)
 
-- 🔴 **Numbers passed while the picture was broken** — "2 sizes, one label x" and Width drew `1(`. Look at
-  the PNG after every drive; `drive.js` now reads each field's `scrollWidth > clientWidth`.
-- 🔴 **CHR-009 §3 was wrong twice** (§6.1): the `:global(.sidebar-property-editor)` hook is NOT gone, and
-  the row grid can't live on `.property-panel-row` — the label is inside the opaque control element. The
-  37% column exists in TWO places (`PropertyPanelInput.module.scss`, `propertyeditor.css`).
-- 🔴 A click that rebuilds a row makes a `find(label).parentElement` retry THROW — swallow it in the retry.
-- The served dev bundle is `http://localhost:8080/src/editor/index.bundle.js`; confirm a marker string in it,
-  then `Page.reload({ignoreCache:true})` on **9333** (`cdp.js` defaults to 9222 — set the env on EVERY call).
-- Recipe: copy `templates/story-engine` to scratch, back up `~/Library/Application Support/NodeGX/
-  recently_opened_project.json`, insert one `Story engine` entry, `npm run dev:debug` in background,
-  `drive.js --expect=<copy>` → `interact.js`, `npm run dev:stop`, restore recents and compare `shasum`.
+- 🔴 **Numbers passed while the picture was broken** (s12 `1(`; s13 a full-bleed divider). Look at the PNG after every drive.
+- 🔴 **A later-loading stylesheet wins an equal-specificity override.** `visualstates.css` is required after
+  `variantseditor.css`; fix a rule at its source, not with an override in an earlier file.
+- 🔴 A popout covers the panel with `.popup-layer-blocker` — a drive's next click must be on the blocker.
+- AC2's font-size count depends on the scope: the whole `BasePanel` reads 4 (13 = the `Properties` title, 15 = the
+  node name); `.sidebar-property-editor` alone read 2. Name the scope with the number.
+- The dev log's "two children with the same key" errors carry a UUID key (launcher recents) — not the panel.
+- Recipe: copy `templates/story-engine` to scratch, back up `~/Library/Application Support/NodeGX/recently_opened_project.json`
+  (sha `a1ea46f2…`), insert one `Story engine` entry, `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 npm run dev:debug`
+  in background, wait for a marker string in `http://localhost:8080/src/editor/index.bundle.js`,
+  `head/drive-head.js --expect=<copy>`, `npm run dev:stop`, restore recents and compare `shasum`.
 - One heavy job at a time: stop the stack BEFORE jest/tsc.
 
 ## Still Richard's
 
-1. R6 final (above). R7's marker-on-the-tab detail is proposed, not ruled.
+1. The look at slice 2 + the four questions above (R6 final, R7 marker, `···` menu).
 2. CHR-007 AC4 `_portsHash` clause declined — don't revisit quietly.
 3. The Projects tab's two full-width cards (BST-003 / UNI-001).
 4. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
 
-## Readings at the end of s12
+## Readings at the end of s13 (2026-09-16)
 
-Targeted `tests-unit` **20 / 20 suites, 332 tests** (every spec that reads a touched file + `chr-008`,
-`property-editor`), EXIT 0. `tsc --noEmit` **0 errors**. `npm run type` / `npm run colors` holding.
-Full `tests-unit` and `test:ci` **not run** this session.
+`tsc --noEmit` (editor) **0 errors**. Full editor `tests-unit` **468 suites / 7,650 tests, EXIT 0** (stack down).
+`npm run type` / `npm run colors` holding. `leg-005`'s rewritten R7 assertion red against HEAD's panel, green after.
+`test:ci` **not run**.

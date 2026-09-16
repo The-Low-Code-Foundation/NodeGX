@@ -221,6 +221,16 @@ $_text-variant-top-padding: 15px;
   }
 }
 
+// CHR-009 (R7): see `TabStripTab.hasMarker`.
+.Marker {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background-color: var(--theme-color-primary);
+}
+
 .TabContent {
   flex: 1;
   overflow: hidden overlay;

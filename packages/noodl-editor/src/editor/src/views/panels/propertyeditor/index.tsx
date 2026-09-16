@@ -6,7 +6,7 @@ import { SidebarModelEvent } from '@noodl-models/sidebar/sidebarmodel';
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 
 import { ScrollArea } from '@noodl-core-ui/components/layout/ScrollArea';
-import { Tabs, TabsVariant } from '@noodl-core-ui/components/layout/Tabs';
+import { Tabs, TabsTab, TabsVariant } from '@noodl-core-ui/components/layout/Tabs';
 import { BasePanel } from '@noodl-core-ui/components/sidebar/BasePanel';
 
 import { Frame } from '../../common/Frame';
@@ -20,6 +20,8 @@ import { PropertyEditor as PropertyEditorView } from './propertyeditor';
 const TAB_AI_CHAT = 'AI Chat';
 const TAB_PROPERTIES = 'Properties';
 const TAB_PORTS = 'Ports';
+/** CHR-009 R7 (Richard, 2026-09-15): the comment is a tab beside `Ports`, not a box above the strip. */
+const TAB_COMMENT = 'Comment';
 
 /**
  * FH-020: which tab is open, remembered per *panel* rather than per node.
@@ -60,6 +62,24 @@ export function NodeGraphNodeDelete(model: NodeGraphNode) {
   const undo = new UndoActionGroup({ label: 'delete node' });
   graph.removeNode(model, { undo: undo });
   UndoQueue.instance.push(undo);
+}
+
+/** Whether `model` has a comment, kept current through undo and every other writer of `setComment`. */
+function useHasComment(model: NodeGraphNode | undefined): boolean {
+  const [hasComment, setHasComment] = useState(() => Boolean(model?.getComment()));
+
+  useEffect(() => {
+    if (!model) return;
+    // A per-effect object: `off(group)` removes every listener registered under that group.
+    const group = {};
+    setHasComment(Boolean(model.getComment()));
+    model.on('commentChanged', () => setHasComment(Boolean(model.getComment())), group);
+    return () => {
+      model.off(group);
+    };
+  }, [model]);
+
+  return hasComment;
 }
 
 export interface PropertyEditorProps {
@@ -176,7 +196,9 @@ export function PropertyEditor(props: PropertyEditorProps) {
  * the AI path has always done between `AI Chat` and `Properties`.
  */
 function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEditorView; hasAiAssistant: boolean }) {
-  const tabs = [
+  const hasComment = useHasComment(props.model);
+
+  const tabs: TabsTab[] = [
     {
       label: TAB_PROPERTIES,
       content: (
@@ -188,6 +210,18 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
     {
       label: TAB_PORTS,
       content: <PortsTab key={props.model?.id} model={props.model} />
+    },
+    {
+      /*
+       * LEG-005's row, moved by R7. Still unconditional — the tab is there on every node, so a
+       * node with no comment still shows that comments exist (L12) — and it carries a marker once
+       * one is written, so a note is never hidden behind a tab nobody opens.
+       */
+      label: TAB_COMMENT,
+      hasMarker: hasComment,
+      content: (
+        <ScrollArea>{Boolean(props.model) && <NodeComment key={props.model.id} model={props.model} />}</ScrollArea>
+      )
     }
   ];
 
@@ -228,31 +262,15 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
         backgroundColor: 'var(--theme-color-bg-1)'
       }}
     >
-      {Boolean(props.model) && (
-        <NodeLabel key={props.model.id} model={props.model} showHelp={!props.hasAiAssistant} />
-      )}
-
-      {/*
-       * LEG-005: the comment row, between the header and the tab strip.
-       *
-       * Above the ports and below the label, which is the ordering the spec
-       * asks for: *what this is*, then *why it is*, then *what it is wired to*.
-       * Outside the `Tabs` rather than inside the Properties tab because a
-       * comment describes the node, not its parameters — the `Ports` tab is
-       * about the same node and the row belongs there too.
-       *
-       * ⚠️ Not conditional on the node having a comment. A row that appears
-       * only when a comment exists teaches nobody that comments exist, and is
-       * the context menu again with more pixels — which is the entire finding
-       * (L12) this task was written from.
-       */}
-      {Boolean(props.model) && <NodeComment key={props.model.id} model={props.model} />}
+      {Boolean(props.model) && <NodeLabel key={props.model.id} model={props.model} showHelp={!props.hasAiAssistant} />}
 
       {/* Re-keyed only when `AI Chat` comes or goes: `Tabs` looks its active id up in the current
-          list and throws on a miss, and `initialActiveTab` is read once. */}
+          list and throws on a miss, and `initialActiveTab` is read once.
+          CHR-009: one segmented control under the node row (was a full-bleed two-block strip). */}
       <Tabs
         key={props.hasAiAssistant ? 'with-ai-chat' : 'without-ai-chat'}
-        variant={TabsVariant.Sidebar}
+        variant={TabsVariant.Segmented}
+        UNSAFE_className="property-editor-tabs"
         tabs={tabs}
         initialActiveTab={initialActiveTab}
         onChange={(activeTab) => {

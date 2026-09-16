@@ -22,6 +22,12 @@ export interface TabStripTab {
   label: string;
   id?: string;
   testId?: string;
+  /**
+   * CHR-009 (R7) — a small dot after the label: this tab holds something the others do not show.
+   * The property panel's `Comment` tab wears it once a comment is written, so moving the comment
+   * off the panel top never hides a note silently.
+   */
+  hasMarker?: boolean;
 }
 
 export interface TabsTab extends TabStripTab {
@@ -113,6 +119,7 @@ export function TabStrip({
             data-test={tab.testId}
           >
             <Text>{tab.label}</Text>
+            {tab.hasMarker && <span className={css['Marker']} aria-label="has content" />}
           </button>
         ))}
       </nav>

@@ -6,8 +6,10 @@
      that typename; the "Style" section's "Variant" picker stamps a built-in preset's parameters
      in place and creates nothing. Two different systems that read as one feature because nothing
      drew a line between them. `border-default` is the divider token this panel already uses for
-     the same job (`.property-header-bar`, `.property-group-children`). */
-  border-bottom: 1px solid var(--theme-color-border-default);
+     the same job (`.property-header-bar`, `.property-group-children`).
+     CHR-009: removed again — the section is one 30px `Variant` row now, labelled, and the
+     `State` row under it is the same shape; a hairline between two rows of one column is the
+     "separate bars" look the rows replaced. */
   position: relative;
   display: flex;
   align-items: center;
@@ -257,4 +259,95 @@
   bottom: 0;
   pointer-events: none;
   border: 2px solid var(--theme-color-secondary);
+}
+
+/* =============================================================================
+   CHR-009 §2 — `Variant` and `State` as rows of the panel's label column.
+
+   The same geometry as a property row (`PropertyPanelInput.module.scss`): the
+   16px groups gutter, a 116px label in `fg-default-shy` at `-sm`, an 8px gap,
+   and a 26px field on `bg-2` with the `border-default` edge the number+unit
+   field uses. They were two 50px bars ("Add style variant ＋", "Neutral state ⇕")
+   each with its own divider.
+   ============================================================================= */
+.variants-section.panel-head-row {
+  min-height: 30px;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.panel-head-row-label {
+  flex: 0 0 116px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-fg-default-shy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-head-row-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel-head-row-field:hover {
+  border-color: var(--theme-color-border-strong);
+}
+
+.panel-head-row-field:focus-visible {
+  outline: 1px solid var(--theme-color-primary);
+  outline-offset: 1px;
+}
+
+.panel-head-row-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-head-row-value.is-placeholder {
+  color: var(--theme-color-fg-default-shy);
+}
+
+.panel-head-row-glyph {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.panel-head-row-action {
+  flex: none;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.panel-head-row-action:hover {
+  border-color: var(--theme-color-border-strong);
+  color: var(--theme-color-fg-highlight);
 }

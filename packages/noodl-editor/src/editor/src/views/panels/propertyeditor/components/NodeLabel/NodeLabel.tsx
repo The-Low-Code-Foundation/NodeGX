@@ -5,6 +5,7 @@ import { platform } from '@noodl/platform';
 import { Keybindings } from '@noodl-constants/Keybindings';
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { ProjectModel } from '@noodl-models/projectmodel';
+import { exportBadgeFor } from '@noodl-utils/codeExport/exportBadge';
 import getDocsEndpoint from '@noodl-utils/getDocsEndpoint';
 import { getNodeDocs } from '@noodl-utils/nodeDocs';
 import { ParameterValueResolver } from '@noodl-utils/ParameterValueResolver';
@@ -15,11 +16,9 @@ import { IconButton, IconButtonVariant } from '@noodl-core-ui/components/inputs/
 import { TextInput } from '@noodl-core-ui/components/inputs/TextInput';
 import { Tooltip } from '@noodl-core-ui/components/popups/Tooltip';
 
-import { exportBadgeFor } from '@noodl-utils/codeExport/exportBadge';
-
+import { NodeGraphNodeDelete, NodeGraphNodeRename } from '../..';
 import { describeKitOrigin, listNodeKits } from '../../../../../../../shared/utils/projectmodules';
 import { ExportBadge } from '../../../../common/ExportBadge';
-import { NodeGraphNodeDelete, NodeGraphNodeRename } from '../..';
 import { getNodeProvenance } from '../../provenance';
 import { getNodeTypeChipInfo } from '../../utils';
 
@@ -33,10 +32,10 @@ export interface NodeLabelProps {
  * canvas painter's category glyph shapes (NodeGraphEditorNodePainter) so the
  * chip and the node card read as the same taxonomy.
  */
-function CategoryGlyph({ category }: { category: string }) {
+function CategoryGlyph({ category, size = 10 }: { category: string; size?: number }) {
   const common = {
-    width: 10,
-    height: 10,
+    width: size,
+    height: size,
     viewBox: '0 0 16 16',
     fill: 'none',
     stroke: 'currentColor',
@@ -65,8 +64,17 @@ function CategoryGlyph({ category }: { category: string }) {
     case 'javascript':
       // Function glyph
       return (
-        <svg width={10} height={10} viewBox="0 0 16 16" fill="currentColor" stroke="none">
-          <text x="8" y="8.5" textAnchor="middle" dominantBaseline="middle" fontFamily="Georgia, serif" fontStyle="italic" fontWeight={600} fontSize="13">
+        <svg width={size} height={size} viewBox="0 0 16 16" fill="currentColor" stroke="none">
+          <text
+            x="8"
+            y="8.5"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontFamily="Georgia, serif"
+            fontStyle="italic"
+            fontWeight={600}
+            fontSize="13"
+          >
             ƒ
           </text>
         </svg>
@@ -303,63 +311,86 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
   return (
     <div className="property-editor-label-and-buttons property-header-bar" style={{ flex: '0 0 auto' }}>
       <div className="property-header-row">
-        {isEditingLabel ? (
-          <div style={{ flexGrow: 1, minWidth: 0 }}>
-            <TextInput
-              onRefChange={(ref) => (labelInputRef.current = ref.current)}
-              value={label}
-              UNSAFE_textStyle={{
-                color: 'var(--theme-color-fg-highlight)',
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)' as TSFixme
-              }}
-              onChange={(e) => setLabel(e.target.value)}
-              onBlur={() => onSaveLabel()}
-              onEnter={() => onSaveLabel()}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  e.stopPropagation();
-                  onCancelLabel();
-                }
-              }}
-            />
-          </div>
-        ) : (
-          // PNL-007: text, not a disabled field. It used to render a real
-          // `TextInput` at all times with `isDisabled={!isEditingLabel}`, so at
-          // rest it was a bordered box that refused the caret — "looks
-          // constantly like a field you can type in but you have to click the
-          // pencil". Double-click already worked; nothing said so.
-          <Tooltip
-            content="Double-click to rename"
-            fineType={Keybindings.PROPERTY_PANEL_EDIT_LABEL.label}
-            // The tooltip wraps its child in a trigger div, which is what the
-            // header row actually lays out — without this the name cannot
-            // shrink and a long one pushes the action rail out of the panel.
-            UNSAFE_triggerClassName="property-header-name-trigger"
+        {/* CHR-009 §2 "head": the node row — a category glyph on its own wash, the name, and the
+            type as a mono eyebrow under it (was a name row, then a separate coloured chip row). */}
+        {chip && (
+          <span
+            className="property-node-glyph"
+            aria-hidden="true"
+            style={{
+              color: `var(${chip.colorToken})`,
+              backgroundColor: `color-mix(in srgb, var(${chip.colorToken}) 14%, transparent)`
+            }}
           >
-            <span
-              className="property-header-name"
-              tabIndex={0}
-              role="button"
-              title={label}
-              onDoubleClick={(e) => {
-                // Stop propagation to prevent canvas double-click handler from triggering
-                e.stopPropagation();
-                onEditLabel();
-              }}
-              onKeyDown={(e) => {
-                // Reachable without a mouse.
-                if (e.key === 'Enter' || e.key === 'F2') {
-                  e.preventDefault();
-                  onEditLabel();
-                }
-              }}
-            >
-              {label}
-            </span>
-          </Tooltip>
+            <CategoryGlyph category={chip.category} size={14} />
+          </span>
         )}
+
+        <div className="property-node-titles">
+          {isEditingLabel ? (
+            <div style={{ flexGrow: 1, minWidth: 0 }}>
+              <TextInput
+                onRefChange={(ref) => (labelInputRef.current = ref.current)}
+                value={label}
+                UNSAFE_textStyle={{
+                  color: 'var(--theme-color-fg-highlight)',
+                  fontSize: 'var(--font-size-lg)',
+                  fontWeight: 'var(--font-weight-semibold)' as TSFixme
+                }}
+                onChange={(e) => setLabel(e.target.value)}
+                onBlur={() => onSaveLabel()}
+                onEnter={() => onSaveLabel()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    onCancelLabel();
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            // PNL-007: text, not a disabled field. It used to render a real
+            // `TextInput` at all times with `isDisabled={!isEditingLabel}`, so at
+            // rest it was a bordered box that refused the caret — "looks
+            // constantly like a field you can type in but you have to click the
+            // pencil". Double-click already worked; nothing said so.
+            <Tooltip
+              content="Double-click to rename"
+              fineType={Keybindings.PROPERTY_PANEL_EDIT_LABEL.label}
+              // The tooltip wraps its child in a trigger div, which is what the
+              // header row actually lays out — without this the name cannot
+              // shrink and a long one pushes the action rail out of the panel.
+              UNSAFE_triggerClassName="property-header-name-trigger"
+            >
+              <span
+                className="property-header-name"
+                tabIndex={0}
+                role="button"
+                title={label}
+                onDoubleClick={(e) => {
+                  // Stop propagation to prevent canvas double-click handler from triggering
+                  e.stopPropagation();
+                  onEditLabel();
+                }}
+                onKeyDown={(e) => {
+                  // Reachable without a mouse.
+                  if (e.key === 'Enter' || e.key === 'F2') {
+                    e.preventDefault();
+                    onEditLabel();
+                  }
+                }}
+              >
+                {label}
+              </span>
+            </Tooltip>
+          )}
+
+          {chip && !isEditingLabel && (
+            <span className="property-type-chip" title={chip.label}>
+              {chip.label}
+            </span>
+          )}
+        </div>
 
         {isEditingLabel && (
           <div className="sidebar-panel-edit-bar property-panel-header-edit-bar">
@@ -449,19 +480,6 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
         )}
       </div>
 
-      {chip && (
-        <span
-          className="property-type-chip"
-          style={{
-            color: `var(${chip.colorToken})`,
-            backgroundColor: `color-mix(in srgb, var(${chip.colorToken}) 12%, transparent)`
-          }}
-        >
-          <CategoryGlyph category={chip.category} />
-          {chip.label}
-        </span>
-      )}
-
       {/*
         EXP-013 AC1 — the same mark the picker card carries, on the placed node. Beside the type
         chip because it is a fact about the *type*: every node of this type is left out of an
@@ -489,9 +507,7 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
           }
         >
           from {kitName}
-          {kitOrigin && (
-            <span data-test="node-provenance-origin"> · {kitOrigin.label}</span>
-          )}
+          {kitOrigin && <span data-test="node-provenance-origin"> · {kitOrigin.label}</span>}
         </span>
       )}
     </div>

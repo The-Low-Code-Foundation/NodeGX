@@ -151,3 +151,78 @@ Gates: targeted `tests-unit` **20 suites / 332 tests** (EXIT 0), `tsc --noEmit` 
   the colour field, the Advanced CSS footer row, variant/state as General rows.
 - R6 stays a **trial** until Richard has looked at `after/props-group-top-{dark,light}.png` beside
   `verdicts/CHR-001/2026-09-15/editor-group-panel-top-{dark,light}.png`.
+
+## 7. Slice 2 — the head (2026-09-16, s13)
+
+Richard on slice 1: *"I literally don't see the difference"* — true: the rows changed by a chevron and one field,
+and the top ~55% of the screen (the head) was untouched. This slice takes the largest area left.
+
+### 7.1 Built
+
+| region (§2) | before (slice 1, `01ac44c38`) | now |
+|---|---|---|
+| node row | name + 3 icon buttons, then a coloured `GROUP · VISUAL` chip on its own row, then a hairline | ONE row: 28px category glyph on its category wash, name at `-lg`, `TYPE · CATEGORY` as a mono `-xs` eyebrow under it, the 3 icon buttons (kept — the mockup's `···` menu would hide delete/docs; not built) |
+| comment (**R7**) | `COMMENT` label + field between the header and the tabs | a **`Comment` tab beside `Ports`**, always present; a 6px `primary` dot on the tab once a comment exists (the *proposed, not ruled* marker detail — built so R7 never hides a note; `TabStripTab.hasMarker`) |
+| tabs | full-bleed two-block `Sidebar` strip, 40px | `TabsVariant.Segmented` with equal segments, 24px segments in a 30px track on `bg-2`, selected `bg-3` |
+| variant / state (§3.4 partly) | two 50px bars, "Add style variant ＋" (FontAwesome) and "Neutral state ⇕" | two 30px rows of the label column: `Variant` / `State`, 116px label, a 26px field (`bg-2`, `border-default`), `Edit` / `Transitions` as 26px buttons. **Not yet inside General** — they sit above the filter, because the filter is rendered by `Ports` and General is a `Ports` group |
+| filter | `SearchInput`'s 45px bar, 14px text, 22px glyph | 30px, `-sm` text, 14px glyph; same `border-control` edge (NAT-001's pairing unchanged). **No `/` hint** — no `/` shortcut exists, and a hint for a key that does nothing is a lie |
+
+Files: `noodl-core-ui` `Tabs.tsx` + `Tabs.module.scss` (marker); editor `propertyeditor/index.tsx` (tabs, `useHasComment`),
+`NodeLabel.tsx`, `variantseditor.tsx`, `visualstates.tsx`, `propertyeditor.css`, `variantseditor.css`, `visualstates.css`;
+`tests-unit/leg-005/nodeCommentRow.test.ts` (placement assertion rewritten to R7 — see 7.3).
+
+### 7.2 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded and restored byte-identical
+(`a1ea46f2…`). Scripts in `verdicts/CHR-009/2026-09-16/head/`: `drive-head.js` (measure, screenshot, real input),
+`extra-paths.js` (Comment tab content; a non-visual node). Results: `head-results.json`, `extra-paths-results.json`.
+
+**The look, same crop:** `after/props-group-top-{dark,light}.png` (slice 1) beside `head/props-group-top-{dark,light}.png`.
+
+| reading (Group, both themes identical) | slice 1 | slice 2 |
+|---|---|---|
+| first property row (`Mounted`) below the panel top | ≈467 px ‡ | **296 px** (−171) |
+| head zones | node + chip ≈75, comment ≈80, tabs ≈40, variant 50, state 50, filter ≈59 ‡ | node row **55**, tabs **30**, variant **30**, state **30**, filter **40** |
+| Variant/State label x vs property label x | — | **17 = 17** (one column) |
+| head control heights | 45 (filter) | **26, 26, 30** |
+| tab labels clipped at 296px | — | 0 of 3 |
+
+‡ Read off slice 1's PNG (2× pixels ÷ 2, same crop, panel top at the same y) — slice 1's drive did not measure
+the head. `variant`/`state` 50 are the CSS `min-height`.
+
+Real input (CDP mouse at an `elementFromPoint`-verified point, `Input.insertText`), dark:
+
+| act | result |
+|---|---|
+| open `Comment`, type, click `Properties` (blur commits) | model `getComment()` = the text; marker **on**; rows back on Properties |
+| `__nodeGraphEditor.undo()` | model `null`; marker **off** |
+| State field → pick `Hover` | list opened (`Neutral`, `Hover`), closed on pick, field reads `Hover`; picked back → `Neutral` |
+| Variant field | picker popout opens; **Escape did not close it** (a blocker click did) — not compared against HEAD, may be pre-existing |
+| a `CSS Definition` node (`javascript`) | pink `ƒ` tile, `CSS DEFINITION · FUNCT…` and a long name both ellipsised, actions stay in the row; no State row (the type has no visual states) |
+
+### 7.3 Readings and gates
+
+- `tsc --noEmit` (editor) **0 errors**. `npm run type` / `npm run colors` **holding**.
+- Full editor `tests-unit` (`npx jest` in `packages/noodl-editor`, stack down): **468 suites / 7,650 tests, EXIT 0**.
+- `leg-005` "sits above the tab strip and below the label" pinned the placement R7 ruled away; rewritten as "is a tab
+  beside Ports, always present, marked once written". Red against HEAD's `index.tsx` (1 failed), green after.
+- `test:ci` **not run**.
+
+### 7.4 Traps met
+
+- 🔴 **A stylesheet that loads later wins an equal-specificity override.** `.property-editor-visual-states`'s divider
+  lived in `visualstates.css`, required by `visualstates.tsx` *after* `variantseditor.css`; my `border-bottom: 0` in
+  the earlier file lost, and only the PNG showed the full-bleed line. Fixed at the source.
+- The drive's popout dismiss clicked the node name and hit `popup-layer-blocker` — a popout covers the whole panel.
+- The dev log's "two children with the same key" errors carry a UUID key (the launcher's recents), not a head key.
+
+### 7.5 Left
+
+- §3.4 proper: `Variant`/`State` INSIDE General, below the filter (needs `Ports` to host them, or the filter to move
+  into the head above the `ScrollArea`).
+- The comment field's right edge overshoots the tab strip by ~4px inside the Comment tab.
+- 28px `Position`/`Layout` selects → 26 (AC2), gutter dot (AC3), paired Gap/Padding (AC4), resizing segment, colour
+  field, Advanced CSS footer.
+- AC2's "2 font sizes" now reads **4** on the whole panel: `13px` is `BasePanel`'s `Properties` title (untouched) and
+  `15px` the node name (the mockup's `-lg`). Slice 1's "2" was measured inside `.sidebar-property-editor` only.
+  Fills over the visible panel: 8 distinct (toggle, dots, glyph wash included) against AC2's ≤ 3.

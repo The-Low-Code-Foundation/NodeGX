@@ -1,5 +1,5 @@
+/* CHR-009: no divider — `State` is a row of the label column, like `Variant` above it. */
 .property-editor-visual-states {
-  border-bottom: 1px solid var(--theme-color-border-default);
   box-sizing: border-box;
 }
 

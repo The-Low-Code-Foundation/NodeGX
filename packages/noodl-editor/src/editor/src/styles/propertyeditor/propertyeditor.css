@@ -325,7 +325,7 @@
 
    It sits on the panel ground so it reads as chrome rather than as a first row. */
 .property-filter {
-  padding: 4px 0 10px 0;
+  padding: 2px 0 8px 0;
   background-color: var(--theme-color-bg-1);
 
   /* ✅ Sticky, and this time it was measured working rather than assumed. Session 23
@@ -359,6 +359,28 @@
      filter bar's stated height and its sticky offset math. */
   box-sizing: border-box;
   border: 1px solid var(--theme-color-border-control);
+}
+
+/* CHR-009 §2 "head" — the filter at the panel's control scale: 30px, 12px text, the glyph at 14px
+   in a 30px gutter (was `SearchInput`'s 45px bar, 14px text and a 22px glyph — the tallest box in
+   the head). Same edge token as above, so NAT-001's pairing is unchanged. */
+.property-filter input.property-filter-input {
+  height: 30px;
+  line-height: 28px;
+  padding-left: 30px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+}
+
+.property-filter input.property-filter-input::placeholder {
+  padding-left: 0;
+}
+
+.property-filter input.property-filter-input + * {
+  width: 14px;
+  height: 14px;
+  left: 9px;
 }
 
 /* The match count is for screen readers only — the surviving rows are the sighted
@@ -399,22 +421,41 @@
   line-height: 1.4;
 }
 
-/* Panel header (PAR-002, mock `.props-head`): column layout — name row +
-   type-chip — on the panel ground with a hairline below. */
+/* CHR-009 §2 "head" — the node row: glyph tile, name over a mono eyebrow, actions. No hairline
+   under it: the segmented `Properties | Ports | Comment` control directly below is the break.
+   (Was PAR-002's name row, then a coloured type chip on a row of its own, then a border.) */
 .property-header-bar {
-  border-bottom: 1px solid var(--theme-color-border-default);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding: 9px 16px 12px;
+  gap: 4px;
+  padding: 10px 14px 10px;
 }
 
 .property-header-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
+}
+
+/* The category glyph on its own wash — the colour the canvas card uses for the category. The
+   fill and the glyph colour are set inline from the category token (NodeLabel.tsx). */
+.property-node-glyph {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+}
+
+.property-node-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* PNL-007: the node name at rest is text, not a field. Editing swaps in a real
@@ -435,8 +476,8 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--theme-color-fg-highlight);
-  line-height: 20px;
-  padding: 4px 2px;
+  line-height: 18px;
+  padding: 0;
   border-radius: var(--radius-default);
   border-bottom: 1px solid transparent;
   cursor: text;
@@ -467,26 +508,59 @@
   flex: none;
 }
 
-/* Type-chip (UIX-004b deferral, closed by PAR-002): `TYPE · CATEGORY`,
-   colored by node category. color + background are set inline from the
-   category token (see NodeLabel.tsx). */
+/* `TYPE · CATEGORY` (UIX-004b / PAR-002), now the mono eyebrow under the name (CHR-009). The
+   category colour moved to the glyph tile; the words are quiet. */
 .property-type-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-family);
+  display: block;
+  font-family: var(--font-family-code);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.03em;
+  font-weight: var(--font-weight-medium);
+  line-height: 14px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: var(--radius-default);
-  padding: 2.5px 7px;
-  width: fit-content;
+  color: var(--theme-color-fg-default-shy);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.property-type-chip svg {
-  flex: none;
+/* CHR-009 §2 "head" — `Properties | Ports | Comment` as ONE segmented control with equal
+   segments, inset to the head's gutter. `Tabs`' segmented buttons size to their labels (the node
+   picker's use); here the segments split the width. Role selectors, not the module's hashed names;
+   the extra attribute step outranks `.is-variant-segmented .Button` whatever the load order. */
+.property-editor-tabs {
+  --tabs-row-padding: 0 14px 8px;
+}
+
+.property-editor-tabs [role='tablist'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+}
+
+.property-editor-tabs [role='tablist'] > [role='tab'] {
+  height: 24px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.property-editor-tabs [role='tablist'] > [role='tab'] > p {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.property-editor-tabs [role='tablist'] > [role='tab'][aria-selected='true'] {
+  background-color: var(--theme-color-bg-3);
+  box-shadow: none;
 }
 
 /* CN-006b AC2 — provenance ("from Cashflow Kit"), under the type chip.
@@ -524,12 +598,13 @@
    mirror element that has to agree with the textarea to the pixel.
    ============================================================================= */
 
+/* CHR-009 R7: the row is the Comment tab's content now — no hairline against a strip it no longer
+   sits under. */
 .property-comment-bar {
-  border-bottom: 1px solid var(--theme-color-border-default);
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px 16px 12px;
+  padding: 6px 14px 12px;
 }
 
 /* The tooltip wraps its child in a trigger div; hug the label so hovering the
