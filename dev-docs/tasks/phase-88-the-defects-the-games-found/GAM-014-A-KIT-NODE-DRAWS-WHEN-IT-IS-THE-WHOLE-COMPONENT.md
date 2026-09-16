@@ -1,6 +1,6 @@
 # GAM-014 — A kit React node draws when it is the whole of a component
 
-**Status: 🟢 built (session 15, 2026-09-16), uncommitted.** AC1 named a third candidate, **(C) the headless deploy's export**: the door writes `visualRoots: ["face"]`, and `nodegx deploy` ships `roots: []`. AC2 is fixed in `NodeGraphModel.isVisualRoot` and `exporter/util.ts`, graded with 3 reverted arms. AC4 and AC5 are graded, and the person sentence reads true in Chromium. **Left:** AC3's editor half and AC6 (see §8). **Source:** [P78 D53](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 (Rocket School) session 1's drive, 2026-09-12 · **Side:** product (MCP door visual-root derivation, or the viewer — AC1 decides which)
+**Status: 🟢 built (session 15, 2026-09-16), committed `bcfb1c2aa`.** AC1 named a third candidate, **(C) the headless deploy's export**: the door writes `visualRoots: ["face"]`, and `nodegx deploy` ships `roots: []`. AC2 is fixed in `NodeGraphModel.isVisualRoot` and `exporter/util.ts`, graded with 3 reverted arms. AC4 and AC5 are graded, and the person sentence reads true in Chromium. Committed `bcfb1c2aa` (s16). **AC3's editor half measured in session 16** (§8). **Left:** AC6 (see §8). **Source:** [P78 D53](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 (Rocket School) session 1's drive, 2026-09-12 · **Side:** product (MCP door visual-root derivation, or the viewer — AC1 decides which)
 
 A kit author makes a component whose only visual node is their kit's React node, places it on a page, and nothing
 draws: no element, no console error. Wrapping the same node in a Group makes it draw.
@@ -210,3 +210,34 @@ reading: the deploy drops a root the file **has**. So they no longer decide the 
   asks of a type (ports, and GAM-023's health filter once it is on) meets the same placeholder.
 - ⚠️ `nodes.json` written by the door pretty-prints arrays over lines, so `grep -o '"visualRoots":[^]]*]'` reads nothing. Parse
   the JSON.
+
+### Session 16 (2026-09-16, over `593de4f57`) — AC3, the editor half
+
+**Committed** in `bcfb1c2aa` (the fix, both specs and the drive script).
+
+**Drive:** `npm run dev:debug` with `NOODL_USER_DATA_DIR` on a scratch profile, holding only `firstRunLegal.json` and a
+`recently_opened_project.json` that names a `cp -R` of session 15's `GAM014_OUT/built/project`, renamed `gam014-ac3-s16`. No peer
+stack was live (`dev:stop --list`). Scratch: session `755e094b…/scratchpad/gam014/`.
+
+| reading | result |
+|---|---|
+| component `nodes.json` SHAs after the open, against the copy (`before.sha`) | all unchanged. The open wrote `.mcp.json`, `CLAUDE.md`, `.gitignore` and `nodegx.project.json`, as it always does |
+| loaded project `name` / directory | `gam014-ac3-s16` / the scratch copy |
+| editor preview, first reading | "No HOME component selected": the door-built fixture has no `rootNodeId`. `setRootComponent('/App')` was called (project setting only; no component was edited) |
+| editor model: `Kit/Face` roots | `face`, type `game-kit.Avatar`, `allowAsChild: true`; `getVisualRootIds()` = `["face"]` |
+| preview (`--target=viewer`): marker / Ada (kit-rooted) / Bea (Group-rooted, control) | `gam014 page drew` / **`<img alt=Ada>` 96×96** / `<img alt=Bea>` 96×96; `__noodl_modules` lists `game-kit.Avatar`, `.RaceTrack`, `.KeyboardMap`, `.AnswerPad` |
+| save: `toDirectory` alone | wrote **neither** kit component (mtime still the copy's): an unchanged component is not rewritten |
+| save after `setLabel` on both roots + `flushPendingProjectSave()` | `Kit/Face` `visualRoots: ["face"]` (label `Face s16`) beside control `Kit/Wrapped face` `["wrap"]` (label `Wrap s16`), both 22:21:29 |
+| `[renderer:exception]` in `.logs/dev.log` | 0 |
+
+**The person sentence reads true in the editor. What that does not grade:** the editor loads `noodl_modules`, so the kit type
+**resolves** there, and the save goes through `isVisualRoot`'s resolved branch (`allowAsChild`). HEAD before the fix would read
+the same, so this is a reading, not an arm. The fix's other editor-side branch, **a save made before a kit registers** keeps
+the recorded root, is still not driven. It needs a module that fails to register, or is removed, while the editor is open.
+
+**Traps found:**
+- 🔴 **A door-built fixture has no `rootNodeId`**, so the editor preview shows the viewer's "No HOME component" page. Set
+  the root in the live model, or write `rootNodeId` with the editor closed.
+- 🔴 **`toDirectory` does not rewrite an unchanged component.** A "save, then read the file" with no edit reads the *copy's*
+  bytes and grades nothing. Make an edit first, then compare the file's mtime with the copy's.
+

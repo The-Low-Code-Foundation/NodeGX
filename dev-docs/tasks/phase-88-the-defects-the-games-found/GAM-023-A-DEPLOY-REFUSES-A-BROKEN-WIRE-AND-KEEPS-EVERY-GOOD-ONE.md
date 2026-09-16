@@ -48,6 +48,7 @@ the feature it carried does nothing. The author is told `ok: true`.
 - P83 [HLS-015](../phase-83-behind-a-click/HLS-015-NODEGX-DEPLOY.md) ✅ and HLS-013-WHAT-WAS-BUILT lines 113-119: the CLI, and
   the headless port preparation for cloud adapters.
 - P88 [GAM-024](GAM-024-THE-DEPLOY-CENSUS-REPORTS-ONLY-REAL-DROPS.md): the port pass this task depends on.
+- ⚠️ **[GAM-014](GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md) §8 s15 (2026-09-16):** `bootstrapNodeLibrary` never loads a project's `noodl_modules`, so every kit type is an `UnknownNodeType` in the deploy. Once this filter is on, a wire to or from a kit node meets that placeholder. Arm a kit-wired component before trusting the filter's census.
 - Grep run: `grep -rlan "evaluateHealth\|isModuleRegistered\|registerModule" dev-docs/tasks`. **No open task owns turning the
   filter on in `noodl-preview`.**
 

@@ -168,4 +168,4 @@ still walks the prototypes and stops before `Object.prototype`. It can now ask `
 | MCP template gates (they pin warning lists): TPL-003, 005, 006, 007, 008, plus GAM-005's and GAM-007's specs | **7 PASS lines for 7 files, 287/287**, `MCP_GATES_EXIT=0` |
 | full noodl-mcp suite, Electron `test:ci`, MCP bundle rebuild | **not run** |
 
-**A is registered, with an owner:** [GAM-025](GAM-025-A-ROW-FIELD-NAMED-ON-READS-AS-THE-DATA.md).
+**A is registered, with an owner:** [GAM-025](GAM-025-A-ROW-FIELD-NAMED-ON-READS-AS-THE-DATA.md). **Closed 2026-09-16 by R22: A is not built.** Renaming is the fix, and this task's texts stay as they are (`row.get('on')` throws in exported code, GAM-025 §7).
