@@ -596,3 +596,84 @@ source (`r.m[key]` includes the new text) *before* driving, not on the bundle.
 - A Text node's `Text Horizontal Align` label at 116px: predicted, not driven.
 - `Attempted to synchronously unmount a root while React was already rendering` repeats in `dev.log` during drives.
   Not attributed (it may predate this slice); worth one look when CHR-008's roots are touched.
+
+### 11.6 Ruling
+
+**Richard, 2026-09-16 (start of s18):** slice 6 **"Looks good"** — one 26px control height, and `Fixed` drawn only on
+a %, both approved on `height/before` → `height/after/props-group-bottom-light.png` and `after/props-group-width-px-dark.png`.
+
+## 12. Slice 7 — the `Border Style` / `Corner Radius` pickers as rows (2026-09-16, s18)
+
+The handoff's next item: two unlabelled icon strips off the label column. 🔴 **Checked before designing, and two
+handoff claims were wrong:** (1) the strips are not value controls like the align strips slice 5 replaced — each is
+the tab bar of one `TabGroup` (`DataTypes/TabGroup.ts`), a **scope picker** that decides which side's ports the rows
+below show (`borderLeftStyle`/`Width`/`Color`, `borderTopLeftRadius`, …) and writes nothing; (2) they were **not
+~50px each** — the rows that replace them save **4px each** (the old strip was 32px icons + 4px margin; a row is 30px).
+This slice is for the column and the labels, not for height.
+
+### 12.1 Built
+
+| region | before (slice 6, `6621a992b`) | now |
+|---|---|---|
+| scope picker | a right-aligned strip of five 32px `Icon`s at opacity 0.25 / 1, no label, off the column | a **30px row of the label column**: `Edge` / `Corner`, one 26px segmented track (slice 5's), five 28px segments, 14px glyphs in `currentColor` |
+| order | port index order (all, left, top, right, bottom) | **CSS clockwise, all first**: all, top, right, bottom, left; all, top-left, top-right, bottom-right, bottom-left |
+| glyphs | the 31px SVGs scaled down (1.5/31 dotted strokes) | drawn at 14px in `model/scopeRows.ts`: the box faint (0.35), the edge/corner in scope solid |
+| a side with its own value | invisible until its tab was opened; `All corners` read `0` over a visibly rounded corner | **a 4px mark** (the reset dot's colour) in that segment's corner; tooltip `Top left corner (set)` |
+| reset dot | — | none: the row writes nothing |
+
+⚠️ **The mark is new behaviour, not in the mockup — for Richard's look.** It answers a hidden-state defect the old
+strip had, and is one class to delete if he does not want it.
+
+Also: `Ports` never disposed a `TabGroup` (they live in groups, not `this.views`), so each rebuild leaked the strip's
+React root; it now tracks and disposes them, since the row also listens to `parametersChanged` (an edit does not
+re-render the panel). `propertyeditor.css` loses the `.property-tab*` rules (no other user).
+
+Files: `model/scopeRows.ts` (new, pure), `components/PropertyTabs.tsx` (rewritten) + new `.module.scss`,
+`DataTypes/TabGroup.ts`, `DataTypes/Ports.ts` (dispose), `styles/propertyeditor/propertyeditor.css`.
+
+### 12.2 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded and restored byte-identical
+(`a1ea46f2…`); renderer module source checked before driving (`scopeRows.ts` includes `Top left corner`: true).
+Script `verdicts/CHR-009/2026-09-16/scope/drive-scope.js`, results `scope/after/scope-results.json`.
+**The look, same crop:** `height/after/props-group-bottom-{dark,light}.png` (slice 6) → `scope/after/props-group-bottom-{dark,light}.png`;
+also `scope/after/props-group-scope-{set,undo,left-edge}-dark.png` and 4× `scope/after/zoom-{edge,corner}-{dark,light}.png`.
+
+| reading (Group, both themes identical) | slice 6 | slice 7 |
+|---|---|---|
+| old strip elements | present | **0** |
+| label left edges | 17 | **17** (`Edge`, `Corner` included; 28 is the gate note's text, as before) |
+| scope row / track | — | **30 / 26**, track x 141 → 297 (the column), 5 × 28.4px segments, glyphs 14×14 |
+| `Corner Radius` / `Box Shadow` header top | 611 / 728 | **607 / 720** (−4 per strip) |
+| labels cut | — | 0 / 2 |
+
+Real input (CDP mouse at `elementFromPoint`-verified points, `Input.insertText`, CDP Enter), dark:
+
+| act | model `borderTopLeftRadius` | row |
+|---|---|---|
+| start | unset | `corners-all` pressed, 1 row shown (`0`), 0 marks |
+| press top-left | unset | `corners-top-left` pressed, 1 row shown (empty) |
+| type `8` + Enter | `{8, px}` (`borderRadius` untouched) | mark on top-left |
+| press All corners | `{8, px}` | `corners-all` pressed, field `0`, **mark still on top-left** |
+| undo | unset | mark gone |
+| press Left edge | — | `borders-left` pressed; shows exactly `Border Style`, `Border Width`, `Border Color` (12 hidden) |
+
+The 4× zooms: the four edges read apart at once; the corner arcs are right but **subtle** at 1× — worth his eye.
+The drive's one failure was the instrument (the Left-edge segment was scrolled out of view, `y −443`); scrolled, re-run.
+
+### 12.3 Gates
+
+- `tsc --noEmit` (editor) **0**. `npm run type` / `npm run colors` **holding**.
+- New `tests-unit/chr-009/scopeRows.test.tsx`, **8 tests**: marks exactly the sides whose own ports are set, unset
+  sides unmarked beside a set one, clockwise order, an unknown tab kept after the known ones and drawn as its name,
+  labels + one pressed, a 14px `currentColor` glyph per known tab, the component (row, segments, pressed, one mark,
+  no reset dot) and the tab a press reports. Mutants: `isSet` ignores the tab → **3 red**; order sort removed → **3 red**.
+- `npx jest` (editor, stack down) **472 suites / 7,705 tests, EXIT 0** — s17's 471 / 7,697 plus exactly this suite.
+  `test:ci` **not run**.
+
+### 12.4 Left
+
+- Seen on the way, not this slice's: a per-side field (Left edge) draws **empty** rather than the inherited all-sides
+  value, and its colour swatch is a checkerboard — a side reads "nothing" when it is in fact `none`/2/#000 from All.
+  Pre-existing; the mark now tells you a side is set, but not what an unset side inherits.
+- The rest of §11.5 unchanged: §3.4 proper; the colour field; Advanced CSS footer; the small list; a Text node.

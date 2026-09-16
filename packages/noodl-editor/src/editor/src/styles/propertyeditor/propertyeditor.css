@@ -756,25 +756,6 @@
   opacity: 0.3;
 }
 
-.property-tab {
-  opacity: 0.25;
-  margin-left: 5px;
-  margin-right: 5px;
-}
-
-.property-tab.selected {
-  opacity: 1;
-}
-
-/* UIX-011: the glyph now comes from a core-ui <Icon> child (PropertyTabs.tsx),
-   not a `content: url()` background — the old SVGs had baked white fills and
-   could not follow the theme. The 32x32 box is unchanged. */
-.property-tab-icon {
-  width: 32px;
-  height: 32px;
-  color: var(--theme-color-fg-default);
-}
-
 /* BCN-010 — a port the chosen backend cannot serve.
    The control is dimmed and inert; the sentence under it is the deliverable.
    Amber rather than red: phase 23's colour law reserves red for danger, and

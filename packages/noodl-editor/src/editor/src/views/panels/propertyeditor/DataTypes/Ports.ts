@@ -269,6 +269,7 @@ export class Ports extends View {
     EventDispatcher.instance.off(this);
 
     this.views.forEach((v) => v.dispose && v.dispose());
+    this.disposeTabGroups();
 
     // CHR-008 §3.4: the Properties panel is no longer remounted per selection, so the next node's view
     // scrolls the SAME `ScrollArea`. A listener left here would record that node's offsets under this
@@ -1073,6 +1074,13 @@ export class Ports extends View {
     return ports;
   }
 
+  private _tabGroups: TabGroup[] = [];
+
+  private disposeTabGroups() {
+    this._tabGroups.forEach((t) => t.dispose());
+    this._tabGroups = [];
+  }
+
   getViewGroupsFromPorts() {
     const ports = this._getPorts();
 
@@ -1081,6 +1089,9 @@ export class Ports extends View {
     // used to just drop them (as the legacy `el.html('')` did), leaking every
     // row's React root on each panel re-render.
     this.views.forEach((v) => v.dispose && v.dispose());
+    // CHR-009 slice 7: a `TabGroup` lives in a group, not in `this.views`, so it was never disposed —
+    // its React root leaked on every rebuild, and it now also listens to the model.
+    this.disposeTabGroups();
 
     this._toolsType = {};
     const _viewForPort = {};
@@ -1157,6 +1168,7 @@ export class Ports extends View {
             parent: this
           });
           addToGroup(_tabViews[group]);
+          this._tabGroups.push(_tabViews[group]);
         }
         _tabViews[group].addView(v);
       } else addToGroup(v);

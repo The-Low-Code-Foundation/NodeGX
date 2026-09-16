@@ -3,6 +3,7 @@ import { createRoot, Root } from 'react-dom/client';
 
 import View from '../../../../../../shared/ListenableView';
 import { PropertyTabs } from '../components/PropertyTabs';
+import { scopeRowOf } from '../model/scopeRows';
 
 function setElementVisible(el: HTMLElement, visible: boolean) {
   if (el) el.style.display = visible ? '' : 'none';
@@ -55,6 +56,14 @@ export class TabGroup extends View {
     }
     this.renderTabs();
 
+    // CHR-009 slice 7: a segment marks a side that holds its own value, and an edit (or undo) in the
+    // rows below does not re-render the panel. `render` can run again: re-bind, never stack.
+    const model = this.parent.model;
+    if (model) {
+      model.off(this);
+      model.on('parametersChanged', () => this.renderTabs(), this);
+    }
+
     const selectedTab = this.selectedTab;
     this.views.forEach((v) => {
       v.render();
@@ -69,10 +78,12 @@ export class TabGroup extends View {
   private renderTabs() {
     if (!this.tabsRoot) return;
 
+    const parameters = (this.parent.model && this.parent.model.parameters) || {};
+    const views = this.views.map((v) => ({ tab: v.port.tab.tab, portName: v.port.name }));
+
     this.tabsRoot.render(
       React.createElement(PropertyTabs, {
-        tabs: this.tabs,
-        selectedTab: this.selectedTab,
+        row: scopeRowOf(this.tabGroup, this.tabs, views, this.selectedTab, parameters),
         onTabClicked: (tab: string) => this.onTabClicked(tab)
       })
     );
@@ -93,6 +104,7 @@ export class TabGroup extends View {
   }
 
   dispose() {
+    this.parent.model && this.parent.model.off(this);
     if (this.tabsRoot) {
       this.tabsRoot.unmount();
       this.tabsRoot = null;

@@ -1,0 +1,72 @@
+/* CHR-009 slice 7: a tab group's scope picker as a row of the label column — the align rows' track
+   (AlignToolsInput.module.scss): bg-2, bg-3 pressed, five segments in ~156px. */
+
+.Segment {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 2px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+}
+
+.Option {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-default);
+  background: none;
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 0;
+  }
+
+  &.is-pressed {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &.is-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--font-size-xs);
+  }
+}
+
+.Glyph {
+  display: flex;
+
+  svg {
+    display: block;
+  }
+}
+
+/* This side holds its own value: the gutter reset dot's colour, small, in the segment's corner. */
+.SetMark {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--theme-color-secondary-as-fg);
+  pointer-events: none;
+}
