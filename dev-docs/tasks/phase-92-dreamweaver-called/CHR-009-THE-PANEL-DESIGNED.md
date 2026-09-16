@@ -233,3 +233,103 @@ stay in the node row; do not build the menu**).
 - AC2's "2 font sizes" now reads **4** on the whole panel: `13px` is `BasePanel`'s `Properties` title (untouched) and
   `15px` the node name (the mockup's `-lg`). Slice 1's "2" was measured inside `.sidebar-property-editor` only.
   Fills over the visible panel: 8 distinct (toggle, dots, glyph wash included) against AC2's ≤ 3.
+
+## 8. Slice 3 — Size Mode, the gutter, the section rhythm (2026-09-16, s14)
+
+The handoff's first item was §3.4 (Variant/State into General), which moves two rows by one filter's height. s12's
+lesson ranks slices by **screen area changed**, so this slice took the largest regions left in the top crop: the
+four-icon size strip, the `●` after labels, and the air between groups.
+
+### 8.1 Built
+
+| region (§2) | before (slice 2, `87004451f`) | now |
+|---|---|---|
+| dimensions — size mode | four 30px icon boxes centred on an unlabelled 50px strip, reset dot at its right edge | **one 30px row of the label column**: `Size Mode`, then `W` [given \| fits] and `H` [given \| fits] as 26px segmented tracks of real `<button aria-pressed>`s. Still writes the one `sizeMode` enum (`model/sizeModeAxes.ts`). Each button's `title` is the mode that press produces, in the port's own tooltip words |
+| connection state (AC3) | the reset `●` drawn *inside* the label box, after the text (R6's `overflow: hidden` could clip it) | `GutterDot` in the 16px left of the label column, centre x = 9 on every row: **connected** → filled `primary` 6px dot with a 3px `primary-bg` ring (not clickable; the chip beside it is the click); **changed** → the reset dot (same class, title, click); **neither → nothing** |
+| section rhythm | `.property-group` padding 13 / 15 | 6 / 10 (the mockup's `section`) |
+
+⚠️ **Deviation from the mockup, for Richard's look:** the mockup draws an *outlined* dot on every row, and AC3 says
+"flips from outlined to filled". Not built: rows that do not draw through `PropertyPanelInput`/`PropertyPanelRow`
+(legacy `.property-row`s, the align strips, the margin/padding box, `Variant`/`State`) would have no ring, and the
+gutter would read as a pattern with holes. One CSS rule adds it back if he wants it.
+
+⚠️ `W`/`H` are two independent axes by design. The rows they switch off are **not removed**: `addDimensions`
+gates `width`/`height` on `sizeMode`, so FB-021/R8 keeps them drawn, dimmed, under one gate line. That line's
+wording ("Width and Height apply when Size Mode is Explicit, or is not set") predates this slice.
+
+### 8.2 🔴 The defect the drive found: a wire never reached an open panel
+
+`Ports.bindModel` subscribed to `connectionAdded`/`connectionRemoved` through `model.owner && model.owner.on(…)`.
+**`Ports.model` is a `ModelProxy`, and the proxy has no `owner`** — so that subscription, and FB-017's
+`nodeAttached`/`nodeDetached` hint refresh beside it, **had never bound anything since the initial commit.** Even
+bound, the connection handler called `renderGroups` without clearing `_portsHash`, whose inputs (ports, variant,
+capabilities, schema, filter) do not include connections, so it would have returned early.
+
+Measured on the dev build, same rig, the fix as the only varied thing:
+
+| arm | wire `app_router.childIndex → app_root.width` with the Group's panel open | after selecting another node and back |
+|---|---|---|
+| before (`graphOf` absent) | reset dot, **no chip**, 1.5 s later still none | connected dot + chip |
+| after | **connected dot + chip at 263 ms**; undo → reset dot, no chip, at 113 ms | — |
+
+Fix: `graphOf(model)` / `nodeOf(model)` read through the proxy (a bare model is its own node — the project
+settings tab passes one); a wire whose `toId`/`fromId` is this node clears the hash. A wire elsewhere in the
+component still hits the hash and does not rebuild (a rebuild costs the caret — §3.5).
+
+⚠️ Side effect, intended but **not separately driven**: FB-017's child attach/detach hint refresh now runs.
+
+### 8.3 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded and restored byte-identical
+(`a1ea46f2…`). Script `verdicts/CHR-009/2026-09-16/rows/drive-rows.js`; results `rows/rows-results.json`.
+**The look, same crop:** `head/props-group-top-{dark,light}.png` (slice 2) beside `rows/props-group-top-{dark,light}.png`;
+also `rows/props-group-lower-*.png`, `props-group-fit-both-dark.png`, `props-group-width-connected-dark.png`.
+
+| reading (Group, both themes identical) | slice 2 | slice 3 |
+|---|---|---|
+| size control | 50px strip, no label | 30px row, label `Size Mode`, 2 × 26px segments, no overflow |
+| label left edges (top crop / scrolled crop) | 17 | **17 / 17** (one value, incl. Variant/State) |
+| gutter marks | after the label text | centre x **9** on all 4 seen, vertically centred on the row (Δ 0), `elementFromPoint`-reachable |
+| Dimensions header / Width row / Layout header (PNG px ÷ 2, same crop) | ≈395 / 477 / 570 | ≈376 / 440 / **521** |
+| Alignment header | below the 900px crop | ≈846, in the crop |
+| visible font sizes over `BasePanel` | 4 (13 title, 15 name, 12, 11) | 4, unchanged |
+| distinct fills (visible) | 8 | 7 |
+
+Real input (CDP mouse at an `elementFromPoint`-verified point), dark:
+
+| act | result |
+|---|---|
+| click `W fits` | model `contentWidth`; pressed `width:fits, height:given`; Width row **gated** (drawn, dimmed), Height live |
+| click `H fits` | model `contentSize`; both rows gated |
+| undo × 2 | model `explicit`; both rows live; pressed `given, given` |
+| Size Mode row focusables | 4 (was 0 — FB-021's `revealGateTarget` fell back to focusing the row) |
+| wire into `width`, undo | see 8.2 |
+
+### 8.4 Gates
+
+- `tsc --noEmit` (editor) **0 errors**. `npm run type` / `npm run colors` **holding**.
+- New `tests-unit/chr-009/sizeModeRow.test.tsx`, 18 tests: all four enum values read AND written against the
+  runtime's own table (`Layout.size`), unknown value presses nothing, reset dot only off-default, gutter mark kinds,
+  mark not inside the label. Mutant (swap `contentWidth`/`contentHeight` in the table) → **5 red**.
+- Full editor `tests-unit` (stack down): **469 suites / 7,668 tests, EXIT 0** — s13's 468 / 7,650 plus exactly this suite.
+- `test:ci` **not run**.
+- The connection fix has **no unit test**: `Ports.ts` cannot load in plain jest without stubbing every import
+  (s4). The drive's before/after arms are its grade.
+
+### 8.5 Traps met
+
+- 🔴 **`model.owner && …` on a proxy is a silent no-op.** A guard that reads "only if there is an owner" also reads
+  "never", and nothing reports it. Check a guarded subscription binds at all before reasoning about what it does.
+- 🔴 The `PropertyPanelInput` **index** pulls in `Icon`; a spec rendering anything that imports it fails TO RUN
+  (`Tests: 0 total`). Import `PropertyPanelInput/PropertyPanelRow` directly.
+- A read taken mid-rebuild finds **no row at all** for <113 ms after an undo. Retry on the END state, not on "not X".
+- A gated row is drawn, not removed — "row drawn: true" after `W fits` looked like a failure until the drive read
+  the three states (live / gated / absent).
+
+### 8.6 Left
+
+- **By screen area, next:** the Margin & Padding box (~145px of the lower crop) → paired `Margin`/`Padding` rows with
+  a per-edge expander (AC4); the Alignment / Align-and-Justify icon strips (unlabelled, off the label column).
+- `Fixed` chip beside Width/Height (the mockup has no such chip; `isFixed` still needs a home).
+- §3.4 proper (Variant/State inside General); 28px `Position`/`Layout` selects (AC2 — heights not yet measured on
+  this build); colour field; Advanced CSS footer; the comment field's 4px overshoot; Escape on the Variant picker.

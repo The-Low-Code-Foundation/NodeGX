@@ -1,0 +1,608 @@
+{
+  "measured": {
+    "dark": {
+      "sizeRow": {
+        "box": {
+          "top": 363,
+          "height": 30,
+          "left": 17,
+          "width": 280
+        },
+        "label": "Size Mode",
+        "buttons": [
+          {
+            "axis": "width",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "width",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Content width & explicit height"
+          },
+          {
+            "axis": "height",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "height",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Explicit width & content height"
+          }
+        ],
+        "segmentHeights": [
+          26,
+          26
+        ],
+        "overflows": false
+      },
+      "oldStripPresent": false,
+      "labelLefts": [
+        17
+      ],
+      "labelsShown": [
+        "Variant",
+        "State",
+        "Mounted",
+        "Size Mode",
+        "Width",
+        "Height",
+        "Position",
+        "Layout",
+        "Multi Line Wrap",
+        "Vertical Gap",
+        "Horizontal Gap",
+        "Clip Content"
+      ],
+      "marks": [
+        {
+          "kind": "reset",
+          "label": "Size Mode",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        },
+        {
+          "kind": "reset",
+          "label": "Width",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        },
+        {
+          "kind": "reset",
+          "label": "Height",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        }
+      ],
+      "legacyMarks": [],
+      "groupHeaders": [
+        {
+          "name": "General",
+          "top": 250
+        },
+        {
+          "name": "Dimensions",
+          "top": 331
+        },
+        {
+          "name": "Layout",
+          "top": 476
+        },
+        {
+          "name": "Alignment",
+          "top": 802
+        }
+      ],
+      "rowHeights": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 11,
+        "12px": 17
+      },
+      "fills": {
+        "rgb(43, 52, 64)": 15,
+        "rgb(33, 41, 50)": 4,
+        "color(srgb 0.360784 0.662745 1 / 0.14)": 1,
+        "rgb(51, 62, 77)": 3,
+        "rgb(77, 163, 255)": 1,
+        "rgb(187, 198, 211)": 3,
+        "rgb(67, 78, 92)": 1
+      },
+      "radii": {
+        "6px": 32,
+        "4px": 20,
+        "9999px": 2,
+        "50%": 3
+      },
+      "elements": 1393
+    },
+    "darkScrolled": {
+      "sizeRow": {
+        "box": {
+          "top": -197,
+          "height": 30,
+          "left": 17,
+          "width": 280
+        },
+        "label": "Size Mode",
+        "buttons": [
+          {
+            "axis": "width",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "width",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Content width & explicit height"
+          },
+          {
+            "axis": "height",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "height",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Explicit width & content height"
+          }
+        ],
+        "segmentHeights": [
+          26,
+          26
+        ],
+        "overflows": false
+      },
+      "oldStripPresent": false,
+      "labelLefts": [
+        17
+      ],
+      "labelsShown": [
+        "Position",
+        "Layout",
+        "Multi Line Wrap",
+        "Vertical Gap",
+        "Horizontal Gap",
+        "Clip Content",
+        "Box Sizing",
+        "Opacity",
+        "Blend Mode",
+        "Background Color",
+        "Background Image",
+        "Background Gradient",
+        "Background Size"
+      ],
+      "marks": [
+        {
+          "kind": "reset",
+          "label": "Background Color",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        }
+      ],
+      "legacyMarks": [],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 242
+        },
+        {
+          "name": "Align and justify content",
+          "top": 321
+        },
+        {
+          "name": "Margin and padding",
+          "top": 430
+        },
+        {
+          "name": "Style",
+          "top": 661
+        }
+      ],
+      "rowHeights": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        33,
+        30,
+        30,
+        30
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 9,
+        "12px": 24
+      },
+      "fills": {
+        "rgb(43, 52, 64)": 23,
+        "rgb(33, 41, 50)": 8,
+        "color(srgb 0.360784 0.662745 1 / 0.14)": 1,
+        "rgb(51, 62, 77)": 1,
+        "rgb(67, 78, 92)": 1,
+        "rgb(77, 163, 255)": 2,
+        "rgb(187, 198, 211)": 1,
+        "rgb(255, 255, 255)": 1
+      },
+      "radii": {
+        "6px": 31,
+        "4px": 37,
+        "9999px": 1,
+        "8px": 1,
+        "50%": 1
+      },
+      "elements": 1393
+    },
+    "light": {
+      "sizeRow": {
+        "box": {
+          "top": 363,
+          "height": 30,
+          "left": 17,
+          "width": 280
+        },
+        "label": "Size Mode",
+        "buttons": [
+          {
+            "axis": "width",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "width",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Content width & explicit height"
+          },
+          {
+            "axis": "height",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "height",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Explicit width & content height"
+          }
+        ],
+        "segmentHeights": [
+          26,
+          26
+        ],
+        "overflows": false
+      },
+      "oldStripPresent": false,
+      "labelLefts": [
+        17
+      ],
+      "labelsShown": [
+        "Variant",
+        "State",
+        "Mounted",
+        "Size Mode",
+        "Width",
+        "Height",
+        "Position",
+        "Layout",
+        "Multi Line Wrap",
+        "Vertical Gap",
+        "Horizontal Gap",
+        "Clip Content"
+      ],
+      "marks": [
+        {
+          "kind": "reset",
+          "label": "Size Mode",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        },
+        {
+          "kind": "reset",
+          "label": "Width",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        },
+        {
+          "kind": "reset",
+          "label": "Height",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        }
+      ],
+      "legacyMarks": [],
+      "groupHeaders": [
+        {
+          "name": "General",
+          "top": 250
+        },
+        {
+          "name": "Dimensions",
+          "top": 331
+        },
+        {
+          "name": "Layout",
+          "top": 476
+        },
+        {
+          "name": "Alignment",
+          "top": 802
+        }
+      ],
+      "rowHeights": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 11,
+        "12px": 17
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 15,
+        "rgb(255, 255, 255)": 4,
+        "color(srgb 0.180392 0.486274 0.839216 / 0.14)": 1,
+        "rgb(229, 233, 237)": 3,
+        "rgb(21, 112, 239)": 1,
+        "rgb(74, 86, 99)": 3,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 32,
+        "4px": 20,
+        "9999px": 2,
+        "50%": 3
+      },
+      "elements": 1393
+    },
+    "lightScrolled": {
+      "sizeRow": {
+        "box": {
+          "top": -197,
+          "height": 30,
+          "left": 17,
+          "width": 280
+        },
+        "label": "Size Mode",
+        "buttons": [
+          {
+            "axis": "width",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "width",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Content width & explicit height"
+          },
+          {
+            "axis": "height",
+            "fits": "false",
+            "pressed": "true",
+            "height": 20,
+            "title": "Explicit width & height"
+          },
+          {
+            "axis": "height",
+            "fits": "true",
+            "pressed": "false",
+            "height": 20,
+            "title": "Explicit width & content height"
+          }
+        ],
+        "segmentHeights": [
+          26,
+          26
+        ],
+        "overflows": false
+      },
+      "oldStripPresent": false,
+      "labelLefts": [
+        17
+      ],
+      "labelsShown": [
+        "Position",
+        "Layout",
+        "Multi Line Wrap",
+        "Vertical Gap",
+        "Horizontal Gap",
+        "Clip Content",
+        "Box Sizing",
+        "Opacity",
+        "Blend Mode",
+        "Background Color",
+        "Background Image",
+        "Background Gradient",
+        "Background Size"
+      ],
+      "marks": [
+        {
+          "kind": "reset",
+          "label": "Background Color",
+          "centreX": 9,
+          "size": 6,
+          "gapToLabel": 5,
+          "rowCentreDelta": 0,
+          "reachable": true
+        }
+      ],
+      "legacyMarks": [],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 242
+        },
+        {
+          "name": "Align and justify content",
+          "top": 321
+        },
+        {
+          "name": "Margin and padding",
+          "top": 430
+        },
+        {
+          "name": "Style",
+          "top": 661
+        }
+      ],
+      "rowHeights": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        33,
+        30,
+        30,
+        30
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 9,
+        "12px": 24
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 23,
+        "rgb(255, 255, 255)": 9,
+        "color(srgb 0.180392 0.486274 0.839216 / 0.14)": 1,
+        "rgb(229, 233, 237)": 1,
+        "rgb(201, 210, 220)": 1,
+        "rgb(21, 112, 239)": 2,
+        "rgb(74, 86, 99)": 1
+      },
+      "radii": {
+        "6px": 31,
+        "4px": 37,
+        "9999px": 1,
+        "8px": 1,
+        "50%": 1
+      },
+      "elements": 1393
+    }
+  },
+  "interaction": {
+    "sizeModeBefore": "explicit",
+    "widthRowBefore": "live",
+    "afterWFits": {
+      "model": "contentWidth",
+      "widthRow": "gated",
+      "heightRow": "live",
+      "pressed": [
+        "width:true",
+        "height:false"
+      ]
+    },
+    "afterHFits": {
+      "model": "contentSize",
+      "widthRow": "gated",
+      "heightRow": "gated"
+    },
+    "afterUndo": {
+      "model": "explicit",
+      "widthRow": "live",
+      "heightRow": "live",
+      "pressed": [
+        "width:false",
+        "height:false"
+      ]
+    },
+    "sizeRowFocusables": 4,
+    "widthMarkBefore": "reset@62,rgb(187, 198, 211),none",
+    "wireSource": {
+      "id": "app_router",
+      "type": "Router",
+      "port": "childIndex"
+    },
+    "widthMarkConnectedMs": 263,
+    "widthMarkConnected": "connected@62,rgb(77, 163, 255),rgba(77, 163, 255, 0.13) 0px 0px 0px 3px",
+    "bindingChip": true,
+    "widthMarkAfterUndo": "reset@62,rgb(187, 198, 211),none",
+    "widthMarkAfterUndoSequence": [
+      "no row",
+      "reset@62,rgb(187, 198, 211),none"
+    ],
+    "widthMarkAfterUndoMs": 113,
+    "chipAfterUndo": false,
+    "connectionsLeft": 0
+  }
+}
