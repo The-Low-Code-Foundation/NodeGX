@@ -106,13 +106,13 @@ import { readNumberInputText } from '@noodl-core-ui/components/property-panel/Pr
 
 import {
   MarginPaddingParam,
-  MarginPaddingSide,
-  agreementKeyOf,
   commitMarginPaddingEdit,
+  commitMarginPaddingPairEdit,
   editTextOf,
   isMarginPaddingToken,
   isZeroValue,
   labelTextOf,
+  pairDisplayOf,
   readMarginPaddingEdit,
   scrubStartOf,
   tokenLabel
@@ -232,11 +232,18 @@ describe('REL-014 — what the widget shows for a token', () => {
     expect(scrubStartOf({ value: 12, unit: '%' }, { value: 8, unit: 'px' }, 'px')).toEqual({ value: 12, unit: '%' });
   });
 
-  it('four sides all carrying the same token agree, so the link seeds on', () => {
-    expect(agreementKeyOf(TOKEN)).toBe(agreementKeyOf(TOKEN));
+  it('sides carrying the same token read as one pair value, not `mixed`', () => {
+    // CHR-009 retired POL-012's lock this used to seed; what survives of the rule is that a
+    // token compares as itself.
+    expect(pairDisplayOf('padding', 'vertical', { 'padding-top': TOKEN, 'padding-bottom': TOKEN }, {})).toEqual({
+      kind: 'same',
+      value: TOKEN
+    });
     // The control: it can disagree, and a token is not the same as "no explicit value".
-    expect(agreementKeyOf(TOKEN)).not.toBe(agreementKeyOf('var(--space-3)'));
-    expect(agreementKeyOf(TOKEN)).not.toBe(agreementKeyOf(undefined));
+    expect(
+      pairDisplayOf('padding', 'vertical', { 'padding-top': TOKEN, 'padding-bottom': 'var(--space-3)' }, {}).kind
+    ).toBe('mixed');
+    expect(pairDisplayOf('padding', 'vertical', { 'padding-top': TOKEN }, {}).kind).toBe('mixed');
     expect(isMarginPaddingToken(TOKEN)).toBe(true);
     expect(isMarginPaddingToken('banana')).toBe(false);
   });
@@ -262,10 +269,9 @@ const PADDING_PORTS = ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRig
 interface WidgetProps {
   values: Record<string, MarginPaddingParam | undefined>;
   defaults: Record<string, MarginPaddingParam>;
-  linked: Record<MarginPaddingSide, boolean>;
   onUpdate: (comp: string, value: MarginPaddingParam | undefined, opts?: unknown) => void;
-  onUpdateAll: (side: MarginPaddingSide, value: MarginPaddingParam | undefined, opts?: unknown) => void;
-  onReset: () => void;
+  onUpdateComps: (comps: string[], value: MarginPaddingParam | undefined, opts?: unknown) => void;
+  onResetSide: (side: 'margin' | 'padding') => void;
 }
 
 /**
@@ -306,9 +312,8 @@ function aPaddingWidget(stored?: unknown) {
     snappedBackTo: (): string | null => snappedBackTo,
     /**
      * The blur/Enter path for one side. 🔴 This calls the row's **own**
-     * `commitMarginPaddingEdit` with the props the row handed the widget — the parse,
-     * the linked/unlinked branch and the refusal are the shipped ones, not restated
-     * here. What stands in for the component is only its five-line hand-off: it holds
+     * `commitMarginPaddingEdit` with the props the row handed the widget — the parse
+     * and the refusal are the shipped ones, not restated here. What stands in for the component is only its five-line hand-off: it holds
      * `text` and `unit` in `useState` and cannot be loaded by this runner.
      */
     commit: (comp: string, text: string, unit = 'px') => {
@@ -319,9 +324,24 @@ function aPaddingWidget(stored?: unknown) {
         text,
         unit,
         values: props.values,
-        linked: props.linked,
         onUpdate: (c, value) => props.onUpdate(c, value),
-        onUpdateAll: (side, value) => props.onUpdateAll(side, value),
+        onRefuse: (restored) => {
+          snappedBackTo = restored;
+        }
+      });
+    },
+    /** CHR-009 — the blur/Enter path for a collapsed `↕` / `↔` field. */
+    commitPair: (axis: 'vertical' | 'horizontal', text: string, unit = 'px') => {
+      const props = frames[frames.length - 1];
+      snappedBackTo = null;
+      return commitMarginPaddingPairEdit({
+        side: 'padding',
+        axis,
+        text,
+        unit,
+        values: props.values,
+        defaults: props.defaults,
+        onUpdateComps: (comps, value) => props.onUpdateComps(comps, value),
         onRefuse: (restored) => {
           snappedBackTo = restored;
         }
@@ -341,8 +361,10 @@ describe('REL-014 — the margin/padding widget (the copy that matters most)', (
     expect(labelTextOf(widget.latest().values['padding-top'] as string)).toBe('--space-2');
   });
 
-  it('…and the four of them agree, so the padding link seeds on', () => {
-    expect(aPaddingWidget(TOKEN).latest().linked.padding).toBe(true);
+  it('…and the four of them read as one value on both pair fields', () => {
+    const { values, defaults } = aPaddingWidget(TOKEN).latest();
+    expect(pairDisplayOf('padding', 'vertical', values, defaults)).toEqual({ kind: 'same', value: TOKEN });
+    expect(pairDisplayOf('padding', 'horizontal', values, defaults)).toEqual({ kind: 'same', value: TOKEN });
   });
 
   it('AC1 — a token typed into the field is what the project holds afterwards', () => {
@@ -402,14 +424,21 @@ describe('REL-014 — the margin/padding widget (the copy that matters most)', (
   it('AC3 — an emptied field still clears, and clearing is still a write', () => {
     const widget = aPaddingWidget(TOKEN);
     expect(widget.commit('padding-top', '')).toBe('committed');
-    // Linked, so all four go — one gesture, four sides, which is what the lock means.
-    for (const p of PADDING_PORTS) expect(widget.stored(p.name)).toBeUndefined();
+    // One per-edge field is one side: the other three keep their token.
+    expect(widget.stored('paddingTop')).toBeUndefined();
+    expect(widget.stored('paddingBottom')).toBe(TOKEN);
     expect(widget.writes.length).toBeGreaterThan(0);
+
+    // CHR-009 — the collapsed `↕` field is both sides of its axis, and only those.
+    expect(widget.commitPair('horizontal', '')).toBe('committed');
+    expect(widget.stored('paddingLeft')).toBeUndefined();
+    expect(widget.stored('paddingRight')).toBeUndefined();
+    expect(widget.stored('paddingBottom')).toBe(TOKEN);
   });
 
   it('AC3 — the reset affordance still clears a side holding a token', () => {
     const widget = aPaddingWidget(TOKEN);
-    widget.latest().onReset();
+    widget.latest().onResetSide('padding');
     for (const p of PADDING_PORTS) expect(widget.stored(p.name)).toBeUndefined();
   });
 

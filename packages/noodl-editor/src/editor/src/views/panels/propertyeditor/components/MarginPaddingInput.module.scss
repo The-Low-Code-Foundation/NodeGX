@@ -1,0 +1,126 @@
+/* CHR-009 §2 "paired values" — Margin and Padding as rows of the label column. Each field is
+   slice 1's number+unit field (`NumberUnitInput.module.scss`) with a direction glyph in front. */
+
+.Root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ⚠️ Every pixel here is the value's: at 328px a field is ~60px, and the glyph takes 16 of it.
+   `120` must fit (measured by the drive); a token ellipsises with the full text in the tooltip.
+   Collapsed: ↕ ↔ + the expander. Expanded: ↑ ↓ + the expander, then ← → under them. */
+.Track {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px;
+  gap: 4px;
+  align-items: center;
+
+  &.is-expanded {
+    padding-block: 2px;
+  }
+
+  /* The expander stays on the first line, whichever state. */
+  .Expander {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+
+.Field {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  transition: border-color var(--speed-turbo);
+
+  &:hover {
+    border-color: var(--theme-color-border-strong);
+  }
+
+  &:focus-within {
+    border-color: var(--theme-color-primary);
+  }
+}
+
+.GlyphBox {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 6px;
+  color: var(--theme-color-fg-muted);
+}
+
+.Glyph {
+  display: block;
+}
+
+.Value {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 0 0 4px;
+  border: 0;
+  outline: none;
+  background-color: transparent;
+  color: var(--theme-color-fg-highlight);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
+
+  &.is-zero {
+    color: var(--theme-color-fg-muted);
+  }
+
+  &::placeholder {
+    color: var(--theme-color-fg-muted);
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* The unit suffix: text, drawn only for a unit that is not px — see the component for why. */
+.Unit {
+  flex: 0 0 auto;
+  padding: 0 6px 0 2px;
+  color: var(--theme-color-fg-muted);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  user-select: none;
+}
+
+.Expander {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--theme-color-border-strong);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  /* Same pressed treatment as the Size Mode segments and the `Fixed` chip. */
+  &[aria-expanded='true'] {
+    background-color: var(--theme-color-bg-3);
+    border-color: var(--theme-color-primary);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}

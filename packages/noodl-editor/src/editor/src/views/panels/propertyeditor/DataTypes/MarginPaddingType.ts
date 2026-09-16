@@ -3,18 +3,13 @@ import { createRoot, Root } from 'react-dom/client';
 
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 
-import { MarginPaddingInput } from '../components/MarginPaddingInput';
 // REL-014 — imported from the pure module rather than through the component, so
 // nothing but the `createElement` call below depends on a file that cannot be
 // loaded outside webpack.
-import {
-  MarginPaddingParam,
-  MarginPaddingSide,
-  agreementKeyOf,
-  isMarginPaddingToken,
-  sideOf
-} from '../components/marginPaddingEdit';
+import { MarginPaddingParam, MarginPaddingSide, isMarginPaddingToken, sideOf } from '../components/marginPaddingEdit';
+import { MarginPaddingInput } from '../components/MarginPaddingInput';
 import { TypeView } from '../TypeView';
+import { sameParameterValue } from './scrubCommit';
 
 export class MarginPaddingType extends TypeView {
   defaults: Record<string, MarginPaddingParam>;
@@ -24,21 +19,15 @@ export class MarginPaddingType extends TypeView {
   private root: Root | null = null;
 
   /**
-   * POL-012 — whether typing one side sets all four, per side.
+   * CHR-009 AC4 — per group, whether the row shows its four per-edge fields instead of the
+   * `↕` / `↔` pair.
    *
-   * ⚠️ **On the view, not in the React component.** `renderReact()` re-renders
-   * the root from here — including from a `setTimeout(…, 0)` in the property
-   * editor — so component state is discarded on any change driven from outside
-   * React, and the lock would silently snap back mid-edit.
-   *
-   * ⚠️ **And never on the model.** This describes how the user is typing, not
-   * what the project is: nothing here reaches `setParameter`, and nothing is
-   * written to `project.json`. A lock persisted into a project would be a
-   * preference of one author leaking into everyone else's editor.
+   * ⚠️ **On the view, not in the React component**, for the reason POL-012's lock lived here:
+   * `renderReact()` re-renders the root from outside React, including from a `setTimeout` in
+   * the property editor. And **never on the model** — it is how this author is looking at the
+   * box, not what the project is.
    */
-  private linked: Record<MarginPaddingSide, boolean> = { margin: false, padding: false };
-  /** Whether {@link linked} has been seeded from the values yet. See {@link seedLinked}. */
-  private linkedSeeded = false;
+  private expanded: Record<MarginPaddingSide, boolean> = { margin: false, padding: false };
 
   constructor() {
     super();
@@ -120,48 +109,7 @@ export class MarginPaddingType extends TypeView {
   }
 
   /**
-   * Whether every side of a group currently says the same thing.
-   *
-   * `undefined` (inheriting the default) is a value like any other here, so four
-   * untouched sides agree — which is the state a node starts in and the one
-   * where linking is most obviously wanted.
-   */
-  private sidesAgree(side: MarginPaddingSide): boolean {
-    const comps = this.compsOf(side);
-    if (comps.length < 2) return false;
-    // REL-014 — a token compares as itself, so the four sides `TextInputConfig`
-    // stamps with `var(--space-2)` agree and the lock seeds on, exactly as four
-    // equal numbers would. Before this they keyed as `undefined|undefined` and
-    // agreed by accident rather than because they held the same value.
-    //
-    // ⚠️ The old sentinel for "no explicit value" was a string containing a literal
-    // NUL byte, which made this whole file read as *binary* to `grep`. It is now
-    // an ordinary string in `agreementKeyOf`.
-    const key = (comp: string) => agreementKeyOf(this.values[comp]);
-    const first = key(comps[0]);
-    return comps.every((comp) => key(comp) === first);
-  }
-
-  /**
-   * ⚠️ **Linked starts on only where the four sides already agree.**
-   *
-   * The alternative — default on always — would mean that the first thing a
-   * user types on a node with four *different* paddings silently flattens three
-   * values they set deliberately. Turning the lock on by hand and then typing is
-   * the same outcome, but it is an action they took and can see.
-   *
-   * Seeded once, after `addComponentPort` has run for every port: the view is
-   * constructed with one port and fed the rest, so anything computed in the
-   * constructor would be looking at a quarter of the group.
-   */
-  private seedLinked() {
-    if (this.linkedSeeded) return;
-    this.linkedSeeded = true;
-    this.linked = { margin: this.sidesAgree('margin'), padding: this.sidesAgree('padding') };
-  }
-
-  /**
-   * Write all four sides of one group as **one** undo step.
+   * Write several sides — a `↕`/`↔` pair, or a whole group on reset — as **one** undo step.
    *
    * ⚠️ The group is `push`ed, not `pushAndDo`n, and it is built with a label
    * only. `setParameter` has already applied each change by the time we get
@@ -171,26 +119,34 @@ export class MarginPaddingType extends TypeView {
    * is documented on `UndoActionGroup` and is exactly the trap this shape
    * avoids.
    */
-  private updateAll(
-    side: MarginPaddingSide,
+  private updateComps(
+    comps: string[],
     value: MarginPaddingParam | undefined,
-    opts?: { drag?: boolean; oldValues?: Record<string, MarginPaddingParam | undefined> }
+    opts?: { drag?: boolean; oldValues?: Record<string, MarginPaddingParam | undefined>; label?: string }
   ) {
-    const comps = this.compsOf(side);
-    if (comps.length === 0) return;
+    // A side this node has no port for (a node with padding and no margin) is skipped.
+    const present = comps.filter((comp) => this.ports[comp]);
+    if (present.length === 0) return;
+
+    const label = (opts && opts.label) || `change ${sideOf(present[0])}`;
+
+    if (opts && opts.oldValues) {
+      this.commitDrag(present, value, opts.oldValues, label);
+      return;
+    }
 
     // A drag writes continuously and must not record anything; the commit that
     // follows it carries the whole gesture, with the values from before it
-    // started. Same contract as `update`, one group wider.
-    const group = opts && opts.drag ? undefined : new UndoActionGroup({ label: `change ${side}` });
+    // started. Same contract as `update`, wider.
+    const group = opts && opts.drag ? undefined : new UndoActionGroup({ label });
 
-    for (const comp of comps) {
+    for (const comp of present) {
       this.values[comp] = value;
       const oldValue = opts && opts.oldValues ? opts.oldValues[comp] : undefined;
       this.parent.model.setParameter(
         this.ports[comp].name,
         value,
-        group ? { undo: group, label: `change ${side}`, oldValue } : undefined
+        group ? { undo: group, label, oldValue } : undefined
       );
       this.refreshDefault(comp);
     }
@@ -199,30 +155,68 @@ export class MarginPaddingType extends TypeView {
     this.renderReact();
   }
 
+  /**
+   * The end of a drag: one undo step for the whole gesture, back to the values from the press.
+   *
+   * 🔴 **Not `setParameter`'s `oldValue`.** It checks `if (args.oldValue)`, so a side that was
+   * unset at the press (`undefined`) reads as "not supplied" and the entry records the DRAGGED
+   * value — undo then does nothing. Measured on the paired row: `↔` margin dragged from unset to
+   * 24, one undo, still 24. The old box never met this because its single-side drag started from
+   * an object; a pair starts from whatever each side holds. Same construction as FB-022's
+   * `commitScrub`, one group wide.
+   */
+  private commitDrag(
+    comps: string[],
+    value: MarginPaddingParam | undefined,
+    before: Record<string, MarginPaddingParam | undefined>,
+    label: string
+  ) {
+    const model = this.parent.model;
+    const group = new UndoActionGroup({ label });
+    for (const comp of comps) {
+      const name = this.ports[comp].name;
+      const start = before[comp];
+      this.values[comp] = value;
+      model.setParameter(name, value);
+      this.refreshDefault(comp);
+      if (sameParameterValue(start, value)) continue;
+      group.push({
+        do: () => {
+          model.setParameter(name, value);
+          model.notifyListeners('modelParameterRedo');
+        },
+        undo: () => {
+          // `undefined` deletes the parameter: the side goes back to its default.
+          model.setParameter(name, start);
+          model.notifyListeners('modelParameterUndo');
+        }
+      });
+    }
+    if (!group.isEmpty()) UndoQueue.instance.push(group);
+    this.renderReact();
+  }
+
   private renderReact() {
     if (!this.root) return;
-    this.seedLinked();
 
     this.root.render(
       React.createElement(MarginPaddingInput, {
         values: { ...this.values },
         defaults: { ...this.defaults },
-        linked: { ...this.linked },
-        onToggleLink: (side) => {
-          // ⚠️ Toggling writes nothing. Criterion 4: turning it on must not
-          // change a value by itself.
-          this.linked[side] = !this.linked[side];
+        expanded: { ...this.expanded },
+        onToggleExpanded: (side) => {
+          // Writes nothing: AC4's "the model holds four values" is about what was typed.
+          this.expanded[side] = !this.expanded[side];
           this.renderReact();
         },
         onUpdate: (comp, value, opts) => this.update(comp, value, opts),
-        onUpdateAll: (side, value, opts) => this.updateAll(side, value, opts),
-        onReset: () => {
-          Object.keys(this.defaults).forEach((comp) => {
-            if (this.values[comp] !== undefined) {
-              this.update(comp, undefined);
-            }
-          });
-        }
+        onUpdateComps: (comps, value, opts) => this.updateComps(comps, value, opts),
+        onResetSide: (side) =>
+          this.updateComps(
+            this.compsOf(side).filter((comp) => this.values[comp] !== undefined),
+            undefined,
+            { label: `reset ${side}` }
+          )
       })
     );
   }
