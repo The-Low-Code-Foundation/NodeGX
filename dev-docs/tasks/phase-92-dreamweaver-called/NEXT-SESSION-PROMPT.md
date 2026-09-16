@@ -24,7 +24,23 @@ pathspec. (s11 did.)
 | **CHR-008 the panel is one tree** | 🟡 **R8** (s8), **§3.4 identity** (s9), **§3.2 + §3.1 scaffold** (s10), **§3.1 slice 4 — first widget converted, driven, INERT** (s11, §10). Left: the undo re-seed defect, then the remaining 37 widgets, §3.6 popout, §3.8 chevron; AC3, AC4 |
 | CHR-004, 009, 010, 011 | ⬜ not built |
 
-## First job
+## 🔴 Before picking anything up: three sessions, zero ACs, nothing visible
+
+s9 (identity), s10 (scaffold) and s11 (this slice) all **built**, and none closed an acceptance
+criterion or changed a single pixel at rest. CHR-008's AC1 was met at s8; AC2–AC6 are still open.
+This phase closes on **Richard's look**, and his standing verdict on the invisible run was
+*"everything in the tasks up to now still looks like shit"* — the lesson written up after s4 was to
+put a visible surface in front of him early and not sequence every foundation first
+([[correct-and-usable-were-never-the-same-criterion]], now on its 6th repeat).
+
+**So weigh this before continuing down §3.1.** The widget conversions are real work with a real payoff
+(AC3/AC4 and the caret), but they are invisible one at a time, and there are ~37 left. The visible
+alternatives are **CHR-009 (the panel designed — R6's trial needs his look at screenshots anyway)**
+and **CHR-004**. If the next session continues §3.1, `dimension` is the one conversion with a visible
+result, because it is what closes §3.5's Width/caret arm. **Ask Richard which he wants rather than
+assuming the queue order.**
+
+## First job (if continuing CHR-008)
 
 🔴 **Fix the undo re-seed defect, then flip one line.** `components/widgets/index.ts` holds
 `// textArea: TextAreaWidget`, commented out. Everything else in the slice is finished, committed and
