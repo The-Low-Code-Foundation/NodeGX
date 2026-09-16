@@ -10,7 +10,7 @@
  * ## Everything here is pure, and that is the point
  *
  * The panel's rows are not React — `Ports.renderParams` builds raw elements from twenty-nine row
- * classes and hands them to `RowHost` to append. So the *decision* about which rows survive a
+ * classes and hands them to `PropertyRow` to draw. So the *decision* about which rows survive a
  * query cannot be graded by rendering anything; it has to be a function over the view objects.
  * That is the same split `propertyPanelTiers.ts` makes and for the same reason: the half worth
  * grading is the half with the judgement in it.

@@ -34,11 +34,20 @@
 import type { CapabilityGate } from '@noodl/backend-contract';
 
 import { gateSentence, type GateTarget } from './index';
+import {
+  GATED_PORT_CLASS,
+  GATED_PORT_CONTROL_CLASS,
+  GATED_PORT_REASON_CLASS
+} from './portDecorationClasses';
 
-/** Class names, also used by the live-pass selectors. */
-export const GATED_PORT_CLASS = 'property-capability-gated';
-export const GATED_PORT_CONTROL_CLASS = 'property-capability-gated-control';
-export const GATED_PORT_REASON_CLASS = 'property-capability-reason';
+/**
+ * Class names, also used by the live-pass selectors.
+ *
+ * Defined in `portDecorationClasses.ts` and re-exported here, so a caller that needs only the names
+ * — `PropertyRow`, and any spec — does not drag `./index` → `projectmodel` → `bugtracker` in with
+ * them. Every existing importer keeps working unchanged.
+ */
+export { GATED_PORT_CLASS, GATED_PORT_CONTROL_CLASS, GATED_PORT_REASON_CLASS };
 
 /**
  * Wrap a rendered row so it shows its gate, or return it untouched.

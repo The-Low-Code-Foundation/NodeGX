@@ -1,13 +1,19 @@
 import classNames from 'classnames';
-import React, { useLayoutEffect, useRef } from 'react';
+import React from 'react';
 
 import { ADVANCED_CSS_GROUP, activityBadgeLabel, sumActiveCounts } from '../propertyPanelTiers';
 
 export interface PropertyGroupModel {
   name: string;
   isExpanded: boolean;
-  /** Row views belonging to the group — raw elements or jQuery-wrapped */
-  els: TSFixme[];
+  /**
+   * The group's rows, as React nodes — CHR-008 §3.2.
+   *
+   * Was `els: TSFixme[]`, a list of DOM elements built by `Ports.renderParams` and appended into a
+   * host by hand. `Ports` now returns `<PropertyRow>` elements, so the rows are siblings in this
+   * tree and a row's decorations are props rather than post-render DOM surgery.
+   */
+  rows: React.ReactNode;
   /**
    * FB-017 AC2: how many of the group's ports are connected or set. Drawn as a badge when the
    * group is collapsed, so nothing folded away is doing something invisible.
@@ -51,26 +57,6 @@ export interface PropertyGroupsProps {
   onToggleGroup?: (groupName: string, isExpanded: boolean) => void;
 }
 
-/** Hosts row views built outside React, replacing whatever was there before. */
-function RowHost({ els, className, style }: { els: TSFixme[]; className?: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Layout effect so the rows are in place before paint — the property panel
-  // measures them (popout anchoring, scroll restore) right after rendering.
-  useLayoutEffect(() => {
-    const container = ref.current;
-    if (!container) return;
-
-    while (container.firstChild) container.removeChild(container.firstChild);
-
-    els.forEach((el) => {
-      el && container.appendChild(el);
-    });
-  }, [els]);
-
-  return <div className={className} style={style} ref={ref} />;
-}
-
 /**
  * A group's heading: the label, a disclosure chevron, and — when collapsed — a count of the
  * ports inside that are connected or set.
@@ -87,10 +73,13 @@ function RowHost({ els, className, style }: { els: TSFixme[]; className?: string
  * than fail.
  *
  * Exported for that runner. It calls no hooks, so `renderElements` can evaluate it end-to-end and
- * grade the actual chevron, `aria-expanded` and badge — whereas `PropertyGroups` below reaches
- * `RowHost`, which calls `useRef` and `useLayoutEffect` and therefore throws there. The same split
- * `views/Community.tsx` makes for the same reason: the hook-free half is the half worth grading,
- * and what remains — that the sections are composed in the right order around it — is a drive.
+ * grade the actual chevron, `aria-expanded` and badge. The same split `views/Community.tsx` makes
+ * for the same reason: the hook-free half is the half worth grading, and what remains — that the
+ * sections are composed in the right order around it — is a drive.
+ *
+ * ⚠️ CHR-008 §3.2 removed `RowHost`, so `PropertyGroups` itself no longer calls a hook. That does
+ * NOT make the whole tree evaluable in that runner: the rows `Ports` hands it each contain a
+ * `ControlHost`, which uses `useRef`/`useLayoutEffect` to host an element built outside React.
  */
 export function GroupHeading({
   name,
@@ -186,7 +175,7 @@ function Group({
 
       {group.gate && group.isExpanded && <GroupGateLine {...group.gate} />}
 
-      <RowHost els={group.els} className={classNames('properties', !group.isExpanded && 'hidden')} />
+      <div className={classNames('properties', !group.isExpanded && 'hidden')}>{group.rows}</div>
     </div>
   );
 }
@@ -216,7 +205,8 @@ export function PropertyGroups({
   }
 
   if (!showHeaders) {
-    return <RowHost els={groups[0] ? groups[0].els : []} />;
+    // ⚠️ No `properties` class here, as before: the single-unnamed-group case never carried one.
+    return <div>{groups[0] ? groups[0].rows : null}</div>;
   }
 
   // The super-group's badge is the sum of what is folded inside it, so a collapsed

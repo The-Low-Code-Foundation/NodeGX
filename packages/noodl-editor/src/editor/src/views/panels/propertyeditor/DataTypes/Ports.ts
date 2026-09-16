@@ -2,10 +2,14 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 import { type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
-import { capabilityProbes, gateForPort, resolveGateTarget, type GateTarget } from '@noodl-utils/capability-gating';
-import { decoratePortElement } from '@noodl-utils/capability-gating/portDecoration';
-import { describePortElement } from '@noodl-utils/portDescription';
-import { applyPortGate, revealGateTarget } from '@noodl-utils/portGate';
+import {
+  capabilityProbes,
+  gateForPort,
+  gateSentence,
+  resolveGateTarget,
+  type GateTarget
+} from '@noodl-utils/capability-gating';
+import { revealGateTarget } from '@noodl-utils/portGate';
 import { applyPortHint, hintPortsOf, portNamesForView, HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
 import { SCHEMA_OUTCOME_CHANGED } from '@noodl-utils/schemaCachePolicy';
 import {
@@ -23,6 +27,7 @@ import PopupLayer from '../../../popuplayer';
 import { CodeEditorType } from '../CodeEditor';
 import { PropertyFilterInput } from '../components/PropertyFilterInput';
 import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups';
+import { ControlHost, PropertyRow, type PropertyRowCapability } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
 import { ModelProxy } from '../models/modelProxy';
@@ -87,6 +92,14 @@ type Port = {
 
 /** How many frames to keep looking for the panel's scroller before giving up. */
 const SCROLL_BIND_ATTEMPTS = 5;
+
+/**
+ * ERG-004 — the longest port description the row puts in a native tooltip.
+ *
+ * The same 400 `portDescription.ts` used, kept because the reason is unchanged: a native tooltip
+ * cannot scroll, so a 900-character description arrives as a wall of text pinned to the pointer.
+ */
+const MAX_DESCRIPTION_TITLE = 400;
 
 export class Ports extends View {
   model: ModelProxy;
@@ -445,12 +458,23 @@ export class Ports extends View {
   }
 
   /**
-   * Render a group's views (and their child views) and collect their elements.
+   * A group's rows, as React nodes — CHR-008 §3.2.
+   *
+   * This used to decorate each row by mutating the element a row class had just built: ERG-004's
+   * description, BCN-010's capability gate and FB-021's switched-off gate, applied in turn by
+   * `describePortElement` / `decoratePortElement` / `applyPortGate`. All three are facts about the
+   * port, known before anything is drawn, so they are **props on `PropertyRow`** now and the rows
+   * are siblings in one tree rather than elements appended into a host.
+   *
+   * ⚠️ The structural hint is deliberately still a post-render pass — see `renderGroups`'s tail and
+   * `PropertyRow`'s note. `PropertyRow` only *marks* the row with `data-hint-ports`, exactly as
+   * `applyPortHint` did, so `refreshHints` can keep bringing notes into line **in place**: a hint
+   * must not rebuild a row under a focused field, which §8 measured costs the caret.
    *
    * CHR-008 (R8): a row a group line already speaks for (`groupGates`) is drawn quiet — dimmed, no sentence.
    */
-  renderParams(views, groupGates?: Map<string, GroupGate>): TSFixme[] {
-    const els = [];
+  renderParams(views, groupGates?: Map<string, GroupGate>): React.ReactNode[] {
+    const nodes: React.ReactNode[] = [];
     const target = this.capabilityTarget();
 
     // CHR-007: every decoration below is read off the row's descriptor. Looked up by the view's
@@ -459,41 +483,88 @@ export class Ports extends View {
     const rows = new Map<string, RowDescriptor>();
     for (const row of this.rowDescriptors(target)) rows.set(row.name, row);
 
-    // FB-017 AC4: computed once per group render rather than per row — every row on one node
-    // resolves against the same node state, and the answer is an empty map in the normal case.
-    const hints = this.structuralHints();
-
     for (const j in views) {
       const v = views[j];
       v.childViews && v.childViews.forEach((v) => v.render()); // Render any child views first
 
       const row = v.name ? rows.get(v.name) : undefined;
 
-      // BCN-010: the one place every row's element passes through, whatever
-      // class produced it. See `portDecoration.ts` for why the gate is a wrapper
-      // here rather than two props on twenty-nine row classes. ERG-004's
-      // description hangs off the same seam, for the same reason — see
-      // `portDescription.ts`.
-      const el = describePortElement(v.render(), row);
-      const gate = row && row.capabilityGate;
-      const decorated = gate ? decoratePortElement(el, gate as TSFixme, target, v.name) : el;
+      // 🔴 Once per view, and the result is held by `ControlHost` for as long as the view lives: a
+      // row class's `render()` mints a NEW element each call (`BasicType` builds a fresh div while
+      // its React root stays bound to the old one), so a second call hands back an empty row.
+      const el = v.render();
+
       // FB-021 — a port a `dynamicports` condition has switched off. `applyPortConditionsFilterForNode`
       // remains the only thing that decides; the descriptor carries what it decided.
       const switchedOff: PortGateReason | undefined = row && row.switchedOff;
       // CHR-008 (R8): the group's one line already says why — the row is dimmed and says nothing itself.
       const groupGate = row && groupGates ? groupGates.get(row.group) : undefined;
-      const quiet = Boolean(groupGate && groupGate.portNames.indexOf(row.name) !== -1);
-      const gated = applyPortGate(decorated as TSFixme, switchedOff, {
-        isConnected: Boolean(row && row.connected),
-        onFocusGate: switchedOff && !quiet ? () => this.focusGatePort(switchedOff.gatePortName) : undefined,
-        quiet
-      });
-      // FB-017 AC4. Last, so the note sits under the gate's reason rather than inside the
-      // dimmed control — and keyed by `portNamesForView`, because the corner-radius ports
-      // arrive folded into a nameless `TabGroup`.
-      els.push(applyPortHint(gated as TSFixme, portNamesForView(v), hints, HINTABLE_PORTS));
+      const quiet = Boolean(groupGate && row && groupGate.portNames.indexOf(row.name) !== -1);
+
+      nodes.push(
+        React.createElement(
+          PropertyRow,
+          {
+            key: v.name || `${v.group || 'group'}#${j}`,
+            description: this.rowDescription(row),
+            capability: this.rowCapability(row, target),
+            gate: switchedOff
+              ? {
+                  reason: switchedOff,
+                  isConnected: Boolean(row && row.connected),
+                  onFocusGate: quiet ? undefined : () => this.focusGatePort(switchedOff.gatePortName),
+                  quiet
+                }
+              : undefined,
+            // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
+            // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
+            hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
+            // As a prop rather than `createElement`'s third argument: `PropertyRowProps` declares
+            // `children`, and the variadic overload does not satisfy a props type that requires it.
+            children: React.createElement(ControlHost, { el })
+          }
+        )
+      );
     }
-    return els;
+    return nodes;
+  }
+
+  /**
+   * ERG-004 — the port's own description, as the row's native tooltip.
+   *
+   * Capped rather than passed whole: a native tooltip has no scrollbar, and a wall of text on hover
+   * is a worse answer than a trimmed one. `describeRows` has already trimmed and dropped the empty
+   * and non-string cases, which is why there is no type check left here.
+   */
+  private rowDescription(row: RowDescriptor | undefined): string | undefined {
+    const text = row && row.description;
+    if (!text) return undefined;
+    return text.length > MAX_DESCRIPTION_TITLE ? `${text.slice(0, MAX_DESCRIPTION_TITLE - 1)}…` : text;
+  }
+
+  /**
+   * BCN-010 — what this row says about the backend, or nothing.
+   *
+   * 🔴 **Refuses to gate a port it cannot explain**, and says so loudly. A disabled control with no
+   * reason converts "this backend cannot do that" into "this is broken", which is the bug BCN-010
+   * was filed for; the contract's own tests make the state impossible, so reaching this branch is a
+   * hole in a capability descriptor rather than a UI fault.
+   */
+  private rowCapability(row: RowDescriptor | undefined, target: GateTarget): PropertyRowCapability | undefined {
+    const gate = row && row.capabilityGate;
+    if (!gate || gate.effective === 'supported') return undefined;
+
+    const sentence = gateSentence(gate as TSFixme, target);
+    if (!sentence) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[capability-gating] port "${row.name}" resolved to ${gate.effective} with no reason string; ` +
+          'leaving it enabled. This is a hole in the capability descriptor, not a UI bug.'
+      );
+      return undefined;
+    }
+
+    return { portName: row.name, state: gate.effective, isUsable: gate.isUsable, sentence };
   }
   /**
    * Bind scroll tracking and restore the offset, once the panel is actually in the DOM.
@@ -748,7 +819,7 @@ export class Ports extends View {
       // AC2: a collapsed group still reports how much of it is live, so folding CSS away
       // cannot become a new hiding place for FB-018's confusion.
       activeCount: this.countActiveInGroup(g),
-      els: this.renderParams(g.views, groupGates),
+      rows: this.renderParams(g.views, groupGates),
       gate: this.groupGateLine(groupGates.get(g.name))
     });
 
@@ -800,6 +871,14 @@ export class Ports extends View {
     //and now the rendering is done. In case any scrolling was done, set the scrolling again.
     //React commits asynchronously, so this has to wait for the rows to be in the DOM.
     this.settleScroll(scrollTop);
+
+    // CHR-008 §3.2 — the structural notes, drawn onto the rows React has just committed.
+    //
+    // `PropertyRow` marks each row with `data-hint-ports`; `applyPortHint` still draws the note
+    // itself, in place, because that is what lets `refreshHints` update one while a field is
+    // focused without rebuilding the row (FB-017's whole reason, and §8 measured what a rebuild
+    // costs). Deferred for the same reason `settleScroll` is: React has not committed yet.
+    setTimeout(() => this.refreshHints(), 0);
   }
   render() {
     this._portsHash = undefined; // Clear cache

@@ -394,3 +394,75 @@ author is not looking at and **leaves the focused input mounted**. The measureme
 that grades it — the same drive, the same undo, expecting `widthIsFocused: true` and `caret: 2`.
 A save-and-restore of `document.activeElement` around `renderGroups` would move the number without
 the structure, and is deliberately **not** what this task builds.
+
+## 9. Built — s10 (2026-09-16), slice 3: the rows are siblings in one tree (§3.1 scaffold, §3.2)
+
+### 9.1 What changed
+
+- **`components/PropertyRow.tsx`** (new) — one hook-free component drawing what three post-render DOM
+  mutators used to: ERG-004's description as the row's `title`, BCN-010's capability wrapper, FB-021's
+  switched-off wrapper (including R8's `quiet`). Plus **`ControlHost`**, which is separate *because* it
+  needs hooks — a hook makes a component unrenderable by the `tests-unit` runner, so the hook-free half
+  stays gradeable, the same split `PropertyGroups` makes for `GroupHeading`.
+- **`Ports.renderParams`** returns `React.ReactNode[]` instead of decorated DOM elements, with
+  `rowDescription` (ERG-004's 400-char cap) and `rowCapability` (BCN-010's **loud fail-open**: a gate with
+  no sentence leaves the control live and logs, rather than dimming a control it cannot explain).
+- **`PropertyGroups`** — `PropertyGroupModel.els: TSFixme[]` → `rows: React.ReactNode`, and **`RowHost` is
+  deleted**: a group is now `<div className="properties">{rows}</div>`.
+- **`capability-gating/portDecorationClasses.ts`** (new) — the three class names, import-free;
+  `portDecoration.ts` re-exports them so every existing importer is untouched.
+
+### 9.2 Two traps this hit, both worth keeping
+
+🔴 **`.property-row` was already taken.** `propertyeditor.css:98` makes it `display: flex` with
+`> .property-label` / `> .property-value` child rules, and `CodeEditor/Property.tsx` renders it. Naming the
+new wrapper that would have laid every row out as a flex container *and* nested a same-named row inside
+itself. It is `.property-panel-row`; the host is `.property-row-control`. Both carry no rule today, and
+neither does `.properties` — which is what makes this conversion layout-neutral.
+
+🔴 **Importing three constants pulled in the editor's singletons.** `portDecoration.ts` imports `./index`
+for `gateSentence`, which reaches `projectmodel` → `bugtracker`, which reads a user-data path at module
+scope. The new spec died on `Cannot read properties of undefined (reading 'join')` — a failure that looks
+nothing like its cause, and the same wall CHR-007 hit from `Ports.ts`.
+
+### 9.3 Specs and arms
+
+`tests-unit/chr-008/propertyRow.test.tsx` (21) — the cases are taken from `fb-021/portGate.test.ts` and
+`property-editor/portDescription.test.ts` **verbatim and re-asked of the component**, so this is an
+equivalence rather than a description: a row that had quietly lost its `aria-disabled`, its `data-test` or
+the rule keeping the dead-wire line outside the dimmed control would pass a spec that merely asserted the
+classes exist.
+
+**Mutants** (backup → mutate → jest → restore → `cmp`, restored byte-identical): **A** a quiet row draws its
+sentence again → 1 red; **B** the quiet row's tooltip dropped → 1 red; **C** `title={description}` instead of
+`|| undefined` → 1 red; **D** a `degraded` gate dimmed after all → 1 red.
+
+⚠️ **Arm C first graded NOTHING and read as a pass.** My mutant table was `|`-delimited and the mutated
+expression contains `||`, so the shell split it mid-expression, wrote garbage into the file, and the suite
+failed **to run** — `Tests: 0 total`, which is indistinguishable from a clean arm at a glance. Re-run properly
+it reddens. A non-compiling arm grades nothing, and a delimiter that occurs in the payload is how one is made.
+
+### 9.4 Readings (2026-09-16, tree `32e216f55` + this slice; the P88 peer's files left alone)
+
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**.
+- jest `chr-007` + `chr-008` + `fb-015` + `fb-017` + `fb-018` + `fb-021` + `fb-022` + `leg-005` +
+  `property-editor` + `def-036` + `rel-014`: **37 / 37 suites, 593 tests**, EXIT=0 — CHR-007's
+  characterisation unchanged, every FB-017/018/021, LEG-005 and DEF-036 assertion green.
+- Full `tests-unit`: **445 / 445 suites, 7,345 tests**, EXIT=0. s9 read 444 / 7,324, so the delta is
+  **exactly** this slice's one suite and its 21 tests: nothing else moved.
+
+### 9.5 Owed, and what this slice deliberately does NOT do
+
+1. **The drive.** Not yet taken — a jsdom spec is not a look (§7 of the phase README).
+   `verdicts/CHR-008/2026-09-16/census.js` is written and takes the panel's census (groups, rows, gate
+   wrappers, R8's gate texts verbatim, elements, inline styles, font sizes) on a Group and a Button in both
+   themes. **The packaged 0.2.4 is the BEFORE arm**; the dev stack is the after. `identity.js` (in-between
+   frames still 0 / 0) and `focus.js` should be re-run beside it. `test:ci` not re-run either.
+2. **§3.5 is not fixed by this slice, and must not be reported as fixed.** A rebuild still tears the rows
+   down, so §8's undo arm still loses the caret. The cure is the *widgets* holding their values in React
+   state (§3.1's row conversion), which is what lets a re-render reconcile instead of rebuild.
+3. **AC3 and AC4 move the wrong way first, by design.** No widget is converted yet, so `createRoot` still
+   reads 39, and `.property-panel-row` + `.property-row-control` add **two elements per row** — CHR-001's
+   1,126 will rise before it falls. Each converted widget removes its own `createRoot` *and* its host.
+4. The structural hint is still a post-render pass (§9.1's note and `PropertyRow`'s header): converting it
+   now would trade FB-017's in-place refresh for the rebuild §8 measured costs the caret.
