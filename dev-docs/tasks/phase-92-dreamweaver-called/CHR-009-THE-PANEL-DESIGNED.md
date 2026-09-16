@@ -339,3 +339,94 @@ by the look, not as a separate ruling. Don't add outlines unless he asks.
 - `Fixed` chip beside Width/Height (the mockup has no such chip; `isFixed` still needs a home).
 - §3.4 proper (Variant/State inside General); 28px `Position`/`Layout` selects (AC2 — heights not yet measured on
   this build); colour field; Advanced CSS footer; the comment field's 4px overshoot; Escape on the Variant picker.
+
+## 9. Slice 4 — Margin & Padding as paired rows (2026-09-16, s15)
+
+The largest region left in the lower crop: the 150px box-model drawing (a dashed margin ring, a padding block,
+eight 40px boxes, an inline edit box that opened over them, and POL-012's two lock buttons).
+
+### 9.1 Built
+
+| region (§2) | before (slice 3, `9960c4aea`) | now |
+|---|---|---|
+| paired values (AC4) | the 150px box, off the label column | **two 30px rows of the label column**: `Margin` and `Padding`, each `↕` (top + bottom) and `↔` (left + right) as 26px fields with a drawn glyph, and a 26px per-edge button |
+| per-edge expander | — | pressed → the same row shows four fields, `↑ ↓` over `← →` (62px); pressed again → the pair |
+| mixed display — **decided** | — | a pair whose two sides differ is an **empty field with a muted `mixed` placeholder**; its tooltip names both (`Top 8px · Bottom 0px`); typing sets both. `↕ 8 · 0` was the other candidate and does not fit a ~61px field |
+| unit | a dropdown inside the edit box | **typed**: `50%` switches, `12px` switches back, a bare number keeps the field's unit. A non-px unit draws as a muted suffix; px draws none (the old box's rule) |
+| undo | one step per side, or four via the lock | a pair = **one** step; a drag = one step; reset clears one group as one step |
+| reset | one dot for all eight sides | the row's gutter dot, per group |
+
+Files: `components/MarginPaddingInput.tsx` (rewritten) + new `.module.scss`, `components/marginPaddingEdit.ts`
+(`axisComps`, `pairDisplayOf`, `commitMarginPaddingPairEdit`, `fieldTextOf`, `MARGIN_PADDING_UNITS`),
+`DataTypes/MarginPaddingType.ts` (`updateComps`, `commitDrag`, `expanded`); `style.css` loses the 105-line
+`marginpadding-*` block; `scripts/pol39-live/pol012-linked-sides.js` deleted (it drove the lock).
+
+⚠️ **POL-012's "set all four together" lock is REMOVED — for Richard's look.** The mockup has no lock, and the
+pair row covers the case in two entries (`↕` then `↔`) instead of one. But POL-012 was a *reported* request
+(item 14: "set all values at once"), so this is a regression in keystrokes for that one case. If he wants it
+back, the cheapest shape is a third collapsed field or "typing into a pair while Shift is held sets all four" —
+not the old hidden lock mode.
+
+### 9.2 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded then restored byte-identical
+(`a1ea46f2…`). Script `verdicts/CHR-009/2026-09-16/box/drive-box.js`; results `box/box-results.json`.
+**The look, same crop:** `rows/props-group-lower-{dark,light}.png` (slice 3) beside `box/props-group-lower-{dark,light}.png`;
+also `box/props-group-box-{dark,light,expanded-dark,mixed-dark,120-dark,percent-dark}.png`.
+
+| reading (Group, both themes identical) | slice 3 | slice 4 |
+|---|---|---|
+| `Style` header in the lower crop | 661 px | **575** (−86) |
+| Margin / Padding rows | 150px drawing | **32 / 32**, fields and expander 26 |
+| label left edges | 17 | **17** (Margin, Padding included) |
+| old box elements | present | **0** |
+| `120` in a pair field | — | **not clipped** |
+| `mixed` placeholder | — | 33 px text in 39 px of room |
+
+Real input (CDP mouse at an `elementFromPoint`-verified point, `Input.insertText`, CDP Enter), dark:
+
+| act | model | one undo |
+|---|---|---|
+| `↕` padding: `120` + Enter | top **and** bottom `120px`, left/right untouched | all four back to `0` |
+| expand → 4 fields; `↑` top: `8` + Enter; collapse | `8 / 0 / 0 / 0`; `↕` empty, placeholder `mixed`, tooltip `Top 8px · Bottom 0px` | restored |
+| `↔` padding: `50%` + Enter | left/right `50%`; field `50`, suffix `%` | restored |
+| drag on `↔` margin (unset) | left/right `24px` | back to **unset** |
+
+### 9.3 What the drives caught (six runs)
+
+- 🔴 **Undo after a drag did nothing** (run 1: dragged unset → 24, undo, still 24). `setParameter`'s `oldValue`
+  override is checked with `if (args.oldValue)`: an unset start reads as "not supplied" and the entry records
+  the dragged value. FB-022's `scrubCommit.ts` already documented this and called it "unreachable from
+  margin/padding" — true of the old single-side drag, false for a pair that starts unset. Fixed with
+  `commitDrag` (the `commitScrub` construction, one group wide); unit test red on the bypass mutant (2 red).
+- 🔴 **The numbers passed while the picture was broken, again.** Run 1's clip check read the input's value
+  only; the PNG showed the placeholder as `m.. px`, and each field had ~16 px for its value (`120` → `1…`).
+- 🔴 **My first fix made it worse:** a px ↔ % toggle drawn on hover took the click meant for the value —
+  `120` + Enter stored **`0%`** (run 3). Replaced by typing the unit.
+- 🔴 A text-slicing edit cut at the NESTED `.Expander {` inside `.Track` ⇒ `SassError`, "Reload prevented",
+  and run 4 timed out on a blank page. Read `.logs`/`dev.log` for `SassError|ERROR in` before re-driving.
+- A setup write straight to `NodeGraphNode.setParameter` is invisible to the panel (s10's trap): the rows
+  showed a stale `24` while the model held unset. Setup only — the drive reads the model.
+
+### 9.4 Gates
+
+- `tsc --noEmit` (editor) **0 errors**. `npm run type` / `npm run colors` **holding**.
+- New `tests-unit/chr-009/marginPaddingRows.test.ts`, **17 tests**: the axis table, pair display (same /
+  mixed / inherited-0 / units), pair and per-edge commits, typed units, `fieldTextOf`, expander writes nothing,
+  a pair is one undo group, drag-undo returns an unset side to unset, reset is one group. Axis-swap mutant →
+  **7 red**; drag-commit bypass mutant → **2 red**.
+- `rel-014/tokenFieldValueRemainingCopies` re-pointed from the lock to the pair (32 tests before and after):
+  "four tokens agree ⇒ lock seeds on" → "four tokens read as one pair value"; "an emptied linked field clears
+  all four" → one per-edge field clears one side, a pair clears its two.
+- Full editor `tests-unit` (stack down): **470 suites / 7,685 tests, EXIT 0** — s14's 469 / 7,668 plus exactly
+  this suite (17).
+- `test:ci` **not run**.
+
+### 9.5 Left
+
+- **By screen area, next:** the two alignment icon strips (`Alignment`; `Align and justify content`) — ~160 px
+  of the lower crop, unlabelled, off the label column.
+- `Fixed` chip beside Width/Height; 28px `Position`/`Layout` selects (measure first); §3.4 proper; colour
+  field; Advanced CSS footer; comment field 4px overshoot; Escape on the Variant picker.
+- A token in a pair field ellipsises (`--sp…`) — every new Text Input carries `var(--space-2)` padding. The
+  full token is in the tooltip; the old 40px boxes clipped it too. Worth Richard's eye on a Text Input.

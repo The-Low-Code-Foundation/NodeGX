@@ -1,0 +1,573 @@
+{
+  "measured": {
+    "darkLower": {
+      "oldBoxPresent": false,
+      "margin": {
+        "top": 462,
+        "height": 32,
+        "visible": true,
+        "label": "Margin",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "margin-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "padding": {
+        "top": 494,
+        "height": 32,
+        "visible": true,
+        "label": "Padding",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 242
+        },
+        {
+          "name": "Align and justify content",
+          "top": 321
+        },
+        {
+          "name": "Margin and padding",
+          "top": 430
+        },
+        {
+          "name": "Style",
+          "top": 575
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 14,
+        "12px": 33
+      },
+      "fills": {
+        "rgb(43, 52, 64)": 24,
+        "rgb(33, 41, 50)": 4,
+        "color(srgb 0.360784 0.662745 1 / 0.14)": 1,
+        "rgb(51, 62, 77)": 1,
+        "rgb(67, 78, 92)": 1,
+        "rgb(187, 198, 211)": 1,
+        "rgb(255, 255, 255)": 1
+      }
+    },
+    "dark": {
+      "oldBoxPresent": false,
+      "margin": {
+        "top": 390,
+        "height": 32,
+        "visible": true,
+        "label": "Margin",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "margin-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "padding": {
+        "top": 422,
+        "height": 32,
+        "visible": true,
+        "label": "Padding",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 170
+        },
+        {
+          "name": "Align and justify content",
+          "top": 249
+        },
+        {
+          "name": "Margin and padding",
+          "top": 358
+        },
+        {
+          "name": "Style",
+          "top": 503
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 15,
+        "12px": 32
+      },
+      "fills": {
+        "rgb(43, 52, 64)": 23,
+        "rgb(33, 41, 50)": 4,
+        "color(srgb 0.360784 0.662745 1 / 0.14)": 1,
+        "rgb(51, 62, 77)": 1,
+        "rgb(67, 78, 92)": 1,
+        "rgb(187, 198, 211)": 1,
+        "rgb(255, 255, 255)": 1,
+        "rgb(77, 163, 255)": 1
+      }
+    },
+    "lightLower": {
+      "oldBoxPresent": false,
+      "margin": {
+        "top": 462,
+        "height": 32,
+        "visible": true,
+        "label": "Margin",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "margin-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "padding": {
+        "top": 494,
+        "height": 32,
+        "visible": true,
+        "label": "Padding",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 242
+        },
+        {
+          "name": "Align and justify content",
+          "top": 321
+        },
+        {
+          "name": "Margin and padding",
+          "top": 430
+        },
+        {
+          "name": "Style",
+          "top": 575
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 14,
+        "12px": 33
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 24,
+        "rgb(255, 255, 255)": 5,
+        "color(srgb 0.180392 0.486274 0.839216 / 0.14)": 1,
+        "rgb(229, 233, 237)": 1,
+        "rgb(201, 210, 220)": 1,
+        "rgb(74, 86, 99)": 1
+      }
+    },
+    "light": {
+      "oldBoxPresent": false,
+      "margin": {
+        "top": 390,
+        "height": 32,
+        "visible": true,
+        "label": "Margin",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "margin-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right margin",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "padding": {
+        "top": 422,
+        "height": 32,
+        "visible": true,
+        "label": "Padding",
+        "labelLeft": 17,
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Top and bottom padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "height": 26,
+            "width": 61,
+            "value": "0",
+            "placeholder": "",
+            "title": "Left and right padding",
+            "unit": null,
+            "clipped": false,
+            "font": "12px"
+          }
+        ],
+        "expander": {
+          "expanded": "false",
+          "height": 26
+        },
+        "mark": null
+      },
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 170
+        },
+        {
+          "name": "Align and justify content",
+          "top": 249
+        },
+        {
+          "name": "Margin and padding",
+          "top": 358
+        },
+        {
+          "name": "Style",
+          "top": 503
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 15,
+        "12px": 32
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 23,
+        "rgb(255, 255, 255)": 5,
+        "color(srgb 0.180392 0.486274 0.839216 / 0.14)": 1,
+        "rgb(229, 233, 237)": 1,
+        "rgb(201, 210, 220)": 1,
+        "rgb(74, 86, 99)": 1,
+        "rgb(21, 112, 239)": 1
+      }
+    }
+  },
+  "interaction": {
+    "paddingBefore": {
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "paddingLeft": 0,
+      "paddingRight": 0
+    },
+    "marginBefore": {
+      "marginTop": null,
+      "marginBottom": null,
+      "marginLeft": null,
+      "marginRight": null
+    },
+    "pairTyped": {
+      "padding": {
+        "paddingTop": {
+          "value": 120,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 120,
+          "unit": "px"
+        },
+        "paddingLeft": 0,
+        "paddingRight": 0
+      },
+      "focusAfterEnter": "BODY",
+      "fieldShows": "120",
+      "unitDrawnAtRest": false,
+      "clipped": false
+    },
+    "pairAfterOneUndo": {
+      "padding": {
+        "paddingTop": 0,
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "paddingRight": 0
+      },
+      "restored": true
+    },
+    "expanded": {
+      "fields": "padding-top,padding-bottom,padding-left,padding-right",
+      "rowHeight": 62,
+      "writes": {
+        "paddingTop": 0,
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "paddingRight": 0
+      }
+    },
+    "edgeTyped": {
+      "padding": {
+        "paddingTop": {
+          "value": 8,
+          "unit": "px"
+        },
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "paddingRight": 0
+      }
+    },
+    "collapsedMixed": {
+      "placeholderWidth": 33,
+      "placeholderRoom": 39,
+      "unitDrawn": false,
+      "value": "",
+      "placeholder": "mixed",
+      "title": "Top and bottom padding: Top 8px · Bottom 0px",
+      "horizontal": "0",
+      "model": {
+        "paddingTop": {
+          "value": 8,
+          "unit": "px"
+        },
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "paddingRight": 0
+      }
+    },
+    "edgeAfterUndo": {
+      "restored": true
+    },
+    "unitSwitched": {
+      "padding": {
+        "paddingTop": 0,
+        "paddingBottom": 0,
+        "paddingLeft": {
+          "value": 50,
+          "unit": "%"
+        },
+        "paddingRight": {
+          "value": 50,
+          "unit": "%"
+        }
+      },
+      "unitShows": "%",
+      "fieldShows": "50"
+    },
+    "unitAfterUndo": {
+      "restored": true
+    },
+    "dragged": {
+      "margin": {
+        "marginTop": null,
+        "marginBottom": null,
+        "marginLeft": {
+          "value": 24,
+          "unit": "px"
+        },
+        "marginRight": {
+          "value": 24,
+          "unit": "px"
+        }
+      }
+    },
+    "dragAfterOneUndo": {
+      "margin": {
+        "marginTop": null,
+        "marginBottom": null,
+        "marginLeft": null,
+        "marginRight": null
+      },
+      "restored": true
+    }
+  }
+}

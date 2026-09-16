@@ -10,6 +10,11 @@ Covers reported item **14**.
 
 ## Status: DONE — 2026-08-04
 
+> ⚠️ **Superseded 2026-09-16 by P92 CHR-009 slice 4 (§9).** The box and its per-group lock are gone: Margin
+> and Padding are paired rows (`↕` top+bottom, `↔` left+right) with a per-edge expander, so all four is two
+> entries. `pol012-linked-sides.js` was deleted with the control it drove. Whether a one-entry "all four" comes
+> back is Richard's call (CHR-009 §9.1).
+
 `scripts/pol39-live/pol012-linked-sides.js` reports **12/12 in both themes**, on a real node in a
 real project, with every value read back off `NodeGraphNode.parameters` — what actually gets written
 to disk — rather than off the screen.
