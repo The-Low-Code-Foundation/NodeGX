@@ -1,0 +1,367 @@
+{
+  "measured": {
+    "darkBottom": {
+      "fields": [
+        {
+          "label": "Background Color",
+          "visible": true,
+          "field": {
+            "top": 153,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "swatch": {
+            "top": 159,
+            "left": 148,
+            "width": 14,
+            "height": 14
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgb(251, 248, 243)",
+          "text": "var(--background)",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 24
+        },
+        {
+          "label": "Border Color",
+          "visible": true,
+          "field": {
+            "top": 554,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "swatch": {
+            "top": 560,
+            "left": 148,
+            "width": 14,
+            "height": 14
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgb(0, 0, 0)",
+          "text": "#000000",
+          "textCut": false,
+          "font": "ui-monospace 11px",
+          "alpha": "100%",
+          "inputHeight": 24
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Shadow Color",
+          "visible": true,
+          "field": {
+            "top": 994,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "swatch": {
+            "top": 1000,
+            "left": 148,
+            "width": 14,
+            "height": 14
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0.2)",
+          "text": "#000000",
+          "textCut": false,
+          "font": "ui-monospace 11px",
+          "alpha": "20%",
+          "inputHeight": 24
+        }
+      ],
+      "oldThumbnails": 0,
+      "labelLefts": [
+        17,
+        28
+      ]
+    },
+    "lightBottom": {
+      "fields": [
+        {
+          "label": "Background Color",
+          "visible": true,
+          "field": {
+            "top": 153,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "swatch": {
+            "top": 159,
+            "left": 148,
+            "width": 14,
+            "height": 14
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgb(251, 248, 243)",
+          "text": "var(--background)",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 24
+        },
+        {
+          "label": "Border Color",
+          "visible": true,
+          "field": {
+            "top": 554,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "swatch": {
+            "top": 560,
+            "left": 148,
+            "width": 14,
+            "height": 14
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgb(0, 0, 0)",
+          "text": "#000000",
+          "textCut": false,
+          "font": "ui-monospace 11px",
+          "alpha": "100%",
+          "inputHeight": 24
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Border Color",
+          "visible": false,
+          "field": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatch": {
+            "top": -30,
+            "left": -53,
+            "width": 0,
+            "height": 0
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0)",
+          "text": "",
+          "textCut": false,
+          "font": "-apple-system 12px",
+          "alpha": null,
+          "inputHeight": 0
+        },
+        {
+          "label": "Shadow Color",
+          "visible": true,
+          "field": {
+            "top": 994,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "swatch": {
+            "top": 1000,
+            "left": 148,
+            "width": 14,
+            "height": 14
+          },
+          "swatchInsideField": true,
+          "swatchFill": "rgba(0, 0, 0, 0.2)",
+          "text": "#000000",
+          "textCut": false,
+          "font": "ui-monospace 11px",
+          "alpha": "20%",
+          "inputHeight": 24
+        }
+      ],
+      "oldThumbnails": 0,
+      "labelLefts": [
+        17,
+        28
+      ]
+    }
+  },
+  "interaction": {},
+  "token": {
+    "field": {
+      "text": "var(--background)",
+      "fill": "rgb(251, 248, 243)",
+      "fillInline": "rgb(251, 248, 243)"
+    },
+    "model": "var(--background)",
+    "expectedFill": "rgb(251, 248, 243)",
+    "pass": true,
+    "picker": {
+      "open": true,
+      "inputs": [
+        "#FBF8F3",
+        ""
+      ]
+    },
+    "pickerModel": "var(--background)",
+    "afterClose": {
+      "open": false,
+      "model": "var(--background)"
+    }
+  }
+}

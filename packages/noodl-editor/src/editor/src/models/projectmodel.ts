@@ -31,6 +31,7 @@ import { applyProjectLevelSlice } from '../services/ProjectStructure';
 import { hashComponent } from '../services/ProjectStructure/ComponentSaver';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import { decideComponentReload } from '../services/ProjectFileWatcher/decide';
+import { resolveProjectTokenValue } from './StyleTokensModel/ProjectTokenCss';
 
 /** Which on-disk format a loaded project uses. Set at load; drives the save path. */
 export type ProjectFormatKind = 'legacy' | 'v2';
@@ -714,7 +715,9 @@ export class ProjectModel extends Model {
 
   resolveColor(color: string) {
     const styles = this.getMetaData('styles');
-    return styles && styles.colors && styles.colors[color] ? styles.colors[color] : color;
+    if (styles && styles.colors && styles.colors[color]) return styles.colors[color];
+    // A project token (`var(--background)`) means nothing in the editor's own document: resolve it here.
+    return resolveProjectTokenValue(this, color) ?? color;
   }
 
   // Name

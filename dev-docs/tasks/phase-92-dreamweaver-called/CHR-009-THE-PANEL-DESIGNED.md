@@ -766,9 +766,70 @@ Real input on `Background Color` (CDP mouse at `elementFromPoint`-verified point
   alone **3 × 14/14, EXIT 0**. Recorded as a load-timing flake, not fixed. `test:ci` **not run**.
 - `dev.log` this session: 0 `SassError|ERROR in`, 0 `synchronously unmount`.
 
-### 13.6 Left
+### 13.6 Richard's ruling (2026-09-16, s20)
 
-- Richard's look at slice 8, and the three ⚠️ in 13.2 (radius, `100%`, a token's transparent swatch).
+Slice 8 **looks ok**. (1) The swatch **keeps its 2px radius**. (2) An opaque hex **keeps `100%`**, so the suffix is
+always there. (3) The token's transparent swatch: **fix it now** (§14).
+
+### 13.7 Left
+
+- ~~Richard's look at slice 8~~ ruled, 13.6. ~~The token's transparent swatch~~ fixed, §14.
 - A per-side border field draws EMPTY rather than the inherited all-sides value (§12.4): in this slice's measure the four
   per-side `Border Color` fields read `''` with no suffix. Still a question for Richard.
 - The rest of §11.5: §3.4 proper (Variant/State inside General); the Advanced CSS footer; the small list; a Text node.
+
+## 14. A project token's swatch paints the token (2026-09-16, s20)
+
+Richard ruled on slice 8 (§13.6), then asked for the third ⚠️ fixed now.
+
+### 14.1 The defect
+
+`ColorType` paints the swatch with `ProjectModel.resolveColor(value)`, which resolved **colour styles only**. A
+`var(--background)` came back unchanged and went straight into the swatch's `backgroundColor`, but the editor's own
+document has none of the project's variables, so the swatch drew transparent (the checkerboard). The picker opened
+from it started on an unparseable `var(...)` too.
+
+### 14.2 Built
+
+- `resolveProjectTokenValue(project, value)` in `models/StyleTokensModel/ProjectTokenCss.ts` (pure): a single
+  `var(--token)` is resolved against the project's effective tokens (shipped defaults plus `designTokens` overrides,
+  references followed, via the existing `TokenResolver`); anything else returns undefined.
+- `ProjectModel.resolveColor`: a colour style first (unchanged), then a project token, else the value as given. One
+  change, so every caller benefits: the colour field's swatch, the picker's starting colour, the style picker, the
+  inspect popup, and `extractProjectColors`.
+- Stored values are untouched: the field still reads and stores `var(--background)`.
+
+### 14.3 Driven
+
+Script `verdicts/CHR-009/2026-09-16/token/drive-token.js` (slice 8's drive, plus the token block; refuses unless the
+renderer's `projectmodel.ts` carries `resolveProjectTokenValue`), results `token/after/token-results.json`, log
+`token/drive.log`. Scratch copy of `templates/story-engine` (its `--background` is `#fbf8f3`), Group `app_root`, recents
+restored byte-identical (`a1ea46f2…`).
+
+| reading (dark) | s19 | s20 |
+|---|---|---|
+| `Background Color` model | `var(--background)` | `var(--background)` |
+| swatch fill (computed) | transparent (checkerboard) | **`rgb(251, 248, 243)`** |
+| picker opened on it: hex field | not read | **`#FBF8F3`** |
+| model after picker open + Escape + click away | not read | `var(--background)` (opening writes nothing) |
+| slice 8's crops, both themes | 3 fields / 26 / 14×14 inside / `100%` / `20%` | identical |
+
+Look: `token/after/zoom-token-dark.png` (a cream swatch beside `var(--background)`),
+`token/after/props-group-token-picker-dark.png`.
+
+⚠️ Not settled: the picker's second input (opacity) read `''` when opened on `#FBF8F3`. Slice 8 only opened it on an
+alpha colour (`40%`), so whether an opaque colour always shows an empty opacity is unmeasured, not a regression claim.
+A token edited in the Design Tokens panel does not re-render an open panel's swatches (only `Model.stylesChanged` for
+colour styles is listened to); the next render picks it up. Not driven.
+
+### 14.4 Gates
+
+- New `tests-unit/chr-009/tokenSwatch.test.ts`, **3 tests**: a shipped token resolves with no overrides; an override
+  wins and a reference to another token is followed (`var(--card)` → `var(--background)` → `#fbf8f3`); a non-token,
+  unknown token or non-string answers undefined. Mutant (resolver returns undefined) → **2 red**.
+- The `ProjectModel.resolveColor` wiring is graded by the drive only: requiring `@noodl-models/projectmodel` in
+  `tests-unit` throws at load (`Cannot read properties of undefined (reading 'join')`, `Tests: 0 total`).
+- `tsc --noEmit` (editor) **0 errors, EXIT 0**.
+- `npx jest` (editor, stack down) **474 suites / 7,715 tests, all passed, EXIT 0**: s19's 473 / 7,712 plus exactly this
+  suite. (s19's relay-auth flake did not recur.)
+- `dev.log`: 0 `SassError|ERROR in`, 0 `synchronously unmount`. `test:ci` not run.
