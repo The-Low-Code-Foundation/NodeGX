@@ -49,7 +49,7 @@ export function PropertyPanelRow({
 
   return (
     <div className={css['Root']}>
-      <div className={classNames(css['Label'], showsChanged && css['is-changed'])}>
+      <div className={classNames(css['Label'], showsChanged && css['is-changed'])} title={label}>
         {label}
         {showsChanged && onReset && <span className={css['ResetDot']} title="Reset to default" onClick={onReset} />}
       </div>

@@ -104,13 +104,16 @@
 /* `.property-label-col` is for the rows whose label is wrapped in a <Tooltip>,
    which inserts two divs between the row and the label — the column has to be
    the flex item, so it cannot always be the label itself. */
+/* CHR-009 R6 (a TRIAL): one fixed 116px label column, ellipsised with a tooltip — must match
+   `PropertyPanelInput.module.scss`'s `.sidebar-property-editor .Label`. */
 .property-row > .property-label,
 .property-row > .property-label-col {
   position: static;
   flex: 0 0 auto;
-  width: 37%;
-  min-width: 62px;
-  max-width: 160px;
+  width: 116px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .property-row > .property-value {
@@ -121,7 +124,7 @@
   bottom: auto;
   flex: 1 1 auto;
   min-width: 0;
-  height: 28px;
+  height: 26px;
   margin-right: 10px;
 }
 
@@ -239,11 +242,14 @@
   text-align: left;
   cursor: pointer;
   color: var(--theme-color-fg-muted);
+  /* CHR-009 §2 section header: mono uppercase at -xs, .08em, one 30px line. */
+  height: 30px;
+  font-family: var(--font-family-code);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 2px;
 }
 
 .property-group-label:hover {
@@ -262,9 +268,9 @@
    `VariantSelector` — see PropertyGroups.tsx for why this module stays icon-free. */
 .property-group-chevron {
   flex-shrink: 0;
-  display: inline-block;
-  width: 8px;
-  font-size: var(--font-size-xs);
+  display: inline-flex;
+  width: 10px;
+  height: 10px;
   line-height: 1;
   color: var(--theme-color-fg-default-shy);
   transform: rotate(-90deg);

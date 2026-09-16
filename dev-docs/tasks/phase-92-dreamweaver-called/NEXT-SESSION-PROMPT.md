@@ -1,141 +1,66 @@
 # Phase 92 — next session
 
-**Written 2026-09-16 at the end of s11 (CHR-008 slice 4: the first widget conversion — built, driven,
-and deliberately NOT shipped).** Branch `cline-dev`. Phase commits:
-`git log -- dev-docs/tasks/phase-92-dreamweaver-called`. The platform half is
-`~/vscode_projects/nodegx-community` (separate repo, no remote), deployed at `f39d20f` — s11 changed
-nothing there.
+**Written 2026-09-16 at the end of s12 (CHR-009 slice 1: the row geometry — built, driven, committed).**
+Branch `cline-dev`. Phase commits: `git log -- dev-docs/tasks/phase-92-dreamweaver-called`. The platform
+half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
-⚠️ A **P88 peer** is working in this checkout: `validation/{authoredCandidate,responsiveArrangement}.ts`
-and the untracked `tests-unit/validation/gam-022-*.test.ts` are theirs. Never commit them; commit by
-pathspec. (s11 did.)
+⚠️ A **P88 peer** works in this checkout (`validation/*`, `noodl-mcp/*`, `templates/rocket-school/*` are
+theirs). Never commit their files; commit by pathspec.
 
 ## The board, re-derived from the task files
 
 | id | state |
 |---|---|
-| CHR-001 the before picture | ✅ committed without its PNGs (ruling) |
-| CHR-002 the type scale | ✅ Richard: "Looks good" |
-| CHR-003 one radius, one shadow, one box model | ✅ Richard: "fine" |
-| CHR-005 one launcher page | ✅ Richard: "fine" |
-| CHR-006 the Templates tab gets its pictures | ✅ WORTHY |
-| CHR-007 the rows become descriptors | ✅ built s4, invisible by design |
-| CHR-012 the Community tab | ✅ closed as "passable" (Richard, after s8) |
-| **CHR-008 the panel is one tree** | 🟡 **R8** (s8), **§3.4 identity** (s9), **§3.2 + §3.1 scaffold** (s10), **§3.1 slice 4 — first widget converted, driven, INERT** (s11, §10). Left: the undo re-seed defect, then the remaining 37 widgets, §3.6 popout, §3.8 chevron; AC3, AC4 |
-| CHR-004, 009, 010, 011 | ⬜ not built |
+| CHR-001, 002, 003, 005, 006, 012 | ✅ closed on Richard's look |
+| CHR-007 | ✅ built s4, invisible by design |
+| CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
+| **CHR-009 the panel designed** | 🟡 **slice 1 built s12 (§6)** — label column, section header, number+unit field. **Awaits Richard's look** |
+| CHR-004, 010, 011 | ⬜ |
 
-## 🔴 Before picking anything up: three sessions, zero ACs, nothing visible
+## First job: Richard's look at slice 1 (a pixel changed this time)
 
-s9 (identity), s10 (scaffold) and s11 (this slice) all **built**, and none closed an acceptance
-criterion or changed a single pixel at rest. CHR-008's AC1 was met at s8; AC2–AC6 are still open.
-This phase closes on **Richard's look**, and his standing verdict on the invisible run was
-*"everything in the tasks up to now still looks like shit"* — the lesson written up after s4 was to
-put a visible surface in front of him early and not sequence every foundation first
-([[correct-and-usable-were-never-the-same-criterion]], now on its 6th repeat).
+Put these side by side for him (PNGs are local/gitignored by ruling):
+- before: `verdicts/CHR-001/2026-09-15/editor-group-panel-top-{dark,light}.png` (installed 0.2.4)
+- after: `verdicts/CHR-009/2026-09-16/after/props-group-top-{dark,light}.png`
 
-**So weigh this before continuing down §3.1.** The widget conversions are real work with a real payoff
-(AC3/AC4 and the caret), but they are invisible one at a time, and there are ~37 left. The visible
-alternatives are **CHR-009 (the panel designed — R6's trial needs his look at screenshots anyway)**
-and **CHR-004**. If the next session continues §3.1, `dimension` is the one conversion with a visible
-result, because it is what closes §3.5's Width/caret arm. **Ask Richard which he wants rather than
-assuming the queue order.**
+Ask him two things: **is the direction right**, and **R6** — the 116px column cuts 4 of 59 Group labels
+(`Background Gradient`, `Scroll To Element - Duration`, `Scroll To Index - Index/Duration`), with a tooltip.
+Keep the trial, or not?
 
-## First job (if continuing CHR-008)
+## Then, in order (CHR-009 §6.5)
 
-🔴 **Fix the undo re-seed defect, then flip one line.** `components/widgets/index.ts` holds
-`// textArea: TextAreaWidget`, commented out. Everything else in the slice is finished, committed and
-driven; that comment is the whole of what is switched off.
+1. **The head** — the biggest visible change left: seven zones → title row, node row (glyph tile, name,
+   mono eyebrow), segmented `Properties | Ports`, filter with `/` hint. R7 = the comment becomes a TAB beside
+   Ports (moves P75's feature; `leg-005/nodeCommentRow` pins today's placement). `propertyeditor/index.tsx`.
+2. **One control height**: `PropertyPanelSelectInput` (Position/Layout, 28px) and legacy `.property-value`
+   rows to 26 — AC2's last open clause on the Group.
+3. The gutter connection dot (AC3) replacing the `●` after the label; paired Gap/Padding rows (AC4).
+4. The resizing segment (four icons + stray dot → per-axis mode segment); colour field; Advanced CSS footer.
 
-**The defect, measured as a control pair** (one node, one drive, one varied thing — which row):
+## Traps (s12)
 
-| row | after `undo()` | agreed |
-|---|---|---|
-| legacy `fontSize` (`createRoot` + `ControlHost`) | field follows the model back | ✅ 250 ms |
-| converted `text` (`TextAreaWidget`) | model reverts, field keeps the typed text | 🔴 no, at 4000 ms |
-
-The legacy path re-seeds by construction — a fresh `createRoot` every render. The converted one needs
-React to re-render the widget *and* `PropertyPanelTextArea`'s `useEffect([value])` to fire. A marker
-set on the textarea **survives the undo**, so the element is never replaced: the component is either
-re-rendering with an unchanged `value`, or not re-rendering at all.
-
-✅ **The diagnostic that separates those in one run:** put a render counter in `TextAreaWidget` (e.g.
-`window.__twRenders = (window.__twRenders || 0) + 1` plus the `value` it saw), rebuild, then repeat
-`verdicts/CHR-008/2026-09-16/probe4`-style edit → undo. If the counter does not move, `renderGroups`
-is not reaching this row and the fix is in `Ports`; if it moves but `value` is stale, the fix is in
-how `TextAreaWidget` reads the parameter (it reads `view.parent.model.getParameter` at render).
-
-🔴 **Do not "fix" it by keying the control on the value.** That remounts the input on every commit and
-throws away the caret, which is the whole property §3.5 is chasing — and this slice already proved the
-caret survives (the textarea element is never replaced).
-
-## Then, in order
-
-1. **The remaining §3.1 conversions, in the order the census gives** (task §10.1), not by file size:
-   **unblocked** — `dimension`, `icon`, `marginPadding`, `listValue`, `stringList`, `alignTools`,
-   `propList`, `pages`, the `logicBuilder` pair, and the six `PickerTypeView` rows (one shared base).
-   **blocked until a host stops reading `.el`** — `basic`, `boolean`, `color`, `enum`,
-   `numberWithUnits`, `sizeMode`.
-   ✅ **`dimension` is unblocked**, and it is the one that closes §3.5's Width/caret arm — take it
-   first once the re-seed defect is fixed, because it is the conversion with a visible payoff.
-2. CHR-004 — smaller than scoped; CHR-005's `drive.js` `CONTRAST` prototypes R3's gate.
-3. CHR-006 remainders (no ruling): plural chip labels; pictures for `site-builder` / `members-area`.
+- 🔴 **Numbers passed while the picture was broken** — "2 sizes, one label x" and Width drew `1(`. Look at
+  the PNG after every drive; `drive.js` now reads each field's `scrollWidth > clientWidth`.
+- 🔴 **CHR-009 §3 was wrong twice** (§6.1): the `:global(.sidebar-property-editor)` hook is NOT gone, and
+  the row grid can't live on `.property-panel-row` — the label is inside the opaque control element. The
+  37% column exists in TWO places (`PropertyPanelInput.module.scss`, `propertyeditor.css`).
+- 🔴 A click that rebuilds a row makes a `find(label).parentElement` retry THROW — swallow it in the retry.
+- The served dev bundle is `http://localhost:8080/src/editor/index.bundle.js`; confirm a marker string in it,
+  then `Page.reload({ignoreCache:true})` on **9333** (`cdp.js` defaults to 9222 — set the env on EVERY call).
+- Recipe: copy `templates/story-engine` to scratch, back up `~/Library/Application Support/NodeGX/
+  recently_opened_project.json`, insert one `Story engine` entry, `npm run dev:debug` in background,
+  `drive.js --expect=<copy>` → `interact.js`, `npm run dev:stop`, restore recents and compare `shasum`.
+- One heavy job at a time: stop the stack BEFORE jest/tsc.
 
 ## Still Richard's
 
-1. CHR-007 declined AC4's "≤ 1 `_portsHash = undefined`" (CHR-007 §6.2) — do not quietly revisit.
-2. R6 final only on his look at CHR-009's screenshots; R7's marker-on-the-tab detail is proposed.
-3. The Projects tab's two full-width cards (BST-003 / UNI-001) — ask before moving them.
-4. `members-area`'s live summary is lowercase and fragmentary (P86/P78 data).
-5. **Nothing in s11 changes a pixel at rest**, by design — the slice is inert. The panel is
-   byte-for-byte the s10 panel.
+1. R6 final (above). R7's marker-on-the-tab detail is proposed, not ruled.
+2. CHR-007 AC4 `_portsHash` clause declined — don't revisit quietly.
+3. The Projects tab's two full-width cards (BST-003 / UNI-001).
+4. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
 
-## 🔴 Two acceptance criteria are wrong as written (task §10.4)
+## Readings at the end of s12
 
-- **AC3 counts prose.** `grep -rl "createRoot"` reads **42**, up from 39, while the code count went
-  **38 → 37** — the new files *discuss* `createRoot` in their comments. Re-word it to strip comments
-  (`tests-unit/support/renderElements.ts` already exports `stripComments`), or it reads as a
-  regression on every slice that documents itself. Its ≤ 3 target is also **unreachable by widget
-  conversion**: popout roots (`IconType`, `ColorType`, `PickerTypeView`, `CodeEditorType`,
-  `componentpicker`, `ListValueEditor`, `TabGroup`, `PopoutGroup`…) keep their files in that grep.
-  Reaching ≤ 3 needs one shared portal host, which is unscoped.
-- **AC4 cannot move on a `textArea` conversion at all**: the Group panel has no `textArea` port — only
-  `Text.text` and `String Format.format` have one in the whole catalog. `dimension` is where 1,241
-  starts falling.
-
-## Traps
-
-- 🔴 **A row class must keep a working `render()` while its widget can be registered.** Emptying the
-  registry is only a real fallback if the class can still draw itself. s11 reduced `TextAreaType` to
-  `fromPort` + a redraw signal, so with the registry off `renderParams` got an `undefined` element and
-  `ControlHost` hosted an empty div — **the Text row drew nothing, silently**. Restored from `HEAD`.
-- 🔴 **Five instrument faults produced confident wrong answers before any product reading was true**
-  (task §10.9): synthetic `input`/`change` commit nothing through a *controlled* component that
-  commits on blur — type with CDP **`Input.insertText`**; a single snapshot is not a measurement (use
-  a bounded retry, as `settleScroll`/`settleHints` do); searching only `getActiveComponent()` misses
-  every node not on screen; a **connected** port draws FB-018's chip and looks exactly like a missing
-  row; and a backtick inside a JS template literal ends the string (`node --check` first).
-- 🔴 **`findNodeWithId` returns the VIEW node — the model is at `.model`.** `ed.selectNode(null)`
-  throws rather than clearing.
-- 🔴 **The census population must be printed, not assumed.** Three censuses returned confident wrong
-  answers (a regex that missed `sizeMode` because its condition is built in a variable;
-  `dynamicports` vs `dynamicPorts`; a dict read as a list). The catalog adapter that works is the one
-  `tests-unit/fb-021/portGateReason.test.ts` already uses: `node.dynamicPorts.declaredPortGroups[]`.
-- 🔴 `--expect-dir` in `open.js` is **inert on the dev build** — `ProjectModel` is not on `window`, so
-  it prints "could not read the project directory" and guards nothing. Verify which project opened by
-  mtime (opening writes three files into it) and by the recents `latestAccessed`.
-- 🔴 The dev build shares `~/Library/Application Support/NodeGX` with the **installed app**. s11 seeded
-  a scratch "Story engine" recents entry before boot and restored the file byte-identical afterwards;
-  back it up first, and never append while the editor is running (`store()` rewrites the whole array).
-- 🔴 One heavy job at a time, and tear the stack down when a drive ends (`npm run dev:stop`, 26
-  processes). zsh: `npx jest $DIRS` needs `${=DIRS}`; `$PIPESTATUS` is bash — zsh is `${pipestatus[1]}`,
-  and s11's first spec run reported `EXIT=0` from a `tail` while the suite had failed **to run**.
-- ✅ Drive recipe that works: `reload.js` → `open.js` → `textarea.js` / `probe4.js`, all in
-  `verdicts/CHR-008/2026-09-16/`. Confirm the served bundle carries the change **and** reload the
-  renderer before believing a re-drive.
-
-## Readings at the end of s11
-
-`tsc` **EXIT=0**; targeted jest **38 suites / 609 tests**, 0 failed-to-run; full `tests-unit`
-**446 / 446 suites, 7,361 tests** (s10: 445 / 7,345 — the delta is exactly the one new suite and its
-16 tests). Mutants **5/5 killed**. Panel structure with the slice inert: **44 rows, 44 control hosts,
-1 textarea**, undo re-seeding in **250 ms** — byte-for-byte the s10 behaviour.
+Targeted `tests-unit` **20 / 20 suites, 332 tests** (every spec that reads a touched file + `chr-008`,
+`property-editor`), EXIT 0. `tsc --noEmit` **0 errors**. `npm run type` / `npm run colors` holding.
+Full `tests-unit` and `test:ci` **not run** this session.

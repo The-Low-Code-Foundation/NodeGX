@@ -5,6 +5,8 @@ import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/Prope
 import { PropertyPanelSelectInput } from '@noodl-core-ui/components/property-panel/PropertyPanelSelectInput';
 import { ScrubBinding, useDragToScrub } from '@noodl-core-ui/components/property-panel/scrub';
 
+import css from './NumberUnitInput.module.scss';
+
 export interface NumberUnitInputProps {
   label: string;
   /** The numeric part, as a string ('' when unset) */
@@ -97,80 +99,57 @@ export function NumberUnitInput({
       connectionLabel={connectionLabel}
       onConnectionClick={onConnectionClick}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-        <PropertyPanelBaseInput
-          type="text"
-          isNumeric
-          value={displayedValue}
-          isChanged={isChanged}
-          isConnected={isConnected}
-          isScrubbable={Boolean(scrub)}
-          dataIdentifier={dataIdentifier}
-          onChange={(text) => setDisplayedValue(String(text))}
-          onMouseDown={dragToScrub.onMouseDown}
-          onFocus={() => onFocus && onFocus()}
-          onBlur={() => {
-            commitIfChanged();
-            onBlur && onBlur();
-          }}
-          onKeyDown={(e) => e.key === 'Enter' && commitIfChanged()}
-        />
-        {/* FH-014. About half the unit-bearing ports declare exactly one unit
+      <div className={css['Line']}>
+        <div className={css['Field']}>
+          <PropertyPanelBaseInput
+            type="text"
+            isNumeric
+            className={css['Value']}
+            value={displayedValue}
+            isChanged={isChanged}
+            isConnected={isConnected}
+            isScrubbable={Boolean(scrub)}
+            dataIdentifier={dataIdentifier}
+            onChange={(text) => setDisplayedValue(String(text))}
+            onMouseDown={dragToScrub.onMouseDown}
+            onFocus={() => onFocus && onFocus()}
+            onBlur={() => {
+              commitIfChanged();
+              onBlur && onBlur();
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && commitIfChanged()}
+          />
+          {/* FH-014. About half the unit-bearing ports declare exactly one unit
             (21x ['px'], 4x ['%'], 1x ['deg'] — Font Size, Padding, Border Width,
             the Shadow numbers, Rotation...). A dropdown offering one immutable
             choice is noise, so those render a static unit label instead. */}
-        {hasUnitChoice ? (
-          <div style={{ width: 40, flexShrink: 0 }}>
-            <PropertyPanelSelectInput
-              value={unit}
-              properties={{ options: units.map((u) => ({ label: u, value: u })) }}
-              onChange={(u) => onUnitChange(String(u), displayedValue)}
-              hasHiddenCaret
-              hasSmallText
-            />
-          </div>
-        ) : (
-          Boolean(staticUnit) && (
-            <div
-              style={{
-                width: 40,
-                flexShrink: 0,
-                textAlign: 'center',
-                fontSize: 'var(--font-size-xs)',
-                lineHeight: '28px',
-                color: 'var(--theme-color-fg-default)',
-                userSelect: 'none'
-              }}
-            >
-              {staticUnit}
+          {hasUnitChoice ? (
+            <div className={css['UnitPicker']}>
+              <PropertyPanelSelectInput
+                value={unit}
+                properties={{ options: units.map((u) => ({ label: u, value: u })) }}
+                onChange={(u) => onUnitChange(String(u), displayedValue)}
+                hasHiddenCaret
+                hasSmallText
+              />
             </div>
-          )
-        )}
+          ) : (
+            Boolean(staticUnit) && <span className={css['Unit']}>{staticUnit}</span>
+          )}
+        </div>
 
+        {/* Only meaningful for a % value; disabled (not hidden) otherwise, so the row keeps its shape. */}
         {showFixed && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexShrink: 0,
-              opacity: isPercent ? 1 : 0.3,
-              pointerEvents: isPercent ? 'auto' : 'none'
-            }}
+          <button
+            type="button"
+            className={css['Fixed']}
+            aria-pressed={Boolean(isFixed)}
+            disabled={!isPercent}
+            title={isPercent ? 'Keep this size fixed instead of a share of the parent' : 'Fixed applies to % values'}
+            onClick={() => onFixedToggle && onFixedToggle()}
           >
-            <label
-              className="property-label"
-              style={{ position: 'relative', width: 'auto', marginLeft: 6, marginRight: 4 }}
-            >
-              Fixed
-            </label>
-            <div
-              className="sidebar-panel-dark-input"
-              style={{ width: 26, height: 26, position: 'relative', cursor: 'pointer' }}
-              onClick={() => onFixedToggle && onFixedToggle()}
-            >
-              {isFixed && <i className="fa fa-check" style={{ position: 'absolute', left: 7, top: 6 }} />}
-            </div>
-          </div>
+            Fixed
+          </button>
         )}
       </div>
     </PropertyPanelRow>

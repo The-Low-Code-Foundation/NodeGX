@@ -81,7 +81,10 @@ export function PropertyPanelBaseInput({
         isFauxFocused && css['is-faux-focused'],
         hasSmallText && css['has-small-text'],
         isNumeric && css['is-numeric'],
-        isScrubbable && css['is-scrubbable']
+        isScrubbable && css['is-scrubbable'],
+        // CHR-009: declared and destructured since it was written, and never applied — a caller's
+        // class arrived nowhere. Last, so a caller can restyle the box it is composing into.
+        className
       )}
       type={type}
       // A port with no value resolves to null; React wants '' for a controlled input

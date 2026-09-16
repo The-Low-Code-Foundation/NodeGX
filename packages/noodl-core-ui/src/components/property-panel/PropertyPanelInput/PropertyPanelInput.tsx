@@ -257,7 +257,7 @@ export function PropertyPanelInput({
       className={classNames(css['Root'], isToggleRow && css['is-toggle-row'])}
       data-property={dataIdentifier}
     >
-      <div className={classNames(css['Label'], showsChanged && css['is-changed'])}>
+      <div className={classNames(css['Label'], showsChanged && css['is-changed'])} title={label}>
         {label}
         {showsChanged && onReset && <span className={css['ResetDot']} title="Reset to default" onClick={onReset} />}
       </div>

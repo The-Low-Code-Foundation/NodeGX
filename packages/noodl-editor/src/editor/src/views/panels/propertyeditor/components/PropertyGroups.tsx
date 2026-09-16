@@ -101,8 +101,12 @@ export function GroupHeading({
       aria-expanded={isExpanded}
       onClick={() => onToggle && onToggle(!isExpanded)}
     >
+      {/* CHR-009 — a drawn chevron, not a text `▾`. Inline SVG rather than `Icon`, which would stop
+          this module rendering in the `tests-unit` runner (see above). */}
       <span className={classNames('property-group-chevron', isExpanded && 'is-expanded')} aria-hidden>
-        ▾
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="m2.5 4 2.5 2.5L7.5 4" />
+        </svg>
       </span>
       <span className="property-group-name">{name}</span>
       {badge && <span className="property-group-badge">{badge}</span>}

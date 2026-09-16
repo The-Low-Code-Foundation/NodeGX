@@ -81,3 +81,73 @@ inheriting the row grid.
   labels are display-only; port names do not change.
 - ⚠️ The mockup renders the `Comment` as a dashed placeholder. P75 owns it; the placeholder's
   text is theirs to change, its position is R7.
+
+## 6. Slice 1 — the row geometry (2026-09-16, s12)
+
+Richard picked CHR-009 over continuing CHR-008 §3.1 and over CHR-004, because s9–s11 changed nothing visible.
+This slice is the part every row draws, whichever widget sits inside it.
+
+### 6.1 What §3 got wrong
+
+- 🔴 **"the `:global(.sidebar-property-editor)` hook is already gone (CHR-004)" is false.** CHR-004 was never
+  built. The hook is live at `PropertyPanelInput.module.scss`, and the 37% label rule is **duplicated** for
+  legacy rows at `propertyeditor.css` `.property-row > .property-label`. Both have to change together.
+- 🔴 **The row grid cannot be "one rule on `.property-panel-row`".** `PropertyRow` wraps ONE opaque control
+  element, and the label is drawn *inside* it (`PropertyPanelInput` / `PropertyPanelRow` / a legacy row
+  class). The column moves where the label is drawn, not on the row.
+- `PropertyPanelBaseInput` declared `className`, destructured it, and **never applied it**. A caller's class
+  arrived nowhere. Fixed (the only caller passing one is the new `NumberUnitInput`).
+
+### 6.2 Built
+
+| region (§2) | now |
+|---|---|
+| row grid (R6 **trial**) | label column a fixed **116px**, `nowrap` + ellipsis, `title` = the label; row `min-height: 30px`; legacy rows mirror it |
+| section header | drawn SVG chevron (inline, so `tests-unit` can still render it), mono uppercase `-xs`, `.08em`, **30px** |
+| number + unit | **one 26px field**: value left in mono, unit as a suffix inside it; `Fixed` is a 26px pressed/unpressed chip (`aria-pressed`, disabled unless %), no FontAwesome `fa-check` |
+
+Files: `PropertyPanelInput.module.scss`, `PropertyPanelInput.tsx`, `PropertyPanelRow.tsx`, `PropertyPanelBaseInput.tsx`
+(core-ui); `propertyeditor.css`, `components/PropertyGroups.tsx`, `components/NumberUnitInput.tsx` + new `.module.scss`.
+
+### 6.3 Driven
+
+Dev stack (`npm run dev:debug`, `NOODLPORT=8674`, `NOODL_REMOTE_DEBUG_PORT=9333`), a scratch **copy** of
+`templates/story-engine`, Group `app_root`, recents seeded then restored **byte-identical** (sha `a1ea46f2…`).
+Scripts: `verdicts/CHR-009/2026-09-16/drive.js` (measure + screenshot, both themes), `interact.js` (real input).
+
+| reading (Group, visible part, both themes identical) | CHR-001 0.2.4 | after |
+|---|---|---|
+| font sizes on visible text | 10 | **2** (12, 11) |
+| label left edges | not measured | **1** (x = 70, all 6 visible; the first build also had `Fixed` ×2 at x = 272) |
+| Width value | `100` (installed build) | `100`, not clipped (first build: **`1(`** — see 6.4) |
+| section header | text `▾`, 11px line | SVG chevron, 30px |
+| labels cut by 116px (R6) | — | **4 / 59 drawn = 6.8%**: `Background Gradient`, `Scroll To Element - Duration`, `Scroll To Index - Index`, `Scroll To Index - Duration` |
+| fills (distinct) | 9 | 5 |
+
+Interaction (`after/interact-results.json`): a CDP click on `Fixed` is reachable (`elementFromPoint`) →
+`width.isFixed: true`, undo → cleared in 111 ms; `Input.insertText "64"` + blur → `{value: 64, unit: "%"}`, undo →
+model and field both back to `100`.
+
+Gates: targeted `tests-unit` **20 suites / 332 tests** (EXIT 0), `tsc --noEmit` **0 errors**, `npm run type` and
+`npm run colors` holding.
+
+### 6.4 Traps met
+
+- 🔴 **The first drive's numbers passed while the picture was broken.** "2 font sizes, one label x, 30px headers"
+  and Width drew `1(`: the fixed column is ~9px wider than 37% was, and Width packed four boxes into the rest.
+  `drive.js` now reads each Width/Height input's `scrollWidth > clientWidth`. Look at the PNG, every time.
+- 🔴 The 2nd picture still centred the value: the `className` never reached the input (6.1). At equal
+  specificity `.Root.is-numeric` won by load order ⇒ the class is doubled (`.Value.Value`).
+- 🔴 A click on `Fixed` rebuilds the row, so a retry that reads `…find(label).parentElement` **throws** mid-rebuild.
+  The retry has to swallow the throw, or it crashes after the undo has run and reads as "nothing happened".
+- `Fixed` persists as `width.isFixed` (`Dimension.ts`), not as a port of its own.
+
+### 6.5 Left (AC2's other clauses, then the rest of §2)
+
+- **28px controls remain**: `Position`/`Layout` selects (`PropertyPanelSelectInput`) and legacy `.property-value`
+  rows. AC2 wants every control at 26.
+- The **head** (seven zones → title, node row, segmented tabs, filter, dashed comment; R7's comment tab).
+- The gutter connection dot (AC3), paired rows (Gap/Padding), per-edge expander (AC4), the resizing segment,
+  the colour field, the Advanced CSS footer row, variant/state as General rows.
+- R6 stays a **trial** until Richard has looked at `after/props-group-top-{dark,light}.png` beside
+  `verdicts/CHR-001/2026-09-15/editor-group-panel-top-{dark,light}.png`.

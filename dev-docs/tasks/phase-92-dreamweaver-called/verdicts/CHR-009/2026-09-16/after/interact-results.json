@@ -1,0 +1,35 @@
+{
+  "fixedBefore": {
+    "pressed": "false",
+    "params": {
+      "width": {
+        "value": 100,
+        "unit": "%"
+      }
+    }
+  },
+  "fixedClick": {
+    "x": 327.0546875,
+    "y": 581,
+    "reachable": true
+  },
+  "fixedPressedMs": 2,
+  "fixedAfter": {
+    "pressed": "true",
+    "params": {
+      "width": {
+        "value": 100,
+        "unit": "%",
+        "isFixed": true
+      }
+    }
+  },
+  "fixedUndoMs": 111,
+  "widthBefore": "{\"value\":100,\"unit\":\"%\"}",
+  "widthCommitMs": 2,
+  "widthAfter": "{\"value\":64,\"unit\":\"%\"}",
+  "widthFieldAfter": "64",
+  "widthUndoModelMs": 7,
+  "widthUndoFieldMs": 9,
+  "widthFieldAfterUndo": "100"
+}
