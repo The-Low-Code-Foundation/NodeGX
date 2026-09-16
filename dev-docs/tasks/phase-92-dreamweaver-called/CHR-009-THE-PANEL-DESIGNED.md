@@ -682,3 +682,93 @@ The drive's one failure was the instrument (the Left-edge segment was scrolled o
 
 **Richard, 2026-09-16 (s18, after the slice):** slice 7 **"looks ok"**; the set-mark **keep**; the corner glyphs
 **good enough**. Slice 7 approved as built.
+
+## 13. Slice 8 — the colour field (2026-09-16, s19)
+
+The handoff's next item by screen area: §2 "colour — one field: swatch, hex in mono, alpha as the unit suffix". Was a
+26px text field plus a separate 33px `.color-thumbnail` box (`style.css`) beside it, which made the row taller than 30.
+
+### 13.1 What the old field hid
+
+🔴 **`ColorType.displayString` stripped the alpha of a `#RRGGBBAA` value, and nothing else showed it.** On this Group
+`Shadow Color` is stored with an alpha: the old field read `#000000`, the same as an opaque black. The new one reads
+`#000000 20%`. And a typed hex replaced the whole value, so typing `#FF0000` over a 40% colour made it opaque with no
+sign that opacity had been touched. The field now shows the alpha, so an edit that keeps showing `40%` has to keep it.
+
+### 13.2 Built
+
+| region | before (slice 7, `ca672b28c`) | now |
+|---|---|---|
+| layout | text field, then a 33px swatch box in its own cell | **one 26px field** (NumberUnitInput's box): a 14px checkered swatch inside at the left, the text, the suffix |
+| text | sans 12px, alpha stripped | a literal hex in **mono 11px** upper-cased without its alpha; a style name or `var()` stays sans, as stored |
+| suffix | — | the alpha as `NN%` in `fg-muted` (floored, as the picker's own opacity field reads); none for a style name/`var()`/empty |
+| typing a hex over one with alpha | alpha dropped | **alpha kept** (`#FF0000` over `#00000066` → `#FF000066`); a typed 8-digit hex, a style name, or empty commits as typed |
+| `abcdef` → `#abcdef` | unanchored test: a style name ending in six hex digits gained a `#` too | anchored |
+| picker anchor | the thumbnail at the column's right edge | **the field** (see 13.4) |
+
+The suffix is display-only; opacity is edited in the picker as before. Files: `model/colorField.ts` (new, pure),
+`components/ColorInput.tsx` (a hook-free `ColorFieldView` inside the stateful `ColorInput`) + new `.module.scss`,
+`DataTypes/ColorPicker/ColorType.ts`.
+
+⚠️ **For Richard's look:** (1) the swatch's radius is `--radius-sm` (2px), a third radius on the panel where AC2 wants
+≤ 2 — the mockup's swatch has one too; (2) an opaque hex shows `100%` (the mockup only draws an alpha colour) — a
+suffix that comes and goes would read like a unit that does; (3) a project token (`var(--background)`) draws a
+**transparent** checkered swatch: `resolveColor` resolves colour *styles*, not the project's CSS variables. Pre-existing
+(the old thumbnail got the same value), now more visible.
+
+### 13.3 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded then restored byte-identical
+(`a1ea46f2…`); renderer module source checked before driving. Script `verdicts/CHR-009/2026-09-16/color/drive-color.js`,
+results `color/after/color-results.json`. **The look, same crop:** `scope/after/props-group-bottom-{dark,light}.png`
+(slice 7) → `color/after/props-group-bottom-{dark,light}.png`; also `color/after/props-group-color-{typed,picker}-dark.png`
+and 4× `color/after/zoom-field-light.png`, `zoom-typed-dark.png`.
+
+| reading (Group, both themes identical) | slice 7 | slice 8 |
+|---|---|---|
+| `.color-thumbnail` in the panel | one per colour row (not counted in s18) | **0** |
+| colour fields visible / height | — | 3 / **26**, swatch 14×14 **inside** the field in all 3 (4 per-side Border Color fields hidden, 0×0) |
+| `Background Color` · `Border Color` · `Shadow Color` | `var(--background)` · `#000000` · `#000000` | `var(--background)` sans, no suffix · `#000000` mono `100%` · `#000000` mono **`20%`** |
+| label left edges | 17 | **17** (28 is the gate note's text, as before) |
+| a colour row's height | not measured (the 33px box) | not measured; on the two crops the `Corner Radius` header sits **6px** higher (read off the PNGs) |
+| text cut | — | 0 / 3 |
+
+Real input on `Background Color` (CDP mouse at `elementFromPoint`-verified points, `Input.insertText`, CDP Enter), dark:
+
+| act | model | field |
+|---|---|---|
+| start | `var(--background)` | `var(--background)`, sans, no suffix |
+| type `#00000066` + Enter | `#00000066` | `#000000` mono, **`40%`**, swatch `rgba(0,0,0,0.4)` |
+| type `#FF0000` + Enter | **`#FF000066`** | `#FF0000`, `40%` |
+| click the swatch | unchanged | picker open, its fields read `#FF0000` / `40%`; popout left **360** ≥ field right **350** |
+| Escape + click away | unchanged | picker closed |
+| undo, undo | `#00000066`, then `var(--background)` | follows |
+
+### 13.4 What the drives caught
+
+- 🔴 **The picker covered the field it edits.** It opens to the right of its anchor; anchored on the swatch — which moved
+  from the column's right edge to the field's left — it hid the hex and alpha (first run's `props-group-color-picker-dark.png`).
+  The numbers had all passed. Now anchored on the field; the drive measures the overlap (`coversField: false`).
+- 🔴 The first zoom crop ("the first visible colour field") caught a field scrolled under the filter: the drive now names the row.
+- 🔴 The stale-renderer trap again: the re-run's first attempt refused (`renderer does not run the slice-8 module`) until
+  a reload; the check now also requires the anchor change in `ColorInput.tsx`.
+
+### 13.5 Gates
+
+- New `tests-unit/chr-009/colorField.test.tsx`, **7 tests**: alpha kept over a 6-digit hex; committed as typed otherwise;
+  the `#` only for exactly six digits; the split (`40%`, `100%`, `#f008` → `53%`, style name, empty); one field in order
+  swatch → text → alpha with `is-hex`; no suffix/mono for a style name or empty; the swatch opens the picker anchored on
+  the field and stops propagation. Mutants: alpha preservation removed → **1 red**; the suffix never drawn → **1 red**.
+- `tsc --noEmit` (editor) **0**. `npm run type` / `npm run colors` / `npm run tokens:css` **holding**.
+- `npx jest` (editor, stack down) **473 suites / 7,712 tests: 7,711 passed, 1 failed, EXIT 1** — s18's 472 / 7,705 plus
+  exactly this suite. The red: `tests-main/relay-auth.test.js` › *still tells editors when a viewer disconnects*
+  (`heard` held only `registered` after `settle()`), at load 13–19; no file of this slice reaches the relay. Re-run
+  alone **3 × 14/14, EXIT 0**. Recorded as a load-timing flake, not fixed. `test:ci` **not run**.
+- `dev.log` this session: 0 `SassError|ERROR in`, 0 `synchronously unmount`.
+
+### 13.6 Left
+
+- Richard's look at slice 8, and the three ⚠️ in 13.2 (radius, `100%`, a token's transparent swatch).
+- A per-side border field draws EMPTY rather than the inherited all-sides value (§12.4): in this slice's measure the four
+  per-side `Border Color` fields read `''` with no suffix. Still a question for Richard.
+- The rest of §11.5: §3.4 proper (Variant/State inside General); the Advanced CSS footer; the small list; a Text node.

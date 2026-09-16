@@ -5,6 +5,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { EventDispatcher } from '../../../../../../../shared/utils/EventDispatcher';
 import { ColorInput } from '../../components/ColorInput';
+import { colorCommitOf } from '../../model/colorField';
 import { TypeView } from '../../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../../utils';
 import ColorPicker from './colorpicker';
@@ -100,20 +101,6 @@ export class ColorType extends TypeView {
     return this.el;
   }
 
-  private displayString(value: TSFixme): string {
-    let stringColor = value;
-
-    if (stringColor && stringColor[0] === '#') {
-      //only display the RGB part of a color in the input field
-      //so if the color has a #RRGGBBAA format, strip away the alpha
-      const hasAlpha = stringColor.length === 9;
-      stringColor = hasAlpha ? stringColor.slice(0, 7) : stringColor;
-      stringColor = stringColor.toUpperCase();
-    }
-
-    return stringColor ?? '';
-  }
-
   renderReact() {
     if (!this.root) return;
 
@@ -122,7 +109,7 @@ export class ColorType extends TypeView {
     this.root.render(
       React.createElement(ColorInput, {
         label: this.displayName,
-        value: this.displayString(current.value),
+        value: current.value,
         resolvedColor: ProjectModel.instance.resolveColor(current.value),
         isChanged: !this.isDefault,
         isConnected: this.isConnected,
@@ -130,15 +117,7 @@ export class ColorType extends TypeView {
         onConnectionClick: this.isConnected ? getConnectionSourceNavigate(this.parent.model, this.name) : undefined,
         dataIdentifier: this.name,
         onCommit: (text: string) => {
-          let value: TSFixme = text.trim();
-          if (value === '') value = undefined;
-
-          const isHex = value !== undefined && /[0-9A-F]{6}$/i.test(value);
-          if (isHex === true && value[0] !== '#') {
-            value = '#' + value;
-          }
-
-          this.parent.setParameter(this.name, value);
+          this.parent.setParameter(this.name, colorCommitOf(text, current.value));
           this.updateCurrentValue();
         },
         onOpenColorPicker: (anchor: HTMLElement) => this.openColorPicker(anchor),

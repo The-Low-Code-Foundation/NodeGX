@@ -1,0 +1,88 @@
+/* CHR-009 §2 "colour": ONE field — the swatch inside it, the hex in mono, the alpha as a suffix in
+   fg-muted — at the panel's one control height. Was a text field and a separate 30px swatch box beside
+   it, and the alpha of a #RRGGBBAA value was shown nowhere. The field box is NumberUnitInput's (slice 1). */
+
+.Field {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  transition: border-color var(--speed-turbo);
+
+  &:hover {
+    border-color: var(--theme-color-border-strong);
+  }
+
+  &:focus-within {
+    border-color: var(--theme-color-primary);
+  }
+}
+
+/* The swatch opens the picker; the text opens the style list — two targets, as before, one box. */
+.Swatch {
+  flex: 0 0 auto;
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin: 0 0 0 6px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-color-border-strong);
+  /* ⚠️ A third radius on the panel (AC2 wants ≤ 2: 6 and full); the mockup's swatch has one too. For the look. */
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+
+  /* checkered, so a transparent colour reads as transparent (as `.color-thumbnail` does) */
+  background-image: linear-gradient(45deg, var(--base-color-neutral-900) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--base-color-neutral-900) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--base-color-neutral-900) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--base-color-neutral-900) 75%);
+  background-size: 6px 6px;
+  background-position: 0 0, 0 3px, 3px -3px, -3px 0;
+  background-color: var(--base-color-white);
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.SwatchFill {
+  position: absolute;
+  inset: 0;
+}
+
+/* The base input's own box belongs to the Field; doubled to outrank `.Root:focus` whatever the load order
+   (NumberUnitInput.module.scss says why). */
+.Field .Value.Value,
+.Field .Value.Value:hover,
+.Field .Value.Value:focus {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 0 0 6px;
+  border: 0;
+  background-color: transparent;
+  text-align: left;
+}
+
+/* A literal hex in mono; a style name reads as a name. */
+.Field .Value.Value.is-hex {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+}
+
+.Alpha {
+  flex: 0 0 auto;
+  padding: 0 8px 0 4px;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
+  user-select: none;
+}
