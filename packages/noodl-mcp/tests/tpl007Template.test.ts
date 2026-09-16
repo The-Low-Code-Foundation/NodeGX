@@ -110,13 +110,21 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     expect([...pages.routes!].sort()).toEqual([...PAGES].sort());
   });
 
-  it('raised no warning the door did not refuse over, except the two it raises about its own plan', () => {
+  it('raised no warning the door did not refuse over, except the one it raises about its own plan', () => {
     const warnings = built.diagnostics.filter((d) => d.severity === 'warning');
     const codes = new Set(warnings.map((d) => d.code));
-    // `page-cannot-scroll` is raised while staging, before the plan's own `scroll: "page"` is
-    // applied — the artefact HAS bodyScroll (asserted below). `uncollapsible-multi-column` is a
-    // wrapped row of content-sized pills, which is the shape a segmented control wants.
-    expect([...codes].sort()).toEqual(['page-cannot-scroll', 'uncollapsible-multi-column']);
+    // P88 GAM-021: `page-cannot-scroll` is gone — the plan door now judges the `bodyScroll` the plan's
+    // own `scroll: "page"` leaves, and the artefact HAS it (asserted below).
+    expect([...codes].sort()).toEqual(['uncollapsible-multi-column']);
+    // P88 GAM-022: Arm B reads the item a `For Each` draws. The content-sized pills of `Game/Choice row` and
+    // `Game/Question box` are no longer told to become columns; the two grids of tiles given a width
+    // (132px hangar tiles, 150px profile cards) still are. Pinned by component, because the code set alone
+    // cannot tell a fixed rule from a broken one. `apply` is the builder's label for `apply_plan`'s
+    // re-validation, which raises the same two again.
+    const multiColumn = new Set(
+      warnings.filter((d) => d.code === 'uncollapsible-multi-column').map((d) => String(d.component).replace(/^\//, ''))
+    );
+    expect([...multiColumn].sort()).toEqual(['Hangar/Shelf', 'Pages/Profiles', 'apply']);
     const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')) as { settings: { bodyScroll?: boolean } };
     expect(project.settings.bodyScroll).toBe(true);
   });

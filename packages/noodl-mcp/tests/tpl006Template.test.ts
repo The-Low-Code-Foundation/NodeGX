@@ -745,32 +745,21 @@ describe('TPL-006 §7 — the artefact', () => {
   });
 
   /**
-   * 🔴 The door's own diagnostics, read rather than assumed silent — and the one
-   * warning it raises is **argued with** rather than suppressed.
+   * 🔴 The door's own diagnostics, read rather than assumed silent.
    *
-   * `uncollapsible-multi-column` Arm B fires on any wrapped row that parents a
-   * `For Each` and sets a `columnGap`, with **no exclusion for content-width
-   * sizing** — while Arm A has exactly that exclusion and calls it *"the exclusion
-   * that took the authored false-positive rate to zero"*
-   * (`responsiveArrangement.ts:262`). The sidebar's pills are `contentSize`, so the
-   * mechanism the message describes — *"each item keeps the width it was given"* —
-   * does not apply: nothing gave them a width. Following the suggestion (a
-   * `Columns` autoFit at 260–320px) would give every two-word tag a 300px column.
+   * Until P88 GAM-022 this list held one argued warning: `uncollapsible-multi-column`
+   * on `Story/Sidebar`, whose wrapped row of `contentSize` tag pills was told to
+   * become a `Columns` autoFit at 260–320px — a 300px column per two-word tag (P78
+   * D50). Arm B now reads the item a `For Each` draws, and a content-sized item is
+   * not a grid. The library's pill rows (`/Tags`, `/Multi Select/Pills`,
+   * `/Multi Select/Dropdown`) had dodged it only by setting no gap at all.
    *
-   * ⚠️ Measured, and the library agrees: `/Tags`, `/Multi Select/Pills` and
-   * `/Multi Select/Dropdown` all wrap a `For Each` of pills — and all three avoid
-   * this warning only by setting **no gap at all**, which is the thing the design
-   * doctrine tells authors not to do (*"use the gap ports, never margins on the
-   * children"*). Filed in `DEFECTS-THE-TEMPLATES-FOUND.md`.
-   *
-   * So the assertion is exact rather than absent: a NEW warning reddens this gate.
+   * The assertion stays exact rather than absent: a NEW warning reddens this gate.
    */
-  it('the door refused nothing, raised no error, and raised exactly the one argued warning', () => {
+  it('the door refused nothing, raised no error, and raised no warning', () => {
     expect(built.diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
     const warnings = built.diagnostics.filter((d) => d.severity === 'warning');
-    expect(warnings.map((w) => `${w.component} ${w.code}`)).toEqual([
-      'Story/Sidebar uncollapsible-multi-column'
-    ]);
+    expect(warnings.map((w) => `${w.component} ${w.code}`)).toEqual([]);
   });
 
   it('the prepared directory carries the note, and the note teaches the one edit', () => {

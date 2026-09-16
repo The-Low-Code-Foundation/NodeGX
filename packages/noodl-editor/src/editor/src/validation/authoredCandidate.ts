@@ -631,7 +631,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // lives with the predicate that needs it.
     ...checkPublicWriteDoor(nodes, { component, security, catalog }),
     // DSG-004 §2.1 — doctrine §7's only mechanical claim, which had no gate.
-    ...checkResponsiveArrangement(nodes, { component, catalog }),
+    // GAM-022 (P78 D50) — Arm B reads the item a `For Each` draws, so it needs the views and whether
+    // `template` is wired.
+    ...checkResponsiveArrangement(nodes, { component, catalog, views, connectedInputs: connections }),
     // DEF-018/DEF-020 — the two layout combinations in which a declared
     // parameter is silently inert: a contentSize child of a Columns, and a
     // distributing justifyContent on a row whose children all grow.

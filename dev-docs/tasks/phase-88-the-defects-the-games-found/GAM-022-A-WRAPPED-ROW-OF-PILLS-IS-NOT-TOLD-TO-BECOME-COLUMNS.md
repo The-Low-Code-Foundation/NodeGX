@@ -1,6 +1,6 @@
 # GAM-022 — A wrapped row of pills is not told to become columns
 
-**Status: ⬜ not started.** **Source:** [P78 D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-006 `Story/Sidebar`, 2026-09-12, and pinned again by TPL-007 `Game/Choice row` · **Side:** product (validator, `uncollapsible-multi-column` arm B)
+**Status: 🟢 built, session 12 (2026-09-15, over `e740727f8`), uncommitted.** Arm B judges the `For Each` item's visual root, and abstains on an unknowable one. The first read found all three calibration grids resolvable with a width, so R19 is not needed. AC1 RED at HEAD (9), the reverted arm 9 red, the wrong fix 10 red. Census 16 → 13. TPL-006's pin is `[]`; TPL-007's names `Hangar/Shelf` and `Pages/Profiles`, which still fire (§2 missed them). **Left:** AC7's render at 390×844. **Source:** [P78 D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-006 `Story/Sidebar`, 2026-09-12, and pinned again by TPL-007 `Game/Choice row` · **Side:** product (validator, `uncollapsible-multi-column` arm B)
 
 On every build the door says that a wrapped row of two-word tags "cannot collapse at any width" and suggests a `Columns`
 autoFit at 260-320px. The tags wrap correctly at 390px. Following the advice would give every tag a 300px column.
@@ -82,4 +82,90 @@ breaks. Obey the doctrine and the warning stays. The library itself chose the th
 
 ## 8. Record
 
-Not started.
+### Session 12 (2026-09-15, HEAD `e740727f8`)
+
+**The first read (§5): the three calibration grids' item roots, off disk.** A scanner over every wrapped row Group with a
+`For Each` child resolved each `template` to its component's roots (`scratchpad/gam022/item-roots.js`, V2 folders and legacy
+`project.json`):
+
+| grid | container | item root |
+|---|---|---|
+| `Puppy test 3` `/Pages/Landing#grid` | contentHeight, 100% | `/Components/PuppyCard`: one Group, **contentHeight, 340px** (+ Component Inputs) |
+| `ecommerce-example` `/Pages/Home#group_65` | unset, 100% | `/Components/ProductCard`: one Group, **sizeMode unset (explicit), 32%** |
+| `phase55-replay-sonnet` `/Sections/FeaturedProducts#fp_grid` | unset, 100% | `/Cards/Product Card`: one Group, **31%** (+ Component Inputs, RouterNavigate) |
+
+**None is unknowable.** Each resolves to exactly one visual root with a width, so abstaining on unknowable roots silences no
+true positive, and **R19 is not needed.** The same scan found 12 wrapped rows with a `For Each`: 8 gapped, 4 not (the
+library's pill rows, which have no gap).
+
+🔴 **§2 and AC6 were wrong about Rocket School.** It has **four** gapped wrapped rows, not one: `Game/Choice row` (pills,
+contentSize), `Game/Question box` (`Option button`, a Button at contentSize), `Hangar/Shelf` (tiles, **132px**) and
+`Pages/Profiles` (cards, **150px**). The last two are the calibration shape, so they keep firing, and TPL-007's code set
+keeps `uncollapsible-multi-column`. A code-set pin cannot grade this task, so the pin now names components (AC6).
+
+**What was built.** `noodl-editor/src/editor/src/validation/responsiveArrangement.ts`:
+- `repeatedItemWidth(repeater, views, connectedInputs, catalog)` returns `content`, `sized` or `unknown`. It resolves
+  `template` to a view, and takes the roots (nodes no other node lists as a child, and with no `parent`). It then needs exactly
+  one visual root, and reads its `sizeMode` or the catalog default (`inputDefaults`: a Group is `explicit`, a Button `contentSize`).
+- `unknown` covers a wired `template`, a template no view names, a `ParentComponentObject` root, a component-instance root, and
+  zero or several visual roots.
+- Arm B fires only when the item is `sized`, or when the caller passes **no views**: then the item cannot be read, and the row is
+  judged alone, as before. That keeps the existing spec's view-less Puppy grid arm, and any caller without views, unchanged.
+- New options `views` (`ItemComponentView`, which `ComponentNodesView` satisfies) and `connectedInputs`.
+- `authoredCandidate.ts` passes both, so the MCP doors and the editor's authoring gate get it from one call site.
+- No container exclusion was added (§5).
+
+**AC1: RED at HEAD.** `noodl-editor/tests-unit/validation/gam-022-a-wrapped-row-of-pills.test.ts`, 16 arms. Its options are
+cast so the file compiles against HEAD's signature. **9 failed, 7 passed**, exactly the 9 arms that supply views and expect
+silence:
+- the item shapes: `Story/Carried`, `Game/Choice`, contentWidth, and a Button with sizeMode unset
+- the five unknowables
+
+The firing arms were green at HEAD: 300px, the three calibration roots, a content-sized container of 150px cards, and no views.
+
+**AC2: after.** 16/16, and the existing `responsiveArrangement.test.ts` 13/13 (29 total). `tsc --noEmit -p packages/noodl-mcp`
+exit 0 (it compiles the editor's validation files).
+
+**AC3: reverted arm S1** (the item read replaced by `true`, one site asserted): **9 red**, the same 9. Every firing arm stayed green.
+
+**AC4: the wrong fix, S2** (Arm A's container exclusion in place of the item read): **10 red**. It is the 9, minus the no-views
+arm (its container is not content-width, so it still fires), plus the content-sized-container arm, which the wrong fix
+silences. The fixture-precondition arm pins that the D50 container is `contentHeight` at 100%. Restored `cmp`-identical, 29/29.
+
+**AC5: census through the real check.** A copy of each project, validated as `validate_project` does. 12 V2 projects: the
+templates, the four calibration projects, and the MCP demo fixture (the known-firing `page-cannot-scroll` row). The 46 prefabs
+are refused by the MCP server as legacy, so the structural scan above covers them (0 gapped rows).
+- **Before, 16:** Rocket School ×4 (`Choice row`, `Question box`, `Shelf`, `Profiles`), `Story/Sidebar`, Puppy grid,
+  `ecommerce-example` ×5, `ecom-responsive-probe` ×2, `phase55-replay-sonnet` ×3.
+- **After, 13:** `Choice row`, `Question box` and `Story/Sidebar` gone. All three calibration grids still fire, and so does
+  every Arm A hit.
+- Totals reconcile: 204 over 11 projects before; 205 over 12 after, which is 204 − 3 + 4 (the fixture's own findings).
+
+**AC6: the pins.**
+- `tpl006Template.test.ts`: the warning list is now `[]`, and the comment is rewritten.
+- `tpl007Template.test.ts`: keeps GAM-021's code set, and adds the components that carry the code: `['Hangar/Shelf',
+  'Pages/Profiles', 'apply']`. `apply` is the builder's label for `apply_plan`'s re-validation (`tpl007Template.ts:220`).
+  🔴 The first version of that pin left out `apply` and was red with the fix in. S1's first TPL-007 reading was therefore not
+  attributable, and was re-run after the correction.
+- Under S1, TPL-006: **1 red** (`Story/Sidebar uncollapsible-multi-column` returns). TPL-007, re-run: **1 red**, and the diff
+  is exactly `Game/Choice row` and `Game/Question box`.
+- Restored: TPL-006 62/62 and TPL-007 93/93.
+
+**AC7: the person's door.** Graded in the door's own output: TPL-006's generator (`validate_component` through the build)
+carries no warning, as the gate above shows. ⬜ **The render half is owed.** This task changes no runtime or layout code, but
+AC7 asks for the sidebar at 390×844, and that was not run.
+
+**Gates, with GAM-021 and GAM-022 both in.**
+- The whole `noodl-mcp` suite: 126 suites, 2,142 passed, **8 failed in 7 suites**. These are the same 8 by name as GAM-021's
+  run, which came before this task, and all of them also failed with HEAD's GAM-021 files (GAM-021 §8).
+- Editor `test:main`: **459 suites, 7,538 / 7,538**, exit 0. That is session 11's 458 / 7,522 plus this spec's suite and 16 tests.
+
+**§4, SBR-004, checked.** Its nav link (`sb006Components.ts:495-519`) is a `Text` at `contentSize` under `Site/Nav`'s wrapped
+row, so the `columnGap` SBR-004 dropped was this false positive. The gap can come back. That is P77's template, so it is
+recorded here and not edited. Its `Gallery grid` (tiles at 48%) is a true grid and still fires.
+
+**Traps.**
+- 🔴 A V2 component's `component.json` `name` is only the leaf. The legacy name is the folder path. The first scan resolved
+  nothing because it used the leaf.
+- 🔴 A template gate's `diagnostics` carry the builder's step label (`apply`) as `component`. A per-component pin must include it.
+- 🔴 The MCP server refuses legacy `project.json`, so a `validate_project` census cannot see `library/prefabs`. Cover them another way.
