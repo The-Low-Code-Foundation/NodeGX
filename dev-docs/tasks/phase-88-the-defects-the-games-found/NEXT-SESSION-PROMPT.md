@@ -76,7 +76,8 @@ the whole task you pick, including its §8.
 | `noodl-mcp` `tsc --noEmit` | 0 |
 | kit suites + budget gates (10 suites) | 105/106; red = `cn004` AC3, identical on HEAD's `entry.js` |
 | `nodegx-kit-catalog` `health.test.js` | 30/30 |
-| whole `noodl-mcp` suite, editor `test:ci`, `test:main` | **not run** |
+| whole `noodl-mcp` suite, after both commits (`c42b8f74f`) | 2151/2160, 8 suites red: the 8 s12 attributed to HEAD (AWP-005, CMP-001, CMP-004 ×2, DEF-038, TPL-001, CN-004, AAQ-011/F12) **plus TPL-007**: `templates/rocket-school` holds untracked `.gitignore`, `.mcp.json`, `CLAUDE.md` dated **Sep 15 13:40** (an editor open wrote them, see the "opening a project writes 3 files" trap). Not kits, not ours: the Rocket School peer's to delete |
+| editor `test:ci`, `test:main` | **not run** (no editor file touched) |
 
 ## Traps found in session 17
 
