@@ -1,0 +1,137 @@
+{
+  "instrument": "file:///Applications/NodeGX.app/Contents/Resources/app.asar/src/editor/index.html",
+  "note": "packaged 0.2.4, no compile",
+  "arms": {
+    "P": {
+      "control": "a real click on a panel checkbox (ModelProxy write)",
+      "point": {
+        "x": 334,
+        "y": 2213,
+        "w": 32,
+        "h": 19
+      },
+      "before": {
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39
+      },
+      "after": {
+        "REBUILT": false,
+        "rowMarkStillConnected": true,
+        "focusedStillConnected": true,
+        "rowMutations": 0,
+        "sameElementFocused": true,
+        "activeTag": "BODY",
+        "activeIsBody": true,
+        "widthIsFocused": false,
+        "caret": null,
+        "widthValue": "250",
+        "heightValue": "321",
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39
+      }
+    },
+    "U": {
+      "control": "undo (Cmd+Z) — modelParameterUndo clears the hash and rebuilds every row",
+      "setup": {
+        "height": "{\"value\":321,\"unit\":\"px\"}",
+        "shown": "321"
+      },
+      "before": {
+        "focusedIsWidth": true,
+        "tag": "INPUT",
+        "value": "250",
+        "caret": 2,
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39,
+        "heightValue": "321",
+        "params": "{\"width\":{\"value\":250,\"unit\":\"%\"},\"sizeMode\":\"contentHeight\",\"alignItems\":\"flex-start\",\"rowGap\":\"var(--space-3)\",\"paddingLeft\":\"var(--space-6)\",\"borderLeftStyle\":\"solid\",\"borderLeftWidth\":\"var(--border-2)\",\"borderLeftColor\":\"var(--border-strong)\",\"height\":{\"value\":321,\"unit\":\"px\"}}"
+      },
+      "nextTick": {
+        "REBUILT": true,
+        "rowMarkStillConnected": false,
+        "focusedStillConnected": false,
+        "rowMutations": 220,
+        "sameElementFocused": false,
+        "activeTag": "BODY",
+        "activeIsBody": true,
+        "widthIsFocused": false,
+        "caret": null,
+        "widthValue": "250",
+        "heightValue": "321",
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39
+      },
+      "after700ms": {
+        "REBUILT": true,
+        "rowMarkStillConnected": false,
+        "focusedStillConnected": false,
+        "rowMutations": 220,
+        "sameElementFocused": false,
+        "activeTag": "BODY",
+        "activeIsBody": true,
+        "widthIsFocused": false,
+        "caret": null,
+        "widthValue": "250",
+        "heightValue": "321",
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39
+      }
+    },
+    "N": {
+      "control": "a direct model write — the panel never hears it (floor)",
+      "before": {
+        "focusedIsWidth": true,
+        "tag": "INPUT",
+        "value": "250",
+        "caret": 2,
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39,
+        "heightValue": "321",
+        "params": "{\"width\":{\"value\":250,\"unit\":\"%\"},\"sizeMode\":\"contentHeight\",\"alignItems\":\"flex-start\",\"rowGap\":\"var(--space-3)\",\"paddingLeft\":\"var(--space-6)\",\"borderLeftStyle\":\"solid\",\"borderLeftWidth\":\"var(--border-2)\",\"borderLeftColor\":\"var(--border-strong)\",\"height\":{\"value\":321,\"unit\":\"px\"},\"opacity\":0.5}"
+      },
+      "nextTick": {
+        "REBUILT": true,
+        "rowMarkStillConnected": true,
+        "focusedStillConnected": true,
+        "rowMutations": 42,
+        "sameElementFocused": true,
+        "activeTag": "INPUT",
+        "activeIsBody": false,
+        "widthIsFocused": true,
+        "caret": 2,
+        "widthValue": "250",
+        "heightValue": "321",
+        "rows": 83,
+        "gatedWrappers": 18,
+        "groups": 19,
+        "scrollTop": 39
+      }
+    }
+  },
+  "baseline": {
+    "rows": 83,
+    "gatedWrappers": 18,
+    "groups": 19,
+    "scrollTop": 39,
+    "params": "{\"width\":{\"value\":250,\"unit\":\"%\"},\"sizeMode\":\"contentHeight\",\"alignItems\":\"flex-start\",\"rowGap\":\"var(--space-3)\",\"paddingLeft\":\"var(--space-6)\",\"borderLeftStyle\":\"solid\",\"borderLeftWidth\":\"var(--border-2)\",\"borderLeftColor\":\"var(--border-strong)\",\"height\":{\"value\":321,\"unit\":\"px\"}}"
+  },
+  "end": {
+    "rows": 83,
+    "gatedWrappers": 18,
+    "groups": 19,
+    "scrollTop": 39,
+    "params": "{\"width\":{\"value\":250,\"unit\":\"%\"},\"sizeMode\":\"contentHeight\",\"alignItems\":\"flex-start\",\"rowGap\":\"var(--space-3)\",\"paddingLeft\":\"var(--space-6)\",\"borderLeftStyle\":\"solid\",\"borderLeftWidth\":\"var(--border-2)\",\"borderLeftColor\":\"var(--border-strong)\",\"height\":{\"value\":321,\"unit\":\"px\"},\"opacity\":0.5}"
+  }
+}

@@ -345,3 +345,52 @@ frame after the selection call can already be blank, so "first state" must be sn
    AC4, AC6's blink check.
 2. Richard's look at s8's R8 shots is not pending (his condition was met and gated, §6.5); nothing in s9 changes a
    pixel at rest — the change is the absence of the in-between frames.
+
+## 8. Measured — s10 (2026-09-16): §3.5, what a rebuild costs a focused field
+
+Taken on the **packaged 0.2.4** (no compile; a second instance on `NOODLPORT=8674`,
+`NOODL_REMOTE_DEBUG_PORT=9333`, scratch profile, a copy of `templates/story-engine`, Group `psWrap`).
+`verdicts/CHR-008/2026-09-16/focus-0.2.4/` — `focus-results.json`, `focus-U-{before,after}.png`.
+
+### 8.1 The reading
+
+**A rebuild of the rows drops the focused field to `<body>` and takes the caret with it.** With `250`
+typed into Width and the caret parked at offset 2, one **undo** (`__nodeGraphEditor.undo()`, the
+Cmd+Z path):
+
+| | rows replaced | focused element | `document.activeElement` | caret | scrollTop |
+|---|---|---|---|---|---|
+| **U — undo** (firing) | **yes**: 220 row mutations, marked row **disconnected** | **disconnected** | **`BODY`** | **lost** (`null`) | 39, kept |
+| N — a write the panel never hears (floor) | no: marked row still connected | still connected | the Width `INPUT` | **2, kept** | 39, kept |
+
+So §3.5's defect is real and person-visible — and note what it is **not**: the scroll offset survives
+either way (FB-017's map), exactly as §7.1 found for the remount. What a rebuild costs is the **caret**.
+
+### 8.2 🔴 Two instruments that graded nothing first, and why
+
+s9 recorded that AC2's arm B was vacuous. **The first two attempts this session were vacuous the same
+way, for a new reason worth writing down:** every candidate control wrote through
+`NodeGraphNode.setParameter` **directly**. The value lands in `parameters` — the drive's own end
+reading proves it — and **the panel never hears it**: the rows are bound to a `ModelProxy`, and
+`Ports.bindModel` subscribes to `instancePortsChanged` / `modelParameterUndo`, not to a raw model
+write. Readings across four candidates (`boxShadowEnabled`, `flexDirection`, `enableScroll`,
+`opacity`): `rows` 83, `gatedWrappers` 18, `groups` 19, marked element connected — **identical in
+every arm, including the negative control**. Flipping a gate port from outside the panel does not
+even clear a dimmed row.
+
+⚠️ **An arm that reads the same as its own control grades nothing**, and it costs a drive to notice.
+The repaired instrument records `rowMarkStillConnected` / `rowMutations` **first**, and no claim about
+focus is read unless the rebuild is visible in the DOM.
+
+⚠️ A third arm (a real click on the `Shadow Enabled` checkbox, to see whether a ModelProxy-routed
+write rebuilds) **also graded nothing**: the checkbox's `getBoundingClientRect().y` was **2213** in a
+900px viewport, so the click landed outside the window. Whether a port-list change rebuilds the rows
+is still **unmeasured** — scroll the target into view before trusting a coordinate.
+
+### 8.3 What this decides for §3.1
+
+The cure is §3.1 as written: values flow through React state, so a re-render reconciles the rows the
+author is not looking at and **leaves the focused input mounted**. The measurement above is the arm
+that grades it — the same drive, the same undo, expecting `widthIsFocused: true` and `caret: 2`.
+A save-and-restore of `document.activeElement` around `renderGroups` would move the number without
+the structure, and is deliberately **not** what this task builds.
