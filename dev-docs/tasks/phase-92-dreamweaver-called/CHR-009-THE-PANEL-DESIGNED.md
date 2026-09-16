@@ -326,7 +326,13 @@ Real input (CDP mouse at an `elementFromPoint`-verified point), dark:
 - A gated row is drawn, not removed — "row drawn: true" after `W fits` looked like a failure until the drive read
   the three states (live / gated / absent).
 
-### 8.6 Left
+### 8.6 Ruling
+
+**Richard on slice 3 (2026-09-16, after s14): *"Looks good, I like it"*.** He approved the build as drawn, which has
+**no outline** on unmarked rows. The outline question was not answered directly, so treat "no outline" as approved
+by the look, not as a separate ruling. Don't add outlines unless he asks.
+
+### 8.7 Left
 
 - **By screen area, next:** the Margin & Padding box (~145px of the lower crop) → paired `Margin`/`Padding` rows with
   a per-edge expander (AC4); the Alignment / Align-and-Justify icon strips (unlabelled, off the label column).

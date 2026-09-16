@@ -15,18 +15,14 @@ half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 | CHR-001, 002, 003, 005, 006, 012 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slice 1 rows (s12), slice 2 head (s13, ruled "looks nice"), **slice 3 (s14, §8) awaits his look** |
+| **CHR-009 the panel designed** | 🟡 slice 1 rows (s12), slice 2 head (s13, "looks nice"), slice 3 (s14, §8, "looks good, I like it"). Next slice below |
 | CHR-004, 010, 011 | ⬜ |
 
-## First: Richard's look at slice 3
+## Settled after s14
 
-Same crop pair: `verdicts/CHR-009/2026-09-16/head/props-group-top-{dark,light}.png` (before) beside
-`verdicts/CHR-009/2026-09-16/rows/props-group-top-{dark,light}.png` (after); plus `rows/props-group-width-connected-dark.png`.
-PNGs are gitignored — they are on disk locally. Questions for him:
-
-1. Direction of the `Size Mode` row (W/H given|fits segments replacing the four icons).
-2. **The gutter dot with no outline on unmarked rows** — the mockup/AC3 draw an outline everywhere; not built (§8.1). Keep or add?
-3. R6 still a trial ("ok so far").
+**Richard on slice 3 (2026-09-16): *"Looks good, I like it"*.** He approved the look as built: the `Size Mode` row, the
+gutter dot with **no outline** on unmarked rows (approved by the look, not ruled separately; don't add outlines
+unasked), and the tighter sections. R6 is still a trial. No look pending: go straight to the build list.
 
 ## Then, in order (ranked by SCREEN AREA, s12's lesson)
 
@@ -63,7 +59,7 @@ PNGs are gitignored — they are on disk locally. Questions for him:
 
 ## Still Richard's
 
-1. Slice 3's look + the gutter outline question (above). R6 final.
+1. R6 final ("ok so far"; ask again once the rows are done).
 2. The `···` menu is DECLINED — don't build it. CHR-007 AC4 `_portsHash` clause declined — don't revisit quietly.
 3. The Projects tab's two full-width cards (BST-003 / UNI-001).
 4. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
