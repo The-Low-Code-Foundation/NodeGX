@@ -190,20 +190,25 @@ export function projectBodyScroll(store: ProjectStore): boolean | null {
  * deliberately: a planned component has no nodes, and adding it to `views` would
  * give it an empty interface rather than no interface — turning "unknown, do not
  * check" into "this component has no ports" for every instance of it.
+ *
+ * GAM-021 — `options.bodyScroll` is the setting a plan's apply will leave, which
+ * the plan door resolves and passes. Omitted, the disk is read, so
+ * `validate_component` and `validate_project` judge the project as it is.
  */
 export function preconditionDiagnostics(
   store: ProjectStore,
   legacyName: string,
   candidate: ComponentFiles,
   views: readonly ComponentNodesView[],
-  alsoResolvable: readonly string[] = []
+  alsoResolvable: readonly string[] = [],
+  options: { bodyScroll?: boolean | null } = {}
 ): Diagnostic[] {
   return authoredPreconditionDiagnostics({
     component: legacyName,
     // DEF-009 — null means "no policy file", never undefined: see projectSecurity.
     security: projectSecurity(store),
     // REL-002a — null means "the project has not set it", never undefined: see projectBodyScroll.
-    bodyScroll: projectBodyScroll(store),
+    bodyScroll: options.bodyScroll !== undefined ? options.bodyScroll : projectBodyScroll(store),
     nodes: authoredNodes(candidate.nodes.nodes),
     components: [...views.map((v) => v.name), legacyName, ...alsoResolvable],
     urlPaths: declaredUrlPaths(views),
