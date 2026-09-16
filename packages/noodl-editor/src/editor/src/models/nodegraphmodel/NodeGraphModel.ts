@@ -150,6 +150,12 @@ export class NodeGraphModel extends Model {
   public owner: ComponentModel;
   boundTypeModels: Set<TSFixme>;
 
+  /**
+   * GAM-014 — the `visualRoots` the loaded file recorded, kept only to answer for a root whose type
+   * this process cannot resolve. See {@link isVisualRoot}.
+   */
+  private recordedVisualRoots: ReadonlySet<string> = new Set();
+
   private evaluatehealthScheduled: boolean;
   private updateTypesScheduled: boolean;
 
@@ -179,6 +185,7 @@ export class NodeGraphModel extends Model {
 
   static fromJSON(json: Partial<NodeGraphModelJson>) {
     const _this = new NodeGraphModel({ comments: json.comments });
+    _this.recordedVisualRoots = new Set(json.visualRoots ?? []);
     for (const i in json.roots) {
       _this.addRoot(NodeGraphNode.fromJSON(json.roots[i]));
     }
@@ -1253,8 +1260,26 @@ export class NodeGraphModel extends Model {
     }
   }
 
+  /**
+   * Does this root draw? A resolved type answers for itself (`allowAsChild`).
+   *
+   * 🔴 GAM-014 — **an unresolved type answers from the file.** A kit's React node is an
+   * `UnknownNodeType` wherever its module is not loaded: always in `nodegx deploy`, whose node
+   * library is the built-in register only, and in the editor before the kit registers. Reading
+   * `allowAsChild` off that placeholder said "not visual", so the export shipped `roots: []` and the
+   * component drew nothing, with no error. The file's `visualRoots` was written by a process that
+   * did know the type (the MCP door with the overlay loaded, or an editor save with the kit loaded).
+   *
+   * ⚠️ Not "every unknown type is visual": a logic kit node is written with no `visualRoots` entry
+   * and stays rootless here.
+   */
+  isVisualRoot(root: NodeGraphNode): boolean {
+    if (NodeLibrary.instance.typeIsMissing(root.type)) return this.recordedVisualRoots.has(root.id);
+    return !!root.type.allowAsChild;
+  }
+
   getVisualRootIds() {
-    return this.roots.filter((root) => root.type.allowAsChild).map((x) => x.id);
+    return this.roots.filter((root) => this.isVisualRoot(root)).map((x) => x.id);
   }
 
   toJSON(): NodeGraphModelJson {
