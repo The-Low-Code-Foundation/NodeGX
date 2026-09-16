@@ -1,0 +1,28 @@
+{
+  "settings-panel": {
+    "count": 7,
+    "heights": {
+      "26": 7
+    },
+    "collapsed": [],
+    "clipped": []
+  },
+  "backend-services-panel": {
+    "count": 0,
+    "heights": {},
+    "collapsed": [],
+    "clipped": []
+  },
+  "project-docs-panel": {
+    "count": 0,
+    "heights": {},
+    "collapsed": [],
+    "clipped": []
+  },
+  "workflows-panel": {
+    "count": 0,
+    "heights": {},
+    "collapsed": [],
+    "clipped": []
+  }
+}

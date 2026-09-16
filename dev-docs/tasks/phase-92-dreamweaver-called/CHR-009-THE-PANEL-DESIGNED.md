@@ -519,3 +519,80 @@ stay separate, no merged X/Y row); POL-012's all-four lock — **keep removed** 
 "CHR 012 look good": *"I dunno, generally the community pages start looking less boxy and horrible"* — so that was a
 general remark, not a ruling on slice 4's rows specifically. Slice 4 has no explicit look of its own; slice 5's approved
 crop contains it unchanged, so it is recorded as approved through slice 5.
+
+## 11. Slice 6 — one control height, and `Fixed` only on a % (2026-09-16, s17)
+
+The handoff's next item by screen area: the `Fixed` chip beside Width/Height (no home in the mockup) and the "28px"
+`Position`/`Layout` selects (measure first). Measured first: they were **27**, and so was every text input.
+
+### 11.1 What the measurement found
+
+§2 asks for "one control height, 26px". The base input never stated a height: it was `padding: 5.5px` + border +
+Chromium's line box for an `<input>` (which is not `line-height`). So on the Group panel, both themes, three crops:
+
+| kind | before | after |
+|---|---|---|
+| selects (`Position`, `Layout`, `Multi Line Wrap`, `Box Sizing`, `Blend Mode`, `Background Size/Position`, `Border Style`) | **27** | **26** |
+| 12px text inputs (`Background Color/Image/Gradient`, `Border Color`) | **27** | **26** |
+| 11px mono inputs (`Opacity`, `zIndex`) | **25.5** | **26** |
+| number+unit, pair, align and Size Mode tracks, `Fixed` | 26 | 26 |
+| section headers / filter | 30 / 30 | 30 / 30 (by design) |
+| `fx` toggle | 24 | 24: borderless, draws no box, left alone |
+
+Group header tops identical before/after in every crop (rows keep their 30px `min-height`), label x one value (17).
+
+### 11.2 Built
+
+- `PropertyPanelBaseInput.module.scss`: `height: 26px; padding: 0 9px` (was `5.5px 9px`).
+- 🔴 **The drive's picture found what its numbers did not:** Corner Radius drew `px` at the TOP of its field. The
+  unit picker's input is `height: 100%` of the select's root, which has no height, so it collapsed to 12.5px; it had
+  read as centred only because of the 5.5px padding. Every "height by kind" still read 26, because the kind is the
+  FIELD. Fix: `.UnitPicker > * { height: 100% }`. The drive now also reports `collapsedInputs` (any visible
+  non-checkbox input under 20px). Armed in the page: with the fix undone on those elements, all 13 unit inputs read
+  12.5; restored, 24.
+- **`Fixed` (Richard, s17: "Only when %")**: drawn only while the unit is `%`, the one unit `layout.ts` treats
+  differently; on `px` the field takes the whole control column. The disabled state and its CSS are gone. A stored
+  `isFixed` on a px value is inert and left as it is.
+
+Files: `noodl-core-ui/…/PropertyPanelBaseInput.module.scss`, `propertyeditor/components/NumberUnitInput.{tsx,module.scss}`.
+
+### 11.3 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded and restored byte-identical
+(`a1ea46f2…`). Script `verdicts/CHR-009/2026-09-16/height/drive-height.js`; `before/` and `after/` results + crops.
+**The look, same crops:** `height/before/props-group-{top,lower,bottom}-{dark,light}.png` →
+`height/after/…`, plus `after/props-group-width-px-dark.png` and `after/props-group-select-open-dark.png`.
+
+| act (dark, real CDP input) | model | panel |
+|---|---|---|
+| `Blend Mode` → Multiply, undo | `multiply` → unset | shows `Multiply` |
+| `Opacity` ← `0.5` + Enter, undo | `0.5` → unset | — |
+| Width unit `%` → `px`, undo | `{100,%}` → `{100,px}` → `{100,%}` | chip ✓ → **none, field right 298 → 350 (column edge)** → chip ✓ |
+
+The other panels that use these inputs: Settings (7 inputs, all 26, text centred on the PNG). Backend services,
+Project docs and Workflows draw none. Design Tokens and AI Settings were **not** opened.
+
+🔴 **Instrument faults on the way (none were product defects):** (1) the select renders a measuring COPY of its
+options, so a `find` by text got the ghost and the click point hit the real option: pick by `elementFromPoint`;
+(2) a CDP Cmd+A selects nothing on macOS, so `1` + `0.5` committed **10.5**: call `input.select()` in the page;
+(3) 🔴 **the served bundle had the TSX change while the renderer still ran the old module.** A bundle grep said ready
+at once, the page reloaded only AFTER the drive, and that run read "chip still on px". Grade on the renderer's module
+source (`r.m[key]` includes the new text) *before* driving, not on the bundle.
+
+### 11.4 Gates
+
+- `tsc --noEmit` (editor) **0**. `npm run type` / `npm run colors` **holding**.
+- `npx jest` (editor, `tests-unit` 449/7,408 + `tests-main` 22/289) = **471 suites / 7,697 tests, EXIT 0**, s16's
+  count exactly. No new spec: `NumberUnitInput` cannot load in this runner (`fb-018/bindingChipRows` says so), so
+  the drive is the grade. `test:ci` **not run**.
+
+### 11.5 Left
+
+- By screen area: §3.4 proper (Variant/State inside General); the colour field (its swatch is **30px** beside a 26px
+  field, visible in `after/props-group-bottom-*`); Advanced CSS footer; the `Border Style` and `Corner Radius`
+  icon strips (unlabelled, off the column, the same shape slice 5 replaced).
+- Small: comment field 4px overshoot; Escape on the Variant picker; a token in a pair field ellipsises; a binding chip
+  on an align row; `Box Sizing` value `Include padding and border` ellipsises at 156px.
+- A Text node's `Text Horizontal Align` label at 116px: predicted, not driven.
+- `Attempted to synchronously unmount a root while React was already rendering` repeats in `dev.log` during drives.
+  Not attributed (it may predate this slice); worth one look when CHR-008's roots are touched.

@@ -1,7 +1,11 @@
 @use '../../../styles/scss-variables/length.scss';
 
 /* PAR-002 (mock `.input`): bg-2 box, hairline border, radius 6; hover lifts
-   the border to border-strong. */
+   the border to border-strong.
+   CHR-009 §2 "one control height, 26px". The height used to be padding + border + Chromium's line box
+   for an <input>, which is not `line-height` — so the 12px text inputs (every select, every text field)
+   drew 27px and the 11px mono ones 25.5, beside the 26px number+unit, pair and segmented fields. The
+   box is now stated and the text centres in it, as it does in any <input>. */
 .Root {
   font-family: var(--font-family);
   color: var(--theme-color-fg-highlight);
@@ -9,7 +13,8 @@
   line-height: 1;
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-md);
-  padding: 5.5px 9px;
+  height: 26px;
+  padding: 0 9px;
   width: 100%;
   box-sizing: border-box;
   font-size: var(--font-size-sm);

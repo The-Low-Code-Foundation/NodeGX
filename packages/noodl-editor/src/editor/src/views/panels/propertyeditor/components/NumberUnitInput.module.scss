@@ -59,6 +59,13 @@
   flex: 0 0 36px;
   height: 100%;
 
+  /* The select's own root has no height, so the input's `100%` resolved to its content. It read as
+     centred only while the base input carried 5.5px of vertical padding; at the stated 26px box with
+     none, `px` drew at the top of the field (s17 drive, Corner Radius). */
+  > * {
+    height: 100%;
+  }
+
   input,
   input:hover,
   input:focus {
@@ -68,7 +75,7 @@
   }
 }
 
-/* "Fixed" — a pressed/unpressed chip at the control height, not a label plus an empty square. */
+/* "Fixed" — a pressed/unpressed chip at the control height, not a label plus an empty square. Drawn only on a % value. */
 .Fixed {
   flex: 0 0 auto;
   height: 26px;
@@ -90,11 +97,6 @@
     background-color: var(--theme-color-bg-3);
     border-color: var(--theme-color-primary);
     color: var(--theme-color-fg-highlight);
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: default;
   }
 
   &:focus-visible {

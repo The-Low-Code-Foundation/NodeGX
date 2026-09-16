@@ -138,14 +138,15 @@ export function NumberUnitInput({
           )}
         </div>
 
-        {/* Only meaningful for a % value; disabled (not hidden) otherwise, so the row keeps its shape. */}
-        {showFixed && (
+        {/* CHR-009 (Richard, s17): only drawn while the value is a %, the one unit it changes anything for
+            (`layout.ts` turns a % in a row/column into a flex share unless it is fixed). On px the field
+            takes the whole control column. A stored `isFixed` on a px value is inert and left alone. */}
+        {showFixed && isPercent && (
           <button
             type="button"
             className={css['Fixed']}
             aria-pressed={Boolean(isFixed)}
-            disabled={!isPercent}
-            title={isPercent ? 'Keep this size fixed instead of a share of the parent' : 'Fixed applies to % values'}
+            title="Keep this size fixed instead of a share of the parent"
             onClick={() => onFixedToggle && onFixedToggle()}
           >
             Fixed
