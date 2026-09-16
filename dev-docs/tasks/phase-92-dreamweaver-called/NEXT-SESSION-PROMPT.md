@@ -1,7 +1,7 @@
 # Phase 92 — next session
 
 **Written 2026-09-16 at the end of s18 (slice 6 ruled "looks good"; CHR-009 slice 7 — the `Border Style` /
-`Corner Radius` pickers as rows — built, driven, committed; awaits Richard's look).**
+`Corner Radius` pickers as rows — built, driven, committed, and approved: looks ok, keep the mark, glyphs fine).**
 Branch `cline-dev`. Phase commits: `git log -- dev-docs/tasks/phase-92-dreamweaver-called`. The platform
 half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
@@ -16,18 +16,13 @@ Never commit their files; commit by pathspec.
 | CHR-001, 002, 003, 005, 006, 012 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slices 1–6 approved (slice 6 at the start of s18, §11.6). **Slice 7 (s18, §12) awaits his look** |
+| **CHR-009 the panel designed** | 🟡 slices 1–7 approved (slice 7 at the end of s18, §12.5). Next: the colour field |
 | CHR-004, 010, 011 | ⬜ |
 
-## First: Richard's look at slice 7
+## Slice 7 is approved
 
-Say up front it is **not** a height win (−4px per strip): it is the column, the labels, and one new thing.
-Same crop, before → after: `verdicts/CHR-009/2026-09-16/height/after/props-group-bottom-light.png` →
-`scope/after/props-group-bottom-light.png`; the mark: `scope/after/props-group-scope-set-dark.png` (top-left corner
-set to 8, All corners selected); 4× glyphs: `scope/after/zoom-{edge,corner}-{dark,light}.png`. Ask three things:
-1. Does it look right? (`Edge` / `Corner` as labels — renamable, display-only.)
-2. **The set-mark** (a 4px dot on a side that holds its own value) is new, not in the mockup — keep it?
-3. The corner glyphs are right but subtle at 1× — good enough?
+Richard, end of s18: slice 7 **looks ok**, the set-mark **keep**, the corner glyphs **good enough** (§12.5).
+Nothing awaits his look. Start on the list below.
 
 ## Then, in order (ranked by SCREEN AREA)
 
@@ -76,11 +71,10 @@ set to 8, All corners selected); 4× glyphs: `scope/after/zoom-{edge,corner}-{da
 
 ## Still Richard's
 
-1. **Slice 7's look, the set-mark, the corner glyphs** (above).
-2. R6 final ("ok so far"; ask again once the rows are done).
-3. The `···` menu is DECLINED, don't build it. CHR-007 AC4 `_portsHash` clause declined, don't revisit quietly.
-4. The Projects tab's two full-width cards (BST-003 / UNI-001).
-5. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
+1. R6 final ("ok so far"; ask again once the rows are done).
+2. The `···` menu is DECLINED, don't build it. CHR-007 AC4 `_portsHash` clause declined, don't revisit quietly.
+3. The Projects tab's two full-width cards (BST-003 / UNI-001).
+4. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
 
 ## Readings at the end of s18 (2026-09-16, working tree on `6621a992b` + slice 7, before its commit)
 

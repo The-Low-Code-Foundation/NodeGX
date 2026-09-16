@@ -677,3 +677,8 @@ The drive's one failure was the instrument (the Left-edge segment was scrolled o
   value, and its colour swatch is a checkerboard — a side reads "nothing" when it is in fact `none`/2/#000 from All.
   Pre-existing; the mark now tells you a side is set, but not what an unset side inherits.
 - The rest of §11.5 unchanged: §3.4 proper; the colour field; Advanced CSS footer; the small list; a Text node.
+
+### 12.5 Ruling
+
+**Richard, 2026-09-16 (s18, after the slice):** slice 7 **"looks ok"**; the set-mark **keep**; the corner glyphs
+**good enough**. Slice 7 approved as built.
