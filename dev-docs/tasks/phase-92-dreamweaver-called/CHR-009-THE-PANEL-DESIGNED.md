@@ -511,3 +511,11 @@ Stretch (the runtime path is `14815f1e3`'s, not this slice's); a Text node, whos
   in a pair field ellipsises.
 - The align rows have no binding chip when a wire arrives (`connectedRowPolicy` still calls `AlignToolsType` an
   exception: "no single port"). Now each row IS one port, so the exception's reason is gone — a follow-up, not built.
+
+### 10.5 Ruling
+
+**Richard, 2026-09-16 (start of s17):** slice 5 **"Looks good"**; the +40px — **keep two rows** (`Align X` / `Align Y`
+stay separate, no merged X/Y row); POL-012's all-four lock — **keep removed** (closes the s15 question). On §9.6's
+"CHR 012 look good": *"I dunno, generally the community pages start looking less boxy and horrible"* — so that was a
+general remark, not a ruling on slice 4's rows specifically. Slice 4 has no explicit look of its own; slice 5's approved
+crop contains it unchanged, so it is recorded as approved through slice 5.
