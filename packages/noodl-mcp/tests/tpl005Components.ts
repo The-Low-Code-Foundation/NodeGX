@@ -1476,6 +1476,9 @@ const PLAY: Tpl005Component = {
     // only it and the keyboard ("Cannot convert object to primitive value"),
     // while registering cleanly in a project holding all 32. A template is a
     // two-module project, which is the arm where it does not work.
+    // ✅ GAM-018 (2026-09-16): that failure was the extractor's catch-all `Noodl`, not
+    // confetti. Confetti now registers alone and beside only the keyboard. Putting the
+    // node back is this template's call, and it has not been made.
     wire('plWinGate', 'ontrue', 'plBannerStates', 'to-won'),
     // Any other room: on to the next one.
     wire('plWinGate', 'onfalse', 'plLevel', 'increase'),
@@ -1546,5 +1549,8 @@ export const TPL005_COMPONENTS: ReadonlyArray<Tpl005Component> = [CELL, ROW, MOV
  * throws on registration takes only itself down — the control pair proved the
  * keyboard survives it — but a node that never reaches the catalog is a node the
  * door refuses to author, so the template cannot use it.
+ *
+ * ✅ GAM-018 (2026-09-16) fixed the cause in the extractor: confetti registers beside only the
+ * keyboard now, and in a browser it always did. Whether the win takes it back is not decided.
  */
 export const REQUIRED_MODULES = ['keyboard-shortcuts'] as const;

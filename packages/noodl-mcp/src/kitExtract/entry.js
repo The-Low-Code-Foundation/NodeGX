@@ -87,13 +87,20 @@ async function main() {
   registerViewerNodes(runtime);
   const builtinTypeNames = Object.keys(runtime.context.nodeRegister._constructors);
 
-  // `dom-shim` installs a recursive-noop `Noodl`; replace it with one that
-  // collects `defineModule` and still answers everything else with the noop,
-  // because kit code touches other members of the global at module scope.
+  // `dom-shim` installs a recursive-noop `Noodl`; replace it with the object a
+  // kit meets in a real page: the viewer's bootstrap (`static/viewer/index.html`)
+  // defines exactly `defineModule`, `deployed` and `Env` before any kit script
+  // runs, and nothing else.
+  //
+  // 🔴 GAM-018 (R2, Richard 2026-09-16: "fake it like a page"): this used to be a
+  // catch-all Proxy answering every missing member with a noop function. A kit
+  // that feature-tests `typeof Noodl.defineNode === "function"` was told yes,
+  // skipped installing its SDK, and handed `defineModule` a Proxy for a node —
+  // 10 shipped kits registered nothing alone, and registered only when an
+  // unguarded kit happened to be scanned first. A kit now registers here exactly
+  // when it registers in a browser.
   const collected = [];
-  const noop = new Proxy(function () {}, { get: () => noop, apply: () => noop });
-  const base = { deployed: false, defineModule: (m) => collected.push(m) };
-  globalThis.Noodl = new Proxy(base, { get: (t, k) => (k in t ? t[k] : noop) });
+  globalThis.Noodl = { deployed: false, Env: {}, defineModule: (m) => collected.push(m) };
   globalThis.window.Noodl = globalThis.Noodl;
 
   // ✅ Reuses CN-001's scanner rather than adding a fourth one. It also carries

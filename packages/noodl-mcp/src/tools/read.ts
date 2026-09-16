@@ -30,10 +30,14 @@ import type {
   SearchProjectResponse
 } from './responses';
 import { currentKitOverlay } from '../kitOverlay';
+import type { KitHealthDiagnostic } from '@nodegx/kit-catalog';
 import { userProfileForPrompt } from '../userProfile';
 import { guarded, jsonResult } from './util';
 import { projectVisualPredicate } from './author';
 import { readVisualRoots } from '../visualRoots';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { kitDiagnostics } = require('@nodegx/kit-catalog');
 
 const SEARCH_RESULT_CAP = 200;
 
@@ -95,6 +99,13 @@ export function kitsReport(): ProjectKitsReport | undefined {
     typesByModule.set(node.kitModule, list);
   }
 
+  // GAM-018 AC6. `assumeLoaded` holds here, unlike in the editor's Kits section: the extractor
+  // requires every kit's `main` before it reports, so "registered nothing" cannot mean "not loaded
+  // yet". `kitDiagnostics` already leaves out a kit that failed or whose only node collided.
+  const registeredNothing = (kitDiagnostics(overlay) as KitHealthDiagnostic[])
+    .filter((d) => d.code === 'kit-registered-nothing')
+    .map((d) => ({ kitModule: d.kitModule, message: d.message }));
+
   return {
     modules: overlay.kits.map((k) => ({
       name: k.kitModule,
@@ -105,6 +116,7 @@ export function kitsReport(): ProjectKitsReport | undefined {
     ...(overlay.failures.length > 0
       ? { failures: overlay.failures.map((f) => ({ kitModule: f.kitModule, message: f.message })) }
       : {}),
+    ...(registeredNothing.length > 0 ? { registeredNothing } : {}),
     ...(overlay.warnings.length > 0 ? { warnings: overlay.warnings } : {}),
     ...(overlay.unavailable ? { unavailable: overlay.unavailable.reason } : {})
   };
