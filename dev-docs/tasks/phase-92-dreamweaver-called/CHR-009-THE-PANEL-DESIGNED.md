@@ -430,3 +430,84 @@ Real input (CDP mouse at an `elementFromPoint`-verified point, `Input.insertText
   field; Advanced CSS footer; comment field 4px overshoot; Escape on the Variant picker.
 - A token in a pair field ellipsises (`--sp…`) — every new Text Input carries `var(--space-2)` padding. The
   full token is in the tooltip; the old 40px boxes clipped it too. Worth Richard's eye on a Text Input.
+
+### 9.6 Ruling
+
+**Richard, 2026-09-16 (start of s16): *"The last phase 92 screens for CHR 012 look good."*** He named CHR-012, but
+CHR-012 closed on 2026-09-15 and the screens awaiting his look were this slice's (`box/`, 2026-09-16). Recorded as the
+look on **slice 4**, confirm if wrong. The paired rows' look is approved. ⚠️ **The POL-012 lock question was not
+answered** and is still his: the lock stays removed until he says otherwise.
+
+## 10. Slice 5 — the alignment ports as rows (2026-09-16, s16)
+
+By screen area the largest region left in the lower crop: two unlabelled icon strips off the label column
+(`Alignment`: six icons in one track, bottom-first; `Align and justify content`: two stacked tracks).
+
+### 10.1 Built
+
+| region (§2) | before (slice 4, `7a4056683`) | now |
+|---|---|---|
+| alignment | one strip per group, no labels, `Align X`/`Align Y` merged into six icons | **one 30px row per port**: `Align X`, `Align Y`, `Align Items`, `Justify Content` (and `Align Content` in Layout), each a 26px segmented track filling the control column, one segment per enum value, 14px glyph in `currentColor` |
+| value order | the icon file's order (vertical: bottom, center, top) | spatial: start → centre → end, then stretch / the distributions (`ALIGN_VALUE_ORDER`) |
+| pressed | the explicit value `sel`; the default a brighter icon | the value **in effect** (explicit, else the port default) is pressed; the gutter reset dot says it was set |
+| reset | one dot for the whole strip | per row (per port), one undo step |
+| press the pressed segment | un-set it (legacy toggle) | **writes nothing** — un-setting is the reset dot |
+
+🔴 **The defect the rewrite fixed: `Align Items → Stretch` could not be picked in the panel.** `14815f1e3` added
+`Stretch` to Group's enum; the strip drew one icon per *known* value, so the panel never offered it. The rows draw a
+segment per **enum** value (a value with no glyph falls back to its label), and `Stretch` has a drawn glyph.
+
+Files: `model/alignRows.ts` (new, pure), `components/AlignToolsInput.tsx` (rewritten) + new `.module.scss`,
+`components/alignToolsIcons.ts` (+ Stretch), `DataTypes/AlignTools/AlignToolsType.ts` (ports in, per-comp reset);
+`style.css` loses the 60-line `.align-tools-seg`/`.align-icon` block (no other user).
+
+### 10.2 Driven
+
+Dev stack, scratch copy of `templates/story-engine`, Group `app_root`, recents seeded then restored byte-identical
+(`a1ea46f2…`). Script `verdicts/CHR-009/2026-09-16/align/drive-align.js`; results `align/align-results.json`.
+**The look, same crop:** `box/props-group-lower-{dark,light}.png` (slice 4) beside `align/props-group-lower-{dark,light}.png`;
+also `align/props-group-align-{dark,light}.png`, `align/props-group-align-stretch-dark.png`.
+
+| reading (Group, both themes identical) | slice 4 | slice 5 |
+|---|---|---|
+| old strip elements | present | **0** |
+| label left edges | 17 | **17** (all five align rows included) |
+| align rows / segment height | — | **32 / 26**, segment x 141 → 297 on every row (the column's right edge) |
+| segment widths | ~30px icon boxes | 3 values **49**, 4 values **36**, 6 values **23**; every glyph 14×14 |
+| align labels cut by 116px | — (no labels) | **0 / 5** |
+| visible font sizes over `BasePanel` | 4 | 4 (13, 15, 12, 11) |
+| 🔴 `Style` header in the lower crop | 575 | **615 (+40)** |
+
+⚠️ **This slice made the panel 40px LONGER.** `Alignment` 79 → 113 px (one strip → two rows), `Align and justify`
+109 → 113. It trades height for labels, the column, and a reachable Stretch. If Richard wants it back, `Align X`
+and `Align Y` fit one row as two 3-segment tracks (Size Mode's `W`/`H` shape): −32px.
+
+Real input (CDP mouse at an `elementFromPoint`-verified point), dark:
+
+| act | model | pressed | then |
+|---|---|---|---|
+| `Align Items` → Stretch | `stretch` | `stretch`, reset dot on | one undo → unset, `flex-start` pressed |
+| press `flex-start` (in effect) | unchanged (unset) | — | — |
+| `Justify Content` → Space Between | `space-between` | `space-between` | reset dot → unset, dot gone; undo → `space-between`; undo → unset |
+
+Not driven: a vertical ↔ row `Layout` flip (the glyph rotation is the legacy rule, unchanged); the viewer's rendering of
+Stretch (the runtime path is `14815f1e3`'s, not this slice's); a Text node, whose `Text Horizontal Align` (21 chars)
+**will** ellipsise at 116px — predicted, not measured.
+
+### 10.3 Gates
+
+- `tsc --noEmit` (editor) **0 errors**. `npm run type` / `npm run colors` **holding**.
+- New `tests-unit/chr-009/alignRows.test.tsx`, **12 tests**: every enum value offered (Stretch), spatial order, an
+  unordered enum value kept, one row per port in port order, pressed = effect, changed = explicit, a press on the
+  value in effect writes nothing, a glyph for every ordered value in `currentColor` at 14px, the component's
+  segments/writes/per-row reset. Mutants: options filtered to the old icon set → **4 red**; order sort removed → **4 red**.
+- Full editor `tests-unit` (stack down): **471 suites / 7,697 tests, EXIT 0** — s15's 470 / 7,685 plus exactly this suite.
+- `test:ci` **not run**.
+
+### 10.4 Left
+
+- **By screen area:** `Fixed` chip beside Width/Height; 28px `Position`/`Layout` selects → 26 (measure first).
+- §3.4 proper; colour field; Advanced CSS footer; comment field 4px overshoot; Escape on the Variant picker; a token
+  in a pair field ellipsises.
+- The align rows have no binding chip when a wire arrives (`connectedRowPolicy` still calls `AlignToolsType` an
+  exception: "no single port"). Now each row IS one port, so the exception's reason is gone — a follow-up, not built.
