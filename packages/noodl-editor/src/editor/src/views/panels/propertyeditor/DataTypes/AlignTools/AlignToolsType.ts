@@ -81,10 +81,11 @@ export class AlignToolsType extends TypeView {
 
     this.root.render(
       React.createElement(AlignToolsInput, {
+        // CHR-009 slice 5: one row per port, so the view hands over the ports, not a merged strip.
+        ports: Object.keys(this.ports).map((comp) => this.ports[comp]),
         values: { ...this.values },
-        defaults: this.defaults,
         isVertical: this.isVertical(),
-        onToggle: (comp: string, value: string | undefined) => {
+        onChange: (comp: string, value: string) => {
           this.values[comp] = value;
           this.parent.model.setParameter(this.ports[comp].name, value, {
             undo: true,
@@ -92,15 +93,12 @@ export class AlignToolsType extends TypeView {
           });
           this.renderReact();
         },
-        onReset: () => {
-          Object.keys(this.defaults).forEach((comp) => {
-            if (this.values[comp] !== undefined) {
-              this.values[comp] = undefined;
-              this.parent.model.setParameter(this.ports[comp].name, undefined, {
-                undo: true,
-                label: 'alignment changed'
-              });
-            }
+        onReset: (comp: string) => {
+          if (this.values[comp] === undefined) return;
+          this.values[comp] = undefined;
+          this.parent.model.setParameter(this.ports[comp].name, undefined, {
+            undo: true,
+            label: 'alignment changed'
           });
           this.renderReact();
         }

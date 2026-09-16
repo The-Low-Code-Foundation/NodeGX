@@ -1,64 +1,73 @@
+import classNames from 'classnames';
 import React from 'react';
 
-import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
+// The row's own module: the `PropertyPanelInput` index pulls in `Icon`, which a tests-unit spec cannot load.
+import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 
-import { ALIGN_ICONS } from './alignToolsIcons';
+import { AlignPortLike, alignGlyphOf, alignRowsOf, valueOnPress } from '../model/alignRows';
+import css from './AlignToolsInput.module.scss';
 
 export interface AlignToolsInputProps {
-  /** Current parameter value per alignment component; a key present with
-   *  undefined value means the comp belongs to this tool but is unset. */
+  /** The ports this control edits, in port order — one row each. */
+  ports: AlignPortLike[];
+  /** alignComp → explicit value, or undefined when unset. */
   values: Record<string, string | undefined>;
-  defaults: Record<string, string | undefined>;
+  /** The flex direction is vertical: the item/content glyphs turn with it. */
   isVertical: boolean;
 
-  onToggle: (comp: string, value: string | undefined) => void;
-  onReset: () => void;
+  onChange: (comp: string, value: string) => void;
+  onReset: (comp: string) => void;
 }
 
 /**
- * The alignment icon toolbar (vertical/horizontal align, justify,
- * align-items, justify-content, align-content). Renders only the icons whose
- * comp belongs to this instance; classes reuse the legacy align-icon CSS.
+ * The alignment ports — CHR-009 §2, slice 5.
+ *
+ * Was an unlabelled icon strip per group, off the label column. Now each port is a row of the column
+ * like every other: its label, then one segmented track that fills the control column, one segment
+ * per enum value (`model/alignRows.ts`). The pressed segment is the value in effect; the gutter's
+ * reset dot says it was set.
  */
-export function AlignToolsInput({ values, defaults, isVertical, onToggle, onReset }: AlignToolsInputProps) {
-  const comps = Object.keys(values);
-  const isDefault = comps.every((comp) => values[comp] === undefined);
-
+export function AlignToolsInput({ ports, values, isVertical, onChange, onReset }: AlignToolsInputProps) {
   return (
-    <div style={{ position: 'relative', display: 'flex' }}>
-      {!isDefault && (
-        <span className="property-changed-dot" title="Reset to default" onClick={() => onReset()}>
-          <Icon icon={IconName.Reset} UNSAFE_style={{ width: 16, height: 16 }} />
-        </span>
-      )}
-
-      {/* PAR-002: the mock's `.seg-icons` segmented control */}
-      <div className="align-tools-seg" style={{ marginLeft: 20 }}>
-        {ALIGN_ICONS.filter((icon) => comps.includes(icon.comp)).map((icon) => {
-          const classes = ['align-icon'];
-          if (values[icon.comp] !== undefined) {
-            if (values[icon.comp] === icon.value) classes.push('sel');
-          } else if (defaults[icon.comp] === icon.value) {
-            classes.push('def');
-          }
-          if (isVertical && icon.rotate) {
-            classes.push(icon.rotate === 'rotate2' ? 'align-icon-rotate2' : 'align-icon-rotate');
-          }
-
-          return (
-            <div
-              key={icon.comp + ':' + icon.value}
-              className={classes.join(' ')}
-              title={icon.tooltip}
-              onClick={() => {
-                // Clicking the selected value un-sets it (legacy toggle semantics)
-                onToggle(icon.comp, values[icon.comp] === icon.value ? undefined : icon.value);
-              }}
-              dangerouslySetInnerHTML={{ __html: icon.svg }}
-            />
-          );
-        })}
-      </div>
+    <div className={css['Root']}>
+      {alignRowsOf(ports, values).map((row) => (
+        <div key={row.comp} data-test={`align-row-${row.comp}`}>
+          <PropertyPanelRow label={row.label} isChanged={row.isChanged} onReset={() => onReset(row.comp)}>
+            <div className={css['Segment']} role="group" aria-label={row.label}>
+              {row.options.map((option) => {
+                const glyph = alignGlyphOf(row.comp, option.value);
+                const rotate = isVertical && glyph ? glyph.rotate : null;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={classNames(
+                      css['Option'],
+                      option.pressed && css['is-pressed'],
+                      !glyph && css['is-text'],
+                      rotate && css[rotate === 'rotate2' ? 'is-rotate2' : 'is-rotate']
+                    )}
+                    aria-pressed={option.pressed}
+                    data-align-comp={row.comp}
+                    data-align-value={option.value}
+                    title={`${row.label}: ${option.label}`}
+                    onClick={() => {
+                      const next = valueOnPress(row, option.value);
+                      if (next !== null) onChange(row.comp, next);
+                    }}
+                  >
+                    {glyph ? (
+                      <span className={css['Glyph']} dangerouslySetInnerHTML={{ __html: glyph.markup }} />
+                    ) : (
+                      option.label
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </PropertyPanelRow>
+        </div>
+      ))}
     </div>
   );
 }
