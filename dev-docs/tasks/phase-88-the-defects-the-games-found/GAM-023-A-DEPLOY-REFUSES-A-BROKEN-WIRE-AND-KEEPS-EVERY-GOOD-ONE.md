@@ -1,6 +1,6 @@
 # GAM-023 — A deploy refuses a broken wire and keeps every good one
 
-**Status: ⬜ not started.** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
+**Status: ⬜ not started. ✅ R20 ruled 2026-09-16 (s17): publish all, warn (option c below).** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
 
 The shipped `nodegx deploy` never runs its connection filter. It kept all 139 of TPL-005's wires only because it checks
 none of them. A wire into a port that does not exist ships just as happily, with `ok: true`.
@@ -65,7 +65,9 @@ the feature it carried does nothing. The author is told `ok: true`.
      has not been measured, so it is AC2's first reading.
 2. **Filter.** Register the project module before export, then report what the filter dropped, by wire, in `DeployOutcome`.
 
-🔒 **Ruling for Richard: what does a deploy do when the honest filter drops a wire?**
+✅ **R20, ruled 2026-09-16 (s17), asked in plain words with the kit-wire catch: "Publish all, warn" — option (c).** Every wire ships; the ones health calls broken are listed in the outcome. ⚠️ So the title's and §1's "refuses", AC2's "dropped, or refused" and AC3's "the sabotage ships again" arm need rewording to (c) before building: the graded consequence becomes *the broken wire is named*, and a good wire is never removed.
+
+~~Ruling for Richard: what does a deploy do when the honest filter drops a wire?~~
 - **(a) Refuse:** non-zero exit, nothing written. The same shape as EXP-017's `DevelopmentEngineError`, with a flag to deploy
   anyway.
 - **(b) Deploy and warn:** exit 0, with each dropped wire in `warnings`.

@@ -1,6 +1,6 @@
 # GAM-018 — A kit registers the same whatever is installed beside it, and a kit that cannot register says so
 
-**Status: 🟡 AC1 measured (session 3); AC2 measured on 3 of 4 arms (session 6): confetti registers alone in a deployed page and in the SSR kit loader, and draws; only the extractor fails it. The editor-preview picker arm is not driven (§8). 🔒 R2 is askable now.** **Source:** [P78 D41](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by [TPL-005](../phase-78-the-templates/TPL-005-THE-PIXEL-GAME.md) (the pixel game), 2026-09-11 · **Side:** product (MCP kit extractor / library modules / kit failure surfaces)
+**Status: 🟢 R2 ruled and built, uncommitted (session 17, 2026-09-16): AC1 re-read, AC3, AC4, AC5 and AC6's MCP half done; AC6's editor half and AC7 left (§8).** Earlier: 🟡 AC1 measured (session 3); AC2 measured on 3 of 4 arms (session 6): confetti registers alone in a deployed page and in the SSR kit loader, and draws; only the extractor fails it. The editor-preview picker arm is not driven (§8). 🔒 R2 is askable now.** **Source:** [P78 D41](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by [TPL-005](../phase-78-the-templates/TPL-005-THE-PIXEL-GAME.md) (the pixel game), 2026-09-11 · **Side:** product (MCP kit extractor / library modules / kit failure surfaces)
 
 TPL-005 wanted `nodegx-confetti` for the end of a run and could not have it. The kit extractor fails confetti on its
 own, and registers it cleanly when all 32 modules sit beside it. A template is a two-module project, which is the arm
@@ -199,3 +199,59 @@ measured. This repo has no script that opens a project in a launched editor. The
   deployed `templates/pixel-game` (exit 0, 4 dropped, matching session 5).
 - AC7's pixel-game-sized question waits on the fix. TPL-005 could take confetti in a browser today, but the door and an
   agent would still not see the node.
+
+### Session 17 (2026-09-16, HEAD `42ba09e24`) — R2 ruled, the extractor's `Noodl` is the page's
+
+**AC3, R2 in Richard's words.** Asked in plain words (what an agent is told, the two fixes, the cost): **"Fake it like a
+page (Recommended)"**, §5 option 1.
+
+**The fix.** `noodl-mcp/src/kitExtract/entry.js`: `globalThis.Noodl = { deployed: false, Env: {}, defineModule }`, the members
+`static/viewer/index.html` defines before any kit script runs, and nothing else. No Proxy. `dom-shim.js` (the catalog
+generator's) is untouched: the extractor replaces its `Noodl` before any kit runs. `dist/kit-extract.cjs` rebuilt locally
+(gitignored).
+
+**AC1 re-read and AC5, the whole library, each kit alone.** One scratch runner (`census.js`) spawns a bundle per project the
+way `extractProjectOverlay` does. Both bundles were built into scratch from the same checkout with `extractorBuildOptions`,
+differing only in `entry.js` (HEAD's snapshot vs the fix). `CENSUS_BEFORE_EXIT=0`, `CENSUS_AFTER_EXIT=0`. 32 kits alone, plus 3 arms.
+
+| reading | HEAD | fix |
+|---|---|---|
+| the 10 guarded kits alone (clipboard, confetti, drag-to-reorder, file-download, intl-format ×4 nodes, maplibre, media-recorder, qrcode, richtext, virtual-list) | 0 nodes, each `registration failed: Cannot convert object to primitive value` | their nodes, 0 failures |
+| 🔴 `noodl-validation-module` alone | **0 nodes and no failure**, a silent zero | `noodl.net.validate` |
+| keyboard + confetti; confetti + `zz-custom-html-module` (E1) | 1 node, confetti fails | 2 nodes, 0 failures |
+| `custom-html-module` first + confetti (B′) | 2 | 2 |
+| every other kit alone | unchanged, incl. keyboard 1, game-kit 6, data-context 4 | identical type names |
+| `noodl-chartjs`, `noodl-lottie`, `simple-tooltips` | thin-DOM failures (§2) | the same messages: not R2's |
+
+**Lost types: 0.** Every change is a gain, compared by type name, not count.
+
+**AC5's browser column.** For all 11 changed kits plus two controls: headless Chrome, a page built from
+`static/viewer/index.html`'s own bootstrap and `@nodegx/module-inject`'s `injectIntoHtml` (the product's injection), each kit
+alone, React from `external/deploy`. Read: node names in `window.__noodl_modules`, read as `registerModule` reads them
+(`{ node }` wrapper or bare). `BROWSER_EXIT=0`, 0 exceptions in any page. **Every one of the 11 gives exactly the type names the
+fixed extractor gives**; `keyboard-shortcuts` (`typeof Noodl.defineNode` stays `undefined`) and `custom-html-module` are the
+controls. ⚠️ The first run read `NON-STRING:undefined` for 7 kits: my instrument read `n.name` where SDK kits hand a
+`{ node }` wrapper. Fixed and re-run, not reported.
+
+**AC4, the spec and its reverted arm.** `noodl-mcp/tests/gam-018-a-kit-registers-the-same-whatever-is-installed-beside-it.test.ts`
+builds the extractor from source (`buildKitExtractor`) over the shipped kits. Fix: 6/6. **Reverted arm** (HEAD's `entry.js` from a
+snapshot, restored by `cp` and `cmp`): 4 red, each with HEAD's reading (confetti's exact message; validation `types: []`), and
+the keyboard control green. In the combined before/after arm only `after` (E1) reads red.
+
+**AC6, MCP half.** `get_project_info`'s `kits.registeredNothing` lists `kitDiagnostics`' `kit-registered-nothing` (its wording,
+`assumeLoaded` true because the extractor requires every `main`). The spec's arm: a hand-written `Silent Kit` whose guard returns
+without throwing (confetti's shape without its shim) beside `keyboard-shortcuts`. Green. **Reverted arm** (the spread removed):
+red with `registeredNothing: undefined`, the other 5 green. **Editor half not built:** Settings → Kits calls `kitDiagnostics`
+with `assumeLoaded: false` because the panel cannot tell "ran, registered nothing" from "not loaded yet". It needs the preview
+to report which kit scripts ran (the injection's capture preamble is the likely seam). That is a viewer + editor slice with a drive.
+
+**Gates.** `noodl-mcp` `tsc --noEmit` 0. Kit suites (kitOverlay, kitAgreement, cn004, cn009, cn010, gam-014, packaging, gam-018)
+plus the budget gates (`toolDisclosure`, `lessonDataVerbs`): 105/106. The red is `cn004` AC3 *"still errors under strict"*
+(`Expected: 1, Received: 2`), **identical with HEAD's `entry.js`** (`CN004_HEAD_EXIT=1`), and one of the 8 s12 attributed to HEAD.
+`nodegx-kit-catalog` `health.test.js` 30/30. Whole `noodl-mcp` suite and editor `test:ci`: not run.
+
+**Corrected elsewhere.** CN-015's premise census (and `health.test.js`'s comment) named `noodl-validation-module` as the one real
+zero-node kit. It was this Proxy: the comment now says so. TPL-005's two confetti comments (`tpl005Components.ts`) now say the
+cause is fixed and putting confetti back is undecided (AC7's question, not answered; comments only, no generated bytes).
+
+**What this unblocks.** GAM-024's plan to reuse `kitExtract` no longer inherits the false failures (§8 s6).

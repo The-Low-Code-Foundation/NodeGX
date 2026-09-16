@@ -1,6 +1,6 @@
 # GAM-004 — A gate reads the value from the same turn as its signal
 
-**Status: 🟡 measured and not reproduced (2026-09-14).** Session 3 ran 13 runtime arms. Session 6 drove TPL-005 in a real browser with real keys and attempt 1 restored on the hit gate. Each environment had a late arm beside it that reads late (§8). **🔒 Whether D47 closes as disproved is Richard's call.** **Source:** [P78 D47](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005 the pixel game, while fixing D46, 2026-09-11 · **Side:** product (runtime ordering, `Condition`)
+**Status: ✅ closed as measured and not reproduced (ruled 2026-09-16, session 17: "Close it"). Nothing built. Reopen only with a real game as evidence.** Earlier: 🟡 measured and not reproduced (2026-09-14). Session 3 ran 13 runtime arms. Session 6 drove TPL-005 in a real browser with real keys and attempt 1 restored on the hit gate. Each environment had a late arm beside it that reads late (§8). **🔒 Whether D47 closes as disproved is Richard's call.** **Source:** [P78 D47](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005 the pixel game, while fixing D46, 2026-09-11 · **Side:** product (runtime ordering, `Condition`)
 
 The enemy reaches you, the board says `calm`, and the heart comes off one move later. The graph looks right, it renders perfectly, and the author cannot tell this shape from one that works.
 

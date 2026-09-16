@@ -1,64 +1,92 @@
 # Phase 88 — next session
 
-**Read first:** [`README.md`](README.md) §3 (what scoping corrected), §4 (rulings) and §7 (rules). Then read the whole task
-you pick, including its §8 (§7 for GAM-025).
+**Read first:** [`README.md`](README.md) §3 (what scoping corrected), §4 (rulings, the ruled table first) and §7 (rules). Then read
+the whole task you pick, including its §8.
 
-**The board (2026-09-16, session 16), re-derived from the task files' status lines:** **12 of 25 built, 1 closed by ruling.**
-- ✅ **GAM-019**, `4bb438165` + `15f7bf720`. ✅ **GAM-025 closed by R22 (s16): rename it, nothing built.**
+**The board (2026-09-16, session 17), re-derived from the task files' status lines:** **13 of 25 built, 2 closed by ruling.**
+- ✅ **GAM-019**, `4bb438165` + `15f7bf720`. ✅ **GAM-025** closed by R22 (s16, rename it). ✅ **GAM-004 closed by ruling (s17): not
+  reproduced, nothing built.**
 - 🟢 **Committed:** GAM-006 `062dfd9c0`, GAM-005 `44b3a9add`, GAM-007 `d57a11668`, GAM-008 `5da1c9fd6`, GAM-009 `bdf1d3b19`,
-  GAM-001/002/003 `89e533625`, **GAM-014 `bcfb1c2aa`, GAM-021 `6a6c309a5`, GAM-022 `593de4f57` (all three s16)**. Nothing of P88's
-  product code is uncommitted. Remainders are in each §8 and on the README board.
-- 🟡 **GAM-012** (fault 3, AC6), **GAM-018** (🔒 R2), **GAM-004** (🔒 close as disproved?).
-- ⬜ **12 not started.** GAM-010 (R11) waits on GAM-012's fault 3. GAM-013, 011, 015, 016, 017, 020 and 023 wait on rulings.
-  GAM-024 waits on GAM-023 and R2.
+  GAM-001/002/003 `89e533625`, GAM-014 `bcfb1c2aa`, GAM-021 `6a6c309a5`, GAM-022 `593de4f57`.
+- 🟢 **GAM-018, built s17, check `git log` for whether it was committed** (R2 ruled "fake it like a page"). AC6 editor half and AC7 left.
+- 🟡 **GAM-012** (fault 3, AC6).
+- ⬜ **10 not started.** **GAM-023 is now unblocked** (R20 ruled: publish all, warn). **GAM-024** was waiting on GAM-023 and R2, and R2 is done.
+  GAM-010 (R11) waits on GAM-012's fault 3. GAM-013, 011, 015, 016, 017 and 020 wait on rulings R1, R12, R15, R16, R17, R18.
 
-**The ratchet:** session 13 measured nothing, s14 measured AC1's door half, s15 built GAM-014, **s16 measured GAM-014 AC3's editor
-half and settled R22.** Session 17 must build or measure an AC.
+**The ratchet:** s16 measured; **s17 built GAM-018 (AC4, AC5, AC6 MCP half) and got three rulings.** Session 18 must build.
 
 ## Do, in order
 
-1. **Ask Richard the rulings that unblock builds, in plain words, not handoff shorthand** (s16: "R22 … A′ … D" got "wtf are you
-   talking about?"). Say what a person sees, what each choice does, and the cost. First ones worth asking: **R2** (GAM-018: a kit
-   that registers alone fails in the extractor. Make the extractor's `Noodl` plain, or keep the Proxy and answer `undefined`),
-   **GAM-004's close** (AC1 does not reproduce in the runtime), **R20** (GAM-023: a deploy that drops a broken wire refuses,
-   warns, or deploys unfiltered). A ruling on R2 unblocks GAM-018 **and** GAM-024.
-2. **Remainders, lightest first, one heavy job at a time:**
-   - GAM-022 AC7: render TPL-006 `Story/Sidebar` at 390×844 and read that the tags wrap, beside a known-firing control.
-   - GAM-003 AC5: a browser page with a meter whose input arrives on a press.
-   - GAM-002 AC4: rebuild the `src/external` viewer bundle, type `String(n)` into an Expression in the editor, and read the port
-     panel and the preview, with a console listener attached first.
-   - GAM-001 AC5: render the corpus both ways. The 14 changes are named in its §8.
-   - GAM-014: **the save made before a kit registers** (the fix's editor branch, not driven in s16), and AC6 (remove Rocket
-     School `Game/Face`'s wrap and re-drive; TPL-007's template and gate, so tell that peer first).
-   - GAM-005, GAM-007, GAM-008, GAM-009: their browser and Rocket School halves (see each §8).
-3. **GAM-018, once R2 is ruled.** GAM-024 waits on it.
+1. **GAM-023 + GAM-024 (deploy wires), now unblocked.** First reword GAM-023's title, §1, AC2 and AC3 to the ruling (publish every
+   wire, name the broken ones, never remove a good one). The ruling was asked with the catch that `nodegx deploy` loads no kits, so kit
+   wires look broken: GAM-024's port pass and kit loading decide how many false names a person sees. Read both task files whole
+   before choosing the order. This is the heaviest open build, so run one job at a time.
+2. **GAM-018's editor half of AC6:** Settings → Kits cannot say "ran, registered nothing" because it cannot tell that from "not
+   loaded yet" (`KitsSection.tsx` `assumeLoaded: false`). The preview would have to report which kit scripts ran. Look at
+   `@nodegx/module-inject`'s capture preamble (`CAPTURE_PREAMBLE`) and `NodeLibraryImporter.getModuleFailures` as the seam. Needs
+   an editor drive with a silent kit beside a registering one.
+3. **Remainders, lightest first** (unchanged from s16): GAM-022 AC7 render (TPL-006 `Story/Sidebar` at 390×844); GAM-003 AC5 browser
+   meter; GAM-002 AC4 editor port panel; GAM-001 AC5 corpus render; GAM-014 save-before-kit-registers + AC6 (tell the TPL-007 peer);
+   the browser/Rocket School halves of GAM-005/007/008/009.
+4. **Rulings still open, ask in plain words** (say what a person sees, each choice, the cost; no R-numbers as content): R1, R11/GAM-012 fault 3, R12,
+   R15, R16, R17, R18.
 
 ## Richard's, not a builder's
 
-- 🔒 **Found by GAM-021, not registered:** the editor's own agent loop (`AuthoringSession.ts:1185`) passes no `bodyScroll`,
-  so an agent building in the editor is never told a page cannot scroll. Register it, and where?
-- 🔒 **Found by GAM-022:** P77 SBR-004 dropped its nav bar's `columnGap` to escape D50 (now fixed). Restore it, or leave it?
-- 🔒 **Found by GAM-022:** Rocket School's `Hangar/Shelf` (132px tiles) and `Pages/Profiles` (150px cards) still get
-  `uncollapsible-multi-column`. Are fixed-pixel tiles in a wrapped row a defect?
-- Carried from session 11: GAM-001's `NaN`-over-unset-inputs abstention; `def036-dash-drive`'s newly visible parts; FLD-004's
-  split `NaN` row; two catalog examples that used `Number(…)`; `catalog:examples` red at HEAD (Text Input `text`, AIX-005).
-- Still open from earlier sessions: `library/prefabs/form-fields/project/project.json` (re-export or revert?); a jump not
-  firing At Target Value (GAM-008); an absorbed focused `Set` deciding what a remount shows (GAM-009); R2 (GAM-018);
-  GAM-004's close; rulings R1, R11, R12, R15, R16, R17, R18, R20.
+- **New, s17:** GAM-018 AC7: confetti now registers in the door. Should TPL-005's win take it back? (Its comments now say it is undecided.)
+- 🔒 Found by GAM-021, not registered: the editor's agent loop (`AuthoringSession.ts:1185`) passes no `bodyScroll`. Register it, and where?
+- 🔒 Found by GAM-022: restore SBR-004's nav `columnGap`? Are Rocket School's fixed-pixel tiles in a wrapped row (`Hangar/Shelf`,
+  `Pages/Profiles`) a defect?
+- Carried: GAM-001's `NaN`-over-unset abstention; `def036-dash-drive`'s newly visible parts; FLD-004's split `NaN` row; two catalog
+  examples that used `Number(…)`; `catalog:examples` red at HEAD (AIX-005); `library/prefabs/form-fields/project/project.json`;
+  a jump not firing At Target Value (GAM-008); an absorbed focused `Set` deciding what a remount shows (GAM-009).
 
-## What session 16 settled, including where the handoff was wrong
+## What session 17 settled, including where the handoff was wrong
 
-- **R22, ruled twice.** Richard first chose D ("point to `row.get`") on the condition it works in exported code. Read before
-  building: exported rows are plain objects with no `get`, and the exported Function node swallows the throw. Measured with the
-  runtime's `Collection` beside a plain row: `row.get('on')` reads the value in the runtime and **throws** on the plain row.
-  🔴 **The s13/s15 handoff's "`row.get('on')` already reads the field, measured" was measured on one target only.** D would
-  have taught code that breaks silently on export. Second ruling: **"just rename it"**. GAM-025 closed, GAM-007's texts unchanged.
-- **GAM-014 AC3, editor half: true.** The preview draws Ada (kit-rooted) 96×96 beside Bea, and a save writes `["face"]` beside
-  `["wrap"]`. But the editor resolves the kit type, so HEAD before the fix reads the same: a reading, not an arm.
-- **Three commits by pathspec**, each diff checked for peer edits first (`tpl006/tpl007Template.test.ts` held only GAM pins).
-  The P78 register's D50, D53, D56 rows and 11 stale "uncommitted" stamps now carry commit hashes.
+- **Three rulings in one plain-words question:** R2 "fake it like a page", GAM-004 "close it", R20 "publish all, warn".
+- **GAM-018 built** (details in its §8 s17): the extractor's `Noodl` is the viewer bootstrap's. The census gained 11 kits and lost
+  0; the browser gave identical names for all 11.
+- 🔴 **The handoff chain said "10 guarded kits fail alone". The census found an 11th, `noodl-validation-module`, which failed
+  SILENTLY** (0 nodes, no failure). CN-015's premise census had recorded it as "the one real zero-node kit" and
+  `health.test.js` cited that. Both were this Proxy. Corrected in the comment.
+- **The AC6 wording existed already:** `kitDiagnostics` has `kit-registered-nothing`. Nothing in the MCP server called it, and the
+  editor turns it off. The MCP half now calls it.
+- GAM-023's design assumed a refusal. The ruling is (c), so its ACs need rewording before anyone builds against them.
 
-## State of the tree (session 16)
+## State of the tree (session 17)
+
+**Session 17's files:** `packages/noodl-mcp/src/kitExtract/entry.js`, `src/tools/read.ts`, `src/tools/responses.ts`, new
+`tests/gam-018-a-kit-registers-the-same-whatever-is-installed-beside-it.test.ts`, comments in `tests/tpl005Components.ts` and
+`packages/nodegx-kit-catalog/tests/health.test.js`, and docs (this file, README, GAM-004/018/023). Nothing else.
+
+**Not ours, left alone:** as s16 below, plus `packages/noodl-mcp/tests/tpl008*.ts` and the untracked `tests/datePicker.ts` (TPL-008 peer).
+
+**Scratch:** s17 `88c470ff…/scratchpad/gam018/`: `census.js`, `before.cjs`/`after.cjs` + `.json`/`.log`, `browser.js` + `browser.json`,
+`entry-head.js` (HEAD snapshot), `entry-fix.js`, `read-fix.ts`, mutant logs.
+
+**Bundles:** `packages/noodl-mcp/dist/kit-extract.cjs` rebuilt locally with the fix (gitignored). The installed app still carries the old one.
+
+## Readings taken in session 17 (2026-09-16, HEAD `42ba09e24`)
+
+| reading | result |
+|---|---|
+| extractor census, 32 kits alone + 3 arms, HEAD bundle vs fix bundle | 11 kits gain their nodes, 0 types lost; chartjs/lottie/tooltips unchanged thin-DOM failures |
+| headless Chrome, viewer bootstrap + `injectIntoHtml`, 11 changed kits + 2 controls | names identical to the fixed extractor, 0 exceptions, `BROWSER_EXIT=0` |
+| GAM-018 spec: fix / `entry.js` reverted / `read.ts` spread removed | 6/6 / 4 red (keyboard green) / 1 red (`registeredNothing: undefined`) |
+| `noodl-mcp` `tsc --noEmit` | 0 |
+| kit suites + budget gates (10 suites) | 105/106; red = `cn004` AC3, identical on HEAD's `entry.js` |
+| `nodegx-kit-catalog` `health.test.js` | 30/30 |
+| whole `noodl-mcp` suite, editor `test:ci`, `test:main` | **not run** |
+
+## Traps found in session 17
+
+- 🔴 **A kit's node in `__noodl_modules` may be a `{ node }` wrapper.** SDK-built kits hand the wrapper; reading `.name` directly
+  read `undefined` for 7 working kits. Read it the way `registerModule` does.
+- 🔴 **A catch-all Proxy makes a census lie in both directions:** it failed 10 kits loudly and 1 silently. The silent one had been
+  recorded as a fact by another phase.
+- ⚠️ zsh: `echo ====` aborts the command (s13 trap, hit again). Use `echo '-----'`.
+
+## State of the tree (session 16) (kept for reference)
 
 **Committed in s16:** `bcfb1c2aa` (GAM-014), `6a6c309a5` (GAM-021), `593de4f57` (GAM-022), then one docs commit (this handoff,
 the README, GAM-001/002/003/007/014/023/025 task files, the P78 register).
