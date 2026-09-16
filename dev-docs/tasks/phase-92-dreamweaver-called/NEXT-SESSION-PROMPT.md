@@ -14,23 +14,17 @@ half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 | CHR-001, 002, 003, 005, 006, 012 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slice 1 rows (s12, Richard: *"I literally don't see the difference"*), **slice 2 the head (s13, §7) — awaits his look** |
+| **CHR-009 the panel designed** | 🟡 slice 1 rows (s12), slice 2 the head (s13, §7) — Richard: *"looks nice"*. Next slice below |
 | CHR-004, 010, 011 | ⬜ |
 
-## First job: Richard's look at slice 2
+## Settled after s13
 
-Same rig, same node, same crop — put them side by side (PNGs are local/gitignored by ruling):
-- before (slice 1): `verdicts/CHR-009/2026-09-16/after/props-group-top-{dark,light}.png`
-- after (slice 2): `verdicts/CHR-009/2026-09-16/head/props-group-top-{dark,light}.png`
-- the marker: `head/props-group-top-dark-marker.png`; the Comment tab: `head/comment-tab-dark.png`;
-  a Function node: `head/other-node-dark.png`
+**Richard's rulings on slice 2 (2026-09-16, after s13):** (1) direction — *"Yeah it looks nice"*; (2) the Comment-tab
+marker — *"I like it"* (**ruled: keep**); (3) R6's 116px column — *"looks ok so far"* (**still a trial, trending keep**);
+(4) the mockup's `···` menu — *"I'd leave them where they are actually"* (**ruled: the help / rename / delete buttons
+stay in the node row; do not build the menu**).
 
-The first property row starts ≈171px higher. Ask him:
-1. **Direction right?** (node row with glyph tile + mono eyebrow; segmented tabs; Variant/State as rows; 30px filter)
-2. **R7 as built** — `Comment` is a tab beside Ports, with a dot once a comment exists. The dot was *proposed, not
-   ruled*; it is built. Keep it?
-3. **R6** still a trial (4/59 Group labels cut at 116px) — keep or not?
-4. The mockup's `···` menu in place of the three icon buttons (help / rename / delete) — NOT built. Want it?
+So there is no look pending: go straight to the build list.
 
 ## Then, in order
 
@@ -61,7 +55,7 @@ The first property row starts ≈171px higher. Ask him:
 
 ## Still Richard's
 
-1. The look at slice 2 + the four questions above (R6 final, R7 marker, `···` menu).
+1. R6 final ("looks ok so far" — ask again once the rows are done). The `···` menu is DECLINED — don't build it.
 2. CHR-007 AC4 `_portsHash` clause declined — don't revisit quietly.
 3. The Projects tab's two full-width cards (BST-003 / UNI-001).
 4. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.

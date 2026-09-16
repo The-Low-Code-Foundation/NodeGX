@@ -216,7 +216,14 @@ Real input (CDP mouse at an `elementFromPoint`-verified point, `Input.insertText
 - The drive's popout dismiss clicked the node name and hit `popup-layer-blocker` — a popout covers the whole panel.
 - The dev log's "two children with the same key" errors carry a UUID key (the launcher's recents), not a head key.
 
-### 7.5 Left
+### 7.5 Rulings
+
+**Richard's rulings on slice 2 (2026-09-16, after s13):** (1) direction — *"Yeah it looks nice"*; (2) the Comment-tab
+marker — *"I like it"* (**ruled: keep**); (3) R6's 116px column — *"looks ok so far"* (**still a trial, trending keep**);
+(4) the mockup's `···` menu — *"I'd leave them where they are actually"* (**ruled: the help / rename / delete buttons
+stay in the node row; do not build the menu**).
+
+### 7.6 Left
 
 - §3.4 proper: `Variant`/`State` INSIDE General, below the filter (needs `Ports` to host them, or the filter to move
   into the head above the `ScrollArea`).
