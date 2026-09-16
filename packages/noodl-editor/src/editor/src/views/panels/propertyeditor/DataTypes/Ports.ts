@@ -30,6 +30,7 @@ import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups
 import { ControlHost, PropertyRow, type PropertyRowCapability } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
+import { WIDGET_COMPONENTS } from '../components/widgets';
 import { ModelProxy } from '../models/modelProxy';
 import { PagesType } from '../Pages';
 import { countFilterableRows, filterGroups, isFilterActive, shouldOfferFilter } from '../propertyPanelFilter';
@@ -489,10 +490,20 @@ export class Ports extends View {
 
       const row = v.name ? rows.get(v.name) : undefined;
 
+      // CHR-008 §3.1 — a widget that has become a React component is rendered as one, under a key
+      // stable across re-renders, so React reconciles the control instead of replacing it. That is
+      // what keeps a focused field's caret through a rebuild (§8.3). A widget still on the old path
+      // falls through to `ControlHost` and behaves exactly as before.
+      const Widget = row ? WIDGET_COMPONENTS[row.widget] : undefined;
+
       // 🔴 Once per view, and the result is held by `ControlHost` for as long as the view lives: a
       // row class's `render()` mints a NEW element each call (`BasicType` builds a fresh div while
       // its React root stays bound to the old one), so a second call hands back an empty row.
-      const el = v.render();
+      // ⚠️ NOT called on the component path: a converted row has no root to build, and calling it
+      // would build one nothing would ever render into.
+      const control = Widget
+        ? React.createElement(Widget, { view: v })
+        : React.createElement(ControlHost, { el: v.render() });
 
       // FB-021 — a port a `dynamicports` condition has switched off. `applyPortConditionsFilterForNode`
       // remains the only thing that decides; the descriptor carries what it decided.
@@ -521,7 +532,7 @@ export class Ports extends View {
             hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
             // As a prop rather than `createElement`'s third argument: `PropertyRowProps` declares
             // `children`, and the variadic overload does not satisfy a props type that requires it.
-            children: React.createElement(ControlHost, { el })
+            children: control
           }
         )
       );

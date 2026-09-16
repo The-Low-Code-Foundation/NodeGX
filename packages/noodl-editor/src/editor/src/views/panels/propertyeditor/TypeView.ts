@@ -10,6 +10,17 @@ import View from '../../../../../shared/ListenableView';
  * components instead (`PropertyPanelInput` / `PropertyPanelRow`). What is left
  * here is the model-side behaviour shared by all rows.
  */
+/**
+ * CHR-008 §3.1 — what a converted row raises instead of re-rendering a root of its own.
+ *
+ * A row class that has become a React component no longer owns a `createRoot`, so `renderReact()`
+ * cannot redraw anything by itself. It raises this on the view's own listener bus
+ * (`ListenableView.notifyListeners`) and the component, subscribed for as long as it is mounted,
+ * re-reads the model. Every existing caller of `renderReact()` — `resetToDefault`, the style-default
+ * watch, `expressionProps` — therefore keeps working unchanged.
+ */
+export const ROW_CHANGED = 'rowChanged';
+
 export class TypeView extends View {
   port: TSFixme;
   displayName: TSFixme;

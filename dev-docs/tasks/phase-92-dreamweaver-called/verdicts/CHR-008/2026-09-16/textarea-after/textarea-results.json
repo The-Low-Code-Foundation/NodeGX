@@ -1,0 +1,53 @@
+{
+  "target": {
+    "component": "/Story/Choice",
+    "nodeId": "chMark",
+    "candidates": 20,
+    "chipOnlySkipped": 0
+  },
+  "arm0_path": {
+    "rows": 44,
+    "hasTextarea": true,
+    "value": "→",
+    "controlHostsInRow": 0,
+    "controlHostsOnPanel": 43,
+    "focusedIsField": false,
+    "caret": 0,
+    "param": "\"→\""
+  },
+  "arm1_liveEdit": {
+    "paramBefore": "\"→\"",
+    "paramAfter": "\"chr008 slice4\"",
+    "shows": "chr008 slice4",
+    "committed": true
+  },
+  "arm2_noopBlur": {
+    "paramAfterNoopBlur": "\"chr008 slice4\"",
+    "unchangedByNoop": true,
+    "paramAfterOneUndo": "\"→\"",
+    "wentPastTheEdit": true
+  },
+  "arm3_undoRedraws": {
+    "param": "\"→\"",
+    "shown": "chr008 slice4",
+    "fieldAgreesWithModel": false,
+    "settledAfterMs": 4000,
+    "attempts": 16,
+    "agreedWithinBudget": false
+  },
+  "arm4_caret": {
+    "rebuildActuallyHappened": true,
+    "armed": {
+      "focused": true,
+      "caret": 3,
+      "value": "abcdefgh",
+      "param": "\"abcdefgh\""
+    },
+    "after": {
+      "focused": true,
+      "caret": 3,
+      "value": "abcdefgh",
+      "param": "\"→\""
+    }
+  }
+}

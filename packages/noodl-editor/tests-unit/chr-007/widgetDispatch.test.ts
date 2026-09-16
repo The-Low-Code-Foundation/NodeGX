@@ -81,6 +81,13 @@ jest.mock('../../src/editor/src/views/panels/propertyeditor/components/SchemaAdd
 jest.mock('../../src/editor/src/views/panels/propertyeditor/components/SchemaFieldNoticeView', () => ({
   SchemaFieldNoticeView: () => null
 }));
+// CHR-008 §3.1 — `Ports.ts` now reaches the converted-widget registry, which imports real
+// components and so `common/Icon`, whose `require.context` ts-jest rejects: without this the
+// suite fails TO RUN. Empty rather than stubbed, because this file grades which row CLASS a port
+// dispatches to (`WIDGET_CLASSES`), and the registry is a separate decision graded elsewhere.
+jest.mock('../../src/editor/src/views/panels/propertyeditor/components/widgets', () => ({
+  WIDGET_COMPONENTS: {}
+}));
 jest.mock('../../src/editor/src/views/panels/propertyeditor/models/modelProxy', () => mockStubClasses('ModelProxy'));
 jest.mock('../../src/editor/src/views/panels/propertyeditor/Pages', () => mockStubClasses('PagesType'));
 jest.mock('../../src/editor/src/views/panels/propertyeditor/propertyPanelHints', () => ({

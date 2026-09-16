@@ -515,3 +515,255 @@ condition cleared (radius → 0) **0**.
 - `tsc -p packages/noodl-editor --noEmit` **EXIT=0**; full `tests-unit` **445 / 445 suites, 7,345 tests**,
   EXIT=0. ⚠️ §9.4's identical numbers were taken *before* `settleHints` and did not cover the shipped code
   — no spec in this repo can see the commit-timing defect the drive found, which is the point.
+
+## 10. Built — s11 (2026-09-16), slice 4: the first widget is a component (§3.1)
+
+### 10.1 🔴 The conversion order in the handoff was wrong, and it would have failed silently
+
+s10's handoff said to convert smallest-first: `FontType` (30 lines) → `ComponentType` (43) →
+`IdentifierType` (60) → `BooleanType` (93) → `EnumType` (109). **All five of those picks are wrong, in
+two different ways**, and the failure mode is not a red test.
+
+- **`FontType`/`ComponentType`/`IdentifierType` are small *files*, not small conversions.** They hold
+  an `openPicker` and nothing else; every line that renders is in the 217-line `PickerTypeView` they
+  share with `ImageType`, `TextStyleType` and `SourceCodeType`. Converting "the 30-line one" means
+  converting the base class and all six subclasses at once — the largest blast radius of the set, not
+  the smallest.
+- **`BooleanType` and `EnumType` cannot be converted at all yet.** Four things still read a row's
+  `.el`, and a converted row has none:
+
+  | reader | what it does with `.el` | reaches |
+  |---|---|---|
+  | `TabGroup.render` / `onTabClicked` | `appendChild`, then `style.display` per tab | `enum`, `numberWithUnits`, `color` |
+  | `VariableInput` (via `VariableType`) | `host.appendChild(childEl)` | `basic`, `color`, `boolean` |
+  | `PropListType` | maps its `childViews` to `view.el` | `enum`, `basic`, `boolean` |
+  | FB-021 `revealGateTarget` | focuses/scrolls the **gating** row | `enum`, `boolean`, `sizeMode` |
+
+  🔴 **`TabGroup`'s helper is `appendChildEl(parent, el) { if (el) parent.appendChild(el); }`.** A
+  converted `EnumType` would make every Border Style row **disappear from the panel**, with no error,
+  no red spec and nothing in the console — the guard swallows it. That is the single most expensive
+  mistake available in this task, and it is what "smallest first" was pointing at.
+
+**The measured sets** (census below): **blocked** = `basic`, `boolean`, `color`, `enum`,
+`numberWithUnits`, `sizeMode`. **Unblocked** = `textArea`, `dimension`, `icon`, `marginPadding`,
+`listValue`, `stringList`, `alignTools`, `propList`, `pages`, the `logicBuilder` pair and the six
+`PickerTypeView` rows. ✅ **`dimension` is unblocked**, so §3.5's Width/caret arm is reachable without
+touching a single host — that is the next conversion, and it is the one with a visible payoff.
+
+### 10.2 The census, and how to re-run it
+
+Gate targets are the population that decides half the table above, and it must come from the shipped
+catalog rather than a grep: `packages/noodl-types/src/node-catalog.json`, read through the adapter
+`tests-unit/fb-021/portGateReason.test.ts` already uses (`node.dynamicPorts.declaredPortGroups[]`,
+each `{name, condition, inputs[]}`), joined to `tests-unit/chr-007/widgetDispatch.snapshot.json` for
+the widget each gating port dispatches to. Reading: **165 `conditionalports` groups, 365 gate-able
+ports**, and exactly three widget classes can ever be a gate target — `EnumType` (79 distinct),
+`BooleanType` (30), `SizeModeType` (14), with 8 unresolved (`#js` and undeclared params, the
+remainder FB-021 documents as refusals). `tab` and `parent` are **not** in the catalog; those two
+columns come from source — the only tab groups are `corners` and `border-styles`
+(`node-shared-port-definitions.ts:1283, 1374`) plus slider's track borders, and the only `parent`
+ports are in `javascript.ts` and `cloudDynamicPorts.ts`.
+
+🔴 **Three censuses in a row returned a confident wrong answer before this one**, each because the
+population was whatever a pattern happened to match:
+1. grepping `addDynamicInputPorts(` call sites for a literal condition — **missed `sizeMode`
+   entirely**, because width/height's condition is built in a variable first. It reported "only enum
+   and boolean gate", which would have unblocked `SizeModeType`.
+2. `dynamicports` (lowercase) against the catalog — **0 groups**, because the key is `dynamicPorts`.
+3. `node.dynamicPorts` as a list — **crashed**, because it is a dict of `declaredPortGroups`.
+
+Each printed a clean total that looked like an answer. ✅ **Print the artefact's shape before counting
+it, and reuse the adapter a passing spec already has** rather than re-deriving one.
+
+### 10.3 What changed
+
+- **`model/textAreaRow.ts`** (new) — the four decisions `TextAreaType.renderReact()` made, as pure
+  functions: the expression-fallback literal, the blur-commit rule, the connection gate, `isChanged`.
+  Import-free but for `ExpressionParameter` (zero imports) and `ParameterValueResolver`, so
+  `tests-unit` can grade it — the split `describeRows` already makes.
+- **`components/widgets/TextAreaWidget.tsx`** + **`components/widgets/index.ts`** (new) — the
+  component and the `WidgetId → component` registry. A widget in the registry is rendered as a
+  component under a stable key; a widget absent from it falls through to `v.render()` +
+  `ControlHost`, unchanged. No flag day.
+- **`Ports.renderParams`** — picks the component path when the descriptor's widget is registered, and
+  **does not call `v.render()`** on that path.
+- **`TypeView`** — exports `ROW_CHANGED`. A converted row's `renderReact()` raises it on the view's own
+  `ListenableView` bus instead of rendering, so `resetToDefault`, the style-default watch and
+  `expressionProps` all keep working untouched, and the mounted component re-reads the model.
+- **`TextAreaType`** — reduced to `fromPort` plus that signal: no `createRoot`, no detached `div`, no
+  `render()`.
+
+### 10.4 🔴 AC3's grep counts prose, and this slice moved it the wrong way
+
+AC3 reads `grep -rl "createRoot" views/panels/propertyeditor/`. Measured now: **42**, up from 39 — and
+this slice *removed* a `createRoot`. The three new files and `TypeView` **discuss** `createRoot` in
+their doc comments, and a text grep cannot tell a use from a mention. Comment-blind, against `HEAD`:
+
+| | code | prose-only | plain grep reads |
+|---|---|---|---|
+| HEAD (before) | **38** | 1 (`expressionProps.ts`) | 39 |
+| after this slice | **37** | 5 | 42 |
+
+So the real movement is **38 → 37**, exactly the one file converted. ⚠️ **AC3 must be re-worded to
+strip comments before counting** (`tests-unit/support/renderElements.ts` already exports
+`stripComments` for precisely this, and its note records the repo being bitten twice before) — or it
+will read as a regression on every slice that documents itself, and could be *satisfied* by deleting
+prose. ⚠️ Note also that AC3's target of ≤ 3 is **not reachable by widget conversion at all**: the
+popout roots (`IconType`, `ColorType`, `PickerTypeView`, `CodeEditorType`, `componentpicker`,
+`ListValueEditor`, `TabGroup`, `PopoutGroup`, …) each keep their file in that grep. Reaching ≤ 3 needs
+one shared portal host, which is unscoped work.
+
+⚠️ **AC4 does not move for this slice and must not be reported as if it did.** The Group panel has no
+`textArea` port — only `Text.text` and `String Format.format` have one in the whole catalog — so
+CHR-001's Group census is unchanged at 1,241. `dimension` (§10.1) is where that number starts moving.
+
+### 10.5 Specs, and the two arms that graded nothing first
+
+`tests-unit/chr-008/textAreaRow.test.tsx` (16) — each case is one decision lifted out of the old
+`renderReact`. `TextAreaType` had **zero** specs before this file.
+
+🔴 **The spec's first version failed TO RUN, and reported `EXIT=0`.** Two independent faults at once:
+it imported `PropertyPanelInputType`, which drags `PropertyPanelInput` → `LengthUnitInput` →
+`SelectInput` → a raw `.svg` that this config has no transform for (it maps `css|scss` only); and the
+run was piped to `tail`, so the shell reported *`tail`'s* status. `Tests: 0 total` with a zero exit is
+indistinguishable from a pass at a glance. ✅ Read `${pipestatus[1]}`, and assert a suite *ran*.
+The enum is now **parsed out of `PropertyPanelInput.tsx` as text**, the move
+`connectedRowPolicy.test.ts` makes on `Ports.WIDGET_CLASSES` for the same reason — mocking the module
+to obtain the enum would have compared the literal against a value written in the spec, which grades
+nothing.
+
+🔴 **Two cases failed against correct code because the fixture was invented.** They built an expression
+parameter by hand and omitted `mode: 'expression'` — the marker `isExpressionParameter` actually
+tests — so the fixture was not an expression parameter at all. They now come from
+`createExpressionParameter`, and an untagged-object arm was added so the pair proves something.
+✅ **A fixture for a tagged shape must come from its producer.**
+
+⚠️ `chr-007/widgetDispatch.test.ts` needed `jest.mock` on the new registry: `Ports.ts` now reaches real
+components, and so `common/Icon`. Without it that suite failed to run — the same `Icon` wall, from a
+new direction.
+
+### 10.6 🔴 A surviving mutant deleted a line, rather than adding a test
+
+Mutants on `model/textAreaRow.ts` (backup → mutate → jest → restore, restored byte-identical;
+🔴 the mutant table is a **tuple list, not `|`-delimited** — s10's harness split a mutated `||` on its
+own delimiter, wrote garbage, and the suite failed *to run*, which reads like a clean arm):
+
+| arm | verdict |
+|---|---|
+| **M1** hand-written expression-fallback branch deleted | 🔴 **SURVIVED** |
+| M2 `shouldCommitTextArea` always true | KILLED (3) |
+| M3 stale connection label kept on a disconnected row | KILLED (1) |
+| M4 `isChanged` inverted | KILLED (1) |
+| M5 input-type literal drifts from the enum | KILLED (1) |
+
+**M1 surviving was correct, and the fix was to delete the line, not to write a test for it.**
+`textAreaLiteral` unwrapped the expression fallback by hand *and then* called
+`ParameterValueResolver.toString`, which already does exactly that
+(`resolve(…, Display)` → `fallback ?? ''`). No test could tell the two apart because there is nothing
+to tell apart — the branch was dead, and it was dead in the legacy `TextAreaType.renderReact()` too,
+faithfully copied across. ✅ **A line kept under a comment claiming it is the guard teaches the next
+reader that the protection lives there.** Re-armed as M1′ (the resolver call swapped for a bare
+`String(parameter ?? '')`) it **kills, 3 red** — so the remaining line is load-bearing and the
+behaviour is pinned wherever it lives.
+
+### 10.7 Readings (2026-09-16, s11)
+
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0** — taken *before* any edit as well, so the P88
+  peer's uncommitted `validation/*.ts` is a clean baseline and cannot be misattributed to this slice.
+- `chr-007` + `chr-008` + `fb-015` + `fb-017` + `fb-018` + `fb-021` + `fb-022` + `leg-005` +
+  `property-editor` + `rel-014` + `def-036`: **38 / 38 suites, 609 tests**, EXIT=0.
+- Full `tests-unit`: **446 / 446 suites, 7,361 tests**, EXIT=0, **0 suites failed to run**. s10 read
+  445 / 7,345, so the delta is **exactly** this slice's one suite and its 16 tests — nothing else moved.
+- `createRoot`, comment-blind: **38 → 37** files in code (§10.4). Plain grep reads 42, and that is the
+  AC's fault rather than the code's.
+- AC4 unchanged at 1,241 by construction: the Group panel has no `textArea` port.
+
+⚠️ **Read every one of these beside §10.4's warning**: `JEST_EXIT` was captured with
+`${pipestatus[1]}` after the first run of this slice reported `EXIT=0` from a `tail` while the suite
+underneath had failed **to run**.
+
+### 10.8 🔴 The drive — BUILT, DRIVEN, AND NOT SHIPPED
+
+Dev stack (`npm run dev:debug`, `NOODLPORT=8674`, `NOODL_REMOTE_DEBUG_PORT=9333`), a scratch **copy**
+of `templates/story-engine`, bundle confirmed carrying the change before the first run
+(`rowChanged`, `TextAreaWidget` ×6, `textAreaRowProps` present in the served 70 MB bundle). Scripts:
+`verdicts/CHR-008/2026-09-16/textarea.js`, driven against `/Story/Choice` → `chMark`.
+
+| arm | reading | |
+|---|---|---|
+| **0 — is the component path even taken?** | row has **0** `.property-row-control`, panel has **43** | ✅ |
+| **1 — a real edit commits on blur** | param `"→"` → `"chr008 slice4"` | ✅ |
+| **2 — a no-op blur writes no undo entry** | unchanged by the blur; one undo goes **past** the edit | ✅ |
+| **4 — the caret survives a rebuild** | rebuild confirmed, focus kept, element never replaced | ✅ |
+| **3 — undo re-seeds the field** | model reverts, field keeps the typed text, **4 s budget, 16 attempts** | 🔴 |
+
+🔴 **The control pair settles the attribution.** One node, one drive, one varied thing — which row:
+
+| row | after undo | agreed |
+|---|---|---|
+| legacy `fontSize` (`createRoot` + `ControlHost`) | field follows the model back | ✅ **250 ms** |
+| converted `text` (this component) | model reverts, field keeps the typed text | 🔴 no, at 4000 ms |
+
+**So the conversion introduced it.** The legacy path re-seeds by construction — a fresh `createRoot`
+per render — while this one needs React to re-render the widget and `PropertyPanelTextArea`'s
+`useEffect([value])` to fire. A marker set on the textarea **survives the undo**, so the element is
+never replaced: the component is re-rendering with an unchanged `value`, or not re-rendering at all.
+✅ Next diagnostic, and the next session's first job: a render counter inside `TextAreaWidget`, then
+the same undo — it separates "never re-rendered" from "re-rendered with a stale parameter" in one run.
+
+⚠️ **Shipped state: the registry is EMPTY and the slice is inert.** `{ textArea: TextAreaWidget }` is
+commented out in `components/widgets/index.ts`; every widget takes the `ControlHost` path exactly as
+before. Everything else — the pure module, the component, the specs, `ROW_CHANGED`, `renderParams`'s
+branch — is committed and reachable, and turning it on is one line. Shipping it live would mean the
+Text node's text field silently stops following Cmd+Z, which is a worse defect than the wrapper div
+the slice removes.
+
+🔴 **AND EMPTYING THE REGISTRY WAS NOT ENOUGH — THE FIRST "SAFE FALLBACK" SHIPPED AN EMPTY ROW.**
+Converting `TextAreaType` had *gutted* it: no `render()`, no `createRoot`, no React rendering, because
+the component was doing all of that. With the registry off, `renderParams` therefore called
+`v.render()`, got `TypeView.render()`'s `undefined` `el`, and `ControlHost` hosted an empty div — **the
+Text row drew nothing at all**. The verification drive read `textShown: null` in every arm, which also
+made its "converted re-seeds: false" verdict **vacuous**: nothing was typed, because there was no
+field to type into.
+
+✅ The genuinely inert state is `TextAreaType.ts` **restored byte-identical to `HEAD`**
+(`git show HEAD:<path>`), with the new module, component and specs present but unreferenced by the
+panel. ⚠️ **A widget therefore cannot be added to the registry until its row class keeps a working
+`render()`** — the two are not alternatives during the transition, they are both required, and the
+class may only be reduced once the registry entry is permanently on. Same failure family as the
+registry's own note: `appendChildEl` and `ControlHost` both swallow a missing element, so the row goes
+missing **silently** rather than throwing.
+
+### 10.9 Five instrument faults, before a single product reading was true
+
+Every one of these produced a confident, wrong answer first. None was caught by a test.
+
+1. **Synthetic `input`/`change` events commit nothing.** `PropertyPanelTextArea` is *controlled* and
+   commits `displayedValue` on **blur**; setting `.value` through the native setter never updated that
+   state, so the blur committed the unchanged value and `shouldCommitTextArea` correctly refused.
+   All four arms read as product failures. ✅ Type with CDP **`Input.insertText`**.
+2. **A single snapshot is not a measurement.** ARM 3 read once at 900 ms and disagreed; ARM 4 then
+   showed the same redraw working. Only a **bounded retry** (16 × 250 ms, the discipline
+   `settleScroll`/`settleHints` already use) turned it into a real, reproducible red.
+3. **The drive searched only `getActiveComponent()`** — `/App` — and reported "no Text node" on a
+   project holding twenty. The active component is where the editor is, never where the node is.
+4. **The first target's port was CONNECTED**, so FB-018 drew the binding chip instead of a control —
+   and arm 0 was about to call a correct, present row a *vanished* one. ✅ Choose a drive target by
+   the property the drive needs, never by position.
+5. **A backtick inside a JS template literal ends the string.** A comment reading
+   `` `getActiveComponent()` `` inside `HELPERS` broke the file at parse time. Same family as the
+   heredoc trap. ✅ `node --check` before spending a drive cycle; no backticks inside `HELPERS`.
+
+Also: `findNodeWithId` returns the **view** node — the model is at `.model` (s10's `focus.js` already
+knew this), and `ed.selectNode(null)` throws rather than clearing, as recorded in §5.
+
+### 10.10 Two renderer warnings, NOT attributed
+
+The drive produced **172** *"Attempted to synchronously unmount a root while React was already
+rendering"* and **8** *"Encountered two children with the same key"*. `172 = 4 × 43` — four panel
+rebuilds times the 43 rows that still own a `createRoot` — and the converted row owns none, so the
+arithmetic says these are pre-existing legacy behaviour that this slice slightly *reduces*.
+🔴 **That is arithmetic, not a control, and it is recorded as unproven.** The cheap decisive arm is
+the one this slice already ships: with the registry empty the count should read `n × 44`, and with
+`textArea` enabled `n × 43`, on the same drive. The first same-key warning carries a **UUID**, not a
+node id, and appears during the initial project open — before the panel was driven at all.
