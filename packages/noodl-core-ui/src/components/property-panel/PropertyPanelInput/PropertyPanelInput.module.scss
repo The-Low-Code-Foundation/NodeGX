@@ -35,7 +35,6 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  margin-left: 6px;
   border-radius: 50%;
   background-color: var(--theme-color-secondary-as-fg);
   cursor: pointer;
@@ -44,6 +43,17 @@
   &:hover {
     opacity: 0.6;
   }
+}
+
+/* CHR-009 §2 — a wire arrives: filled primary with a wash ring (mockup `.dot.on`). */
+.ConnectedDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--theme-color-primary);
+  box-shadow: 0 0 0 3px var(--theme-color-primary-bg);
+  flex-shrink: 0;
 }
 
 .InputContainer {
@@ -90,6 +100,23 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* CHR-009 §2 — the gutter. The row's mark (`GutterDot`) sits in the 16px the groups already
+     leave left of the label column, centred on the row, so the label x is one value with or
+     without a mark. */
+  .Root {
+    position: relative;
+  }
+
+  .ResetDot,
+  .ConnectedDot {
+    position: absolute;
+    top: 50%;
+    left: -11px;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0;
   }
 
   .Root.is-toggle-row .Label {

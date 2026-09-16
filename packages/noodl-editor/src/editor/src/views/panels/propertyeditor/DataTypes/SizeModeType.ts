@@ -48,6 +48,7 @@ export class SizeModeType extends TypeView {
 
     this.root.render(
       React.createElement(SizeModeInput, {
+        label: this.displayName,
         value: this.value,
         isDefault: this.isDefault,
         tooltips: this.tooltip || {},

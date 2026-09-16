@@ -215,8 +215,10 @@
   padding: 6px 16px 16px;
 }
 
+/* CHR-009 §2: the mockup's section rhythm (`section { padding: 6px 14px 10px }`). Was 13/15 — with
+   the 30px header and each row's own 30px, a one-row group (General: Mounted) spent ~60px on air. */
 .property-group {
-  padding: 13px 0 15px;
+  padding: 6px 0 10px;
 }
 
 .property-group:not(:last-child) {

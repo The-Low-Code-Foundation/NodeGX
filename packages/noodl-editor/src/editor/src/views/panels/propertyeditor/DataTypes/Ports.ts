@@ -102,6 +102,17 @@ const SCROLL_BIND_ATTEMPTS = 5;
  */
 const MAX_DESCRIPTION_TITLE = 400;
 
+/** The node behind the panel's model: a `ModelProxy` wraps it, a bare model is its own node. */
+function nodeOf(model: TSFixme): TSFixme {
+  return model && model.model ? model.model : model;
+}
+
+/** The graph the panel's node lives in — where connection and attach events are raised. */
+function graphOf(model: TSFixme): TSFixme {
+  const node = nodeOf(model);
+  return node && node.owner && typeof node.owner.on === 'function' ? node.owner : undefined;
+}
+
 export class Ports extends View {
   model: ModelProxy;
   popout: TSFixme;
@@ -202,9 +213,17 @@ export class Ports extends View {
       this
     );
 
+    // 🔴 CHR-009 slice 3: THE GRAPH, NOT `model.owner`. `model` is a `ModelProxy` everywhere the
+    // property panel builds this view, and the proxy has no `owner` — so both `model.owner && …`
+    // subscriptions below had never bound anything, since the initial commit. Measured on the dev
+    // build: `ModelProxy` has no `owner` field, and a wire into the selected Group's `width` did
+    // not reach its row until another node was selected. `graphOf` reads through the proxy and still
+    // accepts a model that is its own node (the project settings tab).
+    const graph = graphOf(model);
+
     // A child dragged into or out of the selected node changes whether anything can overflow it.
-    model.owner &&
-      model.owner.on(
+    graph &&
+      graph.on(
         ['nodeAttached', 'nodeDetached'],
         () => {
           this.refreshHints();
@@ -221,10 +240,21 @@ export class Ports extends View {
       this
     );
 
-    model.owner &&
-      model.owner.on(
+    graph &&
+      graph.on(
         ['connectionAdded', 'connectionRemoved'],
-        () => {
+        (args) => {
+          // 🔴 CHR-009 slice 3: a wire into THIS node changes what a row draws (FB-018's chip, the
+          // gutter's connected dot) but not the ports, the variant or the filter — so the hash
+          // below was unchanged and `renderGroups` returned early. Measured on the dev build: a
+          // wire into `width` with the Group's panel open drew nothing until another node was
+          // selected and this one reselected. Only a wire that touches this node clears the hash;
+          // the graph raises these for every wire in the component, and a rebuild costs the caret.
+          const connection = args && args.model;
+          const nodeId = nodeOf(this.model)?.id;
+          if (!connection || connection.toId === nodeId || connection.fromId === nodeId) {
+            this._portsHash = undefined;
+          }
           this.renderGroups();
         },
         this
@@ -234,8 +264,8 @@ export class Ports extends View {
     this._unsubscribeProbes && this._unsubscribeProbes();
     this._unsubscribeProbes = null;
     this.model && this.model.off(this);
-    // @ts-expect-error
-    this.model && this.model.owner && this.model.owner.off(this);
+    const graph = this.model && graphOf(this.model);
+    graph && graph.off(this);
     EventDispatcher.instance.off(this);
 
     this.views.forEach((v) => v.dispose && v.dispose());

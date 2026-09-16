@@ -34,6 +34,7 @@ import { ScrubBinding } from '@noodl-core-ui/components/property-panel/scrub';
 import { Slot } from '@noodl-core-ui/types/global';
 
 import css from './PropertyPanelInput.module.scss';
+import { GutterDot } from './PropertyPanelRow';
 
 export enum PropertyPanelInputType {
   Text = 'text',
@@ -257,9 +258,9 @@ export function PropertyPanelInput({
       className={classNames(css['Root'], isToggleRow && css['is-toggle-row'])}
       data-property={dataIdentifier}
     >
+      <GutterDot isConnected={isConnected} showsChanged={showsChanged} onReset={onReset} />
       <div className={classNames(css['Label'], showsChanged && css['is-changed'])} title={label}>
         {label}
-        {showsChanged && onReset && <span className={css['ResetDot']} title="Reset to default" onClick={onReset} />}
       </div>
       <div className={css['InputContainer']}>
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
