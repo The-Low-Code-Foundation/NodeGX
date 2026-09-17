@@ -6,10 +6,10 @@ The platform half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was
 s27 in one paragraph: s26's handoff items 1 and 2 are **done** (CHR-009 §22). **Slice 14: a wired align row now draws the
 binding chip** instead of its segments. Each row has been one port since slice 5, so `connectedRowPolicy`'s "no single
 port" exception had gone stale, and a wired Align X still took presses the wire overwrote. Built, specced + mutant, and
-driven on live, reselect, chip-click and unwire. **It awaits Richard's look.** §14.3's opacity `''` is **by design**
+driven on live, reselect, chip-click and unwire. **Approved by Richard.** §14.3's opacity `''` is **by design**
 (`colorpicker.ts:121` + `placeholder="100%"`, since PLAT-002), and the drive read it as a greyed `100%`. **A token in a
-pair field cuts to `--sp…` docked (needs 69px, has 43) and fits at wide.** No label trim fits, so it is a ruling for Richard.
-Slice 13's look was sent to him at session start; no answer yet.
+pair field cuts to `--sp…` docked (needs 69px, has 43) and fits at wide.** No label trim fits; Richard ruled **leave it**.
+Slice 13 approved too ("They all look good").
 
 ⚠️ Peers work in this checkout: **P88** (`validation/*`, `noodl-mcp/*`, `templates/*`, `library/*`, `nodegx-backend/*`,
 `noodl-runtime/*`) and **P93** (`VisualCanvas/*`, TVW-003). In s27 **a peer launched `dev:debug` (ports 9444/8680) between my
