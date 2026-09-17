@@ -3,10 +3,15 @@
 **Read first:** [`README.md`](README.md) §3 (what scoping corrected), §4 (rulings, the ruled table first) and §7 (rules). Then read
 the whole task you pick, including its §8.
 
-**The board (2026-09-17, end of session 23), re-derived from the 25 task files' status lines:** **19 🟢 + 4 ✅ built, 2 ✅ closed by
-ruling, 0 🟡, 0 ⬜. Everything this session touched is committed** (`5e91dc469`, `c8f8b4c63`, `08b338d6d`, `fad307726`, + this handoff).
-- ✅ GAM-011 (s23, AC7 recorded), GAM-019, GAM-022 (s23, AC7 render), GAM-024. ✅ closed by ruling: GAM-004, GAM-025.
-- 🟢 all others. What is left is remainders: editor-canvas halves and browser drives, listed below.
+**The board (2026-09-17, end of session 23), re-derived from the 28 task files' status lines:** **14 🟢 with named remainders,
+9 ✅ done, 2 ✅ closed by ruling, 3 ⬜ new (written s23 on Richard's ask), 0 🟡.** Everything this session touched is committed.
+- ✅ done, nothing owed: GAM-010 (its ring remainder became GAM-026), GAM-011, GAM-012, GAM-019, GAM-020 (R24), GAM-021,
+  GAM-022, GAM-023, GAM-024. ✅ closed by ruling: GAM-004, GAM-025.
+- 🟢 with remainders, all of them named in their own status line: GAM-001, 002, 003, 005, 006, 007, 008, 009, 013, 014, 015, 016,
+  017, 018. 🔴 **Several say "the peer's files/tree" about Rocket School — that blocker is STALE:** s22 regenerated and committed
+  Rocket School, so those halves are drivable now.
+- ⬜ new, nothing built: **GAM-026** (the focus ring's remainder, put in P88 by Richard), **GAM-027** (a Button can be told not to
+  take the cursor), **GAM-028** (an app knows it is on a touch screen). Each carries an open ruling — R25, R26, R27.
 
 ## What session 23 did (all committed, over `a418871a0`)
 
@@ -38,9 +43,9 @@ ruling, 0 🟡, 0 ⬜. Everything this session touched is committed** (`5e91dc46
 1. **GAM-016 AC3 editor half:** a new Playful project through the wizard; the canvas draws Nunito; rebuild the MCP bundle. Needs the
    editor: check `dev:stop --list` / a peer's stack first.
 2. **GAM-017 AC4 editor half:** a kit signal prop in the editor canvas with a Button's Click wired in.
-3. **The focus ring's own remainders** (GAM-010 §8 s23): the current Checkbox/Radio (`ndl-controls-checkbox-2`/`radio-2`, input at
-   `opacity: 0`) draw no ring; the new `Select` component unmeasured; a click-only round not graded. These are P41 ACC-001's, not a
-   GAM AC — do them only if Richard wants the ring finished here.
+3. **GAM-026 — the focus ring's remainder**, now a task of this phase (Richard, s23: *"Why not phase 88?"*): the current
+   Checkbox/Radio draw no ring (their input is at `opacity: 0`, so the ring must go on the visible sibling), the new `Select` is
+   unmeasured, a click-only arm and the 3:1 contrast check are owed. **Ask R25 first.**
 4. **Remainders:** GAM-013's exported app driven in a browser (and its AC8 Rocket School builds); GAM-015 AC3 editor canvas; GAM-018
    AC6 editor half; GAM-003 AC5 (browser, meter from an Expression); GAM-002 AC4 (editor); GAM-001 AC5 (blast radius); GAM-014 AC6
    (Face wrap); the browser/Rocket School halves of GAM-005/007/008/009.
@@ -69,11 +74,12 @@ build), `g22/` (`copy/`, `drive-sidebar.js`, `sidebar-390.png`).
 
 ## Richard's, not a builder's
 
-- **New in s23:** GAM-020's static door cannot see a template whose sentences are all wired (Rocket School 59/60). Is that enough
-  (the render door catches it at run time), or should the validator follow a wire to a literal word table?
-- **New in s23:** should a Button be able to not take focus (a keypad that keeps the caret in its field), and should the product
-  report a coarse pointer? GAM-011 AC7 found each is the one fact between Text Input + Buttons and the kit's AnswerPad.
-- **New in s23:** finish ACC-001 here (current Checkbox/Radio rings, 3:1 per preset) or leave it to P41?
+- **Answered s23, all three:** ✅ **R24** — *"checking on the rendered page is enough"*, so GAM-020 AC6's static half is closed
+  (the validator will not follow a wire to a word table). ✅ **The keypad gaps are filed as GAM-027 + GAM-028** (*"File both as new
+  tasks"*). ✅ **The ring's remainder stays in P88** as GAM-026 (*"Why not phase 88?"*), not P41.
+- **Open, and each blocks its new task: R25** (does `Modern` gain a `--ring` token; is a ring width owed), **R26** (a Button port
+  or always-on, and on which controls), **R27** (a `Device` node, a general `Media Query` node, or one Text Input port; and what a
+  server render reports).
 
 - **Found in s22, not registered:** Rocket School's deploy names `hpRows.itemOutputSignal-tapped → hpTap.run` as a wire that cannot work
   (identical on the committed template before s22). A For Each item signal is a kind only a running graph knows (GAM-023 §8); the

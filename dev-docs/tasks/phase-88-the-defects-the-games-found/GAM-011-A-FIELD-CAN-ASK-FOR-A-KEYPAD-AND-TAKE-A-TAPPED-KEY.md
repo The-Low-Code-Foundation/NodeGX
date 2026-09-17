@@ -215,6 +215,8 @@ Each clause of RKT-005 is marked **measured** (a reading already in this file) o
 | AC5 fine pointer: typing works, a tap mid-typing inserts | **Insert yes, focus no.** `1923` at the caret either way (s21). With a plain click desktop Chrome moves focus to the Button, so the next typed key goes nowhere until the box is clicked again; s21 kept focus only by cancelling `mousedown` in a page script, which a Button in a graph cannot do. | measured |
 
 **So:** AC3 and AC5's insert are the product now; AC1 is short of one fact the product does not expose (a coarse pointer); AC5's
-continued typing is short of a Button that does not take focus; AC2 and RKT-012's refusal stay kit-only, as expected. Neither missing
-piece is registered as a defect here: whether a Button should be able to not take focus, or the product should report a coarse pointer,
-is a question, not a measured failure.
+continued typing is short of a Button that does not take focus; AC2 and RKT-012's refusal stay kit-only, as expected.
+**Both missing pieces were put to Richard in plain words (s23) and filed on his ask:**
+[GAM-027](GAM-027-A-BUTTON-CAN-BE-TOLD-NOT-TO-TAKE-THE-CURSOR.md) (a Button can be told not to take the cursor) and
+[GAM-028](GAM-028-AN-APP-KNOWS-IT-IS-ON-A-TOUCH-SCREEN.md) (an app knows it is on a touch screen). Each ends with an AC that
+re-runs this record once it lands.

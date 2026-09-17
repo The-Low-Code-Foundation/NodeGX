@@ -1,6 +1,6 @@
 # GAM-010 — A Button can be given the keyboard
 
-**Status: 🟢 2026-09-17 (session 22): every AC met.** AC2 and AC6 done once Richard ruled that Rocket School should be brought fully up to date (its 257 uncommitted files were only an editor re-save: 11 non-noise differences, all empty `parameters: {}` or timestamps). *(was: 🟡 2026-09-17 (session 21): AC1, AC3, AC4, AC5 met, driven in Chromium; AC2 and AC6 (Rocket School's three workarounds replaced by wires) not done — see §8.** **Source:** [P78 D59](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (viewer controls))*
+**Status: ✅ 2026-09-17 (session 23): every AC met; the ring remainder is now [GAM-026](GAM-026-EVERY-CONTROL-A-KEYBOARD-REACHES-SHOWS-WHERE-IT-IS.md), and s23 fixed the invisible ring itself (§8 s23).** *(was: 🟢 2026-09-17 (session 22): every AC met.** AC2 and AC6 done once Richard ruled that Rocket School should be brought fully up to date (its 257 uncommitted files were only an editor re-save: 11 non-noise differences, all empty `parameters: {}` or timestamps). *(was: 🟡 2026-09-17 (session 21): AC1, AC3, AC4, AC5 met, driven in Chromium; AC2 and AC6 (Rocket School's three workarounds replaced by wires) not done — see §8.** **Source:** [P78 D59](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (viewer controls)))*
 
 A game says *"press Enter to go on"*, but nothing in the graph can put the keyboard on the Next button. A
 person on a keyboard has to Tab to it, or reach for the mouse.
@@ -193,7 +193,7 @@ outline-offset: 2px }`. `--ring` is the token Minimal/Playful/Enterprise/Soft an
 | `tests/corpus/gam-focus-ring-…-draws-a-ring.test.ts`; 5 reverted arms | 9/9; A1 body removed 6 red, A2 `auto` 6, A3 plain `:focus` 2, A4 no offset 6, A5 a new class with `outline: none` 1 |
 | d18 + nda-012 (the specs that read the stylesheet) | 24/24 |
 
-**Not done, registered:** the current Checkbox and Radio Button (`ndl-controls-checkbox-2`/`radio-2`) hide the real input with
+**Not done, registered as [GAM-026](GAM-026-EVERY-CONTROL-A-KEYBOARD-REACHES-SHOWS-WHERE-IT-IS.md) (Richard, s23: the remainder stays in P88, not P41):** the current Checkbox and Radio Button (`ndl-controls-checkbox-2`/`radio-2`) hide the real input with
 `opacity: 0`, so neither draws a ring (it has to go on the visible sibling), and the new `Select` component was not measured. An
 exported app (`nodegx export`) has no `outline: none` in the export sources, so it keeps the browser's ring; not driven. The editor
 canvas picks the rule up with the viewer bundle; not driven. The rest of ACC-001 (3:1 against adjacent colours per preset) is P41's.

@@ -1,6 +1,6 @@
 # GAM-012 — A field focused as its row appears has the cursor, every time
 
-**Status: 🟢 2026-09-17 (session 22): every AC met.** AC6 by the same Rocket School keyboard drive as GAM-010 AC2. *(was: 🟡 2026-09-17 (session 21): AC1–AC5 met for all three faults under R13 (§5, §8). Fault 3 fixed by splitting an unmount from an explicit Blur, driven in Chromium; AC6 (Rocket School keyboard drive) still owed.** **Source:** [P78 D68](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) AC5 run 2, 2026-09-13 · **Side:** product (viewer focus tracker))*
+**Status: ✅ 2026-09-17 (session 22): every AC met.** *(was: 🟢 2026-09-17 (session 22): every AC met.** AC6 by the same Rocket School keyboard drive as GAM-010 AC2. *(was: 🟡 2026-09-17 (session 21): AC1–AC5 met for all three faults under R13 (§5, §8). Fault 3 fixed by splitting an unmount from an explicit Blur, driven in Chromium; AC6 (Rocket School keyboard drive) still owed.** **Source:** [P78 D68](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) AC5 run 2, 2026-09-13 · **Side:** product (viewer focus tracker)))*
 
 A child playing with the keyboard answers the first question and presses Enter twice. The second question arrives with no
 cursor in the box. The author did send Focus. It worked once and never again.

@@ -2,7 +2,7 @@
 
 *(Filename kept for links. Titled "refuses a broken wire" until R20 ruled (c).)*
 
-**Status: 🟢 built s18, committed `624b054f2` (s19). ✅ R20 ruled 2026-09-16 (s17): publish all, warn. ✅ s19 ruling: an enum is a string, built.** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
+**Status: ✅ 2026-09-17: built s18, committed `624b054f2` (s19); nothing owed.** *(was: 🟢 built s18, committed `624b054f2` (s19). ✅ R20 ruled 2026-09-16 (s17): publish all, warn. ✅ s19 ruling: an enum is a string, built.** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`))*
 
 The shipped `nodegx deploy` never ran its connection filter. ⚠️ **Corrected s18:** its validation gate already refused a
 wire into a port a built-in's *declaration* lacks, and a wire to a missing node. What shipped silently, with `ok: true`, was
