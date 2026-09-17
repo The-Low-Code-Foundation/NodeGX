@@ -43,11 +43,21 @@ if (typeof window !== 'undefined' && window.NoodlEditor) {
       this.highlighter.setWindowSelected(window.NoodlEditorInspectorAPI.enabled);
       this.highlighter.setDesignMode(window.NoodlEditorInspectorAPI.enabled);
     },
-    selectNode(nodeId) {
+    /**
+     * TVW-003 — takes the editor's selection path (`['heroInstance', 'headline']`), or a bare id as
+     * before. A path outlines only the instance it addresses.
+     */
+    selectNode(nodeIdOrPath) {
       this.highlighter.deselectNodes();
 
-      if (nodeId && nodeId !== 'null') {
-        this.highlighter.selectNodesWithId(nodeId);
+      const path = Array.isArray(nodeIdOrPath)
+        ? nodeIdOrPath
+        : nodeIdOrPath && nodeIdOrPath !== 'null'
+        ? [nodeIdOrPath]
+        : null;
+
+      if (path && path.length) {
+        this.highlighter.selectNodesAtPath(path);
       } else if (window.NoodlEditorInspectorAPI.enabled) {
         this.highlighter.setWindowSelected(true);
       }
@@ -323,9 +333,14 @@ export default class Viewer extends React.Component {
 
       this.inspector = new Inspector({
         onDisableHighlight: () => this.highlighter.disableHighlight(),
-        onHighlight: (id) => this.highlighter.highlightNodesWithId(id),
-        onInspect: (ids) => {
-          NoodlEditor.inspectNodes(ids);
+        onHighlight: (id, path) => this.highlighter.highlightNodesAtPath(path),
+        onInspect: (ids, paths) => {
+          // TVW-003 — an editor older than its viewer has no `inspectPaths`; ids still select.
+          if (paths && NoodlEditor.inspectPaths) {
+            NoodlEditor.inspectPaths(paths);
+          } else {
+            NoodlEditor.inspectNodes(ids);
+          }
         }
       });
       NoodlEditorInspectorAPI.setInspector(this.inspector);

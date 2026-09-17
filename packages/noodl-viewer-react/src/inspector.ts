@@ -1,9 +1,15 @@
+import { instancePathOf } from './instance-path';
 import type { ReactNodeInstance } from './react-component-node';
 
 export interface InspectorCallbacks {
-  /** Receives the ids the editor should select. */
-  onInspect: (nodeIds: string[]) => void;
-  onHighlight: (nodeId: string) => void;
+  /**
+   * Receives the ids the editor should select. A click also sends each node's instance path
+   * (TVW-003), so the editor can tell *this* Hero's headline from *that* one's; "Nodes behind
+   * cursor" sends ids only — it is a list to pick from, not a selection.
+   */
+  onInspect: (nodeIds: string[], paths?: string[][]) => void;
+  /** The hovered node and its instance path; the path is what the outline addresses. */
+  onHighlight: (nodeId: string, path: string[]) => void;
   onDisableHighlight: () => void;
 }
 
@@ -45,7 +51,7 @@ export default class Inspector {
         // that provably cannot happen — and "the button doesn't work" is the
         // report that promise produces.
         document.body.style.cursor = 'crosshair';
-        onHighlight(noodlNode.id);
+        onHighlight(noodlNode.id, instancePathOf(noodlNode));
       } else {
         document.body.style.cursor = 'initial';
       }
@@ -58,7 +64,7 @@ export default class Inspector {
 
       const noodlNode = this.findNoodlNode(e.target as Element);
       if (noodlNode) {
-        onInspect([noodlNode.id]);
+        onInspect([noodlNode.id], [instancePathOf(noodlNode)]);
       }
 
       e.stopPropagation();

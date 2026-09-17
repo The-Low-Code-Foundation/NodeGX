@@ -53,6 +53,22 @@ export function nodeIdOf(path: NodePath): string | undefined {
   return path.length ? path[path.length - 1] : undefined;
 }
 
+/**
+ * The part of a path the project can name: the ids `isAuthored` knows, in order, always keeping the
+ * node's own id.
+ *
+ * The preview reports every instance a rendered node sits in, and some of those are made at
+ * runtime — a Page Router's page, a For Each row — with a fresh `guid()` each render. Stored, such
+ * an id addresses nothing after a reload, and no canvas has a node for it. The viewer matches a
+ * path as an in-order subsequence (`noodl-viewer-react/src/instance-path.ts`), so the authored
+ * part still outlines the same element. A For Each row has no authored id of its own, so its rows
+ * are not told apart: selecting one outlines the element in every row.
+ */
+export function authoredPath(path: NodePath, isAuthored: (nodeId: string) => boolean): string[] {
+  const last = path.length - 1;
+  return path.filter((id, i) => i === last || isAuthored(id));
+}
+
 export function samePath(a: NodePath | null, b: NodePath | null): boolean {
   if (a === b) return true;
   if (!a || !b || a.length !== b.length) return false;

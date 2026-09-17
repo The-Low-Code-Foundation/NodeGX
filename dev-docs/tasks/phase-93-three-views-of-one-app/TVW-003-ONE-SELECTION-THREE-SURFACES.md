@@ -148,3 +148,62 @@ path and outlines only the addressed instance (AC3's count of 1). Then hover thr
 `src/external/{viewer,deploy,ssr}/`, gitignored build output (`.gitignore:206`): a
 `noodl-viewer-react` change is invisible until that is rebuilt (read its mtime after a launch, do not assume),
 and a worktree has none.
+
+### Slice 3 — the viewer sends and outlines instance paths (2026-09-17, session 3)
+
+- `noodl-viewer-react/src/instance-path.ts` — `instancePathOf(node)`: an instance lives in its
+  `parentNodeScope`, anything else in its `nodeScope`; walk `componentOwner` out, stop at the root
+  (the one owner with no `parentNodeScope`), root excluded. `pathAddresses(selector, path)`: last ids
+  equal, the selector's other ids an **in-order subsequence** of the path. Pure.
+- `highlighter.ts` — `selectNodesAtPath` / `highlightNodesAtPath`; the `…WithId` forms are now
+  `[id]`. `[id]` still outlines every instance (what the canvas writes).
+- `inspector.ts` — a click sends `onInspect([id], [path])`; hover passes the path, so preview hover
+  outlines only the hovered instance. "Nodes behind cursor" (context menu) still sends ids only.
+- `viewer.jsx` — `NoodlEditorHighlightAPI.selectNode` takes a path or a bare id; a click calls
+  `NoodlEditor.inspectPaths` when the editor exposes it, else `inspectNodes`.
+- Editor: `webview-preload-viewer.js` + `editorapi.js` gain `inspectPaths` (emits `inspectNodes`
+  with `paths`); `EditorDocument` holds `selectedNodePath` and sends the whole path to the preview
+  (docked `CanvasView.setNodeSelected`, now `JSON.stringify`'d instead of quote-interpolated;
+  detached `viewer-select-node`, whose ipc key `selectedNodeId` keeps its name).
+- `selectionStore.authoredPath` — the editor keeps only ids the project holds (plus the node's own).
+
+**Departure recorded, not asked:** a Page Router's page and a For Each row are instances made at
+runtime with a fresh `guid()` per render. Stored, those ids would address nothing after a reload,
+so the store drops them — which is why the viewer matches a subsequence. Consequence: **For Each
+rows are not told apart** (no authored id distinguishes row 2 from row 3); selecting an element in
+one row outlines it in every row. AC3 names two *placed* `Project Card` instances, which have
+authored ids and are told apart.
+
+Specs: viewer `tests/tvw-003-instance-path.test.ts` 10 (armed: no path filter 2 red, inner scope
+first 2, order ignored 1); editor `tests-unit/tvw-003` 3 suites / 31 (`authoredPath` 3; armed: drop
+the node's own id, 1 red). `tsc --noEmit` exit 0 for `noodl-editor` and `noodl-viewer-react`, new
+files in `--listFiles`.
+
+**Driven** (2026-09-17, own stack `NOODLPORT=8675`, CDP **9444** — a peer held 9333/8674 — a fresh copy
+of `Landing page test V2`, design mode, trusted CDP clicks):
+| step | reading |
+|---|---|
+| runtime walk, `sc_title` ×4 in the preview | chains `[<router guid>, home_services, sv_c1…4]`; the root instance has no `parentNodeScope` (the stop condition holds on the real runtime) |
+| **AC3** — real click on "Product design" (2nd `ServiceCard`) | store `/Components/ServiceCard [["home_services","sv_c2","sc_title"]]` source preview, one write; webview told `selectNode(["home_services","sv_c2","sc_title"])` once; canvas moved to ServiceCard, `sc_title` (Service name) selected; preview `selectedNodes` = **1** (owner `sv_c2`), one connected outline div, drawn on "Product design" only (screenshot) |
+| control: `selectNode` with `'sc_title'`, `["sc_title"]`, `["sv_c3","sc_title"]`, the full path | 4 · 4 · 1 (`sv_c3`) · 1 (`sv_c2`) — the count of 1 is the path, not the page |
+| **AC1** (click half) — canvas on `/Pages/Home`, real click on the hero headline | store `/Sections/Hero [["home_hero","hero_head"]]`; **canvas stayed on Home**, `home_hero` ("The pitch") selected; preview outlines `hero_head` in `home_hero`, 1 div |
+
+🔴 **`cdp.js` `appTarget('webview')` + `dispatchClick` takes EDITOR-window coordinates here, not
+guest ones** (session 2's note said guest). Measured: dispatched (736,156) arrived in the guest as
+(356,44) — minus the webview's (381,112) offset — and selected the sticky nav. Add the webview's
+`getBoundingClientRect()` origin to a guest `elementFromPoint`-verified point.
+
+Not driven in slice 3: the detached preview (same `inspectPaths` API request and the same
+`viewer-select-node` payload — built, unexercised); AC1's canvas → preview half (slice 2 drove
+the channel; a canvas selection is `[id]`, which outlines every instance, unchanged).
+
+Found in the drive and fixed: every repeat click on the same element re-sent the same outline to the
+preview (the path is a new array each time, so React state never matched). `EditorDocument` keeps
+the current array for an equal path. Driven after relaunch: second click on "Brand and identity"
+→ no store write, no second `selectNode`; the outline moved from card 2 to card 1 alone.
+
+`test:ci` (seed 06949, on `4d59dda6`, cache cleared, alone): 2984 specs, 8 failures — the recorded
+eight by name. No new red in `tests/canvas/`.
+
+**Next slice (4): hover through the store**, targeted at the app client, then AC4 (bench) and AC5.
+

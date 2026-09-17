@@ -6,6 +6,10 @@ contextBridge.exposeInMainWorld('NoodlEditor', {
   },
   inspectNodes(nodeIds, cb) {
     makeEditorAPIRequest('inspectNodes', {nodeIds}, cb);
+  },
+  // TVW-003 — a click's instance paths, so the editor can tell one instance from another.
+  inspectPaths(paths, cb) {
+    makeEditorAPIRequest('inspectPaths', {paths}, cb);
   }
 });
 

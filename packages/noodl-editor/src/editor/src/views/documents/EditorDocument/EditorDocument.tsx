@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { IDocumentProvider } from '@noodl-models/app_registry';
 import { ProjectModel } from '@noodl-models/projectmodel';
-import { nodeIdOf, selectionStore } from '@noodl-models/selection/selectionStore';
+import { authoredPath, NodePath, samePath, selectionStore } from '@noodl-models/selection/selectionStore';
 import { EditorSettings } from '@noodl-utils/editorsettings';
 import { KeyCode, KeyMod } from '@noodl-utils/keyboard/KeyCode';
 import { KeyboardCommand } from '@noodl-utils/keyboardhandler';
@@ -57,7 +57,13 @@ function EditorDocument() {
   const [viewportSize, setViewportSize] = useState({ width: null, height: null, deviceName: null });
   const [frameDividerSize, setFrameDividerSize] = useState(undefined);
 
-  const [selectedNodeId, setSelectedNodeId] = useState(null); //The ID of the selected node, as highlighted by the viewer
+  // TVW-003 — the selected node's instance path (`NodePath`), as outlined by the viewer. `null` for none.
+  const [selectedNodePath, setPathState] = useState<NodePath | null>(null);
+  // A new array for an equal path would re-send the same outline to the preview on every click.
+  const setSelectedNodePath = useCallback(
+    (path: NodePath | null) => setPathState((current) => (samePath(current, path) ? current : path)),
+    []
+  );
 
   const [hasLoadedEditorSettings, setHasLoadedEditorSettings] = useState(false);
 
@@ -126,14 +132,13 @@ function EditorDocument() {
    * store itself, including the deselect on switching to a panel that has no use for a selection
    * (FH-008's allow-list, `EditorEventBindings`), so there is nothing left for them to catch.
    *
-   * The id outlined is the path's last element — every instance of that definition node, as before.
-   * Outlining only the addressed instance is the viewer half of TVW-003 and needs the viewer to
-   * accept a path.
+   * The whole path goes to the viewer: `[headline]` from a canvas outlines every instance, as before;
+   * `[homeHero, headline]` from a preview click outlines only that Hero's headline.
    */
   useEffect(() => {
     const unsubscribe = selectionStore.subscribe({
       surface: 'preview',
-      onSelection: (selection) => setSelectedNodeId(nodeIdOf(selection.nodes[0] ?? []) ?? null)
+      onSelection: (selection) => setSelectedNodePath(selection.nodes[0] ?? null)
     });
     return unsubscribe;
   }, [nodeGraph]);
@@ -145,7 +150,8 @@ function EditorDocument() {
         route: navigationState.route,
         viewportSize,
         inspectMode: previewMode ? false : true,
-        selectedNodeId
+        // The key keeps its old name: main forwards it verbatim as `viewer-select-node`'s argument.
+        selectedNodeId: selectedNodePath
       });
 
       const onViewerInspectNode = (_event, nodeId) => {
@@ -174,8 +180,8 @@ function EditorDocument() {
 
   useEffect(() => {
     if (!previewMode) {
-      canvasView?.setNodeSelected(selectedNodeId);
-      ipcRenderer.send('viewer-select-node', selectedNodeId);
+      canvasView?.setNodeSelected(selectedNodePath);
+      ipcRenderer.send('viewer-select-node', selectedNodePath);
     }
 
     // FB-016 scope 4 — a new selection rebuilds the properties panel, which is exactly the case
@@ -183,7 +189,7 @@ function EditorDocument() {
     // back on dispose; this is the belt to that pair of braces, and it is also simply correct:
     // the crosshair described the node that is no longer selected.
     transformOriginFocus.reset();
-  }, [selectedNodeId, canvasView, previewMode]);
+  }, [selectedNodePath, canvasView, previewMode]);
 
   const onRouteChanged = useCallback(
     (route) => {
@@ -304,8 +310,14 @@ function EditorDocument() {
             // TVW-003: the preview writes the store and the canvas decides whether it has to move
             // (`resolveCanvasMove`). The preview does not hear its own write, so it sets its own
             // outline here — the same thing the canvas's echo used to set.
-            selectionStore.select('preview', component, [[node.id]]);
-            setSelectedNodeId(node.id);
+            //
+            // A click sends the instance path (`args.paths`); ids the project does not hold — a
+            // router's page, a For Each row, all fresh guids per render — are dropped, so the path
+            // still addresses the same element after a reload.
+            const clicked = args.paths?.[0];
+            const path = clicked ? authoredPath(clicked, (id) => !!ProjectModel.instance.findNodeWithId(id)) : [node.id];
+            selectionStore.select('preview', component, [path]);
+            setSelectedNodePath(path);
 
             /**
              * DES-001 — say what was selected, in the preview.

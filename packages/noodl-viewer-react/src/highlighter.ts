@@ -6,6 +6,7 @@ import {
   readCornerRadii,
   type RectLike
 } from './box-model-overlay';
+import { instancePathOf, pathAddresses } from './instance-path';
 import type { ReactNodeInstance } from './react-component-node';
 import { TransformOriginCrosshair } from './transform-origin-crosshair';
 
@@ -244,8 +245,13 @@ export class Highlighter {
   }
 
   highlightNodesWithId(nodeId: string): void {
+    this.highlightNodesAtPath([nodeId]);
+  }
+
+  /** TVW-003 — hover outlines what `path` addresses: one instance, or every one for `[nodeId]`. */
+  highlightNodesAtPath(path: readonly string[]): void {
     //gather all nodes with a DOM node we can highlight, that aren't already highlighted
-    const nodes = getNodes(this.noodlRuntime, nodeId)
+    const nodes = getNodesAtPath(this.noodlRuntime, path)
       .filter((node) => node.getRef)
       .filter((node) => !this.highlightedNodes.has(node));
 
@@ -275,17 +281,27 @@ export class Highlighter {
   }
 
   selectNodesWithId(nodeId: string): ReactNodeInstance[] {
+    return this.selectNodesAtPath([nodeId]);
+  }
+
+  /**
+   * TVW-003 — outline what the editor's selection path addresses.
+   *
+   * `[nodeId]` (a canvas showing the definition) outlines every instance, as `selectNodesWithId`
+   * always did; `[card2Id, titleId]` outlines only the second card's title. See `pathAddresses`.
+   */
+  selectNodesAtPath(path: readonly string[]): ReactNodeInstance[] {
     //we don't track when nodes are created, so if there's no root component, wait a while and then highlight so we can get all the instances
     //TODO: track nodes as they're created so newly created nodes can be selected if their IDs match
     if (!this.noodlRuntime.rootComponent) {
       this.noodlRuntime.eventEmitter.once('rootComponentUpdated', () => {
         setTimeout(() => {
-          this.selectNodesWithId(nodeId);
+          this.selectNodesAtPath(path);
         }, 300);
       });
     }
 
-    const nodes = getNodes(this.noodlRuntime, nodeId)
+    const nodes = getNodesAtPath(this.noodlRuntime, path)
       .filter((node) => node.getRef)
       .filter((node) => !this.selectedNodes.has(node));
 
@@ -330,9 +346,10 @@ function childRects(element: HTMLElement): RectLike[] {
   return rects;
 }
 
-function getNodes(noodlRuntime: HighlighterRuntime, nodeId: string): ReactNodeInstance[] {
-  if (!noodlRuntime.rootComponent) {
+function getNodesAtPath(noodlRuntime: HighlighterRuntime, path: readonly string[]): ReactNodeInstance[] {
+  if (!noodlRuntime.rootComponent || !path.length) {
     return [];
   }
-  return noodlRuntime.rootComponent.nodeScope.getNodesWithIdRecursive(nodeId);
+  const nodes = noodlRuntime.rootComponent.nodeScope.getNodesWithIdRecursive(path[path.length - 1]);
+  return path.length === 1 ? nodes : nodes.filter((node) => pathAddresses(path, instancePathOf(node)));
 }

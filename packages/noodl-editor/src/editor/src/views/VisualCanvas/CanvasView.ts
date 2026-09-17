@@ -9,6 +9,9 @@ import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { VisualCanvas } from './VisualCanvas';
 import { previewRoutePath } from './previewRoutePath';
 
+/** What the preview outlines: a TVW-003 selection path, a bare node id, or nothing. */
+type NodeSelection = readonly string[] | string | null;
+
 export class CanvasView extends View {
   webview: Electron.WebviewTag;
   webviewDomReady: boolean;
@@ -19,7 +22,7 @@ export class CanvasView extends View {
   viewportHeight: number;
 
   inspectMode: boolean;
-  selectedNodeId: string | null;
+  selectedNodeId: NodeSelection;
 
   private root: Root | null = null;
 
@@ -129,7 +132,7 @@ export class CanvasView extends View {
       this.webview.executeJavaScript(`NoodlEditorInspectorAPI.setEnabled(${this.inspectMode})`);
 
       if (this.selectedNodeId) {
-        this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode('${this.selectedNodeId}')`);
+        this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode(${JSON.stringify(this.selectedNodeId)})`);
       }
 
       // Inject project design tokens into the preview so var(--token-name) resolves correctly.
@@ -353,10 +356,11 @@ export class CanvasView extends View {
     });
   }
 
-  setNodeSelected(nodeId: string) {
+  /** TVW-003 — a selection path (a bare id still works); the viewer outlines what it addresses. */
+  setNodeSelected(nodeId: NodeSelection) {
     this.selectedNodeId = nodeId;
     this.tryWebviewCall(() => {
-      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode('${nodeId}')`);
+      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode(${JSON.stringify(nodeId)})`);
     });
   }
 

@@ -9,6 +9,7 @@
 
 import type { ComponentModel } from '../../src/editor/src/models/componentmodel';
 import {
+  authoredPath,
   nodeIdOf,
   NodePath,
   Selection,
@@ -156,5 +157,22 @@ describe('TVW-003 selection store', () => {
     store.select('preview', hero, [['a']]);
     store.select('preview', hero, [['b']]);
     expect(heard).toEqual(['canvas', 'layers', 'layers']);
+  });
+});
+
+describe('authoredPath — what the store keeps of a preview click', () => {
+  const authored = new Set(['homeHero', 'headline', 'card2', 'title']);
+  const isAuthored = (id: string) => authored.has(id);
+
+  it('drops a runtime instance (a router page guid) and keeps the authored instances in order', () => {
+    expect(authoredPath(['page-guid', 'homeHero', 'headline'], isAuthored)).toEqual(['homeHero', 'headline']);
+  });
+
+  it('keeps the node itself even when the project cannot find it', () => {
+    expect(authoredPath(['page-guid', 'row-guid', 'unsaved'], isAuthored)).toEqual(['unsaved']);
+  });
+
+  it('leaves a fully authored path as it was — AC3’s second card', () => {
+    expect(authoredPath(['card2', 'title'], isAuthored)).toEqual(['card2', 'title']);
   });
 });
