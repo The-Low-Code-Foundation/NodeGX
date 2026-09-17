@@ -1288,3 +1288,62 @@ Remaining difference, by design of the data: a prop-list entry keeps its `bg-2` 
 - s21 still-small: a token in a pair field ellipsises; a binding chip on an align row; §14.3 opacity `''` (compare with an
   opaque hex first).
 - AC1 (WORTHY on the Group pair) and R6 final once the region list is empty. AC5: CHR-004 + `test:ci`.
+
+## 22. The s21 leftovers: an align row chips, the opacity `''`, a token in a pair field (2026-09-17, s27)
+
+### 22.1 §14.3 opacity `''` — settled from the code, by design
+
+`DataTypes/ColorPicker/colorpicker.ts:121`: `opacity: color.alpha === 1 ? '' : Math.floor(color.alpha * 100) + '%'`, and
+`ColorPickerFields.tsx` gives that input `placeholder="100%"`. **Every** opaque colour opens with an empty field showing a
+greyed `100%`, hex or token alike. The rule is PLAT-002's (`61414da42`, 2026-07-24), not a token regression. The drive (§22.3)
+reads it on an opaque hex beside an alpha hex so the claim rests on the rendered field, not only the line.
+
+### 22.2 Slice 14 built — each align row chips when a wire drives it
+
+- **Measured before building.** Every alignment port (`alignX`/`alignY` in `node-shared-port-definitions.ts`, Group's
+  `alignItems`/`justifyContent`/`alignContent`) is a plain wireable input, with no `allowEditOnly`. `connectedRowPolicy.ts` still
+  called `AlignToolsType` an exception because it had "no single port". That was true of the old strip. Slice 5 made **one row
+  per port**, so the reason no longer held and a wired row kept its segments: the press was taken and the wire overwrote it.
+  This is FB-018's filed bug in another control.
+- `AlignToolsInput` takes `connections` (alignComp → `{label, onClick}`) and hands each row's to `PropertyPanelRow`, which
+  already draws the chip in place of its children and drops the reset dot. `AlignToolsType.connections()` reads
+  `isPortConnected(name, 'target')` + `getConnectionSourceLabel`/`Navigate` per port. `Ports.renderParams` rebuilds
+  `_toolsType` every render, and a connection change re-renders (s14's `bindModel` fix), so nothing caches a stale state.
+- `connectedRowPolicy.ts`: `AlignToolsType` → `chip` (chips 17). `MarginPaddingType` stays an exception: a pair field
+  edits two ports at once. ⚠️ Its reason is now only half true, because an expanded per-edge field IS one port. Not built,
+  and not measured whether a wired margin side keeps an editable field.
+
+### 22.3 Driven — `set/drive-s27.js` → `s27/s27-results.json`, dev build, dark, docked 312 and wide 736
+
+Before the drive: a peer's `dev:debug` started between my `ps` and the recents seed (s25's trap, again). My entry was
+removed and the backup restored before any editor launched. Then a peer `test:ci` ran, and I waited it out before launching.
+
+- **A, align chip** (Group, String `savedValue` → `alignX`), identical docked and wide: before, X 3 segments / Y 3. **Live
+  path, no reselect: chip within 5 s**, `Bound to String · Value`, gutter connected dot, X 0 segments, **Y still 3**
+  (the control arm), row height 32 unchanged. After a reselect (a fresh render), the same. Clicking the chip **selects
+  `chr009-s27-src`**. After `removeConnection` + reselect: X 3 segments, no chip. PNGs `s27/align-wired-*`: docked the chip
+  ellipsises at the control column like every chip at 312. Wide, it sizes to its text like the other chips.
+- **B, token in a pair field** (Text Input with TextInputConfig's paddings): **docked, both fields cut**: `--space-2` needs
+  69px in a 43px value box (61px field). **Wide, neither is cut** (273px fields). The tooltip carries `var(--space-2)`. Dropping
+  the `--` would still need ~54px, so no label trim fits at 312. That makes this a design call, not a fix (§22.5).
+- **C, opacity**: `#FBF8F3` ⇒ opacity input `value ''`, `placeholder 100%`, `:placeholder-shown` true. The PNG shows a greyed
+  `100%`. `#FBF8F366` ⇒ `40%`. **§14.3 closed: not a defect.** Model restored to `undefined`.
+
+### 22.4 Gates (2026-09-17, stack down)
+
+- `chr-009/alignRows.test.tsx` +1 (a wired row draws the chip in place of its segments, the unwired row keeps them, no reset
+  dot). **Mutant** `isConnected={false}` in `AlignToolsInput` ⇒ that test red (1 failed / 12), restored from a scratch copy.
+- `fb-018` both suites green with `AlignToolsType: chip` (partition, pinned deferred list unchanged).
+- `tsc --noEmit -p tsconfig.json` (editor) **EXIT 0**.
+- Plain `npx jest` (editor): **483 suites / 7,783 tests, 1 failed** = `tests-main/relay-auth.test.js` "still tells editors when a
+  viewer disconnects" (a relay socket timing wait, untouched here). Re-run alone **14/14 green**: a flake. `test:ci` **not run**.
+  No CSS changed, so `colors`/`type` were not re-run.
+- `dev.out`: 0 `ERROR in`. Recents restored byte-identical (`a1ea46f2`).
+
+### 22.5 Left
+
+- **Richard: the token in a docked pair field** (`s27/pair-token-docked-dark.png`). It is cut to `--sp…` at 312 and
+  fits at wide. The options are his (§22.3 B).
+- Slice 14 (align chip) awaits his look: `s27/align-wired-docked-dark.png`, `s27/align-wired-wide-dark.png`.
+- ⚠️ `MarginPaddingType`'s exception is half-true now that an expanded edge is one port: a wired margin side is unmeasured.
+- AC1 (WORTHY on the Group pair) and R6 final once the region list is empty. AC5: CHR-004 + `test:ci`.

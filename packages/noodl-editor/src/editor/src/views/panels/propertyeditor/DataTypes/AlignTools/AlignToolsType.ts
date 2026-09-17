@@ -1,8 +1,9 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
-import { AlignToolsInput } from '../../components/AlignToolsInput';
+import { AlignConnection, AlignToolsInput } from '../../components/AlignToolsInput';
 import { TypeView } from '../../TypeView';
+import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../../utils';
 
 export class AlignToolsType extends TypeView {
   defaults: TSFixme;
@@ -85,6 +86,7 @@ export class AlignToolsType extends TypeView {
         ports: Object.keys(this.ports).map((comp) => this.ports[comp]),
         values: { ...this.values },
         isVertical: this.isVertical(),
+        connections: this.connections(),
         onChange: (comp: string, value: string) => {
           this.values[comp] = value;
           this.parent.model.setParameter(this.ports[comp].name, value, {
@@ -104,6 +106,21 @@ export class AlignToolsType extends TypeView {
         }
       })
     );
+  }
+
+  /** alignComp → the wire driving that port, for the rows that are wired (FB-018 chip per row). */
+  private connections(): Record<string, AlignConnection> {
+    const model = this.parent.model;
+    const connections: Record<string, AlignConnection> = {};
+    Object.keys(this.ports).forEach((comp) => {
+      const name = this.ports[comp].name;
+      if (!model.isPortConnected(name, 'target')) return;
+      connections[comp] = {
+        label: getConnectionSourceLabel(model, name),
+        onClick: getConnectionSourceNavigate(model, name)
+      };
+    });
+    return connections;
   }
 
   dispose() {

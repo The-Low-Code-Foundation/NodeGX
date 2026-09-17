@@ -14,9 +14,19 @@ export interface AlignToolsInputProps {
   values: Record<string, string | undefined>;
   /** The flex direction is vertical: the item/content glyphs turn with it. */
   isVertical: boolean;
+  /**
+   * alignComp → the wire driving that port. Each row is one port, so each row chips on its own (FB-018): the
+   * strip this replaced was several ports in one control and had no single connection to name.
+   */
+  connections?: Record<string, AlignConnection | undefined>;
 
   onChange: (comp: string, value: string) => void;
   onReset: (comp: string) => void;
+}
+
+export interface AlignConnection {
+  label?: string;
+  onClick?: () => void;
 }
 
 /**
@@ -27,12 +37,19 @@ export interface AlignToolsInputProps {
  * per enum value (`model/alignRows.ts`). The pressed segment is the value in effect; the gutter's
  * reset dot says it was set.
  */
-export function AlignToolsInput({ ports, values, isVertical, onChange, onReset }: AlignToolsInputProps) {
+export function AlignToolsInput({ ports, values, isVertical, connections, onChange, onReset }: AlignToolsInputProps) {
   return (
     <div className={css['Root']}>
       {alignRowsOf(ports, values).map((row) => (
         <div key={row.comp} data-test={`align-row-${row.comp}`}>
-          <PropertyPanelRow label={row.label} isChanged={row.isChanged} onReset={() => onReset(row.comp)}>
+          <PropertyPanelRow
+            label={row.label}
+            isChanged={row.isChanged}
+            onReset={() => onReset(row.comp)}
+            isConnected={Boolean(connections?.[row.comp])}
+            connectionLabel={connections?.[row.comp]?.label}
+            onConnectionClick={connections?.[row.comp]?.onClick}
+          >
             <div className={css['Segment']} role="group" aria-label={row.label}>
               {row.options.map((option) => {
                 const glyph = alignGlyphOf(row.comp, option.value);

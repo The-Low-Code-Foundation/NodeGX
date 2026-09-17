@@ -185,4 +185,23 @@ describe('CHR-009 — alignment rows (component)', () => {
     (dots[0].props.onClick as () => void)();
     expect(reset).toEqual(['vertical']);
   });
+
+  // FB-018 on the align rows. A wired row that keeps its segments takes presses the wire overwrites. The
+  // unwired row in the same render is the control: its segments must still be there.
+  it('draws the binding chip in place of a wired row’s segments, and only that row', () => {
+    const tree = render(
+      <AlignToolsInput
+        ports={[ALIGN_X, ALIGN_Y]}
+        values={{ vertical: 'bottom' }}
+        isVertical
+        connections={{ vertical: { label: 'Number · Result' } }}
+        onChange={() => undefined}
+        onReset={() => undefined}
+      />
+    );
+    expect(buttons(tree).map((b) => b.props['data-align-comp'])).toEqual(['horizontal', 'horizontal', 'horizontal']);
+    expect(text(tree)).toContain('Number · Result');
+    // The connection overrides the explicit value, so the row stops offering to reset it.
+    expect(byClass(tree, 'ResetDot')).toHaveLength(0);
+  });
 });
