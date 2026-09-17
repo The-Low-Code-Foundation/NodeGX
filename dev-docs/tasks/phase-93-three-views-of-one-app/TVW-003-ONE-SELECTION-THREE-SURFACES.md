@@ -35,8 +35,9 @@ one-line change; record which). Keyboard navigation of the selection.
 1. **(person)** Corpus project, preview on `/`, canvas on `Home`. Click the hero's headline in the
    preview: the `Hero` instance node is selected on Home's canvas (the definition's headline is not
    on this canvas). Double-click into Hero; click `Headline` on the canvas: the headline is outlined
-   in the preview with its label. Hover `Eyebrow` on the canvas: the eyebrow shows the dashed hover
-   outline in the preview; move off: it goes.
+   in the preview with its label. Hover `Eyebrow` on the canvas: the eyebrow shows the thin (1px) hover
+   outline in the preview, the headline keeps its 2px selected one; move off: the hover goes.
+   *(Reworded 2026-09-17: Richard ruled thin-versus-thick over dashed.)*
 2. The store spec: three fake subscribers; a write from any one is read by the other two; a write
    equal to the current value notifies nobody; hover never clears selection.
 3. The instance path: on a page with two `Project Card` instances, click the second card's title in
@@ -326,3 +327,33 @@ red. **AC6 ✅ at the floor for slice 5.**
 
 **AC state after slice 5:** AC2 ✅ · AC3 ✅ · **AC4 ✅** · AC5 ✅ · AC6 ✅ · AC1 🟡 behaviour met, outline
 solid not "dashed" — Richard's call. TVW-003 closes when that is answered.
+
+### Slice 6 — AC1's ruling: hover thin, selection thick (2026-09-17, session 6) ✅ AC1
+
+**Ruling (Richard, 2026-09-17):** of the options put to him (dashed hover; thin hover / thick
+selection; faded hover; a marker on the selection; keep identical), **option 2 — hover 1px, selection
+2px, same teal.** Before this both were one `createHighlightDiv()` at 2px, so a hover and a selection
+on screen together could not be told apart.
+
+Built: `createHighlightDiv(weight)` in `packages/noodl-viewer-react/src/highlighter.ts`; hover passes
+`'hover'` (1px), selection `'selected'` (2px). A node both hovered and selected carries both divs.
+
+Gates: `tests/tvw-003-instance-path.test.ts` 11/11, new spec armed (hover forced to 2px → 1 red);
+whole viewer package `npx jest` **120 suites / 1606**, all green. `test:ci` not re-run for this
+one-line viewer change.
+
+Driven (dev stack, viewer bundle rebuilt 16:58 and grepped for the change, Design mode, canvas on
+`/Sections/Hero`): real click on `hero_head`, real pointer moves onto `hero_badge`. Guest reads:
+`hero_badge` outline `rgb(44, 167, 186) solid 1px` (box 294×33, in document); `hero_head`
+`rgb(44, 167, 186) solid 2px` (box 925×170). Two of three runs held the hover at read time; the
+third read no hover (the pointer path, not the weight). `scrollY` 0 throughout — the app preview
+did not move.
+
+🔴 Drive traps: the preview opens in **Preview** mode after a relaunch — click the first
+`[class*=ModeSegmentedButton]` first or nothing is outlined. **An instance node (`home_hero`) has no
+DOM element of its own**, so hover/select on it outlines nothing and a stale entry reads
+`inDoc: false` — drive on visual nodes inside a definition. The box-model chip covers a small
+hovered element in a screenshot; read `getComputedStyle(div).outline` instead.
+
+**AC state: AC1 ✅ · AC2 ✅ · AC3 ✅ · AC4 ✅ · AC5 ✅ · AC6 ✅ — TVW-003 CLOSED.** Carried, no AC asks
+it: the bench outlining a canvas selection/hover inside itself.

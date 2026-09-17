@@ -101,12 +101,19 @@ export class Highlighter {
     this.windowBorderDiv.style.height = '100vh';
   }
 
-  createHighlightDiv(): HTMLDivElement {
+  /**
+   * TVW-003 AC1 (ruled 2026-09-17, Richard: option 2) — a hover is a 1px line, a selection a 2px
+   * one, same teal. They were both 2px, so with the canvas hovering one thing and another selected
+   * the preview could not say which was which. Thin-versus-thick is the Figma/Webflow convention and
+   * stays legible over a photograph, where a dashed line breaks up. A node both hovered and
+   * selected carries both divs; the 2px line covers the 1px one.
+   */
+  createHighlightDiv(weight: 'hover' | 'selected' = 'selected'): HTMLDivElement {
     const div = document.createElement('div');
     div.style.position = 'absolute';
     div.style.top = '0';
     div.style.left = '0';
-    div.style.outline = '2px solid #2CA7BA';
+    div.style.outline = `${weight === 'hover' ? 1 : 2}px solid #2CA7BA`;
     div.style.opacity = '1.0';
     return div;
   }
@@ -256,7 +263,7 @@ export class Highlighter {
       .filter((node) => !this.highlightedNodes.has(node));
 
     for (const node of nodes) {
-      const highlight = this.createHighlightDiv();
+      const highlight = this.createHighlightDiv('hover');
 
       this.highlightRootDiv.appendChild(highlight);
       this.highlightedNodes.set(node, highlight);
@@ -306,7 +313,7 @@ export class Highlighter {
       .filter((node) => !this.selectedNodes.has(node));
 
     for (const node of nodes) {
-      const selection = this.createHighlightDiv();
+      const selection = this.createHighlightDiv('selected');
 
       this.highlightRootDiv.appendChild(selection);
       this.selectedNodes.set(node, selection);

@@ -124,4 +124,12 @@ describe('Highlighter — AC3’s outline count', () => {
     h.highlightNodesAtPath(instancePathOf(title1));
     expect(Array.from(h.highlightedNodes.keys())).toEqual([title1]);
   });
+
+  it('a hover draws a 1px line and a selection a 2px one, so the two read apart (AC1, option 2)', () => {
+    const h = highlighter();
+    h.highlightNodesAtPath(instancePathOf(title1));
+    h.selectNodesAtPath(instancePathOf(title2));
+    expect(h.highlightedNodes.get(title1 as never).style.outline).toBe('1px solid #2CA7BA');
+    expect(h.selectedNodes.get(title2 as never).style.outline).toBe('2px solid #2CA7BA');
+  });
 });

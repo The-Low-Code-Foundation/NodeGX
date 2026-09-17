@@ -1,7 +1,8 @@
 # Phase 93 — next session
 
 **Written 2026-09-17, end of session 6.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
-started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed.
+started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed; then closed TVW-003 on
+Richard's hover ruling (slice 6).
 
 ## The board, re-derived from the task files
 
@@ -9,7 +10,7 @@ started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed.
 |---|---|---|---|
 | TVW-001 | The panel tells the truth | 🟡 slice 1: highlight follows the canvas (a), `×N`/`unplaced`/`empty`/route meta (b) | **AC1 ✅ AC2 ✅** · AC3–8 — |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
-| TVW-003 | One selection, three surfaces | 🟡 slices 1–5 | AC2–6 ✅ · AC1 🟡 (solid vs "dashed", Richard) |
+| TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** — AC1 ✅ (hover 1px / selection 2px, ruled) |
 | TVW-004 | Layers (needs 001, 003) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
@@ -18,7 +19,7 @@ started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed.
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 7** (TVW-003 AC2–6; TVW-001 AC1, AC2).
+**ACs closed: 8** (TVW-003 all six — closed; TVW-001 AC1, AC2).
 
 ## Gate readings (2026-09-17, session 6)
 
@@ -46,13 +47,11 @@ started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed.
    the Router's Pages editor, undo both ways).
 2. Slice 3 (c, AC4), slice 4 (e, AC5), slice 5 (f, AC6), then AC7 screenshots (fix the meta
    alignment beside a warning dot first) and AC8.
-3. **TVW-003 close-out** the moment Richard answers AC1's style word.
+3. Optional, no AC asks it: the bench outlining a canvas selection/hover inside itself.
 
 ## Rulings owed by Richard
 
-- **AC1 hover outline: solid or dashed?** Today's canvas hover outline in the preview is a solid 2px
-  teal line with box-model chips (unchanged from before P93). AC1 says "dashed". Keep solid (AC reworded),
-  or make hover dashed so it reads differently from the selected outline?
+None open. **Ruled s6:** preview hover outline is 1px, selection 2px (TVW-003 slice 6).
 
 R-A…R-I inherited, R-J ruled.
 
