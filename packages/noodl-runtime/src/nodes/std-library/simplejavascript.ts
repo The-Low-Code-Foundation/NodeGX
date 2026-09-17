@@ -69,6 +69,12 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
      * call that never reaches the proxy's `set` trap at all.
      */
     outputWrites: Set<string>;
+    /**
+     * GAM-011 AC2 — outputs this run wrote with the value they already held, so nothing was published.
+     *
+     * Published after all if the same run fires a signal: see `publishHeldWrites`.
+     */
+    heldWrites: Set<string>;
     /** The receiver user code sees as `this`; persists across runs. */
     _this: Record<string, unknown>;
     func?: (...args: unknown[]) => Promise<unknown>;
@@ -109,6 +115,26 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
   _isSignalType(name: string): boolean;
 }
 
+/**
+ * GAM-011 AC2 (Richard, 2026-09-17: "whatever actually fixes it") — a value written in the same run as a
+ * signal is sent with that signal, even when it did not change.
+ *
+ * A Function publishes an output only when **its own** last value changes; old projects rely on that, and
+ * a value written on its own still follows it. But a value and a signal sent together are one message.
+ * An on-screen keypad is one Function per key, `Outputs.key = "5"; Outputs.press();`, every key wired into
+ * one Text Input's `Text To Insert`. Key 5 still held `5` from an earlier tap, published nothing, and the
+ * field inserted the `0` another key had sent: 305 typed as 300, measured in Chromium in session 21.
+ *
+ * Called before the signal is sent, so the value is delivered first, in the same update.
+ */
+function publishHeldWrites(node: SimpleJavascriptNodeInstance): void {
+  for (const prop of node._internal.heldWrites) {
+    node.registerOutputIfNeeded('out-' + prop);
+    node.flagOutputDirty('out-' + prop);
+  }
+  node._internal.heldWrites.clear();
+}
+
 const SimpleJavascriptNode: NodeDefinitionOptions = {
   name: 'JavaScriptFunction',
   displayNodeName: 'Function',
@@ -136,6 +162,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
     this._internal.inputValues = {};
     this._internal.outputValues = {};
     this._internal.outputWrites = new Set<string>();
+    this._internal.heldWrites = new Set<string>();
 
     this._internal.outputValuesProxy = new Proxy(this._internal.outputValues, {
       set: (obj, prop: string, value) => {
@@ -164,6 +191,9 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
 
           this._internal.outputValues[prop] = value;
           this.flagOutputDirty('out-' + prop);
+          this._internal.heldWrites.delete(prop);
+        } else {
+          this._internal.heldWrites.add(prop);
         }
         return true;
       }
@@ -404,6 +434,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
             // `outputValuesProxy`'s `set` trap — a Function whose only output is a signal
             // would otherwise be told it produced nothing on the very run in which it fired.
             this._internal.outputWrites.add(key.substring('out-'.length));
+            publishHeldWrites(this);
             if (this.hasOutput(key)) this.sendSignalOnOutput(key);
           };
           // The value is both callable and carries `.send`, so user code may write either
@@ -426,6 +457,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
       // put out. Placed after the signal-preparation loop above, which writes the callable
       // stubs straight to `outputValues` rather than through the proxy and so is not a write.
       this._internal.outputWrites = new Set<string>();
+      this._internal.heldWrites = new Set<string>();
 
       try {
         await func.apply(this._internal._this, [

@@ -1,6 +1,6 @@
 # GAM-011 — A field can ask for a keypad, and take a tapped key at the caret
 
-**Status: 🟡 2026-09-17 (session 21): (a) and (b) built. AC1, AC3, AC4, AC5 met; AC6 met by naming (Insert/Backspace deferred, not translated). 🔴 AC2 NOT met: a keypad wired the obvious way mistypes (a Function publishes only on change) — a question for Richard, §8. AC7 not recorded. ✅ R12 ruled s19 (§5).** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export)
+**Status: 🟢 2026-09-17 (session 22): AC2 met.** Richard ruled the keypad trap *"whatever actually fixes it"*: a value a Function writes in the same run as it fires a signal is now sent with that signal even when unchanged (runtime), and session 21's keypad page types 5/5 by touch at 1024×768 and 390×844 (was 3/5). AC1, AC3–AC5 met in s21; AC6 met by naming. **Left:** AC7. *(s21 status: 🟡 2026-09-17 (session 21): (a) and (b) built. AC1, AC3, AC4, AC5 met; AC6 met by naming (Insert/Backspace deferred, not translated). 🔴 AC2 NOT met: a keypad wired the obvious way mistypes (a Function publishes only on change) — a question for Richard, §8. AC7 not recorded. ✅ R12 ruled s19 (§5).** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export))*
 
 On a tablet, a number answer opens the full letter keyboard over half the game. An on-screen pad cannot type into the box while a
 child's caret is in it. Rocket School had to build its own React node to get either.
@@ -179,4 +179,24 @@ still held `0`. Pressing 3, 0, 5, 4, 2 once each lands every key (`30542`, logge
 (handoff). Scratch: `g11/pad` (the plain page), `g11/pad-null`, `drive-pad.js`, `drive-order.js`, `drive-pad3-{before,after}.log`.
 
 **AC7 not recorded.**
+
+### Session 22 (2026-09-17) — AC2, ruled and fixed
+
+**Ruling (Richard, asked in plain words):** *"I'd say whatever actually fixes it."* The fix that repairs the keypad people actually
+build is in Function, not in Insert: **a value written in the same run as a signal is published with that signal, even when unchanged.**
+A value written on its own keeps the old publish-on-change rule that old projects rely on.
+
+- `noodl-runtime/src/nodes/std-library/simplejavascript.ts`: an unchanged write is held (`heldWrites`), and `publishHeldWrites` flags
+  it dirty just before any `Outputs.<signal>()` of the same run is sent. Reset per run.
+- Spec `noodl-runtime/test/gam-011-a-value-sent-with-a-signal-arrives.test.ts` (real Function nodes, ports as a project file carries
+  them, one tap per frame): HEAD 1 red, **`121` typed as `122`** (s21's browser reading reproduced), beside 3 green controls (`123`,
+  `11`, and the backwards-compatible row: an unchanged write with no signal still publishes nothing). Fix 4/4.
+  🔴 The first run graded nothing: without `ports` on the node, `Outputs.press` does not exist and every arm read `""`.
+- Reverted arms: M1 the publish call removed → exactly the `121` row red; M2 every unchanged write published → exactly the
+  backwards-compatibility row red.
+- Whole `noodl-runtime` suite: 164 suites, 2778 ✓ (13 skipped), exit 0; `tsc --noEmit` 0.
+- **Chromium, AC2 touch** (s21's `g11/pad` project and `drive-pad.js`, served by `render-from-disk.js` over the current viewer bundle,
+  which carries the fix): **5/5 at 1024×768 and 5/5 at 390×844** (12, 7,5, 305, 9, 42), `inputmode="decimal"`, 0 console errors.
+  AC3 unchanged: `1923`, caret 2, focus kept. The deploy engine in `noodl-preview/dist` is stale (its catalog predates Insert Text) and
+  refused the project; not rebuilt.
 
