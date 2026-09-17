@@ -3,7 +3,7 @@
 **Written 2026-09-17 at the end of s25.** Branch `cline-dev`, commits `git log -- dev-docs/tasks/phase-92-dreamweaver-called`.
 The platform half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
-s25 in one paragraph: handoff item 1 is **built, driven and committed as slice 12 (`10354b4ba`), and needs Richard's look.**
+s25 in one paragraph: handoff item 1 is **built, driven and committed as slice 12 (`10354b4ba`), and approved by Richard ("Looks good").**
 The Function node's bright bordered `</>` `+` were **not a style**. Their class, `components-panel-edit-button`, has **no
 rule in any stylesheet**, so they drew as Chromium's unstyled `<button>`, pinned 30px up over the group heading. Both list
 widgets now draw one `ListActions` row after the list. It uses the node head's 26px `IconButton`s, and entry rows use the
