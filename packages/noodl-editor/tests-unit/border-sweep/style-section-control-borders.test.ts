@@ -73,7 +73,9 @@ const FILES = {
   size: `${CORE}/components/propertyeditor/SizePicker/SizePicker.module.scss`,
   token: `${CORE}/components/inputs/TokenPicker/TokenPicker.module.scss`,
   section: `${CORE}/components/propertyeditor/ElementStyleSection/ElementStyleSection.module.scss`,
-  panel: `${EDITOR}/assets/css/style.css`
+  panel: `${EDITOR}/assets/css/style.css`,
+  head: `${EDITOR}/editor/src/styles/propertyeditor/variantseditor.css`,
+  sizeMode: `${EDITOR}/editor/src/views/panels/propertyeditor/components/SizeModeInput.module.scss`
 } as const;
 
 type FileKey = keyof typeof FILES;
@@ -327,19 +329,15 @@ const ANY_PANEL_STEP: Ground[] = [
   { token: '--theme-color-bg-3', what: 'a bg-3 surface, wherever it is eventually placed' }
 ];
 
+/**
+ * 🔴 `.VariantSelector-trigger` and `.SizePicker-group` LEFT THIS TABLE in CHR-009 s24 (2026-09-17), BY RULING.
+ * Slice 10 made them the `Preset` and `Size` rows between `Variant` and `State`, and their `border-control` edge on
+ * `bg-3` drew them brighter than the two head rows beside them. Richard, asked which edge all four should share:
+ * "All four dimmer". They now paint `.panel-head-row-field`'s pair (`bg-2` fill, `border-default` edge), which is
+ * under 3:1 on the panel exactly as `Variant`/`State` always were. The row below grades that they MATCH the head
+ * row, so neither can drift back to its own look, and `PANEL` stays pinned for the rows that remain.
+ */
 const CONTROLS: { name: string; file: FileKey; selectors: string[]; grounds: Ground[] }[] = [
-  {
-    name: '.VariantSelector-trigger — ON the list, and its ground is in another package',
-    file: 'variant',
-    selectors: ['.VariantSelector-trigger'],
-    grounds: [PANEL]
-  },
-  {
-    name: '.SizePicker-group — the segmented control beside it, on NO list because the group sets no cursor',
-    file: 'size',
-    selectors: ['.SizePicker-group'],
-    grounds: [PANEL]
-  },
   {
     name: '.DismissButton — paints no fill, so the edge was the only thing marking it',
     file: 'banner',
@@ -484,6 +482,37 @@ describe.each(['dark', 'light'] as ThemeName[])('the property editor style secti
     );
   });
 
+  it('🔴 Preset and Size paint the head row’s field, so the four head rows share one edge (CHR-009 s24 ruling)', () => {
+    const tokenOf = (paint: Paint | null) => (paint ? describe_(paint) : 'nothing');
+    const edgeOf = (body: string) => paintOf(body, 'border-color') ?? paintOf(body, 'border');
+    const head = rule('head', '.panel-head-row-field');
+    const headHover = rule('head', '.panel-head-row-field:hover');
+    const hoverOf = (file: FileKey, selector: string) =>
+      nestedStates(rule(file, selector)).find((s) => s.selector.includes(':hover'))!.body;
+
+    const read = {
+      'Preset fill': tokenOf(fillOf(rule('variant', '.VariantSelector-trigger'))),
+      'Preset edge': tokenOf(edgeOf(rule('variant', '.VariantSelector-trigger'))),
+      'Preset hover edge': tokenOf(edgeOf(hoverOf('variant', '.VariantSelector-trigger'))),
+      'Size track fill': tokenOf(fillOf(rule('size', '.SizePicker-group'))),
+      'Size track edge': tokenOf(edgeOf(rule('size', '.SizePicker-group'))),
+      'Size selected fill': tokenOf(
+        fillOf(nestedStates(rule('size', '.SizePicker-option')).find((s) => s.selector.includes('--active'))!.body)
+      )
+    };
+    const segmentSelected = nestedStates(rule('sizeMode', '.Option')).find((s) => s.selector.includes('is-pressed'))!;
+    expect(read).toEqual({
+      'Preset fill': tokenOf(fillOf(head)),
+      'Preset edge': tokenOf(edgeOf(head)),
+      'Preset hover edge': tokenOf(edgeOf(headHover)),
+      'Size track fill': tokenOf(fillOf(rule('sizeMode', '.Segment'))),
+      'Size track edge': tokenOf(edgeOf(rule('sizeMode', '.Segment'))),
+      'Size selected fill': tokenOf(fillOf(segmentSelected.body))
+    });
+    // ...and the head row is still the dimmer pair the ruling chose, so "match" cannot pass by both moving up.
+    expect(tokenOf(edgeOf(head))).toBe('--theme-color-border-default');
+  });
+
   it('🔴 FINDING 2 — the ground is in another package, and the chain to it paints nothing', () => {
     // The pin is only worth having while the three links between the control and `.sidebar-panel`
     // stay transparent. The moment any of them paints a fill, THAT becomes the ground and every
@@ -613,7 +642,7 @@ describe.each(['dark', 'light'] as ThemeName[])('the property editor style secti
       { token: groundOf('panel', '.sidebar-panel'), bound: 1.4, what: 'the property editor panel (bg-1)' },
       { token: groundOf('banner', '.Banner'), bound: 1.2, what: 'the banner card (bg-2)' },
       { token: groundOf('token', '.TokenPicker-dropdown'), bound: 1.2, what: 'the dropdown (bg-2)' },
-      { token: groundOf('variant', '.VariantSelector-trigger'), bound: 1.2, what: "the trigger's own fill (bg-3)" }
+      { token: groundOf('variant', '.VariantSelector-trigger'), bound: 1.2, what: "the trigger's own fill (bg-2)" }
     ];
 
     const failures = surfaces
