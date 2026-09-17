@@ -263,7 +263,13 @@ export function PropertyPanelInput({
         {label}
       </div>
       <div className={css['InputContainer']}>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
+        {/* CHR-009 — the select's root has no width of its own (it is also the unit select inside a
+            number field, so it must not get one), so in this flex line it shrink-wrapped to its
+            text: 174px at wide beside number fields that fill 580. `is-select` grows it here only. */}
+        <div
+          className={classNames(css['Control'], inputType === PropertyPanelInputType.Select && css['is-select'])}
+          style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}
+        >
           {renderInput()}
           {showExpressionToggle && (
             <ExpressionToggle mode={expressionMode} isConnected={isConnected} onToggle={handleToggleMode} />

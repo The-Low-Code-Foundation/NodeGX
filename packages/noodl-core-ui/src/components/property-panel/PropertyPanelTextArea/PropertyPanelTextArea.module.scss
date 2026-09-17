@@ -7,15 +7,17 @@
   background-color: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-md);
-  padding: 5.5px 9px;
+  // CHR-009 §2 "one control height, 26px": one line is 1 + 4 + 16 + 4 + 1. It was 5.5px padding on a
+  // 16.8px line with a 33px floor, the only field in the panel off 26; more lines still grow it.
+  padding: 4px 9px;
   width: 100%;
   box-sizing: border-box;
   font-size: var(--font-size-sm);
-  line-height: 1.4;
+  line-height: 16px;
   resize: none;
   // Replaces the legacy jquery.autosize behaviour (Chromium >= 123).
   field-sizing: content;
-  min-height: 33px;
+  min-height: 26px;
   max-height: 300px;
   transition: background-color var(--speed-turbo), color var(--speed-turbo), border-color var(--speed-turbo);
 

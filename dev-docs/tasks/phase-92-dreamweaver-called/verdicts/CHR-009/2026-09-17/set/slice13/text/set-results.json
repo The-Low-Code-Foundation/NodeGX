@@ -1,0 +1,132 @@
+{
+  "text": {
+    "type": "Text",
+    "selected": "Text / Text",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 719,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(187, 198, 211)": 1,
+        "rgb(56, 54, 66)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "50%": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 8,
+        "30": 1,
+        "58": 1
+      }
+    },
+    "docked-light": {
+      "elements": 719,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(74, 86, 99)": 1,
+        "rgb(229, 233, 237)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "50%": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 8,
+        "30": 1,
+        "58": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 46,
+      "cuts": []
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 718,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 718,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 46,
+      "cuts": []
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  }
+}
