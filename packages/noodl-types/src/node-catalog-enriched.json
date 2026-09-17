@@ -26723,6 +26723,171 @@
       }
     },
     {
+      "typeName": "Repeat",
+      "displayName": "Repeat",
+      "category": "Utilities",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "browser"
+      ],
+      "providedBy": "noodl-viewer-react",
+      "ssr": {
+        "compat": "client-only",
+        "note": "Does nothing during a server render: it never ticks there and Count reads empty. It starts in the browser after hydration."
+      },
+      "searchTags": [
+        "interval",
+        "every",
+        "tick",
+        "ticker",
+        "clock",
+        "loop",
+        "timer",
+        "poll",
+        "countdown"
+      ],
+      "inputs": [
+        {
+          "name": "interval",
+          "displayName": "Interval",
+          "group": "Values",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 1000,
+          "description": "Time between ticks, in milliseconds. A change takes effect from the next tick. Must be above zero"
+        },
+        {
+          "name": "start",
+          "displayName": "Start",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Starts ticking from a Count of 0: the first Tick fires one Interval later. Fires Unchanged while already running"
+        },
+        {
+          "name": "stop",
+          "displayName": "Stop",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Stops ticking. Count keeps its value until the next Start"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
+          "name": "count",
+          "displayName": "Count",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "How many times Tick has fired since the last Start"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Start began ticking or Stop stopped it"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires on a Start whose Interval is not a number of milliseconds above zero"
+        },
+        {
+          "name": "tick",
+          "displayName": "Tick",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once every Interval while running"
+        },
+        {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires on a Start while already running, or a Stop with nothing running"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null,
+      "enrichment": {
+        "typeName": "Repeat",
+        "summary": "Repeat: fires a Tick signal every Interval milliseconds between Start and Stop, and counts the ticks.",
+        "description": "Repeat turns one Start into a steady beat. After `start` (Start) the first `tick` (Tick) fires one `interval` (Interval, milliseconds, default 1000) later, then once every Interval until `stop` (Stop). `count` (Count) is how many ticks have fired since the last Start; Stop keeps it, the next Start resets it to 0. A Start while already running reports Unchanged and does not start a second beat. The beat does not drift, and ticks missed while the browser tab was in the background are skipped rather than fired in a burst. Repeat stops by itself when its page or component is left, and it never ticks during a server render. A Start whose Interval is not a number above zero reports Failure with the reason.",
+        "whenToUse": "Use it for anything that happens on its own at a steady pace: a clock, a countdown, a slideshow that advances, polling for new data, an autosave, a number that counts up. For one later signal use Delay (Timer) instead; to animate a value smoothly use Animate To Value.",
+        "ports": {
+          "start": "Signal; starts ticking from a Count of 0. Unchanged while already running.",
+          "stop": "Signal; stops ticking and keeps Count. Unchanged when nothing is running.",
+          "interval": "Number value in milliseconds between ticks (default 1000). A change takes effect from the next tick.",
+          "tick": "Signal; fires once every Interval while running.",
+          "count": "Number; ticks fired since the last Start."
+        },
+        "examples": [
+          "logic-stopwatch-every-second"
+        ],
+        "patterns": [
+          "A Group's Did Mount → `start`, `tick` → Counter's Increase Count, the Counter's value into a Text: a number that goes up once a second, with no script.",
+          "`count` into an Expression `10 - count` for the Text, and a second Expression `count >= 10` into a Condition whose On True → `stop`: a ten-second countdown that stops itself."
+        ],
+        "antiPatterns": [
+          "Looping a Delay's `timerFinished` into its own `restart` for a repeating tick — Repeat is that loop as one node, without drift.",
+          "A `setInterval` inside a Function node — invisible on the canvas, and nothing stops it when the page is left.",
+          "Treating `interval` as seconds — it is milliseconds."
+        ],
+        "relatedNodes": [
+          "Timer",
+          "Counter",
+          "net.noodl.animatetovalue"
+        ]
+      }
+    },
+    {
       "typeName": "Router",
       "displayName": "Page Router",
       "category": "Visual",
@@ -33015,7 +33180,7 @@
         "typeName": "Timer",
         "summary": "Delay: fires a Finished signal a set number of milliseconds after being started; restartable for debouncing.",
         "description": "Timer (displayed as Delay) turns one signal into a later signal. Triggering `start` (Start) begins a countdown of `duration` milliseconds (after an optional `startDelay`, also milliseconds); when it completes, `timerFinished` (Finished) fires. `timerStarted` (Started) fires at the moment the countdown actually begins. `start` does nothing while the timer is already running, whereas `restart` (Restart) always begins the countdown again from zero — that difference is what makes `restart` the debounce input. `stop` (Stop) cancels a running countdown without firing `timerFinished`. With the default `duration` of 0 the finish fires on the next tick, which still defers the signal until after the current update.",
-        "whenToUse": "Use it to defer an action (auto-dismiss a toast, poll once after mount) or, via `restart`, to debounce a noisy source such as typing. For repeating ticks, loop `timerFinished` back into `restart`. For animating a value over time use Animation instead — Timer carries no value, only timing.",
+        "whenToUse": "Use it to defer an action (auto-dismiss a toast, poll once after mount) or, via `restart`, to debounce a noisy source such as typing. For a repeating tick use Repeat. For animating a value over time use Animation instead — Timer carries no value, only timing.",
         "ports": {
           "start": "Signal; starts the countdown only if the timer is not already running.",
           "restart": "Signal; starts the countdown unconditionally, restarting from zero if already running — use for debouncing.",
@@ -33031,18 +33196,19 @@
           "community-tiptap-text-editor"
         ],
         "patterns": [
-          "Value Changed `valueChanged` → `restart`, act on `timerFinished`: debounce — the action runs only after the input has been quiet for `duration` ms.",
-          "`timerFinished` → its own `restart`: a simple repeating tick."
+          "Value Changed `valueChanged` → `restart`, act on `timerFinished`: debounce — the action runs only after the input has been quiet for `duration` ms."
         ],
         "antiPatterns": [
           "Using `start` for debouncing — while running it ignores triggers, so the action fires on the first quiet gap after the *first* event, not the last. Use `restart`.",
-          "Treating `duration` as seconds — it is milliseconds."
+          "Treating `duration` as seconds — it is milliseconds.",
+          "`timerFinished` looped into its own `restart` for a repeating tick — use Repeat, which does not drift and stops when its page is left."
         ],
         "relatedNodes": [
           "Value Changed",
           "Animation",
           "States",
-          "Switch"
+          "Switch",
+          "Repeat"
         ]
       }
     },
@@ -62877,8 +63043,8 @@
     "version": "1.0.0",
     "docs": "docs/node-catalog/ENRICHMENT.md",
     "coverage": {
-      "documented": 176,
-      "total": 176
+      "documented": 177,
+      "total": 177
     }
   },
   "compatibility": {
@@ -75181,6 +75347,119 @@
               "fromProperty": "remappedValue",
               "toId": "fill_circle",
               "toProperty": "opacity"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logic-stopwatch-every-second",
+      "title": "Stopwatch: a number that goes up once a second, with no script",
+      "description": "A Repeat node is the beat. The root Group's Did Mount starts it, so the count begins when the part appears, and it stops by itself when the part is removed or its page is left. Start and Stop buttons drive the same node: a Start while it is already running reports Unchanged and does not start a second beat, and a Start after Stop begins again from 0. Count, the number of ticks since the last Start, goes through a String Format into the readout. Nothing here is JavaScript, and every moving part is on the canvas.",
+      "demonstrates": [
+        "Repeat",
+        "String Format"
+      ],
+      "components": [
+        {
+          "name": "/Stopwatch",
+          "nodes": [
+            {
+              "id": "root",
+              "type": "Group",
+              "label": "Stopwatch",
+              "parameters": {
+                "flexDirection": "column"
+              },
+              "children": [
+                "readout",
+                "buttons"
+              ]
+            },
+            {
+              "id": "readout",
+              "type": "Text",
+              "label": "Seconds readout",
+              "parent": "root"
+            },
+            {
+              "id": "buttons",
+              "type": "Group",
+              "label": "Buttons",
+              "parent": "root",
+              "parameters": {
+                "flexDirection": "row"
+              },
+              "children": [
+                "start_btn",
+                "stop_btn"
+              ]
+            },
+            {
+              "id": "start_btn",
+              "type": "net.noodl.controls.button",
+              "label": "Start",
+              "parent": "buttons",
+              "parameters": {
+                "label": "Start"
+              }
+            },
+            {
+              "id": "stop_btn",
+              "type": "net.noodl.controls.button",
+              "label": "Stop",
+              "parent": "buttons",
+              "parameters": {
+                "label": "Stop"
+              }
+            },
+            {
+              "id": "beat",
+              "type": "Repeat",
+              "label": "Every second",
+              "parameters": {
+                "interval": 1000
+              }
+            },
+            {
+              "id": "caption",
+              "type": "String Format",
+              "label": "Seconds caption",
+              "parameters": {
+                "format": "{seconds} s"
+              }
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "root",
+              "fromProperty": "didMount",
+              "toId": "beat",
+              "toProperty": "start"
+            },
+            {
+              "fromId": "start_btn",
+              "fromProperty": "onClick",
+              "toId": "beat",
+              "toProperty": "start"
+            },
+            {
+              "fromId": "stop_btn",
+              "fromProperty": "onClick",
+              "toId": "beat",
+              "toProperty": "stop"
+            },
+            {
+              "fromId": "beat",
+              "fromProperty": "count",
+              "toId": "caption",
+              "toProperty": "seconds"
+            },
+            {
+              "fromId": "caption",
+              "fromProperty": "formatted",
+              "toId": "readout",
+              "toProperty": "text"
             }
           ]
         }

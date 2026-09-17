@@ -7,7 +7,7 @@ Timer (displayed as Delay) turns one signal into a later signal. Triggering `sta
 
 ## When to use it
 
-Use it to defer an action (auto-dismiss a toast, poll once after mount) or, via `restart`, to debounce a noisy source such as typing. For repeating ticks, loop `timerFinished` back into `restart`. For animating a value over time use Animation instead — Timer carries no value, only timing.
+Use it to defer an action (auto-dismiss a toast, poll once after mount) or, via `restart`, to debounce a noisy source such as typing. For a repeating tick use Repeat. For animating a value over time use Animation instead — Timer carries no value, only timing.
 
 ## At a glance
 
@@ -51,12 +51,12 @@ Use it to defer an action (auto-dismiss a toast, poll once after mount) or, via 
 ## Patterns
 
 - Value Changed `valueChanged` → `restart`, act on `timerFinished`: debounce — the action runs only after the input has been quiet for `duration` ms.
-- `timerFinished` → its own `restart`: a simple repeating tick.
 
 ## Watch out for
 
 - Using `start` for debouncing — while running it ignores triggers, so the action fires on the first quiet gap after the *first* event, not the last. Use `restart`.
 - Treating `duration` as seconds — it is milliseconds.
+- `timerFinished` looped into its own `restart` for a repeating tick — use Repeat, which does not drift and stops when its page is left.
 
 ## Examples
 
@@ -74,7 +74,7 @@ The larger companion to the single-button component: a `Static Data` node holds 
 
 ## Related nodes
 
-[Value Changed](../logic/value-changed.md), [Animation](../animation/animation.md), [States](../animation/states.md), [Switch](../logic/switch.md)
+[Value Changed](../logic/value-changed.md), [Animation](../animation/animation.md), [States](../animation/states.md), [Switch](../logic/switch.md), [Repeat](./repeat.md)
 
 
 :::info Generated

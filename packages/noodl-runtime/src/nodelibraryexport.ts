@@ -648,6 +648,7 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
             'States',
             'Value Changed',
             'Timer',
+            'Repeat',
             'Color Blend',
             'Number Remapper',
             'Counter',

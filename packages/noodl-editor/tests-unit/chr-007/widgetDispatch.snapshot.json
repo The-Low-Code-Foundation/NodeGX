@@ -993,6 +993,11 @@
       "store": null,
       "targetId": "BasicType"
     },
+    "Repeat": {
+      "interval": "BasicType",
+      "start": null,
+      "stop": null
+    },
     "Router": {
       "backgroundColor": "ColorType",
       "clip": "EnumType",

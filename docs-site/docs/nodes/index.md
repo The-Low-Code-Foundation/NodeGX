@@ -2,7 +2,7 @@
 title: Node reference
 ---
 
-Every node in the catalog — 176 in total — generated from the same
+Every node in the catalog — 177 in total — generated from the same
 enriched catalog the editor reads for its own in-editor help. Grouped by picker category.
 
 :::info Generated
@@ -194,6 +194,7 @@ This page is generated from `node-catalog-enriched.json`. Do not edit it by hand
 - [On App Error](./utilities/on-app-error.md)
 - [Open File Picker](./utilities/open-file-picker.md)
 - [Random Bytes](./utilities/net-noodl-random-bytes.md)
+- [Repeat](./utilities/repeat.md)
 - [Screen Resolution](./utilities/screen-resolution.md)
 - [String Mapper](./utilities/string-mapper.md)
 - [UUID](./utilities/net-noodl-uuid.md)

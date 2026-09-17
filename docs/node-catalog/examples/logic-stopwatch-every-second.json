@@ -1,0 +1,40 @@
+{
+  "id": "logic-stopwatch-every-second",
+  "title": "Stopwatch: a number that goes up once a second, with no script",
+  "description": "A Repeat node is the beat. The root Group's Did Mount starts it, so the count begins when the part appears, and it stops by itself when the part is removed or its page is left. Start and Stop buttons drive the same node: a Start while it is already running reports Unchanged and does not start a second beat, and a Start after Stop begins again from 0. Count, the number of ticks since the last Start, goes through a String Format into the readout. Nothing here is JavaScript, and every moving part is on the canvas.",
+  "demonstrates": ["Repeat", "String Format"],
+  "components": [
+    {
+      "name": "/Stopwatch",
+      "nodes": [
+        {
+          "id": "root",
+          "type": "Group",
+          "label": "Stopwatch",
+          "parameters": { "flexDirection": "column" },
+          "children": ["readout", "buttons"]
+        },
+        { "id": "readout", "type": "Text", "label": "Seconds readout", "parent": "root" },
+        {
+          "id": "buttons",
+          "type": "Group",
+          "label": "Buttons",
+          "parent": "root",
+          "parameters": { "flexDirection": "row" },
+          "children": ["start_btn", "stop_btn"]
+        },
+        { "id": "start_btn", "type": "net.noodl.controls.button", "label": "Start", "parent": "buttons", "parameters": { "label": "Start" } },
+        { "id": "stop_btn", "type": "net.noodl.controls.button", "label": "Stop", "parent": "buttons", "parameters": { "label": "Stop" } },
+        { "id": "beat", "type": "Repeat", "label": "Every second", "parameters": { "interval": 1000 } },
+        { "id": "caption", "type": "String Format", "label": "Seconds caption", "parameters": { "format": "{seconds} s" } }
+      ],
+      "connections": [
+        { "fromId": "root", "fromProperty": "didMount", "toId": "beat", "toProperty": "start" },
+        { "fromId": "start_btn", "fromProperty": "onClick", "toId": "beat", "toProperty": "start" },
+        { "fromId": "stop_btn", "fromProperty": "onClick", "toId": "beat", "toProperty": "stop" },
+        { "fromId": "beat", "fromProperty": "count", "toId": "caption", "toProperty": "seconds" },
+        { "fromId": "caption", "fromProperty": "formatted", "toId": "readout", "toProperty": "text" }
+      ]
+    }
+  ]
+}

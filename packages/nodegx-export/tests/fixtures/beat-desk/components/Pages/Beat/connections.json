@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b7c2d9e1-0000-4000-8000-000000000132",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "startButton",
+      "fromProperty": "onClick",
+      "toId": "beat",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "stopButton",
+      "fromProperty": "onClick",
+      "toId": "beat",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "beat",
+      "fromProperty": "tick",
+      "toId": "counter",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "beat",
+      "fromProperty": "count",
+      "toId": "ticksText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "counter",
+      "fromProperty": "currentCount",
+      "toId": "counterText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "beat",
+      "fromProperty": "done",
+      "toId": "setDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "beat",
+      "fromProperty": "unchanged",
+      "toId": "setUnchanged",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "beat",
+      "fromProperty": "failure",
+      "toId": "setFailure",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "doneConst",
+      "fromProperty": "savedValue",
+      "toId": "setDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "unchangedConst",
+      "fromProperty": "savedValue",
+      "toId": "setUnchanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "failureConst",
+      "fromProperty": "savedValue",
+      "toId": "setFailure",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "outcomeVar",
+      "fromProperty": "value",
+      "toId": "outcomeText",
+      "toProperty": "text"
+    }
+  ]
+}

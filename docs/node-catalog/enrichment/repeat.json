@@ -1,0 +1,24 @@
+{
+  "typeName": "Repeat",
+  "summary": "Repeat: fires a Tick signal every Interval milliseconds between Start and Stop, and counts the ticks.",
+  "description": "Repeat turns one Start into a steady beat. After `start` (Start) the first `tick` (Tick) fires one `interval` (Interval, milliseconds, default 1000) later, then once every Interval until `stop` (Stop). `count` (Count) is how many ticks have fired since the last Start; Stop keeps it, the next Start resets it to 0. A Start while already running reports Unchanged and does not start a second beat. The beat does not drift, and ticks missed while the browser tab was in the background are skipped rather than fired in a burst. Repeat stops by itself when its page or component is left, and it never ticks during a server render. A Start whose Interval is not a number above zero reports Failure with the reason.",
+  "whenToUse": "Use it for anything that happens on its own at a steady pace: a clock, a countdown, a slideshow that advances, polling for new data, an autosave, a number that counts up. For one later signal use Delay (Timer) instead; to animate a value smoothly use Animate To Value.",
+  "ports": {
+    "start": "Signal; starts ticking from a Count of 0. Unchanged while already running.",
+    "stop": "Signal; stops ticking and keeps Count. Unchanged when nothing is running.",
+    "interval": "Number value in milliseconds between ticks (default 1000). A change takes effect from the next tick.",
+    "tick": "Signal; fires once every Interval while running.",
+    "count": "Number; ticks fired since the last Start."
+  },
+  "examples": ["logic-stopwatch-every-second"],
+  "patterns": [
+    "A Group's Did Mount → `start`, `tick` → Counter's Increase Count, the Counter's value into a Text: a number that goes up once a second, with no script.",
+    "`count` into an Expression `10 - count` for the Text, and a second Expression `count >= 10` into a Condition whose On True → `stop`: a ten-second countdown that stops itself."
+  ],
+  "antiPatterns": [
+    "Looping a Delay's `timerFinished` into its own `restart` for a repeating tick — Repeat is that loop as one node, without drift.",
+    "A `setInterval` inside a Function node — invisible on the canvas, and nothing stops it when the page is left.",
+    "Treating `interval` as seconds — it is milliseconds."
+  ],
+  "relatedNodes": ["Timer", "Counter", "net.noodl.animatetovalue"]
+}

@@ -49,6 +49,7 @@ const AMBIGUOUS_TYPE_NAMES = new Set([
   'Value',
   'Event',
   'Timer',
+  'Repeat',
   'Counter',
   'Switch',
   'Options',

@@ -558,7 +558,7 @@
           "plug": "input",
           "group": "General",
           "displayName": "Expression",
-          "description": "JavaScript expression whose value becomes Result; every identifier in it becomes an input port"
+          "description": "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those"
         },
         {
           "name": "run",
@@ -570,6 +570,18 @@
           "group": "Actions",
           "displayName": "Run",
           "description": "Evaluates the expression now. This is additional to the inputs that re-run it; untick an input under Run On Value Change to stop that one triggering a run"
+        },
+        {
+          "name": "evaluateAtLoad",
+          "type": {
+            "name": "boolean",
+            "allowEditOnly": true
+          },
+          "plug": "input",
+          "group": "Run On Value Change",
+          "displayName": "Evaluate At Load",
+          "description": "Whether the expression runs when the page loads even though an input it reads has not arrived yet. Those inputs read as undefined, so `m !== false` is true and `m === true` is false. An expression that throws or gives NaN over them waits for its inputs instead. Untick to wait for an input to arrive",
+          "default": true
         },
         {
           "name": "result",
@@ -10046,6 +10058,7 @@
               "States",
               "Value Changed",
               "Timer",
+              "Repeat",
               "Color Blend",
               "Number Remapper",
               "Counter",

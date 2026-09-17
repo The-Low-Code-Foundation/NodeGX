@@ -24846,6 +24846,141 @@
       }
     },
     {
+      "typeName": "Repeat",
+      "displayName": "Repeat",
+      "category": "Utilities",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "browser"
+      ],
+      "providedBy": "noodl-viewer-react",
+      "ssr": {
+        "compat": "client-only",
+        "note": "Does nothing during a server render: it never ticks there and Count reads empty. It starts in the browser after hydration."
+      },
+      "searchTags": [
+        "interval",
+        "every",
+        "tick",
+        "ticker",
+        "clock",
+        "loop",
+        "timer",
+        "poll",
+        "countdown"
+      ],
+      "inputs": [
+        {
+          "name": "interval",
+          "displayName": "Interval",
+          "group": "Values",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 1000,
+          "description": "Time between ticks, in milliseconds. A change takes effect from the next tick. Must be above zero"
+        },
+        {
+          "name": "start",
+          "displayName": "Start",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Starts ticking from a Count of 0: the first Tick fires one Interval later. Fires Unchanged while already running"
+        },
+        {
+          "name": "stop",
+          "displayName": "Stop",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Stops ticking. Count keeps its value until the next Start"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
+          "name": "count",
+          "displayName": "Count",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "How many times Tick has fired since the last Start"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Start began ticking or Stop stopped it"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires on a Start whose Interval is not a number of milliseconds above zero"
+        },
+        {
+          "name": "tick",
+          "displayName": "Tick",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once every Interval while running"
+        },
+        {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires on a Start while already running, or a Stop with nothing running"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null
+    },
+    {
       "typeName": "Router",
       "displayName": "Page Router",
       "category": "Visual",

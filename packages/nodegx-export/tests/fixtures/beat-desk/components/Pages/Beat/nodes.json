@@ -1,0 +1,204 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b7c2d9e1-0000-4000-8000-000000000132",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Beat",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Beat Desk",
+        "urlPath": "beat"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "ticksText",
+        "counterText",
+        "outcomeText",
+        "startButton",
+        "stopButton"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-10)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "text": "Beat Desk"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ticksText",
+      "type": "Text",
+      "label": "Ticks",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 360
+    },
+    {
+      "id": "counterText",
+      "type": "Text",
+      "label": "Counter",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "outcomeText",
+      "type": "Text",
+      "label": "Outcome",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 440
+    },
+    {
+      "id": "startButton",
+      "type": "net.noodl.controls.button",
+      "label": "Start",
+      "parent": "shell",
+      "parameters": {
+        "label": "Start"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "stopButton",
+      "type": "net.noodl.controls.button",
+      "label": "Stop",
+      "parent": "shell",
+      "parameters": {
+        "label": "Stop"
+      },
+      "x": 160,
+      "y": 560
+    },
+    {
+      "id": "beat",
+      "type": "Repeat",
+      "label": "Beat",
+      "parameters": {
+        "interval": 1000
+      },
+      "x": 400,
+      "y": 520
+    },
+    {
+      "id": "counter",
+      "type": "Counter",
+      "label": "Seconds",
+      "parameters": {},
+      "x": 640,
+      "y": 400
+    },
+    {
+      "id": "outcomeVar",
+      "type": "Variable2",
+      "label": "Outcome",
+      "parameters": {
+        "name": "outcome"
+      },
+      "x": 400,
+      "y": 440
+    },
+    {
+      "id": "setDone",
+      "type": "Set Variable",
+      "label": "Done",
+      "parameters": {
+        "name": "outcome"
+      },
+      "x": 640,
+      "y": 560
+    },
+    {
+      "id": "setUnchanged",
+      "type": "Set Variable",
+      "label": "Unchanged",
+      "parameters": {
+        "name": "outcome"
+      },
+      "x": 640,
+      "y": 600
+    },
+    {
+      "id": "setFailure",
+      "type": "Set Variable",
+      "label": "Failure",
+      "parameters": {
+        "name": "outcome"
+      },
+      "x": 640,
+      "y": 640
+    },
+    {
+      "id": "doneConst",
+      "type": "String",
+      "label": "Done text",
+      "parameters": {
+        "value": "Done"
+      },
+      "x": 520,
+      "y": 560
+    },
+    {
+      "id": "unchangedConst",
+      "type": "String",
+      "label": "Unchanged text",
+      "parameters": {
+        "value": "Unchanged"
+      },
+      "x": 520,
+      "y": 600
+    },
+    {
+      "id": "failureConst",
+      "type": "String",
+      "label": "Failure text",
+      "parameters": {
+        "value": "Failure"
+      },
+      "x": 520,
+      "y": 640
+    }
+  ]
+}

@@ -571,7 +571,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -582,6 +582,12 @@ export const WEBSOCKET_TYPE = 'net.noodl.WebSocket';
  * its own module, riding EXP-009's client. The Backend picker, the Filter and its `qp-` ports are refused by name (streamPlanOf).
  */
 export const SUBSCRIBE_TO_CHANGES_TYPE = 'SubscribeToChanges';
+/**
+ * GAM-013 (P88). `Repeat` — the seventh member: no data port, one config port (Interval), two Actions (Start, Stop), Tick
+ * and the outcome trio as listeners, Count a live getter; its own module, `src/lib/repeat.ts`. The table fits it exactly,
+ * where Delay's per-verb callbacks (§39) could not carry a node whose Tick belongs to the node and whose Count is a value.
+ */
+export const REPEAT_TYPE = 'Repeat';
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -597,7 +603,7 @@ export interface StreamNodeSpec {
   hook: string;
   localStem: string;
   /** The module the hook lives in (component.ts maps it to a path; emitApp.ts ships it). */
-  lib: 'streaming' | 'sse' | 'websocket' | 'realtime';
+  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat';
   /** The runtime file the hook transcribes, for the emitted comment. */
   sourceFile: string;
   /** The data port, delivered with the pulse — absent on a node whose actions carry nothing (§64's SSE). */
@@ -817,12 +823,29 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
       changedRecords: { tsType: 'Record<string, unknown>[]', cast: 'array', maybeUndefined: false },
       changedRecordId: { tsType: 'string', cast: 'string', maybeUndefined: false }
     }
+  },
+  // GAM-013 (P88). The Interval is the one config port (read at Start and at every tick, so a change lands on the next
+  // tick); Start and Stop carry nothing; Tick and the outcome trio are the listeners; Count is a live getter, 0 before the
+  // first Start (initialize), never undefined.
+  [REPEAT_TYPE]: {
+    kind: 'repeat',
+    displayName: 'Repeat',
+    hook: 'useRepeat',
+    localStem: 'Repeat',
+    lib: 'repeat',
+    sourceFile: 'repeat.ts',
+    config: [{ port: 'interval', displayName: 'Interval' }],
+    actions: { start: { verb: 'start', takesData: false }, stop: { verb: 'stop', takesData: false } },
+    signals: ['tick', ...OUTCOME_SIGNALS],
+    values: {
+      count: { tsType: 'number', cast: 'number', maybeUndefined: false }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -856,6 +879,8 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   [WEBSOCKET_TYPE]: STREAM_NODES[WEBSOCKET_TYPE].signals,
   // EXP-011 §66. The subscription's five signals, the same footing.
   [SUBSCRIBE_TO_CHANGES_TYPE]: STREAM_NODES[SUBSCRIBE_TO_CHANGES_TYPE].signals,
+  // GAM-013. Tick and the outcome trio, the same footing.
+  [REPEAT_TYPE]: STREAM_NODES[REPEAT_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],

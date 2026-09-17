@@ -202,7 +202,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // `PuppyCard.tsx`, `EXPORT-REPORT.md` (its file count, `src/lib/media.ts` joined) and `@report`.
     // Zero hashes changed in the other 42, which have no wired media URL. `tests/the-picture-path.test.ts`
     // grades the rule; the hand-written PuppyCard golden in `visual.test.ts` moved by the same two lines.
-    expect(corpusProjects().length).toBe(46);
+    //
+    // 46 → 47 on 2026-09-17 (P88 GAM-013): `beat-desk` is the first project with a `Repeat`, the new built-in
+    // node (18 files added). 🔴 **Not additive, counted before the literal moved:** 46 existing hashes changed,
+    // every one a project's `README.md` and nothing else, because the alpha sentence reads the ledger and now
+    // says "118 of the 128 nodes you can place". Proved by putting 117/127 back in three READMEs (tick-desk,
+    // cheer, socket-desk): each hash equalled the old golden. Zero other files moved.
+    expect(corpusProjects().length).toBe(47);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

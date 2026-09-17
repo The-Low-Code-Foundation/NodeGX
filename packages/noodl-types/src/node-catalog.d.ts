@@ -83,6 +83,7 @@ export type NodeTypeName =
   | 'Radio Button Group'
   | 'Range'
   | 'RemoveDbModelRelation'
+  | 'Repeat'
   | 'Router'
   | 'RouterNavigate'
   | 'RunTasks'

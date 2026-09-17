@@ -1009,7 +1009,7 @@ describe('§F the ledger', () => {
     const row = ledger.entries.find((e) => e.typeName === SUBSCRIBE_TO_CHANGES_TYPE)!;
     expect(row.exemption).toBeUndefined();
     expect(String(row.note)).toContain('useSubscribeToChanges');
-    expect(ledger.pickerCoverageFloor).toBe(117); // §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89)
+    expect(ledger.pickerCoverageFloor).toBe(118); // GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89)
     expect(ledger.$pickerCoverageFloorComment).toContain('117 after Tier 3.11 row 3 Subscribe To Changes');
   });
 
