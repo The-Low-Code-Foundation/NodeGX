@@ -980,4 +980,125 @@ three left fields and the radius read grey against the white labels in both them
 ### 16.4 Left
 
 - Not hinted: the colour field's alpha suffix for an inherited `#RRGGBBAA` (the placeholder carries the hex only).
-- For Richard's look: the greyed hints (both themes), and whether `fg-disabled` for every panel placeholder is fine.
+- ~~For Richard's look~~ → §16.5.
+
+### 16.5 Richard's ruling (2026-09-17, s23)
+
+Shown on the **obsidian** palette (CHR-013 landed after §16.2's shots): the drive re-run unchanged into
+`inherited/after-obsidian/` (+ `after-obsidian.log`), same readings as §16.2 (placeholder `rgb(125,138,152)`,
+swatch `rgb(255,0,0)`, type 5 ⇒ `{5,px}`, undo ⇒ `undefined` and `3` again).
+
+- **The greyed hint reads as "this side uses the all-sides value": approved as built.**
+- **`fg-disabled` on every panel placeholder: fine as is**, including that `fg-disabled` kept its old blue-grey
+  (CHR-013 moved only the dark grounds). Do not re-hue it on this task's account.
+
+## 17. A cleared scoped field and its segment mark (2026-09-17, s23)
+
+The s21 handoff's item 4: `model/scopeRows.ts:117` marks a segment set with `parameters[p] !== undefined`, the rule
+§15.5 found wrong for the folded count (a cleared text field stores `''`).
+
+**Population, printed** (CHR-007 snapshot, ports matching `border{Top,Right,Bottom,Left}{Style,Width,Color}` and
+`border{TopLeft,…}Radius`): **144** scoped ports = `NumberWithUnits` 72, `ColorType` 36, `EnumType` 36. An enum
+cannot be typed empty, so the two clearable kinds are the whole question.
+
+**Driven** (`verdicts/CHR-009/2026-09-17/scope-clear/drive-scope-clear.js`, `drive.log`, `after/scope-clear-results.json`;
+Group `app_root`, Left edge, real mouse + `insertText`, clear = `input.select()` + Backspace + Enter, then a
+Border Style fold/open to redraw the tabs):
+
+| field | before | typed (control) | cleared: stored | cleared: mark | after redraw |
+|---|---|---|---|---|---|
+| Border Width (Left) | no mark | `{5,px}`, **mark** | `undefined`, placeholder `3` back | none | none |
+| Border Color (Left) | no mark | `#00FF00`, **mark** | `undefined`, placeholder `#FF0000` back | none | none |
+
+**Verdict: not a defect through the panel.** Both clearable widgets store `undefined` on a clear, so `!== undefined`
+is correct for every scoped port a person can empty. Not changed. (A `''` written by something other than the
+panel, e.g. an MCP write, would still mark; unmeasured and not this task's.)
+
+Also caught in the same stack's `dev.log`: **one** React ``value` prop on `input` should not be null`` at 10:39:55,
+between selecting the Group and the drive's first setup write, i.e. on the **first render of a Group's property
+panel** on `story-engine`. React prints it once per session, so which row is still unknown (CHR-013 §5.3).
+
+## 18. The §3.6 verdict set, and slice 10: `Preset` and `Size` as rows (2026-09-17, s23)
+
+Every slice so far was graded on ONE node, the Group. AC1 is ruled on §3.6's set, which had never been shot.
+
+### 18.1 The set (the instrument)
+
+`verdicts/CHR-009/2026-09-17/set/drive-set.js`: a FRESH node of each type is added to `/App` on the scratch copy (defaults,
+no earlier drive's writes), selected, and read at **docked (312 panel / 328 frame)** and **wide (736)** via the panel's own
+toggle, both themes: the top PNG (`after/props-<node>-<docked|wide>-top-<theme>.png`, 32 shots) and AC2's eval; then every
+section opened (and put back) and every label, text or input value wider than its box listed. Targets: Group (also the
+TabGroup node), Text, Image, Function, Query Records, Columns, States, Button (the PopoutGroup node). Results
+`after/set-results.json`, `drive.log`.
+
+🔴 **The first run read "12 controls at 24px" on the Group.** Those are the input and unit select INSIDE a number+unit field
+(outer `NumberUnitInput-module__Field` is 26, bordered). The eval now grades the outermost drawn field.
+
+### 18.2 What the set found (dark = light unless noted)
+
+| node | AC2 sizes | fills (≤3) | radii (≤2) | label x | off-26 heights | cut (all sections open) |
+|---|---|---|---|---|---|---|
+| Group | 11, 12 | **5** | **4, 6, 9999** | one | 30 filter | `Box Sizing` value; labels `Background Gradient`, `Scroll To Element - Duration`, `Scroll To Index - Index`, `… - Duration` |
+| Text | **10**, 11, 12 | **4** | **4, 6, 9999** | one | 30 filter, **33** | none |
+| Image | 11, 12 | **4** | **4, 6, 9999** | one | 30 filter | none |
+| Function | 11, 12 | 2 | 6 | one | — | none |
+| Query Records | 11, 12 | 3 | **4, 6, 9999** | one | — | none |
+| Columns | 11, 12 | **4** | **4, 6, 9999** | one | 30 filter | none |
+| States | 11, 12 | 1 | 9999 | one | — | none |
+| Button | **10**, 11, 12 | **6** / 5 light | **2, 4, 6, 9999** | one | 30 filter, **24** | `Box Sizing` value |
+
+Wide changes none of it: the label column is fixed (R6), and **selects stay ~174px while number fields stretch to the edge**,
+which is why `Box Sizing` is still cut at 736. By eye (PNGs), regions CHR-009 never touched:
+
+1. **Text / Button / Checkbox / Text Input: STYLE-004's `ElementStyleSection`** — a grey caps `STYLE` band, a stacked caps
+   `VARIANT` + full-width trigger with a 10px text `▾`, a stacked `SIZE` segmented bar, a divider. It was the only 10px
+   text on the panel and put two rows named "Variant" on one panel. **→ slice 10, below.**
+2. **Button `Icon Source`** draws as a 24px empty square (gated off at defaults).
+3. **Function `Script Inputs` / `Script Outputs`**: bright bordered `</>` and `+` boxes in the heading; **States** draws the
+   same two buttons borderless — two looks for one action.
+4. Wide: selects do not stretch; number fields do.
+5. The handoff's prediction that Text's `Text Horizontal Align` is cut: **not reproduced** — 0 cut labels on a fresh Text
+   with every section open (46 drawn). The align rows carry no such label at defaults.
+
+### 18.3 Slice 10 built — `Preset` and `Size` rows
+
+**Richard's ruling (s23): the label is `Preset`** (asked in plain words: the row above is `Variant`, which saves a shared
+named style; this one stamps a built-in preset onto the node). Rows now read `Variant · Preset · Size · State`.
+
+| part | before | now |
+|---|---|---|
+| `ElementStyleSection` | `Style` band (`bg-2`, caps, 600), body wrapper with 8px padding, `border-default` divider | no band, no wrapper, no divider: the two rows only |
+| `VariantSelector` | caps label stacked over a full-width trigger, `-base` text, text `▾` 10px, text `✓` 10px, radius 4 | a 30px row: 16px gutter, 116px label in `fg-default-shy` `-sm`, 26px trigger `-sm`, radius-md, SVG chevron and check; the list opens under the FIELD (`left: 140px`) |
+| `SizePicker` | caps label stacked over the bar | the same row; the segmented group is the 26px field |
+| kept on purpose | | `border-control` edges on the trigger and the group (the P75 sweep's ≥3:1 pin); the section still paints no fill |
+
+⚠️ **Visible consequence of the kept pin:** `Preset`/`Size` draw a brighter edge than `Variant`/`State` (`border-default`)
+beside them. For Richard's look.
+
+### 18.4 Driven
+
+- `set/preset/` (the set drive, Text + Button, after a full renderer reload and the module source checked for `Preset`):
+  Text and Button now **11, 12** only; the Text panel's first property ~70px higher. PNGs
+  `preset/props-{text,button-popout}-{docked,wide}-top-{dark,light}.png` beside `after/…` (same crop).
+- `set/drive-preset-input.js` → `preset/preset-input-results.json`, real mouse on the Button: list under the field
+  (**194–350 = field 194–350**, top 226 = field bottom 226), 6 options; pick `Secondary` ⇒ `_variant: secondary`, field
+  `Secondary`, list closed; reopen + **Escape ⇒ closed**; `lg` ⇒ `_size: lg`, pressed `lg`, group **26px**; undo ⇒ `_size`
+  null; undo ⇒ `_variant` null, field `None`. Open list: `preset/preset-open-dark.png`.
+
+### 18.5 Gates
+
+- `tests-unit/border-sweep/style-section-control-borders.test.ts` reddened **4** (both themes × 2): the removed `-body` rule
+  and the removed divider. Updated to the new shape (chain one link shorter; the section's edge graded **absent**). **35/35.**
+  Mutant: the divider restored as `border-control` ⇒ **2 red**; restored from a copy, `cmp` identical.
+- `tsc --noEmit` (editor) **EXIT 0**. `npm run colors` holding. `npm run type` **2 fewer** raw px ⇒ baseline lowered to 720.
+- Full `npx jest` (editor): see the handoff.
+- `dev.log` (stack 2): 0 `SassError|ERROR in`. **334** "synchronously unmount" — all at log lines 2324–2626, during the set
+  drive's add-and-select of eight fresh nodes, BEFORE this slice compiled (line 4828); **0** after it. 57 duplicate-key
+  warnings from the launcher's `ProjectsPage` at boot, also before. Both → CHR-013 §5.
+
+### 18.6 Left
+
+- Richard's look: slice 10 (same-crop pairs above) and the edge-tone mismatch (§18.3).
+- AC2 over the set: **fills ≤3 and radii ≤2 unmet on every node with inputs** (the 4px radius and a 4th–6th fill); off-26
+  heights (filter 30 by s13 design, Text 33, Button 24). Name which radius/fill each is before touching.
+- §18.2 items 2–4: `Icon Source` square; the Function/States list-heading buttons; selects not stretching at wide.

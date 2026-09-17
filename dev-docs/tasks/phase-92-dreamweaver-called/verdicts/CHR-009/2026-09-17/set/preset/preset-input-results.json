@@ -1,0 +1,55 @@
+{
+  "before": {
+    "variant": null,
+    "size": null
+  },
+  "fieldBefore": "None",
+  "open": {
+    "options": [
+      "Primary",
+      "Secondary",
+      "Outline",
+      "Ghost",
+      "Destructive",
+      "Link"
+    ],
+    "listLeft": 194,
+    "listRight": 350,
+    "fieldLeft": 194,
+    "fieldRight": 350,
+    "labelRight": 186,
+    "listTop": 226,
+    "fieldBottom": 226
+  },
+  "afterPick": {
+    "params": {
+      "variant": "secondary",
+      "size": null
+    },
+    "field": "Secondary",
+    "listOpen": false
+  },
+  "escape": {
+    "openedAgain": true,
+    "openAfterEscape": false
+  },
+  "afterSize": {
+    "params": {
+      "variant": "secondary",
+      "size": "lg"
+    },
+    "pressed": "lg",
+    "groupHeight": 26
+  },
+  "undo1": {
+    "variant": "secondary",
+    "size": null
+  },
+  "undo2": {
+    "params": {
+      "variant": null,
+      "size": null
+    },
+    "field": "None"
+  }
+}

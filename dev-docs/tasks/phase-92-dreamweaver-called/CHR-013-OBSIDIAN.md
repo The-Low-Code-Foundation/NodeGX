@@ -75,5 +75,12 @@ against `bg-1` (the instruction in `colors.css` since NAT-003).
 2. 🔴 **28 × "Attempted to synchronously unmount a root while React was already rendering"** in `dev.log`, in two
    bursts, each exactly at a project → launcher transition (09:01:59 and ~09:13). s21's stacks read 0 but never took
    that path. CSS cannot cause it; unowned, unregistered elsewhere; re-measure on HEAD before filing.
+   **s23, a second trigger on HEAD `f25a643b2`:** **334** in one stack, in bursts right after each `Project saved`, while
+   CHR-009's set drive added a fresh node (`graph.addRoot`) and selected it, for eight node types (dev log lines 2324–2626).
+   The first s23 stack (select an existing Group, edit, undo) read **0**. So it is not only project → launcher. Still
+   unowned.
 3. One `` `value` prop on `input` should not be null `` in the property panel at 09:12 while Richard clicked nodes.
-   Which node/row is unknown.
+   Which node/row is unknown. **s23:** reproduced once, on the **first render of a Group's panel** (`story-engine`
+   `app_root`, before any write). React prints it once per session, so a per-row search needs a fresh session each try.
+4. **s23:** 57 × "Encountered two children with the same key" from the launcher's `ProjectsPage` at boot, before any
+   project opened. Unowned.
