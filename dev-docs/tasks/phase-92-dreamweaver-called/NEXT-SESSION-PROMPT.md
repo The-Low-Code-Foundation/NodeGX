@@ -120,9 +120,9 @@ a rule. If you add an entry, these are the properties 21 specs hold it to (7 mut
   the only dependents of what I changed are `chr-004/*` (`themeTokens.ts` depends on `color.js`,
   which I did not touch; verified by grep). It is cheap insurance next session: 465 / 7,483 at s30.
 - `test:ci` **TAKEN, at the floor**: 2,985 specs / 8 failures, seed 68399, HEAD `e50ea09b`, 78s,
-  fresh JSON against a baseline mtime recorded before the run. 🔴 **The count is the floor; the
-  composition is NOT what the phase notes record** ("8, all P88 by name"). These eight are SUB-006 ×3,
-  NDA-017 ×2 and SUB-011 ×3 — none in this phase's surface. **Compare NAMES; an 8 is not reassurance.**
+  fresh JSON against a baseline mtime recorded before the run. ✅ **The same eight by name as the
+  standing floor — 3 SUB-006, 3 SUB-011, 2 NDA-017 — and a THIRD seed agreeing** (P93 has the set at
+  46376 and 38645). None is in this phase's surface; none touches `look-gate` or `chr-004`.
 - Gate at HEAD, property panel, both themes: rulings active **0 findings / 7 ruled exceptions per
   theme, exit 0**; `--no-rulings` **14 findings, exit 1**.
 - Box left **free**: dev stack torn down (25 procs), 8080 / 9333 clear, peer `noodl-mcp` pids checked
@@ -132,6 +132,12 @@ a rule. If you add an entry, these are the properties 21 specs hold it to (7 mut
 
 - 🔴 **A count is not a finding.** 82 of s31's 84 were one token decision. Attribute by the colour
   pair and the element behind it before reporting a number to anyone.
+- 🔴 **An index line is a POINTER, not the claim — open the file before declaring an artefact has
+  moved.** s31 read `MEMORY.md`'s *"09-15 reads 8, all P88 BY NAME"* as a claim about the SPEC names,
+  found SUB/NDA names instead and reported the floor's composition as drifted. "P88" was an
+  ATTRIBUTION (all eight are caused by P88's GAM commits), and the pointer file tabulates these exact
+  eight. A peer caught it. The baseline file even says *"Owners: re-judge staleness here, not in the
+  index."* When your reading disagrees with a note, the note is a reading too — find the newest one.
 - 🔴 **A leftover popout silently zeroes the whole gate.** A `.popup-layer-blocker` left over the
   panel made the next run refuse **1,018 of 1,018** elements and exit 2. Close what a drive opened.
   Escape and `.click()` do NOT dismiss it; a real `Input.dispatchMouseEvent` press does, and

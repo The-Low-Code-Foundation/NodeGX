@@ -1540,11 +1540,16 @@ was graded on more than the Group. Full numbers, attribution and the ruling in
   68399, HEAD `e50ea09b`, 78s**, fresh JSON (mtime 23:53:04 against a 23:10:50 baseline, recorded
   before the run so a stale read could not pass as this one). Exit 1 is what the 8-failure floor
   produces, not a new red.
-  🔴 **The count is the floor; the COMPOSITION is not the one the phase notes record.** Those say
-  "8, all P88 by name". These eight are **SUB-006 ×3** (false-positive corpus, v2 directory loader),
-  **NDA-017 ×2** (the family table against the shipped catalog) and **SUB-011 ×3** (expression
-  parameters — the validator stays silent). Other phases' work has moved *which* eight fail, so a
-  future session must compare NAMES and not be reassured by an 8. None of them is in this phase's
-  surface, and none touches `scripts/look-gate` or `tests-unit/chr-004`.
+  ✅ **The same eight by name as the standing floor — a THIRD seed agreeing.** **SUB-006 ×3**
+  (false-positive corpus, v2 directory loader), **SUB-011 ×3** (expression parameters — the validator
+  stays silent), **NDA-017 ×2** (the family table against the shipped catalog). P93 recorded this
+  exact set at seeds **46376** and **38645** (`TVW-003` §, twice); mine at **68399** makes three
+  independent orders on the same names, which is as close to "floor, not luck" as this gate gets.
+  None is in this phase's surface, and none touches `scripts/look-gate` or `tests-unit/chr-004`.
+  🔴 **I first reported this as "the composition has drifted", and that was wrong — the stale side
+  was my reading of the index, not the run.** `MEMORY.md`'s line says *"09-15 reads 8, all P88 BY
+  NAME"*, which I took as a claim about the SPEC names; it is an ATTRIBUTION (all eight are caused by
+  P88's GAM commits), and the pointer file it points to lists these exact eight in a table. **An
+  index line is a pointer, not the claim — open the file before declaring an artefact has moved.**
 
 ⇒ **AC5 is met except the `IconInput` placeholder ruling.** AC1 was ruled WORTHY in s29.
