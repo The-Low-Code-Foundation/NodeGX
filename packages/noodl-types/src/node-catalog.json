@@ -51197,6 +51197,48 @@
           "description": "Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing"
         },
         {
+          "name": "enterKeyHint",
+          "displayName": "Enter Key Hint",
+          "group": "Text",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Enter",
+                "value": "enter"
+              },
+              {
+                "label": "Done",
+                "value": "done"
+              },
+              {
+                "label": "Go",
+                "value": "go"
+              },
+              {
+                "label": "Next",
+                "value": "next"
+              },
+              {
+                "label": "Previous",
+                "value": "previous"
+              },
+              {
+                "label": "Search",
+                "value": "search"
+              },
+              {
+                "label": "Send",
+                "value": "send"
+              }
+            ]
+          },
+          "isSignal": false,
+          "description": "The word on the Enter key of a phone or tablet keyboard, such as Next, Go or Send",
+          "index": 21
+        },
+        {
           "name": "focus",
           "displayName": "Focus",
           "group": "Actions",
@@ -51459,6 +51501,52 @@
           "description": "Gap between the icon and the text beside it",
           "index": 24,
           "allowVisualStates": true
+        },
+        {
+          "name": "inputMode",
+          "displayName": "Input Mode",
+          "group": "Text",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Text",
+                "value": "text"
+              },
+              {
+                "label": "Numeric",
+                "value": "numeric"
+              },
+              {
+                "label": "Decimal",
+                "value": "decimal"
+              },
+              {
+                "label": "Telephone",
+                "value": "tel"
+              },
+              {
+                "label": "Email",
+                "value": "email"
+              },
+              {
+                "label": "URL",
+                "value": "url"
+              },
+              {
+                "label": "Search",
+                "value": "search"
+              },
+              {
+                "label": "None",
+                "value": "none"
+              }
+            ]
+          },
+          "isSignal": false,
+          "description": "Which on-screen keyboard a phone or tablet opens: Decimal for numbers with a decimal key, Telephone for digits, None for no keyboard when the page has its own keypad",
+          "index": 20
         },
         {
           "name": "label",

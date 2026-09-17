@@ -87,6 +87,9 @@ export const CONTENT_PARAMS: Record<string, Record<string, string>> = {
     startValue: 'attr:defaultValue',
     type: 'attr:type',
     maxLength: 'attr:maxLength',
+    // GAM-011 (a) — the soft keyboard and its Enter label, as the runtime renders them.
+    inputMode: 'attr:inputMode',
+    enterKeyHint: 'attr:enterKeyHint',
     enabled: 'attr-not:disabled'
   },
   'Text Input': {
@@ -94,6 +97,9 @@ export const CONTENT_PARAMS: Record<string, Record<string, string>> = {
     startValue: 'attr:defaultValue',
     type: 'attr:type',
     maxLength: 'attr:maxLength',
+    // GAM-011 (a) — the soft keyboard and its Enter label, as the runtime renders them.
+    inputMode: 'attr:inputMode',
+    enterKeyHint: 'attr:enterKeyHint',
     enabled: 'attr-not:disabled'
   },
   Page: { title: 'head', description: 'head', urlPath: 'routing' },
@@ -198,6 +204,8 @@ export const CONTENT_ATTR_ORDER: string[] = [
   'max',
   'step',
   'maxLength',
+  'inputMode',
+  'enterKeyHint',
   'controls',
   'autoPlay',
   'muted',

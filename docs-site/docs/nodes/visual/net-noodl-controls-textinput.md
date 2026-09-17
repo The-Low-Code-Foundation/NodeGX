@@ -61,6 +61,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `color` | Color | — | Colour of the text itself, not of the element behind it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
+| `enterKeyHint` | Enum (`enter`, `done`, `go`, `next`, `previous`, `search`, `send`) | — | The word on the Enter key of a phone or tablet keyboard, such as Next, Go or Send |
 | `fontFamily` | Font | — | Typeface to render the text in, either a web-safe family name or a font file added to the project |
 | `fontSize` | Number | — | Height of the text, in pixels |
 | `fontStyle` | Enum (`normal`, `italic`) | `normal` | Renders the text upright or italic |
@@ -74,6 +75,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `iconSize` | Number | `16` | Height of the icon |
 | `iconSourceType` | Enum (`image`, `icon`) | `icon` | Whether the icon comes from an installed icon set or from an image file, which decides the source port below |
 | `iconSpacing` | Number | `10` | Gap between the icon and the text beside it |
+| `inputMode` | Enum (`text`, `numeric`, `decimal`, `tel`, `email`, `url`, `search`, `none`) | — | Which on-screen keyboard a phone or tablet opens: Decimal for numbers with a decimal key, Telephone for digits, None for no keyboard when the page has its own keypad |
 | `label` | String | `Label` | Text shown on this element |
 | `labelSpacing` | Number | `10` | Gap between the label and the edges around it |
 | `labelcolor` | Color | — | Colour of the text itself, not of the element behind it |

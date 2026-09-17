@@ -18,6 +18,9 @@ function preventGlobalFocusChange(e) {
 export interface TextInputProps extends Noodl.ReactProps {
   id: string;
   type: 'text' | 'textArea' | 'email' | 'number' | 'password' | 'url';
+  /** GAM-011 (a) — unset renders no attribute. */
+  inputMode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'email' | 'url' | 'search' | 'none';
+  enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
   textStyle: Noodl.TextStyle;
 
   enabled: boolean;
@@ -174,6 +177,9 @@ export class TextInput extends React.Component<TextInputProps, State> {
       className,
       placeholder: props.placeholder,
       maxLength: props.maxLength,
+      // GAM-011 (a) — `undefined` when unset, which React leaves off the element.
+      inputMode: props.inputMode || undefined,
+      enterKeyHint: props.enterKeyHint || undefined,
       onChange: (e) => this.onChange(e)
     };
 

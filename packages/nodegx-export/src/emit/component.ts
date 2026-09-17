@@ -4426,6 +4426,9 @@ export function emitComponent(
     loop: 'boolean'
   };
 
+  /** GAM-011 (a) — attributes whose React type is a keyword union, so a `string` cannot be printed into them. */
+  const KEYWORD_ATTRS = new Set(['inputMode', 'enterKeyHint']);
+
   /** The sink a declared TypeScript prop type stands for — anything else is `opaque`. */
   const sinkOfTsType = (tsType: string | undefined): Sink => {
     const bare = (tsType ?? '').replace(/\s*\|\s*undefined/g, '').trim();
@@ -4731,6 +4734,17 @@ export function emitComponent(
       if (!role?.startsWith('attr:')) continue;
       claimBinding(node.id, toProperty);
       const attr = role.slice('attr:'.length);
+      // GAM-011 (a). React types `inputMode` and `enterKeyHint` as a union of keywords, and a wired value is
+      // a `string` at best: printed, the app does not compile (TS2322, measured on a typed string component
+      // input). So a wire is refused by name; only an authored keyword prints (above). The runtime would pass
+      // the value through, so this is a real drop, and it says so.
+      if (KEYWORD_ATTRS.has(attr)) {
+        if (source.kind === 'computed' && source.expr.kind === 'undefined') continue;
+        const reason = 'is not an authored keyword, and the exported attribute only takes one of its keywords';
+        notes.push(`${plan.path}: wire into ${node.id}.${toProperty} ${reason} — dropped, reported`);
+        defer(node.id, `the wire into "${toProperty}"`, reason, source);
+        continue;
+      }
       // A boot-value read renders as the attribute's absence — undefined delivered and nothing
       // delivered are the same rendered control (COMPONENT-OBJECT-TARGET §3; noted at plan).
       if (source.kind === 'computed' && source.expr.kind === 'undefined') continue;

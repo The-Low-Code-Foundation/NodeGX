@@ -89,6 +89,48 @@ const TextInputNode = {
       },
       default: 'text'
     },
+    // GAM-011 (a) — which soft keyboard a touch screen opens, and what its Enter key says. Both reach the
+    // element as `inputmode` / `enterkeyhint`. **No default**: unset renders no attribute, so no field
+    // that exists today changes. 🔒 R12: `none` is the way to ask for no soft keyboard (an on-screen pad).
+    // Desktop browsers ignore both, so a desktop drive grades the attribute, not a keyboard.
+    inputMode: {
+      displayName: 'Input Mode',
+      description:
+        'Which on-screen keyboard a phone or tablet opens: Decimal for numbers with a decimal key, Telephone for digits, None for no keyboard when the page has its own keypad',
+      group: 'Text',
+      index: 20,
+      type: {
+        name: 'enum',
+        enums: [
+          { label: 'Text', value: 'text' },
+          { label: 'Numeric', value: 'numeric' },
+          { label: 'Decimal', value: 'decimal' },
+          { label: 'Telephone', value: 'tel' },
+          { label: 'Email', value: 'email' },
+          { label: 'URL', value: 'url' },
+          { label: 'Search', value: 'search' },
+          { label: 'None', value: 'none' }
+        ]
+      }
+    },
+    enterKeyHint: {
+      displayName: 'Enter Key Hint',
+      description: 'The word on the Enter key of a phone or tablet keyboard, such as Next, Go or Send',
+      group: 'Text',
+      index: 21,
+      type: {
+        name: 'enum',
+        enums: [
+          { label: 'Enter', value: 'enter' },
+          { label: 'Done', value: 'done' },
+          { label: 'Go', value: 'go' },
+          { label: 'Next', value: 'next' },
+          { label: 'Previous', value: 'previous' },
+          { label: 'Search', value: 'search' },
+          { label: 'Send', value: 'send' }
+        ]
+      }
+    },
     placeholder: {
       index: 22,
       group: 'Text',
