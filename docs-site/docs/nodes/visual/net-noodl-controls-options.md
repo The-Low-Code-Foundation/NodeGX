@@ -126,6 +126,13 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `width` | Dimension | `100` | Width of the element; how the value is read depends on Size Mode |
 | `zIndex` | Number | — | Paint order among overlapping siblings; higher numbers paint on top |
 
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `blur` | Signal | — | Takes the keyboard away from this dropdown, which is what fires Blurred |
+| `focus` | Signal | — | Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it |
+
 ## Outputs
 
 ### Values
@@ -148,7 +155,9 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
+| `done` | Signal | — | Fires when Focus put the keyboard on this dropdown, or Blur took it away |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
 | `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
@@ -156,6 +165,7 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
 | `pointerUp` | Signal | — | Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system |
+| `unchanged` | Signal | — | Fires when Focus arrived while this dropdown was not on the page, so nothing was focused |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ## Dynamic ports

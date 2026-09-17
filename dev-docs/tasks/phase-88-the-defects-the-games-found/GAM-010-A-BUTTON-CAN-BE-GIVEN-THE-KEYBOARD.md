@@ -1,6 +1,6 @@
 # GAM-010 — A Button can be given the keyboard
 
-**Status: ⬜ not started.** **Source:** [P78 D59](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (viewer controls)
+**Status: 🟡 2026-09-17 (session 21): AC1, AC3, AC4, AC5 met, driven in Chromium; AC2 and AC6 (Rocket School's three workarounds replaced by wires) not done — see §8.** **Source:** [P78 D59](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (viewer controls)
 
 A game says *"press Enter to go on"*, but nothing in the graph can put the keyboard on the Next button. A
 person on a keyboard has to Tab to it, or reach for the mouse.
@@ -86,4 +86,69 @@ HEAD `eb12ebe99`, 2026-09-14.
 
 ## 8. Record
 
-Not started.
+### Session 21 (P88) — 2026-09-17, over `416462813` (GAM-012 fault 3)
+
+**Built.** `Utils.addFocusActions(definition, { noun })` in `nodes/controls/utils.ts`, called by Button, Checkbox, Radio Button, Dropdown
+(`options.ts`) and Slider. It adds `Focus` and `Blur` signals (group Actions) and, where the node has none, the outcome ports
+`Done`/`Completed`/`Unchanged`. Checkbox already had them for Check/Uncheck; its two sentences now also name Focus and Blur.
+- **R11/R13:** both go through `context.setNodeFocused`, the tracker GAM-012 corrected. A control not on the page: `Unchanged`, the
+  editor-only `focus/not-mounted` diagnostic, nothing recorded, nothing held.
+- **Target:** the real `<button>`/`<input>`/`<select>`: the root if it is one, else the first inside it. Not the wrapper `div`. The
+  `Target` bullet's `withInnerComponent` queue is not used (rejected by R11).
+- `_canFocus` is false when the root is missing **or no longer connected**; `_hasFocus` compares `ownerDocument.activeElement`.
+- **Radio Button Group: no Focus, decided.** It is a container, not a control, and has no element of its own to focus. An author sends
+  Focus to the Radio Button they mean. Not a ruling; reverse it if a game needs "focus the checked one".
+- Text Input's own Focus and Blur are unchanged. The deprecated controls are not touched.
+- 🔴 **Found while driving, fixed in the tracker (`focus-tracker.ts` `onClickCapture`):** Space on a Focus-given Checkbox left
+  `document.activeElement` on `body`. A key that activates a control is a **click**; the click walk names only elements carrying
+  `noodlNode` (Groups), so it blurred the listed control the keyboard was on. Text Input escapes this with a mouse-only
+  `preventGlobalFocusChange`. Now a listed node that still holds real focus after a click is kept and not blurred. A node that cannot
+  say (a Group) is unchanged, and a mouse click elsewhere has already moved real focus, so it is blurred as before.
+
+**AC1 — RED at HEAD.** Spec `tests/gam-010-a-control-can-be-given-the-keyboard.test.ts` before the build: **30 failed, 2 passed** (every row for
+all five controls; the two "what did not change" rows green). Browser, on the viewer bundle from before any session-21 edit, a page with
+14 wires (below): every Focus/Blur wire logged `Invalid connection, input doesn't exist. Trying to connect from … to
+net.noodl.controls.button input focus` (and checkbox, radiobutton, options, range), and `document.activeElement` never left the field
+that sent the signal. Known-firing beside it: the same page's Text Input Focus works on both bundles (GAM-012's page, below).
+
+**AC3 and AC4 — the spec, final: 39 passed**, exit 0 (with GAM-012's spec: 56). Reverted arms on a `cp` snapshot, restored `cmp`-identical:
+| reverted | red |
+|---|---|
+| S1 **AC4's named arm: target the wrapper** (`_focusTarget` returns the root) | 12: Checkbox, Radio Button, Dropdown, Slider × (Focus lands, AC3, Blur). **Button stays green** (its root is the `<button>`). §6 predicted Checkbox and Dropdown only |
+| S2 `_canFocus` removed | 10: not-on-the-page and disconnected-element, all five |
+| S3 `_hasFocus` always true | 5: AC3, all five |
+| S4 the `isConnected` check removed | 5: disconnected element, all five |
+| S5 the tracker's `false` ignored | 10: as S2 |
+| S6 the click walk's still-focused keep removed | 5: "Enter or Space on a Focus-given … keeps it focused", all five |
+
+**In Chromium** (scratch prod bundle `OUT_PATH`, the shared `src/external` bundle not written; `render-from-disk.js` copy with the viewer dir
+from an env var; CDP keys with `text: "\r"`, focus emulation on; fields focused by script, never a pointer):
+| arm | before | after |
+|---|---|---|
+| **V (AC3):** a field's Enter → `btnV.focus`; Enter on Next remounts its row (200 ms) → `rowV.didMount → btnV.focus`, × 5 | field keeps focus, 0/5 | **`BUTTON(Next)` 5/5**; log per cycle: `click detail=0`, `onClick`, `didMount`, `onFocus`, `done` |
+| C: field Enter → Checkbox Focus, then Space | field | `INPUT:checkbox`; Space ticks it (false → true) and it **keeps focus** (first build: `body`, see above) |
+| R: → Radio Button Focus, then Space | field | `INPUT:radio`, keeps focus. Not selectable outside a Radio Button Group (its own `radio-button/no-group` error, the page's only console error) |
+| D: → Dropdown Focus, then ArrowDown | field | `SELECT`, keeps focus. `selectedIndex` 1 → 1: already the last default item, so the key's effect is not graded |
+| S: → Slider Focus, then ArrowRight | field | `INPUT:range`, value 0 → 1 |
+| U: → Focus to a Button whose row is unmounted | field | field keeps focus, nothing in the browser console (the diagnostic is editor-only, spec-graded) |
+| B: → Button Focus; its Focused → 300 ms → its Blur | field | `BUTTON(BlurMe)` at +100 ms, **`body` at +700 ms** |
+
+Zero pointer events in both runs. **Regression on the final bundle:** GAM-012's keyboard page identical to its session-21 reading (K 2–5, B 5/5,
+control 2–5, C by ruling, D 5/5); its Blur page identical (E, T, F); multi-select's Dropdown identical at all 11 steps.
+
+**AC5 — blast radius.** Catalog regenerated (`catalog:generate`, `catalog:merge`, `docs:nodes`), then compared type by type against the catalog
+before it: **5 types changed, 0 ports removed, 0 altered** except Checkbox's `done`/`unchanged` sentences. Added: `focus`, `blur` on all five;
+`done`, `completed`, `unchanged` on the four without them. `catalog:check`, `catalog:merge:check`, `catalog:groups:check`, `docs:nodes:check`
+exit 0; `cloud-library:check` unaffected (exit 0). CHR-007's row-class snapshot, which pins the class of every existing port, moved by
+exactly the ten new signal rows (`null`), 23/23 after. `get_node_type` reads this catalog. MCP `toolDisclosure` + `cmp009PortsPathConfidence`
+44/44. Viewer specs touching controls, Group, the wrapper, focus or outcomes: **59 suites, 856 tests**, exit 0; `tsc --noEmit` exit 0.
+**Export (§7's trap):** `parseProject` + `emitApp` over the drive page: every Focus/Blur wire is a named deferral, `wire fieldV:onEnter->btnV:focus
+has no deterministic translation in step 5 (deferred to EXP-003)`, the same as a Text Input Focus today. Not silent. The coverage ledger is
+per type and unchanged.
+
+**AC2 and AC6 — not done.** They edit `packages/noodl-mcp/tests/tpl007Components.ts` and regenerate `templates/rocket-school/`, whose working
+tree holds **257 uncommitted files** (key reorders and more, mtime Sep 15 13:40, an editor open) that are not this phase's. Regenerating
+over them is an unperformed merge. See the handoff.
+
+Scratch: session `a79831ee…/scratchpad/g10/` (`proj/`, `drive-controls.js`, `drive-{before,after,after2}.log`, the regression logs
+`drive-*-after2.log`, `S1…S6.log`, `checks/`, `cat/`).

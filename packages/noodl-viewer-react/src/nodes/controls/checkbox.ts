@@ -162,8 +162,10 @@ const CheckBoxNode = {
      * Not `Failure`. The box is ticked, which is what `Check` asked for.
      */
     ...outcomeOutputs({
-      done: 'Fires when Check or Uncheck actually flipped the box',
-      unchanged: 'Fires when the box was already in that state, so nothing was flipped and Changed did not fire'
+      done: 'Fires when Check or Uncheck actually flipped the box, when Focus put the keyboard on it, or when Blur took it away',
+      unchanged:
+        'Fires when the box was already in that state, so nothing was flipped and Changed did not fire, or when a ' +
+        'Focus arrived while the box was not on the page'
     })
   },
   methods: {
@@ -213,5 +215,6 @@ NodeSharedPortDefinitions.addShadowInputs(CheckBoxNode, {
   styleTag: 'checkbox'
 });
 Utils.addControlEventsAndStates(CheckBoxNode, { checked: true });
+Utils.addFocusActions(CheckBoxNode, { noun: 'checkbox' });
 
 export default createNodeFromReactComponent(CheckBoxNode);

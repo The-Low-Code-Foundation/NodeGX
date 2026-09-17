@@ -100,5 +100,6 @@ NodeSharedPortDefinitions.addBorderInputs(ButtonNode);
 NodeSharedPortDefinitions.addShadowInputs(ButtonNode);
 
 Utils.addControlEventsAndStates(ButtonNode);
+Utils.addFocusActions(ButtonNode, { noun: 'button' });
 
 export default createNodeFromReactComponent(ButtonNode);

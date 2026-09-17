@@ -317,6 +317,7 @@ NodeSharedPortDefinitions.addShadowInputs(OptionsNode, {
   styleTag: 'inputWrapper'
 });
 Utils.addControlEventsAndStates(OptionsNode);
+Utils.addFocusActions(OptionsNode, { noun: 'dropdown' });
 
 /**
  * The options this instance actually offers, read from the stored `items` parameter.

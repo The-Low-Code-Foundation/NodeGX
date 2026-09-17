@@ -43595,6 +43595,18 @@
           "index": 450
         },
         {
+          "name": "blur",
+          "displayName": "Blur",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Takes the keyboard away from this button, which is what fires Blurred"
+        },
+        {
           "name": "borderBottomColor",
           "displayName": "Border Color",
           "editorName": "Border Color (Bottom)",
@@ -44217,6 +44229,18 @@
           "isSignal": false,
           "default": true,
           "description": "Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing"
+        },
+        {
+          "name": "focus",
+          "displayName": "Focus",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Puts the keyboard on this button, so Enter, Space and the arrow keys go to it"
         },
         {
           "name": "fontFamily",
@@ -45244,6 +45268,17 @@
           "description": "How many child elements are currently mounted inside this one"
         },
         {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
           "name": "didMount",
           "displayName": "Did Mount",
           "group": "Mounted",
@@ -45253,6 +45288,17 @@
           },
           "isSignal": true,
           "description": "Fires once this element has been added to the page and can be measured"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus put the keyboard on this button, or Blur took it away"
         },
         {
           "name": "enabled",
@@ -45407,6 +45453,17 @@
           },
           "isSignal": false,
           "description": "A reference to this node itself, for ports that take a node rather than a value"
+        },
+        {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus arrived while this button was not on the page, so nothing was focused"
         },
         {
           "name": "willUnmount",
@@ -45687,6 +45744,18 @@
           "isSignal": false,
           "description": "Stops every pointer event that lands on this control from reaching the nodes it sits inside. Blunt: it takes hover and pointer-down with it, so reach for Click Bubbling first if it is only clicks you want to keep in",
           "index": 450
+        },
+        {
+          "name": "blur",
+          "displayName": "Blur",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Takes the keyboard away from this checkbox, which is what fires Blurred"
         },
         {
           "name": "borderBottomColor",
@@ -46321,6 +46390,18 @@
           "isSignal": false,
           "default": true,
           "description": "Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing"
+        },
+        {
+          "name": "focus",
+          "displayName": "Focus",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Puts the keyboard on this checkbox, so Enter, Space and the arrow keys go to it"
         },
         {
           "name": "height",
@@ -47264,7 +47345,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when Check or Uncheck actually flipped the box"
+          "description": "Fires when Check or Uncheck actually flipped the box, when Focus put the keyboard on it, or when Blur took it away"
         },
         {
           "name": "enabled",
@@ -47429,7 +47510,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the box was already in that state, so nothing was flipped and Changed did not fire"
+          "description": "Fires when the box was already in that state, so nothing was flipped and Changed did not fire, or when a Focus arrived while the box was not on the page"
         },
         {
           "name": "willUnmount",
@@ -47685,6 +47766,18 @@
           "isSignal": false,
           "description": "Stops every pointer event that lands on this control from reaching the nodes it sits inside. Blunt: it takes hover and pointer-down with it, so reach for Click Bubbling first if it is only clicks you want to keep in",
           "index": 450
+        },
+        {
+          "name": "blur",
+          "displayName": "Blur",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Takes the keyboard away from this dropdown, which is what fires Blurred"
         },
         {
           "name": "borderBottomColor",
@@ -48309,6 +48402,18 @@
           "isSignal": false,
           "default": true,
           "description": "Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing"
+        },
+        {
+          "name": "focus",
+          "displayName": "Focus",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it"
         },
         {
           "name": "fontFamily",
@@ -49635,6 +49740,17 @@
           "description": "This element's position among its parent's children, counting from 0"
         },
         {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
           "name": "didMount",
           "displayName": "Did Mount",
           "group": "Mounted",
@@ -49644,6 +49760,17 @@
           },
           "isSignal": true,
           "description": "Fires once this element has been added to the page and can be measured"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus put the keyboard on this dropdown, or Blur took it away"
         },
         {
           "name": "enabled",
@@ -49798,6 +49925,17 @@
           },
           "isSignal": false,
           "description": "A reference to this node itself, for ports that take a node rather than a value"
+        },
+        {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus arrived while this dropdown was not on the page, so nothing was focused"
         },
         {
           "name": "value",
@@ -50081,6 +50219,18 @@
           "isSignal": false,
           "description": "Stops every pointer event that lands on this control from reaching the nodes it sits inside. Blunt: it takes hover and pointer-down with it, so reach for Click Bubbling first if it is only clicks you want to keep in",
           "index": 450
+        },
+        {
+          "name": "blur",
+          "displayName": "Blur",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Takes the keyboard away from this radio button, which is what fires Blurred"
         },
         {
           "name": "borderBottomColor",
@@ -50722,6 +50872,18 @@
           "default": 2,
           "description": "Gap between the dot and the button edge, so a larger value makes a smaller dot",
           "allowVisualStates": true
+        },
+        {
+          "name": "focus",
+          "displayName": "Focus",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Puts the keyboard on this radio button, so Enter, Space and the arrow keys go to it"
         },
         {
           "name": "height",
@@ -51635,6 +51797,17 @@
           "description": "This element's position among its parent's children, counting from 0"
         },
         {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
           "name": "didMount",
           "displayName": "Did Mount",
           "group": "Mounted",
@@ -51644,6 +51817,17 @@
           },
           "isSignal": true,
           "description": "Fires once this element has been added to the page and can be measured"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus put the keyboard on this radio button, or Blur took it away"
         },
         {
           "name": "enabled",
@@ -51798,6 +51982,17 @@
           },
           "isSignal": false,
           "description": "A reference to this node itself, for ports that take a node rather than a value"
+        },
+        {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus arrived while this radio button was not on the page, so nothing was focused"
         },
         {
           "name": "willUnmount",
@@ -52038,6 +52233,18 @@
           "index": 450
         },
         {
+          "name": "blur",
+          "displayName": "Blur",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Takes the keyboard away from this slider, which is what fires Blurred"
+        },
+        {
           "name": "boxSizing",
           "displayName": "Box Sizing",
           "group": "Margin and padding",
@@ -52112,6 +52319,18 @@
           "isSignal": false,
           "default": true,
           "description": "Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing"
+        },
+        {
+          "name": "focus",
+          "displayName": "Focus",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Puts the keyboard on this slider, so Enter, Space and the arrow keys go to it"
         },
         {
           "name": "marginBottom",
@@ -53841,6 +54060,17 @@
           "description": "This element's position among its parent's children, counting from 0"
         },
         {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
           "name": "didMount",
           "displayName": "Did Mount",
           "group": "Mounted",
@@ -53850,6 +54080,17 @@
           },
           "isSignal": true,
           "description": "Fires once this element has been added to the page and can be measured"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus put the keyboard on this slider, or Blur took it away"
         },
         {
           "name": "enabled",
@@ -54004,6 +54245,17 @@
           },
           "isSignal": false,
           "description": "A reference to this node itself, for ports that take a node rather than a value"
+        },
+        {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus arrived while this slider was not on the page, so nothing was focused"
         },
         {
           "name": "value",

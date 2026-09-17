@@ -572,5 +572,6 @@ addShadowInputs(RangeNode, {
 });
 
 Utils.addControlEventsAndStates(RangeNode);
+Utils.addFocusActions(RangeNode, { noun: 'slider' });
 
 export default createNodeFromReactComponent(RangeNode);

@@ -100,7 +100,16 @@ export class FocusTracker {
     if (index !== -1) this.nodes.splice(index, 1);
   }
 
-  /** A click focuses the Noodl nodes it landed inside and blurs the rest. Unchanged by GAM-012. */
+  /**
+   * A click focuses the Noodl nodes it landed inside and blurs the rest.
+   *
+   * GAM-010 — except a listed node that **still holds focus** after the click. A control's element
+   * does not carry `noodlNode`, so a click on it names only the Groups around it. Pressing Enter on a
+   * Button, or Space on a Checkbox, is a click too, and this walk used to blur the very control the
+   * keyboard was on (driven: Space on a Focus-given Checkbox left `document.activeElement` on
+   * `body`). A mouse click elsewhere has already moved real focus by the time it arrives here, so
+   * such a node reports `false` and is blurred as before. A Group cannot say, and is unchanged.
+   */
   onClickCapture(target: unknown): void {
     const clicked: FocusTrackedNode[] = [];
 
@@ -111,12 +120,15 @@ export class FocusTracker {
       elem = elem.parentNode as typeof elem;
     }
 
-    // Blur nodes that weren't part of this click
-    this.nodes.filter((node) => clicked.indexOf(node) === -1).forEach((node) => node._blur());
+    const notClicked = this.nodes.filter((node) => clicked.indexOf(node) === -1);
+    const stillFocused = notClicked.filter((node) => node._hasFocus && node._hasFocus());
+
+    // Blur nodes that weren't part of this click and no longer hold focus
+    notClicked.filter((node) => stillFocused.indexOf(node) === -1).forEach((node) => node._blur());
 
     // Focus all new focused nodes
     clicked.filter((node) => this.nodes.indexOf(node) === -1).forEach((node) => node._focus());
 
-    this.nodes = clicked;
+    this.nodes = clicked.concat(stillFocused);
   }
 }
