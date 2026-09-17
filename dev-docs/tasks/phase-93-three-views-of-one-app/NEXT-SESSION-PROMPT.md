@@ -1,16 +1,16 @@
 # Phase 93 — next session
 
-**Written 2026-09-17, end of session 7.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
-started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed; then closed TVW-003 on
-Richard's hover ruling (slice 6). **Session 7 built and drove TVW-001 slice 2 (row d, sections by
-role) and closed AC3.** The drive found two defects that blocked it, and both are fixed: the panel's
-kinds were stale on first open, and the Router's Pages editor could not be undone.
+**Written 2026-09-17, end of session 8.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
+started TVW-001 (slice 1, AC1 + AC2); session 7 built and drove slice 2 (row d) and closed AC3.
+**Session 8 built and drove TVW-001 slice 3 (row c, `×N` → *Used in*) and closed AC4** (`6396ea64c`).
+It also fixed the meta misalignment slice 1 had recorded, and spent a large part of its wall-clock
+blocked on a peer's dev stack — see "The box", below, which is now a phase rule rather than a note.
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | 🟡 slices 1 (a, b) and 2 (d) ✅ | **AC1 ✅ AC2 ✅ AC3 ✅** · AC4–8 — |
+| TVW-001 | The panel tells the truth | 🟡 slices 1 (a, b), 2 (d), 3 (c) ✅ | **AC1 ✅ AC2 ✅ AC3 ✅ AC4 ✅** · AC5–8 — |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** — AC1 ✅ (hover 1px / selection 2px, ruled) |
 | TVW-004 | Layers (needs 001, 003) | — | — |
@@ -21,16 +21,19 @@ kinds were stale on first open, and the Router's Pages editor could not be undon
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 9** (TVW-003 all six — closed; TVW-001 AC1, AC2, AC3).
+**ACs closed: 10** (TVW-003 all six — closed; TVW-001 AC1, AC2, AC3, AC4).
 
-## Gate readings (2026-09-17, session 7, after both fixes)
+## Gate readings (2026-09-17, session 8, at `6396ea64c`)
 
-- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **3 suites / 23**, armed (s6: 2
-  mutants; s7: 3 on `componentSections.ts` + 1 on `pagesValue.ts`, all red, restored `cmp` clean).
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **4 suites / 33**, armed (s8: five
+  mutants on `usedIn.ts`, each red — one row per occurrence; walk order kept; the parent's *last*
+  instance navigated to; the heading never reconciling the counts; the label/folder split off by
+  one. Restored, `cmp` clean).
 - `tsc -p packages/noodl-editor --noEmit` EXIT=0.
-- `test:ci` **not run** in s6 or s7. It is owed before TVW-001 closes (AC8); run it alone with the
-  cache cleared. s7 touched `propertyeditor/Pages/Pages.tsx`, which no spec in `tests/` references.
-- Driven: TVW-001 §7 has the slice 1 and slice 2 tables.
+- `test:ci` **not run** in s6, s7 or s8. Owed before TVW-001 closes (AC8); run it alone with
+  `.webpack-cache` cleared. s7 touched `propertyeditor/Pages/Pages.tsx` and s8 touched only
+  `ComponentsPanelNew/`; no spec in `tests/` references either.
+- Driven: TVW-001 §7 has the slice 1, 2 and 3 tables.
 
 ## What session 7 settled
 
@@ -61,23 +64,37 @@ kinds were stale on first open, and the Router's Pages editor could not be undon
 - The usage index already carries each instance's `{parent, nodeId}` — slice 3's *Used in* popover
   needs no second walk.
 
+## What session 8 settled
+
+- **Slice 3 is built and driven; AC4 is closed.** The design decision inside it — rows grouped **by
+  parent**, not one per occurrence as X-Ray draws them — came from a measurement, not taste: on the
+  corpus, five of the six components with 2+ instances have them all in one parent. It is not a
+  ruling, but Richard sees it at AC7. Detail and the drive table are in TVW-001 §7.
+- 🔴 **The handoff's own slice-3 plan named the wrong candidates.** It said "`ServiceCard ×4` and
+  `StatTile ×4` are the `×3`-or-more candidates" for AC4. Both have **one** parent, so neither can
+  satisfy "lists three parents". The only component on LPV2 that can is
+  `/Components/Logic/Scroll to section` (×8 across Hero, SiteFooter, SiteNav). Check the parents, not
+  the count, when picking a fixture.
+- The meta misalignment slice 1 recorded is fixed (`WarningDot` reserves its slot); every row's meta
+  right edge is now 344, dotted or not.
+
 ## Next, in order
 
-1. **TVW-001 slice 3 — row c, AC4**: `×N` becomes a button that opens a *Used in* popover (X-Ray's
-   rows, `ComponentXRayPanel.tsx:142-160`), fed by `usage.instances` (`{parent, nodeId}`, already
-   in the index). Picking one calls `switchToComponent(parent, {node})`; assert `activeComponent`
-   and the selection. On LPV2, `ServiceCard ×4` and `StatTile ×4` are the `×3`-or-more candidates.
-2. Slice 4 (e, AC5). Sheets retire; `#Sheet` folders draw as folders (the unfiltered view still
+1. Slice 4 (e, AC5). Sheets retire; `#Sheet` folders draw as folders (the unfiltered view still
    strips them); a door for the first cloud function once the sheet selector goes (today the cloud
    section's empty text names no door). Drive a drag across the cloud boundary here: s7 could not,
    because the QA fixture has no cloud folder.
-3. Slice 5 (f, AC6), then AC7 screenshots (fix the meta alignment beside a warning dot and the three
-   s7 notes first) and AC8 (`test:ci`).
+3. Slice 5 (f, AC6), then AC7 screenshots and AC8 (`test:ci`). The AC7 list is now: the three s7
+   notes (the `Not in a router` heading repeating the row chip; 26px rows under 30px headings; home
+   sorting after folders) plus one from s8 — in the *Used in* popover a parent's count renders on a
+   **second line** under the path (`MenuDialogItem.endSlot` draws below the label), so rows with a
+   count are two lines tall and rows without are one. The meta alignment item is **done**.
 4. Optional, no AC asks it: the bench outlining a canvas selection or hover inside itself.
 
 ## Rulings owed by Richard
 
-None open. **Ruled s6:** preview hover outline is 1px, selection 2px (TVW-003 slice 6).
+None open. **Ruled s6:** preview hover outline is 1px, selection 2px (TVW-003 slice 6). Richard also
+ruled the Docker cleanup in s8 (below) — not a phase matter, but it is why the box is quieter.
 
 R-A…R-I inherited, R-J ruled.
 
@@ -113,6 +130,31 @@ Router node → `__nodeGraphEditor.selectNode(findNodeWithId(id))`, then *Add ne
 `.router-pages-actions-icon`; the rail's Components button (26,101) brings the tree back after the
 property panel. `location.reload()` returns to the launcher, so re-`cp` the project copy there to
 reset it.
+
+## The box — read this before planning a drive
+
+**Only one dev stack can run in this checkout at a time.** `webpack-dev-server` hardcodes
+`port: 8080` *and* `publicPath: http://localhost:8080/` in
+`packages/noodl-editor/webpackconfigs/webpack.renderer.dev.js`. `NOODLPORT` moves the editor's own
+server and design socket but not webpack's, so a second `npm run dev:debug` dies with
+`EADDRINUSE ::1:8080`. Editing that file to get around it would repoint a peer's live bundle URL —
+don't. **Check `node scripts/devtools/stop-dev.js --list` and `lsof -nP -iTCP:8080 -sTCP:LISTEN`
+first, and if a peer holds it, ask them rather than waiting blind.** s8 lost roughly 50 minutes here.
+
+🔴 **A failed launch looks exactly like a good one.** `dev:debug -- --quiet` writes its banner only
+to `.logs/dev.log`, and the launcher **exits 0** even when the stack never came up. Gate on the CDP
+port answering:
+
+```bash
+until curl -s -m2 http://127.0.0.1:9444/json/list >/dev/null; do sleep 10; done
+```
+
+⚠️ Also: `&` inside a backgrounded tool call dies with its wrapper; background the launcher as the
+call's own command. And `dev-debug.js` opens `.logs/dev.log` with `flags: 'w'`, so launching
+**truncates a peer's live log**.
+
+✅ **Teardown sweeps the whole checkout, by every route** — `dev:stop`, killing the launcher pid, all
+of it. Announce before you run it; s8 announced to two peers and took the box cleanly.
 
 ## The rule that will be tempting to break
 
