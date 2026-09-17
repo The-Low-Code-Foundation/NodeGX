@@ -39,6 +39,7 @@ import {
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
+import { WORKBENCH } from './benchWords';
 import css from './PreviewChrome.module.scss';
 
 export interface PreviewScopeControlProps {
@@ -151,6 +152,19 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
               <span className={css.ScopeItemHint}>the whole project, as it ships</span>
             </button>
 
+            {/*
+              TVW-001 (f) / R-G — the picker had no heading at all, so the list
+              below `App preview` was a row of component names that never said
+              what picking one *does*. It puts the component on the Workbench,
+              and now it says so. This is the third surface fed by
+              `benchWords.ts`, with the caption and the panel's menu row.
+
+              Drawn above the empty state as well as the list, because the
+              heading is what makes "No component matches" legible as a failed
+              search rather than an empty feature.
+            */}
+            <div className={css.ScopeHeading}>{WORKBENCH}</div>
+
             {targets.length === 0 && (
               <div className={css.ScopeEmpty}>
                 <Text textType={TextType.Secondary}>No component matches “{query}”.</Text>
@@ -256,7 +270,7 @@ export function BenchFrameControl({ frame, onFrameChange, onSetDefaultSize, hasD
         className={css.FrameWidth}
         value={draft}
         disabled={frame.stretch}
-        aria-label="Bench frame width in pixels"
+        aria-label={`${WORKBENCH} frame width in pixels`}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={commit}
         onKeyDown={(event) => {
@@ -282,7 +296,7 @@ export function BenchFrameControl({ frame, onFrameChange, onSetDefaultSize, hasD
         className={css.FrameHeight}
         value={heightDraft}
         placeholder="Fill"
-        aria-label="Bench frame height in pixels, empty to fill the stage"
+        aria-label={`${WORKBENCH} frame height in pixels, empty to fill the stage`}
         title="Frame height in pixels. Leave empty to fill the stage."
         onChange={(event) => setHeightDraft(event.target.value)}
         onBlur={commitHeight}
@@ -324,8 +338,8 @@ export function BenchFrameControl({ frame, onFrameChange, onSetDefaultSize, hasD
           className={css.FrameDefault}
           title={
             hasDefaultSize
-              ? 'Update the size this component opens at on the bench'
-              : 'Set as the size this component opens at on the bench'
+              ? `Update the size this component opens at on the ${WORKBENCH}`
+              : `Set as the size this component opens at on the ${WORKBENCH}`
           }
           aria-label="Set as default size"
           onClick={onSetDefaultSize}

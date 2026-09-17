@@ -533,7 +533,7 @@ export function BlocklyWorkspace({
               : {
                   label: '▶ Run',
                   title:
-                    'Run these blocks here in the editor, with the app stopped, using the sandbox values in the ' +
+                    'Run these blocks here in the editor, with the app stopped, using the test values in the ' +
                     'Inputs rail. Nothing it does reaches your app.',
                   run: () => {
                     const trigger = bench?.defaultTrigger();

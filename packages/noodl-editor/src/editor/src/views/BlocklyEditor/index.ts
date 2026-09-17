@@ -145,7 +145,7 @@ export {
 } from './BenchRunner';
 export type { BenchRunRequest, BenchRunResult, CompiledBenchProgram, SandboxNoodl } from './BenchRunner';
 export {
-  SANDBOX_NOTE,
+  TEST_VALUES_NOTE,
   benchInputRows,
   benchInputsFor,
   benchOutputRows,

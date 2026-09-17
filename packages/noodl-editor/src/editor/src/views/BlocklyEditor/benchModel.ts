@@ -188,19 +188,28 @@ export function benchOutputRows(
 }
 
 /**
- * The one sentence every sandbox surface carries — acceptance criterion 3.
+ * The one sentence every run surface here carries — acceptance criterion 3.
  *
  * ⚠️ **A constant, so it cannot be said in three dialects.** The cost of running in the editor was
  * accepted on the condition that it is *stated in the UI, not hidden*, and a rule enforced by three
  * separate string literals is a rule that decays the first time one of them is edited.
+ *
+ * TVW-001 (f) / P93 R-G — **the promise is unchanged; the jargon is gone.** This used to open with
+ * the word *sandbox*, which named an implementation technique rather than telling anyone what they
+ * were looking at. Criterion 3 asks that the cost be *stated*, and "test values" states it to a
+ * person who has never read the word sandbox. Ruled by Richard, 2026-09-17.
+ *
+ * ⚠️ This surface is **not** the component Workbench (`views/VisualCanvas/benchWords.ts`), and the
+ * sweep deliberately did not give it that name: it runs blocks inside the editor against values you
+ * type, which is a different promise from mounting one component of the real app.
  */
-export const SANDBOX_NOTE = 'sandbox — not your app’s data';
+export const TEST_VALUES_NOTE = 'test values — not your app’s data';
 
 /**
  * What the strip says after a bench run, so the scrubber is never ambiguous about what it is
  * showing. Criterion 7's editor-side half.
  */
 export function benchRunNote(result: { ok: boolean; error?: string; errorBlockId?: string }): string {
-  if (result.ok) return 'Sandbox run — ' + SANDBOX_NOTE + '.';
-  return 'Sandbox run failed: ' + (result.error || 'the blocks threw, with no message.');
+  if (result.ok) return 'Test run — ' + TEST_VALUES_NOTE + '.';
+  return 'Test run failed: ' + (result.error || 'the blocks threw, with no message.');
 }

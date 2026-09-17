@@ -12,6 +12,7 @@ import { MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 
 import { showContextMenuInPopup } from '../../../ShowContextMenuInPopup';
 import { requestBenchMount } from '../../../VisualCanvas/benchRequest';
+import { OPEN_ON_WORKBENCH } from '../../../VisualCanvas/benchWords';
 import { iconForKind, labelForKind } from '../componentKind';
 import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
@@ -218,13 +219,18 @@ export function ComponentItem({
            * looking for the surface is looking for the place they work on one
            * component, and the report's own word for that is the workbench.
            *
-           * ⚠️ Scoped to this menu item on purpose. Whether "the workbench"
-           * becomes the product word *everywhere* — the surface's own caption,
-           * the docstrings — is a ruling still owed, and sweeping it here would
-           * pre-empt it. The `data-test` ids are untouched either way: live
-           * drive scripts reference them.
+           * TVW-001 (f) — **the ruling this row was waiting for arrived.** The
+           * note here used to say the sweep was owed and that scoping the word
+           * to one menu item avoided pre-empting it; P93 R-G is that ruling, so
+           * the word is now the surface's name everywhere and comes from
+           * `VisualCanvas/benchWords.ts`.
+           *
+           * *Show* became *Open* because this sits directly under *Open* and is
+           * the second of two ways to open the thing that was right-clicked —
+           * "show" read as a preview toggle. The `data-test` ids are untouched:
+           * live drive scripts reference them.
            */
-          label: 'Show in workbench',
+          label: OPEN_ON_WORKBENCH,
           icon: IconName.PlayCircle,
           onClick: () => requestBenchMount(component.name)
         });

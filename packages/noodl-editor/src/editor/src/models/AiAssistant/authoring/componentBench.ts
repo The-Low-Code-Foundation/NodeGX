@@ -81,6 +81,17 @@ import { buildSandboxDataset, unknownShapeNotice } from './sandboxData';
 import type { AgentSampleData } from './types';
 
 /**
+ * TVW-001 (f) — the surface's name, from the one module that holds it.
+ *
+ * A model importing a view constant is the inversion it looks like, and it is
+ * deliberate: this sentence is drawn on the Workbench (`ComponentBench`'s
+ * summary strip), so it is that surface's vocabulary and must not become a
+ * second spelling of it. `captureReferences.ts` sets the precedent for the
+ * direction; `benchWords.ts` is pure and pulls in no React.
+ */
+import { WORKBENCH } from '../../../views/VisualCanvas/benchWords';
+
+/**
  * The harness component's name.
  *
  * Prefixed out of any namespace a user can author into: component paths are
@@ -372,7 +383,7 @@ function describe(component: ComponentModel, iface: BenchInterface, unknown: str
     iface.inputs.length === 1 ? '1 input' : `${iface.inputs.length} inputs`,
     iface.outputs.length === 1 ? '1 output' : `${iface.outputs.length} outputs`
   );
-  let summary = `${component.name} on the bench — ${parts.join(', ')}.`;
+  let summary = `${component.name} on the ${WORKBENCH} — ${parts.join(', ')}.`;
 
   if (!visual) {
     summary +=
@@ -453,7 +464,7 @@ export function buildBenchExport({
 
   if (!useSampleData) {
     delete json.metadata[SANDBOX_METADATA_KEY];
-    return { ...result, summary: `${summary} Real backend — this bench uses your project’s live data.` };
+    return { ...result, summary: `${summary} Real backend — this ${WORKBENCH} uses your project’s live data.` };
   }
 
   // The closure starts at the harness, which reaches the target through its one

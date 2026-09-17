@@ -115,6 +115,18 @@
   white-space: nowrap;
 }
 
+/* TVW-001 (f) — the picker's one heading, naming what choosing a row below it
+   does. Tokens only: `--font-size-xs` is the scale's designated "caps labels,
+   units, tags, hints" step, so this adds no raw px for the font-size ratchet to
+   count and nothing to P92's scale. */
+.ScopeHeading {
+  padding: 8px 10px 4px;
+  color: var(--theme-color-fg-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .ScopeEmpty {
   padding: 10px;
 }

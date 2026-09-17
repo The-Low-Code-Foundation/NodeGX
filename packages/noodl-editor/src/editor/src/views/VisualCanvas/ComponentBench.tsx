@@ -56,6 +56,7 @@ import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import { ViewerConnection } from '../../ViewerConnection';
 import { SANDBOX_PARTITION, SANDBOX_WEBVIEW_ATTRIBUTES, useSandboxViewer } from '../SandboxSurface';
 import { benchParameterContent, benchSignalContents } from './benchInputs';
+import { WORKBENCH } from './benchWords';
 import { BenchInputsRail } from './BenchInputsRail';
 import { BenchOutputsRail } from './BenchOutputsRail';
 import { BenchScenarioBar } from './BenchScenarioBar';
@@ -791,7 +792,7 @@ export function ComponentBench({
               />
             ) : (
               <div className={css.Empty}>
-                <Text textType={TextType.Secondary}>{result?.unrenderable ?? 'Building the bench…'}</Text>
+                <Text textType={TextType.Secondary}>{result?.unrenderable ?? `Building the ${WORKBENCH}…`}</Text>
               </div>
             )}
 

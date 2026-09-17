@@ -40,6 +40,7 @@ import {
   type BenchValueState
 } from './benchOutputs';
 import css from './BenchOutputsRail.module.scss';
+import { WORKBENCH } from './benchWords';
 
 export interface BenchOutputsRailProps {
   iface?: BenchInterface;
@@ -156,7 +157,7 @@ export function BenchOutputsRail({ iface, values, log, origin, armed, onClear }:
                 <Text textType={TextType.Shy}>
                   {armed
                     ? NOTHING_EMITTED_HINT
-                    : 'Waiting for the bench to connect — nothing can be read until it does.'}
+                    : `Waiting for the ${WORKBENCH} to connect — nothing can be read until it does.`}
                 </Text>
               </div>
             )}

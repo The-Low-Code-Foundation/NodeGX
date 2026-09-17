@@ -28,6 +28,8 @@
 
 import { BENCH_COMPONENT_NAME, BENCH_NODE_ID, type BenchPort } from '@noodl-models/AiAssistant/authoring';
 
+import { WORKBENCH } from './benchWords';
+
 /** The controls the rail can render. One per row. */
 export type BenchControlKind = 'text' | 'number' | 'boolean' | 'color' | 'enum' | 'json' | 'signal' | 'untyped';
 
@@ -255,4 +257,4 @@ export function benchTypeLabel(port: BenchPort): string {
  * the bench is guessing about, and the fix — wire the port to something — is not
  * one they would arrive at on their own.
  */
-export const UNTYPED_HINT = 'No type — this input is wired to nothing, so the bench is guessing. Wire it to give it one.';
+export const UNTYPED_HINT = `No type — this input is wired to nothing, so the ${WORKBENCH} is guessing. Wire it to give it one.`;

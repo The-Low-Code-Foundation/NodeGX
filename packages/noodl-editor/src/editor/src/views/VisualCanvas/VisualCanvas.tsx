@@ -53,6 +53,7 @@ import {
 } from './benchRequest';
 import { registerLivePreview, unregisterLivePreview } from '../SandboxSurface';
 import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './benchFrameDefault';
+import { CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
 import { ComponentBench } from './ComponentBench';
 import { BenchFrameControl, PreviewScopeControl } from './PreviewChrome';
 import {
@@ -348,10 +349,19 @@ export function VisualCanvas({
           <>
             {/* R2's persistent strip: what is mounted, and that it is isolated.
                 Said in words as well as drawn, because the words are what a
-                user repeats when they file a bug about it. */}
+                user repeats when they file a bug about it.
+
+                TVW-001 (f) / R-G — and the word it hands them is now the
+                surface's own name. FIX-019 had it describe itself without
+                naming itself; a person who cannot name it cannot ask for it.
+                The strings live in `benchWords.ts` so this, the panel's menu
+                row and the scope picker cannot drift into three dialects. */}
             <div className={css.BenchCaption} data-test="bench-caption">
-              <strong>{benchTargetLabel(scope.target)}</strong>
-              <span>&nbsp;— isolated component, not the app</span>
+              <strong>{WORKBENCH}</strong>
+              <span>
+                {CAPTION_JOIN}
+                {benchCaptionRest(benchTargetLabel(scope.target))}
+              </span>
             </div>
 
             {/*

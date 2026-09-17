@@ -79,6 +79,30 @@ AC1 against `activeComponent` **and** the rendered class, both.
 - The `Pages` section is Router order. Two Routers means two ordered groups under `Pages`, each
   headed by the Router's name (`RouterAdapter.getRouterNames()`).
 
+### AC6's exclusion list (the one the criterion points at)
+
+AC6's grep returns **73 lines** at slice 5's HEAD and passes, because every one of them is excluded
+by its own terms. The exclusions, so a later reader can re-derive the pass rather than trust it:
+
+- **Comments and docstrings** — the bulk. Including `AskAboutNodeDialog.tsx:600`, which is a JSX
+  `{/* … */}` block quoting the sentence NAT-012 *removed* ("Answers will appear on the Bench"); the
+  quote is the record of the removal, so deleting it would delete the reason.
+- **Identifiers, types and module paths** — `SandboxExport`, `SANDBOX_PARTITION`,
+  `SANDBOX_WEBVIEW_ATTRIBUTES`, `useSandboxViewer`, `buildSandboxExport`, `SandboxPreview`,
+  `SandboxToolbar`, `SandboxDataEditor`, `views/SandboxSurface`, `BENCH_COMPONENT_NAME`,
+  `BENCH_NODE_ID`, `BenchInterface`.
+- **`data-test` / `testId` values** — `bench-caption`, `bench-summary`, `bench-size`,
+  `bench-diverged`, `component-bench`, `preview-scope-*`, `sandbox-auth-toggle`. 🔴 Untouched on
+  purpose: the phase's drive scripts resolve rows through them, and renaming them would cost every
+  recorded drive its handle for the sake of a word no person reads.
+- **CSS class names** — `css.BenchCaption`, `css.RailSandboxNote`, `css['is-bench']`.
+- **URLs and query keys** — `/api/v1/bench/threads`, `noodl-sandbox-data`, `noodl-sandbox-auth`.
+
+🔴 **The AC's grep is `--include=*.tsx`, and `.ts` holds user-visible strings too** — `benchInputs.ts`
+(`UNTYPED_HINT`), `benchModel.ts` and `InterfaceRailsOverlay.ts` all draw text a person reads. The
+sweep covered `.ts` as well; a future reader should not mistake the criterion's file filter for the
+sweep's boundary.
+
 ## 7. Progress
 
 | slice | rows | built | driven |
@@ -87,7 +111,7 @@ AC1 against `activeComponent` **and** the rendered class, both.
 | 2 (s7, 2026-09-17) | d — sections by role, `not in a router` placement | ✅ | driven ✅ · **AC3 ✅** |
 | 3 (s8, 2026-09-17) | c — `×N` button → *Used in* | ✅ | driven ✅ · **AC4 ✅** |
 | 4 (s9, 2026-09-17) | e — sheets retired | ✅ | driven ✅ · **AC5 ✅** |
-| 5 | f — the Workbench words | — | — |
+| 5 (s10, 2026-09-17) | f — the Workbench words | ✅ | **AC6 ✅** (static; no drive owed) |
 
 ### Slice 1 — what was built
 
@@ -403,3 +427,76 @@ Left undriven rather than recorded as a pass.
   component name* prompt and a component at `/chargeCard`; that reads exactly like "the cloud
   destination override is broken". It was not. `document.elementFromPoint(cx, cy)` on every row
   separates the two: the ghost's own centre returns the *previous* real row.
+
+### Slice 5 — what was built
+
+Row f. The Workbench says its own name, from one module: `views/VisualCanvas/benchWords.ts`
+(`WORKBENCH`, `OPEN_ON_WORKBENCH`, `CAPTION_JOIN`, `benchCaptionRest`, `benchCaption`), pure and
+graded in `tests-unit/tvw-001/benchWords.test.ts`.
+
+- **The caption** (`VisualCanvas.tsx`) was `<name> — isolated component, not the app` and is now
+  `Workbench — <name> on its own, not the app. Sample values.` It leads with the surface because the
+  word a person needs in order to ask for it again was the one word it never said.
+- **The menu row** (`ComponentItem.tsx`) was *Show in workbench* and is now *Open on the Workbench*.
+  🔴 **It was already directly under *Open*** — the spec's "promote it" describes a move that had
+  already happened, so this slice is a rename, not a reorder. *Show* became *Open* because it is the
+  second of two ways to open what was right-clicked, and "show" read as a preview toggle.
+- **The picker heading did not exist.** The spec says "the scope chip's picker heading says
+  `Workbench`"; `PreviewChrome`'s `ScopeMenu` had no heading element, no `aria-label`, no title — the
+  list under *App preview* was component names that never said what picking one *does*. Added, with
+  a `.ScopeHeading` style in tokens only (`--font-size-xs`, the scale's designated "caps labels,
+  units, tags, hints" step), so the font-size ratchet counts no new raw px.
+- **Swept with it:** `PreviewChrome`'s two frame `aria-label`s and the set-default-size title,
+  `BenchScenarioBar`'s overwrite title, `ComponentBench`'s *Building the…* placeholder,
+  `BenchOutputsRail`'s waiting state, `benchInputs.UNTYPED_HINT`, and `componentBench.ts`'s summary
+  sentence. That last one is a model importing a view constant, deliberately: the sentence is drawn
+  on the Workbench, so it is that surface's vocabulary (`captureReferences.ts` sets the direction).
+
+**The handoff was wrong about the one thing it was most certain of.** It said to "re-pin FIX-019's
+caption spec to the new text". **There is no such spec.** FIX-019's block in
+`tests/canvas/preview-scope.test.ts:207` pins `isDivergedFromCanvas` booleans and asserts no strings
+at all, and a repo-wide search found nothing anywhere pinning `isolated component, not the app`. The
+caption was unguarded for its whole life — which is how it sat a ruling behind without a gate
+noticing. `benchWords.test.ts` is the first assertion that has ever covered it.
+
+**"Sample values." is a claim, and it was checked before it was written.** Two independent reads
+agree it is true of this surface: `ComponentBench` calls `buildBenchExport` *without* `useSampleData`
+(default `true`), and mounts the viewer with `useSampleData: true` hardcoded, with no toggle. The
+`Real backend — …` branch (`componentBench.ts:454`) is unreachable from here; the AI authoring
+sandbox, which *can* be pointed at a real backend, says so in its own summary and does not draw this
+caption. A test pins the sentence with a note saying that if a data toggle ever arrives, that
+assertion is the one that should fail and the fix is a parameter, never a deletion.
+
+### Slice 5 — the second bench, and Richard's ruling
+
+The sweep found **a second surface that calls itself a bench**: the logic builder's Blockly run
+bench (VFN-011). It is not the Workbench — it runs blocks *inside the editor* against values you
+type — and its acceptance criterion 3 requires it to say so in the UI rather than hide it. AC6's
+grep failed on exactly one user-visible string because of it: `BlocklyWorkspace.tsx`'s ▶ Run
+tooltip, *"using the sandbox values in the Inputs rail"*.
+
+**Ruled by Richard, 2026-09-17: swap the jargon, do not rename it.** So the word *sandbox* is gone
+from that surface and the word *Workbench* was never given to it:
+
+- `SANDBOX_NOTE` → **`TEST_VALUES_NOTE`**, `'sandbox — not your app's data'` →
+  `'test values — not your app's data'`. VFN-011's criterion 3 is stated *better*, not weaker:
+  "test values" says what the note means to someone who has never read the word sandbox.
+- `'Sandbox run — '` / `'Sandbox run failed: '` → `'Test run — '` / `'Test run failed: '`; the rail
+  cell and signal-pulse titles follow. `tests-unit/vfn-011/bench.spec.ts` updated with them — three
+  of its four assertions referenced the *constant* and needed no change, which is the pin working.
+- 🔴 **Still open, and not this task's:** the Blockly surface still calls itself "the bench" in its
+  own prose. Whether the logic bench gets a name of its own is a separate question for Richard.
+
+### Slice 5 — gates (2026-09-17)
+
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **6 suites / 54** (was 5 / 46).
+  Armed — six mutants on `benchWords.ts`, each red, each `cmp`-proven to have applied before the run
+  and restored `cmp`-clean after: lower-case name (3 red); ordinary space for the nbsp join (2);
+  the *Sample values.* claim dropped (3); the menu row back to *Show in workbench* (1); the caption
+  leading with the subject instead of the surface (2); *isolated component* reinstated (4).
+- `npx jest tests-unit/vfn-011 tests-unit/tvw-001`: **10 suites / 109**, green — the Blockly rename
+  carries its own spec with it.
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0** (run twice: after the Workbench sweep and again
+  after the Blockly rename).
+- `node scripts/font-size-ratchet.js`: editor **593 vs baseline 599**, `-6` — the new `.ScopeHeading`
+  uses a token, so it adds nothing to count.
