@@ -30,6 +30,9 @@
  *   focusNext— the verdict arrives with Next focused, so Enter plays on
  *   ringNext — Next, focused that way, draws a visible focus ring (outline, :focus-visible)   (P88 s23)
  *   ringTab  — an option reached by Tab draws a visible focus ring before Enter picks it       (P88 s23)
+ * --measure-text arm (P88 GAM-020 AC6), at every verdict:
+ *   textFits — render_report's own measurement, run in the page, reports no text-wider-than-its-box (and measured > 0 texts)
+ *   textFitsEnd — the same on the result screen, with --reward
  * Per cell (AC3), read at the first verdict:
  *   390×844  — a rocket's rendered box is ≥ 28px on its long side; the track is ≥ 180px tall
  *   1366×768 — the track takes ≤ 40% of the viewport height
@@ -67,6 +70,8 @@ const LIVE = /^https?:\/\//.test(DIR || '');
 const BASE = arg('--path') ? arg('--path').replace(/\/?$/, '/') : '/';
 const ONLY = arg('--only');
 const KEYS = argv.includes('--keys');
+// P88 s23 (GAM-020 AC6): at every verdict, run render_report's own measurement in the page and grade its text finding.
+const MEASURE_TEXT = argv.includes('--measure-text');
 const LANGS = arg('--lang') ? [arg('--lang')] : ['fr', 'en'];
 const REWARD = argv.includes('--reward');
 const REDUCED = argv.includes('--reduced-motion');
@@ -378,6 +383,14 @@ async function driveCell(lang, vp) {
       const { data } = await send('Page.captureScreenshot', { format: 'png' });
       fs.writeFileSync(path.join(SHOTS, `${lang}-${vpName(vp)}${KEYS ? '-keys' : ''}${REDUCED ? '-reduced' : ''}-${name}.png`), Buffer.from(data, 'base64'));
     };
+    /** GAM-020 AC6: render_report's own text measurement, run in the page as it stands. `texts` is the known-firing count. */
+    const measureTexts = async () => {
+      const { measureExpression, summarise, RenderFinding } = require('@nodegx/render-measure');
+      const raw = await page.evaluate(measureExpression([], []));
+      const measured = { [vpName(vp)]: { requested: { width: vp.width, height: H }, ...raw, consoleErrors: [] } };
+      const findings = summarise(measured).findings.filter((f) => f.code === RenderFinding.TextWiderThanItsBox);
+      return { texts: raw.text ? raw.text.elements : 0, findings: findings.map((f) => f.message + ' ' + JSON.stringify(f.evidence)) };
+    };
     const startChallenge = async () => {
       if (!(await pressLabel(w.challenge))) note(`no "${w.challenge}" choice on setup`);
       if (!(await pressLabel(w.start))) return false;
@@ -403,6 +416,10 @@ async function driveCell(lang, vp) {
       clause('resultFold', bottoms.every((b) => b !== null && b <= H) && s.scrollY === 0, JSON.stringify({ title: s.title, again: s.again, other: s.other, track: s.track, scrollY: s.scrollY, H }));
       clause('resultReach', s.reach === true, `elementFromPoint at ${w.again}'s centre: ${s.reach}`);
       clause('resultFocus', s.againFocused, `the focus is on ${s.active}`);
+      if (MEASURE_TEXT) {
+        const m = await measureTexts();
+        clause('textFitsEnd', m.texts > 0 && m.findings.length === 0, `${m.texts} texts measured; ${m.findings.join(' | ')}`);
+      }
       if (REDUCED) {
         clause('landingStill', landing.shown > 0 && landing.animations.length === 0, JSON.stringify(landing));
         clause('resultStill', card.shown > 0 && card.animations.length === 0 && glyph.animations.length === 0, JSON.stringify({ card, glyph }));
@@ -428,6 +445,9 @@ async function driveCell(lang, vp) {
     await wait(1200);
 
     // ── A player, Home, a Défi race ──
+    // P88 s23: a fixed 1.2 s was the whole wait, and a build that loads more bundles on a busy machine read "no New player"
+    // with the button on screen 6 s in. Wait for the first screen (up to 15 s) instead.
+    for (let t = 0; t < 28 && !(await page.evaluate(`[...document.querySelectorAll('button')].some((b) => b.innerText.trim() === 'New player')`)); t++) await wait(500);
     if (!(await pressLabel('New player'))) return note('no "New player" button');
     await wait(400);
     const at = await page.evaluate(`(() => { const i = [...document.querySelectorAll('input')].find((i) => i.offsetParent !== null); if (!i) return null; i.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = i.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
@@ -539,6 +559,11 @@ async function driveCell(lang, vp) {
       const bottoms = { title: v.title.bottom, prompt: v.prompt ? v.prompt.bottom : null, next: v.next ? v.next.bottom : null };
       clause('fold', v.prompt && v.next && Object.values(bottoms).every((b) => b !== null && b <= H), `bottoms ${JSON.stringify(bottoms)}, H ${H}, scrollHeight ${v.scrollHeight}`);
       clause('reach', v.reach === true, `elementFromPoint at Next's centre is ${v.reach === null ? 'absent/off screen' : 'something else'}; next ${JSON.stringify(v.next)}`);
+      if (MEASURE_TEXT) {
+        // The banner exists only once a verdict is up, so a load-time render_report cannot see it (GAM-020 §8 s23).
+        const m = await measureTexts();
+        clause('textFits', m.texts > 0 && m.findings.length === 0, `${m.texts} texts measured; ${m.findings.join(' | ')}`);
+      }
       if (KEYS) {
         // P87 s10: build 7 read this red in 2 of 4 runs (a timeout round each time), build 5 in 0 of 4. The clause still grades the
         // verdict's first reading; the note says what held the focus then, and whether Next had it 600 ms later (Next is focused one

@@ -1,6 +1,6 @@
 # GAM-020 — A sentence that will never wrap is flagged before a person sees it clipped
 
-**Status: 🟢 built s19 (2026-09-17), both doors. AC1–AC5, AC7, AC8 met; AC6 (Rocket School regenerated with the old helper) left. ✅ R18 ruled s19.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
+**Status: 🟢 built s19 (2026-09-17), both doors. AC1–AC5, AC7, AC8 met. AC6 (s23): the render door names Rocket School's clipped title at the moment it exists; the generator's door cannot, because every Rocket School sentence is wired — Richard's question. ✅ R18 ruled s19.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
 
 Rocket School's Text helper gave every Text `sizeMode: contentSize`. Every sentence then ran off its card: *"a lot of texts
 don't wrap"*. The validator, the plan tools and `render_report` all stayed quiet.
@@ -123,7 +123,7 @@ parent (`clientWidth` 0) is skipped.
 | AC3 | Real Chrome (`measure-from-disk`, phone): pixel-game **before** names *"The five rooms are one Static Data node — open it and add a sixth."* **429px in a 358px box**; **after** the template fix: no text finding, and `minimum-layout-width` is gone too (it was this Text). Screenshots `scratchpad/gam020/shots/b1-phone.png` (cut at both ends) vs `a1-phone.png` (wraps, centred); desktop unchanged. Story-engine Remix: no render finding before or after (its eyebrow heading fits at 390) |
 | AC4 | Validator mutants (sha-restored): no call 5 red; threshold 27 → 1 (the 26-char arm); 21 → 1 (headings); no Columns skip → 1 (AC7); no wired abstention → 2; no ellipsis → 1; whole text not longest line → 1. Render: the self clause (`scrollWidth > clientWidth`) in real Chrome on the clipped build names **nothing**; pinned as the reverted arm of `nodegx-render-measure/tests/textWiderThanItsBox.test.js` (4/4) |
 | AC5 | Census through the real validator (`npm run calibrate:layout -- templates library/prefabs/*/project`, GAM-020 section added): **6 firings**, all sentences, 0 headings: pixel-game `plFoot` (66), story-engine `rxHelpHead` (33), crud-screen empty hint (37), settings-page ×3 section blurbs (28–32). Python's 7th (settings-page, 44) has `text` **wired**: correct abstention |
-| AC6 | ⬜ **Not done.** Rocket School is the TPL-007 peer's uncommitted tree |
+| AC6 | **s23: half.** Render ✅ ("Tu as atteint la planète !" 353px in 312 at 390 FR, old helper; silent on current). Generator diagnostics ❌: 59/60 Rocket School Texts are wired, the rule abstains by design. §8 s23 |
 | AC7 | Decided one diagnostic, asserted in the spec, mutant-graded |
 | AC8 | TPL-005 and TPL-006 gates went red on the new warning. **The templates were fixed, not the pins**: `plFoot` → `contentHeight` + `textAlignX: center`, `rxHelpHead` → `contentHeight` (left-aligned column), regenerated (`template:pixel`, `template:story`; one-line diffs). Gates 119/119. TPL-007 and TPL-008 read no new warning |
 
@@ -133,3 +133,39 @@ School's untracked `.gitignore`/`.mcp.json`/`CLAUDE.md`, s17). **Not run:** `typ
 type-checked both changed modules), editor `test:ci`, the whole `noodl-mcp` suite. The prefab hits (crud-screen, settings-page) are left
 as findings, not edited. The installed app and `noodl-mcp`'s bundle carry neither door until rebuilt.
 
+
+### Session 23 (2026-09-17, over `0e7105bca`) — AC6, the person's door
+
+**The old helper, today.** `text()` in `tpl007Components.ts` swapped for one run (`cp` snapshot, `cmp`-restored) and the generator
+pointed at scratch (`prepareRocketArtefact` refuses a folder not named `rocket-school`). The literal pre-RKT-001 helper
+(`contentSize` everywhere) **no longer stages**: `Game/Header`'s name Text now carries a `width`, and the door refuses it
+(`inert-dimension`). The arm therefore reverts every Text that has no `width`/`maxWidth`/`height` of its own: **51 Texts** went
+`contentSize` (current build: 13), `fbTitle` among them.
+
+**Half 1 — "the generator's diagnostics name the banner correction": ❌ not met, and cannot be by this door.** Both builds raise the
+same diagnostics (156 `dynamic-port-skipped`, 58 `unknown-type-check-skipped`, 4 `uncollapsible-multi-column`), **0
+`text-cannot-wrap`**. Measured why: **59 of Rocket School's 60 Texts have a wired `text`** (every string is bilingual, fed from the
+word table), and the rule abstains on a wired `text` by design (AC2). The one literal is "Rocket School" (13 chars, under R18's 26).
+A game whose words are all wired is invisible to the static door; the sentence exists only at run time.
+
+**Half 2 — "render_report names it with its width and its parent's": ✅ met, at the moment the sentence exists.** A load-time
+`measure-from-disk` at 390×844 reports no text on either build (7 pages; the banner and the result card are not on screen at load).
+`drive-rkt003-stage.js --measure-text` runs `@nodegx/render-measure`'s own `measureExpression` + `summarise` in the page at every
+verdict (`textFits`) and on the result screen (`textFitsEnd`), each with a measured-texts count as its known-firing signal.
+
+| build (deployed with `nodegx deploy --allow-development-engine`), 390×844 FR, `--reward --measure-text` | result |
+|---|---|
+| old helper | **"Tu as atteint la planète !" is 353px in a 312px box** (`textFitsEnd`, 11 texts measured); verdict prompts "Écris en chiffres : mille soixante-dix-sept" 566 in 304, "Arrondis 6 761 à la dizaine" 369 in 304. Screenshot: the title runs past both edges of the card |
+| current | ALL PASS, 10 rounds + the end: `textFitsEnd`, `resultFold`, `resultFocus`, `landing`, `againPlays` |
+| 5-round plan, no reward, both | ALL PASS on both: "Pas tout à fait." fits at 390 even at `contentSize` (silence is the true reading there) |
+
+**Instrument defects found (not product, not fixed):**
+- 🔴 `scripts/devtools/deploy-from-disk.cjs` (checked in, built 2026-09-12) deploys HEAD's Rocket School as **12 bundles whose "New
+  player" skips the profile form** and lands on Home; `nodegx deploy` of the same folder writes 8 bundles with the form. The drive read
+  that as "no Let's go! button". A fresh build (`build-deploy-from-disk.mjs` to scratch) **throws at load**: `EditorSettings` reads
+  `StorageWeb.get` in a static initialiser ("Method not implemented."). Use `nodegx deploy`.
+- The drive waited a fixed 1.2 s for the first screen; a heavier build on a busy machine read "no New player" with the button on
+  screen at 6 s. It now waits for the button (up to 15 s).
+
+Scratch: session `b19df43b…/scratchpad/g20/` (`old/`, `current/` builds, `gen-*.log`, `census.py`, `measure-*.json`, `deploy-*`,
+`drive-end-*.log`, `shots-end-*`).
