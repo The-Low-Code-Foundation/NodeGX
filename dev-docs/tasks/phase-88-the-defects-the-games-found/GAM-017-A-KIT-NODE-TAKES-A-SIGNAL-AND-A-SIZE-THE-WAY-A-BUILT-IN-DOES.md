@@ -165,3 +165,37 @@ stays on the wrapper Group (z3).
 1605 ✓, exit 0; `nodegx-node-kit-types` 83/83 (the new sample compiled); `nodegx-kit-scaffold` 74/74 (types-copy gate on the 5 refreshed
 copies). Scratch: `6ec64024-…/scratchpad/g17/` (`head.log`, `fix.log`, `mutants.py` + `M*.log`, `census*.js/json`, `browser/project`,
 `deploy-{head,fix}`, `drive-signal.js`, `drive-{head,fix}.json`, `drive-fix-shot.png`, `export/`).
+
+### Session 22, later (2026-09-17) — the export half, and AC7
+
+**Richard: "Why does the export drop something? Please fix it."** Measured cause (a subagent mapped it, then read at source): the
+export's handler pass (`plan.ts` Pass 2) claims a signal wire only when the target port is in its hand-written trigger tables
+(`TRIGGER_PORTS`, `isTriggerWire`, a Script's own signal inputs). A kit node's port can never be on one, so the wire fell to Pass 6's
+catch-all note. And the generated kit runtime had no way to pulse a node: it never called `valueChangedToTrue`, and it did not seed
+a signal prop.
+
+**Built.**
+- `parse/kitSource.ts`: an `inputs` port with a `valueChangedToTrue` is a signal whatever its `type` says (the runtime does the same).
+- `analyze/plan.ts`: `isTriggerInto` accepts a kit node's declared signal input; `compileKitSignal` mints one pulse-count row per wired
+  kit input (`useState<number>(0)`), binds it to the port, and the handler is `state-set` `op: 'inc'` (a functional update).
+- `emit/kits.ts`: a signal input is typed `number`; the runtime seeds a signal prop at 0 (the bridge's seed); `KitNode` runs
+  `valueChangedToTrue` once each time an `inputs` signal's count rises (the count it mounts with is where it starts), and does not hand
+  that count to the component as a prop.
+- Emitted page for the fixture: `onClick={() => { setSignalPropPlay((v) => v + 1); setInputsRoutePlay((v) => v + 1); }}`,
+  `<SignalProp play={signalPropPlay} />`, `<InputsRoute play={inputsRoutePlay} />`, and the unwired copy untouched.
+
+**Spec** `nodegx-export/tests/gam-017-a-click-reaches-a-kit-signal.test.ts` over the new fixture `tests/fixtures/kit-signals` (the
+GAM-017 page; its `inputs` signal declares no `type`): the page (no drop note, a count per wired input, the Click increments each,
+the unwired copy has none, `typecheckEmittedApp` `[]`) and the **generated runtime run in jsdom** with the kit's own script. HEAD: 5
+red by name beside the known-firing row and typecheck green. Fix: 8/8.
+
+**Reverted arms** (7, sha-restored; `scratchpad/exp/mut.py`): not a trigger 3 · a literal set instead of inc 1 · no binding 2 · no
+seed 1 · no edge call 2 · parse ignores `valueChangedToTrue` 2 · mount count treated as a pulse 1. The first pass left three arms green
+(the spec did not check the increment, the fixture declared `type`, nothing mounted above 0): all three closed before recording.
+
+**Regression:** whole `nodegx-export` suite 104/105 suites, 3590 ✓; the one red was HLS-001's golden, counted before it moved: one
+project added (`kit-signals`), and only `src/kits/runtime.tsx` changed in `kits` and `charts`. After: HLS-001 + custom-nodes + FLD-015
+54/54, `tsc --noEmit` 0.
+
+**§6 title:** "(export half) ... AC7" — AC7 is recorded below once Rocket School is regenerated.
+

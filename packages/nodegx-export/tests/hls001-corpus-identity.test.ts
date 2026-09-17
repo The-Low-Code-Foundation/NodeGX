@@ -208,7 +208,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // every one a project's `README.md` and nothing else, because the alpha sentence reads the ledger and now
     // says "118 of the 128 nodes you can place". Proved by putting 117/127 back in three READMEs (tick-desk,
     // cheer, socket-desk): each hash equalled the old golden. Zero other files moved.
-    expect(corpusProjects().length).toBe(47);
+    //
+    // 47 → 48 on 2026-09-17 (P88 GAM-017, export half): `kit-signals` is the first project with a Click wired into a
+    // kit node's signal input, both ways a kit declares one. Counted before the literal moved: one project added, and
+    // exactly one existing file changed in each of the two projects that carry a kit (`kits`, `charts`):
+    // `src/kits/runtime.tsx`, which now seeds a signal prop and runs `valueChangedToTrue` on a rising count. Zero other
+    // hashes moved.
+    expect(corpusProjects().length).toBe(48);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

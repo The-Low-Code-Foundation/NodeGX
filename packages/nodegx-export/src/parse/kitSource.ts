@@ -283,7 +283,12 @@ function readDefinition(raw: unknown): KitNodeDefinition | null {
     // A definition may declare both; the prop form wins because that is the one the component
     // actually reads, and two entries for one port name would make the emit side pick arbitrarily.
     if (inputs.some((i) => i.name === name)) continue;
-    inputs.push({ ...readPort(name, spec), via: 'node' });
+    const port = readPort(name, spec);
+    // P88 GAM-017 — a `valueChangedToTrue` makes the port a signal whatever `type` says; the runtime
+    // overrides the type the same way (`nodedefinition.ts` `registerInput`). Without this an
+    // `inputs` signal with no declared type was invisible to the export as a signal.
+    const edge = typeof (spec as Record<string, unknown> | undefined)?.valueChangedToTrue === 'function';
+    inputs.push({ ...port, ...(edge ? { type: 'signal' } : {}), via: 'node' });
   }
 
   const outputs: KitNodeDefinition['outputs'] = [];
