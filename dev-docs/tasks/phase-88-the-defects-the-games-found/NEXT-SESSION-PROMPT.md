@@ -40,9 +40,11 @@ the whole task you pick, including its §8.
 - 🔴 **No dev stack is running and nothing is watching `src/external`.** Session 24 launched one at 21:50 and tore it down at
   22:13 (25 processes, nothing left). The bundles **on disk carry both of this session's viewer changes** — verified by reading
   the compiled source, not the mtime. Any further viewer edit needs a rebuild of your own, or a stack.
-- 🔴 **The editor renderer may not compile.** At 22:13 a peer's uncommitted `ComponentsPanelNew` work failed the webpack ts
-  check, so the editor mounted nothing. Gate on `npm run cdp -- health` reporting `reactMounted: true`, and read `.logs/dev.log`
-  before concluding anything about the app.
+- ✅ **The editor renderer compiles again.** It did not at 22:13 — a peer's in-flight `ComponentsPanelNew` work failed the
+  webpack ts check and the editor mounted nothing — and they fixed it at 22:20 (`tsc -p packages/noodl-editor --noEmit` exit 0):
+  `SheetSelector.tsx` and `useSheetManagement.ts` are **deleted** by P93 TVW-001 slice 4, sheets being retired, along with the
+  `Sheet` type and `CLOUD_SHEET.displayName` those two were reaching for. Still gate on `npm run cdp -- health` reporting
+  `reactMounted: true` and read `.logs/dev.log`: a peer's refactor can break the renderer under you at any time.
 - **Left behind by s24:** the throwaway project `NodeGX test projects/gam016-ac3-playful`. Its Home page was swapped for the
   GAM-017 kit fixture before the failed reload, so it is **not** a clean wizard output any more — delete it or remake it rather
   than reading it.
@@ -69,9 +71,9 @@ the whole task you pick, including its §8.
    calls peek and consume in the same test, which is a hole shaped exactly like this defect.
 2. **GAM-017 AC4 editor half** — a kit signal prop in the editor canvas with a Button's Click wired in. The fixture is ready:
    session 22's project (with `gam017.SignalProp` and a `Fire` Button already wired to its `play`) is copied to this session's
-   scratch at `g17ac4/project`. 🔴 Parked s24 because **a peer's in-flight `ComponentsPanelNew` refactor did not typecheck** and
-   the renderer would not build (`reactMounted: false`): `useSheetManagement.ts:10` TS2305 `Sheet`, `SheetSelector.tsx:75`
-   TS2339 `displayName`. Check the renderer compiles before counting on the canvas.
+   scratch at `g17ac4/project`. Parked s24 because the renderer would not build (`reactMounted: false`) on a peer's in-flight
+   `ComponentsPanelNew` refactor — **since fixed** (22:20, those two files are deleted by P93 TVW-001 slice 4), so this is now
+   only waiting on a free box. Check `reactMounted: true` before counting on the canvas.
 3. **GAM-028 — now unblocked (R27).** A `Device` node with named boolean outputs, `false` on the server. GAM-013 §8 is the worked
    example of what a new built-in node owes: 14 surfaces, 15 export floor pins, `ssr.compat` decided on purpose. AC1 is a census
    **before** designing. With it, GAM-011 AC7's answer changes — that is the point of building it.

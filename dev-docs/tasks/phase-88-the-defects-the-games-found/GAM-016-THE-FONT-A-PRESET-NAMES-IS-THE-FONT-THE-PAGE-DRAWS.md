@@ -238,7 +238,9 @@ sequence (create → project loads → tokens applied) ever calls the second one
 **Not done, and why:** GAM-017 AC4 was queued for the same editor session. After the reading above, a reload to swap in the kit
 fixture came up `reactMounted: false` and stayed there: a peer's in-flight `ComponentsPanelNew` refactor does not typecheck
 (`useSheetManagement.ts:10` TS2305 `types` has no exported member `Sheet`; `SheetSelector.tsx:75` TS2339 `displayName`), so
-webpack-dev-server could not build the renderer. Reported to them; AC4 is parked again.
+webpack-dev-server could not build the renderer. Reported to them and **fixed by them at 22:20** — both files are deleted by P93
+TVW-001 slice 4 (sheets retired), and `tsc -p packages/noodl-editor --noEmit` is exit 0 again. AC4 is parked only for want of a
+free box, not for a broken tree.
 
 **Left behind:** the throwaway project `NodeGX test projects/gam016-ac3-playful` (its Home page was swapped for the GAM-017 kit
 fixture before the failed reload, so it is no longer a clean wizard output — delete it, or remake it, rather than reading it).
