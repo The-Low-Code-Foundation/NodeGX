@@ -50537,6 +50537,18 @@
           "allowVisualStates": true
         },
         {
+          "name": "backspace",
+          "displayName": "Backspace",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Deletes the selection, or the character before the caret, as the Backspace key does — even while the field has focus"
+        },
+        {
           "name": "blockTouch",
           "displayName": "Block Pointer Events",
           "group": "Pointer Events",
@@ -51549,6 +51561,18 @@
           "index": 20
         },
         {
+          "name": "insert",
+          "displayName": "Insert Text",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Writes Text To Insert at the caret, replacing any selection, as if it had been typed — even while the field has focus. Max length still applies"
+        },
+        {
           "name": "label",
           "displayName": "Label",
           "group": "Label",
@@ -52392,6 +52416,17 @@
           "allowVisualStates": true
         },
         {
+          "name": "textToInsert",
+          "displayName": "Text To Insert",
+          "group": "Text",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What Insert Text writes, for example the digit on a keypad button"
+        },
+        {
           "name": "textTransform",
           "displayName": "Case",
           "editorName": "Case",
@@ -52724,7 +52759,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when Set, Clear, Focus or Blur did something"
+          "description": "Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something"
         },
         {
           "name": "enabled",
@@ -52913,7 +52948,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed — or when a Focus arrived while the field was not on the page"
+          "description": "Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed — when Insert Text or Backspace had nothing to write (a full Max length, or an empty field), or when a Focus arrived while the field was not on the page"
         },
         {
           "name": "willUnmount",

@@ -115,6 +115,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `textAlignX` | Enum (`left`, `center`, `right`) | `left` | Aligns the typed text within the field |
 | `textStyle` | TextStyle | `None` | Applies one of the project's saved text styles; the individual font ports below override whatever it sets |
+| `textToInsert` | String | — | What Insert Text writes, for example the digit on a keypad button |
 | `textTransform` | Enum (`none`, `uppercase`, `lowercase`, `capitalize`) | `none` | Forces the text to upper case, lower case or capitalised without changing the underlying value |
 | `transformOriginX` | Number | `50` | Horizontal point the element rotates and scales around, as a fraction of its width |
 | `transformOriginY` | Number | `50` | Vertical point the element rotates and scales around, as a fraction of its height |
@@ -134,9 +135,11 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `backspace` | Signal | — | Deletes the selection, or the character before the caret, as the Backspace key does — even while the field has focus |
 | `blur` | Signal | — | Takes keyboard focus away from this field, which is what fires Blurred |
 | `clear` | Signal | — | Empties the field |
 | `focus` | Signal | — | Puts the keyboard cursor in this field |
+| `insert` | Signal | — | Writes Text To Insert at the caret, replacing any selection, as if it had been typed — even while the field has focus. Max length still applies |
 | `set` | Signal | — | Writes the current Value into the field now. This is additional to Value applying as it arrives; untick Value under Run On Value Change to stop that |
 
 ## Outputs
@@ -163,7 +166,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 |---|---|---|---|
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
-| `done` | Signal | — | Fires when Set, Clear, Focus or Blur did something |
+| `done` | Signal | — | Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
 | `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
@@ -172,7 +175,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
 | `pointerUp` | Signal | — | Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system |
 | `textChanged` | Signal | — | Fires whenever the Value output changes, so a graph can sequence off the new value rather than poll it |
-| `unchanged` | Signal | — | Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed — or when a Focus arrived while the field was not on the page |
+| `unchanged` | Signal | — | Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed — when Insert Text or Backspace had nothing to write (a full Max length, or an empty field), or when a Focus arrived while the field was not on the page |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ## Dynamic ports

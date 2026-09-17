@@ -1,6 +1,6 @@
 # GAM-011 — A field can ask for a keypad, and take a tapped key at the caret
 
-**Status: ⬜ not started. ✅ R12 ruled s19 (§5): buildable.** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export)
+**Status: 🟡 2026-09-17 (session 21): (a) and (b) built. AC1, AC3, AC4, AC5 met; AC6 met by naming (Insert/Backspace deferred, not translated). 🔴 AC2 NOT met: a keypad wired the obvious way mistypes (a Function publishes only on change) — a question for Richard, §8. AC7 not recorded. ✅ R12 ruled s19 (§5).** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export)
 
 On a tablet, a number answer opens the full letter keyboard over half the game. An on-screen pad cannot type into the box while a
 child's caret is in it. Rocket School had to build its own React node to get either.
@@ -85,4 +85,98 @@ HEAD `eb12ebe99`, 2026-09-14.
 
 ## 8. Record
 
-Not started.
+### Session 21 (P88) — 2026-09-17, over `35e9e4ae6` (GAM-010): part (a)
+
+**Built.**
+- `text-input.ts`: `Input Mode` (`text`, `numeric`, `decimal`, `tel`, `email`, `url`, `search`, `none`; index 20) and `Enter Key Hint`
+  (`enter`, `done`, `go`, `next`, `previous`, `search`, `send`; index 21), group Text, **no default**.
+- `TextInput.tsx`: both passed to the `<input>` and the `<textarea>` as `inputMode={props.inputMode || undefined}` (and
+  `enterKeyHint`), so an unset port renders no attribute.
+- **Export** (`nodegx-export`): `CONTENT_PARAMS` maps both to `attr:` roles on Text Input (both spellings), `CONTENT_ATTR_ORDER` prints
+  them after `maxLength`. A **wire** into either is refused by name (`KEYWORD_ATTRS` in `component.ts`): React types both as a keyword
+  union, and a typed `string` component input printed as `inputMode={mode}` failed the exported app's typecheck (`TS2322 … 'string' is
+  not assignable to "search" | "none" | …`, measured before the refusal existed). Ledger note on Text Input updated.
+
+**AC1 — RED at HEAD** (`noodl-viewer-react/tests/gam-011-a-field-can-ask-for-a-keypad.test.tsx`, GAM-009's harness: a real Text Input node
+rendered by its own `render()` into `createRoot` over hand-built jsdom): **5 failed, 1 passed**. The passing row is the refusal, "unset
+renders no attribute". §6's AC1 also names the insert action and the focused-`Set` rows; those belong to part (b) and GAM-009's
+existing AC4 rows, which pass unchanged.
+
+**Part (a), the spec, final: 6/6.** Reverted arm: the two props not passed to the element → exactly the three attribute rows red.
+
+**AC5 — census.** 926 JSON files under `library/` and `templates/`: **61 Text Inputs** (library 24, templates 37), **none** sets
+`inputMode` or `enterKeyHint`. Every one takes the path the "unset renders no attribute" row grades. (A census, not a per-field render.)
+
+**AC6 — export, part (a)** (`nodegx-export/tests/gam-011-input-mode.test.ts`, a project written to a temp dir because several suites walk
+every folder in `tests/fixtures`): **7/7**, including `typecheckEmittedApp(app) → []`. Before the change the same project exported
+`<input placeholder="Answer" />` with `parameter inputMode on answer has no style/content mapping — dropped, reported`. Reverted arms:
+| reverted | red |
+|---|---|
+| E1 both out of `CONTENT_ATTR_ORDER` | authored keywords print (1) |
+| E2 both out of `CONTENT_PARAMS` | authored keywords print; the old drop is gone; the typed-input refusal (3) |
+| E3 the keyword refusal skipped | the typed-input refusal; **the emitted app compiles** (2) |
+| E3, first form (`false && …`) | **did not compile, `Tests: 0 total`: graded nothing**, replaced by E3 |
+| E4 a branch printing a wire that folds to a literal | **green: unreachable in this project, so the branch was removed**, not kept untested |
+
+**Catalog and docs:** regenerated (`catalog:generate`, `catalog:merge`, `docs:nodes`, CHR-007's snapshot): the delta is the two ports.
+**Not done for (a):** a browser reading of the attribute; AC2's touch drive is written for the whole sentence and waits for part (b).
+
+**Found, not ours:** a Text Area exports as `<input type="textArea" />` (seen in the probe). Not registered.
+
+### Session 21 (P88), continued: part (b)
+
+**Built.**
+- `text-input.ts`: `Text To Insert` (string, group Text: SIG-003's gate refuses a value in "Actions", caught by `catalog:groups:check`),
+  `Insert Text` and `Backspace` (signals, Actions). Both report `Done`/`Unchanged`; the two outcome sentences name them.
+- `TextInput.tsx` `edit(mode, text)`: through React state, never `el.value`. The caret is the selection **only if the field has held focus
+  since it mounted** (`hadCaret`, set in `onFocus`); otherwise, and where `selectionStart` is `null` or throws (Number, Email), it appends.
+  🔒 R12: Max length holds, by whole characters; what does not fit is not written, and a full field is `Unchanged`. Backspace removes the
+  selection or one whole character (an emoji is two UTF-16 units). The write goes through `_typed` (GAM-009 R10, so a remount keeps it),
+  then `setText`, and the caret is set after the commit, **only while the field holds focus**. **Backspace included** (§5 asked to include
+  it or rule it out: a pad needs it).
+- Not mounted: Insert appends to (and Backspace trims) the start value, and the Value output is set and flagged, as `Set` does while
+  unmounted.
+
+**Spec** (`gam-011-a-field-can-ask-for-a-keypad.test.tsx`, parts (a)+(b)): **17/17**. Reverted arms (`cp` snapshots, `cmp`-restored):
+| reverted | red |
+|---|---|
+| B1 **§6 AC3's named arm: Insert routed through `setText`** | caret insert, selection, Max length, Number field (4) |
+| B2 the selection never read | caret insert, selection, both Backspace rows (4) |
+| B3 Max length ignored | Max length (1) |
+| B4 `hadCaret` never set | caret insert, selection, both Backspace rows (4) |
+| B5 caret not restored | caret insert, selection, emoji Backspace (3) |
+| B6 Backspace by UTF-16 unit | emoji Backspace (1) |
+| B7 not-mounted output not flagged | **green at first**; a row spying on `flagOutputDirty` added → red (1) |
+| B8 `_typed` not called | **green at first**; a hide/show row added → red (1) |
+
+AC4: viewer specs mentioning Text Input, controls, focus or outcomes (ERG-001's corpus rows, GAM-009, GAM-010, GAM-012 included): **46
+suites, 737 tests**, exit 0; `tsc --noEmit` exit 0. GAM-010's spec pinned Text Input's old `Done` sentence; updated to the new one.
+
+**Catalog:** `catalog:generate`/`merge`, `docs:nodes`, CHR-007 snapshot: the delta is the three ports and the two sentences. `catalog:check`,
+`merge:check`, `groups:check` (after the Text To Insert move), `docs:nodes:check`, `cloud-library:check` exit 0; editor CHR-007/008, FB-018,
+AIB-001 223/223. `nodegx-export` whole suite (part (a) in, before (b)): **104 suites, 3567 passed, 1 skipped**, exit 0.
+
+**Export (b):** a Button's `onClick → answer.insert` and `→ answer.backspace` are named deferrals (`no deterministic translation in step 5
+(deferred to EXP-003)`), and an authored `Text To Insert` is `has no style/content mapping — dropped, reported`. Ledger note says so.
+**AC6 is met by naming, not by translation.**
+
+**In Chromium** (scratch prod bundle; `render-from-disk.js` copy; before = the GAM-010 bundle): a page with a decimal field and a keypad of
+eleven Buttons, each `onClick → a Function` whose script is `Outputs.key = "<k>"; Outputs.press();`, wired `out-key → Text To Insert` and
+`out-press → Insert Text`, plus `⌫ → Backspace`.
+| reading | before | after |
+|---|---|---|
+| attributes on the `<input>` | none | `inputmode="decimal"`, `enterkeyhint="next"` |
+| **AC3, fine pointer, focus kept** (the page cancels a button's `mousedown`, as a pad would; iOS keeps focus anyway): type `123`, caret 1, click `9` | `123`, caret 1 | **`1923`, caret 2, `activeElement` = the field** |
+| AC3, plain mouse click | `123` | `1923`; focus moved to the button, caret at the end (desktop Chrome focuses a clicked button; §7) |
+| **AC2, touch** (`setTouchEmulationEnabled` + reload, `(pointer: coarse)` true), answers 12, 7,5, 305, 9, 42 | 0/5, `Invalid connection, input doesn't exist` | 🔴 **3/5 at 1024×768 and at 390×844: `305` → `300`, `42` → `44`** |
+
+🔴 **Why AC2 misses, measured:** a Function publishes an output **only when its value changes** (`simplejavascript.ts:160-166`, kept for
+backward compatibility). Key 5's Function already held `5` from the earlier answer `7,5`, so it published nothing, and `Text To Insert`
+still held `0`. Pressing 3, 0, 5, 4, 2 once each lands every key (`30542`, logged `set textToInsert` then `EDIT insert` per tap). So
+**any keypad wired this way types `121` as `122`**. A `Outputs.key = null` first made it worse: nothing landed, because Insert read the
+`null`. The first touch runs also had instrument faults, fixed before these readings: undeclared Function ports; a 12-key row off-screen at 390.
+**This is not a defect in Insert. It is a trap in the obvious way to author this task's person sentence, and it is Richard's to rule on**
+(handoff). Scratch: `g11/pad` (the plain page), `g11/pad-null`, `drive-pad.js`, `drive-order.js`, `drive-pad3-{before,after}.log`.
+
+**AC7 not recorded.**
+

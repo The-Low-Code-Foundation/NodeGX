@@ -239,6 +239,42 @@ const TextInputNode = {
         }
       }
     },
+    // GAM-011 (b) — an on-screen key. Insert Text writes at the caret (or over the selection) the way a
+    // pressed key does, **whether or not the field has focus**: `Set` abstains while focused, and a keypad
+    // tapped while the caret is in the box is exactly that case. 🔒 R12: Max length holds.
+    textToInsert: {
+      type: 'string',
+      // SIG-003: "Actions" holds signals only; the value Insert Text writes sits with the field's text.
+      group: 'Text',
+      displayName: 'Text To Insert',
+      description: 'What Insert Text writes, for example the digit on a keypad button',
+      set(value) {
+        this._internal.textToInsert = value === undefined || value === null ? '' : String(value);
+      }
+    },
+    insert: {
+      type: 'signal',
+      group: 'Actions',
+      displayName: 'Insert Text',
+      description:
+        'Writes Text To Insert at the caret, replacing any selection, as if it had been typed — even while the field has focus. Max length still applies',
+      valueChangedToTrue() {
+        const outcome = this.beginOutcome();
+        this.scheduleAfterInputsHaveUpdated(() => {
+          this.reportOutcome(outcome, this.edit('insert', this._internal.textToInsert || '') ? 'done' : 'unchanged');
+        });
+      }
+    },
+    backspace: {
+      type: 'signal',
+      group: 'Actions',
+      displayName: 'Backspace',
+      description: 'Deletes the selection, or the character before the caret, as the Backspace key does — even while the field has focus',
+      valueChangedToTrue() {
+        const outcome = this.beginOutcome();
+        this.reportOutcome(outcome, this.edit('backspace') ? 'done' : 'unchanged');
+      }
+    },
     clear: {
       type: 'signal',
       group: 'Actions',
@@ -374,11 +410,12 @@ const TextInputNode = {
      * still always reports `Done`.
      */
     ...outcomeOutputs({
-      done: 'Fires when Set, Clear, Focus or Blur did something',
+      done: 'Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something',
       unchanged:
         'Fires when a Set or Clear left the field as it was — most often a Set while the field ' +
-        'has focus, which is deliberately absorbed so it cannot overwrite what is being typed — or when a ' +
-        'Focus arrived while the field was not on the page'
+        'has focus, which is deliberately absorbed so it cannot overwrite what is being typed — when Insert Text ' +
+        'or Backspace had nothing to write (a full Max length, or an empty field), or when a Focus arrived while ' +
+        'the field was not on the page'
     })
   },
   methods: {
@@ -415,6 +452,34 @@ const TextInputNode = {
      */
     _announcedValueIs(value) {
       return this._internal.announced !== undefined && this._internal.announced.value === value;
+    },
+    /**
+     * GAM-011 (b) — Insert Text and Backspace. Mounted, the component edits at the caret. Not mounted,
+     * there is no caret, so Insert appends to (and Backspace trims) the value the field will start from,
+     * and the Value output says so at once, as `Set` does while unmounted.
+     *
+     * @returns whether the text changed — `Unchanged` when not.
+     */
+    edit(mode, text) {
+      if (this.innerReactComponentRef) return this.innerReactComponentRef.edit(mode, text);
+
+      const current = this.props.startValue === undefined || this.props.startValue === null ? '' : String(this.props.startValue);
+      let next;
+      if (mode === 'backspace') {
+        const chars = Array.from(current);
+        chars.pop();
+        next = chars.join('');
+      } else {
+        const maxLength = Number(this.props.maxLength);
+        const room = maxLength > 0 ? Math.max(0, maxLength - current.length) : Infinity;
+        next = current + Array.from(String(text ?? '')).reduce((kept: string, ch: string) => (kept.length + ch.length <= room ? kept + ch : kept), '');
+      }
+      if (next === current) return false;
+
+      this.props.startValue = next;
+      this.outputPropValues['onTextChanged'] = outwardValueForFieldType(this.props.type, next);
+      this.flagOutputDirty('onTextChanged');
+      return true;
     },
     /** @returns whether anything actually changed — ERG-001 §4 reports `Unchanged` when not. */
     clear() {

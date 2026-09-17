@@ -235,7 +235,7 @@ describe('GAM-010 — what did not change', () => {
   it("Text Input keeps its own Focus and Blur, with its own descriptions", () => {
     const d = def(TextInputModule);
     expect(d.inputs.focus.displayName).toBe('Focus');
-    expect(d.outputs.done.description).toBe('Fires when Set, Clear, Focus or Blur did something');
+    expect(d.outputs.done.description).toBe('Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something');
   });
 
   it("Checkbox's Check and Uncheck still own Done and Unchanged, and the descriptions say Focus too", () => {

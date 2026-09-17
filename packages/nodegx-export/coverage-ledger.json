@@ -726,7 +726,7 @@
     {
       "typeName": "net.noodl.controls.textinput",
       "status": "translated",
-      "note": "controlled input; Input Mode and Enter Key Hint print as authored keywords, a wired one is refused by name (GAM-011)"
+      "note": "controlled input; Input Mode and Enter Key Hint print as authored keywords, a wired one is refused by name; Insert Text and Backspace wires are deferred by name, not translated (GAM-011)"
     },
     {
       "typeName": "net.noodl.externallink",
