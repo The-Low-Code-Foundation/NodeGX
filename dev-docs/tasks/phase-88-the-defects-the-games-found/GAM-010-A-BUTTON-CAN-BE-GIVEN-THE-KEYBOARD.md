@@ -164,3 +164,36 @@ the wires. The door raised 8 fewer diagnostics (the four Functions' dynamic-port
 The reward arm (`--reward --keys`, 1366×768 FR/EN): ALL PASS, `resultFocus` included (Play again holds the focus at the race's end).
 **Focus ring:** not visible on the focused Next in the screenshots (ACC-001's concern, recorded, not fixed here).
 
+
+### Session 23 (2026-09-17, over `f66ba97a8`) — the focus ring (ruled by Richard: fix it first)
+
+**The defect, measured.** `drive-rkt003-stage.js --keys` gained two clauses, `ringNext` (Next, focused by its Focus wire, draws a
+ring) and `ringTab` (an answer reached by Tab draws one before Enter), read from the focused element's computed outline and
+`:focus-visible`. On session 22's deploy (shared bundle of 17:20), 1366×768 EN, 5 rounds: **7 red of 7**, every reading
+`{"tag":"BUTTON","visible":true,"style":"none"}`. `:focus-visible` matched both ways; the browser was not the cause.
+`noodl-viewer-react/src/assets/style.css` sets `outline: none` on Button, both deprecated Checkbox/Radio, Select and both Ranges and
+never drew a replacement: exactly P41's row 1 (ACC-001, no task file was ever written, so no owner to hand it to).
+
+**The fix.** `.ndl-controls-{button,checkbox,radiobutton,select,range2,range}:focus-visible { outline: 3px solid var(--ring, #101010);
+outline-offset: 2px }`. `--ring` is the token Minimal/Playful/Enterprise/Soft and the templates already declare (Rocket School
+`#2a211b`); `#101010` is Chromium's own ring colour for a project without one (Modern declares none).
+- 🔴 **First fix was `outline: auto`, and the clauses passed it.** Screenshotted, the platform's thin two-tone ring sat on the template's
+  dark 3px border and hard shadow and could hardly be seen. At 2px solid it read as a double border; 3px is plainly a ring. The unit
+  gate now requires a solid width ≥ 2px in the token, with an offset.
+
+**Readings (one file varied: `noodl.deploy.js` swapped into a copy of s22's deploy; bundles rebuilt by a peer's running dev stack):**
+
+| reading | result |
+|---|---|
+| s22 deploy, `--keys` 1366×768 EN, 5 rounds | 7 red (`ringTab` 2, `ringNext` 5) |
+| fix (2px), 10-round plan, EN / FR | EN ALL PASS (3 option rounds graded `ringTab`); FR `ringNext`/`ringTab` green, 2 red `focusNext` = P87 s10's poll flake (Next focused 600 ms later) |
+| fix (3px), 10 rounds EN | ALL PASS, typed rounds only (`ringTab` not graded; graded at 2px, same selector); screenshots looked at: ring on Next, none on "Show me how" |
+| rule reverted (bundle wait on a stable size — a first copy caught a 0-byte bundle mid-write and graded nothing) | 6 red of 6 `ringNext`, `style: none` |
+| mouse arm, 3 rounds | ALL PASS; the ring shows on Next after a **typed** answer (keyboard modality, right). A click-only round was not graded |
+| `tests/corpus/gam-focus-ring-…-draws-a-ring.test.ts`; 5 reverted arms | 9/9; A1 body removed 6 red, A2 `auto` 6, A3 plain `:focus` 2, A4 no offset 6, A5 a new class with `outline: none` 1 |
+| d18 + nda-012 (the specs that read the stylesheet) | 24/24 |
+
+**Not done, registered:** the current Checkbox and Radio Button (`ndl-controls-checkbox-2`/`radio-2`) hide the real input with
+`opacity: 0`, so neither draws a ring (it has to go on the visible sibling), and the new `Select` component was not measured. An
+exported app (`nodegx export`) has no `outline: none` in the export sources, so it keeps the browser's ring; not driven. The editor
+canvas picks the rule up with the viewer bundle; not driven. The rest of ACC-001 (3:1 against adjacent colours per preset) is P41's.

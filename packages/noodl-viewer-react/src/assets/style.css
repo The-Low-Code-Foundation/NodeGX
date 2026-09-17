@@ -41,6 +41,29 @@
   cursor: default;
 }
 
+/* 🔴 P88 s23 (ruled; the defect P41 ACC-001 names). Every control below sets
+   `outline: none` and nothing ever drew a replacement, so a keyboard person
+   could not see what held the focus: Rocket School's Next, focused by its Focus
+   wire, and an option reached by Tab both matched `:focus-visible` and read
+   `outline-style: none`. The ring is drawn for keyboard focus only
+   (`:focus-visible`, so a mouse click draws nothing), in the project's own
+   `--ring` token (Minimal, Playful, Enterprise and Soft all declare one; so do
+   the templates), offset so the ground shows between it and the control.
+   ⚠️ Not `outline: auto`: measured first, the platform's thin two-tone ring sat
+   on Rocket School's dark border and hard shadow and could hardly be seen.
+   3px, not 2px: at 2px beside a template's 3px border it read as a double border.
+   `#101010` is Chromium's own ring colour, for a project with no `--ring`.
+   The Text Input keeps `outline: none`: its caret is its focus indicator. */
+.ndl-controls-button:focus-visible,
+.ndl-controls-checkbox:focus-visible,
+.ndl-controls-radiobutton:focus-visible,
+.ndl-controls-select:focus-visible,
+.ndl-controls-range2:focus-visible,
+.ndl-controls-range:focus-visible {
+  outline: 3px solid var(--ring, #101010);
+  outline-offset: 2px;
+}
+
 /** Deprecated checkbox **/
 .ndl-controls-checkbox {
   margin: 0;

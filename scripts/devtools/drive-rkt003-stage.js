@@ -28,6 +28,8 @@
  *   --keys arm, no pointer event during a round:
  *   focusIn  — a typed question arrives with the answer box focused
  *   focusNext— the verdict arrives with Next focused, so Enter plays on
+ *   ringNext — Next, focused that way, draws a visible focus ring (outline, :focus-visible)   (P88 s23)
+ *   ringTab  — an option reached by Tab draws a visible focus ring before Enter picks it       (P88 s23)
  * Per cell (AC3), read at the first verdict:
  *   390×844  — a rocket's rendered box is ≥ 28px on its long side; the track is ≥ 180px tall
  *   1366×768 — the track takes ≤ 40% of the viewport height
@@ -211,6 +213,8 @@ const READ = (H, words, promptText) => `(() => {
     options: options.map((b) => ({ label: b.innerText.trim(), ...box(b) })),
     next: box(next),
     nextFocused: !!next && (active === next || next.contains(active)),
+    // P88 s23: the focus ring a keyboard person sees on whatever holds the focus (ACC-001's defect: \`outline: none\`).
+    ring: active && active !== document.body ? (() => { const cs = getComputedStyle(active); return { tag: active.tagName, visible: active.matches(':focus-visible'), style: cs.outlineStyle, width: parseFloat(cs.outlineWidth) || 0, color: cs.outlineColor, offset: cs.outlineOffset }; })() : null,
     check: box(check),
     reach,
     track: box(svg),
@@ -511,6 +515,10 @@ async function driveCell(lang, vp) {
               await wait(60);
               if (await page.evaluate(`(document.activeElement && document.activeElement.innerText || '').trim() === ${JSON.stringify(label)}`)) break;
             }
+            // P88 s23 (ruled): the option Tab reached draws a ring before Enter picks it.
+            const tabbed = await read();
+            clause('ringTab', !!tabbed.ring && tabbed.ring.visible && tabbed.ring.style !== 'none' && tabbed.ring.width >= 1, `focus ring on "${label}" after Tab: ${JSON.stringify(tabbed.ring)}`);
+            if (!shotTaken.tabRing) { shotTaken.tabRing = true; await shoot('tab-ring'); }
             await enter();
           } else {
             scrolled = (await press((r) => r.options.find((o) => o.label === label))).scrolled || scrolled;
@@ -537,6 +545,9 @@ async function driveCell(lang, vp) {
         // frame after the card mounts, so a poll can land before it).
         const later = v.nextFocused ? v : await until((r) => r.nextFocused, 600);
         clause('focusNext', v.nextFocused, `Next was not focused when the verdict arrived (focus on: ${v.activeWas}); 600 ms later focused: ${!!(later && later.nextFocused)} (focus on: ${later ? later.activeWas : 'no reading'})`);
+        // P88 s23 (ruled): a focus nobody can see is not a way on. Next, focused by the Focus wire, draws a ring.
+        const lit = later && later.nextFocused ? later : v;
+        clause('ringNext', !!lit.ring && lit.ring.visible && lit.ring.style !== 'none' && lit.ring.width >= 1, `focus ring on Next: ${JSON.stringify(lit.ring)}`);
       }
       if (REWARD && w.verdicts.slice(0, 2).includes(v.title.text)) {
         await wait(120);
