@@ -144,7 +144,9 @@ export const TPL006_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   // 🔴 The prose face, and the only reason this template sets a font anywhere.
   {
     name: '--font-serif',
-    value: 'Iowan Old Style, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif'
+    // GAM-016: Source Serif 4 ships in `story-engine-fonts`; Iowan Old Style only exists on Apple machines, so it
+    // stays as the first fallback and Windows no longer falls through to Palatino Linotype.
+    value: '"Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif'
   }
 ];
 

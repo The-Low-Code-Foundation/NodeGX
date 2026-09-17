@@ -17,6 +17,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "backgroundColor": "var(--surface)",
         "borderRadius": "var(--radius-xl)",
         "borderStyle": "solid",

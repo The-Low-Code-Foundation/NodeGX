@@ -15,12 +15,12 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "flexDirection": "column",
         "alignItems": "center",
         "paddingTop": "var(--space-12)",
         "paddingBottom": "var(--space-12)",
         "backgroundColor": "var(--accent)",
-        "sizeMode": "contentHeight",
         "borderTopStyle": "solid",
         "borderTopWidth": "var(--border-1)",
         "borderTopColor": "var(--border)"
@@ -43,6 +43,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "maxWidth": {
           "value": 720,
           "unit": "px"
@@ -50,7 +51,6 @@
         "flexDirection": "column",
         "paddingLeft": "var(--space-6)",
         "paddingRight": "var(--space-6)",
-        "sizeMode": "contentHeight",
         "alignX": "center",
         "alignItems": "center",
         "rowGap": "var(--space-3)"

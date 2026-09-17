@@ -252,7 +252,7 @@
         },
         {
           "name": "--font-serif",
-          "value": "Iowan Old Style, \"Palatino Linotype\", Palatino, \"Book Antiqua\", Georgia, \"Times New Roman\", serif",
+          "value": "\"Source Serif 4\", \"Iowan Old Style\", \"Palatino Linotype\", Palatino, Georgia, \"Times New Roman\", serif",
           "category": "typography-family",
           "isCustom": true,
           "description": "System serif stack"

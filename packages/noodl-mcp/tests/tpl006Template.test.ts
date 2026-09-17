@@ -64,6 +64,8 @@ import {
   TEMPLATE_PROJECT_NAME
 } from './tpl006Template';
 import { MEANING, requestedCompositions, TPL006_TOKENS, USED_COMPOSITIONS } from './tpl006Theme';
+import { checkFontFaces } from '../src/editor-deps';
+import { firstFamily } from '../../noodl-editor/src/editor/src/validation/fontFaces';
 
 jest.setTimeout(300_000);
 
@@ -716,13 +718,25 @@ describe('TPL-006 §6 — the graph is an interpreter, not a story', () => {
 // ── §7 The artefact keeps its promises ──────────────────────────────────────
 
 describe('TPL-006 §7 — the artefact', () => {
-  it('it ships ZERO library modules, and that is read off the directory', () => {
+  it('it ships ZERO library modules and one font module, and that is read off the directory', () => {
     // 🔴 "We did not install one" and "there is not one here" are different
     // sentences, and AC4 asks for the second.
     expect(REQUIRED_MODULES).toEqual([]);
     const dir = path.join(built.projectDir, 'noodl_modules');
     const contents = fs.existsSync(dir) ? fs.readdirSync(dir) : [];
-    expect(contents).toEqual([]);
+    expect(contents).toEqual(['story-engine-fonts']);
+  });
+
+  it('GAM-016: the face --font-serif names first is one the project ships (Source Serif 4, with its licence)', async () => {
+    const serif = TPL006_TOKENS.find((t) => t.name === '--font-serif')!.value;
+    expect(firstFamily(serif)).toBe('Source Serif 4');
+    const moduleDir = path.join(built.projectDir, 'noodl_modules', 'story-engine-fonts');
+    const manifest = JSON.parse(fs.readFileSync(path.join(moduleDir, 'manifest.json'), 'utf8'));
+    const css = manifest.browser.stylesheets.map((s: string) => fs.readFileSync(path.join(built.projectDir, s), 'utf8'));
+    expect(checkFontFaces({ tokens: [{ name: '--font-serif', value: serif }], stylesheets: css, component: '/App' })).toEqual([]);
+    // Known-firing: the same token with no stylesheet is named.
+    expect(checkFontFaces({ tokens: [{ name: '--font-serif', value: serif }], stylesheets: [], component: '/App' })).toHaveLength(1);
+    expect(fs.readFileSync(path.join(moduleDir, 'OFL-SourceSerif4.txt'), 'utf8')).toContain('SIL OPEN FONT LICENSE');
   });
 
   it('it ships no backend, and says so by containing nothing that needs one', () => {
@@ -774,9 +788,9 @@ describe('TPL-006 §7 — the artefact', () => {
     // SHAPE, so a person replacing the story does not find their own prose quoted
     // back at them in the documentation.
     for (const p of STORY) expect(note).not.toContain(p.title);
-    // Zero modules, all the way to the directory a person unzips.
+    // No kit, all the way to the directory a person unzips: only the prose face.
     const dir = path.join(OUTPUT, 'noodl_modules');
-    expect(fs.existsSync(dir) ? fs.readdirSync(dir) : []).toEqual([]);
+    expect(fs.existsSync(dir) ? fs.readdirSync(dir) : []).toEqual(['story-engine-fonts']);
   });
 });
 

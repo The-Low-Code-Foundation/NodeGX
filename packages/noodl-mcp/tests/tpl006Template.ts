@@ -29,8 +29,14 @@
  * TPL-005 had to install `keyboard-shortcuts` **before** authoring, because the MCP
  * door validates node types against the catalog and refuses a module's node with
  * `unknown-node-type`. This template uses nothing outside the standard library, so
- * there is no install step at all and {@link prepareStoryArtefact} asserts the
- * absence rather than trusting it.
+ * no kit is installed, and {@link prepareStoryArtefact} asserts that rather than
+ * trusting it.
+ *
+ * 🔴 **One module that is not a kit: its prose face** (P88 GAM-016, Richard 2026-09-17: *"Ship a Google
+ * Font, we don't want Windows users to be disappointed"*). `--font-serif` named Iowan Old Style, which
+ * only Apple machines carry, so a Windows reader got Palatino Linotype or Georgia. `story-engine-fonts`
+ * ships Source Serif 4 (OFL) beside the template's source, the way Rocket School ships its fonts, and
+ * the artefact must hold exactly that one module.
  *
  * ## Prepared, not embedded
  *
@@ -187,6 +193,9 @@ export interface BuildOptions {
 export async function buildStoryTemplateProject(options: BuildOptions = {}): Promise<AuthoredTemplate> {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tpl006-template-'));
   writeSkeleton(dir);
+  for (const name of TEMPLATE_FONT_MODULES) {
+    fs.cpSync(path.join(TEMPLATE_MODULES, name), path.join(dir, 'noodl_modules', name), { recursive: true });
+  }
   const storyJson = options.storyJson ?? readStoryJson();
 
   const { server } = createServer({ projectDir: dir, allowWrites: true });
@@ -291,13 +300,15 @@ export function prepareStoryArtefact(built: AuthoredTemplate, output: string): v
   if (fs.existsSync(path.join(output, 'components', '__cloud__'))) {
     throw new Error('refusing to write: this template ships no backend, and a __cloud__ component was authored');
   }
-  // 🔴 And zero modules is a claim too (AC4) — asserted on the directory, because
-  // "we did not install one" and "there is not one here" are different sentences.
+  // 🔴 And no kit is a claim too (AC4) — asserted on the directory, because "we did not
+  // install one" and "there is not one here" are different sentences. The one module allowed
+  // is the prose face (GAM-016).
   const modulesDir = path.join(output, 'noodl_modules');
-  if (fs.existsSync(modulesDir) && fs.readdirSync(modulesDir).length > 0) {
+  const present = fs.existsSync(modulesDir) ? fs.readdirSync(modulesDir).sort() : [];
+  if (JSON.stringify(present) !== JSON.stringify([...TEMPLATE_FONT_MODULES].sort())) {
     throw new Error(
-      `refusing to write: this template claims zero noodl_modules and ${modulesDir} holds ` +
-        `${fs.readdirSync(modulesDir).join(', ')}`
+      `refusing to write: this template ships no kit and exactly ${TEMPLATE_FONT_MODULES.join(', ')}, and ` +
+        `${modulesDir} holds ${present.join(', ') || 'nothing'}`
     );
   }
 
@@ -395,3 +406,7 @@ export const PAGES = [PAGE_READ, PAGE_REMIX] as const;
 
 /** Zero, and named so a gate reads the claim rather than a literal. */
 export const MODULE_COUNT = REQUIRED_MODULES.length;
+
+/** P88 GAM-016 — the template's own font module (not a kit), beside its source like Rocket School's. */
+export const TEMPLATE_MODULES = path.join(__dirname, 'tpl006Assets', 'noodl_modules');
+export const TEMPLATE_FONT_MODULES: ReadonlyArray<string> = ['story-engine-fonts'];

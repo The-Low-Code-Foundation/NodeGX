@@ -52,7 +52,8 @@ import {
   withoutInertBorderWidth
 } from './tpl001Components';
 import { APP_COMPONENT, buildMembersTemplateProject, prepareArtefact, START_HERE_FILE, TEMPLATE_ID } from './tpl001Template';
-import { requestedCompositions, USED_COMPOSITIONS } from './tpl001Theme';
+import { requestedCompositions, TPL001_PRESET, USED_COMPOSITIONS } from './tpl001Theme';
+import { PRESET_FONTS } from '../src/editor-deps';
 import {
   COLLECTION_ANNOUNCEMENT,
   COLLECTION_ASSOCIATION,
@@ -294,7 +295,11 @@ describe('TPL-001 — the committed template is what the door writes today', () 
     // ⚠️ **The count is not the check and never was** — the named assertions
     // below are. This number going up by two is satisfied by any two files at
     // all, which is exactly why the paragraph above it says which two and why.
-    expect(committed.length).toBe(32 * 3 + 4); // TPL-002: +4 cloud functions, +2 pages
+    // P88 GAM-016: + the Enterprise preset's typeface, which `set_style_preset` now copies (Source Sans 3,
+    // its stylesheet, manifest and licence). Named by the table it comes from, and asserted by name below.
+    const presetFont = PRESET_FONTS[TPL001_PRESET];
+    expect(committed.length).toBe(32 * 3 + 4 + presetFont.files.length); // TPL-002: +4 cloud functions, +2 pages
+    for (const file of presetFont.files) expect(committed).toContain(path.join('noodl_modules', presetFont.dir, file));
     expect(committed).toContain('nodegx.project.json');
     expect(committed).toContain('nodegx.security.json');
     expect(committed).toContain(path.join('components', '_registry.json'));

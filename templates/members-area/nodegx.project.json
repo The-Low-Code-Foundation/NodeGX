@@ -179,7 +179,7 @@
         },
         {
           "name": "--font-sans",
-          "value": "\"Source Sans Pro\", \"Segoe UI\", ui-sans-serif, sans-serif",
+          "value": "\"Source Sans 3\", \"Source Sans Pro\", \"Segoe UI\", ui-sans-serif, sans-serif",
           "category": "typography-family",
           "isCustom": true,
           "description": "Inter, falling back to the system sans-serif stack"

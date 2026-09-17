@@ -149,6 +149,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "maxWidth": {
           "value": 720,
           "unit": "px"
@@ -156,7 +157,6 @@
         "flexDirection": "column",
         "paddingLeft": "var(--space-6)",
         "paddingRight": "var(--space-6)",
-        "sizeMode": "contentHeight",
         "alignX": "center",
         "rowGap": "var(--space-5)"
       },
@@ -185,6 +185,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "maxWidth": {
           "value": 720,
           "unit": "px"
@@ -192,7 +193,6 @@
         "flexDirection": "column",
         "paddingLeft": "var(--space-6)",
         "paddingRight": "var(--space-6)",
-        "sizeMode": "contentHeight",
         "alignX": "center",
         "rowGap": "var(--space-5)",
         "paddingTop": "var(--space-12)",
@@ -215,6 +215,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "flexDirection": "column",
         "rowGap": "var(--space-1)",
         "paddingBottom": "var(--space-2)"
@@ -271,6 +272,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "backgroundColor": "var(--surface)",
         "borderRadius": "var(--radius-xl)",
         "borderStyle": "solid",
@@ -380,6 +382,7 @@
           "value": 100,
           "unit": "%"
         },
+        "sizeMode": "contentHeight",
         "backgroundColor": "var(--surface)",
         "borderRadius": "var(--radius-xl)",
         "borderStyle": "solid",
