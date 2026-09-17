@@ -60,7 +60,26 @@
 .ndl-controls-select:focus-visible,
 .ndl-controls-range2:focus-visible,
 .ndl-controls-range:focus-visible {
-  outline: 3px solid var(--ring, #101010);
+  outline: var(--ring-width, 3px) solid var(--ring, #101010);
+  outline-offset: 2px;
+}
+
+/* 🔴 P88 GAM-026 (ruled). The rule above lands on the element that HAS the focus, and for the
+   three controls a person places today that element is invisible: the current Checkbox and Radio
+   Button put their real `<input>` at `opacity: 0` (below), and the Dropdown does the same inline
+   in `Select.tsx` — each is overlaid on a wrapper that draws the box you actually see. So
+   `:focus-visible` matched, `outline-style` read `solid`, and the page did not change: measured on
+   a deployed page, the checkbox, the radio and the dropdown were all `:focus-visible` with their
+   visible box one hop up reading `outline-style: none`, while the Button beside them rang.
+   A ring is a visibility claim, so it is drawn on the element a person looks at.
+   ⚠️ `outline`, not `box-shadow`: an author's own `Box Shadow` parameter is inline and beats a
+   stylesheet shadow, which would delete the ring on exactly the controls somebody had styled.
+   ⚠️ The Dropdown's `<select>` carries no control class of its own — `Select.tsx` passes
+   `props.className` straight through — so it is matched by element, inside this wrapper only. */
+.ndl-controls-pointer:has(> .ndl-controls-checkbox-2:focus-visible),
+.ndl-controls-pointer:has(> .ndl-controls-radio-2:focus-visible),
+.ndl-controls-pointer:has(> select:focus-visible) {
+  outline: var(--ring-width, 3px) solid var(--ring, #101010);
   outline-offset: 2px;
 }
 

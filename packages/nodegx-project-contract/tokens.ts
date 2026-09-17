@@ -228,6 +228,12 @@ export const DEFAULT_TOKENS: StyleTokenRecord[] = [
     isCustom: false,
     description: 'Focus ring offset color'
   },
+  // P88 GAM-026, ruled by Richard: the ring is one look for every app, but its THICKNESS is a
+  // project's own. 3px is what session 23 drove and screenshotted on Rocket School — at 2px,
+  // beside a template's own 3px border, the ring read as a double border rather than a ring.
+  // ⚠️ The viewer's rule is `var(--ring-width, 3px)`, so a project that never heard of this token
+  // draws exactly what it drew before.
+  { name: '--ring-width', value: '3px', category: 'border-width', isCustom: false, description: 'Focus ring thickness' },
 
   // ─── Palette Colors (Gray) ────────────────────────────────────────────────────
 
