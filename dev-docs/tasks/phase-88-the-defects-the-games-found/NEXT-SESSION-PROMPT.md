@@ -3,53 +3,101 @@
 **Read first:** [`README.md`](README.md) §3 (what scoping corrected), §4 (rulings, the ruled table first) and §7 (rules). Then read
 the whole task you pick, including its §8.
 
-**The board (2026-09-17, session 18), re-derived from the task files' status lines:** **15 of 25 built, 2 closed by ruling.**
-- ✅ **GAM-019**, `4bb438165` + `15f7bf720`. ✅ **GAM-025** closed by R22. ✅ **GAM-004** closed by ruling (not reproduced).
+**The board (2026-09-17, session 19), re-derived from the task files' status lines:** **16 of 25 built, 2 closed by ruling, 1 🟡, 6 ⬜.**
+- ✅ GAM-019, GAM-024 (AC5 closed by R21). ✅ closed by ruling: GAM-004, GAM-025.
 - 🟢 **Committed:** GAM-006 `062dfd9c0`, GAM-005 `44b3a9add`, GAM-007 `d57a11668`, GAM-008 `5da1c9fd6`, GAM-009 `bdf1d3b19`,
-  GAM-001/002/003 `89e533625`, GAM-014 `bcfb1c2aa`, GAM-021 `6a6c309a5`, GAM-022 `593de4f57`, GAM-018 `78e06c376`.
-- 🟢 **GAM-023 + GAM-024, built s18. Check `git log` for whether they were committed** (commit asked of Richard).
-- 🟡 **GAM-012** (fault 3, AC6). GAM-018 AC6 editor half + AC7 left.
-- ⬜ **7 not started, all waiting on a ruling:** GAM-010 (R11, after GAM-012's fault 3), GAM-013 (R1), GAM-011 (R12), GAM-015 (R15),
-  GAM-016 (R16), GAM-017 (R17), GAM-020 (R18).
+  GAM-001/002/003 `89e533625`, GAM-014 `bcfb1c2aa`, GAM-021 `6a6c309a5`, GAM-022 `593de4f57`, GAM-018 `78e06c376`,
+  GAM-023 `624b054f2` + `64ce98a32` (enum → string), **GAM-020 `577c0a1bf` (s19)**. (Several older status lines still say
+  "uncommitted": the hashes here are what `git log` reads.)
+- 🟡 **GAM-012** (fault 3, AC6).
+- ⬜ **6 not started, and every one is now ruled and buildable:** GAM-015 (R15), GAM-013 (R1), GAM-011 (R12), GAM-017 (R17),
+  GAM-016 (R16), **GAM-010 (R11 was ruled in s2, not open: the s18 handoff was wrong; it follows GAM-012's fault 3)**.
 
-**The ratchet:** s17 built GAM-018 and got three rulings; **s18 built GAM-023 + GAM-024.** Every no-ruling task is now built. Session 19
-either builds a remainder below or gets rulings; it does not re-measure.
+**The ratchet:** s18 built GAM-023 + GAM-024. **s19 committed them, got every open ruling (R1, R12, R15, R16, R17, R18, R21, R23), and
+built R23 (enum → string) and GAM-020.** There is no ruling left to ask. Session 20 builds.
 
 ## Do, in order
 
-1. **If s18's work is uncommitted:** ask Richard. Files: `packages/noodl-preview/src/wireHealth.ts` (new), `src/deploy.ts`,
-   `tests/gam-023-a-deploy-publishes-every-wire-and-names-the-broken-ones.test.ts` (new), `scripts/devtools/deploy-from-disk.entry.ts`,
-   docs (this file, README, GAM-023, GAM-024, P78 register D44/D48/D52). **Not** `scripts/devtools/drive-tpl008-demo.js` or
-   `drive-date-picker-firefox.js` (a peer's).
-2. **GAM-018's editor half of AC6:** Settings → Kits cannot say "ran, registered nothing" because it cannot tell that from "not loaded
-   yet" (`KitsSection.tsx` `assumeLoaded: false`). Seam: `@nodegx/module-inject`'s `CAPTURE_PREAMBLE` and
-   `NodeLibraryImporter.getModuleFailures`. Needs an editor drive with a silent kit beside a registering one.
-3. **Remainders, lightest first:** GAM-022 AC7 render (TPL-006 `Story/Sidebar` at 390×844); GAM-003 AC5 browser meter; GAM-002 AC4
-   editor port panel; GAM-001 AC5 corpus render; GAM-014 save-before-kit-registers + AC6 (tell the TPL-007 peer); the browser/Rocket
-   School halves of GAM-005/007/008/009.
-4. **Rulings still open, ask in plain words** (what a person sees, each choice, the cost; no R-numbers as content): R1, R11/GAM-012
-   fault 3, R12, R15, R16, R17, R18, and now **R21** (below).
+1. **GAM-015** (lightest, R15 = types, docs and a reader helper; nothing that runs changes). AC1 through the real bridge:
+   `noodl-viewer-react/tests/cn-006-token-defaults.test.ts`'s `createNodeFromReactComponent` + `instantiate` harness is the one to copy
+   (a units `inputProps` port default 64; set `{value: 40, unit: 'px'}` as the merged wire arrives; `props.size` should read `"40px"`).
+   ⚠️ Kits have no imports (`Noodl.defineModule`, React global), so "one reader" means: documented on `ReactInputPropDefinition` in
+   `packages/nodegx-node-kit-types/src/index.d.ts`, written into the scaffold's `indexJs` (`nodegx-kit-scaffold/src/index.js:394`), and the
+   drift between the types copies fixed. The scaffold's own size props go straight into `style`, where `"40px"` is correct: only a kit
+   doing arithmetic breaks. §7: accept only the real shape, do not promote `padPx`. AC3's editor-canvas half needs an editor; AC6 is
+   Rocket School (the peer's tree).
+2. **GAM-013** (R1: a new Repeat node, stops when its page is left, no SSR ticks, on `timerScheduler`). Runtime node + its export row
+   (README §7: a runtime change owes its `nodegx-export` row in the same change).
+3. **GAM-012 fault 3, then GAM-010.** Fault 3: split an unmount (drop the node, fire nothing) from an explicit Blur, then fix the branch;
+   AC5's multi-select Dropdown drive is what broke the first attempt. GAM-010 is R13's rule on Button.
+4. **GAM-011** (R12: Input Mode incl. `none` is enough; Insert Text respects Max length). Two commits, (a) then (b).
+5. **GAM-017** (R17: s1, the bridge makes a declared signal prop work; z3, document the wrapper Group, close the size half as disproved).
+6. **GAM-016** (R16: presets carry their faces, plus the undeclared-face warning). ⚠️ Switching preset with an installed font module is
+   still to be asked when the build reaches it.
+7. **Remainders:** GAM-020 AC6 (Rocket School, peer); GAM-018 AC6 editor half; GAM-022 AC7 render; GAM-003 AC5; GAM-002 AC4; GAM-001 AC5;
+   GAM-014 AC6; the browser/Rocket School halves of GAM-005/007/008/009.
 
 ## Richard's, not a builder's
 
-- **New, s18, R21 in plain words:** `nodegx deploy` now says "4 wires touch a kit node this deploy does not load, so they were
-  published without being checked". Checking them means loading each kit's node types into the deploy (the MCP server's kit extractor
-  already runs kits safely in a child process). Worth it, or is "unchecked" enough?
-- **New, s18:** Rocket School's `/Game/Keyboard` wire `kbPick.value → kbOut.picked` is named broken by the editor's own type rule
-  (enum into a port typed string). The page may well work. Is the rule too strict, or should the template type the output `*`?
-  (Rocket School is the peer's, uncommitted.)
-- **New, s18:** the headless deploy exports component input ports untyped (`*`), leaves Function nodes' `runOnChange-in-*` ports out,
-  and splits pixel-game into 2 bundles, where the model **after** the editor's port pass does not. The editor's own deploy probably
-  ships the second. Measured by accident (GAM-023 §8 s18 item 4), not fixed, not registered. Register it, and where?
-- s17: GAM-018 AC7, should TPL-005's win take confetti back?
-- 🔒 Found by GAM-021, not registered: the editor's agent loop (`AuthoringSession.ts:1185`) passes no `bodyScroll`.
-- 🔒 Found by GAM-022: restore SBR-004's nav `columnGap`? Rocket School's fixed-pixel tiles in a wrapped row a defect?
-- Carried: GAM-001's `NaN`-over-unset abstention; `def036-dash-drive`'s newly visible parts; FLD-004's split `NaN` row; two catalog
-  examples that used `Number(…)`; `catalog:examples` red at HEAD (AIX-005); `library/prefabs/form-fields/project/project.json`;
-  a jump not firing At Target Value (GAM-008); an absorbed focused `Set` deciding what a remount shows (GAM-009).
-- P78's TPL-005 AC7 and TPL-006 AC7 still read "BLOCKED on D44": the census they gate on now reads 0 broken. Theirs to update.
+- **New, s19, found not registered:** `cloud-node-library.json` is stale against `cloud-library:generate --check` at HEAD (before s19's
+  one-row edit). Whose?
+- **New, s19:** prefab sentences `text-cannot-wrap` now names, left unedited: crud-screen's empty hint, settings-page's three section blurbs.
+- Carried from s18: the headless deploy exports component inputs untyped (`*`), leaves Function `runOnChange-in-*` out and splits
+  pixel-game into 2 bundles where the editor's port pass does not (GAM-023 §8 s18 item 4), not registered. The editor's agent loop
+  (`AuthoringSession.ts:1185`) passes no `bodyScroll` (GAM-021). SBR-004's nav `columnGap`; Rocket School's fixed-pixel tiles (GAM-022).
+  GAM-018 AC7 (TPL-005's win and confetti).
+- Carried: GAM-001's `NaN`-over-unset abstention; `def036-dash-drive`'s visible parts; FLD-004's split `NaN` row; two catalog examples
+  using `Number(…)`; `catalog:examples` red at HEAD (AIX-005); `library/prefabs/form-fields/project/project.json`; GAM-008's jump at
+  target; GAM-009's absorbed focused `Set`. P78's TPL-005/TPL-006 AC7 "BLOCKED on D44" are theirs to update.
 
-## What session 18 settled, including where the handoff chain was wrong
+## What session 19 settled
+
+- 🔴 **The s18 handoff listed GAM-010 as waiting on R11. R11 was ruled in session 2** (GAM-010 §5 line 59). Read a task's §5 before
+  asking its ruling.
+- **R23, an enum is a string:** the cast table's `enum` row gains `string` only. The table has **five** copies: `nodelibraryexport.ts`
+  (source), both generated catalogs, `docs/node-catalog/compatibility.json` (`verifiedPairs` + `castSemantics`; `catalog:merge` refuses
+  until it agrees), `cloud-node-library.json`, and `portTypes.test.ts`'s "verbatim" fixture.
+- **R18's threshold is a measurement:** 26 characters, the shortest line RKT-001 saw clip; every corpus heading is ≤ 20.
+- **A template a new warning fires on gets fixed, not pinned**, when the render agrees: pixel-game's footer was 429px in 358px on a phone
+  and was also the page's `minimum-layout-width`.
+
+## State of the tree (session 19)
+
+**All of s19's work is committed** (`624b054f2`, `06591185c`, `64ce98a32`, `1de18171f`, `577c0a1bf`, and this handoff's docs commit).
+**Scratch:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/338ee70a-837e-43ad-a00b-fa6ff766139a/scratchpad/`:
+`enum/` (`arm.py`, `diff7.sh` + `diff7.out`, `deploy-{fix,mutant}.cjs`, `mutant.log`), `gam020/` (`census.py`, `census-validator.log`,
+`mut-*.log`, `readfind.py`, `{head,fix,tmpl,mut-self}-*.json`, `shots/{b1,a1}-{phone,desktop}.png`).
+**Bundles:** `packages/noodl-preview/dist/*.cjs` rebuilt with the enum row (gitignored). The installed app, `src/external` and the MCP
+bundle carry neither the enum row nor GAM-020's two doors.
+**Not ours, left alone:** the TPL-008 peer's backend/runtime/tpl008 files, `scripts/devtools/drive-tpl008-demo.js`,
+`drive-date-picker-firefox.js`, Rocket School's dirty tree, P92's commits.
+
+## Readings taken in session 19 (2026-09-17, over `f25a643b2`)
+
+| reading | result |
+|---|---|
+| GAM-023 spec before commit | 6/6 |
+| enum arm, engine before / after | enum→text + enum→opacity named / only enum→opacity |
+| GAM-023 spec with the enum arm; enum-row-only mutant | 7/7; 1 red, exactly enum→text (the first `sed` mutant also reverted 4 other rows: discarded) |
+| deployed files, reverted vs fix engine, 7 templates | 0 differing, 7/7 `ok`; rocket-school broken 1 → 0 |
+| `catalog:check`, `catalog:merge:check`; editor `tests-unit` portTypes/fix-025/cn-015/lib-006; preview `tsc` | up to date ×2; 175/175; 0 |
+| GAM-020 spec at HEAD (code added, no rule) | 5 red (all firing arms), 7 green |
+| GAM-020 validator mutants ×7 | each red on its own arm (5, 1, 1, 1, 2, 1, 1) |
+| corpus via `calibrate:layout` | 6 firings, all sentences; the 7th Python hit is a wired `text` |
+| render, pixel-game phone, before / after template fix / self-clause mutant | 429px in 358 named + `minimum-layout-width` / neither / no text finding |
+| editor `tests-unit/validation` + gam-020; `nodegx-render-measure`; `renderReportModule`; tpl003/005/006/008 | 152/152; 17/17; 41/41; green |
+| tpl001, tpl007 | red, not ours: tpl001 red with GAM-020 reverted; tpl007 = Rocket School's untracked files |
+| `typecheck:editor`, editor `test:ci`, whole `noodl-mcp` suite | **not run** (a peer's editor was starting) |
+
+## Traps found in session 19
+
+- 🔴 **A `sed` mutant on a repeated line reverts every copy.** `s/to: \['string'\]/…/` hit five cast rows. Mutate with an exact,
+  count-asserted replace (`python` `assert s.count(a)==1`), and read the diff before the run.
+- 🔴 **A deploy bundle copied out of `dist/` cannot find the viewer runtime**, fails at stage `runtime`, and a file diff over its two empty
+  outputs reads "0 differing". Copy it beside the original, and read `ok` before any diff.
+- ⚠️ A python heredoc with `pixel-game\'s` inside a single-quoted string is a syntax error and writes nothing: check `ok` printed.
+
+## What session 18 settled (kept for reference)
 
 - 🔴 **GAM-023's premise was half wrong.** "A wire into a port that does not exist ships with `ok: true`" is false for a built-in's
   declared port: the validation gate refuses it. It is true for 6 kinds only a running graph knows (component ports, Set Variable,
@@ -61,7 +109,7 @@ either builds a remainder below or gets rulings; it does not re-measure.
   the deploy is byte-identical to HEAD on 7/7 templates.
 - ✅ The devtool and the CLI now report the same set on 7/7 templates (one pass, `leaveFilterOn` the only difference).
 
-## State of the tree (session 18)
+## State of the tree (session 18) (kept for reference)
 
 **Session 18's files:** listed in "Do" 1. **Scratch:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/5cf6c7fd-e843-469b-8898-816f3d6cde7d/scratchpad/gam023/`:
 `matrix.js` + `matrix-pixel-game-{head,fix1}.json`, `census.js` + `census.json`, `exportdiff.js` + `exportdiff.json`, `mutants.py` +
@@ -73,7 +121,7 @@ carries the old engine. `scripts/devtools/deploy-from-disk.cjs` (gitignored, Sep
 **Not ours, left alone:** as s16/s17, plus `scripts/devtools/drive-tpl008-demo.js`, `drive-date-picker-firefox.js`, and P92's commits
 (`a2f5ce210` landed mid-session).
 
-## Readings taken in session 18 (2026-09-17, over `67e1c7639`, HEAD at write `a2f5ce210`)
+## Readings taken in session 18 (kept for reference) (2026-09-17, over `67e1c7639`, HEAD at write `a2f5ce210`)
 
 | reading | result |
 |---|---|
@@ -88,7 +136,7 @@ carries the old engine. `scripts/devtools/deploy-from-disk.cjs` (gitignored, Sep
 | `nodegx-export` hls014 + hls015 + exp017 | 80/80 |
 | editor `test:ci`, `test:main`, `noodl-mcp` | **not run** (no file in those packages touched) |
 
-## Traps found in session 18
+## Traps found in session 18 (kept for reference)
 
 - 🔴 **`ProjectModel.instance = project` arms the editor's autosave.** A headless tool that sets it without `_isReadOnly` writes a legacy
   `project.json` into the project folder. Hit: all 7 `templates/` folders, cleaned. `readWireHealth` now refuses.
