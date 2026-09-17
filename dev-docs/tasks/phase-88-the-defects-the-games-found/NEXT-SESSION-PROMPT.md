@@ -3,66 +3,74 @@
 **Read first:** [`README.md`](README.md) §3 (what scoping corrected), §4 (rulings, the ruled table first) and §7 (rules). Then read
 the whole task you pick, including its §8.
 
-**The board (2026-09-17, session 22), re-derived from the 25 task files' status lines:** **20 built (18 🟢 + 2 ✅), 3 🟡, 2 closed by
-ruling, 0 ⬜.** Nothing is left unbuilt; what is left is 🟡 remainders, drives, and Richard's questions.
+**The board (2026-09-17, end of session 22), re-derived from the 25 task files' status lines:** **21 🟢 + 2 ✅ built, 2 closed by
+ruling, 0 🟡, 0 ⬜. Everything is committed** (HEAD at write: see `git log`; s22's last P88 commit is `7669e3303`).
 - ✅ GAM-019, GAM-024. ✅ closed by ruling: GAM-004, GAM-025.
-- 🟢 **Committed:** GAM-006, 005, 007, 008, 009, 001/002/003, 014, 021, 022, 018, 023, 020; **s22:** GAM-017 `cf435545f` (bridge, spec,
-  task file) and GAM-016 `ef5d7771f`.
-- 🟢 **Session 20, STILL UNCOMMITTED:** GAM-013 (Repeat) and GAM-015 (`readPx`), left to Richard.
-- 🟡 GAM-012 (AC6), GAM-010 (AC2, AC6), GAM-011 (AC2 🔴, AC7): all wait on Richard (below).
+- 🟢 all others. What is left is remainders (named ACs, mostly editor-canvas halves and browser drives), listed below.
 
 ## State of the tree (session 22)
 
-- **GAM-017 committed** `cf435545f`. 🔴 **Its types, docs and README hunks are NOT committed:** they sit directly on session 20's
-  uncommitted GAM-015 text (the `readPx` paragraph in `nodegx-node-kit-types/src/index.d.ts` and its 5 copies, the size section of
-  `docs-site/docs/custom-nodes.md`, the GAM-015 row in the README), so a patch of them does not apply to HEAD. Commit them **with or
-  after** s20's GAM-015.
-- **GAM-016 committed** `ef5d7771f` (34 files: assets, code, specs, the two MCP gates, the task file), parent pinned and swapped with
-  `update-ref`. Its README row is not committed (same README as above).
-- 🔴 **s22 made, and repaired within a minute, a commit that reverted a peer's P92 slice** (the temp index was read before their commit
-  landed). HEAD was rebuilt on their commit with `commit-tree` + `update-ref HEAD new old`; their files read clean after. The recipe is now
-  in memory (`commit-your-delta-through-a-temporary-index`): **pin the parent and compare-and-swap; never `git commit` a temp index.**
-- **Bundles:** none rebuilt by s22. The peer's dev stack rebuilt `src/external/deploy` from the tree at 15:50 (it carries GAM-017). The
-  MCP bundle (`noodl-mcp/dist`) does **not** carry GAM-016; the installed app carries neither.
+- Committed in s22: GAM-017 bridge `cf435545f`, GAM-016 `ef5d7771f`, s20's GAM-013 `9e165a5ca`, GAM-015 + GAM-017 docs `01fd5e292`,
+  members-area + story-engine fonts `338655941`, keypad (Function) `85c640b6c`, export kit signals `99522fd72`, Rocket School
+  `7669e3303`, handoffs. The phase README's row edits for GAM-010/011/012/016/017 are in the working tree with this handoff's commit.
+- 🔴 **Rocket School's 257 uncommitted files were an editor re-save**, compared by node id: 11 differences, all empty `parameters: {}`,
+  timestamps and a project id. Regenerated from the generator; a copy of the old tree is in s22 scratch `rkt/worktree-snapshot`.
+- 🔴 **Twice in s22 a temp-index commit went wrong** (a peer's commit reverted, repaired in a minute; later an empty `NEW` passed to
+  `update-ref`, a no-op). The recipe in memory now pins the parent, guards every step and uses `git status --porcelain -z`.
+- **Bundles:** `noodl-preview/dist` rebuilt at 18:11 (Insert Text, Focus, kit signals known). The shared `src/external` viewer/deploy
+  bundles were rebuilt by a peer's dev stack at 17:20 and carry every s22 runtime change. The MCP bundle (`noodl-mcp/dist`) does NOT
+  carry GAM-016's preset fonts; the installed app carries none of s22.
 
 ## Do, in order
 
-1. **Once Richard answers the Rocket School question below:** GAM-010 AC2 + AC6 (replace `fbFocusNext`, `tcFocus`, `rrFocus` in
-   `packages/noodl-mcp/tests/tpl007Components.ts` with Focus wires, regenerate, `drive-rkt003-stage.js --keys` 4 cells, record the focus
-   ring); GAM-012 AC6 (same drive); GAM-017 AC7 (Boost A/B → a signal prop); GAM-015's game-kit `readPx`.
-2. **Once Richard answers the keypad question below:** GAM-011 AC2 (re-drive `g11/pad` from s21's scratch), then AC7.
-3. **GAM-016 remainders:** members-area names `"Source Sans Pro"` and ships nothing (a true finding: switch it to Source Sans 3, ship the
-   folder, render); AC3's editor half (a new Playful project through the wizard, the canvas draws Nunito); rebuild the MCP bundle.
-4. **GAM-017 AC4 editor half:** a kit with a signal prop in the editor canvas, a Button's Click wired into it.
-5. **Remainders:** GAM-013's exported app driven in a browser; GAM-015 AC3 editor canvas; GAM-020 AC6; GAM-018 AC6 editor half;
-   GAM-022 AC7 render; GAM-003 AC5; GAM-002 AC4; GAM-001 AC5; GAM-014 AC6; the browser/Rocket School halves of GAM-005/007/008/009.
+1. **GAM-016 AC3 editor half:** a new Playful project through the wizard; the canvas draws Nunito; rebuild the MCP bundle.
+2. **GAM-017 AC4 editor half:** a kit signal prop in the editor canvas with a Button's Click wired in.
+3. **GAM-011 AC7:** record, clause by clause.
+4. **Remainders:** GAM-013's exported app driven in a browser (and its AC8 Rocket School builds); GAM-015 AC3 editor canvas; GAM-020 AC6
+   (Rocket School, now unblocked); GAM-018 AC6 editor half; GAM-022 AC7 render; GAM-003 AC5; GAM-002 AC4; GAM-001 AC5; GAM-014 AC6
+   (TPL-007's wrap); the browser/Rocket School halves of GAM-005/007/008/009 (unblocked: the tree is clean).
 
-## Richard's, not a builder's (new in session 22 first)
+## Richard's, not a builder's
 
-- **Commit s20's GAM-013 + GAM-015, and with them s22's GAM-017 docs/types hunks?** They cannot be separated cleanly (above).
-- **GAM-016's warning fires on every MCP-made project.** `create_project` places no starter assets, so the default `--font-sans: Inter`
-  names a face the project does not ship (true; SBR-014's gap). It also fires on template and prefab **source** folders, which get Inter
-  when installed (47 of 53). Keep it firing, or skip the default Inter until SBR-014 lands? Built as ruled: firing.
-- **story-engine's `--font-serif` names `Iowan Old Style`**, a face only Apple machines carry, and the warning names it. A deliberate
-  platform stack, or ship a face?
-- **Found in s22, not registered:** `nodegx export` drops a Button Click wired into a kit node's signal, **for both** the new signal prop
-  and the old `inputs` route: one "no deterministic translation (EXP-003)" note, nothing in the generated code.
-- **Rocket School's uncommitted tree.** `templates/rocket-school/` holds **257 modified files**, mtime Sep 15 13:40 (an editor open: key
-  reorders and more). GAM-010 AC2/AC6 and GAM-012 AC6 regenerate that template from `tpl007Components.ts`, which would overwrite them.
-  Discard them and regenerate, or keep them?
-- **The keypad trap (GAM-011 AC2).** A Function publishes an output only when its value changes (`simplejavascript.ts:160-166`, kept on
-  purpose for old projects). So a keypad made of one Function per key, all wired into a Text Input's one `Text To Insert`, types `121` as
-  `122`: key 1's Function still holds `1`, publishes nothing, and the field inserts the `2` it last heard. Measured in Chromium, 3/5
-  answers. Insert itself lands every key. Options to put to Richard: (a) document the pattern that works; (b) a keypad-friendly way to
-  send a value with its signal (e.g. Insert Text reads a value that arrives with the pulse, or a Button gets a Value output); (c) leave it.
-- Carried from s20: a Delay with a Duration or an Animate To Value started from Did Mount keeps every server render from going quiet
-  (found, not registered). From s19: prefab sentences `text-cannot-wrap` names (crud-screen's empty hint, settings-page's three blurbs).
-  From s18: the headless deploy exports component inputs untyped, leaves Function `runOnChange-in-*` out and splits pixel-game into 2
-  bundles; the editor's agent loop passes no `bodyScroll` (GAM-021); SBR-004's nav `columnGap`; Rocket School's fixed-pixel tiles
-  (GAM-022); GAM-018 AC7. Carried: GAM-001's `NaN`-over-unset abstention; `def036-dash-drive`'s visible parts; FLD-004's split `NaN` row;
-  two catalog examples using `Number(…)`; `catalog:examples` red at HEAD (AIX-005); `library/prefabs/form-fields/project/project.json`;
-  GAM-008's jump at target; GAM-009's absorbed focused `Set`. P78's TPL-005/TPL-006 AC7 "BLOCKED on D44" are theirs to update.
-- **Found in s21, not registered:** a Text Area exports as `<input type="textArea" />` (`nodegx-export`).
+- **Focus ring:** a keyboard-focused Button shows no visible ring in Rocket School's screenshots (ACC-001's concern). Fix it now?
+- **Found in s22, not registered:** Rocket School's deploy names `hpRows.itemOutputSignal-tapped → hpTap.run` as a wire that cannot work
+  (identical on the committed template before s22). A For Each item signal is a kind only a running graph knows (GAM-023 §8); the
+  keyboard drive played the Hunt-free race only, so the Hunt tap is not driven.
+- Carried: a Delay with a Duration or an Animate To Value started from Did Mount keeps every server render from going quiet (s20);
+  prefab sentences `text-cannot-wrap` names (crud-screen, settings-page); the headless deploy exports component inputs untyped, leaves
+  Function `runOnChange-in-*` out and splits pixel-game into 2 bundles; the editor's agent loop passes no `bodyScroll` (GAM-021);
+  SBR-004's nav `columnGap`; Rocket School's fixed-pixel tiles (GAM-022); GAM-018 AC7; GAM-001's `NaN`-over-unset abstention;
+  FLD-004's split `NaN` row; `catalog:examples` red at HEAD (AIX-005); a Text Area exports as `<input type="textArea" />`.
+
+## What session 22 settled, later (Richard's five answers)
+
+- **R: Rocket School "as up to date and stable as possible".** Done by regeneration (above), with four focus scripts → Focus wires
+  (the handoff named three; the Hunt's `hpFocusNext` was a fourth), Boost as a signal, Nunito from the Playful preset.
+- **R: keypad "whatever actually fixes it".** Fixed in Function, not Insert: an unchanged write is published when the same run fires a
+  signal. Runtime spec reproduced `121 → 122` at HEAD; runtime suite 2778 ✓; touch keypad 5/5 at 1024 and 390.
+- **R: commit s20's work — "Sure".** Committed, re-graded at HEAD first (viewer 34/34, export 36/36, catalog checks ×3).
+- **R: the Inter warning on MCP-made projects — "Dunno".** Left firing (true; SBR-014 silences it).
+- **R: story-engine — "Ship a Google Font".** Source Serif 4, a template font module; TPL-006 "zero modules" → "no kit, one font module".
+- **members-area — "fix it".** Regenerated; Enterprise's Source Sans 3 ships.
+- **Export — "Please fix it".** The handler pass claimed only tabled ports; kit signal inputs now plan a pulse count, and the kit runtime
+  seeds signal props and runs `valueChangedToTrue` on a rising count. HLS-001 golden: +`kit-signals`, `runtime.tsx` in `kits`/`charts`.
+- 🔴 A spec's first pass left 3 reverted arms green (increment unchecked, fixture declared `type`, nothing mounted above 0) — closed.
+
+## Readings taken in session 22, later
+
+| reading | result |
+|---|---|
+| Rocket School HEAD vs fresh generation vs working tree | fresh == HEAD (173 files); working tree differs only by re-save noise |
+| story-engine / members-area fresh generation vs committed | byte-identical / parameter key order only |
+| TPL-006 / TPL-001 gates after | 63/63 / 82/82; deployed: Source Serif 4 / Source Sans 3 loaded, same-origin |
+| keypad runtime spec HEAD / fix; 2 arms; runtime suite | 1 red (`122`) + 3 green / 4/4; each arm red on its row; 164 suites 2778 ✓ |
+| keypad Chromium touch (s21 page, render-from-disk over the current viewer) | 5/5 at 1024×768 and 390×844, 0 errors |
+| export kit-signal spec HEAD / fix; 7 arms | 5 red / 8/8; all red (after closing 3 holes) |
+| whole `nodegx-export` suite | 104/105, 3590 ✓; the red HLS-001 golden, counted, regenerated; after 54/54 kit gates, `tsc` 0 |
+| TPL-007 gates (template + game-kit) after regeneration | 138/138 |
+| Rocket School `drive-rkt003-stage.js --keys`, 20 rounds | ALL PASS, 10 cells, failed clauses none |
+| `--reward --keys` 1366 FR/EN; `drive-rkt002-look.js` | ALL PASS; 14/14; Nunito from `preset-font-nunito`, Grandstander from `rocket-school-fonts` |
+| editor `test:ci`, whole `noodl-mcp` | **not run** |
 
 ## What session 22 settled
 
