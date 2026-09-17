@@ -1405,9 +1405,23 @@ Group `chr009-set-group`, String `chr009-s27-src` `savedValue` → `paddingLeft`
   resolution mocks as `marginPaddingRows.test.ts`.
 - `dev.out`: 0 `ERROR in`. Stack stopped (26 processes), `dev:stop --list` empty.
 
-### 23.5 Left
+### 23.5 Richard tried it live, and the label now sits on its first line (s28)
 
-- **Richard:** slice 15 as drawn, and specifically **the docked bound edge reads `S…`**: the source is in the tooltip only.
+- Richard in the dev editor: *"the margin and padding panel looks a bit confusing now"*. With one side split, **the label
+  centred on the 62px row**, so `Padding` floated between its own `↑ ↓` and Margin's fields above, and *"is that up arrow for
+  padding or margin?"*
+- Built: `PropertyPanelRow` `alignTop` → `.Root.is-top-aligned` (label `line-height: 30px`, gutter mark `top: 15px`), passed
+  `alignTop={isExpanded}` by the Margin/Padding row. Live reading: label midpoint **= first field midpoint** on both rows
+  (467/467, 499/499). Spec +2 (`boundEdge.test.tsx`); mutant `false && css['is-top-aligned']` ⇒ 1 failed / 5, restored `cmp`.
+  CHR-009 + FB-018 suites **13 / 114** green, `tsc --noEmit` **EXIT 0**, `colors`/`type`/`tokens:css` holding.
+- ✅ **Richard (2026-09-17, s28): "It looks good now, it's clearer."** He used it with Pad Left wired (docked, `S…` visible).
+- 🔴 Launch trap hit: editing `.tsx` during the first compile **wedged** the dev server (bundle `000`, blank window). Only a relaunch
+  cleared it (the compile took ~25 min at load 31). A mutant edit on the live stack later disconnected the renderer, and the
+  editor then quit.
+
+### 23.6 Left
+
+- ✅ Slice 15 + the label fix approved ("clearer"). Still open, **only if he says so**: the docked bound edge reads `S…`: the source is in the tooltip only.
   Same shape as the pair-field token he ruled "leave it" in s27, but here the cut hides *what drives it*, not a value. Options
   if not "leave it": drop the link glyph (gains ~14px, still `Str…`), or show `🔗` alone docked.
 - AC1 (WORTHY on the Group pair) and R6 final. AC5: CHR-004 + `test:ci`.

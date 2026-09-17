@@ -30,6 +30,12 @@ export interface PropertyPanelRowProps {
   connectionLabel?: string;
   /** Click-to-navigate to the driving node; the chip is read-only without it. */
   onConnectionClick?: () => void;
+  /**
+   * CHR-009 — a control taller than one line (Margin/Padding split into four edges) pins the label and the gutter
+   * mark to its FIRST line. Centred on a 62px row the label floated between its own fields and the row above,
+   * and read as belonging to either.
+   */
+  alignTop?: boolean;
 }
 
 /**
@@ -71,7 +77,8 @@ export function PropertyPanelRow({
   onReset,
   isConnected,
   connectionLabel,
-  onConnectionClick
+  onConnectionClick,
+  alignTop
 }: PropertyPanelRowProps) {
   // The chip REPLACES the row's controls rather than sitting beside them. For the
   // number+unit row that also retires the unit dropdown and the Fixed checkbox while
@@ -80,7 +87,7 @@ export function PropertyPanelRow({
   const showsChanged = isChanged && !isConnected;
 
   return (
-    <div className={css['Root']}>
+    <div className={classNames(css['Root'], alignTop && css['is-top-aligned'])}>
       <GutterDot isConnected={isConnected} showsChanged={showsChanged} onReset={onReset} />
       <div className={classNames(css['Label'], showsChanged && css['is-changed'])} title={label}>
         {label}

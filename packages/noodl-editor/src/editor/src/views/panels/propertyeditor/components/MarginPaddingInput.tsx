@@ -421,7 +421,12 @@ export function MarginPaddingInput({
 
           return (
             <div key={side} data-test={`marginpadding-row-${side}`}>
-              <PropertyPanelRow label={label} isChanged={layout.isChanged} onReset={() => onResetSide(side)}>
+              <PropertyPanelRow
+                label={label}
+                isChanged={layout.isChanged}
+                onReset={() => onResetSide(side)}
+                alignTop={isExpanded}
+              >
                 <div className={classNames(css['Track'], isExpanded && css['is-expanded'])}>
                   {layout.fields.map((field) =>
                     field.kind === 'pair' ? (

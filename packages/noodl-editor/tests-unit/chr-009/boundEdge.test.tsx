@@ -10,6 +10,7 @@ import path from 'path';
 import React from 'react';
 
 import { bindingTooltip } from '@noodl-core-ui/components/property-panel/BindingChip';
+import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 
 import { BoundField } from '../../src/editor/src/views/panels/propertyeditor/components/MarginPaddingInput';
 import { byClass, render, stripComments, text, walk } from '../support/renderElements';
@@ -60,3 +61,32 @@ describe('CHR-009 / FB-018 — BoundField', () => {
     expect(src).toMatch(/disabled=\{layout\.forced\}/);
   });
 });
+
+describe('CHR-009 — a split Margin/Padding row pins its label to the first line', () => {
+  // Richard, s28: centred on a two-line row, "Padding" floated between its own `↑ ↓` and Margin's fields above.
+  it('PropertyPanelRow draws `is-top-aligned` only when asked — the control is the default row', () => {
+    const top = render(
+      <PropertyPanelRow label="Padding" alignTop>
+        <div />
+      </PropertyPanelRow>
+    );
+    const plain = render(
+      <PropertyPanelRow label="Padding">
+        <div />
+      </PropertyPanelRow>
+    );
+    expect(String(top!.props.className).split(' ')).toContain('is-top-aligned');
+    expect(String(plain!.props.className).split(' ')).not.toContain('is-top-aligned');
+  });
+
+  it('the Margin/Padding row asks for it exactly when the side is split', () => {
+    const src = stripComments(
+      fs.readFileSync(
+        path.join(__dirname, '../../src/editor/src/views/panels/propertyeditor/components/MarginPaddingInput.tsx'),
+        'utf8'
+      )
+    );
+    expect(src).toMatch(/alignTop=\{isExpanded\}/);
+  });
+});
+

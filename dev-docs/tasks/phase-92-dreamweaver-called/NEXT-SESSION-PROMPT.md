@@ -21,13 +21,13 @@ in Preview for Richard; docked the source cuts to `S…`.
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slices 1–14 approved; **slice 15 built + driven, awaiting Richard**. AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Left: §23.5 |
+| **CHR-009 the panel designed** | 🟡 slices 1–14 approved; **slice 15 + label fix approved** ("clearer"). AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Left: §23.5 |
 | CHR-004, 010, 011 | ⬜ |
 
 ## What to do next, in order
 
-1. **Richard's look at slice 15** (`s28/padding-*-dark.png`, reopen with `open -a Preview`): approve as drawn, and rule
-   the docked `S…` (leave it / drop the link glyph / link glyph alone docked). Build only what he rules.
+1. ✅ Done in s28: Richard drove slice 15 live, found the floating label, and approved the fix (*"It looks good now, it's
+   clearer"*, §23.5). The docked `S…` was visible and he raised nothing about it; don't reopen it unless he does.
 2. **The region list is now empty** (§22.5 and §23.5 have no unbuilt region). Shoot the Group pair for **AC1**
    (CHR-001's `props-group-top.png` beside a fresh one) and ask for WORTHY; then **R6 final** with the cut census
    (`slice13/set-results.json`: docked Group 5/69, Button 1/54; wide Group 4/69, others 0). Re-run `set/drive-set.js`
@@ -83,13 +83,16 @@ in Preview for Richard; docked the source cuts to `S…`.
   one-row `recently_opened_project.json`) + `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 npm run dev:debug -- --quiet`. Richard's
   recents are never written, so the peer-launch race above cannot touch them. s28's profile + project copy:
   `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/e3ba906e-8785-410f-9df9-08288b835f9b/scratchpad/{profile,story-engine}`.
+- 🔴 **Never edit a source file while a stack is compiling or live** (s28): mid-compile it WEDGED the dev server (bundle
+  `000`, blank window, relaunch only). A mutant on a live stack disconnected the renderer under Richard. Mutants and edits go
+  BEFORE the launch or after `dev:stop`.
 - 🔴 **Your `dev:debug` REAPS a peer's live stack** (`start.ts` `reapPreviousSession()` sweeps the whole checkout). s28 waited
   ~35 min for a peer `dev:debug` to exit (`while ps -p <pid>`), then launched with the `ps` check in the same command.
 - One heavy job at a time: stop the stack BEFORE jest, and wait out a peer's jest/`test:ci`.
 
 ## Still Richard's
 
-1. **Slice 15 as drawn, and the docked `S…` bound edge** (§23.5).
+1. ✅ Slice 15 + the top-aligned label: approved in s28.
 2. AC1's WORTHY on the Group pair. R6 final ("ok so far"; show the cut census).
 3. The `···` menu is DECLINED. CHR-007 AC4 `_portsHash` clause declined. §3.4 closed by position (s20).
 4. The Projects tab's two full-width cards (BST-003 / UNI-001).
