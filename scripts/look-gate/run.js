@@ -34,6 +34,7 @@ const path = require('path');
 const { appTarget, connect, evaluate } = require(path.join(__dirname, '../devtools/cdp.js'));
 const { scalesFromDisk } = require('./lib/scale');
 const { auditElements, summarise } = require('./lib/audit');
+const { RULINGS } = require('./rulings');
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) =>
@@ -176,6 +177,18 @@ function report(surfaceName, reading, result, state) {
       .join('  ') || '(nothing)'}`
   );
 
+  // 🔴 Printed every run, never folded into the pass. A person ruled these; a later session must be
+  // able to see WHAT was excepted and HOW MANY without reading the source.
+  const ruled = Object.entries(population.ruled || {});
+  if (ruled.length) {
+    console.log(`   ruled exceptions: ${ruled.map(([id, n]) => `${id}×${n}`).join('  ')}`);
+  }
+  // A ruling that matched nothing on a surface it applies to is a rule quietly switched off, and a
+  // clean run is exactly what it looks like. Name them.
+  if ((population.unmatchedRulings || []).length) {
+    console.log(`   rulings that matched NOTHING here: ${population.unmatchedRulings.join(', ')}`);
+  }
+
   for (const finding of result.findings) {
     const extra = [finding.value, finding.threshold ? `< ${finding.threshold}` : null, finding.detail]
       .filter(Boolean)
@@ -219,6 +232,9 @@ async function main() {
         const reading = typeof raw === 'string' ? JSON.parse(raw) : raw;
         const result = auditElements(reading.records, {
           scales,
+          // `--no-rulings` is the raw picture. Any claim about a whole surface should be taken at
+          // least once without them, or the claim is about the exceptions as much as the surface.
+          rulings: args.includes('--no-rulings') ? [] : RULINGS,
           meta: {
             surface: surfaceName,
             root: surface.root,
@@ -244,7 +260,12 @@ async function main() {
     fs.writeFileSync(
       jsonPath,
       JSON.stringify(
-        readings.map((r) => ({ meta: r.result.population.meta, population: r.result.population, findings: r.result.findings })),
+        readings.map((r) => ({
+          meta: r.result.population.meta,
+          population: r.result.population,
+          findings: r.result.findings,
+          ruledExceptions: r.result.ruledExceptions
+        })),
         null,
         1
       )

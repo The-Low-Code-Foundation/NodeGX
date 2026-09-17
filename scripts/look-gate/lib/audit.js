@@ -28,6 +28,7 @@
  */
 const { parseColorAlpha, flattenGround, contrastRatio, toHex } = require('./color');
 const { onScale } = require('./scale');
+const { applyRulings } = require('../rulings');
 
 /**
  * NAT-001's ruling (phase 72), which this gate enforces and does not restate in its own words.
@@ -74,7 +75,11 @@ function count(population, rule) {
  * Grade a collected surface.
  *
  * @param {ElementRecord[]} records
- * @param {{ scales: {fontSizes: number[], radii: number[]}, meta?: object }} options
+ * @param {{ scales: {fontSizes: number[], radii: number[]}, meta?: object,
+ *          rulings?: import('../rulings').Ruling[] }} options
+ *   `rulings` are the exceptions a person has ruled on (`../rulings.js`). Pass `[]` for the raw
+ *   picture. 🔴 They move a finding into `ruledExceptions`; they never change a threshold, and a
+ *   finding with no measured `ink`/`ground` pair can never be excepted.
  */
 function auditElements(records, options) {
   const scales = options && options.scales;
@@ -165,6 +170,10 @@ function auditElements(records, options) {
           fail('text-contrast', record, {
             value: `${ratio.toFixed(3)}:1`,
             threshold: `${NAT_001.text}:1`,
+            // `ink`/`ground` are the measurement, structured. `detail` is the same two values for a
+            // person to read; a ruled exception matches on THESE, never on the display string.
+            ink: toHex(flattened),
+            ground: toHex(groundUnder),
             detail: `${toHex(flattened)} on ${toHex(groundUnder)}`,
             text: record.ownText
           });
@@ -194,6 +203,8 @@ function auditElements(records, options) {
           fail('control-edge-contrast', record, {
             value: `${ratio.toFixed(3)}:1`,
             threshold: `${NAT_001.controlEdge}:1`,
+            ink: toHex(flattened),
+            ground: toHex(groundBehind),
             detail: `${toHex(flattened)} on ${toHex(groundBehind)}`
           });
         }
@@ -201,7 +212,20 @@ function auditElements(records, options) {
     }
   }
 
-  return { findings, population };
+  // -- the exceptions a person has ruled on ----------------------------------
+  //
+  // Applied LAST, over findings the rules produced without knowing anything about them, so the
+  // measurement in the task file is always the unruled one. `population.ruled` keeps the count
+  // visible: a ruled exception is not a reading that passed.
+  const ruled = applyRulings(findings, options && options.rulings);
+  population.ruled = ruled.ruled;
+  population.unmatchedRulings = ruled.unmatchedRulings;
+
+  return {
+    findings: ruled.findings,
+    ruledExceptions: ruled.ruledExceptions,
+    population
+  };
 }
 
 /** A translucent ink over a known ground is the colour a person actually sees. */
@@ -219,6 +243,7 @@ function summarise(result) {
   const { findings, population } = result;
   const graded = Object.values(population.graded).reduce((sum, n) => sum + n, 0);
   const skipped = Object.values(population.skipped).reduce((sum, n) => sum + n, 0);
+  const ruled = Object.values(population.ruled || {}).reduce((sum, n) => sum + n, 0);
   const byRule = {};
   for (const finding of findings) byRule[finding.rule] = (byRule[finding.rule] || 0) + 1;
 
@@ -228,10 +253,14 @@ function summarise(result) {
     byRule,
     graded,
     skipped,
+    ruled,
     elements: population.elements,
     line:
       `${findings.length} finding(s) over ${graded} graded reading(s) on ${population.elements} element(s)` +
-      `; ${skipped} refused`
+      `; ${skipped} refused` +
+      // 🔴 Always on the verdict line when non-zero. An exception nobody can see on the one line
+      // they read is an exception that has quietly become the rule.
+      (ruled ? `; ${ruled} ruled exception(s)` : '')
   };
 }
 

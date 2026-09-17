@@ -242,3 +242,167 @@ helper itself.
 - **`icon-contrast.js` and `deploy-from-disk.cjs` still carry their own copy of the formula.**
   Neither runs without a live editor / a deploy, and rewiring an untestable script is how you ship a
   broken tool. Owed, with a note.
+
+---
+
+## 7. Session 31 (2026-09-17) — the HEAD run, and the first thing the gate found
+
+### 7.1 The reading AC5's first half owed
+
+The gate, unchanged, over CHR-009 §3.6's eight-node verdict set on a **dev build** (so: HEAD), both
+themes, resting state. Driver `verdicts/CHR-004/2026-09-17-head/drive-gate-set.js` — it only selects
+the node and waits for its rows, then shells out to `scripts/look-gate/run.js` per reading, so the
+instrument being run is the one 39 specs grade and there is no second copy of the judgement.
+
+| node | rows | graded | findings |
+|---|---|---|---|
+| Group | 147 | 638 | 14 |
+| Text | 89 | 570 | 18 |
+| Image | 104 | 578 | 18 |
+| Function | 3 | 146 | 2 |
+| Query Records | 20 | 352 | 6 |
+| Columns | 29 | 416 | 10 |
+| States | 4 | 142 | **0** |
+| Button (PopoutGroup) | 119 | 542 | 16 |
+| **total** | | **3,384** | **84** |
+
+✅ **The scale half is GREEN at HEAD: zero `font-size-off-scale`, zero `radius-off-scale`, zero
+`text-cut`, over 8 nodes × 2 themes.** That is CHR-002 and CHR-003 holding, measured rather than
+assumed, and it is the first time either has been graded on anything but the Group.
+
+🔴 **82 of the 84 findings are ONE decision counted 80 times.** A count is not a finding: attributed
+by colour pair, `control-edge-contrast` × 40 at `#33323d on #232129` (dark) and × 40 at
+`#e0e5eb on #ffffff` (light), across 9 element kinds (base inputs 42, `panel-head-row-field` 18,
+`NumberUnitInput.Fixed` 12, `VariantSelector-trigger` 4, colour swatch, code-editor button, textarea).
+
+### 7.2 What it is, named
+
+`verdicts/CHR-004/2026-09-17-head/field-edge-token.js`, live in both themes:
+
+| | light | dark |
+|---|---|---|
+| the field's own fill | `#f2f4f6` | `#2e2c36` |
+| the field's edge (`border-default`) | `#e0e5eb` | `#33323d` |
+| the panel ground | `#ffffff` | `#232129` |
+| **edge vs ground** | **1.267:1** | **1.260:1** |
+| fill vs ground | 1.103:1 | 1.158:1 |
+| `--theme-color-border-control` vs that ground | **3.719:1** | **4.512:1** |
+
+So **every boundary a person could see is ≤ 1.27:1**, and the token that meets NAT-001's 3:1 already
+exists in the palette and passes comfortably on this exact ground. The fields simply do not use it.
+
+🔴 **This is §2's thesis with a live defect behind it.** `nat-001/palette-contrast.spec.ts` is GREEN
+and always was: it grades `border-control` on the grounds it knows about and never asks which token a
+field actually paints. *"That is a property of the rendered element, which is not what most of these
+tests measure."*
+
+### 7.3 Ruled: the quiet edge stays
+
+Priced before proposing, with the gate's own `--arm` (a stylesheet over the running app, no compile):
+`verdicts/CHR-004/2026-09-17-head/pair.js` → `pair/field-edge-{before,after}-{dark,light}.png`, the
+same crop of the Group panel, the only difference being every field edge armed to `border-control`.
+
+**Richard ruled "fix it", was shown the armed picture, and took it back: *"no outlines like in the
+after pic, I don't like it."*** ⇒ the quiet edge is the **ruled look** for panel fields. CHR-009's
+Group pair was ruled WORTHY with it in. 🔴 **Do not re-propose `border-control` on panel fields.**
+
+Nothing in the product changed. `git status` over `packages/` was clean of mine throughout.
+
+### 7.4 So the gate learned to carry a ruled exception — `scripts/look-gate/rulings.js`
+
+A hand-run check that reports 82 findings every session is a check nobody reads, and the next session
+to read them would "fix" exactly what was declined, at full price, twice. **`NAT_001.controlEdge` is
+still 3.** Nothing in the file can change a threshold or except a rule.
+
+What keeps it honest, each graded by `tests-unit/chr-004/rulings.test.ts` (21 specs):
+
+1. **An exception matches the MEASUREMENT** — two colours, as the gate's own hex — never an element,
+   a class or a rule. There is deliberately no syntax for a wildcard. Move `border-default` one step
+   and it stops matching and reds again.
+2. **It cannot leak**: not across rules (same two colours as *text* is unruled), not onto a
+   neighbouring colour (`#33323e`, `border-subtle`, the field fill as ground all still red), not onto
+   the ruled ink over an unruled ground.
+3. **A finding with no measured pair can never be excepted** — otherwise one ruling would delete a
+   whole rule, reported as clean.
+4. **It is never counted as a reading that passed.** `population.graded['control-edge']` still counts
+   it; `population.ruled` counts it separately and the verdict LINE says `N ruled exception(s)`.
+5. **A ruling that matched nothing is named** (`unmatchedRulings`) — a stale ruling is a rule quietly
+   switched off, and a clean run is exactly what it looks like.
+6. **It carries who ruled it, when, and the artefact they were shown**, so a later session need not
+   re-derive the question. Asserted, including that `what` and `shown` are non-trivial.
+7. **`run.js --no-rulings`** reports the raw picture. Any claim about a whole surface should be taken
+   once without them.
+
+**Control pair, live, property panel, both themes:** rulings active → **0 findings / 7 ruled
+exceptions per theme, exit 0**; `--no-rulings` → **7 findings per theme, 14 total, exit 1**, each
+naming its element. An identical reading across those arms would have been indistinguishable from a
+facility that was never wired up.
+
+### 7.5 Still standing after the ruling — 2 findings, NOT excepted
+
+`span.IconInput.Name.is-placeholder "None"` — the icon row's empty-state word:
+**3.897:1 dark / 3.373:1 light, against 4.5:1.** Owed a ruling of its own; it is text, not an edge,
+and nobody has looked at it. 🔴 Related: s21's *"greyed is a picture, not a DOM attribute"*.
+
+### 7.6 Readings and traps
+
+- `npx jest tests-unit/chr-004` **3 suites / 60 tests, exit 0** (was 2 / 39). `typecheck:editor-tests`
+  clean. **7 mutants, 7 red**, every file restored byte-identical (`cmp`).
+- ✅ **A surviving mutant made me delete a line rather than write a test** (second time in this
+  phase). `rulingFor`'s `!finding.ink || !finding.ground` guard was unreachable: the pair comparison
+  already refuses, because `norm(undefined)` is `''` and every pair is six hex digits. The invariant
+  is now pinned where it CAN break — the spec asserting every pair matches `/^#[0-9a-f]{6}$/` — and
+  the mutant that breaks it (a pair written `['','']`) reddens 11 tests.
+- 🔴 **`execFileSync` hands back only STDOUT, and jest prints its summary to STDERR even on a PASS.**
+  The first mutant runner therefore reported a passing mutant as `Tests: (none printed)` — byte-identical
+  to the shape of a suite that failed to run, which is the one outcome that must never be confused
+  with another. `spawnSync`, and concatenate both streams.
+- 🔴 **A leftover popout silently zeroes the whole gate.** `popout-scope.js` had clicked a trigger and
+  left a `.popup-layer-blocker` over the panel; the next run refused **1,018 of 1,018** elements as
+  `not-reachable` and exited 2. That is the gate being right, and it is only legible because every
+  result carries its population. Close what a drive opened. (Escape and `.click()` do not dismiss it;
+  a real `Input.dispatchMouseEvent` press does. `dispatchClick(client, {x, y})` takes a POINT.)
+- 🔴 **A pipe ate the exit code again** — `node run.js … | tail -14; echo $?` printed `0` over a run
+  that exited 2. Redirect to a file, capture `$?`, then grep.
+- 🔴 **`cdp.js` defaults to 9222**: set `NOODL_REMOTE_DEBUG_PORT` on every single call, including
+  one-off `node -e` probes.
+- 🔴 `--json` on `run.js` must be **ABSOLUTE** when shelled out: it runs with `cwd: ROOT`, so a
+  relative path lands beside the repo root and the read-back fails with ENOENT *after* the gate has
+  measured — which reads as "the gate could not measure".
+- The gate's own `contrastRatio` takes **parsed** colours, not CSS strings; handed a string it throws
+  inside `relativeLuminance`. Use `flattenGround([css])` first.
+
+### 7.7 §3.3 — measured, and NOT done
+
+**The `:global(.sidebar-property-editor)` removal is not free, and the task says it is.** §3.3 says
+the hook goes "with its geometry moved into the component". Measured:
+
+- The only consumer of `PropertyPanelRow` outside the editor's property panel is
+  `noodl-core-ui/src/preview/property-panel/Group/Group.tsx`, which **has no importer at all** (dead
+  storybook-era preview). So far, so free.
+- 🔴 **But `showPopout` appends into the popup layer** (`popuplayer.ts:918` → `this.popoutsEl`), which
+  is NOT inside `.sidebar-property-editor`. `PopoutGroup`, `CodeEditorType`, `CurveType`, `ImageType`
+  and `PickerTypeView` all render rows there. ⇒ the hook is a **live conditional**: dropping it would
+  give every popout's rows a 118px fixed label column, a 30px min-height and absolutely-positioned
+  gutter dots they do not have today — a look change to surfaces Richard has never been shown.
+- ⇒ doing it properly means a variant the panel's rows opt into, threaded through ~18 call sites (each
+  row is its own `createRoot`, so one provider cannot wrap them). Priced, not built.
+
+**The class-name half is also mis-scoped, and two of §2's four claims are stale:**
+
+- 🔴 `fb-018/bindingChipRows.test.tsx` no longer asserts `sidebar-panel-dark-input` **anywhere** —
+  that string appears in **zero** files under `tests-unit/`. It is a live product class in 5 source
+  files; the audit line is left over from before FB-018's rewrite.
+- 🔴 `byClass(node, '<product class>')` is the **house style of this runner**, not a four-file problem:
+  **~40 spec files and ~180 call sites** use it, and `renderElements.ts` documents it. §3.3 names four.
+  Converting only those four would leave the codebase less consistent, not more.
+- What IS genuinely worth fixing, and is small: `property-editor/portHint.test.ts:123,128` asserts
+  `className === 'property-row'` — a literal that is **stale** (CHR-008 §3.2 moved the row class to
+  `.property-panel-row`; `.property-row` was already taken by `propertyeditor.css:98`). It is a
+  sentinel, so it should be a neutral one.
+- ✅ **`leg-005/nodeCommentRow.test.ts`'s CSS read must NOT be retired.** It asserts the placeholder is
+  dimmed with a colour TOKEN and `opacity: 1`, never a fraction — and the rendered gate **cannot see a
+  `::placeholder`** (it grades elements, and a pseudo-element has no element). §7.5's finding is a real
+  `span`, which is why that one *is* visible. Read what a test asserts, not what it is filed under.
+
+AC4's `expect(` counts are therefore still **18 / 24 / 24 / 36, unchanged**.

@@ -1517,3 +1517,27 @@ Driving the 118px column turned up something bigger than the 2px. Over **every**
   **118px**. PNGs `labels/flat-*.png`; the before is `labels/nested-*.png`, the rejected variant
   `labels/headingindent-*.png`.
 - ⇒ AC2's "every label's left edge is one value" is met **over the whole panel** for the first time.
+
+## 24. AC5's first half, taken (2026-09-17, s31)
+
+**The CHR-004 look gate has now been run at HEAD over the whole of §3.6's verdict set**, both themes
+— the reading AC5 has been owing since the gate was built, and the first time anything in this task
+was graded on more than the Group. Full numbers, attribution and the ruling in
+`CHR-004-THE-GATES-MEASURE-THE-SCALE-NOT-THE-FILLS.md` §7; artefacts in
+`verdicts/CHR-004/2026-09-17-head/`.
+
+- ✅ **The scale gate is GREEN on every node in the set, both themes: 0 `font-size-off-scale`,
+  0 `radius-off-scale`, 0 `text-cut`** over 3,384 graded readings. AC2's type and radius claims now
+  hold over eight node types, not one.
+- ✅ **The contrast gate is GREEN with one ruled exception**: the panel's quiet field edge (1.26:1,
+  both themes, `border-default`). Richard ruled "fix it", saw the armed `border-control` picture and
+  took it back — *"no outlines like in the after pic, I don't like it"* — so it is now a recorded
+  exception in `scripts/look-gate/rulings.js`, matched on the measured colour pair, counted in its
+  own bucket, and reversible with `--no-rulings`. **The panel was not changed.**
+- 🟡 **One finding still standing, owed a ruling:** `IconInput`'s `None` placeholder word at
+  **3.897:1 dark / 3.373:1 light** against 4.5:1. Text, not an edge; nobody has looked at it.
+- ⬜ **`test:ci` still owed for AC5.** P93 reported one at HEAD a few minutes before this session
+  started: **2,985 / 8 at seed 38645, the recorded floor** — their measurement, relayed with its
+  numbers, not mine. A run of my own is still the honest thing for the AC.
+
+⇒ **AC5 is met except for `test:ci` and the placeholder ruling.** AC1 was ruled WORTHY in s29.
