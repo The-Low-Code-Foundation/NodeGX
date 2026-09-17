@@ -1,6 +1,6 @@
 # GAM-011 — A field can ask for a keypad, and take a tapped key at the caret
 
-**Status: 🟢 2026-09-17 (session 22): AC2 met.** Richard ruled the keypad trap *"whatever actually fixes it"*: a value a Function writes in the same run as it fires a signal is now sent with that signal even when unchanged (runtime), and session 21's keypad page types 5/5 by touch at 1024×768 and 390×844 (was 3/5). AC1, AC3–AC5 met in s21; AC6 met by naming. **Left:** AC7. *(s21 status: 🟡 2026-09-17 (session 21): (a) and (b) built. AC1, AC3, AC4, AC5 met; AC6 met by naming (Insert/Backspace deferred, not translated). 🔴 AC2 NOT met: a keypad wired the obvious way mistypes (a Function publishes only on change) — a question for Richard, §8. AC7 not recorded. ✅ R12 ruled s19 (§5).** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export))*
+**Status: ✅ 2026-09-17 (session 23): AC7 recorded (§8) — the kit stays; AC3 and AC5's insert are the product now, AC1/AC5 each short of one fact, AC2 kit-only.** *(s22: 🟢 AC2 met.)* Richard ruled the keypad trap *"whatever actually fixes it"*: a value a Function writes in the same run as it fires a signal is now sent with that signal even when unchanged (runtime), and session 21's keypad page types 5/5 by touch at 1024×768 and 390×844 (was 3/5). AC1, AC3–AC5 met in s21; AC6 met by naming. *(s21 status: 🟡 2026-09-17 (session 21): (a) and (b) built. AC1, AC3, AC4, AC5 met; AC6 met by naming (Insert/Backspace deferred, not translated). 🔴 AC2 NOT met: a keypad wired the obvious way mistypes (a Function publishes only on change) — a question for Richard, §8. AC7 not recorded. ✅ R12 ruled s19 (§5).** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export))*
 
 On a tablet, a number answer opens the full letter keyboard over half the game. An on-screen pad cannot type into the box while a
 child's caret is in it. Rocket School had to build its own React node to get either.
@@ -200,3 +200,21 @@ A value written on its own keeps the old publish-on-change rule that old project
   AC3 unchanged: `1923`, caret 2, focus kept. The deploy engine in `noodl-preview/dist` is stale (its catalog predates Insert Text) and
   refused the project; not rebuilt.
 
+
+### Session 23 (2026-09-17, over `5e91dc469`) — AC7, recorded
+
+**Could Rocket School's `game-kit.AnswerPad` now be a Text Input + Buttons? Not whole. The kit stays** (and is not touched here).
+Each clause of RKT-005 is marked **measured** (a reading already in this file) or **reasoned** (from the code, not driven).
+
+| RKT-005 | With Text Input (`Input Mode`, `Insert Text`, `Backspace`) + Buttons | Basis |
+|---|---|---|
+| AC1 touch, taps only, `activeElement` never an `<input>`, verdicts right | **Half.** The taps type right: s22's touch page 5/5 at 1024×768 and 390×844, `inputmode="decimal"`. `Input Mode = none` stops the soft keyboard (R12). But Rocket School focuses the box as a question arrives (GAM-010's `didMount → focus`, `focusIn` in the keyboard drive), so `activeElement` **is** the `<input>` on a tablet. Meeting the clause means not focusing on a coarse pointer, and no product node reports `(pointer: coarse)`. | measured (taps); reasoned (focus) |
+| AC2 AZERTY, `code: Digit4` + `key: "'"` enters `4` | **No.** A Text Input takes the character the key produces (`'`). Reading `KeyboardEvent.code` is a game's choice, not a field's (§5), as expected. | reasoned, by design |
+| AC3 decimal key `,` FR / `.` EN, graded right | **Yes.** A key's label and its `Text To Insert` are the graph's; `7,5` typed by touch landed in s22's 5/5. | measured (`,`); `.` reasoned |
+| AC4 accent strip = exactly the accents in the FR word list, gate computes the set | **Buildable, unproven.** A Function computes the set, a For Each draws a key per letter. The key sits inside the repeated component and `Insert Text` belongs to the page's Text Input, so each tap must leave the row as an item signal carrying its letter. s22 found Rocket School's deploy naming `hpRows.itemOutputSignal-tapped → hpTap.run` as a wire that cannot work (GAM-023: a kind only a running graph knows); that route is not driven. RKT-012's refusal of a wrong letter (`acceptsTyping`) has no Text Input equivalent at all. | reasoned |
+| AC5 fine pointer: typing works, a tap mid-typing inserts | **Insert yes, focus no.** `1923` at the caret either way (s21). With a plain click desktop Chrome moves focus to the Button, so the next typed key goes nowhere until the box is clicked again; s21 kept focus only by cancelling `mousedown` in a page script, which a Button in a graph cannot do. | measured |
+
+**So:** AC3 and AC5's insert are the product now; AC1 is short of one fact the product does not expose (a coarse pointer); AC5's
+continued typing is short of a Button that does not take focus; AC2 and RKT-012's refusal stay kit-only, as expected. Neither missing
+piece is registered as a defect here: whether a Button should be able to not take focus, or the product should report a coarse pointer,
+is a question, not a measured failure.
