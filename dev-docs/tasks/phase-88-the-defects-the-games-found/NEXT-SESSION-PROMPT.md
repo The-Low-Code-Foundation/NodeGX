@@ -37,11 +37,20 @@ the whole task you pick, including its §8.
 
 ## State of the tree (session 24)
 
-- 🔴 **No dev stack is running and nothing is watching `src/external`.** A peer (`opennoodl-ba`) tore theirs down at ~21:40. The
-  bundles **on disk (21:31) carry both of this session's changes** — verified by reading the compiled source, not the mtime. Any
-  further viewer edit needs a rebuild of your own, or a stack.
-- 🔴 **`:8080` is contended.** `opennoodl-3e` is driving P93 TVW-001 and was blocked on it all evening; the dev server's port is
-  hardcoded in `webpack.renderer.dev.js`, so a second stack in this checkout dies with `EADDRINUSE`. **Ask before launching one.**
+- 🔴 **No dev stack is running and nothing is watching `src/external`.** Session 24 launched one at 21:50 and tore it down at
+  22:13 (25 processes, nothing left). The bundles **on disk carry both of this session's viewer changes** — verified by reading
+  the compiled source, not the mtime. Any further viewer edit needs a rebuild of your own, or a stack.
+- 🔴 **The editor renderer may not compile.** At 22:13 a peer's uncommitted `ComponentsPanelNew` work failed the webpack ts
+  check, so the editor mounted nothing. Gate on `npm run cdp -- health` reporting `reactMounted: true`, and read `.logs/dev.log`
+  before concluding anything about the app.
+- **Left behind by s24:** the throwaway project `NodeGX test projects/gam016-ac3-playful`. Its Home page was swapped for the
+  GAM-017 kit fixture before the failed reload, so it is **not** a clean wizard output any more — delete it or remake it rather
+  than reading it.
+- 🔴 **`:8080` is contended and only one stack can exist.** The dev server's port and `publicPath` are hardcoded in
+  `packages/noodl-editor/webpackconfigs/webpack.renderer.dev.js`, so a second stack in this checkout dies with `EADDRINUSE`.
+  Two peers wanted it this evening. **Ask before launching, and announce the teardown to whoever you asked.**
+- ⚠️ **`npm run dev:debug -- --quiet` prints nothing and exits 0 even when the stack never comes up** (`opennoodl-3e`). Gate on
+  the CDP port answering (`127.0.0.1:9222/json/version`), never on the launcher's exit code.
 - **Deploy with `node packages/nodegx-export/dist/cli.mjs deploy <project> <out> --allow-development-engine`.**
   `scripts/devtools/deploy-from-disk.cjs` deploys a *different app* — see the memory note of that name.
 - Uncommitted files in the tree are peers': the staged `library/prefabs/date-picker` font deletions were **already staged at
@@ -49,9 +58,20 @@ the whole task you pick, including its §8.
 
 ## Do, in order
 
-1. **GAM-016 AC3 editor half** — a new **Playful** project through the wizard; the canvas draws Nunito; then rebuild the MCP
-   bundle. **Needs the editor**: check `npm run dev:stop -- --list` and ask `opennoodl-3e` about `:8080` first.
-2. **GAM-017 AC4 editor half** — a kit signal prop in the editor canvas with a Button's Click wired in. Same stack, same ask.
+1. 🔴 **GAM-016: the wizard applies a preset's FONT and not its TOKENS.** Driven s24 (first reading of the wizard route, GAM-016
+   §8 s24): a **Playful** project ships `preset-font-nunito` and loads its stylesheet, and the canvas still computes **Inter**
+   and `--ring: #2563eb` — Modern's defaults — with Nunito `unloaded` and `metadata.designTokens` **empty**. The pending preset
+   id is peeked by `installPresetFonts` (`LocalProjectsModel.ts:321`) and `StyleTokensModel._applyAndClearPendingPreset`
+   (`StyleTokensModel.ts:400-405`) never lands it; it is a **one-shot**, so reopening cannot repair the project.
+   **Next step is instrumentation, not a guess:** log the order of `ProjectModel.instanceHasChanged` / `importComplete` against
+   `setPendingPresetId` for a freshly created project, and find which of the three failures it is (never called / wrong
+   ProjectModel / already consumed by an earlier reload). Then a test **over the real sequence** — `installPresetFonts.test.ts:86`
+   calls peek and consume in the same test, which is a hole shaped exactly like this defect.
+2. **GAM-017 AC4 editor half** — a kit signal prop in the editor canvas with a Button's Click wired in. The fixture is ready:
+   session 22's project (with `gam017.SignalProp` and a `Fire` Button already wired to its `play`) is copied to this session's
+   scratch at `g17ac4/project`. 🔴 Parked s24 because **a peer's in-flight `ComponentsPanelNew` refactor did not typecheck** and
+   the renderer would not build (`reactMounted: false`): `useSheetManagement.ts:10` TS2305 `Sheet`, `SheetSelector.tsx:75`
+   TS2339 `displayName`. Check the renderer compiles before counting on the canvas.
 3. **GAM-028 — now unblocked (R27).** A `Device` node with named boolean outputs, `false` on the server. GAM-013 §8 is the worked
    example of what a new built-in node owes: 14 surfaces, 15 export floor pins, `ssr.compat` decided on purpose. AC1 is a census
    **before** designing. With it, GAM-011 AC7's answer changes — that is the point of building it.
@@ -86,6 +106,9 @@ the whole task you pick, including its §8.
 | editor **`test:main`** | **490 suites, 7867 ✓, exit 0** |
 | token-vocabulary readers: MCP ×2, export ×3, editor ×4 | 23 ✓ / 42 ✓ / 43 ✓ |
 | `catalog:generate` | my delta was **one 12-line port entry**; committed through a temp index over a peer's own catalog commit |
+| GAM-016 AC3, **wizard route, first ever reading** — Playful project, editor canvas | 🔴 **RED**: `--font-sans` **Inter**, `--ring` **#2563eb**, "Hello World!" computes **Inter**, Nunito **unloaded**, project tokens **{}** — while `preset-font-nunito` is shipped and its stylesheet loaded |
+| the same, control: name Nunito in the page and re-read | family **Nunito**, face **loaded** — the instrument sees it, so the absence is real |
+| GAM-017 AC4 | **parked**: renderer `reactMounted: false`, a peer's `ComponentsPanelNew` refactor fails the ts check |
 | editor `test:ci`, whole `noodl-mcp` suite, members-area `Account` | **not run** / **not run** / behind its sign-in, no backend |
 
 **Scratch:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/3f3493cb-7a19-4a04-beef-8f516360adc2/scratchpad/`

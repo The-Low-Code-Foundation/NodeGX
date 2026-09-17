@@ -1,6 +1,6 @@
 # GAM-016 — The font a preset names is the font the page draws
 
-**Status: 🟢 built (session 22, 2026-09-17).** (a) + (c) as ruled, and the switching addendum ruled in s22. AC1 RED on deployed pages, AC2 with 10 reverted arms, AC3 + AC6 deployed half, AC4, AC5. **Left:** AC3's editor-canvas half (the wizard not driven); members-area's `Source Sans Pro` finding; an MCP bundle rebuild. **Source:** [P78 D69](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC3, 2026-09-13 · **Side:** product (style presets / project modules)
+**Status: 🟢 built (session 22), and 🔴 AC3's editor half is RED (session 24) — see §8 s24.** (a) + (c) as ruled, and the switching addendum ruled in s22. AC1 RED on deployed pages, AC2 with 10 reverted arms, AC3 + AC6 deployed half, AC4, AC5. **Left:** members-area's `Source Sans Pro` finding; an MCP bundle rebuild — and now **a second defect on the wizard route, measured in s24**: the preset's *tokens* are never applied, so a Playful project draws Inter although Nunito is shipped and its stylesheet loaded. **Source:** [P78 D69](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC3, 2026-09-13 · **Side:** product (style presets / project modules)
 
 A person picks the Playful look for their app. It says Nunito, and every visitor reads the platform's fallback font,
 because nothing ever ships or loads Nunito. Richard played Rocket School session 1 that way.
@@ -198,3 +198,47 @@ render); the `--font-sans` description still says "Inter, falling back…" after
   `drive-rkt002-look.js` 14/14, no failed network request.
 - **The Inter warning on MCP-made projects** (*"Dunno"*): left firing, as ruled. It is true, and SBR-014's starter assets silence it.
 
+### Session 24 (2026-09-17) — AC3's editor half driven, and it is RED
+
+Driven at last: the editor was held by peers for two sessions, and this is the first reading of the **wizard** route. New project
+through **Guided Setup**, named `gam016-ac3-playful`, preset **Playful** (checkmark and description confirmed in the screenshot),
+created into the NodeGX test projects folder.
+
+**What s22 fixed still works.** The project ships `noodl_modules/preset-font-nunito` with both real `.woff2` subsets, and the
+editor canvas **loads that stylesheet** (`http://localhost:8574/noodl_modules/preset-font-nunito/styles.css`).
+
+🔴 **But the canvas draws Inter.** Measured in the viewer frame of the editor (`--target=viewer`):
+
+| reading | result |
+|---|---|
+| `--font-sans` on the canvas | `Inter, ui-sans-serif, system-ui, …` — **Modern's default**, not Nunito |
+| `--ring` on the canvas | `#2563eb` — **Modern's default**, not Playful's `#7c3aed` |
+| the page's only text, "Hello World!" | computed family **`Inter`**; screenshot looked at — a plain grotesque, not Nunito's rounded shapes |
+| `document.fonts`, Nunito | **`unloaded`** (both subsets) while Inter is `loaded` |
+| the project file's `metadata.designTokens` | **`{}`** — the project has **zero** custom tokens of any kind |
+| **control:** set `--font-sans: Nunito` in the page, then re-read | family becomes **`Nunito`** and the face reports **`loaded`** — so the instrument can see it, and the absence is real |
+
+**So the preset is half-applied: its typeface reaches the disk and its palette and family never reach the project.** A "Playful"
+project is Playful in name and in one unused font folder; its colours, its radii and its type are Modern's, permanently — the
+pending preset is a **one-shot**, so reopening the project cannot apply it later either.
+
+**Where it goes wrong, as far as this reading proves it.** The handshake is: the launcher calls `setPendingPresetId(presetId)`
+(`ProjectsPage.tsx:1155`), `installPresetFonts` **peeks** it — *"The id is peeked, not consumed: StyleTokensModel writes the
+tokens"* (`LocalProjectsModel.ts:321-325`) — and `StyleTokensModel._applyAndClearPendingPreset()` is supposed to **consume** it on
+a `ProjectModel.instanceHasChanged` / `importComplete` reload (`StyleTokensModel.ts:370-405`). The **peek fired** — that is why the
+font folder is there — and the **apply did not**. Which half of the consume fails (never called for a freshly created project, or
+called against the wrong ProjectModel, or consumed by an earlier reload and cleared) is **not** established here; it needs the
+event order instrumented, and that is the next step.
+
+🔴 **The unit gate has a hole shaped exactly like this defect.** `tests-unit/gam-016/installPresetFonts.test.ts:86` asserts
+*"peeking leaves the preset for StyleTokensModel to consume"* by calling `peekPendingPresetId()` and then `consumePendingPreset()`
+**itself**, in one test. It proves the pair works when something calls both — and nothing in the suite proves that the real
+sequence (create → project loads → tokens applied) ever calls the second one. 39/39 green, product red.
+
+**Not done, and why:** GAM-017 AC4 was queued for the same editor session. After the reading above, a reload to swap in the kit
+fixture came up `reactMounted: false` and stayed there: a peer's in-flight `ComponentsPanelNew` refactor does not typecheck
+(`useSheetManagement.ts:10` TS2305 `types` has no exported member `Sheet`; `SheetSelector.tsx:75` TS2339 `displayName`), so
+webpack-dev-server could not build the renderer. Reported to them; AC4 is parked again.
+
+**Left behind:** the throwaway project `NodeGX test projects/gam016-ac3-playful` (its Home page was swapped for the GAM-017 kit
+fixture before the failed reload, so it is no longer a clean wizard output — delete it, or remake it, rather than reading it).
