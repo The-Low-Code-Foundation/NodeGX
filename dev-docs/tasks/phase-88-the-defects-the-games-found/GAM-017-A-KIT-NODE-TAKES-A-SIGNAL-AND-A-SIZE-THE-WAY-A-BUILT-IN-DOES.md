@@ -1,6 +1,6 @@
 # GAM-017 — A kit React node takes a signal and a size the way a built-in node does
 
-**Status: 🟢 built (session 22, 2026-09-17).** s1 in the bridge, z3 in the docs, as ruled; the export keeps a Click into a kit signal; AC7 done in Rocket School. **Left:** AC4's editor half. **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
+**Status: 🟢 built (session 22, 2026-09-17).** s1 in the bridge, z3 in the docs, as ruled; the export keeps a Click into a kit signal; AC7 done in Rocket School. **AC4's editor half done (s24).** Nothing left. **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
 
 Rocket School's kit wanted a `Burst` signal and got a console error, so the burst became a number that rises. The kit
 wanted a height and got no size port, so the Race Track is sized by a Group wrapped around it.
@@ -205,3 +205,46 @@ Driven: `drive-rkt003-stage.js --reward --keys` at 1366×768 FR/EN, ALL PASS (th
 result and Play-again clauses); the burst screenshot shows sparks behind the rocket after a right answer. `tpl007GameKit` pins Boost as
 `signal` with no default; the template gate pins `rpBoostA/B ontrue → rpTrack.burstA/B`.
 
+### Session 24 (2026-09-17) — AC4's editor half, driven
+
+The half s22 could not reach: a peer's dev stack held the editor for two sessions. Driven here in the editor's own canvas, on
+s22's fixture project (copied, then its page opened in a throwaway project — see the note at the end).
+
+**The signal, and its control in the same run.** The page carries two `gam017.SignalProp` nodes: one with the `Fire` Button's
+`Click` wired into its `Play`, one **unwired**. Clicking the Button in the canvas:
+
+| press | wired node | unwired node | inputs route |
+|---|---|---|---|
+| (at rest) | `signal-prop 0` | `signal-prop 0` | `inputs-route 0` |
+| 1st | **`signal-prop 1`** | `signal-prop 0` | `inputs-route 1` |
+| 2nd | **`signal-prop 2`** | `signal-prop 0` | `inputs-route 2` |
+
+The unwired node is the control: it sits on the same page, is the same node type, and never moves — so the count is the wire,
+not the click. The editor's **Ports** tab names the connection in words: `Play | signal | Accepts signal, boolean | from | Fire · Click`.
+
+**The size, the way R17 ruled it.** z3 was the ruling — *no size ports*, the wrapper Group is the way — and the property panel
+agrees: the kit node's whole `Properties` tab is `Variant`, `Mounted` and Advanced CSS, and its five inputs are Variant, Mounted,
+**Play**, CSS Class, CSS Style. So "the Width a person types" is typed on the **Group**, and it lands:
+
+| reading | result |
+|---|---|
+| Group `Width` at rest | `100` (unit **%**), kit node's box **988px** |
+| typed `320` (unit still %), real key events | kit node's box **3162px** — exactly 3.2 × 988 |
+| the kit's own inner element, throughout | **120px**, which is this fixture's kit hardcoding `width: '120px'` inline in its Face — the kit's business, not the product's |
+
+⚠️ **The number is a percentage, not pixels**: the Group ships `100%`, so `320` means 320%. The proportion is what makes the
+reading unambiguous; a px unit was not switched to, and a cleaner pixel reading is a nicety this AC does not need.
+
+**Screenshots looked at** (`g17ac4/ac4-editor.png`, `ac4-canvas.png`): the panel shows `Width 320 %`, and the canvas shows
+`signal-prop 2` beside `signal-prop 0`.
+
+🔴 **Two instrument traps, both of which produced a wrong number first.**
+- **`cdp type` INSERTS, it does not replace.** Typing `320` into a field holding `100` gave `100320`, and the rendered box went
+  to **991162px**; a second attempt gave `100332020` and the browser's **33554432px** clamp. `input.select()` does not help — the
+  field is React-controlled. Clear it with real `Backspace` key events, one per character, then type.
+- **The node graph is canvas-rendered, not DOM**, so a node cannot be found by its text. Select through the editor's own API
+  (`window.__nodeGraphEditor.selectNode`, found by `forEachNode` on `n.id`) — and ⚠️ `forEachNode` **stops on a truthy return**,
+  so record into a variable and return nothing.
+
+**Left behind:** the throwaway project `NodeGX test projects/gam016-ac3-playful` now holds this fixture's page, the
+`gam017-kit` module, and a Group width of 320%. It was never a clean wizard output after that swap — delete it.

@@ -4,7 +4,8 @@
 the whole task you pick, including its §8.
 
 **The board (2026-09-17, end of session 24), re-derived from the 28 task files' status lines:** **16 🟢 with named remainders,
-9 ✅ done, 2 ✅ closed by ruling, 1 ⬜, 0 🟡.** Everything this session touched is committed (`19b3517d3`, `238c455e9`).
+9 ✅ done, 2 ✅ closed by ruling, 1 ⬜, 0 🟡.** Everything this session touched is committed.
+**GAM-017 has nothing left** — its last remainder, AC4's editor half, was driven at 22:5x once the box finally came free.
 - ✅ done, nothing owed: GAM-010, GAM-011, GAM-012, GAM-019, GAM-020 (R24), GAM-021, GAM-022, GAM-023, GAM-024.
   ✅ closed by ruling: GAM-004, GAM-025.
 - 🟢 with remainders, each named in its own status line: GAM-001, 002, 003, 005, 006, 007, 008, 009, 013, 014, 015, 016, 017, 018,
@@ -77,11 +78,9 @@ the whole task you pick, including its §8.
    `setPendingPresetId` for a freshly created project, and find which of the three failures it is (never called / wrong
    ProjectModel / already consumed by an earlier reload). Then a test **over the real sequence** — `installPresetFonts.test.ts:86`
    calls peek and consume in the same test, which is a hole shaped exactly like this defect.
-2. **GAM-017 AC4 editor half** — a kit signal prop in the editor canvas with a Button's Click wired in. The fixture is ready:
-   session 22's project (with `gam017.SignalProp` and a `Fire` Button already wired to its `play`) is copied to this session's
-   scratch at `g17ac4/project`. Parked s24 because the renderer would not build (`reactMounted: false`) on a peer's in-flight
-   `ComponentsPanelNew` refactor — **since fixed** (22:20, those two files are deleted by P93 TVW-001 slice 4), so this is now
-   only waiting on a free box. Check `reactMounted: true` before counting on the canvas.
+2. ✅ **GAM-017 AC4 — done s24, nothing left on that task.** The wired kit node counted 0→1→2 on the Button's Click while the
+   **unwired** one on the same page stayed 0; the Ports tab names it `Play … from Fire · Click`; and a Width typed on the
+   wrapping Group lands (320% → 3162px on a 988px parent), which is R17's z3 — the kit has no size ports by ruling.
 3. **GAM-028 — now unblocked (R27).** A `Device` node with named boolean outputs, `false` on the server. GAM-013 §8 is the worked
    example of what a new built-in node owes: 14 surfaces, 15 export floor pins, `ssr.compat` decided on purpose. AC1 is a census
    **before** designing. With it, GAM-011 AC7's answer changes — that is the point of building it.
