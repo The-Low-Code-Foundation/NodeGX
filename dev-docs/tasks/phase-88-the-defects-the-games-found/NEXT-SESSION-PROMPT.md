@@ -3,35 +3,77 @@
 **Read first:** [`README.md`](README.md) §3 (what scoping corrected), §4 (rulings, the ruled table first) and §7 (rules). Then read
 the whole task you pick, including its §8.
 
-**The board (2026-09-17, end of session 22), re-derived from the 25 task files' status lines:** **21 🟢 + 2 ✅ built, 2 closed by
-ruling, 0 🟡, 0 ⬜. Everything is committed** (HEAD at write: see `git log`; s22's last P88 commit is `7669e3303`).
-- ✅ GAM-019, GAM-024. ✅ closed by ruling: GAM-004, GAM-025.
-- 🟢 all others. What is left is remainders (named ACs, mostly editor-canvas halves and browser drives), listed below.
+**The board (2026-09-17, end of session 23), re-derived from the 25 task files' status lines:** **19 🟢 + 4 ✅ built, 2 ✅ closed by
+ruling, 0 🟡, 0 ⬜. Everything this session touched is committed** (`5e91dc469`, `c8f8b4c63`, `08b338d6d`, `fad307726`, + this handoff).
+- ✅ GAM-011 (s23, AC7 recorded), GAM-019, GAM-022 (s23, AC7 render), GAM-024. ✅ closed by ruling: GAM-004, GAM-025.
+- 🟢 all others. What is left is remainders: editor-canvas halves and browser drives, listed below.
 
-## State of the tree (session 22)
+## What session 23 did (all committed, over `a418871a0`)
 
-- Committed in s22: GAM-017 bridge `cf435545f`, GAM-016 `ef5d7771f`, s20's GAM-013 `9e165a5ca`, GAM-015 + GAM-017 docs `01fd5e292`,
-  members-area + story-engine fonts `338655941`, keypad (Function) `85c640b6c`, export kit signals `99522fd72`, Rocket School
-  `7669e3303`, handoffs. The phase README's row edits for GAM-010/011/012/016/017 are in the working tree with this handoff's commit.
-- 🔴 **Rocket School's 257 uncommitted files were an editor re-save**, compared by node id: 11 differences, all empty `parameters: {}`,
-  timestamps and a project id. Regenerated from the generator; a copy of the old tree is in s22 scratch `rkt/worktree-snapshot`.
-- 🔴 **Twice in s22 a temp-index commit went wrong** (a peer's commit reverted, repaired in a minute; later an empty `NEW` passed to
-  `update-ref`, a no-op). The recipe in memory now pins the parent, guards every step and uses `git status --porcelain -z`.
-- **Bundles:** `noodl-preview/dist` rebuilt at 18:11 (Insert Text, Focus, kit signals known). The shared `src/external` viewer/deploy
-  bundles were rebuilt by a peer's dev stack at 17:20 and carry every s22 runtime change. The MCP bundle (`noodl-mcp/dist`) does NOT
-  carry GAM-016's preset fonts; the installed app carries none of s22.
+- **0. The focus ring (ruled first) — fixed, `5e91dc469`.** `noodl-viewer-react/src/assets/style.css` set `outline: none` on Button,
+  deprecated Checkbox/Radio, Select and both Ranges and drew nothing instead (P41 ACC-001's row 1; no ACC-001 task file exists).
+  Now `:focus-visible { outline: 3px solid var(--ring, #101010); outline-offset: 2px }`. `drive-rkt003-stage.js --keys` gained
+  `ringNext` + `ringTab`; gate `noodl-viewer-react/tests/corpus/gam-focus-ring-a-control-the-keyboard-reaches-draws-a-ring.test.ts`.
+  🔴 `outline: auto` passed every clause and could hardly be seen in the screenshot. Record: GAM-010 §8 s23.
+- **3. GAM-011 AC7 — recorded, `c8f8b4c63`.** The kit's AnswerPad stays: AC3 and AC5's insert are the product now; AC1 lacks a
+  "coarse pointer" fact (Rocket School focuses the box on arrival), AC5's continued typing lacks a Button that keeps focus; AC2 kit-only.
+- **Remainder GAM-020 AC6 — half, `08b338d6d`.** The render door names the old helper's "Tu as atteint la planète !" **353px in 312**
+  at 390×844 FR (at the race end, via the new `--measure-text` arm); the current build is silent. The generator's door **cannot**:
+  59/60 Rocket School Texts have a wired `text`, and `text-cannot-wrap` abstains on wired text by design.
+- **Remainder GAM-022 AC7 — met, `fad307726`.** Story Engine's sidebar at 390×844 with 8 carried things: 5 rows, none past the box.
+- **Not done: items 1 and 2** (GAM-016 AC3 / GAM-017 AC4 editor halves). A peer's dev stack (editor + viewer webpack watches, started
+  ~19:01) was live all session; a second editor cannot coexist with it.
+
+## State of the tree (session 23)
+
+- The peer's dev stack rebuilt `src/external/{viewer,deploy,ssr}` at 19:14 **with the focus ring** (verified by grep, stable size).
+  `noodl-preview/dist` (18:11) and `noodl-mcp/dist` do **not** carry the ring; the MCP bundle still lacks GAM-016's preset fonts.
+- 🔴 **Deploy Rocket School with `node packages/nodegx-export/dist/cli.mjs deploy <project> <out> --allow-development-engine`.**
+  `scripts/devtools/deploy-from-disk.cjs` (built 09-12) writes a 12-bundle site whose "New player" skips the profile form; a fresh
+  build of it throws at load (`EditorSettings` → `StorageWeb.get`, "Method not implemented."). Neither is fixed or registered.
+- Uncommitted files in the tree are peers' (P78 TPL-008 todo-list, date-picker prefab, P24/P26 docs, P92 CHR-009 verdicts, backend).
 
 ## Do, in order
 
-0. **Ruled by Richard (2026-09-17, end of s22): fix the invisible focus ring.** A keyboard-focused Button shows no visible ring in Rocket School's screenshots (`scratchpad/rkt/shots-reward/*-keys-verdict-*.png`, s22). Reproduce RED first (a `:focus-visible` style reading plus a screenshot on a Button focused by the Focus action and by Tab), find whether the Button's own style or the template's hard-shadow look removes it, fix at the product level (check ACC-001 in P41 for an owner first), reverted arm, re-drive `drive-rkt003-stage.js --keys` and look at the shots.
-1. **GAM-016 AC3 editor half:** a new Playful project through the wizard; the canvas draws Nunito; rebuild the MCP bundle.
+1. **GAM-016 AC3 editor half:** a new Playful project through the wizard; the canvas draws Nunito; rebuild the MCP bundle. Needs the
+   editor: check `dev:stop --list` / a peer's stack first.
 2. **GAM-017 AC4 editor half:** a kit signal prop in the editor canvas with a Button's Click wired in.
-3. **GAM-011 AC7:** record, clause by clause.
-4. **Remainders:** GAM-013's exported app driven in a browser (and its AC8 Rocket School builds); GAM-015 AC3 editor canvas; GAM-020 AC6
-   (Rocket School, now unblocked); GAM-018 AC6 editor half; GAM-022 AC7 render; GAM-003 AC5; GAM-002 AC4; GAM-001 AC5; GAM-014 AC6
-   (TPL-007's wrap); the browser/Rocket School halves of GAM-005/007/008/009 (unblocked: the tree is clean).
+3. **The focus ring's own remainders** (GAM-010 §8 s23): the current Checkbox/Radio (`ndl-controls-checkbox-2`/`radio-2`, input at
+   `opacity: 0`) draw no ring; the new `Select` component unmeasured; a click-only round not graded. These are P41 ACC-001's, not a
+   GAM AC — do them only if Richard wants the ring finished here.
+4. **Remainders:** GAM-013's exported app driven in a browser (and its AC8 Rocket School builds); GAM-015 AC3 editor canvas; GAM-018
+   AC6 editor half; GAM-003 AC5 (browser, meter from an Expression); GAM-002 AC4 (editor); GAM-001 AC5 (blast radius); GAM-014 AC6
+   (Face wrap); the browser/Rocket School halves of GAM-005/007/008/009.
+
+## Readings taken in session 23 (2026-09-17, over `a418871a0`)
+
+| reading | result |
+|---|---|
+| `--keys` 1366×768 EN, s22 deploy (bundle 17:20) | 7 red: `ringTab` 2, `ringNext` 5, all `style: none`, `:focus-visible` true |
+| same, bundle with the 2px ring, 10 rounds EN / FR | EN ALL PASS (3 option rounds); FR ring clauses green, 2 red `focusNext` = P87 s10's poll flake |
+| same, 3px ring, EN | ALL PASS; screenshots looked at (ring on Next, not on "Show me how") |
+| ring rule reverted (stable-size bundle wait) | 6 red of 6 `ringNext` |
+| mouse arm, 3 rounds | ALL PASS; ring after a typed answer (keyboard modality) |
+| focus-ring gate; 5 reverted arms | 9/9; A1 6, A2 (`auto`) 6, A3 (plain `:focus`) 2, A4 (no offset) 6, A5 (new `outline: none` class) 1 |
+| viewer d18 + nda-012 (read `style.css`) | 24/24 |
+| Rocket School, old `text()` helper vs current, generator diagnostics | identical code counts; 0 `text-cannot-wrap`; 51 vs 13 content-sized Texts; 59/60 wired |
+| `measure-from-disk` 390×844, both builds | no text finding on either (7 pages; the sentence is not on screen at load) |
+| `--reward --measure-text` 390×844 FR, `nodegx deploy` builds | old: `textFitsEnd` red 353 in 312 + 2 prompts (566, 369 in 304); current ALL PASS |
+| Story Engine sidebar 390×844, 8 things in `storyCarrying` | 0 → 8 pills, 5 rows, 0 outside the 300px list, 0 console errors (bare strings drew 0: caught by the count) |
+| editor `test:ci`, `test:main`, whole viewer suite, whole `noodl-mcp` | **not run** |
+
+**Scratch:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/b19df43b-4935-4573-8d7d-6daf86bdd741/scratchpad/`
+`ring/` (`head.log`, `fix*.log`, `arm.log`, `mouse.log`, `deploy-fix/`, `*-shots/`, `style.fixed.css`), `g20/` (`old/` + `current/`
+builds, `gen-*.log`, `census.py`, `deploy-{old,current}/`, `drive-end-*.log`, `shots-end-*`, `deploy-from-disk.cjs` the broken fresh
+build), `g22/` (`copy/`, `drive-sidebar.js`, `sidebar-390.png`).
 
 ## Richard's, not a builder's
+
+- **New in s23:** GAM-020's static door cannot see a template whose sentences are all wired (Rocket School 59/60). Is that enough
+  (the render door catches it at run time), or should the validator follow a wire to a literal word table?
+- **New in s23:** should a Button be able to not take focus (a keypad that keeps the caret in its field), and should the product
+  report a coarse pointer? GAM-011 AC7 found each is the one fact between Text Input + Buttons and the kit's AnswerPad.
+- **New in s23:** finish ACC-001 here (current Checkbox/Radio rings, 3:1 per preset) or leave it to P41?
 
 - **Found in s22, not registered:** Rocket School's deploy names `hpRows.itemOutputSignal-tapped → hpTap.run` as a wire that cannot work
   (identical on the committed template before s22). A For Each item signal is a kind only a running graph knows (GAM-023 §8); the
@@ -115,93 +157,4 @@ ruling, 0 🟡, 0 ⬜. Everything is committed** (HEAD at write: see `git log`; 
 `drive-signal.js`, `drive-*.json`, `drive-fix-shot.png`, `export/`), `g16/` (GAM-016: `npm/` the fontsource packs, `{mcp,editor}-*` tool
 output, `page-*` + `deploy-head/` + `head-*.json/png` (AC1), `after/` (AC3), `mut/run.py` + logs, `census.json`, `drive-fonts.js`).
 
-## What session 21 settled
-
-- 🔴 **The handoff's "fault 3 broke the Dropdown" was about the unsplit fix.** Split into `nodeUnmounted` (fires nothing) and an explicit
-  Blur (the named node only), the Dropdown reads identical at 11 steps, including selecting options. HEAD's real person-facing bug was
-  different from what the task file described: **a Blur after a Focus signal did nothing** (the cursor stayed), driven.
-- 🔴 **A click into a Text Input does not list it in the focus tracker** (`preventGlobalFocusChange` stops the click). My spec row assumed
-  it did; driving corrected it. Only a Focus signal lists a field.
-- 🔴 **A key that activates a control is a click**, and the tracker's click walk only sees elements carrying `noodlNode` (Groups). Giving
-  Button & co. a Focus made Space on a Checkbox blur it. Fixed: a listed node that still holds real focus after a click is kept.
-- 🔴 **The export binds a typed `string` source straight through whatever `ATTR_SINK` says.** An `opaque` sink did not refuse it; the
-  exported app failed `tsc` (TS2322). Keyword-union attributes need an explicit refusal (`KEYWORD_ATTRS`).
-- 🔴 **An attribute missing from `CONTENT_ATTR_ORDER` is dropped silently**, and its old "no mapping" note disappears with it.
-- **SIG-003's gate (`catalog:groups:check`) refuses a value input in "Actions"**, caught `Text To Insert`.
-- **Committing beside another session's uncommitted hunks in the same generated files works through a temporary index:**
-  `GIT_INDEX_FILE=<scratch> git read-tree HEAD`, `git add` whole files that are only yours, `git apply --cached` a patch diffed from a
-  snapshot taken **before your own edit**, commit, then `git reset -q -- <paths>` on the real index. Check `git show --stat` for foreign files.
-- A viewer build for a drive can go to scratch with `OUT_PATH=<dir> npx webpack --config webpack-configs/webpack.viewer.prod.js`, and a copy
-  of `render-from-disk.js` + `harness-paths.js` with `VIEWER_DIR` from an env var serves it (run with `NODE_PATH=<repo>/node_modules`).
-  The shared `src/external/viewer` is left alone for a peer's dev stack.
-
-## Readings taken in session 21 (2026-09-17, over `8fe91b234` → `8c7f57a06`)
-
-| reading | result |
-|---|---|
-| GAM-012 spec; 6 reverted arms | 18/18; M1 2, M2–M6 1 each |
-| GAM-012 Chromium, Blur page before/after | F (Focus then Blur): `INPUT[F]` → `body`; T: 3 container `focusLost` → none |
-| GAM-012 keyboard page (s2's) and Dropdown (11 steps, + 2 selections), before/after/final bundle | identical; wrapper close no longer fires root `focusLost` |
-| GAM-010 spec at HEAD / final; 6 arms | 30 red of 32 / 39 (56 with GAM-012); S1 12, S2 10, S3 5, S4 5, S5 10, S6 5 |
-| GAM-010 Chromium keyboard-only, before / final | all arms red + "input doesn't exist" / V 5/5, C/R/D/S focus kept, U silent, B → `body`; 0 pointer events |
-| catalog/merge/groups/docs/cloud checks; CHR-007 + editor units; MCP toolDisclosure + cmp009 | exit 0 ×5; 223/223; 44/44 |
-| viewer specs (controls, focus, outcomes, Group, wrapper) after GAM-010; after GAM-011 | 59 suites 856 ✓; 46 suites 737 ✓; `tsc --noEmit` 0 both |
-| GAM-011 (a) spec at HEAD / final; export spec; E arms | 5 red of 6 / 6/6; 7/7 + `typecheckEmittedApp` `[]`; E1 1, E2 3, E3 2, E4 green → branch removed |
-| `nodegx-export` whole suite (with (a)) | 104 suites, 3567 ✓, 1 skipped, exit 0 |
-| GAM-011 (b) spec; 8 arms | 17/17 (16/16 of the (a)+(b) file before two added rows); B1 4, B2 4, B3 1, B4 4, B5 3, B6 1, B7 1, B8 1 |
-| GAM-011 Chromium AC3 kept / plain; AC2 touch 1024 & 390 | `1923` caret 2 focus field / `1923` focus on button; **3/5 each** (Function publish-on-change) |
-| editor `test:ci`, `test:main`, whole `noodl-mcp`, whole viewer suite | **not run** |
-
-**Scratch:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a79831ee-2350-416c-9b06-f62b10d5ca49/scratchpad/`
-`f3/` (GAM-012: `before/` viewer, `after/`, `devtools/` render copy, `blurproj/`, `project/`, drives + logs, `mut/`), `g10/` (`proj/`,
-`drive-controls.js`, `after2/` bundle, `S*.log`, `checks/`, `cat/`), `g11/` (`after/` bundle, `pad/`, `pad-null/`, `drive-pad.js`,
-`drive-order.js`, arms, `commitA/`, `commitB/`). **Bundles:** none shared rebuilt; the peer dev stack's watch rebuilt `src/external` itself.
-
-## Readings taken in session 20 (2026-09-17, over `7bb79dc53`)
-
-| reading | result |
-|---|---|
-| GAM-015 spec (bridge + runtime + React); reverted arms M1/M2/M3 | 17/17; 6 red / suite fails ("defines no readPx") / 3 red |
-| GAM-015 Chromium, deployed kit, `Number()` vs `readPx` faces | wired + typed: prop `"40px"`, 64 vs **40**; unset 64/64; 0 errors |
-| types-copy gate, game-kit copy put back to HEAD | 1 red, that copy |
-| GAM-013 AC1 census at HEAD (`repeat.ts` removed) / fix | 12 clock files, 10 probes, nothing twice, Delay 1 / + `Repeat.start → tick ×5` |
-| GAM-013 spec; 5 runtime mutants | 17/17; 2/1/1/4/1 red (M5 read 0 until the scheduler check) |
-| GAM-013 Chromium, 2-page app through the router | 5 at 5.0 s; 3 round trips return 0; +3 in 3004 ms; 0 errors |
-| GAM-013 AC5, server platform, 100 turns, `partial` / `client-only` | 0 ticks, timer pending, 100 updates / 0, false, 0 |
-| export: `gam-013-repeat` 32/32; 19 mutants; ledger check + picker | all red where named; exit 0, 118/128 |
-| `nodegx-export` whole suite; `tsc --noEmit` | 3557/3561, the 3 reds HLS-001 (counted, regenerated, 4/4 after); exit 0 |
-| catalog: `check`, `merge:check`, `groups:check`, `cloud-library:check`; `catalog:examples` | green ×4; 103/105, the 2 reds AIX-005 at HEAD |
-| editor `test:main` | 7772/7773; the red LGC-005 timeout under load, **22/22 alone** |
-| runtime suite; viewer suite; scaffold; node-kit-types; CHR-007 | 2774 ✓ (13 skip); 1540 ✓; 74/74; 82/82; 8/8 |
-| `noodl-mcp` `nodeDocBudget` | 14/15: `Group` 14,340 > 14,300, **identical with HEAD's enriched catalog** (AWP-005, s12's list) |
-| editor `test:ci`, `typecheck:editor`, whole `noodl-mcp` | **not run** |
-
-**Scratch:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/87a7498a-22f7-4721-a704-83abd3d5417d/scratchpad/`
-`gam015/` (mutants, browser kit + deploy + drive.json), `gam013/` (mutants, census logs, `browser/` project + deploy + drive.json, `export/`
-the subagent's mutant logs, `hls001-before.json`, gate logs `g-*.log`). **Bundles:** `noodl-preview/dist` rebuilt (Repeat known). The
-dev stack someone started at ~12:20 rebuilt `src/external` viewer/deploy/ssr with Repeat as `partial`; the node is now `client-only`, so
-those bundles are one field stale. New devtools: `drive-gam015-kit-size.js`, `drive-gam013-repeat.js`.
-
-## What session 20 settled
-
-- 🔴 **GAM-015: a typed size arrives as `"40px"` too**, measured through the real bridge and in Chromium (the register said a plain
-  number). `readPx` is strict (only `"<number>px"`), one source string emitted into every scaffolded `index.js`.
-  🔴 `Function.toString()` is not a source: `webpack-caller.test.js` read the scaffold differently in a bundle.
-- 🔴 **All 7 kit copies of the node-kit types were stale**; 5 refreshed and now gated (`types-copy.test.js`), Rocket School's 2 left.
-- **game-kit's `padPx` goes in favour of `readPx`, but not by us:** `tpl007Template.test.ts` requires Rocket School's copy of
-  `game-kit/index.js` to be byte-identical to the library build. The peer's tree.
-- 🔴 **GAM-013: `ssr.compat: 'partial'` (Delay's) is wrong for anything that keeps a timer.** A server render fires Did Mount; the
-  frozen clock never finishes the timer, and a pending timer schedules an update every turn, so `settle` never goes quiet (100/100
-  turns). Repeat is `client-only`. **Found, not registered:** a Delay with a Duration or an Animate To Value started from Did Mount does
-  the same to every server render.
-- 🔴 **s19's "whose is the stale `cloud-node-library.json`?" is ours:** its other hunks are GAM-001's `Evaluate At Load` and GAM-002's
-  Expression description, never regenerated in s11. Regenerated in s20.
-- 🔴 **A new built-in node owes 14 surfaces** (register-nodes, `nodelibraryexport.ts` picker list, catalog, enrichment, merge, cloud
-  library, docs pages, docLint, CHR-007 snapshot, export ledger + floor pins, HLS-001). The survey said 7 floor pins: **15**.
-- 🔴 **The export of a node with a live value output is a `STREAM_NODES` member, not Delay's shape.** 3 of 19 reverted arms read 0
-  red first (M4, M13, M14); the spec gained a per-frame pending comparison before they went red.
-- 🔴 A catalog-wide behavioural census crashed jest (`RangeError: Invalid string length`, console flood). Probe only the node files
-  that hold a clock, and silence the console.
-- 🔴 `createCorpusGraph` parameters land on the first update; a signal pressed before it reads defaults. Run `graph.update()` first.
-
-_Sessions 17–19's settled / readings / traps blocks were dropped from this file in s22; they are in its git history and in the task files' §8._
+_Sessions 20–21's settled / readings blocks were dropped from this file in s23; they are in its git history and in the task files' §8._
