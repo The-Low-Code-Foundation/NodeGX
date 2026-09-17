@@ -478,8 +478,9 @@ describe.each(['dark', 'light'] as ThemeName[])('the property editor style secti
     expect(onPanel).toBeLessThan(primaryAlone);
     expect(onPanel).toBeGreaterThan(restingAlone);
 
+    // CHR-013 (2026-09-17): dark 4.63 → 5.01 — the obsidian `bg-1` is darker, the blend did not move.
     expect(`has-value boundary ${onPanel.toFixed(2)}:1`).toBe(
-      `has-value boundary ${(theme === 'dark' ? 4.63 : 4.22).toFixed(2)}:1`
+      `has-value boundary ${(theme === 'dark' ? 5.01 : 4.22).toFixed(2)}:1`
     );
   });
 

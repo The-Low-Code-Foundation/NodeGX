@@ -35,8 +35,8 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
  * and a failing Do It is the one thing in this overlay entitled to it.
  */
 const BALLOON_TOKENS: Record<string, ColorSpec> = {
-  surface: { css: '--theme-color-bg-2', fallback: '#2b3440' },
-  border: { css: '--theme-color-border-strong', fallback: '#434e5c' },
+  surface: { css: '--theme-color-bg-2', fallback: '#2e2c36' },
+  border: { css: '--theme-color-border-strong', fallback: '#494656' },
   text: { css: '--theme-color-fg-default', fallback: '#dde4ec' },
   muted: { css: '--theme-color-fg-muted', fallback: '#c4cedb' },
   danger: { css: '--theme-color-danger', fallback: '#f97066' },

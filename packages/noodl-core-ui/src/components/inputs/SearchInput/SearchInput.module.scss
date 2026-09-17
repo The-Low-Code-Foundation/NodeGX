@@ -3,7 +3,8 @@ $_search-bar-height: 45px;
 .Root {
   position: relative;
   display: flex;
-  background-color: var(--theme-color-bg-1);
+  /* CHR-013: `bg-2`, an input on the panel ground — BasePanel moved to `bg-1`, where `bg-1` vanished. */
+  background-color: var(--theme-color-bg-2);
 }
 
 /*

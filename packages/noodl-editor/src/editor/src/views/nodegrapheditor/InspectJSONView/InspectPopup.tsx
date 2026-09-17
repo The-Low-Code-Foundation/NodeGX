@@ -30,9 +30,9 @@ import css from './InspectPopup.module.scss';
  * ------------------------------------------------------------------------- */
 const JSON_THEME_TOKENS = {
   /** Popup surface (ReactJson's own background is forced transparent). */
-  surface: { css: '--theme-color-bg-4', fallback: '#3c4857' },
-  surfaceRaised: { css: '--theme-color-bg-5', fallback: '#414e5e' },
-  border: { css: '--theme-color-border-default', fallback: '#2f3945' },
+  surface: { css: '--theme-color-bg-4', fallback: '#42404e' },
+  surfaceRaised: { css: '--theme-color-bg-5', fallback: '#484555' },
+  border: { css: '--theme-color-border-default', fallback: '#33323d' },
   /** Object/array keys and braces. */
   key: { css: '--theme-color-fg-highlight', fallback: '#ffffff' },
   /** `undefined`, the collapsed-node ellipsis. */

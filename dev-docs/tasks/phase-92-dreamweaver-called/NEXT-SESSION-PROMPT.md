@@ -1,5 +1,13 @@
 # Phase 92 — next session
 
+> **s22 (2026-09-17) addendum — CHR-013 obsidian ✅ closed on Richard's look ("love it").** The dark ramp is
+> obsidian and every `BasePanel` paints `bg-1` (CHR-013). Richard then moved to other work, so **§16's greyed hint
+> was NOT shown to him — it still awaits his look (item "First" below stands).** New open items from s22, in
+> CHR-013 §5: ~15 `bg-1` wells in six rail panels may blend with the new panel ground (look by eye); 28 × React
+> "synchronously unmount" on every project → launcher transition (re-measure on HEAD, then file); one null `value`
+> input warning in the property panel. Readings: `npx jest` 476 suites, 3 palette pins moved on purpose and
+> re-run green (318/318), `colors`/`type` holding. The verdict PNGs for §16 were shot on the OLD palette.
+
 **Written 2026-09-17 at the end of s21.** Richard approved slice 9 and ruled on the count wording and the per-side
 hint. The folded count had a real defect (fixed). An unset per-side border field now shows its inherited value greyed.
 Both are driven and committed, and the greyed hint awaits his look. Branch `cline-dev`. Phase commits:

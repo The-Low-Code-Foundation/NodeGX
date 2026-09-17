@@ -42,8 +42,10 @@
   height: 100%;
   min-height: 0;
 
-  /* Background */
-  background-color: var(--theme-color-bg-2);
+  /* Background — CHR-013 (2026-09-17): `bg-1`, the panel ground, was `bg-2`, the card/input tone.
+     Every panel on this frame read a step lighter than the property panel beside it (whose legacy
+     frames paint `bg-1` over this), which Richard called out on the obsidian palette. */
+  background-color: var(--theme-color-bg-1);
 
   /* 🔴 DSG-008 — the backstop, and it is a backstop rather than the rule.
    *
@@ -180,7 +182,7 @@
     right: 0;
     height: 10px;
     border-radius: 50%;
-    box-shadow: var(--shadow-card) var(--theme-color-bg-2);
+    box-shadow: var(--shadow-card) var(--theme-color-bg-1);
     pointer-events: none;
   }
 }

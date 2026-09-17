@@ -22,12 +22,12 @@ import { ColorSpec, resolveThemeTokens } from '../nodegrapheditor/canvas/CanvasT
 
 const THEME_TOKENS: Record<string, ColorSpec> = {
   /** Workspace ground — the same surface the node canvas uses, so the tab does not jump. */
-  workspace: { css: '--theme-color-bg-0', fallback: '#161c24' },
+  workspace: { css: '--theme-color-bg-0', fallback: '#141318' },
   /** Toolbox tree and flyout sit one step up, like every other panel. */
-  panel: { css: '--theme-color-bg-1', fallback: '#212932' },
+  panel: { css: '--theme-color-bg-1', fallback: '#232129' },
   panelText: { css: '--theme-color-fg-default', fallback: '#dde4ec' },
   /** Grid dots and scrollbars: present, not loud. */
-  subtle: { css: '--theme-color-border-default', fallback: '#2f3945' },
+  subtle: { css: '--theme-color-border-default', fallback: '#33323d' },
   /** Selection and insertion markers use the azure action accent. */
   accent: { css: '--theme-color-primary', fallback: '#4da3ff' }
 };

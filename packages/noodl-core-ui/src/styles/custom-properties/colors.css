@@ -34,14 +34,20 @@
      BASE COLORS
      --------------------------------------------------------------------------- */
 
-  /* Neutrals - cool blue-gray ramp, dark end = elevation steps, light end = text */
-  --base-color-neutral-0: #0e1117;
-  --base-color-neutral-50: #161c24;
-  --base-color-neutral-100: #212932;
-  --base-color-neutral-200: #2b3440;
-  --base-color-neutral-300: #333e4d;
-  --base-color-neutral-400: #3c4857;
-  --base-color-neutral-500: #4a5560;
+  /* Neutrals - dark end = elevation steps, light end = text.
+     🔴 CHR-013 (2026-09-17): the dark end is OBSIDIAN — charcoal with a faint violet lean (hue ~250,
+     sat ~10%). Richard: *"sick of the bluey green grey of the old Noodl editor … something not black,
+     but deep"*. Solved, not eyeballed: each step keeps the ≥1.15 ratio NAT-003 set (a darker ground
+     compresses contrast, so a deeper `bg-1` would have pushed `bg-0` to black — the first attempt did,
+     and was rejected), and the three border literals below were re-placed at their ratios to `bg-1`.
+     The light end (600+) keeps its blue-grey tint; the text inks were not touched. */
+  --base-color-neutral-0: #050506;
+  --base-color-neutral-50: #141318;
+  --base-color-neutral-100: #232129;
+  --base-color-neutral-200: #2e2c36;
+  --base-color-neutral-300: #383642;
+  --base-color-neutral-400: #42404e;
+  --base-color-neutral-500: #4e4c5d;
   --base-color-neutral-600: #7d8a98;
   --base-color-neutral-700: #8b95a1;
   /* NAT-002: a half-step, added because the ramp had no tone between "secondary"
@@ -296,7 +302,7 @@
   --theme-color-bg-2: var(--base-color-neutral-200);
   --theme-color-bg-3: var(--base-color-neutral-300);
   --theme-color-bg-4: var(--base-color-neutral-400);
-  --theme-color-bg-5: #414e5e;
+  --theme-color-bg-5: #484555;
   --theme-color-bg-hover: var(--base-color-white-transparent-10);
 
   /* ---------------------------------------------------------------------------
@@ -525,9 +531,9 @@
      the relationship a reader actually sees. They are still literals — expressing them as ramp
      offsets is a real improvement and a bigger change than this task should make. If the ramp
      moves again, MOVE THESE, and re-run VFN-002. */
-  --theme-color-border-default: #2f3945;
-  --theme-color-border-subtle: #27303e;
-  --theme-color-border-strong: #434e5c;
+  --theme-color-border-default: #33323d;
+  --theme-color-border-subtle: #2a2932;
+  --theme-color-border-strong: #494656;
   /* POL-016. The three above are DIVIDER tones: against bg-1/2/3 they measure
      1.01–1.73:1, which is right for a hairline between two regions and far under
      the 3:1 WCAG 1.4.11 asks of anything that has to be identified as a control.

@@ -1057,9 +1057,9 @@ describe.each(['dark', 'light'] as const)('the %s elevation ramp is a ramp', (th
  */
 describe('the light arm is a different palette from the dark arm', () => {
   it.each([
-    ['--theme-color-bg-0', '#161c24', '#eef1f5'],
-    ['--theme-color-bg-1', '#212932', '#ffffff'],
-    ['--theme-color-bg-4', '#3c4857', '#d9dfe6'],
+    ['--theme-color-bg-0', '#141318', '#eef1f5'],
+    ['--theme-color-bg-1', '#232129', '#ffffff'],
+    ['--theme-color-bg-4', '#42404e', '#d9dfe6'],
     ['--theme-color-fg-highlight', '#ffffff', '#18212b'],
     ['--theme-color-fg-default', '#dde4ec', '#4a5663'],
     ['--theme-color-fg-default-shy', '#c4cedb', '#59626e'],

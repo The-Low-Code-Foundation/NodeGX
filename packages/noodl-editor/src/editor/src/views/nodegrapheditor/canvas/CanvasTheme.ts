@@ -77,15 +77,15 @@ export function resolveThemeTokens<K extends string>(specs: Record<K, ColorSpec>
 const COLOR_SPECS = {
   /* --- Ground ------------------------------------------------------------ */
   /** Canvas ground (also set on `.nodegrapgeditor-bg` in CSS). */
-  ground: { css: '--theme-color-bg-0', fallback: '#161c24' },
+  ground: { css: '--theme-color-bg-0', fallback: '#141318' },
   /** Base colour of the dot grid; alpha is applied in `derive()`. */
   gridDotBase: { css: '--theme-color-fg-highlight', fallback: '#ffffff' },
 
   /* --- Node card ---------------------------------------------------------- */
-  cardBg: { css: '--theme-color-bg-1', fallback: '#212932' },
-  cardBgHover: { css: '--theme-color-bg-2', fallback: '#2b3440' },
-  cardBorder: { css: '--theme-color-border-default', fallback: '#2f3945' },
-  cardBorderHover: { css: '--theme-color-border-strong', fallback: '#434e5c' },
+  cardBg: { css: '--theme-color-bg-1', fallback: '#232129' },
+  cardBgHover: { css: '--theme-color-bg-2', fallback: '#2e2c36' },
+  cardBorder: { css: '--theme-color-border-default', fallback: '#33323d' },
+  cardBorderHover: { css: '--theme-color-border-strong', fallback: '#494656' },
   /** Node name. */
   cardText: { css: '--theme-color-fg-highlight', fallback: '#ffffff' },
   /** Type line. NAT-002: this is TEXT and it measured 3.93:1 on the card, so it takes the raise
@@ -133,7 +133,7 @@ const COLOR_SPECS = {
   annotationChanged: { css: '--theme-color-warning', fallback: '#fdb022' },
   annotationDeleted: { css: '--theme-color-danger', fallback: '#f97066' },
   /** Ink for the +/-/~ glyph inside the corner badge (dark on colour). */
-  annotationBadgeGlyph: { css: '--theme-color-bg-0', fallback: '#161c24' },
+  annotationBadgeGlyph: { css: '--theme-color-bg-0', fallback: '#141318' },
 
   /* --- Editor decorations ------------------------------------------------- */
   /** Connection-drag indicator line + endpoints. */
@@ -145,11 +145,11 @@ const COLOR_SPECS = {
   /** Multi-selection AABB outline. */
   multiselectBox: { css: '--theme-color-fg-default', fallback: '#dde4ec' },
   /** Parent→child hierarchy spine (the mock's `--border-2` spine). */
-  hierarchyLine: { css: '--theme-color-border-strong', fallback: '#434e5c' },
+  hierarchyLine: { css: '--theme-color-border-strong', fallback: '#494656' },
   /** Child insert-location indicator bar. */
   insertIndicator: { css: '--theme-color-primary', fallback: '#4da3ff' },
   /** Dim layer behind a connection drag (painted at 0.6 globalAlpha). */
-  scrim: { css: '--theme-color-bg-page', fallback: '#0e1117' },
+  scrim: { css: '--theme-color-bg-page', fallback: '#050506' },
 
   /* --- Wires -------------------------------------------------------------- */
   wireSignal: { css: '--theme-color-wire-signal', fallback: '#35c3e8' },

@@ -420,8 +420,9 @@ describe.each(['dark', 'light'] as ThemeName[])('the folder tree family in %s', 
     expect(tokenOf(hover!.body, 'border-color')).toBe('--theme-color-danger-dim');
 
     const hoverStep = tokenContrast(theme, '--theme-color-danger-dim', '--theme-color-bg-2');
+    // CHR-013 (2026-09-17): dark 2.61 → 2.84 on the obsidian `bg-2` — better, still under 3, still open.
     expect(`hover boundary ${hoverStep.toFixed(2)}:1`).toBe(
-      `hover boundary ${(theme === 'dark' ? 2.61 : 5.96).toFixed(2)}:1`
+      `hover boundary ${(theme === 'dark' ? 2.84 : 5.96).toFixed(2)}:1`
     );
   });
 

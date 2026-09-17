@@ -153,6 +153,12 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
 | [CHR-009](./CHR-009-THE-PANEL-DESIGNED.md) | The mockup, built: one label column, one control height, units in the field, gutter dot, paired rows, a real chevron (R6, R7) | mockup | CHR-002, CHR-003, CHR-004, CHR-008 |
 | [CHR-010](./CHR-010-THE-LAST-ICON-FONT.md) | The 22 Font Awesome glyphs become `Icon`; the FA stylesheet is unlinked; the text-glyph chevron goes | audit §4 | CHR-008 |
 
+### Track C — the palette
+
+| id | task | source | depends on |
+|---|---|---|---|
+| [CHR-013](./CHR-013-OBSIDIAN.md) ✅ | **Richard: "love it" (s22).** The dark ramp is obsidian (charcoal, faint violet), solved to keep NAT-003's 1.15 step bar; every `BasePanel` paints `bg-1` like the property panel. Open: ~15 `bg-1` wells in six panels to check by eye; 28 unmount errors on project → launcher (§5) | Richard, 2026-09-17 | — |
+
 ### The verdict
 
 | id | task | source | depends on |
