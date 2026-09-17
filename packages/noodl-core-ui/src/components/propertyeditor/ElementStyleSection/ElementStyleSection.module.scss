@@ -4,8 +4,9 @@
  *
  * CHR-009 §2 (s23): `Preset` and `Size` are rows of the panel's label column, drawn like the `Variant` and `State`
  * rows around them (`variantseditor.css` `.panel-head-row`). The grey uppercase "Style" band and the divider under it
- * are gone. The section still paints no fill: `border-sweep/style-section-control-borders` grades its controls against
- * the `.sidebar-panel` ground behind it.
+ * are gone. The section still paints no fill, so its controls are graded against the ground behind it — since CHR-004
+ * (2026-09-17) by `scripts/look-gate/` on the rendered panel, which walks to whatever actually paints instead of
+ * asserting that the elements in between paint nothing. `border-sweep/style-section-control-borders` is retired.
  */
 
 .ElementStyleSection {

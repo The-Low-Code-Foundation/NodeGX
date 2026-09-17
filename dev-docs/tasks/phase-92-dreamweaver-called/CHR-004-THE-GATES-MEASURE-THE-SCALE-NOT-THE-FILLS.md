@@ -167,15 +167,78 @@ Every one of them passed the 37 unit specs and would have been reported as a pro
 4. **A genuine 4.4968:1 printed as `4.50:1 — < 4.5:1`**, which reads as a gate bug rather than a
    marginal fail. Contrast now prints three decimals.
 
-### 6.5 What is left
+### 6.5 🔴 The retirement nearly lost coverage the replacement did not have
 
-- **AC3 / AC4 — retiring the eight `*-control-borders` specs and the four class-name ones — is NOT
-  started, on purpose.** The gate has been driven against **one** surface (the launcher) on **one**
-  build (0.2.4). Retiring a pinned test before its replacement has covered the same surface on HEAD
-  would be trading a gate that works for one that has not been shown to.
-- **AC5 needs CI.** The judgement half already runs in CI (`test:main` → `tests-unit/chr-004`). The
-  rendered half needs a decision — it is a drive, and CI has a renderer only inside `test:ci`.
-  **That is a ruling, not an implementation detail**; it is in the handoff.
+I had put AC3/AC4 off, and Richard ruled **"delete them now."** Acting on that immediately would
+have been wrong, and reading the specs first is what caught it:
+
+**They grade the STATES.** `it('🔴 no state of it moves the edge below 3:1 on EITHER side')` appears
+in four of the six, and they can make that claim from CSS text because `:hover` is *written* in the
+stylesheet. A gate that reads computed styles sees only the state the surface is sitting in. Deleting
+them against a resting-only gate would have traded a broad claim for a narrower one without saying so.
+
+So the gate learned the states first, with Chromium's own `CSS.forcePseudoState` — the mechanism
+DevTools' `:hov` panel uses, so the state graded is the one the cascade really produces:
+
+```bash
+NOODL_REMOTE_DEBUG_PORT=9333 node scripts/look-gate/run.js --surface=launcher --theme=both --state=all
+```
+
+`rest, hover, focus, active`, forcing on every control in the surface, and **forcing zero nodes is a
+failure, not a pass** — a selector matching nothing would otherwise report the resting state as hover.
+
+🔴 **The first reading looked like a dead instrument and was not.** All four states returned 19
+findings over 149 readings — identical. The probe that settled it: a forced hover moves
+`LauncherButton`'s fill `rgb(43,52,64)` → `rgb(51,62,77)` and back on release, so the forcing works;
+0.2.4's hover states simply do not break the ruling, and the findings that *are* there (radius,
+font-size, a folder-tree text pair) are state-independent. ✅ **Positive control, armed live:** a
+`:hover`-only failure is **invisible at rest** (19 findings, none about a button) and **caught under
+hover** (27 findings, 8 `text-contrast` naming each button). An identical reading across arms is only
+believable next to an arm that differs.
+
+### 6.6 AC3 / AC4 — what was retired, and the numbers
+
+**Six specs deleted** (2,715 lines, 44 `it()` blocks, 93 `expect(`): the four launcher slices
+(`launcher-`, `launcher-button-`, `folder-tree-`, `learner-path-control-borders`),
+`style-section-control-borders`, and `fb-005/template-shelf-control-borders` — exactly the six §3.1
+names. `tests-unit/border-sweep/README.md` records what moved where and why.
+
+**Kept:** `bench-`, `code-editor-` and `node-picker-control-borders` cover surfaces this phase does
+not redesign and the gate has not been pointed at. Same shape, same limitation — retire each when
+the gate has covered its surface. Plus §3.4's palette gates (`nat-001`, `nat-003`, `def-001`), which
+gate the palette rather than the look.
+
+**Three stale source comments fixed**, each naming a deleted spec as its grader: `LauncherCard`,
+`ElementStyleSection` and `VariantSelector` `.module.scss`. ⚠️ §2's audit also quotes
+`LauncherButton.module.scss:54-58` — that file no longer exists in source at all; **CHR-005 deleted
+the component**, and only build artefacts still mention it.
+
+| reading | before | after |
+|---|---|---|
+| `npx jest tests-unit` | 471 suites / 7,630 tests | **465 / 7,483**, exit **0** |
+| the four class-name specs' `expect(` (AC4) | 18 / 24 / 24 / 36 | **unchanged — §3.3 not done** |
+| specs resolving tokens out of a stylesheet | 18 | **12** |
+| AC3's grep **verbatim** | 3 | **3** |
+
+🔴 **AC3 is unmeasurable as written.** `grep -rl "readFileSync.*\.s\?css" tests-unit/` returns
+**three** files — and returned three *before* this session too, because the retired specs read CSS
+through a helper (`support/themeTokens.ts`), not with a `readFileSync` on the same line. Its
+"down from 28" was never what that grep counted. The population that answers the question is "specs
+that resolve a token out of a stylesheet", and it went **18 → 12**, of which 5 are other tasks'
+surfaces, 3 are the kept border-sweep files, 3 are the palette gates §3.4 says to keep, and 1 is the
+helper itself.
+
+### 6.7 What is left
+
+- **§3.3 — the class-name assertions — NOT done.** `groupHeading`, `portHint`, `bindingChipRows` and
+  `nodeCommentRow` still assert class names, and `PropertyPanelInput.module.scss`'s
+  `:global(.sidebar-property-editor)` hook is still there. It is a source change inside the property
+  panel, which a peer is refactoring next door, and it cannot be driven this session. AC4's counts
+  are therefore recorded as unchanged rather than as met.
+- **AC5's CI half: ruled.** Richard, 2026-09-17: the rendered gate stays a **hand-run check**, taken
+  each session before work is shown to him, rather than being wired into CI. The judgement half runs
+  in CI on every PR via `test:main` and stays there.
+- **A HEAD run is still owed** — everything measured so far is packaged 0.2.4.
 - **`icon-contrast.js` and `deploy-from-disk.cjs` still carry their own copy of the formula.**
-  Neither can be run without a live editor / a deploy, and rewiring an untestable script is how you
-  ship a broken tool. Owed, with a note.
+  Neither runs without a live editor / a deploy, and rewiring an untestable script is how you ship a
+  broken tool. Owed, with a note.

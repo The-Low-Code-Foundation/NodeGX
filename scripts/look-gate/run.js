@@ -81,12 +81,6 @@ function collectorExpression(rootSelector, options) {
 }
 
 /**
- * Put the document in `theme` and wait for the cascade.
- *
- * 🔴 A write is invisible in the SAME eval — the tokens the new theme brings are not resolved
- * until the next task. Two evals with a frame between them, always.
- */
-/**
  * The reverted arm, as a facility rather than a one-off script.
  *
  * Every acceptance claim this gate makes is of the form "it stays green when X moves and reddens
@@ -115,6 +109,44 @@ async function disarm(client) {
   await sleep(120);
 }
 
+/**
+ * Force a pseudo-state on every control in the surface, so the gate can grade the states a person
+ * puts a control into rather than only the one it is sitting in.
+ *
+ * 🔴 This is what makes the gate a replacement rather than a subset. The `*-control-borders`
+ * specs it retires assert *"no state of it moves the edge below 3:1 on EITHER side"*, and they
+ * could make that claim from CSS text because hover is written in the stylesheet. A gate that
+ * reads computed styles sees only the resting state unless it asks for the others — so it asks.
+ * `CSS.forcePseudoState` is Chromium's own mechanism (it is what DevTools' `:hov` panel uses),
+ * which means the state being graded is the one the cascade actually produces, not a guess at it.
+ *
+ * Returns how many nodes were forced: **zero is a failure, not a pass** — a selector that matched
+ * nothing would otherwise report the resting state as though it were hover.
+ */
+async function forceState(client, rootSelector, states) {
+  await client.send('DOM.enable');
+  await client.send('CSS.enable');
+  const { root } = await client.send('DOM.getDocument', {});
+  const { nodeId: rootNode } = await client.send('DOM.querySelector', { nodeId: root.nodeId, selector: rootSelector });
+  if (!rootNode) throw new Error(`Look gate: no element matches ${rootSelector} (forcing ${states.join('+') || 'none'})`);
+
+  const { nodeIds } = await client.send('DOM.querySelectorAll', { nodeId: rootNode, selector: CONTROLS });
+  for (const nodeId of nodeIds) {
+    await client.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: states });
+  }
+  await sleep(80);
+  return nodeIds;
+}
+
+/** Must match `collect.js`'s CONTROL_SELECTOR — these are the elements NAT-001 rules the edge of. */
+const CONTROLS = require('./lib/collect').CONTROL_SELECTOR;
+
+/**
+ * Put the document in `theme` and wait for the cascade.
+ *
+ * 🔴 A write is invisible in the SAME eval — the tokens the new theme brings are not resolved
+ * until the next task. Two evals with a frame between them, always.
+ */
 async function setTheme(client, theme) {
   await evaluate(client, `document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)})`);
   await sleep(120);
@@ -122,11 +154,14 @@ async function setTheme(client, theme) {
   if (applied !== theme) throw new Error(`Theme did not apply: asked for ${theme}, document says ${applied}`);
 }
 
-function report(surfaceName, reading, result) {
+function report(surfaceName, reading, result, state) {
   const summary = summarise(result);
   const { population } = result;
 
-  console.log(`\n── ${surfaceName} · ${reading.theme || 'default'} · ${reading.viewport.join('×')} ──`);
+  console.log(
+    `\n── ${surfaceName} · ${reading.theme || 'default'} · ${state || 'rest'}` +
+      `${population.meta.forcedOn ? ` (forced on ${population.meta.forcedOn})` : ''} · ${reading.viewport.join('×')} ──`
+  );
   console.log(summary.line);
   console.log(
     `   scales: font ${population.scales.fontSizes.join('/')}  radius ${population.scales.radii.join('/')}`
@@ -154,6 +189,10 @@ async function main() {
   const surfaceName = opt('surface', 'property-panel');
   const surface = SURFACES[surfaceName] || { root: opt('root', surfaceName), target: opt('target', 'editor') };
   const themes = opt('theme', 'current') === 'both' ? ['dark', 'light'] : [opt('theme', 'current')];
+  // `rest` is the state a surface is sitting in; the others are forced with `CSS.forcePseudoState`.
+  // `--state=all` is what a retirement claim needs — the specs this replaces assert that NO state
+  // drops an edge below 3:1, and a resting-only reading cannot make that claim.
+  const states = opt('state', 'rest') === 'all' ? ['rest', 'hover', 'focus', 'active'] : opt('state', 'rest').split(',');
   const jsonPath = opt('json', '');
 
   const scales = scalesFromDisk();
@@ -169,13 +208,29 @@ async function main() {
     }
     for (const theme of themes) {
       if (theme !== 'current') await setTheme(client, theme);
-      const raw = await evaluate(client, collectorExpression(surface.root, { includeUnreachable: false }));
-      const reading = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      const result = auditElements(reading.records, {
-        scales,
-        meta: { surface: surfaceName, root: surface.root, theme: reading.theme, viewport: reading.viewport }
-      });
-      readings.push({ reading, result, summary: report(surfaceName, reading, result) });
+      for (const state of states) {
+        const forced = state === 'rest' ? [] : state.split('+');
+        const nodes = await forceState(client, surface.root, forced);
+        if (forced.length && !nodes.length) {
+          throw new Error(`Look gate: nothing to force ${state} on inside ${surface.root} — the ${state} reading would be the resting one`);
+        }
+
+        const raw = await evaluate(client, collectorExpression(surface.root, { includeUnreachable: false }));
+        const reading = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        const result = auditElements(reading.records, {
+          scales,
+          meta: {
+            surface: surfaceName,
+            root: surface.root,
+            theme: reading.theme,
+            viewport: reading.viewport,
+            state,
+            forcedOn: nodes.length
+          }
+        });
+        readings.push({ reading, result, summary: report(surfaceName, reading, result, state) });
+      }
+      await forceState(client, surface.root, []);
     }
   } finally {
     if (armPath) await disarm(client);

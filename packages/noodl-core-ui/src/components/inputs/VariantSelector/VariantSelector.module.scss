@@ -42,7 +42,8 @@
   /* CHR-009 s24, Richard: the four head rows (`Variant · Preset · Size · State`) share ONE edge, the dimmer
      one — `.panel-head-row-field`'s bg-2 fill, `border-default` edge and `border-strong` hover. Was the
      Phase-75 sweep's `border-control` on `bg-3` (≥3:1), which drew these two brighter than their neighbours;
-     `style-section-control-borders.test.ts` now grades them as matching the head row instead. */
+     matching the head row is the ruling. CHR-004 retired `style-section-control-borders.test.ts`; the fills and
+     edges here are now read off the rendered panel by `scripts/look-gate/`, in every state. */
   background: var(--theme-color-bg-2);
   color: var(--theme-color-fg-default);
   border: 1px solid var(--theme-color-border-default);

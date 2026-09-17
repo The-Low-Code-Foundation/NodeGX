@@ -11,8 +11,10 @@ by 39 specs in `tests-unit/chr-004/` (in CI today via `test:main`), 10 mutants o
 person sentence is **proved on a running build**: moving every `LauncherButton` fill one token step
 with the ink intact produced a finding set *byte-identical* to the unarmed baseline (19 = 19, same
 rules, elements and values), and moving it to a failing colour produced 8 new `text-contrast`
-findings naming each button. AC3 and AC4 — retiring the pinned specs — are deliberately **not**
-started: see §2.
+findings naming each button. Then Richard ruled **"delete them now"**, and the six colour-pinning
+`*-control-borders` specs are **gone** — but not before the gate learned to force `hover`/`focus`/
+`active`, because those specs asserted *"no state of it moves the edge below 3:1"* and a resting-only
+gate could not have made that claim (§6.5).
 
 ⚠️ Peers work in this checkout: **P88 / GAM** (`viewer-react/src/nodes/controls/*`, `templates/*`)
 and **P93** (`ComponentsPanelNew/*` — a live refactor with STAGED deletions in the shared index).
@@ -23,10 +25,10 @@ Commit through a temp index; `git commit -- <paths>` would sweep their work.
 | id | state |
 |---|---|
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
-| CHR-007 | ✅ built s4, invisible by design. 🔴 its snapshot is RED right now — not ours, see §4 |
+| CHR-007 | ✅ built s4, invisible by design. Its snapshot went red on a P88 port mid-session; **they fixed it** |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
 | CHR-009 the panel designed | ✅ **AC1 WORTHY (s29)**. Left: **AC5 only** — the gate now exists; it needs a run against HEAD over §3.6's node set, plus a `test:ci` |
-| **CHR-004 the gates measure the scale** | 🟡 **gate BUILT + DRIVEN (s30)**. AC1 ✅ / AC2 ✅ (live arms, §6.3). Left: AC3, AC4, AC5 |
+| **CHR-004 the gates measure the scale** | 🟡 **gate BUILT + DRIVEN, six specs RETIRED (s30)**. AC1 ✅ AC2 ✅ AC3 ✅ AC5's CI half RULED. Left: **AC4/§3.3** (class-name assertions) and a HEAD run |
 | CHR-010, 011 | ⬜ |
 
 ## What to do next, in order
@@ -36,22 +38,23 @@ Commit through a temp index; `git commit -- <paths>` would sweep their work.
    `NOODL_REMOTE_DEBUG_PORT=9333 node scripts/look-gate/run.js --surface=property-panel --theme=both --json=…`
    🔴 Everything measured so far is about **packaged 0.2.4**, which predates CHR-003, CHR-005 and
    CHR-009. Those findings are the gate working, not a defect list for HEAD.
-2. **Then, and only then, AC3/AC4** — retire the eight `*-control-borders` specs and the four
-   class-name ones. The order matters: a pinned test retired before its replacement has covered the
-   same surface on HEAD trades a gate that works for one that has not been shown to. Count the
-   `expect(` lines before and after, as AC4 asks.
+2. **§3.3 — the class-name assertions**, the one piece of AC3/AC4 left. `groupHeading`, `portHint`,
+   `bindingChipRows` and `nodeCommentRow` keep every behavioural assertion and lose the class-name
+   ones; `PropertyPanelInput.module.scss`'s `:global(.sidebar-property-editor)` hook goes with them.
+   Not done in s30 because it is a source change inside the property panel — which P93 is
+   refactoring next door — and it could not be driven. Count the `expect(` lines before and after
+   (they are recorded unchanged at 18 / 24 / 24 / 36 in CHR-004 §6.6).
 3. A **`test:ci`** when no peer holds the box — the last one was s10 (at the floor, 2,984/8, seed
    53977). CHR-009 AC5 needs it.
 4. Then **CHR-010** (the last icon font) and **CHR-011** (re-runs CHR-001's instruments UNCHANGED).
 
 ## Still Richard's
 
-1. **Where the rendered gate runs, if anywhere, in CI.** It needs a running editor, and the only
-   renderer CI has is `test:ci` (xvfb + Electron, already near its 900 s ceiling and timed out three
-   times in August). Asked at the end of s30 — the answer decides AC5 and nothing else in the task
-   waits on it.
-2. The Projects tab's two full-width cards (BST-003 / UNI-001).
-3. Whether CHR-008's §3.1 widget conversions resume after CHR-009, or only where a region needs one.
+1. The Projects tab's two full-width cards (BST-003 / UNI-001).
+2. Whether CHR-008's §3.1 widget conversions resume after CHR-009, or only where a region needs one.
+3. **RULED in s30:** the look gate stays a **hand-run check** taken each session before work is shown
+   to Richard, NOT wired into CI (its judgement half does run in CI via `test:main`); and the six
+   colour-pinning specs were to be **deleted now**, which they were.
 4. `···` menu DECLINED; CHR-007 AC4's `_portsHash` clause DECLINED; §3.4 closed by position (s20);
    the docked bound edge's `S…` left as-is (s28); the switch's colours and a 4px option in a 6px
    track ALLOWED (s24).
@@ -63,7 +66,14 @@ Commit through a temp index; `git commit -- <paths>` would sweep their work.
   browser anywhere in the repo (no puppeteer, no playwright; `jsdom` is transitive and its
   `getComputedStyle` does not resolve custom properties, which is every colour here). The only
   renderer in CI is `test:ci` under `xvfb-run` (`pr.yml:132`). ⇒ the gate is a **drive** whose
-  judgement half is unit-graded, which is why §2's order above puts a HEAD run before any retirement.
+  judgement half is unit-graded — and Richard has now ruled that it stays a hand-run check.
+- 🔴 **AC3 is unmeasurable as written.** Its grep (`readFileSync.*\.s\?css`) returns **three** files
+  and returned three before this session too: the retired specs read CSS through `support/themeTokens.ts`,
+  not with a `readFileSync` on the same line, so "down from 28" was never what that grep counted. The
+  population that answers the question — specs that resolve a token out of a stylesheet — went **18 → 12**.
+- ✅ **The gate covers the STATES**, with Chromium's `CSS.forcePseudoState` (`--state=all`). Forcing
+  zero nodes is a failure, not a pass. Positive control: a `:hover`-only failure is invisible at rest
+  and caught under hover (19 → 27 findings, 8 naming each button).
 - ✅ **One home for the contrast formula.** It had four (`themeTokens.ts`, `icon-contrast.js`,
   `deploy-from-disk.cjs`, `CanvasTheme.ts`) and this would have been a fifth.
   `scripts/look-gate/lib/color.js` is it; `themeTokens.ts` re-exports, public API unchanged, and the
@@ -77,21 +87,29 @@ Commit through a temp index; `git commit -- <paths>` would sweep their work.
 
 ## Readings at the end of s30 (2026-09-17)
 
-`npx jest tests-unit` (the 471-suite runner, plain Node): **470 passed / 471, 7,629 / 7,630 tests**.
-The single red is **`tests-unit/chr-007/widgetDispatch.test.ts`** and it is **not this session's**:
-the diff is one added port, `keepsFocus: BooleanType`, which arrived in `238c455e9`
-*(feat(p88/gam-027): a Button can be told to leave the keyboard where it was)*. CHR-007's
-characterisation snapshot has to be regenerated by whoever adds a port; regenerating another task's
-snapshot from here would be a wholesale write over a shared artefact. **P88 was told and has since
-regenerated it** with the spec's own `CHR007_WRITE_SNAPSHOT=1`, one added line, chr-007 green — so
-the suite should read 471/471 next session. Their note, worth keeping: adding a port to the catalog
-is a thing CHR-007 notices **by design**, and the snapshot's history shows GAM-013 and GAM-011b each
-regenerating it for the same reason. **Add the port, then run `test:main`, in that order.**
-`npm run typecheck:editor-tests` **clean**. `tests-unit/chr-004` **39 / 39**, 10 mutants 10 red.
-`test:ci` **not run** (owed). Packaged instance torn down; 9333 / 8674 free.
+**Final: `npx jest tests-unit` = 465 suites / 7,483 tests, ALL PASSING, real exit 0.** (Was 471 /
+7,630 before the six retirements: −6 suites, −147 tests.) `npm run typecheck:editor-tests` **clean**.
+`tests-unit/chr-004` **39 / 39**, 10 mutants 10 red. `test:ci` **not run** (owed).
+Packaged instance torn down; 9333 / 8674 free.
+
+Mid-session `tests-unit` read 470 / 471: **`tests-unit/chr-007/widgetDispatch.test.ts`**, one added
+port `keepsFocus: BooleanType` from P88's `238c455e9`. Not this session's, and **P88 fixed it** with
+the spec's own `CHR007_WRITE_SNAPSHOT=1`. Their note, worth keeping: a new catalog port reddening
+CHR-007 is **by design**, and the snapshot's history shows GAM-013 and GAM-011b regenerating it for
+the same reason — **add the port, then run `test:main`, in that order.**
 
 ## Traps (s12–s30)
 
+- 🔴 **Before retiring a test, read what it ASSERTS, not what it is filed under.** The six retired
+  here looked like fill pins and four of them also graded every `:hover`/`:focus` state. The gate
+  gained `--state=all` before they went, not after.
+- 🔴 **An identical reading across arms is only believable next to an arm that differs** (s30: all
+  four forced states returned the same 19 findings, which looked exactly like forcing that had not
+  taken; a probe showed the fill moving `rgb(43,52,64)` → `rgb(51,62,77)` under forced hover, and a
+  hover-only arm reddened 8 buttons).
+- 🔴 **`git rm` stages into the SHARED index.** `git reset -q HEAD -- <paths>` puts it back (the
+  files stay deleted on disk). Also: the shared index can be STALE against your own commit, so it
+  reads as a staged revert of your work — reset your paths after committing through a temp index.
 - 🔴 **A pipe eats the exit code.** `npx jest … | tail -8; echo "EXIT=$?"` logged `JEST_EXIT=0` over
   a run with a failing suite — `$?` was `tail`'s. Capture the status before piping, and gate on it.
 - 🔴 **The first drive of a new instrument finds instrument faults, not product defects** (s30: four

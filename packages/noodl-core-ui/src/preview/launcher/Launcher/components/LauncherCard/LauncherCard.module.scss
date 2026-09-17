@@ -4,7 +4,10 @@
  * The card's edge keeps the tones `LauncherProjectCard` measured (POL-016): it is a `role="button"`,
  * so the resting edge is the CONTROL tone — 4.17 dark / 3.72 light on its bg-1 fill, 4.86 / 3.28 on
  * the bg-0 page — and the hover moves it to `primary` (5.60 / 4.57) rather than to a divider.
- * `tests-unit/border-sweep/launcher-control-borders` reads `.Card` from this file.
+ * CHR-004 (2026-09-17) retired `tests-unit/border-sweep/launcher-control-borders`, which read `.Card`
+ * out of this file and pinned the tone by name. The numbers above are still ruled — they are now
+ * measured on the rendered card, in every state, by `scripts/look-gate/` (`--surface=launcher
+ * --state=all`), which does not care which token delivers them.
  */
 
 .Grid {
