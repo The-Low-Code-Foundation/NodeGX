@@ -1,0 +1,44 @@
+/* CHR-009 slice 11: the icon row's control is a field of the label column — the 26px `.panel-head-row-field` pair
+   (bg-2, `border-default`, radius-md, `border-strong` hover). Was a 33x32 `bg-3` square drawing a white glyph, which
+   vanished on the light theme's fill. */
+
+.IconField {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--theme-color-border-strong);
+  }
+}
+
+.Glyph {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  color: var(--theme-color-fg-default);
+}
+
+.Name {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.is-placeholder {
+  color: var(--theme-color-fg-disabled);
+}
