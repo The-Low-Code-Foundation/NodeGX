@@ -1373,9 +1373,24 @@ removed and the backup restored before any editor launched. Then a peer `test:ci
 - `MarginPaddingType.connections()` has the same shape as slice 14's `AlignToolsType.connections()`, and the view's reset
   skips wired edges. `connectedRowPolicy.ts`: `MarginPaddingType` exception → **chip** (chips 18, exceptions 3).
 
-### 23.3 Driven — `set/drive-s28.js` → `s28/s28-results.json`
+### 23.3 Driven — `set/drive-s28.js` → `s28/s28-results.json`, dev build, dark, docked 312 and wide 736
 
-PENDING.
+The stack ran on a **private profile** (`NOODL_USER_DATA_DIR` in the scratchpad, seeded with `firstRunLegal.json` and a
+one-row recents file). Richard's recents were never written: sha `a1ea46f2` after the run. Before launching, I waited
+~35 min for a peer's `dev:debug` to exit: my launch's `reapPreviousSession()` sweep would have killed it.
+
+Group `chr009-set-group`, String `chr009-s27-src` `savedValue` → `paddingLeft`. Identical docked and wide except widths:
+- **Before:** Margin `↕ ↔`, Padding `↕ ↔`, expanders free, rows 32.
+- **Live, no reselect: bound within 5 s.** Padding shows `↑ ↓ ← →`: `padding-left` `data-bound`, **no input**, text
+  `String · Value`, title `Left padding. This input is driven by String · Value. The value you typed is used only while the
+  connection hasn't sent anything.` Top, bottom and right keep inputs. Expander `disabled`, `aria-expanded=true`, forced title.
+  Row 62. **Margin (the control) stays `↕ ↔`, 32, expander free.** After a reselect, the same.
+- **Typing `7` + Enter into `↑`** while left is wired stores `{value: 7, unit: 'px'}`, and the reset dot then lights for it.
+- **Clicking the bound field selects `chr009-s27-src`.**
+- **After `removeConnection` + reselect:** Padding back to `↕ ↔` (the expander was never set), `↕` reads mixed
+  `Top 7px · Bottom 0px`, expander free. `paddingTop` restored to `undefined` at the end.
+- **Cut:** docked, the source is cut at 61px (`← 🔗 S…` in the PNG); wide (273px), it is not. PNGs `s28/padding-before-docked-dark.png`,
+  `s28/padding-wired-{docked,wide}-dark.png`, looked at: fill and ink match the row chip, 26px, on the label column.
 
 ### 23.4 Gates (2026-09-17)
 
@@ -1385,6 +1400,15 @@ PENDING.
   ("a wired edge splits its side"); **M2** `resettable` keeps wired ⇒ 1 / 23 ("…no reset dot…"); **M3** the view's reset
   keeps wired ⇒ 1 / 23 ("the view's reset leaves a wired edge's stored value alone").
 - `tsc --noEmit -p tsconfig.json` (editor) **EXIT 0**. `npm run colors`, `npm run type` **holding**; `tokens:css` ✓.
+- Plain `npx jest` (editor, stack down, after the drive): **487 suites / 7,841 tests, EXIT 0**. `test:ci` **not run**.
 - ⚠️ `boundEdge.test.tsx` first **failed to run** (the `NumberUnitInput` → `.svg` chain), not failed. It needed the same
   resolution mocks as `marginPaddingRows.test.ts`.
+- `dev.out`: 0 `ERROR in`. Stack stopped (26 processes), `dev:stop --list` empty.
+
+### 23.5 Left
+
+- **Richard:** slice 15 as drawn, and specifically **the docked bound edge reads `S…`**: the source is in the tooltip only.
+  Same shape as the pair-field token he ruled "leave it" in s27, but here the cut hides *what drives it*, not a value. Options
+  if not "leave it": drop the link glyph (gains ~14px, still `Str…`), or show `🔗` alone docked.
+- AC1 (WORTHY on the Group pair) and R6 final. AC5: CHR-004 + `test:ci`.
 

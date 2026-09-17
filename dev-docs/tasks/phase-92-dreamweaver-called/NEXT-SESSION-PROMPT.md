@@ -1,19 +1,18 @@
 # Phase 92 — next session
 
-**Written 2026-09-17 at the end of s27.** Branch `cline-dev`, commits `git log -- dev-docs/tasks/phase-92-dreamweaver-called`.
+**Written 2026-09-17 at the end of s28.** Branch `cline-dev`, commits `git log -- dev-docs/tasks/phase-92-dreamweaver-called`.
 The platform half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
-s27 in one paragraph: s26's handoff items 1 and 2 are **done** (CHR-009 §22). **Slice 14: a wired align row now draws the
-binding chip** instead of its segments. Each row has been one port since slice 5, so `connectedRowPolicy`'s "no single
-port" exception had gone stale, and a wired Align X still took presses the wire overwrote. Built, specced + mutant, and
-driven on live, reselect, chip-click and unwire. **Approved by Richard.** §14.3's opacity `''` is **by design**
-(`colorpicker.ts:121` + `placeholder="100%"`, since PLAT-002), and the drive read it as a greyed `100%`. **A token in a
-pair field cuts to `--sp…` docked (needs 69px, has 43) and fits at wide.** No label trim fits; Richard ruled **leave it**.
-Slice 13 approved too ("They all look good").
+s28 in one paragraph: s27's item 1 is **done** (CHR-009 §23). **The code answered the measurement:** `MarginPaddingType` and
+`MarginPaddingInput` never read a connection, so a wired margin/padding edge kept an editable, scrubbable field in its pair
+and expanded. That is FB-018's bug in a third control. **Slice 15:** any wired edge forces its side to per-edge fields. The wired
+edge draws a `BoundField` (edge glyph, link glyph, source in mono, chip paint, precedence sentence in the tooltip, click to
+navigate). The other edges stay editable, and reset and the changed dot skip wired edges. Policy `MarginPaddingType` → chip.
+Specced (+9), 3 mutants killed, driven live/reselect/type/click/unwire docked and wide. **Not yet approved:** PNGs opened
+in Preview for Richard; docked the source cuts to `S…`.
 
 ⚠️ Peers work in this checkout: **P88** (`validation/*`, `noodl-mcp/*`, `templates/*`, `library/*`, `nodegx-backend/*`,
-`noodl-runtime/*`) and **P93** (`VisualCanvas/*`, TVW-003). In s27 **a peer launched `dev:debug` (ports 9444/8680) between my
-`ps` and my recents seed, then ran `test:ci`**. Commit by pathspec. **Run `ps` in the SAME command that seeds recents.**
+`noodl-runtime/*`) and **P93** (`VisualCanvas/*`). Commit by pathspec.
 
 ## The board, re-derived from the task files
 
@@ -22,29 +21,29 @@ Slice 13 approved too ("They all look good").
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slices 1–14 approved (13+14 in s27: "They all look good"). AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Left: §22.5 |
+| **CHR-009 the panel designed** | 🟡 slices 1–14 approved; **slice 15 built + driven, awaiting Richard**. AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Left: §23.5 |
 | CHR-004, 010, 011 | ⬜ |
 
 ## What to do next, in order
 
-0. ✅ Done in s27: Richard approved slices 13 and 14 and read the docked `--sp…` pair field as **leave it** ("They all look
-   good", shown in Preview). Show him pictures with `open -a Preview <paths>`: links and file cards do not reach him.
-1. **A wired margin/padding side** (§22.5 ⚠️): expanded per-edge fields are one port each, but `MarginPaddingType` is still an
-   exception. Measure first with a copy of `drive-s27.js` arm A: wire `String.savedValue` → `paddingLeft`, expand, and read
-   whether the field stays editable. Build a chip only if it does.
-2. When the region list is empty: shoot the Group pair for **AC1** (CHR-001's `props-group-top.png` beside a fresh one) and
-   ask for WORTHY; then **R6 final** with the cut census (`slice13/set-results.json`: docked Group 5/69, Button 1/54; wide
-   Group 4/69, others 0).
+1. **Richard's look at slice 15** (`s28/padding-*-dark.png`, reopen with `open -a Preview`): approve as drawn, and rule
+   the docked `S…` (leave it / drop the link glyph / link glyph alone docked). Build only what he rules.
+2. **The region list is now empty** (§22.5 and §23.5 have no unbuilt region). Shoot the Group pair for **AC1**
+   (CHR-001's `props-group-top.png` beside a fresh one) and ask for WORTHY; then **R6 final** with the cut census
+   (`slice13/set-results.json`: docked Group 5/69, Button 1/54; wide Group 4/69, others 0). Re-run `set/drive-set.js`
+   first (8 node types) because slice 15 is visual. Its fixtures carry no wires, so it will not show a bound field.
+3. Then CHR-004 (the gates), which AC5 needs, and a `test:ci` when no peer holds the box.
 
-## Settled in s27 (and where the handoff was wrong)
+## Settled in s28 (and where the handoff was wrong)
 
-- **"§14.3 opacity `''`: compare against an opaque hex before calling it a defect"**: the code answered it before any drive
-  (`alpha === 1 ? ''`). The drive confirmed the rendered placeholder. Not a defect.
-- **The align-row chip was listed as "small"**, but it was a live FB-018-class defect: a wired alignment port kept clickable
-  segments. The policy table's exception was a reason written for the pre-slice-5 strip, and nothing re-checks a reason.
-- "A token in a pair field ellipsises" is true **docked only**. At wide it fits (273px fields).
+- **"Measure first with a drive"**: the code measured it with no branch to miss (zero connection reads in both files). The
+  drive was spent on the built consequence instead. That is cheaper and grades more.
+- `connectedRowPolicy`'s `MarginPaddingType` reason ("four sides in one control", FB-016) was the second stale reason in two
+  sessions (s27: align rows). **Every exception in that table is now a real one** (the Logic Builder pair and trigger info).
+  The 17 deferred rows were not re-read.
+- A pair field cannot chip one wire, so the design **forces the side open** instead of drawing a chip over a pair.
 
-## Traps (s12–s27)
+## Traps (s12–s28)
 
 - 🔴 **A peer stack can start in the gap between `ps` and the recents write** (s25, again s27). Check and seed in one command.
   If it happens, remove only your entry, then `cp` the backup back **before** their editor launches (`JSON.stringify` changes
@@ -80,19 +79,25 @@ Slice 13 approved too ("They all look good").
   `{retainedProjectDirectory, latestAccessed, id, name:"Story engine"}`, then
   `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 npm run dev:debug` in the background (exit 144 on `dev:stop` is the stop).
   Wait for `:9333/json/version`, run drives with `--expect=<copy>`, `npm run dev:stop`, `cp` the backup back, compare `shasum`.
+- ✅ **s28 recipe, better than the recents seed:** `NOODL_USER_DATA_DIR=<scratch>/profile` (copy `firstRunLegal.json`, write a
+  one-row `recently_opened_project.json`) + `NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333 npm run dev:debug -- --quiet`. Richard's
+  recents are never written, so the peer-launch race above cannot touch them. s28's profile + project copy:
+  `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/e3ba906e-8785-410f-9df9-08288b835f9b/scratchpad/{profile,story-engine}`.
+- 🔴 **Your `dev:debug` REAPS a peer's live stack** (`start.ts` `reapPreviousSession()` sweeps the whole checkout). s28 waited
+  ~35 min for a peer `dev:debug` to exit (`while ps -p <pid>`), then launched with the `ps` check in the same command.
 - One heavy job at a time: stop the stack BEFORE jest, and wait out a peer's jest/`test:ci`.
 
 ## Still Richard's
 
-1. ✅ Slices 13, 14 and the pair-field token: ruled in s27.
-2. —
-3. AC1's WORTHY on the Group pair, when the region list is done. R6 final ("ok so far"; show the cut census).
-4. The `···` menu is DECLINED. CHR-007 AC4 `_portsHash` clause declined. §3.4 closed by position (s20).
-5. The Projects tab's two full-width cards (BST-003 / UNI-001).
-6. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
+1. **Slice 15 as drawn, and the docked `S…` bound edge** (§23.5).
+2. AC1's WORTHY on the Group pair. R6 final ("ok so far"; show the cut census).
+3. The `···` menu is DECLINED. CHR-007 AC4 `_portsHash` clause declined. §3.4 closed by position (s20).
+4. The Projects tab's two full-width cards (BST-003 / UNI-001).
+5. Whether CHR-008's §3.1 conversions resume after CHR-009, or only where a CHR-009 region needs one.
 
-## Readings at the end of s27 (2026-09-17, working tree on `ade2ced58` + slice 14)
+## Readings at the end of s28 (2026-09-17, slice 15 = the commit after `53cc84b90`)
 
-`tsc --noEmit -p tsconfig.json` (editor) **EXIT 0**. Plain `npx jest` (editor, stack down) **483 suites / 7,783 tests, 1 failed**
-(`tests-main/relay-auth` flake; 14/14 alone). `chr-009/alignRows` + `fb-018` 32/32; mutant killed. `colors`/`type` not re-run
-(no CSS changed). `test:ci` **not run**. `dev.out`: 0 `ERROR in`. Recents restored byte-identical (`a1ea46f2`).
+Targeted jest (editor): `chr-009/marginPaddingRows` 23, `chr-009/boundEdge` 3, `fb-018` ×2 → **4 suites, 45/45**. Mutants
+M1–M3 each **1 failed / 23**, restored `cmp`-identical. `tsc --noEmit -p tsconfig.json` **EXIT 0**. `npm run colors` / `type`
+**holding**, `tokens:css` ✓. Plain `npx jest` (editor, stack down) **487 suites / 7,841 tests, EXIT 0**. `test:ci` not run. Drive EXIT 0, `dev.out`
+0 `ERROR in`, stack stopped (26), recents sha `a1ea46f2`.
