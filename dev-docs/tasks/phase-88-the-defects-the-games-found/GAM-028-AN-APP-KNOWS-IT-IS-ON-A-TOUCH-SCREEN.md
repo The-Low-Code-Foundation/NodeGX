@@ -1,6 +1,6 @@
 # GAM-028 — An app knows it is on a touch screen
 
-**Status: ⬜ not started.** Written session 23 (2026-09-17) on Richard's ask, from GAM-011 AC7's record.
+**Status: ⬜ not started, R27 ruled (s24).** Written session 23 (2026-09-17) on Richard's ask, from GAM-011 AC7's record.
 **Source:** GAM-011 AC7 (s23) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md) · **Side:** product
 (runtime, a node or a port that reports the pointer)
 
@@ -41,14 +41,19 @@ only do it by writing a kit node in JavaScript. RKT-008 already put an on/off/au
 
 ## 5. Design
 
-- 🔒 **Ruling for Richard, and it is the whole scope question:** which shape?
+- ✅ **R27 ruled (s24): shape (a), a `Device` node with named boolean outputs.** Plain words, no CSS for the author, and it is the
+  one shape that also carries P41's `prefers-reduced-motion` and a dark-mode fact. It costs a new built-in node's whole surface —
+  GAM-013 §8 counted **14**, plus the export floor pins — and that is the accepted price. (b) and (c) below were declined.
+- 🔒 ~~Ruling for Richard, and it is the whole scope question:~~ which shape? **(ruled: a)**
   - **(a) One node**, working name `Device`, with boolean outputs (`Coarse Pointer`, maybe `Reduced Motion`, `Dark Mode`), each
     updating when the media query changes. Costs a new node's 14 surfaces (GAM-013 §8).
   - **(b) A general `Media Query` node** taking any query string and reporting `Matches`. One node, every future fact, and the
     author has to know CSS.
   - **(c) A port on Text Input only** ("no soft keyboard on a touch screen"), which solves the keypad and nothing else.
 - Whatever lands must update live (a tablet with a mouse attached, a window moved between screens) rather than be read once.
-- 🔒 **Ruling:** what does it report during a server render — `false`, or nothing until the client takes over?
+- ✅ **R27, second half (s24): it reports `false` during a server render**, and the client corrects it on arrival. Not "nothing
+  until the client answers": an output that never arrives is what kept a server render from going quiet in GAM-013 s20. So the
+  server draws the not-touch, not-reduced-motion page, and nothing waits.
 
 ## 6. Acceptance criteria
 

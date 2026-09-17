@@ -46,6 +46,34 @@ const ButtonNode = {
       allowVisualStates: true
     }
   },
+  inputProps: {
+    /**
+     * GAM-027, ruled by Richard (R26, s24): **a port, default off — and on the Button only.**
+     *
+     * A click focuses the button, which is right for a button and wrong for a key on a keypad:
+     * measured in Chromium (GAM-011 s21), typing `123` with the caret after the `1` and then
+     * clicking a `9` key wired to `Insert Text` gives `1923` either way, but a plain click moves
+     * focus to the button and drops the caret at the end — so the next digit the person types on
+     * the real keyboard goes nowhere they are looking. The only escape was cancelling `mousedown`
+     * in a page script, which a graph cannot do.
+     *
+     * ⚠️ **Unset must change nothing**, which is why "a Button never takes the caret from a text
+     * field" was offered and declined: that would be a change to every app ever built. Off is
+     * today's behaviour exactly — the handler is not installed at all (`Button.tsx`).
+     *
+     * Keyboard operation is untouched: Tab still reaches the button, Space and Enter still
+     * activate it, and it still draws GAM-026's focus ring when the keyboard puts focus on it.
+     * Only the pointer's focus side effect is cancelled.
+     */
+    keepsFocus: {
+      type: 'boolean',
+      displayName: 'Keeps Focus',
+      group: 'General',
+      description:
+        'Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into',
+      default: false
+    }
+  },
   outputProps: {
     onClick: {
       displayName: 'Click',

@@ -27,6 +27,8 @@ export interface ButtonProps extends Noodl.ReactProps {
   iconColor: Noodl.Color;
 
   onClick: () => void;
+  /** GAM-027 (R26): leave the keyboard where it was when this button is clicked. Off by default. */
+  keepsFocus: boolean;
 
   children: Slot;
 }
@@ -101,6 +103,32 @@ export function Button(props: ButtonProps) {
     content = _renderIcon();
   }
 
+  /**
+   * GAM-027 (R26, ruled off by default). Focusing the thing you pressed is the **default action**
+   * of `mousedown`, so cancelling that event is the only way to leave the keyboard where it was —
+   * and it is what a keypad key needs: the caret stays in the field, and the next digit typed on
+   * the real keyboard lands where the person is looking.
+   *
+   * 🔴 **Composed, not appended.** FH-015 slice 1 (below) is the standing lesson: a handler written
+   * after the `controlEvents` spread REPLACES the one the spread built, taking `blockTouch`'s
+   * `stopPropagation` and the runtime's dirty-node flush with it. So this wraps the handler that
+   * is already there rather than adding a second `onMouseDown` to the element.
+   *
+   * ⚠️ `mousedown` only. Cancelling `touchstart` would stop the browser synthesising the click
+   * and take scrolling with it, and a tap on a touch screen does not focus a button anyway.
+   *
+   * ⚠️ With the port off, nothing is installed at all — the props are byte-for-byte what they
+   * were, which is what "unset changes nothing" has to mean for a node in every existing app.
+   */
+  const events = Utils.controlEvents(props);
+  if (props.keepsFocus) {
+    const inner = events.onMouseDown;
+    events.onMouseDown = (e: React.MouseEvent) => {
+      e.preventDefault();
+      inner && inner(e);
+    };
+  }
+
   // FH-015 slice 1. There used to be a trailing `onClick={props.onClick}` here, after the
   // `controlEvents` spread. JSX later-wins, so it replaced the handler `pointerProps` had
   // built — which is the one that carries the `blockTouch` `stopPropagation` wrapper and the
@@ -113,7 +141,7 @@ export function Button(props: ButtonProps) {
       ref={noodlRootRef(props.noodlNode)}
       className={className}
       disabled={!props.enabled}
-      {...Utils.controlEvents(props)}
+      {...events}
       type={props.buttonType}
       style={style}
     >

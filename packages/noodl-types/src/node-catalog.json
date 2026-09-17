@@ -40757,6 +40757,18 @@
           "allowVisualStates": true
         },
         {
+          "name": "keepsFocus",
+          "displayName": "Keeps Focus",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into"
+        },
+        {
           "name": "label",
           "displayName": "Label",
           "group": "Label",

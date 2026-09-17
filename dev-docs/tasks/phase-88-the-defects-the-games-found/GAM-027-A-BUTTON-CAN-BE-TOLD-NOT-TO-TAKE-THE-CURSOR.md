@@ -1,6 +1,6 @@
 # GAM-027 — A button can be told not to take the cursor
 
-**Status: ⬜ not started.** Written session 23 (2026-09-17) on Richard's ask, from GAM-011 AC7's record.
+**Status: 🟢 built, session 24 (2026-09-17).** R26 ruled and applied; AC1–AC5 met, AC6 met as a reported refusal, AC7 answered. Written session 23 (2026-09-17) on Richard's ask, from GAM-011 AC7's record.
 **Source:** GAM-011 AC7 (s23) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md)'s answer pad ·
 **Side:** product (viewer controls, Button)
 
@@ -39,10 +39,11 @@ defect, and the only escape today is a custom kit node written in JavaScript.
 
 - A Button port — working name **`Keeps Focus`** (boolean, default **unset = today's behaviour**) — that cancels the pointer-down
   default so the element that had focus keeps it. Unset must change nothing anywhere: this is a defaults-are-sacred change.
-- 🔒 **Ruling for Richard:** is this a port on the Button, or is it what the Button should do **always** when the thing losing focus
-  is a text field? (Always is the behaviour a person expects from a keypad, and it is a change to every existing app.)
-- 🔒 **Ruling for Richard:** does the same port belong on the other controls a pad might use (Checkbox, Radio Button, the whole
-  `-2` set), or is Button enough for the sentence?
+- ✅ **R26 ruled (s24): a `Keeps Focus` port on the Button, default off.** Not "always": unset keeps today's behaviour, so no app
+  ever built changes, and the keypad author ticks one box. The alternative — a clicked Button never taking the caret from a text
+  field — was offered and declined, so *"a click moves focus to the Button"* stays the default everywhere.
+- ✅ **R26, second half (s24): Button only.** The port does not go on the Checkbox, the Radio Button or the rest of the `-2` set;
+  Button is enough for the person sentence. A pad built from other controls is not covered — say so if it comes up.
 - Keyboard operation must not change: Tab still reaches the Button, Space and Enter still activate it, and activating it by key is
   still a click (GAM-010 §8 s21's finding).
 
@@ -71,3 +72,49 @@ defect, and the only escape today is a custom kit node written in JavaScript.
 ## 8. Record
 
 _(empty — nothing built yet)_
+
+## 8. Record
+
+### Session 24 (2026-09-17) — built, over `19b3517d3`
+
+**R26 ruled by Richard: a `Keeps Focus` port on the Button, default off, Button only.** The alternative — a clicked Button never
+taking the caret from a text field — was offered and declined, so *"a click moves focus to the button"* stays the default in every
+app ever built. The other `-2` controls do **not** get the port: a pad built from Checkboxes is not covered.
+
+**The fix.** Focusing the pressed element is the **default action** of `mousedown`, so the whole of it is cancelling that event:
+`Button.tsx` wraps the handler `Utils.controlEvents` already built and calls `preventDefault()` before it. Composed, not appended —
+FH-015 slice 1 is the standing lesson that a handler written after the spread *replaces* the one the spread made, taking
+`blockTouch`'s `stopPropagation` and the runtime's dirty-node flush with it. With the port off nothing is installed at all.
+⚠️ `mousedown` only: cancelling `touchstart` would stop the browser synthesising the click and take scrolling with it, and a tap
+on a touch screen does not focus a button anyway.
+
+🔴 **jsdom cannot grade the person sentence, and saying so is half this task's instrument.** Measured before the spec was written:
+with an `<input>` focused, dispatching `mousedown` on a `<button>` — and calling `.click()` — leaves `document.activeElement` on
+the input and `defaultPrevented` false. An arm there asserting "focus moved to the button" reads **identically in both arms and
+grades nothing**. So the split is: the **spec** grades the mechanism (is the press cancelled, and does cancelling cost the graph a
+signal), and the **browser** grades the consequence (the caret stays, the next typed digit lands).
+
+| reading | result |
+|---|---|
+| AC1/AC4 spec, `tests/gam-027-a-button-can-keep-the-cursor.test.tsx` | **8/8**: unset leaves the press uncancelled, on cancels it, the port is off by default, and `Click` and `Pointer Down` each fire exactly once **in both arms** |
+| AC5 reverted arm: the cancel removed from `Button.tsx` | **1 red, and the right one** — only the "Keeps Focus on" row |
+| AC2, deployed keypad, 1024×768 **and** 390×844 | **ALL PASS at both.** Key `7` (on): `12` → `192`, caret **2**, the field still has the keyboard, and a `5` typed on the real keyboard gives **`1952`**. Key `4` (off), same page, same wiring: `12` → `192`, caret **3**, focus on the `<button>`, and the typed `5` **goes nowhere** — the value stays `192` |
+| AC3 census: Buttons in `templates/` + `library/prefabs` | **185**, and **0** set `keepsFocus`. Every one of them is the `4` row above, which is HEAD's behaviour unchanged |
+| AC6 export, `nodegx export` of the keypad | *"parameter keepsFocus on keep-7 has no style/content mapping — dropped, reported"* — a **named refusal**, one per node. `export-ledger:check` OK, 177 types |
+| Catalog | regenerated: the port is one 12-line entry, `keepsFocus` / `Keeps Focus` / General / boolean / default `false` |
+
+🔴 **The control pair is what makes AC2 a measurement.** Both keys sit on one page, wired identically to the same field's
+`Insert Text`; only the port differs. The `4` row is the known-firing signal — if a plain key had *not* moved the caret, the drive
+would not be pressing and the `7` row would prove nothing. Both rows are read in the same run, and the two disagree exactly where
+the port says they should.
+
+**AC6's honest half:** a keypad **exported as React code still steals the caret**. The export reports the port as dropped rather
+than silently ignoring it, which is the discipline EXP-011 asks for, but `CONTENT_PARAMS` can only express `children`, `attr:` and
+`attr-not:` — an event handler is a shape the table does not have. Emitting it is owed and belongs in P18.
+
+**AC7 (the workaround question):** with this port, `game-kit.AnswerPad`'s field **could** be a Text Input plus ordinary Buttons as
+far as the *caret* is concerned — GAM-011 built `Insert Text`/`Backspace`, and this keeps the cursor. What still stands between
+them is **GAM-028**: the pad has to know it is on a touch screen to stop the soft keyboard covering the game. The kit node stays
+until that lands.
+
+**Gates run:** the new spec 8/8; `noodl-viewer-react` `tsc --noEmit` and the whole viewer suite (see the handoff for counts).
