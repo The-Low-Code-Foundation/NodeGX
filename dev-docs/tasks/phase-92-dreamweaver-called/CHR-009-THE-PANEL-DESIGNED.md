@@ -1235,3 +1235,56 @@ Remaining difference, by design of the data: a prop-list entry keeps its `bg-2` 
 - Selects do not stretch at wide (§18.2.4); Text's 33px; s21 still-small; §14.3 opacity `''`.
 - `ComponentPortsView` still draws `sidebar-panel-edit-button` + FA (not in the property panel; CHR-010's icon-font scope).
 - AC5: CHR-004 + `test:ci`. AC1: Richard's WORTHY on the Group pair.
+
+## 21. Slice 13 — selects fill the track, the textarea is 26 (2026-09-17, s26)
+
+### 21.1 Measured before building — `set/drive-select-chain.js`, `set/drive-row-slack.js`
+
+- **The select cap was the row's own flex line.** `PropertyPanelInput` wraps every control in an inline
+  `display:flex; gap:4px; align-items:center; min-width:0` div (580px at wide). The select's root
+  (`PropertyPanelSelectInput-module__Root`) has no width and sat in that line as a `0 1 auto` item, so it shrink-wrapped
+  to its text: **174px**. A number field fills because its own `NumberUnitInput` `Field` is `1 1 auto`. s25's reading
+  list had cleared every file on the path except this inline style.
+- **Why not give the select root a width:** the same root is the unit select inside `NumberUnitInput` and
+  `PropertyPanelLengthUnitInput`.
+- **Reach, census at 736 over the 8-node set, every section opened:** all **30** selects left **406px** of the line empty.
+  Everything else fills except Size Mode (72px, the W/H toggle, designed in slice 3), colour swatch +4 and Icon Source
+  +18 (noise). So the fix is scoped to selects.
+- **Text's 33px** was `PropertyPanelTextArea`: `min-height: 33px`, padding 5.5, line 16.8 (1.4 × 12). Used only by
+  property-panel multi-line rows.
+
+### 21.2 Built
+
+- `PropertyPanelInput.tsx`: the row's flex line gets `css.Control` + `is-select` when `inputType === Select`;
+  `.Control.is-select > :first-child { flex: 1 1 auto }`. The expression toggle stays at the end of the line.
+- `PropertyPanelTextArea.module.scss`: padding `4px 9px`, `line-height: 16px`, `min-height: 26px`. One line is
+  1 + 4 + 16 + 4 + 1 = 26, and `field-sizing: content` still grows it 16px per line.
+
+### 21.3 Driven, dev build, after `cdp.js reload` (HMR had left the old CSS: the rule was not in `document.styleSheets`)
+
+- Chain at wide: `Position`, `Layout`, `Box Sizing` selects **580px, `1 1 auto`**, the same box as `Vertical Gap`'s field.
+- `drive-set.js` → `slice13/` (8 nodes, docked + wide, both themes): **cuts at wide Group 4/69 (was 5: the `Box Sizing`
+  value is gone), Button 0/54 (was 1)**. Docked unchanged: Group 5/69, Button 1/54 (the value does not fit 312).
+  Label lefts one value, font sizes unchanged. PNGs looked at: Group wide/docked dark and Text wide light. Selects end on
+  the number fields' right edge, docked identical to slice 12.
+- `drive-textarea.js` (Text node, both themes): default `Text` ⇒ **textarea 26, row 30, label centre − field centre 0**;
+  three real lines ⇒ **58** (1 + 4 + 48 + 4 + 1), still centred. PNGs `slice13/textarea-*` looked at. ⚠️ The drive's
+  readings trail its `setParameter` by one step (a reselect did not refresh in time), so each reading was attributed by the
+  `value` it carries, not by its step name. The PNG names are swapped the same way. `drive-set.js --only=text` → `slice13/text`:
+  wide heights **`26 × 9, 30 × 1`, no 33**. Docked showed a 58, which was the drive's three-line value still on screen.
+  The model was reset to `undefined` and checked.
+
+### 21.4 Gates (2026-09-17, stack down)
+
+- `tsc --noEmit` (editor) **EXIT 0**. `npm run colors` / `npm run type` **holding**.
+- Plain `npx jest` (editor): **482 suites / 7,777 tests, all green, EXIT 0**. `test:ci` **not run**.
+- No spec added. The defect and the fix are layout (a flex item's grow, a box's height). jsdom does no layout, and a class
+  assertion would pass on a rule that never applies (§21.3's stale CSS was exactly that case). The drives above are the grade.
+- `dev.log`: 0 `ERROR in`. Recents restored byte-identical (`a1ea46f2`).
+
+### 21.5 Left
+
+- **Richard's look on slice 13** (selects at wide, the Text field at one line).
+- s21 still-small: a token in a pair field ellipsises; a binding chip on an align row; §14.3 opacity `''` (compare with an
+  opaque hex first).
+- AC1 (WORTHY on the Group pair) and R6 final once the region list is empty. AC5: CHR-004 + `test:ci`.
