@@ -106,9 +106,20 @@ export function VariantSelector({
         <span className={css['VariantSelector-triggerText']}>
           {currentVariant ? formatVariantLabel(currentVariant) : 'None'}
         </span>
-        <span className={css['VariantSelector-chevron']} aria-hidden>
-          ▾
-        </span>
+        {/* CHR-009 — a drawn chevron, as the group headings and selects draw it; the text `▾` was the panel's
+            only 10px text. */}
+        <svg
+          className={css['VariantSelector-chevron']}
+          aria-hidden
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <path d="m2.5 4 2.5 2.5L7.5 4" />
+        </svg>
       </button>
 
       {isOpen && (
@@ -129,9 +140,18 @@ export function VariantSelector({
             >
               <span className={css['VariantSelector-optionLabel']}>{formatVariantLabel(name)}</span>
               {name === currentVariant && (
-                <span className={css['VariantSelector-checkmark']} aria-hidden>
-                  ✓
-                </span>
+                <svg
+                  className={css['VariantSelector-checkmark']}
+                  aria-hidden
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="m2 5.2 2 2L8 3" />
+                </svg>
               )}
             </button>
           ))}

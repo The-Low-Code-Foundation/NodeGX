@@ -3,25 +3,34 @@
  * All colors via design tokens.
  */
 
+// CHR-009 §2 (s23): a 30px row of the label column, like `Preset` above it; the group is a 26px segmented field.
 .SizePicker {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1, 4px);
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 16px;
+  box-sizing: border-box;
   width: 100%;
 }
 
 .SizePicker-label {
+  flex: 0 0 116px;
   font-size: var(--font-size-sm);
-  font-weight: 500;
   color: var(--theme-color-fg-default-shy);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   user-select: none;
 }
 
 // Segmented control group
 .SizePicker-group {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
   gap: 2px;
   background: var(--theme-color-bg-3);
   /* Phase-75 border sweep, and this one is on NO inventory: the segmented
@@ -31,19 +40,18 @@
      1.36 / 1.22 on the `bg-1` panel, the old `border-default` 1.26 / 1.27,
      `border-control` 4.17 / 3.72 on the panel and 3.08 / 3.05 on the fill. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-md);
   padding: 2px;
 }
 
 .SizePicker-option {
   flex: 1;
-  padding: var(--spacing-1, 4px) 0;
+  padding: 0;
   background: transparent;
   color: var(--theme-color-fg-default-shy);
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-default);
   font-size: var(--font-size-sm);
-  font-weight: 500;
   cursor: pointer;
   text-transform: lowercase;
   letter-spacing: 0.02em;

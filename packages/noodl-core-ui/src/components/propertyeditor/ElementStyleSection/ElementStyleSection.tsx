@@ -49,22 +49,21 @@ export function ElementStyleSection({
 }: ElementStyleSectionProps) {
   const hasSizes = sizes.length > 0 && onSizeChange !== undefined;
 
+  // CHR-009 §2 (s23) — two rows of the panel's label column, between `Variant` and `State`: no "Style" band, no
+  // divider. Richard ruled the label `Preset` (s23): the row above is `Variant`, which saves a shared named style;
+  // this one stamps a built-in preset onto the node and creates nothing, and two rows called "Variant" read as one.
   return (
     <div className={css['ElementStyleSection']}>
-      <div className={css['ElementStyleSection-header']}>Style</div>
+      {variants.length > 0 && (
+        <VariantSelector
+          variants={variants}
+          currentVariant={currentVariant}
+          onVariantChange={onVariantChange}
+          label="Preset"
+        />
+      )}
 
-      <div className={css['ElementStyleSection-body']}>
-        {variants.length > 0 && (
-          <VariantSelector
-            variants={variants}
-            currentVariant={currentVariant}
-            onVariantChange={onVariantChange}
-            label="Variant"
-          />
-        )}
-
-        {hasSizes && <SizePicker sizes={sizes} currentSize={currentSize} onSizeChange={onSizeChange} label="Size" />}
-      </div>
+      {hasSizes && <SizePicker sizes={sizes} currentSize={currentSize} onSizeChange={onSizeChange} label="Size" />}
     </div>
   );
 }

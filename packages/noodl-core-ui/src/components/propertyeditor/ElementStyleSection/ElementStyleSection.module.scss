@@ -1,30 +1,14 @@
 /**
  * STYLE-004: ElementStyleSection styles
- * Matches the visual rhythm of the existing property editor sections.
  * All colors via design tokens — no hardcoded values.
+ *
+ * CHR-009 §2 (s23): `Preset` and `Size` are rows of the panel's label column, drawn like the `Variant` and `State`
+ * rows around them (`variantseditor.css` `.panel-head-row`). The grey uppercase "Style" band and the divider under it
+ * are gone. The section still paints no fill: `border-sweep/style-section-control-borders` grades its controls against
+ * the `.sidebar-panel` ground behind it.
  */
 
 .ElementStyleSection {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--theme-color-border-default);
-  margin-bottom: 0;
-}
-
-.ElementStyleSection-header {
-  padding: var(--spacing-1, 4px) var(--spacing-2, 8px);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--theme-color-fg-default-shy);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  user-select: none;
-  background: var(--theme-color-bg-2);
-}
-
-.ElementStyleSection-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2, 8px);
-  padding: var(--spacing-2, 8px);
 }

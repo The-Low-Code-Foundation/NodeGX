@@ -489,9 +489,10 @@ describe.each(['dark', 'light'] as ThemeName[])('the property editor style secti
     // stay transparent. The moment any of them paints a fill, THAT becomes the ground and every
     // ratio above is measured against the wrong surface — which is the shape of defect session 67
     // caught with a modal.
+    // CHR-009 §2 (s23): the section is `Preset` + `Size` rows now, with no `-body` wrapper, so the chain is one link
+    // shorter.
     for (const [file, selector] of [
       ['section', '.ElementStyleSection'],
-      ['section', '.ElementStyleSection-body'],
       ['variant', '.VariantSelector'],
       ['size', '.SizePicker']
     ] as [FileKey, string][]) {
@@ -634,9 +635,18 @@ describe.each(['dark', 'light'] as ThemeName[])('the property editor style secti
       ['banner', '.Banner'],
       ['variant', '.VariantSelector-dropdown'],
       ['token', '.TokenPicker-dropdown'],
-      ['token', '.TokenPicker-searchRow'],
-      ['section', '.ElementStyleSection']
+      ['token', '.TokenPicker-searchRow']
     ];
+
+    // CHR-009 §2 (s23): the section's divider is GONE, not raised. It is two rows of the panel's label column between
+    // `Variant` and `State`, which draw no line between rows, so an edge of any tone here is the "separate bar" look
+    // the rows replaced. Graded as absent, which still reddens the blanket over-fix.
+    const section = rule('section', '.ElementStyleSection');
+    expect(
+      `.ElementStyleSection edge: ${JSON.stringify(
+        paintOf(section, 'border') ?? paintOf(section, 'border-bottom') ?? paintOf(section, 'border-color')
+      )}`
+    ).toBe('.ElementStyleSection edge: null');
 
     for (const [file, selector] of regions) {
       const body = rule(file, selector);

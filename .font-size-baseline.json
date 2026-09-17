@@ -14,9 +14,9 @@
     "packages/noodl-editor/src/editor/src/views/panels/propertyeditor": 0,
     "packages/noodl-core-ui/src/components/property-panel": 0
   },
-  "commit": "2c5c31fa2",
+  "commit": "1de18171f",
   "max": {
-    "noodl-core-ui": 123,
+    "noodl-core-ui": 121,
     "noodl-editor": 599
   },
   "byFile": {
@@ -44,7 +44,6 @@
     "packages/noodl-core-ui/src/components/inputs/TextButton/TextButton.module.scss": 2,
     "packages/noodl-core-ui/src/components/inputs/TextInput/TextInput.module.scss": 2,
     "packages/noodl-core-ui/src/components/inputs/TokenPicker/TokenPicker.module.scss": 7,
-    "packages/noodl-core-ui/src/components/inputs/VariantSelector/VariantSelector.module.scss": 2,
     "packages/noodl-core-ui/src/components/json-editor/JSONEditor.module.scss": 8,
     "packages/noodl-core-ui/src/components/json-editor/modes/AdvancedMode/AdvancedMode.module.scss": 9,
     "packages/noodl-core-ui/src/components/json-editor/modes/EasyMode/EasyMode.module.scss": 11,
