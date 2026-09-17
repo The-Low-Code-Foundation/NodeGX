@@ -500,3 +500,87 @@ from that surface and the word *Workbench* was never given to it:
   after the Blockly rename).
 - `node scripts/font-size-ratchet.js`: editor **593 vs baseline 599**, `-6` — the new `.ScopeHeading`
   uses a token, so it adds nothing to count.
+
+### AC7 — the screenshot pass (s11, 2026-09-17)
+
+Dev stack over CDP, scratch profile, **copies** of `Landing page test V2` (corpus) and
+`nodegx-qa-fixture` (the only project on this machine with a real cloud function,
+`/#__cloud__/test` — `Landing page test V2` and `Members area (TPL-001)` have none). Both widths
+were set by **dragging the real divider**, not by forcing a CSS width, so the clamps are the
+product's: `MIN_PANEL_WIDTH` is **240**, which makes AC7's narrow width the *enforced minimum* a
+user can actually reach, and its wide one 300. Theme flipped through `ThemeManager.setMode`, the
+persisted path, not by stamping `data-theme`.
+
+**The set** (`verdicts/TVW-001/2026-09-17/`): `ac7-{corpus,cloud}-{300,240}-{light,dark}.png` — the
+eight AC7 asks for — plus `ac7-scope-picker-heading-light.png`, `ac7-workbench-caption-light.png`,
+`ac7-workbench-caption-truncated.png`, `ac7-menu-open-on-workbench.png`, `ac7-used-in-popover.png`.
+
+**Slice 5's JSX rendered correctly on first sight.** The caption draws as two elements reading
+`Workbench — FilterPill on its own, not the app. Sample values.`; the `.ScopeHeading` is present
+with DOM text `Workbench`, CSS-uppercased, at `--font-size-xs` (11px); the menu row reads *Open on
+the Workbench* directly under *Open*, and *Move to…* is absent. The `MenuDialog` measuring ghost
+reproduced exactly as documented (every row twice, ~36px apart).
+
+🔴 **The handoff's wrapping worry was the wrong question — the caption cannot wrap.** It is
+`white-space: nowrap` + `text-overflow: ellipsis` and it is the only flex-shrinkable item in the
+strip (every sibling is `flex-shrink: 0`), so it **truncates**. `CAPTION_JOIN`'s nbsp can therefore
+never produce the bad break it was reasoned about; what it prevents is a break that the CSS already
+forbids. Measured: at a squeezed stage the caption gets **105px of the 330px it needs**
+(`ac7-workbench-caption-truncated.png`) and reads `Workbench — Filt…`, so *"not the app. Sample
+values."* — the sentence that exists to stop the phase's foundational confusion — is the **first
+thing dropped**, while the Small/Medium/Large and frame-size controls beside it keep full width.
+
+🔴 **A contradiction only a look could find: "Sample values." sits directly above "No sample
+data".** The caption (`benchWords.ts`, about synthesised *input port* values) and the bench summary
+(`[data-test="bench-summary"]`, from `sandboxData.ts:580`, about *backend records*) use the word
+*sample* for two different things, ~44px apart:
+
+> **Workbench** — FilterPill on its own, not the app. **Sample values.**
+> /Components/FilterPill on the Workbench — 2 inputs, 0 outputs. **No sample data** — signed in as a sample user
+
+The contradiction appears in the **empty-data branch**, which is what every project without a
+backend shows — the common case, not the corner. Row f unified *Workbench* across three dialects
+and did not notice that *sample* was already two. Unit tests could not see it: each string is
+pinned in isolation and neither spec knows the other renders beneath it. **Not fixed — the wording
+is Richard's to rule** (see §Rulings owed).
+
+🔴 **A page's name loses its row to a machine-derived URL at 240px.** Corpus, 240px: the `Home`
+row's label is clipped to `H…` — **19px allotted against the 33px it needs** — while the route meta
+takes **88px** and is *itself* truncated and unreadable. The label has no floor and the meta no cap.
+Cause: the page's `urlPath` is empty, so `RouterAdapter.getPageInfoForComponents:158` falls back to
+`title.replace(/\s+/g,'-').toLowerCase()` and the corpus's SEO title yields a **57-character**
+route. Pre-existing editor behaviour that the panel is the first surface to put in a narrow row.
+⚠️ **Control:** the cloud fixture at 240px, whose routes are `/home`, `/catalog`, `/settings`,
+truncates **nothing** — so this is the long route, not the width. Not fixed; see §Rulings owed.
+
+✅ **The route chip is truthful, and that was measured rather than assumed.** Driving the app to the
+chip's own URL renders the whole Home page (4892 chars of body text); a nonsense path under the same
+server renders **0**. So the ugly string names a URL the app really serves — the control is what
+makes that a finding and not a guess, since a catch-all router would have rendered Home either way.
+
+✅ **s8's meta alignment holds, measured not eyeballed.** At 240px every
+`[data-test="component-tree-meta"]` has right edge **258**, including the warning-dot row
+(`Contact`) — the s1 dot-slot shift is gone.
+
+✅ **The carried AC7 list, as rendered.** *Used in* popover on the right fixture
+(`/Components/Logic/Scroll to section`, ×8 over **3 parents** — the only corpus component that
+qualifies on parent count): heading `Used in 3 places · 8 times`, rows `Sections/Hero ×2`,
+`Sections/SiteFooter`, `Sections/SiteNav ×5` (2+1+5=8). The recorded unevenness is confirmed and
+now has a number: a row **with** a count is **51px** tall, one **without** is **29px**.
+`unplaced` renders dimmed-italic on `FooterLink`, `QuoteCard`, `WorkCard`. The disabled *Create
+Cloud Function Component* row now reads **"Top level only"** — SPR-005's dead instruction to use
+the deleted sheet selector is gone.
+
+⚠️ **Seen firing, and NOT this task's — already an owned row.** Opening the cloud fixture raises
+`Could not deploy cloud functions: … Duplicate component name /#__cloud__/test`. The fixture has
+**exactly one** such component on disk (24 components, no duplicate names), so it is created at
+registration. This is already recorded in
+`phase-80-the-defects-the-templates-found/UNOWNED-ROWS-TO-MEASURE.md:114-125`, which states no
+editor code is implicated (the throw is in the committed backend CLI). **One fresh measurement for
+that row:** it says the editor sees only `TypeError: fetch failed` with no reason — here the editor
+surfaced the actual cause in the toast, so either that has been fixed or the `backend:update-workflow`
+IPC is a different path from the PUT sequence it describes. Not chased; recorded so P80 does not
+re-derive it.
+
+**AC7 is therefore built but NOT closed: the WORTHY ruling is Richard's, and two of the findings
+above are wording/layout questions that are his to settle, not mine.**

@@ -1,0 +1,125 @@
+{
+  "task": "TVW-001",
+  "criterion": "AC7",
+  "date": "2026-09-17",
+  "session": 11,
+  "buildKind": "dev",
+  "buildHeadSha": "c51cbbb03",
+  "headShaAtWrite": "e50ea09b4923dee6662d177f35150c9000aacd40",
+  "buildShaNote": "The stack compiled while HEAD was c51cbbb03. Two peer commits (e685a9d72, e50ea09b4) landed during the drive; `git show --name-only` confirms NEITHER touches packages/noodl-editor/src, so the renderer bundle under these screenshots is unaffected by them.",
+  "viewerBundleMd5": "bf998c2aea1be4102abb24d473e3c47c",
+  "viewport": "1368x784 CSS px, captured at 2x (2736x1568)",
+  "widthMethod": "real FrameDivider drag, not a forced CSS width; MIN_PANEL_WIDTH=240 is the product's own clamp",
+  "themeMethod": "ThemeManager.setMode (the persisted path), not a data-theme stamp",
+  "projects": {
+    "corpus": "copy of 'Landing page test V2'",
+    "cloud": "copy of 'nodegx-qa-fixture' (the only project on this machine with a real /#__cloud__ function)"
+  },
+  "images": [
+    {
+      "file": "ac7-corpus-300-dark.png",
+      "surface": "components panel",
+      "state": "corpus, Sections expanded",
+      "panelWidth": 300,
+      "theme": "dark",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-corpus-300-light.png",
+      "surface": "components panel",
+      "state": "corpus, Sections expanded",
+      "panelWidth": 300,
+      "theme": "light",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-corpus-240-dark.png",
+      "surface": "components panel",
+      "state": "corpus, Sections expanded",
+      "panelWidth": 240,
+      "theme": "dark",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-corpus-240-light.png",
+      "surface": "components panel",
+      "state": "corpus, Sections expanded",
+      "panelWidth": 240,
+      "theme": "light",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-cloud-300-dark.png",
+      "surface": "components panel",
+      "state": "nodegx-qa-fixture, collapsed",
+      "panelWidth": 300,
+      "theme": "dark",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-cloud-300-light.png",
+      "surface": "components panel",
+      "state": "nodegx-qa-fixture, collapsed",
+      "panelWidth": 300,
+      "theme": "light",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-cloud-240-dark.png",
+      "surface": "components panel",
+      "state": "nodegx-qa-fixture, collapsed",
+      "panelWidth": 240,
+      "theme": "dark",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-cloud-240-light.png",
+      "surface": "components panel",
+      "state": "nodegx-qa-fixture, collapsed",
+      "panelWidth": 240,
+      "theme": "light",
+      "why": "AC7"
+    },
+    {
+      "file": "ac7-scope-picker-heading-light.png",
+      "surface": "preview scope picker",
+      "state": "open, showing the new WORKBENCH heading",
+      "panelWidth": 300,
+      "theme": "light",
+      "why": "slice 5 first look"
+    },
+    {
+      "file": "ac7-workbench-caption-light.png",
+      "surface": "workbench caption",
+      "state": "FilterPill mounted, caption untruncated",
+      "panelWidth": 300,
+      "theme": "light",
+      "why": "slice 5 first look"
+    },
+    {
+      "file": "ac7-workbench-caption-truncated.png",
+      "surface": "workbench caption",
+      "state": "stage squeezed by a 646px panel; caption ellipsised",
+      "panelWidth": 646,
+      "theme": "light",
+      "why": "slice 5 first look"
+    },
+    {
+      "file": "ac7-menu-open-on-workbench.png",
+      "surface": "component row context menu",
+      "state": "Sections/Hero right-clicked",
+      "panelWidth": 300,
+      "theme": "light",
+      "why": "slice 5 first look"
+    },
+    {
+      "file": "ac7-used-in-popover.png",
+      "surface": "used-in popover",
+      "state": "/Components/Logic/Scroll to section, x8 over 3 parents",
+      "panelWidth": 300,
+      "theme": "light",
+      "why": "carried AC7 item"
+    }
+  ],
+  "verdict": "NOT RULED — the WORTHY ruling is Richard's; three findings were referred to him (see the task file's AC7 section)."
+}
