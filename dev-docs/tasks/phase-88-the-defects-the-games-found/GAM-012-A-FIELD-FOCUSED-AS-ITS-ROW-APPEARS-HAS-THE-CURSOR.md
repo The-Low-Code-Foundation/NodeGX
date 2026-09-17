@@ -1,6 +1,6 @@
 # GAM-012 — A field focused as its row appears has the cursor, every time
 
-**Status: 🟡 2026-09-17 (session 21): AC1–AC5 met for all three faults under R13 (§5, §8). Fault 3 fixed by splitting an unmount from an explicit Blur, driven in Chromium; AC6 (Rocket School keyboard drive) still owed.** **Source:** [P78 D68](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) AC5 run 2, 2026-09-13 · **Side:** product (viewer focus tracker)
+**Status: 🟢 2026-09-17 (session 22): every AC met.** AC6 by the same Rocket School keyboard drive as GAM-010 AC2. *(was: 🟡 2026-09-17 (session 21): AC1–AC5 met for all three faults under R13 (§5, §8). Fault 3 fixed by splitting an unmount from an explicit Blur, driven in Chromium; AC6 (Rocket School keyboard drive) still owed.** **Source:** [P78 D68](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) AC5 run 2, 2026-09-13 · **Side:** product (viewer focus tracker))*
 
 A child playing with the keyboard answers the first question and presses Enter twice. The second question arrives with no
 cursor in the box. The author did send Focus. It worked once and never again.
@@ -287,4 +287,8 @@ until their next build. The deprecated Text Input's Blur now gets the corrected 
 
 Scratch: session `a79831ee…/scratchpad/f3/` (`before/`, `after/`, `devtools/`, `blurproj/`, `project/`, `drive-blur.js`,
 `drive-dropdown.js`, `drive-*-{before,after}.log`, `mut/`).
+
+### Session 22 (2026-09-17) — AC6
+
+Rocket School regenerated (`npm run template:rocket`) and deployed with a rebuilt `noodl-preview/dist` engine; the shared `src/external/deploy` bundle carries GAM-010/012/017 and the Function fix. `drive-rkt003-stage.js --keys` with a 20-round plan: **ALL PASS across 10 cells** (FR and EN × 1366×768, 1280×720, 1024×768, 768×1024, 390×844), **20/20 rounds, failed clauses: none** in every cell, `focusIn` and `focusNext` included, no pointer event. (Some planned-right rounds read "Not quite": the drive's own `solve()` does not know rounding or written-number prompts; the clauses grade the stage and the focus, not the answer.) `focusIn` is this task's clause: a typed question arrives with the answer box holding the cursor, in every typed round of the 200 driven across 10 cells (option rounds have no box and are not graded by it).
 

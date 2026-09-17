@@ -965,15 +965,15 @@
         description:
           'The shortest a rocket is drawn, nose to tail, in screen pixels. On a small track the rockets, the lanes, the names and the planet grow to it; a big track keeps its natural size. 0 turns the floor off.'
       },
+      // P88 GAM-017: a signal. Before the bridge could deliver one, Boost was a number the page had to count up; a signal
+      // prop now reaches the component as exactly that count (from 0, one per pulse), so the burst code below is unchanged.
       burstA: {
-        type: 'number',
+        type: 'signal',
         displayName: 'Boost A',
         group: 'Rewards',
-        default: 0,
-        description:
-          'Each time this number goes up, sparks burst from rocket A. Wire a Counter that counts right answers into it. Resetting it to 0 bursts nothing.'
+        description: 'Sparks burst from rocket A each time this fires. Wire a right answer into it.'
       },
-      burstB: { type: 'number', displayName: 'Boost B', group: 'Rewards', default: 0, description: 'The same, for rocket B.' },
+      burstB: { type: 'signal', displayName: 'Boost B', group: 'Rewards', description: 'The same, for rocket B.' },
       targetA: {
         type: 'number',
         displayName: 'Target A',
@@ -1381,9 +1381,10 @@
   }
 
   /**
-   * A px port as a number: 48, "48px" and { value: 48, unit: 'px' } all read 48. The last is what the runtime delivers when a number
-   * is WIRED into a units port, so every px port the kit reads goes through here. D65: the Avatar read `Number(props.size) || 64`, so
-   * a wired Size drew at 64 whatever it asked for (the header's 40, the hangar preview's 96).
+   * A px port as a number: 48, "48px" and { value: 48, unit: 'px' } all read 48. P88 GAM-015 measured what the bridge delivers: the
+   * string "48px", for a wired size and a typed one alike; `{ value, unit }` is only what the port's setter receives. D65: the Avatar
+   * read `Number(props.size) || 64`, so a wired Size drew at 64 whatever it asked for (the header's 40, the hangar preview's 96).
+   * Kept rather than swapped for the scaffold's stricter `readPx`: it reads the same "48px", and a kit's own fallback for 0 is its call.
    */
   function padPx(v, whenUnset) {
     var n = v && typeof v === 'object' ? Number(v.value) : parseFloat(v);

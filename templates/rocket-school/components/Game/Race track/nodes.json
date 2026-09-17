@@ -56,12 +56,12 @@
         {
           "name": "burstA",
           "plug": "output",
-          "type": "number"
+          "type": "signal"
         },
         {
           "name": "burstB",
           "plug": "output",
-          "type": "number"
+          "type": "signal"
         },
         {
           "name": "compact",

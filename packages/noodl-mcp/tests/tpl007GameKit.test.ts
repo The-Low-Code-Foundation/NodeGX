@@ -485,8 +485,9 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     it("the three new ports are documented, and Boost left at its default bursts nothing", () => {
       const props = track().inputProps as Record<string, { type: unknown; default?: unknown; description?: string }>;
       expect(Object.fromEntries(["burstA", "burstB", "celebrate"].map((k) => [k, [props[k]?.type, props[k]?.default, !!props[k]?.description]]))).toEqual({
-        burstA: ["number", 0, true],
-        burstB: ["number", 0, true],
+        // P88 GAM-017: signals. The bridge seeds a signal prop at 0 and adds one per pulse, so the burst code reads a count.
+        burstA: ["signal", undefined, true],
+        burstB: ["signal", undefined, true],
         celebrate: ["boolean", true, true]
       });
       expect(motion().burstRose(undefined, props.burstA.default)).toBe(false);

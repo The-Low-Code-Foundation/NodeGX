@@ -385,26 +385,6 @@
       "y": 760
     },
     {
-      "id": "tcFocus",
-      "type": "JavaScriptFunction",
-      "label": "Put the focus on Got it",
-      "parameters": {
-        "functionScript": "if (typeof document !== 'undefined') {\n  const word = String(Inputs.word || '').trim();\n  requestAnimationFrame(() => {\n    const button = Array.from(document.querySelectorAll('button')).find((b) => b.getClientRects().length > 0 && b.innerText.trim() === word);\n    if (button) button.focus();\n  });\n}",
-        "runOnChange-in-word": false
-      },
-      "x": 410,
-      "y": 160,
-      "ports": [
-        {
-          "name": "in-word",
-          "displayName": "word",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        }
-      ]
-    },
-    {
       "id": "tcOut",
       "type": "Component Outputs",
       "label": "Understood",

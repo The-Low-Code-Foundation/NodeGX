@@ -172,16 +172,10 @@
       "toProperty": "mounted"
     },
     {
-      "fromId": "fbIn",
-      "fromProperty": "nextWord",
-      "toId": "fbFocusNext",
-      "toProperty": "in-word"
-    },
-    {
-      "fromId": "fbCard",
+      "fromId": "fbNext",
       "fromProperty": "didMount",
-      "toId": "fbFocusNext",
-      "toProperty": "run"
+      "toId": "fbNext",
+      "toProperty": "focus"
     },
     {
       "fromId": "fbOpen",

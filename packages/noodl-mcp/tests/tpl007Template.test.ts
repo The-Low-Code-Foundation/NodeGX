@@ -30,6 +30,7 @@ import type { LegacyConnection, LegacyNode } from '../../noodl-editor/src/editor
 
 import { CURRICULUM, HANGAR_SHELF, HangarItem, WORDS } from './tpl007Curriculum';
 import { APP_CSS, C, CONTENT_SIZED_TEXTS, DATA_COMPONENTS, LOGIC_COMPONENTS, MONSTER_PIXELS, PAGES, REQUIRED_MODULES, TPL007_COMPONENTS } from './tpl007Components';
+import { buildEffectiveTokens, checkFontFaces } from '../src/editor-deps';
 import { reducedMotionReport } from './reducedMotion';
 import { DRAW_HUNT_SCRIPT, MONSTER_LOOKS, runScript } from './tpl007Scripts';
 import { AuthoredTemplate, buildRocketTemplateProject, prepareRocketArtefact, TEMPLATE_ID } from './tpl007Template';
@@ -335,13 +336,34 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     });
 
     it('🔴 the faces travel with the project: every face the stylesheet names is in the folder, with its licence', () => {
-      const dir = path.join(built.projectDir, 'noodl_modules', 'rocket-school-fonts');
-      const css = fs.readFileSync(path.join(dir, 'styles.css'), 'utf8');
-      const faces = [...css.matchAll(/url\('([^']+)'\)/g)].map((m) => m[1]);
-      expect(faces).toHaveLength(4);
-      for (const face of faces) expect({ face, there: fs.existsSync(path.join(dir, face)) }).toEqual({ face, there: true });
-      for (const licence of ['OFL-Grandstander.txt', 'OFL-Nunito.txt']) expect({ licence, there: fs.existsSync(path.join(dir, licence)) }).toEqual({ licence, there: true });
-      expect(JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')).browser.stylesheets).toEqual(['noodl_modules/rocket-school-fonts/styles.css']);
+      // P88 GAM-016: Grandstander is the template's own; Nunito comes with the Playful preset's folder.
+      for (const [folder, licences, count] of [
+        ['rocket-school-fonts', ['OFL-Grandstander.txt'], 2],
+        ['preset-font-nunito', ['OFL.txt'], 2]
+      ] as const) {
+        const dir = path.join(built.projectDir, 'noodl_modules', folder);
+        const css = fs.readFileSync(path.join(dir, 'styles.css'), 'utf8');
+        const faces = [...css.matchAll(/url\('([^']+)'\)/g)].map((m) => m[1]);
+        expect({ folder, faces: faces.length }).toEqual({ folder, faces: count });
+        for (const face of faces) expect({ face, there: fs.existsSync(path.join(dir, face)) }).toEqual({ face, there: true });
+        for (const licence of licences) expect({ licence, there: fs.existsSync(path.join(dir, licence)) }).toEqual({ licence, there: true });
+        expect(JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')).browser.stylesheets).toEqual([`noodl_modules/${folder}/styles.css`]);
+      }
+    });
+
+    it('GAM-016: every family token names a face the project ships (validate_project\'s font-face-not-shipped is silent)', () => {
+      const modules = path.join(built.projectDir, 'noodl_modules');
+      const sheets = fs.readdirSync(modules).flatMap((m) => {
+        const manifest = path.join(modules, m, 'manifest.json');
+        if (!fs.existsSync(manifest)) return [];
+        const listed: string[] = JSON.parse(fs.readFileSync(manifest, 'utf8')).browser?.stylesheets ?? [];
+        return listed.map((sheet) => fs.readFileSync(path.join(built.projectDir, sheet), 'utf8'));
+      });
+      const stored = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')).metadata?.designTokens;
+      const tokens = [...buildEffectiveTokens(stored).values()];
+      expect(checkFontFaces({ tokens, stylesheets: sheets, component: '/App' })).toEqual([]);
+      // Known-firing: without the stylesheets, Nunito is named.
+      expect(checkFontFaces({ tokens, stylesheets: [], component: '/App' }).map((d) => d.message.match(/names "([^"]+)"/)?.[1])).toContain('Nunito');
     });
 
     it('titles and buttons wear the display face', () => {
@@ -399,13 +421,14 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect(reducedMotionReport(bare).unstilled).toEqual(ANIMATED);
     });
 
-    it('a right answer that moves rocket A raises its Boost count, and the course hands the count to the kit', () => {
+    it('a right answer that moves rocket A signals its Boost, and the course hands the signal to the kit (P88 GAM-017)', () => {
       expect(
         missing(C.racePlay, [
           ['rpRound', 'correct', 'rpBoostA', 'condition'],
           ['rpGateA', 'ontrue', 'rpBoostA', 'eval'],
           ['rpBoostA', 'ontrue', 'rpBoostsA', 'increase'],
-          ['rpBoostsA', 'currentCount', 'rpTrack', 'burstA'],
+          ['rpBoostA', 'ontrue', 'rpTrack', 'burstA'],
+          ['rpBoostB', 'ontrue', 'rpTrack', 'burstB'],
           ['rpResetB', 'done', 'rpBoostsA', 'reset']
         ])
       ).toEqual([]);
@@ -626,7 +649,6 @@ describe('TPL-007 — Rocket School, the artefact', () => {
           ['rpResetA', 'done', 'rpResetB', 'do'],
           ['rpResetB', 'done', 'rpRounds', 'reset'],
           ['rpResetB', 'done', 'rpBoostsA', 'reset'],
-          ['rpResetB', 'done', 'rpBoostsB', 'reset'],
           ['rpResetB', 'done', 'rpRound', 'ask']
         ])
       ).toEqual([]);
@@ -1006,7 +1028,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
 
     it('🔴 a race that crosses a milestone offers the pick on the result screen, beside Play again, which keeps the focus', () => {
       expect(missing(C.racePlay, [['rpFinish', 'earnedPick', 'rpResult', 'hasPick'], ['rpIn', 'pickWord', 'rpResult', 'pickWord'], ['rpIn', 'hangarWord', 'rpResult', 'hangarWord'], ['rpResult', 'hangar', 'rpOut', 'hangar']])).toEqual([]);
-      expect(missing(C.raceResult, [['rrIn', 'hasPick', 'rrPick', 'mounted'], ['rrIn', 'hasPick', 'rrHangar', 'mounted'], ['rrHangar', 'onClick', 'rrOut', 'hangar'], ['rrCard', 'didMount', 'rrFocus', 'run'], ['rrIn', 'againWord', 'rrFocus', 'in-word']])).toEqual([]);
+      expect(missing(C.raceResult, [['rrIn', 'hasPick', 'rrPick', 'mounted'], ['rrIn', 'hasPick', 'rrHangar', 'mounted'], ['rrHangar', 'onClick', 'rrOut', 'hangar'], ['rrAgain', 'didMount', 'rrAgain', 'focus']])).toEqual([]);
       expect(missing(C.pageRace, [['rcT', 'earnedPick', 'rcPlay', 'pickWord'], ['rcT', 'toHangar', 'rcPlay', 'hangarWord'], ['rcPlay', 'hangar', 'rcGoHangar', 'navigate']])).toEqual([]);
       expect(params(C.pageRace, 'rcGoHangar').target).toBe(C.pageHangar);
     });
@@ -1227,7 +1249,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     it('Show me one waits for the misses, Next grid waits for every way and takes the focus; the note is ink on its tone; a wrong pick’s shake is stilled for reduced motion', () => {
       expect(
         missing(C.huntPlay, [
-          ['hpDraw', 'canShow', 'hpShow', 'mounted'], ['hpPhase', 'found', 'hpNextRow', 'mounted'], ['hpNextRow', 'didMount', 'hpFocusNext', 'run'], ['hpIn', 'nextGridWord', 'hpFocusNext', 'in-word'],
+          ['hpDraw', 'canShow', 'hpShow', 'mounted'], ['hpPhase', 'found', 'hpNextRow', 'mounted'], ['hpNext', 'didMount', 'hpNext', 'focus'],
           ['hpTone', 'ground', 'hpNoteBox', 'backgroundColor'], ['hpTone', 'edge', 'hpNoteBox', 'borderColor']
         ])
       ).toEqual([]);

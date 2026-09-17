@@ -183,3 +183,18 @@ nothing would restore it. A shared template carries its `preset-font-*` folder w
 
 **Found, not fixed:** members-area's `Source Sans Pro` (a template fix: switch the token to Source Sans 3 and ship the folder, with a
 render); the `--font-sans` description still says "Inter, falling back…" after a preset overrides it (REL-010, adjacent, unchanged).
+
+### Session 22, later (2026-09-17) — Richard's answers, applied
+
+- **story-engine** (*"Ship a Google Font, we don't want Windows users to be disappointed"*): `--font-serif` is `"Source Serif 4",
+  "Iowan Old Style", …`, and `story-engine-fonts` ships Source Serif 4 (OFL, Latin + Latin-ext variable, 93 KB) beside the generator
+  (`tpl006Assets`). TPL-006's "zero modules" claim became "no kit, exactly one font module". Regenerated; TPL-006 63/63; deployed, loads
+  Source Serif 4, and the passage prose renders in it (screenshot looked at).
+- **members-area** (*"If the members area thing needs a font, fix it"*): regenerated; the Enterprise preset now names Source Sans 3 and
+  `set_style_preset` ships it. TPL-001's file count names the preset's five files. TPL-001 82/82; deployed, loads Source Sans 3.
+- **Rocket School, AC7:** the Playful preset now brings Nunito, so `rocket-school-fonts` keeps only Grandstander (no preset's face).
+  The RKT-002 gate checks both folders and adds `checkFontFaces` over the project (silent) beside a known-firing arm (Nunito named
+  without the stylesheets). Deployed: Nunito loads from `preset-font-nunito`, Grandstander from `rocket-school-fonts`;
+  `drive-rkt002-look.js` 14/14, no failed network request.
+- **The Inter warning on MCP-made projects** (*"Dunno"*): left firing, as ruled. It is true, and SBR-014's starter assets silence it.
+

@@ -1,6 +1,6 @@
 # GAM-010 — A Button can be given the keyboard
 
-**Status: 🟡 2026-09-17 (session 21): AC1, AC3, AC4, AC5 met, driven in Chromium; AC2 and AC6 (Rocket School's three workarounds replaced by wires) not done — see §8.** **Source:** [P78 D59](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (viewer controls)
+**Status: 🟢 2026-09-17 (session 22): every AC met.** AC2 and AC6 done once Richard ruled that Rocket School should be brought fully up to date (its 257 uncommitted files were only an editor re-save: 11 non-noise differences, all empty `parameters: {}` or timestamps). *(was: 🟡 2026-09-17 (session 21): AC1, AC3, AC4, AC5 met, driven in Chromium; AC2 and AC6 (Rocket School's three workarounds replaced by wires) not done — see §8.** **Source:** [P78 D59](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (viewer controls))*
 
 A game says *"press Enter to go on"*, but nothing in the graph can put the keyboard on the Next button. A
 person on a keyboard has to Tab to it, or reach for the mouse.
@@ -152,3 +152,15 @@ over them is an unperformed merge. See the handoff.
 
 Scratch: session `a79831ee…/scratchpad/g10/` (`proj/`, `drive-controls.js`, `drive-{before,after,after2}.log`, the regression logs
 `drive-*-after2.log`, `S1…S6.log`, `checks/`, `cat/`).
+
+### Session 22 (2026-09-17) — AC2 and AC6
+
+**AC6.** `FOCUS_BUTTON_SCRIPT` is gone from `tpl007Components.ts`, with **four** Function nodes, not three: the register's
+`fbFocusNext`, `tcFocus`, `rrFocus`, and `hpFocusNext` (the Hunt game's Next grid, added after scoping). Each button now focuses itself
+as it mounts: `fbNext`, `tcGotIt`, `rrAgain`, `hpNext` `didMount → focus`. The two template-gate pins that named the scripts now pin
+the wires. The door raised 8 fewer diagnostics (the four Functions' dynamic-port notes). TPL-007 gates 138/138.
+
+**AC2.** Rocket School regenerated (`npm run template:rocket`) and deployed with a rebuilt `noodl-preview/dist` engine; the shared `src/external/deploy` bundle carries GAM-010/012/017 and the Function fix. `drive-rkt003-stage.js --keys` with a 20-round plan: **ALL PASS across 10 cells** (FR and EN × 1366×768, 1280×720, 1024×768, 768×1024, 390×844), **20/20 rounds, failed clauses: none** in every cell, `focusIn` and `focusNext` included, no pointer event. (Some planned-right rounds read "Not quite": the drive's own `solve()` does not know rounding or written-number prompts; the clauses grade the stage and the focus, not the answer.)
+The reward arm (`--reward --keys`, 1366×768 FR/EN): ALL PASS, `resultFocus` included (Play again holds the focus at the race's end).
+**Focus ring:** not visible on the focused Next in the screenshots (ACC-001's concern, recorded, not fixed here).
+

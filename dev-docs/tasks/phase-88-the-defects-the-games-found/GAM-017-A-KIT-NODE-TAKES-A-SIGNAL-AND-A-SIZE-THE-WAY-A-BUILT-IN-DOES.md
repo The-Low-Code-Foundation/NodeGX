@@ -1,6 +1,6 @@
 # GAM-017 — A kit React node takes a signal and a size the way a built-in node does
 
-**Status: 🟢 built (session 22, 2026-09-17).** s1 in the bridge, z3 in the docs, as ruled. AC1 (i)(ii) RED at HEAD in jest and on a deployed page, AC2 with 5 reverted arms, AC3 docs, AC4 deployed half, AC5, AC6 recorded. **Left:** AC4's editor half; AC7 waits on Richard's Rocket School question. **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
+**Status: 🟢 built (session 22, 2026-09-17).** s1 in the bridge, z3 in the docs, as ruled; the export keeps a Click into a kit signal; AC7 done in Rocket School. **Left:** AC4's editor half. **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
 
 Rocket School's kit wanted a `Burst` signal and got a console error, so the burst became a number that rises. The kit
 wanted a height and got no size port, so the Race Track is sized by a Group wrapped around it.
@@ -197,5 +197,11 @@ seed 1 · no edge call 2 · parse ignores `valueChangedToTrue` 2 · mount count 
 project added (`kit-signals`), and only `src/kits/runtime.tsx` changed in `kits` and `charts`. After: HLS-001 + custom-nodes + FLD-015
 54/54, `tsc --noEmit` 0.
 
-**§6 title:** "(export half) ... AC7" — AC7 is recorded below once Rocket School is regenerated.
+**AC7, Rocket School's Boost** (Rocket School regenerated, session 22): game-kit's `burstA`/`burstB` are signal props now.
+The Race Track's burst code is unchanged, because a signal prop hands it the rising count it already read. The page wires each rocket's
+right-answer gate straight into Boost; rocket A's Counter stays (the result line reads it), rocket B's is gone (nothing else read it).
+The course's 30vh / 56vw budget stays on its wrapper Group (z3).
+Driven: `drive-rkt003-stage.js --reward --keys` at 1366×768 FR/EN, ALL PASS (the per-round burst clause and the end's landing,
+result and Play-again clauses); the burst screenshot shows sparks behind the rocket after a right answer. `tpl007GameKit` pins Boost as
+`signal` with no default; the template gate pins `rpBoostA/B ontrue → rpTrack.burstA/B`.
 

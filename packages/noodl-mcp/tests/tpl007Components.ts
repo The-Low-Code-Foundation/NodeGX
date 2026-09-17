@@ -1293,10 +1293,10 @@ const COUNTDOWN: Tpl007Component = {
 const RACE_TRACK: Tpl007Component = {
   path: 'Game/Race track',
   description: 'The course, the planet and two rockets. Progress A and B (0..1) glide to their new values; ReachedA / ReachedB fire when a rocket lands on the planet. RKT-002: Burst A / B going up bursts sparks from that rocket, and the kit rings the planet on a landing.',
-  inputs: [port('progressA', 'number'), port('progressB', 'number'), port('nameA', 'string'), port('nameB', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('lookB', 'string'), port('seedB', 'string'), port('showB', 'boolean'), port('burstA', 'number'), port('burstB', 'number'), port('compact', 'boolean', 'A shorter course (18% of the screen height, not 30%), so the typing keyboard fits under it'), port('optionsA', 'object', 'RKT-011: what rocket A’s face wears'), port('paintA', 'string', 'RKT-011: rocket A’s paint, a colour token; unfed, it stays tomato')],
+  inputs: [port('progressA', 'number'), port('progressB', 'number'), port('nameA', 'string'), port('nameB', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('lookB', 'string'), port('seedB', 'string'), port('showB', 'boolean'), port('burstA', 'signal'), port('burstB', 'signal'), port('compact', 'boolean', 'A shorter course (18% of the screen height, not 30%), so the typing keyboard fits under it'), port('optionsA', 'object', 'RKT-011: what rocket A’s face wears'), port('paintA', 'string', 'RKT-011: rocket A’s paint, a colour token; unfed, it stays tomato')],
   outputs: [port('reachedA', 'signal'), port('reachedB', 'signal')],
   nodes: [
-    inputs('rtIn', 'Who is where', [['progressA', 'number'], ['progressB', 'number'], ['nameA', 'string'], ['nameB', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['lookB', 'string'], ['seedB', 'string'], ['showB', 'boolean'], ['burstA', 'number'], ['burstB', 'number'], ['compact', 'boolean'], ['optionsA', 'object'], ['paintA', 'string']]),
+    inputs('rtIn', 'Who is where', [['progressA', 'number'], ['progressB', 'number'], ['nameA', 'string'], ['nameB', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['lookB', 'string'], ['seedB', 'string'], ['showB', 'boolean'], ['burstA', 'signal'], ['burstB', 'signal'], ['compact', 'boolean'], ['optionsA', 'object'], ['paintA', 'string']]),
     // 🔴 RKT-005 (RKT-003 §3's unbuilt half): in a typing race the on-screen keyboard ended at 793 on a 768px screen and 779 on 720.
     // The course gives it room. A number reaching a units port keeps the port's unit, so 18 stays vh.
     logic('rtCompact', EXPRESSION_NODE, 'Full or compact?', { expression: "compact === true ? 'compact' : 'full'" }),
@@ -1349,14 +1349,6 @@ const RACE_TRACK: Tpl007Component = {
 };
 
 /** Focus the visible button labelled Inputs.word, on the next frame: it has only just mounted. */
-const FOCUS_BUTTON_SCRIPT = `if (typeof document !== 'undefined') {
-  const word = String(Inputs.word || '').trim();
-  requestAnimationFrame(() => {
-    const button = Array.from(document.querySelectorAll('button')).find((b) => b.getClientRects().length > 0 && b.innerText.trim() === word);
-    if (button) button.focus();
-  });
-}`;
-
 /** What just happened, and the two things to do about it. */
 const FEEDBACK_BANNER: Tpl007Component = {
   path: 'Game/Feedback banner',
@@ -1397,9 +1389,8 @@ const FEEDBACK_BANNER: Tpl007Component = {
     // 🔴 Open/closed is a States node, NOT a Variable: a Variable is global by name, and the
     // race page holds two banners (the round's, the result's) — one Variable opened both.
     withStates('fbOpen', 'Open or closed', ['closed', 'open'], { isOpen: { type: 'boolean', by: { closed: false, open: true } } }),
-    // 🔴 RKT-003: Next takes the keyboard, so Enter, Enter plays on. A Button has no Focus input, so a Function focuses
-    // the rendered button by its label once the card has mounted.
-    logic('fbFocusNext', FUNCTION_NODE, 'Put the focus on Next', { functionScript: FOCUS_BUTTON_SCRIPT, ...signalOnly('in-word') }),
+    // RKT-003: Next takes the keyboard, so Enter, Enter plays on. P88 GAM-010: a Button has a Focus action now, so Next
+    // focuses itself as it mounts (every time the banner opens) — no script looking for a button by its label.
     outputs('fbOut', 'What was pressed', [['next', 'signal'], ['showMe', 'signal'], ['isOpen', 'boolean']])
   ],
   connections: [
@@ -1431,8 +1422,7 @@ const FEEDBACK_BANNER: Tpl007Component = {
     wire('fbNext', 'onClick', 'fbOpen', 'to-closed'),
     wire('fbTeach', 'onClick', 'fbOpen', 'to-closed'),
     wire('fbOpen', 'isOpen', 'fbCard', 'mounted'),
-    wire('fbIn', 'nextWord', 'fbFocusNext', 'in-word'),
-    wire('fbCard', 'didMount', 'fbFocusNext', 'run'),
+    wire('fbNext', 'didMount', 'fbNext', 'focus'),
     wire('fbOpen', 'isOpen', 'fbOut', 'isOpen'),
     wire('fbNext', 'onClick', 'fbOut', 'next'),
     wire('fbTeach', 'onClick', 'fbOut', 'showMe')
@@ -1470,7 +1460,6 @@ const TEACH_CARD: Tpl007Component = {
     withStates('tcSize', 'Big for a sum, body size for a sentence', ['sum', 'long'], { size: { type: 'string', by: { sum: 'var(--text-xl)', long: 'var(--text-base)' } } }),
     logic('tcHasWorked', EXPRESSION_NODE, 'This question, worked?', { expression: "((worked || '') + '').length > 0" }),
     logic('tcNoWorked', EXPRESSION_NODE, 'If not, the card’s example', { expression: "((worked || '') + '').length === 0" }),
-    logic('tcFocus', FUNCTION_NODE, 'Put the focus on Got it', { functionScript: FOCUS_BUTTON_SCRIPT, ...signalOnly('in-word') }),
     outputs('tcOut', 'Understood', [['gotIt', 'signal']])
   ],
   connections: [
@@ -1489,8 +1478,7 @@ const TEACH_CARD: Tpl007Component = {
     wire('tcIn', 'worked', 'tcNoWorked', 'worked'),
     wire('tcNoWorked', 'result', 'tcExampleBox', 'mounted'),
     wire('tcIn', 'gotItWord', 'tcGotIt', 'label'),
-    wire('tcIn', 'gotItWord', 'tcFocus', 'in-word'),
-    wire('tcCard', 'didMount', 'tcFocus', 'run'),
+    wire('tcGotIt', 'didMount', 'tcGotIt', 'focus'),
     wire('tcGotIt', 'onClick', 'tcOut', 'gotIt')
   ]
 };
@@ -1972,7 +1960,6 @@ const RACE_RESULT: Tpl007Component = {
     }),
     logic('rrHasLine', EXPRESSION_NODE, 'Anything to count?', { expression: "((line || '') + '').length > 0" }),
     logic('rrHasStars', EXPRESSION_NODE, 'Any stars to say?', { expression: "((s || '') + '').length > 0" }),
-    logic('rrFocus', FUNCTION_NODE, 'Put the focus on Play again', { functionScript: FOCUS_BUTTON_SCRIPT, ...signalOnly('in-word') }),
     outputs('rrOut', 'Which way on', [['again', 'signal'], ['other', 'signal'], ['hangar', 'signal']])
   ],
   connections: [
@@ -1993,8 +1980,7 @@ const RACE_RESULT: Tpl007Component = {
     wire('rrHasStars', 'result', 'rrWhy', 'mounted'),
     wire('rrIn', 'againWord', 'rrAgain', 'label'),
     wire('rrIn', 'otherWord', 'rrOther', 'label'),
-    wire('rrIn', 'againWord', 'rrFocus', 'in-word'),
-    wire('rrCard', 'didMount', 'rrFocus', 'run'),
+    wire('rrAgain', 'didMount', 'rrAgain', 'focus'),
     wire('rrAgain', 'onClick', 'rrOut', 'again'),
     wire('rrOther', 'onClick', 'rrOut', 'other'),
     wire('rrIn', 'hasPick', 'rrPick', 'mounted'),
@@ -2073,7 +2059,6 @@ const RACE_PLAY: Tpl007Component = {
     logic('rpTeachPick', logicName('Logic/Teach card'), 'The card for the skill just missed'),
     logic('rpStep', EXPRESSION_NODE, 'Which step: less each miss in a row', { expression: 'min(2, max(0, misses - 1))' }),
     logic('rpBoostsA', COUNTER_NODE, 'Right answers that moved A', { startValue: 0 }),
-    logic('rpBoostsB', COUNTER_NODE, 'Right answers that moved B', { startValue: 0 }),
     gate('rpBoostA', 'Was A right?'),
     logic('rpBRight', EXPRESSION_NODE, 'Was player two right?', { expression: 'players === 2 && correct === true' }),
     gate('rpBoostB', 'Burst B?'),
@@ -2171,19 +2156,18 @@ const RACE_PLAY: Tpl007Component = {
     wire('rpSetWinA', 'done', 'rpOut', 'finished'),
     wire('rpSetWinB', 'done', 'rpOut', 'finished'),
     wire('rpWinner', 'value', 'rpOut', 'winner'),
-    // RKT-002 AC4: a right answer bursts sparks from the rocket it moved. The kit bursts when a count rises, so a reset is quiet.
+    // RKT-002 AC4: a right answer bursts sparks from the rocket it moved — a signal into the kit's Boost (P88 GAM-017). A's
+    // count stays, because the result line reads how many right answers moved A.
     wire('rpRound', 'correct', 'rpBoostA', 'condition'),
     wire('rpGateA', 'ontrue', 'rpBoostA', 'eval'),
     wire('rpBoostA', 'ontrue', 'rpBoostsA', 'increase'),
-    wire('rpBoostsA', 'currentCount', 'rpTrack', 'burstA'),
+    wire('rpBoostA', 'ontrue', 'rpTrack', 'burstA'),
     wire('rpIn', 'players', 'rpBRight', 'players'),
     wire('rpRound', 'correct', 'rpBRight', 'correct'),
     wire('rpBRight', 'result', 'rpBoostB', 'condition'),
     wire('rpGateB', 'ontrue', 'rpBoostB', 'eval'),
-    wire('rpBoostB', 'ontrue', 'rpBoostsB', 'increase'),
-    wire('rpBoostsB', 'currentCount', 'rpTrack', 'burstB'),
+    wire('rpBoostB', 'ontrue', 'rpTrack', 'burstB'),
     wire('rpResetB', 'done', 'rpBoostsA', 'reset'),
-    wire('rpResetB', 'done', 'rpBoostsB', 'reset'),
     // When a rocket lands, the result takes the round's slot. Play again puts the round back and starts over.
     wire('rpIn', 'start', 'rpPhase', 'to-racing'),
     wire('rpSetWinA', 'done', 'rpPhase', 'to-over'),
@@ -3333,7 +3317,6 @@ const HUNT_PLAY: Tpl007Component = {
     }),
     watch('hpIsOver', 'Every grid cleared?'),
     logic('hpFinish', logicName('Logic/Finish hunt'), 'Pay the hunt, once'),
-    logic('hpFocusNext', FUNCTION_NODE, 'Put the focus on Next grid', { functionScript: FOCUS_BUTTON_SCRIPT, ...signalOnly('in-word') }),
     logic('hpEndInView', FUNCTION_NODE, 'Bring New game on screen', { functionScript: BRING_BUTTON_INTO_VIEW_SCRIPT, ...signalOnly('in-word') }),
     outputs('hpOut', 'What the hunt did', [['model', 'object'], ['graded', 'signal'], ['home', 'signal'], ['hangar', 'signal'], ['cheer', 'signal']])
   ],
@@ -3371,8 +3354,8 @@ const HUNT_PLAY: Tpl007Component = {
     wire('hpIn', 'showWayWord', 'hpShow', 'label'),
     wire('hpIn', 'newGameWord', 'hpNew', 'label'),
     // Every way found: Next grid takes the keyboard, so Enter plays on.
-    wire('hpIn', 'nextGridWord', 'hpFocusNext', 'in-word'),
-    wire('hpNextRow', 'didMount', 'hpFocusNext', 'run'),
+    // P88 GAM-010: Next grid focuses itself as its row appears.
+    wire('hpNext', 'didMount', 'hpNext', 'focus'),
     // 🔴 A hunt is paid only when its last grid is cleared, and once (the script keeps its id). New game abandons a hunt and pays nothing.
     wire('hpDraw', 'over', 'hpIsOver', 'condition'),
     wire('hpIsOver', 'ontrue', 'hpFinish', 'run'),

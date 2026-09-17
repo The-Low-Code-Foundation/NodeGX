@@ -462,16 +462,16 @@
     "Game/Feedback banner": {
       "path": "Game/Feedback banner",
       "type": "visual",
-      "nodeCount": 20,
-      "connectionCount": 33,
+      "nodeCount": 19,
+      "connectionCount": 32,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
     "Game/Teach card": {
       "path": "Game/Teach card",
       "type": "visual",
-      "nodeCount": 18,
-      "connectionCount": 18,
+      "nodeCount": 17,
+      "connectionCount": 17,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -534,16 +534,16 @@
     "Race/Result": {
       "path": "Race/Result",
       "type": "visual",
-      "nodeCount": 18,
-      "connectionCount": 26,
+      "nodeCount": 17,
+      "connectionCount": 25,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
     "Race/Play": {
       "path": "Race/Play",
       "type": "visual",
-      "nodeCount": 52,
-      "connectionCount": 168,
+      "nodeCount": 51,
+      "connectionCount": 166,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -590,8 +590,8 @@
     "Hunt/Play": {
       "path": "Hunt/Play",
       "type": "visual",
-      "nodeCount": 30,
-      "connectionCount": 60,
+      "nodeCount": 29,
+      "connectionCount": 59,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -686,7 +686,7 @@
   },
   "stats": {
     "totalComponents": 85,
-    "totalNodes": 865,
-    "totalConnections": 2109
+    "totalNodes": 860,
+    "totalConnections": 2103
   }
 }

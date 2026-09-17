@@ -478,8 +478,8 @@
       "toProperty": "increase"
     },
     {
-      "fromId": "rpBoostsA",
-      "fromProperty": "currentCount",
+      "fromId": "rpBoostA",
+      "fromProperty": "ontrue",
       "toId": "rpTrack",
       "toProperty": "burstA"
     },
@@ -510,12 +510,6 @@
     {
       "fromId": "rpBoostB",
       "fromProperty": "ontrue",
-      "toId": "rpBoostsB",
-      "toProperty": "increase"
-    },
-    {
-      "fromId": "rpBoostsB",
-      "fromProperty": "currentCount",
       "toId": "rpTrack",
       "toProperty": "burstB"
     },
@@ -523,12 +517,6 @@
       "fromId": "rpResetB",
       "fromProperty": "done",
       "toId": "rpBoostsA",
-      "toProperty": "reset"
-    },
-    {
-      "fromId": "rpResetB",
-      "fromProperty": "done",
-      "toId": "rpBoostsB",
       "toProperty": "reset"
     },
     {

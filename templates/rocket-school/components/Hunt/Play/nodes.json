@@ -555,26 +555,6 @@
       "y": 1720
     },
     {
-      "id": "hpFocusNext",
-      "type": "JavaScriptFunction",
-      "label": "Put the focus on Next grid",
-      "parameters": {
-        "functionScript": "if (typeof document !== 'undefined') {\n  const word = String(Inputs.word || '').trim();\n  requestAnimationFrame(() => {\n    const button = Array.from(document.querySelectorAll('button')).find((b) => b.getClientRects().length > 0 && b.innerText.trim() === word);\n    if (button) button.focus();\n  });\n}",
-        "runOnChange-in-word": false
-      },
-      "x": 590,
-      "y": 1240,
-      "ports": [
-        {
-          "name": "in-word",
-          "displayName": "word",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        }
-      ]
-    },
-    {
       "id": "hpEndInView",
       "type": "JavaScriptFunction",
       "label": "Bring New game on screen",

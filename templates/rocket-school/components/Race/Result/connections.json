@@ -106,16 +106,10 @@
       "toProperty": "label"
     },
     {
-      "fromId": "rrIn",
-      "fromProperty": "againWord",
-      "toId": "rrFocus",
-      "toProperty": "in-word"
-    },
-    {
-      "fromId": "rrCard",
+      "fromId": "rrAgain",
       "fromProperty": "didMount",
-      "toId": "rrFocus",
-      "toProperty": "run"
+      "toId": "rrAgain",
+      "toProperty": "focus"
     },
     {
       "fromId": "rrAgain",

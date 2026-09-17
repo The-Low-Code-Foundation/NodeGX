@@ -220,16 +220,10 @@
       "toProperty": "label"
     },
     {
-      "fromId": "hpIn",
-      "fromProperty": "nextGridWord",
-      "toId": "hpFocusNext",
-      "toProperty": "in-word"
-    },
-    {
-      "fromId": "hpNextRow",
+      "fromId": "hpNext",
       "fromProperty": "didMount",
-      "toId": "hpFocusNext",
-      "toProperty": "run"
+      "toId": "hpNext",
+      "toProperty": "focus"
     },
     {
       "fromId": "hpDraw",

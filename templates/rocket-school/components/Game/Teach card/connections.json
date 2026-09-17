@@ -94,16 +94,10 @@
       "toProperty": "label"
     },
     {
-      "fromId": "tcIn",
-      "fromProperty": "gotItWord",
-      "toId": "tcFocus",
-      "toProperty": "in-word"
-    },
-    {
-      "fromId": "tcCard",
+      "fromId": "tcGotIt",
       "fromProperty": "didMount",
-      "toId": "tcFocus",
-      "toProperty": "run"
+      "toId": "tcGotIt",
+      "toProperty": "focus"
     },
     {
       "fromId": "tcGotIt",
