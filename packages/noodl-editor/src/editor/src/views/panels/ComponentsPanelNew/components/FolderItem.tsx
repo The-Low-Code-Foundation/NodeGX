@@ -16,6 +16,7 @@ import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
 import { CLOUD_SHEET, FolderItemData, Sheet, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
+import { showUsedInPopover } from '../showUsedInPopover';
 import { RowMetaLabel } from './RowMetaLabel';
 import { WarningDot } from './WarningDot';
 
@@ -383,7 +384,8 @@ export function FolderItem({
             <Icon icon={icon} size={IconSize.Small} />
           </div>
           <div className={css['Label']}>{folder.name}</div>
-          <RowMetaLabel meta={folder.meta} />
+          {/* TVW-001 (c): a folder that is also a component answers the same question. */}
+          <RowMetaLabel meta={folder.meta} onUsedIn={(anchor) => showUsedInPopover(folder.instances, anchor)} />
           <WarningDot count={folder.warningCount} />
         </div>
       </div>

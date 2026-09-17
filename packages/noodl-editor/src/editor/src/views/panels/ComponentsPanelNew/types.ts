@@ -6,7 +6,7 @@ import { ComponentModel } from '@noodl-models/componentmodel';
 
 import { ComponentKind } from './componentKind';
 import { SectionId } from './componentSections';
-import { RowMeta } from './componentUsage';
+import { RowMeta, UsageInstance } from './componentUsage';
 
 /**
  * Data structure for a component item in the tree
@@ -35,6 +35,11 @@ export interface ComponentItemData {
   meta: RowMeta | null;
   /** TVW-001 (d): in the `Pages` section, the Router opens this page first. */
   isStartPage?: boolean;
+  /**
+   * TVW-001 (c): every place this component is instantiated, from the same walk `meta` counts —
+   * the rows behind the `×N` button. Grouped by parent in `usedIn.ts`.
+   */
+  instances?: UsageInstance[];
   path: string;
 }
 
@@ -59,6 +64,8 @@ export interface FolderItemData {
   warningCount?: number;
   /** TVW-001 (b), only when `isComponentFolder`. */
   meta?: RowMeta | null;
+  /** TVW-001 (c): the rows behind `×N` — a component that is also a folder has them too. */
+  instances?: UsageInstance[];
 }
 
 /**

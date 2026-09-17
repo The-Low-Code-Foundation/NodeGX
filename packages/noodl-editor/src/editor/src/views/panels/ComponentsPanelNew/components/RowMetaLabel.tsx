@@ -23,13 +23,22 @@ const TITLE: Record<RowMeta['tone'], (meta: RowMeta) => string> = {
 
 export function RowMetaLabel({
   meta,
-  isStart
+  isStart,
+  onUsedIn
 }: {
   meta: RowMeta | null | undefined;
   /** TVW-001 (d): the Router opens this page first — said before the route, as the mock's `★`. */
   isStart?: boolean;
+  /**
+   * TVW-001 (c): `×N` is the only meta that answers a question, so it is the only one that is a
+   * button. Without a handler it draws as the plain label it was in slice 1.
+   */
+  onUsedIn?: (anchor: HTMLElement) => void;
 }) {
   if (!meta) return null;
+
+  const isButton = meta.tone === 'count' && !!onUsedIn;
+  const title = isButton ? `${TITLE.count(meta)} — click to see where` : TITLE[meta.tone](meta);
 
   return (
     <>
@@ -38,14 +47,34 @@ export function RowMetaLabel({
           start
         </span>
       )}
-      <span
-        className={classNames(css['Meta'], css[`Meta-${meta.tone}`])}
-        data-test="component-tree-meta"
-        data-tone={meta.tone}
-        title={TITLE[meta.tone](meta)}
-      >
-        {meta.text}
-      </span>
+      {isButton ? (
+        <button
+          type="button"
+          className={classNames(css['Meta'], css[`Meta-${meta.tone}`], css['MetaButton'])}
+          data-test="component-tree-meta"
+          data-tone={meta.tone}
+          title={title}
+          onClick={(e) => {
+            // The row underneath would switch the canvas to this component — the opposite of what
+            // the button is for, which is leaving it for one of its parents.
+            e.stopPropagation();
+            onUsedIn(e.currentTarget);
+          }}
+          onDoubleClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {meta.text}
+        </button>
+      ) : (
+        <span
+          className={classNames(css['Meta'], css[`Meta-${meta.tone}`])}
+          data-test="component-tree-meta"
+          data-tone={meta.tone}
+          title={title}
+        >
+          {meta.text}
+        </span>
+      )}
     </>
   );
 }

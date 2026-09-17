@@ -556,7 +556,8 @@ function convertFolderToTreeNodes(
         kind,
         category: info?.category,
         warningCount: matchingComponent ? warningCountFor(matchingComponent) : 0,
-        meta: matchingComponent ? metaFor(matchingComponent, kind ?? 'component', usageIndex) : null
+        meta: matchingComponent ? metaFor(matchingComponent, kind ?? 'component', usageIndex) : null,
+      instances: matchingComponent ? usageIndex.get(matchingComponent.name)?.instances : undefined
       }
     };
     nodes.push(folderNode);
@@ -606,6 +607,7 @@ function componentNodeFor(
       hasWarnings: warningCount > 0,
       warningCount,
       meta: metaFor(comp, kind, usageIndex),
+      instances: usageIndex.get(comp.name)?.instances,
       isStartPage,
       path: comp.name
     }

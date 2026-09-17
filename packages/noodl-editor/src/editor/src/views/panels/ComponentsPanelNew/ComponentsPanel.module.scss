@@ -361,7 +361,8 @@
  * is filed as a follow-up rather than faked here; `cursor: help` says
  * "informational" instead of promising a click that would do nothing.
  * -------------------------------------------------------------------------- */
-.Warning {
+.Warning,
+.WarningSlot {
   flex: 0 0 auto;
   width: 6px;
   height: 6px;
@@ -369,6 +370,13 @@
   border-radius: var(--radius-full);
   background-color: var(--theme-color-warning);
   cursor: help;
+}
+
+/* TVW-001 (c) — the empty half of that pair: reserves the dot's width so every row's meta shares
+   one right edge. No background, no cursor, nothing to hover. */
+.WarningSlot {
+  background: none;
+  cursor: inherit;
 }
 
 /* -----------------------------------------------------------------------------
@@ -409,6 +417,29 @@
 
 .TreeItem.Selected .Meta-count {
   color: var(--theme-color-fg-highlight);
+}
+
+/* TVW-001 (c) — `×N` is a button: it opens the *Used in* list. It has to stay the same size and
+   colour as the label it replaced (the meta column's rhythm is shared with routes and `unplaced`),
+   so the affordance is the hover, not a border or a background at rest. */
+.MetaButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.MetaButton:hover {
+  color: var(--theme-color-fg-highlight);
+  text-decoration: underline;
+}
+
+.MetaButton:focus-visible {
+  outline: 2px solid var(--theme-color-primary);
+  outline-offset: 1px;
 }
 
 /* TVW-001 (d) — the start page's marker, in front of its route. Same voice as the meta, one step

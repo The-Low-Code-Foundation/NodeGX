@@ -85,7 +85,7 @@ AC1 against `activeComponent` **and** the rendered class, both.
 |---|---|---|---|
 | 1 (s6, 2026-09-17) | a, b | ✅ | AC1 ✅ (door corrected, below) · AC2 ✅ |
 | 2 (s7, 2026-09-17) | d — sections by role, `not in a router` placement | ✅ | driven ✅ · **AC3 ✅** |
-| 3 | c — `×N` button → *Used in* | — | — |
+| 3 (s8, 2026-09-17) | c — `×N` button → *Used in* | ✅ | driven ✅ · **AC4 ✅** |
 | 4 | e — sheets retired | — | — |
 | 5 | f — the Workbench words | — | — |
 
@@ -140,6 +140,72 @@ further left than on rows without (`StatTile ×4` vs `ServiceCard ×4`). Evidenc
 Components tree is then in the DOM at 0×0 (`getBoundingClientRect` all zero). Click the rail's
 Components button (26,101) before reading row geometry.
 
+### Slice 3 — what was built (s8)
+
+- `usedIn.ts` (pure, graded in `tests-unit/tvw-001`): `usedInRows(instances)` groups the walk's
+  `{parent, nodeId}` **by parent** and orders by path; `usedInTitle(rows, instanceCount)` heads the
+  list. `showUsedInPopover.ts` is the editor half — menu rows through `showContextMenuInPopup`
+  (`attachTo` the button, never the cursor: PNL-009), each picking
+  `switchToComponent(parent, { node })`, which is X-Ray's own door. `navigateToInstance` is exported
+  so a drive can call the row's action without synthesising a menu click.
+- `RowMetaLabel` draws the `count` tone as a `<button>` when it is given a handler — and only that
+  tone: it is the one meta that answers a question. The click is stopped from reaching the row
+  underneath, which would switch the canvas *to* this component, the opposite of what the button is
+  for. Both `ComponentItem` and `FolderItem` pass the handler (a component can also be a folder).
+- **The decision this slice made, and the measurement behind it** (not a ruling; Richard sees it at
+  AC7). The spec says the popover lists "the parents (X-Ray's rows)". X-Ray draws **one row per
+  occurrence**. On the corpus that answers nothing: of the six components with two or more instances,
+  **five have every instance inside a single parent** — `ServiceCard ×4` is four instances of
+  `Sections/Services`, `FilterPill ×5` five of `Sections/Work` — so X-Ray's shape would draw the
+  same path four or five times. The rows are therefore **one per parent**, with the parent's own
+  count beside it, and picking one goes to its first instance (`instanceNodeIds[0]`, as X-Ray does).
+  The heading then has to reconcile the two numbers the user can see — the `×8` they pressed and the
+  three rows they got: `Used in 3 places · 8 times`.
+- `WarningDot` renders an empty slot instead of nothing, which fixes the meta misalignment slice 1
+  recorded (`StatTile ×4` sat 12px left of `ServiceCard ×4`). It was cosmetic for a label; for a
+  button it is the hit area. The spacer carries no `data-test` — the P23 corpus checker counts dots
+  by that attribute (`phase-23-visual-refresh/corpus/components-tree.mjs:524`).
+
+### Slice 3 — gates
+
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **4 suites / 33**. Armed on
+  `usedIn.ts` with five mutants, each red (one row per occurrence → 4; walk order kept → 2; the
+  parent's *last* instance navigated to → 2; the heading never reconciling the counts → 2; the
+  label/folder split off by one → 3). Restored, `cmp` clean.
+- `tsc -p packages/noodl-editor --noEmit` EXIT=0.
+- `test:ci` not run (owed at close, AC8).
+
+### Slice 3 — drive (dev stack, copy of `Landing page test V2`, 2026-09-17)
+
+| step | read | result |
+|---|---|---|
+| open the copy, first render | `PAGES 1 · COMPONENTS 22 · LOGIC 2 · CLOUD FUNCTIONS 0`; `activeComponent` `App` | ✅ (slice 2's staleness fix still holds) |
+| every `count` row | `FilterPill ×5`, `FooterColumn ×3`, `ServiceCard ×4`, `StatTile ×4`, `Is valid email ×1`, `Scroll to section ×8`, nine `Sections/* ×1`; three `unplaced` | ✅ each rendered as a `<button>` (`tagName === 'BUTTON'`) |
+| **meta alignment** (slice 1's defect) | every row's meta right edge = **344**, including `QuoteCard` and `StatTile`, which carry warning dots | ✅ fixed — was 12px left on a dotted row |
+| **AC4** real click on `Scroll to section ×8` | popover: `Used in 3 places · 8 times` over `Sections/Hero ×2` · `Sections/SiteFooter` · `Sections/SiteNav ×5` | ✅ matches a disk walk exactly (2 + 1 + 5 = 8) |
+| AC4 real click on the **second** row (`Sections/SiteFooter`) | `activeComponent` `App` → `/Sections/SiteFooter`; `getSelectedNodes()` = [`ft_go`] | ✅ |
+| AC4 selection checked against the artefact | `Sections/SiteFooter/nodes.json` holds exactly one `/Components/Logic/Scroll to section`, id **`ft_go`** | ✅ the node named, not just *a* node |
+| the grouping decision, control | `ServiceCard ×4` → **one** row `Sections/Services ×4`, `Used in 1 place · 4 times` | ✅ X-Ray's shape would have drawn the same path four times |
+| pressing `×N` must **not** enter that component | after pressing `ServiceCard`'s `×4`, `activeComponent` still `/Sections/SiteFooter` | ✅ the row's own click is stopped |
+| picking that row | `/Sections/Services`, selection [`sv_c1`] — the **first** instance in walk order (disk: `sv_c1…sv_c4`) | ✅ |
+| the highlight follows the new door | `Sections` expanded → `.Selected` = [`Services`], `activeComponent` `/Sections/Services` | ✅ round trip closes |
+
+Evidence: `verdicts/TVW-001/2026-09-17/slice3-used-in-scroll-to-section-dark.png` (verdict PNGs are
+gitignored).
+
+🔴 **Drive traps, both recorded before and both hit again:** navigating from the popover switches the
+sidebar to Properties, leaving the Components tree in the DOM at **0×0** — click the rail's
+Components button (26,101) before reading any geometry. And the popover is rendered **twice**
+(`BaseDialog`'s measuring copy); `document.elementFromPoint` picks the hit-testable one — the first
+copy in DOM order is the ghost. ⚠️ New one: **expanding a folder invalidates every y you measured** —
+a screenshot taken on stale coordinates showed no popover at all and had to be retaken. Re-read the
+row's rect immediately before each click.
+
+**Seen at AC7, not fixed:** in the popover a parent's count (`×2`, `×5`) renders on a **second line**
+under the path, because `MenuDialogItem.endSlot` draws below the label — so a row with a count is two
+lines tall and a row without is one, and the rows are unevenly spaced. Legible and correct, but the
+count reads as a separate item rather than as the row's own number.
+
 ### Slice 2 — what was built (s7)
 
 - `componentSections.ts` (pure, graded in `tests-unit/tvw-001`): `sectionFor(name, kind, usage)` and
@@ -167,6 +233,15 @@ Components button (26,101) before reading row geometry.
   - The filter never matches a section heading and drops a section with no surviving rows.
 - **Owed to slice 4:** the unfiltered view still strips `#Sheet` folders from display; the
   first-cloud-function door is still the sheet selector (the `+` menu offers browser templates).
+
+- **Measured for slice 4 (s8), so it is not re-derived:** a sheet has **no runtime meaning left**.
+  `GraphModel.getBundlesContainingSheet` (`noodl-runtime/src/models/graphmodel.ts:122`) maps a sheet
+  to lazy-load bundles and reads like the reason sheets must survive — but **nothing calls it** in
+  live source. The only other hits are its `.d.ts`, the `kit-extract` bundle, and copies frozen
+  inside the prebuilt `noodl.deploy.js` / `noodl.viewer.js` blobs. `#__cloud__` is the one real
+  boundary, and R-C already keeps it. So retiring the UI costs nothing at runtime; what it costs a
+  user is *Move to…* as a bulk "move to folder", with folder deletion still unimplemented
+  (`useComponentActions.ts:152-156`) — the thing to put in front of Richard when slice 4 lands.
 
 ### Slice 2 — gates (final, after the drive's two fixes)
 

@@ -17,6 +17,7 @@ import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
 import { CLOUD_SHEET, ComponentItemData, Sheet, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
+import { showUsedInPopover } from '../showUsedInPopover';
 import { RowMetaLabel } from './RowMetaLabel';
 import { WarningDot } from './WarningDot';
 
@@ -398,7 +399,12 @@ export function ComponentItem({
           <Icon icon={icon} size={IconSize.Small} />
         </div>
         <div className={css['Label']}>{component.localName}</div>
-        <RowMetaLabel meta={component.meta} isStart={component.isStartPage} />
+        <RowMetaLabel
+          meta={component.meta}
+          isStart={component.isStartPage}
+          /* TVW-001 (c): the instances are the ones the panel's single walk already found. */
+          onUsedIn={(anchor) => showUsedInPopover(component.instances, anchor)}
+        />
         <WarningDot count={component.warningCount} />
       </div>
     </div>

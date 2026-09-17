@@ -33,7 +33,14 @@ export interface WarningDotProps {
 }
 
 export function WarningDot({ count }: WarningDotProps) {
-  if (!count) return null;
+  /**
+   * TVW-001 (c): the slot is kept even with nothing in it, so the meta column lands on one x down
+   * the whole tree. Before this, a row with a dot pushed its `×N` 12px left of its neighbours'
+   * (slice 1 recorded it on `StatTile ×4` vs `ServiceCard ×4`) — tolerable for a label, not for a
+   * button you have to hit. It carries no `data-test`: a spacer is not a warning, and the corpus
+   * checker counts dots by that attribute.
+   */
+  if (!count) return <div className={css['WarningSlot']} aria-hidden="true" />;
 
   return (
     <div
