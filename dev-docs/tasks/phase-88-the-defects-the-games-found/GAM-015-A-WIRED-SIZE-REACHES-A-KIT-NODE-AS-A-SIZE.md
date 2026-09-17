@@ -1,6 +1,6 @@
 # GAM-015 — A kit node reads a wired size as the size it was sent
 
-**Status: ⬜ not started. ✅ R15 ruled s19 (§5): buildable.** **Source:** [P78 D65](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-011](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), 2026-09-13 · **Side:** product (React bridge / node-kit types and docs)
+**Status: 🟢 built (session 20, 2026-09-17), uncommitted.** Door (a) as ruled: `readPx` in the kit scaffold, the string shape documented in the types and on the docs page, and the drift fixed with a gate. AC1 RED through the real bridge and in Chromium, AC2 with 3 reverted arms, AC3's deployed half, AC4, AC6's gate. **Left:** AC3's editor-canvas half, AC6's game-kit adoption and re-drive (Rocket School, the peer's tree). **Source:** [P78 D65](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-011](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), 2026-09-13 · **Side:** product (React bridge / node-kit types and docs)
 
 A kit's React node draws at its default size whenever the size is wired: Rocket School's header face asked for 40 px
 and drew 64. Nothing in the node-kit types or docs says what a px port hands the component.
@@ -89,4 +89,59 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
 
 ## 8. Record
 
-Not started.
+### Session 20 (2026-09-17, over `7bb79dc53`) — built, door (a)
+
+**AC1, RED at HEAD, through the caller.** `noodl-viewer-react/tests/gam-015-a-wired-size-reaches-a-kit-node.test.ts`: a kit definition
+handed to the real `createNodeFromReactComponent`, placed in a `createCorpusGraph` runtime graph, and rendered with real React from
+the props the bridge wrote. Then in Chromium on a deployed page, with `scripts/devtools/drive-gam015-kit-size.js`: a one-file kit written
+through `update_component` into a copy of `demo-app`, deployed with `dist/nodegx-deploy.cjs --allow-development-engine`.
+
+| arm | prop the component got (jest = browser) | `Number()` read draws | `readPx` read draws |
+|---|---|---|---|
+| (i) Size wired from an Expression / Number node of 40 | `"40px"` (string) | **64** | 40 |
+| (ii) Size typed as 40 | `"40px"` (string) | **64** | 40 |
+| (iii) nothing set (known-firing) | `"64px"` (string) | 64 | 64 |
+| String `"tall"` wired (AC4) | `"64px"` kept, `dimensions/not-a-dimension` raised | — | 64 |
+| no-default port, bare 40 wired (§7) | `undefined`, `dimensions/not-a-dimension` raised | — | — |
+
+- 🔴 **The register's "a parameter arrives as a plain number" is false, measured.** A typed 40 is merged into the port's unit and arrives
+  as `"40px"`, exactly like a wire. §2's source reading was right.
+- Browser: `DRIVE_EXIT=0`, marker true, 0 console errors; the six faces read as the table. The deploy published both kit wires as
+  `unchecked` (GAM-023's report), `DEPLOY_EXIT=0`.
+
+**Built (R15 = a).**
+- `@nodegx/kit-scaffold`: `readPx(value)` reads `"<number>px"` and nothing else (token, `%`, bare number, `{value, unit}`, `"40"`,
+  `"tallpx"`, `"px"`, unset all read `undefined`). One source string, `READ_PX_SOURCE`: exported, and emitted into every scaffolded
+  `index.js` with a comment saying what a size prop is. 🔴 First written as `readPx.toString()`: `webpack-caller.test.js` went red
+  because a bundler rewrites a function's whitespace. Declared in the scaffold's `index.d.ts`.
+- `@nodegx/node-kit-types`: `ReactInputPropDefinition` says a size port hands the component a CSS string, shows the `readPx` read,
+  and names `Number("40px")`; `InputPortDefinition.default` says the `{value, unit}` wrap is the setter's.
+- `docs-site/docs/custom-nodes.md`: "A size port hands your component a string". `docsamples.test.js` fragment budget 7 → 8, reasoned.
+- **Drift:** all **7** checked-in kit copies were stale (not 3). Refreshed the 4 `library/modules` copies and pixel-game's; a new
+  `types-copy.test.js` block grades those 5 as current (known-firing count 5). Rocket School's 2 copies left: the peer's tree.
+
+**AC2, reverted arms** (count-asserted exact replace, sha-restored; `scratchpad/gam015/mutants.py`):
+
+| mutant | result |
+|---|---|
+| M1 the reader reads with `Number()` | 6 red: AC3 "wired 40 draws 40…" by name, 4 `"…px" reads` rows, `"40"` reads undefined |
+| M2 the scaffold stops emitting `readPx` | suite fails to run: "the scaffolded index.js defines no readPx" |
+| M3 the bridge hands the bare magnitude | 3 red: AC1 prop shape, AC1 `Number()` draws 64, AC3 (the spec reads the bridge, not a fixture) |
+| types copy gate, game-kit's copy put back to HEAD | 1 red, exactly that copy |
+
+**AC5:** the bridge did not change, so no blast radius is owed. Census anyway, every `library/modules` kit with a units `inputProps` port
+(loaded, not grepped): example-node-kit 3 (all straight into `style`), nodegx-charts 9 (into `style`; Sparkline's `lineWidth` strips
+`px` before `* 2.5`), game-kit 6 (`padPx`/`parseFloat`, both read `"40px"`; `ringWidth` concatenated). **No shipped kit reads a size
+with `Number()`.** simple-tooltips did not load headless (`document.querySelector`); its minified ports carry their own `set`. Not graded.
+
+**AC6.** The kit gate (`noodl-mcp/tests/tpl007GameKit.test.ts`, D65 block) now feeds `"40px"`, `"96px"`, `"72px"`, and falls back on
+unset, `"0px"`, a token and `"tallpx"`; its sabotage arm feeds `"40px"`. 44/44. **`padPx` goes, in favour of `readPx`, but not in this
+change:** `tpl007Template.test.ts` requires Rocket School's `noodl_modules/game-kit/index.js` to be byte-identical to the library build,
+so changing the kit reddens the peer's template. The kit, its rebuild and `drive-rkt011-hangar.js` are Rocket School's owner's.
+
+**Gates:** GAM-015 spec 17/17; `nodegx-kit-scaffold` 70/70; `nodegx-node-kit-types` 82/82; viewer `cn-006-*` + `fld-004-*` 49/49;
+`noodl-mcp` `tpl007GameKit` + `kitTools` 54/54; editor `tests-unit/cn-006*` 66/66; viewer `tsc --noEmit` 0 (tests excluded).
+**Not run:** the whole viewer suite, `test:main`, editor `test:ci` (no editor or viewer source changed). The editor's bundled scaffold
+(`src/editor/index.bundle.js`) and the installed app do not carry `readPx` until rebuilt.
+
+**Not driven:** AC3's editor-canvas half. The canvas renders through the same bridge the spec grades.

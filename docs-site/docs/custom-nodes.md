@@ -199,6 +199,83 @@ One thing to know if you hardcode anyway: a `color`-typed port carries no units,
 string passes straight through. A **units-typed** port (like `padding` above) is a different path,
 and it is one the runtime had to be taught explicitly.
 
+### A size port hands your component a string
+
+An `inputProps` port with units does not give your component a number. A wired 40 and a typed 40
+both arrive as `"40px"`, and a token default arrives as `"var(--space-4)"`. The `{ value, unit }`
+object you may have seen is what the port's setter receives; your component never sees it.
+
+Passing the prop straight into `style` needs nothing more, because the string is already valid CSS.
+Arithmetic does: `Number("40px")` is `NaN`, so a node that reads a size that way draws its fallback
+whatever was wired. Read the magnitude with `readPx`, which the scaffold writes into your `index.js`:
+
+```js title="reading a size"
+var size = readPx(props.size); // "40px" reads 40
+if (size === undefined) size = 64; // a token, a percentage, or nothing set: your call
+```
+
+`readPx` reads only `"<number>px"`. Everything else reads `undefined`, so your node decides what an
+unreadable size means instead of guessing.
+
+### A signal port hands your component a count
+
+A prop cannot hold an event, so a signal declared in `inputProps` arrives as a number. It starts at
+`0` and goes up by one each time the signal fires, and your node re-renders. Wire a Button's
+**Click** into it and react when the number changes:
+
+```js title="noodl_modules/burst-kit/index.js"
+// @ts-check
+(function () {
+  var h = React.createElement;
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Burst = {
+    name: 'burst-kit.Burst',
+    displayNodeName: 'Burst',
+    noodlNodeAsProp: true,
+
+    getReactComponent: function () {
+      return function BurstComponent(props) {
+        var el = React.useRef(null);
+        var shown = React.useState(false);
+        React.useEffect(function () {
+          props.noodlNode && props.noodlNode.setDOMElement(el.current);
+        }, []);
+
+        React.useEffect(function () {
+          if (!props.play) return; // 0: the signal has not fired yet
+          shown[1](true);
+          var timer = setTimeout(function () { shown[1](false); }, 600);
+          return function () { clearTimeout(timer); };
+        }, [props.play]);
+
+        return h('div', { ref: el, style: props.style }, shown[0] ? 'Boom' : '');
+      };
+    },
+
+    inputProps: {
+      play: { type: 'signal', displayName: 'Play', group: 'Actions' }
+    }
+  };
+
+  Noodl.defineModule({ reactNodes: [Burst] });
+})();
+```
+
+A signal fires on a change from off to on, so two pulses sent in the same frame can count as one.
+If your node needs to run code as well as re-render, a `valueChangedToTrue` on the same port still
+runs, just after the count goes up.
+
+### Sizing a kit node: put it in a Group
+
+A kit node has no Width or Height inputs. The **Width** and **Height** it shows are outputs: the size
+it ended up after layout. To give it a size a person can set in the property panel, place it inside a
+Group, size the Group, and have your component fill it (`width: '100%'`, `height: '100%'` on its root
+element). The Group's Width and Height take `px`, `%`, `vw` and `vh`, like any other Group's.
+
+If a number decides the size, such as a count of rows, declare a size port in `inputProps` instead
+and read it with `readPx`, as above.
+
 ## What you get without asking
 
 Every visual kit node inherits a set of ports from the bridge. You do not declare any of these:

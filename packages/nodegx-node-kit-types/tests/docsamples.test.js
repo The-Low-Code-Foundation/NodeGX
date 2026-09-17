@@ -164,9 +164,15 @@ describe('CN-007 — the custom-nodes docs page', () => {
    * logic-node sample (`noodl_modules/tally-kit/index.js`) is compiled in full
    * against `LogicNodeDefinition`. A section added as fragments only would have
    * raised this budget while grading nothing new.
+   *
+   * **7 → 8 on 2026-09-17** (GAM-015): the two-line `readPx` read of a size prop.
+   * It uses a helper that lives inside the author's own `index.js`, so it cannot
+   * compile alone. What it claims is graded instead by
+   * `noodl-viewer-react/tests/gam-015-a-wired-size-reaches-a-kit-node.test.ts`,
+   * through the real bridge.
    */
   it('declares how many blocks it does not compile', () => {
-    expect(fragments.length).toBe(7);
+    expect(fragments.length).toBe(8);
   });
 
   /**

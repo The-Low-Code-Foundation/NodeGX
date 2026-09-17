@@ -200,7 +200,10 @@ export interface InputPortDefinition {
   /** Called when a unit-bearing value (`{ value, unit }`) changes unit. */
   setUnitType?(this: NodeInstance, unit: string): void;
 
-  /** Value used when the project sets no parameter. Unit types wrap it as `{ value, unit }`. */
+  /**
+   * Value used when the project sets no parameter. Unit types wrap it as `{ value, unit }` for the
+   * port's {@link set}. What a React component receives is a string: see {@link ReactInputPropDefinition}.
+   */
   default?: unknown;
 
   displayName?: string;
@@ -226,6 +229,12 @@ export interface InputPortDefinition {
   /** Allows per-visual-state values (hover, pressed, …) for this port. */
   allowVisualStates?: boolean;
   nodeDoubleClickAction?: unknown;
+  /**
+   * Shape hint shown in the property-panel field while it is empty — for a port whose value has a
+   * *syntax* rather than just a value, such as a raw `srcset` list. It is never committed and it
+   * disappears as soon as the author types, so it is neither a `default` nor a `description`.
+   */
+  placeholder?: string;
   /** One-sentence description, read by the catalog, the validator and the AI authoring loop. */
   description?: string;
 }
@@ -459,6 +468,31 @@ export interface NodeInstance {
   shouldRunOnValueChange(inputName: string): boolean;
 
   /**
+   * The same question from a setter that knows the value it is replacing — DEF-046.
+   *
+   * `true` only when the box is still ticked AND the value actually changed. Prefer this in
+   * any setter that stores what it is handed:
+   *
+   * ```js
+   * set: function (value) {
+   *   const previous = this._internal.reading;
+   *   this._internal.reading = Number(value);
+   *   if (this.shouldRunOnValueChanged('reading', previous, this._internal.reading))
+   *     this.flagOutputDirty('output');
+   * }
+   * ```
+   *
+   * 🔴 Until this existed, a setter handed the value it already held re-ran the node anyway,
+   * and a node whose run has a SIDE EFFECT — a write, a request, an email — did it twice.
+   *
+   * ⚠️ Comparison is **primitives only**: an array or object mutated in place is the same
+   * reference and always counts as changed, so a node that passes rows around never goes
+   * quiet. ⚠️ A call site with no previous value — an event arriving rather than a value
+   * being set — should keep using {@link NodeInstance.shouldRunOnValueChange}.
+   */
+  shouldRunOnValueChanged(inputName: string, previous: unknown, next: unknown): boolean;
+
+  /**
    * Mint a `runOnChange-<name>` checkbox for an input **discovered at runtime**.
    * Declared inputs get theirs from `defineNode`; a node whose ports come from
    * user text or a schema has to register them alongside the port they govern.
@@ -582,6 +616,37 @@ export interface ReactOutputDefinition
  * The value is stored at `this.props[name]`, or at `this.props[propPath][name]`
  * when {@link propPath} is set. A `type` of `'node'` is special: the connected
  * node is rendered and the resulting element passed as the prop.
+ *
+ * **A size port hands the component a CSS string, not a number.** For a port
+ * typed `{ name: 'number', units: ['px'] }`, a wired 40 and a typed 40 both
+ * arrive as `"40px"`, and a token default as `"var(--space-4)"`. The
+ * `{ value, unit }` object is what the setter receives; the component never
+ * sees it. Pass the string straight into `style`. To do arithmetic, read the
+ * magnitude with the scaffold's `readPx`, which reads `"40px"` as `40` and
+ * everything else as `undefined`:
+ *
+ * ```js
+ * var size = readPx(props.size);
+ * if (size === undefined) size = 64; // a token, or not set: your call
+ * ```
+ *
+ * 🔴 `Number("40px")` is `NaN`, and `+props.size` is too. A kit that reads a
+ * size that way draws its fallback whatever was wired (GAM-015).
+ *
+ * **A signal port hands the component a count.** Declare
+ * `play: { type: 'signal', displayName: 'Play' }` and wire a Button's Click
+ * into it: the prop starts at `0` and goes up by one on each pulse, and the
+ * node re-renders. React to the change, and skip the `0`:
+ *
+ * ```js
+ * React.useEffect(function () {
+ *   if (props.play) startTheBurst();
+ * }, [props.play]);
+ * ```
+ *
+ * A `valueChangedToTrue` you write here still runs, after the count goes up.
+ * A pulse counts on a false → true edge, so two pulses in one frame can count
+ * once (GAM-017).
  */
 export interface ReactInputPropDefinition extends Omit<InputPortDefinition, 'set'> {
   /** Nests the prop one level down, e.g. `propPath: 'inputProps'`. */
@@ -891,6 +956,12 @@ export interface NodeDefinitionOptions {
   exportDynamicPorts?: boolean;
   /** The node instantiates a component, so its ports come from that component. */
   haveComponentPorts?: boolean;
+  /**
+   * Ports under this prefix are declared by the author's WIRES as well as by the node's own port
+   * set (`prop-` on the Record family). Such a port may not exist yet — the runtime mints it from
+   * the wires — and the editor reads this to stop calling the wire broken in the meantime.
+   */
+  wireDeclaredPortPrefix?: string;
 
   /**
    * Declares this node a member of the control-signal class: one

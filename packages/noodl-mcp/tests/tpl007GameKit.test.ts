@@ -338,7 +338,11 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     });
   });
 
-  describe('P87 D65 — a px port arrives from the runtime as { value, unit }, and the kit draws that size', () => {
+  describe('P87 D65 — a px port arrives at the component as a CSS string, "40px", and the kit draws that size', () => {
+    // GAM-015 (2026-09-17): these arms fed `{ value: 40, unit: 'px' }` and a bare `40` into props, two shapes the
+    // bridge never hands a component. `{ value, unit }` is what the port's SETTER receives; the component gets
+    // `value + unit` (`react-component-node.ts`, the units branch), for a wired and a typed Size alike. Graded through
+    // the real bridge in `noodl-viewer-react/tests/gam-015-a-wired-size-reaches-a-kit-node.test.ts`.
     /** Render one node out of a kit source (the built file, or a doctored copy of it). */
     const renderFrom = (source: string, name: string, props: Record<string, unknown>) => {
       let captured: KitModule | null = null;
@@ -353,15 +357,15 @@ describe('TPL-007 — game-kit, the built artefact', () => {
 
     it('🔴 the Avatar draws the Size it is wired, in the shape the runtime delivers (session 10: every Game/Face drew at 64; the header asked for 40, the preview for 96)', () => {
       const face = (size: unknown) => imgWidth(renderFrom(builtSource(), 'game-kit.Avatar', { look: 'big-smile', seed: 'Léa', size }));
-      expect([face(40), face({ value: 40, unit: 'px' }), face({ value: 96, unit: 'px' }), face('72px')]).toEqual([40, 40, 96, 72]);
-      // Known-firing: unset, zero and junk still fall back to the port's default.
-      expect([face(undefined), face(0), face({ value: 'x' })]).toEqual([64, 64, 64]);
+      expect([face('40px'), face('96px'), face('72px')]).toEqual([40, 96, 72]);
+      // Known-firing: unset, zero, a token and junk still fall back to the port's default.
+      expect([face(undefined), face('0px'), face('var(--space-4)'), face('tallpx')]).toEqual([64, 64, 64, 64]);
     });
 
     it('D65 sabotage arm: the old reader, Number(props.size), draws a wired Size at 64', () => {
       const doctored = builtSource().replace('var size = padPx(props.size, 64);', 'var size = Number(props.size) || 64;');
       expect(doctored).not.toBe(builtSource());
-      expect(imgWidth(renderFrom(doctored, 'game-kit.Avatar', { look: 'big-smile', seed: 'Léa', size: { value: 40, unit: 'px' } }))).toBe(64);
+      expect(imgWidth(renderFrom(doctored, 'game-kit.Avatar', { look: 'big-smile', seed: 'Léa', size: '40px' }))).toBe(64);
     });
   });
 

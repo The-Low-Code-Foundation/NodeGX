@@ -94,6 +94,14 @@ export declare function nodeTypeName(dirName: string, nodeId: string): string;
 export declare function readPublishedTypes(): { body: string; version: string };
 
 /**
+ * GAM-015 — the pixel magnitude of a units `inputProps` prop, which the component receives as a CSS
+ * string (`"40px"`). Anything that is not `"<number>px"` (a token, a percentage, a bare number, the
+ * setter's `{ value, unit }`) reads `undefined`. The same source is emitted into every scaffolded
+ * `index.js`.
+ */
+export declare function readPx(value: unknown): number | undefined;
+
+/**
  * Whether a kit's `types/node-kit.d.ts` still matches what is published.
  *
  * Compares the body, not the stamped version, so a hand-edited stamp and a

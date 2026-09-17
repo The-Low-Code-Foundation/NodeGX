@@ -338,6 +338,46 @@ function typesCopyStatus(contents) {
   };
 }
 
+// ─── Reading a size ──────────────────────────────────────────────────────────
+
+/**
+ * GAM-015 (P78 D65), R15 — the one reader for a units `inputProps` port.
+ *
+ * 🔴 **A size port does not hand the component a number.** For an `inputProps`
+ * port typed `{ name: 'number', units: ['px'] }`, the bridge writes the CSS
+ * string: a wired 40 and a typed 40 both arrive as `"40px"`, and a token default
+ * arrives as `"var(--space-4)"`. `{ value, unit }` is what the port's *setter*
+ * receives, never the component. `Number("40px")` is `NaN`, which is how Rocket
+ * School's header face asked for 40 and drew its default 64.
+ *
+ * Passing the prop straight into `style` needs no reader: the string is already
+ * valid CSS. Only a component doing arithmetic needs the magnitude.
+ *
+ * Deliberately strict: it accepts the shape the bridge delivers and nothing else.
+ * A token, a percentage, a bare number and the setter's object all read
+ * `undefined`, so the caller decides what an unreadable size means. A reader
+ * that accepts every shape hides which one is real, and the kit gate that fed
+ * `{ value: 40 }` into props is what kept D65 green.
+ *
+ * Emitted verbatim into every scaffolded `index.js` ({@link indexJs}) from one
+ * source string. Not `readPx.toString()`: a bundler rewrites a function's
+ * whitespace, and `webpack-caller.test.js` read the scaffold differently in and
+ * out of a bundle when it was.
+ *
+ * @param {unknown} value a units `inputProps` prop, as the component receives it
+ * @returns {number | undefined} the pixel magnitude, or `undefined` when it is not `"<number>px"`
+ */
+const READ_PX_SOURCE = [
+  'function readPx(value) {',
+  "  if (typeof value !== 'string') return undefined;",
+  '  var match = /^\\s*(-?(?:\\d+(?:\\.\\d*)?|\\.\\d+))px\\s*$/.exec(value);',
+  '  return match ? Number(match[1]) : undefined;',
+  '}'
+].join('\n');
+
+// eslint-disable-next-line no-new-func
+const readPx = new Function('return ' + READ_PX_SOURCE)();
+
 // ─── The generated files ─────────────────────────────────────────────────────
 
 /**
@@ -430,6 +470,19 @@ function indexJs(kit) {
   // is missing from the server-rendered HTML, and shows up only after the
   // browser hydrates — a mismatch that is silent unless you look for it.
   var h = React.createElement;
+
+  // A size port hands your component a CSS STRING, not a number: a wired or
+  // typed 40 on a \`{ name: 'number', units: ['px'] }\` inputProps port arrives
+  // as "40px", and a token default as "var(--space-4)". Pass it straight into
+  // \`style\` (the example below does). To do arithmetic with it, read it here:
+  // \`readPx("40px")\` is 40, and anything that is not "<number>px" is
+  // undefined, so decide what your node does then. \`Number("40px")\` is NaN.
+  // Delete this helper if nothing of yours does sums with a size.
+  /**
+   * @param {unknown} value
+   * @returns {number | undefined}
+   */
+  var readPx = ${READ_PX_SOURCE.split('\n').join('\n  ')};
 
   /** @type {import('${TYPES_SPECIFIER}').ReactNodeDefinition} */
   var ${EXAMPLE_NODE.id} = {
@@ -787,6 +840,7 @@ module.exports = {
   resolveKitName,
   nodeTypeName,
   readPublishedTypes,
+  readPx,
   typesCopyStatus,
   scaffoldKitFiles,
   writeKitScaffold
