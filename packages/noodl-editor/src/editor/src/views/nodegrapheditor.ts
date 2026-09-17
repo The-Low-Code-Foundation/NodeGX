@@ -242,6 +242,12 @@ export class NodeGraphEditor extends View {
   /** TVW-003: set by `NodeGraphContext` on the app's canvas only. */
   unbindSelectionStore?: () => void;
 
+  /**
+   * TVW-003 — hovering a node outlines it in the preview. Set by the store binding, so only the app's
+   * canvas has it: a change review or diff canvas hovering its own copy of a graph outlines nothing.
+   */
+  setPreviewHover?: (nodeId: string, hovered: boolean) => void;
+
   dispose() {
     this.unbindSelectionStore?.();
     this.unbindSelectionStore = undefined;

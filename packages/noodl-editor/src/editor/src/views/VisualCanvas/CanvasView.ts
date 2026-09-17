@@ -364,6 +364,16 @@ export class CanvasView extends View {
     });
   }
 
+  /**
+   * TVW-003 — outline what the canvas is hovering (a path; `null` when it moves off). Replaces the
+   * old relay broadcast, which reached this webview and nothing that could draw it.
+   */
+  setNodeHovered(path: NodeSelection) {
+    this.tryWebviewCall(() => {
+      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.hoverNode(${JSON.stringify(path)})`);
+    });
+  }
+
   async captureThumbnail() {
     if (!this.webviewDomReady || !this.webview?.isConnected) {
       return null;

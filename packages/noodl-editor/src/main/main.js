@@ -1090,6 +1090,7 @@ function launchApp() {
       'viewer-set-viewport-size',
       'viewer-set-inspect-mode',
       'viewer-select-node',
+      'viewer-hover-node',
       'viewer-transform-origin-focus',
       'viewer-design-selection',
       'viewer-capture-thumb',

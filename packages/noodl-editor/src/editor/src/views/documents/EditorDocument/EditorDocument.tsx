@@ -2,7 +2,7 @@ import { useNodeGraphContext } from '@noodl-contexts/NodeGraphContext/NodeGraphC
 import { useKeyboardCommands } from '@noodl-hooks/useKeyboardCommands';
 import usePrevious from '@noodl-hooks/usePrevious';
 import { ipcRenderer } from 'electron';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { IDocumentProvider } from '@noodl-models/app_registry';
 import { ProjectModel } from '@noodl-models/projectmodel';
@@ -135,10 +135,28 @@ function EditorDocument() {
    * The whole path goes to the viewer: `[headline]` from a canvas outlines every instance, as before;
    * `[homeHero, headline]` from a preview click outlines only that Hero's headline.
    */
+  /**
+   * Hover goes straight to the preview this document owns, not through React state: it changes on
+   * every pointer move over the canvas, and re-rendering this document for each would be the cost.
+   *
+   * 🔴 **This is the app client and nothing else.** Hover used to be a `hoverStart`/`hoverEnd`
+   * broadcast over the relay to every viewer. Only a `CanvasView` webview loads the preload that
+   * gives the viewer `window.NoodlEditor`, so only the app preview ever listened; a bench or
+   * authoring sandbox received the message and dropped it. Sending it here says so.
+   *
+   * It outlines, it never scrolls: the app preview does not move because the canvas did.
+   */
+  const canvasViewRef = useRef(canvasView);
+  canvasViewRef.current = canvasView;
+
   useEffect(() => {
     const unsubscribe = selectionStore.subscribe({
       surface: 'preview',
-      onSelection: (selection) => setSelectedNodePath(selection.nodes[0] ?? null)
+      onSelection: (selection) => setSelectedNodePath(selection.nodes[0] ?? null),
+      onHover: (path) => {
+        canvasViewRef.current?.setNodeHovered(path);
+        ipcRenderer.send('viewer-hover-node', path);
+      }
     });
     return unsubscribe;
   }, [nodeGraph]);

@@ -63,6 +63,18 @@ if (typeof window !== 'undefined' && window.NoodlEditor) {
       }
     },
     /**
+     * TVW-003 — the editor's hover, as a path (`null` to clear). Replaces the relay's
+     * `hoverStart`/`hoverEnd`, which every viewer received and only this one could draw. Outlines;
+     * never scrolls.
+     */
+    hoverNode(path) {
+      if (!this.highlighter) return;
+      this.highlighter.disableHighlight();
+      if (Array.isArray(path) && path.length) {
+        this.highlighter.highlightNodesAtPath(path);
+      }
+    },
+    /**
      * FB-016 scope 4 — the crosshair follows focus on the editor's transform-origin field, and
      * only the editor can know that. Everything else in the overlay is inferable from the DOM the
      * viewer already has; this one fact is not, so it is pushed.
@@ -324,13 +336,6 @@ export default class Viewer extends React.Component {
     if (typeof window !== 'undefined' && window.NoodlEditor) {
       this.highlighter = new Highlighter(noodlRuntime);
       NoodlEditorHighlightAPI.setHighlighter(this.highlighter);
-
-      noodlRuntime.editorConnection.on('hoverStart', (id) => {
-        this.highlighter.highlightNodesWithId(id);
-      });
-      noodlRuntime.editorConnection.on('hoverEnd', (id) => {
-        this.highlighter.disableHighlight();
-      });
 
       this.inspector = new Inspector({
         onDisableHighlight: () => this.highlighter.disableHighlight(),

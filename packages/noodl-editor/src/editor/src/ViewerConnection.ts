@@ -1,4 +1,3 @@
-import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { NodeLibraryImporter } from '@noodl-models/nodelibrary/NodeLibraryImporter';
 import { WORKFLOW_NAME_PREFIX } from '@noodl-utils/NodeGraph';
 
@@ -65,7 +64,6 @@ export class ViewerConnection extends Model {
   lastExports: object;
   clientsToExportTo: Set<unknown>;
   registeredRuntimeTypes: Set<unknown>;
-  highlightedNode: NodeGraphNode;
   /** AIX-008: clientId → the export that client gets instead of the project. */
   sandboxProviders: Map<string, () => object | undefined>;
 
@@ -482,34 +480,6 @@ export class ViewerConnection extends Model {
   send(request) {
     if (this.ws && this.ws.readyState == 1) {
       this.ws.send(JSON.stringify(request));
-    }
-  }
-
-  sendNodeHighlighted(node: NodeGraphNode, highlighted: boolean) {
-    if (highlighted) {
-      // Send and store this node as the highlighted node
-      if (this.highlightedNode === node) return;
-
-      if (this.highlightedNode) {
-        // Cancel existing highlight
-        this.send({
-          cmd: 'hoverEnd',
-          content: { id: this.highlightedNode.id }
-        });
-      }
-      this.highlightedNode = node;
-
-      this.send({
-        cmd: 'hoverStart',
-        content: { id: node.id }
-      });
-    } else {
-      if (this.highlightedNode == node) this.highlightedNode = undefined;
-
-      this.send({
-        cmd: 'hoverEnd',
-        content: { id: node.id }
-      });
     }
   }
 

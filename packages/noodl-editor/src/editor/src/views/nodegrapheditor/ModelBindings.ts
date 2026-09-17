@@ -1,6 +1,5 @@
 import { ProjectModel } from '../../models/projectmodel';
 import DebugInspector from '../../utils/debuginspector';
-import { ViewerConnection } from '../../ViewerConnection';
 import Inspectors from '../nodegrapheditor.debuginspectors';
 import { NodeGraphEditorConnection } from './NodeGraphEditorConnection';
 import { NodeGraphEditorNode } from './NodeGraphEditorNode';
@@ -28,7 +27,7 @@ export class ModelBindings {
     const editor = this.editor;
 
     editor.clearSelection({ disableHidePanels: true });
-    editor.highlighted && ViewerConnection.instance.sendNodeHighlighted(editor.highlighted.model, false);
+    editor.highlighted && editor.setPreviewHover?.(editor.highlighted.model.id, false);
     editor.highlighted = undefined; // This is not cleared in clearSelection
 
     // Delete existing nodes and connections
@@ -158,7 +157,7 @@ export class ModelBindings {
 
         // If the highlighted node is delete empty the reference
         if (owner.highlighted === node) {
-          owner.highlighted && ViewerConnection.instance.sendNodeHighlighted(owner.highlighted.model, false);
+          owner.highlighted && owner.setPreviewHover?.(owner.highlighted.model.id, false);
           owner.highlighted = undefined;
         }
 

@@ -87,9 +87,11 @@ function bound(start = home) {
   const store = new SelectionStore();
   const canvas = fakeCanvas(start);
   const preview: Selection[] = [];
-  store.subscribe({ surface: 'preview', onSelection: (s) => preview.push(s) });
-  const unbind = bindSelectionStore(canvas as unknown as NodeGraphEditor, store);
-  return { store, canvas, preview, unbind };
+  const hovers: (readonly string[] | null)[] = [];
+  store.subscribe({ surface: 'preview', onSelection: (s) => preview.push(s), onHover: (h) => hovers.push(h) });
+  const editor = canvas as unknown as NodeGraphEditor;
+  const unbind = bindSelectionStore(editor, store);
+  return { store, canvas, editor, preview, hovers, unbind };
 }
 
 describe('TVW-003 the canvas bound to the store', () => {
@@ -139,6 +141,46 @@ describe('TVW-003 the canvas bound to the store', () => {
 
     expect(preview).toHaveLength(1); // the panel's write only
     expect(canvas.activeComponent).toBe(home);
+  });
+
+  it('hovering a node tells the preview its one-element path, and moving off clears it', () => {
+    const { store, editor, preview, hovers } = bound();
+    editor.setPreviewHover('footer', true);
+    editor.setPreviewHover('footer', true);
+    editor.setPreviewHover('footer', false);
+
+    expect(hovers).toEqual([['footer'], null]);
+    expect(preview).toEqual([]);
+    expect(store.hover).toBeNull();
+  });
+
+  it('hover never touches the selection', () => {
+    const { store, canvas, editor } = bound();
+    canvas.click('footer');
+    editor.setPreviewHover('heroInstance', true);
+    editor.setPreviewHover('heroInstance', false);
+
+    expect(store.selection.nodes).toEqual([['footer']]);
+  });
+
+  it("leaving a node the pointer already left for another does not clear the other's outline", () => {
+    const { store, editor, hovers } = bound();
+    editor.setPreviewHover('footer', true);
+    editor.setPreviewHover('heroInstance', true);
+    editor.setPreviewHover('footer', false);
+
+    expect(store.hover).toEqual(['heroInstance']);
+    expect(hovers).toEqual([['footer'], ['heroInstance']]);
+  });
+
+  it('unbinding takes the hover writer away and clears an outline it left', () => {
+    const { store, editor, hovers, unbind } = bound();
+    editor.setPreviewHover('footer', true);
+    unbind();
+
+    expect(editor.setPreviewHover).toBeUndefined();
+    expect(store.hover).toBeNull();
+    expect(hovers).toEqual([['footer'], null]);
   });
 
   it('unbinding stops both directions and removes its listener', () => {

@@ -1,6 +1,6 @@
 import type { ComponentModel } from '../../models/componentmodel';
 import { pathsOfCanvasSelection, resolveCanvasMove } from '../../models/selection/canvasSelection';
-import type { Selection, SelectionStore } from '../../models/selection/selectionStore';
+import { samePath, Selection, SelectionStore } from '../../models/selection/selectionStore';
 
 import type { NodeGraphEditor } from '../nodegrapheditor';
 
@@ -73,14 +73,29 @@ export function bindSelectionStore(editor: NodeGraphEditor, store: SelectionStor
     }
   };
 
+  /**
+   * Hover is the canvas's `[nodeId]`, so the preview outlines every instance of the node. Leaving a
+   * node clears the hover only if it is still that node's: the pointer can enter the next node before
+   * the last one hears it left, and clearing then would drop the new outline.
+   */
+  const setPreviewHover = (nodeId: string, hovered: boolean) => {
+    if (hovered) store.setHover('canvas', [nodeId]);
+    else if (samePath(store.hover, [nodeId])) store.setHover('canvas', null);
+  };
+
   editor.selectionActions.onSelectionChanged = publish;
   editor.on('activeComponentChanged', publish, bindingContext);
+  editor.setPreviewHover = setPreviewHover;
 
   const unsubscribe = store.subscribe({ surface: 'canvas', onSelection: apply });
 
   return () => {
     unsubscribe();
     editor.off(bindingContext);
+    if (editor.setPreviewHover === setPreviewHover) {
+      if (store.hover && store.hover.length === 1) setPreviewHover(store.hover[0], false);
+      editor.setPreviewHover = undefined;
+    }
     if (editor.selectionActions.onSelectionChanged === publish) {
       editor.selectionActions.onSelectionChanged = undefined;
     }

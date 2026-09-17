@@ -5,7 +5,6 @@ import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 
 import { ProjectModel } from '../../models/projectmodel';
-import { ViewerConnection } from '../../ViewerConnection';
 import { NodeGraphEditor } from '../nodegrapheditor';
 import PopupLayer from '../popuplayer';
 import { CanvasFonts } from './canvas/CanvasTheme';
@@ -224,7 +223,7 @@ export class NodeGraphEditorNode {
         }
 
         // Send node highlighted to viewer if this node is being highligted
-        if (!this.borderHighlighted) ViewerConnection.instance.sendNodeHighlighted(this.model, true);
+        if (!this.borderHighlighted) this.owner.setPreviewHover?.(this.model.id, true);
 
         this.owner.setHighlightedNode(this, pos);
 
@@ -280,7 +279,7 @@ export class NodeGraphEditorNode {
         this.borderHighlighted = false;
         this.owner.repaint();
 
-        ViewerConnection.instance.sendNodeHighlighted(this.model, false);
+        this.owner.setPreviewHover?.(this.model.id, false);
         break;
       case 'down':
         PopupLayer.instance.hideTooltip();

@@ -3,7 +3,6 @@ import _ from 'underscore';
 
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 
-import { ViewerConnection } from '../../../ViewerConnection';
 import { CreateNewNodePanel } from '../../createnewnodepanel';
 import { canAcceptDrop, onDrop } from '../../nodegrapheditor.drag';
 import PopupLayer from '../../popuplayer';
@@ -213,7 +212,7 @@ export class InteractionController {
 
     this.owner.setDOMLayerVisible(false);
 
-    this.owner.highlighted && ViewerConnection.instance.sendNodeHighlighted(this.owner.highlighted.model, false);
+    this.owner.highlighted && this.owner.setPreviewHover?.(this.owner.highlighted.model.id, false);
     this.owner.highlighted = undefined; // Clear highlighted
 
     this.draggingConnection = { fromNode: fromNode };
@@ -240,7 +239,7 @@ export class InteractionController {
     this.owner.selector.unselect();
     this.owner.setDOMLayerVisible(false);
 
-    this.owner.highlighted && ViewerConnection.instance.sendNodeHighlighted(this.owner.highlighted.model, false);
+    this.owner.highlighted && this.owner.setPreviewHover?.(this.owner.highlighted.model.id, false);
     this.owner.highlighted = undefined;
 
     this.reroutingConnection = { connection, end, pos: this.latestMousePos };

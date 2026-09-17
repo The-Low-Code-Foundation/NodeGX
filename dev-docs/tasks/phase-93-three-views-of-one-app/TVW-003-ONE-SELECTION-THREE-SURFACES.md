@@ -207,3 +207,76 @@ eight by name. No new red in `tests/canvas/`.
 
 **Next slice (4): hover through the store**, targeted at the app client, then AC4 (bench) and AC5.
 
+
+### Slice 4 — canvas hover through the store (2026-09-17, session 4)
+
+- `SelectionStoreBinding` gives the app's canvas `editor.setPreviewHover(nodeId, hovered)`: hovered
+  writes `setHover('canvas', [nodeId])`; leaving clears only if the hover is still that node's (the
+  old broadcast sent `hoverEnd` for the node left, and the viewer cleared *every* outline — entering
+  B before A heard it left dropped B's). Unbinding removes the writer and clears an outline it left.
+- The five `ViewerConnection.sendNodeHighlighted` call sites (`NodeGraphEditorNode` move/move-out,
+  `ModelBindings` reset + node removed, `InteractionController` ×2) call `owner.setPreviewHover?.`.
+  `sendNodeHighlighted` and `highlightedNode` are gone.
+- `EditorDocument`'s preview subscriber gains `onHover` → `CanvasView.setNodeHovered(path)` (docked)
+  + ipc `viewer-hover-node` (main forwards; the viewer frame calls the same method). Through a ref,
+  not React state: hover changes on every pointer move.
+- `viewer.jsx` — `NoodlEditorHighlightAPI.hoverNode(path)`: clear, then `highlightNodesAtPath`. The
+  relay `hoverStart`/`hoverEnd` listeners are removed. Outlines; never scrolls.
+
+🔴 **Landmine 2 was not what it looked like — measured by reading.** The broadcast did reach every
+client, but **only a `CanvasView` webview loads `webview-preload-viewer.js`** (`CanvasView.ts:98`,
+the only `preload` in `views/`), and `viewer.jsx` registers its `hoverStart` listener only under
+`window.NoodlEditor`. A bench or authoring sandbox received hover and had no listener. So "app client
+only" is what the code already did; slice 4 makes it say so by construction, not by the relay.
+
+**Consequence for AC4 (recorded, not built):** the bench webview has no `window.NoodlEditor`, so it
+has no `Inspector` and no `inspectPaths` — a click on the bench cannot select anything today. AC4
+needs the bench to load the preload (or an equivalent bridge) first. Re-measure on a running bench
+before building on this.
+
+**Departure recorded:** a read-only canvas (change review, diff, authoring preview) used to broadcast
+hover too; unbound, it now outlines nothing in the app preview — the same rule slice 2 applied to its
+selection.
+
+Specs: `tests-unit/tvw-003` 3 suites / **35** (binding +4 hover). Armed: unconditional clear on
+leave (1 red), no clear on unbind (1 red); restored by `cp` from a snapshot, `cmp` equal.
+`tsc -p packages/noodl-editor --noEmit` EXIT=0, `tsc -p packages/noodl-viewer-react --noEmit` EXIT=0.
+
+**Driven** (2026-09-17, own stack `NOODLPORT=8680`, CDP 9444, alone on the box after a peer's stack
+exited; a fresh copy of `Landing page test V2`; design mode; canvas on `/Sections/Hero`; real CDP
+`mouseMoved`/clicks; the webview's `executeJavaScript` spied, reset in a separate eval):
+| step | reading |
+|---|---|
+| before | store hover `null`, preview `highlightedNodes` 0, `scrollY` 0 |
+| **AC1 hover** — pointer onto the `Badge` node (the eyebrow, `hero_badge`), two moves | store hover `["hero_badge"]`, canvas `highlighted` = `hero_badge`, **one** `hoverNode(["hero_badge"])`; preview: 1 outline div, rect **equal** to the pill's (24,170 294×33), connected; `scrollY` 0, no element scrolled; selection still `[]` |
+| webview's own screenshot | teal 2px outline + box-model chips on "Sheffield · taking new work from March" |
+| pointer off to empty canvas | store `null`, `hoverNode(null)`, preview outlines 0; screenshot clean |
+| **AC5** — `hero_badge` (Group): canvas click, then preview click | store `[["hero_badge"]]` vs `[["home_hero","hero_badge"]]`; canvas selects `hero_badge` both times; properties panel text **identical** (1011 chars) |
+| **AC5** — `hero_badgetext` (Text): same | `[["hero_badgetext"]]` vs `[["home_hero","hero_badgetext"]]`; panel **identical** (558 chars) |
+
+⚠️ Two discarded readings: an editor-window screenshot showed no outline (it does not carry the
+webview's latest frame — the webview target's own capture did); a first AC5 pair compared a Group
+with a Text because the preview click landed on the badge's text and the canvas had re-centred.
+Re-run with coordinates computed per node from `global` + `getPanAndScale()`.
+
+**AC5's reading, stated exactly:** the canvas-click panel is the pre-TVW-003 door (TVW-003 adds only a
+publish hook after `SelectionActions` settles, and no TVW commit touches `panels/propertyeditor/`), and
+the preview-click panel through the store matches it on a Group and a Text. That is the before/after.
+
+**AC1 — one gap against its wording:** the hover outline is **solid** 2px teal (`outline: solid 2px`),
+not "dashed". Slice 4 did not change how it is drawn (the same `highlightNodesAtPath` the relay
+path used). Behaviour met; the style word is a question for Richard, not a slice-4 change.
+
+🔴 **Correction to slice 3's coordinate note.** `cdp.js appTarget('webview')` matches no target url or
+title and **silently falls back to the editor page** — so "`dispatchClick` takes editor-window
+coordinates" was true only because the click went to the editor. The embedded preview *is* a
+separate CDP target (`webview`, url `http://localhost:<NOODLPORT>/`): `appTarget('localhost:8680')`
+attaches to it (its own `Page.captureScreenshot`, guest-coordinate evaluation).
+
+`test:ci` (2026-09-17, slice 4 uncommitted on `3b63ca5e`, seed 18181, `.webpack-cache` cleared, alone):
+**2984 specs, 8 failures** — the recorded eight by name (SUB-011 ×3, NDA-017 ×2, SUB-006 ×3). No new
+red in `tests/canvas/`. **AC6 ✅ at the floor for slice 4.**
+
+**AC state after slice 4:** AC2 ✅ · AC3 ✅ · AC5 ✅ · AC6 ✅ (floor, slice 4) · AC1 🟡 behaviour met
+(click, canvas → preview, hover on/off), outline is solid not "dashed" — Richard's call · AC4 ❌ open,
+needs the bench to have an inspector bridge first (above).

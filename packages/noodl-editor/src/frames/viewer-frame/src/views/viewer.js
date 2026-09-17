@@ -47,6 +47,10 @@ class Viewer extends View {
       this.canvasView.setNodeSelected(nodeId);
     });
 
+    ipcRenderer.on('viewer-hover-node', (sender, path) => {
+      this.canvasView.setNodeHovered(path);
+    });
+
     // FB-016 scope 4 — the crosshair follows a field in the editor window's properties panel,
     // so the detached preview can only hear about it through main.
     ipcRenderer.on('viewer-transform-origin-focus', (sender, enabled) => {
