@@ -23,6 +23,7 @@ ruling, 0 🟡, 0 ⬜. Everything is committed** (HEAD at write: see `git log`; 
 
 ## Do, in order
 
+0. **Ruled by Richard (2026-09-17, end of s22): fix the invisible focus ring.** A keyboard-focused Button shows no visible ring in Rocket School's screenshots (`scratchpad/rkt/shots-reward/*-keys-verdict-*.png`, s22). Reproduce RED first (a `:focus-visible` style reading plus a screenshot on a Button focused by the Focus action and by Tab), find whether the Button's own style or the template's hard-shadow look removes it, fix at the product level (check ACC-001 in P41 for an owner first), reverted arm, re-drive `drive-rkt003-stage.js --keys` and look at the shots.
 1. **GAM-016 AC3 editor half:** a new Playful project through the wizard; the canvas draws Nunito; rebuild the MCP bundle.
 2. **GAM-017 AC4 editor half:** a kit signal prop in the editor canvas with a Button's Click wired in.
 3. **GAM-011 AC7:** record, clause by clause.
@@ -32,7 +33,6 @@ ruling, 0 🟡, 0 ⬜. Everything is committed** (HEAD at write: see `git log`; 
 
 ## Richard's, not a builder's
 
-- **Focus ring:** a keyboard-focused Button shows no visible ring in Rocket School's screenshots (ACC-001's concern). Fix it now?
 - **Found in s22, not registered:** Rocket School's deploy names `hpRows.itemOutputSignal-tapped → hpTap.run` as a wire that cannot work
   (identical on the committed template before s22). A For Each item signal is a kind only a running graph knows (GAM-023 §8); the
   keyboard drive played the Hunt-free race only, so the Hunt tap is not driven.
