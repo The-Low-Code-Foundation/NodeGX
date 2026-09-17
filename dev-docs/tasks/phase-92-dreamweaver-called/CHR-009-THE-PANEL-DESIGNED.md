@@ -1284,7 +1284,7 @@ Remaining difference, by design of the data: a prop-list entry keeps its `bg-2` 
 
 ### 21.5 Left
 
-- **Richard's look on slice 13** (selects at wide, the Text field at one line).
+- ✅ **Richard on slice 13 (2026-09-17, s27, shown the 4 PNGs in Preview): "They all look good"**, approved as drawn.
 - s21 still-small: a token in a pair field ellipsises; a binding chip on an align row; §14.3 opacity `''` (compare with an
   opaque hex first).
 - AC1 (WORTHY on the Group pair) and R6 final once the region list is empty. AC5: CHR-004 + `test:ci`.
@@ -1342,8 +1342,8 @@ removed and the backup restored before any editor launched. Then a peer `test:ci
 
 ### 22.5 Left
 
-- **Richard: the token in a docked pair field** (`s27/pair-token-docked-dark.png`). It is cut to `--sp…` at 312 and
-  fits at wide. The options are his (§22.3 B).
-- Slice 14 (align chip) awaits his look: `s27/align-wired-docked-dark.png`, `s27/align-wired-wide-dark.png`.
+- ✅ **Richard (2026-09-17, s27): "They all look good"** on the 7 PNGs: slice 14 (`s27/align-wired-*`) approved as drawn,
+  and the docked `--sp…` pair field (`s27/pair-token-docked-dark.png`) read as **leave it**, full token in the tooltip.
+  Not built: short chip, stacked fields. (Recorded as "leave it" from "looks good"; confirm if he meant otherwise.)
 - ⚠️ `MarginPaddingType`'s exception is half-true now that an expanded edge is one port: a wired margin side is unmeasured.
 - AC1 (WORTHY on the Group pair) and R6 final once the region list is empty. AC5: CHR-004 + `test:ci`.

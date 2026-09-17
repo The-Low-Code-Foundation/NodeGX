@@ -22,18 +22,13 @@ Slice 13's look was sent to him at session start; no answer yet.
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slices 1–12 approved; **slice 13 (§21) and slice 14 (§22) await his look**. AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Left: §22.5 |
+| **CHR-009 the panel designed** | 🟡 slices 1–14 approved (13+14 in s27: "They all look good"). AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Left: §22.5 |
 | CHR-004, 010, 011 | ⬜ |
 
 ## What to do next, in order
 
-0. **Richard's looks + one ruling** (ask in plain words, with the PNGs; they are gitignored and exist only on this machine):
-   - slice 13: `verdicts/CHR-009/2026-09-17/set/slice13/props-group-wide-top-dark.png`, `props-group-docked-top-dark.png`,
-     `textarea-one-line-light.png`, `textarea-three-lines-dark.png` (sent in s27; names swapped vs content, §21.3).
-   - slice 14: `set/s27/align-wired-docked-dark.png`, `set/s27/align-wired-wide-dark.png`.
-   - ruling: `set/s27/pair-token-docked-dark.png`. A Text Input's padding pair shows `--sp…` in the docked panel, with the
-     full name in the tooltip. Options: leave it; show the token as a short chip (`sp-2`); or when a pair holds a token, let
-     the two fields stack full-width docked (+30px). Do not build before he picks.
+0. ✅ Done in s27: Richard approved slices 13 and 14 and read the docked `--sp…` pair field as **leave it** ("They all look
+   good", shown in Preview). Show him pictures with `open -a Preview <paths>`: links and file cards do not reach him.
 1. **A wired margin/padding side** (§22.5 ⚠️): expanded per-edge fields are one port each, but `MarginPaddingType` is still an
    exception. Measure first with a copy of `drive-s27.js` arm A: wire `String.savedValue` → `paddingLeft`, expand, and read
    whether the field stays editable. Build a chip only if it does.
@@ -89,8 +84,8 @@ Slice 13's look was sent to him at session start; no answer yet.
 
 ## Still Richard's
 
-1. **Slice 13's look** and **slice 14's look** (item 0).
-2. **The token in a docked pair field** (item 0's ruling).
+1. ✅ Slices 13, 14 and the pair-field token: ruled in s27.
+2. —
 3. AC1's WORTHY on the Group pair, when the region list is done. R6 final ("ok so far"; show the cut census).
 4. The `···` menu is DECLINED. CHR-007 AC4 `_portsHash` clause declined. §3.4 closed by position (s20).
 5. The Projects tab's two full-width cards (BST-003 / UNI-001).
