@@ -833,3 +833,57 @@ colour styles is listened to); the next render picks it up. Not driven.
 - `npx jest` (editor, stack down) **474 suites / 7,715 tests, all passed, EXIT 0**: s19's 473 / 7,712 plus exactly this
   suite. (s19's relay-auth flake did not recur.)
 - `dev.log`: 0 `SassError|ERROR in`, 0 `synchronously unmount`. `test:ci` not run.
+
+## 15. Slice 9 — the Advanced CSS footer; §3.4 ruled closed (2026-09-17, s20)
+
+### 15.1 Richard's rulings (2026-09-17, s20)
+
+- **§3.4 (Variant/State inside General): leave them above the filter.** Asked in plain words with the cost stated: inside
+  General, folding General or scrolling away would hide Variant, State and the variant edit-mode bar. They already sit in
+  the label column (x 17 = 17, slice 2). **§3.4 is closed by position**; do not move them.
+- **The Advanced CSS footer: match the mockup**: a rule above, the count as plain grey text on the right, no pill.
+
+### 15.2 Built
+
+| region | before (`0e2812dac`) | now |
+|---|---|---|
+| `Advanced CSS` count, folded | a pill: `bg-3`, `1px 5px`, radius 7, `fg-default`, weight 600 | **plain text**: no fill/padding/radius, `fg-default-shy`, weight 500, letter-spacing 0, flush right (gap 0) |
+| rule above | the previous group's `border-bottom`, 1px `border-default` | unchanged; it already was the mockup's rule |
+| chevron | right when folded (the section chevron rotated -90°) | unchanged |
+
+`GroupHeading` takes `isFooter`; only the `Advanced CSS` heading passes it, and one CSS rule
+(`.property-group-label--footer .property-group-badge`) keys on it. The count still reads **`1 set`**, not the mockup's
+bare `3`: FB-017's wording says what the number counts, and a bare digit beside a heading does not. ⚠️ For Richard's
+look: keep `N set`, or the bare number?
+
+### 15.3 Driven
+
+`verdicts/CHR-009/2026-09-17/footer/drive-footer.js`, results `footer/after/footer-results.json`. Scratch copy of
+story-engine, Group `app_root`; `cssClassName` set on the copy so the count draws; recents restored byte-identical
+(`a1ea46f2…`). BEFORE is the same page with the footer modifier removed (the only thing the new rule keys on).
+
+| reading, both themes | before | after |
+|---|---|---|
+| count background / padding / radius | `bg-3` / `1px 5px` / 7px | transparent / 0 / 0 |
+| count colour (dark · light) | `rgb(221,228,236)` · `rgb(74,86,99)` | `rgb(196,206,219)` · `rgb(89,98,110)` (same as the heading) |
+| count width × height | 45 × 15 | 33 × 13 |
+| heading | 30 tall, label x 17 | unchanged |
+| rule above | 1px solid, flush on the section top (789 = 789) | unchanged |
+| mouse press: open → fold | — | `aria-expanded` true, children shown, no count → false, children hidden, count back |
+
+The look: `footer/after/zoom-footer-before-{dark,light}.png` vs `zoom-footer-{dark,light}.png` (4×), and
+`props-group-footer-{dark,light}.png`.
+
+🔴 **What the first run caught:** a setup `setParameter` on an Advanced port did not redraw the count, even after
+reselecting the node. `renderGroups`' hash is built from the port list, not from the values, so nothing changed. Only
+a toggle, which clears the hash, drew it. The drive toggles once now. Whether a real edit made inside Advanced CSS
+updates the folded count is **not measured**. That is the FB-017 AC2 claim, and it is worth one drive.
+
+### 15.4 Gates
+
+- New `tests-unit/chr-009/advancedFooter.test.tsx`, **2 tests** (the modifier only when asked, beside a plain heading
+  without it; the count's shown-folded / withheld-open rule kept). Mutant (modifier never applied) → **1 red**.
+  `fb-017/groupHeading.test.tsx` unchanged and green.
+- `tsc --noEmit` (editor) **EXIT 0**. `npx jest` (editor, stack down) **475 suites / 7,717 tests, all passed, EXIT 0**
+  (§14's 474 / 7,715 plus this suite).
+- `dev.log` (this stack): 0 `SassError|ERROR in`, 0 `synchronously unmount`. `test:ci` not run.

@@ -1,0 +1,165 @@
+{
+  "setup": {
+    "badge": true
+  },
+  "measured": {
+    "darkBefore": {
+      "hasFooterClass": false,
+      "expanded": "false",
+      "heading": {
+        "top": 795,
+        "left": 17,
+        "width": 280,
+        "height": 30
+      },
+      "headingColor": "rgb(196, 206, 219)",
+      "headingFont": "ui-monospace 11px",
+      "name": "Advanced CSS",
+      "count": {
+        "text": "1 set",
+        "rect": {
+          "top": 803,
+          "left": 252,
+          "width": 45,
+          "height": 15
+        },
+        "bg": "rgb(51, 62, 77)",
+        "padding": "1px 5px",
+        "radius": "7px",
+        "color": "rgb(221, 228, 236)",
+        "weight": "600",
+        "letterSpacing": "0.33px",
+        "font": "ui-monospace 11px"
+      },
+      "countRightGap": 0,
+      "ruleAbove": {
+        "prevClass": "property-group",
+        "borderBottom": "1px solid rgb(47, 57, 69)",
+        "prevBottom": 789,
+        "groupTop": 789
+      }
+    },
+    "darkAfter": {
+      "hasFooterClass": true,
+      "expanded": "false",
+      "heading": {
+        "top": 795,
+        "left": 17,
+        "width": 280,
+        "height": 30
+      },
+      "headingColor": "rgb(196, 206, 219)",
+      "headingFont": "ui-monospace 11px",
+      "name": "Advanced CSS",
+      "count": {
+        "text": "1 set",
+        "rect": {
+          "top": 804,
+          "left": 264,
+          "width": 33,
+          "height": 13
+        },
+        "bg": "rgba(0, 0, 0, 0)",
+        "padding": "0px",
+        "radius": "0px",
+        "color": "rgb(196, 206, 219)",
+        "weight": "500",
+        "letterSpacing": "normal",
+        "font": "ui-monospace 11px"
+      },
+      "countRightGap": 0,
+      "ruleAbove": {
+        "prevClass": "property-group",
+        "borderBottom": "1px solid rgb(47, 57, 69)",
+        "prevBottom": 789,
+        "groupTop": 789
+      }
+    },
+    "lightBefore": {
+      "hasFooterClass": false,
+      "expanded": "false",
+      "heading": {
+        "top": 795,
+        "left": 17,
+        "width": 280,
+        "height": 30
+      },
+      "headingColor": "rgb(89, 98, 110)",
+      "headingFont": "ui-monospace 11px",
+      "name": "Advanced CSS",
+      "count": {
+        "text": "1 set",
+        "rect": {
+          "top": 803,
+          "left": 252,
+          "width": 45,
+          "height": 15
+        },
+        "bg": "rgb(229, 233, 237)",
+        "padding": "1px 5px",
+        "radius": "7px",
+        "color": "rgb(74, 86, 99)",
+        "weight": "600",
+        "letterSpacing": "0.33px",
+        "font": "ui-monospace 11px"
+      },
+      "countRightGap": 0,
+      "ruleAbove": {
+        "prevClass": "property-group",
+        "borderBottom": "1px solid rgb(224, 229, 235)",
+        "prevBottom": 789,
+        "groupTop": 789
+      }
+    },
+    "lightAfter": {
+      "hasFooterClass": true,
+      "expanded": "false",
+      "heading": {
+        "top": 795,
+        "left": 17,
+        "width": 280,
+        "height": 30
+      },
+      "headingColor": "rgb(89, 98, 110)",
+      "headingFont": "ui-monospace 11px",
+      "name": "Advanced CSS",
+      "count": {
+        "text": "1 set",
+        "rect": {
+          "top": 804,
+          "left": 264,
+          "width": 33,
+          "height": 13
+        },
+        "bg": "rgba(0, 0, 0, 0)",
+        "padding": "0px",
+        "radius": "0px",
+        "color": "rgb(89, 98, 110)",
+        "weight": "500",
+        "letterSpacing": "normal",
+        "font": "ui-monospace 11px"
+      },
+      "countRightGap": 0,
+      "ruleAbove": {
+        "prevClass": "property-group",
+        "borderBottom": "1px solid rgb(224, 229, 235)",
+        "prevBottom": 789,
+        "groupTop": 789
+      }
+    }
+  },
+  "click": {
+    "open": {
+      "expanded": "true",
+      "footerClass": true,
+      "badge": false,
+      "childrenHidden": false
+    },
+    "close": {
+      "expanded": "false",
+      "footerClass": true,
+      "badge": true,
+      "childrenHidden": true
+    }
+  }
+}

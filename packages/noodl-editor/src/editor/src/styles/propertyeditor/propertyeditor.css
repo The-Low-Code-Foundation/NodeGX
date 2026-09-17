@@ -302,6 +302,18 @@
   text-transform: none;
 }
 
+/* CHR-009 §2 — `Advanced CSS` as the panel's footer row (Richard, s20: "match the mockup"): the count is
+   plain muted text on the trailing edge, not a pill. The rule above it is the previous group's own
+   `border-bottom`. */
+.property-group-label--footer .property-group-badge {
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
 /* The nested groups inside `Advanced CSS`. Indented so the folded headings read as
    belonging to the section rather than as siblings of the basics above it, and with
    the last child's divider suppressed — the super-group draws its own. */

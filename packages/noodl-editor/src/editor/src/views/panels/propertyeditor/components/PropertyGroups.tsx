@@ -85,19 +85,25 @@ export function GroupHeading({
   name,
   isExpanded,
   activeCount,
-  onToggle
+  onToggle,
+  isFooter = false
 }: {
   name: string;
   isExpanded: boolean;
   activeCount?: number;
   onToggle?: (isExpanded: boolean) => void;
+  /**
+   * CHR-009 §2 (Richard, s20: "match the mockup") — `Advanced CSS` is the panel's footer row, so its count
+   * reads as plain muted text rather than the pill a section heading carries. Same button, same count.
+   */
+  isFooter?: boolean;
 }) {
   const badge = isExpanded ? null : activityBadgeLabel(activeCount ?? 0);
 
   return (
     <button
       type="button"
-      className="property-group-label"
+      className={classNames('property-group-label', isFooter && 'property-group-label--footer')}
       aria-expanded={isExpanded}
       onClick={() => onToggle && onToggle(!isExpanded)}
     >
@@ -230,6 +236,7 @@ export function PropertyGroups({
             name={ADVANCED_CSS_GROUP}
             isExpanded={isAdvancedExpanded}
             activeCount={advancedActiveCount}
+            isFooter
             onToggle={(next) => onToggleGroup && onToggleGroup(ADVANCED_CSS_GROUP, next)}
           />
 
