@@ -10,6 +10,9 @@ the whole task you pick, including its §8.
 - 🟢 with remainders, all of them named in their own status line: GAM-001, 002, 003, 005, 006, 007, 008, 009, 013, 014, 015, 016,
   017, 018. 🔴 **Several say "the peer's files/tree" about Rocket School — that blocker is STALE:** s22 regenerated and committed
   Rocket School, so those halves are drivable now.
+- 🔴 **A peer session is building GAM-026 right now** (as of 21:02 on 2026-09-17): `noodl-viewer-react/src/assets/style.css` carries
+  uncommitted rings for `checkbox-2`, `radio-2` and the Dropdown via `:has()`, plus a `--ring-width` token (so R25's width half is
+  being answered in code). Check that file and the focus-ring gate before touching either.
 - ⬜ new, nothing built: **GAM-026** (the focus ring's remainder, put in P88 by Richard), **GAM-027** (a Button can be told not to
   take the cursor), **GAM-028** (an app knows it is on a touch screen). Each carries an open ruling — R25, R26, R27.
 
@@ -37,6 +40,23 @@ the whole task you pick, including its §8.
   `scripts/devtools/deploy-from-disk.cjs` (built 09-12) writes a 12-bundle site whose "New player" skips the profile form; a fresh
   build of it throws at load (`EditorSettings` → `StorageWeb.get`, "Method not implemented."). Neither is fixed or registered.
 - Uncommitted files in the tree are peers' (P78 TPL-008 todo-list, date-picker prefab, P24/P26 docs, P92 CHR-009 verdicts, backend).
+
+## R28's work, still owed (Richard answered nine workaround criteria at the end of s23)
+
+Done in s23: **GAM-001 AC6** (comments only), **GAM-007 AC7** (the gate asks `Model.isReservedFieldName`), **GAM-014 AC6** (the kit
+wraps stay) — `8f08980ba`, TPL-007 gate 94/94. The rest each need a **regeneration and a drive**, and three of them touch the same
+generator, so do them as ONE pass over `tpl007Components.ts` → one `npm run template:rocket` → TPL-007 gate → the two drives:
+- **GAM-002 AC6** — `'' + …` back to `String(…)`; the pin at `tpl007Template.test.ts:727` holds the old string; drive `drive-rkt007-boost.js`.
+- **GAM-003 AC7** — the Expression (`round((s || 0) * 48)`) goes back between the grader and `fbMeterFill.width`, so the one-source
+  gate (`:691-693`) **relaxes**; same drive, 8/8 with no console error.
+- **GAM-015 AC6** — game-kit's `padPx` **goes** for the shipped `readPx`; refresh Rocket School's byte-identical copy of
+  `game-kit/index.js`, re-point the kit gate's `{value: 40}` arms, re-drive `drive-rkt011-hangar.js` (face 40, preview 96).
+  ⚠️ Richard wrote *"Goes?"* with the question mark — confirm before spending the regeneration.
+- **GAM-008 AC6** — `cdKick`/`cdOne` **dropped** (the builder's call on "Dunno", overturnable). The expensive one: RKT-006's 12 cells
+  plus RKT-007's clock clauses, and `tpl007Template.test.ts:624-631` updated.
+- **GAM-006 AC6** — the pins **stay** (builder's call on "I dunno"); the drive half is still owed: flip `chStates` to `true` in a copy,
+  drive the selected look, and read TPL-005's two unpinned nodes.
+- **GAM-018 AC7** — the pixel game **takes confetti**: that is a P78 TPL-005 change (its own generator and gates), registered there.
 
 ## Do, in order
 
