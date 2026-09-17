@@ -1230,6 +1230,8 @@ Remaining difference, by design of the data: a prop-list entry keeps its `bg-2` 
 
 ### 20.5 Left
 
+- ✅ **Richard on slice 12 (2026-09-17): "Looks good"** — approved as drawn, actions under the list.
+
 - Selects do not stretch at wide (§18.2.4); Text's 33px; s21 still-small; §14.3 opacity `''`.
 - `ComponentPortsView` still draws `sidebar-panel-edit-button` + FA (not in the property panel; CHR-010's icon-font scope).
 - AC5: CHR-004 + `test:ci`. AC1: Richard's WORTHY on the Group pair.

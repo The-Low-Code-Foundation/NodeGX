@@ -23,17 +23,12 @@ at that moment and did not launch.**
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | 🟡 slices 1–11 approved, **slice 12 awaits his look**. AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Region leftovers §20.5 |
+| **CHR-009 the panel designed** | 🟡 slices 1–12 approved (12: "Looks good", after s25). AC2 met on the Group by ruling (§19.1.4). AC1 = Richard's WORTHY on the Group pair. AC5 needs CHR-004 + `test:ci`. Region leftovers §20.5 |
 | CHR-004, 010, 011 | ⬜ |
 
 ## What to do next, in order (re-run `set/drive-set.js` before and after each)
 
-0. **Show Richard slice 12** as a same-crop pair. Before: `verdicts/CHR-009/2026-09-17/set/after/props-function-docked-top-light.png`
-   and `props-states-docked-top-light.png`. After: `set/lists/` (same names), plus `set/slice12/function-one-entry-light.png`
-   and `states-one-entry-dark.png`. Ask in plain words: "the list's `</>` and `+` now sit under the list on both nodes, drawn
-   like the head's icons. OK?" The heading position was **rejected on evidence, not taste**: there is no header action slot, a
-   single-group node draws no heading, and a filtered panel moves rows. If he wants them in the heading, that needs a
-   `PropertyGroups` header-action slot, which is a bigger build. Tell him so.
+0. ✅ Slice 12 approved by Richard after s25 ("Looks good"), actions under the list.
 1. **Selects do not stretch at wide** (`Position`/`Layout` ≈174px at 736 while number fields fill; `Box Sizing` cut). **Measure
    before building.** Select a Group at wide and walk the `Position` select's ancestors (`getBoundingClientRect`, computed
    `width`/`flex`/`max-width`) up to `.property-panel-row`, beside `Vertical Gap`'s chain. s25 already **ruled out by reading**:
@@ -98,7 +93,7 @@ at that moment and did not launch.**
 
 ## Still Richard's
 
-1. Slice 12's look (item 0).
+1. ~~Slice 12's look~~ approved.
 2. AC1's WORTHY on the Group pair, when the region list is done.
 3. R6 final ("ok so far"; show the cut census).
 4. The `···` menu is DECLINED. CHR-007 AC4 `_portsHash` clause declined. §3.4 closed by position (s20).
