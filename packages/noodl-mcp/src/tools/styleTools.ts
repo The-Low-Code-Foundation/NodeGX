@@ -24,6 +24,7 @@ import {
   type StyleTokensData,
   type TokenCategory
 } from '../editor-deps';
+import { applyPresetFonts } from '../presetFontFiles';
 import { ToolError } from '../errors';
 import { readIconSets, renderIconSets } from '../iconSets';
 import { readImagery, renderImagery } from '../imagery';
@@ -164,7 +165,9 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
       description:
         'Adopt a built-in style preset for this project — a curated set of token overrides that gives a ' +
         'coherent look from the start. Applied as token overrides on top of the defaults (like ' +
-        'set_project_tokens). List available presets via get_style_vocabulary (presets field).',
+        'set_project_tokens). A preset that names a typeface also copies its font files into noodl_modules ' +
+        '(and removes a previous preset\'s font folder if nobody changed it). List available presets via ' +
+        'get_style_vocabulary (presets field).',
       inputSchema: {
         preset_id: z.string().describe(
           `One of: ${listVocabularyPresets()
@@ -182,18 +185,23 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
         });
       }
       const entries = Object.entries(preset.tokens).map(([name, value]) => ({ name, value }));
+      // P88 GAM-016 — the typeface travels with the tokens that name it. Reported, never fatal: the
+      // tokens are the preset, and a font that could not be copied is named in `fonts.failed`, which
+      // `validate_project`'s `font-face-not-shipped` repeats until it is fixed.
+      const fonts = applyPresetFonts(store.projectDir, preset.id);
       // Modern = the defaults, so its override map is empty; clear overrides to
       // return to defaults rather than write an empty block.
       if (entries.length === 0) {
         store.writeDesignTokens(TOKEN_METADATA_KEY, null);
-        return jsonResult({ ok: true, preset: preset.id, customTokenCount: 0 });
+        return jsonResult({ ok: true, preset: preset.id, customTokenCount: 0, fonts });
       }
       const customTokens = upsertTokens(store, entries);
       return jsonResult({
         ok: true,
         preset: preset.id,
         updated: entries.map((e) => e.name),
-        customTokenCount: customTokens.length
+        customTokenCount: customTokens.length,
+        fonts
       });
     })
   );

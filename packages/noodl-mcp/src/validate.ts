@@ -47,6 +47,7 @@ import {
   sortDiagnostics
 } from './editor-deps';
 import type { ComponentNodesView } from './editor-deps';
+import { buildEffectiveTokens, checkFontFaces, readStoredTokens } from './editor-deps';
 import { catalogGeneration, catalogIndex } from './catalog';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
@@ -463,8 +464,57 @@ export function validateOnDisk(
   }
 
   const report = validator().validate(project, validatorOptions);
-  const targets = store.listComponents().map((row) => ({ key: row.path, name: row.legacyName }));
-  return { report: withPreconditions(report, onDiskPreconditions(store, views, targets, emitSkipNotes)) };
+  const rows = store.listComponents();
+  const targets = rows.map((row) => ({ key: row.path, name: row.legacyName }));
+  const root = rows.find((row) => row.type === 'root') ?? rows[0];
+  return {
+    report: withPreconditions(report, [
+      ...onDiskPreconditions(store, views, targets, emitSkipNotes),
+      ...fontFaceDiagnostics(store, root ? root.legacyName : '')
+    ])
+  };
+}
+
+/**
+ * P88 GAM-016 (R16 (c)) — a family token naming a face no module stylesheet declares.
+ *
+ * Project-wide, so only `validate_project` asks it, once, against the root component. The
+ * stylesheets are the ones each `noodl_modules/<dir>/manifest.json` lists under
+ * `browser.stylesheets`, which is exactly the set the viewer links into the page.
+ */
+function fontFaceDiagnostics(store: ProjectStore, component: string): Diagnostic[] {
+  const tokens = [...buildEffectiveTokens(readStoredTokens(store.designTokenMetaSource())).values()];
+  return checkFontFaces({ tokens, stylesheets: moduleStylesheets(store.projectDir), component });
+}
+
+function moduleStylesheets(projectDir: string): string[] {
+  const modulesDir = path.join(projectDir, 'noodl_modules');
+  let dirs: string[];
+  try {
+    dirs = fs.readdirSync(modulesDir);
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  for (const dir of dirs) {
+    let manifest: { browser?: { stylesheets?: unknown } };
+    try {
+      manifest = JSON.parse(fs.readFileSync(path.join(modulesDir, dir, 'manifest.json'), 'utf8'));
+    } catch {
+      continue;
+    }
+    const sheets = manifest?.browser?.stylesheets;
+    if (!Array.isArray(sheets)) continue;
+    for (const sheet of sheets) {
+      if (typeof sheet !== 'string') continue;
+      try {
+        out.push(fs.readFileSync(path.join(projectDir, sheet), 'utf8'));
+      } catch {
+        // A stylesheet the manifest names but the folder lacks declares nothing, which is the finding.
+      }
+    }
+  }
+  return out;
 }
 
 /**

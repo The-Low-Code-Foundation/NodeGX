@@ -42,8 +42,10 @@ export const EnterprisePreset: StylePreset = {
     // Focus ring
     '--ring': '#0f172a',
     '--ring-offset': '#ffffff',
-    // Font family — professional, slightly traditional
-    '--font-sans': '"Source Sans Pro", "Segoe UI", ui-sans-serif, sans-serif',
+    // Font family — professional, slightly traditional.
+    // GAM-016: Source Sans 3 is the face this preset ships (`presetFonts.ts`); it is what Adobe's Source Sans
+    // Pro is now called. The old name stays second, for a machine that has the old face installed.
+    '--font-sans': '"Source Sans 3", "Source Sans Pro", "Segoe UI", ui-sans-serif, sans-serif',
     // Border radius — conservative
     '--radius-sm': '2px',
     '--radius-md': '4px',

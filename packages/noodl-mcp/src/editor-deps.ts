@@ -328,6 +328,14 @@ export type {
   TokenCategory
 } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/TokenCategories';
 export { getPreset, getAllPresets } from '../../noodl-editor/src/editor/src/models/StylePresets/StylePresetsModel';
+// P88 GAM-016 — a preset's typeface travels with it. Import-free, like `starterAssetList`.
+export {
+  planPresetFonts,
+  PRESET_FONTS,
+  PRESET_FONT_SOURCE_ROOT
+} from '../../noodl-editor/src/editor/src/models/StylePresets/presetFonts';
+export type { PresetFontPlan, PresetFontReader } from '../../noodl-editor/src/editor/src/models/StylePresets/presetFonts';
+export { checkFontFaces } from '../../noodl-editor/src/editor/src/validation/fontFaces';
 export type { StylePreset } from '../../noodl-editor/src/editor/src/models/StylePresets/StylePresetTypes';
 
 // ─── Project docs (AIX-009) ───────────────────────────────────────────────────

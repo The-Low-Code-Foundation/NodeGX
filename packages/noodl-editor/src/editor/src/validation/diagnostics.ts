@@ -344,6 +344,18 @@ export enum DiagnosticCode {
    */
   PageCannotScroll = 'page-cannot-scroll',
   /**
+   * P88 GAM-016 (R16 (c)) — a family token (`--font-sans`, `--font-serif`, `--font-mono`) whose
+   * **first** family is a named face that no `@font-face` in the project's module stylesheets
+   * declares, and that is not a generic or widely installed platform family.
+   *
+   * The page then draws the next family in the stack, on every visitor's machine, with zero console
+   * errors — and `getComputedStyle().fontFamily` still reports the stack as written, so nothing a
+   * person or an agent reads says it happened. Measured on deployed pages before the fix: Playful,
+   * Enterprise and Soft loaded no face at all. A warning, not an error: the page still reads.
+   * Project-wide, so it is reported once per token against the root component.
+   */
+  FontFaceNotShipped = 'font-face-not-shipped',
+  /**
    * A bare number on a units-typed port that is read as a **percentage** —
    * `width`, `height`, `maxWidth`, `minWidth`. `{ value, unit }` is the form
    * real content uses: across the whole repository these ports are written in

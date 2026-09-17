@@ -1,6 +1,6 @@
 # GAM-016 — The font a preset names is the font the page draws
 
-**Status: ⬜ not started. ✅ R16 ruled s19 (§5): buildable.** **Source:** [P78 D69](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC3, 2026-09-13 · **Side:** product (style presets / project modules)
+**Status: 🟢 built (session 22, 2026-09-17).** (a) + (c) as ruled, and the switching addendum ruled in s22. AC1 RED on deployed pages, AC2 with 10 reverted arms, AC3 + AC6 deployed half, AC4, AC5. **Left:** AC3's editor-canvas half (the wizard not driven); members-area's `Source Sans Pro` finding; an MCP bundle rebuild. **Source:** [P78 D69](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC3, 2026-09-13 · **Side:** product (style presets / project modules)
 
 A person picks the Playful look for their app. It says Nunito, and every visitor reads the platform's fallback font,
 because nothing ever ships or loads Nunito. Richard played Rocket School session 1 that way.
@@ -69,6 +69,8 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
 
 > 🔒 **R16** **Ruled (2026-09-17, s19, asked in plain words): (a) with (c).** A preset brings its font files (licences, offline, never fetched) when applied, and a validation door warns when a `--font-*` token names a face no `@font-face` declares. ⚠️ Still open inside the ruling: what switching preset does to an installed font module (§5 (d)); asked once the build reaches it.
 
+> 🔒 **R16 addendum** **Ruled (2026-09-17, s22, asked in plain words when `set_style_preset` reached it): remove it if untouched.** Switching preset deletes the old preset's font folder only when its files are byte-identical to what shipped (a deleted file counts as untouched, an added file does not); otherwise the folder stays and the tool says which file changed.
+
 ## 6. Acceptance criteria
 
 | AC | Clause |
@@ -90,4 +92,94 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
 
 ## 8. Record
 
-Not started.
+### Session 22 (2026-09-17, over `cf435545f`) — built, (a) + (c)
+
+**AC1, RED at HEAD, deployed and driven.** Projects made by the real MCP `set_style_preset` on the demo-app fixture (the MCP route),
+and the same plus the starter assets copied as `installStarterAssets` does (the editor route's artefact, **reconstructed, not driven
+through the wizard**). The demo-app Router has no pages, so the first drive drew a blank page and its control loaded nothing: re-based
+on a page that renders (a paragraph, a 32px heading, a Button, a Text Input), carrying the `designTokens` metadata the tool wrote,
+verbatim. Deployed with `nodegx-deploy.cjs`; read `[...document.fonts]` after `fonts.ready` (§7). No preset face is installed on the machine.
+
+| route | Modern | Playful | Enterprise | Soft |
+|---|---|---|---|---|
+| editor (starter assets) | **Inter loaded** (known-firing) | nothing loaded | nothing loaded | nothing loaded |
+| MCP `set_style_preset` | nothing loaded (MCP places no starter assets, SBR-014's gap) | nothing loaded | nothing loaded | nothing loaded |
+
+- 🔴 §7's trap measured: `getComputedStyle().fontFamily` read `Nunito, Quicksand, …` on the page that loaded no Nunito.
+- MCP `create_project` places no `noodl_modules` at all (`createProject.ts:564`, read), so it has no Inter either.
+- Only the pending-preset path applies a preset in the editor (`StyleTokensModel._applyAndClearPendingPreset`, the one caller). The
+  "applies one later" route is MCP `set_style_preset`, which is where switching happens.
+
+**Built.**
+- **Font folders** `noodl-editor/src/assets/preset-fonts/{nunito,dm-sans,source-sans-3}`: the Latin and Latin-extended variable woff2
+  from `@fontsource-variable/*@5.3.0` (unmodified; Nunito's Latin file is byte-identical to Rocket School's), `OFL.txt`, a `styles.css`
+  with two `@font-face` rules and `font-display: swap`, and a manifest listing it. Nunito 75 KB, DM Sans 55 KB, Source Sans 3 89 KB.
+- **Enterprise** now names `"Source Sans 3", "Source Sans Pro", …`: Source Sans 3 is the current OFL name of the face; the old name
+  stays second for a machine that has it installed.
+- `StylePresets/presetFonts.ts` (import-free, like `starterAssetList.ts`): the preset → typeface table and `planPresetFonts`, which
+  copies what is missing, never overwrites, and removes another preset's folder only when untouched (the addendum).
+- **Editor:** `installPresetFonts` beside `installStarterAssets` in `LocalProjectsModel.newProject`, before the project loads, with
+  the pending preset **peeked** (`peekPendingPresetId`) so `StyleTokensModel` still consumes it for the tokens.
+- **MCP:** `set_style_preset` performs the plan (`presetFontFiles.ts`) and returns `fonts: { added, removed, kept, failed? }`. The files
+  are found beside the server (`extraResources` → `noodl-mcp/preset-fonts`, added to `noodl-editor/package.json`) or in a checkout
+  above it; `NODEGX_PRESET_FONTS_DIR` overrides. Unlocated, nothing is removed.
+- **(c)** `validation/fontFaces.ts` + `DiagnosticCode.FontFaceNotShipped` (`font-face-not-shipped`, warning): the first family of
+  `--font-sans` / `--font-serif` / `--font-mono` that is not a generic or common platform family and that no module stylesheet's
+  `@font-face` declares. Wired into `validate_project` (project-wide, once, on the root component).
+
+**AC2, reverted arms** (count-asserted replace, sha-restored; `scratchpad/g16/mut/run.py`). Specs: `noodl-editor/tests-unit/gam-016/`
+(`presetFonts.test.ts` 35, `installPresetFonts.test.ts` 5) and `noodl-mcp/tests/gam-016-a-preset-brings-its-typeface.test.ts` (8); fix 40/40 + 8/8 (the arms ran at 39, before the default-peek row).
+
+| mutant | editor red | MCP red |
+|---|---|---|
+| M1 never remove | 3 | 2 |
+| M2 remove an edited folder | 2 | 1 |
+| M3 overwrite a present file | 3 | — |
+| M4 Playful's row gone from the table | 11 (table count, Playful row, planner rows) | 4 |
+| M5 any stylesheet counts as the face | 1 | — |
+| M6 generic families fire | 11 | — |
+| M7 Enterprise back to "Source Sans Pro" first | 2 | — |
+| M8 `set_style_preset` places nothing | — | 7 |
+| M9 `validate_project` not wired | — | 2 (control + known-firing) |
+| M10 `installPresetFonts` a no-op | 2 | — |
+
+**AC3 + AC6, deployed half, after the fix.** Same 8 projects remade through the tools with the fix:
+
+| route | Modern | Playful | Enterprise | Soft |
+|---|---|---|---|---|
+| editor | Inter | **Nunito** | **Source Sans 3** | **DM Sans** |
+| MCP | nothing (no Inter module; the door says so) | **Nunito** | **Source Sans 3** | **DM Sans** |
+
+Every font file requested was the preset's own Latin file from the page's own origin; **0 foreign requests**, 0 console errors.
+Paragraph, heading, Button and Text Input all compute the preset family, and the loaded face is the only one on a page whose only text
+is those four (AC6). Screenshots looked at: Playful before draws the platform sans, after draws Nunito's rounded forms.
+**Not done:** the editor canvas, and the new-project wizard driven end to end (a peer's dev stack was up); "offline" is graded as
+"nothing fetched from another origin", not with the network cut.
+
+**AC4, the door, one run.** `validate_project` on the 8 fixed projects: silent on 7, one warning on MCP-Modern naming `"Inter"` (true:
+it ships no Inter). The MCP spec's control (fixture as it is: Inter warned once) and known-firing arm (Playful with its folder deleted:
+Nunito warned) sit beside the silences; M9 turns both red.
+
+**AC5, blast radius.** The door over every project in `templates/` and `library/prefabs` (53): **50 fire.** 47 are `Inter` in source
+folders that carry no starter assets because the installer adds them (every prefab, landing-pages, pixel-game, story-engine): quiet in
+a real project, and true for an MCP-made one. Three are real: **members-area names `"Source Sans Pro"` and ships nothing** (Enterprise's
+old stack), story-engine's `--font-serif` names `Iowan Old Style` (a face only Apple machines carry), and rocket-school is quiet (its own
+`rocket-school-fonts` declares Nunito). todo-list and todo-list-demo use a system stack. Deploy size added per preset: Nunito 75 KB,
+DM Sans 55 KB, Source Sans 3 89 KB (woff2), + ~1 KB CSS and 4 KB licence. In the MCP suite, 2 count gates on kit fixtures that name
+Inter and ship none went red by one warning (`cn004` AC2, `kitOverlay` CN-002 AC3); both now name the font finding and keep it out of
+the kit's count. The other reds in that run (AWP-005 budget, CMP-004 ×2, AAQ-011/F12, `kitOverlay` AC3 errors) are red with the wiring
+reverted too.
+
+**Regression readings.** `typecheck:editor` 0, `noodl-mcp` `tsc --noEmit` 0. Editor `test:main`: 487 suites, 7839/7840; the red was
+this change: HLS-009 pins the recent-projects writer at `LocalProjectsModel.ts:88`, and an added import moved it to 89. The import is
+gone (`installPresetFonts` peeks the pending preset itself, a spec row covers that call), and HLS-009 + gam-016 read 42/42.
+
+**AC7.** Rocket School's `rocket-school-fonts` stays: its token is its own (`"Nunito", ui-rounded, …`), not Playful's, and Grandstander
+is no preset's face. Its Nunito half does not come from the product, and the RKT-002 gate needs no change.
+
+**Sharing (§5's note, read):** `shareAsTemplate.ts`'s `RESTORED_ON_INSTALL` is derived from `STARTER_ASSETS` and may hold only what
+the editor puts back on install. A preset font folder is not on it and must not be: installing from a template applies no preset, so
+nothing would restore it. A shared template carries its `preset-font-*` folder whole, like any third-party module.
+
+**Found, not fixed:** members-area's `Source Sans Pro` (a template fix: switch the token to Source Sans 3 and ship the folder, with a
+render); the `--font-sans` description still says "Inter, falling back…" after a preset overrides it (REL-010, adjacent, unchanged).

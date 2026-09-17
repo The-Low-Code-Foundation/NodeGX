@@ -14,7 +14,7 @@ import { RuntimeVersionInfo } from '../models/migration/types';
 import { projectFromDirectory, unzipIntoDirectory } from '../models/projectmodel.editor';
 import { backfillProjectAgentConfig, installProjectAgentConfig } from '../models/template/installAgentConfig';
 import { createProjectFromTemplate } from '../models/template/createFromTemplate';
-import { installStarterAssets } from '../models/template/starterAssets';
+import { installPresetFonts, installStarterAssets } from '../models/template/starterAssets';
 import { GitHubOAuthService } from '../services/GitHubOAuthService';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import { tracker } from './tracker';
@@ -318,7 +318,12 @@ export class LocalProjectsModel extends Model {
       {
         makeDirectory: (directory) => filesystem.makeDirectory(directory),
         installTemplate: (templateUrl, destination) => templateRegistry.install(templateUrl, destination),
-        installStarterAssets: (destination) => installStarterAssets(destination),
+        // P88 GAM-016 — the chosen preset's typeface, placed with the starter assets so the first
+        // module scan links it. The id is peeked, not consumed: StyleTokensModel writes the tokens.
+        installStarterAssets: async (destination) => {
+          await installStarterAssets(destination);
+          await installPresetFonts(destination);
+        },
         writeAgentConfig: (destination, projectName) => this.writeAgentConfigFor(destination, projectName),
         // FB-005 T3 / AC2. The one caller passes a `makeUniquePath`, so this pair only ever
         // removes a directory that did not exist a moment ago — and it now matters, because a

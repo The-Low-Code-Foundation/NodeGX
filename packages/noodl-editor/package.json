@@ -135,6 +135,10 @@
         "to": "noodl-mcp/cloud-bundle.cjs"
       },
       {
+        "from": "src/assets/preset-fonts",
+        "to": "noodl-mcp/preset-fonts"
+      },
+      {
         "from": "../nodegx-observe/dist/nodegx-observe.cjs",
         "to": "nodegx-observe/nodegx-observe.cjs"
       },
