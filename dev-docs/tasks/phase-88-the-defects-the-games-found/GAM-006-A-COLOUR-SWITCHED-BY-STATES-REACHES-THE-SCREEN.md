@@ -421,3 +421,9 @@ byte changed) deployed in all three arms. No arm reached a choice:
   `FilterPill` (`bg`, `fg`, `edge`), which is driven above, so removing the pins is **recommended** once a drive
   reaches a choice. That is P87's call, in its own tree.
 - **TPL-005's two nodes carried no pin** and now read correct in a browser. Nothing to remove.
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"I dunno."*** Decided by the builder, overturnable: **the two pins and their gates stay.** They are cheap, they name a
+real defect, and a pin that costs nothing is worth more than the tidiness of removing it — this is the "belt and braces" the AC
+offered. AC6's drive half (flip `chStates` to `true` in a copy, drive the selected look; read TPL-005's two unpinned nodes) is still
+owed: the ruling settles the pins, not the reading.

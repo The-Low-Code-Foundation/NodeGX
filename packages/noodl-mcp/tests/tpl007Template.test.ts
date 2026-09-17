@@ -984,24 +984,30 @@ describe('TPL-007 — Rocket School, the artefact', () => {
      * name is unreachable. Read from the runtime's own Model, never copied: its prototype's members, plus the `data` field it keeps the
      * record in. `id` is the Model's id and reads back the row's own id, so it is safe.
      */
-    const reservedRowNames = (): Set<string> => {
+    /**
+     * 🔒 R28 (Richard, 2026-09-17, GAM-007 AC7): *"Follow new reserved name list."* This used to build its own set by walking the
+     * Model's prototypes and **stopping before `Object.prototype`**, so every name a Model answers for through Object — `toString`,
+     * `hasOwnProperty`, `constructor` — was missing from the list this gate checked against. It now asks the product the same
+     * question the door asks (`Model.isReservedFieldName`, GAM-007 AC2), so the gate and the door cannot drift apart.
+     */
+    const isReservedRowName = (name: string): boolean => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const loaded = require('../../noodl-runtime/src/model');
       const RuntimeModel = loaded.default ?? loaded;
-      const names = new Set<string>(['data']);
-      for (let p = RuntimeModel.prototype; p && p !== Object.prototype; p = Object.getPrototypeOf(p)) for (const n of Object.getOwnPropertyNames(p)) names.add(n);
-      return names;
+      return RuntimeModel.isReservedFieldName(name) === true;
     };
-    const rowNameClashes = (sources: Array<{ path: string; rows: unknown[] }>, reserved: Set<string>) =>
-      sources.flatMap(({ path: p, rows }) => [...new Set(rows.flatMap((r) => (r && typeof r === 'object' ? Object.keys(r) : [])))].filter((k) => reserved.has(k)).map((k) => `${p}: ${k}`));
+    const rowNameClashes = (sources: Array<{ path: string; rows: unknown[] }>) =>
+      sources.flatMap(({ path: p, rows }) => [...new Set(rows.flatMap((r) => (r && typeof r === 'object' ? Object.keys(r) : [])))].filter(isReservedRowName).map((k) => `${p}: ${k}`));
 
     it('🔴 D64: no Data/* row carries a field the runtime Model answers for itself (session 10: `on` read as its event method, and no tile drew)', () => {
-      const reserved = reservedRowNames();
-      // Known-firing: the list read from the runtime holds the name that bit, and the members a Model is used through.
-      expect([reserved.has('on'), reserved.has('get'), reserved.has('data'), reserved.has('id')]).toEqual([true, true, true, false]);
+      // Known-firing: the product answers for the name that bit, for the members a Model is used through, and for the
+      // `Object.prototype` name the old hand-walk in this gate could not see (R28). `id` reads the row's own id, so it is safe.
+      expect(
+        ['on', 'get', 'data', 'hasOwnProperty', 'toString', 'id'].map(isReservedRowName)
+      ).toEqual([true, true, true, true, true, false]);
       const sources = DATA_COMPONENTS.map((d) => ({ path: d.path, rows: JSON.parse(params('/' + d.path, `${d.path.replace(/\W/g, '').toLowerCase()}Data`).json) as unknown[] }));
       expect(sources.map((s) => s.rows.length > 0)).toEqual(DATA_COMPONENTS.map(() => true));
-      expect(rowNameClashes(sources, reserved)).toEqual([]);
+      expect(rowNameClashes(sources)).toEqual([]);
     });
 
     it('D64 sabotage arm: the shelf with its old field name is named', () => {
@@ -1010,7 +1016,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
         const { faces, ...rest } = i;
         return { ...rest, on: faces };
       });
-      expect(rowNameClashes([{ path: 'Data/Hangar', rows: doctored }], reservedRowNames())).toEqual(['Data/Hangar: on']);
+      expect(rowNameClashes([{ path: 'Data/Hangar', rows: doctored }])).toEqual(['Data/Hangar: on']);
     });
 
     it('🔴 rocket A wears the hangar’s choices in the race, and every face the child sees wears them too', () => {

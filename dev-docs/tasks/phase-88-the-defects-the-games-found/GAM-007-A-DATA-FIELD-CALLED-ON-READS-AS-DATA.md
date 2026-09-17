@@ -169,3 +169,16 @@ still walks the prototypes and stops before `Object.prototype`. It can now ask `
 | full noodl-mcp suite, Electron `test:ci`, MCP bundle rebuild | **not run** |
 
 **A is registered, with an owner:** [GAM-025](GAM-025-A-ROW-FIELD-NAMED-ON-READS-AS-THE-DATA.md). **Closed 2026-09-16 by R22: A is not built.** Renaming is the fix, and this task's texts stay as they are (`row.get('on')` throws in exported code, GAM-025 §7).
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"Follow new reserved name list."*** Rocket School's `faces` gate follows AC2's list, `Object.prototype` names included,
+rather than being retired. The rename itself stays either way. Graded by that gate's own sabotage arm.
+
+**AC7 done, as ruled.** `tpl007Template.test.ts`'s `reservedRowNames()` walk is gone; the gate now asks the product
+(`Model.isReservedFieldName`, GAM-007 AC2's own list) through `isReservedRowName`, so the gate and the door cannot drift.
+- Known-firing row grew the name the old walk could not see: `['on','get','data','hasOwnProperty','toString','id']` →
+  `[true,true,true,true,true,false]`.
+- **Reverted arm:** the old prototype walk (stopping before `Object.prototype`) put back → that row red on exactly
+  `hasOwnProperty` and `toString` (`- true, - true / + false, + false`), the sabotage arm still green; restored, 2/2.
+- Gate whole file: **94/94**.
+**Still owed on this task: the browser halves of AC1 and AC5.**

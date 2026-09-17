@@ -145,3 +145,10 @@ so changing the kit reddens the peer's template. The kit, its rebuild and `drive
 (`src/editor/index.bundle.js`) and the installed app do not carry `readPx` until rebuilt.
 
 **Not driven:** AC3's editor-canvas half. The canvas renders through the same bridge the spec grades.
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"Goes?"*** Read as: game-kit's `padPx` **goes**, in favour of the shipped `readPx` — one reader, not two, which is what
+(a) shipped it for. Owed: `library/modules/game-kit/src/kit.js` uses the scaffold's reader, Rocket School's byte-identical copy is
+refreshed with it (`tpl007Template.test.ts` requires the two to match), the kit gate's `{value: 40}` arms point at the shape the
+bridge really delivers, and `drive-rkt011-hangar.js` re-drives (header face 40, preview 96). AC3's editor-canvas half is unaffected
+and still owed. ⚠️ If "Goes?" meant the question rather than the answer, this is the one to overturn first.

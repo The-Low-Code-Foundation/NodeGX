@@ -1,6 +1,6 @@
 # GAM-014 — A kit React node draws when it is the whole of a component
 
-**Status: 🟢 built (session 15, 2026-09-16), committed `bcfb1c2aa`.** AC1 named a third candidate, **(C) the headless deploy's export**: the door writes `visualRoots: ["face"]`, and `nodegx deploy` ships `roots: []`. AC2 is fixed in `NodeGraphModel.isVisualRoot` and `exporter/util.ts`, graded with 3 reverted arms. AC4 and AC5 are graded, and the person sentence reads true in Chromium. Committed `bcfb1c2aa` (s16). **AC3's editor half measured in session 16** (§8). **Left:** AC6 (see §8). **Source:** [P78 D53](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 (Rocket School) session 1's drive, 2026-09-12 · **Side:** product (MCP door visual-root derivation, or the viewer — AC1 decides which)
+**Status: ✅ 2026-09-17 (session 23): every AC met — AC6 ruled by Richard (R28: keep the wraps) and recorded.** *(was: 🟢 built (session 15, 2026-09-16), committed `bcfb1c2aa`.** AC1 named a third candidate, **(C) the headless deploy's export**: the door writes `visualRoots: ["face"]`, and `nodegx deploy` ships `roots: []`. AC2 is fixed in `NodeGraphModel.isVisualRoot` and `exporter/util.ts`, graded with 3 reverted arms. AC4 and AC5 are graded, and the person sentence reads true in Chromium. Committed `bcfb1c2aa` (s16). **AC3's editor half measured in session 16** (§8). **Left:** AC6 (see §8). **Source:** [P78 D53](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 (Rocket School) session 1's drive, 2026-09-12 · **Side:** product (MCP door visual-root derivation, or the viewer — AC1 decides which))*
 
 A kit author makes a component whose only visual node is their kit's React node, places it on a page, and nothing
 draws: no element, no console error. Wrapping the same node in a Group makes it draw.
@@ -240,4 +240,14 @@ the recorded root, is still not driven. It needs a module that fails to register
   the root in the live model, or write `rootNodeId` with the editor closed.
 - 🔴 **`toDirectory` does not rewrite an unchanged component.** A "save, then read the file" with no edit reads the *copy's*
   bytes and grades nothing. Make an edit first, then compare the file's mtime with the copy's.
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
 
+**Richard: *"Keep."*** `Game/Face`'s Group wrap stays, and so does `Game/Keyboard`'s.
+
+**AC6 done, as ruled.** `fcRoot` in `tpl007Components.ts` carries the reason: GAM-014 fixed the cause (a kit-rooted component drew
+nothing because a deploy never loaded the kit, so its root read as an unknown type), so the wrap is a size decision — it is what
+`contentSize` is declared on — and not a workaround. `Game/Race track`'s stays for GAM-017's size half (the 30vh / 56vw budget).
+- ⚠️ **No gate pins the wraps**, so the AC's "update the template gate" had nothing to update: checked by grepping `fcRoot`, `kbRoot`,
+  `visualRoots` and `Avatar` in `tpl007Template.test.ts` — it pins their **wires** (`fcIn.options → fcAvatar.options`), not their roots.
+- Gate: **94/94**. No regeneration needed (a comment changes no output).
+**AC6 was this task's last open clause.**

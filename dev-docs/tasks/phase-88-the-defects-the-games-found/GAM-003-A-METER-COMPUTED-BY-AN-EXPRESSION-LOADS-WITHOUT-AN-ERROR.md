@@ -146,3 +146,9 @@ rule.
 **Gates** (with GAM-001 and GAM-002, one job at a time): the whole `noodl-viewer-react` suite, FLD-004's file included, is
 **114 suites, 1,496 passed**, exit 0. The whole `noodl-runtime` suite, including `fld-004-dynamic-units-port.test.js`, is
 **162 suites, 2,759 passed**, exit 0. `nodegx-export` passed 3,510 and editor `test:main` 7,522 / 7,522, both exit 0.
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"Put it back."*** The Expression returns to the shipped template: `round((s || 0) * 48)` goes back between the grader
+and `fbMeterFill.width`, because that is how a person would author a meter and the product now loads it without an error. It follows
+that the one-source gate (`tpl007Template.test.ts:691-693`) is **relaxed** — it exists only to pin the workaround. AC7's drive
+(`drive-rkt007-boost.js` 8/8, no console error) is the grading, and AC5's browser page is unaffected and still owed.

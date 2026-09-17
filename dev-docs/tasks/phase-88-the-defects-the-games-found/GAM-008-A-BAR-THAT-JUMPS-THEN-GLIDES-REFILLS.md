@@ -254,3 +254,10 @@ presses, each aimed with `elementFromPoint`. The page stamps each `pointerdown` 
 - `src/external` viewer, deploy and ssr bundles are not rebuilt, so the editor preview and deploys on this machine do not have Jump To yet.
 - An MCP bundle rebuild, so the installed app's `get_node_type` shows the ports.
 - P18: translate a jump in `useAnimatedValue`, or keep the refusal.
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"Dunno."*** Decided by the builder, overturnable: **`cdKick` and `cdOne` are dropped.** A template is read as the way to
+build something, and a kick-start the product no longer needs teaches a person to write it — the same reason an inert parameter in a
+corpus example teaches a lie. The cost is real and is why this is recorded rather than done in the same breath: removal needs a
+regeneration, RKT-006's 12 cells and RKT-007's clock clauses, and `tpl007Template.test.ts:624-631` updated. AC2 and AC5's Défi clause
+are unaffected and still owed.

@@ -200,3 +200,18 @@ parity).
 - Whole `nodegx-export`: **102 suites, 3,510 passed**, 1 skipped, exit 0.
 - Editor `test:main`: **458 suites, 7,522 / 7,522**, exit 0.
 - Not run: the noodl-mcp suites, the Electron `test:ci`, the bundles and the cloud runtime.
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"Keep them with a comment I guess."*** AC6's four sites stay in Rocket School — `hdBarRoom`, RKT-008's language-row
+States node, `hdPanel`'s `closed`-first, and D55's three removed `mounted` pass-throughs. What is owed is the comment: each gate that
+pins one of them stops citing D55 as the reason (the product no longer needs the dodge) and says it is a deliberate template choice.
+
+**AC6 done (comments only, as ruled).** `tpl007Components.ts`: `hdPanel`'s `closed`-FIRST comment and `hdBarRoom`'s States-pattern
+comment now say they are kept deliberately and that GAM-001 fixed the cause, so **neither cites D55 as the reason** any more.
+- ⚠️ **Two of AC6's four sites are not in today's generator, checked:** the *"header's language-row States node from RKT-008"* — `hdLang`
+  is a `Game/Choice row` placement, and no States node drives the language row (grepped `hdLang`, `langRoom`, `withStates` in the
+  header) — and *"D55's three removed `mounted` pass-throughs"*, which are **already absent**: `Game/Stat`, `Game/Choice row` and
+  `Game/Face` carry no `m !== false` guard (the two that remain, `rsShown` and `zsShown`, are on components whose pages do wire
+  `mounted`, which is the shape D55 said works). AC6's line citations (`:817-853`, `:823`) are stale — the file has moved since s11.
+- Gate: `noodl-mcp` `tpl007Template.test.ts` **94/94** after (a comment changes no output, so no regeneration was needed).
+**Still owed on this task: AC4 (the browser drive) and AC5 (the corpus census).**

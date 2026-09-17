@@ -683,6 +683,11 @@ const FACE: Tpl007Component = {
     // 🔴 A Group root, with the kit node inside it. A kit React node as a component's ROOT
     // renders nothing when the component is placed (measured on the deployed page, 2026-09-12);
     // a Group root draws, and the kit node draws as its child.
+    // 🔒 R28 (Richard, 2026-09-17, GAM-014 AC6): the Group around the kit node STAYS. GAM-014 fixed the cause (a kit-rooted
+    // component drew nothing, because a deploy never loaded the kit and its root read as an unknown type), so the wrap is a
+    // size decision now, not a workaround: it is what `contentSize` is declared on. `Game/Keyboard`'s `kbRoot` stays for the
+    // same reason, and `Game/Race track`'s carries the 30vh / 56vw budget until GAM-017's size half. No gate pins these three
+    // wraps (checked: the gate pins their wires, not their roots), so there was nothing to update.
     group('fcRoot', 'The face', undefined, { sizeMode: 'contentSize' }, ['fcAvatar']),
     place('fcAvatar', KIT_AVATAR, 'The picture', 'fcRoot', { look: 'pixel-art', seed: 'Rocket', size: 64, ringColor: ROLE.you }),
     outputs('fcOut', 'Tapped', [['clicked', 'signal']])
@@ -916,9 +921,14 @@ const HEADER: Tpl007Component = {
     // WHOLE bar (EN, FR and Switch player all 0, both cells), whatever the port was called (`mounted` in build 3, `hideBar` in build 4):
     // Home never feeds it, and the wire seeded Mounted with the unevaluated result. Session 6's pattern instead: a States node whose
     // FIRST state is `shown`, so a page that never says "hide" keeps its bar.
+    // 🔒 R28 (Richard, 2026-09-17, GAM-001 AC6): KEPT DELIBERATELY, and no longer because of D55 — GAM-001 fixed the unset-input
+    // cause. A States node says what each page means (`shown` / `hidden`) where a boolean would say nothing on the canvas.
     logic('hdHide', EXPRESSION_NODE, 'Hide the bar?', { expression: "hide === true ? 'hidden' : 'shown'" }),
     withStates('hdBarRoom', 'The bar, or the race’s own row', ['shown', 'hidden'], { on: { type: 'boolean', by: { shown: true, hidden: false } } }),
-    // 🔴 `closed` FIRST (D55): a States node starts in its first state, so a page that never touches the menu shows it closed.
+    // `closed` FIRST: a States node starts in its first state, so a page that never touches the menu shows it closed.
+    // 🔒 R28 (Richard, 2026-09-17, GAM-001 AC6): KEPT DELIBERATELY. It began as a D55 workaround — an unset input reached its
+    // target — and GAM-001 fixed that cause, so this is a template choice now: the first state is the one a page that says
+    // nothing should get. D55 is no longer the reason.
     withStates('hdPanel', 'Closed, the menu, or editing the player', ['closed', 'menu', 'editing'], {
       open: { type: 'boolean', by: { closed: false, menu: true, editing: true } },
       menu: { type: 'boolean', by: { closed: false, menu: true, editing: false } },

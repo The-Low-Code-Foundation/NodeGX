@@ -197,3 +197,8 @@ cause**. `cheer`'s `hasLongName` (`(name || '').length > 1`) no longer mints `le
 | whole `nodegx-export`, first run | 3 red (above); HEAD `jsfun.ts`: 70/70; after pins and golden: the 4 suites **80/80** |
 | editor `test:main` | **458 suites, 7,522 / 7,522**, exit 0 |
 | Electron `test:ci`, noodl-mcp suites, viewer/MCP bundles, cloud runtime | not run |
+### Session 23, later — R28 ruled (2026-09-17, asked in plain words: the nine workarounds)
+
+**Richard: *"Change them back."*** Rocket School's `'' + …` sites return to `String(…)`, now that an Expression offers the port.
+Owed with it: regenerate, update the pin at `tpl007Template.test.ts:727` (it pins the old string), and drive `drive-rkt007-boost.js`.
+AC4's editor drive is unaffected and still owed.
