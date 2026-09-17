@@ -1174,8 +1174,62 @@ The first run left the picker open and the next `press` read "not reachable" (it
 
 ### 19.6 Left
 
-- Function `Script Inputs/Outputs` heading buttons (bordered `</>` `+`) vs States (borderless) — §18.2.3.
+- ~~Function `Script Inputs/Outputs` heading buttons (bordered `</>` `+`) vs States (borderless) — §18.2.3.~~ §20.
 - Selects do not stretch at wide while number fields do (`Box Sizing` cut at 736) — §18.2.4.
 - Off-26: Text's 33px (the textarea, s21's comment-field overshoot family). The filter's 30 is s13 design.
 - Still-small from s21 and the §14.3 opacity `''` comparison (handoff).
+- AC5: CHR-004 + `test:ci`. AC1: Richard's WORTHY on the Group pair.
+
+## 20. Slice 12 — the list rows' actions as one control (2026-09-17, s25)
+
+### 20.1 What it was (named before building)
+
+- **The prop list** (`PropListInput`: Function/Javascript2 `Script Inputs`/`Script Outputs`, Page Stack `Components`, Create/
+  Update Record `Access Control Rules`) drew `</>` and `+` with class **`components-panel-edit-button`, which has NO rule in
+  any stylesheet** — the "bright bordered" look was Chromium's unstyled `<button>`. They were pinned `position: absolute;
+  top: -30px` over the group heading.
+- **The string list** (`StringListInput`: States `States`/`Values`, Model `Properties`, Page Inputs, Event Sender `Payload`,
+  … 25 ports) drew the same two actions borderless (`sidebar-panel-edit-button`, 33px) in a row under the list.
+- Entry rows in both drew FontAwesome `fa-pencil-square-o` / `fa-trash-o` (33px, borderless).
+- **Why not the heading for both:** the overlay assumes the list is the first row of a group whose heading is drawn. Catalog
+  census (`node-catalog.json` × the CHR-007 snapshot): 35 list ports, 34 alone in their group, `ToCSV.columns` 1 of 4;
+  `PropertyGroups` draws NO headings for a single unnamed group (`showHeaders: false`) and a filtered panel. There is no
+  header action slot to put them in properly.
+
+### 20.2 Built
+
+- `components/ListActions.tsx`: `ListIconButton` (the node head's `IconButton`, Tiny, `OpaqueOnHover`, in a 26px box; stops
+  propagation, hands the pressed element to the handler as the anchor) and `ListActions` (`</>` `list-edit-json`, `+`
+  `list-add-entry`, right-aligned 30px row). Both widgets draw `ListActions` AFTER the list; entry rows use
+  `ListIconButton` for rename/delete. 6 FontAwesome glyphs and the unstyled class gone from the two files.
+- 🔴 **The first build broke the prop list's entry row — only the PNG showed it.** The legacy label is
+  `position: absolute` with a 35px line-height, so the header's height had come from the 33px FA buttons; at 26px the
+  header shrank and the name hung below its `bg-2` band (the string list's row has `height: 35` and drew ~5px off-centre).
+  `ListInputRow.module.scss` `.ItemRow.ItemRow` (30px, line-height 30; doubled to beat the later-loading globals) and
+  `.ItemBar.ItemBar` (centred). Rename field containers `height: 35` → `100%`.
+
+### 20.3 Driven — `set/drive-lists.js` → `slice12/lists-results.json` (+ `set/lists/` from `drive-set.js`)
+
+Real mouse and `Input.insertText` on the set's States (`states`) and Function (`scriptInputs`), dev build:
+`+` ⇒ name field focused; `Alpha` + Enter ⇒ model `"Alpha"` / `[{id,label:"Alpha"}]`, row drawn with 2 `IconButton`s;
+entry header **30px, name centre − icon centre = 0, text inside the row** (both; the first build's PNG showed ~9px on the
+prop list — the metric was added after, so it was NOT armed on the broken build); pencil ⇒ field, `Beta` + Enter ⇒ model
+renamed, id kept; `</>` ⇒ JSON editor opens (x 329–849, clear of the button), closes; trash ⇒ model `null`. Empty lists in
+the set: Function and States draw identical `</>` `+` rows, both themes, docked and wide. 0 FA list glyphs left in the panel.
+Remaining difference, by design of the data: a prop-list entry keeps its `bg-2` header band because it hosts child rows
+(`Type`); a string-list entry has none.
+
+### 20.4 Gates
+
+- `chr-009/listActions.test.tsx` (new, 2). Mutants: `stopPropagation` removed ⇒ 1 red; anchor not passed ⇒ 1 red.
+- `tsc --noEmit` (editor) **EXIT 0**. `npm run colors` / `npm run type` **holding**.
+- Plain `npx jest` (editor, stack down, before the new spec was written): **481 / 7,770, all green, EXIT 0** (s24 479/7,751;
+  the P93 peer added suites). New spec 2/2 on its own. `test:ci` **not run**.
+- `dev.log`: 4 `ERROR in` lines = the P93 peer's `CanvasView.ts` `NodeSelection` mid-edit (2 errors × 2 lines, mtime 12:22:44),
+  recompiled clean. Recents restored byte-identical (`a1ea46f2`).
+
+### 20.5 Left
+
+- Selects do not stretch at wide (§18.2.4); Text's 33px; s21 still-small; §14.3 opacity `''`.
+- `ComponentPortsView` still draws `sidebar-panel-edit-button` + FA (not in the property panel; CHR-010's icon-font scope).
 - AC5: CHR-004 + `test:ci`. AC1: Richard's WORTHY on the Group pair.

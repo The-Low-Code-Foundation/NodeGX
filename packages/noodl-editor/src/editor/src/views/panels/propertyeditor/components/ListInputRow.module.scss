@@ -25,6 +25,41 @@
   color: var(--theme-color-fg-default);
 }
 
+/* CHR-009: `ListActions` — the list's `</>` and `+`, right-aligned in a 30px row like every other row. */
+.Actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  height: 30px;
+}
+
+/*
+ * An entry's row. The legacy label is `position: absolute` with a 35px line-height, so the row's height came from
+ * the old 33px FontAwesome buttons; with 26px icons the prop list's header shrank to 26 and its name hung below the
+ * band. The row now owns its height: 30, like every other row, name and icons centred on it. Doubled to beat
+ * `.sidebar-panel-item` / `.proplist-item`, which load after this module.
+ */
+.ItemRow.ItemRow {
+  position: relative;
+  height: 30px;
+  line-height: 30px;
+}
+
+.ItemBar.ItemBar {
+  height: 100%;
+  align-items: center;
+}
+
+.IconButton {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: none;
+}
+
 /**
  * Shown under the list when an entry was refused. The entry is NOT stored when
  * this appears, and the field stays open so the name can be corrected — which is

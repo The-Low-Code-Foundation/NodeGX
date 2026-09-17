@@ -1,0 +1,182 @@
+{
+  "function": {
+    "type": "JavaScriptFunction",
+    "selected": "JavaScriptFunction / Function",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 66,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-light": {
+      "elements": 66,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "docked-opened": [],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 66,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-light": {
+      "elements": 66,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "wide-opened": []
+  },
+  "states": {
+    "type": "States",
+    "selected": "States / States",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 68,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(77, 163, 255)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-light": {
+      "elements": 68,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(21, 112, 239)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "docked-opened": [],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 68,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(77, 163, 255)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-light": {
+      "elements": 68,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(21, 112, 239)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "wide-opened": []
+  }
+}

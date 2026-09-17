@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { IconName } from '@noodl-core-ui/components/common/Icon';
 import { BindingChip } from '@noodl-core-ui/components/property-panel/BindingChip/BindingChip';
 
+import { ListActions, ListIconButton } from './ListActions';
 import css from './ListInputRow.module.scss';
 
 export interface StringListInputProps {
@@ -86,7 +88,7 @@ function StringListItem({
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="sidebar-panel-item component-ports-item">
+    <div className={`sidebar-panel-item component-ports-item ${css['ItemRow']}`}>
       {editing ? (
         <div className="name-edit-container">
           <NameField
@@ -110,30 +112,10 @@ function StringListItem({
             {name}
           </span>
 
-          <div className="sidebar-panel-edit-bar">
-            <button
-              type="button"
-              className="sidebar-panel-edit-button"
-              onClick={(e) => {
-                setEditing(true);
-                e.stopPropagation();
-              }}
-            >
-              <i className="fa fa-pencil-square-o" />
-            </button>
+          <div className={`sidebar-panel-edit-bar ${css['ItemBar']}`}>
+            <ListIconButton icon={IconName.Pencil} title="Rename" onClick={() => setEditing(true)} />
 
-            {!isDefault && (
-              <button
-                type="button"
-                className="sidebar-panel-edit-button"
-                onClick={(e) => {
-                  onDelete(name);
-                  e.stopPropagation();
-                }}
-              >
-                <i className="fa fa-trash-o" />
-              </button>
-            )}
+            {!isDefault && <ListIconButton icon={IconName.Trash} title="Delete" onClick={() => onDelete(name)} />}
           </div>
         </>
       )}
@@ -188,7 +170,7 @@ export function StringListInput({
         ))}
 
         {adding && (
-          <div className="sidebar-panel-item component-ports-item">
+          <div className={`sidebar-panel-item component-ports-item ${css['ItemRow']}`}>
             <div className="name-edit-container">
               <NameField
                 initialValue=""
@@ -216,32 +198,13 @@ export function StringListInput({
 
       {error && <div className={css['InlineError']}>{error}</div>}
 
-      <div className="sidebar-panel-edit-bar stringlist-add-button-container">
-        <button
-          type="button"
-          className="sidebar-panel-edit-button"
-          title="Edit as JSON"
-          onClick={(e) => {
-            onOpenCode(e.currentTarget);
-            e.stopPropagation();
-          }}
-        >
-          <i className="fa fa-code" />
-        </button>
-
-        <button
-          type="button"
-          className="sidebar-panel-edit-button"
-          title="Add entry"
-          onClick={(e) => {
-            setError(undefined);
-            setAdding(true);
-            e.stopPropagation();
-          }}
-        >
-          <i className="fa fa-plus" />
-        </button>
-      </div>
+      <ListActions
+        onOpenCode={onOpenCode}
+        onAdd={() => {
+          setError(undefined);
+          setAdding(true);
+        }}
+      />
     </div>
   );
 }
