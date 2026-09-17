@@ -21,17 +21,31 @@ const TITLE: Record<RowMeta['tone'], (meta: RowMeta) => string> = {
   unrouted: () => 'No Router lists this page, so nothing can navigate to it'
 };
 
-export function RowMetaLabel({ meta }: { meta: RowMeta | null | undefined }) {
+export function RowMetaLabel({
+  meta,
+  isStart
+}: {
+  meta: RowMeta | null | undefined;
+  /** TVW-001 (d): the Router opens this page first — said before the route, as the mock's `★`. */
+  isStart?: boolean;
+}) {
   if (!meta) return null;
 
   return (
-    <span
-      className={classNames(css['Meta'], css[`Meta-${meta.tone}`])}
-      data-test="component-tree-meta"
-      data-tone={meta.tone}
-      title={TITLE[meta.tone](meta)}
-    >
-      {meta.text}
-    </span>
+    <>
+      {isStart && (
+        <span className={css['MetaStart']} data-test="component-tree-start" title="The Router opens this page first">
+          start
+        </span>
+      )}
+      <span
+        className={classNames(css['Meta'], css[`Meta-${meta.tone}`])}
+        data-test="component-tree-meta"
+        data-tone={meta.tone}
+        title={TITLE[meta.tone](meta)}
+      >
+        {meta.text}
+      </span>
+    </>
   );
 }

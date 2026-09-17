@@ -398,7 +398,7 @@ export function ComponentItem({
           <Icon icon={icon} size={IconSize.Small} />
         </div>
         <div className={css['Label']}>{component.localName}</div>
-        <RowMetaLabel meta={component.meta} />
+        <RowMetaLabel meta={component.meta} isStart={component.isStartPage} />
         <WarningDot count={component.warningCount} />
       </div>
     </div>

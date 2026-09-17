@@ -6,9 +6,10 @@
 
 import React from 'react';
 
-import { Sheet, TreeNode } from '../types';
+import { CLOUD_SHEET, Sheet, TreeNode } from '../types';
 import { ComponentItem } from './ComponentItem';
 import { FolderItem } from './FolderItem';
+import { SectionHeader } from './SectionHeader';
 
 interface ComponentTreeProps {
   nodes: TreeNode[];
@@ -92,6 +93,50 @@ export function ComponentTree({
   return (
     <>
       {nodes.map((node) => {
+        /* TVW-001 (d): a section is a heading over rows at the same depth — it adds no indent, and
+           the rows under it author for the section's runtime (the cloud section's create menus make
+           cloud components). */
+        if (node.type === 'section') {
+          const isCloud = node.data.runtimeType === 'cloud';
+          return (
+            <React.Fragment key={`section:${node.data.id}`}>
+              <SectionHeader section={node.data} />
+              {node.data.children.length > 0 && (
+                <ComponentTree
+                  nodes={node.data.children}
+                  level={level}
+                  onItemClick={onItemClick}
+                  onCaretClick={onCaretClick}
+                  expandedFolders={expandedFolders}
+                  activeComponentName={activeComponentName}
+                  onMakeHome={onMakeHome}
+                  onDelete={onDelete}
+                  onDuplicate={onDuplicate}
+                  onRename={onRename}
+                  onOpen={onOpen}
+                  onDragStart={onDragStart}
+                  onDrop={onDrop}
+                  canAcceptDrop={canAcceptDrop}
+                  onAddComponent={onAddComponent}
+                  onAddFolder={onAddFolder}
+                  onGoToCloudSheet={onGoToCloudSheet}
+                  renamingItem={renamingItem}
+                  renameValue={renameValue}
+                  onRenameChange={onRenameChange}
+                  onRenameConfirm={onRenameConfirm}
+                  onRenameCancel={onRenameCancel}
+                  onDoubleClick={onDoubleClick}
+                  sheets={sheets}
+                  onMoveToSheet={onMoveToSheet}
+                  matched={matched}
+                  runtimeType={node.data.runtimeType}
+                  sheetName={isCloud ? CLOUD_SHEET.displayName : sheetName}
+                />
+              )}
+            </React.Fragment>
+          );
+        }
+
         const id = node.type === 'component' ? node.data.name : node.data.path;
         const isDimmed = matched !== null && !matched.has(id);
 

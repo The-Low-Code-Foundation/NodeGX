@@ -411,6 +411,76 @@
   color: var(--theme-color-fg-highlight);
 }
 
+/* TVW-001 (d) — the start page's marker, in front of its route. Same voice as the meta, one step
+   louder: it is the one page that opens by itself. */
+.MetaStart {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--theme-color-fg-default);
+}
+
+.MetaStart + .Meta {
+  margin-left: var(--spacing-1);
+}
+
+/* -----------------------------------------------------------------------------
+ * TVW-001 (d) — section headings: Pages, Components, Logic, Cloud functions.
+ *
+ * A heading, not a row: the row height (30px, CHR-009) so the rhythm does not
+ * break, the tree inset so its label starts where a level-0 caret does, and the
+ * muted small caps the mock draws. The count sits where a row's meta sits.
+ * A Router's group inside Pages is the same heading, quieter and unspaced.
+ * -------------------------------------------------------------------------- */
+.Section {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 var(--spacing-3) 0 var(--tree-inset);
+  margin-top: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--theme-color-fg-muted);
+  user-select: none;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.Section-router {
+  margin-top: 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.SectionLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.SectionCount {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.SectionEmpty {
+  padding: 0 var(--spacing-3) var(--spacing-2) var(--tree-inset);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
+}
+
 /* -----------------------------------------------------------------------------
  * Rename (PNL-007 owns rename affordances elsewhere; the tree's inline input
  * already works and stays — it only follows the new indent arithmetic).

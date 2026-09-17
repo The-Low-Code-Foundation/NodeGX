@@ -1,14 +1,16 @@
 # Phase 93 — next session
 
-**Written 2026-09-17, end of session 6.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
+**Written 2026-09-17, end of session 7.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
 started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed; then closed TVW-003 on
-Richard's hover ruling (slice 6).
+Richard's hover ruling (slice 6). **Session 7 built TVW-001 slice 2 (row d, sections by role) —
+unit-graded and typechecked, NOT DRIVEN**: a peer session held the dev stack the whole session
+(relaunched it the moment it exited), so no editor was launched.
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | 🟡 slice 1: highlight follows the canvas (a), `×N`/`unplaced`/`empty`/route meta (b) | **AC1 ✅ AC2 ✅** · AC3–8 — |
+| TVW-001 | The panel tells the truth | 🟡 slice 1 (a, b) ✅ · slice 2 (d, sections by role) **built, undriven** | **AC1 ✅ AC2 ✅** · AC3–8 — |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** — AC1 ✅ (hover 1px / selection 2px, ruled) |
 | TVW-004 | Layers (needs 001, 003) | — | — |
@@ -21,12 +23,25 @@ Richard's hover ruling (slice 6).
 
 **ACs closed: 8** (TVW-003 all six — closed; TVW-001 AC1, AC2).
 
-## Gate readings (2026-09-17, session 6)
+## Gate readings (2026-09-17, session 7)
 
-- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **1 suite / 9**, armed (2 mutants).
-- `tsc -p packages/noodl-editor --noEmit` EXIT=0.
-- `test:ci` **not run** in s6 — owed before TVW-001 closes (AC8). Run it alone, cache cleared.
-- Driven: TVW-001 §7 slice 1 table.
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **2 suites / 18**, armed (s6: 2
+  mutants; s7: 3 mutants on `componentSections.ts`, each 1 red, restored `cmp` clean).
+- `tsc -p packages/noodl-editor --noEmit` EXIT=0 (after fixing 3 narrowing errors the new
+  `section` TreeNode raised in `ComponentsPanelReact`, `useDragDrop`, `useRenameMode`).
+- `test:ci` **not run** in s6 or s7 — owed before TVW-001 closes (AC8). Run it alone, cache cleared.
+- Driven: TVW-001 §7 slice 1 table. **Slice 2: nothing driven.**
+
+## What session 7 settled
+
+- Slice 2's decisions are in TVW-001 §7 "Slice 2 — what was built": Pages flat in Router order,
+  headed per Router only when >1 group; `start` marker; home in Pages only with a `Page` node;
+  `empty` always in Components (the spec's "its folder's section" has no answer for a split folder);
+  cloud rows keep full paths; cross-boundary drags refused in the sectioned view. None is a ruling —
+  but Richard sees them at AC7.
+- AC1 reworded in the task file to the s6-driven sequence (the handoff's "reword owed" is done).
+- 🔴 The sectioned view is **only the unfiltered view** (`currentSheet === null`, the default). A
+  selected sheet still draws the old tree — deliberately, until slice 4.
 
 ## What session 6 settled
 
@@ -40,14 +55,17 @@ Richard's hover ruling (slice 6).
 
 ## Next, in order
 
-1. **TVW-001 slice 2 — row d, sections by role** (`Pages` in Router order with the start page
-   marked, `Components`, `Logic`, `Cloud functions`; unrouted pages in `Pages`; two Routers = two
-   groups). `componentKind.ts` refuses a `logic` kind on purpose — R-H allows it only because `empty`
-   is separate; `routedBy` in the usage index is already there for the chip. Then AC3 (add/remove from
-   the Router's Pages editor, undo both ways).
-2. Slice 3 (c, AC4), slice 4 (e, AC5), slice 5 (f, AC6), then AC7 screenshots (fix the meta
+1. **Drive slice 2 FIRST** (dev stack, copy of `Landing page test V2`): the four headings
+   (`[data-test=component-tree-section]`, `data-section`), Pages in the Router's order with one
+   `[data-test=component-tree-start]`, every row still clickable/highlighting, filter keeps headings
+   only over survivors, both themes. Then `NodeGX QA Fixture` for the cloud section (rows present,
+   right-click create menu offers cloud templates, drag to a browser folder refused). Check `ps` for a
+   peer `dev:debug` first — s7 lost the whole drive to one.
+2. **AC3** — create a page no Router lists → under `Pages` with `not in a router`; add it in the
+   Router's Pages editor → chip goes, route appears, row moves into Router order; remove; undo both.
+3. Slice 3 (c, AC4), slice 4 (e, AC5 — also: `#Sheet` folders drawn as folders, and a first-cloud-function door once the sheet selector goes), slice 5 (f, AC6), then AC7 screenshots (fix the meta
    alignment beside a warning dot first) and AC8.
-3. Optional, no AC asks it: the bench outlining a canvas selection/hover inside itself.
+4. Optional, no AC asks it: the bench outlining a canvas selection/hover inside itself.
 
 ## Rulings owed by Richard
 

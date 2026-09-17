@@ -7,12 +7,23 @@
 
 import { useCallback, useState } from 'react';
 
-import { TreeNode } from '../types';
+import { CLOUD_SHEET, TreeNode } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const PopupLayer = require('@noodl-views/popuplayer').default;
 
-export function useDragDrop() {
+/**
+ * TVW-001 (d) — whether a row is on the cloud side of `#__cloud__`. Only meaningful in the
+ * sectioned (unfiltered) tree, where every row carries its full name; a selected sheet strips the
+ * prefix from folder paths, and holds one runtime anyway.
+ */
+export function isCloudNode(node: TreeNode): boolean {
+  if (node.type === 'section') return node.data.runtimeType === 'cloud';
+  const path = node.type === 'component' ? node.data.name : node.data.path;
+  return path === CLOUD_SHEET.pathPrefix.slice(0, -1) || path.startsWith(CLOUD_SHEET.pathPrefix);
+}
+
+export function useDragDrop({ guardCloudBoundary = false }: { guardCloudBoundary?: boolean } = {}) {
   const [draggedItem, setDraggedItem] = useState<TreeNode | null>(null);
   const [dropTarget, setDropTarget] = useState<TreeNode | null>(null);
 
@@ -22,6 +33,7 @@ export function useDragDrop() {
   const startDrag = useCallback((item: TreeNode, sourceElement: HTMLElement) => {
     setDraggedItem(item);
 
+    if (item.type === 'section') return; // TVW-001 (d): a heading does not drag.
     const label = item.type === 'component' ? item.data.localName : `📁 ${item.data.name}`;
 
     PopupLayer.instance.startDragging({
@@ -52,6 +64,12 @@ export function useDragDrop() {
         if (draggedItem.data.path === target.data.path) return false;
       }
 
+      // TVW-001 (d): the cloud section sits in the same tree as the browser ones now. A drop across
+      // the `#__cloud__` boundary would change which runtime executes the component, so it is not
+      // a move this tree offers (WFA-001's "Move to…" rule, applied to drag).
+      if (target.type === 'section') return false;
+      if (guardCloudBoundary && isCloudNode(draggedItem) !== isCloudNode(target)) return false;
+
       // Folder-specific rules
       if (draggedItem.type === 'folder' && target.type === 'folder') {
         // Can't drop folder into its own children (descendant check)
@@ -65,7 +83,7 @@ export function useDragDrop() {
 
       return true;
     },
-    [draggedItem]
+    [draggedItem, guardCloudBoundary]
   );
 
   /**

@@ -45,10 +45,12 @@ export interface ComponentFilterResult {
 
 /** A tree node's stable identity — the same key the tree selects and expands by. */
 function idOf(node: TreeNode): string {
+  if (node.type === 'section') return `section:${node.data.id}`;
   return node.type === 'component' ? node.data.name : node.data.path;
 }
 
 function nameOf(node: TreeNode): string {
+  if (node.type === 'section') return '';
   return node.type === 'component' ? node.data.localName : node.data.name;
 }
 
@@ -84,6 +86,14 @@ export function useComponentFilter(
      * dimming is reserved for rows kept purely as ancestry.
      */
     function walk(node: TreeNode, keepWholeSubtree: boolean): TreeNode | null {
+      /* TVW-001 (d): a section is never a match (typing "logic" filters names, not roles) and never
+         dims. It survives when something under it does, headed as before. */
+      if (node.type === 'section') {
+        const children = node.data.children.map((child) => walk(child, false)).filter(Boolean);
+        if (children.length === 0) return null;
+        return { type: 'section', data: { ...node.data, children, emptyText: undefined } };
+      }
+
       const self = nameOf(node).toLowerCase().includes(needle);
       const id = idOf(node);
 

@@ -25,7 +25,7 @@ import { buildCreateMenuItems, createMenuTitle, DEFAULT_SHEET_NAME } from './cre
 import { useComponentActions } from './hooks/useComponentActions';
 import { useComponentFilter } from './hooks/useComponentFilter';
 import { useComponentsPanel } from './hooks/useComponentsPanel';
-import { useDragDrop } from './hooks/useDragDrop';
+import { isCloudNode, useDragDrop } from './hooks/useDragDrop';
 import { useRenameMode } from './hooks/useRenameMode';
 import { useSheetManagement } from './hooks/useSheetManagement';
 import { ComponentsPanelProps } from './types';
@@ -87,7 +87,7 @@ export function ComponentsPanel({ options }: ComponentsPanelProps) {
 
   const { createSheet, renameSheet, deleteSheet, moveToSheet } = useSheetManagement();
 
-  const { draggedItem, startDrag, canDrop } = useDragDrop();
+  const { draggedItem, startDrag, canDrop } = useDragDrop({ guardCloudBoundary: currentSheet === null });
 
   const { renamingItem, renameValue, startRename, setRenameValue, cancelRename, validateName } = useRenameMode();
 
@@ -179,6 +179,7 @@ export function ComponentsPanel({ options }: ComponentsPanelProps) {
     }
 
     // Check if name actually changed
+    if (renamingItem.type === 'section') return cancelRename();
     const currentName = renamingItem.type === 'component' ? renamingItem.data.localName : renamingItem.data.name;
 
     if (renameValue === currentName) {
@@ -221,9 +222,15 @@ export function ComponentsPanel({ options }: ComponentsPanelProps) {
 
     // If we're dragging and no specific item claimed the drop, it's a root drop
     if (draggedItem && PopupLayer.instance.isDragging()) {
+      // TVW-001 (d): in the sectioned tree "root" is the browser root, so a cloud row dropped on
+      // empty space would leave `#__cloud__` and stop being a function. Not a move this offers.
+      if (currentSheet === null && isCloudNode(draggedItem)) {
+        PopupLayer.instance.dragCompleted();
+        return;
+      }
       handleDropOnRoot(draggedItem);
     }
-  }, [draggedItem, handleDropOnRoot]);
+  }, [draggedItem, handleDropOnRoot, currentSheet]);
 
   /**
    * SPR-005 — the sheet root's create menu, built once for both doors onto it.

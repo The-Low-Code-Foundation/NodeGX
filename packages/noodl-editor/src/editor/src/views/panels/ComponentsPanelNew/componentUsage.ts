@@ -45,16 +45,34 @@ export interface ComponentUsage {
   instances: UsageInstance[];
   /** Names of the Routers whose `pages` list this component (`Main` when unnamed). */
   routedBy: string[];
+  /** TVW-001 (d) — the graph holds a `Page` node. The home component can be a page too. */
+  hasPageNode: boolean;
+}
+
+/**
+ * TVW-001 (d) — a Router's page list, in the order its own Pages editor shows. Routers that share a
+ * name (the same Router placed on two pages) are one list: the runtime resolves a route by name.
+ */
+export interface RouterPages {
+  name: string;
+  routes: string[];
+  /** `pages.startPage`, or the first route when unset — what `RouterAdapter.parametersChanged` writes. */
+  startPage?: string;
 }
 
 export type UsageIndex = Map<string, ComponentUsage>;
 
 const ROUTER_TYPE = 'Router';
+const PAGE_TYPE = 'Page';
 
-export function buildUsageIndex(components: readonly UsageComponent[]): UsageIndex {
+export function buildUsageIndex(
+  components: readonly UsageComponent[],
+  /** TVW-001 (d) — filled with every Router's page list, in walk order, from the same walk. */
+  routersOut?: RouterPages[]
+): UsageIndex {
   const index: UsageIndex = new Map();
   for (const component of components) {
-    index.set(component.name, { nodeCount: 0, instances: [], routedBy: [] });
+    index.set(component.name, { nodeCount: 0, instances: [], routedBy: [], hasPageNode: false });
   }
 
   for (const component of components) {
@@ -65,19 +83,36 @@ export function buildUsageIndex(components: readonly UsageComponent[]): UsageInd
       const target = node.typename ? index.get(node.typename) : undefined;
       if (target) target.instances.push({ parent: component.name, nodeId: node.id });
 
+      if (node.typename === PAGE_TYPE) own.hasPageNode = true;
+
       if (node.typename === ROUTER_TYPE) {
-        const pages = node.parameters?.pages as { routes?: unknown } | undefined;
+        const pages = node.parameters?.pages as { routes?: unknown; startPage?: unknown } | undefined;
         const routes = Array.isArray(pages?.routes) ? pages.routes : [];
         const routerName = (node.parameters?.name as string) || 'Main';
         for (const route of routes) {
           const routed = typeof route === 'string' ? index.get(route) : undefined;
           if (routed && !routed.routedBy.includes(routerName)) routed.routedBy.push(routerName);
         }
+        if (routersOut) collectRouter(routersOut, routerName, routes, pages?.startPage);
       }
     });
   }
 
   return index;
+}
+
+function collectRouter(routers: RouterPages[], name: string, routes: unknown[], startPage: unknown) {
+  let router = routers.find((r) => r.name === name);
+  if (!router) {
+    router = { name, routes: [] };
+    routers.push(router);
+  }
+  for (const route of routes) {
+    if (typeof route === 'string' && !router.routes.includes(route)) router.routes.push(route);
+  }
+  if (router.startPage === undefined) {
+    router.startPage = typeof startPage === 'string' && startPage ? startPage : router.routes[0];
+  }
 }
 
 /**

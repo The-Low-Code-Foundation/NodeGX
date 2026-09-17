@@ -38,10 +38,11 @@ folders were load-bearing organisation loses the dropdown and keeps the folders.
 
 ## 4. Acceptance criteria
 
-1. **(person)** Open the P92 corpus project (`Landing page test V2`). Double-click the `Page Router`
-   on `App`'s canvas to enter `Home`. The Components row for `Home` is highlighted without touching
-   the panel. Now click `Hero` in the panel: the canvas shows Hero *and* the row is highlighted. Press
-   ⌘[ — the highlight goes back to `Home`.
+1. **(person)** Open the P92 corpus project (`Landing page test V2`). Click `Home` in the panel:
+   the canvas shows Home *and* the row is highlighted. Double-click the `Hero` instance on Home's
+   canvas: the `Hero` row is highlighted without touching the panel. Press ⌘[ — the highlight goes
+   back to `Home`. *(Reworded s7 to the sequence driven in s6: the original first step —
+   double-clicking the `Page Router` — enters nothing, because a Router has no component port.)*
 2. Every visual component row carries `×N` or `unplaced`; the sum of all `×N` equals the count of
    instance nodes in the project (assert against a walk of every graph — the artefact, not the
    panel's own number).
@@ -83,7 +84,7 @@ AC1 against `activeComponent` **and** the rendered class, both.
 | slice | rows | built | driven |
 |---|---|---|---|
 | 1 (s6, 2026-09-17) | a, b | ✅ | AC1 ✅ (door corrected, below) · AC2 ✅ |
-| 2 | d — sections by role, `not in a router` placement | — | — |
+| 2 (s7, 2026-09-17) | d — sections by role, `not in a router` placement | ✅ | drive owed · AC3 — |
 | 3 | c — `×N` button → *Used in* | — | — |
 | 4 | e — sheets retired | — | — |
 | 5 | f — the Workbench words | — | — |
@@ -138,3 +139,39 @@ further left than on rows without (`StatTile ×4` vs `ServiceCard ×4`). Evidenc
 🔴 **Drive trap:** a double-click on a non-component node switches the sidebar to Properties; the
 Components tree is then in the DOM at 0×0 (`getBoundingClientRect` all zero). Click the rail's
 Components button (26,101) before reading row geometry.
+
+### Slice 2 — what was built (s7)
+
+- `componentSections.ts` (pure, graded in `tests-unit/tvw-001`): `sectionFor(name, kind, usage)` and
+  `pageGroups(pageNames, routers)`. The Routers are read by the same walk that counts instances —
+  `buildUsageIndex(components, routersOut)`, which also records `hasPageNode` per component.
+- The unfiltered view (no sheet selected) is now four sections: `Pages` · `Components` · `Logic` ·
+  `Cloud functions`, drawn by `SectionHeader.tsx` (`data-test="component-tree-section"`,
+  `data-section`). A selected sheet keeps the old folder tree until slice 4 retires sheets.
+- **Decisions this slice made** (the spec did not say; cheap to change, not rulings):
+  - `Pages` is **flat** in Router order — a folder would break the order the Router gives. Headings
+    per Router only when there is more than one group (two Routers, or one Router plus pages none
+    lists → `Not in a router` group). A page two Routers list draws in both groups, counts once.
+    Routers that share a name (one Router placed twice) are one group.
+  - The start page carries a `start` marker before its route (the mock's `★`); `startPage`, else
+    the first route — what `RouterAdapter.parametersChanged` writes.
+  - The **home component** goes to `Pages` only if it has a `Page` node; an `App` holding the Router
+    goes to `Components`.
+  - **`empty` always draws in `Components`.** The spec's "whichever section its folder is in, never
+    Logic" has no answer when a folder spans sections; with no nodes there is no role to read.
+  - A folder whose members split across sections draws in each section it has members in; an empty
+    folder (placeholder) draws in `Components`.
+  - `Cloud functions` rows keep their full `/#__cloud__/…` paths, so rename/drag/create need no
+    sheet prefix, and create menus inside it author cloud components. Drawn even when empty (WFA-001).
+    A drag across the boundary, or a cloud row dropped on empty space, is refused in this view.
+  - The filter never matches a section heading and drops a section with no surviving rows.
+- **Owed to slice 4:** the unfiltered view still strips `#Sheet` folders from display; the
+  first-cloud-function door is still the sheet selector (the `+` menu offers browser templates).
+
+### Slice 2 — gates
+
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **2 suites / 18**. Armed, 3 mutants
+  each 1 red: `empty` → `Logic`; unrouted pages left in walk order; a home with a `Page` kept out of
+  `Pages`. Restored, `cmp` clean.
+- `tsc -p packages/noodl-editor --noEmit` EXIT=0.
+

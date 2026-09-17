@@ -8,7 +8,8 @@ import { WarningsModel } from '@noodl-models/warningsmodel';
 
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
 import { buildKindIndex, ComponentKind, ComponentKindIndex } from '../componentKind';
-import { buildUsageIndex, RowMeta, rowMetaFor, UsageIndex } from '../componentUsage';
+import { CLOUD_PATH_PREFIX, pageGroups, SECTION_LABEL, SECTION_ORDER, sectionFor, SectionId } from '../componentSections';
+import { buildUsageIndex, RouterPages, RowMeta, rowMetaFor, UsageIndex } from '../componentUsage';
 import { CLOUD_SHEET, Sheet, TreeNode } from '../types';
 
 /**
@@ -264,16 +265,24 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
   const kindIndex = useMemo(() => buildKindIndex(ProjectModel.instance), [updateCounter]);
 
   /** TVW-001 (b) — instances, node counts and routers, from a fresh walk on the same counter. */
-  const usageIndex = useMemo(
-    () => (ProjectModel.instance ? buildUsageIndex(ProjectModel.instance.getComponents()) : new Map()),
-    [updateCounter]
-  );
+  const usage = useMemo(() => {
+    const routers: RouterPages[] = [];
+    const index: UsageIndex = ProjectModel.instance
+      ? buildUsageIndex(ProjectModel.instance.getComponents(), routers)
+      : new Map();
+    return { index, routers };
+  }, [updateCounter]);
 
   // Build tree structure with optional sheet filtering
   const treeData = useMemo(() => {
     if (!ProjectModel.instance) return [];
-    return buildTreeFromProject(ProjectModel.instance, hideSheets, currentSheet, kindIndex, usageIndex, warningCounter);
-  }, [updateCounter, hideSheets, currentSheet, kindIndex, usageIndex, warningCounter]);
+    // TVW-001 (d): the unfiltered view is sections by role. A selected sheet keeps the folder tree
+    // until slice 4 retires sheets from the UI.
+    if (currentSheet === null) {
+      return buildSectionedTree(ProjectModel.instance, hideSheets, kindIndex, usage.index, usage.routers, warningCounter);
+    }
+    return buildTreeFromProject(ProjectModel.instance, hideSheets, currentSheet, kindIndex, usage.index, warningCounter);
+  }, [updateCounter, hideSheets, currentSheet, kindIndex, usage, warningCounter]);
 
   // Toggle folder expand/collapse
   const toggleFolder = useCallback((folderId: string) => {
@@ -291,6 +300,7 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
   // Handle item click
   const handleItemClick = useCallback(
     (node: TreeNode) => {
+      if (node.type === 'section') return;
       if (node.type === 'component') {
         // Open component - trigger the NodeGraphEditor to switch to this component
         const component = node.data.component;
@@ -531,35 +541,168 @@ function convertFolderToTreeNodes(
       return;
     }
 
-    const info = kindIndex.get(comp.name);
-    const kind = info?.kind ?? 'component';
-    const warningCount = warningCountFor(comp);
-
-    const componentNode: TreeNode = {
-      type: 'component',
-      data: {
-        id: comp.id,
-        name: comp.name,
-        localName: comp.localName,
-        component: comp,
-        isRoot: kind === 'home',
-        isPage: kind === 'page',
-        isCloudFunction: kind === 'cloudfunction',
-        // "Can this be placed in, or made, a visual tree" — the question the
-        // context menu's "Make Home" actually asks.
-        isVisual: kind === 'visual' || kind === 'page' || kind === 'popup' || kind === 'home',
-        kind,
-        category: info?.category ?? 'default',
-        hasWarnings: warningCount > 0,
-        warningCount,
-        meta: metaFor(comp, kind, usageIndex),
-        path: comp.name
-      }
-    };
-    nodes.push(componentNode);
+    nodes.push(componentNodeFor(comp, kindIndex, usageIndex));
   });
 
   return nodes;
+}
+
+function componentNodeFor(
+  comp: ComponentModel,
+  kindIndex: ComponentKindIndex,
+  usageIndex: UsageIndex,
+  isStartPage?: boolean
+): TreeNode {
+  const info = kindIndex.get(comp.name);
+  const kind = info?.kind ?? 'component';
+  const warningCount = warningCountFor(comp);
+
+  return {
+    type: 'component',
+    data: {
+      id: comp.id,
+      name: comp.name,
+      localName: comp.localName,
+      component: comp,
+      isRoot: kind === 'home',
+      isPage: kind === 'page',
+      isCloudFunction: kind === 'cloudfunction',
+      // "Can this be placed in, or made, a visual tree" — the question the
+      // context menu's "Make Home" actually asks.
+      isVisual: kind === 'visual' || kind === 'page' || kind === 'popup' || kind === 'home',
+      kind,
+      category: info?.category ?? 'default',
+      hasWarnings: warningCount > 0,
+      warningCount,
+      meta: metaFor(comp, kind, usageIndex),
+      isStartPage,
+      path: comp.name
+    }
+  };
+}
+
+const CLOUD_EMPTY_TEXT = 'None yet. Cloud functions run on your backend, not in the browser.';
+
+/**
+ * TVW-001 (d) — the unfiltered tree: sections by role, the user's folders inside each.
+ *
+ * - `Pages` is flat, in Router order (`pageGroups`); a folder would break the order the Router
+ *   gives. With two Routers — or one Router and pages none lists — each group is headed.
+ * - `Components` and `Logic` are the folder tree of their own members. A folder whose components
+ *   split across sections draws in each section it has members in; its placeholder (an empty folder
+ *   made from the `+` menu) draws in `Components`.
+ * - `Cloud functions` keeps full `/#__cloud__/…` paths on its rows, so rename, drag and create act
+ *   on the real name with no sheet prefix, and its create menus author cloud components. It is
+ *   drawn even when empty (WFA-001: otherwise nothing says the runtime exists).
+ * - Sheet folders (`#Name`) are stripped from display as the unfiltered view always did; slice 4
+ *   turns them into ordinary folders.
+ *
+ * A section with no rows is not drawn, except `Cloud functions`.
+ */
+function buildSectionedTree(
+  project: ProjectModel,
+  hideSheets: string[],
+  kindIndex: ComponentKindIndex,
+  usageIndex: UsageIndex,
+  routers: RouterPages[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  warningGeneration: number
+): TreeNode[] {
+  const roots: Record<Exclude<SectionId, 'pages'>, FolderStructure> = {
+    components: { name: '', path: '/', components: [], children: [] },
+    logic: { name: '', path: '/', components: [], children: [] },
+    cloud: { name: '', path: '/', components: [], children: [] }
+  };
+  const counts: Record<SectionId, number> = { pages: 0, components: 0, logic: 0, cloud: 0 };
+  const pages: ComponentModel[] = [];
+
+  for (const comp of project.getComponents()) {
+    if (hideSheets.includes(getSheetForComponent(comp.name))) continue;
+
+    const isCloud = comp.name.startsWith(CLOUD_PATH_PREFIX);
+    const isPlaceholder = comp.name.endsWith('/.placeholder');
+    if (isPlaceholder) {
+      addComponentToFolderStructure(isCloud ? roots.cloud : roots.components, comp, isCloud ? comp.name : displayPathFor(comp.name), true);
+      continue;
+    }
+
+    const section = sectionFor(comp.name, kindIndex.get(comp.name)?.kind ?? 'component', usageIndex.get(comp.name));
+    counts[section]++;
+    if (section === 'pages') {
+      pages.push(comp);
+    } else if (section === 'cloud') {
+      addComponentToFolderStructure(roots.cloud, comp, comp.name);
+    } else {
+      const displayPath = displayPathFor(comp.name);
+      if (displayPath !== '/') addComponentToFolderStructure(roots[section], comp, displayPath);
+    }
+  }
+
+  const byName = new Map(pages.map((p) => [p.name, p]));
+  const groups = pageGroups(
+    pages.map((p) => p.name),
+    routers
+  );
+  const headed = groups.length > 1;
+  const pageChildren: TreeNode[] = [];
+  for (const group of groups) {
+    const rows = group.pages.map((row) => componentNodeFor(byName.get(row.name), kindIndex, usageIndex, row.isStart));
+    if (!headed) {
+      pageChildren.push(...rows);
+      continue;
+    }
+    pageChildren.push({
+      type: 'section',
+      data: {
+        id: `pages:${group.router ?? ''}`,
+        section: 'pages',
+        variant: 'router',
+        label: group.router ?? 'Not in a router',
+        count: rows.length,
+        runtimeType: 'browser',
+        children: rows
+      }
+    });
+  }
+
+  // The cloud tree is built on full names; its rows are what is inside the `#__cloud__` folder.
+  const cloudTree = convertFolderToTreeNodes(roots.cloud, kindIndex, usageIndex);
+  const cloudFolder = cloudTree.find((n) => n.type === 'folder' && n.data.path === CLOUD_PATH_PREFIX.slice(0, -1));
+  const cloudChildren = cloudFolder?.type === 'folder' ? cloudFolder.data.children : [];
+
+  const children: Record<SectionId, TreeNode[]> = {
+    pages: pageChildren,
+    components: convertFolderToTreeNodes(roots.components, kindIndex, usageIndex),
+    logic: convertFolderToTreeNodes(roots.logic, kindIndex, usageIndex),
+    cloud: cloudChildren
+  };
+
+  const tree: TreeNode[] = [];
+  for (const id of SECTION_ORDER) {
+    if (id === 'cloud' && (hideSheets.includes(CLOUD_SHEET.folderName) || hideSheets.includes('__cloud__'))) continue;
+    if (children[id].length === 0 && id !== 'cloud') continue;
+    tree.push({
+      type: 'section',
+      data: {
+        id,
+        section: id,
+        variant: 'section',
+        label: SECTION_LABEL[id],
+        count: counts[id],
+        runtimeType: id === 'cloud' ? 'cloud' : 'browser',
+        emptyText: children[id].length === 0 ? CLOUD_EMPTY_TEXT : undefined,
+        children: children[id]
+      }
+    });
+  }
+  return tree;
+}
+
+/** The unfiltered view's display path: a top-level `#Sheet` folder is not drawn (slice 4 changes this). */
+function displayPathFor(name: string): string {
+  const parts = name.split('/').filter((p) => p !== '');
+  if (parts.length > 0 && parts[0].startsWith('#')) return '/' + parts.slice(1).join('/');
+  return name;
 }
 
 /** TVW-001 (b) — the row's right-hand meta; the route is asked of the Router adapter only for a routed page. */
