@@ -1,6 +1,6 @@
 # GAM-022 — A wrapped row of pills is not told to become columns
 
-**Status: 🟢 built, session 12 (2026-09-15, over `e740727f8`), uncommitted.** Arm B judges the `For Each` item's visual root, and abstains on an unknowable one. The first read found all three calibration grids resolvable with a width, so R19 is not needed. AC1 RED at HEAD (9), the reverted arm 9 red, the wrong fix 10 red. Census 16 → 13. TPL-006's pin is `[]`; TPL-007's names `Hangar/Shelf` and `Pages/Profiles`, which still fire (§2 missed them). **Left:** AC7's render at 390×844. **Source:** [P78 D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-006 `Story/Sidebar`, 2026-09-12, and pinned again by TPL-007 `Game/Choice row` · **Side:** product (validator, `uncollapsible-multi-column` arm B)
+**Status: ✅ 2026-09-17 (session 23): AC7's render met, 8 pills wrap in 5 rows at 390×844 (§8 s23).** *(s12: 🟢 built over `e740727f8`.)* Arm B judges the `For Each` item's visual root, and abstains on an unknowable one. The first read found all three calibration grids resolvable with a width, so R19 is not needed. AC1 RED at HEAD (9), the reverted arm 9 red, the wrong fix 10 red. Census 16 → 13. TPL-006's pin is `[]`; TPL-007's names `Hangar/Shelf` and `Pages/Profiles`, which still fire (§2 missed them).  **Source:** [P78 D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-006 `Story/Sidebar`, 2026-09-12, and pinned again by TPL-007 `Game/Choice row` · **Side:** product (validator, `uncollapsible-multi-column` arm B)
 
 On every build the door says that a wrapped row of two-word tags "cannot collapse at any width" and suggests a `Columns`
 autoFit at 260-320px. The tags wrap correctly at 390px. Following the advice would give every tag a 300px column.
@@ -169,3 +169,19 @@ recorded here and not edited. Its `Gallery grid` (tiles at 48%) is a true grid a
   nothing because it used the leaf.
 - 🔴 A template gate's `diagnostics` carry the builder's step label (`apply`) as `component`. A per-component pin must include it.
 - 🔴 The MCP server refuses legacy `project.json`, so a `validate_project` census cannot see `library/prefabs`. Cover them another way.
+
+### Session 23 (2026-09-17, over `08b338d6d`) — AC7's render, the last clause
+
+The sidebar at 390×844, rendered from a copy of `templates/story-engine` (`render-report.js` `withRenderedPage`, Read page). The story
+ships **one** carryable thing ("what Aldis wrote"), and one pill cannot show a wrap, so eight things of mixed length were put into the
+page's own `storyCarrying` variable, in the `{ id, thing }` shape `rdCarry` writes (a first try with bare strings drew **0 pills**:
+the known-firing count caught it, so the reading below is not an empty pass).
+
+| reading | result |
+|---|---|
+| before the write | 0 pills ("Nothing yet") |
+| after, 8 things | **8 pills in 5 rows** inside `sbList` (300px, `flex-wrap: wrap`); 0 pills past the list's content box; 0 texts wider than their pill; no sideways scroll; 0 console errors |
+| screenshot (`scratchpad/g22/sidebar-390.png`, looked at) | two, one, two, one, two pills per row; the longest ("the harbour chart with the wreck marked", 295px) fits |
+
+**AC7 met.** Not measured: a single thing longer than the list is wide (a pill is content-sized, so it would not wrap inside
+itself; GAM-020's static rule abstains on the wired text). Story Engine's own story has no such thing.

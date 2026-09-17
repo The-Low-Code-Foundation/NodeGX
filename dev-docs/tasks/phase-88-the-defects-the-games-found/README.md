@@ -140,7 +140,7 @@ Each task file states its ruling in full, with the trade-offs.
 | R5 | **Moot (s17):** GAM-004 closed as not reproduced, so there is no mechanism to rule on | [GAM-004](GAM-004-A-GATE-READS-THE-VALUE-FROM-THE-SAME-TURN-AS-ITS-SIGNAL.md) |
 | R13 | ✅ **measured, now askable (session 2):** the tracker is the cause, as three faults (a no-op Focus is recorded, a recorded node is never refocused, Blur is inverted). Should it exist at all? | [GAM-012](GAM-012-A-FIELD-FOCUSED-AS-ITS-ROW-APPEARS-HAS-THE-CURSOR.md) §8 |
 | R14 | ~~AC1 finds the door wrote no visual root: refuse, warn, or treat an unknown root type as visual?~~ **Moot (s15):** AC1 excluded (A); the door writes the root | [GAM-014](GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md) |
-| R19 | a true positive of the rule turns out to have an item root the check cannot resolve | [GAM-022](GAM-022-A-WRAPPED-ROW-OF-PILLS-IS-NOT-TOLD-TO-BECOME-COLUMNS.md) |
+| R19 | a true positive of the rule turns out to have an item root the check cannot resolve | [GAM-022](GAM-022-A-WRAPPED-ROW-OF-PILLS-IS-NOT-TOLD-TO-BECOME-COLUMNS.md)  **s23: AC7 render met** — 8 carried things wrap in 5 rows inside the 300px list at 390×844, none past its box. |
 | R21 | ✅ **Ruled s19: unchecked is enough** (see the ruled table). ~~the MCP kit extractor cannot be reused for module node types. s18: kit wires are now counted unchecked; the question is only whether to check them~~ | [GAM-024](GAM-024-THE-DEPLOY-CENSUS-REPORTS-ONLY-REAL-DROPS.md) |
 
 **No ruling:** [GAM-019](GAM-019-A-WIRE-TO-AN-INPUT-A-BUILT-IN-NODE-DOES-NOT-HAVE-IS-REFUSED-AT-THE-DOOR.md) and
