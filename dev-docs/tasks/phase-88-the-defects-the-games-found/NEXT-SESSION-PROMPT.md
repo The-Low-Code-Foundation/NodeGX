@@ -53,6 +53,14 @@ the whole task you pick, including its §8.
   Two peers wanted it this evening. **Ask before launching, and announce the teardown to whoever you asked.**
 - ⚠️ **`npm run dev:debug -- --quiet` prints nothing and exits 0 even when the stack never comes up** (`opennoodl-3e`). Gate on
   the CDP port answering (`127.0.0.1:9222/json/version`), never on the launcher's exit code.
+- ✅ **A drive that needs no dev stack at all** (`opennoodl-ba`, s24): run the **packaged** app with its own port and profile —
+  `NOODL_REMOTE_DEBUG_PORT=9333` against `/Applications/NodeGX.app` — and no `:8080` is taken, so it never contends.
+  🔴 **Its boundary:** it answers for the code **that build carries**, not for the tree. Measured in the asar rather than assumed
+  from its date: 0.2.4 (built **Sep 12**) has **no** `keepsFocus`, **no** `ndl-controls-pointer:has` and **no**
+  `preset-font-nunito`, so it cannot verify GAM-016, GAM-026 or GAM-027 — driving it would read RED for a build that never
+  contained the fix. Right instrument for shipped behaviour, wrong one for a source change.
+  ⚠️ `ring-width` *did* match in that asar and is a **pre-existing substring**, not the new token: word-match, never substring,
+  when a grep decides what a bundle carries.
 - **Deploy with `node packages/nodegx-export/dist/cli.mjs deploy <project> <out> --allow-development-engine`.**
   `scripts/devtools/deploy-from-disk.cjs` deploys a *different app* — see the memory note of that name.
 - Uncommitted files in the tree are peers': the staged `library/prefabs/date-picker` font deletions were **already staged at
