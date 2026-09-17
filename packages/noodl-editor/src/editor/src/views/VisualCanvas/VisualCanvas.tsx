@@ -440,6 +440,7 @@ export function VisualCanvas({
             frame={frame}
             onFrameChange={setFrame}
             onFrameMeasured={setBenchMeasured}
+            designMode={Boolean(designMode)}
           />
         )}
 

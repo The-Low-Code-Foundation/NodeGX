@@ -24,10 +24,12 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { platform } from '@noodl/platform';
 import { guid } from '@noodl-utils/utils';
 
 import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { ViewerConnection } from '../../ViewerConnection';
+import { sandboxEditorBridge } from './editorBridge';
 import { registerLivePreview, unregisterLivePreview } from './livePreviewCapture';
 import { viewerOrigin } from './viewerOrigin';
 
@@ -76,6 +78,13 @@ export interface SandboxViewerOptions {
    * `lastExports[clientId]` for a sandbox client.
    */
   remountKey?: number;
+  /**
+   * TVW-003 AC4 — the editor's Design | Preview state, given only by a host whose design-mode
+   * clicks select on the canvas (the bench). Left out, the window gets no editor bridge at all:
+   * the authoring preview renders a proposal, and a click there must not move the app canvas.
+   * See `editorBridge`.
+   */
+  designMode?: boolean;
 }
 
 export interface SandboxViewer {
@@ -92,13 +101,16 @@ export interface SandboxViewer {
    * which is exactly the add/remove the injector needs.
    */
   attachWebview: (element: Electron.WebviewTag | null) => void;
+  /** `preload` for the `<webview>`; `undefined` unless the host passed `designMode`. */
+  preload: string | undefined;
 }
 
 export function useSandboxViewer({
   json,
   useSampleData,
   signedIn,
-  remountKey = 0
+  remountKey = 0,
+  designMode
 }: SandboxViewerOptions): SandboxViewer {
   const sessionId = useMemo(() => guid(), []);
   const clientId = `sandbox-${sessionId}`;
@@ -110,6 +122,20 @@ export function useSandboxViewer({
 
   const webview = useRef<Electron.WebviewTag | null>(null);
   const onDomReady = useRef<(() => void) | null>(null);
+
+  const bridge = sandboxEditorBridge(designMode, platform.getAppPath());
+  // Read on dom-ready, which is not when React renders.
+  const inspectScript = useRef<string | null>(null);
+  inspectScript.current = bridge.inspectScript;
+
+  // A reload re-runs this through dom-ready; this is the toggle while the page stays up.
+  useEffect(() => {
+    const element = webview.current;
+    if (!element || !bridge.inspectScript) return;
+    element.executeJavaScript(bridge.inspectScript).catch(() => {
+      // Not attached or not loaded yet — dom-ready will apply it.
+    });
+  }, [bridge.inspectScript]);
 
   useEffect(() => {
     ViewerConnection.instance.registerSandboxExport(clientId, () => latest.current);
@@ -135,7 +161,10 @@ export function useSandboxViewer({
     onDomReady.current = null;
 
     if (element) {
-      const handler = () => PreviewTokenInjector.instance.notifyDomReady(element);
+      const handler = () => {
+        PreviewTokenInjector.instance.notifyDomReady(element);
+        if (inspectScript.current) element.executeJavaScript(inspectScript.current).catch(() => undefined);
+      };
       onDomReady.current = handler;
       element.addEventListener('dom-ready', handler);
       registerLivePreview(element);
@@ -157,5 +186,5 @@ export function useSandboxViewer({
     // to the one it loaded before this option existed.
     (remountKey > 0 ? `&noodl-sandbox-remount=${remountKey}` : '');
 
-  return { clientId, src, attachWebview };
+  return { clientId, src, attachWebview, preload: bridge.preload };
 }

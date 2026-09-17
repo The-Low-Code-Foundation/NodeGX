@@ -1,8 +1,8 @@
 # Phase 93 — next session
 
-**Written 2026-09-17, end of session 4.** Session 1 scoped the phase and built TVW-003 slice 1;
-sessions 2–3 built and drove slices 2–3 (canvas binding, instance paths); session 4 built and drove
-slice 4 (canvas hover through the store) and closed AC5 and AC6.
+**Written 2026-09-17, end of session 5.** Session 1 scoped the phase and built TVW-003 slice 1;
+sessions 2–4 built and drove slices 2–4 (canvas binding, instance paths, hover); session 5 built and
+drove slice 5 (the bench gets the editor bridge) and closed AC4.
 
 ## The board, re-derived from the task files
 
@@ -10,7 +10,7 @@ slice 4 (canvas hover through the store) and closed AC5 and AC6.
 |---|---|---|---|
 | TVW-001 | The panel tells the truth | — | — |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
-| TVW-003 | One selection, three surfaces | 🟡 slices 1–4: store, canvas binding, instance paths, hover | AC2 ✅ AC3 ✅ AC5 ✅ AC6 ✅ · AC1 🟡 (solid vs "dashed", Richard) · **AC4 ❌** |
+| TVW-003 | One selection, three surfaces | 🟡 slices 1–5: store, canvas binding, instance paths, hover, bench bridge | AC2 ✅ AC3 ✅ **AC4 ✅** AC5 ✅ AC6 ✅ · AC1 🟡 (solid vs "dashed", Richard) |
 | TVW-004 | Layers (needs 001, 003) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
@@ -19,44 +19,42 @@ slice 4 (canvas hover through the store) and closed AC5 and AC6.
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 4 (TVW-003 AC2, AC3, AC5, AC6).** Built-but-undriven: the detached preview's select and
-hover paths (same payloads as docked, over ipc `viewer-select-node` / `viewer-hover-node`).
+**ACs closed: 5 (TVW-003 AC2, AC3, AC4, AC5, AC6).** TVW-003 is one ruling from closed.
+Built-but-undriven: the detached preview's select and hover paths; the authoring preview's *absence*
+of a bridge (graded by spec only).
 
-## Gate readings (2026-09-17, session 4)
+## Gate readings (2026-09-17, session 5)
 
-- editor `npx jest tests-unit/tvw-003` (from `packages/noodl-editor`): **3 suites / 35**; hover specs
-  armed (unconditional clear on leave → 1 red; no clear on unbind → 1 red).
-- `tsc -p packages/noodl-editor --noEmit` EXIT=0; `tsc -p packages/noodl-viewer-react --noEmit` EXIT=0.
-- `test:ci` seed 18181 on `3b63ca5e` + slice 4, cache cleared, alone: **2984 specs, 8 failures** — the
-  recorded eight by name. No new red.
-- Driven on a live editor: hover on/off with outline rect equal to the element and `scrollY` 0; AC5
-  panel text identical canvas-click vs preview-click on a Group and a Text. Tables in TVW-003 §6.
+- editor `npx jest tests-unit/tvw-003` (from `packages/noodl-editor`): **4 suites / 40**; bridge spec
+  armed (bridge with no design mode → 1 red; unguarded script → 1 red).
+- `tsc -p packages/noodl-editor --noEmit` EXIT=0 (viewer untouched this session).
+- `test:ci` seed 18181 on `8c7f57a0` + slice 5, cache cleared, alone: **2984 specs, 8 failures** — the
+  recorded eight by name. No new red. (The background notification said exit 0; the log's `EXIT=1`
+  is the real one, from the eight.)
+- Driven on a live editor: TVW-003 §6 slice 5 table.
 
-## What session 4 settled
+## What session 5 settled
 
-- **Hover goes through the store**: `SelectionStoreBinding` gives the app canvas `setPreviewHover`;
-  `EditorDocument`'s preview subscriber sends `hoverNode(path)` to the docked webview and over ipc to
-  the detached one. The relay `hoverStart`/`hoverEnd` broadcast is removed (sender and viewer listener).
-- 🔴 **The handoff was wrong about landmine 2.** The broadcast was not reaching a bench that drew it:
-  only `CanvasView`'s webview loads `webview-preload-viewer.js`, so only the app preview ever had the
-  listener. Measured by reading (`CanvasView.ts:98`, the only `preload` in `views/`).
-- 🔴 **Which makes AC4 harder than the handoff assumed**: the bench webview has no `window.NoodlEditor`,
-  so no `Inspector`, so a click on the bench selects nothing today. Re-measure on a running bench first.
-- 🔴 **Slice 3's "editor-window coordinates" note was about the wrong target**: `cdp.js appTarget('webview')`
-  matches nothing and falls back to the editor page. The embedded preview is its own target:
-  `appTarget('localhost:<NOODLPORT>')`. An editor-window screenshot did not show the guest outline;
-  the webview target's own capture did.
-- Read-only canvases (review/diff/authoring) no longer outline hover in the preview — slice 2's rule.
+- **The handoff was right about AC4** — re-measured by reading before building: no `preload` on the
+  bench `<webview>`, and `viewer.jsx` builds the inspector only under `window.NoodlEditor`.
+- **Smallest bridge = the same preload, bench only.** `sandboxEditorBridge(designMode, appPath)`;
+  `useSandboxViewer({ designMode })` returns `preload` and sets the inspector on dom-ready and on
+  every Design | Preview flip, in place. `SandboxPreview` (authoring) passes nothing → no bridge.
+- The bench click needs **no new editor path**: `inspectPaths` → `inspectNodes` → store, and
+  `authoredPath` drops the bench harness instance id, so the store holds `[["hero_head"]]`.
+- With the canvas on another component, a bench click moves the canvas to the definition. Correct —
+  the bench shows a definition, not an instance.
+- The app preview did not move (`scrollY` 0).
 
 ## Next, in order
 
-1. **AC4 (bench)** — drive a bench on `Hero` and confirm (eval `typeof window.NoodlEditor` in the
-   sandbox target) that it has no inspector bridge. If so, decide the smallest bridge: the preload is
-   shared with the app preview and brings `inspectPaths` + the highlight API; the sandbox hook
-   (`views/SandboxSurface/useSandboxViewer.ts`) also serves the authoring preview, where a click must
-   NOT move the app canvas. Then: click the headline on the bench → canvas on Hero selects `Headline`.
-2. **TVW-003 close-out** once AC4 lands and Richard answers AC1's style word.
-3. **TVW-001** (Components panel, `ComponentsPanelNew/` only) — unblocked, and TVW-004 needs it.
+1. **TVW-001** (Components panel, `ComponentsPanelNew/` only) — unblocked, and TVW-004 needs it. Read
+   its task file and the proposal §4.1 first.
+2. **TVW-003 close-out** the moment Richard answers AC1's style word (a one-line change either way:
+   reword the AC, or draw hover dashed in `highlighter.ts`, which needs the viewer rebuilt —
+   `src/external/viewer` is gitignored build output).
+3. Optional, no AC asks it: the bench outlining a canvas selection/hover inside itself (§2's "the
+   bench client gets the same"). Don't build it before TVW-001.
 
 ## Rulings owed by Richard
 
@@ -84,8 +82,10 @@ mode = first `[class*=ModeSegmentedButton]`. Node screen point = canvas rect ori
 clicks through the editor target at guest point + webview rect origin; guest reads via
 `webview.executeJavaScript` or the `localhost:<NOODLPORT>` target. Spy by wrapping
 `webview.executeJavaScript`; 🔴 reset it in a separate eval. Stop with `node scripts/devtools/stop-dev.js`
-(`--list` first). Drive scripts from s4: `drive-hover.js`, `drive-ac5b.js` (scratchpad, gone — the
-shapes are above).
+(`--list` first). Drive scripts from s5: `ev.js` (`--target=<substr>` + expression, awaited) and `click.js x y`
+(scratchpad, gone — the shapes are above). Bench: `EventDispatcher.instance.emit('preview-bench-mount',
+{target})` (the module with `EventDispatcher.instance`); its guest target is `--target=noodl-sandbox=`.
+🔴 An absence ("no store write") needs a guest `pointerdown` counter beside it, or it grades nothing.
 
 ## The rule that will be tempting to break
 

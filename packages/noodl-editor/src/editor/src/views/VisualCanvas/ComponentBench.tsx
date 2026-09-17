@@ -101,9 +101,20 @@ export interface ComponentBenchProps {
    * otherwise is the defect this whole phase is about.
    */
   onFrameMeasured?: (size: { width: number; height: number } | undefined) => void;
+  /**
+   * TVW-003 AC4 — the editor's Design | Preview state. In Design, a click on the bench selects that
+   * node on the canvas, the same door the app preview's click goes through.
+   */
+  designMode?: boolean;
 }
 
-export function ComponentBench({ target, frame, onFrameChange, onFrameMeasured }: ComponentBenchProps) {
+export function ComponentBench({
+  target,
+  frame,
+  onFrameChange,
+  onFrameMeasured,
+  designMode = false
+}: ComponentBenchProps) {
   const [result, setResult] = useState<BenchExport | undefined>(undefined);
   const [revision, setRevision] = useState(0);
   /**
@@ -261,7 +272,8 @@ export function ComponentBench({ target, frame, onFrameChange, onFrameMeasured }
    * `emptyState`), never here. Turning the shim off instead would hand the
    * bench the live backend — the opposite of what ruling 1(c) asked for.
    */
-  const viewer = useSandboxViewer({ json: result?.json, useSampleData: true, signedIn: true, remountKey });
+  // TVW-003 AC4 — `designMode` gives the bench the editor bridge, so a design-mode click selects.
+  const viewer = useSandboxViewer({ json: result?.json, useSampleData: true, signedIn: true, remountKey, designMode });
   const clientId = viewer.clientId;
 
   /**
@@ -772,6 +784,8 @@ export function ComponentBench({ target, frame, onFrameChange, onFrameMeasured }
                 // rule has no way to know that.
                 // eslint-disable-next-line react/no-unknown-property
                 partition={SANDBOX_PARTITION}
+                // eslint-disable-next-line react/no-unknown-property
+                preload={viewer.preload}
                 src={viewer.src}
                 {...SANDBOX_WEBVIEW_ATTRIBUTES}
               />

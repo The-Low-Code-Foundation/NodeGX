@@ -280,3 +280,49 @@ red in `tests/canvas/`. **AC6 ✅ at the floor for slice 4.**
 **AC state after slice 4:** AC2 ✅ · AC3 ✅ · AC5 ✅ · AC6 ✅ (floor, slice 4) · AC1 🟡 behaviour met
 (click, canvas → preview, hover on/off), outline is solid not "dashed" — Richard's call · AC4 ❌ open,
 needs the bench to have an inspector bridge first (above).
+
+### Slice 5 — the bench gets the editor bridge (2026-09-17, session 5) ✅ AC4
+
+- `views/SandboxSurface/editorBridge.ts` — `sandboxEditorBridge(designMode, appPath)`: `designMode`
+  left out → no preload, no script; given → the app preview's own `webview-preload-viewer.js` and a
+  guarded `NoodlEditorInspectorAPI.setEnabled(designMode)`. Pure.
+- `useSandboxViewer` takes `designMode?` and returns `preload`; runs the script on `dom-ready` and
+  again whenever Design | Preview flips, in place (no reload).
+- `ComponentBench` takes `designMode` (from `VisualCanvas`) and renders `preload` on its `<webview>`.
+  **`SandboxPreview` (the authoring preview) passes nothing**: it renders a proposal, and a click there
+  must not move the app canvas. Nothing else changed: the bench click goes through the same
+  `inspectPaths` → `inspectNodes` → store door as the app preview's, and `authoredPath` drops the
+  bench harness's instance id, so the store holds the definition path.
+
+Specs: `tests-unit/tvw-003` **4 suites / 40** (bridge +5). Armed: bridge given with no design mode
+(1 red), unguarded script (1 red); restored by `cp`, `cmp` equal. `tsc -p packages/noodl-editor
+--noEmit` EXIT=0.
+
+**Re-measured before building** (the handoff's claim): by reading, the bench `<webview>` had no
+`preload` attribute, and `viewer.jsx` builds the `Inspector` only under `window.NoodlEditor`.
+
+**Driven** (2026-09-17, own stack `NOODLPORT=8680`, CDP 9444, alone; a fresh copy of
+`Landing page test V2`; canvas on `/Sections/Hero`; bench mounted by `preview-bench-mount`; real CDP
+clicks at the headline, point verified with the guest's `elementFromPoint`; a guest `pointerdown`
+counter as the signal that the click arrived):
+| step | reading |
+|---|---|
+| bench `<webview>` | `preload` = the same path as the app preview's; guest `typeof NoodlEditor` `object`, `inspectPaths` a function, inspector present, `enabled` false (Preview mode) |
+| **control** — Preview mode, click the headline | guest counted the pointerdown on "We draw it, then we make it."; store writes **0**; canvas selection `[]` |
+| switch to Design | guest `enabled` true, **same page** (the counter survived — no reload) |
+| **AC4** — Design, click the headline | store **one** write `/Sections/Hero [["hero_head"]]` source preview; canvas on Hero selects `hero_head` ("The one display headline on the page") |
+| app preview after it | `scrollY` 0 — it did not move |
+| canvas on `/Pages/Home`, same bench click | store `/Sections/Hero [["hero_head"]]`; canvas moved to Hero, `hero_head` selected. Right: the bench shows the definition, not an instance on Home |
+| back to Preview, click again | guest `enabled` false; pointerdown counted; store writes **0** |
+
+Not driven: the authoring preview's absence of a bridge (needs an AI plan to open one; the decision
+is graded by the spec, and `SandboxPreview` does not pass `designMode`). The bench does not yet
+outline a canvas selection or hover inside itself (§2's "the bench client gets the same") — no AC
+asks it; recorded for TVW-003's close-out.
+
+`test:ci` (2026-09-17, slice 5 uncommitted on `8c7f57a0`, seed 18181, `.webpack-cache` cleared, alone):
+**2984 specs, 8 failures** — the recorded eight by name (SUB-011 ×3, NDA-017 ×2, SUB-006 ×3). No new
+red. **AC6 ✅ at the floor for slice 5.**
+
+**AC state after slice 5:** AC2 ✅ · AC3 ✅ · **AC4 ✅** · AC5 ✅ · AC6 ✅ · AC1 🟡 behaviour met, outline
+solid not "dashed" — Richard's call. TVW-003 closes when that is answered.
