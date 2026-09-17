@@ -275,6 +275,19 @@ export interface PortActivityProbe {
   isSet(portName: string): boolean;
 }
 
+/**
+ * Whether a stored parameter moves a port off its default — the `isSet` half of {@link PortActivityProbe}.
+ *
+ * 🔴 CHR-009 §15.3, driven: clearing a text field stores `''`, not `undefined`, so `!== undefined` counted an
+ * emptied `CSS Class` as `1 set` on the folded footer. An empty string on a port whose default is empty is the
+ * default. On a port that ships non-empty (a Text node's text), `''` is a real edit and still counts.
+ */
+export function isParameterSet(value: unknown, defaultValue: unknown): boolean {
+  if (value === undefined) return false;
+  if (value === '') return defaultValue !== undefined && defaultValue !== null && defaultValue !== '';
+  return true;
+}
+
 export function countActivePorts(portNames: readonly string[], probe: PortActivityProbe): number {
   let count = 0;
   for (const name of portNames) {

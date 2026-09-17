@@ -13,6 +13,7 @@ import {
   SUBJECT_GROUPS,
   activityBadgeLabel,
   countActivePorts,
+  isParameterSet,
   sumActiveCounts,
   orderPropertyGroups,
   tierForGroup
@@ -236,5 +237,21 @@ describe('the ruling, swept over the real node catalog', () => {
     // The super-group is chrome the panel draws, never a group a port declares — if a node ever
     // declared it, the panel would nest a section inside itself.
     expect(carriers.has(ADVANCED_CSS_GROUP)).toBe(false);
+  });
+});
+
+describe('isParameterSet — CHR-009 §15.3', () => {
+  it('does not count a field cleared back to an empty default', () => {
+    // Driven: clearing `CSS Class` stores '' and the folded footer read `1 set`.
+    expect(isParameterSet('', undefined)).toBe(false);
+    expect(isParameterSet('', '')).toBe(false);
+    expect(isParameterSet(undefined, 'Text')).toBe(false);
+  });
+
+  it('counts an empty string that clears a non-empty default, and any other stored value', () => {
+    expect(isParameterSet('', 'Text')).toBe(true);
+    expect(isParameterSet('drive-count', undefined)).toBe(true);
+    expect(isParameterSet(0, undefined)).toBe(true);
+    expect(isParameterSet(false, true)).toBe(true);
   });
 });

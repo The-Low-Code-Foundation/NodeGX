@@ -1,0 +1,35 @@
+{
+  "rendererRunsFix": true,
+  "steps": {
+    "baseline": {
+      "expanded": "false",
+      "count": null,
+      "stored": "\"\""
+    },
+    "typeFocused": true,
+    "afterType": {
+      "expanded": "false",
+      "count": "1 set",
+      "stored": "\"drive-count\""
+    },
+    "clearFocused": true,
+    "fieldBeforeClear": "drive-count",
+    "fieldAfterClear": "",
+    "afterClear": {
+      "expanded": "false",
+      "count": null,
+      "stored": "\"\""
+    },
+    "retyped": {
+      "expanded": "false",
+      "count": "1 set",
+      "stored": "\"drive-count\""
+    },
+    "undo": "null",
+    "afterFoldedUndo": {
+      "expanded": "false",
+      "count": null,
+      "stored": "\"\""
+    }
+  }
+}

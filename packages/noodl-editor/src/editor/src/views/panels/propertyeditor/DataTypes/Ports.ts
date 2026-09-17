@@ -35,7 +35,7 @@ import { ModelProxy } from '../models/modelProxy';
 import { PagesType } from '../Pages';
 import { countFilterableRows, filterGroups, isFilterActive, shouldOfferFilter } from '../propertyPanelFilter';
 import { hintsForNode, HINTABLE_PORTS, HINT_INPUT_PARAMETERS } from '../propertyPanelHints';
-import { ADVANCED_CSS_GROUP, countActivePorts, orderPropertyGroups } from '../propertyPanelTiers';
+import { ADVANCED_CSS_GROUP, countActivePorts, isParameterSet, orderPropertyGroups } from '../propertyPanelTiers';
 import { propertyPanelViewState } from '../propertyPanelViewState';
 import { describeRows, type RowDescriptor, type RowPortLike } from '../model/describeRows';
 import { groupGatesFor, type GroupGate } from '../model/groupGate';
@@ -777,13 +777,17 @@ export class Ports extends View {
    */
   countActiveInGroup(group: TSFixme): number {
     const names: string[] = [];
+    const defaults: Record<string, unknown> = {};
     for (const view of group.views || []) {
-      if (view && typeof view.name === 'string') names.push(view.name);
+      if (view && typeof view.name === 'string') {
+        names.push(view.name);
+        defaults[view.name] = view.port?.default;
+      }
     }
 
     return countActivePorts(names, {
       isConnected: (name) => Boolean(this.model && this.model.isPortConnected(name)),
-      isSet: (name) => Boolean(this.model) && this.model.parameters[name] !== undefined
+      isSet: (name) => Boolean(this.model) && isParameterSet(this.model.parameters[name], defaults[name])
     });
   }
 
