@@ -84,7 +84,7 @@ AC1 against `activeComponent` **and** the rendered class, both.
 | slice | rows | built | driven |
 |---|---|---|---|
 | 1 (s6, 2026-09-17) | a, b | ✅ | AC1 ✅ (door corrected, below) · AC2 ✅ |
-| 2 (s7, 2026-09-17) | d — sections by role, `not in a router` placement | ✅ | drive owed · AC3 — |
+| 2 (s7, 2026-09-17) | d — sections by role, `not in a router` placement | ✅ | driven ✅ · **AC3 ✅** |
 | 3 | c — `×N` button → *Used in* | — | — |
 | 4 | e — sheets retired | — | — |
 | 5 | f — the Workbench words | — | — |
@@ -168,10 +168,49 @@ Components button (26,101) before reading row geometry.
 - **Owed to slice 4:** the unfiltered view still strips `#Sheet` folders from display; the
   first-cloud-function door is still the sheet selector (the `+` menu offers browser templates).
 
-### Slice 2 — gates
+### Slice 2 — gates (final, after the drive's two fixes)
 
-- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **2 suites / 18**. Armed, 3 mutants
-  each 1 red: `empty` → `Logic`; unrouted pages left in walk order; a home with a `Page` kept out of
-  `Pages`. Restored, `cmp` clean.
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **3 suites / 23**. Armed: on
+  `componentSections.ts` 3 mutants each 1 red (`empty` → `Logic`; unrouted pages left in walk order;
+  a home with a `Page` kept out of `Pages`); on `pagesValue.ts` "edit in place" → 3 red. Restored,
+  `cmp` clean.
 - `tsc -p packages/noodl-editor --noEmit` EXIT=0.
+- `test:ci` not run (owed at close, AC8).
 
+### Slice 2 — drive (dev stack, copies of `Landing page test V2` and `NodeGX QA Fixture`, 2026-09-17)
+
+| step | read | result |
+|---|---|---|
+| open LPV2, first render | 🔴 `COMPONENTS 2 · LOGIC 22`: every visual component `data-kind="component"`, filed in `Logic` | ❌ **defect 1**, below |
+| same, after `rootNodeChanged` forces a rebuild | `COMPONENTS 22 · LOGIC 2` (the two `Components/Logic/*`), all `data-kind="visual"` | control: the kind was stale, not wrong |
+| fix; reload; reopen the pristine copy (fix confirmed in the bundle) | `PAGES 1 · COMPONENTS 22 · LOGIC 2 · CLOUD FUNCTIONS 0` + empty text, on first render | ✅ (twice) |
+| Pages | `Home` `start` `/halden-&-rowe-…`, no group heading (one group) | ✅ |
+| real click `Hero`, then `Home` | `activeComponent` `/Sections/Hero`, `.Selected`=[Hero]; then `/Pages/Home`, [Home] | ✅ |
+| filter `hero` / `email` / `test` / clear | only `COMPONENTS` over `Sections/Hero`; only `LOGIC` over `Components/Logic/Is valid email`; only `COMPONENTS` over `Testimonials`; clear → previous expansion back | ✅ — the heading still said `22` over one row: fixed, count = surviving rows (QA: `cart` → `LOGIC · 1`) |
+| light + dark | `slice2-sections-dark.png`, `slice2-sections-light.png` (on disk; verdict PNGs are gitignored) | read, clean |
+| **AC3** create `/Pages/Legal` (Page node, no Router) | groups `Main` [Home] + `Not in a router` [Legal · `not in a router`] | ✅ `slice2-ac3-not-in-a-router-light.png` |
+| AC3 add via the Router's Pages editor (real clicks: *Add new page* → `Legal`) | routes `[Home, Legal]`; Legal `/legal` in Router order; headings gone (one group) | ✅ |
+| AC3 undo | 🔴 before the fix: routes still `[Home, Legal]`, undo did nothing. After: `[Home]`, chip back, two groups | ✅ after **defect 2** fix |
+| AC3 redo · remove (real clicks: `…` → *Remove page*) · undo · redo · undo | `[Home, Legal]` `/legal` · `[Home]` chip · `[Home, Legal]` · `[Home]` · `[Home, Legal]`; the editor's own list follows | ✅ |
+| QA fixture | `PAGES 3` Home `start` / Catalog / Settings (Router order, `#__page__` sheet); `Content/` in both `COMPONENTS` and `LOGIC` (split folder); `Logic/*` ×3 in `LOGIC`; `CLOUD FUNCTIONS 1` `test` | ✅ `slice2-qa-fixture-cloud-dark.png` |
+| QA right-click `test` (cloud) vs `Cart Totals` (browser) | cloud: no *Create Visual Component*, *Show in workbench*, *Move to…*; browser: all three | ✅ the section's runtime reaches the menu |
+| drag across the cloud boundary | not driven (the fixture has no cloud folder); the `canDrop` guard is code-only | — |
+
+Undo/redo driven through `UndoQueue.instance.undo()/redo()`, not a ⌘Z keypress.
+
+**Two defects the drive found, both fixed here because each blocked an AC:**
+
+1. **The panel's kinds were stale on first open.** `ComponentModel.allowAsChild` reads each root's
+   cached `node.type`. Graphs only re-resolve it after the node library loads
+   (`scheduleUpdateTypes`, a `setTimeout(1)` on `libraryUpdated`/`moduleRegistered`). The panel never
+   listened, so its first walk classified every visual component as `component`. PNL-006's glyphs
+   had been wrong the same way, unseen. Slice 2 turned a dull glyph into the wrong section. Fix:
+   `useComponentsPanel` rebuilds 20ms after those library events.
+2. **The Router's Pages editor could not be undone.** `Pages.tsx` kept the Router's live `pages`
+   object and `push`/`splice`d into it. `PagesType` passed that same object as undo's `oldValue`, so
+   undo restored the change it was undoing: add, remove and *Make start page*. This predates P93. Fix:
+   `pagesValue.ts` returns a new value for every edit.
+
+**Seen, for AC7's WORTHY pass (not fixed):** the `Not in a router` heading and the row's
+`not in a router` chip say the same thing twice; rows are 26px under 30px headings (CHR-009's 30px
+row not adopted yet); the home component sorts after the folders in `Components`.

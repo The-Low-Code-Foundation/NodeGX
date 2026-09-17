@@ -2,15 +2,15 @@
 
 **Written 2026-09-17, end of session 7.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
 started TVW-001: slice 1 (rows a + b) built and driven, AC1 and AC2 closed; then closed TVW-003 on
-Richard's hover ruling (slice 6). **Session 7 built TVW-001 slice 2 (row d, sections by role) —
-unit-graded and typechecked, NOT DRIVEN**: a peer session held the dev stack the whole session
-(relaunched it the moment it exited), so no editor was launched.
+Richard's hover ruling (slice 6). **Session 7 built and drove TVW-001 slice 2 (row d, sections by
+role) and closed AC3.** The drive found two defects that blocked it, and both are fixed: the panel's
+kinds were stale on first open, and the Router's Pages editor could not be undone.
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | 🟡 slice 1 (a, b) ✅ · slice 2 (d, sections by role) **built, undriven** | **AC1 ✅ AC2 ✅** · AC3–8 — |
+| TVW-001 | The panel tells the truth | 🟡 slices 1 (a, b) and 2 (d) ✅ | **AC1 ✅ AC2 ✅ AC3 ✅** · AC4–8 — |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** — AC1 ✅ (hover 1px / selection 2px, ruled) |
 | TVW-004 | Layers (needs 001, 003) | — | — |
@@ -21,16 +21,16 @@ unit-graded and typechecked, NOT DRIVEN**: a peer session held the dev stack the
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 8** (TVW-003 all six — closed; TVW-001 AC1, AC2).
+**ACs closed: 9** (TVW-003 all six — closed; TVW-001 AC1, AC2, AC3).
 
-## Gate readings (2026-09-17, session 7)
+## Gate readings (2026-09-17, session 7, after both fixes)
 
-- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **2 suites / 18**, armed (s6: 2
-  mutants; s7: 3 mutants on `componentSections.ts`, each 1 red, restored `cmp` clean).
-- `tsc -p packages/noodl-editor --noEmit` EXIT=0 (after fixing 3 narrowing errors the new
-  `section` TreeNode raised in `ComponentsPanelReact`, `useDragDrop`, `useRenameMode`).
-- `test:ci` **not run** in s6 or s7 — owed before TVW-001 closes (AC8). Run it alone, cache cleared.
-- Driven: TVW-001 §7 slice 1 table. **Slice 2: nothing driven.**
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **3 suites / 23**, armed (s6: 2
+  mutants; s7: 3 on `componentSections.ts` + 1 on `pagesValue.ts`, all red, restored `cmp` clean).
+- `tsc -p packages/noodl-editor --noEmit` EXIT=0.
+- `test:ci` **not run** in s6 or s7. It is owed before TVW-001 closes (AC8); run it alone with the
+  cache cleared. s7 touched `propertyeditor/Pages/Pages.tsx`, which no spec in `tests/` references.
+- Driven: TVW-001 §7 has the slice 1 and slice 2 tables.
 
 ## What session 7 settled
 
@@ -40,6 +40,14 @@ unit-graded and typechecked, NOT DRIVEN**: a peer session held the dev stack the
   cloud rows keep full paths; cross-boundary drags refused in the sectioned view. None is a ruling —
   but Richard sees them at AC7.
 - AC1 reworded in the task file to the s6-driven sequence (the handoff's "reword owed" is done).
+- 🔴 **Defect 1, fixed:** on first open every visual component was filed under `Logic`, because
+  `allowAsChild` reads a cached `node.type` that resolves only after the node library loads. The
+  panel now rebuilds on NodeLibrary events. The same staleness was behind PNL-006's wrong glyphs.
+- 🔴 **Defect 2, fixed:** the Router's Pages editor mutated the parameter object that undo holds, so
+  add, remove and start page could not be undone. `pagesValue.ts` now returns a new object per edit.
+- Filter: a section heading's count is now the rows that survive the filter.
+- Seen for AC7 (not fixed): the `Not in a router` heading repeats the row chip; rows are 26px under
+  30px headings; home sorts after folders.
 - 🔴 The sectioned view is **only the unfiltered view** (`currentSheet === null`, the default). A
   selected sheet still draws the old tree — deliberately, until slice 4.
 
@@ -55,17 +63,17 @@ unit-graded and typechecked, NOT DRIVEN**: a peer session held the dev stack the
 
 ## Next, in order
 
-1. **Drive slice 2 FIRST** (dev stack, copy of `Landing page test V2`): the four headings
-   (`[data-test=component-tree-section]`, `data-section`), Pages in the Router's order with one
-   `[data-test=component-tree-start]`, every row still clickable/highlighting, filter keeps headings
-   only over survivors, both themes. Then `NodeGX QA Fixture` for the cloud section (rows present,
-   right-click create menu offers cloud templates, drag to a browser folder refused). Check `ps` for a
-   peer `dev:debug` first — s7 lost the whole drive to one.
-2. **AC3** — create a page no Router lists → under `Pages` with `not in a router`; add it in the
-   Router's Pages editor → chip goes, route appears, row moves into Router order; remove; undo both.
-3. Slice 3 (c, AC4), slice 4 (e, AC5 — also: `#Sheet` folders drawn as folders, and a first-cloud-function door once the sheet selector goes), slice 5 (f, AC6), then AC7 screenshots (fix the meta
-   alignment beside a warning dot first) and AC8.
-4. Optional, no AC asks it: the bench outlining a canvas selection/hover inside itself.
+1. **TVW-001 slice 3 — row c, AC4**: `×N` becomes a button that opens a *Used in* popover (X-Ray's
+   rows, `ComponentXRayPanel.tsx:142-160`), fed by `usage.instances` (`{parent, nodeId}`, already
+   in the index). Picking one calls `switchToComponent(parent, {node})`; assert `activeComponent`
+   and the selection. On LPV2, `ServiceCard ×4` and `StatTile ×4` are the `×3`-or-more candidates.
+2. Slice 4 (e, AC5). Sheets retire; `#Sheet` folders draw as folders (the unfiltered view still
+   strips them); a door for the first cloud function once the sheet selector goes (today the cloud
+   section's empty text names no door). Drive a drag across the cloud boundary here: s7 could not,
+   because the QA fixture has no cloud folder.
+3. Slice 5 (f, AC6), then AC7 screenshots (fix the meta alignment beside a warning dot and the three
+   s7 notes first) and AC8 (`test:ci`).
+4. Optional, no AC asks it: the bench outlining a canvas selection or hover inside itself.
 
 ## Rulings owed by Richard
 
@@ -91,13 +99,20 @@ mode = first `[class*=ModeSegmentedButton]`. Node screen point = canvas rect ori
 clicks through the editor target at guest point + webview rect origin; guest reads via
 `webview.executeJavaScript` or the `localhost:<NOODLPORT>` target. Spy by wrapping
 `webview.executeJavaScript`; 🔴 reset it in a separate eval. Stop with `node scripts/devtools/stop-dev.js`
-(`--list` first). Drive scripts from s5: `ev.js` (`--target=<substr>` + expression, awaited) and `click.js x y`
+(`--list` first). Drive scripts (s7's are in its scratchpad, gone): `ev.js` (`--target=<substr>` + expression, awaited) and `click.js x y`
 (scratchpad, gone — the shapes are above). 🔴 cdp.js reads `NOODL_REMOTE_DEBUG_PORT` at require time —
 set it to 9444 before requiring, or every call hits 9222. 🔴 zsh does not word-split `$P`: pass
 coordinates as two literal args. 🔴 A double-click on a non-component node hides the Components tree
 (0×0 rects) — click the rail's Components button first. Bench: `EventDispatcher.instance.emit('preview-bench-mount',
 {target})` (the module with `EventDispatcher.instance`); its guest target is `--target=noodl-sandbox=`.
 🔴 An absence ("no store write") needs a guest `pointerdown` counter beside it, or it grades nothing.
+s7 additions: theme = the module exporting `ThemeManager` → `setMode('light'|'dark')`; panel-only PNG
+= `Page.captureScreenshot` with `clip` = the tree's BasePanel rect (`sips -c` crops from the CENTRE);
+Router node → `__nodeGraphEditor.selectNode(findNodeWithId(id))`, then *Add new page* is
+`.sidebar-fullwidth-button`, the popup rows `.variant-item-name`, a page's menu
+`.router-pages-actions-icon`; the rail's Components button (26,101) brings the tree back after the
+property panel. `location.reload()` returns to the launcher, so re-`cp` the project copy there to
+reset it.
 
 ## The rule that will be tempting to break
 

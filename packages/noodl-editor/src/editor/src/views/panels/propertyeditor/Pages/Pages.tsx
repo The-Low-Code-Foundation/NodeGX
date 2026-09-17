@@ -11,6 +11,7 @@ import { ProjectModel } from '../../../../models/projectmodel';
 import PopupLayer from '../../../popuplayer';
 import * as NewPopupLayer from '../../../PopupLayer/index';
 import { ToastLayer } from '../../../ToastLayer/ToastLayer';
+import { RouterPagesValue, withRouteAdded, withRouteRemoved, withStartPage } from './pagesValue';
 
 // Styles
 require('../../../../styles/propertyeditor/pages.css');
@@ -152,33 +153,28 @@ export class Pages extends React.Component {
     this.props.onPageClicked && this.props.onPageClicked(p);
   }
 
+  /**
+   * TVW-001 AC3 — every edit replaces `this.value` with a new object (`pagesValue.ts`). The old
+   * one is the Router's own parameter, and `PagesType` hands it to undo as `oldValue`: mutating it
+   * in place made every edit here impossible to undo.
+   */
+  commit(next: RouterPagesValue) {
+    // @ts-expect-error
+    this.value = next;
+    this.setState({ pages: RouterAdapter.getPageInfoForComponents(next.routes) });
+    // @ts-expect-error
+    this.props.onChange && this.props.onChange(next);
+  }
+
   removePage(p) {
     // @ts-expect-error
-    if (this.value === undefined || this.value.routes === undefined) return;
-
-    // @ts-expect-error
-    const idx = this.value.routes.indexOf(p.component);
-    if (idx !== -1) {
-      // @ts-expect-error
-      this.value.routes.splice(idx, 1);
-      // @ts-expect-error
-      if (this.value.startPage === p.component) this.value.startPage = undefined;
-
-      this.setState({
-        // @ts-expect-error
-        pages: RouterAdapter.getPageInfoForComponents(this.value.routes)
-      });
-      // @ts-expect-error
-      this.props.onChange && this.props.onChange(this.value);
-    }
+    const next = withRouteRemoved(this.value, p.component);
+    if (next) this.commit(next);
   }
 
   setAsStartPage(p) {
     // @ts-expect-error
-    this.value.startPage = p.component;
-    this.setState({});
-    // @ts-expect-error
-    this.props.onChange && this.props.onChange(this.value);
+    this.commit(withStartPage(this.value, p.component));
   }
 
   onAddNewPageClicked() {
@@ -214,29 +210,13 @@ export class Pages extends React.Component {
         ProjectModel.instance.addComponent(pageComponent, { undo: true, label: 'page created' });
 
         // @ts-expect-error
-        if (this.value.routes === undefined) this.value.routes = [];
-        // @ts-expect-error
-        this.value.routes.push(fullName);
-        this.setState({
-          // @ts-expect-error
-          pages: RouterAdapter.getPageInfoForComponents(this.value.routes)
-        });
-        // @ts-expect-error
-        this.props.onChange && this.props.onChange(this.value);
+        this.commit(withRouteAdded(this.value, fullName));
 
         PopupLayer.instance.hidePopup();
       },
       onPageSelected: (page) => {
         // @ts-expect-error
-        if (this.value.routes === undefined) this.value.routes = [];
-        // @ts-expect-error
-        this.value.routes.push(page.component);
-        this.setState({
-          // @ts-expect-error
-          pages: RouterAdapter.getPageInfoForComponents(this.value.routes)
-        });
-        // @ts-expect-error
-        this.props.onChange && this.props.onChange(this.value);
+        this.commit(withRouteAdded(this.value, page.component));
 
         PopupLayer.instance.hidePopup();
       }

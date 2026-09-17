@@ -2,6 +2,7 @@ import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphC
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ComponentModel } from '@noodl-models/componentmodel';
+import { NodeLibrary } from '@noodl-models/nodelibrary';
 import { RouterAdapter } from '@noodl-models/NodeTypeAdapters/RouterAdapter';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { WarningsModel } from '@noodl-models/warningsmodel';
@@ -33,6 +34,19 @@ const PROJECT_EVENTS = ['componentAdded', 'componentRemoved', 'componentRenamed'
  */
 const GRAPH_EVENTS = ['Model.nodeAdded', 'Model.nodeRemoved', 'Model.parametersChanged'];
 const META_PARAMETER_OWNERS = new Set(['Router', 'Page']);
+
+/**
+ * TVW-001 (d) — the node-library changes after which a component's kind can change.
+ *
+ * 🔴 `ComponentModel.allowAsChild` reads each root's *cached* `node.type`. On project open the
+ * panel's first walk runs before the library has resolved those types, so every visual component
+ * read `allowAsChild === false` — kind `component`, which slice 2 files under `Logic` (driven
+ * s7: 22 of 23 visual components in `Logic` on `Landing page test V2`; PNL-006's glyphs had been
+ * wrong the same way, unseen). Each graph re-resolves its types in `scheduleUpdateTypes` — a
+ * `setTimeout(1)` booked on these same events — so the rebuild waits past it.
+ */
+const LIBRARY_EVENTS = ['libraryUpdated', 'moduleRegistered', 'moduleUnregistered', 'typeAdded', 'typeRemoved'];
+const AFTER_GRAPH_TYPE_UPDATE_MS = 20;
 
 interface UseComponentsPanelOptions {
   hideSheets?: string[];
@@ -122,6 +136,23 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
     setActiveComponentName(NodeGraphContextTmp.nodeGraph?.activeComponent?.name);
     return () => {
       EventDispatcher.instance.off(group);
+    };
+  }, []);
+
+  useEffect(() => {
+    const group = { id: 'useComponentsPanel.library' };
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    NodeLibrary.instance.on(
+      LIBRARY_EVENTS,
+      () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => setUpdateCounter((c) => c + 1), AFTER_GRAPH_TYPE_UPDATE_MS);
+      },
+      group
+    );
+    return () => {
+      clearTimeout(timer);
+      NodeLibrary.instance.off(group);
     };
   }, []);
 
