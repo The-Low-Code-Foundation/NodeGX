@@ -20,7 +20,8 @@
  *    Group sends a Blur on every unmount (`Group.tsx`), so this fired constantly. On a simple page
  *    it happened to remove the stale field and hide fault 2, and on others it removed the wrong node.
  *
- * Faults 1 and 2 are fixed here. Fault 3 is kept, with the reason, at the Blur branch below.
+ * All three are fixed here. Fault 3 was fixed last, once an unmount and an explicit Blur had been split
+ * apart ({@link FocusTracker.nodeUnmounted}), because the unsplit correction broke a shipped prefab.
  *
  * 🔒 R13 (Richard, 2026-09-14): *"if the input is mounted, you focus, it focusses, otherwise it's
  * not mounted and the focus signal fails and that's the end of the story"*. So a Focus is **not
@@ -74,27 +75,29 @@ export class FocusTracker {
       return true;
     }
 
-    // ⚠️ Fault 3 is NOT fixed, deliberately: this is HEAD's Blur, unchanged, because a shipped prefab
-    // leans on it. Measured, not preferred (GAM-012 §8, AC5). A first correction ("blur the tracked
-    // node and its containers, splice its own index") broke multi-select's Dropdown. Its opening
-    // click lists the "Border neutral" overlay and every ancestor. The state change unmounts that
-    // overlay, and `Group.tsx`'s unmount Blur then blurred the Dropdown's root, whose `Focus Lost`
-    // closed the sheet 20ms after it opened. HEAD's early return for a tracked node is what keeps
-    // it open.
+    // Fault 3: an explicit Blur acts on the node it names, and only on it. HEAD's branch was
+    // inverted: it did nothing for a node it tracked (so a Blur after the person clicked into a
+    // field never took the cursor away), and for one it did not, it blurred that node's containers
+    // and spliced the list's LAST entry. A node focused outside the tracker (Tab) is still blurred.
     //
-    // The real fault is that an unmount and an explicit Blur arrive through the same call and need
-    // different answers. An unmount should drop the node and fire nothing; a Blur should blur the
-    // node it names. Split those first, then fix this branch. Faults 1 and 2 carry the person
-    // sentence without it: a listed field is re-focused whatever this branch left in the list.
-    if (index !== -1) return true;
-
+    // An unmount used to arrive here too, from `Group.tsx`, and needed a different answer. Now it
+    // goes to `nodeUnmounted`. Mixing the two was why the first correction closed multi-select's
+    // Dropdown (GAM-012 §8, AC5): its opening click lists the "Border neutral" overlay, the state
+    // change unmounts it, and "blur its containers" fired the root's `Focus Lost`.
     node._blur();
-
-    //also blur nodes that contain this node
-    this.nodes.filter((focusedNode) => focusedNode.contains(node)).forEach((blurredNode) => blurredNode._blur());
-
-    this.nodes.splice(index, 1);
+    if (index !== -1) this.nodes.splice(index, 1);
     return true;
+  }
+
+  /**
+   * GAM-012 fault 3 — a node leaving the page is dropped from the list, and nothing fires. Leaving
+   * is not losing focus: a Group's `Focus Lost` means the person clicked or tabbed elsewhere, and a
+   * sheet closed by a state change must not tell its own container that. R13: the list describes
+   * reality, so a node that is gone is not listed.
+   */
+  nodeUnmounted(node: FocusTrackedNode): void {
+    const index = this.nodes.indexOf(node);
+    if (index !== -1) this.nodes.splice(index, 1);
   }
 
   /** A click focuses the Noodl nodes it landed inside and blurs the rest. Unchanged by GAM-012. */

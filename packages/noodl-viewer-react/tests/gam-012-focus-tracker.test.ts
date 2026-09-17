@@ -23,6 +23,13 @@
 
 import { FocusTracker, FocusTrackedNode } from '../src/focus-tracker';
 import TextInputModule from '../src/nodes/controls/text-input';
+import { NoodlReactComponent } from '../src/react-component-node';
+import { Group } from '../src/components/visual/Group/Group';
+
+// Group's scroll plugins are ES modules jest does not transform; its unmount does not touch them.
+jest.mock('../src/components/visual/Group/scroll-plugins/nested-scroll-plugin', () => ({}));
+jest.mock('../src/components/visual/Group/scroll-plugins/patched-momentum-scroll', () => ({}));
+jest.mock('../src/components/visual/Group/scroll-plugins/slide-scroll-plugin', () => ({}));
 
 interface Fake extends FocusTrackedNode {
   name: string;
@@ -131,48 +138,116 @@ describe('GAM-012 fault 2 — a listed field that no longer holds focus is focus
   });
 });
 
-describe("GAM-012 fault 3 — Blur is HEAD's, because multi-select's Dropdown leans on it (§8, AC5)", () => {
+describe('GAM-012 fault 3 — an unmount drops the node and fires nothing', () => {
   /**
    * The Dropdown's opening click lands on its "Border neutral" overlay, so the click lists the
-   * overlay and the root around it. The state change unmounts the overlay, whose `Group.tsx` unmount
-   * sends a Blur. A correction that blurred the tracked overlay's containers fired the root's
-   * `Focus Lost`, and the sheet closed 20ms after it opened, in a browser. This pins what keeps it
-   * open. It does not pin HEAD's other Blur behaviour as correct; see the todo below.
+   * overlay and the root around it. The state change unmounts the overlay. The first correction of
+   * Blur still received that unmount as a Blur, blurred the overlay's containers, and the root's
+   * `Focus Lost` closed the sheet 20ms after it opened, in a browser (§8, AC5). This is that pin,
+   * now on the unmount path.
    */
-  it('a clicked child Group that unmounts does not blur the Group around it', () => {
+  it('a clicked child Group that unmounts does not blur the Group around it, and leaves the list', () => {
     const t = new FocusTracker();
     const root = group('root');
     const border = group('borderNeutral');
     border.parent = root;
     t.onClickCapture({ noodlNode: border, parentNode: { noodlNode: root, parentNode: null } });
     expect(root.calls).toEqual(['focus']); // the click reached the root: the known-firing half
+    expect(t.nodes).toEqual([border, root]);
 
-    t.setNodeFocused(border, false); // the overlay unmounts as the sheet opens
+    t.nodeUnmounted(border); // the overlay unmounts as the sheet opens
 
     expect(root.calls).toEqual(['focus']);
+    expect(border.calls).toEqual(['focus']);
+    expect(t.nodes).toEqual([root]);
   });
 
-  it.todo(
-    'fault 3 proper: an unmount drops the node and fires nothing, and an explicit Blur acts only on the node it names (split the two first)'
-  );
-
-  it('a field focused outside the tracker (Tab) is still blurred by its Blur', () => {
+  it('an unlisted node that unmounts removes nobody else and fires nothing', () => {
+    // HEAD blurred it, blurred every listed node containing it, and spliced the list's last entry.
     const t = new FocusTracker();
+    const root = group('root');
+    const field1 = field('answer', root);
+    t.onClickCapture({ noodlNode: field1, parentNode: { noodlNode: root, parentNode: null } });
+    const sibling = group('sibling');
+    sibling.parent = root;
+
+    t.nodeUnmounted(sibling);
+
+    expect(t.nodes).toEqual([field1, root]);
+    expect(root.calls).toEqual(['focus']);
+    expect(sibling.calls).toEqual([]);
+  });
+
+  it("the wrapper's unmount is what tells the tracker, for every node", () => {
+    const told: unknown[] = [];
+    const node = {
+      context: { setNodeUnmounted: (n: unknown) => told.push(n) },
+      sendSignalOnOutput: () => undefined
+    };
+    NoodlReactComponent.prototype.componentWillUnmount.call({ props: { noodlNode: node } } as never);
+    expect(told).toEqual([node]);
+  });
+
+  it('a runtime without the browser viewer has no tracker, and an unmount there does not throw', () => {
+    const node = { context: {}, sendSignalOnOutput: () => undefined };
+    expect(() =>
+      NoodlReactComponent.prototype.componentWillUnmount.call({ props: { noodlNode: node } } as never)
+    ).not.toThrow();
+  });
+
+  it("a Group's own unmount no longer sends a Blur", () => {
+    const blurs: unknown[] = [];
+    const node = { context: { setNodeFocused: (n: unknown, f: boolean) => blurs.push([n, f]) } };
+    Group.prototype.componentWillUnmount.call({ props: { noodlNode: node } } as never);
+    expect(blurs).toEqual([]);
+  });
+});
+
+describe('GAM-012 fault 3 — an explicit Blur acts on the node it names, and only on it', () => {
+  it('a field given Focus by a signal loses the cursor on Blur, leaves the list, and its Group keeps focus', () => {
+    // HEAD returned early for a listed node: the Blur did nothing and the cursor stayed (driven, §8
+    // session 21, arm F). A click into a field does not list it, so a signal is how a field is listed.
+    const t = new FocusTracker();
+    const row = group('row');
+    const f = field('cell', row);
+    t.onClickCapture({ noodlNode: row, parentNode: null });
+    t.setNodeFocused(f, true);
+    expect(f.hasFocus).toBe(true);
+    expect(t.nodes).toEqual([row, f]);
+
+    t.setNodeFocused(f, false);
+
+    expect(f.hasFocus).toBe(false);
+    expect(f.calls).toEqual(['focus', 'blur']);
+    expect(t.nodes).toEqual([row]);
+    expect(row.calls).toEqual(['focus']);
+  });
+
+  it('a field focused outside the tracker (Tab) is blurred, and the list is left alone', () => {
+    // HEAD blurred it and then spliced the list's last entry, some other node.
+    const t = new FocusTracker();
+    const other = group('other');
+    t.setNodeFocused(other, true);
     const f = field('answer');
     f.hasFocus = true;
+
     t.setNodeFocused(f, false);
+
     expect(f.calls).toEqual(['blur']);
     expect(f.hasFocus).toBe(false);
+    expect(t.nodes).toEqual([other]);
+    expect(other.calls).toEqual(['focus']);
   });
 
-  it("arm K's order: after rowB's unmount Blur, fieldB's next Focus still lands", () => {
+  it("arm K's order: after rowB unmounts, fieldB's next Focus still lands", () => {
     const t = new FocusTracker();
     const fieldB = field('fieldB');
     const fieldD = field('fieldD');
     t.setNodeFocused(fieldB, true);
     t.setNodeFocused(fieldD, true); // fieldD last, as at boot in AC1's page
     fieldB.hasFocus = false;
-    t.setNodeFocused(group('rowB'), false);
+    t.nodeUnmounted(group('rowB'));
+    expect(t.nodes).toEqual([fieldB, fieldD]);
     t.setNodeFocused(fieldB, true);
     expect(fieldB.hasFocus).toBe(true);
   });

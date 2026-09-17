@@ -98,6 +98,11 @@ export interface ReactNodeContext extends NodeContextLike {
    */
   /** `false` when a Focus could not act because the node is not mounted (GAM-012, R13); see `focus-tracker.ts`. */
   setNodeFocused(node: ReactNodeInstance, focused: boolean): boolean | void;
+  /**
+   * Drops a node leaving the page from the focus tracker, firing nothing (GAM-012 fault 3). Installed by
+   * `viewer.jsx`, so absent in any runtime without the browser viewer.
+   */
+  setNodeUnmounted?(node: ReactNodeInstance): void;
   /** True when the runtime is rendering inside the editor's canvas preview. */
   runningInCanvas?: boolean;
 }
@@ -769,6 +774,9 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
     this.props.noodlNode.sendSignalOnOutput('willUnmount');
     //Remove
     const noodlNode = this.props.noodlNode;
+    // GAM-012 fault 3 — leaving the page is not a Blur. Every node is dropped from the focus list
+    // here; `Group.tsx` used to send a Blur instead, and the tracker could not tell the two apart.
+    noodlNode.context.setNodeUnmounted?.(noodlNode);
     if (noodlNode.currentVisualStates) {
       const statesToRemove = ['hover', 'pressed', 'focused'];
       const vs = noodlNode.currentVisualStates.filter((s) => !statesToRemove.includes(s));

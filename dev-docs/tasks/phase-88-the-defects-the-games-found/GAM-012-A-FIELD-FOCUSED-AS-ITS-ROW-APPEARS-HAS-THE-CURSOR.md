@@ -1,6 +1,6 @@
 # GAM-012 — A field focused as its row appears has the cursor, every time
 
-**Status: 🟡 2026-09-14 (session 2): AC1–AC5 met for faults 1 and 2 under R13 (§5, §8); fault 3 kept on purpose (it holds multi-select's Dropdown open) and owed; AC6 owed.** **Source:** [P78 D68](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) AC5 run 2, 2026-09-13 · **Side:** product (viewer focus tracker)
+**Status: 🟡 2026-09-17 (session 21): AC1–AC5 met for all three faults under R13 (§5, §8). Fault 3 fixed by splitting an unmount from an explicit Blur, driven in Chromium; AC6 (Rocket School keyboard drive) still owed.** **Source:** [P78 D68](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) AC5 run 2, 2026-09-13 · **Side:** product (viewer focus tracker)
 
 A child playing with the keyboard answers the first question and presses Enter twice. The second question arrives with no
 cursor in the box. The author did send Focus. It worked once and never again.
@@ -230,3 +230,61 @@ cannot reach it, and Blur is HEAD's.
 
 **AC2 re-driven on the final build** (viewer rebuilt again, exit 0): D 5/5, K cycles 2-5, B 5/5, control 2-5, C unfocused by ruling,
 console errors `[]`.
+
+### Session 21 (P88) — 2026-09-17, over `8fe91b234`: fault 3
+
+**Built.** An unmount and an explicit Blur no longer share one call.
+- `focus-tracker.ts`: `setNodeFocused(node, false)` is the explicit Blur. It calls the node's `_blur()` and removes **that node** from
+  the list if listed. It no longer returns early for a listed node, blurs no containers, and splices nothing else. New
+  `nodeUnmounted(node)` removes the node from the list and fires nothing.
+- `react-component-node.ts`: the wrapper's `componentWillUnmount` calls `context.setNodeUnmounted?.(node)` for **every** node (R13:
+  "dropped on unmount"). `viewer.jsx` installs it. Optional, so a runtime without the browser viewer does not throw.
+- `Group.tsx`: its unmount no longer sends `setNodeFocused(node, false)`.
+
+**AC4, the spec** (`tests/gam-012-focus-tracker.test.ts`): the todo is gone; **18 passed**, exit 0. Group's scroll plugins are mocked
+(as GAM-001's spec does) so the real `Group.prototype.componentWillUnmount` can be called. **Reverted arms**, each on a snapshot restored
+with `cp` and `cmp`-checked:
+| reverted | red |
+|---|---|
+| M1 HEAD's Blur branch | Blur after a Focus signal; Blur on a Tab-focused field (2) |
+| M2 `nodeUnmounted` empty | the Dropdown pin, which also asserts the overlay leaves the list (1) |
+| M3 the wrapper's `setNodeUnmounted` call removed | "the wrapper's unmount is what tells the tracker" (1) |
+| M4 `Group.tsx`'s unmount Blur put back | "a Group's own unmount no longer sends a Blur" (1) |
+| M5 Blur also blurs listed containers (session 2's first correction) | Blur after a Focus signal (1) |
+| M6 Blur does not splice | Blur after a Focus signal (1) |
+
+**In Chromium.** Viewer bundles: **before** = `src/external/viewer/noodl.viewer.js` copied to scratch before any edit (a dev build of
+12:31, logic identical to `8fe91b234` for these files); **after** = a prod build with `OUT_PATH` in scratch, exit 0. The shared bundle was
+not overwritten (a peer's dev stack was watching). `render-from-disk.js` and `harness-paths.js` copied to scratch with `VIEWER_DIR` from an
+env var. Page: Text Inputs E, T, F, G, a Group "Pad"; `fieldE.onEnter → fieldE.blur`, `fieldT.onEnter → fieldT.blur`,
+`fieldG.onEnter → fieldF.focus`, `fieldF.onEnter → fieldF.blur`. Real mouse clicks and CDP keys, focus emulation on.
+| arm | before | after |
+|---|---|---|
+| E: click into the field, type, Enter → its Blur | `body`; list `[]` | `body`; list `[]` |
+| T: click Pad (lists Pad and 3 ancestors), Tab into T, Enter → its Blur | `body`; **`focusLost` on Layout, the page Group and `app_group`**; `app_group` spliced from the list | `body`; no `focusLost`; list unchanged |
+| **F: G's Enter sends F a Focus (listed), Enter → F's Blur** | 🔴 **`active=INPUT[F]`, F still listed, no `onBlur`** | **`body`**, F removed, `onBlur` fired |
+
+🔴 **My prediction was wrong in one place:** I wrote the spec row as "a field the person clicked into". A click into a Text Input does
+**not** list it (arm E's list stayed `[]`). A field is listed only by a Focus signal, so the row was rewritten to that shape before
+the arms were re-run (M1/M5/M6 red again on it). The person-visible defect at HEAD is arm F: **Focus then Blur left the cursor in the
+field.** Console errors `[]` in all four runs.
+
+**Regression.**
+- Session 2's keyboard page, 5 cycles, before vs after: **identical**, K 2–5 Y, B 5/5, control 2–5 Y, C unfocused by ruling, D 5/5,
+  console errors `[]`.
+- multi-select's Dropdown (test112 copy, `drive-dropdown.js` extended to select two options while the sheet is open), before vs after:
+  sheet open/closed **identical at all 11 steps**, including after selecting One and Two. One difference: closing with the wrapper
+  fired the root's `Focus Lost` before (the old unmount Blur) and not after. The sheet closes by its own toggle either way; its
+  `focusLost` only sends `to-No`.
+- The other consumers, **read, not driven**: `fb020b-drive`'s copy is the same prefab. `def036-dash-drive`'s "Text Input With Dropdown"
+  closes on `Item Selected` and on `Focus Lost`, which a click away still sends through the unchanged click path. Its checkbox variant
+  opens on `Focused` **and** on its field's `onClick`, and closes through a script, so reopening does not depend on the list.
+- Viewer specs that mention Group, Text Input, the wrapper, `viewer.jsx` or focus: **26 suites, 349 tests, exit 0**. `tsc --noEmit`
+  exit 0.
+
+**Not rebuilt:** `nodegx-backend/deploy/artifact/app/noodl.deploy.js` and `scripts/devtools/deploy-from-disk.cjs` carry the old tracker
+until their next build. The deprecated Text Input's Blur now gets the corrected branch too.
+
+Scratch: session `a79831ee…/scratchpad/f3/` (`before/`, `after/`, `devtools/`, `blurproj/`, `project/`, `drive-blur.js`,
+`drive-dropdown.js`, `drive-*-{before,after}.log`, `mut/`).
+

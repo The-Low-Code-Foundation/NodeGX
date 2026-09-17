@@ -176,6 +176,7 @@ export default class Viewer extends React.Component {
     this.focusTracker = new FocusTracker();
 
     noodlRuntime.context.setNodeFocused = this.setNodeFocused.bind(this);
+    noodlRuntime.context.setNodeUnmounted = (node) => this.focusTracker.nodeUnmounted(node);
 
     const enableDebugInspectors =
       (typeof document !== 'undefined' && document.location.href.indexOf('forceDebugger=true') !== -1) ||
