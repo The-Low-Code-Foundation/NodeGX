@@ -1,94 +1,123 @@
 # Phase 92 — next session
 
-**Written 2026-09-17 at the end of s29.** Branch `cline-dev`, commits `git log -- dev-docs/tasks/phase-92-dreamweaver-called`.
+**Written 2026-09-17 at the end of s30.** Branch `cline-dev`, commits `git log -- dev-docs/tasks/phase-92-dreamweaver-called`.
 The platform half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
-s29 in one paragraph: **CHR-009 is closed on its look.** Richard put `verdicts/CHR-001/…/editor-group-panel-top-*.png`
-beside a fresh Group panel, same crop, both themes, and ruled **WORTHY** — that is **AC1**, the criterion the task was
-written for. **R6 is final**: keep the fixed label column, shorten what does not fit, and the column is **118px**. The
-four long labels were repeating their own group heading, so the value ports carry the bare word and the two signals keep
-the full action (the canvas draws a wired port's label with no heading beside it). Then two defects the task's own
-instruments could not see: a **sub-pixel** label cut (`scrollWidth` is an integer) and **two label edges** on the panel
-(the sections nested in `Advanced CSS` indented their rows 11px, invisible because they are collapsed by default and the
-census only reads visible rows). Both fixed and driven: `a42f48665`, `c1e05ec60`.
+s30 in one paragraph: **CHR-004's gate exists, is graded, and has been driven.** `scripts/look-gate/`
+collects a live surface in the renderer over CDP and judges it in Node — text ≥ 4.5:1, control edge
+≥ 3:1, font size on R1's ramp, radius on CHR-003's, and does the text fit its box — every finding
+naming the element, every result carrying the population it came from. The judgement half is graded
+by 39 specs in `tests-unit/chr-004/` (in CI today via `test:main`), 10 mutants of it are red. The
+person sentence is **proved on a running build**: moving every `LauncherButton` fill one token step
+with the ink intact produced a finding set *byte-identical* to the unarmed baseline (19 = 19, same
+rules, elements and values), and moving it to a failing colour produced 8 new `text-contrast`
+findings naming each button. AC3 and AC4 — retiring the pinned specs — are deliberately **not**
+started: see §2.
 
-⚠️ Peers work in this checkout: **P88 / GAM** (`viewer-react/src/nodes/controls/*`, `templates/*`, `validation/*`,
-`noodl-mcp/*`) and **P93** (`VisualCanvas/*`, `ComponentsPanelNew/*`). Commit by pathspec — and see the index trap below.
+⚠️ Peers work in this checkout: **P88 / GAM** (`viewer-react/src/nodes/controls/*`, `templates/*`)
+and **P93** (`ComponentsPanelNew/*` — a live refactor with STAGED deletions in the shared index).
+Commit through a temp index; `git commit -- <paths>` would sweep their work.
 
 ## The board, re-derived from the task files
 
 | id | state |
 |---|---|
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
-| CHR-007 | ✅ built s4, invisible by design |
+| CHR-007 | ✅ built s4, invisible by design. 🔴 its snapshot is RED right now — not ours, see §4 |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert** (s8–s11). Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | ✅ **AC1 WORTHY (s29)**, AC2 met over the whole panel for the first time, R6 final at 118px. Left: **AC5 only** — CHR-004 + a `test:ci` |
-| CHR-004 the gates measure the scale | ⬜ **next**, and AC5 needs it |
+| CHR-009 the panel designed | ✅ **AC1 WORTHY (s29)**. Left: **AC5 only** — the gate now exists; it needs a run against HEAD over §3.6's node set, plus a `test:ci` |
+| **CHR-004 the gates measure the scale** | 🟡 **gate BUILT + DRIVEN (s30)**. AC1 ✅ / AC2 ✅ (live arms, §6.3). Left: AC3, AC4, AC5 |
 | CHR-010, 011 | ⬜ |
 
 ## What to do next, in order
 
-1. **CHR-004** (the gates measure the scale, not the fills). It is what CHR-009's AC5 waits on, and s29 handed it two
-   ready-made lessons: the gate must grade text with `measureText` (not `scrollWidth`) and must state the population it
-   measured. Read §25.3 and §25.5 of CHR-009 before writing a single check.
-2. A **`test:ci`** when no peer holds the box — the last one was s10 (at the floor, 2,984/8, seed 53977). AC5 needs it.
-3. Then **CHR-010** (the last icon font: 22 of the editor's 32 FontAwesome uses were in the property panel, which is now
-   React) and **CHR-011** (the after picture: re-runs CHR-001's `capture.js` + `measure.js` UNCHANGED).
+1. **Run the gate against HEAD, on a dev build, over CHR-009 §3.6's node set.** That is CHR-009
+   AC5's first half and it is now one command per surface:
+   `NOODL_REMOTE_DEBUG_PORT=9333 node scripts/look-gate/run.js --surface=property-panel --theme=both --json=…`
+   🔴 Everything measured so far is about **packaged 0.2.4**, which predates CHR-003, CHR-005 and
+   CHR-009. Those findings are the gate working, not a defect list for HEAD.
+2. **Then, and only then, AC3/AC4** — retire the eight `*-control-borders` specs and the four
+   class-name ones. The order matters: a pinned test retired before its replacement has covered the
+   same surface on HEAD trades a gate that works for one that has not been shown to. Count the
+   `expect(` lines before and after, as AC4 asks.
+3. A **`test:ci`** when no peer holds the box — the last one was s10 (at the floor, 2,984/8, seed
+   53977). CHR-009 AC5 needs it.
+4. Then **CHR-010** (the last icon font) and **CHR-011** (re-runs CHR-001's instruments UNCHANGED).
 
 ## Still Richard's
 
-1. The Projects tab's two full-width cards (BST-003 / UNI-001).
-2. Whether CHR-008's §3.1 widget conversions resume after CHR-009, or only where a region needs one.
-3. `···` menu DECLINED; CHR-007 AC4's `_portsHash` clause DECLINED; §3.4 closed by position (s20); the docked bound
-   edge's `S…` left as-is (s28); the switch's colours and a 4px option in a 6px track ALLOWED (s24).
+1. **Where the rendered gate runs, if anywhere, in CI.** It needs a running editor, and the only
+   renderer CI has is `test:ci` (xvfb + Electron, already near its 900 s ceiling and timed out three
+   times in August). Asked at the end of s30 — the answer decides AC5 and nothing else in the task
+   waits on it.
+2. The Projects tab's two full-width cards (BST-003 / UNI-001).
+3. Whether CHR-008's §3.1 widget conversions resume after CHR-009, or only where a region needs one.
+4. `···` menu DECLINED; CHR-007 AC4's `_portsHash` clause DECLINED; §3.4 closed by position (s20);
+   the docked bound edge's `S…` left as-is (s28); the switch's colours and a 4px option in a 6px
+   track ALLOWED (s24).
 
-## Settled in s29 (and what it cost)
+## Settled in s30 (and where the task file was wrong)
 
-- **A ruled number must have one home.** `116px` was written in five stylesheets, three of which commented "must
-  match". It is now `--property-label-column` on `:root` in `propertyeditor.css`, read as `var(--property-label-column,
-  118px)` so a core-ui surface outside the editor keeps the geometry. `npm run tokens:css` verifies it resolves.
-- **Renaming a port's `displayName` is cheap; renaming its `name` is not.** Ids untouched ⇒ no migration. But the
-  committed catalogs are CI-gated: `catalog:generate` + `catalog:merge`, then `catalog:check`, `catalog:merge:check`,
-  `catalog:groups:check`. Check the catalog is clean BEFORE editing so you do not inherit a peer's staleness.
-- **Two labels had been cut for the whole task** and two label edges had been reported as one for nine slices. Both were
-  instrument faults, not new regressions (§25.3, §25.5).
+- 🔴 **CHR-004 §3.1 and §5 both say "run it in `test:main`". It cannot go there.** `test:main` is
+  `jest` with `testEnvironment: 'node'` — no DOM at all, not jsdom — and there is no headless
+  browser anywhere in the repo (no puppeteer, no playwright; `jsdom` is transitive and its
+  `getComputedStyle` does not resolve custom properties, which is every colour here). The only
+  renderer in CI is `test:ci` under `xvfb-run` (`pr.yml:132`). ⇒ the gate is a **drive** whose
+  judgement half is unit-graded, which is why §2's order above puts a HEAD run before any retirement.
+- ✅ **One home for the contrast formula.** It had four (`themeTokens.ts`, `icon-contrast.js`,
+  `deploy-from-disk.cjs`, `CanvasTheme.ts`) and this would have been a fifth.
+  `scripts/look-gate/lib/color.js` is it; `themeTokens.ts` re-exports, public API unchanged, and the
+  28 suites that depend on it are green (978 tests). `CanvasTheme.ts` is deliberately not rewired
+  (product code, own headless fallbacks, own spec). `icon-contrast.js` / `deploy-from-disk.cjs`
+  still carry copies — neither can be run without a live editor or a deploy, and rewiring an
+  untestable script is how you ship a broken tool. Owed.
+- ✅ **The ramps are read, never retyped.** `scale.js` reads `--font-size-*` from `fonts.css` and
+  `--radius-*` from `spacing.css`, and throws if it finds none — a gate with an empty allowed set
+  passes everything.
 
-## Traps (s12–s29)
+## Readings at the end of s30 (2026-09-17)
 
-- 🔴 **`scrollWidth`, `clientWidth` and a `Range` cannot see an overflow under 1px** (s29). `canvas.measureText` with the
-  element's computed font is the only honest "does this text fit" reading.
-- 🔴 **`drive-set.js`'s `MEASURE` grades only the labels VISIBLE in the viewport** (s29) — 12 of 71 on the Group. Any
-  claim about the whole panel needs the whole population, with its size printed beside the reading.
-- 🔴 **The shared git index can hold two peers' staged work** (s29: font deletions, a deleted drive script, and a peer's
-  regenerated catalog carrying their new port). `git commit -- <paths>` would have swept the worktree state of those
-  paths. Commit through a temp index: `GIT_INDEX_FILE=<scratch>/idx git read-tree HEAD`, `git add <my paths>`,
-  `write-tree`, `commit-tree -p HEAD`, `update-ref refs/heads/cline-dev`. For a shared generated file, commit
-  `HEAD's blob + only your lines` (`git show HEAD:<path>`, patch it, `hash-object -w`, `update-index --cacheinfo`).
-- 🔴 **Load decides your session length.** At load 25 (Docker held all 8 cores) a renderer rebuild took ~25 min; at load
-  3 the same CSS edit was live in ~60 s. Check `uptime` before planning a drive.
-- 🔴 **Never edit a source file while a stack is compiling or live** (s28). Edits go BEFORE the launch or after teardown.
-- 🔴 **A reload leaves the editor on the LAUNCHER** (s29): `__nodeGraphEditor` never appears until you click the project
-  card again — a wait-loop on it will burn ten minutes reporting "booting".
-- 🔴 **Your `dev:debug` REAPS a peer's live stack** (`reapPreviousSession` sweeps the checkout), and **your stack's
-  webpack holds :8080**, which a peer's stack cannot share. Announce the launch AND the teardown; ask for the box back
-  rather than reaping (s29: c5 held GAM-016/017 for 15 min when asked).
-- 🔴 `npm run dev:stop` did NOT stop my stack in s29. Kill by process tree walked from your own `npm run dev:debug` pid
-  (plus anything whose command line carries your `NOODL_USER_DATA_DIR`), never by process name.
-- ✅ **Drive on `NOODL_USER_DATA_DIR=<scratch>/profile`** (copy `firstRunLegal.json`, write a one-row
-  `recently_opened_project.json`): Richard's recents are never touched, so the peer-launch race cannot happen.
-  s29's profile + project copy: `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/d7b2c2ac-9a30-4bb0-a9a2-8104576365e0/scratchpad/{profile,story-engine}`.
-- 🔴 **Numbers passed while the picture was broken** (s12, s13, s15, s17, s19, s21, s25, **s29 twice**). Look at every PNG.
-- 🔴 `verdicts/…/*.png` and `out/` are gitignored; `node --check` every drive edit. `appTarget()` returns what
-  `connect()` takes, and `evaluate()` already unwraps to the value — copy `drive-set.js`'s helpers verbatim.
-- 🔴 A spec reaching `common/Icon` needs FLD-017's `jest.mock` stub; `@noodl-models/projectmodel` throws at load in
-  `tests-unit`. A CDP Cmd+A selects nothing on macOS (call `input.select()`). Plain `npx jest` adds `tests-main`.
-- 🔴 A nested control reads as its own height: grade the outermost drawn field (s23). **A count is not a finding** (s24).
+`npx jest tests-unit` (the 471-suite runner, plain Node): **470 passed / 471, 7,629 / 7,630 tests**.
+The single red is **`tests-unit/chr-007/widgetDispatch.test.ts`** and it is **not this session's**:
+the diff is one added port, `keepsFocus: BooleanType`, which arrived in `238c455e9`
+*(feat(p88/gam-027): a Button can be told to leave the keyboard where it was)*. CHR-007's
+characterisation snapshot has to be regenerated by whoever adds a port; regenerating another task's
+snapshot from here would be a wholesale write over a shared artefact. **P88 has been told.**
+`npm run typecheck:editor-tests` **clean**. `tests-unit/chr-004` **39 / 39**, 10 mutants 10 red.
+`test:ci` **not run** (owed). Packaged instance torn down; 9333 / 8674 free.
 
-## Readings at the end of s29 (2026-09-17)
+## Traps (s12–s30)
 
-Live, dev build, docked 312, every section open: `--property-label-column` **118px**, **71 labels on one left edge (70)**,
-19 section headings on one edge (86), **68 rows all ending at 350**, **0 cut labels** by `measureText`. The 8-node verdict
-set (`set/final/`, before the flat fix): 2 font sizes (11, 12) on every type, one label edge, 0 cut labels after the
-renames at both 312 and 736. Editor panel suites **24 suites / 281 tests**, `tsc --noEmit` **EXIT 0**, `npm run colors`
-/ `type` / `tokens:css` **holding**, the three catalog gates **green**. `test:ci` **not run** (owed by AC5). Stack torn
-down, 8080/8674/9333 free, `dev3.out` 0 `ERROR in`.
+- 🔴 **A pipe eats the exit code.** `npx jest … | tail -8; echo "EXIT=$?"` logged `JEST_EXIT=0` over
+  a run with a failing suite — `$?` was `tail`'s. Capture the status before piping, and gate on it.
+- 🔴 **The first drive of a new instrument finds instrument faults, not product defects** (s30: four
+  of them, all of which had passed 37 unit specs — a transparent border scored 1.000:1 against its
+  own ground on seven buttons, `svg`/`circle`/`path` were graded for a font size they paint no text
+  in, `className` on an SVG is an `SVGAnimatedString` so three findings were named
+  `[object SVGAnimatedString]`, and a real 4.4968:1 printed as `4.50:1 — < 4.5:1`). Budget for it.
+- ✅ **The packaged app is an instrument that needs no compile and cannot disturb a peer** —
+  `env -u ELECTRON_RUN_AS_NODE -u NODE_OPTIONS NOODLPORT=8674 NOODL_REMOTE_DEBUG_PORT=9333
+  /Applications/NodeGX.app/Contents/MacOS/NodeGX --user-data-dir=<scratch>/profile`, with
+  `firstRunLegal.json` copied in. 🔴 **But it answers about the build IT carries, not your tree**
+  (0.2.4, built Sep 12). Right subject for shipped chrome; wrong one for verifying a source change.
+- 🔴 **`scrollWidth`, `clientWidth` and a `Range` cannot see an overflow under 1px** (s29).
+  `canvas.measureText` with the element's computed font is the only honest "does this text fit".
+- 🔴 **`drive-set.js`'s `MEASURE` grades only the labels VISIBLE in the viewport** (s29) — 12 of 71.
+  Any claim about a whole surface needs the whole population, with its size printed beside it.
+- 🔴 **The shared git index can hold two peers' staged work.** Commit through a temp index:
+  `GIT_INDEX_FILE=<scratch>/idx git read-tree HEAD`, `git add <my paths>`, `write-tree`,
+  `commit-tree -p HEAD`, `update-ref refs/heads/cline-dev`.
+- 🔴 **Load decides your session length.** At load 25 a renderer rebuild took ~25 min; at load 3 the
+  same CSS edit was live in ~60 s. Check `uptime` before planning a drive.
+- 🔴 **Never edit a source file while a stack is compiling or live** (s28).
+- 🔴 **A reload leaves the editor on the LAUNCHER** (s29): `__nodeGraphEditor` never appears until
+  you click the project card again.
+- 🔴 **Your `dev:debug` REAPS a peer's live stack** and your webpack holds :8080, which a peer's
+  cannot share. Announce the launch AND the teardown; ask for the box back rather than reaping.
+- 🔴 **Numbers passed while the picture was broken** (s12, s13, s15, s17, s19, s21, s25, s29 twice).
+  Look at every PNG.
+- 🔴 A spec reaching `common/Icon` needs FLD-017's `jest.mock` stub; `@noodl-models/projectmodel`
+  throws at load in `tests-unit`. A CDP Cmd+A selects nothing on macOS (call `input.select()`).
+  `npx jest tests-unit` is 449 suites of the 471 a plain `npx jest` runs.
+- 🔴 A nested control reads as its own height: grade the outermost drawn field (s23). **A count is
+  not a finding** (s24).
