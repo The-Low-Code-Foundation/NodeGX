@@ -15,7 +15,7 @@ import { requestBenchMount } from '../../../VisualCanvas/benchRequest';
 import { iconForKind, labelForKind } from '../componentKind';
 import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
-import { CLOUD_SHEET, ComponentItemData, Sheet, TreeNode } from '../types';
+import { ComponentItemData, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
 import { showUsedInPopover } from '../showUsedInPopover';
 import { RowMetaLabel } from './RowMetaLabel';
@@ -45,15 +45,10 @@ interface ComponentItemProps {
   onRenameChange?: (value: string) => void;
   onRenameConfirm?: () => void;
   onRenameCancel?: () => void;
-  // Sheet management
-  sheets?: Sheet[];
-  onMoveToSheet?: (componentPath: string, sheet: Sheet) => void;
   /** PNL-006: kept only as ancestry for a filter match — rendered dimmed. */
   isDimmed?: boolean;
   /** WFA-001: which runtime the create menu authors for — see `ComponentTree`. */
   runtimeType?: 'browser' | 'cloud';
-  /** SPR-005: the sheet in force, by display name — the create menu says where a new thing lands. */
-  sheetName?: string;
 }
 
 export function ComponentItem({
@@ -77,11 +72,8 @@ export function ComponentItem({
   onRenameChange,
   onRenameConfirm,
   onRenameCancel,
-  sheets,
-  onMoveToSheet,
   isDimmed,
   runtimeType = 'browser',
-  sheetName
 }: ComponentItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -183,18 +175,19 @@ export function ComponentItem({
       // Add "Create" menu items if handlers are provided
       if (onAddComponent && onAddFolder) {
         // WFA-001: nesting *inside a component*, so `forParentType` is
-        // 'component'. This is what keeps "Cloud Function Component" out of
-        // this menu even on the cloud sheet: the template declares
-        // `parentTypes: ['folder']`, and a function nested inside another
-        // function would export as `/#__cloud__/outer/inner` — a name the
-        // backend's `/functions/:name` route cannot address.
+        // 'component'. This is what keeps "Cloud Function Component" out of this
+        // menu: the template declares `parentTypes: ['folder']`, and a function
+        // nested inside another function would export as
+        // `/#__cloud__/outer/inner` — a name the backend's `/functions/:name`
+        // route cannot address.
         //
         // SPR-005: that reasoning is now *said*, as a disabled row, instead of
         // being enforced silently — a user who never sees the option cannot
-        // learn why it is not there.
+        // learn why it is not there. TVW-001 (e): this is the last context that
+        // still disables it. Every folder context creates one for real now.
         items.push(
           ...buildCreateMenuItems(
-            { forParentType: 'component', runtimeType, sheetName, parentPath },
+            { forParentType: 'component', runtimeType, parentPath },
             { onAddComponent, onAddFolder }
           )
         );
@@ -260,56 +253,11 @@ export function ComponentItem({
       });
 
       /**
-       * "Move to…". WFA-001: the cloud sheet is not an organisational folder
-       * but a runtime boundary, so it is neither a source nor a destination
-       * here — moving a component across it would change what executes it, and
-       * a menu that reads like tidying should not do that. Use it from the
-       * cloud sheet's own create menu instead.
+       * TVW-001 (e) — "Move to…" is gone with the sheets (R-C). It moved a component between
+       * sheets, and there are none; drag-to-folder is the move that remains. `useComponentActions`
+       * never grew a folder equivalent, so this is a removal, not a replacement — see the task's
+       * §6 landmine about people who used it as "move to folder".
        */
-      const movableSheets = (sheets || []).filter((s) => !s.isCloud);
-      const isCloudComponent = component.path.startsWith(CLOUD_SHEET.pathPrefix);
-      if (!isCloudComponent && movableSheets.length > 0 && onMoveToSheet) {
-        items.push('divider');
-
-        // "Move to" opens a separate popup with sheet options
-        items.push({
-          label: 'Move to...',
-          icon: IconName.FolderClosed,
-          onClick: () => {
-            // Determine which sheet this component is currently in
-            const currentSheetFolder = movableSheets.find(
-              (s) => !s.isDefault && component.path.startsWith('/' + s.folderName + '/')
-            );
-            const isInDefaultSheet = !currentSheetFolder;
-
-            // Create sheet selection menu items
-            const sheetItems: TSFixme[] = movableSheets.map((sheet) => {
-              const isCurrentSheet = sheet.isDefault
-                ? isInDefaultSheet
-                : sheet.folderName === currentSheetFolder?.folderName;
-
-              return {
-                label: sheet.name + (isCurrentSheet ? ' (current)' : ''),
-                icon: sheet.isDefault ? IconName.Component : IconName.FolderClosed,
-                isDisabled: isCurrentSheet,
-                isHighlighted: isCurrentSheet,
-                onClick: () => {
-                  if (!isCurrentSheet) {
-                    onMoveToSheet(component.name, sheet);
-                  }
-                }
-              };
-            });
-
-            // Show the sheet selection popup
-            showContextMenuInPopup({
-              items: sheetItems,
-              width: MenuDialogWidth.Default
-            });
-          }
-        });
-      }
-
       items.push('divider');
       items.push({
         label: 'Delete',
@@ -318,7 +266,7 @@ export function ComponentItem({
 
       showContextMenuInPopup({
         // SPR-005: the destination, said before the click rather than after it.
-        title: onAddComponent && onAddFolder ? createMenuTitle({ sheetName, parentPath }) : undefined,
+        title: onAddComponent && onAddFolder ? createMenuTitle({ parentPath }) : undefined,
         items,
         width: MenuDialogWidth.Default
       });
@@ -332,10 +280,7 @@ export function ComponentItem({
       onDelete,
       onAddComponent,
       onAddFolder,
-      sheets,
-      onMoveToSheet,
-      runtimeType,
-      sheetName
+      runtimeType
     ]
   );
 

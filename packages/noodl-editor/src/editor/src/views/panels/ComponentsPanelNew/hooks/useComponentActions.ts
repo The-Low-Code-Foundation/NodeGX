@@ -21,34 +21,24 @@ import { TreeNode } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const PopupLayer = require('@noodl-views/popuplayer').default;
 
-export interface UseComponentActionsOptions {
-  /**
-   * WFA-001 — the selected sheet's folder name (`#__cloud__`, `#Pages`, …), or
-   * `''` for the default sheet / the "All" view.
-   *
-   * The tree hands these handlers **display** paths, which have had the sheet
-   * prefix stripped (`useComponentsPanel.buildTreeFromProject`). Without this,
-   * creating a component while a sheet is selected names it `/Home` instead of
-   * `/#Pages/Home` — it lands in the default sheet and disappears from the view
-   * it was created in — and dragging one into a folder yanks it out of its
-   * sheet. Harmless-looking for `#Pages`; for `#__cloud__` it silently turns a
-   * cloud function into a browser component that no backend will ever serve.
-   */
-  sheetPrefix?: string;
-}
-
 /**
- * WFA-001 — turn a tree display path into an absolute folder path.
+ * WFA-001 — turn a tree path into an absolute folder path.
  *
- * Always absolute and always trailing-slashed, so `path + localName` is a
- * component name in the same shape as every other producer of one
- * (`moveToSheet`, `handleAddFolder`). The old normalisation mapped root to `''`,
- * which produced components named `Home` with no leading slash.
+ * Always absolute and always trailing-slashed, so `path + localName` is a component name in the
+ * same shape as every other producer of one. The old normalisation mapped root to `''`, which
+ * produced components named `Home` with no leading slash.
+ *
+ * 🔴 TVW-001 (e) — there is no `sheetPrefix` any more, and that is a fact about the *tree*, not a
+ * simplification here. It existed because a selected sheet handed these handlers display paths with
+ * the sheet folder stripped off, so every one of them had to put it back; forgetting turned a cloud
+ * function into a browser component no backend would serve. Slice 4 retires sheets, the tree hands
+ * out real component names, and there is nothing left to put back. **If a display path ever again
+ * differs from the name on disk, this is the seam that breaks first.**
  */
-function toFolderPath(sheetPrefix: string, parentPath?: string): string {
-  const relative = !parentPath || parentPath === '/' ? '/' : parentPath.startsWith('/') ? parentPath : '/' + parentPath;
-  const joined = sheetPrefix + relative;
-  return joined.endsWith('/') ? joined : joined + '/';
+function toFolderPath(parentPath?: string): string {
+  return !parentPath || parentPath === '/'
+    ? '/'
+    : (parentPath.startsWith('/') ? parentPath : '/' + parentPath).replace(/\/?$/, '/');
 }
 
 /**
@@ -126,9 +116,8 @@ export function makeComponentHome(project: ProjectModel, component: ComponentMod
   return { ok: true };
 }
 
-export function useComponentActions(options: UseComponentActionsOptions = {}) {
-  const { sheetPrefix = '' } = options;
-  const handleMakeHome = useCallback((node: TreeNode) => {
+export function useComponentActions() {
+    const handleMakeHome = useCallback((node: TreeNode) => {
     // Support both component nodes and folder nodes (for component-folders)
     let component;
     if (node.type === 'component') {
@@ -268,7 +257,7 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
       return true;
     } else if (node.type === 'folder') {
       // WFA-001: display path → real component path (see `handleDropOn`).
-      const oldPath = sheetPrefix + node.data.path;
+      const oldPath = node.data.path;
       const parentPath = oldPath.substring(0, oldPath.lastIndexOf('/'));
       const newPath = `${parentPath}/${newName}`;
 
@@ -334,7 +323,7 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
     }
 
     return false;
-  }, [sheetPrefix]);
+  }, []);
 
   const handleOpen = useCallback((node: TreeNode) => {
     // Support both component nodes and folder nodes (for component-folders)
@@ -364,7 +353,7 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
    */
   const handleAddComponent = useCallback(
     (template: TSFixme, parentPath?: string) => {
-      const finalParentPath = toFolderPath(sheetPrefix, parentPath);
+      const finalParentPath = toFolderPath(parentPath);
 
       const popup = template.createPopup({
         onCreate: (localName: string, options?: TSFixme) => {
@@ -439,16 +428,16 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
         hasDynamicHeight: true
       });
     },
-    [sheetPrefix]
+    []
   );
 
   /**
    * Handle adding a new folder
    */
   const handleAddFolder = useCallback((parentPath?: string) => {
-    // WFA-001: resolved before the popup so the sheet in force when the menu was
-    // opened is the one the folder lands in.
-    const normalizedPath = toFolderPath(sheetPrefix, parentPath);
+    // WFA-001: resolved before the popup, so the folder lands where the menu was opened rather
+    // than wherever the tree has got to by the time the name is typed.
+    const normalizedPath = toFolderPath(parentPath);
 
     const popup = new PopupLayer.StringInputPopup({
       label: 'New folder name',
@@ -512,7 +501,7 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
       // FIX-020 — the New folder name prompt, same shell.
       hasDynamicHeight: true
     });
-  }, [sheetPrefix]);
+  }, []);
 
   /**
    * Handle dropping an item onto the root level (empty space)
@@ -521,10 +510,16 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
     // Component → Root
     if (draggedItem.type === 'component') {
       const component = draggedItem.data.component;
-      // WFA-001: "root" means the root *of the current sheet*. Without the
-      // prefix, dropping a cloud function on empty space moves it out of
-      // `#__cloud__` and it silently stops being a function.
-      const newName = sheetPrefix + '/' + component.localName;
+      /**
+       * "Root" is the project root, full stop.
+       *
+       * WFA-001 made this the root *of the current sheet*, because dropping a cloud function on
+       * empty space would otherwise move it out of `#__cloud__` and it would silently stop being a
+       * function. TVW-001 (e) removed the prefix and moved that protection one level up, to where
+       * it can say no instead of quietly relocating: `ComponentsPanel.handleTreeMouseUp` refuses a
+       * root drop from a cloud row (`isCloudNode`) before it ever reaches here.
+       */
+      const newName = '/' + component.localName;
 
       // Check if already at root
       if (component.name === newName) {
@@ -559,11 +554,11 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
     }
     // Folder → Root (including component-folders)
     else if (draggedItem.type === 'folder') {
-      // WFA-001: the tree's folder paths are display paths — on a sheet they
-      // have had the sheet prefix stripped, so matching real component names
-      // against them found nothing and the drag was a silent no-op.
-      const sourcePath = sheetPrefix + draggedItem.data.path;
-      const newPath = sheetPrefix + '/' + draggedItem.data.name;
+      // TVW-001 (e): `path` is the real component path — `#` and all — while `name` is the
+      // label with a legacy sheet's `#` taken off. Moving a `#Design` folder to the root therefore
+      // lands it at `/Design`, which is the only reading that matches what the row says.
+      const sourcePath = draggedItem.data.path;
+      const newPath = '/' + draggedItem.data.name;
 
       // Check if already at root
       if (sourcePath === newPath) {
@@ -617,19 +612,19 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
         })
       );
     }
-  }, [sheetPrefix]);
+  }, []);
 
   /**
    * Handle dropping an item onto a target
    *
-   * WFA-001: every path taken from a `TreeNode` here is a **display** path, so
-   * each is resolved back to a real component name with the sheet prefix.
+   * WFA-001 resolved every path taken from a `TreeNode` back to a real component name with the
+   * sheet prefix. TVW-001 (e): a tree path *is* a real component name now, so they are used as-is.
    */
   const handleDropOn = useCallback((draggedItem: TreeNode, targetItem: TreeNode) => {
     // Component → Folder
     if (draggedItem.type === 'component' && targetItem.type === 'folder') {
       const component = draggedItem.data.component;
-      const targetPath = sheetPrefix + (targetItem.data.path === '/' ? '' : targetItem.data.path);
+      const targetPath = (targetItem.data.path === '/' ? '' : targetItem.data.path);
       const newName = targetPath ? `${targetPath}/${component.localName}` : `/${component.localName}`;
 
       // Check for naming conflicts
@@ -656,8 +651,8 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
     }
     // Folder → Folder
     else if (draggedItem.type === 'folder' && targetItem.type === 'folder') {
-      const sourcePath = sheetPrefix + draggedItem.data.path;
-      const targetPath = sheetPrefix + (targetItem.data.path === '/' ? '' : targetItem.data.path);
+      const sourcePath = draggedItem.data.path;
+      const targetPath = (targetItem.data.path === '/' ? '' : targetItem.data.path);
       const newPath = `${targetPath}/${draggedItem.data.name}`;
 
       // Prevent moving folder into itself
@@ -739,7 +734,7 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
     }
     // Folder → Component (treat component-folder AS a component, nest inside target)
     else if (draggedItem.type === 'folder' && targetItem.type === 'component') {
-      const sourcePath = sheetPrefix + draggedItem.data.path;
+      const sourcePath = draggedItem.data.path;
       const targetComponent = targetItem.data.component;
       const newPath = `${targetComponent.name}/${draggedItem.data.name}`;
 
@@ -794,7 +789,7 @@ export function useComponentActions(options: UseComponentActionsOptions = {}) {
         })
       );
     }
-  }, [sheetPrefix]);
+  }, []);
 
   return {
     handleMakeHome,

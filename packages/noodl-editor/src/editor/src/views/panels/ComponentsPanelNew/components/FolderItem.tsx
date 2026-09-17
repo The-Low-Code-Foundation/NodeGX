@@ -14,7 +14,7 @@ import { showContextMenuInPopup } from '../../../ShowContextMenuInPopup';
 import { iconForKind, labelForKind } from '../componentKind';
 import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
-import { CLOUD_SHEET, FolderItemData, Sheet, TreeNode } from '../types';
+import { FolderItemData, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
 import { showUsedInPopover } from '../showUsedInPopover';
 import { RowMetaLabel } from './RowMetaLabel';
@@ -39,16 +39,11 @@ interface FolderItemProps {
   onDoubleClick?: (node: TreeNode) => void;
   onAddComponent?: (template: TSFixme, parentPath?: string) => void;
   onAddFolder?: (parentPath?: string) => void;
-  /** Switch to the Cloud Functions sheet, offered from the create menu's disabled row. */
-  onGoToCloudSheet?: () => void;
   isRenaming?: boolean;
   renameValue?: string;
   onRenameChange?: (value: string) => void;
   onRenameConfirm?: () => void;
   onRenameCancel?: () => void;
-  // Sheet management
-  sheets?: Sheet[];
-  onMoveToSheet?: (componentPath: string, sheet: Sheet) => void;
   // Component-folder actions (same as ComponentItem)
   onOpen?: (node: TreeNode) => void;
   onMakeHome?: (node: TreeNode) => void;
@@ -57,8 +52,6 @@ interface FolderItemProps {
   isDimmed?: boolean;
   /** WFA-001: which runtime the create menu authors for — see `ComponentTree`. */
   runtimeType?: 'browser' | 'cloud';
-  /** SPR-005: the sheet in force, by display name — the create menu says where a new thing lands. */
-  sheetName?: string;
 }
 
 export function FolderItem({
@@ -77,20 +70,16 @@ export function FolderItem({
   onDoubleClick,
   onAddComponent,
   onAddFolder,
-  onGoToCloudSheet,
   isRenaming,
   renameValue,
   onRenameChange,
   onRenameConfirm,
   onRenameCancel,
-  sheets,
-  onMoveToSheet,
   onOpen,
   onMakeHome,
   onDuplicate,
   isDimmed,
-  runtimeType = 'browser',
-  sheetName
+  runtimeType = 'browser'
 }: FolderItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -182,14 +171,14 @@ export function FolderItem({
 
       // Add "Create" menu items if handlers are provided
       if (onAddComponent && onAddFolder) {
-        // WFA-001: a folder's create menu authors for the sheet's runtime, and
+        // WFA-001: a folder's create menu authors for its section's runtime, and
         // declares itself a folder context so `parentTypes` is honoured.
         // SPR-005: built by the shared builder, which is what puts the
         // filtered-out cloud template back as a disabled row with its reason.
         items.push(
           ...buildCreateMenuItems(
-            { forParentType: 'folder', runtimeType, sheetName, parentPath },
-            { onAddComponent, onAddFolder, onGoToCloudSheet }
+            { forParentType: 'folder', runtimeType, parentPath },
+            { onAddComponent, onAddFolder }
           )
         );
 
@@ -231,54 +220,10 @@ export function FolderItem({
         });
       }
 
-      // Add "Move to" option for any folder that has a path and sheets are available
-      // Works for both component-folders and regular folders
-      // WFA-001: the cloud sheet is a runtime boundary, not a destination — see
-      // the same guard in `ComponentItem`.
-      const movableSheets = (sheets || []).filter((s) => !s.isCloud);
-      const folderPath = folder.isComponentFolder && folder.component ? folder.component.name : folder.path;
-      if (folder.path && !folderPath.startsWith(CLOUD_SHEET.pathPrefix) && movableSheets.length > 0 && onMoveToSheet) {
-        items.push('divider');
-
-        // "Move to" opens a separate popup with sheet options
-        items.push({
-          label: 'Move to...',
-          icon: IconName.FolderClosed,
-          onClick: () => {
-            // Determine which sheet this folder is currently in
-            const currentSheetFolder = movableSheets.find(
-              (s) => !s.isDefault && folderPath.startsWith('/' + s.folderName + '/')
-            );
-            const isInDefaultSheet = !currentSheetFolder;
-
-            // Create sheet selection menu items
-            const sheetItems: TSFixme[] = movableSheets.map((sheet) => {
-              const isCurrentSheet = sheet.isDefault
-                ? isInDefaultSheet
-                : sheet.folderName === currentSheetFolder?.folderName;
-
-              return {
-                label: sheet.name + (isCurrentSheet ? ' (current)' : ''),
-                icon: sheet.isDefault ? IconName.Component : IconName.FolderClosed,
-                isDisabled: isCurrentSheet,
-                isHighlighted: isCurrentSheet,
-                onClick: () => {
-                  if (!isCurrentSheet) {
-                    onMoveToSheet(folderPath, sheet);
-                  }
-                }
-              };
-            });
-
-            // Show the sheet selection popup
-            showContextMenuInPopup({
-              items: sheetItems,
-              width: MenuDialogWidth.Default
-            });
-          }
-        });
-      }
-
+      /**
+       * TVW-001 (e) — "Move to…" is gone with the sheets (R-C), here as in `ComponentItem`. Drag
+       * a folder onto another folder to move it; that path is unchanged.
+       */
       items.push('divider');
       items.push({
         label: 'Delete',
@@ -287,7 +232,7 @@ export function FolderItem({
 
       showContextMenuInPopup({
         // SPR-005: the destination, said before the click rather than after it.
-        title: onAddComponent && onAddFolder ? createMenuTitle({ sheetName, parentPath }) : undefined,
+        title: onAddComponent && onAddFolder ? createMenuTitle({ parentPath }) : undefined,
         items,
         width: MenuDialogWidth.Default
       });
@@ -298,14 +243,10 @@ export function FolderItem({
       onDelete,
       onAddComponent,
       onAddFolder,
-      onGoToCloudSheet,
-      sheets,
-      onMoveToSheet,
       onOpen,
       onMakeHome,
       onDuplicate,
-      runtimeType,
-      sheetName
+      runtimeType
     ]
   );
 

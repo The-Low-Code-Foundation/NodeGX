@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { CLOUD_SHEET, Sheet, TreeNode } from '../types';
+import { TreeNode } from '../types';
 import { ComponentItem } from './ComponentItem';
 import { FolderItem } from './FolderItem';
 import { SectionHeader } from './SectionHeader';
@@ -29,8 +29,6 @@ interface ComponentTreeProps {
   canAcceptDrop?: (node: TreeNode) => boolean;
   onAddComponent?: (template: TSFixme, parentPath?: string) => void;
   onAddFolder?: (parentPath?: string) => void;
-  /** Switch to the Cloud Functions sheet, offered from a folder row's create menu. */
-  onGoToCloudSheet?: () => void;
   // Rename mode props
   renamingItem?: TreeNode | null;
   renameValue?: string;
@@ -38,9 +36,6 @@ interface ComponentTreeProps {
   onRenameConfirm?: () => void;
   onRenameCancel?: () => void;
   onDoubleClick?: (node: TreeNode) => void;
-  // Sheet management props
-  sheets?: Sheet[];
-  onMoveToSheet?: (componentPath: string, sheet: Sheet) => void;
   /**
    * PNL-006 — rows that matched the filter themselves. Anything rendered while
    * this is non-null and *not* in it is ancestry kept for context, and is
@@ -48,16 +43,10 @@ interface ComponentTreeProps {
    */
   matched?: Set<string> | null;
   /**
-   * WFA-001 — which runtime the create menus author for. Derived from the
-   * selected sheet by `ComponentsPanel`; `'cloud'` only on the Cloud Functions
-   * sheet.
+   * WFA-001 — which runtime the create menus author for. TVW-001 (e): it comes from the section a
+   * row sits under, not from a selected sheet; `'cloud'` only inside `Cloud functions`.
    */
   runtimeType?: 'browser' | 'cloud';
-  /**
-   * SPR-005 — the sheet in force, by the name a user sees. Passed to every row's
-   * create menu so it can say where a new component will land before the click.
-   */
-  sheetName?: string;
 }
 
 export function ComponentTree({
@@ -77,18 +66,14 @@ export function ComponentTree({
   canAcceptDrop,
   onAddComponent,
   onAddFolder,
-  onGoToCloudSheet,
   renamingItem,
   renameValue,
   onRenameChange,
   onRenameConfirm,
   onRenameCancel,
   onDoubleClick,
-  sheets,
-  onMoveToSheet,
   matched = null,
   runtimeType = 'browser',
-  sheetName
 }: ComponentTreeProps) {
   return (
     <>
@@ -97,7 +82,6 @@ export function ComponentTree({
            the rows under it author for the section's runtime (the cloud section's create menus make
            cloud components). */
         if (node.type === 'section') {
-          const isCloud = node.data.runtimeType === 'cloud';
           return (
             <React.Fragment key={`section:${node.data.id}`}>
               <SectionHeader section={node.data} />
@@ -119,18 +103,14 @@ export function ComponentTree({
                   canAcceptDrop={canAcceptDrop}
                   onAddComponent={onAddComponent}
                   onAddFolder={onAddFolder}
-                  onGoToCloudSheet={onGoToCloudSheet}
                   renamingItem={renamingItem}
                   renameValue={renameValue}
                   onRenameChange={onRenameChange}
                   onRenameConfirm={onRenameConfirm}
                   onRenameCancel={onRenameCancel}
                   onDoubleClick={onDoubleClick}
-                  sheets={sheets}
-                  onMoveToSheet={onMoveToSheet}
                   matched={matched}
                   runtimeType={node.data.runtimeType}
-                  sheetName={isCloud ? CLOUD_SHEET.displayName : sheetName}
                 />
               )}
             </React.Fragment>
@@ -164,20 +144,16 @@ export function ComponentTree({
               onDoubleClick={onDoubleClick}
               onAddComponent={onAddComponent}
               onAddFolder={onAddFolder}
-              onGoToCloudSheet={onGoToCloudSheet}
               isRenaming={isRenaming}
               renameValue={renameValue}
               onRenameChange={onRenameChange}
               onRenameConfirm={onRenameConfirm}
               onRenameCancel={onRenameCancel}
-              sheets={sheets}
-              onMoveToSheet={onMoveToSheet}
               onOpen={onOpen}
               onMakeHome={onMakeHome}
               onDuplicate={onDuplicate}
               isDimmed={isDimmed}
               runtimeType={runtimeType}
-              sheetName={sheetName}
             >
               {expandedFolders.has(node.data.path) && node.data.children.length > 0 && (
                 <ComponentTree
@@ -197,18 +173,14 @@ export function ComponentTree({
                   canAcceptDrop={canAcceptDrop}
                   onAddComponent={onAddComponent}
                   onAddFolder={onAddFolder}
-                  onGoToCloudSheet={onGoToCloudSheet}
                   renamingItem={renamingItem}
                   renameValue={renameValue}
                   onRenameChange={onRenameChange}
                   onRenameConfirm={onRenameConfirm}
                   onRenameCancel={onRenameCancel}
                   onDoubleClick={onDoubleClick}
-                  sheets={sheets}
-                  onMoveToSheet={onMoveToSheet}
                   matched={matched}
                   runtimeType={runtimeType}
-                  sheetName={sheetName}
                 />
               )}
             </FolderItem>
@@ -237,11 +209,8 @@ export function ComponentTree({
               onRenameChange={onRenameChange}
               onRenameConfirm={onRenameConfirm}
               onRenameCancel={onRenameCancel}
-              sheets={sheets}
-              onMoveToSheet={onMoveToSheet}
               isDimmed={isDimmed}
               runtimeType={runtimeType}
-              sheetName={sheetName}
             />
           );
         }

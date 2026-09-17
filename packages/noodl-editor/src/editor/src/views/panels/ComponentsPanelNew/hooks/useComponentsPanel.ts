@@ -11,7 +11,8 @@ import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher'
 import { buildKindIndex, ComponentKind, ComponentKindIndex } from '../componentKind';
 import { CLOUD_PATH_PREFIX, pageGroups, SECTION_LABEL, SECTION_ORDER, sectionFor, SectionId } from '../componentSections';
 import { buildUsageIndex, RouterPages, RowMeta, rowMetaFor, UsageIndex } from '../componentUsage';
-import { CLOUD_SHEET, Sheet, TreeNode } from '../types';
+import { folderSegmentLabel } from '../folderDisplay';
+import { TreeNode } from '../types';
 
 /**
  * useComponentsPanel
@@ -48,22 +49,16 @@ const META_PARAMETER_OWNERS = new Set(['Router', 'Page']);
 const LIBRARY_EVENTS = ['libraryUpdated', 'moduleRegistered', 'moduleUnregistered', 'typeAdded', 'typeRemoved'];
 const AFTER_GRAPH_TYPE_UPDATE_MS = 20;
 
-interface UseComponentsPanelOptions {
-  hideSheets?: string[];
-  /** Lock to a specific sheet - cannot switch (e.g., for Cloud Functions panel) */
-  lockToSheet?: string;
-}
-
 interface FolderStructure {
+  /** What the row says — `folderDisplay.ts`, so a legacy `#Design` reads as `Design`. */
   name: string;
+  /** 🔴 The real component path, `#` and all — what every action resolves against. */
   path: string;
   components: ComponentModel[];
   children: FolderStructure[];
 }
 
-export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
-  const { hideSheets = [], lockToSheet } = options;
-
+export function useComponentsPanel() {
   // Local state
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['/']));
   /**
@@ -82,7 +77,6 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
    * dots without rebuilding the kind index.
    */
   const [warningCounter, setWarningCounter] = useState(0);
-  const [currentSheetName, setCurrentSheetName] = useState<string | null>(lockToSheet || null);
 
   // Subscribe to ProjectModel events using DIRECT pattern (proven in UseRoutes.ts)
   // This bypasses the problematic useEventListener abstraction
@@ -171,124 +165,6 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
     };
   }, []);
 
-  // Get all components (including placeholders) for sheet detection
-  // IMPORTANT: Spread to create new array reference - getComponents() may return
-  // the same mutated array, which would cause useMemo to skip recalculation
-  const rawComponents = useMemo(() => {
-    if (!ProjectModel.instance) return [];
-    return [...ProjectModel.instance.getComponents()];
-  }, [updateCounter]);
-
-  // Get non-placeholder components for counting and tree display
-  const allComponents = useMemo(() => {
-    return rawComponents.filter((comp) => !comp.name.endsWith('/.placeholder'));
-  }, [rawComponents]);
-
-  // Detect all sheets from component paths (including placeholders for empty sheet detection)
-  // Sheets are top-level folders starting with # (e.g., #Pages, #Components)
-  // Note: Component names start with leading "/" (e.g., "/#Pages/Home")
-  const sheets = useMemo((): Sheet[] => {
-    const sheetSet = new Set<string>(); // All detected sheet folder names
-    const sheetCounts = new Map<string, number>(); // folderName -> non-placeholder component count
-
-    // First pass: detect all sheets (including from placeholders)
-    rawComponents.forEach((comp) => {
-      const parts = comp.name.split('/').filter((p) => p !== ''); // Remove empty strings from leading /
-      if (parts.length > 0 && parts[0].startsWith('#')) {
-        const sheetFolder = parts[0];
-        sheetSet.add(sheetFolder);
-      }
-    });
-
-    // Second pass: count non-placeholder components per sheet
-    allComponents.forEach((comp) => {
-      const parts = comp.name.split('/').filter((p) => p !== '');
-      if (parts.length > 0 && parts[0].startsWith('#')) {
-        const sheetFolder = parts[0];
-        sheetCounts.set(sheetFolder, (sheetCounts.get(sheetFolder) || 0) + 1);
-      }
-    });
-
-    // Count default sheet components (not in any # folder)
-    const defaultCount = allComponents.filter((comp) => {
-      const parts = comp.name.split('/').filter((p) => p !== '');
-      return parts.length === 0 || !parts[0].startsWith('#');
-    }).length;
-
-    // Build sheet list with Default first
-    const result: Sheet[] = [
-      {
-        name: 'Default',
-        folderName: '',
-        isDefault: true,
-        componentCount: defaultCount
-      }
-    ];
-
-    // Add detected sheets, filtering out hidden ones
-    sheetSet.forEach((folderName) => {
-      const displayName = folderName.substring(1); // Remove # prefix
-      if (!hideSheets.includes(displayName) && !hideSheets.includes(folderName)) {
-        result.push({
-          name: folderName === CLOUD_SHEET.folderName ? CLOUD_SHEET.displayName : displayName,
-          folderName,
-          isDefault: false,
-          componentCount: sheetCounts.get(folderName) || 0,
-          isCloud: folderName === CLOUD_SHEET.folderName
-        });
-      }
-    });
-
-    /**
-     * WFA-001: the cloud sheet is listed whether or not it exists yet.
-     *
-     * Sheets are derived from component names, so a project with no cloud
-     * functions has no `#__cloud__` sheet — and "Add Sheet" refuses `#` in a
-     * name, so there would be no way to author the first one. Synthesising the
-     * entry (count 0) is what makes the door reachable; the tree itself is
-     * untouched until something is actually created.
-     */
-    if (!hideSheets.includes(CLOUD_SHEET.folderName) && !hideSheets.includes('__cloud__')) {
-      if (!result.some((s) => s.folderName === CLOUD_SHEET.folderName)) {
-        result.push({
-          name: CLOUD_SHEET.displayName,
-          folderName: CLOUD_SHEET.folderName,
-          isDefault: false,
-          componentCount: 0,
-          isCloud: true
-        });
-      }
-    }
-
-    // Sort non-default sheets alphabetically
-    result.sort((a, b) => {
-      if (a.isDefault) return -1;
-      if (b.isDefault) return 1;
-      return a.name.localeCompare(b.name);
-    });
-
-    return result;
-  }, [rawComponents, allComponents, hideSheets, updateCounter]);
-
-  // Get current sheet object
-  const currentSheet = useMemo((): Sheet | null => {
-    if (currentSheetName === null) {
-      // No sheet selected = show all (no filtering)
-      return null;
-    }
-    return sheets.find((s) => s.folderName === currentSheetName || (s.isDefault && currentSheetName === '')) || null;
-  }, [currentSheetName, sheets]);
-
-  // Select a sheet
-  const selectSheet = useCallback(
-    (sheet: Sheet | null) => {
-      // Don't allow switching if locked
-      if (lockToSheet !== undefined) return;
-      setCurrentSheetName(sheet ? sheet.folderName : null);
-    },
-    [lockToSheet]
-  );
-
   /**
    * PNL-006: one walk of every graph, memoised against the same change counter
    * the tree is. Cheaper than what it replaced — see `componentKind.ts`.
@@ -304,16 +180,17 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
     return { index, routers };
   }, [updateCounter]);
 
-  // Build tree structure with optional sheet filtering
+  /**
+   * TVW-001 (e) — there is one view now.
+   *
+   * Slice 2 built the sectioned tree for the unfiltered view and left the old folder tree drawing
+   * whenever a sheet was selected, because a sheet selector still existed to select one. R-C
+   * retires it, so the branch has no condition left to test and `buildTreeFromProject` no caller.
+   */
   const treeData = useMemo(() => {
     if (!ProjectModel.instance) return [];
-    // TVW-001 (d): the unfiltered view is sections by role. A selected sheet keeps the folder tree
-    // until slice 4 retires sheets from the UI.
-    if (currentSheet === null) {
-      return buildSectionedTree(ProjectModel.instance, hideSheets, kindIndex, usage.index, usage.routers, warningCounter);
-    }
-    return buildTreeFromProject(ProjectModel.instance, hideSheets, currentSheet, kindIndex, usage.index, warningCounter);
-  }, [updateCounter, hideSheets, currentSheet, kindIndex, usage, warningCounter]);
+    return buildSectionedTree(ProjectModel.instance, kindIndex, usage.index, usage.routers, warningCounter);
+  }, [updateCounter, kindIndex, usage, warningCounter]);
 
   // Toggle folder expand/collapse
   const toggleFolder = useCallback((folderId: string) => {
@@ -368,105 +245,14 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
     activeComponentName,
     toggleFolder,
     handleItemClick,
-    // Sheet system
-    sheets,
-    currentSheet,
-    selectSheet
   };
 }
 
-/**
- * Build tree structure from ProjectModel
- *
- * @param project - The project model
- * @param hideSheets - Sheet names to hide (filter out)
- * @param currentSheet - If provided, filter to only show components in this sheet
- * @param kindIndex - PNL-006 kind/category per component name
- * @param warningGeneration - PNL-006; unused as a value, present so the tree is
- *   rebuilt when warnings change (the counts are read live below)
- */
-function buildTreeFromProject(
-  project: ProjectModel,
-  hideSheets: string[],
-  currentSheet: Sheet | null,
-  kindIndex: ComponentKindIndex,
-  usageIndex: UsageIndex,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  warningGeneration: number
-): TreeNode[] {
-  const rootFolder: FolderStructure = {
-    name: '',
-    path: '/',
-    components: [],
-    children: []
-  };
-
-  // Get all components
-  const components = project.getComponents();
-
-  // First pass: Build folder structure from ALL components (including placeholders)
-  // This ensures empty folders created via placeholders are visible
-  components.forEach((comp) => {
-    // Filter by hideSheets
-    const sheet = getSheetForComponent(comp.name);
-    if (hideSheets.includes(sheet)) {
-      return;
-    }
-
-    /**
-     * WFA-001: cloud components are never drawn in the flattened "All" tree.
-     *
-     * "All" strips the sheet prefix from every display path (below), so
-     * `/#__cloud__/saveOrder` would be drawn at `/saveOrder`, sharing a folder
-     * namespace with browser components and inheriting the browser create menu.
-     * Two different runtimes must not be merged into one namespace — select the
-     * Cloud Functions sheet to see them.
-     */
-    if (currentSheet === null && comp.name.startsWith(CLOUD_SHEET.pathPrefix)) {
-      return;
-    }
-
-    // Apply current sheet filtering
-    if (currentSheet !== null) {
-      const parts = comp.name.split('/').filter((p) => p !== '');
-      const firstPart = parts.length > 0 ? parts[0] : '';
-      const isInSheetFolder = firstPart.startsWith('#');
-
-      if (currentSheet.isDefault) {
-        if (isInSheetFolder) return;
-      } else {
-        if (firstPart !== currentSheet.folderName) return;
-      }
-    }
-
-    // Determine display path (strip sheet prefix if needed)
-    let displayPath = comp.name;
-    if (currentSheet === null) {
-      const parts = comp.name.split('/').filter((p) => p !== '');
-      if (parts.length > 0 && parts[0].startsWith('#')) {
-        displayPath = '/' + parts.slice(1).join('/');
-      }
-    } else if (!currentSheet.isDefault) {
-      const sheetPrefix = '/' + currentSheet.folderName + '/';
-      if (comp.name.startsWith(sheetPrefix)) {
-        displayPath = '/' + comp.name.substring(sheetPrefix.length);
-      }
-    }
-
-    if (displayPath && displayPath !== '/') {
-      // For placeholders: create folder structure but don't add to components array
-      const isPlaceholder = comp.name.endsWith('/.placeholder');
-      addComponentToFolderStructure(rootFolder, comp, displayPath, isPlaceholder);
-    }
-  });
-
-  // Convert folder structure to tree nodes
-  return convertFolderToTreeNodes(rootFolder, kindIndex, usageIndex);
-}
 
 /**
  * Add a component to the folder structure
- * @param displayPath - Optional override path for tree building (used when stripping sheet prefix)
+ * @param displayPath - Path to file the component under. TVW-001 (e): always the component's real
+ *   name now — the sheet-stripped variant it used to take is gone with the sheets.
  * @param skipAddComponent - If true, only create folder structure but don't add component (for placeholders)
  */
 function addComponentToFolderStructure(
@@ -482,13 +268,24 @@ function addComponentToFolderStructure(
 
   // Navigate/create folder structure (all parts except the last one)
   for (let i = 0; i < parts.length - 1; i++) {
-    const folderName = parts[i];
-    let folder = currentFolder.children.find((c) => c.name === folderName);
+    const folderPath = parts.slice(0, i + 1).join('/');
+    /**
+     * 🔴 TVW-001 (e): matched on the **path**, not the label.
+     *
+     * The label strips a leading `#` at the top level, so `/#Design/Card` and `/Design/Card` both
+     * read `Design`. Matching on the label merged them into one folder — whose path was whichever
+     * of the two was seen first, which is then the path every rename, drag and create resolves
+     * against. Half the rows would have acted on the other folder.
+     */
+    let folder = currentFolder.children.find((c) => c.path === folderPath);
 
     if (!folder) {
       folder = {
-        name: folderName,
-        path: parts.slice(0, i + 1).join('/'),
+        // Depth, counted off the path rather than off `i` — a component name's leading `/` makes
+        // `parts[0]` the empty string, so `i` runs one ahead of the depth. Only a top-level `#`
+        // was ever a sheet.
+        name: folderSegmentLabel(parts[i], folderPath.split('/').filter(Boolean).length - 1),
+        path: folderPath,
         components: [],
         children: []
       };
@@ -614,7 +411,18 @@ function componentNodeFor(
   };
 }
 
-const CLOUD_EMPTY_TEXT = 'None yet. Cloud functions run on your backend, not in the browser.';
+/**
+ * TVW-001 (e) — the empty cloud section, which is the state every project starts in.
+ *
+ * It used to say what a cloud function is and stop there. That was survivable while the sheet
+ * selector existed, because the section was a *place you had navigated to* and its own create menu
+ * was a right-click away. With sheets retired there is no navigating to it — it is a heading with
+ * nothing under it — so the text has to name the door, or F83's finding is back: the runtime is
+ * there, the authoring is there, and nothing on screen says so. The `+` is the door
+ * (`createMenu.ts` offers the cloud template from every folder context now).
+ */
+const CLOUD_EMPTY_TEXT =
+  'None yet. Cloud functions run on your backend, not in the browser. Use + in the panel header to create one.';
 
 /**
  * TVW-001 (d) — the unfiltered tree: sections by role, the user's folders inside each.
@@ -627,14 +435,15 @@ const CLOUD_EMPTY_TEXT = 'None yet. Cloud functions run on your backend, not in 
  * - `Cloud functions` keeps full `/#__cloud__/…` paths on its rows, so rename, drag and create act
  *   on the real name with no sheet prefix, and its create menus author cloud components. It is
  *   drawn even when empty (WFA-001: otherwise nothing says the runtime exists).
- * - Sheet folders (`#Name`) are stripped from display as the unfiltered view always did; slice 4
- *   turns them into ordinary folders.
+ * - Legacy sheet folders (`#Name`) are **ordinary folders** (TVW-001 (e)). Until slice 4 the tree
+ *   dropped them from the display path entirely, so `/#Design/Card` rendered as a bare `Card` at
+ *   the section root and the folder its author made was invisible. They now draw like any other
+ *   folder, with the `#` off the label and still on the path — see `folderDisplay.ts`.
  *
  * A section with no rows is not drawn, except `Cloud functions`.
  */
 function buildSectionedTree(
   project: ProjectModel,
-  hideSheets: string[],
   kindIndex: ComponentKindIndex,
   usageIndex: UsageIndex,
   routers: RouterPages[],
@@ -650,12 +459,10 @@ function buildSectionedTree(
   const pages: ComponentModel[] = [];
 
   for (const comp of project.getComponents()) {
-    if (hideSheets.includes(getSheetForComponent(comp.name))) continue;
-
     const isCloud = comp.name.startsWith(CLOUD_PATH_PREFIX);
     const isPlaceholder = comp.name.endsWith('/.placeholder');
     if (isPlaceholder) {
-      addComponentToFolderStructure(isCloud ? roots.cloud : roots.components, comp, isCloud ? comp.name : displayPathFor(comp.name), true);
+      addComponentToFolderStructure(isCloud ? roots.cloud : roots.components, comp, comp.name, true);
       continue;
     }
 
@@ -666,8 +473,7 @@ function buildSectionedTree(
     } else if (section === 'cloud') {
       addComponentToFolderStructure(roots.cloud, comp, comp.name);
     } else {
-      const displayPath = displayPathFor(comp.name);
-      if (displayPath !== '/') addComponentToFolderStructure(roots[section], comp, displayPath);
+      addComponentToFolderStructure(roots[section], comp, comp.name);
     }
   }
 
@@ -712,7 +518,6 @@ function buildSectionedTree(
 
   const tree: TreeNode[] = [];
   for (const id of SECTION_ORDER) {
-    if (id === 'cloud' && (hideSheets.includes(CLOUD_SHEET.folderName) || hideSheets.includes('__cloud__'))) continue;
     if (children[id].length === 0 && id !== 'cloud') continue;
     tree.push({
       type: 'section',
@@ -731,12 +536,6 @@ function buildSectionedTree(
   return tree;
 }
 
-/** The unfiltered view's display path: a top-level `#Sheet` folder is not drawn (slice 4 changes this). */
-function displayPathFor(name: string): string {
-  const parts = name.split('/').filter((p) => p !== '');
-  if (parts.length > 0 && parts[0].startsWith('#')) return '/' + parts.slice(1).join('/');
-  return name;
-}
 
 /** TVW-001 (b) — the row's right-hand meta; the route is asked of the Router adapter only for a routed page. */
 function metaFor(component: ComponentModel, kind: ComponentKind, usageIndex: UsageIndex): RowMeta | null {
@@ -777,17 +576,6 @@ function warningCountFor(component: ComponentModel): number {
   }
 }
 
-/**
- * Extract sheet name from component name
- * Note: Component names start with leading "/" (e.g., "/#Pages/Home")
- */
-function getSheetForComponent(componentName: string): string {
-  const parts = componentName.split('/').filter((p) => p !== '');
-  if (parts.length > 0 && parts[0].startsWith('#')) {
-    return parts[0].substring(1); // Return sheet name without # prefix
-  }
-  return 'default';
-}
 
 /* PNL-006: `checkIsPage`, `checkIsCloudFunction` and `checkIsVisual` are gone.
    Two of the three could never return anything but a constant —

@@ -109,19 +109,6 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
         appRegistry.openDocument(EditorDocumentProvider.ID);
       }
     },
-    panelProps: {
-      // This is a temporary solution so we can keep the state of open folder etc
-      options: {
-        showSheetList: true
-        // WFA-001: `hideSheets: ['__cloud__']` used to be here, and it filtered
-        // cloud functions out of both the sheet dropdown and the tree — the
-        // first of the four cuts that made everything phases 19 and 22 built
-        // unreachable from the editor. The cloud sheet is now a first-class,
-        // always-listed sheet; it is still kept out of the flattened "All" tree,
-        // but that is `useComponentsPanel`'s decision about runtime boundaries
-        // rather than a panel option. See WFA-001-NOTES.md decision 1.
-      }
-    },
     panel: ComponentsPanel
   });
 

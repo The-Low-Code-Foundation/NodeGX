@@ -86,7 +86,7 @@ AC1 against `activeComponent` **and** the rendered class, both.
 | 1 (s6, 2026-09-17) | a, b | ✅ | AC1 ✅ (door corrected, below) · AC2 ✅ |
 | 2 (s7, 2026-09-17) | d — sections by role, `not in a router` placement | ✅ | driven ✅ · **AC3 ✅** |
 | 3 (s8, 2026-09-17) | c — `×N` button → *Used in* | ✅ | driven ✅ · **AC4 ✅** |
-| 4 | e — sheets retired | — | — |
+| 4 (s9, 2026-09-17) | e — sheets retired | ✅ | driven ✅ · **AC5 ✅** |
 | 5 | f — the Workbench words | — | — |
 
 ### Slice 1 — what was built
@@ -289,3 +289,117 @@ Undo/redo driven through `UndoQueue.instance.undo()/redo()`, not a ⌘Z keypress
 **Seen, for AC7's WORTHY pass (not fixed):** the `Not in a router` heading and the row's
 `not in a router` chip say the same thing twice; rows are 26px under 30px headings (CHR-009's 30px
 row not adopted yet); the home component sorts after the folders in `Components`.
+
+
+### Slice 4 — what was built
+
+Sheets are gone from the UI (R-C). `SheetSelector.tsx`, `SheetSelector.module.scss` and
+`useSheetManagement.ts` are deleted; `panelProps.options` (`showSheetList`, `hideSheets`,
+`lockToSheet`) is gone from `router.setup.ts`, from `types.ts` and from the legacy
+`componentspanel/index.tsx` wrapper, which is now two re-export lines. `useComponentsPanel` has no
+sheet state and one view: `buildTreeFromProject` — the old folder tree, drawn only while a sheet was
+selected — had no caller left and is deleted with it (88 lines).
+
+**The decision inside it: the `#` comes off the label and stays on the path.** The spec says "no
+name on disk changes", and the code says why it must be exactly that split. `useComponentActions`
+resolves what the tree hands it straight onto real component names; `sheetPrefix` existed solely to
+put back what a selected sheet had stripped. With sheets gone the tree's paths *are* component
+names, `sheetPrefix` is deleted, and a display label leaking into a path position would silently
+rename a legacy project's folders. So `FolderItemData.path` keeps `/#Design` and `name` reads
+`Design` — `folderDisplay.ts`, pure, graded in `tests-unit/tvw-001`.
+
+- 🔴 **The folder lookup in `addComponentToFolderStructure` now matches on `path`, not `name`.** It
+  matched on the name, and after stripping, `/#Design/Card` and `/Design/Card` both read `Design`:
+  they would have merged into one folder whose path was whichever was seen first — the path every
+  rename, drag and create then resolves against. Armed as mutant 5 below.
+- Until this slice the unfiltered tree **dropped a `#Sheet` folder from the display path entirely**,
+  so `/#Design/Card` drew as a bare `Card` at the section root. The folder its author made was
+  invisible, which is a stronger statement than the spec's "as `:347-358` already strips them"
+  implies. It is an ordinary folder now.
+- The canvas trail agreed with the old behaviour and had to move with it: a crumb for `#Design` now
+  reads `Design`, through the same `folderSegmentLabel`. Its sheet test was written
+  `name.substring(1, -1) === '#'`, which reads as "the second character" and is not — JS `substring`
+  swaps a reversed range and clamps the negative to 0, so it returned the *first*. Right answer, by
+  an expression nobody could check. Rewritten as `startsWith('#')`.
+- `CLOUD_SHEET.displayName` (`'Cloud Functions'`) is deleted in favour of `SECTION_LABEL.cloud`
+  (`'Cloud functions'`) — two spellings of one user-visible name, already drifted by a capital
+  letter. The `#__cloud__` boundary itself is untouched.
+
+**The cloud door, which the sheet retirement would otherwise have shut.** SPR-005's answer to
+"you are in a browser folder" was a disabled row reading *choose Cloud Functions in the sheet
+selector*, plus a *Go to Cloud Functions* row that switched sheets. Both are uninstructable once the
+selector goes — F83's finding restored intact. So the row is now **enabled from every folder
+context** and creates into `#__cloud__` regardless of which folder was right-clicked
+(`CLOUD_CREATE_PARENT_PATH`); its end slot names that destination, because it is deliberately not
+where the click was. The one disabled case left is nesting inside a component, whose reason never
+mentioned sheets (`POST /functions/<name>` cannot address a nested name). The empty cloud section's
+text now names the `+`, since with no sheet to navigate to it is a heading with nothing under it.
+
+**Decisions this slice made** (none is a ruling; Richard sees them at AC7): a folder rename now
+writes the label, so renaming a legacy `Design` folder sheds its `#` — an opt-in migration, never an
+automatic one. Dragging a `#Design` folder to the root lands it at `/Design` for the same reason.
+*Move to…* is removed from both row menus with no replacement (§6's landmine: some people used it as
+"move to folder"; drag-to-folder remains).
+
+### Slice 4 — gates (2026-09-17)
+
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **5 suites / 46** (was 4 / 33).
+  Armed — five mutants on `folderDisplay.ts`, each red, each proven to have applied (`cmp` against
+  the pristine copy before running): strip `#` at every depth (2 red); cloud matched by
+  `startsWith` rather than `===` (1); never strip `#` (6); root label `''` instead of `null` (1);
+  every segment labelled as if it were depth 0 (1). Restored, `cmp` clean.
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**.
+- `tests/components/createMenu.spec.ts` rewritten — it pinned the sheet-based menu, so most of it
+  asserted behaviour R-C removes. It runs in `test:ci` (Jasmine, via `tests/components/index.ts`),
+  **not yet run this slice** — owed with AC8.
+- AC5's grep: `SheetSelector.tsx` and `useSheetManagement.ts` are gone. `grep -rna "sheet"
+  ComponentsPanelNew/ --include='*.tsx' -i` returns **11 lines, none of them code** — the
+  `#__cloud__` boundary, two `stylesheet` substrings, and comments recording the retirement. The
+  live-code reading (same grep, comment lines filtered) is `CLOUD_SHEET` only. 🔴 Use `grep -a`:
+  without it this grep skips `.tsx` files silently and the absence means nothing.
+
+
+### Slice 4 — drive (dev stack, `TVW-001 Slice4 Drive`, 2026-09-17)
+
+**The fixture had to be built.** AC5 names a project with `/#Design/Card` and **no project on this
+machine has a `#` folder** — checked all 128 in `NodeGX test projects`. Nor can the editor make one
+any more: *Add Sheet* is what this slice deletes. So the fixture is a copy of `Landing page test V2`
+with `components/#Design/Card` added on disk (a copy of `StatTile`, its `componentId` remapped and
+asserted disjoint from the original's) and registered in `_registry.json`.
+
+| step | read | result |
+|---|---|---|
+| open the fixture | sections `Pages 1` `Components 23` `Logic 2` `Cloud functions 0`; header has the `+` and **no sheet selector** | ✅ |
+| **AC5** `/#Design/Card` | a `Design` folder in `Components`, `Card` inside it at level 1, meta `unplaced` | ✅ |
+| **AC5** the name on disk | `ProjectModel` still holds `/#Design/Card` — the `#` is on the path, off the label | ✅ |
+| **AC5** `SheetSelector.tsx`, `useSheetManagement.ts` | deleted | ✅ |
+| create menu on the `Design` row | title **“New in Design”** (the label, not `#Design`); no *Move to…* | ✅ |
+| create a component in `Design` → `SheetProof` | lands at **`/#Design/SheetProof`** — the label resolved back to the real path | ✅ the seam `sheetPrefix` used to hold |
+| header `+` from the project root | title “New in the project root”; *Create Cloud Function Component* **enabled**, end slot `Cloud functions` | ✅ the new door |
+| that row → name prompt → create | prompt is the cloud template's own (*New cloud function name* / *e.g. chargeCard*); lands at **`/#__cloud__/chargeCard`**, section reads `Cloud functions 1` | ✅ F83's door, with no sheet to switch to |
+| empty cloud section | *“None yet. Cloud functions run on your backend, not in the browser. Use + in the panel header to create one.”* | ✅ |
+| **control** drag `/#Design/Card` → `Sections` | moves to `/Sections/Card` — drag works, and resolves the `#` path | ✅ armed |
+| drag `chargeCard` (cloud) → `Sections` (browser) | refused; still `/#__cloud__/chargeCard` | ✅ **the boundary drag s7 could not run** |
+| drag `chargeCard` → tree empty space (root drop) | unchanged — **but this grades nothing**, see below | ❌ not driven |
+
+Evidence: `verdicts/TVW-001/2026-09-17/slice4-sheets-retired-dark.png` (verdict PNGs are gitignored).
+
+🔴 **The root-drop refusal is not a result.** Its control — root-dropping an ordinary *browser*
+component — did not move it either, so "the cloud row stayed put" is consistent with "root drop does
+not fire under a synthetic drag at all" and distinguishes nothing. Row-to-row drops do fire (the
+control above), so the difference is `handleTreeMouseUp`'s `PopupLayer.instance.isDragging()` gate,
+which this slice did not touch: it only removed `currentSheet === null &&` from the guard beside it.
+Left undriven rather than recorded as a pass.
+
+**Two drive traps, both already in memory, both paid for again:**
+
+- 🔴 **`dispatchDrag` is not exported from `cdp.js`** (`module.exports` is `appTarget`, `connect`,
+  `evaluate`, `elementCentre`, `dispatchClick`, `httpJson`, `KNOWN_TARGETS`). The first boundary-drag
+  attempt threw `FATAL: dispatchDrag is not a function` and the "after" reading was *identical to the
+  before* — a perfect-looking refusal from a gesture that never happened. An unarmed instrument
+  measures nothing.
+- 🔴 **A `MenuDialog` renders every row twice** — a measuring ghost 36px above the real one. Clicking
+  the cloud row's measured centre hit the **Logic** row underneath, which produced a generic *New
+  component name* prompt and a component at `/chargeCard`; that reads exactly like "the cloud
+  destination override is broken". It was not. `document.elementFromPoint(cx, cy)` on every row
+  separates the two: the ghost's own centre returns the *previous* real row.

@@ -11,9 +11,9 @@ import { MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 import { Tooltip } from '@noodl-core-ui/components/popups/Tooltip';
 
 import { ViewerConnection } from '../../ViewerConnection';
-import { buildCreateMenuItems, createMenuTitle, DEFAULT_SHEET_NAME } from '../panels/ComponentsPanelNew/createMenu';
+import { buildCreateMenuItems, CLOUD_CREATE_PARENT_PATH, createMenuTitle } from '../panels/ComponentsPanelNew/createMenu';
+import { folderSegmentLabel } from '../panels/ComponentsPanelNew/folderDisplay';
 import { useComponentActions } from '../panels/ComponentsPanelNew/hooks/useComponentActions';
-import { CLOUD_SHEET } from '../panels/ComponentsPanelNew/types';
 import { showContextMenuInPopup } from '../ShowContextMenuInPopup';
 import css from './NodeGraphComponentTrail.module.scss';
 
@@ -76,21 +76,21 @@ export function NodeGraphComponentTrail({
   const trailRef = useRef<HTMLDivElement>(null);
 
   /**
-   * SPR-005 — which sheet this bar's "+" creates into.
+   * SPR-005 — where this bar's "+" creates into.
    *
-   * It used to call `useComponentActions()` with no options, so `sheetPrefix`
-   * was `''` and every component it created was named `/<name>`. On a cloud
-   * function's canvas the menu offers **Cloud Function Component**, so that
-   * produced a component with `noodl.cloud.request`/`response` roots sitting
-   * *outside* `#__cloud__` — which `isCloudFunctionComponent` does not match, so
-   * no backend would ever be sent it and no `call-function` step could resolve
-   * it. It looked like a cloud function in the tree and was not one. The prefix
-   * is the same string `ComponentsPanel` computes from the selected sheet.
+   * On a cloud function's canvas the menu offers **Cloud Function Component**, and the component it
+   * creates has to land inside `#__cloud__`: a component with `noodl.cloud.request`/`response`
+   * roots sitting *outside* it is not matched by `isCloudFunctionComponent`, so no backend is ever
+   * sent it and no `call-function` step can resolve it. It looks like a cloud function in the tree
+   * and is not one.
+   *
+   * TVW-001 (e): that used to be done with `useComponentActions({ sheetPrefix })`, which silently
+   * prefixed every name the bar produced. `sheetPrefix` is gone with the sheets, so the destination
+   * is now said out loud — as the create context's `parentPath`, the same field every other surface
+   * uses to name where a new component lands.
    */
   const isCloudCanvas = runtimeType === RuntimeType.Cloud;
-  const { handleAddComponent } = useComponentActions({
-    sheetPrefix: isCloudCanvas ? '/' + CLOUD_SHEET.folderName : ''
-  });
+  const { handleAddComponent } = useComponentActions();
 
   /**
    * A workflow is not a component and is not stored in the project, so no
@@ -114,11 +114,11 @@ export function NodeGraphComponentTrail({
   // that literally the same builder rather than a second copy of it, so the
   // bar and the panel cannot offer different things or land them differently.
   const createContext = {
-    // The bar creates at the root of the sheet the canvas belongs to, which is
-    // a folder context — the same one the panel's empty space declares.
+    // The bar creates at the root of the section the canvas belongs to, which is a folder context —
+    // the same one the panel's empty space declares.
     forParentType: 'folder' as const,
     runtimeType: (isCloudCanvas ? 'cloud' : 'browser') as 'browser' | 'cloud',
-    sheetName: isCloudCanvas ? CLOUD_SHEET.displayName : DEFAULT_SHEET_NAME
+    parentPath: isCloudCanvas ? CLOUD_CREATE_PARENT_PATH : undefined
   };
 
   function onNewComponentClick() {
@@ -262,16 +262,21 @@ function Item({ item, onSwitchToComponent }: ItemProps) {
     itemRef.current.scrollIntoView();
   }, [itemRef.current, item.isCurrent]);
 
-  const name = item.name;
-  let isSheet = false;
+  /**
+   * TVW-001 (e) — a legacy `#Sheet` crumb.
+   *
+   * Written as `name.substring(1, -1) === '#'` until slice 4, which reads as "the second character"
+   * and is not: JS `substring` swaps a reversed range and clamps the negative to 0, so it returned
+   * the *first* character. Right answer, by an expression nobody could check.
+   *
+   * The `#` is stripped here for the same reason the tree strips it — the two surfaces name the
+   * same folder, and after slice 4 the tree calls it `Design`. `folderSegmentLabel` is the one rule
+   * they share.
+   */
+  const isSheet = !item.component && item.name.startsWith('#');
+  const name = isSheet ? folderSegmentLabel(item.name) : item.name;
 
-  if (!item.component) {
-    if (name.substring(1, -1) === '#') {
-      isSheet = true;
-    }
-  }
-
-  if (name === '#__cloud__') return null;
+  if (item.name === '#__cloud__') return null;
 
   const rootComponent = getDefaultComponent();
   let isRootComponent = false;
