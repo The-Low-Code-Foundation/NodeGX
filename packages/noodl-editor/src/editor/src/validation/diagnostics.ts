@@ -713,6 +713,17 @@ export enum DiagnosticCode {
   ColumnsChildKeepsOwnWidth = 'columns-child-keeps-own-width',
 
   /**
+   * P88 GAM-020 (P78 D58) — a `Text` at `contentSize`/`contentWidth` holding a sentence.
+   * `Text.tsx` renders those modes as `white-space: pre`, so the sentence is one line in any
+   * box, and runs out of a card on a phone with zero console errors (Rocket School, RKT-001).
+   *
+   * R18 (Richard, 2026-09-17): fires only when the longest literal line is at least 26
+   * characters, the shortest line measured clipping (RKT-001 §6). A **warning**, advisory.
+   * Inside a `Columns` the D28 warning above speaks instead: same node, same exit.
+   */
+  TextCannotWrap = 'text-cannot-wrap',
+
+  /**
    * DEF-020 (P78 D32) — a row `Group` whose `justifyContent` distributes free
    * space, with two or more children that grow: the free space never exists,
    * the children split the row evenly, and the parameter is silently inert.

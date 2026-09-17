@@ -1,6 +1,6 @@
 # GAM-017 — A kit React node takes a signal and a size the way a built-in node does
 
-**Status: ⬜ not started.** **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
+**Status: ⬜ not started. ✅ R17 ruled s19 (§5): buildable.** **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
 
 Rocket School's kit wanted a `Burst` signal and got a console error, so the burst became a number that rises. The kit
 wanted a height and got no size port, so the Race Track is sized by a Group wrapped around it.
@@ -72,6 +72,8 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
   the export until P40 has an owner.
 - **Do not** remove the console error without putting a working route or a refusal in its place.
 - **Do not** touch `layout.ts`'s percentage-to-`flexGrow` conversion (FLD-004's trap).
+
+> 🔒 **R17** **Ruled (2026-09-17, s19, asked in plain words): signals (s1), the bridge makes a declared signal prop work** (an edge-triggered re-render). **Size (z3): document the wrapper Group** and close the "size ports" half as disproved; no ports added, P40 not needed.
 
 ## 6. Acceptance criteria
 

@@ -208,7 +208,7 @@
         "textTransform": "uppercase",
         "color": "var(--muted-foreground)",
         "as": "span",
-        "sizeMode": "contentSize"
+        "sizeMode": "contentHeight"
       },
       "x": 280,
       "y": 1120

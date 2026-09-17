@@ -168,6 +168,9 @@ function main(): void {
   let fixedHeightColumns = 0;
   const d28Lines: string[] = [];
   const d32Lines: string[] = [];
+  // GAM-020 (R18): the denominator is every content-sized Text, not the firings.
+  let contentSizedTexts = 0;
+  const g20Lines: string[] = [];
   const f05Lines: string[] = [];
   const d28Projects = new Set<string>();
   const d32Projects = new Set<string>();
@@ -187,6 +190,9 @@ function main(): void {
       const nodes = component.nodes;
       const byId = new Map(nodes.map((n) => [n.id, n]));
       for (const n of nodes) {
+        if (n.type === 'Text' && ['contentSize', 'contentWidth'].includes(n.parameters?.['sizeMode'] as string)) {
+          contentSizedTexts++;
+        }
         if (n.type === COLUMNS_TYPE) {
           columnsNodes++;
           columnsChildren += (n.children ?? []).length;
@@ -229,6 +235,8 @@ function main(): void {
           f05Projects.add(projectName);
           const m = d.message.match(/(\d+) of/);
           f05Lines.push(`  [${m ? m[1] : '?'} sharing] ${where}`);
+        } else if (d.code === DiagnosticCode.TextCannotWrap) {
+          g20Lines.push(`  ${where}: ${d.message.match(/\("(.*?)"\)/)?.[1] ?? '?'}`);
         } else if (d.code === DiagnosticCode.JustifyContentDistributesNothing) {
           d32Projects.add(projectName);
           const m = d.message.match(/(\d+) children/);
@@ -261,6 +269,11 @@ function main(): void {
   );
   console.log(`  firings: ${f05Lines.length} in ${f05Projects.size} projects`);
   for (const line of f05Lines) console.log(line);
+  console.log('');
+  console.log(`GAM-020 text-cannot-wrap`);
+  console.log(`  denominators: ${contentSizedTexts} authored content-sized Texts`);
+  console.log(`  firings: ${g20Lines.length}`);
+  for (const line of g20Lines) console.log(line);
 }
 
 main();

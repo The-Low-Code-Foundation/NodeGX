@@ -169,6 +169,21 @@ function measureExpression(placeholders, probes = []) {
     .filter((x) => x.w > vw + 1)
     .map((x) => ({ tag: x.el.tagName, cls: cls(x.el), width: round(x.w) }));
 
+  // P88 GAM-020 (D58) — a Text wider than the box it sits in. RKT-001's corrected clause: the text's
+  // border box against its PARENT's content box. A 'white-space: pre' Text always fits itself, so its
+  // own scrollWidth against its own clientWidth cannot fail (that read 60/60 green on the clipped
+  // build). An inline parent has no content box (clientWidth 0) and is skipped, never judged.
+  const textsWiderThanBox = visible
+    .filter((el) => el.classList.contains('ndl-visual-text') && el.parentElement)
+    .map((el) => {
+      const parent = el.parentElement;
+      const ps = styleOf(parent);
+      const box = parent.clientWidth - (parseFloat(ps.paddingLeft) || 0) - (parseFloat(ps.paddingRight) || 0);
+      return { el, width: el.getBoundingClientRect().width, box };
+    })
+    .filter((x) => x.box > 0 && x.width > x.box + 1)
+    .map((x) => ({ text: x.el.textContent.trim().slice(0, 80), width: round(x.width), parentWidth: round(x.box), cls: cls(x.el) }));
+
   // AWP-004 — what is on screen, as opposed to what is in the DOM. The page is
   // never scrolled when this runs, so a rect is already a document position.
   // Kimi K3's storefront was 83 texts in the DOM and about three on screen, and
@@ -508,6 +523,8 @@ function measureExpression(placeholders, probes = []) {
     contentBottom: round(contentBottom),
     overflowing: overflowing.slice(0, 10),
     overflowingCount: overflowing.length,
+    textsWiderThanBox: textsWiderThanBox.slice(0, 10),
+    textsWiderThanBoxCount: textsWiderThanBox.length,
     text: {
       elements: textEls.length,
       onScreen: textEls.filter(onScreen).length,
@@ -604,6 +621,12 @@ const RenderFinding = {
   ClippedPage: 'clipped-page',
   /** Elements wider than the viewport inside a page that does not itself scroll sideways. */
   ElementsOverflowing: 'elements-overflowing',
+  /**
+   * P88 GAM-020 (D58) — a Text wider than its parent's content box, so it is cut off or spills. The
+   * text is named. Rocket School's French sentences did this with zero console errors, and every
+   * page-level finding stayed quiet because the page itself kept its width.
+   */
+  TextWiderThanItsBox: 'text-wider-than-its-box',
   SingleColumnGrid: 'single-column-grid',
   MinimumLayoutWidth: 'minimum-layout-width',
   HorizontalOverflow: 'horizontal-overflow',
@@ -973,6 +996,22 @@ function summarise(viewports, diagnosis, overridden = {}) {
           'viewport, while the page itself does not scroll sideways — so each is clipped by an ancestor ' +
           `rather than reachable${widestOffender(v) ? `; the widest is ${widestOffender(v)}` : ''}.`,
         evidence: v.overflowing
+      });
+    }
+
+    if (v.textsWiderThanBoxCount > 0) {
+      const first = v.textsWiderThanBox[0];
+      add({
+        code: RenderFinding.TextWiderThanItsBox,
+        severity: 'warning',
+        viewport: name,
+        message:
+          `${plural(v.textsWiderThanBoxCount, 'text is', 'texts are')} wider than the box ${
+            v.textsWiderThanBoxCount === 1 ? 'it sits' : 'they sit'
+          } in at ${v.requested.width}px, so the line is cut off or spills: "${first.text}" is ${first.width}px ` +
+          `in a ${first.parentWidth}px box. A Text sized to its content (sizeMode "contentSize" or "contentWidth") ` +
+          'never wraps; "contentHeight" takes its width from the parent and wraps.',
+        evidence: v.textsWiderThanBox
       });
     }
 

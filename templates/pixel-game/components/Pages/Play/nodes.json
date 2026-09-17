@@ -266,7 +266,8 @@
         "text": "The five rooms are one Static Data node — open it and add a sixth.",
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)",
-        "sizeMode": "contentSize"
+        "sizeMode": "contentHeight",
+        "textAlignX": "center"
       },
       "x": 160,
       "y": 1720

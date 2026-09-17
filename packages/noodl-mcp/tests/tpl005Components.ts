@@ -1307,10 +1307,13 @@ const PLAY: Tpl005Component = {
 
     place('plTeach', TEACH_COMPONENT, 'How to play', 'plWrap'),
 
+    // P88 GAM-020: a sentence, so it takes the column's width and wraps. At contentSize it rendered
+    // 429px in a 358px box at 390×844 and held the whole page at 410px (minimum-layout-width).
     text('plFoot', 'Where to start editing', 'plWrap', 'The five rooms are one Static Data node — open it and add a sixth.', {
       ...T_META,
       color: 'var(--muted-foreground)',
-      sizeMode: 'contentSize'
+      sizeMode: 'contentHeight',
+      textAlignX: 'center'
     }),
 
     // ── The room, and the run ──────────────────────────────────────────────

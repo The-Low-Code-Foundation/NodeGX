@@ -1568,10 +1568,12 @@ const REMIX: Tpl006Component = {
       borderWidth: 'var(--border-1)',
       borderColor: 'var(--border)'
     }, ['rxHelpHead', 'rxHelpBody', 'rxHelpExample']),
+    // P88 GAM-020: a sentence in a content-sized Text cannot wrap. It fitted at 390×844, and a
+    // longer translation would not; the column is left-aligned, so contentHeight draws the same.
     text('rxHelpHead', 'The heading', 'rxHelp', 'Four words, and there is no fifth', {
       ...T_EYEBROW,
       color: 'var(--muted-foreground)',
-      sizeMode: 'contentSize'
+      sizeMode: 'contentHeight'
     }),
     prose('rxHelpBody', 'The four words', 'rxHelp',
       [

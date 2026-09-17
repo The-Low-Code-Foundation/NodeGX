@@ -1,6 +1,6 @@
 # GAM-020 — A sentence that will never wrap is flagged before a person sees it clipped
 
-**Status: ⬜ not started. ✅ R18 ruled s19 (§5): buildable.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
+**Status: 🟢 built s19 (2026-09-17), both doors. AC1–AC5, AC7, AC8 met; AC6 (Rocket School regenerated with the old helper) left. ✅ R18 ruled s19.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
 
 Rocket School's Text helper gave every Text `sizeMode: contentSize`. Every sentence then ran off its card: *"a lot of texts
 don't wrap"*. The validator, the plan tools and `render_report` all stayed quiet.
@@ -100,4 +100,36 @@ words.
 
 ## 8. Record
 
-Not started.
+### Session 19 (2026-09-17, over `f25a643b2`; HEAD at write `1de18171f`)
+
+**The threshold (R18), measured, not chosen:** **26 characters** of the longest literal line. RKT-001 §6 measured *"Tu as atteint
+la planète !"* (26) at 320px in a 304px banner: the shortest line seen clipping. The corpus census (templates + prefabs, 545 Texts, 123
+content-sized, 27 with a multi-word literal) puts every heading at **20 or under** ("An interactive story") and every sentence at 25 or
+over. `SENTENCE_MIN_CHARS` in `layoutInertCombination.ts`. A newline is honoured (`pre` respects it): the longest *line* is measured.
+
+**Door 1, the validator:** `text-cannot-wrap` (warning, advisory) in `layoutInertCombination.ts`, reached through
+`authoredPreconditionDiagnostics`. Port `sizeMode`, suggestion `sizeMode: "contentHeight"`. Abstains on a wired `text`/`sizeMode`/
+`textOverflow`, on `textOverflow` ellipsis/clip, on a single word, on a `var(` token. **AC7 cardinality decided: one diagnostic.** A
+Columns child gets D28's `columns-child-keeps-own-width` only (same node, same exit).
+
+**Door 2, the render:** `text-wider-than-its-box` (warning) in `nodegx-render-measure`: a visible `.ndl-visual-text` whose border box is
+wider than its parent's content box (`clientWidth` minus padding) + 1px, per viewport, naming the text, its width and the box. An inline
+parent (`clientWidth` 0) is skipped.
+
+| AC | reading |
+|---|---|
+| AC1 | Validator: spec `tests-unit/gam-020/textCannotWrap.test.ts` before the rule: the 5 firing arms red, 7 silent arms green (DiagnosticCode added first, so the red is not a compile failure). Render: pixel-game (not the synthetic banner; ⚠️ deviation) at 390×844 with HEAD's measure: `minimum-layout-width` (410px) and `no-imagery` fire, **nothing names a text** ✅ RED, known-firing beside it |
+| AC2 | Spec 12/12: fires on the French sentence at contentSize and contentWidth, and at 26 chars; silent at contentHeight, bare Text, ellipsis, clip, one word, headings ≤ 25, a newline-split sentence, each wired port, a token |
+| AC3 | Real Chrome (`measure-from-disk`, phone): pixel-game **before** names *"The five rooms are one Static Data node — open it and add a sixth."* **429px in a 358px box**; **after** the template fix: no text finding, and `minimum-layout-width` is gone too (it was this Text). Screenshots `scratchpad/gam020/shots/b1-phone.png` (cut at both ends) vs `a1-phone.png` (wraps, centred); desktop unchanged. Story-engine Remix: no render finding before or after (its eyebrow heading fits at 390) |
+| AC4 | Validator mutants (sha-restored): no call 5 red; threshold 27 → 1 (the 26-char arm); 21 → 1 (headings); no Columns skip → 1 (AC7); no wired abstention → 2; no ellipsis → 1; whole text not longest line → 1. Render: the self clause (`scrollWidth > clientWidth`) in real Chrome on the clipped build names **nothing**; pinned as the reverted arm of `nodegx-render-measure/tests/textWiderThanItsBox.test.js` (4/4) |
+| AC5 | Census through the real validator (`npm run calibrate:layout -- templates library/prefabs/*/project`, GAM-020 section added): **6 firings**, all sentences, 0 headings: pixel-game `plFoot` (66), story-engine `rxHelpHead` (33), crud-screen empty hint (37), settings-page ×3 section blurbs (28–32). Python's 7th (settings-page, 44) has `text` **wired**: correct abstention |
+| AC6 | ⬜ **Not done.** Rocket School is the TPL-007 peer's uncommitted tree |
+| AC7 | Decided one diagnostic, asserted in the spec, mutant-graded |
+| AC8 | TPL-005 and TPL-006 gates went red on the new warning. **The templates were fixed, not the pins**: `plFoot` → `contentHeight` + `textAlignX: center`, `rxHelpHead` → `contentHeight` (left-aligned column), regenerated (`template:pixel`, `template:story`; one-line diffs). Gates 119/119. TPL-007 and TPL-008 read no new warning |
+
+**Suites:** editor `tests-unit/validation` + `gam-020` 152/152; `nodegx-render-measure` 17/17; `noodl-mcp` `renderReportModule` 41/41,
+tpl003/005/006/008 green. **Red, not ours:** tpl001 (members-area regen differs, red with this module reverted too) and tpl007 (Rocket
+School's untracked `.gitignore`/`.mcp.json`/`CLAUDE.md`, s17). **Not run:** `typecheck:editor` (a peer's editor was starting; `ts-jest`
+type-checked both changed modules), editor `test:ci`, the whole `noodl-mcp` suite. The prefab hits (crud-screen, settings-page) are left
+as findings, not edited. The installed app and `noodl-mcp`'s bundle carry neither door until rebuilt.
+
