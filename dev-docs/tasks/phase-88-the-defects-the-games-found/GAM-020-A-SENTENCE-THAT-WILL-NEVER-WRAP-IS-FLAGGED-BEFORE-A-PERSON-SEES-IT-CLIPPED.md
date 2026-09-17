@@ -1,6 +1,6 @@
 # GAM-020 — A sentence that will never wrap is flagged before a person sees it clipped
 
-**Status: 🟢 built s19 (2026-09-17), both doors. AC1–AC5, AC7, AC8 met. AC6 (s23): the render door names Rocket School's clipped title at the moment it exists; the generator's door cannot, because every Rocket School sentence is wired — Richard's question. ✅ R18 ruled s19.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
+**Status: ✅ 2026-09-17 (session 23): every AC met. R24 ruled — "checking on the rendered page is enough", so AC6's static half is closed as not owed.** Both doors built s19 (AC1–AC5, AC7, AC8); AC6's render half names Rocket School's clipped title at the moment it exists (§8 s23). ✅ R18 ruled s19.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
 
 Rocket School's Text helper gave every Text `sizeMode: contentSize`. Every sentence then ran off its card: *"a lot of texts
 don't wrap"*. The validator, the plan tools and `render_report` all stayed quiet.
@@ -169,3 +169,7 @@ verdict (`textFits`) and on the result screen (`textFitsEnd`), each with a measu
 
 Scratch: session `b19df43b…/scratchpad/g20/` (`old/`, `current/` builds, `gen-*.log`, `census.py`, `measure-*.json`, `deploy-*`,
 `drive-end-*.log`, `shots-end-*`).
+
+> 🔒 **R24 ruled (2026-09-17, s23, asked in plain words): "I think checking on the rendered page is enough."** The validator will **not** follow a wire to a
+> word table, so a template whose sentences are all wired stays silent at the static door on purpose. AC6's generator half is closed as not owed, and the
+> render door — run where the sentence exists, not at page load — is the door for this case. **AC6 ✅.**
