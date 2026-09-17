@@ -20,7 +20,34 @@ import type { NodeGraphEditor } from '../nodegrapheditor';
 export class SelectionActions {
   constructor(private editor: NodeGraphEditor) {}
 
+  /**
+   * TVW-003: told once the node selection has settled after an action, so the selection store can
+   * mirror it (`SelectionStoreBinding`). Unset on every canvas but the app's.
+   */
+  onSelectionChanged?: () => void;
+
+  /**
+   * How deep inside a selection action we are. `selectNode` deselects before it selects; without
+   * this the store would hear "nothing selected" and then the node, and the preview would drop its
+   * outline and redraw it on every click.
+   */
+  private actionDepth = 0;
+
+  private settle<T>(action: () => T): T {
+    this.actionDepth++;
+    try {
+      return action();
+    } finally {
+      this.actionDepth--;
+      if (this.actionDepth === 0) this.onSelectionChanged?.();
+    }
+  }
+
   deselect(args?: { disableHidePanels: boolean }) {
+    this.settle(() => this.deselectNow(args));
+  }
+
+  private deselectNow(args?: { disableHidePanels: boolean }) {
     const editor = this.editor;
 
     editor.commentLayer?.clearMultiselection();
@@ -112,6 +139,10 @@ export class SelectionActions {
   }
 
   addNodeToSelection(node: NodeGraphEditorNode) {
+    this.settle(() => this.addNodeToSelectionNow(node));
+  }
+
+  private addNodeToSelectionNow(node: NodeGraphEditorNode) {
     const editor = this.editor;
 
     if (editor.readOnly) {
@@ -144,11 +175,13 @@ export class SelectionActions {
 
     // Always select the node in the selector if not already selected
     if (!node.selected) {
-      this.clearSelection();
-      editor.commentLayer?.clearSelection();
-      node.selected = true;
-      editor.selector.select([node]);
-      editor.repaint();
+      this.settle(() => {
+        this.clearSelection();
+        editor.commentLayer?.clearSelection();
+        node.selected = true;
+        editor.selector.select([node]);
+        editor.repaint();
+      });
     }
 
     // Always switch to the node in the sidebar (fixes property panel stuck issue)
@@ -188,6 +221,10 @@ export class SelectionActions {
   }
 
   multiselectNodes(x, y, x2, y2, mode) {
+    this.settle(() => this.multiselectNodesNow(x, y, x2, y2, mode));
+  }
+
+  private multiselectNodesNow(x, y, x2, y2, mode) {
     const editor = this.editor;
 
     const selectRect = { x: Math.min(x, x2), y: Math.min(y, y2), width: Math.abs(x2 - x), height: Math.abs(y2 - y) };

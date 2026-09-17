@@ -105,9 +105,46 @@ canvas's own selection for copy, paste, delete and marquee. The canvas writes th
 selection changes (`SelectionActions.selectNode` / `deselect` / `addNodeToSelection` /
 `multiselectNodes`) and subscribes to apply writes from elsewhere. No `selectNode` caller moves.
 
-**Next slice:** the canvas as writer + subscriber, and `EditorDocument`'s preview relay reading the
-store instead of `SidebarModelEvent.nodeSelected`. That edits editor `src/`, so announce it (a
-peer's `npm run start` was live at 11:26). Then the viewer side: the instance path out of
-`inspector.ts`, and `selectNode`/`hoverStart` taking a path. 🔴 The editor loads the viewer from `src/external/{viewer,deploy,ssr}/`, which is gitignored build
-output (`.gitignore:206`): a `noodl-viewer-react` change is invisible until that is rebuilt, and a
-worktree has none.
+### Slice 2 — the canvas and the preview relay on the store (2026-09-17, session 2) ✅ built, driven
+
+- `models/selection/canvasSelection.ts` — `resolveCanvasMove`: which element of each path is on
+  this canvas (innermost wins); select in place when every path has one, switch component only when
+  one does not. Pure.
+- `views/nodegrapheditor/SelectionStoreBinding.ts` — bound in `NodeGraphContext` to the app's
+  canvas only (change review / diff / authoring preview canvases stay unbound); unbound in
+  `dispose()`. Publishes after `SelectionActions` settles (a depth counter: `selectNode` no longer
+  reads as "nothing, then the node"); applies other surfaces' writes with publishing suppressed, so
+  the canvas never echoes a *lossy* version (on Home it can only hold `heroInstance` of
+  `[heroInstance, headline]`).
+- `EditorDocument.tsx` — the `SidebarModelEvent.nodeSelected` "hack" and its `activeChanged` twin are
+  gone; the preview outline reads the store. `inspectNodes` (single id) writes the store with
+  `source: 'preview'` instead of calling `switchToComponent`; the multi-id "Nodes behind cursor"
+  picker is unchanged.
+- Specs: `tests-unit/tvw-003/` now 3 suites / 28 (resolver 10, binding against a fake canvas 6).
+  Armed: no applying guard (3 red), outermost element (1), switch whenever the component differs
+  (3), `applying` never reset (1). `tsc -p packages/noodl-editor --noEmit` clean (files confirmed in
+  `--listFiles`).
+
+**Driven** (dev stack, `NOODLPORT=8674`, CDP 9333, a copy of `Landing page test V2`, design mode,
+trusted clicks):
+| step | reading |
+|---|---|
+| click `Page Router` on App's canvas | store `App [[0d0047f8…]]` source canvas, **one** write; webview got exactly one `selectNode('0d0047f8…')` |
+| click the hero headline in the preview | store `/Sections/Hero [["hero_head"]]` source preview; canvas moved to Hero, headline selected + centred, properties open, DES-001 toast; **no canvas echo**; one `selectNode('hero_head')` |
+| canvas on `/Pages/Home`, store written `[["home_hero","hero_head"]]` from preview | canvas **stayed on Home**, selected `home_hero` ("The pitch"); store kept the full path — AC1's canvas half |
+| select on canvas, then open Search (outside FH-008's allow-list) | store → `[]`, webview `selectNode('null')` — the removed sidebar listener's job is done by the canvas's deselect |
+
+⚠️ One confounded reading, discarded: resetting the spy in the same eval as the write read "no
+call"; re-run in separate evals it read correctly.
+
+**What slice 2 did not change:** the preview still sends a bare definition id, so a *real* click
+still moves the canvas to the definition (row 2). Hover still goes canvas → every client, bypassing
+the store.
+
+**Next slice (3): the viewer half.** `inspector.ts` sends the instance path (walk `nodeScope` →
+`componentOwner` to the root), `editorapi`/`inspectNodes` accept it, `highlighter.selectNode` takes a
+path and outlines only the addressed instance (AC3's count of 1). Then hover through the store with a
+`target` (landmine 2). 🔴 The editor loads the viewer from
+`src/external/{viewer,deploy,ssr}/`, gitignored build output (`.gitignore:206`): a
+`noodl-viewer-react` change is invisible until that is rebuilt (read its mtime after a launch, do not assume),
+and a worktree has none.

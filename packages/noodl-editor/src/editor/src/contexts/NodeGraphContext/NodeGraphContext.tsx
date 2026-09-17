@@ -2,12 +2,14 @@ import React, { createContext, useContext, useCallback, useState, useEffect } fr
 
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { ProjectModel } from '@noodl-models/projectmodel';
+import { selectionStore } from '@noodl-models/selection/selectionStore';
 import { isComponentModel_CloudRuntime } from '@noodl-utils/NodeGraph';
 
 import { Slot } from '@noodl-core-ui/types/global';
 
 import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import { CenterToFitMode, NodeGraphEditor } from '../../views/nodegrapheditor';
+import { bindSelectionStore } from '../../views/nodegrapheditor/SelectionStoreBinding';
 
 type NodeGraphID = 'frontend' | 'backend';
 
@@ -51,6 +53,9 @@ export function NodeGraphContextProvider({ children }: NodeGraphContextProviderP
     function createNodeGraph() {
       const newNodeGraph = new NodeGraphEditor({});
       newNodeGraph.render();
+      // TVW-003: this is the app's canvas, the one whose selection the preview and Layers share.
+      // The unbind runs from `dispose()`, which hot reload and unmount both call.
+      newNodeGraph.unbindSelectionStore = bindSelectionStore(newNodeGraph, selectionStore);
       return newNodeGraph;
     }
 

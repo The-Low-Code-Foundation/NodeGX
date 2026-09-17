@@ -6,8 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { IDocumentProvider } from '@noodl-models/app_registry';
 import { ProjectModel } from '@noodl-models/projectmodel';
-import { SidebarModel } from '@noodl-models/sidebar';
-import { SidebarModelEvent } from '@noodl-models/sidebar/sidebarmodel';
+import { nodeIdOf, selectionStore } from '@noodl-models/selection/selectionStore';
 import { EditorSettings } from '@noodl-utils/editorsettings';
 import { KeyCode, KeyMod } from '@noodl-utils/keyboard/KeyCode';
 import { KeyboardCommand } from '@noodl-utils/keyboardhandler';
@@ -23,7 +22,6 @@ import { EditorTopbar } from '../../EditorTopbar';
 import { HelpCenter } from '../../HelpCenter';
 import { NodeGraphEditor } from '../../nodegrapheditor';
 import { remeasureNodeGraphCanvas } from '../../nodegrapheditor/CanvasDOMBindings';
-import { panelHoldsCanvasSelection } from '../../nodegrapheditor/EditorEventBindings';
 import { ScopePlanStrip } from '../../panels/AiAuthoringPanel/ScopePlanStrip';
 import {
   TRANSFORM_ORIGIN_FOCUS_EVENT,
@@ -120,33 +118,24 @@ function EditorDocument() {
 
   useSetupNodeGraph(nodeGraph);
 
-  //track which nodes is currently selected. A hack that relies on the side panel to tell us.
+  /**
+   * TVW-003 — what the preview outlines is read from the one selection store.
+   *
+   * This replaced "a hack that relies on the side panel to tell us" (`SidebarModelEvent.nodeSelected`)
+   * and its `activeChanged` twin. Both were copies of the canvas selection; the canvas now writes the
+   * store itself, including the deselect on switching to a panel that has no use for a selection
+   * (FH-008's allow-list, `EditorEventBindings`), so there is nothing left for them to catch.
+   *
+   * The id outlined is the path's last element — every instance of that definition node, as before.
+   * Outlining only the addressed instance is the viewer half of TVW-003 and needs the viewer to
+   * accept a path.
+   */
   useEffect(() => {
-    const eventGroup = {};
-    SidebarModel.instance.on(
-      SidebarModelEvent.nodeSelected,
-      (nodeId) => {
-        setSelectedNodeId(nodeId);
-      },
-      eventGroup
-    );
-
-    SidebarModel.instance.on(
-      SidebarModelEvent.activeChanged,
-      (activeId) => {
-        // Same allow-list as the canvas deselect, deliberately shared: this is
-        // what the detached viewer highlights, and it drifting from what is
-        // selected on canvas is how the two used to disagree (FH-008).
-        if (panelHoldsCanvasSelection(activeId) === false) {
-          setSelectedNodeId(null);
-        }
-      },
-      eventGroup
-    );
-
-    return () => {
-      SidebarModel.instance.off(eventGroup);
-    };
+    const unsubscribe = selectionStore.subscribe({
+      surface: 'preview',
+      onSelection: (selection) => setSelectedNodeId(nodeIdOf(selection.nodes[0] ?? []) ?? null)
+    });
+    return unsubscribe;
   }, [nodeGraph]);
 
   useEffect(() => {
@@ -312,7 +301,11 @@ function EditorDocument() {
           // Did we find a node that belongs to a component
           if (node && node.owner && node.owner.owner) {
             const component = node.owner.owner;
-            nodeGraph.switchToComponent(component, { node: node, pushHistory: true });
+            // TVW-003: the preview writes the store and the canvas decides whether it has to move
+            // (`resolveCanvasMove`). The preview does not hear its own write, so it sets its own
+            // outline here — the same thing the canvas's echo used to set.
+            selectionStore.select('preview', component, [[node.id]]);
+            setSelectedNodeId(node.id);
 
             /**
              * DES-001 — say what was selected, in the preview.

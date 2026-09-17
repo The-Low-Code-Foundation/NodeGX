@@ -239,7 +239,13 @@ export class NodeGraphEditor extends View {
     );
   }
 
+  /** TVW-003: set by `NodeGraphContext` on the app's canvas only. */
+  unbindSelectionStore?: () => void;
+
   dispose() {
+    this.unbindSelectionStore?.();
+    this.unbindSelectionStore = undefined;
+
     AiAssistantModel.instance.off(this);
     KeyboardHandler.instance.deregisterCommands(this.keyboardCommands);
 
