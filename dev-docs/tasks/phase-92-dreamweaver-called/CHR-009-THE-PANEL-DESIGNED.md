@@ -1536,8 +1536,15 @@ was graded on more than the Group. Full numbers, attribution and the ruling in
   own bucket, and reversible with `--no-rulings`. **The panel was not changed.**
 - 🟡 **One finding still standing, owed a ruling:** `IconInput`'s `None` placeholder word at
   **3.897:1 dark / 3.373:1 light** against 4.5:1. Text, not an edge; nobody has looked at it.
-- ⬜ **`test:ci` still owed for AC5.** P93 reported one at HEAD a few minutes before this session
-  started: **2,985 / 8 at seed 38645, the recorded floor** — their measurement, relayed with its
-  numbers, not mine. A run of my own is still the honest thing for the AC.
+- ✅ **`test:ci` TAKEN, at the floor.** My own run, at my own HEAD: **2,985 specs / 8 failures, seed
+  68399, HEAD `e50ea09b`, 78s**, fresh JSON (mtime 23:53:04 against a 23:10:50 baseline, recorded
+  before the run so a stale read could not pass as this one). Exit 1 is what the 8-failure floor
+  produces, not a new red.
+  🔴 **The count is the floor; the COMPOSITION is not the one the phase notes record.** Those say
+  "8, all P88 by name". These eight are **SUB-006 ×3** (false-positive corpus, v2 directory loader),
+  **NDA-017 ×2** (the family table against the shipped catalog) and **SUB-011 ×3** (expression
+  parameters — the validator stays silent). Other phases' work has moved *which* eight fail, so a
+  future session must compare NAMES and not be reassured by an 8. None of them is in this phase's
+  surface, and none touches `scripts/look-gate` or `tests-unit/chr-004`.
 
-⇒ **AC5 is met except for `test:ci` and the placeholder ruling.** AC1 was ruled WORTHY in s29.
+⇒ **AC5 is met except the `IconInput` placeholder ruling.** AC1 was ruled WORTHY in s29.

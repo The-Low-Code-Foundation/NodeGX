@@ -29,23 +29,18 @@ Commit through a temp index; `git commit -- <paths>` would sweep their work.
 | CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
 | CHR-007 | ✅ built s4, invisible by design |
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert**. Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
-| **CHR-009 the panel designed** | ✅ AC1 WORTHY (s29). **AC5 now met except two things**: a `test:ci`, and a ruling on the `IconInput` placeholder (§24) |
+| **CHR-009 the panel designed** | ✅ AC1 WORTHY (s29), **AC5 met except one thing**: a ruling on the `IconInput` placeholder (§24). `test:ci` taken at the floor |
 | **CHR-004 the gates measure the scale** | 🟡 AC1 ✅ AC2 ✅ AC3 ✅ AC5's CI half RULED, **HEAD run ✅ (s31 §7)**. Left: **AC4/§3.3, which s31 re-priced — read §7.7 before touching it** |
 | CHR-010, 011 | ⬜ |
 
 ## What to do next, in order
 
-1. **A `test:ci`, when no peer holds the box.** The last one I own was s10. P93 reported one at HEAD
-   a few minutes before s31 started — **2,985 / 8 at seed 38645, the recorded floor** — but that is
-   their measurement relayed, not mine, and CHR-009 AC5 wants one. 🔴 P93 took the box at the end of
-   s31 for a TVW-001 AC7 screenshot drive (their CDP is **9444**, mine was 9333); ask before running,
-   because an editor launch sweeps a running `test:ci` and vice versa.
-2. **Ask Richard about the one finding still standing.** `IconInput`'s `None` placeholder word reads
+1. **Ask Richard about the one finding still standing.** `IconInput`'s `None` placeholder word reads
    **3.897:1 dark / 3.373:1 light** against 4.5:1. It is text, not an edge, and nobody has looked at
    it. Two honest options to put to him: darken that one word to the AA token, or rule it as
    placeholder text and add a second entry to `scripts/look-gate/rulings.js`. 🔴 Related trap: s21's
    *"greyed is a picture, not a DOM attribute"* — show him a PNG, not a ratio.
-3. **§3.3 / AC4 — but NOT as written.** s31 measured it and **three of its premises are wrong**; the
+2. **§3.3 / AC4 — but NOT as written.** s31 measured it and **three of its premises are wrong**; the
    whole re-pricing is in CHR-004 §7.7. Summary:
    - The `:global(.sidebar-property-editor)` removal is **not free**. `showPopout` appends into the
      popup layer (`popuplayer.ts:918`), so five row types (`PopoutGroup`, `CodeEditorType`,
@@ -63,7 +58,7 @@ Commit through a temp index; `git commit -- <paths>` would sweep their work.
    - The one genuinely worth fixing, and small: `property-editor/portHint.test.ts:123,128` asserts
      `className === 'property-row'`, a **stale** literal (CHR-008 §3.2 moved it to
      `.property-panel-row`). It is only a sentinel — make it a neutral one.
-4. Then **CHR-010** (the last icon font) and **CHR-011** (re-runs CHR-001's instruments UNCHANGED).
+3. Then **CHR-010** (the last icon font) and **CHR-011** (re-runs CHR-001's instruments UNCHANGED).
 
 ## How to take the gate reading each session (Richard's standing rule)
 
@@ -89,8 +84,8 @@ selects each node and shells out to the gate per reading (so the instrument run 
 
 1. The Projects tab's two full-width cards (BST-003 / UNI-001).
 2. Whether CHR-008's §3.1 widget conversions resume, or only where a region needs one.
-3. Whether §3.3's `:global` removal is worth the ~18-call-site refactor it actually costs (item 3).
-4. The `IconInput` placeholder (item 2).
+3. Whether §3.3's `:global` removal is worth the ~18-call-site refactor it actually costs (item 2).
+4. The `IconInput` placeholder (item 1).
 5. **RULED s30:** the gate is a hand-run check, not CI; the six colour-pinning specs deleted.
    **RULED s31:** the panel's quiet field edge STAYS — *"no outlines like in the after pic"*.
    🔴 **Do not re-propose `border-control` on panel fields.** If a field ever needs a stronger edge
@@ -124,7 +119,10 @@ a rule. If you add an entry, these are the properties 21 specs hold it to (7 mut
 - **Full `npx jest tests-unit` NOT run, deliberately** — P93 held the box with a live dev stack, and
   the only dependents of what I changed are `chr-004/*` (`themeTokens.ts` depends on `color.js`,
   which I did not touch; verified by grep). It is cheap insurance next session: 465 / 7,483 at s30.
-- `test:ci` **not run** (owed, item 1).
+- `test:ci` **TAKEN, at the floor**: 2,985 specs / 8 failures, seed 68399, HEAD `e50ea09b`, 78s,
+  fresh JSON against a baseline mtime recorded before the run. 🔴 **The count is the floor; the
+  composition is NOT what the phase notes record** ("8, all P88 by name"). These eight are SUB-006 ×3,
+  NDA-017 ×2 and SUB-011 ×3 — none in this phase's surface. **Compare NAMES; an 8 is not reassurance.**
 - Gate at HEAD, property panel, both themes: rulings active **0 findings / 7 ruled exceptions per
   theme, exit 0**; `--no-rulings` **14 findings, exit 1**.
 - Box left **free**: dev stack torn down (25 procs), 8080 / 9333 clear, peer `noodl-mcp` pids checked
