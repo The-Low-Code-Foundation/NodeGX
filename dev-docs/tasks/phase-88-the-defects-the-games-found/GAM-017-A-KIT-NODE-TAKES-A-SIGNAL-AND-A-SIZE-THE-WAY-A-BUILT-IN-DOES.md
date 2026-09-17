@@ -1,6 +1,6 @@
 # GAM-017 — A kit React node takes a signal and a size the way a built-in node does
 
-**Status: ⬜ not started. ✅ R17 ruled s19 (§5): buildable.** **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
+**Status: 🟢 built (session 22, 2026-09-17).** s1 in the bridge, z3 in the docs, as ruled. AC1 (i)(ii) RED at HEAD in jest and on a deployed page, AC2 with 5 reverted arms, AC3 docs, AC4 deployed half, AC5, AC6 recorded. **Left:** AC4's editor half; AC7 waits on Richard's Rocket School question. **Source:** [P78 D70](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4 and [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), 2026-09-13 · **Side:** product (React bridge / node-kit types, docs and scaffold)
 
 Rocket School's kit wanted a `Burst` signal and got a console error, so the burst became a number that rises. The kit
 wanted a height and got no size port, so the Race Track is sized by a Group wrapped around it.
@@ -97,4 +97,71 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
 
 ## 8. Record
 
-Not started.
+### Session 22 (2026-09-17, over `8c7f57a06`) — built, s1 + z3
+
+**AC1, RED at HEAD, through the caller.** `noodl-viewer-react/tests/gam-017-a-kit-node-takes-a-signal.test.ts`: two kit definitions
+handed to the real `createNodeFromReactComponent`, placed in a `createCorpusGraph` graph with a node whose signal output stands in for
+a Button's Click, pulsed twice in separate frames, and rendered with real React from the props the bridge wrote.
+
+| arm | HEAD, jest | HEAD, deployed page (Chromium, 2 real clicks) |
+|---|---|---|
+| (i) `inputProps: { play: { type: 'signal' } }`, wired | prop `undefined` after 2 pulses; `propPath` twin `undefined` | prop `undefined`, reacted 0, after both clicks |
+| (i) registration log | 2 lines, one per signal prop, **before anything is wired** | `Error: Signals not supported as a react prop. node: 'gam017.SignalProp' input: 'play'` once, on load |
+| (ii) `inputs` + `valueChangedToTrue` bumping a prop + `forceUpdate` (known-firing) | 0 → 2 | 0 → 1 → 2, reacted 2 |
+| (iii) `frame: { dimensions: true }` | **not run**: R17 ruled z3 before the build, so no `frame` route is shipped | — |
+
+- 🔴 **D70's first half is false as written, measured.** A kit React node takes a signal through `inputs` today (arm ii, both
+  instruments). What was dead was the signal declared as a **prop**, which is the shape the types invite.
+- §7's trap held: the HEAD log fires at registration, so "no log after wiring" would have read the same with the port dead.
+
+**Built (R17 = s1, z3).**
+- `react-component-node.ts`: `defineSignalInputProp`. A signal prop gets a `valueChangedToTrue` (so the runtime makes the port a signal
+  and gives each instance its own edge detector) that adds one to the prop, runs an authored `valueChangedToTrue` if there is one, and
+  calls `forceUpdate`. The prop is seeded at `0` where defaults are seeded. `propPath` honoured. The console error is gone because a
+  working route replaced it (§5's guard).
+- `@nodegx/node-kit-types`: `ReactInputPropDefinition` says a signal port hands the component a count, with the `useEffect` read and
+  the same-frame edge caveat. The 5 gated copies refreshed from the scaffold (4 `library/modules` + pixel-game).
+- `docs-site/docs/custom-nodes.md`: "A signal port hands your component a count" with a **complete** sample (`burst-kit/index.js`, compiled
+  by `docsamples.test.js`, so the fragment budget stays 8), and "Sizing a kit node: put it in a Group" (z3).
+
+**AC2, reverted arms** (count-asserted exact replace, sha-restored; `scratchpad/g17/mutants.py`). Fix: 5/5.
+
+| mutant | red |
+|---|---|
+| M1 the HEAD branch put back (log, no setter) | 4: counts, unwired, re-render, log |
+| M2 no `0` seed | 2: starts at 0, unwired |
+| M3 no `forceUpdate` | 1: re-render |
+| M4 `set` instead of `valueChangedToTrue` | 3: **counts 2 per pulse** (true and false both count), unwired reads 4, the port is not a signal |
+| M5 `propPath` ignored | 1: the nested prop |
+
+**AC3 (z3).** The docs section is the fix: a kit node has no Width/Height inputs, a person sizes the Group around it (`px`, `%`, `vw`,
+`vh`, read from `node-shared-port-definitions`), and a size a number decides stays GAM-015's `readPx` port. No code, so no reverted arm.
+A wired size that is not a size is FLD-004's report, graded by GAM-015's spec. **The "size ports" half is closed as disproved:** no
+shipped kit sets `frame` (AC5), and none needs to.
+
+**AC4, deployed half.** Same project, deployed with `nodegx-deploy.cjs`, the engine swapped for the fix bundle (the peer's dev stack
+rebuilt `src/external/deploy` from the tree at 15:50; the HEAD arm is session 20's 12:02 bundle; told apart by the error call, 1 vs 0,
+and `defineSignalInputProp`, 0 vs 2). Fix: wired signal prop 0 → 1 → 2 and reacted each time, the **unwired** copy stays 0, the
+control agrees click for click, **0 console errors**. Screenshot looked at: `signal-prop 2`, `signal-prop 0`, `inputs-route 2`.
+**Editor half not driven:** a peer's dev stack was up, and two editors cannot share the CDP port.
+
+**AC5, blast radius.** Every kit under `library/modules` loaded in a stubbed VM: 28 kits, 24 loaded, 14 React nodes, **0 signal
+`inputProps`, 0 `frame`**, 3 `inputs` signals (marquee's Pause/Play/Toggle, unaffected). The 4 that do not load headless (chart-js,
+lottie, rich-text-editor, simple-tooltips) read from source text: their signals are `outputProps`, `inputs`, or the SDK's
+`signals → inputs`; none is a signal prop. Templates' own kits: 3, 0 signal props, 0 `frame`. **So the registration log was 0 lines
+per shipped module before and is 0 after; no shipped kit changes behaviour.** Not driven per module (nothing to read).
+
+**AC6, export.** z3 needs no size port, so P40 is not reached (R17). 🔴 **Found, not registered:** `nodegx export` of this project
+drops a Button Click wired into a kit signal **for both routes**: `wire fire:onClick->signalProp:play has no deterministic translation
+in step 5 (deferred to EXP-003)`, one line in the report, and the generated `Home.tsx` renders `<SignalProp />` with nothing on the
+Button. This predates the fix (arm ii's route reads the same). CLI `dist` of 15:22.
+
+**AC7, not done.** Rocket School's `Boost A` / `Boost B` could become signals, but the Race Track reads "a count that went up" and a
+signal prop now delivers exactly that count, so the kit change is small. Its game-kit copy must stay byte-identical to the library's
+(`tpl007Template.test.ts`) and the template has 257 uncommitted files: waits on Richard's Rocket School question. The 30vh / 56vw budget
+stays on the wrapper Group (z3).
+
+**Readings** (2026-09-17): spec HEAD 4 red / 1 green (control), fix 5/5; viewer `tsc --noEmit` 0; whole viewer suite 120 suites,
+1605 ✓, exit 0; `nodegx-node-kit-types` 83/83 (the new sample compiled); `nodegx-kit-scaffold` 74/74 (types-copy gate on the 5 refreshed
+copies). Scratch: `6ec64024-…/scratchpad/g17/` (`head.log`, `fix.log`, `mutants.py` + `M*.log`, `census*.js/json`, `browser/project`,
+`deploy-{head,fix}`, `drive-signal.js`, `drive-{head,fix}.json`, `drive-fix-shot.png`, `export/`).

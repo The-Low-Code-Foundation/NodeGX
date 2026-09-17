@@ -736,6 +736,34 @@ function defineRegularInputProp(input: ReactInputPropDefinition, name: string) {
   }
 }
 
+/**
+ * GAM-017 (P78 D70), R17 — a signal declared as a prop.
+ *
+ * It used to log "Signals not supported as a react prop" when the kit registered, and was registered
+ * anyway with the runtime's no-op setter: the port showed in the editor, took a wire, and did nothing.
+ * Rocket School's Race Track turned its Burst into a number that rises because of it.
+ *
+ * A prop cannot hold an event, so the pulse becomes a count: the prop starts at 0 (seeded where the
+ * defaults are) and goes up by one on each pulse, and the node re-renders. A component reacts with
+ * `useEffect(() => { if (props.play) … }, [props.play])`. That is the pattern kits already wrote by
+ * hand through `inputs` + `valueChangedToTrue`; this is the same thing, declared where the author
+ * reached for it first.
+ *
+ * `valueChangedToTrue`, not `set`: the runtime makes a port with one a signal in the editor and gives
+ * every instance its own edge detector, so a held `true` counts once.
+ */
+function defineSignalInputProp(input: ReactInputPropDefinition, name: string) {
+  const authored = input.valueChangedToTrue;
+  delete input.set;
+  input.valueChangedToTrue = function () {
+    const node = this as unknown as ReactNodeInstance;
+    const props = input.propPath ? node.props[input.propPath] : node.props;
+    props[name] = (typeof props[name] === 'number' ? props[name] : 0) + 1;
+    if (authored) authored.call(this);
+    node.forceUpdate();
+  };
+}
+
 function flattenArray(target: React.ReactNode[], array: React.ReactNode[]) {
   for (const e of array) {
     if (Array.isArray(e)) {
@@ -1060,7 +1088,10 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
 
         const props = input.propPath ? this.props[input.propPath] : this.props;
 
-        if (input.hasOwnProperty('default')) {
+        if (input.type === 'signal') {
+          // GAM-017: a signal prop is a pulse count, and 0 is "not pulsed yet".
+          props[name] = 0;
+        } else if (input.hasOwnProperty('default')) {
           // Only the object form of a port type carries units; the bare-name form
           // never does, so reading through it is safe and yields undefined.
           const type = input.type as PortType;
@@ -2036,7 +2067,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       };
     } else {
       if (input.type === 'signal') {
-        console.error(`Error: Signals not supported as a react prop. node: '${def.name}' input: '${inputName}'`);
+        defineSignalInputProp(input, inputName);
       } else {
         defineRegularInputProp(input, inputName);
       }
