@@ -132,6 +132,47 @@ export function axisComps(side: MarginPaddingSide, axis: MarginPaddingAxis): [st
   return axis === 'vertical' ? [`${side}-top`, `${side}-bottom`] : [`${side}-left`, `${side}-right`];
 }
 
+/** One field of a Margin or Padding row. `bound`: a wire drives that edge, so it names the source instead of editing. */
+export type MarginPaddingField =
+  | { kind: 'pair'; axis: MarginPaddingAxis }
+  | { kind: 'edge'; comp: string }
+  | { kind: 'bound'; comp: string };
+
+export interface MarginPaddingSideLayout {
+  /** The four per-edge fields are showing. */
+  expanded: boolean;
+  /** Expanded because an edge is wired, whatever the expander says: a pair cannot name one wire. */
+  forced: boolean;
+  fields: MarginPaddingField[];
+  /** The reset dot: an edge the author can see holds a typed value. A wired edge's value is not shown. */
+  isChanged: boolean;
+  /** What the reset clears — the set, unwired edges. */
+  resettable: string[];
+}
+
+/**
+ * CHR-009 — which fields one side draws, and what its reset covers, given the wires (FB-018).
+ *
+ * Each expanded field is one port, so a wired edge gets the chip treatment on its own. A `↕`/`↔` pair
+ * writes two ports at once and cannot, so **any wired edge expands its side**: a pair left editable
+ * would take a typed value for the wired edge that the wire then overwrites, which is the filed bug.
+ */
+export function sideLayoutOf(
+  side: MarginPaddingSide,
+  expanded: boolean,
+  values: Record<string, MarginPaddingParam | undefined>,
+  isWired: (comp: string) => boolean
+): MarginPaddingSideLayout {
+  const comps = MARGIN_PADDING_AXES.flatMap((axis) => axisComps(side, axis));
+  const forced = comps.some(isWired);
+  const showEdges = expanded || forced;
+  const fields: MarginPaddingField[] = showEdges
+    ? comps.map((comp) => (isWired(comp) ? { kind: 'bound', comp } : { kind: 'edge', comp }))
+    : MARGIN_PADDING_AXES.map((axis) => ({ kind: 'pair', axis }));
+  const resettable = comps.filter((comp) => values[comp] !== undefined && !isWired(comp));
+  return { expanded: showEdges, forced, fields, isChanged: resettable.length > 0, resettable };
+}
+
 /** `padding-top` → `Top`, for a field's tooltip and the mixed state's description. */
 export function edgeNameOf(comp: string): string {
   const edge = comp.slice(comp.indexOf('-') + 1);

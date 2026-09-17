@@ -7,8 +7,9 @@ import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 // nothing but the `createElement` call below depends on a file that cannot be
 // loaded outside webpack.
 import { MarginPaddingParam, MarginPaddingSide, isMarginPaddingToken, sideOf } from '../components/marginPaddingEdit';
-import { MarginPaddingInput } from '../components/MarginPaddingInput';
+import { MarginPaddingConnection, MarginPaddingInput } from '../components/MarginPaddingInput';
 import { TypeView } from '../TypeView';
+import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
 import { sameParameterValue } from './scrubCommit';
 
 export class MarginPaddingType extends TypeView {
@@ -196,14 +197,31 @@ export class MarginPaddingType extends TypeView {
     this.renderReact();
   }
 
+  /** comp → the wire driving that edge, for the edges that are wired (FB-018: each edge is one port). */
+  private connections(): Record<string, MarginPaddingConnection> {
+    const model = this.parent.model;
+    const connections: Record<string, MarginPaddingConnection> = {};
+    Object.keys(this.ports).forEach((comp) => {
+      const name = this.ports[comp].name;
+      if (!model.isPortConnected(name, 'target')) return;
+      connections[comp] = {
+        label: getConnectionSourceLabel(model, name),
+        onClick: getConnectionSourceNavigate(model, name)
+      };
+    });
+    return connections;
+  }
+
   private renderReact() {
     if (!this.root) return;
+    const connections = this.connections();
 
     this.root.render(
       React.createElement(MarginPaddingInput, {
         values: { ...this.values },
         defaults: { ...this.defaults },
         expanded: { ...this.expanded },
+        connections,
         onToggleExpanded: (side) => {
           // Writes nothing: AC4's "the model holds four values" is about what was typed.
           this.expanded[side] = !this.expanded[side];
@@ -211,9 +229,10 @@ export class MarginPaddingType extends TypeView {
         },
         onUpdate: (comp, value, opts) => this.update(comp, value, opts),
         onUpdateComps: (comps, value, opts) => this.updateComps(comps, value, opts),
+        // A wired edge's typed value is not shown, so the reset does not reach it either.
         onResetSide: (side) =>
           this.updateComps(
-            this.compsOf(side).filter((comp) => this.values[comp] !== undefined),
+            this.compsOf(side).filter((comp) => this.values[comp] !== undefined && !connections[comp]),
             undefined,
             { label: `reset ${side}` }
           )

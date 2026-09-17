@@ -87,14 +87,11 @@ export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
   // Was an exception: one icon strip for several ports, so no single connection to name. CHR-009 slice 5
   // drew one labelled row per port, which removed the reason, and each row now chips on its own.
   AlignToolsType: { kind: 'chip' },
+  // Was an exception: the box editor wrote four sides from one control. CHR-009 slice 4 made each expanded
+  // field one port, so a wired edge chips on its own and a wired edge forces its side out of the `↕`/`↔` pairs.
+  MarginPaddingType: { kind: 'chip' },
 
   // ── structural exceptions ────────────────────────────────────────────────
-  MarginPaddingType: {
-    kind: 'exception',
-    reason:
-      'The box-model editor edits four sides as four ports in one control. ' +
-      'No single port for a chip to be about. FB-016 owns this control.'
-  },
   // CHR-007: dispatched all along, and invisible to the old chain parse — both are early
   // `editorType` returns the regex never matched.
   LogicBuilderWorkspaceType: {

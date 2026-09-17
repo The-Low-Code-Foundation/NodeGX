@@ -1345,5 +1345,46 @@ removed and the backup restored before any editor launched. Then a peer `test:ci
 - ✅ **Richard (2026-09-17, s27): "They all look good"** on the 7 PNGs: slice 14 (`s27/align-wired-*`) approved as drawn,
   and the docked `--sp…` pair field (`s27/pair-token-docked-dark.png`) read as **leave it**, full token in the tooltip.
   Not built: short chip, stacked fields. (Recorded as "leave it" from "looks good"; confirm if he meant otherwise.)
-- ⚠️ `MarginPaddingType`'s exception is half-true now that an expanded edge is one port: a wired margin side is unmeasured.
+- ✅ `MarginPaddingType`'s half-true exception: measured and built in s28 (§23).
 - AC1 (WORTHY on the Group pair) and R6 final once the region list is empty. AC5: CHR-004 + `test:ci`.
+
+## 23. Slice 15 — a wired margin or padding edge (2026-09-17, s28)
+
+### 23.1 Measured from the code before building
+
+- The eight ports (`node-shared-port-definitions.ts` `paddingLeft` etc.) are plain `number` inputs with no `allowEditOnly`:
+  wireable. **Neither `MarginPaddingType.ts` nor `MarginPaddingInput.tsx` read a connection anywhere** (no
+  `isPortConnected`, no chip, no row `isConnected`). So a wired edge kept an editable, scrubbable field, both in its `↕`/`↔`
+  pair and expanded. It is FB-018's filed bug again, the third control after `Dimension` and the align rows. The handoff
+  asked for a drive to measure this first. The code answers it with no branch to miss, so the drive (§23.3) grades the
+  built consequence instead.
+
+### 23.2 Built
+
+- `marginPaddingEdit.sideLayoutOf(side, expanded, values, isWired)` is pure and makes the decision: **any wired edge forces
+  its side to per-edge fields** (a pair writes two ports and cannot name one wire). A wired edge becomes `bound`, and the
+  other three stay `edge` fields that still take typed values. `isChanged` and the reset's `resettable` skip wired edges
+  (their typed value is not shown, as on every chipped row, where `PropertyPanelRow` drops the dot).
+- `BoundField` is the binding chip at a field's size: the edge glyph, the chip's link glyph, and the source in mono, on the
+  chip's `primary-bg`/`primary` paint. **The row chip's `Bound to …` would read `Bou…` in a ~60px field**, so only the source
+  is drawn. The tooltip is `<Edge> <side>. ` + `bindingTooltip(source)`, so FB-018's precedence sentence rides it. A click
+  navigates to the source (`role="button"` only when there is one). There is no input and no scrub.
+- The expander is `disabled` while forced, titled `An edge is wired, so each padding edge shows on its own`.
+- `MarginPaddingType.connections()` has the same shape as slice 14's `AlignToolsType.connections()`, and the view's reset
+  skips wired edges. `connectedRowPolicy.ts`: `MarginPaddingType` exception → **chip** (chips 18, exceptions 3).
+
+### 23.3 Driven — `set/drive-s28.js` → `s28/s28-results.json`
+
+PENDING.
+
+### 23.4 Gates (2026-09-17)
+
+- `chr-009/marginPaddingRows.test.ts` +6 (23 total), new `chr-009/boundEdge.test.tsx` 3, `fb-018` both suites green:
+  **45/45** across the 4 suites.
+- Mutants, each type-valid, `Tests:` count printed, restored by `cp` + `cmp`: **M1** `forced && false` ⇒ 1 failed / 23
+  ("a wired edge splits its side"); **M2** `resettable` keeps wired ⇒ 1 / 23 ("…no reset dot…"); **M3** the view's reset
+  keeps wired ⇒ 1 / 23 ("the view's reset leaves a wired edge's stored value alone").
+- `tsc --noEmit -p tsconfig.json` (editor) **EXIT 0**. `npm run colors`, `npm run type` **holding**; `tokens:css` ✓.
+- ⚠️ `boundEdge.test.tsx` first **failed to run** (the `NumberUnitInput` → `.svg` chain), not failed. It needed the same
+  resolution mocks as `marginPaddingRows.test.ts`.
+

@@ -6,7 +6,8 @@ import {
   commitMarginPaddingEdit,
   commitMarginPaddingPairEdit,
   fieldTextOf,
-  pairDisplayOf
+  pairDisplayOf,
+  sideLayoutOf
 } from '../../src/editor/src/views/panels/propertyeditor/components/marginPaddingEdit';
 import { MarginPaddingType } from '../../src/editor/src/views/panels/propertyeditor/DataTypes/MarginPaddingType';
 
@@ -19,8 +20,11 @@ import { MarginPaddingType } from '../../src/editor/src/views/panels/propertyedi
  * props it hands the component.
  */
 
-// Resolution only: `NumberWithUnits` imports these for its row, and nothing graded here calls them.
-jest.mock('../../src/editor/src/views/panels/propertyeditor/utils', () => ({}));
+// `NumberWithUnits` imports these for its row; the view calls the two connection readers for a wired edge.
+jest.mock('../../src/editor/src/views/panels/propertyeditor/utils', () => ({
+  getConnectionSourceLabel: (_model: unknown, port: string) => `String · Value → ${port}`,
+  getConnectionSourceNavigate: () => () => undefined
+}));
 jest.mock('@noodl-models/nodelibrary', () => ({ NodeLibrary: {} }));
 
 // `marginPaddingEdit` reads through `DataTypes/NumberWithUnits`, whose component reaches an `.svg`.
@@ -57,10 +61,11 @@ interface Props {
   onResetSide: (side: 'margin' | 'padding') => void;
 }
 
-function aBox(parameters: Record<string, unknown> = {}) {
+function aBox(parameters: Record<string, unknown> = {}, wired: string[] = []) {
   const writes: { name: string; value: unknown; opts?: { undo?: unknown } }[] = [];
   const model = {
     parameters,
+    isPortConnected: (name: string, direction: string) => direction === 'target' && wired.includes(name),
     getParameter: (name: string) => parameters[name],
     notifyListeners: () => undefined,
     setParameter(name: string, value: unknown, opts?: { undo?: unknown }) {
@@ -326,6 +331,65 @@ describe('CHR-009 — the view', () => {
       expect(box.parameters.marginTop).toEqual(px(4));
       // Only the sides that held a value are written: an already-default side adds no entry.
       expect(box.writes.map((w) => w.name).sort()).toEqual(['paddingLeft', 'paddingTop']);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
+describe('CHR-009 / FB-018 — a wired margin or padding edge', () => {
+  const none = () => false;
+  const wiredLeft = (comp: string) => comp === 'padding-left';
+
+  it('the control: nothing wired, collapsed — two pairs, the expander free', () => {
+    const layout = sideLayoutOf('padding', false, {}, none);
+    expect(layout.fields).toEqual([
+      { kind: 'pair', axis: 'vertical' },
+      { kind: 'pair', axis: 'horizontal' }
+    ]);
+    expect(layout.forced).toBe(false);
+  });
+
+  it('a wired edge splits its side: the wired edge is bound, the other three stay fields', () => {
+    const layout = sideLayoutOf('padding', false, {}, wiredLeft);
+    expect(layout.expanded).toBe(true);
+    expect(layout.forced).toBe(true);
+    expect(layout.fields).toEqual([
+      { kind: 'edge', comp: 'padding-top' },
+      { kind: 'edge', comp: 'padding-bottom' },
+      { kind: 'bound', comp: 'padding-left' },
+      { kind: 'edge', comp: 'padding-right' }
+    ]);
+  });
+
+  it('the other side is untouched by a wire on this one', () => {
+    expect(sideLayoutOf('margin', false, {}, wiredLeft).fields.map((f) => f.kind)).toEqual(['pair', 'pair']);
+  });
+
+  it('a wired edge’s typed value lights no reset dot and is not what the reset clears', () => {
+    const onlyWired = sideLayoutOf('padding', false, { 'padding-left': px(9) }, wiredLeft);
+    expect(onlyWired.isChanged).toBe(false);
+    expect(onlyWired.resettable).toEqual([]);
+    const both = sideLayoutOf('padding', false, { 'padding-left': px(9), 'padding-top': px(2) }, wiredLeft);
+    expect(both.isChanged).toBe(true);
+    expect(both.resettable).toEqual(['padding-top']);
+  });
+
+  it('the view hands the component the wire for exactly the wired edge, named', () => {
+    const box = aBox({}, ['paddingLeft']);
+    const { connections } = box.latest() as Props & { connections: Record<string, { label?: string; onClick?: unknown }> };
+    expect(Object.keys(connections)).toEqual(['padding-left']);
+    expect(connections['padding-left'].label).toBe('String · Value → paddingLeft');
+    expect(typeof connections['padding-left'].onClick).toBe('function');
+  });
+
+  it('the view’s reset leaves a wired edge’s stored value alone', () => {
+    const box = aBox({ paddingTop: px(8), paddingLeft: px(2) }, ['paddingLeft']);
+    const spy = jest.spyOn(UndoQueue.instance, 'push').mockImplementation(() => undefined);
+    try {
+      box.latest().onResetSide('padding');
+      expect(box.writes.map((w) => w.name)).toEqual(['paddingTop']);
+      expect(box.parameters.paddingLeft).toEqual(px(2));
     } finally {
       spy.mockRestore();
     }

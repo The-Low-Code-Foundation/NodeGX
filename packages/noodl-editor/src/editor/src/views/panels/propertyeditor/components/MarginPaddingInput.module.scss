@@ -46,6 +46,49 @@
   }
 }
 
+/* A wired edge (FB-018): the binding chip's fill and ink at the field's box, so it reads as the chip on
+   the rows around it. No hover border: it is not a field you can type into. */
+.Field.is-bound {
+  border-color: transparent;
+  background-color: var(--theme-color-primary-bg);
+  color: var(--theme-color-primary);
+
+  .GlyphBox {
+    color: var(--theme-color-primary);
+  }
+
+  &[role='button'] {
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--theme-color-primary-25);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--theme-color-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+}
+
+.BoundLink {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 4px;
+}
+
+.BoundSource {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 6px 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+}
+
 .GlyphBox {
   flex: 0 0 auto;
   display: flex;
@@ -122,5 +165,16 @@
   &:focus-visible {
     outline: 1px solid var(--theme-color-primary);
     outline-offset: 1px;
+  }
+
+  /* An edge is wired: the side stays split until the wire goes, so the toggle has nothing to do. */
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+
+    &:hover {
+      border-color: var(--theme-color-primary);
+      color: var(--theme-color-fg-highlight);
+    }
   }
 }

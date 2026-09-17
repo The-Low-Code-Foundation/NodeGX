@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import React, { useRef, useState } from 'react';
 
+import { bindingTooltip } from '@noodl-core-ui/components/property-panel/BindingChip';
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 import { scrubStepForUnit, useDragToScrub } from '@noodl-core-ui/components/property-panel/scrub';
 
@@ -25,6 +26,7 @@ import {
   fieldTextOf,
   pairDisplayOf,
   scrubStartOf,
+  sideLayoutOf,
   sideOf,
   unitOf
 } from './marginPaddingEdit';
@@ -49,6 +51,8 @@ export interface MarginPaddingInputProps {
   /** CHR-009 AC4 — per group, whether the four per-edge fields are showing. */
   expanded: Record<MarginPaddingSide, boolean>;
   onToggleExpanded: (side: MarginPaddingSide) => void;
+  /** comp → the wire driving that edge, for the edges that are wired (FB-018). */
+  connections?: Record<string, MarginPaddingConnection | undefined>;
 
   onUpdate: (
     comp: string,
@@ -59,6 +63,11 @@ export interface MarginPaddingInputProps {
   onUpdateComps: (comps: string[], value: MarginPaddingParam | undefined, opts?: WriteOpts) => void;
   /** Clear every side of one group, as one undo step. */
   onResetSide: (side: MarginPaddingSide) => void;
+}
+
+export interface MarginPaddingConnection {
+  label?: string;
+  onClick?: () => void;
 }
 
 const SIDES: { side: MarginPaddingSide; label: string }[] = [
@@ -98,6 +107,68 @@ function ExpanderGlyph() {
       <rect x="3.5" y="3.5" width="5" height="5" rx="1" fill="none" stroke="currentColor" strokeWidth="1" />
       <path d="M4 1 H8 M4 11 H8 M1 4 V8 M11 4 V8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
+  );
+}
+
+/** The binding chip's link glyph, at the field's glyph size. */
+function LinkGlyph() {
+  return (
+    <svg className={css['Glyph']} width="10" height="10" viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M6.5 9.5 9.5 6.5M5 11a2.5 2.5 0 0 1 0-3.5l1.7-1.7M11 5a2.5 2.5 0 0 1 0 3.5l-1.7 1.7"
+        transform="rotate(45 8 8)"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export interface BoundFieldProps {
+  comp: string;
+  connection: MarginPaddingConnection;
+}
+
+/**
+ * A wired edge — FB-018's binding chip at a field's size. A pair field is ~60px docked, where the row chip's
+ * `Bound to …` would read `Bou…`, so the field keeps its edge glyph and names only the source; the chip's
+ * precedence sentence rides in the tooltip, as it does on every chip. No input, no scrub: nothing typed here
+ * would survive the wire.
+ */
+export function BoundField({ comp, connection }: BoundFieldProps) {
+  const { label, onClick } = connection;
+  const edge = comp.slice(comp.indexOf('-') + 1) as Glyph;
+  const interactive = Boolean(onClick);
+  return (
+    <div
+      className={classNames(css['Field'], css['is-bound'])}
+      title={`${edgeNameOf(comp)} ${sideOf(comp)}. ${bindingTooltip(label)}`}
+      data-comp={comp}
+      data-bound="true"
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        interactive
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick?.();
+              }
+            }
+          : undefined
+      }
+    >
+      <span className={css['GlyphBox']}>
+        <EdgeGlyph glyph={edge} />
+      </span>
+      <span className={css['BoundLink']}>
+        <LinkGlyph />
+      </span>
+      <span className={css['BoundSource']}>{label || 'Connected'}</span>
+    </div>
   );
 }
 
@@ -232,6 +303,7 @@ export function MarginPaddingInput({
   defaults,
   expanded,
   onToggleExpanded,
+  connections,
   onUpdate,
   onUpdateComps,
   onResetSide
@@ -339,22 +411,34 @@ export function MarginPaddingInput({
     <div className={css['Root']}>
       {SIDES.filter(({ side }) => Object.keys(defaults).some((comp) => sideOf(comp) === side)).map(
         ({ side, label }) => {
-          const isExpanded = expanded[side];
-          const isChanged = Object.keys(values).some((comp) => sideOf(comp) === side && values[comp] !== undefined);
+          const layout = sideLayoutOf(side, expanded[side], values, (comp) => Boolean(connections?.[comp]));
+          const isExpanded = layout.expanded;
+          const expanderTitle = layout.forced
+            ? `An edge is wired, so each ${side} edge shows on its own`
+            : isExpanded
+            ? `Set ${side} in pairs`
+            : `Set each ${side} edge separately`;
 
           return (
             <div key={side} data-test={`marginpadding-row-${side}`}>
-              <PropertyPanelRow label={label} isChanged={isChanged} onReset={() => onResetSide(side)}>
+              <PropertyPanelRow label={label} isChanged={layout.isChanged} onReset={() => onResetSide(side)}>
                 <div className={classNames(css['Track'], isExpanded && css['is-expanded'])}>
-                  {isExpanded
-                    ? MARGIN_PADDING_AXES.flatMap((axis) => axisComps(side, axis).map(edgeField))
-                    : MARGIN_PADDING_AXES.map((axis) => pairField(side, axis))}
+                  {layout.fields.map((field) =>
+                    field.kind === 'pair' ? (
+                      pairField(side, field.axis)
+                    ) : field.kind === 'bound' ? (
+                      <BoundField key={field.comp} comp={field.comp} connection={connections![field.comp]!} />
+                    ) : (
+                      edgeField(field.comp)
+                    )
+                  )}
                   <button
                     type="button"
                     className={css['Expander']}
                     aria-expanded={isExpanded}
-                    aria-label={isExpanded ? `Set ${side} in pairs` : `Set each ${side} edge separately`}
-                    title={isExpanded ? `Set ${side} in pairs` : `Set each ${side} edge separately`}
+                    aria-label={expanderTitle}
+                    title={expanderTitle}
+                    disabled={layout.forced}
                     data-test={`marginpadding-expand-${side}`}
                     onClick={() => onToggleExpanded(side)}
                   >
