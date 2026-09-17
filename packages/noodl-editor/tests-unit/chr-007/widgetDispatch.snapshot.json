@@ -1617,6 +1617,7 @@
       "iconSize": "NumberWithUnits",
       "iconSourceType": "EnumType",
       "iconSpacing": "NumberWithUnits",
+      "keepsFocus": "BooleanType",
       "label": "BasicType",
       "letterSpacing": "NumberWithUnits",
       "lineHeight": "NumberWithUnits",

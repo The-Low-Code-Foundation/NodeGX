@@ -117,4 +117,13 @@ far as the *caret* is concerned — GAM-011 built `Insert Text`/`Backspace`, and
 them is **GAM-028**: the pad has to know it is on a touch screen to stop the soft keyboard covering the game. The kit node stays
 until that lands.
 
-**Gates run:** the new spec 8/8; `noodl-viewer-react` `tsc --noEmit` and the whole viewer suite (see the handoff for counts).
+**Gates run:** the new spec 8/8; `noodl-viewer-react` `tsc --noEmit` 0 and the whole viewer suite 122 suites / 1627 ✓.
+
+🔴 **A new port regenerates CHR-007's snapshot, and this session learned it the expensive way.** `tests-unit/chr-007/widgetDispatch.test.ts`
+records the class every catalog port gets, so adding `keepsFocus` reddened it — one line, `"keepsFocus": "BooleanType"`. That is the
+spec working as designed: its whole job is to notice a port appearing. Regenerated with the spec's own switch
+(`CHR007_WRITE_SNAPSHOT=1`), diff verified as exactly that one line, chr-007 then 2 suites / 23 ✓ read-only, and editor `test:main` re-run **with** the port: **493 suites, 7919 ✓, exit 0**.
+⚠️ **The mistake was ordering, not the snapshot:** editor `test:main` was run green *after* GAM-026 and *before* this port existed,
+and never re-run. A peer's own full run found it. The file's history (`9e165a5ca` GAM-013, `8c7f57a06` GAM-011b) shows every P88
+port before this one regenerating it — so **a catalog port owes a chr-007 regeneration and a re-run of `test:main` after the port,
+not before**.
