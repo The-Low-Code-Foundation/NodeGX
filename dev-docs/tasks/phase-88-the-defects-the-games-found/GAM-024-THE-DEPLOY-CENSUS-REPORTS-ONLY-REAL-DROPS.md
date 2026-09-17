@@ -1,6 +1,6 @@
 # GAM-024 — The deploy census reports only real drops
 
-**Status: 🟢 built s18 (2026-09-17) with GAM-023, uncommitted at write. AC1–AC4, AC6, AC7 met; AC5 (kits checked, not just counted) open on R21.** **Source:** [P78 D44 (remaining)](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) and [P78 D52](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005 (2026-09-11) and TPL-006 AC7 (2026-09-12) · **Side:** tooling (`scripts/devtools/deploy-from-disk`), used as a publication gate
+**Status: ✅ built s18 with GAM-023, committed `624b054f2` (s19). AC1–AC4, AC6, AC7 met; AC5 closed by ruling R21 (s19): unchecked is enough.** **Source:** [P78 D44 (remaining)](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) and [P78 D52](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005 (2026-09-11) and TPL-006 AC7 (2026-09-12) · **Side:** tooling (`scripts/devtools/deploy-from-disk`), used as a publication gate
 
 The `deploy-from-disk` census says TPL-005 dropped 4 wires and TPL-006 dropped 3. Neither did: the shipped deploy carries
 them and the pages play. The census is what TPL-005 and TPL-006 were told to check before publishing, so a phantom drop
@@ -99,7 +99,7 @@ it with `leaveFilterOn: true`. Readings from `deploy-from-disk` bundles built in
 | AC2 | `droppedWires` names each: story-engine's `rdChoices.itemOutput-gives → rdCarry.in-gift`, `rdChoices.itemOutputSignal-picked → rdCarry.run`, `rdChoices.itemOutput-goto → rdSetAt.value` (D52's three); pixel-game's `plKey{Up,Down,Left,Right}.pressed → plMove*.go` (D44's four). ✅ |
 | AC3 | Fix: story-engine **0** dropped; `--sabotage` drops exactly `srStory.items → srPick.thisPortDoesNotExist_SBR007`. `For Each` in the types that minted ports. ✅ |
 | AC4 | `--arm-skip-import-complete`: **exactly D52's three** come back. `--arm-skip-import` (the components-map gate): **19** come back on story-engine and **46** on pixel-game, which is D44's recorded 46. ⚠️ The task predicted "the 3" for both gates. The import also feeds `nodeAdded` to every non-lazy family, so skipping it loses more than For Each. ✅ Each gate graded alone |
-| AC5 | ⬜ **Open.** Kit wires are now counted **unchecked**, not dropped-as-broken, and named per wire in the devtool. pixel-game reads broken 0, unchecked 4. Checking them needs kit types in the headless library (R21: reuse `kitExtract`, or not). The devtool still DROPS unchecked wires (it filters on health), so its bundle is not what ships |
+| AC5 | ✅ **Closed by R21 (Richard, s19, 2026-09-17): "unchecked is enough".** No kit loading at deploy time. Kit wires are now counted **unchecked**, not dropped-as-broken, and named per wire in the devtool. pixel-game reads broken 0, unchecked 4. Checking them needs kit types in the headless library (R21: reuse `kitExtract`, or not). The devtool still DROPS unchecked wires (it filters on health), so its bundle is not what ships |
 | AC6 | Census, all 7 templates: see GAM-023 §8 s18. HEAD 11/33/4/76/3/24/18 dropped → fix 0 broken on all but rocket-school (1, a type-rule verdict) with 4 and 75 unchecked kit wires |
 | AC7 | Devtool drop set == `nodegx deploy` broken+unchecked set on **7/7** templates ✅ |
 

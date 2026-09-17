@@ -2,7 +2,7 @@
 
 *(Filename kept for links. Titled "refuses a broken wire" until R20 ruled (c).)*
 
-**Status: 🟢 built s18 (2026-09-17), uncommitted at write, commit is Richard's. ✅ R20 ruled 2026-09-16 (s17): publish all, warn.** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
+**Status: 🟢 built s18, committed `624b054f2` (s19). ✅ R20 ruled 2026-09-16 (s17): publish all, warn. ✅ s19 ruling: an enum is a string, built.** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
 
 The shipped `nodegx deploy` never ran its connection filter. ⚠️ **Corrected s18:** its validation gate already refused a
 wire into a port a built-in's *declaration* lacks, and a wire to a missing node. What shipped silently, with `ok: true`, was
@@ -182,3 +182,38 @@ Deploy time about 1.2 s → 2.3 s per template. **Not run:** editor `test:ci` / 
 07:49–07:50, deleted; nothing else written, checked with `find -newer`). Now refused in `readWireHealth`; the devtool sets the flag.
 
 **Left:** kit wires are unchecked, not checked (GAM-024 AC5, R21); the installed app's engine still carries the old deploy (a release).
+
+### Session 19 (2026-09-17, over `f25a643b2`) — committed, and Richard's ruling on the one wire it named
+
+s18's work committed as `624b054f2` (code) and `06591185c` (docs), on Richard's yes.
+
+**Ruling (Richard, 2026-09-17, asked in plain words):** Rocket School's `/Game/Keyboard: kbPick.value → kbOut.picked` was
+named broken by the editor's type rule (an Options `value`, type `enum`, into a Component Outputs port typed `string`). *"The rule
+is too strict"*: an enum is a string. Built as one row of the cast table: `enum` → `['string']`. **Only** `string`: an enum into
+`number` stays refused, which is also the known-firing half of the spec's arm.
+
+**Where the table lives, and its copies:** `noodl-runtime/src/nodelibraryexport.ts` (the source, which the editor and the headless
+deploy both read); `packages/noodl-types/src/node-catalog.json` + `node-catalog-enriched.json` (regenerated, `catalog:check` and
+`catalog:merge:check` up to date); `docs/node-catalog/compatibility.json` (`merge.js` refused the regen until its `verifiedPairs`
+moved enum→string from rejected to permitted, with enum→number the new rejected row and a `castSemantics` sentence); the editor's
+`cloud-node-library.json` (**hand-edited, one row**: `cloud-library:generate --check` was already stale at HEAD, so a regen would
+have swept unrelated changes in); `tests-unit/property-editor/portTypes.test.ts`'s "verbatim" copy.
+
+| reading | result |
+|---|---|
+| story-engine + an Options node wired into `rdFoot.text` and `rdFoot.opacity`, engine before the change | both named broken ✅ RED |
+| same, fix engine | only `opacity` named (enum → number) |
+| GAM-023 spec (new arm `story-enum`, runtime source added to the staleness guard) | 7/7 |
+| mutant: the enum row alone back to `[]` (python exact replace; sha-restored) | 1 red, exactly the enum → text wire. ⚠️ The first mutant was a `sed` that also reverted date/color/object/textStyle → string: discarded |
+| deployed files, reverted engine vs fix engine, 7 templates (bundles copied into `dist/` so they find the viewer runtime) | **0 differing files** on 7/7, all `ok: true`; rocket-school broken **1 → 0**, unchecked 75 both |
+| editor `tests-unit` portTypes + fix-025 + cn-015 + lib-006 | 175/175 in 15 suites |
+| `noodl-preview` `tsc --noEmit` (includes `tests/`) | 0 |
+| editor `test:ci`, `test:main`, `noodl-mcp` whole suite | **not run** |
+
+⚠️ **Not measured:** the value arriving on screen in a browser (the enum value is the option's string, so nothing converts it, read
+from source), and `findCompatiblePortType`'s inference for a component port fed by mixed types (it now resolves `string` where it
+resolved nothing). The 7-template export diff saw no port type change. The installed app and `src/external` still carry the old table
+until rebuilt.
+
+⚠️ **First deploy diff graded nothing:** bundles copied to scratch fail at stage `runtime` (they find the viewer runtime relative to
+themselves), and "0 differing files" was two empty folders. Read `ok` before the diff.

@@ -62,7 +62,9 @@
     },
     {
       "from": "enum",
-      "to": []
+      "to": [
+        "string"
+      ]
     },
     {
       "from": "object",

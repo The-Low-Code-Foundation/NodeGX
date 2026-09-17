@@ -255,8 +255,12 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
         to: ['string']
       },
       {
+        // P88 GAM-023 ruling (Richard, 2026-09-17): an enum is a string. An enum value is
+        // already the option's string, so a dropdown's value wired into a text port (or a
+        // component output typed string) arrives as it is. Only `string`: an enum into
+        // `number` still has nothing to convert it.
         from: 'enum',
-        to: []
+        to: ['string']
       },
       {
         // PORT-TYPE-CONTRACT.md: declaring `object` must not strand the port.

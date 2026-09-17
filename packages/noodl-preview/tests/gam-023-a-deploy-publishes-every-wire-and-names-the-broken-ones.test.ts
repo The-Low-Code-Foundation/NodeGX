@@ -23,6 +23,9 @@
  *     wires exist only after the editor's NodeTypeAdapters run; without them 25 read broken.
  *   - **pixel-game, clean.** Its 4 keyboard wires touch a kit node the deploy never loads: unchecked,
  *     not broken.
+ *   - **story-engine, an Options value wired into a Text's `text` and its `opacity`.** Richard's ruling
+ *     (2026-09-17, s19): an enum is a string, so the first is not named. The second still is (no enum to
+ *     number cast), which is what makes the first's silence readable.
  *
  * Reverted arms were run as source mutants against a rebuilt bundle (GAM-023 §8 s18).
  *
@@ -38,7 +41,11 @@ const PKG_ROOT = path.resolve(__dirname, '..');
 const REPO = path.resolve(PKG_ROOT, '../..');
 const ENGINE_BUNDLE = path.join(PKG_ROOT, 'dist/nodegx-deploy.cjs');
 const VIEWER_ENGINE = path.resolve(PKG_ROOT, '../noodl-editor/src/external/deploy/noodl.deploy.js');
-const FIX_SOURCES = [path.join(PKG_ROOT, 'src/wireHealth.ts'), path.join(PKG_ROOT, 'src/deploy.ts')];
+const FIX_SOURCES = [
+  path.join(PKG_ROOT, 'src/wireHealth.ts'),
+  path.join(PKG_ROOT, 'src/deploy.ts'),
+  path.join(REPO, 'packages/noodl-runtime/src/nodelibraryexport.ts')
+];
 
 interface NamedWire {
   component: string;
@@ -95,6 +102,21 @@ function deploy(arm: string, template: string, edit?: (projectDir: string) => vo
   runs[arm] = { report: JSON.parse(lastLine), outDir };
 }
 
+/** An Options node (enum `value` output) and two wires from it: into a string port and a number port. */
+const ENUM_WIRES = [
+  { fromId: 'gamEnum', fromProperty: 'value', toId: 'rdFoot', toProperty: 'text' },
+  { fromId: 'gamEnum', fromProperty: 'value', toId: 'rdFoot', toProperty: 'opacity' }
+];
+
+function editComponent(projectDir: string, edit: (nodes: any, connections: any) => void): void {
+  const dir = path.join(projectDir, 'components/Pages/Read');
+  const nodes = JSON.parse(fs.readFileSync(path.join(dir, 'nodes.json'), 'utf8'));
+  const connections = JSON.parse(fs.readFileSync(path.join(dir, 'connections.json'), 'utf8'));
+  edit(nodes, connections);
+  fs.writeFileSync(path.join(dir, 'nodes.json'), JSON.stringify(nodes, null, 2));
+  fs.writeFileSync(path.join(dir, 'connections.json'), JSON.stringify(connections, null, 2));
+}
+
 const SABOTAGE = [
   { fromId: 'rdFind', fromProperty: 'out-title', toId: 'rdPassage', toProperty: 'gam023NoSuchInput' },
   { fromId: 'rdChoices', fromProperty: 'itemOutput-gam023NoSuch', toId: 'rdPassage', toProperty: 'title' }
@@ -118,12 +140,16 @@ beforeAll(() => {
 
   work = fs.mkdtempSync(path.join(os.tmpdir(), 'gam023-deploy-'));
   deploy('story-clean', 'story-engine');
-  deploy('story-sabotaged', 'story-engine', (projectDir) => {
-    const file = path.join(projectDir, 'components/Pages/Read/connections.json');
-    const json = JSON.parse(fs.readFileSync(file, 'utf8'));
-    json.connections.push(...SABOTAGE);
-    fs.writeFileSync(file, JSON.stringify(json, null, 2));
-  });
+  deploy('story-sabotaged', 'story-engine', (projectDir) =>
+    editComponent(projectDir, (_nodes, json) => json.connections.push(...SABOTAGE))
+  );
+  deploy('story-enum', 'story-engine', (projectDir) =>
+    editComponent(projectDir, (json, connections) => {
+      json.nodes.push({ id: 'gamEnum', type: 'net.noodl.controls.options', label: 'An enum source', parent: 'rdShell' });
+      json.nodes.find((n: { id: string }) => n.id === 'rdShell').children.push('gamEnum');
+      connections.connections.push(...ENUM_WIRES);
+    })
+  );
   deploy('members-clean', 'members-area');
   deploy('pixel-clean', 'pixel-game');
 }, 120_000);
@@ -191,6 +217,19 @@ describe('GAM-023 — nodegx deploy publishes every wire and names the broken on
     expect({ bundles: bundles.length, hudPortTypes: hud.ports.map((p: { type: unknown }) => p.type) }).toEqual({
       bundles: 2,
       hudPortTypes: ['*', '*', '*']
+    });
+  });
+
+  it('🔴 an enum into a string port is not named, and an enum into a number port still is (ruling, s19)', () => {
+    const { report, outDir } = runs['story-enum'];
+    expect({
+      broken: report.wires.broken.map((w) => `${name(w)} (${w.reason})`),
+      published: deployedText(outDir).includes('gamEnum')
+    }).toEqual({
+      broken: [
+        '/Pages/Read: gamEnum.value → rdFoot.opacity (Target port of type number cannot be connected to a source port of type enum)'
+      ],
+      published: true
     });
   });
 
