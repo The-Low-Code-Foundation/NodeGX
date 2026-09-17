@@ -16,7 +16,8 @@ interface ComponentTreeProps {
   onItemClick: (node: TreeNode) => void;
   onCaretClick: (folderId: string) => void;
   expandedFolders: Set<string>;
-  selectedId?: string;
+  /** TVW-001 (a): the component the canvas shows — the only thing a row highlights for. */
+  activeComponentName?: string;
   onMakeHome?: (node: TreeNode) => void;
   onDelete?: (node: TreeNode) => void;
   onDuplicate?: (node: TreeNode) => void;
@@ -64,7 +65,7 @@ export function ComponentTree({
   onItemClick,
   onCaretClick,
   expandedFolders,
-  selectedId,
+  activeComponentName,
   onMakeHome,
   onDelete,
   onDuplicate,
@@ -107,7 +108,7 @@ export function ComponentTree({
               folder={node.data}
               level={level}
               isExpanded={expandedFolders.has(node.data.path)}
-              isSelected={selectedId === node.data.path}
+              isSelected={!!node.data.component && node.data.component.name === activeComponentName}
               onCaretClick={() => onCaretClick(node.data.path)}
               onClick={() => onItemClick(node)}
               onDelete={onDelete}
@@ -140,7 +141,7 @@ export function ComponentTree({
                   onItemClick={onItemClick}
                   onCaretClick={onCaretClick}
                   expandedFolders={expandedFolders}
-                  selectedId={selectedId}
+                  activeComponentName={activeComponentName}
                   onMakeHome={onMakeHome}
                   onDelete={onDelete}
                   onDuplicate={onDuplicate}
@@ -162,7 +163,7 @@ export function ComponentTree({
                   onMoveToSheet={onMoveToSheet}
                   matched={matched}
                   runtimeType={runtimeType}
-              sheetName={sheetName}
+                  sheetName={sheetName}
                 />
               )}
             </FolderItem>
@@ -173,7 +174,7 @@ export function ComponentTree({
               key={node.data.id}
               component={node.data}
               level={level}
-              isSelected={selectedId === node.data.name}
+              isSelected={node.data.name === activeComponentName}
               onClick={() => onItemClick(node)}
               onMakeHome={onMakeHome}
               onDelete={onDelete}

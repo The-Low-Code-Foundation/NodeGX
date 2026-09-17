@@ -35,7 +35,7 @@ import { ComponentsPanelProps } from './types';
  * allowing users to navigate, create, rename, and organize components.
  */
 export function ComponentsPanel({ options }: ComponentsPanelProps) {
-  const { treeData, expandedFolders, selectedId, toggleFolder, handleItemClick, sheets, currentSheet, selectSheet } =
+  const { treeData, expandedFolders, activeComponentName, toggleFolder, handleItemClick, sheets, currentSheet, selectSheet } =
     useComponentsPanel({
       hideSheets: options?.hideSheets,
       lockToSheet: options?.lockToSheet
@@ -348,7 +348,7 @@ export function ComponentsPanel({ options }: ComponentsPanelProps) {
             nodes={filtered.nodes}
             expandedFolders={filtered.expandedFolders}
             matched={filtered.isFiltering ? filtered.matched : null}
-            selectedId={selectedId}
+            activeComponentName={activeComponentName}
             onItemClick={handleItemClick}
             onCaretClick={toggleFolder}
             onMakeHome={handleMakeHome}

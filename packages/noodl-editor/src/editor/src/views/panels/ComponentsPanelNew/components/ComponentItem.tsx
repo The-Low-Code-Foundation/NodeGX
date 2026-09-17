@@ -17,6 +17,7 @@ import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
 import { CLOUD_SHEET, ComponentItemData, Sheet, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
+import { RowMetaLabel } from './RowMetaLabel';
 import { WarningDot } from './WarningDot';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -397,6 +398,7 @@ export function ComponentItem({
           <Icon icon={icon} size={IconSize.Small} />
         </div>
         <div className={css['Label']}>{component.localName}</div>
+        <RowMetaLabel meta={component.meta} />
         <WarningDot count={component.warningCount} />
       </div>
     </div>

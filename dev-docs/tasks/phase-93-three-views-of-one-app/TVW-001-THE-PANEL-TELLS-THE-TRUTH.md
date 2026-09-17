@@ -77,3 +77,64 @@ AC1 against `activeComponent` **and** the rendered class, both.
   *Move to…* that some people used as "move to folder"; drag-to-folder remains the way.
 - The `Pages` section is Router order. Two Routers means two ordered groups under `Pages`, each
   headed by the Router's name (`RouterAdapter.getRouterNames()`).
+
+## 7. Progress
+
+| slice | rows | built | driven |
+|---|---|---|---|
+| 1 (s6, 2026-09-17) | a, b | ✅ | AC1 ✅ (door corrected, below) · AC2 ✅ |
+| 2 | d — sections by role, `not in a router` placement | — | — |
+| 3 | c — `×N` button → *Used in* | — | — |
+| 4 | e — sheets retired | — | — |
+| 5 | f — the Workbench words | — | — |
+
+### Slice 1 — what was built
+
+- `componentUsage.ts` (pure, graded in `tests-unit/tvw-001`): one walk → per component `nodeCount`,
+  `instances` (`{parent, nodeId}`, walk order — slice 3's popover reads this) and `routedBy` (Router
+  names whose `pages.routes` list it). `rowMetaFor(kind, usage, route)` → `count` / `unplaced` /
+  `empty` / `route` / `unrouted` / `null`.
+- **Decisions this slice made** (the AC says "every visual component row"; these are the rows where
+  that would be false): `empty` is checked first for every kind (R-H). **Home** gets no meta (it is
+  the app; nothing places it, `unplaced` would lie) unless a Router lists it. A **popup** nothing
+  places gets none (a `Show Popup` opens it; the glyph says so). A **cloud function** gets none.
+  A page's route is `RouterAdapter.getPageInfoForComponents` — the string the Router's own Pages
+  editor shows.
+- `useComponentsPanel`: `selectedId` is gone. The highlight is `activeComponentName`, seeded from
+  `NodeGraphContextTmp.nodeGraph.activeComponent` and moved by the global `activeComponentChanged`.
+  A panel click only switches the canvas; the highlight comes back through the event. A plain folder
+  click highlights nothing (the canvas cannot show a folder). The usage index rebuilds on the
+  existing project counter plus `Model.nodeAdded` / `Model.nodeRemoved` / `Model.parametersChanged`
+  (the last only for `Router` and `Page` nodes).
+- `RowMetaLabel.tsx`, `.Meta*` styles (tokens only: `--font-size-xs`, `fg-muted`, `warning`).
+
+### Slice 1 — gates
+
+- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **1 suite / 9**. Armed: a count
+  callback returning truthy → 4 red; instances of `/H…` skipped → 3 red. Restored with `cp`.
+- `tsc -p packages/noodl-editor --noEmit` EXIT=0.
+- `test:ci` **not run** this slice (owed before TVW-001 closes, AC8).
+
+### Slice 1 — drive (dev stack, copy of `Landing page test V2`, 2026-09-17)
+
+| step | read | result |
+|---|---|---|
+| open project | `activeComponent` `App`; row `App` `.Selected`, no panel touch | ✅ |
+| AC1 as written: double-click `Page Router` on App's canvas | canvas stays on `App`; sidebar opens the Router's properties | ❌ **the AC's door does not exist** — a Router has no component-typed port, so `SelectionActions.ts:200-217` forwards the double-click to the sidebar. Nothing to do with the panel |
+| real click on the `Home` row | `activeComponent` `/Pages/Home`; `.Selected` = [`Home`] | ✅ |
+| real double-click on the `Hero` instance on Home's canvas | `activeComponent` `/Sections/Hero`; `.Selected` = [`Hero`], panel untouched | ✅ |
+| ⌘[ (CDP key, focus emulation on the same connection) | `activeComponent` `/Pages/Home`; `.Selected` = [`Home`] | ✅ |
+| AC2: sum of rendered `×N` | 25 (Components) + 6 (Form Fields) + 8 (Sections) = **39** | — |
+| AC2: independent walk of `components/*/nodes.json` on disk, nodes whose `type` is a registry name | **39**, per-component equal to every row; `FooterLink`, `QuoteCard`, `WorkCard`, `Labelled Date` absent (the four `unplaced`) | ✅ |
+| route | `Home` → `/halden-&-rowe-—-design-and-fabrication-studio,-sheffield`, identical to the Router's Pages editor | ✅ |
+
+**AC1 wording owed:** step 1 should read "double-click the `Hero` instance on `Home`'s canvas" (the
+door driven above). Not a ruling — the gesture named does not enter anything.
+
+**Seen, not fixed (for AC7's WORTHY pass):** on a row with a warning dot the meta sits one dot-slot
+further left than on rows without (`StatTile ×4` vs `ServiceCard ×4`). Evidence:
+`verdicts/TVW-001/2026-09-17/slice1-panel-dark-default-width.png`.
+
+🔴 **Drive trap:** a double-click on a non-component node switches the sidebar to Properties; the
+Components tree is then in the DOM at 0×0 (`getBoundingClientRect` all zero). Click the rail's
+Components button (26,101) before reading row geometry.

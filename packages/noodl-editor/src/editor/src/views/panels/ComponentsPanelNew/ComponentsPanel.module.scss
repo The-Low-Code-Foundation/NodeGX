@@ -372,6 +372,46 @@
 }
 
 /* -----------------------------------------------------------------------------
+ * TVW-001 (b) — the row's right-hand meta.
+ *
+ * Quieter than the label on purpose: it answers "where is this used" for a row
+ * you are already reading, and must never compete with the name. `unplaced` and
+ * `empty` are dimmed and italic — a fact about absence, said in the voice of an
+ * absence. `not in a router` is the one that is a problem, so it takes the
+ * warning colour the dot already uses rather than a new one.
+ * -------------------------------------------------------------------------- */
+.Meta {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 45%;
+  margin-left: var(--spacing-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-fg-default);
+}
+
+.Meta-unplaced,
+.Meta-empty {
+  font-style: italic;
+  color: var(--theme-color-fg-muted);
+}
+
+.Meta-route {
+  color: var(--theme-color-fg-muted);
+}
+
+.Meta-unrouted {
+  color: var(--theme-color-warning);
+}
+
+.TreeItem.Selected .Meta-count {
+  color: var(--theme-color-fg-highlight);
+}
+
+/* -----------------------------------------------------------------------------
  * Rename (PNL-007 owns rename affordances elsewhere; the tree's inline input
  * already works and stays — it only follows the new indent arithmetic).
  * -------------------------------------------------------------------------- */
@@ -380,8 +420,7 @@
   display: flex;
   align-items: center;
   min-height: 26px;
-  padding: 0 var(--spacing-2) 0
-    calc(var(--tree-inset) + var(--level, 0) * var(--tree-indent) + var(--tree-caret-slot));
+  padding: 0 var(--spacing-2) 0 calc(var(--tree-inset) + var(--level, 0) * var(--tree-indent) + var(--tree-caret-slot));
   background-color: var(--theme-color-bg-3);
 }
 

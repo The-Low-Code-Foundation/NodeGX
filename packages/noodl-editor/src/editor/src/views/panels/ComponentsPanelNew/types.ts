@@ -5,6 +5,7 @@
 import { ComponentModel } from '@noodl-models/componentmodel';
 
 import { ComponentKind } from './componentKind';
+import { RowMeta } from './componentUsage';
 
 /**
  * Data structure for a component item in the tree
@@ -29,6 +30,8 @@ export interface ComponentItemData {
   hasWarnings: boolean;
   /** PNL-006: real count from `WarningsModel`, for the dot's tooltip. */
   warningCount: number;
+  /** TVW-001 (b): `×N`, `unplaced`, `empty`, the route, or `not in a router` — see `componentUsage.ts`. */
+  meta: RowMeta | null;
   path: string;
 }
 
@@ -51,6 +54,8 @@ export interface FolderItemData {
   kind?: ComponentKind;
   category?: string;
   warningCount?: number;
+  /** TVW-001 (b), only when `isComponentFolder`. */
+  meta?: RowMeta | null;
 }
 
 /**

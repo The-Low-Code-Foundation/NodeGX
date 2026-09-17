@@ -1,11 +1,14 @@
+import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ComponentModel } from '@noodl-models/componentmodel';
+import { RouterAdapter } from '@noodl-models/NodeTypeAdapters/RouterAdapter';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { WarningsModel } from '@noodl-models/warningsmodel';
 
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
-import { buildKindIndex, ComponentKindIndex } from '../componentKind';
+import { buildKindIndex, ComponentKind, ComponentKindIndex } from '../componentKind';
+import { buildUsageIndex, RowMeta, rowMetaFor, UsageIndex } from '../componentUsage';
 import { CLOUD_SHEET, Sheet, TreeNode } from '../types';
 
 /**
@@ -20,6 +23,15 @@ import { CLOUD_SHEET, Sheet, TreeNode } from '../types';
 
 // Events to subscribe to on ProjectModel.instance
 const PROJECT_EVENTS = ['componentAdded', 'componentRemoved', 'componentRenamed', 'rootNodeChanged'];
+
+/**
+ * TVW-001 — the graph edits that change a row's meta: an instance placed or deleted (`×N`), a
+ * component's first node or last one (`empty`), a Router's `pages` or a Page's `urlPath` edited
+ * (the route, `not in a router`). Global, because they are raised by every graph in the project,
+ * not by `ProjectModel` itself.
+ */
+const GRAPH_EVENTS = ['Model.nodeAdded', 'Model.nodeRemoved', 'Model.parametersChanged'];
+const META_PARAMETER_OWNERS = new Set(['Router', 'Page']);
 
 interface UseComponentsPanelOptions {
   hideSheets?: string[];
@@ -39,7 +51,15 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
 
   // Local state
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['/']));
-  const [selectedId, setSelectedId] = useState<string | undefined>();
+  /**
+   * TVW-001 (a) — the highlighted row is the component the canvas shows, however it got there
+   * (canvas double-click, trail, tabs, ⌘[, X-Ray, Problems, Search, the bench). The panel no longer
+   * keeps its own idea of what is selected: a click here switches the canvas, and the highlight
+   * arrives back through the same event as every other door.
+   */
+  const [activeComponentName, setActiveComponentName] = useState<string | undefined>(
+    () => NodeGraphContextTmp.nodeGraph?.activeComponent?.name
+  );
   const [updateCounter, setUpdateCounter] = useState(0);
   /**
    * PNL-006: warnings change far more often than the project's shape does, and
@@ -87,6 +107,35 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
     return () => {
       // `Model.off` returns the model; the cleanup must return void.
       WarningsModel.instance.off(group);
+    };
+  }, []);
+
+  useEffect(() => {
+    const group = { id: 'useComponentsPanel.activeComponent' };
+    EventDispatcher.instance.on(
+      'activeComponentChanged',
+      ({ component }: { component?: ComponentModel }) => setActiveComponentName(component?.name),
+      group
+    );
+    // The canvas may have switched between the first render and this subscription.
+    setActiveComponentName(NodeGraphContextTmp.nodeGraph?.activeComponent?.name);
+    return () => {
+      EventDispatcher.instance.off(group);
+    };
+  }, []);
+
+  useEffect(() => {
+    const group = { id: 'useComponentsPanel.graph' };
+    EventDispatcher.instance.on(
+      GRAPH_EVENTS,
+      (e: { model?: { typename?: string } }, event?: string) => {
+        if (event === 'Model.parametersChanged' && !META_PARAMETER_OWNERS.has(e?.model?.typename)) return;
+        setUpdateCounter((c) => c + 1);
+      },
+      group
+    );
+    return () => {
+      EventDispatcher.instance.off(group);
     };
   }, []);
 
@@ -214,11 +263,17 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
    */
   const kindIndex = useMemo(() => buildKindIndex(ProjectModel.instance), [updateCounter]);
 
+  /** TVW-001 (b) — instances, node counts and routers, from a fresh walk on the same counter. */
+  const usageIndex = useMemo(
+    () => (ProjectModel.instance ? buildUsageIndex(ProjectModel.instance.getComponents()) : new Map()),
+    [updateCounter]
+  );
+
   // Build tree structure with optional sheet filtering
   const treeData = useMemo(() => {
     if (!ProjectModel.instance) return [];
-    return buildTreeFromProject(ProjectModel.instance, hideSheets, currentSheet, kindIndex, warningCounter);
-  }, [updateCounter, hideSheets, currentSheet, kindIndex, warningCounter]);
+    return buildTreeFromProject(ProjectModel.instance, hideSheets, currentSheet, kindIndex, usageIndex, warningCounter);
+  }, [updateCounter, hideSheets, currentSheet, kindIndex, usageIndex, warningCounter]);
 
   // Toggle folder expand/collapse
   const toggleFolder = useCallback((folderId: string) => {
@@ -237,7 +292,6 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
   const handleItemClick = useCallback(
     (node: TreeNode) => {
       if (node.type === 'component') {
-        setSelectedId(node.data.name);
         // Open component - trigger the NodeGraphEditor to switch to this component
         const component = node.data.component;
         if (component) {
@@ -247,8 +301,8 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
           });
         }
       } else {
-        // It's a folder
-        setSelectedId(node.data.path);
+        // It's a folder. TVW-001 (a): a plain folder is not something the canvas can show, so
+        // clicking one highlights nothing — it only opens or closes.
 
         // BUG-6 FIX: If it's a component-folder, open the component too
         // Component-folders are folders that also have an associated component
@@ -270,7 +324,7 @@ export function useComponentsPanel(options: UseComponentsPanelOptions = {}) {
   return {
     treeData,
     expandedFolders,
-    selectedId,
+    activeComponentName,
     toggleFolder,
     handleItemClick,
     // Sheet system
@@ -295,6 +349,7 @@ function buildTreeFromProject(
   hideSheets: string[],
   currentSheet: Sheet | null,
   kindIndex: ComponentKindIndex,
+  usageIndex: UsageIndex,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   warningGeneration: number
 ): TreeNode[] {
@@ -365,7 +420,7 @@ function buildTreeFromProject(
   });
 
   // Convert folder structure to tree nodes
-  return convertFolderToTreeNodes(rootFolder, kindIndex);
+  return convertFolderToTreeNodes(rootFolder, kindIndex, usageIndex);
 }
 
 /**
@@ -411,7 +466,11 @@ function addComponentToFolderStructure(
 /**
  * Convert folder structure to tree nodes
  */
-function convertFolderToTreeNodes(folder: FolderStructure, kindIndex: ComponentKindIndex): TreeNode[] {
+function convertFolderToTreeNodes(
+  folder: FolderStructure,
+  kindIndex: ComponentKindIndex,
+  usageIndex: UsageIndex
+): TreeNode[] {
   const nodes: TreeNode[] = [];
 
   // Build a set of folder paths for quick lookup
@@ -425,7 +484,7 @@ function convertFolderToTreeNodes(folder: FolderStructure, kindIndex: ComponentK
     // Skip root folder (empty name) from rendering as a folder item
     // The root should be transparent - just show its contents directly
     if (childFolder.name === '') {
-      nodes.push(...convertFolderToTreeNodes(childFolder, kindIndex));
+      nodes.push(...convertFolderToTreeNodes(childFolder, kindIndex, usageIndex));
       return;
     }
 
@@ -447,7 +506,7 @@ function convertFolderToTreeNodes(folder: FolderStructure, kindIndex: ComponentK
         isOpen: false,
         isComponentFolder,
         component: matchingComponent, // Attach the component if it exists
-        children: convertFolderToTreeNodes(childFolder, kindIndex),
+        children: convertFolderToTreeNodes(childFolder, kindIndex, usageIndex),
         // Component type flags (only meaningful when isComponentFolder && matchingComponent exists)
         isRoot: kind === 'home',
         isPage: kind === 'page',
@@ -455,7 +514,8 @@ function convertFolderToTreeNodes(folder: FolderStructure, kindIndex: ComponentK
         isVisual: kind === 'visual' || kind === 'page' || kind === 'popup' || kind === 'home',
         kind,
         category: info?.category,
-        warningCount: matchingComponent ? warningCountFor(matchingComponent) : 0
+        warningCount: matchingComponent ? warningCountFor(matchingComponent) : 0,
+        meta: matchingComponent ? metaFor(matchingComponent, kind ?? 'component', usageIndex) : null
       }
     };
     nodes.push(folderNode);
@@ -492,6 +552,7 @@ function convertFolderToTreeNodes(folder: FolderStructure, kindIndex: ComponentK
         category: info?.category ?? 'default',
         hasWarnings: warningCount > 0,
         warningCount,
+        meta: metaFor(comp, kind, usageIndex),
         path: comp.name
       }
     };
@@ -499,6 +560,13 @@ function convertFolderToTreeNodes(folder: FolderStructure, kindIndex: ComponentK
   });
 
   return nodes;
+}
+
+/** TVW-001 (b) — the row's right-hand meta; the route is asked of the Router adapter only for a routed page. */
+function metaFor(component: ComponentModel, kind: ComponentKind, usageIndex: UsageIndex): RowMeta | null {
+  const usage = usageIndex.get(component.name);
+  const route = usage?.routedBy.length ? RouterAdapter.getPageInfoForComponents([component.name])[0]?.path : undefined;
+  return rowMetaFor(kind, usage, route);
 }
 
 /**

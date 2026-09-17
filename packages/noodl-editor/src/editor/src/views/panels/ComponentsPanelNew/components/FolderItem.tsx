@@ -16,6 +16,7 @@ import css from '../ComponentsPanel.module.scss';
 import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
 import { CLOUD_SHEET, FolderItemData, Sheet, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
+import { RowMetaLabel } from './RowMetaLabel';
 import { WarningDot } from './WarningDot';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -382,6 +383,7 @@ export function FolderItem({
             <Icon icon={icon} size={IconSize.Small} />
           </div>
           <div className={css['Label']}>{folder.name}</div>
+          <RowMetaLabel meta={folder.meta} />
           <WarningDot count={folder.warningCount} />
         </div>
       </div>
