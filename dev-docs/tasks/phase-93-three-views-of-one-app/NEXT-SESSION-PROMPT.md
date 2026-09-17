@@ -1,15 +1,15 @@
 # Phase 93 — next session
 
-**Written 2026-09-17, end of session 9.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
-started TVW-001 (slice 1, AC1 + AC2); session 7 built and drove slice 2 (row d, AC3); session 8 built
-and drove slice 3 (row c, AC4). **Session 9 built and drove TVW-001 slice 4 (row e, sheets retired)
-and closed AC5.**
+**Written 2026-09-17, end of session 10.** Sessions 1–5 built and drove TVW-003 slices 1–5. Session 6
+started TVW-001 (slice 1, AC1 + AC2); s7 built and drove slice 2 (row d, AC3); s8 slice 3 (row c,
+AC4); s9 slice 4 (row e, sheets retired, AC5). **Session 10 built TVW-001 slice 5 (row f, the
+Workbench words) and closed AC6** (`950ac4623`). AC6 is a static criterion and owes no drive.
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | 🟡 slices 1 (a, b), 2 (d), 3 (c), 4 (e) ✅ | **AC1 ✅ AC2 ✅ AC3 ✅ AC4 ✅ AC5 ✅** · AC6–8 — |
+| TVW-001 | The panel tells the truth | 🟡 slices 1 (a, b), 2 (d), 3 (c), 4 (e), 5 (f) ✅ — **all six rows built** | **AC1–AC6 ✅** · AC7 (Richard) — · AC8 green at s10, re-read at close |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** |
 | TVW-004 | Layers (needs 001, 003) | — | — |
@@ -20,84 +20,101 @@ and closed AC5.**
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 11** (TVW-003 all six; TVW-001 AC1–AC5).
+**ACs closed: 12** (TVW-003 all six; TVW-001 AC1–AC6).
 
-## Gate readings (2026-09-17, session 9)
+## Gate readings (2026-09-17, session 10)
 
-- `npx jest tests-unit/tvw-001` (from `packages/noodl-editor`): **5 suites / 46** (was 4 / 33).
-  Armed — five mutants on `folderDisplay.ts`, each red, each `cmp`-proven to have applied before the
-  run. Restored, `cmp` clean.
-- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**. 🔴 Always `--noEmit`: `tsc -p <package>` emits
-  in place and reddens ~85 suites.
-- `npm run test:ci` — **started at the end of s9 after `rm -rf packages/noodl-editor/.webpack-cache`,
-  result not in hand when this was written. Read it before trusting AC8.** The log is at
-  `scratchpad/testci.log`; the run's own exit code is the gate, and a stale
-  `packages/noodl-editor/test-results.json` reads as a pass, so check its mtime. Baseline is **6 at
-  seed 39386** (`test-ci-baseline-is-six-at-seed-39386`).
-- 🔴 **`tests/components/createMenu.spec.ts` was rewritten this session** and has not been run. It is
-  the one gate most likely to be red: it pinned the sheet-based create menu, and R-C removes what
-  most of it asserted. If `test:ci` is above the floor, look there first.
+- `npm run test:ci`: **2985 specs, 8 failures, seed 38645** — **the recorded floor**, the same eight
+  by name as s9 read at seed 46376 (3 SUB-006, 3 SUB-011, 2 NDA-017), none of them TVW's. Two
+  different seeds agreeing is as close to "this is the floor, not luck" as this gate gets.
+  🔴 The run's own exit is **1** at the floor, exactly as a real regression would exit — gate on the
+  readout's names, never on the exit code alone. Delete `packages/noodl-editor/tests/test-results.json`
+  before starting, or a stale file reads as a pass; check its mtime afterwards either way.
+  🔴 Backgrounding `npm run test:ci; echo $?` reports the **echo's** 0, not the run's 1.
+- **s9's flagged debt is clear.** `tests/components/createMenu.spec.ts` — "the gate most likely to be
+  red" — passes. It was already green in s9's own run, which finished after that handoff was written.
+- `npx jest tests-unit/tvw-001`: **6 suites / 54** (was 5 / 46). Armed — six mutants on
+  `benchWords.ts`, each red, each `cmp`-proven applied before the run, restored `cmp`-clean.
+- `npx jest tests-unit/vfn-011 tests-unit/tvw-001`: **10 suites / 109** green.
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**. 🔴 Always `--noEmit`.
+- Hex ratchet **16/16 holding**; font-size ratchet **−6 under baseline**; `chr-004` + `chr-009`
+  **13 suites / 134** green.
+- ✅ **AC8's gates are all green at s10** — but AC8 closes with the task, so re-read them after
+  whatever AC7 changes.
 
-## What session 9 settled
+## What session 10 settled
 
-- **Slice 4 is built and driven; AC5 is closed.** Detail and the drive table are in TVW-001 §7.
-- **The design decision: the `#` comes off the label and stays on the path.** Not taste — the code
-  forces it. `useComponentActions` maps what the tree hands it straight onto real component names,
-  and `sheetPrefix` (the thing that used to put back what a selected sheet stripped) is deleted. A
-  display label leaking into a path position silently renames a legacy project's folders. So
-  `FolderItemData.path` keeps `/#Design` and `name` reads `Design`, via the new pure
-  `folderDisplay.ts`. Driven both ways: the row says `Design`, `ProjectModel` still says
-  `/#Design/Card`, and creating in that folder lands at `/#Design/SheetProof`.
-- 🔴 **`addComponentToFolderStructure` now keys its folder lookup on the path, not the name** —
-  after stripping, `/#Design/…` and `/Design/…` both read `Design` and would have merged into one
-  folder whose path was whichever was seen first.
-- **The cloud door was about to be shut by this slice, and had to be reopened.** SPR-005's answer to
-  "you are in a browser folder" was a disabled row saying *choose Cloud Functions in the sheet
-  selector*. With no selector that is an uninstructable instruction — F83's finding restored intact.
-  *Create Cloud Function Component* is now **enabled from every folder context** and creates into
-  `#__cloud__` whatever was right-clicked, with its end slot naming that destination. Driven: header
-  `+` at the project root → `/#__cloud__/chargeCard`.
-- **The handoff's slice-4 plan was right about the drag and wrong about the fixture.** It said to
-  drive a cloud-boundary drag "here, because the QA fixture has no cloud folder" — true, and the
-  drag is now driven. But **no project on this machine has a `#` folder** (all 128 checked) and the
-  editor can no longer make one, so AC5's fixture had to be built on disk:
-  `NodeGX test projects/TVW-001 Slice4 Drive`.
-- **Deleted:** `SheetSelector.tsx`, `SheetSelector.module.scss`, `useSheetManagement.ts`,
-  `buildTreeFromProject` (88 lines, no caller left), `panelProps.options`, `Sheet`,
-  `ComponentsPanelOptions`, `CLOUD_SHEET.displayName` (a second spelling of `SECTION_LABEL.cloud`,
-  already drifted by a capital letter). `StringInputDialog` stays — `BackendServicesPanel` uses it.
+- **Slice 5 is built and AC6 is closed** (`950ac4623`). All six of TVW-001's rows are now built.
+  Detail in TVW-001 §7; the AC6 exclusion list is now written into the task's §6.
+- **The Workbench says its own name, from one module.** `views/VisualCanvas/benchWords.ts` —
+  `WORKBENCH`, `OPEN_ON_WORKBENCH`, `CAPTION_JOIN`, `benchCaptionRest`, `benchCaption` — feeds the
+  caption, the panel's menu row and the scope picker, so the word cannot drift into three dialects.
+- 🔴 **Two of the handoff's instructions described work that was already done or impossible.**
+  *"Re-pin FIX-019's caption spec to the new text"* — **there is no such spec.** FIX-019's block in
+  `tests/canvas/preview-scope.test.ts:207` pins `isDivergedFromCanvas` booleans and asserts no
+  strings; nothing in the repo pinned the caption text. It was unguarded for its whole life, which is
+  *how* it sat a ruling behind without a gate noticing — so s10 **wrote** the first pin rather than
+  moving one. And *"Open on the Workbench directly under Open"*: it was **already** directly under
+  *Open*, so row f was a rename, not a reorder.
+- **The scope chip's picker had no heading at all** — not a wrong one. The list under *App preview*
+  was component names that never said what picking one does. Added, with a `.ScopeHeading` in tokens
+  only (`--font-size-xs`), so the font-size ratchet counts no new raw px.
+- **"Sample values." was checked before it was written.** `ComponentBench` calls `buildBenchExport`
+  without `useSampleData` (default `true`) *and* mounts the viewer with it hardcoded — two
+  independent reads. The `Real backend` branch cannot reach this caption. A test pins the sentence
+  and says that if a data toggle ever arrives, that assertion is the one that should fail, and the
+  fix is a parameter, never a deletion.
+- 🔴 **There is a SECOND surface calling itself a bench** — the Blockly logic run bench (VFN-011),
+  whose criterion 3 requires it to say it runs *in the editor* on values you type. **Richard ruled:
+  swap the jargon, do not rename it.** `SANDBOX_NOTE` → `TEST_VALUES_NOTE`
+  (`'test values — not your app's data'`), `'Sandbox run…'` → `'Test run…'`; it was never given the
+  name *Workbench*. Three of the four `vfn-011/bench.spec.ts` assertions referenced the **constant**
+  and needed no edit — that is the pin working, and the argument for asserting constants.
 
 ## Next, in order
 
-1. **Read the `test:ci` result** (above) before anything else. If `createMenu.spec` is red, that is
-   s9's debt, not a new finding.
-2. Slice 5 (f, AC6): *Open on the Workbench* directly under *Open*; the `VisualCanvas.tsx:352-355`
-   caption; the scope chip's picker heading; sweep every user-visible *bench* / *isolated component*
-   / *sandbox* string; re-pin FIX-019's caption spec to the new text.
-3. AC7 screenshots (panel at 300px and 240px, both themes, corpus + a cloud project — use
-   `Members area (TPL-001)`, which has cloud functions), then AC8.
-4. Optional, no AC asks it: the bench outlining a canvas selection or hover inside itself.
+1. **AC7 — the only thing between TVW-001 and closed.** Screenshots in
+   `verdicts/TVW-001/<date>/`: the panel at 300px and 240px, both themes, on the corpus
+   (`Landing page test V2`) and on a cloud project (`Members area (TPL-001)` has cloud functions).
+   Then **Richard rules WORTHY**; that ruling is not yours to make.
+2. ⚠️ **Slice 5's JSX has never been seen rendered.** The caption's two-element split, the new
+   `.ScopeHeading` and the renamed menu row are graded by unit tests only, and a jsdom spec is not a
+   look. AC7's drive is also their first look — expect instrument faults before product faults, and
+   check the caption does not wrap badly at 240px (that is what `CAPTION_JOIN`'s nbsp is for).
+3. Re-read AC8's gates after AC7's changes, then close TVW-001.
+4. Then TVW-002 (the preview strip) unblocks, and TVW-004 (Layers) needs 001 + 003 — both now met.
+5. Optional, no AC asks it: the bench outlining a canvas selection or hover inside itself.
 
 **The AC7 list, carried forward:** the `Not in a router` heading repeats the row chip; rows are 26px
 under 30px headings; home sorts after folders; in the *Used in* popover a parent's count renders on a
 second line under the path (`MenuDialogItem.endSlot` draws below the label). Meta alignment is
-**done** (s8). New from s9, for Richard to see: a folder rename now writes the label, so renaming a
+**done** (s8). From s9, for Richard to see: a folder rename now writes the label, so renaming a
 legacy `Design` folder sheds its `#` (opt-in migration, never automatic); dragging `#Design` to the
-root lands it at `/Design`; *Move to…* is gone from both row menus with no replacement.
+root lands it at `/Design`; *Move to…* is gone from both row menus with no replacement. **From s10:**
+the caption now leads with the word *Workbench*; the menu row reads *Open on the Workbench*; the
+scope picker has gained a `WORKBENCH` heading it never had.
 
 ## Not driven, and why
 
-🔴 **The root-drop refusal for a cloud row grades nothing.** Its control — root-dropping an ordinary
-browser component — did not move it either, so "the cloud row stayed put" is equally consistent with
-"root drop does not fire under a synthetic drag at all". Row-to-row drops *do* fire (controlled and
-passing), so the difference is `handleTreeMouseUp`'s `PopupLayer.instance.isDragging()` gate, which
-s9 did not touch — it only made the guard beside it unconditional. Either get the control firing or
+🔴 **The root-drop refusal for a cloud row grades nothing** (inherited from s9, still true). Its
+control — root-dropping an ordinary browser component — did not move it either, so "the cloud row
+stayed put" is equally consistent with "root drop does not fire under a synthetic drag at all".
+Row-to-row drops *do* fire, so the difference is `handleTreeMouseUp`'s
+`PopupLayer.instance.isDragging()` gate, which s9 did not touch. Either get the control firing or
 leave the row alone; do not record it as a pass.
+
+🔴 **Nothing in slice 5 was driven, and nothing in it needed to be.** AC6 is a static criterion. Do
+not record the unit suites as a look — see item 2 above.
 
 ## Rulings owed by Richard
 
-None open. R-A…R-I inherited, R-J ruled. Slice 4's decisions above are not rulings; he sees them at
-AC7.
+- **AC7's WORTHY ruling** on TVW-001, once the screenshots exist.
+- 🔴 **Open, surfaced by s10, and NOT TVW-001's to settle:** the Blockly logic bench still calls
+  itself *"the bench"* in its own prose. It now shares no vocabulary with the Workbench and says
+  *"test values"* rather than *"sandbox"*, but whether that surface gets a name of its own is a
+  product question. Ask in plain words if a task needs it; do not rename it in passing.
+
+R-A…R-I inherited, R-J ruled. Slice 4's and slice 5's decisions are not rulings; he sees them at AC7.
 
 ## Read first
 
@@ -155,10 +172,14 @@ log**.
 
 ## Committing, this week especially
 
-🔴 **The working tree carries other sessions' staged work** — s9 found staged deletions under
-`packages/noodl-editor/tests-unit/chr-004/` and `scripts/look-gate/` belonging to a phase-92 peer
-mid-move. **Commit by explicit pathspec only**; a bare `git commit` sweeps them into your commit.
-Add untracked files first — a pathspec commit skips them otherwise.
+🔴 **The working tree carries other sessions' work** — still true at s10, and it moved *during* the
+session: the phase-92 peer's chr-004 / look-gate move landed as `b908859d5` while s10's `test:ci` was
+running, so HEAD changed under the run. **Commit by explicit pathspec only**; a bare `git commit`
+sweeps a peer's files into yours. Add untracked files first — a pathspec commit skips them otherwise.
+Check afterwards that the peer's commit did not carry your staged files (`git show --stat <theirs>`).
+
+🔴 **`git commit -- <paths> -F msg` fails**: everything after `--` is a pathspec, so `-F` is read as a
+filename. Put `-F <file>` *before* the `--`.
 
 ## The rule that will be tempting to break
 
