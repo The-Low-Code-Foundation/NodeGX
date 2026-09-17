@@ -45,6 +45,9 @@ export interface NumberUnitInputProps {
    * is the coercion question FB-019 owns and settled the other way.
    */
   scrub?: ScrubBinding;
+
+  /** CHR-009 §12.4 — an unset per-side field shows what it inherits from all sides, muted. */
+  placeholder?: string;
 }
 
 export function NumberUnitInput({
@@ -66,7 +69,8 @@ export function NumberUnitInput({
   onReset,
   onFocus,
   onBlur,
-  scrub
+  scrub,
+  placeholder
 }: NumberUnitInputProps) {
   const [displayedValue, setDisplayedValue] = useState(value ?? '');
   // ⚠️ A scrub does not go through `commitIfChanged`. That path goes to the view's
@@ -106,6 +110,7 @@ export function NumberUnitInput({
             isNumeric
             className={css['Value']}
             value={displayedValue}
+            placeholder={placeholder}
             isChanged={isChanged}
             isConnected={isConnected}
             isScrubbable={Boolean(scrub)}

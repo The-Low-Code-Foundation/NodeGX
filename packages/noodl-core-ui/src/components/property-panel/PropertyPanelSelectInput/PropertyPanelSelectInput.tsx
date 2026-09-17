@@ -36,7 +36,8 @@ export function PropertyPanelSelectInput({
 
   hasHiddenCaret,
 
-  hasSmallText
+  hasSmallText,
+  placeholder
 }: PropertyPanelSelectInputProps) {
   const [isSelectCollapsed, setIsSelectCollapsed] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,7 @@ export function PropertyPanelSelectInput({
       <PropertyPanelBaseInput
         type="text"
         value={displayValue}
+        placeholder={placeholder}
         hasHiddenCaret
         onClick={() => {
           setIsSelectCollapsed((prev) => !prev);

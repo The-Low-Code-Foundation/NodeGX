@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 import { NumberUnitInput } from '../components/NumberUnitInput';
+import { inheritedNumberText, inheritedSideValue } from '../model/inheritedSide';
 import { transformOriginFocus } from '../transformOriginFocus';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
@@ -156,6 +157,9 @@ export class NumberWithUnits extends TypeView {
         key: `${this.name}#${this.refusals}`,
         label: this.displayName,
         value: this.value === undefined ? '' : String(this.value),
+        placeholder: inheritedNumberText(
+          inheritedSideValue(this.name, this.numberWithUnits, (n) => this.parent.model.getParameter(n))
+        ),
         unit: this.unit,
         units: this.type.units || [],
         isChanged: !this.isDefault,

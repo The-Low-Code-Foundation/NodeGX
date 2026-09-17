@@ -24,6 +24,12 @@
     border-color: var(--theme-color-border-strong);
   }
 
+  /* CHR-009 §12.4 — a placeholder is a hint (an unset side's inherited value), never a value. `fg-muted` read almost as white as a value in dark (196,206,219 vs 255), so the dimmer grey. */
+  &::placeholder {
+    color: var(--theme-color-fg-disabled);
+    opacity: 1;
+  }
+
   &:focus,
   &.is-faux-focused {
     background-color: var(--theme-color-bg-1);

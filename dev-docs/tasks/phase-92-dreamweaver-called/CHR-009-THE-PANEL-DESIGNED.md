@@ -887,3 +887,97 @@ updates the folded count is **not measured**. That is the FB-017 AC2 claim, and 
 - `tsc --noEmit` (editor) **EXIT 0**. `npx jest` (editor, stack down) **475 suites / 7,717 tests, all passed, EXIT 0**
   (§14's 474 / 7,715 plus this suite).
 - `dev.log` (this stack): 0 `SassError|ERROR in`, 0 `synchronously unmount`. `test:ci` not run.
+
+### 15.5 A real edit and the folded count (2026-09-17, s21)
+
+§15.3 left one claim unmeasured: that a real edit made inside `Advanced CSS` updates the folded count (FB-017 AC2).
+Driven with real input only (mouse presses on the footer, a click into `CSS Class`, `insertText`, `select()` plus
+Backspace, no `setParameter`): `verdicts/CHR-009/2026-09-17/footer-count/drive-footer-count.js`, Group `app_root` on
+a scratch copy of story-engine; recents restored byte-identical (`a1ea46f2…`).
+
+| step, footer folded after each | before the fix (`67e1c7639`) | after |
+|---|---|---|
+| baseline | no count, stored `undefined` | no count, stored `''` (left by the first run) |
+| type `drive-count`, fold | `1 set` | `1 set` |
+| clear the field, fold | 🔴 **`1 set`, stored `''`** | no count |
+| type again, fold, then undo with the section folded | `1 set` → `1 set` (stored `''`, so nothing to see) | `1 set` → **no count** |
+
+**Type-then-fold always worked**: folding clears `renderGroups`' hash and recounts from the model. **Clearing did
+not**: a text field stores `''`, not `undefined`, and `countActiveInGroup` counted `!== undefined`, so an emptied
+field read as set. The folded-undo step could not show the problem before the fix (it undid to `''`). After the fix it
+shows the undo reaching the folded count (`modelParameterUndo` clears the hash).
+
+**Fixed:** `isParameterSet(value, default)` in `propertyPanelTiers.ts`. `''` counts only when the port's default
+is non-empty (a Text node's text cleared on purpose). `Ports.countActiveInGroup` passes each view's `port.default`.
+PNGs `footer-count/{before,after}/zoom-count-*.png` agree with the numbers (looked at: the cleared and folded-undo
+footers draw no count after the fix).
+
+Gates: `tests-unit/fb-017/propertyPanelTiers.test.ts` **22/22** (+2 for `isParameterSet`); mutant (`''` always set) →
+**1 red**. `tsc --noEmit` (editor) **EXIT 0**. `npx jest` (editor, stack down) **475 suites / 7,719 tests, all
+passed, EXIT 0**. `dev.log`: 0 `SassError|ERROR in`, 0 `synchronously unmount`. `test:ci` not run.
+
+⚠️ Not changed: `scopeRows.ts:117` uses the same `!== undefined` rule for a tab's "is set". Not driven; it may
+have the same empty-string defect.
+
+### 15.6 Richard's rulings (2026-09-17, s21)
+
+Shown `footer/after/zoom-footer-before-dark.png`, `zoom-footer-dark.png` and `props-group-footer-dark.png`, and asked in
+plain words:
+
+- **Slice 9's look stands** (he did not pick "the look is wrong").
+- **The count keeps `N set`**, not the mockup's bare number: it says what the number counts.
+- **§12.4, the per-side border field: show the all-sides value greyed out** as a hint until the side gets its own
+  value.
+
+## 16. An unset side shows what it inherits, greyed (2026-09-17, s21)
+
+Richard's ruling (§15.6) on §12.4: a per-side border field drew **empty** over a side that renders the all-sides
+value (the runtime reads `b[side] || b.all`). It now shows that value as a greyed placeholder and writes nothing.
+
+### 16.1 Built
+
+| part | what |
+|---|---|
+| `model/inheritedSide.ts` (new, pure) | `allSidesPortOf`: `border{Top,Right,Bottom,Left}{Style,Width,Color}` → `border{…}`, `border{TopLeft,…}Radius` → `borderRadius`, prefixes kept (`thumbBorderLeftColor` → `thumbBorderColor`); `inheritedSideValue(port, own, read)`, hinting only while the side has no value of its own; `inheritedNumberText` |
+| `EnumType` | `placeholder` = the label of the inherited option; `PropertyPanelSelectInput` now passes `placeholder` to its input |
+| `NumberWithUnits` → `NumberUnitInput` | `placeholder` = the inherited number |
+| `ColorType` → `ColorInput` → `ColorFieldView` | `placeholder` = the inherited hex, **and the swatch paints the inherited colour** (it is what renders) |
+| `PropertyPanelBaseInput.module.scss` | `::placeholder` in **`fg-disabled`** |
+
+⚠️ The placeholder colour is on the shared base input, so every placeholder in a panel field (FB-015's shape hints
+too) now draws in `fg-disabled`. The first drive used `fg-muted`: in dark it read `rgb(196,206,219)` beside a value's
+`rgb(255,255,255)`, too close to look greyed at 1× (`inherited/after-fg-muted/`). `fg-disabled` reads
+`rgb(125,138,152)`.
+
+### 16.2 Driven
+
+`verdicts/CHR-009/2026-09-17/inherited/drive-inherited.js`, results `inherited/after/inherited-results.json`. Scratch
+copy, Group `app_root`; setup on the copy: all sides `solid`, `#FF0000`, 3px, radius 8px. Renderer module source
+checked for all four changed files first. Real mouse on the `Left edge` and `Top left corner` segments, a click into
+`Border Width` (Left), `insertText` + Enter, then undo.
+
+| field (Left edge / Top left) | value | placeholder | placeholder colour (dark) |
+|---|---|---|---|
+| Border Style | `''` | `Solid` | `rgb(125,138,152)` |
+| Border Width | `''` | `3` | same |
+| Border Color | `''` | `#FF0000`, swatch `rgb(255,0,0)` | same |
+| Corner Radius (top left) | `''` | `8` | same |
+| Border Width after typing `5` + Enter | `5`, stored `{5, px}` | none | — |
+| after undo | `''`, stored `undefined` | `3` again | same |
+
+Looked at: `inherited/after/border-left-inherited-{dark,light}.png` and `corner-top-left-inherited-dark.png`. The
+three left fields and the radius read grey against the white labels in both themes.
+
+### 16.3 Gates
+
+- New `tests-unit/chr-009/inheritedSide.test.tsx`, **5 tests**. Mutants: the own-value guard removed → **1 red**; the
+  colour field not passing `placeholder` → **1 red**.
+- `tsc --noEmit` (editor) **EXIT 0**. `npm run colors` / `npm run type` **holding**. `npx jest` (editor, stack down)
+  **476 suites / 7,724 tests, all passed, EXIT 0** (§15.5's 475 / 7,719 plus this suite). `dev.log`: 0
+  `SassError|ERROR in`, 0 `synchronously unmount`. `test:ci` not run. (`noodl-core-ui`'s own `tsc` reports 45
+  pre-existing path-alias errors in editor files, none in a file changed here.)
+
+### 16.4 Left
+
+- Not hinted: the colour field's alpha suffix for an inherited `#RRGGBBAA` (the placeholder carries the hex only).
+- For Richard's look: the greyed hints (both themes), and whether `fg-disabled` for every panel placeholder is fine.

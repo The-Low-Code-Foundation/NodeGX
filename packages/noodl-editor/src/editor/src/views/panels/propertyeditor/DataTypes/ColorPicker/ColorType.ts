@@ -5,7 +5,8 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { EventDispatcher } from '../../../../../../../shared/utils/EventDispatcher';
 import { ColorInput } from '../../components/ColorInput';
-import { colorCommitOf } from '../../model/colorField';
+import { colorCommitOf, colorFieldPartsOf } from '../../model/colorField';
+import { inheritedSideValue } from '../../model/inheritedSide';
 import { TypeView } from '../../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../../utils';
 import ColorPicker from './colorpicker';
@@ -105,12 +106,15 @@ export class ColorType extends TypeView {
     if (!this.root) return;
 
     const current = this.getCurrentValue();
+    // CHR-009 §12.4 — an unset side paints and hints the all-sides colour it renders with.
+    const inherited = inheritedSideValue(this.name, current.value, (n) => this.parent.model.getParameter(n));
 
     this.root.render(
       React.createElement(ColorInput, {
         label: this.displayName,
         value: current.value,
-        resolvedColor: ProjectModel.instance.resolveColor(current.value),
+        placeholder: inherited === undefined ? undefined : colorFieldPartsOf(inherited).text || undefined,
+        resolvedColor: ProjectModel.instance.resolveColor(inherited === undefined ? current.value : inherited),
         isChanged: !this.isDefault,
         isConnected: this.isConnected,
         connectionLabel: this.isConnected ? getConnectionSourceLabel(this.parent.model, this.name) : undefined,

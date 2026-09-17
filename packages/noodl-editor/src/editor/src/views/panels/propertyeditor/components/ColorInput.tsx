@@ -29,6 +29,8 @@ export interface ColorInputProps {
   onEnter?: () => void;
   onReset?: () => void;
   dataIdentifier?: string;
+  /** CHR-009 §12.4 — an unset per-side field shows the colour it inherits from all sides, muted. */
+  placeholder?: string;
 }
 
 export interface ColorFieldViewProps {
@@ -39,6 +41,7 @@ export interface ColorFieldViewProps {
   isChanged?: boolean;
   isConnected?: boolean;
   dataIdentifier?: string;
+  placeholder?: string;
   onTextChange: (text: string) => void;
   onTextClick: (anchor: HTMLElement) => void;
   onTextBlur: () => void;
@@ -57,6 +60,7 @@ export function ColorFieldView({
   isChanged,
   isConnected,
   dataIdentifier,
+  placeholder,
   onTextChange,
   onTextClick,
   onTextBlur,
@@ -86,6 +90,7 @@ export function ColorFieldView({
         type="text"
         className={`${css['Value']} ${parts.isHex ? css['is-hex'] : ''}`}
         value={displayedValue}
+        placeholder={placeholder}
         isChanged={isChanged}
         isConnected={isConnected}
         dataIdentifier={dataIdentifier}
@@ -122,7 +127,8 @@ export function ColorInput({
   onFilter,
   onEnter,
   onReset,
-  dataIdentifier
+  dataIdentifier,
+  placeholder
 }: ColorInputProps) {
   const shownText = colorFieldPartsOf(value).text;
   const [displayedValue, setDisplayedValue] = useState(shownText);
@@ -153,6 +159,7 @@ export function ColorInput({
         isChanged={isChanged}
         isConnected={isConnected}
         dataIdentifier={dataIdentifier}
+        placeholder={placeholder}
         onTextChange={(text) => {
           setDisplayedValue(text);
           onFilter && onFilter(text);
