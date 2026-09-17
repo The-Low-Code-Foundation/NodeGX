@@ -324,12 +324,21 @@
   letter-spacing: 0;
 }
 
-/* The nested groups inside `Advanced CSS`. Indented so the folded headings read as
-   belonging to the section rather than as siblings of the basics above it, and with
-   the last child's divider suppressed — the super-group draws its own. */
+/* The nested groups inside `Advanced CSS`. The last child's divider is suppressed — the
+   super-group draws its own.
+   CHR-009 (ruled 2026-09-17, s29): the 10px padding + 1px rule that used to indent this
+   block are GONE. They moved every row inside `Advanced CSS` 11px right of every other row
+   in the panel — 8 of the Group's sections, 28 of its 71 labels at x=81 while the rest sat
+   at x=70 — and narrowed those fields by the same 11px. Richard: align them, the nesting is
+   shown by the heading alone. AC2's own census could not see this: it reads the rows VISIBLE
+   near the top of the panel, and these sections are collapsed by default, so nine slices
+   graded a two-edge panel as one. What the indent used to carry is a real thing (a folded
+   `Border Color` here restyles a sub-element and shares the root's port name); that is now
+   carried by the sub-group's own NAMED heading and nothing else. Richard was shown the
+   alternative — rows aligned, 11px on the nested heading only, so `SCROLL` still read as
+   inside `ADVANCED CSS` — and ruled **fully flat**: do not re-indent either one. */
 .property-group-children {
-  padding-left: 10px;
-  border-left: 1px solid var(--theme-color-border-default);
+  padding-left: 0;
 }
 
 .property-group-children .property-group:last-child {

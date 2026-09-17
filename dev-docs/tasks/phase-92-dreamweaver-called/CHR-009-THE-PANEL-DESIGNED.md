@@ -1494,3 +1494,26 @@ The post-rename census read **0 cut labels on every node, both widths**. The PNG
 ([[a-second-copy-of-a-palette-drifts-silently]]), so the number is now `--property-label-column` on `:root` in
 `propertyeditor.css`, read everywhere as `var(--property-label-column, 118px)` — the fallback keeps a core-ui
 surface rendered outside the editor on the same geometry.
+
+### 25.5 🔴 The panel had TWO label edges for nine slices, and AC2 could not see either one
+
+Driving the 118px column turned up something bigger than the 2px. Over **every** label in the panel
+(not only the ones on screen), the Group read **two** left edges: **70 × 43** and **81 × 28**.
+
+- Cause: the eight sections folded inside **`Advanced CSS`** (Scroll, Placement, File Drop, Dimension
+  Constraints, Pointer Events, Scroll To Element, Scroll To Index, Advanced HTML) are nested groups, and
+  `.property-group-children` carried `padding-left: 10px` + a `1px` left rule = **11px**. Their labels sat
+  at 81 and their fields were 11px narrower than every other row's.
+- 🔴 **Why nine slices of "one label x" were wrong:** `drive-set.js`'s `MEASURE` counts only labels
+  **visible in the viewport**, and these sections are **collapsed by default**, so they were never in the
+  population. It read `lefts {"70": 12}` — twelve of seventy-one — and every slice reported one edge.
+  The census that opens every section (`CUTS`) did include them but only looks for overflow, not position.
+  **A population filtered to what is on screen cannot grade a property of the whole panel.**
+- Ruled by Richard (shown both, 2026-09-17): **fully flat.** The indent and its rule are gone; he was also
+  shown a variant with the 11px moved onto the nested heading (rows aligned, `SCROLL` still reading as
+  inside `ADVANCED CSS`) and ruled against it. The nesting is carried by the sub-group's named heading.
+- Measured after, docked 312, all sections open: **71 labels, one left edge (70)**, 19 section headings on
+  one edge (86), **68 rows all ending at 350**, **0 cut labels** (`measureText`), `--property-label-column`
+  **118px**. PNGs `labels/flat-*.png`; the before is `labels/nested-*.png`, the rejected variant
+  `labels/headingindent-*.png`.
+- ⇒ AC2's "every label's left edge is one value" is met **over the whole panel** for the first time.
