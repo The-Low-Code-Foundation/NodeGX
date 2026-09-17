@@ -1,13 +1,20 @@
-# GAM-023 — A deploy refuses a broken wire and keeps every good one
+# GAM-023 — A deploy publishes every wire and names the broken ones
 
-**Status: ⬜ not started. ✅ R20 ruled 2026-09-16 (s17): publish all, warn (option c below).** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
+*(Filename kept for links. Titled "refuses a broken wire" until R20 ruled (c).)*
 
-The shipped `nodegx deploy` never runs its connection filter. It kept all 139 of TPL-005's wires only because it checks
-none of them. A wire into a port that does not exist ships just as happily, with `ok: true`.
+**Status: 🟢 built s18 (2026-09-17), uncommitted at write, commit is Richard's. ✅ R20 ruled 2026-09-16 (s17): publish all, warn.** **Source:** [P78 D48](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md), with the [D44 correction](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005's deploy control, 2026-09-11 · **Side:** product (`nodegx deploy`, `noodl-preview`)
+
+The shipped `nodegx deploy` never ran its connection filter. ⚠️ **Corrected s18:** its validation gate already refused a
+wire into a port a built-in's *declaration* lacks, and a wire to a missing node. What shipped silently, with `ok: true`, was
+every wire into a port that only exists once something runs (a component's inputs and outputs, `Set Variable`, `Function`,
+a `For Each` item port, a kit port): 6 of 10 sabotage kinds (§8 s18).
 
 ## 1. The person sentence
 
-**`nodegx deploy` publishes every wire that works and refuses to publish one that cannot, and it names the one it refused.**
+**`nodegx deploy` publishes every wire, and names each one that cannot work, so a person can find it.** A working wire is
+never named, and a wire it could not check (a kit node the deploy does not load) is counted as unchecked, not called broken.
+
+*(Before R20: "publishes every wire that works and refuses to publish one that cannot".)*
 
 ## 2. What was measured
 
@@ -80,14 +87,16 @@ headless consumer, the MCP render path included.
 
 ## 6. Acceptance criteria
 
+Reworded to R20 (c) in s18. The graded consequence is **the broken wire is named and still published**.
+
 | AC | Clause |
 |---|---|
-| AC1 | **RED at HEAD, recorded in §8:** `nodegx deploy` on a copy of `templates/pixel-game` with one wire sabotaged to `thisPortDoesNotExist` exits 0, and the sabotaged wire is present in the deployed bundle. Beside it, the same copy through `deploy-from-disk --sabotage` drops that wire, which shows the filter can fire. |
-| AC2 | With ports moved and the filter on: all four shipped game and landing templates deploy with **0** drops of good wires (TPL-005 139→139, TPL-006 84→84). The sabotaged wire is dropped, or refused per the ruling, and named in the outcome. |
-| AC3 | 🔴 **Two reverted arms:** filter on without the port pass, and TPL-005 loses the D44 family (the count is recorded, not assumed). Ports without the filter, and the sabotage ships again. |
-| AC4 | The census across every shipped template records, per template: wires authored, deployed, and dropped with names. Read every dropped wire before landing. |
-| AC5 | **The person's door:** a browser drive of the deployed TPL-005 plays (player, coins and walls drawn, room readout `1 / 5`), and the sabotaged deploy's output names the refused wire in the form a person reads. |
-| AC6 | `deploy-from-disk` and `nodegx deploy` report the same drop set on the same project, which shows there is one port pass. |
+| AC1 | **RED at HEAD, recorded in §8:** `nodegx deploy` on a copy of `templates/pixel-game` with a wire sabotaged into a port that does not exist exits 0 and says nothing, with the wire in the deployed bundle. Beside it, `deploy-from-disk` drops the wire, which shows the filter can fire. ✅ s18, **reshaped:** a built-in-declaration sabotage is REFUSED by the validation gate at HEAD, so the RED is the 6 kinds the gate cannot judge |
+| AC2 | With ports moved and health read: all shipped templates deploy with **0** good wires named broken, and every good wire still published. The sabotaged wire is **named** in the outcome and still published. ✅ s18 |
+| AC3 | 🔴 **Reverted arms:** no import / no `editorImportComplete` / no adapters, and good wires are named broken; filter left on, and the sabotage stops shipping; the naming removed from `warnings`, and the person reads nothing. The counts are recorded, not assumed. ✅ s18, 7 mutants |
+| AC4 | The census across every shipped template records, per template: wires broken (named) and unchecked. Read every named wire before landing. ✅ s18 |
+| AC5 | **The person's door:** the sabotaged deploy's output names the wire in the form a person reads, and a clean deploy publishes the same artefact as before. ✅ s18 (terminal read; the export is **byte-identical** to HEAD on all 7 templates, so the page plays as P78's drives recorded, and no browser drive was added) |
+| AC6 | `deploy-from-disk` and `nodegx deploy` report the same set on the same project, which shows there is one port pass. ✅ s18, 7/7 |
 
 ## 7. Traps
 
@@ -100,4 +109,76 @@ headless consumer, the MCP render path included.
 
 ## 8. Record
 
-Not started.
+### Session 18 (2026-09-17, over `67e1c7639`; HEAD at write `a2f5ce210`, P92 commits only)
+
+**AC1 at HEAD, a matrix of 10 sabotage kinds on copies of pixel-game** (scratch `…/5cf6c7fd…/scratchpad/gam023/matrix.js`):
+
+| kind | shipped `nodegx-deploy` | `deploy-from-disk` (filter on) |
+|---|---|---|
+| A target port missing on a built-in (`Text`) | **refused**: `Text has no input named "thisPortDoesNotExist"` | dropped |
+| B source port missing on a built-in (`Group`) | **refused** | dropped |
+| I wire from a node that does not exist | **refused**: `references a missing node` | dropped |
+| J source port missing on `Counter` | **refused** | dropped |
+| C a component instance's missing input | `ok: true`, silent, wire in bundle | dropped |
+| D a component instance's missing output | `ok: true`, silent, wire in bundle | dropped |
+| E `Set Variable` missing input | `ok: true`, silent, wire in bundle | dropped |
+| F `Function` missing input | `ok: true`, silent, wire in bundle | dropped |
+| G kit node missing output | `ok: true`, silent, wire in bundle | dropped |
+| H `For Each` item port missing | `ok: true`, silent, wire in bundle | dropped |
+
+🔴 **§2 and the header were wrong about the population.** The deploy's validation gate (`loader.ts` `readProjectForDeploy`, SUB-006)
+already refused the built-in-declaration kind this task's AC1 named. The live defect was the 6 kinds only a running graph can judge.
+
+**Built** (`noodl-preview/src/wireHealth.ts`, new; `deploy.ts`; `scripts/devtools/deploy-from-disk.entry.ts` now imports it):
+1. **Editor adapters** (`RouterNavigate`, `PageInputs`, `CloudFunction2`, `NamedPorts`), driven with `projectLoaded` the way
+   `cloudDeployEnvironment.ts` drives them. **Found by the census, not by the task file:** members-area's 25 remaining phantoms were
+   `pm-` and `CloudFunction2` `in-`/`out-` ports, which come from `NodeTypeAdapters`, not from the runtime.
+2. **The runtime pass, as the viewer does it:** `graphModel.importEditorData(export)` then `emit('editorImportComplete')` on a probe
+   runtime with a patched connection. It replaces the devtool's one-fake-node-per-type emit (GAM-024's fix).
+3. **Health** on the registered project; a broken wire with an end on a missing type is **unchecked**, not broken. Then unregistered,
+   which clears every warning.
+4. 🔴 **On a second model read from the same files.** Run on the exported model, the pass changed what every site ships (component
+   input types `*` → `string` with `default: ""`, Function nodes gaining `runOnChange-in-*`, pixel-game's 2 bundles → 1). That may be
+   what the editor ships, but R20 did not rule on it. With the copy, **all 7 templates' deploys are byte-identical to HEAD's engine**.
+5. `readWireHealth` **refuses** a project that is not `_isReadOnly` (see the trap below).
+
+**What a person reads** (`nodegx deploy`, story-engine copy with a `titel` typo, exit 0):
+`! /Pages/Read: the wire rdFind.out-title → rdPassage.titel cannot work (Target port doesn't exist.). It was published as it is.`
+
+**Census, every template** (devtool HEAD dropped → fix devtool dropped; fix CLI broken/unchecked; same set CLI vs devtool):
+
+| template | HEAD devtool dropped | fix: broken | fix: unchecked | same set |
+|---|---|---|---|---|
+| landing-pages | 11 | 0 | 0 | ✅ |
+| members-area | 33 | 0 | 0 | ✅ |
+| pixel-game | 4 | 0 | 4 (`keyboard-shortcuts.KeyboardShortcut`) | ✅ |
+| rocket-school (peer's, dirty tree) | 76 | **1** | 75 (6 `game-kit` types + keyboard) | ✅ |
+| story-engine | 3 | 0 | 0 | ✅ |
+| todo-list | 24 | 0 | 0 | ✅ |
+| todo-list-demo | 18 | 0 | 0 | ✅ |
+
+The one named wire: `/Game/Keyboard: kbPick.value → kbOut.picked`, *"Target port of type string cannot be connected to a source port
+of type enum"*. An Options `value` into a Component Outputs port typed `string`: the editor's own type rule, not a missing port. Whether
+that rule is too strict is not this task's to rule. 🔒 For Rocket School's peer / Richard.
+
+**Spec** `noodl-preview/tests/gam-023-a-deploy-publishes-every-wire-and-names-the-broken-ones.test.ts`, grading `dist/nodegx-deploy.cjs`
+(refuses a stale bundle): 6/6. **Mutants** (source edited, bundle rebuilt, spec run, source restored from a `cp` snapshot, sha-checked):
+
+| mutant | red |
+|---|---|
+| M1 adapters not run | 1: members-area |
+| M2 no `editorImportComplete` | 3: sabotage, story-engine, members-area |
+| M3 no import | 4: all but "deployed" and export shape |
+| M4b project left registered | 1: export shape (the copy leaks into type resolution). ⚠️ The first M4 (skip the whole restore) failed all 6 on unparseable stdout, a save-skipped line after the report: graded nothing, replaced |
+| M5 kit ends not separated | 1: pixel-game |
+| M6 not in `warnings` | 2: sabotage, pixel-game |
+| M7 health on the exported model | 1: export shape |
+
+**Gates:** `noodl-preview` suite 53/53 (6 suites), `tsc --noEmit` 0 (both files listed); `nodegx-export` hls014/hls015/exp017 80/80.
+Deploy time about 1.2 s → 2.3 s per template. **Not run:** editor `test:ci` / `test:main` (no editor file touched).
+
+🔴 **Trap, hit and cleaned:** making the project `ProjectModel.instance` armed the editor autosave. The devtool, which never set
+`_isReadOnly`, wrote a legacy `project.json` (0.1–2 MB) into **all 7 `templates/` folders** during one census (untracked, born
+07:49–07:50, deleted; nothing else written, checked with `find -newer`). Now refused in `readWireHealth`; the devtool sets the flag.
+
+**Left:** kit wires are unchecked, not checked (GAM-024 AC5, R21); the installed app's engine still carries the old deploy (a release).
