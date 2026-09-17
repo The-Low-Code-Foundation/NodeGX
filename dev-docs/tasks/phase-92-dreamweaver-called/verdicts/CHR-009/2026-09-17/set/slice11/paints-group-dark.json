@@ -1,0 +1,48 @@
+{
+ "theme": "dark",
+ "fills": {
+  "rgb(46, 44, 54) = bg-2": {
+   "button panel-head-row-field": 2,
+   "div SearchInput.Root": 1,
+   "div SizeModeInput.Segment": 2,
+   "div NumberUnitInput.Field": 4,
+   "input PropertyPanelBaseInput.Root PropertyPanelBaseInput.has-hidden-caret": 3,
+   "div AlignToolsInput.Segment": 3
+  },
+  "rgb(35, 33, 41) = bg-1|on-secondary|focus-ring-offset": {
+   "div property-filter": 1
+  },
+  "rgb(77, 163, 255) = primary|focus-ring|accent": {
+   "div PropertyPanelCheckbox.FauxCheckbox PropertyPanelCheckbox.is-checked": 1
+  },
+  "rgb(56, 54, 66) = bg-3": {
+   "button SizeModeInput.Option SizeModeInput.is-pressed": 2
+  },
+  "rgb(73, 70, 86) = border-strong|border-highlight|border-hover": {
+   "div PropertyPanelCheckbox.FauxCheckbox": 1
+  }
+ },
+ "radii": {
+  "6px --radius-md": {
+   "button panel-head-row-field": 2,
+   "input SearchInput.SearchInput property-filter-input": 1,
+   "div SizeModeInput.Segment": 2,
+   "div NumberUnitInput.Field": 4,
+   "input PropertyPanelBaseInput.Root PropertyPanelBaseInput.is-numeric": 4,
+   "input PropertyPanelBaseInput.Root PropertyPanelBaseInput.has-hidden-caret": 7,
+   "button NumberUnitInput.Fixed": 2,
+   "div AlignToolsInput.Segment": 3
+  },
+  "9999px --radius-full": {
+   "div PropertyPanelCheckbox.FauxCheckbox PropertyPanelCheckbox.is-checked": 1,
+   "div PropertyPanelCheckbox.FauxCheckbox": 1
+  },
+  "4px --radius-default": {
+   "button SizeModeInput.Option SizeModeInput.is-pressed": 2,
+   "button SizeModeInput.Option": 2,
+   "button AlignToolsInput.Option AlignToolsInput.is-rotate2": 2,
+   "button AlignToolsInput.Option AlignToolsInput.is-rotate": 4,
+   "button AlignToolsInput.Option": 3
+  }
+ }
+}

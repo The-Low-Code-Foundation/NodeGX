@@ -1,0 +1,152 @@
+{
+  "button-popout": {
+    "type": "net.noodl.controls.button",
+    "selected": "net.noodl.controls.button / Button",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 1007,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 25,
+        "11px": 7
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 13,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 3,
+        "rgb(73, 70, 86)": 1,
+        "rgb(255, 255, 255)": 1
+      },
+      "radii": {
+        "6px": 16,
+        "4px": 4,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 12
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 7,
+        "30": 1
+      }
+    },
+    "docked-light": {
+      "elements": 1007,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 25,
+        "11px": 7
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 13,
+        "rgb(255, 255, 255)": 2,
+        "rgb(21, 112, 239)": 3,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 16,
+        "4px": 4,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 12
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 7,
+        "30": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 54,
+      "cuts": [
+        {
+          "kind": "value",
+          "row": "Box Sizing",
+          "text": "Include padding and border",
+          "box": 154,
+          "content": 193
+        }
+      ]
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 1007,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 26,
+        "11px": 8
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 3,
+        "rgb(73, 70, 86)": 1,
+        "rgb(255, 255, 255)": 1
+      },
+      "radii": {
+        "6px": 17,
+        "4px": 5,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 13
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 8,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 1007,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 26,
+        "11px": 8
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 2,
+        "rgb(21, 112, 239)": 3,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 17,
+        "4px": 5,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 13
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 8,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 54,
+      "cuts": [
+        {
+          "kind": "value",
+          "row": "Box Sizing",
+          "text": "Include padding and border",
+          "box": 172,
+          "content": 193
+        }
+      ]
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  }
+}

@@ -1102,3 +1102,80 @@ beside them. For Richard's look.
 - AC2 over the set: **fills ≤3 and radii ≤2 unmet on every node with inputs** (the 4px radius and a 4th–6th fill); off-26
   heights (filter 30 by s13 design, Text 33, Button 24). Name which radius/fill each is before touching.
 - §18.2 items 2–4: `Icon Source` square; the Function/States list-heading buttons; selects not stretching at wide.
+
+## 19. The head rows' edge, AC2's fills attributed, and slice 11: the icon row and the popout button (2026-09-17, s24)
+
+### 19.1 Rulings (Richard, s24, asked in plain words with same-crop PNGs)
+
+1. **Slice 10 approved:** `Variant · Preset · Size · State` read as one column.
+2. **Edge: "All four dimmer".** Measured before touching (dark): `Variant`/`State` = `bg-2` fill + `border-default`
+   (`rgb(51,50,61)` on `rgb(46,44,54)`); `Preset` = `bg-3` + `border-control` (`rgb(125,138,152)`). So the match is the
+   FILL as well as the edge. `Preset` now paints `.panel-head-row-field`'s pair and hover (`border-strong`); `Size` paints
+   `SizeModeInput`'s `.Segment` track (`bg-2`, `border-default`, selected `bg-3`, colour-only hover, no shadow). Driven:
+   the four fields read identical computed edge and fill; `md` selected reads `bg-3`; undo clears. `fbc88257b`.
+3. **Slice 11 approved** ("looks good").
+4. **AC2's fill/radius count: the switch's own track (`primary` on, `border-strong` off, pill) and the segment option's
+   4px corner nested inside a 6px track are ALLOWED** ("leave both as they are"). With that, AC2 is met on the Group.
+
+### 19.2 AC2's fills and radii, attributed (not counted)
+
+`set/paints.js` (readings `slice11/paints-{group,button-before,button-after}-dark.json`): every visible element of the panel, grouped by
+computed background / top-left radius, the colour matched back to its `--theme-color-*` names.
+
+| paint | Group | Button (before slice 11) | owner |
+|---|---|---|---|
+| `bg-2` | ✓ | ✓ | every field: head rows, filter, number+unit, selects, segment tracks, colour field |
+| `bg-1` | ✓ | ✓ | `.property-filter` — **sticky** (`top:0; z-index:2`), so it must be opaque; it is the panel's own tone |
+| `bg-3` | ✓ | ✓ | the selected segment option; **Button also:** `Icon Source` square and `PropertyPanelButton` (`Edit`) |
+| `primary` / `border-strong` | ✓ | ✓ | the switch track, on / off |
+| `fg-highlight` (white) | — | ✓ | the colour swatch painting the STORED value (refused as a palette fill, like FINDING 4) |
+| radius 6 (`md`) | ✓ | ✓ | every field and track |
+| radius 4 (`default`) | ✓ | ✓ | segment options inside a 6px track (2px padding) |
+| radius 9999 | ✓ | ✓ | the switch |
+| radius 2 (`sm`) | — | ✓ | the colour swatch (kept by ruling, s19) |
+
+So the Group was already at spec (§2's "3 fills: panel, field, selected; radii: 6 and full") apart from what §19.1.4 rules.
+The only controls OUTSIDE the field vocabulary were the Button's two `bg-3` blocks ⇒ slice 11.
+
+### 19.3 Slice 11 built — `7bb79dc53`
+
+| control | before | now |
+|---|---|---|
+| `Icon Source` (`IconInput`) | 33×32 inline-styled `bg-3` square, borderless, glyph 20px in a hard-coded **`color: white`** (invisible on the light fill) | 26px field filling the control column: `bg-2`, `border-default`, radius-md, `border-strong` hover; 14px glyph in `fg-default` + the icon's NAME (`icon-star` → `star`, a PUA codepoint → `U+F015`, a sprite → its symbol id); nothing chosen → `None` in `fg-disabled` (§16's greyed tone) |
+| `PropertyPanelButton` (popout `Edit`; also AI settings, curve, logic-builder) | borderless 27px `bg-3` block, hover went DARKER (`bg-1`) | the same 26px field; `is-primary` keeps its primary fill with a matching edge |
+
+### 19.4 Driven — `set/drive-icon.js` → `slice11/icon-input-results.json`
+
+Real mouse on the set's Button (dark; rows both themes): `Turn on` in the Icon gate line ⇒ `useIcon: true`, field `None`
+at 26px; press the field ⇒ picker opens at x 360–830, field at 194–350 ⇒ **does not cover it**; closed. Named state:
+`{class:'lucide', code:'icon-star', codeAsClass:true}` set on the model + reselect ⇒ field `star`, glyph slot present.
+Press `Edit` ⇒ popout opens (360–660), clear of the button (194–350); closed. Undo + clear ⇒ `useIcon: null`,
+`iconIconSource: null`, field `None`. Re-attributed Button panel: **`bg-3` gone** (fills 6 → 5: `bg-2`, `bg-1` filter,
+switch ×2, swatch value).
+
+🔴 **The scratch copy has no icon set installed**: the picker is empty ("This project has no icon sets installed") so a
+pick could not be driven, and the lucide glyph has no stylesheet ⇒ `star` draws after an EMPTY 14px slot. The old square
+was equally blank. A project with the set installed is the drive that shows the glyph.
+🔴 **Neither Escape nor `.popup-layer-blocker.click()` closes the icon picker** — a real CDP press on the blocker does.
+The first run left the picker open and the next `press` read "not reachable" (it was protecting the drive, not failing).
+
+### 19.5 Gates
+
+- `border-sweep/style-section-control-borders.test.ts`: the two ≥3:1 rows for `.VariantSelector-trigger`/`.SizePicker-group`
+  reddened **6** (intended). They left `CONTROLS` BY RULING; a new row grades that Preset/Size paint the head row's pair
+  (fill, edge, hover; track, edge, selected against `SizeModeInput`) and that the head row is still `border-default`.
+  **29/29.** Mutant: Preset's `border-control` restored ⇒ **2 red** (both themes).
+- `chr-009/iconField.test.tsx` (new, 9) + `fb-018/bindingChipRows` (class name updated). Mutants: `icon-` prefix kept ⇒ 1
+  red; inline `height: 32` ⇒ 1 red.
+- `tsc --noEmit` (editor) **EXIT 0**. `npm run colors` / `npm run type` holding.
+- Plain `npx jest` (editor, stack down): **478 / 7,742** after the edge change, **479 / 7,751** after slice 11, all green
+  (s23's one red, the P88 peer's `gam-020`, passes now). `test:ci` **not run**.
+- `.logs/dev.log`: 0 `SassError|ERROR in` on both stacks. Recents restored byte-identical (`a1ea46f2`) after both.
+
+### 19.6 Left
+
+- Function `Script Inputs/Outputs` heading buttons (bordered `</>` `+`) vs States (borderless) — §18.2.3.
+- Selects do not stretch at wide while number fields do (`Box Sizing` cut at 736) — §18.2.4.
+- Off-26: Text's 33px (the textarea, s21's comment-field overshoot family). The filter's 30 is s13 design.
+- Still-small from s21 and the §14.3 opacity `''` comparison (handoff).
+- AC5: CHR-004 + `test:ci`. AC1: Richard's WORTHY on the Group pair.
