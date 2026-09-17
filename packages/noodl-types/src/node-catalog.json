@@ -11001,7 +11001,7 @@
         },
         {
           "name": "backgroundGradient",
-          "displayName": "Background Gradient",
+          "displayName": "Gradient",
           "group": "Style",
           "plug": "input",
           "type": {
@@ -12349,7 +12349,7 @@
         },
         {
           "name": "scrollToElement.do",
-          "displayName": "Scroll To Element - Do",
+          "displayName": "Scroll To Element",
           "group": "Scroll To Element",
           "plug": "input",
           "type": {
@@ -12362,7 +12362,7 @@
         },
         {
           "name": "scrollToElement.duration",
-          "displayName": "Scroll To Element - Duration",
+          "displayName": "Duration",
           "group": "Scroll To Element",
           "plug": "input",
           "type": {
@@ -12375,7 +12375,7 @@
         },
         {
           "name": "scrollToElement.element",
-          "displayName": "Scroll To Element - Element",
+          "displayName": "Element",
           "group": "Scroll To Element",
           "plug": "input",
           "type": {
@@ -12387,7 +12387,7 @@
         },
         {
           "name": "scrollToIndex.do",
-          "displayName": "Scroll To Index - Do",
+          "displayName": "Scroll To Index",
           "group": "Scroll To Index",
           "plug": "input",
           "type": {
@@ -12400,7 +12400,7 @@
         },
         {
           "name": "scrollToIndex.duration",
-          "displayName": "Scroll To Index - Duration",
+          "displayName": "Duration",
           "group": "Scroll To Index",
           "plug": "input",
           "type": {
@@ -12413,7 +12413,7 @@
         },
         {
           "name": "scrollToIndex.index",
-          "displayName": "Scroll To Index - Index",
+          "displayName": "Index",
           "group": "Scroll To Index",
           "plug": "input",
           "type": {

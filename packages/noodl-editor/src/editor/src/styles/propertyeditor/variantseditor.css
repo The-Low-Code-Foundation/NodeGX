@@ -265,7 +265,7 @@
    CHR-009 §2 — `Variant` and `State` as rows of the panel's label column.
 
    The same geometry as a property row (`PropertyPanelInput.module.scss`): the
-   16px groups gutter, a 116px label in `fg-default-shy` at `-sm`, an 8px gap,
+   16px groups gutter, a label in `--property-label-column` in `fg-default-shy` at `-sm`, an 8px gap,
    and a 26px field on `bg-2` with the `border-default` edge the number+unit
    field uses. They were two 50px bars ("Add style variant ＋", "Neutral state ⇕")
    each with its own divider.
@@ -277,7 +277,7 @@
 }
 
 .panel-head-row-label {
-  flex: 0 0 116px;
+  flex: 0 0 var(--property-label-column, 118px);
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default-shy);

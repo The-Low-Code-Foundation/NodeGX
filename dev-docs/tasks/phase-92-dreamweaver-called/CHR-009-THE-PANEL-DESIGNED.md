@@ -1426,3 +1426,71 @@ Group `chr009-set-group`, String `chr009-s27-src` `savedValue` → `paddingLeft`
   if not "leave it": drop the link glyph (gains ~14px, still `Str…`), or show `🔗` alone docked.
 - AC1 (WORTHY on the Group pair) and R6 final. AC5: CHR-004 + `test:ci`.
 
+
+## 24. The set re-shot after slice 15, and the AC1 pair (2026-09-17, s29)
+
+- `set/drive-set.js --out=set/final` on the dev build (scratch profile via `NOODL_USER_DATA_DIR`, the s28 `story-engine` copy),
+  **EXIT 0**, `dev.out` 0 `ERROR in`. Every node type, docked 312 and wide 736, dark = light:
+  **2 font sizes (11, 12)**, **one label left edge (70)**, control heights 26 (+30 filter; Button's one 24 as before).
+- Cuts with every section open: Group docked **6/69** = 4 labels (`Background Gradient`, `Scroll To Element - Duration`,
+  `Scroll To Index - Index`, `… - Duration`) + the `Box Sizing` value + the s28 wired padding edge (`String · Value`, the `S…`
+  already seen); Group wide 4/69 (the same 4 labels); Button docked 1/54 (`Box Sizing` value), wide 0; the other 6 types **0**.
+  ⇒ **R6 census: 4 of 69 Group labels (5.8%) cut at either width; 0 labels cut on the other 7 types.**
+- By eye (all 32 PNGs looked at): no region broken; nothing new beside §18.2's already-ruled items.
+- AC1 pair: CHR-001's `editor-group-panel-top-*.png` (0.2.4, full window at 2×) cropped to the panel and scaled to 328, beside
+  `final/props-group-docked-top-*.png` cropped below the title strip, both themes, composed with `sharp` in the scratchpad.
+  Opened in Preview for Richard with a tile of the other five types.
+
+## 25. AC1 is met, and R6 is final at 118px (2026-09-17, s29)
+
+### 25.1 The ruling
+
+- **AC1: Richard ruled the Group pair WORTHY** (0.2.4 beside the 15-slice build, same crop, both themes,
+  `labels/`-adjacent composites in the session scratchpad). That is the close CHR-009 was written for.
+- **R6 final: keep the fixed label column, shorten the labels that do not fit** — then, once two sub-pixel
+  cases surfaced (§25.3), **give the column 2px: 118px**.
+
+### 25.2 The four long labels were repeating their own group heading
+
+The panel draws a section header per port `group`, so `SCROLL TO INDEX › Scroll To Index - Duration` said it twice.
+
+| port (id unchanged) | was | now |
+|---|---|---|
+| `backgroundGradient` | `Background Gradient` | `Gradient` |
+| `scrollToElement.duration` | `Scroll To Element - Duration` | `Duration` |
+| `scrollToIndex.index` | `Scroll To Index - Index` | `Index` |
+| `scrollToIndex.duration` | `Scroll To Index - Duration` | `Duration` |
+| `scrollToElement.do` | `Scroll To Element - Do` | `Scroll To Element` |
+| `scrollToIndex.do` | `Scroll To Index - Do` | `Scroll To Index` |
+
+- 🔴 **The two SIGNALS keep the full action on purpose.** `NodeGraphEditorNodePainter.ts:542` draws a connected
+  port's `displayName` on the canvas with **no group heading beside it**, so two ports both reading `Do` would be
+  indistinguishable there. The value ports take the bare word, which is this repo's own convention
+  (`LIMIT › Use limit`, `REALTIME › Subscribe To Changes`).
+- **Only display text changed. Every port `name` is untouched**, so no project migrates
+  ([[a-rename-of-a-built-in-port-ships-no-migration]] is about ids, not labels).
+- The generated catalog is gated by CI: `catalog:generate` + `catalog:merge` moved **exactly 7 lines each** in
+  `node-catalog.json` / `node-catalog-enriched.json` — no peer's work swept in — and `catalog:check`,
+  `catalog:merge:check`, `catalog:groups:check` are all green. `tests-unit/fb-021`'s fixture label followed.
+
+### 25.3 🔴 The census could not see a sub-pixel cut — `scrollWidth` is an integer
+
+The post-rename census read **0 cut labels on every node, both widths**. The PNG then showed `Background Positi…`.
+
+- Measured live: that label's `clientWidth` **116** and `scrollWidth` **116** — equal, so
+  `scrollWidth > clientWidth + 1` is false — while the text is **116.2px** and Chromium ellipsises it.
+  A `Range` over the contents is clamped to the box and reads 116 too.
+- The honest instrument is `canvas.measureText` with the label's own computed font. Over the Group's 69 labels it
+  named **two**: `Background Position` 116.2 / 116, `Pointer Events Mode` 116.6 / 116. **Both were cut before this
+  session too** — s23's `4 / 59` and s29's `4 / 69` under-reported by two for the whole task.
+- ⇒ **Any "does it fit" gate built on `scrollWidth`, `clientWidth` or a `Range` cannot see an overflow under 1px.**
+  Measure the text, not the box that clipped it.
+
+### 25.4 The width now has one home
+
+`116px` was written in **five** stylesheets, three of which carried a comment saying it must match the others
+(`PropertyPanelInput.module.scss`, `propertyeditor.css`, `variantseditor.css`, `VariantSelector.module.scss`,
+`SizePicker.module.scss`). A 2px ruling is exactly the change a copy sleeps through
+([[a-second-copy-of-a-palette-drifts-silently]]), so the number is now `--property-label-column` on `:root` in
+`propertyeditor.css`, read everywhere as `var(--property-label-column, 118px)` — the fallback keeps a core-ui
+surface rendered outside the editor on the same geometry.

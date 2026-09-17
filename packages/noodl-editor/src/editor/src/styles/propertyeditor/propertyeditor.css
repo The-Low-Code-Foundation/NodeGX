@@ -101,16 +101,26 @@
   gap: 0;
 }
 
+/* CHR-009 R6 (RULED 2026-09-17, s29): the label column is 118px, and this is the ONE place the
+   width is written. It was 116px copied into five stylesheets that each said "must match"; the
+   ruling moved it by 2px, which is exactly the kind of change a copy sleeps through
+   (`--sp` palettes drifted the same way). Everything below reads it with a 118px fallback, so a
+   surface rendered outside the editor keeps the same geometry.
+   Why 118: at 116px, `Background Position` (116.2px) and `Pointer Events Mode` (116.6px) each lost
+   a character to the ellipsis — a sub-pixel overflow that `scrollWidth`, being an integer, reads as
+   a fit. Measured with `measureText` on the row's own computed font. */
+:root {
+  --property-label-column: 118px;
+}
+
 /* `.property-label-col` is for the rows whose label is wrapped in a <Tooltip>,
    which inserts two divs between the row and the label — the column has to be
    the flex item, so it cannot always be the label itself. */
-/* CHR-009 R6 (a TRIAL): one fixed 116px label column, ellipsised with a tooltip — must match
-   `PropertyPanelInput.module.scss`'s `.sidebar-property-editor .Label`. */
 .property-row > .property-label,
 .property-row > .property-label-col {
   position: static;
   flex: 0 0 auto;
-  width: 116px;
+  width: var(--property-label-column, 118px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

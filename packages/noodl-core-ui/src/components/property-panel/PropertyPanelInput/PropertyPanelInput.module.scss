@@ -89,11 +89,11 @@
    ceiling: it still starts at 62px on the narrowest panel, grows as the panel
    grows, and stops at 160px so the value track always keeps the majority of
    the row. Every row shares the one column, so inputs stay aligned. */
-/* CHR-009 R6 — a TRIAL, not final (Richard: "we need to see it (text cut off often?)"). One
-   fixed 116px label column at every panel width, so every label's left AND every control's left
-   edge line up; a label that does not fit is ellipsised, and the component sets `title` so the
-   whole label is one hover away. This reverses FH-013's wrap on purpose, for the trial.
-   Mirrored for legacy rows in `propertyeditor.css` `.property-row > .property-label`. */
+/* CHR-009 R6 — RULED (Richard, 2026-09-17): one fixed label column at every panel width, so every
+   label's left AND every control's left edge line up; a label that does not fit is ellipsised, and
+   the component sets `title` so the whole label is one hover away. This reverses FH-013's wrap on
+   purpose. The width itself is `--property-label-column`, declared once in the editor's
+   `propertyeditor.css`; never write the number here. */
 :global(.sidebar-property-editor) {
   .Root {
     min-height: 30px;
@@ -101,7 +101,7 @@
   }
 
   .Label {
-    width: 116px;
+    width: var(--property-label-column, 118px);
     color: var(--theme-color-fg-default-shy);
     white-space: nowrap;
     overflow: hidden;

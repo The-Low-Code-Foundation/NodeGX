@@ -80,7 +80,12 @@ const GroupNode: ReactNodeDefinition = {
       }
     },
     'scrollToIndex.do': {
-      displayName: 'Scroll To Index - Do',
+      // CHR-009 R6: these six labels repeated their own group heading and three of them were the
+      // longest labels in the editor (up to 159px in a 116px column). The heading says `Scroll To
+      // Index`, so the value ports carry the bare word; each SIGNAL keeps the full action, because
+      // the canvas draws a connected port's label with no heading beside it and `Do` alone would
+      // read the same on both scroll actions. Port ids are untouched, so no project changes.
+      displayName: 'Scroll To Index',
       description: 'Scrolls to the child at Index, then fires Done — or Failure with the reason it could not',
       group: 'Scroll To Index',
       type: 'signal',
@@ -111,7 +116,7 @@ const GroupNode: ReactNodeDefinition = {
       }
     },
     'scrollToElement.do': {
-      displayName: 'Scroll To Element - Do',
+      displayName: 'Scroll To Element',
       description: 'Scrolls to the element on Element; fired in the same frame the Group mounts, it is held until the Group exists rather than dropped',
       group: 'Scroll To Element',
       type: 'signal',
@@ -131,7 +136,7 @@ const GroupNode: ReactNodeDefinition = {
       }
     },
     'scrollToElement.element': {
-      displayName: 'Scroll To Element - Element',
+      displayName: 'Element',
       description: 'Which element to scroll to, taken from another node\'s DOM Element output',
       group: 'Scroll To Element',
       type: 'reference',
@@ -141,7 +146,7 @@ const GroupNode: ReactNodeDefinition = {
       }
     },
     'scrollToElement.duration': {
-      displayName: 'Scroll To Element - Duration',
+      displayName: 'Duration',
       description: 'How long the scroll animation takes, in milliseconds; 0 jumps',
       group: 'Scroll To Element',
       type: 'number',
@@ -152,7 +157,7 @@ const GroupNode: ReactNodeDefinition = {
       }
     },
     'scrollToIndex.index': {
-      displayName: 'Scroll To Index - Index',
+      displayName: 'Index',
       description: 'Zero-based index of the child to scroll to',
       group: 'Scroll To Index',
       type: 'number',
@@ -163,7 +168,7 @@ const GroupNode: ReactNodeDefinition = {
       }
     },
     'scrollToIndex.duration': {
-      displayName: 'Scroll To Index - Duration',
+      displayName: 'Duration',
       description: 'How long the scroll animation takes, in milliseconds; 0 jumps',
       group: 'Scroll To Index',
       type: 'number',

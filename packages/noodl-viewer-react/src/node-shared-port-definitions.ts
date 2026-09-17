@@ -1720,7 +1720,10 @@ export default {
       backgroundGradient: {
         index: 203,
         group: 'Style',
-        displayName: 'Background Gradient',
+        // CHR-009 R6: the property panel's label column is 116px, and 'Background Gradient' drew
+        // 120px — the only label of this family over the line. Shortened to the word that carries
+        // the meaning; the `Style` group heading above it already says what it is the background of.
+        displayName: 'Gradient',
         description:
           'A CSS gradient painted as the ground — normally a design token such as "var(--gradient-brand)". ' +
           'It is drawn ON TOP of Background Image, which is what makes it usable as a legibility scrim',

@@ -15,7 +15,7 @@
 }
 
 .SizePicker-label {
-  flex: 0 0 116px;
+  flex: 0 0 var(--property-label-column, 118px);
   font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default-shy);
   white-space: nowrap;
