@@ -141,8 +141,16 @@ a checkbox is **members-area** (`Pages/Account`), behind its sign-in — not dri
 
 **Owed, and named:** AC7 is met for the at-rest render and for the mouse arm, but **no prefab or template corpus was rendered
 before-and-after** — the claim "every control in `library/prefabs` and `templates/`" is still an argument from the selector
-(`:focus-visible` gates the whole rule) plus one fixture. `library/prefabs/form` carries the Checkbox, the Radio Button and the
-Dropdown in one project and is the obvious subject; it has no page and no router, so it needs wrapping before it can be deployed.
+(`:focus-visible` gates the whole rule) plus one fixture.
+
+🔴 **And the reason that corpus has never been driven is not the missing page — it is that the prefabs cannot be deployed at all.**
+`library/prefabs/form` carries the Checkbox, the Radio Button and the Dropdown in one project and is the obvious subject; measured
+s24, `nodegx deploy` **refuses it**: *"holds a legacy project.json. Code export reads the v2 format (nodegx.project.json). Open the
+project in the editor once and accept the migration it offers."* So the corpus reading needs **an editor trip per prefab** before
+any browser can see it, which is a cost nobody had counted. A copy must be migrated (🔴 open a COPY: opening writes three files
+into a project), then given a page: `add-page.js` in this session's scratch does that part — an `/App` with a Router and a
+`/Pages/Home` placing the prefab's own `/Form/Checkbox`, `/Form/Single Choice` and `/Form/Drop Down`, touching nothing the prefab
+ships. Written and not yet run: the box was a peer's when it was ready.
 
 **Gates run:** focus-ring gate **13/13**; whole `noodl-viewer-react` suite **121 suites, 1619 ✓, exit 0**; the token vocabulary's
 readers — `noodl-mcp` `cmp007TokensAcrossTheShelf` + `styleTools` **23/23**, `nodegx-export` `hls001-package-boundary` +
