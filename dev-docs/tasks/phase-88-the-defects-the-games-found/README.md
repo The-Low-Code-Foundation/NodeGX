@@ -110,19 +110,24 @@ Each task file states its ruling in full, with the trade-offs.
 | R20 | (s17) **"Publish all, warn"** (§5 option c): `nodegx deploy` keeps every wire and lists the ones health calls broken. Asked with the catch that a headless deploy sees kit wires as broken (TPL-005's 4 keyboard wires) | GAM-023 |
 | R21 | (s19, 2026-09-17, asked in plain words) **"Unchecked is enough"**: a deploy does not load kits to check their wires; it keeps naming them as published unchecked. GAM-024 AC5 closed | GAM-024 |
 | R23 | (s19) **"The rule is too strict"**: an enum is a string. The cast table gains `enum` → `string` (only `string`). Asked about Rocket School's `kbPick.value → kbOut.picked`, the one wire s18's deploy named broken. ✅ Built s19, see GAM-023 §8 | GAM-023 |
+| R1 | (s19) **A new Repeat node**, and it **stops when its page is left** | GAM-013 |
+| R12 | (s19) Insert Text **respects Max length**; `Input Mode = none` **is enough** | GAM-011 |
+| R15 | (s19) **(a) types, docs, a reader helper**; the bridge is unchanged | GAM-015 |
+| R16 | (s19) **(a) + (c)**: presets carry their faces, and a door warns on an undeclared face. Switching preset asked at build | GAM-016 |
+| R18 | (s19) **Warn above a length threshold** measured from the corpus, plus the render finding | GAM-020 |
 | GAM-004 | (s17) **"Close it"**: D47 closed as measured and not reproduced, runtime and browser. Reopen only with a real game as evidence | GAM-004 |
 
 **Still askable now:**
 
 | # | question | task |
 |---|---|---|
-| R1 | Is a repeat a new node or a Repeat port on Delay, and what does it do when its page is navigated away from, or on the server? | [GAM-013](GAM-013-SOMETHING-CAN-HAPPEN-EVERY-SECOND-WITHOUT-A-SCRIPT.md) |
+| R1 | ✅ **Ruled s19: a new Repeat node, and it stops on leaving the page**. ~~Is a repeat a new node or a Repeat port on Delay, and what does it do when its page is navigated away from, or on the server?~~ | [GAM-013](GAM-013-SOMETHING-CAN-HAPPEN-EVERY-SECOND-WITHOUT-A-SCRIPT.md) |
 | R11 | Does a control's Focus go through the viewer's focus tracker, or straight to the element? | [GAM-010](GAM-010-A-BUTTON-CAN-BE-GIVEN-THE-KEYBOARD.md) |
-| R12 | Does Insert Text respect Max length? Is `inputmode=none` enough, or does the product owe a display-only box? | [GAM-011](GAM-011-A-FIELD-CAN-ASK-FOR-A-KEYPAD-AND-TAKE-A-TAPPED-KEY.md) |
-| R15 | For a wired size, fix only a kit's types and docs, have the bridge hand single-unit ports as numbers (built-ins too), or add a per-port opt-in? | [GAM-015](GAM-015-A-WIRED-SIZE-REACHES-A-KIT-NODE-AS-A-SIZE.md) |
-| R16 | Should presets ship their fonts as modules, name only fonts that ship, or be caught by a validator? And what does switching preset do to an installed font? | [GAM-016](GAM-016-THE-FONT-A-PRESET-NAMES-IS-THE-FONT-THE-PAGE-DRAWS.md) |
+| R12 | ✅ **Ruled s19: Insert Text respects Max length; `inputmode=none` is enough**. ~~Does Insert Text respect Max length? Is `inputmode=none` enough, or does the product owe a display-only box?~~ | [GAM-011](GAM-011-A-FIELD-CAN-ASK-FOR-A-KEYPAD-AND-TAKE-A-TAPPED-KEY.md) |
+| R15 | ✅ **Ruled s19: types, docs and a reader helper (a)**. ~~For a wired size, fix only a kit's types and docs, have the bridge hand single-unit ports as numbers (built-ins too), or add a per-port opt-in?~~ | [GAM-015](GAM-015-A-WIRED-SIZE-REACHES-A-KIT-NODE-AS-A-SIZE.md) |
+| R16 | ✅ **Ruled s19: presets bring their fonts, plus the validation warning (a + c)**; switching preset still asked at build. ~~Should presets ship their fonts as modules, name only fonts that ship, or be caught by a validator? And what does switching preset do to an installed font?~~ | [GAM-016](GAM-016-THE-FONT-A-PRESET-NAMES-IS-THE-FONT-THE-PAGE-DRAWS.md) |
 | R17 | Should kit signal props be fixed in the bridge or refused in the types with a check? Should kit size come from `frame`, from default Width/Height ports, or be documented as a wrapper Group? | [GAM-017](GAM-017-A-KIT-NODE-TAKES-A-SIGNAL-AND-A-SIZE-THE-WAY-A-BUILT-IN-DOES.md) |
-| R18 | Is a short multi-word heading in a content-sized Text a finding: warn on any sentence, warn above a length threshold, or info only? | [GAM-020](GAM-020-A-SENTENCE-THAT-WILL-NEVER-WRAP-IS-FLAGGED-BEFORE-A-PERSON-SEES-IT-CLIPPED.md) |
+| R18 | ✅ **Ruled s19: warn above a length threshold measured from the corpus**. ~~Is a short multi-word heading in a content-sized Text a finding: warn on any sentence, warn above a length threshold, or info only?~~ | [GAM-020](GAM-020-A-SENTENCE-THAT-WILL-NEVER-WRAP-IS-FLAGGED-BEFORE-A-PERSON-SEES-IT-CLIPPED.md) |
 | R20 | ✅ **Ruled s17: publish all, warn** (see the ruled table) | [GAM-023](GAM-023-A-DEPLOY-REFUSES-A-BROKEN-WIRE-AND-KEEPS-EVERY-GOOD-ONE.md) |
 | R22 | ✅ **Ruled s16: just rename it.** D was ruled first, then withdrawn once `row.get('on')` measured throwing in exported code. GAM-025 closed, nothing built. ~~(s13, from the sweep) R8's A means moving 265 sites, 151 of them untested, and changes what `record.data` means on a `data` column, while `row.get('on')` already reads the field. Choose A as ruled, A′ (keep `data` and the engine's names reserved), or D (keep the trap and name `row.get(…)` in GAM-007's warning and error). Recommended: D~~ | [GAM-025](GAM-025-A-ROW-FIELD-NAMED-ON-READS-AS-THE-DATA.md) §7 |
 

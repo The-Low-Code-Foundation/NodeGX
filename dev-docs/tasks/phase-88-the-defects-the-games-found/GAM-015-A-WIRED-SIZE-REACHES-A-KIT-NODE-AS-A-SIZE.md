@@ -1,6 +1,6 @@
 # GAM-015 — A kit node reads a wired size as the size it was sent
 
-**Status: ⬜ not started.** **Source:** [P78 D65](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-011](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), 2026-09-13 · **Side:** product (React bridge / node-kit types and docs)
+**Status: ⬜ not started. ✅ R15 ruled s19 (§5): buildable.** **Source:** [P78 D65](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-011](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), 2026-09-13 · **Side:** product (React bridge / node-kit types and docs)
 
 A kit's React node draws at its default size whenever the size is wired: Rocket School's header face asked for 40 px
 and drew 64. Nothing in the node-kit types or docs says what a px port hands the component.
@@ -64,6 +64,8 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
   (a) and (c) risk nothing and fix only what gets rewritten.
 - **Do not** undo FLD-004's abstain branch or its `dimensions/not-a-dimension` report.
 - **Do not** promote `padPx` into the product untyped. A reader that accepts three shapes hides which shape is real.
+
+> 🔒 **R15** **Ruled (2026-09-17, s19, asked in plain words): door (a), types, docs and a reader helper.** Nothing that runs changes; the bridge still hands `"40px"`, and existing kits adopt the reader.
 
 ## 6. Acceptance criteria
 

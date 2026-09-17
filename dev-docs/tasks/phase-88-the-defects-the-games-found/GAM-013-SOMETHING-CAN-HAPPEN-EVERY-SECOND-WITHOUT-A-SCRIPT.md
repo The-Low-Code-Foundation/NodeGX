@@ -1,6 +1,6 @@
 # GAM-013 — Something can happen every second without a script
 
-**Status: ⬜ not started — 🔒 blocked on two rulings (§5) before any code.** **Source:** [P78 D40](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005 scoping, 2026-09-11; met again by TPL-007 and P87 RKT-010 · **Side:** product (runtime node library)
+**Status: ⬜ not started. ✅ R1 ruled s19 (§5): buildable.** **Source:** [P78 D40](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-005 scoping, 2026-09-11; met again by TPL-007 and P87 RKT-010 · **Side:** product (runtime node library)
 
 A clock, a countdown, a carousel, an autosave, a stars total that counts up: nothing in NodeGX repeats. The author either wires
 a Delay's Finished into its own Restart (taught nowhere) or hides a `setInterval` in a Function.
@@ -66,6 +66,8 @@ neither is a coding question:
 After the rulings, the design constraints: the tick runs on `timerScheduler`, as Delay does, not a raw `setInterval`, so SSR and
 tests share one clock. Deleting, unmounting or navigating stops it with the shortcuts module's three guarantees. A `Stop` then
 `Start` does not stack two intervals. And there is no catch-up burst after a throttled tab: a missed tick is skipped, not replayed.
+
+> 🔒 **R1** **Ruled (2026-09-17, s19, asked in plain words): a new Repeat node** (Start, Stop, Interval → Tick, Count), not a Repeat option on Delay; **and it stops when its page is navigated away from** (the keyboard-shortcuts rule; a background poll would be a separate, named option later). No ticks during server render.
 
 ## 6. Acceptance criteria (apply after both rulings are recorded in §8)
 

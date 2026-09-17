@@ -1,6 +1,6 @@
 # GAM-020 — A sentence that will never wrap is flagged before a person sees it clipped
 
-**Status: ⬜ not started.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
+**Status: ⬜ not started. ✅ R18 ruled s19 (§5): buildable.** **Source:** [P78 D58](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by TPL-007 / P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), 2026-09-13 · **Side:** product (validator + `render_report`)
 
 Rocket School's Text helper gave every Text `sizeMode: contentSize`. Every sentence then ran off its card: *"a lot of texts
 don't wrap"*. The validator, the plan tools and `render_report` all stayed quiet.
@@ -74,6 +74,8 @@ has never been seen to clip.
 
 **Do not** change `Text.tsx`'s `pre` rule. RKT-001 §2 records it as deliberate: it respects `\n` and lets a label size to its
 words.
+
+> 🔒 **R18** **Ruled (2026-09-17, s19, asked in plain words): warn above a length threshold**, the threshold measured from the corpus (§5 option 2), plus the render finding.
 
 ## 6. Acceptance criteria
 

@@ -1,6 +1,6 @@
 # GAM-016 — The font a preset names is the font the page draws
 
-**Status: ⬜ not started.** **Source:** [P78 D69](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC3, 2026-09-13 · **Side:** product (style presets / project modules)
+**Status: ⬜ not started. ✅ R16 ruled s19 (§5): buildable.** **Source:** [P78 D69](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC3, 2026-09-13 · **Side:** product (style presets / project modules)
 
 A person picks the Playful look for their app. It says Nunito, and every visitor reads the platform's fallback font,
 because nothing ever ships or loads Nunito. Richard played Rocket School session 1 that way.
@@ -66,6 +66,8 @@ Read at HEAD `eb12ebe99`, 2026-09-14. Nothing was run for this file.
 - **Do not** drop the fallback stack. A missing file must still degrade to a readable face.
 - A face travels with its licence file, as Rocket School's does. `shareAsTemplate.ts:100-134` already treats font
   directories specially, so read it before a font module is shared.
+
+> 🔒 **R16** **Ruled (2026-09-17, s19, asked in plain words): (a) with (c).** A preset brings its font files (licences, offline, never fetched) when applied, and a validation door warns when a `--font-*` token names a face no `@font-face` declares. ⚠️ Still open inside the ruling: what switching preset does to an installed font module (§5 (d)); asked once the build reaches it.
 
 ## 6. Acceptance criteria
 

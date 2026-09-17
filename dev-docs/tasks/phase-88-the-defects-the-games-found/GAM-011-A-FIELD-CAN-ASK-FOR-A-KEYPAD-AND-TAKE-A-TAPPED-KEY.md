@@ -1,6 +1,6 @@
 # GAM-011 — A field can ask for a keypad, and take a tapped key at the caret
 
-**Status: ⬜ not started.** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export)
+**Status: ⬜ not started. ✅ R12 ruled s19 (§5): buildable.** **Source:** [P78 D60](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) · found by P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), 2026-09-13 · **Side:** product (viewer controls, Text Input; code export)
 
 On a tablet, a number answer opens the full letter keyboard over half the game. An on-screen pad cannot type into the box while a
 child's caret is in it. Rocket School had to build its own React node to get either.
@@ -58,6 +58,8 @@ HEAD `eb12ebe99`, 2026-09-14.
   display-only box? `none` still lets the field take focus and a caret; the kit decided that was wrong for a child.
 - (a) and (b) are separable. Land them as two commits so each has its own blast radius.
 - **Do not** read a digit by `KeyboardEvent.code` in Text Input. That is a game's AZERTY choice (RKT-005 AC2), not a field's.
+
+> 🔒 **R12** **Ruled (2026-09-17, s19, asked in plain words):** `Insert Text` **respects Max length**, as a typed key does. **`Input Mode = none` is enough**: no display-only box is owed.
 
 ## 6. Acceptance criteria
 
