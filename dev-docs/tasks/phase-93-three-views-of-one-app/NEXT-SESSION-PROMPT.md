@@ -1,9 +1,9 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 15.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
-s12–13 built and closed TVW-002; s14 built TVW-004. **s15 drove TVW-004's AC1 and AC2 against the
-running preview, and the independent walk found three defects in the surface s14 had already driven
-twice with nine green arms.**
+**Written 2026-09-18, end of session 16.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
+s12–13 built and closed TVW-002; s14–15 built and drove TVW-004. **s16 closed TVW-004 AC5 (10/10
+arms, no product code changed) and built and drove the first slice of TVW-005 — a drag in Layers
+now reorders the page, and the drive found the defect that stopped it starting at all.**
 
 ## The board, re-derived from the task files
 
@@ -12,101 +12,107 @@ twice with nine green arms.**
 | TVW-001 | The panel tells the truth | ✅ | **CLOSED — all 8 ACs** |
 | TVW-002 | The preview says what it is not showing | ✅ | **CLOSED — all 7 ACs** |
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
-| TVW-004 | Layers | ✅ | **AC1, 2, 3, 4, 7 green.** AC5 open (needs a cold start). **AC6 captured — Richard's verdict is the only thing left** |
-| TVW-005 | Layers can move things (needs 004) | — | — |
+| TVW-004 | Layers | ✅ | **AC1–5 and AC7 green. AC6 captured — Richard's verdict is the only thing left** |
+| TVW-005 | Layers can move things | **slice 1** | **9/9 arms.** AC1 needs the tab-header drop strip; AC5's shots and AC6's `test:ci` not yet taken as the task's own |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
 | TVW-008 | The board (needs 002) | — | — |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 33** (29 + AC1, AC2 and — pending his look — AC6 is capture-complete; AC7 re-run).
+**ACs closed: 39** (33 + TVW-004 AC5, + TVW-005's AC2 decision half and AC3, driven).
 
 ## Start here
 
-1. 🔴 **Put AC6 in front of Richard.** 20 shots in `verdicts/TVW-004/2026-09-18/` with a
-   `manifest.json` naming what to look at. **The PNGs are gitignored by design** — he has to look
-   at them on this machine, or they have to be sent to him. Two specific questions are in the
-   manifest's `whatToLookAt` and in §9 of the task file; do not turn them into a summary.
-2. **AC5** — the tab default and ⌘⇧L, **from a cold start on each of the four component kinds**.
-   ⚠️ §8.2: this cannot ride the AC1 drive. `chosenTab` is remembered for the session, the panel
-   does not remount between runs, and the attempt read `Components` at 300px and `Layers` at 240px
-   from one unchanged build. A cold start means a fresh renderer per kind, or a way to clear
-   `chosenTab` that is verified to work.
-3. Then **TVW-005** (Layers can move things) — the first task that needs 004 and is not blocked.
+1. 🔴 **AC6 is still owed to Richard, and it is the only thing between TVW-004 and closed.** Seven
+   of the twenty shots were sent to him in s16 (the five states in dark at 298px, plus
+   `3-selected--light--238px` and `2-editing--light--238px`, which carry the two questions). The
+   PNGs are gitignored, so they have to be *sent*, not linked. The questions are in
+   `verdicts/TVW-004/2026-09-18/manifest.json` under `whatToLookAt` and in TVW-004 §9.
+2. **Finish TVW-005.** In dependency order:
+   - the **drop-target strip on the Layers tab header** (§2 row 4, §6) — the one §2 row with no code
+     behind it, and what AC1's third sentence drives;
+   - the **preview half of AC1** — the reorder is read in the model today, not in the viewer's DOM.
+     `drive-tvw004-ac2.js` already walks the viewer's tree through `noodlNode`; reuse it rather than
+     writing a third walk;
+   - **AC4** — assert the placement goes through `NodeOperations.createNewNode` by spying it, not by
+     comparing results. The `placement` parameter is already on that door.
+   - **AC5's shots** of the three indicators, both themes, for Richard.
+3. Then **TVW-006** (the structure lane) or **TVW-007**, neither of which is blocked.
 
-## What s15 found, and what it cost to find
+## What s16 found
 
-**The AC2 instrument is the point.** `scripts/devtools/drive-tvw004-ac2.js` walks the **viewer's**
-DOM — every element, up React's fiber tree to `noodlNode`, path from the runtime's own scope links.
-Different process, different tree, different data structure; the only thing shared with
-`layersTree.ts` is the node id. s14's "independent walk" was a second walk over the same structure
-in the same process, and it agreed with the build for two sessions.
+**AC5 did not need what §8.2 said it needed.** Not a fresh renderer per component kind — a
+**launcher round trip**: `route({to:'projects'})` and back remounts `EditorPage`, so `chosenTab` is
+`null` again. ~20s, no webpack race, and it is a door a person has. Two things the first pass would
+have got away with, both now in the drive:
 
-🔴 **101 of 104 rendered nodes had no row that addressed them.** A Router mounts its page through a
-node it mints at run time; a `For Each` mints one per item. `layersTree` was putting its own id
-where the runtime had those guids, so `pathAddresses` matched nothing. Against the live preview:
-`[router, navbar, header]` → **0** nodes selected, `[navbar, header]` → 1, `[header]` → 1 — three
-known-firing arms beside the one absence. Under R-R that was **every row of every routed screen**.
+- **The canvas comes back where it was left**, so three of the four readings began on the tab they
+  expected. Each subject is **primed** on a component whose default is the other tab, so the arm
+  watches the tab *arrive*.
+- The four subjects are classified off **`project.json`**, not off `buildKindIndex` — which is the
+  pipeline the tab decision itself reads. The runtime's kind is a **precondition**: the
+  unplaced-visual arm goes UNGRADED if the runtime calls it a logic component, because then
+  `Components` would be the right answer for the wrong reason.
 
-🔴 **The fix duplicated React keys, and `.logs/dev.log` is where that showed up.** `key` and `path`
-were one array. Two repeaters drawing one template then produced identical keys. They are two
-arrays now: `path` is the runtime's identity, `key` is React's. **The unit fixture has one repeater
-and could not have seen it.**
+**🔴 TVW-005's drag would not start if you moved down.** The 5px threshold was measured inside the
+pressed row's own `onMouseMove` — the Components tab's own pattern, so it looked like the house
+style. A Layers row is 26px: press in the middle, move 13px *down*, and the next mouse event belongs
+to the row below, which has no press to compare against. Measured, not reasoned: `(x+10, y+10)` left
+`PopupLayer.isDragging()` **false** with all three handlers bound. It is watched on the **window**
+now. ⚠️ `ComponentItem.tsx` still has the row-local version.
 
-🔴 **A repeater whose template arrives on a wire was asserting its stale parameter.** 38 of 864
-`For Each` nodes on this machine have the port wired; 34 still carry a `template`. It draws a note
-now. ⚠️ **Refusing made the raw count worse** (30 → 36 unaddressed) and the arm had to learn to
-attribute them, or it would have scored the honest build below the mis-naming one.
+**The instrument was wrong twice before it measured anything.**
+- A row scrolled out of the panel answers `getBoundingClientRect()` with plausible coordinates and a
+  press there lands on `<html>`. Two runs read as *the drag will not start*. The drive collapses the
+  siblings, scrolls into view, and refuses unless `elementFromPoint` lands inside the row.
+- The refusal arm's first version guessed the drag-message selector, found nothing, and could not
+  tell a silent build from its own bad selector. It reads `.popup-layer-drag-message` now, and the
+  **legal drag that shows no message** is the first row of the table so the absence has a
+  known-firing signal beside it.
 
-🔴 **The crumb lost the component name for want of 3px**, and only the screenshot could say so —
-`scrollWidth` is meaningless on an inline element and `elementFromPoint` still returned the button.
-A button is an atomic inline box, so Chromium drops the whole name rather than clipping it.
-**Fourth time this phase a screenshot has failed a set of green arms.**
+**Filed, not fixed:** §2 of TVW-004 says the tab is *"remembered per session, not per project"*. It
+is remembered per project **visit** — `chosenTab` is `useState` and `EditorPage` unmounts on the way
+to the launcher. It does not block AC5, whose sentence is the default and the flip. TVW-004 §9.4 has
+the fix and the warning that doing it breaks the drive's own cold start.
 
-## The instrument faults, which cost more than the defects
+## The model traps TVW-005 is built around
 
-Every one of these produced a confident wrong answer first. They are written up in §8.1.
+Read §6.1 of the task before touching the applier. In short: `attachNode` **silently no-ops** unless
+the child is a root (detach first, resolve the index after); `NodeOperations.attachNode/detachNode`
+**record no undo at all** outside a canvas drag; an `UndoActionGroup` *constructed* with `do`/`undo`
+cannot be undone; and a plan must name an **anchor**, never an index, because the tree draws visual
+nodes only.
 
-- **Twenty screenshots of one width, named as two** — `useSidePanelLayout` reads its widths once at
-  mount, so writing the setting changed the store and nothing on screen. Drag the divider (the one
-  **taller than it is wide**), and put the **measured** width in the filename.
-- **State 3 read a designed-in absence** — `previewMode` starts `true` and gates the whole outline
-  channel (DES-001). "Outlined in the preview" is a claim about **design mode**.
-- **The subject was a `Loader`** — a component that draws nothing until something is loading. An
-  arm about an outline needs a subject the preview is drawing.
-  ⚠️ An **instance** row is never on screen by the leaf test: a component instance draws no element
-  of its own. Test whether its path is a **prefix** of a rendered path.
-- **"On no screen" asked of the row list** picked `/App`, the project's own root.
-- **`Page.reload` returns before the navigation starts**, so a poll for "the bundle is ready"
-  passes on the page that is about to be destroyed. Stamp the document first. (The AC1 drive no
-  longer reloads at all.)
+## Gates at s16
 
-## Gates at s15
+`test:ci` **2985 specs, 8 failures, seed 99341, HEAD `061d03f4` = the floor BY NAME** (3 SUB-006,
+3 SUB-011, 2 NDA-017), none mine — a **tenth** agreeing seed, from a readout whose mtime was checked
+(14 seconds old). ⚠️ The log ends `lerna ERR! exited 1` while the harness reported 0, again: **read
+the log and the JSON, never the status.** `tsc --noEmit` **0**. `tests-unit/tvw-004` + `tvw-005`
+**3 suites / 56 specs**; tvw-005 is 15 specs with **8 mutants, each caught**.
 
-`test:ci` **2985 specs, 8 failures, seed 90754 = the floor BY NAME** (3 SUB-006, 3 SUB-011,
-2 NDA-017), none mine — a **ninth** agreeing seed, from a readout whose mtime was checked.
-⚠️ The run was backgrounded through `tail`, which **ate the exit code**; the log said
-`lerna ERR! exited 1` while the harness reported 0. Read the log, not the status.
-`test:main` **497 suites / 7939** green. `tests-unit/tvw-004` **2 suites / 41 specs**, 4 new mutants
-each `cmp`-proven applied and each red on its own spec. `tsc --noEmit` **0**.
+🔴 **`test:main` is 496/498 and the two reds are NOT this phase's** — and they are worth knowing
+about, because they are the shape the harness memory warns of: a peer's additive runtime change
+(P96's `net.noodl.ParseFeed` / `net.noodl.ParseXML`, commit `c3754c6e1`) passed its own package's
+suite and reds two **editor** gates that only a whole-repo run reaches —
+`tests-unit/alpha-006/nodeDocs.test.ts:139` (every catalog node owes a docs page) and
+`tests-unit/chr-007/widgetDispatch.test.ts:301` (the dispatch map must cover the catalog). Reported
+to `opennoodl-62` with the file:line. **If they are still red next session, they are still not
+yours** — check `git log -S` on the node name before inheriting them
+([[a-none-owned-blocker-is-the-one-most-likely-already-fixed]]).
 
 ## The box
 
-s15 left it **free** (`Stopped 26 process(es). Nothing left running.`) and told **opennoodl-5f** so;
-5f had held its P95 drives for about 40 minutes at s15's request and should be assumed to be using
-the box now. **opennoodl-ec** was on P94/STY-001. Announce before launching `dev`.
+s16 left it **free** and said so to `opennoodl-ec` and `opennoodl-62`. 62 is on P96 (backend feeds)
+and added two suites — `noodl-runtime/test/fed-001-feed.test.ts` and
+`nodegx-backend/tests/cloud-feed-nodes.test.ts` — which a `test:main` run now picks up. ec is on
+P94/STY-004 (nodegx-export unit tests). Announce before launching `dev`.
 
 ## Committing
 
-🔴 The working tree carries **three** other sessions' work — P78's TPL-009, P94's STY-001 and
-P96's whole directory were all there throughout s15. Commit by explicit pathspec, add untracked
-files first, and put `-F <file>` **before** the `--`. s15's commit is `105ba39bf`.
+🔴 The working tree carries **three** other sessions' work — P78's TPL-009, P94's STY-001/STY-004
+and P96's directory. Commit by explicit pathspec, `git add` untracked files first, and put
+`-F <file>` **before** the `--`. s16's commits are `31d89a153`, `ea3ee7a5d`, `061d03f48`.
 
 🔴 **Verdict PNGs are gitignored** (`.gitignore:265`). The tracked artefact is `manifest.json`.
-`git check-ignore -v` every image before believing it is committed.
-
-## Owed to Richard
-
-**AC6's look, and nothing else.** Everything he ruled on in s14 (R-R…R-V) is built, driven and
-still green.

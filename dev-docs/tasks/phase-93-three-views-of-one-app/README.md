@@ -178,3 +178,17 @@ This phase closes when:
 - every TVW task is built or recorded as disproved.
 
 Not when the suite is green. It was green on the day this was scoped.
+
+## 5. Where the phase stands (updated s16, 2026-09-18)
+
+| id | built | driven |
+|---|---|---|
+| TVW-001 | ✅ | CLOSED — 8 ACs |
+| TVW-002 | ✅ | CLOSED — 7 ACs |
+| TVW-003 | ✅ | CLOSED — 6 ACs |
+| TVW-004 | ✅ | AC1–5, AC7 green; **AC6 awaits Richard's look** |
+| TVW-005 | slice 1 | 9/9 arms; AC1 needs the tab-header drop strip |
+| TVW-006…010 | — | — |
+
+**39 ACs closed.** The board is re-derived from the task files each session; this table is a
+convenience, and the task files win where they disagree.
