@@ -595,6 +595,24 @@ const PAIRS: Pair[] = [
     bg: '--theme-color-bg-1',
     min: 3,
     why: 'NON-TEXT (1.4.11): the field paints no fill of its own, so this edge is the only thing that says a control is there'
+  },
+  // 🔴 **This repeats a (fg, bg, min) tuple the rail-panel row already carries, on purpose.** The
+  // duplicate is the point: that row is described as the rail's field edge, so a session that moves
+  // the rail to another ground edits it — and the colour swatch, which is a different control in a
+  // different panel, would lose its only token-level gate without anybody touching this file. The
+  // table tolerates duplicates by design (`PAIRS.length > distinct.size` is asserted below); what it
+  // does not tolerate is one row standing in for two surfaces.
+  //
+  // ⚠️ What this row CANNOT see: which token `.Swatch` actually uses. It grades the pair, not the
+  // component, so it would stay green if the swatch went back to `border-strong`. The instrument for
+  // that is the rendered look gate (`--surface=property-panel`), which is what found it —
+  // deliberately NOT a spec that greps the stylesheet for a class name (CHR-004 §3.3).
+  {
+    what: 'the property panel: the edge of the colour swatch inside a colour field',
+    fg: '--theme-color-border-control',
+    bg: '--theme-color-bg-2',
+    min: 3,
+    why: 'NON-TEXT (1.4.11): the swatch IS the value, so the edge is what says where the colour stops — it sat at 1.499:1 dark / 1.387:1 light on `border-strong` until Richard ruled it a visible edge (2026-09-18)'
   }
 ];
 

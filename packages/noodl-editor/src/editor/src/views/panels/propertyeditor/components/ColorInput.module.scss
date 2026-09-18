@@ -32,7 +32,14 @@
   margin: 0 0 0 6px;
   padding: 0;
   box-sizing: border-box;
-  border: 1px solid var(--theme-color-border-strong);
+  /* CHR-004 §8 / CHR-011 s34: `border-strong` measured **1.499:1 dark / 1.387:1 light** against the
+     field's `bg-2` fill — you could not see where the square stopped, and NAT-001 asks 3:1 of a
+     control's edge. Richard ruled (2026-09-18) *"give the swatch a visible edge"*; his earlier
+     "no outlines" ruling is about the panel's FIELDS, and this is the swatch inside one.
+     `border-control` is the house token for exactly this job (`Chip`, the search box, the filter
+     pill) and needs no new token: **3.897:1 dark / 3.373:1 light**. 🔴 Measured against `bg-2`,
+     the fill of `.Field` — not against the panel, and not against the swatch's own colour. */
+  border: 1px solid var(--theme-color-border-control);
   /* ⚠️ A third radius on the panel (AC2 wants ≤ 2: 6 and full); the mockup's swatch has one too. For the look. */
   border-radius: var(--radius-sm);
   overflow: hidden;

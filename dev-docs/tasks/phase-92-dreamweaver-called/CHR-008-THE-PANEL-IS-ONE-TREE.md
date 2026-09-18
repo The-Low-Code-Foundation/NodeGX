@@ -767,3 +767,30 @@ arithmetic says these are pre-existing legacy behaviour that this slice slightly
 the one this slice already ships: with the registry empty the count should read `n × 44`, and with
 `textArea` enabled `n × 43`, on the same drive. The first same-key warning carries a **UUID**, not a
 node id, and appears during the initial project open — before the panel was driven at all.
+
+## 11. s34, 2026-09-18 — Richard ruled the conversions RESUME
+
+The question §10.8 left open — *do the §3.1 widget conversions continue, or only where a region
+needs one?* — was put to him in plain words: every row in the panel still builds its own separate
+little React app, 38 of them; the one trial conversion broke undo (the stored value went back, the
+text on screen did not) and shipped switched off; converting the other 37 means fixing that first.
+
+Options put: convert only when another task needs a row anyway (P94's pickers were named), stop and
+close the row, or **fix undo and convert all 37**. **He ruled: fix undo and convert all 37.**
+
+So this task does not close with the phase. What that makes true:
+
+1. 🔴 **The undo defect is the first job, and §10.8 already names the next diagnostic** — a render
+   counter inside `TextAreaWidget`, then the same undo, which separates *never re-rendered* from
+   *re-rendered with a stale parameter* in one run. Do not start a second conversion first: the
+   trial exists precisely so the defect is paid for once.
+2. 🔴 **A widget may not be added to the registry until its row class keeps a working `render()`**
+   (§10.8). The two are both required during the transition, not alternatives — the first "safe
+   fallback" shipped an empty Text row because `TextAreaType` had been gutted, and both
+   `appendChildEl` and `ControlHost` swallow a missing element **silently**.
+3. **AC3's ≤ 3 `createRoot` files stays unreachable while popout roots exist** (§10.4), so the
+   conversions being ruled in does **not** make that row of CHR-011's AC2 pass. Re-read §10.4 before
+   writing a number against it; the count is **38 code calls / 46 calls / 42 by plain grep**,
+   unchanged at `24d2a282c`.
+4. The registry is still `{}` and every widget still takes the `ControlHost` path — nothing a person
+   sees has changed, and nothing here is a regression waiting to be found.

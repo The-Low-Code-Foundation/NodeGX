@@ -483,3 +483,58 @@ because `countFile` stripped line comments for the TS scope only. A gate that re
 changelog is one somebody switches off (the third time this phase has met that shape). SCSS now
 strips `//` comments too, per extension, and a real hex added in code still reddens it — checked
 with an arm that put `#ff0000` in this same file and restored byte-identical.
+
+## 9. s34, 2026-09-18 — the swatch edge ruled and built; §3.3 ruled IN
+
+### 9.1 The swatch edge — built
+
+§8's last open finding (`button.ColorInput.Swatch`, **1.499:1 dark / 1.387:1 light** against 3:1)
+was put to Richard in plain words, with the note that his "no outlines" ruling is about the panel's
+**fields** and this is the swatch **inside** one. He ruled: **give the swatch a visible edge.**
+
+Built in `propertyeditor/components/ColorInput.module.scss`: `.Swatch`'s border moves from
+`--theme-color-border-strong` to **`--theme-color-border-control`** — the house token for a control's
+edge (`Chip`, the directory search box, the filter pill), so **no new token**:
+
+| theme | ground (`.Field` fill) | before, `border-strong` | after, `border-control` |
+|---|---|---|---|
+| dark | `bg-2` `#2e2c36` | **1.499:1** | **3.897:1** |
+| light | `bg-2` `#f2f4f6` | **1.387:1** | **3.373:1** |
+
+🔴 Computed against **`bg-2`, the field's fill** — not the panel behind it and not the swatch's own
+colour. That the recomputed *before* numbers reproduce §8's gate reading to three decimals is what
+says the ground was identified correctly ([[a-client-property-read-as-a-fact-about-the-source]]).
+
+**Gated in `tests-unit/nat-001/palette-contrast.spec.ts`**, one row, `min: 3`. 260 tests, exit 0;
+the mutant (the row's `fg` back to `border-strong`) reddens **both** theme arms and the
+distinct-pairings guard, and the file was restored byte-identical.
+
+⚠️ **Two things this row deliberately does NOT do**, stated because an unstated limit reads as
+coverage:
+- It repeats a `(fg, bg, min)` tuple the rail-panel row already carries. That duplicate is the
+  point: the rail row is *described* as the rail's field edge, so a session that moves the rail to
+  another ground edits it, and the swatch would lose its only token-level gate with nobody touching
+  this file. `PAIRS.length > distinct.size` is asserted, so duplicates are by design.
+- It grades the **pair**, not the component. It stays green if `.Swatch` goes back to
+  `border-strong`. The instrument for *that* is the rendered look gate, which is what found it —
+  and deliberately not a spec that greps the stylesheet for a class name, which is the very family
+  §3.3 is removing.
+
+⬜ **Owed: the look gate re-run** (`--surface=property-panel` on an `Icon` node, both themes) to see
+the finding clear on the rendered surface. Not run here — P93 held the box and had a dev stack up,
+and two dev stacks do not coexist. **Until it is, §8's `Icon`-node row is "fixed at the token level",
+not "green"** ([[verify-the-consequence-not-just-the-mechanism]]).
+
+### 9.2 §3.3 — Richard ruled it IN
+
+Asked as *"18 places check a CSS class name instead of what a person sees; the styles-panel phase is
+about to rework the pickers where several of them sit."* Options put: rewrite only the ones in P94's
+way, leave them all and close the row, or rewrite all 18. **He ruled: rewrite all 18.**
+
+So AC4 is live work, not a question — `groupHeading`, `portHint`, `bindingChipRows`, `nodeCommentRow`
+and the `:global(.sidebar-property-editor)` hook in `PropertyPanelInput.module.scss:76`, per §3.3.
+Every behavioural assertion is kept; only the class-name ones move to behaviour or a `data-test`
+attribute the component owns. The `expect(` counts to beat are §7.7's **18 / 24 / 24 / 36**.
+
+🔴 **Do this before P94 reworks the pickers, not after** — that is the argument he ruled on, and it
+expires when P94 starts.

@@ -90,6 +90,105 @@ re-take the rendered rows:
 The four rendered rows — font sizes on the Templates tab and the Group panel, button styles, and
 elements/inline-styled on the Group panel — are the ones the packaged build still owes.
 
-⬜ **Also owed, and cheaper:** CHR-004's look gate over the surfaces CHR-010 changed
-(`node scripts/look-gate/run.js --surface=property-panel --theme=both`). It was not run in s33 —
-a peer held the box for the whole window in which it would have run.
+⬜ ~~**Also owed, and cheaper:** CHR-004's look gate over the surfaces CHR-010 changed.~~
+✅ **Superseded — it WAS run later in s33**, after this section was written: panel GREEN on a Group
+both themes (638 readings), exit 1 on an `Icon` node for the `ColorInput` swatch edge, launcher green
+after two ruled fixes. Readings in **CHR-004 §8**, which is the artefact to read, not this line.
+
+## 7. s34, 2026-09-18 at `24d2a282c` — Richard ruled the build waits, so everything else is ready
+
+**Richard's ruling, asked in plain words and answered in one click: _wait until the machine is free._**
+The alternatives put to him were building a private copy of the repo now (~1 hour of the box) or
+packaging the checkout as it stands. He chose to wait, so **no build was taken and no picture is new.**
+
+### 7.1 Why the build could not honestly be taken here
+
+Three sessions disowned the same dirt, so this is now a fact about the checkout rather than one
+session's impression:
+
+- The working tree carries **36 modified and 15 untracked paths dated 2026-09-16** — `templates/todo-list*`,
+  `library/prefabs/date-picker`, `packages/nodegx-backend/src`, `packages/noodl-mcp/tests`,
+  `packages/noodl-runtime/.../local-sql` — plus **staged deletions** of two date-picker Inter fonts.
+  P93 and P95 were both asked and both say the paths are not theirs. 🔴 **The pile is unowned and
+  only Richard can say what happens to it**; nobody may pathspec-commit another session's unstaged
+  edits ([[pathspec-commit-sweeps-a-sibling-edit]]).
+- P93 then took the box for several hours — `VisualCanvas/*`, `EditorDocument.tsx`, `main.js`, the
+  viewer frame, then jest, `tsc`, `test:ci` and a dev-stack drive on 8680/9444. Those paths are
+  **inside the app CHR-011 photographs**, so the tree does not merely stay dirty, it stays dirty
+  *in the photographed surfaces*.
+
+🔴 **The worktree escape hatch does not work here, and the reason is worth keeping.**
+`make-worktree.sh`'s own header says `lerna exec` resolves the package root to the **primary**
+checkout even when launched from a worktree — and `build-editor.ts` is `npx lerna clean --yes`
+followed by `npx lerna exec --scope noodl-editor -- npm run build`. So a "clean worktree build"
+would clean and build **primary's** tree, peers' dirt and all, while reading as isolated. A
+standalone `git clone` *would* be correct (it is a repo of its own, so lerna resolves inside it);
+it costs a second full `npm install` and ~1 hour of the same 8 cores. That is the option Richard
+declined for now, not one that was never found.
+
+⚠️ Also worth knowing before the next attempt: `build-editor.ts` gates on **`git diff --numstat`**,
+which is *unstaged tracked* changes only. Untracked files do not refuse it, and neither do staged
+ones. And `build:editor:_editor` does `npx rimraf ./node_modules` + `npm install` at the repo root —
+**that is what makes this the whole box**, not the electron-builder step.
+
+### 7.2 The static half re-measured at this HEAD — every number unchanged
+
+Re-taken at `24d2a282c` (§6 was taken at `f8558113`), so AC4's "green on the commit the pictures
+were taken from" has a fresh reading to stand on:
+
+| gate | reading at `24d2a282c` | exit |
+|---|---|---|
+| `npm run type` | −3 raw px vs baseline | 0 |
+| `npm run colors` | 16 = 16, holding the line | 0 |
+| `npm run icons:css` | 0 url()-to-SVG over 332 stylesheets | 0 |
+| `npm run icons:font` | 0 Font Awesome references over 3,187 files | 0 |
+| `npm run tokens:css` | every `var(--…)` defined over 333 stylesheets | 0 |
+
+🔴 Gated on the **exit status**, taken without a pipe — a `| tail` would have handed back `tail`'s
+code ([[a-pipe-eats-the-exit-code-you-are-gating-on]]).
+
+The two counts that name an open task are also unchanged: `createRoot` under `propertyeditor/` is
+**38 files / 46 calls** (42 by plain grep, which counts prose), and **24** `tests-unit` files read
+`.css`/`.scss` from disk.
+
+### 7.3 The capture recipe was checked against the source, and one string has moved
+
+Every selector CHR-001's `capture.js` depends on still exists at this HEAD — the launcher nav, the
+project card, the Editor-mode toggle, `.sidebar-property-editor`, `.property-type-chip`, the
+ScrollArea root, the node-picker input. **One does not:** `applies when Shadow Enabled is on`, which
+CHR-001 counted **six** times, is **gone from the source**. CHR-008's R8 slice replaced it with the
+single sentence *"Offset X, Offset Y and Color apply once Shadow Enabled is on."*
+(`propertyeditor/model/groupGate.ts`).
+
+🔴 That is a **promised move, not a broken capture** — but a script that counts only the old string
+reads `0` and looks like a surface that failed to render. The CHR-011 capture counts both.
+
+### 7.4 What is ready to run, so the picture session is short
+
+Written this session, in `verdicts/CHR-011/`:
+
+- **`capture.js`** — CHR-001's flow, changed in exactly three places: it **reads CHR-001's own
+  `measure.js`** rather than carrying a copy (a before/after taken with two different evals measures
+  nothing), it counts **both** shadow sentences, and it asserts its preconditions loudly — the
+  Templates shelf row count (§5's compare-like-with-like), the Group chip, the `Box Shadow` heading,
+  and the panel's real box rather than the hidden 0×16 shell the editor never unmounts.
+- **`build-page.js`** — writes `<date>/index.html`: the eight before/after pairs, the AC2 tables,
+  and a verdict slot per surface. Missing after-shots render as a labelled gap, so the page cannot
+  quietly be short of pictures.
+- **`2026-09-18/index.html`** — already generated, and it says **0 of 14 after-shots taken** at the
+  top. The before column and both number tables are live; open it with
+  `open dev-docs/tasks/phase-92-dreamweaver-called/verdicts/CHR-011/2026-09-18/index.html`.
+
+⚠️ **Neither script has met a running renderer.** They were written from the source, which is not the
+same thing — expect the first run to find instrument faults before it finds product ones
+([[a-new-instruments-first-drive-finds-instrument-faults]]).
+
+### 7.5 The recipe, for the session that gets the box
+
+1. `git status` — the tree must be clean, or the `.app` is not HEAD. Ask the peers, do not assume.
+2. `npm run build:editor` (one heavy job; announce it, and announce the teardown to the same list).
+3. Install or run the packaged app on private ports with the CHR-001 profile recipe (manifest
+   `launch` field), seeded with the **same two projects**, one run per theme.
+4. `NOODL_REMOTE_DEBUG_PORT=9333 node verdicts/CHR-011/capture.js <theme> verdicts/CHR-011/<date>`
+5. Write `<date>/manifest.json` with the HEAD sha, the app version and the **`app.asar` md5** (AC3),
+   then `node verdicts/CHR-011/build-page.js <date>` and `open` the page for Richard.
