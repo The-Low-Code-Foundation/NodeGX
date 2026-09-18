@@ -113,8 +113,8 @@ filling. A charged turbo is a button beside Next, not a hidden state.
 | AC5 | ✅ (s1) Engine gate: the chain charges at exactly 3 in a row, holds one, survives a wrong answer once charged, and is spent only while behind. Sabotage: let it charge at 2. |
 | AC6 | ✅ (s1) Engine gate, the one that grades Richard's sentence: a bad start wins ≥ 15% with the comeback on and ≤ 2% with it off, **and** a clean race rises by no more than 15 points, **and** a child guessing still wins ≤ 35%. Four clauses, because a fix that makes the race easy is not a fix. *As built: 1% → 57%, clean 98% → 98%, guessing 13%.* |
 | AC7 | 🔜 **Not built.** Layer 3 (the bought Starter turbo) is designed in §3.2 and nothing of it exists yet: no shelf row, no `boosts` count on the profile, no consume at the start of a race. Layers 1 and 2 deliver the comeback without it, so this is a task and not a hole. Its clause: layer 3 is off in a two-player race, and a bought turbo is consumed exactly once. |
-| AC8 | 🟡 (s2) **DRIVEN — the comeback works, at SIX misses not four, and the line that says why is clipped on the phone.** `--scenario ply006`. The chain line counts `1/3 → 2/3`, the turbo charges on the third right answer, `⚡ Fire the turbo!` appears and is reachable (not behind a blocker), firing it puts `⚡⚡ turbo fired` / `turbo lancé` in the line, and the answer it grades wins **1.81–1.85×** the distance of the preceding plain right answer — read from the kit's own `data-gain` dasharray, which is the app's own arithmetic. Not exactly 2× because `gain = RACE_STEP × speed × slip × turboMult` and the slipstream shrinks as the gap closes. **Two findings, both in §5.** |
-| AC9 | 🔴 **RED (s2) at ALL FIVE viewports.** Measured on the rendered `<image>` in a real race: **15, 15, 15, 19 and 14 px** at 1366×768, 1280×720, 1024×768, 768×1024 and 390×844 — short of 20 by 1 to 6 px. See §5. |
+| AC8 | 🟡 (s2/s3) **DRIVEN — the comeback works; the clipped line is fixed in source and the "four" question is answered by R5.** `--scenario ply006`. The chain line counts `1/3 → 2/3`, the turbo charges on the third right answer, `⚡ Fire the turbo!` appears and is reachable (not behind a blocker), firing it puts `⚡⚡ turbo fired` / `turbo lancé` in the line, and the answer it grades wins **1.81–1.85×** the distance of the preceding plain right answer — read from the kit's own `data-gain` dasharray, which is the app's own arithmetic. Not exactly 2× because `gain = RACE_STEP × speed × slip × turboMult` and the slipstream shrinks as the gap closes. **Two findings, both in §5.** |
+| AC9 | 🟡 **FIXED IN SOURCE (s3), NOT YET DRIVEN.** Was RED at all five viewports — **15, 15, 15, 19 and 14 px** on the rendered `<image>` in a real race. **The cause was not the course box.** `Game/Race track` placed the kit's track with `rocketSize: 44`, a bare literal; the kit documents the relation itself (`kit.js:490`) as `rocketSize × 2·WINDOW_R ÷ ROCKET_UNITS` = `rocketSize × 25/78`, so 44 draws **14.1 px** — which is what the phone measured, with the roomier viewports landing a little above the floor. `spriteScale` floors the sprite at `rocketSize` **whatever the box is**, so the box never capped anything. R4 (Richard, 2026-09-18): the face is 23 px, the kit's own default. The override is **deleted** rather than raised, here and on `Hangar/Preview`, so the kit's `ROCKET_SIZE_DEFAULT` applies and there is no second copy of the number to drift from the one AC2 measures. Predicted face: **23.1 px at every viewport**. 🔴 Re-drive to confirm, and watch the phone: at 390×844 the two rockets already started stacked with their labels overlapping, and a longer rocket has more to stack. |
 | AC10 | Richard comes back from a bad start, and says whether it felt earned or given. |
 
 ## 5. What driving found that the gates could not (s2, 2026-09-18)
@@ -154,6 +154,18 @@ why. EN 1366×768 is clean. This is the longest the line ever gets — speed, tu
 exists for exactly one answer per race, which is why no earlier drive met it. `innerText` holds the whole string
 either way, so only a box measurement or the picture can see it.
 
+🟡 **s3 — fixed in source, not yet driven.** The line is a content-sized Text, which the house rule (`text()`,
+`tpl007Components.ts:224`) allows *"only for a name, a number or a glyph"* — and `CONTENT_SIZED_TEXTS` justified this
+one as *"a short line … at most 'Ta fusée ne bouge pas'"*. **That justification was written when the line WAS short,
+and PLY-006 made it three clauses long without revisiting it.** Content-sizing renders `white-space: pre`, so the line
+cannot wrap, and its row is centred — which is why it spills off both ends and not one.
+
+It wraps **under 480px and nowhere else** now (`.rkt-boost` in `APP_CSS`): the height RKT-006 was protecting is a
+height on a LAPTOP, where this line is short and the rule never applies. `!important`, because content-sizing writes
+`white-space` inline and an inline style beats a class. 🔴 The drive must read the BOX at 390×844, never `innerText`,
+and confirm two things — nothing spills, **and** the banner did not grow a row at 1280×720, which is the screen
+RKT-006 measured Next falling off.
+
 ### 5.3 AC8's "four" should be six
 
 After **four** misses the chain still charges (`race.turbo` → 1 on the third right answer) but the button never
@@ -161,3 +173,61 @@ appears: by then the slipstream has pulled the child back inside `BEHIND_FROM` (
 `behind`. The turbo is not lost — it waits for the next time they fall behind — but AC8's sequence cannot be
 completed at four. At **six** the gap survives three right answers and the button appears. Either the AC's number
 moves to six, or a charged turbo becomes spendable while level; **Richard's call.**
+
+### 5.4 🔴 s3 — what the fix was, and why §5.1's diagnosis was wrong
+
+§5.1 named the course box, and the box was innocent. `spriteScale` (`kit.js:518`) is a FLOOR:
+
+```js
+return Math.max(1, want / (ROCKET_UNITS * unit));   // want = rocketSize
+```
+
+so the sprite is scaled up until a rocket is `rocketSize` pixels long **whatever the box measures**. The box only
+decides whether the floor has to do any work. What set the size was one literal on one placement:
+
+```
+place('rtTrack', KIT_TRACK, …, { …, aspect: 'auto', rocketSize: 44 })   ← the whole of finding 6a
+```
+
+and the kit's own line 490 gives the arithmetic: `face = rocketSize × 2·WINDOW_R ÷ ROCKET_UNITS = rocketSize × 25/78`.
+
+| rocketSize | face | where that number came from |
+|---|---|---|
+| 44 | **14.1 px** | the literal the race asked for — and 14 px is what 390×844 measured |
+| 62.4 | 20 px | the smallest that clears AC2's promise |
+| **72** | **23.1 px** | `ROCKET_SIZE_DEFAULT`, the kit's own default — **R4, Richard's call** |
+
+The gate that could not see this is the gate that now does: the kit gate reads the kit's default, so AC2 was true and
+irrelevant. The new template clause reads the **built artefact** and fails if any placement of the kit's track lowers
+the floor, with the hangar tile's 52 px thumbnail as the one named exception — verified RED by restoring the 44.
+
+🔴 **The general shape, for the next reader:** AC2 measured a property of the KIT and the AC was about what a CHILD
+sees. Between them sat one override, and no gate looked at it. See
+[[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]].
+
+### 5.5 🔴 s3 — R5: a charged turbo is spendable while level, and what that did to the numbers
+
+§5.3's question went to Richard, who ruled the second way: **a charged turbo can be fired even when level.** A child
+must never earn something they cannot spend, and the three right answers that charge a turbo are the same three that
+close the gap. Dropped from both places that required it — the engine's `turboUsed` and the button's `rdCanFire` — and
+the AC5 clause that asserted the opposite is re-armed.
+
+Re-measured as a **control pair in one harness**, 400 seeded races per cell, the only difference between the columns
+being that one term:
+
+| arm | turbo needs `behind` | R5: spendable while level |
+|---|---|---|
+| bad start, comeback off | 0% | 0% |
+| **bad start, comeback on** | **41%** | **47%** |
+| clean race, comeback off | 92% | 92% |
+| clean race, comeback on | 93% | **98%** |
+| a child guessing (35%) | 10% | 16% |
+
+So R5 **strengthens** the comeback rather than weakening it, and the cost is +5 on a clean race and +6 on guessing —
+both inside AC6's bounds (clean must rise by ≤ 15, guessing must stay ≤ 35). The slipstream is still behind-only, so
+the automatic half of the comeback still only helps a child who needs it; the turbo is the earned half, and it is
+theirs.
+
+🔴 These are not §3.3's numbers and do not replace them: §3.3 was measured with a different harness (its bad-start
+"after" was 57%). **The columns above are comparable with each other and with nothing else** — which is the only way
+this question could be answered, because what was being measured was a difference.

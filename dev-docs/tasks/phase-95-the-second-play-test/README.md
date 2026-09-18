@@ -89,7 +89,7 @@ Every cause below was read from source on 2026-09-18, not guessed. Line numbers 
 | 6a | the rocket is too small to see yourself in | the sprite is 64 units nose to tail and the face is a **20 × 20 image clipped to a 9-unit circle** — about 14% of the rocket's length. At the 44px floor that is a **12px face** (`kit.js:487, 778-786, 960`) | [PLY-006](PLY-006-BIGGER-ROCKETS-AND-A-WAY-BACK-INTO-THE-RACE.md) |
 | 6b | a bad start is an unwinnable race | `cpuGain = RACE_STEP × (0.35 + 0.35 p)` (`tpl007Scripts.ts:877`) — **the computer moves on every question, including the ones the child gets wrong**, while the child's `gain` is 0 on a miss (`:876`). There is no term anywhere that reads the gap. Four missed answers at the start is a lead of ≈0.25 the child can only close by being perfect | [PLY-006](PLY-006-BIGGER-ROCKETS-AND-A-WAY-BACK-INTO-THE-RACE.md) |
 
-## 3. Richard's three rulings, 2026-09-18
+## 3. Richard's rulings, 2026-09-18
 
 Asked before any file was written, because each fork changed the work:
 
@@ -98,6 +98,16 @@ Asked before any file was written, because each fork changed the work:
 | R1 | **Stars become spendable prices.** Items carry a star cost; buying subtracts from the total; a confirmation shows balance, cost and what is left. | 🔴 Reverses [RKT-011 §3.1](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md)'s ruling **A** (pick at a milestone) for **B** (shop). `HANGAR_MILESTONES` / `HANGAR_EVERY` retire; save code goes to **v3**; Home's "next 🎁 at N ⭐" becomes a purse. |
 | R2 | **Boosts can be bought with stars too** — as well as earned in the race. | Adds a second, non-cosmetic sink to R1's economy. [rkt-010's](../phase-87-the-first-play-test/rkt-010-rewards-research.md) "no reward a child cannot earn" still binds: every boost must also be earnable by playing, so a child with 0 ⭐ is never short of one. |
 | R3 | **Drop `fun-emoji` and `thumbs` from the chooser.** | The chooser offers three styles, not five. Existing profiles on a dropped style must keep their face and still get a shelf — see [PLY-001](PLY-001-THE-HANGAR-FITS-THE-FACE-YOU-CHOSE.md) §3.4. |
+
+### R4–R6 — asked in s3, after the second drive measured what was wrong
+
+Each of these was a fork the drive found, and each was asked from the section that MEASURED it, never from a headline.
+
+| # | Ruling | What it settles |
+|---|---|---|
+| R4 | **The rocket is 72 long — a 23 px face — which is the kit's own default.** | [PLY-006](PLY-006-BIGGER-ROCKETS-AND-A-WAY-BACK-INTO-THE-RACE.md) AC9. The race had asked for `rocketSize: 44`, a literal, drawing a 14 px face while AC2 measured the kit's 72 and passed. The override is deleted rather than raised, so the kit's default applies and no second copy of the number exists. See §5.4. |
+| R5 | **A charged turbo can be fired even when level.** | [PLY-006](PLY-006-BIGGER-ROCKETS-AND-A-WAY-BACK-INTO-THE-RACE.md) AC8/AC5. A child could earn a turbo and never spend it: the three right answers that charge it are the same three that close the gap, and the button required being behind. 🔴 Re-measured as a control pair — bad start **41% → 47%**, clean race **93% → 98%**, guessing **10% → 16%** — so it strengthens the comeback, inside AC6's bounds. The slipstream stays behind-only. See §5.5. |
+| R6 | **The buy card sits over the shelf, and closing it returns the child to the tab they were on.** | The hangar. Both halves had one cause: asking UNMOUNTED the shelf, and remounting re-fired the node whose job is to open on the Face tab — so every "No thanks" threw a child browsing rockets back to Face. |
 
 ## 4. Order
 
