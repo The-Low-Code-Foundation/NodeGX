@@ -481,7 +481,74 @@ the obvious answer — they are context, the tail is the subject — and it rend
 for an ellipsis, and the steps are 20px and 29px. The leading steps now hold their ground and the
 long tail absorbs it: **`App › Home › Main Nav…`**, every word legible.
 
-## 9. Where TVW-004 stands after s15
+## 9. Slice 4 — AC5, the tab a cold start opens (s16, 2026-09-18)
+
+`scripts/devtools/drive-tvw004-ac5.js`. **11 arms, 10 graded, 10 held.** No product code changed:
+the surface was already right, and what was missing was a drive that could see it.
+
+### 9.1 The cold start is a door the product already has
+
+§8.2 left AC5 needing "a fresh renderer per kind, or a way to clear `chosenTab` that is verified to
+work". It needs neither. `route({to:'projects'})` and back unmounts `EditorPage`, so the panel is
+built again with `chosenTab === null` — **leaving the project and coming back is the cold start**,
+it costs about twenty seconds, and it is a route a person takes. A renderer reload also works and
+buys a webpack race for the privilege.
+
+⚠️ **And the canvas comes back where it was left**, which is why three of the first four readings
+started on the tab they expected. An arm that reads `Components` on a panel already showing
+`Components` grades nothing. Each subject is now **primed** first: the canvas goes to a component
+whose default is the *other* tab, the drive checks it moved there, and only then goes to the
+subject. Priming moves the canvas, and only a tab click or ⌘⇧L writes `chosenTab`, so the panel is
+still cold — and if priming ever did make a choice, the primed tab would not be the opposite one
+and the subject would go **ungraded** rather than pass.
+
+### 9.2 The four subjects were chosen off the project file, not off the panel's index
+
+`buildKindIndex` is the pipeline the tab decision reads; picking the fixture with it would make the
+subject and the answer one measurement. `project.json` was read directly instead — a `Page` node at
+a root, a visual root type, and how many nodes anywhere carry the component's name as their `type`:
+
+| AC5's kind | component | file says | runtime says |
+|---|---|---|---|
+| a page | `/Pages/Main/Creator` | `Page` node at its root | `page`, 0 instances |
+| a placed visual | `…/Atoms/Layout/Limiter` | `Group` root, 12 nodes place it | `visual`, 12 instances |
+| an unplaced visual | `…/File Dropzone/Samples/Image File Dropzone` | `Group` root, nothing places it | `visual`, 0 instances |
+| a logic component | `…/Utils/Media Queries/Match Media Query` | no visual root at all | `component`, 6 instances |
+
+The runtime's kind is read too, as a **precondition**: an arm about an unplaced *visual* whose
+subject the runtime calls a logic component would expect `Components` for the wrong reason, so it
+refuses rather than passes. The logic subject is deliberately a **placed** one — so that arm also
+says placement alone does not open Layers.
+
+**The pair that carries the claim** is the two visuals: same kind, different placement, different
+tab. Four readings that all said `Components` could be a build that never opens Layers at all.
+
+### 9.3 ⌘⇧L was pressed, not emitted
+
+`Emulation.setFocusEmulationEnabled` and `Input.dispatchKeyEvent` on the same connection, Meta|Shift
+and `KeyL`. Emitting `componentsPanel.flipTab` would have proved the panel listens and said nothing
+about whether the shortcut reaches it. It flips, it flips back, and — pressed from the **search**
+panel — it opens the Project panel and flips, which is the claim `EditorPage` makes for it in its
+own comment: *"a shortcut that only worked while the panel happened to be showing would be a door
+you have to already be through."* R-E's other half held in the same run: with a tab chosen, moving
+the canvas to a component whose default is the other tab does not move it.
+
+### 9.4 🔴 What the memory does NOT survive — §2's row is one word too strong
+
+§2 says the tab is **"remembered per session, not per project"**. Measured: choose `Components`,
+leave to the launcher, come back — and the tab is `Layers` again, the default for whatever the
+canvas opens. `chosenTab` is `useState` inside `ComponentsPanelReact`, and `EditorPage` unmounts on
+the way out, so the choice is remembered **for as long as you stay in the project**, not for the
+session.
+
+**This does not block AC5**, whose sentence is about the default and the flip, and both are green.
+It is filed because the spec row as written is not true of the build, and a later session reading
+§2 would believe it. The fix, if it is ever wanted, is small — `chosenTab` lifted out of the
+component into a module-level value — and it is the same shape of thing the drive relies on to get
+a cold start at all, so whoever does it has to rewrite `coldStart()` in the drive as a renderer
+reload in the same change.
+
+## 10. Where TVW-004 stands after s16
 
 | AC | state |
 |---|---|
@@ -489,7 +556,7 @@ long tail absorbs it: **`App › Home › Main Nav…`**, every word legible.
 | 2 — rows against an independent walk, glyph colours | 🟢 4/4 on three projects; three defects found and fixed |
 | 3 — the tinted region | 🟢 (s14) |
 | 4 — a cycle | 🟢 (s14) |
-| 5 — tab default and ⌘⇧L | 🔴 **open** — needs a cold-start drive per component kind (§8.2) |
+| 5 — tab default and ⌘⇧L | 🟢 **10/10 arms** on four cold starts, each one primed so the tab is seen arriving (§9) |
 | 6 — the shots | 🟡 **20 captured; Richard's WORTHY verdict is what is left** |
 | 7 — gates | 🟢 `test:main` 497/7939; `tests-unit/tvw-004` 2 suites / **41 specs**, 4 new mutants each `cmp`-proven applied and each red on its own spec |
 
