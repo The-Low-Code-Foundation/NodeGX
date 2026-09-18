@@ -98,6 +98,31 @@ async function main() {
   })()`);
   console.log(`project: ${JSON.stringify(info)}`);
 
+  /**
+   * 🔴 REFUSE TO READ A SCREEN THAT HAS NO PREVIEW ON IT.
+   *
+   * AC3's whole assertion is `before.src === after.src`. On the launcher — no project open — both
+   * reads are `null`, `null === null` is true, and this script would print HELD for every switch
+   * against a window with no preview and no canvas in it. A negative arm whose two sides are both
+   * missing passes hardest.
+   *
+   * Learned from a peer the same day (P92, 2026-09-18): their look gate rooted its `launcher`
+   * surface at `body`, so with a project open it silently graded the EDITOR and filed the findings
+   * under "launcher". Same shape, opposite direction — the reading names the surface you asked
+   * for, not the one you got. They made theirs exit 2; so does this.
+   */
+  const ready = await ev(`(() => ({
+    preview: !!document.querySelector('[data-test="app-preview"] webview'),
+    canvas: !!document.querySelector('[data-test="component-tree"]')
+  }))()`);
+  if (!ready.preview || !ready.canvas) {
+    console.error(
+      `refusing: this renderer is not showing a project (preview=${ready.preview}, componentTree=${ready.canvas}). ` +
+        'Open the project first — on the launcher every AC3 pair is null === null, which reads as HELD.'
+    );
+    process.exit(2);
+  }
+
   const targets = (opt('components') || '').split(',').filter(Boolean);
   if (targets.length === 0) {
     console.error('pass --components "/A,/B" — pick them with the fixture probe, not by guessing');
@@ -123,7 +148,10 @@ async function main() {
     await wait(500);
 
     const after = await ev(SURFACES);
-    const held = before.src === after.src && before.mode === after.mode;
+    // Both sides must be REAL, not merely equal — see the refusal above for why `null === null` is
+    // the failure this guards.
+    const read = Boolean(before.src && after.src && before.mode && after.mode);
+    const held = read && before.src === after.src && before.mode === after.mode;
 
     rows.push({ target, before, after, ac3: held });
     console.log(
@@ -173,7 +201,8 @@ async function main() {
   const json = opt('json');
   if (json) fs.writeFileSync(json, JSON.stringify({ project: info, rows }, null, 2));
 
-  const ac3Held = rows.filter((r) => r.ac3 !== undefined).every((r) => r.ac3);
+  const ac3Rows = rows.filter((r) => r.ac3 !== undefined);
+  const ac3Held = ac3Rows.length > 0 && ac3Rows.every((r) => r.ac3);
   console.log(`\nAC3 (preview did not move on any canvas switch): ${ac3Held ? 'HELD' : 'BROKEN'}`);
   console.log(`known-firing navigation seen: ${navigationSeen}`);
   process.exit(ac3Held && navigationSeen ? 0 : 1);
