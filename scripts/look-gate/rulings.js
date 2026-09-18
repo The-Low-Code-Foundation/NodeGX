@@ -71,6 +71,33 @@ const RULINGS = [
       'unexamined leftover — CHR-009\'s Group pair was ruled WORTHY with this edge in it. 🔴 Do not ' +
       're-propose `border-control` on panel fields. If a field ever needs a stronger edge, it is a ' +
       'question for him about THAT field, not a compliance fix for all 40.'
+  },
+  {
+    id: 'unset-field-placeholder-stays-greyed',
+    rule: 'text-contrast',
+    // dark:  `fg-disabled` #7d8a98 on the field fill `bg-2` #2e2c36 → 3.897:1
+    // light: `fg-disabled` #7a8691 on the field fill `bg-2` #f2f4f6 → 3.373:1
+    pairs: [
+      ['#7d8a98', '#2e2c36'],
+      ['#7a8691', '#f2f4f6']
+    ],
+    what:
+      'The word an unset field shows in place of a value — `None` in `IconInput`, the greyed tone ' +
+      '\u00a716 gave every placeholder — reads 3.897:1 dark and 3.373:1 light where NAT-001 asks ' +
+      '4.5:1 of text. It is not a value a person reads; it is the field saying it is empty, and it ' +
+      'is deliberately quieter than the values around it.',
+    ruledBy: 'Richard',
+    ruledOn: '2026-09-18',
+    shown:
+      'https://claude.ai/artifact/UgyGxHTS9A1vp9ozw7E4cz — the `Icon Source` row photographed in ' +
+      'both themes, beside the numbers; also ' +
+      'dev-docs/tasks/phase-92-dreamweaver-called/verdicts/CHR-010/2026-09-18-surfaces/' +
+      'iconinput-none-placeholder-{dark,light}.png',
+    note:
+      'Asked as a straight choice — darken it to the AA token, or rule it as placeholder text. He ' +
+      'ruled placeholder text. \ud83d\udd34 This excepts the PLACEHOLDER tone only: it matches ' +
+      '`fg-disabled` on the field fill, so a real value drawn in this tone, or this tone moving, ' +
+      'reds again. CHR-009 \u00a724 was the finding that owed this ruling.'
   }
 ];
 

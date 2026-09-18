@@ -1534,8 +1534,16 @@ was graded on more than the Group. Full numbers, attribution and the ruling in
   took it back — *"no outlines like in the after pic, I don't like it"* — so it is now a recorded
   exception in `scripts/look-gate/rulings.js`, matched on the measured colour pair, counted in its
   own bucket, and reversible with `--no-rulings`. **The panel was not changed.**
-- 🟡 **One finding still standing, owed a ruling:** `IconInput`'s `None` placeholder word at
-  **3.897:1 dark / 3.373:1 light** against 4.5:1. Text, not an edge; nobody has looked at it.
+- ✅ **RULED 2026-09-18 (s33): the placeholder stays as it is.** `IconInput`'s `None` at
+  **3.897:1 dark / 3.373:1 light** against 4.5:1 was put to Richard as a straight choice — darken it
+  to the AA token, or rule it as placeholder text — with the row photographed in both themes
+  (`verdicts/CHR-010/2026-09-18-surfaces/iconinput-none-placeholder-{dark,light}.png`, and on
+  https://claude.ai/artifact/UgyGxHTS9A1vp9ozw7E4cz). He ruled **placeholder text**: it is the field
+  saying it is empty, not a value anyone reads. Recorded as
+  `unset-field-placeholder-stays-greyed` in `scripts/look-gate/rulings.js`, matched on the measured
+  COLOUR PAIR (`fg-disabled` on `bg-2`, both themes) so a real value in this tone, or this tone
+  moving, reds again. 3 mutant arms red; `tests-unit/chr-004` **63 tests, exit 0**.
+  ⇒ **AC5 is met. CHR-009 is closed.**
 - ✅ **`test:ci` TAKEN, at the floor.** My own run, at my own HEAD: **2,985 specs / 8 failures, seed
   68399, HEAD `e50ea09b`, 78s**, fresh JSON (mtime 23:53:04 against a 23:10:50 baseline, recorded
   before the run so a stale read could not pass as this one). Exit 1 is what the 8-failure floor

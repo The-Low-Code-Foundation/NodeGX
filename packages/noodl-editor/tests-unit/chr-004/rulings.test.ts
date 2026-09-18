@@ -205,10 +205,14 @@ describe('CHR-004 — the ruling reaches auditElements without touching a thresh
   });
 
   it('🔴 text and radius findings are untouched by the edge ruling', () => {
+    // 🔴 The text fixture is deliberately NOT `fg-disabled` on `bg-2`: that exact pair is itself
+    // ruled now (`unset-field-placeholder-stays-greyed`), and a spec whose counter-example is a
+    // ruled pair stops grading what its name says the moment the table grows. This ink is under
+    // 4.5:1 on the same ground and matches no ruling.
     const mixed = auditElements(
       [
         quietField(),
-        { id: 'span.Label', role: 'text', ownText: 'None', textColor: '#7d8a98', grounds: ['#2e2c36'] },
+        { id: 'span.Label', role: 'text', ownText: 'Value', textColor: '#6b7683', grounds: ['#2e2c36'] },
         { id: 'div.Odd', role: 'text', grounds: ['#232129'], radius: '7px' }
       ],
       { scales: SCALES, rulings: RULINGS }
@@ -216,6 +220,34 @@ describe('CHR-004 — the ruling reaches auditElements without touching a thresh
 
     expect(mixed.ruledExceptions).toHaveLength(1);
     expect(mixed.findings.map((f: TSFixme) => f.rule).sort()).toEqual(['radius-off-scale', 'text-contrast']);
+  });
+
+  it('🔴 excepts the unset-field placeholder in BOTH themes, and only that tone', () => {
+    // The ruling Richard gave on 2026-09-18: `None` in a field is the field saying it is empty, not
+    // a value someone reads. It matches the measured pair, so a real value drawn in this tone — or
+    // this tone moving — reds again, which is the whole point of matching colours over elements.
+    const placeholders = auditElements(
+      [
+        { id: 'span.Dark', role: 'text', ownText: 'None', textColor: '#7d8a98', grounds: ['#2e2c36'] },
+        { id: 'span.Light', role: 'text', ownText: 'None', textColor: '#7a8691', grounds: ['#f2f4f6'] }
+      ],
+      { scales: SCALES, rulings: RULINGS }
+    );
+
+    expect(placeholders.findings).toHaveLength(0);
+    expect(placeholders.ruledExceptions.map((e: TSFixme) => e.ruledBy)).toEqual([
+      'unset-field-placeholder-stays-greyed',
+      'unset-field-placeholder-stays-greyed'
+    ]);
+
+    // The same word in the same tone, on a ground nobody ruled, is still a finding. (`bg-3`
+    // #33323d reads 3.581:1 under this ink — failing, and not the pair Richard was shown.)
+    const elsewhere = auditElements(
+      [{ id: 'span.Odd', role: 'text', ownText: 'None', textColor: '#7d8a98', grounds: ['#33323d'] }],
+      { scales: SCALES, rulings: RULINGS }
+    );
+    expect(elsewhere.ruledExceptions).toHaveLength(0);
+    expect(elsewhere.findings.map((f: TSFixme) => f.rule)).toEqual(['text-contrast']);
   });
 });
 

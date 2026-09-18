@@ -164,6 +164,30 @@ the variant popout opens straight into its create-mode branch and never draws th
 the nodes with `NodeGraphNode.fromJSON` the way `CHR-009/2026-09-17/set/drive-set.js` does.
 And AC1 closes on **Richard's look**, which has not happened.
 
+## 9. CLOSED — Richard's look (2026-09-18, s33)
+
+✅ **CHR-010 is closed.** Shown the six surfaces (https://claude.ai/artifact/UgyGxHTS9A1vp9ozw7E4cz),
+Richard: *"Let's close CHR 010."* AC1 is met on the look, AC2–AC4 on the readings in §7.
+
+He looked past the glyphs while he was in there, and named two things that are **not** this task's
+and are now P94's opening defects (`dev-docs/tasks/phase-94-one-styles-panel/`):
+
+1. *"When you add a new colour to the colour style picker, no matter what colour you choose it adds
+   it transparent and you have to set it again once it's in the list."* — the create path reads the
+   **port's** committed value (`<CreateNewStyle color={props.inputValue}>`), not the colour in the
+   wheel.
+2. *"Also how TF do you delete colours?"* — delete and rename exist on every style row and are
+   `visibility: hidden` until the row is hovered.
+
+And the variant/save defect §8 records: *"I reckon this will be part of the new phase I asked to
+have made."* ⇒ P94 STY-005.
+
+⬜ **One reading is still owed and was NOT taken:** CHR-004's look gate over these surfaces
+(`node scripts/look-gate/run.js --surface=property-panel --theme=both`). The box went to a peer
+before I could run it, and it is the instrument that measures "nothing stays black" as CONTRAST
+rather than by eye — which is how the magnifier got past s32. Take it the next time the box is free;
+it grades the surface, not this task's verdict, which Richard has given.
+
 ## 8. The surfaces AC1 names (s33, 2026-09-18) — `verdicts/CHR-010/2026-09-18-surfaces/`
 
 Dev build at HEAD `382b716f` + `725a0b2b`, a **scratch copy** of `templates/rocket-school` in the
