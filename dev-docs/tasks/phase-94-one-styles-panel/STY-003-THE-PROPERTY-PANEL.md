@@ -1,6 +1,11 @@
 # STY-003 — The property panel
 
-**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** ⬜ not started.
+**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟡 **the decision is built and gated
+(s4); the surface is not.** `models/Looks/fieldState.ts` answers the only question this panel asks —
+*where did this value come from?* — and `tests-unit/sty-003/fieldState.test.ts` is **16 tests green**,
+including the pair that would pass any implementation written as "highlight it if it differs".
+**Nothing is drawn yet**, so AC1–AC5, AC7 and AC8 are open; the editor stack was held by a peer for
+most of the session.
 **Design:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §2 (the four rules), §3
 (the panel), §4 (the Look menu) — **ruled by Richard, 2026-09-18**.
 
@@ -41,6 +46,33 @@ exactly the case a person most needs it ([[a-css-property-whose-default-equals-t
 **The three states are a fact about provenance, never about the value.**
 
 ---
+
+## 2a. What s4 built — the decision, so the surface has only drawing left
+
+**`models/Looks/fieldState.ts`** (pure, no React, no singletons):
+
+- `readField(node, look, name)` → `linked` / `overridden` / `own` / `default`, with the Look's name
+  and **what the Look wanted**, which is what rule 3's revert needs.
+- 🔴 **It decides on ownership, never on values.** `NodeGraphNode.getParameter` resolves own →
+  variant → port default (`:799-824`) and the viewer merges in the same order, so ownership is the
+  real question. **A field that owns the same value the Look offers still reads `overridden`**, and
+  `matchesLook` reports the coincidence without ever suppressing the treatment — the §2 trap, armed
+  as its own test.
+- `styledFieldNames` is the **union** of the Look's fields and the node's own, so an overridden field
+  is never dropped from the section rule 3 is about.
+- ⚠️ **Four facts, three treatments.** `own` and `default` are both drawn plainly, but they are not
+  the same fact, and a surface that cannot tell them apart cannot say "nothing is set here" when that
+  is true. `treatmentOf()` collapses them for drawing; the fact stays for anything that reasons.
+- `buildLookMenu` gives design §4's three sections in order, with wearer counts, the current Look
+  marked, and the save row named after the thing in front of the person. 🔴 **A shipped Look whose
+  name the project already holds is not offered twice** — after first use they are the same thing
+  (rule 4), and two rows for it would be the two-systems problem returning.
+
+**Gates:** `tests-unit/sty-003` 16/16; editor `test:main` **501 suites / 8004 tests**; `tsc` clean.
+
+**What is left is the surface**, and it is the larger half: the `Look` row itself, the three
+treatments drawn and read off the rendered element in both themes (AC5), R6's `⋯` menu (AC7), and
+Richard's WORTHY (AC8).
 
 ## 3. Acceptance criteria
 
