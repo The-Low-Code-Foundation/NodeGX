@@ -45,15 +45,29 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const STRIP = '[data-test="preview-strip"]';
 
-/** What both surfaces are showing, as one reading. The pair AC3 compares. */
+/**
+ * What both surfaces are showing, as one reading. The pair AC3 compares.
+ *
+ * 🔴 The comments that belong to this snippet live OUT here, not inside it. A backtick inside a
+ * template literal ends the template literal, and the first draft of this file was a syntax error
+ * for exactly that reason — caught by running node over it before the drive, not during one.
+ *
+ * - the sentence is read by CLASS, not by querySelector('span'): the strip's sentence is a span
+ *   containing a strong and another span, so "the first span" is a coincidence, not a reading;
+ * - the webview's src is read as the PROPERTY first (CanvasView assigns the property), with the
+ *   attribute only as a fallback — a property write that never reflected would make every AC3 pair
+ *   hold for the wrong reason;
+ * - the dismiss button is in `doors` too, as a bare multiplication sign. Left in on purpose: a run
+ *   where it is missing is a run where the strip did not render what this script thinks it did.
+ */
 const SURFACES = `(() => {
   const bg = document.querySelector('[data-preview-mode]');
   const webview = document.querySelector('[data-test="app-preview"] webview');
   const strip = document.querySelector('${STRIP}');
-  const text = strip && strip.querySelector('span');
+  const text = strip && strip.querySelector('[class*="StripText"]');
   return {
     mode: bg ? bg.getAttribute('data-preview-mode') : null,
-    src: webview ? webview.getAttribute('src') : null,
+    src: webview ? webview.src || webview.getAttribute('src') : null,
     shape: strip ? strip.getAttribute('data-shape') : 'agree',
     text: text ? text.innerText.replace(/\\s+/g, ' ').trim() : '',
     doors: strip ? Array.from(strip.querySelectorAll('button')).map((b) => b.innerText.trim()) : []
