@@ -2,8 +2,8 @@
 
 **Written 2026-09-18, end of session 14.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
 s12–13 built and closed TVW-002. **s14 built TVW-004 — the Layers tab exists, opens, draws the
-screen, and was driven once.** It also corrected a defect in TVW-002's closed surface that only
-showed up because Layers was being built next to it.
+screen, and was driven twice.** Richard ruled six times on it. It also corrected a defect in
+TVW-002's closed surface that only showed up because Layers was being built next to it.
 
 ## The board, re-derived from the task files
 
@@ -79,8 +79,20 @@ not the drawn root in **572 of 5,039 components**; **20 of 66 dynamic repeaters 
   reason alone.
 - `scripts/devtools/drive-tvw004-layers.js` — the arms above, each refusing when its subject is not
   on screen (the indent arm says so rather than passing on a shallow screen).
-- `tests-unit/tvw-004` — 2 suites, 29 specs, **13 mutants** on `layersTree` and 3 on `pageReach`,
-  each proven applied by a byte compare and each red with a real count.
+- `tests-unit/tvw-004` — 2 suites, **36 specs**, **17 mutants** on `layersTree`/`layersTab` and
+  **6** on `pageReach`/`previewStripWords`, each proven applied by a byte compare and each red with
+  a real count.
+
+## What the second drive added (§6.9–6.10 of the task file)
+
+🔴 **A tint with no band to explain it.** With the canvas on the root, the shell's rows tinted and
+nothing said why — nine green arms went straight through it, the shot showed it. The rule is now
+**tint only what a band names**, which is what §2 was reaching for.
+🔴 **The tint was the SELECTION colour** — the same fill `.Selected` uses eleven lines below in the
+same stylesheet. A region being *edited* read as a row you had *clicked*.
+⚠️ **The renderer ran the OLD module for three readings.** HMR had not applied the fix and it
+looked broken. `String(layersOfScreen).includes(…)` is how that was settled — **ask the renderer
+which source it is running** before doubting the change.
 
 ## Gates at s14 (all re-run after the last change)
 
@@ -93,9 +105,11 @@ applied by byte compare and each red with a real count. **AC7 is green.**
 ## The box
 
 One dev stack per checkout. `node scripts/devtools/stop-dev.js --list`, and **ask the peer**.
-At handoff **opennoodl-5f** (P95 rocket-school drives) holds it; they confirmed in writing that
-their drives use ephemeral ports, and their `dev` launch reaped s14's editor stack mid-drive
-(exit 144) — **a `dev` launch sweeps the whole checkout, so announce before launching.**
+s14 left it **free** (`Stopped 35 process(es). Nothing left running.`). Two peers were active:
+**opennoodl-5f** (P95 rocket drives, ephemeral ports, never launches `dev`) and **opennoodl-ec**
+(P94/STY-001), whose `dev` launch reaped s14's editor stack mid-drive (exit 144) — **a `dev` launch
+sweeps the whole checkout, so announce before launching.** Both answer messages quickly; ec asked
+for 10 minutes and then handed the box over as promised.
 
 🔴 **The 09-16 dirty pile is still unowned and still uncommitted.** Four sessions have now disowned
 it. It needs Richard, not a fifth guess.
