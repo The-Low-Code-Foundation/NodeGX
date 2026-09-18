@@ -26,23 +26,28 @@
     outline-offset: -2px;
   }
 
+  // CHR-004 (Richard, 2026-09-18): the selected row was `primary` on `primary-bg` — 3.589:1 in
+  // light, in every state, on the one row that says which folder you are in. `primary-as-fg` is
+  // the same hue at a weight that clears AA on that wash (6.21:1 light; unchanged in dark, where
+  // azure-500 already did).
   &--selected {
     background: var(--theme-color-primary-bg);
-    color: var(--theme-color-primary);
+    color: var(--theme-color-primary-as-fg);
 
     &:hover {
       background: var(--theme-color-primary-bg);
-      color: var(--theme-color-primary);
+      color: var(--theme-color-primary-as-fg);
     }
 
+    // 🔴 No `opacity` here. At 0.75 the count composites back to 3.755:1 — the fix undone by the
+    // one line that made the number quieter than its label.
     .Count {
-      color: var(--theme-color-primary);
-      opacity: 0.75;
+      color: var(--theme-color-primary-as-fg);
     }
 
     .FolderIcon,
     .Chevron {
-      color: var(--theme-color-primary);
+      color: var(--theme-color-primary-as-fg);
     }
   }
 }

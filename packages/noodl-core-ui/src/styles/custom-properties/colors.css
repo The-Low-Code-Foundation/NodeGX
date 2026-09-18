@@ -403,6 +403,10 @@
      CTAs, active tabs, selection, links. NEVER destructive/error UI.
      --------------------------------------------------------------------------- */
   --theme-color-primary: var(--base-color-azure-500);
+  /* CHR-004 (2026-09-18): `primary` as TEXT on `primary-bg`. On the dark wash azure-500 is
+     already AA, so this is the same colour; it exists because the LIGHT theme's azure is not,
+     and a component cannot branch on theme — only a token can. */
+  --theme-color-primary-as-fg: var(--base-color-azure-500);
   --theme-color-primary-highlight: var(--base-color-azure-400);
   --theme-color-primary-dim: var(--base-color-azure-700);
   --theme-color-primary-bg: rgba(77, 163, 255, 0.13);
@@ -678,6 +682,10 @@
   --theme-color-fg-disabled: #7a8691;
 
   --theme-color-primary: #1570ef;
+  /* CHR-004 (2026-09-18): #1570ef on the 9% wash reads 3.589:1, and the launcher's selected
+     folder row sits in that state while a person reads it. Richard: "contrast is key here for
+     accessibility". This is the same hue two steps down — 6.21:1 on the same wash. */
+  --theme-color-primary-as-fg: #0b4daa;
   --theme-color-primary-highlight: #0e5fd0;
   --theme-color-primary-dim: #0b4daa;
   --theme-color-primary-bg: rgba(21, 112, 239, 0.09);

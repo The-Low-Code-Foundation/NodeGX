@@ -42,10 +42,19 @@
       transform: translateY(-1px);
     }
 
+    // CHR-004 (Richard, 2026-09-18): held down, the fill darkens to `primary-dim` and the dark
+    // theme's resting ink (`on-primary`, #071627) reads 3.433:1 on it. He ruled the darker fill
+    // stays and the pressed label goes white — 5.305:1. The glyph follows the label, or the `+`
+    // stays dark while the word beside it turns white.
     &:active:not(:disabled) {
+      color: var(--base-color-white);
       background-color: var(--theme-color-primary-dim);
       box-shadow: none;
       transform: translateY(0);
+
+      path {
+        fill: var(--base-color-white);
+      }
     }
   }
 

@@ -456,3 +456,30 @@ red and every arm restored byte-identical.
 and the variants popup are drawn in the popup layer, outside `.sidebar-property-editor` — so
 CHR-010's black magnifier would have been green here. The gate cannot see the surfaces where two of
 this phase's last three defects were.
+
+### The two findings, ruled and built (Richard, 2026-09-18)
+
+Shown both in the states they appear in (https://claude.ai/artifact/79baJxVJU69UXVzwYVkyoL):
+
+1. **The pressed primary button** — *"The darker pressed fill is ok, making the pressed font white
+   will help with contrast and close this task."* Built: `:active` keeps `primary-dim` and takes
+   `--base-color-white` for the label **and the glyph** (`path { fill }` follows, or the `+` stays
+   dark beside a white word). **3.433:1 → 5.305:1.**
+2. **The selected folder row** — *"Darken the text, add a border around the fill, whatever, contrast
+   is key here for accessibility."* Built as a token, because a component cannot branch on theme:
+   **`--theme-color-primary-as-fg`** (the house `-as-fg` convention, as `secondary-as-fg` already
+   uses) — light `#0b4daa`, dark unchanged at azure-500, which already cleared AA on its wash.
+   **3.589:1 → 6.21:1.**
+   🔴 The `.Count`'s `opacity: 0.75` had to go with it: at 75% the fixed ink composites back to
+   **3.755:1** — the fix undone by the one line that made the number quieter than its label. A
+   contrast fix must be measured **after** every opacity in its own rule.
+
+✅ **Re-driven: `--surface=launcher --theme=both --state=all` is GREEN, 0 findings over 2,026
+readings.** Shots before and after in `verdicts/CHR-004/2026-09-18-gate/`.
+
+🔴 **The hex ratchet counted its own prose.** Adding the comment that explains the change made
+`npm run colors` red — `#071627` inside a `//` line comment in a `.scss` file counted as a literal,
+because `countFile` stripped line comments for the TS scope only. A gate that reddens on its
+changelog is one somebody switches off (the third time this phase has met that shape). SCSS now
+strips `//` comments too, per extension, and a real hex added in code still reddens it — checked
+with an arm that put `#ff0000` in this same file and restored byte-identical.
