@@ -172,7 +172,8 @@ export function useLayersTree(): LayersView {
       components: project.components,
       labelOf: benchTargetLabel,
       labelOfNode: safeLabel,
-      categoryOfNode: safeCategory
+      categoryOfNode: safeCategory,
+      hasIncomingConnection: isPortWired
     });
   }, [project, screenPage, canvasComponent]);
 
@@ -268,6 +269,30 @@ function readStartPage(project: ProjectModel): string | undefined {
     if (startPage) break;
   }
   return startPage;
+}
+
+/**
+ * Whether a wire feeds `port` on this node.
+ *
+ * 🔴 **Asked of the node's OWN graph, not of the project.** `NodeGraphNode.owner` is the
+ * `NodeGraphModel` the node lives in (verified against the live model, not assumed — a nested node
+ * reports `owner.constructor.name === 'NodeGraphModel'` and `owner.owner` is its `ComponentModel`),
+ * and its `connections` are the only ones that can reach this node. Searching every component's
+ * connections would match a `toId` in another component's graph whenever two nodes share an id,
+ * which copy-paste makes ordinary.
+ *
+ * ⚠️ Guarded like `safeLabel` for the same reason: this runs inside the panel's render, and a
+ * model mid-edit can leave a node briefly detached from its graph.
+ */
+function isPortWired(node: LayerNode, port: string): boolean {
+  try {
+    const graph = (node as unknown as { owner?: { connections?: readonly { toId: string; toProperty: string }[] } }).owner;
+    const connections = graph?.connections;
+    if (!connections) return false;
+    return connections.some((connection) => connection.toId === node.id && connection.toProperty === port);
+  } catch {
+    return false;
+  }
 }
 
 /**

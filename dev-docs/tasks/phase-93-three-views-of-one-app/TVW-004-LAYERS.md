@@ -322,3 +322,182 @@ Pricing does not claim it while the preview is showing Home. 4 specs, 3 mutants,
 **Driven after both:** the strip carries `File Selector isn't on Home. It's on New, Update and
 Upload.` with its two doors; the panel carries the header, the crumb (absent here, correctly — the
 component is not on this screen) and `+ 8 logic nodes on the canvas`. One claim, one place.
+
+---
+
+## 7. Slice 2 — AC2 against the running preview, and what it found (s15, 2026-09-18)
+
+AC2 asks for the rows to be checked against **an independent DOM walk of the page**. s14 had an
+independent walk, but it was a second walk over the same data structure in the same process. This
+one is written in the **viewer**: every element of the running app, up React's fiber tree to the
+`noodlNode` prop, and each node's instance path derived from the runtime's own `nodeScope` links.
+Different process, different tree, different data. The only thing the two share is the node id,
+which is the thing both are claims about. `scripts/devtools/drive-tvw004-ac2.js`.
+
+**It failed on the first project it was pointed at, and the first number was 101 of 104.**
+
+### 7.1 🔴 A Layers row under a Router page selected NOTHING in the preview
+
+The row for `Header` wrote the path `[pageRouter, mainNavbar, header]`. The runtime's path for the
+same element is `[<page guid>, mainNavbar, header]` — a Router mounts its page through a node it
+**mints at run time**, and that node's guid is in no project file. `pathAddresses` requires every id
+in the selector to appear in the rendered path, so the match failed and nothing was outlined.
+
+Measured, three shapes against the live preview on the corpus's Home:
+
+| path handed to `selectNodesAtPath` | nodes the preview selected |
+|---|---|
+| `[router, navbar, header]` — what Layers wrote | **0** |
+| `[navbar, header]` — the authored convention | 1 |
+| `[header]` | 1 |
+| `[pageGuid, navbar, header]` — the full rendered path | 1 |
+
+Three known-firing arms beside the one absence, which is the only way an absence means anything.
+The Router's own id appeared in **zero of the 104 rendered paths** on that screen.
+
+**The editor's own side already agreed with the runtime rather than with this walk.**
+`EditorDocument` stores what a preview click reports through `authoredPath()`, which drops exactly
+the ids no project file holds. Layers was the one surface writing a path in a third convention.
+
+Under R-R the tree starts at the top of the screen and *everything below the page* is under the
+Router, so this was **every row of every routed screen** — 78 of the 117 projects on this machine.
+
+### 7.2 🔴 The same defect at the repeater, and the rule both are instances of
+
+A `For Each` draws its template through an instance minted **per item**, so the walk was offering
+one constant id where the runtime had three different guids. 37 of the remaining 104 nodes.
+
+The rule, now written in both places: **a node's id goes on the trail only when the runtime draws
+that node.** A component instance is drawn, so `visitInstance` pushes it. A Router and a `For Each`
+place something without being it, so they do not.
+
+⚠️ **What this gives up:** two `For Each`es drawing the same template on one screen now produce rows
+with identical paths, so selecting one addresses both. That ambiguity is the runtime's — the ids
+that would separate them are per-item guids no editor surface can name — and the alternative was not
+a more precise selection but **no selection at all**.
+
+### 7.3 🔴 The key and the path are two identities, and merging them duplicated React keys
+
+Dropping those ids from the trail also dropped them from every **key** beneath, because both were
+built from one array. Two repeaters drawing one template under one parent then produced rows with
+identical keys — `Encountered two children with the same key` in the editor's console, on the very
+screen the drive was photographing, found by reading `.logs/dev.log` while waiting for webpack.
+
+`path` is handed to the preview and may hold only ids the runtime draws. `key` is React's identity
+and must be unique among the rows on screen. They are now two arrays. **The unit fixture has one
+repeater and could not have seen this**; the corpus said it immediately.
+
+### 7.4 🔴 A repeater whose template arrives on a wire was asserting the stale parameter
+
+s14 guarded on `templateType`, which is the *other* way a template goes dynamic. A **connection into
+the `template` port** overrides the parameter at run time and leaves `templateType` unset — so the
+walk waved it through and drew whatever the stale parameter still named. On the corpus's Home,
+`Multi Choice` carries `template: ".../Checkbox Item"` **and** a wire into `template`; Layers drew
+`Checkbox Item`'s insides while the screen was showing `Tag Item`'s.
+
+Measured over the **212 projects** on this machine: **38 of 864 `For Each` nodes have the port
+wired, 34 of those still carry a `template` parameter, across 17 projects.**
+
+Now a note — `the template comes from a connection` — rather than a guess, on the same judgement as
+`ROUTER_PAGES_NOTE`: which component draws there depends on data the editor has not run, and a tree
+that says the wrong name is worse than one that says it cannot know.
+
+⚠️ **Refusing made the raw count WORSE** — 30 unaddressed nodes became 36 — and that is correct. The
+arm now attributes them: `2 wired-template repeaters on screen account for 36 of the 36 nodes no row
+addresses`. An arm that scored the honest build below the mis-naming one was grading the wrong thing.
+
+### 7.5 AC2 as it now stands
+
+| project | rendered | authored | addressed | glyph colours |
+|---|---|---|---|---|
+| corpus (Noodl Marketplace, 165 components) | 104 | 103 | **103, +36 under two refusing repeaters** | visual + component, both = canvas |
+| QA fixture | 6 | 6 | 6 | visual = canvas |
+| TPL-008 (todo list) | 17 | 16 | 16 | visual = canvas |
+
+⚠️ **Only the corpus grades a real population.** The QA fixture's start page is `erg-rig` (6 nodes)
+and TPL-008's preview sits on `/sign-in` (17). They agree, on different shapes, and they are not
+evidence of much on their own — [[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]].
+
+**The colour arm compares the rendered glyph with `CanvasTheme.instance.categoryColors(name).accent`
+— what the canvas actually paints — not with the stylesheet.** Read off the `Cat-*` wrapper, because
+`Icon` renders an empty span whose colour is inherited.
+
+## 8. Slice 3 — AC1's five states and AC6's shots (s15)
+
+`scripts/devtools/drive-tvw004-ac1.js`, driven twice (300px and 240px), **14/14 graded arms** each.
+Shots in `verdicts/TVW-004/2026-09-18/`: five states × two themes × two widths = 20.
+
+**The arm that matters is state 3's third one: `THE PREVIEW OUTLINES IT`.** It is read in the
+**viewer**, off `Highlighter.selectedNodes` — the map the outline divs are drawn from — because
+reading the editor's selection store confirms only that the editor agrees with itself, which was
+true throughout the period when the preview outlined nothing. It now reads 1. That arm is green
+only because of §7.1.
+
+### 8.1 What the drive had to learn before it measured anything
+
+Four instrument faults, each of which had produced a confident wrong answer first:
+
+- 🔴 **Twenty screenshots of one width, named as two.** `useSidePanelLayout` seeds its widths with
+  `useState(readStoredWidths)` — read once at mount — so writing the setting changed the store and
+  nothing on screen. Every shot measured 326px, including the ten called `240px`. The filename now
+  carries the width that was **measured**, and the drive drags the divider like a person.
+- 🔴 **State 3 read a designed-in absence.** `previewMode` starts `true` and `EditorDocument` gates
+  the whole outline channel behind `if (!previewMode)` (DES-001). AC1's "outlined in the preview" is
+  a claim about **design mode**; the drive now presses `Design` and refuses if the banner is absent.
+- 🔴 **The subject was a `Loader`.** Expanding until *any* instance row appeared picked the shell's
+  spinner, which draws nothing until something is loading — so the outline arm read an absence that
+  meant nothing. The drive now expands until an instance the preview is **drawing** is reachable.
+  ⚠️ An instance row is never "on screen" by the leaf test: a component instance draws no element of
+  its own, only its insides do. `Main Navbar`, `Limiter`, `Logo` and `Icon Button` were all among
+  AC2's "rows with nothing rendered", correctly.
+- 🔴 **"On no screen" was asked of the row list**, which names components only on instance and band
+  rows — so it picked `/App`, the project's own root, which is on every screen there is. It is a
+  question about **placement**, and is now put to the project.
+
+### 8.2 🔴 AC5's tab rule cannot be graded by this drive, and the attempt read as a defect
+
+The same arm read `Components` at 300px and `Layers` at 240px **from one unchanged build**.
+`defaultTabFor` is a *cold-start* default: `ComponentsPanelReact` keeps `chosenTab` and falls back to
+the default only while it is null, and §2 says the choice is remembered for the session. This drive
+makes such a choice — it clicks `Layers` to ask AC1's own question — and the panel does not remount
+between runs. **It was the memory, working as specified.** AC5 wants a cold start on each of four
+component kinds; that is a drive of its own, and it is still open.
+
+### 8.3 🔴 The crumb lost the one word that was not already on screen — found by the screenshot
+
+At `MIN_PANEL_WIDTH` the crumb read **`App › Home ›…`**. The three steps measured 143px inside a
+140px box, and because a button is an *atomic* inline box Chromium cannot clip three pixels off it:
+it drops the whole box and draws the ellipsis. So the name of the thing being edited disappeared for
+want of **3px**, leaving a line that says only what the header above it already said.
+
+**The DOM said it was fine.** `scrollWidth > clientWidth` is meaningless on an inline element, and
+`elementFromPoint` still returned the button at its midpoint — rendered, reachable, and not drawn.
+The pixels were the only honest witness. Fourth time this phase that a screenshot has failed a set
+of green arms.
+
+⚠️ **Which step gives up the width was measured, not assumed.** Shrinking the leading steps first is
+the obvious answer — they are context, the tail is the subject — and it renders
+`A… › Ho… › Main Navb…`: three shredded words, because a step one pixel short still has to find room
+for an ellipsis, and the steps are 20px and 29px. The leading steps now hold their ground and the
+long tail absorbs it: **`App › Home › Main Nav…`**, every word legible.
+
+## 9. Where TVW-004 stands after s15
+
+| AC | state |
+|---|---|
+| 1 — the five states | 🟢 driven end to end, 14/14 arms, both widths |
+| 2 — rows against an independent walk, glyph colours | 🟢 4/4 on three projects; three defects found and fixed |
+| 3 — the tinted region | 🟢 (s14) |
+| 4 — a cycle | 🟢 (s14) |
+| 5 — tab default and ⌘⇧L | 🔴 **open** — needs a cold-start drive per component kind (§8.2) |
+| 6 — the shots | 🟡 **20 captured; Richard's WORTHY verdict is what is left** |
+| 7 — gates | 🟢 `test:main` 497/7939; `tests-unit/tvw-004` 2 suites / **41 specs**, 4 new mutants each `cmp`-proven applied and each red on its own spec |
+
+**Owed to Richard: AC6.** The shots are in `verdicts/TVW-004/2026-09-18/`.
+Two things to look at rather than read about:
+
+1. **`3-selected--light--238px.png`** — a deliberate selection draws the box-model chip over the
+   running app (TVW-002 §6 kept it off the *placement* channel for exactly this reason, but a real
+   selection is supposed to feed it). It covers a good part of the hero. Is that right here?
+2. **`INSIDE LIM…`** — band labels truncate at 240px the way row labels do. The tree above says
+   `Limiter` two rows up, so nothing is lost; it is a question of whether it looks unfinished.

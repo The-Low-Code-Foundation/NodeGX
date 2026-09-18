@@ -138,12 +138,12 @@ function LayerRowItem({
     );
   }
 
-  if (row.kind === 'cycle' || row.kind === 'router-note') {
+  if (row.kind === 'cycle' || row.kind === 'router-note' || row.kind === 'dynamic-template') {
     return (
       <div
         className={classNames(css['TreeItem'], css['LayerNote'])}
         style={{ '--level': String(row.indent) } as React.CSSProperties}
-        data-test={row.kind === 'cycle' ? 'layers-cycle' : 'layers-router-note'}
+        data-test={`layers-${row.kind}`}
         data-level={row.depth}
       >
         <div className={css['CaretSlot']} />
@@ -156,6 +156,12 @@ function LayerRowItem({
 
   const isInstance = row.kind === 'instance';
 
+  /**
+   * `data-node-path` is AC2's seam. The row's identity is its instance path, and the preview's own
+   * inspector addresses a rendered element by exactly the same path (`instancePathOf`) — so the two
+   * walks can be compared element for element rather than by counting. A bare node id would not do
+   * it: a component placed twice draws the same ids twice, and AC2 is a claim about *this* copy.
+   */
   return (
     <div
       className={classNames(css['TreeItem'], {
@@ -166,6 +172,7 @@ function LayerRowItem({
       data-test={isInstance ? 'layers-instance' : 'layers-node'}
       data-level={row.depth}
       data-component={row.component ?? undefined}
+      data-node-path={row.path.join('/')}
       title={row.typename ? `${row.label} · ${row.typename}` : row.label}
       tabIndex={0}
       onClick={() => onSelectRow(row)}

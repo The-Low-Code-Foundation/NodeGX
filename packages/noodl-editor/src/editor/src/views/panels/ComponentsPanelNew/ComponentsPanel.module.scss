@@ -752,12 +752,33 @@
   font-size: var(--font-size-xs);
 }
 
+/* 🔴 **The crumb's LAST step is the one a person is looking for, and it was the first to go.**
+ *
+ * This was a block with `text-overflow: ellipsis` over inline-block buttons. At `MIN_PANEL_WIDTH`
+ * the three steps measured 143px inside a 140px box — and because a button is an *atomic* inline
+ * box, Chromium cannot clip three pixels off it: it drops the whole box and draws the ellipsis
+ * instead. So `App › Home › Main Navbar` rendered as `App › Home ›…` and the name of the thing
+ * being edited — the only word on the line that is not already in the header — disappeared for
+ * want of 3px. Found in AC6's screenshot at 240px; the DOM read "not clipped", because
+ * `scrollWidth > clientWidth` is meaningless on an inline element and `elementFromPoint` still
+ * returned the button. **The pixels were the only honest witness.**
+ *
+ * A flex row instead, where each step ellipsises **in its own box** — so what a tight panel costs
+ * is characters, not a name.
+ *
+ * ⚠️ **Which step gives up the width was measured, not assumed.** Shrinking the leading steps
+ * first looks like the obvious answer — they are the context, the last one is the subject — and it
+ * renders `A… › Ho… › Main Navb…`: three shredded words, because a step one pixel short still has
+ * to find room for the ellipsis. The steps are 20px and 29px; there is nothing there to take. So
+ * the leading steps hold their ground and the long tail absorbs it: `App › Home › Main Navb…`,
+ * which loses three characters of one word and keeps every word legible. */
 .LayersCrumbPath {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  align-items: baseline;
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .LayersCrumbStep,
@@ -779,13 +800,24 @@
   }
 }
 
+.LayersCrumbStep {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* The context holds its ground; the subject absorbs the shortfall — see `.LayersCrumbPath`. */
+  flex: 0 0 auto;
+}
+
 .LayersCrumbStep:last-child {
   color: var(--theme-color-fg-default);
+  flex: 0 1 auto;
 }
 
 .LayersCrumbSep {
   margin: 0 var(--spacing-1);
   color: var(--theme-color-fg-muted);
+  flex: 0 0 auto;
 }
 
 .LayersCrumbPlaces {

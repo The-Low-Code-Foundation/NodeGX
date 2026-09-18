@@ -20,6 +20,7 @@ import {
   LayerNode,
   LayerRow,
   containmentCrumb,
+  DYNAMIC_TEMPLATE_NOTE,
   MAX_INDENT_LEVEL,
   offScreenFooter,
   offScreenNodeCount,
@@ -189,6 +190,97 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
     expect(tree.rows.some((r) => r.label === 'Cards')).toBe(true);
   });
 
+  /**
+   * AC2, driven against the running preview on 2026-09-18 — and the reason three of these specs
+   * exist at all.
+   *
+   * A row's `path` is not a label: it is what `selectNodesAtPath` is handed, and the preview
+   * resolves it by matching it against the **rendered** node's own path (`pathAddresses`). So every
+   * id on the trail has to be an id the runtime actually draws. A Router and a `For Each` are the
+   * two nodes that place something **without being it** — the runtime mounts their contents through
+   * a node it mints itself, carrying a fresh guid that is in no project file — so their ids are in
+   * no rendered path, and a trail containing one matches nothing.
+   *
+   * Measured in the corpus's preview: of 104 rendered nodes on Home, the Router's id appeared in
+   * **zero** paths, and the preview answered `[router, navbar, header]` with **0** selected nodes
+   * against **1** for `[navbar, header]`. 101 of 104 nodes on that screen were unselectable.
+   */
+  describe('the trail carries only ids the runtime draws (AC2)', () => {
+    it('leaves the Router out of the trail, because the runtime mounts the page through a node of its own', () => {
+      const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components: corpus() });
+
+      const headline = tree.rows.find((r) => r.owner === '/Hero' && r.label === 'Text');
+      expect(headline.path).toEqual(['hero', 'headline']);
+      // 🔴 The id of the Router is `router`; it must not be on the trail. This is the whole spec.
+      expect(headline.path).not.toContain('router');
+
+      // The Router's own row still addresses the Router — it IS a node somebody can select.
+      expect(tree.rows.find((r) => r.typename === 'Router').path).toEqual(['router']);
+    });
+
+    it('leaves the For Each out of the trail, because it draws its template once per item', () => {
+      const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components: corpus() });
+
+      // ⚠️ The row inside the template, not the band above it. The band's own path IS the
+      // repeater (`['list']`) and should be: a band names a boundary, and the repeater node is
+      // the only thing on that boundary anybody can point at.
+      const cardRoot = tree.rows.find((r) => r.owner === '/Card' && r.kind === 'node');
+      expect(cardRoot.path).toEqual(['cardRoot']);
+      // `list` is the `For Each`'s id. The runtime puts a per-item guid where it would sit.
+      expect(cardRoot.path).not.toContain('list');
+
+      // And the repeater's own row is still selectable, like the Router's.
+      expect(tree.rows.find((r) => r.label === 'Cards').path).toEqual(['list']);
+    });
+  });
+
+  it('refuses to name a template when the repeater takes it from a connection', () => {
+    // 🔴 `templateType` is not the only way a template goes dynamic, and the guard above cannot
+    // see the other one. A wire into the `template` port overrides the parameter at run time and
+    // leaves `templateType` unset — so the walk waved it through and drew whatever the stale
+    // parameter still named. Found on the corpus's own Home: `Multi Choice` carried
+    // `template: ".../Checkbox Item"` **and** a connection into `template`, so Layers drew
+    // `Checkbox Item`'s insides while the screen was showing `Tag Item`'s.
+    //
+    // 38 of the 864 `For Each` nodes on this machine have the port wired; 34 of those still carry
+    // a `template` parameter, across 17 projects.
+    const components = corpus();
+
+    const wired = layersOfScreen({
+      root: '/App',
+      screenPage: '/Home',
+      components,
+      hasIncomingConnection: (node, port) => node.id === 'list' && port === 'template'
+    });
+
+    expect(wired.rows.some((r) => r.kind === 'dynamic-template')).toBe(true);
+    expect(wired.rows.find((r) => r.kind === 'dynamic-template').label).toBe(DYNAMIC_TEMPLATE_NOTE);
+    // The thing that matters: it does NOT assert the parameter's component.
+    expect(wired.rows.some((r) => r.owner === '/Card')).toBe(false);
+    expect(wired.rows.some((r) => r.component === '/Card')).toBe(false);
+
+    // ⚠️ The control, in the same spec: with nothing wired, the same fixture still draws the card.
+    // Without it, a build that never drew a template at all would pass the three expectations above.
+    const unwired = layersOfScreen({ root: '/App', screenPage: '/Home', components });
+    expect(unwired.rows.some((r) => r.owner === '/Card')).toBe(true);
+    expect(unwired.rows.some((r) => r.kind === 'dynamic-template')).toBe(false);
+  });
+
+  it('asks about the template port only, not about any wire into the repeater', () => {
+    // A `For Each` almost always has its `items` port wired; if the guard asked "is anything
+    // connected", every repeater in every project would become a note and Layers would stop
+    // drawing repeated content altogether.
+    const tree = layersOfScreen({
+      root: '/App',
+      screenPage: '/Home',
+      components: corpus(),
+      hasIncomingConnection: (node, port) => node.id === 'list' && port === 'items'
+    });
+
+    expect(tree.rows.some((r) => r.kind === 'dynamic-template')).toBe(false);
+    expect(tree.rows.some((r) => r.owner === '/Card')).toBe(true);
+  });
+
   it('says where a Router keeps its pages when it is showing one this screen is not on', () => {
     const tree = layersOfScreen({ root: '/App', screenPage: undefined, components: corpus() });
 
@@ -266,8 +358,11 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
       const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components });
       const headlines = tree.rows.filter((r) => r.label === 'Text' && r.owner === '/Hero');
       expect(headlines).toHaveLength(2);
-      expect(headlines[0].path).toEqual(['router', 'hero', 'headline']);
-      expect(headlines[1].path).toEqual(['router', 'hero2', 'headline']);
+      // 🔴 No `router` on the trail — see 'the trail carries only ids the runtime draws'. This
+      // spec used to assert it, and asserting it is what shipped a path the preview could not
+      // resolve: the expectation was written from the walk rather than from the runtime.
+      expect(headlines[0].path).toEqual(['hero', 'headline']);
+      expect(headlines[1].path).toEqual(['hero2', 'headline']);
       // 🔴 A bare node id is "every instance of it" in the editor's selection semantics, which is
       // not what a Layers row means. The leading ids are what say *which* copy.
       expect(headlines[0].path).not.toEqual(['headline']);
@@ -288,6 +383,46 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
       const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components });
       expect(tree.rows.filter((r) => r.owner === '/Hero')).toHaveLength(6);
       expect(new Set(tree.rows.map((r) => r.key)).size).toBe(tree.rows.length);
+    });
+
+    it('keys the rows of ONE template drawn by TWO repeaters apart', () => {
+      // 🔴 The fixture the spec above uses has a single repeater, and a single repeater cannot see
+      // this: a key that mentions nothing but the template's own nodes is unique while only one
+      // thing draws it. Two are what a real screen has, and the corpus produced React's
+      // `Encountered two children with the same key` the moment the walk stopped putting the
+      // `For Each` on the trail the key is built from.
+      //
+      // A row's `path` is the runtime's identity and MAY collide here — the runtime separates the
+      // two lists by per-item guids no project file holds. Its `key` is React's identity and may
+      // not. That is why there are two trails.
+      const components = corpus();
+      const home = components.get('/Home');
+      const page = home.roots[1];
+      components.set('/Home', {
+        ...home,
+        roots: [
+          home.roots[0],
+          {
+            ...page,
+            children: [
+              ...page.children,
+              node('list2', 'For Each', { label: 'More cards', parameters: { template: '/Card' } })
+            ]
+          }
+        ]
+      });
+
+      const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components });
+
+      expect(tree.rows.filter((r) => r.kind === 'instance' && r.component === '/Card')).toHaveLength(2);
+      expect(new Set(tree.rows.map((r) => r.key)).size).toBe(tree.rows.length);
+      // And the paths DO collide, which is the runtime's own ambiguity rather than a defect: the
+      // ids that separate the two lists are per-item guids the editor never sees. Asserted so the
+      // difference between the two identities is written down rather than discovered again.
+      expect(tree.rows.filter((r) => r.owner === '/Card' && r.kind === 'node').map((r) => r.path.join('/'))).toEqual([
+        'cardRoot',
+        'cardRoot'
+      ]);
     });
   });
 

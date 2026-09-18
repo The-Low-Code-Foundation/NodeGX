@@ -73,7 +73,9 @@ export type LayerRowKind =
   /** A component placed inside itself: `↻ places itself`, and the walk stops (§4 AC4). */
   | 'cycle'
   /** A `Router` whose pages are not children of anything — see {@link ROUTER_PAGES_NOTE}. */
-  | 'router-note';
+  | 'router-note'
+  /** A `For Each` whose template is chosen at run time — see {@link DYNAMIC_TEMPLATE_NOTE}. */
+  | 'dynamic-template';
 
 export interface LayerRow {
   /**
@@ -165,6 +167,13 @@ export function indentFor(depth: number): number {
  */
 export const ROUTER_PAGES_NOTE = 'pages are in Components → Pages';
 
+/**
+ * What a repeater says when its template arrives on a wire. Phrased as the reason rather than as
+ * an apology: the person can follow the connection, and the row tells them that is where the
+ * answer is.
+ */
+export const DYNAMIC_TEMPLATE_NOTE = 'the template comes from a connection';
+
 /** What a repeated instance's row says instead of a count it cannot have. One per repeater. */
 export const REPEATED_BY = 'one per item';
 
@@ -192,6 +201,15 @@ export interface LayersOptions {
   labelOfNode?: (node: LayerNode) => string | undefined;
   /** The canvas category of a node — the editor passes a guarded read of `node.type.color`. */
   categoryOfNode?: (node: LayerNode) => string | undefined;
+  /**
+   * Whether a wire feeds `port` on this node — the only way to tell a repeater whose template is
+   * a parameter from one whose template arrives at run time.
+   *
+   * ⚠️ A **connection** question, and the walk has only nodes, so the caller answers it. Defaults
+   * to "nothing is wired", which is what an offline census of a project file sees before it reads
+   * `graph.connections`, and which keeps every existing spec meaning what it meant.
+   */
+  hasIncomingConnection?: (node: LayerNode, port: string) => boolean;
 }
 
 /**
@@ -208,16 +226,36 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
   const labelOf = options.labelOf ?? defaultLabel;
   const labelOfNode = options.labelOfNode ?? ((node: LayerNode) => node.label);
   const categoryOfNode = options.categoryOfNode ?? ((node: LayerNode) => node.category);
+  const hasIncomingConnection = options.hasIncomingConnection ?? (() => false);
 
   const rows: LayerRow[] = [];
   const tree: LayersTree = { rows, screen: undefined, cyclic: false, unresolvedRouters: [] };
   const onStack = new Set<string>();
 
-  /** The instance ids that lead to where the walk currently is. */
+  /**
+   * The ids that lead to where the walk currently is — **the runtime's trail**, and the thing a
+   * row's `path` is made of. Only nodes the runtime actually draws go on it: see `visitRouter` and
+   * `visitRepeater` for the two that do not.
+   */
   const trail: string[] = [];
 
+  /**
+   * 🔴 **A second trail, because a key and a path answer different questions.**
+   *
+   * `path` is handed to the preview, so it may hold only ids the runtime draws. `key` is React's
+   * identity and the collapse state's — it must be unique among the rows on screen, and it is
+   * free to mention anything that got the walk here.
+   *
+   * They were one trail for an hour, and the corpus said so immediately: dropping the Router and
+   * the `For Each` from the trail also dropped them from every key beneath, so two repeaters
+   * drawing the same template under one parent produced rows with **identical keys** —
+   * `Encountered two children with the same key` in the editor's console, on the screen the AC2
+   * drive was photographing. The unit fixture has one repeater and could not see it.
+   */
+  const keyTrail: string[] = [];
+
   function keyFor(nodeId: string, suffix?: string): string {
-    return [...trail, nodeId, suffix].filter(Boolean).join('/');
+    return [...keyTrail, nodeId, suffix].filter(Boolean).join('/');
   }
 
   /** Every row goes through here, so the drawn indent has exactly one arithmetic. */
@@ -347,7 +385,9 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
 
     onStack.add(name);
     trail.push(node.id);
+    keyTrail.push(node.id);
     enterComponent(name, depth + 1, key, callDepth + 1);
+    keyTrail.pop();
     trail.pop();
     onStack.delete(name);
 
@@ -361,10 +401,41 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
    *
    * ⚠️ `templateType` is what decides, never the presence of `template`: **20 of this machine's 66
    * dynamic repeaters still carry a stale `template`** from before they were switched over.
+   *
+   * 🔴 **And `templateType` is not the only way a template goes dynamic.** A wire into the
+   * `template` port overrides the parameter at run time and leaves `templateType` unset, so the
+   * guard above waves it through and the walk draws whatever the stale parameter still names.
+   * Found by AC2's drive on the corpus's own Home: `Multi Choice`'s repeater has `template:
+   * ".../Checkbox Item"` **and** a connection into `template`, so Layers drew `Checkbox Item`'s
+   * insides while the screen was showing `Tag Item`'s — 30 of the 103 authored nodes on that
+   * screen had no row, and the rows they should have had named a different component.
+   *
+   * Measured over the 212 projects on this machine: **38 of 864 `For Each` nodes have the port
+   * wired, 34 of those still carry a `template` parameter, across 17 projects.** Every one of
+   * them was a subtree asserted from a value the runtime ignores.
+   *
+   * A note rather than a guess. Which component draws here depends on data the editor has not
+   * run, and a tree that says the wrong name is worse than one that says it cannot know — the
+   * same judgement `ROUTER_PAGES_NOTE` makes for an unresolved Router.
    */
   function visitRepeater(node: LayerNode, owner: string, depth: number, parentKey: string, callDepth: number) {
     const templateType = node.parameters?.templateType;
     if (templateType !== undefined && templateType !== 'explicit') return;
+
+    if (hasIncomingConnection(node, 'template')) {
+      push({
+        key: keyFor(node.id, 'dynamic-template'),
+        kind: 'dynamic-template',
+        depth,
+        parentKey,
+        label: DYNAMIC_TEMPLATE_NOTE,
+        category: 'default',
+        owner,
+        path: [...trail, node.id],
+        tinted: owner === canvasComponent
+      });
+      return;
+    }
 
     const template = node.parameters?.template;
     if (typeof template !== 'string' || !template) return;
@@ -424,9 +495,28 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
     });
 
     onStack.add(template);
-    trail.push(node.id);
+    /**
+     * 🔴 **The `For Each`'s own id is not on the trail either** — the same rule as the Router, and
+     * found by the same measurement. A repeater draws its template through an instance it mints
+     * **per item**, so the rendered path carries one fresh `guid()` per row where this walk used to
+     * put the one constant id of the `For Each` node. Measured on the corpus's Home: the three
+     * checkbox rows rendered under `913eab70`, `62b4c1e4` and `d2605456`, and the walk offered
+     * `cd1f9ded` — the repeater — for all three. 37 of the 104 nodes on that screen were
+     * unaddressable for this reason alone, after the Router fix had taken the count from 101.
+     *
+     * The rule both cases are instances of: **a node's id goes on the trail only when the runtime
+     * draws that node.** A component instance is drawn, so `visitInstance` pushes it; a Router and
+     * a `For Each` place something without being it, so they do not.
+     *
+     * ⚠️ **What this gives up, and why it is still the better answer.** Two `For Each`es drawing
+     * the same template on one screen now produce rows with identical paths, so selecting one
+     * addresses both. That ambiguity is the runtime's, not ours: the ids that would separate them
+     * are per-item guids no project file holds and no editor surface can name. The alternative is
+     * not a more precise selection, it is **no selection at all** — which is what was shipping.
+     */
+    keyTrail.push(node.id);
     enterComponent(template, depth + 1, key, callDepth + 1);
-    trail.pop();
+    keyTrail.pop();
     onStack.delete(template);
   }
 
@@ -451,9 +541,30 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       });
 
       onStack.add(screenPage);
-      trail.push(node.id);
+      /**
+       * 🔴 **The Router's own id is NOT on the trail, and that is not a tidy-up.**
+       *
+       * An instance node's id belongs on the trail because the runtime draws that very node: the
+       * id in the project file is the id in the rendered tree, and `visitInstance` pushes it for
+       * exactly that reason. A **Router does not work that way.** It mounts its page through a
+       * node it creates at run time, carrying a fresh `guid()` that is in no project file
+       * (`instance-path.ts`'s own warning), and its own id never appears in the rendered path at
+       * all — measured in the preview, 2026-09-18: of 104 rendered nodes on the corpus's Home, the
+       * Router's id was in **zero** of their paths.
+       *
+       * So a trail with it in cannot be matched. `pathAddresses` requires every id in the selector
+       * to appear in the rendered path in order, and the preview answered the three shapes like
+       * this — `[router, navbar, header]` → **0 nodes**, `[navbar, header]` → 1, `[header]` → 1.
+       * A Layers row under a page therefore selected nothing in the preview, which under R-R is
+       * *every row of every routed screen*. The editor's own side already agreed with the runtime
+       * rather than with this walk: `EditorDocument` stores what a preview click reports through
+       * `authoredPath()`, which drops exactly the ids no project file holds.
+       *
+       * Not pushing it is what makes a Layers click and a preview click write the same path.
+       */
+      keyTrail.push(node.id);
       enterComponent(screenPage, depth, key, callDepth + 1);
-      trail.pop();
+      keyTrail.pop();
       onStack.delete(screenPage);
       return;
     }
