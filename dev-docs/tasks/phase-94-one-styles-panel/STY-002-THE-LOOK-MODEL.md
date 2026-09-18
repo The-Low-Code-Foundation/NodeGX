@@ -58,7 +58,7 @@ does (`v2?.textStyles ?? legacy?.text`) and is the worked example.
 | **AC4** | **"Save this node's styles as a new Look"** creates a Look from a node's current parameters and puts the node in it. This is the entry point the 90-project scan says nobody has ever found (4 Looks across 90 projects, every one a test artefact) | 🟡 **model green (s4)** — `lookFromNode` copies a node's styles minus the preset markers and without aliasing it, pinned against **the shape a real project already holds** (`members area Richard test`'s Look carries `"_variant": "heading-1"`). ⬜ Left: the menu row and wiring the node into the new Look |
 | **AC5** | **`Preset` and `Size` rows are removed from the property panel**, and a project carrying `_variant`/`_size` markers still opens and renders exactly as before — they become inert parameters, not errors | 🟡 **removed (s5); the "still opens" half is AC7's drive.** `renderElementStyleSection`, `onElementVariantChange` and `onElementSizeChange` are gone from `propertyeditor.ts`. The markers are now read by **nothing** — the census's 21 markers in 12 real projects become parameters no port matches and the runtime already drops, which is what makes them inert rather than broken. ⚠️ **That last clause is reasoned, not driven**, and a dozen real projects carry it, so it is AC7's first arm |
 | **AC6** | **`get_style_vocabulary` reports the project's Looks plus the shipped library**, and no longer teaches the sentence at `StyleVocabulary.ts:18-22`, which is false for the surviving concept | ✅ **green (s4)** — the false sentence is replaced by what the two things actually do, `projectLooks` is reported (read from the sidecar, **both** spellings of the state key), the block is `SHIPPED LOOKS` with no sizes half, and `styleLint`'s pointer to a heading that no longer exists is fixed. 3 new specs. **Three budget gates held rather than being raised** (§3b) |
-| **AC7** | **Nothing that exists breaks.** All seven templates and the export corpus render and export unchanged (design §7). 🔴 Graded with the counts, not with a claim — STY-004 §4a is the worked example of separating an inherited red from a caused one | ⬜ **and it is now the first job.** s5 changed what a newly created node carries and removed a panel section; `tsc` on both configs is clean and `tests-unit/sty-003` is 30 green, but **`test:main` and `test:ci` have not been run** — the box was at load 24.8 under a peer's cold webpack rebuild all session and a second heavy job is against the standing rule. **Run these before building anything further**, and one of the arms is opening a real project that carries `_variant` (the census names twelve; `members area Richard test` has 4) |
+| **AC7** | **Nothing that exists breaks.** All seven templates and the export corpus render and export unchanged (design §7). 🔴 Graded with the counts, not with a claim — STY-004 §4a is the worked example of separating an inherited red from a caused one | 🟡 **`test:main` run at the end of s5: 501 suites pass, 8,019 tests pass, and the ONE red is not ours** — see §3d. ⬜ **`test:ci` and the templates are still open** s5 changed what a newly created node carries and removed a panel section; `tsc` on both configs is clean and `tests-unit/sty-003` is 30 green, but **`test:main` and `test:ci` have not been run** — the box was at load 24.8 under a peer's cold webpack rebuild all session and a second heavy job is against the standing rule. **Run these before building anything further**, and one of the arms is opening a real project that carries `_variant` (the census names twelve; `members area Richard test` has 4) |
 
 ## 3a. What s4 built, and the defect it had to fix first
 
@@ -171,3 +171,30 @@ and the `variant` input port still carry the word. The name is not ruled (design
 a model, a port and forty call sites to "Look" before Richard picks it would have to be done twice
 if he picks something else. The *collision* AC1 is really about — two storages sharing one word —
 is what s5 removed: there is now only one of them.
+
+
+## 3d. AC7's first arm: `test:main`, and the one red separated from it
+
+**Run at the end of s5, once a peer released the box:** `501 passed / 502 suites`, **8,019 of 8,020
+tests**, exit 1 on a single failure — `tests-unit/exp-013/exportBadge.test.tsx`.
+
+🔴 **It is a peer's uncommitted work, and the attribution is a count rather than a claim**
+([[a-relayed-conclusion-decays-faster-than-a-relayed-measurement]]):
+
+| arm | reading |
+|---|---|
+| `"exemption": "scheduled"` rows **at HEAD** | **0** (`git show HEAD:packages/nodegx-export/coverage-ledger.json`) |
+| the same, **in the working tree** | **2** — `net.noodl.ParseFeed`, `net.noodl.ParseXML`, added uncommitted by the P96/FED session |
+| files touched by s5's four commits under `nodegx-export/` or `exp-013` | **0** |
+
+The spec asserts the deferred rows' badge kinds are exactly `{'out-of-scope'}`, and its own name
+says *"no scheduled row remains"* — so the peer's edit, which deliberately introduces **the ledger's
+first `scheduled` row**, contradicts it by design. ⚠️ **That is a finding for P96/EXP-013, not a
+defect in this phase, and it is relayed rather than fixed here** — EXP-011 AC4 exists precisely so
+`scheduled` and `out-of-scope` never read alike, and this editor-side badge gate appears not to have
+been taught the difference yet ([[a-finding-may-already-be-another-tasks-acceptance-criterion]]).
+
+⚠️ **What this does NOT say:** that `test:ci` is green. It has not been run — it is the Electron
+half, it is where `tests/models/ElementConfigRegistry.test.ts` and `StyleTokenCoverage.test.ts`
+actually execute (jest's `testMatch` covers only `tests-main/` and `tests-unit/`, so s5's edits to
+those two files are **typechecked and not run**), and the templates arm is untouched.
