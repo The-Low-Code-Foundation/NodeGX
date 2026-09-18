@@ -82,8 +82,23 @@ export interface LayerRow {
    */
   key: string;
   kind: LayerRowKind;
-  /** 0 for the screen's own outermost node; one per level of nesting *and* per band. */
+  /** 0 for the screen's own outermost node; one per level of nesting. */
   depth: number;
+  /**
+   * The row this one is nested under — `undefined` at the top. What collapse is computed from:
+   * a row is visible when every key on its parent chain is expanded.
+   */
+  parentKey?: string;
+  /**
+   * How far right the row is actually drawn, in levels — {@link MAX_INDENT_LEVEL} caps it.
+   *
+   * 🔴 **Not the same as `depth`, and that is Richard's ruling of 2026-09-18.** Measured over the
+   * 47,494 rows on this machine: half sit **12+ levels deep** and **28% sit past 238px** at the
+   * panel's existing 12px step — the whole width of a 240px panel, leaving no room for the name.
+   * Structure keeps the true depth; the drawing stops stepping, and the indent guides carry the
+   * rest.
+   */
+  indent: number;
   label: string;
   /** The node's type name; `undefined` on a band and on the notes. */
   typename?: string;
@@ -132,6 +147,18 @@ const FOR_EACH_TYPE = 'For Each';
 const MAX_DEPTH = 64;
 
 /**
+ * Where the indent stops growing (Richard, 2026-09-18). Eight levels at the panel's step is 80px,
+ * which leaves 160px for glyph and name at `MIN_PANEL_WIDTH`; the ninth level and everything below
+ * it draw at the same offset, with the guides showing how deep they are.
+ */
+export const MAX_INDENT_LEVEL = 8;
+
+/** The drawn offset for a true depth. Exported so the stylesheet's step has one arithmetic. */
+export function indentFor(depth: number): number {
+  return Math.min(depth, MAX_INDENT_LEVEL);
+}
+
+/**
  * §5 — a Router's pages are reachable but they are not *children*, so expanding one shows nothing
  * unless the walk descended into the routed page. When it could not, the row says where they live
  * rather than drawing an empty branch that reads as "this page is empty".
@@ -140,6 +167,9 @@ export const ROUTER_PAGES_NOTE = 'pages are in Components → Pages';
 
 /** What a repeated instance's row says instead of a count it cannot have. One per repeater. */
 export const REPEATED_BY = 'one per item';
+
+/** AC4 — what a component placed inside itself says, once, before the walk stops. */
+export const CYCLE_ROW = '↻ places itself';
 
 export interface LayersOptions {
   /** The project's root/home component — what the viewer mounts. */
@@ -173,45 +203,47 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
   /** The instance ids that lead to where the walk currently is. */
   const trail: string[] = [];
 
-  function push(row: LayerRow) {
-    rows.push(row);
-  }
-
   function keyFor(nodeId: string, suffix?: string): string {
     return [...trail, nodeId, suffix].filter(Boolean).join('/');
   }
 
+  /** Every row goes through here, so the drawn indent has exactly one arithmetic. */
+  function push(row: Omit<LayerRow, 'indent'>): string {
+    rows.push({ ...row, indent: indentFor(row.depth) });
+    return row.key;
+  }
+
   /**
    * Draw one component's rendered tree: its first visual root and everything below it.
-   *
-   * @param depth the row depth its outermost node gets.
    */
-  function enterComponent(name: string, depth: number, callDepth: number) {
+  function enterComponent(name: string, depth: number, parentKey: string | undefined, callDepth: number) {
     const component = components.get(name);
     if (!component) return;
 
     const visual = new Set(component.visualRootIds);
     // 🔴 The first *visual* root by graph order, not `roots[0]`: a logic node authored above the
-    // visual one is root 0 in the file and draws nothing.
+    // visual one is root 0 in the file and draws nothing. It is `roots[0]` in 572 of this
+    // machine's 5,039 components, which is why the spec's fixture authors one that way.
     const first = component.roots.find((node) => visual.has(node.id));
     if (!first) return;
 
-    visitNode(first, name, depth, callDepth);
+    visitNode(first, name, depth, parentKey, callDepth);
   }
 
-  function visitNode(node: LayerNode, owner: string, depth: number, callDepth: number) {
+  function visitNode(node: LayerNode, owner: string, depth: number, parentKey: string | undefined, callDepth: number) {
     const typename = node.typename;
     const placed = typename ? components.get(typename) : undefined;
 
     if (placed) {
-      visitInstance(node, placed, owner, depth, callDepth);
+      visitInstance(node, placed, owner, depth, parentKey, callDepth);
       return;
     }
 
-    push({
+    const key = push({
       key: keyFor(node.id),
       kind: 'node',
       depth,
+      parentKey,
       label: node.label || typename || 'Node',
       typename,
       category: node.category ?? 'visual',
@@ -221,31 +253,44 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
     });
 
     if (typename === ROUTER_TYPE) {
-      visitRouter(node, depth + 1, callDepth);
+      visitRouter(node, depth + 1, key, callDepth);
       return;
     }
 
-    for (const child of node.children ?? []) visitNode(child, owner, depth + 1, callDepth);
+    for (const child of node.children ?? []) visitNode(child, owner, depth + 1, key, callDepth);
 
-    if (typename === FOR_EACH_TYPE) visitRepeater(node, owner, depth + 1, callDepth);
+    if (typename === FOR_EACH_TYPE) visitRepeater(node, owner, depth + 1, key, callDepth);
   }
 
   /**
-   * An instance: the purple row, then the band, then the component's own tree one level in again.
+   * An instance: the purple row, then the band, then the component's own tree.
+   *
+   * 🔴 **The band and the insides sit at the SAME depth** — one step per component boundary, not
+   * two (Richard, 2026-09-18). A boundary used to cost two levels, which was p50 4 of a row's 12
+   * and p90 10 of 26: a third of an indent that already ran off the panel. The band reads as a
+   * heading over the rows it introduces rather than as their parent, which is what it is.
    *
    * ⚠️ The instance's **children** are drawn after its insides, at the instance's own depth + 1.
    * They are real — a child of an instance node is placed into the component's child root
    * (`componentinstance.getChildRoot`) — but they belong to the *placing* graph, so they keep that
-   * graph as their owner and sit outside the band.
+   * graph as their owner and sit outside the band. 731 instances on this machine carry them.
    */
-  function visitInstance(node: LayerNode, placed: LayerComponent, owner: string, depth: number, callDepth: number) {
+  function visitInstance(
+    node: LayerNode,
+    placed: LayerComponent,
+    owner: string,
+    depth: number,
+    parentKey: string | undefined,
+    callDepth: number
+  ) {
     const name = placed.name;
     const cyclic = onStack.has(name) || callDepth > MAX_DEPTH;
 
-    push({
+    const key = push({
       key: keyFor(node.id),
       kind: 'instance',
       depth,
+      parentKey,
       label: node.label || labelOf(name),
       typename: name,
       category: node.category ?? 'component',
@@ -261,7 +306,8 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
         key: keyFor(node.id, 'cycle'),
         kind: 'cycle',
         depth: depth + 1,
-        label: '↻ places itself',
+        parentKey: key,
+        label: CYCLE_ROW,
         category: 'component',
         owner,
         path: [...trail, node.id],
@@ -276,7 +322,8 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       key: keyFor(node.id, 'band'),
       kind: 'band',
       depth: depth + 1,
-      label: editing ? `EDITING ${labelOf(name).toUpperCase()}` : `INSIDE ${labelOf(name).toUpperCase()}`,
+      parentKey: key,
+      label: bandLabel(editing ? 'EDITING' : 'INSIDE', name, labelOf),
       category: 'component',
       owner: name,
       path: [...trail, node.id],
@@ -287,19 +334,22 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
 
     onStack.add(name);
     trail.push(node.id);
-    enterComponent(name, depth + 2, callDepth + 1);
+    enterComponent(name, depth + 1, key, callDepth + 1);
     trail.pop();
     onStack.delete(name);
 
-    for (const child of node.children ?? []) visitNode(child, owner, depth + 1, callDepth);
+    for (const child of node.children ?? []) visitNode(child, owner, depth + 1, key, callDepth);
   }
 
   /**
    * A `For Each` places its template through a **parameter**, not a child (§5). `templateScript`
    * chooses per item at runtime and is not readable here, so a dynamic repeater draws no band —
    * which is the honest answer, and the reason this row never claims a count.
+   *
+   * ⚠️ `templateType` is what decides, never the presence of `template`: **20 of this machine's 66
+   * dynamic repeaters still carry a stale `template`** from before they were switched over.
    */
-  function visitRepeater(node: LayerNode, owner: string, depth: number, callDepth: number) {
+  function visitRepeater(node: LayerNode, owner: string, depth: number, parentKey: string, callDepth: number) {
     const templateType = node.parameters?.templateType;
     if (templateType !== undefined && templateType !== 'explicit') return;
 
@@ -311,10 +361,11 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
 
     const cyclic = onStack.has(template) || callDepth > MAX_DEPTH;
 
-    push({
+    const key = push({
       key: keyFor(node.id, 'template'),
       kind: 'instance',
       depth,
+      parentKey,
       label: labelOf(template),
       typename: template,
       category: 'component',
@@ -333,7 +384,8 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
         key: keyFor(node.id, 'template-cycle'),
         kind: 'cycle',
         depth: depth + 1,
-        label: '↻ places itself',
+        parentKey: key,
+        label: CYCLE_ROW,
         category: 'component',
         owner,
         path: [...trail, node.id],
@@ -343,42 +395,40 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       return;
     }
 
+    const editing = template === canvasComponent;
     push({
       key: keyFor(node.id, 'template-band'),
       kind: 'band',
       depth: depth + 1,
-      label:
-        template === canvasComponent
-          ? `EDITING ${labelOf(template).toUpperCase()}`
-          : `INSIDE ${labelOf(template).toUpperCase()}`,
+      parentKey: key,
+      label: bandLabel(editing ? 'EDITING' : 'INSIDE', template, labelOf),
       category: 'component',
       owner: template,
       path: [...trail, node.id],
       component: template,
-      editing: template === canvasComponent,
-      tinted: template === canvasComponent
+      editing,
+      tinted: editing
     });
 
     onStack.add(template);
     trail.push(node.id);
-    enterComponent(template, depth + 2, callDepth + 1);
+    enterComponent(template, depth + 1, key, callDepth + 1);
     trail.pop();
     onStack.delete(template);
   }
 
-  function visitRouter(node: LayerNode, depth: number, callDepth: number) {
+  function visitRouter(node: LayerNode, depth: number, parentKey: string, callDepth: number) {
     const pages = node.parameters?.pages as { routes?: unknown } | undefined;
     const routes = Array.isArray(pages?.routes) ? pages.routes.filter((r): r is string => typeof r === 'string') : [];
 
     if (screenPage && routes.includes(screenPage)) {
       const editing = screenPage === canvasComponent;
-      push({
+      const key = push({
         key: keyFor(node.id, 'page-band'),
         kind: 'band',
         depth,
-        label: editing
-          ? `EDITING ${labelOf(screenPage).toUpperCase()}`
-          : `SHOWING ${labelOf(screenPage).toUpperCase()}`,
+        parentKey,
+        label: bandLabel(editing ? 'EDITING' : 'SHOWING', screenPage, labelOf),
         category: 'component',
         owner: screenPage,
         path: [...trail, node.id],
@@ -389,7 +439,7 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
 
       onStack.add(screenPage);
       trail.push(node.id);
-      enterComponent(screenPage, depth + 1, callDepth + 1);
+      enterComponent(screenPage, depth, key, callDepth + 1);
       trail.pop();
       onStack.delete(screenPage);
       return;
@@ -404,6 +454,7 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       key: keyFor(node.id, 'router-note'),
       kind: 'router-note',
       depth,
+      parentKey,
       label: ROUTER_PAGES_NOTE,
       category: 'default',
       owner: '',
@@ -413,12 +464,95 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
   }
 
   tree.screen = screenPage ?? root;
-  enterComponent(root, 0, 0);
+  enterComponent(root, 0, undefined, 0);
   return tree;
 }
+
+/** `INSIDE SECTIONS/HERO` — the word, then the component, in the panel's one band voice. */
+function bandLabel(word: string, component: string, labelOf: (name: string) => string): string {
+  return `${word} ${labelOf(component).toUpperCase()}`;
+}
+
 
 /** `/Sections/Hero` → `Hero`. The editor passes `benchTargetLabel`, which says the same thing. */
 function defaultLabel(componentName: string): string {
   const parts = componentName.split('/').filter(Boolean);
   return parts[parts.length - 1] ?? componentName;
+}
+
+/**
+ * Which rows have rows under them — what gets a caret.
+ *
+ * Derived from `parentKey` rather than recorded during the walk: "has children" is a fact about the
+ * finished list, and a row that *would* have had them (a cyclic instance, a dynamic repeater) must
+ * not draw a caret that opens nothing.
+ */
+export function rowsWithChildren(rows: readonly LayerRow[]): Set<string> {
+  const parents = new Set<string>();
+  for (const row of rows) if (row.parentKey) parents.add(row.parentKey);
+  return parents;
+}
+
+/**
+ * What is open when the tab opens (Richard, 2026-09-18): **the branch you are editing, and nothing
+ * else**.
+ *
+ * Measured before asking: fully expanded, `Prefab marketplace` → `Home` is **330 rows** and the
+ * heaviest screen on this machine is **2,994**. Landing in a 330-row list to find the five nodes
+ * you are working on is the surface failing at the one moment it exists for.
+ *
+ * So: every ancestor of the editing region is open, plus the chain down to the page the preview is
+ * showing — which is what the person is looking at even when the canvas is somewhere else. Nothing
+ * else is, and every row with children under it carries a caret.
+ *
+ * ⚠️ Returns the keys that are **open**, not the ones that are closed. A closed-set default would
+ * silently open every branch a later walk invented, which is the wrong failure direction for a tab
+ * whose whole claim is that you can find one thing in it.
+ */
+export function expandedForEditing(rows: readonly LayerRow[]): Set<string> {
+  const byKey = new Map(rows.map((row) => [row.key, row]));
+  const open = new Set<string>();
+
+  const openTo = (row: LayerRow | undefined) => {
+    let current = row?.parentKey ? byKey.get(row.parentKey) : undefined;
+    while (current) {
+      if (open.has(current.key)) break;
+      open.add(current.key);
+      current = current.parentKey ? byKey.get(current.parentKey) : undefined;
+    }
+  };
+
+  for (const row of rows) {
+    // The editing region, and the band that names it.
+    if (row.tinted) openTo(row);
+    // The screen's own page: `SHOWING HOME` is the row a person reads first.
+    if (row.kind === 'band' && !row.component) continue;
+    if (row.kind === 'band' && row.label.startsWith('SHOWING')) {
+      openTo(row);
+      open.add(row.key);
+    }
+  }
+
+  return open;
+}
+
+/**
+ * The rows a collapsed tree actually draws, in order: a row is visible when **every** key on its
+ * parent chain is open.
+ *
+ * ⚠️ Checks the whole chain rather than the immediate parent. A row whose parent is open inside a
+ * grandparent that is closed is not on screen, and a one-level check would draw it — orphaned at
+ * its own indent, under a heading that is not there.
+ */
+export function visibleRows(rows: readonly LayerRow[], expanded: ReadonlySet<string>): LayerRow[] {
+  const visible = new Map<string, boolean>();
+  const out: LayerRow[] = [];
+
+  for (const row of rows) {
+    const shown = !row.parentKey || (visible.get(row.parentKey) === true && expanded.has(row.parentKey));
+    visible.set(row.key, shown);
+    if (shown) out.push(row);
+  }
+
+  return out;
 }

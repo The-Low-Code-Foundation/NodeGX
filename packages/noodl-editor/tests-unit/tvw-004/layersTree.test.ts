@@ -13,12 +13,17 @@
  */
 
 import {
+  expandedForEditing,
+  indentFor,
   layersOfScreen,
   LayerComponent,
   LayerNode,
   LayerRow,
+  MAX_INDENT_LEVEL,
   REPEATED_BY,
-  ROUTER_PAGES_NOTE
+  ROUTER_PAGES_NOTE,
+  rowsWithChildren,
+  visibleRows
 } from '../../src/editor/src/views/panels/ComponentsPanelNew/layersTree';
 
 const node = (id: string, typename: string, extra: Partial<LayerNode> = {}): LayerNode => ({
@@ -107,9 +112,12 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
     expect(labels(tree.rows).slice(0, 6)).toEqual([
       '0:node:Shell',
       '1:instance:NavBar',
+      // 🔴 The band and the rows it introduces sit at the SAME depth: one step per component
+      // boundary, not two (Richard, 2026-09-18). Two cost p90 **10 levels of 26** on this
+      // machine's corpus, on an indent that had already run off the panel.
       '2:band:INSIDE NAVBAR',
-      '3:node:Bar',
-      '4:node:Text',
+      '2:node:Bar',
+      '3:node:Text',
       '1:node:Router'
     ]);
     // The page's own rows follow the Router, under a band naming what the Router resolved to.
@@ -123,7 +131,7 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
 
     // `/Ghost` is a root of `/Pricing` and `visualRootIds` says it draws, but `/Pricing` renders
     // `roots[0]` of its visual roots and nothing else.
-    expect(labels(tree.rows)).toContain('4:node:Table');
+    expect(labels(tree.rows)).toContain('3:node:Table');
     expect(tree.rows.some((r) => r.component === '/Ghost')).toBe(false);
   });
 
@@ -319,6 +327,99 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
       const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components });
       expect(tree.cyclic).toBe(true);
       expect(tree.rows.length).toBeLessThan(40);
+    });
+  });
+
+  describe("what is drawn, and what is open (Richard's rulings, 2026-09-18)", () => {
+    it('stops stepping the indent after eight levels, while the depth keeps counting', () => {
+      // A chain deep enough to pass the cap: Hero places Hero's inner group … at depth 9+.
+      const components = corpus();
+      let previous = 'Deep 0';
+      components.set('/Deep 0', {
+        name: '/Deep 0',
+        roots: [node('d0', 'Group', { label: 'Deep 0' })],
+        visualRootIds: ['d0']
+      });
+      for (let i = 1; i <= 12; i++) {
+        const name = `/Deep ${i}`;
+        components.set(name, {
+          name,
+          roots: [node(`d${i}`, 'Group', { label: `Deep ${i}`, children: [node(`p${i}`, `/Deep ${i - 1}`)] })],
+          visualRootIds: [`d${i}`]
+        });
+        previous = name;
+      }
+      const home = components.get('/Home');
+      const page = home.roots[1];
+      components.set('/Home', {
+        ...home,
+        roots: [home.roots[0], { ...page, children: [...page.children, node('deep', previous)] }]
+      });
+
+      const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components });
+      const deep = tree.rows.filter((r) => r.depth > MAX_INDENT_LEVEL);
+
+      expect(deep.length).toBeGreaterThan(5);
+      expect(deep.every((r) => r.indent === MAX_INDENT_LEVEL)).toBe(true);
+      // The structure still knows how deep it is — only the drawing stops.
+      expect(Math.max(...deep.map((r) => r.depth))).toBeGreaterThan(MAX_INDENT_LEVEL + 5);
+      expect(tree.rows.every((r) => r.indent === indentFor(r.depth))).toBe(true);
+    });
+
+    it('opens the branch being edited and the page on screen, and nothing else', () => {
+      const tree = layersOfScreen({
+        root: '/App',
+        screenPage: '/Home',
+        canvasComponent: '/Hero',
+        components: corpus()
+      });
+      const open = expandedForEditing(tree.rows);
+      const visible = visibleRows(tree.rows, open);
+
+      // You land next to what you are editing…
+      expect(visible.map((r) => r.label)).toContain('EDITING HERO');
+      expect(visible.map((r) => r.label)).toContain('Hero root');
+      // …and the navbar's insides, which you are not editing, are folded away.
+      expect(visible.map((r) => r.label)).not.toContain('Bar');
+      expect(visible.map((r) => r.label)).toContain('NavBar');
+      // Far less to read than the whole screen: 330 rows on the real fixture.
+      expect(visible.length).toBeLessThan(tree.rows.length);
+    });
+
+    it('hides a row whose parent is open inside a grandparent that is closed', () => {
+      const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components: corpus() });
+      const navBar = tree.rows.find((r) => r.component === '/NavBar' && r.kind === 'instance');
+      // ⚠️ The band is a **sibling** of the rows it introduces, not their parent — both hang off
+      // the instance row, which is what collapsing an instance has to fold away in one press.
+      const bar = tree.rows.find((r) => r.label === 'Bar');
+      const text = tree.rows.find((r) => r.parentKey === bar.key);
+      expect(bar.parentKey).toBe(navBar.key);
+
+      // `Bar` is open; the instance above it is not, so nothing under either is on screen.
+      const visible = visibleRows(tree.rows, new Set([bar.key]));
+      expect(visible.map((r) => r.key)).not.toContain(text.key);
+      expect(visible.map((r) => r.key)).not.toContain(bar.key);
+      // …and opening the whole chain brings it back, so the check is not just "everything hides".
+      const both = visibleRows(tree.rows, new Set([bar.key, navBar.key, tree.rows[0].key]));
+      expect(both.map((r) => r.key)).toContain(text.key);
+    });
+
+    it('gives a caret only to rows that actually have something under them', () => {
+      const components = corpus();
+      components.set('/Hero', {
+        name: '/Hero',
+        roots: [node('heroRoot', 'Group', { label: 'Hero root', children: [node('again', '/Hero')] })],
+        visualRootIds: ['heroRoot']
+      });
+      const tree = layersOfScreen({ root: '/App', screenPage: '/Home', components });
+      const withChildren = rowsWithChildren(tree.rows);
+
+      const cycle = tree.rows.find((r) => r.kind === 'cycle');
+      expect(withChildren.has(cycle.key)).toBe(false);
+      const leaf = tree.rows.find((r) => r.label === 'Text');
+      expect(leaf === undefined || !withChildren.has(leaf.key)).toBe(true);
+      const shell = tree.rows[0];
+      expect(withChildren.has(shell.key)).toBe(true);
     });
   });
 

@@ -147,3 +147,33 @@ is provably `allowAsChild`); 57 → 4.
 3. **Q3 — the indent.** 28% of rows are past the right edge of a 240px panel at 14px/level.
    Proposal: cap the indent (it stops growing after N levels, the guides carry the rest), and drop
    the band's extra level so an instance costs one, not two.
+
+### 6.6 The three rulings, and what they did to the numbers (s14)
+
+Richard ruled all three the same session, on the measurements in §6.1–6.3:
+
+- **R-R — Layers starts at the top of the screen.** The shell's rows first, then `SHOWING HOME`
+  where the page begins, then the page. *"Nothing you can see is missing from the list."* Built as
+  measured; §2's **scope** row is superseded.
+- **R-S — the tab opens on the branch you are editing.** Every ancestor of the editing region is
+  open, plus the chain down to the page on screen; everything else is closed with a caret.
+- **R-T — reduce the indent a bit, and cap it at 8 levels.** 🔴 §2's *"14px indent per level"* was
+  never the artefact: `ComponentsPanel.module.scss` has shipped `--tree-indent: 12px` since PNL-006.
+  Reduced to **10px** and capped at **8 levels** = 80px, which is the whole of the indent a row can
+  ever carry. The band's extra step went with it — a component boundary now costs **one** level.
+
+**Measured after, not assumed** (`tvw004-layers-census.ts` and its depth arm):
+
+| | before | after |
+|---|---|---|
+| row depth p50 / p90 / max | 12 / 26 / 41 | **10 / 22 / 33** |
+| rows past a 240px panel at the step | 28.0% | **0%** — the indent stops at 80px |
+| rows visible when the tab opens (p50 / p90 / worst screen) | 68 / 325 / 2,994 | **23 / 39 / 309** |
+
+`expandedForEditing` + `visibleRows` are pure and graded with the rest; the collapse state is the
+view's, the default is not. **21 specs, 13 mutants, each `cmp`-proven applied and each red with a
+real count** — including one for each ruling, so a later session cannot quietly undo them.
+
+⚠️ **The band is a *sibling* of the rows it introduces, not their parent.** Both hang off the
+instance row, which is what lets one press fold an instance away — and what makes a
+parent-chain visibility check (not an immediate-parent one) load-bearing. Mutant 11.
