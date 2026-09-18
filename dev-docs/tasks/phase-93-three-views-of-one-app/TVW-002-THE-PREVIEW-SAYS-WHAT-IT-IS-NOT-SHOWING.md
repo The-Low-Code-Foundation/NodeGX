@@ -14,7 +14,7 @@ and the preview has not moved.**
 |---|---|
 | **the rule** | The app preview never changes route or mode because the canvas moved. Not in this task, not in any. The only things that move the preview are the route pill, a `Navigate` in the running app, and the person pressing a door |
 | **when the strip shows** | the component on the canvas (`nodegrapheditor.activeComponent`) is not in the DOM of the page the preview is showing. "In the DOM" = the page component, or reachable from it by walking `NodeGraphNode.children[]` through instances (`ComponentModel` types) — the same walk TVW-004 draws. The page the preview is showing is the route's component (`UseRoutes.ts`, `EditorDocument.tsx:199-204 onRouteChanged`) |
-| **where** | one line under the preview caption, inside `VisualCanvas.tsx`'s stage column, above the `<webview>`; never over it. 28px, `amber-bg` wash, no icon, dismissable with `×` for the session-pair (component, page) |
+| **where** | 🔴 **RULED 2026-09-18 (Richard): the LAST row of the preview column**, directly above the frame divider — *at the seam between the app and the node canvas*, not under the caption. The original "one line under the preview caption" is superseded; see §"Where the bar goes". 28px, `amber-bg` wash over an opaque base, no icon, dismissable with `×` for the session-pair (component, page). Never over the app |
 | **shape 1 — on another page** | `**Hero isn't on Pricing.** It's on **Home** → Go to Home · or see it on its own on the **Workbench** — with sample values, not the app's data.` Pages listed are those a Router lists (`RouterAdapter.getPageInfoForComponents`) that contain an instance, from the `findComponentUsages` walk (`TopologyMapPanel/hooks/useTopologyGraph.ts:35-68`). More than three pages: the first three and `+N` |
 | **shape 2 — on no page** | `**Price Tag isn't on any page yet** — nothing in the app places it. See it on its own on the **Workbench**, or drag it into Layers to put it on this page.` (before TVW-004 ships, the second door reads "or drag it onto a page's canvas") |
 | **shape 3 — logic** | `**Format price is logic** — it draws nothing. It runs on Home and Pricing. **Watch it run on the Workbench**: feed it inputs, read its outputs.` |
@@ -246,3 +246,35 @@ after the fix.
 - A **v2-format** project: the populations quoted throughout are measured on legacy `project.json`
   files, which is what the offline probe can read. The editor path is the same model either way, but
   that is reasoning, not a measurement.
+
+
+---
+
+## Where the bar goes — ruled 2026-09-18
+
+§2 originally put the strip "one line under the preview caption … above the `<webview>`". Driven, it
+was ~300px from the edge it is about. Richard, on seeing the shots:
+
+> *"I wonder if it wouldn't be cognitively clearer if that bar was at the top of the node canvas, in
+> between the node canvas and the preview, as a kind of visual separator before your eye confuses
+> what's on the node canvas with the preview?"*
+
+**Ruled: the last row of the preview column**, directly above the frame divider. A separator has to
+be at the seam to be one, and the seam is where the eye slides from the running app onto the graph
+with nothing marking the change — which is proposal §2 row 11 stated as a piece of geometry rather
+than as a sentence.
+
+**Why that side of the divider**, rather than the top of the node canvas as literally described —
+three structural reasons, all of which would have had to be undone later:
+
+1. the sentence is about what the **preview** is showing, and R4 keeps the way back on this surface;
+2. the node graph frame is a **legacy non-React view**, so a row there is a different kind of change;
+3. in the **detached** layout the node graph is the only thing in the editor window, so a strip at
+   its top would describe a preview in another window — the AC5 problem, acquired for free.
+
+⚠️ **The `vertical` layout (the lessons default) puts the two surfaces side by side**, so they meet
+at a vertical edge and no horizontal row can sit in it. There the strip is simply the preview's last
+row. Not solved, recorded: if it matters, it is a second placement rule, and it needs its own look.
+
+The border moved with it — the rule is drawn on the **app** side, because that is the edge the row
+separates you from; the frame divider already draws the other one.

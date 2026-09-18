@@ -384,7 +384,10 @@
      underneath as its own layer, the wash on top, both still tokens. */
   background-color: var(--theme-color-bg-2);
   background-image: linear-gradient(var(--theme-color-notice-bg), var(--theme-color-notice-bg));
-  border-bottom: 1px solid var(--theme-color-bg-3);
+  /* The rule goes on the APP side, because that is the edge this row is separating you from. It is
+     the last row of the preview column (Richard, 2026-09-18), directly above the frame divider —
+     the divider draws the other edge, so a second bottom rule here would be two lines in one seam. */
+  border-top: 1px solid var(--theme-color-bg-3);
   font-size: 11.5px;
   line-height: 1.2;
   color: var(--theme-color-fg-default);

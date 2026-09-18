@@ -419,59 +419,6 @@ export function VisualCanvas({
         )}
       </div>
 
-      {/*
-        TVW-002 — what the preview is NOT showing, said under the caption and above the app, never
-        over it. Proposal §2 row 11: the canvas and the preview show two different things and the
-        editor has never had a sentence between them.
-
-        🔴 **This is what is shipped INSTEAD of moving the preview.** The rule is that the app
-        preview never changes route or mode because the canvas did, and every door below is a
-        thing the *user* pressed. See `usePreviewStrip`.
-      */}
-      {strip.shape !== 'agree' && (
-        <div className={css.Strip} data-test="preview-strip" data-shape={strip.shape}>
-          <span className={css.StripText}>
-            <strong>{strip.lead}</strong>
-            {strip.rest ? ' ' : ''}
-            <span>{strip.rest}</span>
-          </span>
-
-          {strip.doors.map((door) =>
-            door.kind === 'goto' ? (
-              <button
-                key={`goto:${door.page}`}
-                className={css.StripDoor}
-                onClick={() => goToPage(door.page)}
-                data-test="preview-strip-goto"
-              >
-                {door.label}
-              </button>
-            ) : (
-              <button
-                key="bench"
-                className={css.StripDoor}
-                onClick={() => canvasComponent && setScope({ mode: 'bench', target: canvasComponent })}
-                data-test="preview-strip-bench"
-              >
-                {door.label}
-              </button>
-            )
-          )}
-
-          {/* Per pair, for the session — `dismissalKey`. Not an icon: a `×` needs no legend and
-              this strip has already spent its width on a sentence. */}
-          <button
-            className={css.StripDismiss}
-            onClick={dismiss}
-            title="Dismiss — until you open this component on this page again"
-            aria-label="Dismiss"
-            data-test="preview-strip-dismiss"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
       <div className={classNames(css.Stages, showDesignChrome && css['is-design'])}>
         {/* PAR-003: size tag per mock — `1280 × 800 · 100%`, mono, top-right.
             Lives inside the stage so it floats over the preview rather than
@@ -528,6 +475,75 @@ export function VisualCanvas({
           </div>
         )}
       </div>
+
+      {/*
+        TVW-002 — what the preview is NOT showing, said AT THE BOUNDARY: the last row of the
+        preview column, directly above the frame divider that separates the app from the node
+        canvas. Proposal §2 row 11: the canvas and the preview show two different things and the
+        editor has never had a sentence between them.
+
+        🔴 **Richard moved it here on 2026-09-18, and the reason is the whole task.** §2 said "one
+        line under the preview caption"; driven, that put the sentence ~300px away from the edge
+        where the two surfaces actually meet — where an eye slides from the app straight onto the
+        graph without anything marking the change. A separator has to be at the seam to be one.
+        Never over the app (§2's own rule): it is a row in the column, so it takes its height.
+
+        ⚠️ It stays inside `VisualCanvas` rather than moving to the top of the node graph, which is
+        where the boundary also is. Three reasons, all structural: the sentence is about what the
+        PREVIEW is showing (R4 keeps the way back on this surface); the node graph is a legacy
+        non-React view; and in the detached layout the graph is the only thing in the window, so a
+        strip there would describe a preview that is somewhere else entirely.
+
+        ⚠️ In the `vertical` layout (the lessons default) the two surfaces meet at a VERTICAL edge,
+        so no horizontal row can sit in it. This is then simply the preview's last row.
+
+        🔴 **This is what is shipped INSTEAD of moving the preview.** The rule is that the app
+        preview never changes route or mode because the canvas did, and every door below is a
+        thing the *user* pressed. See `usePreviewStrip`.
+      */}
+      {strip.shape !== 'agree' && (
+        <div className={css.Strip} data-test="preview-strip" data-shape={strip.shape}>
+          <span className={css.StripText}>
+            <strong>{strip.lead}</strong>
+            {strip.rest ? ' ' : ''}
+            <span>{strip.rest}</span>
+          </span>
+
+          {strip.doors.map((door) =>
+            door.kind === 'goto' ? (
+              <button
+                key={`goto:${door.page}`}
+                className={css.StripDoor}
+                onClick={() => goToPage(door.page)}
+                data-test="preview-strip-goto"
+              >
+                {door.label}
+              </button>
+            ) : (
+              <button
+                key="bench"
+                className={css.StripDoor}
+                onClick={() => canvasComponent && setScope({ mode: 'bench', target: canvasComponent })}
+                data-test="preview-strip-bench"
+              >
+                {door.label}
+              </button>
+            )
+          )}
+
+          {/* Per pair, for the session — `dismissalKey`. Not an icon: a `×` needs no legend and
+              this strip has already spent its width on a sentence. */}
+          <button
+            className={css.StripDismiss}
+            onClick={dismiss}
+            title="Dismiss — until you open this component on this page again"
+            aria-label="Dismiss"
+            data-test="preview-strip-dismiss"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {Boolean(crashed) && (
         <div className={css.Crashed}>

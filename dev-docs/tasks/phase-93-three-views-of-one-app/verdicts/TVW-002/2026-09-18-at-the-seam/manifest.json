@@ -1,0 +1,16 @@
+{
+  "task": "TVW-002",
+  "date": "2026-09-18",
+  "session": 12,
+  "buildSha": "f85581137",
+  "supersedes": "../2026-09-18 — same five shapes, same fixture, bar at the TOP of the preview",
+  "change": "Richard ruled the bar to the LAST ROW of the preview column, at the seam with the node canvas, so it works as a visual separator. Border moved to the app side.",
+  "note": "PNGs gitignored (.gitignore:265). numbers.json carries the geometry; every sentence is unchanged from the first pass.",
+  "geometry": "identical to the top placement: 28px tall, text 653/653 (shape 1) and 789/789 (shapes 2 and 3), no truncation, both themes",
+  "openFinding": {
+    "what": "the bar only renders on DIVERGENCE, so in the AGREE case there is no separator at all",
+    "evidence": "tvw002-agree-no-strip-light.png — the app's teal hero image abuts the node canvas's dotted grid with nothing between them",
+    "whyItMatters": "Richard's stated reason for moving the bar was 'before your eye confuses what's on the node canvas with the preview'. That confusion is not limited to the divergent case; the bar is.",
+    "status": "NOT BUILT — needs a ruling, see the task file"
+  }
+}
