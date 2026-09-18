@@ -373,9 +373,22 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  /* 🔴 RULED 2026-09-18 (Richard): BELOW A CERTAIN WIDTH THE DOORS GO UNDER THE SENTENCE.
+     Measured in the detached preview at its default 372px: the sentence kept **96px of the 266 it
+     needed** — `_DSI Atoms isn'…` — while the two doors kept **277px of the window**. That is the
+     same shape as the Workbench caption he ruled on the day before: the text collapses to its floor
+     while the controls beside it keep full width.
+     Wrapping rather than a container query, because the trigger is "these items do not fit", which
+     is the question flex already answers — no breakpoint to pick, and it is right for a narrow
+     DOCKED panel too, which no width-based rule about the window would have covered. */
+  flex-wrap: wrap;
+  row-gap: 6px;
   flex: 0 0 auto;
-  height: 28px;
-  padding: 0 10px;
+  /* ⚠️ `min-height`, not `height`: it has to be able to become two rows. The single-row case still
+     measures exactly 28px (content ~14px + 8px padding is under the floor), which is what every
+     docked reading in the s13 verdicts asserts. */
+  min-height: 28px;
+  padding: 4px 10px;
   /* 🔴 OPAQUE BASE UNDER THE WASH, and the drive is what found it.
      `--theme-color-notice-bg` is `rgba(…, 0.12)`, and this row sits inside `.Background`, whose
      backdrop is the preview CHECKERBOARD. A 12% wash over a checkerboard is a striped strip: the
@@ -413,7 +426,11 @@
    never squeezed to nothing by a button that could have wrapped. */
 .StripText {
   flex: 1 1 auto;
-  min-width: 96px;
+  /* The width at which the doors give up the line. Wide enough that when they DO wrap, a normal
+     sentence gets the whole row and nothing truncates at all (266px needed, 352px available at the
+     detached window's 372px); low enough that ellipsis is still the last resort in a window too
+     narrow for even one row of text, where overflow would be worse. */
+  min-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

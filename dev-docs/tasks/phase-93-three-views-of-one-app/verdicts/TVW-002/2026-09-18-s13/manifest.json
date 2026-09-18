@@ -2,48 +2,66 @@
   "task": "TVW-002",
   "date": "2026-09-18",
   "session": 13,
-  "supersedes": "../2026-09-18-at-the-seam — same fixture, before Richard's four rulings of this morning",
-  "fixture": "a COPY of Noodl projects/Prefab marketplace, at NodeGX test projects/TVW-002 s13 Drive — 165 components, 11 routed pages",
+  "supersedes": "../2026-09-18-at-the-seam \u2014 same fixture, before Richard's four rulings of this morning",
+  "fixture": "a COPY of Noodl projects/Prefab marketplace, at NodeGX test projects/TVW-002 s13 Drive \u2014 165 components, 11 routed pages",
   "note": "PNGs are gitignored (.gitignore:265). light/numbers.json and dark/numbers.json carry every sentence and every measurement.",
   "whatChanged": [
     "R-N: the row is drawn in EVERY case; agree is a QUIET tone with a short sentence rather than no row",
     "AC1: the outline-when-agreeing, which had never been built",
-    "AC5: the strip in the detached window, doors and all"
+    "AC5: the strip in the detached window, doors and all",
+    "AC6 (Richard, 2026-09-18): the detached window now follows the editor theme, and below a width the strip's doors stack UNDER the sentence"
   ],
   "arms": {
     "AC3 preview did not move": "HELD across 7 canvas switches, both themes, with the known-firing Go to door firing in each run",
     "the row is drawn on every reading": "7/7, both themes",
     "agree rows are quiet and say something": "3/3, both themes",
-    "AC1 outline drawn": "Main Navbar — a measured 973x72 box, both themes",
-    "no inspector chip over the app": "true, both themes"
+    "AC1 outline drawn": "Main Navbar \u2014 a measured 973x72 box, both themes",
+    "no inspector chip over the app": "true, both themes",
+    "detached window follows the editor theme": "driven as a TRANSITION both ways (light->dark->light); attribute AND painted strip colours change. Reading 'dark while the editor is dark' would have graded nothing.",
+    "nothing truncates in the detached window": "352 of 352px needed (was 96 of 266). Doors wrap to a second row; strip 49px there, still 28px quiet / 29px notice docked."
   },
-  "idempotence": "two consecutive runs compared field by field: identical. The script now RESETS the preview to the start page first and refuses if the reset did not take — see findings.",
+  "idempotence": "two consecutive runs compared field by field: identical. The script now RESETS the preview to the start page first and refuses if the reset did not take \u2014 see findings.",
   "findings": [
     {
       "what": "the outline pointed at the node that PLACES the component, and drew nothing",
       "measured": "placement id -> found 1, getRef present, getDOMElement ABSENT. painting id -> found 1, getDOMElement -> DIV 973x72.",
       "whyItHid": "getRef is only the highlighter's existence filter; the element comes from getDOMElement in updateHighlights. The instance passes the filter, so selectedNodes.size reads a healthy 1 and NOTHING is on screen. A count-based arm would have called AC1 green.",
-      "status": "FIXED — firstRendered now returns a PATH ending on the node that paints. The drive arm now reads the rect."
+      "status": "FIXED \u2014 firstRendered now returns a PATH ending on the node that paints. The drive arm now reads the rect."
     },
     {
       "what": "the outline dragged the box-model inspector chip over the running app",
       "measured": "five lines of CSS facts over the hero, in the shot. Every geometry reading was clean.",
-      "whyItHid": "no number in the drive looked for it. The highlighter takes its inspector focus from the selected and hovered maps, and the outline was being sent down the selection channel — which is what TVW-002 section 2 specified.",
-      "status": "FIXED — placedNodes is a third map, excluded from focus, on its own guest API and its own IPC channel. It is a graded arm now."
+      "whyItHid": "no number in the drive looked for it. The highlighter takes its inspector focus from the selected and hovered maps, and the outline was being sent down the selection channel \u2014 which is what TVW-002 section 2 specified.",
+      "status": "FIXED \u2014 placedNodes is a third map, excluded from focus, on its own guest API and its own IPC channel. It is a graded arm now."
     },
     {
       "what": "the drive was not idempotent",
-      "measured": "run twice, the second run read five different sentences, one fewer agree row, no outline and 'no Go to door was on screen' — all correct answers about the wrong screen.",
+      "measured": "run twice, the second run read five different sentences, one fewer agree row, no outline and 'no Go to door was on screen' \u2014 all correct answers about the wrong screen.",
       "whyItHid": "the script ENDS by pressing a Go to door, which is its own known-firing control, so it leaves the preview on another page.",
-      "status": "FIXED — it resets to the start page first and exits 2 if the reset did not take."
+      "status": "FIXED \u2014 it resets to the start page first and exits 2 if the reset did not take."
     },
     {
       "what": "AC1's first drive read NOTHING because the editor was in Preview mode",
       "measured": "the guest reported designMode=false; EditorDocument deliberately pushes no outline in preview mode.",
       "status": "instrument fault, not a defect. The drive now reports designMode and says so when it is off."
+    },
+    {
+      "what": "the strip was pushed on CHANGE and never seeded when the detached window opens",
+      "measured": "a freshly loaded viewer window had no strip at all until the next canvas switch",
+      "whyItHid": "the wordless seam is a legitimate state, so an absent sentence looks exactly like a correct one. AC5's own drive missed it because the drive switches component immediately after detaching, which pushes.",
+      "status": "FIXED \u2014 the window asks (`StripAction {kind:'ready'}`) rather than the editor guessing when to seed. Ordered by construction: the window cannot ask before it exists."
+    },
+    {
+      "what": "I under-described the truncation to Richard and he ruled against a wrong number",
+      "measured": "I reported '25px' \u2014 that was the QUIET row, which has no doors. The NOTICE row kept 96px of 266 (36%) while the doors kept 277px of a 372px window.",
+      "whyItMatters": "it is the same shape as the Workbench caption defect he ruled on the day before. Re-asked with the real number; he ruled the doors stack under the sentence.",
+      "status": "FIXED and re-driven."
     }
   ],
   "openForRichard": {
-    "detachedTheme": "the detached preview window never receives data-theme, so it sits on the dark :root defaults whatever the editor is set to. Pre-existing; the strip inherits it. Not fixed here."
-  }
+    "none": "all three of the s13 findings are ruled and built. AC6 needs only his look at the shots."
+  },
+  "instrumentFaults": [
+    "reloading the detached viewer window is not a supported operation \u2014 its index.html document-writes its bundle, so Page.reload leaves it at readyState 'interactive' with an empty body. Re-detach through the layout menu instead; that is also the path a person takes."
+  ]
 }

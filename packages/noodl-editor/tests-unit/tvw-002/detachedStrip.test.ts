@@ -28,6 +28,7 @@ import { seam, type StripModel } from '../../src/editor/src/views/VisualCanvas/p
 
 const MAIN = path.join(__dirname, '../../src/main/main.js');
 const VIEWER = path.join(__dirname, '../../src/frames/viewer-frame/src/views/viewer.js');
+const THEME_MANAGER = path.join(__dirname, '../../src/editor/src/models/ThemeManager.ts');
 
 /**
  * The argument list of a call, by the name of the function called.
@@ -114,5 +115,52 @@ describe('TVW-002 AC5 — which strip a window draws', () => {
 
   it('🔴 null and undefined are not the same answer', () => {
     expect(stripToRender(null, local)).not.toEqual(stripToRender(undefined, local));
+  });
+});
+
+/**
+ * TVW-002 AC6 — the detached window's theme, pinned the same way the strip's channels are.
+ *
+ * 🔴 Richard ruled this in on 2026-09-18 after the drive measured `data-theme` as **null** in that
+ * window, permanently, whatever the editor was set to. It is the same silent-join shape as the
+ * strip: three processes, a string channel, and a failure that looks exactly like "the theme simply
+ * did not change" rather than like an error.
+ *
+ * ⚠️ It needs BOTH legs, and this is the arm that says so. A forward with no seed means a window
+ * detached while the theme is sitting still never hears anything and opens dark in a light editor;
+ * a seed with no forward means it never follows a change made afterwards. Each alone looks like it
+ * works, in the state you happen to test.
+ */
+describe('TVW-002 AC6 — the detached window gets the editor theme', () => {
+  const main = fs.readFileSync(MAIN, 'utf8');
+  const THEME = 'viewer-set-theme';
+
+  it('forwards a theme CHANGE to the viewer window', () => {
+    const toViewer = forwardList(main, 'viewerWindow.forwardIpcEvents([');
+
+    expect(toViewer).toContain(`'${THEME}'`);
+    // The known-firing neighbour: this is demonstrably the editor → viewer list.
+    expect(toViewer).toContain(`'viewer-design-selection'`);
+  });
+
+  it('🔴 also SEEDS it when the window opens, not only on a change', () => {
+    // `did-finish-load` — the same place route, zoom, viewport and inspect mode are seeded.
+    expect(main).toContain(`viewerWindow.send('${THEME}', eventArgs.theme)`);
+  });
+
+  it('the viewer renderer stamps it on documentElement', () => {
+    const viewer = fs.readFileSync(VIEWER, 'utf8');
+
+    expect(viewer).toContain(`ipcRenderer.on('${THEME}'`);
+    expect(viewer).toContain(`setAttribute('data-theme'`);
+  });
+
+  it('🔴 sends the RESOLVED theme, never the mode', () => {
+    // `system` means nothing in a window with no media query worth consulting — it would have to
+    // re-answer a question this renderer has already answered, and could answer differently.
+    const theme = fs.readFileSync(THEME_MANAGER, 'utf8');
+
+    expect(theme).toContain('applyDetachedPreviewTheme(resolved)');
+    expect(theme).not.toContain('applyDetachedPreviewTheme(this.mode)');
   });
 });

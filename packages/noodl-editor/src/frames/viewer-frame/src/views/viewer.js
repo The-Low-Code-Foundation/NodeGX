@@ -31,6 +31,12 @@ class Viewer extends View {
     // place in the tree that can say so without guessing. The view itself deliberately cannot tell.
     this.canvasView.setDetachedWindow();
 
+    // TVW-002 — ask the editor for the current strip and theme, rather than waiting for the next
+    // CHANGE. This window can open, or reload, while nothing is changing; the push channel would
+    // then say nothing and the row would sit wordless, which is a legitimate state and so reads
+    // exactly like working. See `StripAction`'s `ready`.
+    ipcRenderer.send('viewer-preview-strip-action', { kind: 'ready' });
+
     ipcRenderer.on('viewer-refresh', () => {
       this.canvasView.refresh();
       ipcRenderer.send('viewer-refreshed');
@@ -78,6 +84,16 @@ class Viewer extends View {
 
     ipcRenderer.on('viewer-set-inspect-mode', (sender, inspectMode) => {
       this.canvasView.setInspectMode(inspectMode);
+    });
+
+    // TVW-002 AC6 — the editor's RESOLVED theme. This renderer loads the same token sheets
+    // (`viewer-frame/index.js`), so the light overrides under `:root[data-theme='light']` work the
+    // moment the attribute is here; nothing was ever setting it, so this window was permanently
+    // dark. `ThemeManager` stamps the editor's own documentElement and cannot reach this one.
+    ipcRenderer.on('viewer-set-theme', (sender, resolved) => {
+      if (resolved === 'light' || resolved === 'dark') {
+        document.documentElement.setAttribute('data-theme', resolved);
+      }
     });
 
     // DES-001 — the design-mode toast, resolved to a label by the editor

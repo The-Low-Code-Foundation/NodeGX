@@ -577,6 +577,13 @@ function launchApp() {
 
       viewerWindow.send('viewer-set-inspect-mode', eventArgs.inspectMode);
       viewerWindow.send('viewer-select-node', eventArgs.selectedNodeId);
+
+      // TVW-002 AC6 — seeded, not only subscribed. The forward above carries a theme CHANGE; a
+      // window detached while the theme is simply sitting still would never see one, and would
+      // open dark in a light editor until the user happened to flip it.
+      if (eventArgs.theme) {
+        viewerWindow.send('viewer-set-theme', eventArgs.theme);
+      }
     });
 
     // viewerWindow.openDevTools();
@@ -1102,6 +1109,9 @@ function launchApp() {
       'viewer-placement-outline',
       'viewer-transform-origin-focus',
       'viewer-design-selection',
+      // TVW-002 AC6: the editor's resolved theme. Without it this window sits on the dark :root
+      // defaults for ever — it is a second renderer and ThemeManager only stamps its own.
+      'viewer-set-theme',
       // TVW-002 AC5: the strip's sentence, computed in the editor window
       // because the detached renderer has no node graph and no project model.
       'viewer-preview-strip',

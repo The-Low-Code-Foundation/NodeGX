@@ -62,7 +62,23 @@ export type StripAction =
   /** `Open on the Workbench`. */
   | { kind: 'bench' }
   /** The `×`. */
-  | { kind: 'dismiss' };
+  | { kind: 'dismiss' }
+  /**
+   * Not a door — *"I have just loaded; tell me what is true."*
+   *
+   * 🔴 **Found by accident, and it is a real gap.** The push channel carries a CHANGE. A window that
+   * opens, or reloads, while the canvas is sitting still therefore hears nothing and renders the
+   * wordless seam — which is a legitimate state, so it looks exactly like working. TVW-002's own
+   * AC5 drive missed it because the drive switches component immediately after detaching, which
+   * pushes.
+   *
+   * ⚠️ The alternative was to seed from the detach payload, the way route, zoom and inspect mode
+   * are seeded in `main.js`'s `did-finish-load`. That fixes *detaching* and not *reloading*, and it
+   * races: the payload is assembled in the same tick the layout flips, before the strip for the
+   * detached case has been computed. Asking is ordered by construction — the window cannot ask
+   * before it exists, and the editor always knows the answer.
+   */
+  | { kind: 'ready' };
 
 /** The props `CanvasView` hands `VisualCanvas` when it is the detached window's copy. */
 export interface DetachedStripProps {

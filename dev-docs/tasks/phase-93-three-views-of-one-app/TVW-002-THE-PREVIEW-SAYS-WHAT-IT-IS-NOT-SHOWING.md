@@ -371,7 +371,40 @@ scans `elementFromPoint` down a column.
 | 6 | ⏳ **Richard's look.** `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` |
 | 7 | ✅ **`test:ci` at the floor** — 2985 specs, 8 failures, seed 57873, HEAD `bf1c17c0`, fresh JSON. The same eight **by name**: 3 SUB-011, 3 SUB-006, 2 NDA-017. None mine. A **sixth** agreeing seed. |
 
-### For Richard, with the shots (AC6)
+### AC6 — Richard's three rulings, built and re-driven (2026-09-18)
+
+1. **The detached window's theme: *"just fix it."*** `ThemeManager` now sends the **resolved** theme
+   beside the native-theme send it already made; `main.js` forwards it and seeds it on
+   `did-finish-load`. 🔴 **Graded as a TRANSITION, both ways** — reading *"it says dark"* while the
+   editor is dark grades nothing, because the broken build (attribute never set, window falls back
+   to the dark `:root` defaults) reads identically. Driven light→dark→light: the attribute follows
+   **and so do the strip's painted colours** (two distinct backgrounds), which is the consequence
+   rather than the mechanism.
+2. **The bottom placement in the detached window: *"that's ok."*** Left as built.
+3. **The truncation — and I had described it wrongly.** I told him it "truncates by 25px". That was
+   the **quiet** row, which has no doors. The **notice** row kept **96px of the 266 it needed
+   (36%)** — `_DSI Atoms isn'…` — while the two doors kept **277px of the 372px window**. The same
+   shape as the Workbench caption he ruled on the day before. Re-asked with the real number; he
+   ruled **the doors stack under the sentence**. Built with `flex-wrap`, not a container query —
+   the trigger is *"these items do not fit"*, which is the question flex already answers, so there
+   is no breakpoint to pick and a narrow **docked** panel is covered for free.
+   **Re-driven: 352 of 352px, nothing truncated.** Docked geometry holds — quiet rows 28px, notice
+   rows 29px (the row gained 4px of block padding so it *can* become two).
+
+🔴 **A gap found by accident while driving that fix: the strip was pushed on CHANGE and never
+seeded when the window opens.** A freshly loaded detached window had no strip at all until the next
+canvas switch — and the wordless seam is a legitimate state, so that looks exactly like working.
+AC5's own drive missed it because the drive switches component immediately after detaching, which
+pushes. Fixed by having the window **ask** (`StripAction {kind:'ready'}`) rather than the editor
+guessing when to seed: the window cannot ask before it exists, so it is ordered by construction,
+and it covers a reload as well as an open.
+
+⚠️ **Instrument note: do not `Page.reload` the detached viewer window.** Its `index.html`
+document-writes its bundle, so a reload leaves it at `readyState: 'interactive'` with an empty body
+and no strip — which reads as a defect in the strip. Re-detach through the layout menu instead;
+that is also the path a person takes.
+
+### For Richard, with the shots (AC6) — SUPERSEDED, all three ruled above
 
 1. **The detached preview is stuck on the dark theme.** Measured: `data-theme` is `null` in that
    window. `ThemeManager` stamps it on the editor renderer only, and its `backgroundColor` is

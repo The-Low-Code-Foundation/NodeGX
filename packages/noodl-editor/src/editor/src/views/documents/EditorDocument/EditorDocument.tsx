@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { IDocumentProvider } from '@noodl-models/app_registry';
 import { ProjectModel } from '@noodl-models/projectmodel';
+import { ThemeManager } from '@noodl-models/ThemeManager';
 import { authoredPath, NodePath, samePath, selectionStore } from '@noodl-models/selection/selectionStore';
 import { EditorSettings } from '@noodl-utils/editorsettings';
 import { KeyCode, KeyMod } from '@noodl-utils/keyboard/KeyCode';
@@ -179,6 +180,10 @@ function EditorDocument() {
         route: navigationState.route,
         viewportSize,
         inspectMode: previewMode ? false : true,
+        // TVW-002 AC6 — the RESOLVED theme, so the window does not open dark in a light editor.
+        // `ThemeManager` pushes every CHANGE, but a window detached while the theme is sitting
+        // still would never see one; this is the seed, and main sends it on `did-finish-load`.
+        theme: ThemeManager.resolvedTheme,
         // The key keeps its old name: main forwards it verbatim as `viewer-select-node`'s argument.
         selectedNodeId: selectedNodePath
       });
@@ -261,7 +266,12 @@ function EditorDocument() {
     const onAction = (_event: unknown, action: StripAction) => {
       if (action?.kind === 'goto') detachedGoToPage(action.page);
       else if (action?.kind === 'dismiss') detachedDismiss();
-      else if (action?.kind === 'bench' && detachedCanvasComponent) {
+      else if (action?.kind === 'ready') {
+        // The detached window has just loaded and is asking what is true. Both facts it cannot
+        // work out for itself, in one answer.
+        ipcRenderer.send(PREVIEW_STRIP_PUSH, detachedStrip);
+        ipcRenderer.send('viewer-set-theme', ThemeManager.resolvedTheme);
+      } else if (action?.kind === 'bench' && detachedCanvasComponent) {
         // BEN-004: the bench is a mode of the DOCKED surface. `requestBenchMount` parks the target
         // and the handler below re-attaches, which is what this door has always meant — it is the
         // menu item's behaviour, reached from a second place.
@@ -273,7 +283,7 @@ function EditorDocument() {
     return () => {
       ipcRenderer.off(PREVIEW_STRIP_ACTION, onAction);
     };
-  }, [detachedGoToPage, detachedDismiss, detachedCanvasComponent]);
+  }, [detachedGoToPage, detachedDismiss, detachedCanvasComponent, detachedStrip]);
 
   /**
    * TVW-002 AC1 — where the canvas's component sits on the screen the preview is showing, published
