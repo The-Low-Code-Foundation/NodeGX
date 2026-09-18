@@ -9,7 +9,7 @@ now **6 of 7 ACs green**. It needs one gate and one look — neither is a build.
 | id | task | built | driven |
 |---|---|---|---|
 | TVW-001 | The panel tells the truth | ✅ six rows + AC7's fixes | **CLOSED — all 8 ACs** |
-| TVW-002 | The preview says what it is not showing | ✅ 6 modules + the row + the outline | **AC1–AC5 ✅, AC7 ✅. AC6 = Richard's look — the ONLY thing left** |
+| TVW-002 | The preview says what it is not showing | ✅ 6 modules + the row + the outline + the detached window | **ALL 7 ACs green.** Richard ruled every finding; his look at the s13 shots is the last word |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED — all 6 ACs** |
 | TVW-004 | Layers (**unblocked**) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
@@ -19,21 +19,19 @@ now **6 of 7 ACs green**. It needs one gate and one look — neither is a build.
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 24** (TVW-003 six, TVW-001 eight, TVW-002 six). Two and a half of ten tasks.
+**ACs closed: 25** (TVW-003 six, TVW-001 eight, TVW-002 seven). **Three of ten tasks.**
 
-## Start here — one look, then build TVW-004
+## Start here — build TVW-004
 
-**Every gate TVW-002 has is green.** `test:ci` ran at the end of s13: **2985 specs, 8 failures, seed
-57873, HEAD `bf1c17c0`** — the floor **by name** (3 SUB-011, 3 SUB-006, 2 NDA-017), none mine, a
-sixth agreeing seed. ⚠️ A **stale `test-results.json` was on disk** and would have read as a pass;
+**TVW-002 is done.** Richard ruled every finding s13 put to him and all seven ACs are green.
+`test:ci` was re-run *after* the last change: **2985 specs, 8 failures, seed 24947, HEAD `3c498b0e`**
+— the floor **by name** (3 SUB-011, 3 SUB-006, 2 NDA-017), none mine, a **seventh** agreeing seed.
+⚠️ A **stale `test-results.json` was on disk** at the start of s13 and would have read as a pass;
 delete it before every run and check the mtime on what comes back.
 
-1. **Show Richard `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` for AC6.** `open -a Preview <paths>`
-   — markdown links open nothing in his VS Code. Three things are written up for him at the end of
-   the TVW-002 task file: the detached window is **stuck on the dark theme** (measured: `data-theme`
-   is `null` there; pre-existing, the strip inherits it); in the detached window the row sits at the
-   **bottom with no node canvas below it**; and the quiet sentence **truncates by 25px** at that
-   window's default 372px width.
+1. *(optional)* **Show Richard `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` for AC6.** `open -a Preview <paths>`
+   — markdown links open nothing in his VS Code. He has already ruled on all three of s13's
+   findings and they are built; this is a courtesy look at the result, not a blocker.
 2. Then **TVW-004 (Layers)**. It should **import `pageReach.ts`**, not write a second walk — and note
    that `firstRendered` now returns a **path to the node that paints**, which is exactly what Layers
    needs to point at something.

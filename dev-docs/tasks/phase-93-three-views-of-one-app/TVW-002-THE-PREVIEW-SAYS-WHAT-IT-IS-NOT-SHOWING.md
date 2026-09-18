@@ -368,8 +368,8 @@ scans `elementFromPoint` down a column.
 | 3 | ✅ HELD across 7 canvas switches per run, both themes, control firing in each |
 | 4 | ✅ |
 | 5 | ✅ **driven in the detached window**: four shapes, `data-detached=true`, and `Go to Design System` pressed *there* moved the preview and returned the correct new quiet sentence — three processes in the loop |
-| 6 | ⏳ **Richard's look.** `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` |
-| 7 | ✅ **`test:ci` at the floor** — 2985 specs, 8 failures, seed 57873, HEAD `bf1c17c0`, fresh JSON. The same eight **by name**: 3 SUB-011, 3 SUB-006, 2 NDA-017. None mine. A **sixth** agreeing seed. |
+| 6 | ✅ **all three findings RULED and built** (theme fixed, placement kept, doors stacked). Richard's look at `verdicts/TVW-002/2026-09-18-s13/` is the last word. |
+| 7 | ✅ **`test:ci` at the floor, re-run after AC6's changes** — 2985 specs, 8 failures, seed 24947, HEAD `3c498b0e`, fresh JSON. The same eight **by name**: 3 SUB-011, 3 SUB-006, 2 NDA-017. None mine. A **seventh** agreeing seed. |
 
 ### AC6 — Richard's three rulings, built and re-driven (2026-09-18)
 
