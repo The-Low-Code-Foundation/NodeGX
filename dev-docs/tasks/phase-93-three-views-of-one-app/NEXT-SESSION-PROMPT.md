@@ -98,9 +98,16 @@ about, because they are the shape the harness memory warns of: a peer's additive
 suite and reds two **editor** gates that only a whole-repo run reaches —
 `tests-unit/alpha-006/nodeDocs.test.ts:139` (every catalog node owes a docs page) and
 `tests-unit/chr-007/widgetDispatch.test.ts:301` (the dispatch map must cover the catalog). Reported
-to `opennoodl-62` with the file:line. **If they are still red next session, they are still not
-yours** — check `git log -S` on the node name before inheriting them
-([[a-none-owned-blocker-is-the-one-most-likely-already-fixed]]).
+to `opennoodl-62` with the file:line, **fixed by them in `09b286e69`, and re-measured here after
+their commit: both suites 28/28 green.** Neither was a defect in the nodes — both were
+regenerations that a per-package run gives no reason to do (`docs:nodes` for the pages,
+`CHR007_WRITE_SNAPSHOT=1` for the port-class map).
+
+⚠️ **The lesson is the one to keep, because it will recur:** a new node type owes two *editor*
+artefacts, and the package suite that proves the node works cannot see either. ⚠️ Their regeneration
+also swept up a `keepsFocus` row on the button docs page that **GAM-027 (`238c455e9`) should have
+written and did not** — it updated `node-catalog.json` and the widget snapshot but neither the
+enriched catalog nor the docs pages. Nothing of this phase's is involved in either.
 
 ## The box
 
