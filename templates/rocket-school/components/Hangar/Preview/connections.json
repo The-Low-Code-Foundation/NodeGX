@@ -47,6 +47,12 @@
     },
     {
       "fromId": "pvIn",
+      "fromProperty": "pattern",
+      "toId": "pvTrack",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "pvIn",
       "fromProperty": "name",
       "toId": "pvTrack",
       "toProperty": "nameA"

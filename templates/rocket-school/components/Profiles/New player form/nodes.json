@@ -211,7 +211,7 @@
       "parent": "nfCard",
       "children": [
         "nfFace",
-        "nfRoll"
+        "nfRollWrap"
       ],
       "parameters": {
         "sizeMode": "contentSize",
@@ -236,10 +236,32 @@
       "y": 520
     },
     {
+      "id": "nfRollWrap",
+      "type": "Group",
+      "label": "Roll, and the way back",
+      "parent": "nfFaceRow",
+      "children": [
+        "nfRoll",
+        "nfWalk"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "alignItems": "flex-start"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
       "id": "nfRoll",
       "type": "net.noodl.controls.button",
       "label": "Roll again",
-      "parent": "nfFaceRow",
+      "parent": "nfRollWrap",
       "parameters": {
         "backgroundColor": "var(--surface)",
         "color": "var(--foreground)",
@@ -271,8 +293,123 @@
         "boxShadowColor": "var(--foreground)",
         "label": "Roll again"
       },
-      "x": 160,
-      "y": 640
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "nfWalk",
+      "type": "Group",
+      "label": "Back and forward",
+      "parent": "nfRollWrap",
+      "children": [
+        "nfBack",
+        "nfPos",
+        "nfForward"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "nfBack",
+      "type": "net.noodl.controls.button",
+      "label": "The face before",
+      "parent": "nfWalk",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "◀",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "nfPos",
+      "type": "Text",
+      "label": "Which of the faces rolled",
+      "parent": "nfWalk",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "nfForward",
+      "type": "net.noodl.controls.button",
+      "label": "The face after",
+      "parent": "nfWalk",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "▶",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1240
     },
     {
       "id": "nfLook",
@@ -280,7 +417,7 @@
       "label": "Which style",
       "parent": "nfCard",
       "x": 100,
-      "y": 760
+      "y": 1360
     },
     {
       "id": "nfLevel",
@@ -288,7 +425,7 @@
       "label": "Which class",
       "parent": "nfCard",
       "x": 100,
-      "y": 880
+      "y": 1480
     },
     {
       "id": "nfLangWrap",
@@ -307,7 +444,7 @@
         "flexDirection": "column"
       },
       "x": 100,
-      "y": 1000
+      "y": 1600
     },
     {
       "id": "nfLang",
@@ -315,7 +452,7 @@
       "label": "Which language",
       "parent": "nfLangWrap",
       "x": 160,
-      "y": 1120
+      "y": 1720
     },
     {
       "id": "nfActions",
@@ -335,7 +472,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 100,
-      "y": 1240
+      "y": 1840
     },
     {
       "id": "nfCreate",
@@ -374,7 +511,7 @@
         "label": "Let’s go!"
       },
       "x": 160,
-      "y": 1360
+      "y": 1960
     },
     {
       "id": "nfCancel",
@@ -413,7 +550,7 @@
         "label": "Cancel"
       },
       "x": 160,
-      "y": 1480
+      "y": 2080
     },
     {
       "id": "nfLookItems",
@@ -424,7 +561,7 @@
         "json": "[{\"label\":\"Pixel\",\"value\":\"pixel-art\"},{\"label\":\"Emoji\",\"value\":\"fun-emoji\"},{\"label\":\"Thumbs\",\"value\":\"thumbs\"},{\"label\":\"Smile\",\"value\":\"big-smile\"},{\"label\":\"Adventurer\",\"value\":\"adventurer\"}]"
       },
       "x": 530,
-      "y": 880
+      "y": 1720
     },
     {
       "id": "nfLevelItems",
@@ -435,7 +572,7 @@
         "json": "[{\"label\":\"CE2\",\"value\":\"CE2\"},{\"label\":\"CM1\",\"value\":\"CM1\"},{\"label\":\"CM2\",\"value\":\"CM2\"},{\"label\":\"6e\",\"value\":\"6e\"}]"
       },
       "x": 530,
-      "y": 1240
+      "y": 2080
     },
     {
       "id": "nfLangItems",
@@ -446,7 +583,7 @@
         "json": "[{\"label\":\"English\",\"value\":\"en\"},{\"label\":\"Français\",\"value\":\"fr\"}]"
       },
       "x": 530,
-      "y": 1720
+      "y": 2560
     },
     {
       "id": "nfLookVar",
@@ -459,7 +596,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 1000
+      "y": 1840
     },
     {
       "id": "nfSetLook",
@@ -469,7 +606,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 1120
+      "y": 1960
     },
     {
       "id": "nfLevelVar",
@@ -482,7 +619,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 1360
+      "y": 2200
     },
     {
       "id": "nfSetLevel",
@@ -492,7 +629,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 1480
+      "y": 2320
     },
     {
       "id": "nfLangVar",
@@ -505,7 +642,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 1840
+      "y": 2680
     },
     {
       "id": "nfSetLang",
@@ -515,7 +652,7 @@
         "name": "newLang"
       },
       "x": 530,
-      "y": 1960
+      "y": 2800
     },
     {
       "id": "nfSeedVar",
@@ -538,7 +675,7 @@
         "name": "newSeed"
       },
       "x": 530,
-      "y": 640
+      "y": 3160
     },
     {
       "id": "nfRandom",
@@ -551,6 +688,112 @@
       "y": 760
     },
     {
+      "id": "nfHistVar",
+      "type": "Variable2",
+      "label": "The faces rolled",
+      "parameters": {
+        "name": "newSeedHistory"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
+      },
+      "x": 530,
+      "y": 3280
+    },
+    {
+      "id": "nfSetHist",
+      "type": "Set Variable",
+      "label": "Keep the faces rolled",
+      "parameters": {
+        "name": "newSeedHistory"
+      },
+      "x": 530,
+      "y": 3400
+    },
+    {
+      "id": "nfAtVar",
+      "type": "Variable2",
+      "label": "Which face of them",
+      "parameters": {
+        "name": "newSeedAt"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
+      },
+      "x": 530,
+      "y": 3520
+    },
+    {
+      "id": "nfSetAt",
+      "type": "Set Variable",
+      "label": "Keep which face",
+      "parameters": {
+        "name": "newSeedAt"
+      },
+      "x": 530,
+      "y": 3640
+    },
+    {
+      "id": "nfRollSet",
+      "type": "/Logic/Roll face",
+      "label": "Start the list at one face",
+      "parameters": {
+        "action": "set"
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "nfRollRoll",
+      "type": "/Logic/Roll face",
+      "label": "Roll, and add it",
+      "parameters": {
+        "action": "roll"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "nfRollBack",
+      "type": "/Logic/Roll face",
+      "label": "The face before",
+      "parameters": {
+        "action": "back"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "nfRollFwd",
+      "type": "/Logic/Roll face",
+      "label": "The face after",
+      "parameters": {
+        "action": "forward"
+      },
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "nfCanBack",
+      "type": "Expression",
+      "label": "Is there a face before?",
+      "parameters": {
+        "expression": "at > 0"
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "nfCanFwd",
+      "type": "Expression",
+      "label": "Is there a face after?",
+      "parameters": {
+        "expression": "at >= 0 && at < n - 1"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
       "id": "nfDefaultLook",
       "type": "Expression",
       "label": "pixel-art",
@@ -558,7 +801,7 @@
         "expression": "'pixel-art'"
       },
       "x": 530,
-      "y": 2320
+      "y": 3760
     },
     {
       "id": "nfDefaultLevel",
@@ -568,7 +811,7 @@
         "expression": "'CE2'"
       },
       "x": 530,
-      "y": 2440
+      "y": 3880
     },
     {
       "id": "nfDefaultLang",
@@ -578,7 +821,7 @@
         "expression": "'en'"
       },
       "x": 530,
-      "y": 2560
+      "y": 4000
     },
     {
       "id": "nfResetLook",
@@ -588,7 +831,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 2680
+      "y": 4120
     },
     {
       "id": "nfResetLevel",
@@ -598,7 +841,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 2800
+      "y": 4240
     },
     {
       "id": "nfResetLang",
@@ -608,7 +851,7 @@
         "name": "newLang"
       },
       "x": 530,
-      "y": 2920
+      "y": 4360
     },
     {
       "id": "nfShown",
@@ -628,7 +871,7 @@
         "expression": "editing === true ? 'edit' : 'create'"
       },
       "x": 530,
-      "y": 3040
+      "y": 4480
     },
     {
       "id": "nfMode",
@@ -646,7 +889,7 @@
         "value-edit-edit": true
       },
       "x": 530,
-      "y": 1600
+      "y": 2440
     },
     {
       "id": "nfDanger",
@@ -667,7 +910,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 100,
-      "y": 1600
+      "y": 2200
     },
     {
       "id": "nfDelete",
@@ -706,7 +949,7 @@
         "label": "Delete this player"
       },
       "x": 160,
-      "y": 1720
+      "y": 2320
     },
     {
       "id": "nfAsk",
@@ -727,7 +970,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 160,
-      "y": 1840
+      "y": 2440
     },
     {
       "id": "nfAskText",
@@ -742,7 +985,7 @@
         "fontWeight": "var(--font-semibold)"
       },
       "x": 220,
-      "y": 1960
+      "y": 2560
     },
     {
       "id": "nfAskButtons",
@@ -766,7 +1009,7 @@
         }
       },
       "x": 220,
-      "y": 2080
+      "y": 2680
     },
     {
       "id": "nfNo",
@@ -805,7 +1048,7 @@
         "label": "No, keep"
       },
       "x": 280,
-      "y": 2200
+      "y": 2800
     },
     {
       "id": "nfYes",
@@ -844,7 +1087,7 @@
         "label": "Yes, delete"
       },
       "x": 280,
-      "y": 2320
+      "y": 2920
     },
     {
       "id": "nfAskState",
@@ -862,7 +1105,7 @@
         "value-asking-asking": true
       },
       "x": 530,
-      "y": 2080
+      "y": 2920
     },
     {
       "id": "nfAskLine",
@@ -872,7 +1115,7 @@
         "functionScript": "Outputs.line = String(Inputs.word || '').replace('{name}', String(Inputs.name || ''));"
       },
       "x": 530,
-      "y": 2200,
+      "y": 3040,
       "ports": [
         {
           "name": "in-word",
@@ -905,7 +1148,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 3160
+      "y": 4600
     },
     {
       "id": "nfFillLevel",
@@ -915,17 +1158,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 3280
-    },
-    {
-      "id": "nfFillSeed",
-      "type": "Set Variable",
-      "label": "Their face seed",
-      "parameters": {
-        "name": "newSeed"
-      },
-      "x": 530,
-      "y": 3400
+      "y": 4720
     },
     {
       "id": "nfOut",

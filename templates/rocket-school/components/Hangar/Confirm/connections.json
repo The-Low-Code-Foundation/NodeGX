@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "10f7c5d6-8fa3-5944-851e-96f7f1e60c5f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hcIn",
+      "fromProperty": "mounted",
+      "toId": "hcShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "hcShown",
+      "fromProperty": "result",
+      "toId": "hcCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "title",
+      "toId": "hcTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "haveWord",
+      "toId": "hcSum",
+      "toProperty": "in-haveWord"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "costWord",
+      "toId": "hcSum",
+      "toProperty": "in-costWord"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "leftWord",
+      "toId": "hcSum",
+      "toProperty": "in-leftWord"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "purse",
+      "toId": "hcSum",
+      "toProperty": "in-purse"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "cost",
+      "toId": "hcSum",
+      "toProperty": "in-cost"
+    },
+    {
+      "fromId": "hcSum",
+      "fromProperty": "out-rows",
+      "toId": "hcEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "yesWord",
+      "toId": "hcYes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hcIn",
+      "fromProperty": "noWord",
+      "toId": "hcNo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hcYes",
+      "fromProperty": "onClick",
+      "toId": "hcOut",
+      "toProperty": "yes"
+    },
+    {
+      "fromId": "hcNo",
+      "fromProperty": "onClick",
+      "toId": "hcOut",
+      "toProperty": "no"
+    }
+  ]
+}

@@ -34,6 +34,11 @@
           "type": "string"
         },
         {
+          "name": "pattern",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "line",
           "plug": "output",
           "type": "string"

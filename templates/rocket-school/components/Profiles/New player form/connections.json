@@ -156,14 +156,242 @@
     {
       "fromId": "nfRandom",
       "fromProperty": "result",
-      "toId": "nfSetSeed",
-      "toProperty": "value"
+      "toId": "nfRollRoll",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nfRandom",
+      "fromProperty": "result",
+      "toId": "nfRollSet",
+      "toProperty": "seed"
     },
     {
       "fromId": "nfRoll",
       "fromProperty": "onClick",
+      "toId": "nfRollRoll",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfBack",
+      "fromProperty": "onClick",
+      "toId": "nfRollBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfForward",
+      "fromProperty": "onClick",
+      "toId": "nfRollFwd",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollSet",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollSet",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "done",
       "toId": "nfSetSeed",
       "toProperty": "do"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollRoll",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollRoll",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollBack",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollBack",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollFwd",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollFwd",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfSetSeed",
+      "fromProperty": "done",
+      "toId": "nfSetHist",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfSetHist",
+      "fromProperty": "done",
+      "toId": "nfSetAt",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfCanBack",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfCanFwd",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfCanFwd",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "nfCanBack",
+      "fromProperty": "result",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfCanFwd",
+      "fromProperty": "result",
+      "toId": "nfForward",
+      "toProperty": "mounted"
     },
     {
       "fromId": "nfDefaultLook",
@@ -210,8 +438,8 @@
     {
       "fromId": "nfResetLang",
       "fromProperty": "done",
-      "toId": "nfSetSeed",
-      "toProperty": "do"
+      "toId": "nfRollSet",
+      "toProperty": "run"
     },
     {
       "fromId": "nfIn",
@@ -312,14 +540,14 @@
     {
       "fromId": "nfIn",
       "fromProperty": "seed0",
-      "toId": "nfFillSeed",
-      "toProperty": "value"
+      "toId": "nfRollSet",
+      "toProperty": "seed"
     },
     {
       "fromId": "nfIn",
       "fromProperty": "fill",
-      "toId": "nfFillSeed",
-      "toProperty": "do"
+      "toId": "nfRollSet",
+      "toProperty": "run"
     },
     {
       "fromId": "nfIn",

@@ -24,8 +24,32 @@
     {
       "fromId": "htIn",
       "fromProperty": "paint",
-      "toId": "htSwatch",
-      "toProperty": "backgroundColor"
+      "toId": "htRocket",
+      "toProperty": "colorA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "pattern",
+      "toId": "htRocket",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "look",
+      "toId": "htRocket",
+      "toProperty": "styleA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "seed",
+      "toId": "htRocket",
+      "toProperty": "seedA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "options",
+      "toId": "htRocket",
+      "toProperty": "optionsA"
     },
     {
       "fromId": "htIn",
@@ -134,6 +158,18 @@
       "fromProperty": "id",
       "toId": "htOut",
       "toProperty": "id"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "label",
+      "toId": "htOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "cost",
+      "toId": "htOut",
+      "toProperty": "cost"
     }
   ]
 }

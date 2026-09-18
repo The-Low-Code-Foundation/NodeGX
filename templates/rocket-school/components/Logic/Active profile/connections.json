@@ -125,6 +125,12 @@
     },
     {
       "fromId": "activeprofilFn",
+      "fromProperty": "out-pattern",
+      "toId": "activeprofilOut",
+      "toProperty": "pattern"
+    },
+    {
+      "fromId": "activeprofilFn",
       "fromProperty": "out-picks",
       "toId": "activeprofilOut",
       "toProperty": "picks"

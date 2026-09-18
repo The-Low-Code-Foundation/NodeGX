@@ -904,14 +904,36 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       }
       return schemas.get(look)!;
     };
-    /** Every face row naming a part or a value its face does not have, by name. */
+    /**
+     * Every face row naming a part or a value its face does not have, by name.
+     *
+     * 🔴 PLY-001: a DiceBear part is one of two shapes, and the gate has to know which. A CHOICE part (`hat`, `glasses`,
+     * `accessories`, `features`, `hair`) carries an enum, and the value must be in it. A COLOUR part (`hairColor`) carries
+     * no enum at all — it takes any 6-digit hex — so the enum check reported every hair colour as a part the face "has
+     * no such value" for. It is checked against the schema's own pattern instead, and the part must still EXIST.
+     */
     const unknownParts = (rows: ReadonlyArray<HangarItem>) => {
       const out: string[] = [];
       for (const item of rows.filter((i) => i.kind === 'face')) {
         if (!item.faces || Object.keys(item.faces).length === 0) out.push(`${item.id}: fits no face`);
-        for (const [look, { part, value }] of Object.entries(item.faces ?? {})) {
-          const values: string[] = schemaOf(look)[part]?.items?.enum ?? [];
-          if (!values.includes(value)) out.push(`${item.id}: the ${look} face has no ${part} "${value}"`);
+        for (const [look, { part, value, prob }] of Object.entries(item.faces ?? {})) {
+          const schema = schemaOf(look);
+          const spec = schema[part];
+          if (!spec) {
+            out.push(`${item.id}: the ${look} face has no ${part} at all`);
+            continue;
+          }
+          const values: string[] | undefined = spec.items?.enum;
+          if (values) {
+            if (!values.includes(value)) out.push(`${item.id}: the ${look} face has no ${part} "${value}"`);
+          } else if (!/^(transparent|[a-fA-F0-9]{6})$/.test(value)) {
+            out.push(`${item.id}: ${part} takes a colour, and "${value}" is not one`);
+          }
+          // 🔴 PLY-001 §3.3: `prob` must say exactly what the installed schema says. A part that is OPTIONAL and not
+          // forced to 100 leaves the seed to decide whether the thing the child bought is drawn at all; a part that is
+          // not optional has no such property and forcing it would be a lie in the data.
+          const optional = Object.prototype.hasOwnProperty.call(schema, `${part}Probability`);
+          if (!!prob !== optional) out.push(`${item.id}: ${look}/${part} is ${optional ? 'optional and needs' : 'always drawn and must not have'} prob`);
         }
       }
       return out;
@@ -932,7 +954,8 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     const paintFaults = (rows: ReadonlyArray<HangarItem>, entries: Array<{ name: string; value: string }>) => {
       const value = (name: string) => [...entries].reverse().find((t) => t.name === name)?.value;
       const out: string[] = [];
-      for (const item of rows.filter((i) => i.kind === 'rocket')) {
+      // PLY-002: a rocket item is EITHER a paint or a decal. A decal is not a colour and has no contrast to clear.
+      for (const item of rows.filter((i) => i.kind === 'rocket' && !i.pattern)) {
         const token = /^var\((--rocket-paint-[a-z]+)\)$/.exec(item.paint ?? '')?.[1];
         const hex = token ? value(token) : undefined;
         if (!token || !hex) {
@@ -954,13 +977,24 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     });
 
     it('AC4 sabotage arm: a hat that does not exist is named', () => {
-      const doctored = HANGAR_SHELF.map((i) => (i.id === 'cap' ? { ...i, faces: { 'pixel-art': { part: 'hat', value: 'variant99' } } } : i));
+      const doctored = HANGAR_SHELF.map((i) => (i.id === 'cap' ? { ...i, faces: { 'pixel-art': { part: 'hat', value: 'variant99', prob: true } } } : i));
       expect(unknownParts(doctored)).toEqual(['cap: the pixel-art face has no hat "variant99"']);
+      // PLY-001 §3.3 sabotage: drop the probability from an optional part and the gate names it.
+      const noProb = HANGAR_SHELF.map((i) => (i.id === 'cap' ? { ...i, faces: { 'pixel-art': { part: 'hat', value: 'variant01' } } } : i));
+      expect(unknownParts(noProb)).toEqual(['cap: pixel-art/hat is optional and needs prob']);
     });
 
     it('🔴 AC4: every paint is a token the generator writes, and clears 3:1 on every ground the rocket is drawn over', () => {
       expect(paintFaults(HANGAR_SHELF, tpl007TokenEntries())).toEqual([]);
-      expect(HANGAR_SHELF.filter((i) => i.kind === 'rocket').length).toBe(6);
+      expect(HANGAR_SHELF.filter((i) => i.kind === 'rocket' && !i.pattern).length).toBe(6);
+      // 🔴 PLY-002: white reads on every paint a decal is drawn over. (That the KIT can draw each decal is the kit
+      // gate's clause — it is the only one that has the built kit in front of it.)
+      expect(HANGAR_SHELF.filter((i) => i.pattern).length).toBeGreaterThanOrEqual(7);
+      const token = (name: string) => [...tpl007TokenEntries()].reverse().find((t) => t.name === name)?.value;
+      for (const item of HANGAR_SHELF.filter((i) => i.kind === 'rocket' && i.paint)) {
+        const hex = token(/^var\((--rocket-paint-[a-z]+)\)$/.exec(item.paint!)![1])!;
+        expect({ paint: item.id, white: Number(ratio('#ffffff', hex).toFixed(2)) >= 3 }).toEqual({ paint: item.id, white: true });
+      }
     });
 
     it('AC4 sabotage arm: a pale paint, and a paint that is not a token, are named', () => {
@@ -972,6 +1006,8 @@ describe('TPL-007 — Rocket School, the artefact', () => {
 
     it('three items are everyone’s from the start, and every face that can wear anything has one of them; the shelf in the graph is the shelf', () => {
       expect(HANGAR_SHELF.filter((i) => i.free).map((i) => i.id)).toEqual(['glasses', 'paint-green', 'paint-blue']);
+      // PLY-002: a free item costs nothing, and nothing else costs nothing.
+      for (const item of HANGAR_SHELF) expect({ id: item.id, ok: (item.cost === 0) === (item.free === true) }).toEqual({ id: item.id, ok: true });
       const wearable = [...new Set(HANGAR_SHELF.flatMap((i) => Object.keys(i.faces ?? {})))].sort();
       expect(wearable).toEqual(['adventurer', 'big-smile', 'pixel-art']);
       for (const look of wearable) expect({ look, free: HANGAR_SHELF.some((i) => i.free && i.faces?.[look]) }).toEqual({ look, free: true });
@@ -1060,7 +1096,6 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect(missing(C.hangarTile, [['htCard', 'onClick', 'htCanPick', 'eval'], ['htCard', 'onClick', 'htCanWear', 'eval'], ['htCanPick', 'ontrue', 'htOut', 'pick'], ['htCanWear', 'ontrue', 'htOut', 'wear']])).toEqual([]);
       expect(
         missing(C.pageHangar, [
-          ['hgShelf', 'pick', 'hgPick', 'run'],
           ['hgShelf', 'wear', 'hgWear', 'run'],
           ['hgShelf', 'itemId', 'hgPick', 'itemId'],
           ['hgShelf', 'itemId', 'hgWear', 'itemId'],
@@ -1068,8 +1103,18 @@ describe('TPL-007 — Rocket School, the artefact', () => {
           ['hgItems', 'items', 'hgWear', 'shelf'],
           ['hgPick', 'done', 'hgStore', 'write'],
           ['hgWear', 'done', 'hgStore', 'write'],
-          ['hgPick', 'done', 'hgPreview', 'changed']
+          ['hgPick', 'done', 'hgPreview', 'changed'],
+          // 🔴 PLY-002: the tap ASKS, and only Yes buys. This is the "auto-buy" Richard found, encoded.
+          ['hgShelf', 'pick', 'hgAsk', 'to-asking'],
+          ['hgConfirm', 'yes', 'hgPick', 'run'],
+          ['hgConfirm', 'no', 'hgAsk', 'to-idle'],
+          ['hgAsk', 'idle', 'hgShelfBox', 'mounted'],
+          ['hgAsk', 'asking', 'hgConfirm', 'mounted']
         ])
+      ).toEqual([]);
+      // 🔴 And nothing wires a tap straight to the purchase any more.
+      expect(
+        connectionsOf(built, C.pageHangar).filter((w) => w.fromId === 'hgShelf' && w.fromProperty === 'pick' && w.toId === 'hgPick')
       ).toEqual([]);
     });
 
@@ -1319,7 +1364,11 @@ describe('TPL-007 — Rocket School, the artefact', () => {
           ['zpWalking', 'value', 'zpLane', 'walking'], ['zpRound', 'clockLeft', 'zpLane', 'left']
         ])
       ).toEqual([]);
-      expect(params(C.monsterPlay, 'zpRound').mode).toBe('maths');
+      // 🔴 PLY-004: was `.toBe('maths')`, a literal on the placement, and it was the whole reason Monster Gate had no
+      // typing version. The mode now arrives from the setup, and no node may pin it again.
+      expect(params(C.monsterPlay, 'zpRound').mode).toBeUndefined();
+      expect(connectionsOf(built, C.monsterPlay)).toEqual(expect.arrayContaining([expect.objectContaining({ fromId: 'zpIn', fromProperty: 'mode', toId: 'zpRound', toProperty: 'mode' })]));
+      expect(connectionsOf(built, C.pageMonster)).toEqual(expect.arrayContaining([expect.objectContaining({ fromId: 'zgSetup', fromProperty: 'mode', toId: 'zgPlay', toProperty: 'mode' })]));
     });
 
     it('🔴 a game is paid only when it is over, from the round’s latest model; the end card waits for Next, and the page stores both the answers and the finish', () => {
@@ -1376,8 +1425,10 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect([params(C.monsterSetup, 'zsDefStyle').expression, params(C.monsterSetup, 'zsDefTimed').expression]).toEqual(["'gate'", "'practice'"]);
       expect(
         missing(C.monsterSetup, [
-          ['zsCard', 'didMount', 'zsFirst', 'eval'], ['zsFirst', 'onfalse', 'zsInitStyle', 'do'], ['zsInitStyle', 'done', 'zsInitTimed', 'do'], ['zsInitTimed', 'done', 'zsSeeded', 'to-seeded'],
-          ['zsStart', 'onClick', 'zsOut', 'start'], ['zsStyleVar', 'value', 'zsOut', 'style'], ['zsIsTimed', 'result', 'zsOut', 'timed'], ['zsRuleText', 'result', 'zsRule', 'text']
+          ['zsCard', 'didMount', 'zsFirst', 'eval'], ['zsInitStyle', 'done', 'zsInitTimed', 'do'], ['zsInitTimed', 'done', 'zsSeeded', 'to-seeded'],
+          ['zsStart', 'onClick', 'zsOut', 'start'], ['zsStyleVar', 'value', 'zsOut', 'style'], ['zsIsTimed', 'result', 'zsOut', 'timed'], ['zsRuleText', 'result', 'zsRule', 'text'],
+          // PLY-004: and the maths/typing row, written once like the other two.
+          ['zsFirst', 'onfalse', 'zsInitMode', 'do'], ['zsInitMode', 'done', 'zsInitStyle', 'do'], ['zsModeVar', 'value', 'zsOut', 'mode']
         ])
       ).toEqual([]);
       const items = (id: string, inputs: Record<string, unknown>) => new Function('Inputs', 'Outputs', `${String(params(C.monsterSetup, id).functionScript)}; return Outputs.items;`)(inputs, {});

@@ -113,6 +113,30 @@
     },
     {
       "fromId": "gradeanswerIn",
+      "fromProperty": "myAt",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-myAt"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "cpuAt",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-cpuAt"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "useTurbo",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-useTurbo"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "startTurbo",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-startTurbo"
+    },
+    {
+      "fromId": "gradeanswerIn",
       "fromProperty": "run",
       "toId": "gradeanswerFn",
       "toProperty": "run"
@@ -218,6 +242,54 @@
       "fromProperty": "out-stars",
       "toId": "gradeanswerOut",
       "toProperty": "stars"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-slip",
+      "toId": "gradeanswerOut",
+      "toProperty": "slip"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-slipPct",
+      "toId": "gradeanswerOut",
+      "toProperty": "slipPct"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-behind",
+      "toId": "gradeanswerOut",
+      "toProperty": "behind"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-turboUsed",
+      "toId": "gradeanswerOut",
+      "toProperty": "turboUsed"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-chain",
+      "toId": "gradeanswerOut",
+      "toProperty": "chain"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-turbo",
+      "toId": "gradeanswerOut",
+      "toProperty": "turbo"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-chainReady",
+      "toId": "gradeanswerOut",
+      "toProperty": "chainReady"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-chainOf",
+      "toId": "gradeanswerOut",
+      "toProperty": "chainOf"
     },
     {
       "fromId": "gradeanswerFn",

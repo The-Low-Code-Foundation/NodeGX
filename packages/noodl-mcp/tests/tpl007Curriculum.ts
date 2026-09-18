@@ -703,7 +703,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   // TPL-007 §16: Monster Gate's two ways to play (ruling 1), each pace's rule in one line (RKT-007's setup), and its way back to the setup.
   monsterGate: s('Beat it to the gate', 'Plus rapide que le monstre'),
   monsterPush: s('Push it back', 'Repousse-le'),
-  monsterGatePractice: s('It moves only when you get one wrong. Three wrong in a row and it reaches the gate.', 'Il n’avance que si tu te trompes. Trois erreurs de suite et il atteint la porte.'),
+  monsterGatePractice: s('Every wrong answer brings it closer. A quick answer ⚡ pushes it back; a slow one only holds it.', 'Chaque erreur le rapproche. Une réponse rapide ⚡ le repousse ; une réponse lente ne fait que le retenir.'),
   monsterGateChallenge: s('It walks while you think. Answer before it reaches the gate, or a heart is gone.', 'Il marche pendant que tu réfléchis. Réponds avant qu’il n’atteigne la porte, sinon tu perds un cœur.'),
   monsterPushPractice: s('Right answers push it back into its cave. Every answer, it takes a step.', 'Les bonnes réponses le repoussent dans sa grotte. À chaque réponse, il fait un pas.'),
   monsterPushChallenge: s('Push it back into its cave before time runs out. Out of time, it takes a step.', 'Repousse-le dans sa grotte avant la fin du temps. Temps écoulé : il fait un pas.'),
@@ -721,6 +721,14 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   stars: s('stars earned ⭐', 'étoiles gagnées ⭐'),
   // RKT-011: the hangar, where a milestone's 🎁 pick becomes something to wear.
   hangar: s('Hangar', 'Hangar'),
+  // P95 PLY-002: the confirmation. Richard's three lines, and nothing else on the card.
+  buyTitle: s('Buy {item}?', 'Acheter {item} ?'),
+  youHave: s('You have', 'Tu as'),
+  itCosts: s('This costs', 'Ça coûte'),
+  youllHave: s('You’ll have', 'Il te restera'),
+  yesBuy: s('Yes, buy it', 'Oui, achète'),
+  noThanks: s('No', 'Non'),
+  ownedElsewhere: s('for other faces', 'pour d’autres têtes'),
   hangarBlurb: s('Dress up your face and paint your rocket.', 'Habille ta tête et peins ta fusée.'),
   faceTab: s('Face', 'Visage'),
   rocketTab: s('Rocket', 'Fusée'),
@@ -774,45 +782,150 @@ export const WORDS: Readonly<Record<string, Bi>> = {
 };
 
 /**
- * P87 RKT-011 — the hangar shelf. A face item is a DiceBear part per face it fits (`faces`), so "Glasses" fits the Pixel, Smile and
- * Adventurer faces with each one's own glasses. A paint names a `--rocket-paint-*` token. Three items are everyone's from the start
- * (`free`): the glasses, which fit every face that can wear anything, and two paints. Nothing is random, time-limited or paid.
- * Values chosen by looking at each part drawn (session 10's contact sheet); the template gate checks each against the installed schema.
+ * P87 RKT-011, reshaped by P95 PLY-001 and PLY-002 — the hangar shelf.
+ *
+ * A face item is a DiceBear part per face it fits (`faces`), so "Sunglasses" is ONE id, ONE price and ONE purchase
+ * that draws each face's own sunglasses. **PLY-001: an item the chosen face cannot wear is no longer offered at all**
+ * (RKT-011 §3.2 greyed it instead, and Richard's second play test found that is what "doesn't correspond to the type
+ * of avatar they picked" means). So every kept style carries a range of its own, ≥ MIN_FACE_ITEMS_PER_LOOK.
+ *
+ * **PLY-002, R1: every item carries a star `cost`, and buying spends it.** Richard's ruling, 2026-09-18:
+ * *"the colour would be a basic thing, and the reward would be stripes or polkadots"*. So a paint is 15 ⭐ (about one
+ * race) and a pattern is 120–220 ⭐ (six to eleven). `free` items cost 0 and are everyone's from the start.
+ *
+ * 🔴 **`prob` is not decoration.** A DiceBear part that is OPTIONAL only draws when the seed says so, unless its
+ * `<part>Probability` is forced to 100 (RKT-011 §3.3). `prob: true` marks exactly those parts, and the template gate
+ * asserts `prob === (the installed schema has <part>Probability)` — read from the schema, never from this comment.
+ *
+ * 🔴 **Nothing here is named from a value's spelling.** Every face value below was rendered to a contact sheet and
+ * looked at (2026-09-18, seed "Zoe", `scratchpad/sheets/*.png`). Two things that reading found, and that a green
+ * "the SVG differs" gate would NOT have found:
+ *   - **pixel-art `beard`** is invisible at avatar size — a reward whose picture does not change. Left off the shelf.
+ *   - **adventurer `earrings`** are hidden under the hair on most seeds. Left off the shelf.
+ * Values chosen by looking, prices chosen against RKT-010's earn rate (≈20 ⭐ a race).
  */
+export interface HangarFacePart {
+  part: string;
+  value: string;
+  /** 🔴 True only where the installed DiceBear schema has `<part>Probability` — the part is optional and the seed would otherwise decide. */
+  prob?: boolean;
+}
+
 export interface HangarItem {
   id: string;
   kind: 'face' | 'rocket';
   en: string;
   fr: string;
+  /** Everyone's from the start. A free item costs 0 and is never bought, so it can never be un-bought. */
   free?: boolean;
+  /** PLY-002 R1: what it costs in ⭐. 0 for a free item; the gate refuses any other pairing. */
+  cost: number;
   /**
    * 🔴 Not `on`. The runtime hands a Static Data row to a Function as a Model, whose proxy answers a member's name with the member
    * (session 10: `row.on` was the Model's event method, the shelf script threw, and no tile drew). The template gate refuses any row
    * field the runtime Model answers for itself (D64).
    */
-  faces?: Readonly<Record<string, { part: string; value: string }>>;
+  faces?: Readonly<Record<string, HangarFacePart>>;
+  /** A rocket item is EITHER a paint (a `--rocket-paint-*` token) or a pattern (a decal the kit draws over the hull). */
   paint?: string;
+  pattern?: string;
 }
 
+/**
+ * PLY-001 R3 — the faces Rocket School offers. `fun-emoji` and `thumbs` are NOT here: DiceBear 9.4.2 gives them
+ * `eyes`, `mouth`, `face` and `shape` and nothing wearable, so a child who picked one had a hangar that fitted
+ * nothing. The KIT still draws all five (`kit.js`, a library node other projects use), so a profile already on one
+ * keeps its face — see `LOOK_ITEMS` in the components, which adds the player's own look when it is not one of these.
+ */
+export const HANGAR_LOOKS = ['pixel-art', 'big-smile', 'adventurer'] as const;
+
+/** PLY-001 AC3: no kept style may offer fewer than this. The gate reads it, never a literal. */
+export const MIN_FACE_ITEMS_PER_LOOK = 12;
+
+/** PLY-002: what a paint costs, and what a pattern costs. One place, so Richard's feedback is a one-line change. */
+export const PAINT_COST = 15;
+export const PATTERN_COSTS = { stripes: 120, dots: 120, checker: 150, chevron: 150, flames: 180, stars: 180, bolt: 220 } as const;
+
+/** Hair colour, the one reward every kept face can wear: a big area, certain to be visible, and named by the hex WE choose. */
+const HAIR_COLOURS: ReadonlyArray<{ id: string; en: string; fr: string; hex: string }> = [
+  { id: 'hair-pink', en: 'Pink hair', fr: 'Cheveux roses', hex: 'ff77c8' },
+  { id: 'hair-blue', en: 'Blue hair', fr: 'Cheveux bleus', hex: '3aa7ff' },
+  { id: 'hair-green', en: 'Green hair', fr: 'Cheveux verts', hex: '2fbf71' },
+  { id: 'hair-purple', en: 'Purple hair', fr: 'Cheveux violets', hex: '9b5de5' },
+  { id: 'hair-orange', en: 'Orange hair', fr: 'Cheveux orange', hex: 'ff8c42' },
+  { id: 'hair-silver', en: 'Silver hair', fr: 'Cheveux argentés', hex: 'c7ccd4' },
+  { id: 'hair-red', en: 'Red hair', fr: 'Cheveux rouges', hex: 'e63946' },
+  { id: 'hair-gold', en: 'Golden hair', fr: 'Cheveux dorés', hex: 'f2c14e' }
+];
+
+/** A hair colour is one purchase that works on all three faces. `hairColor` is not an optional part, so it takes no probability. */
+const HAIR_COLOUR_ITEMS: ReadonlyArray<HangarItem> = HAIR_COLOURS.map((c) => ({
+  id: c.id,
+  kind: 'face' as const,
+  en: c.en,
+  fr: c.fr,
+  cost: 25,
+  faces: {
+    'pixel-art': { part: 'hairColor', value: c.hex },
+    'big-smile': { part: 'hairColor', value: c.hex },
+    adventurer: { part: 'hairColor', value: c.hex }
+  }
+}));
+
 export const HANGAR_SHELF: ReadonlyArray<HangarItem> = [
-  { id: 'glasses', kind: 'face', en: 'Glasses', fr: 'Lunettes', free: true, faces: {'pixel-art': { part: 'glasses', value: 'light01' }, 'big-smile': { part: 'accessories', value: 'glasses' }, adventurer: { part: 'glasses', value: 'variant05' } } },
-  { id: 'sunglasses', kind: 'face', en: 'Sunglasses', fr: 'Lunettes de soleil', faces: {'pixel-art': { part: 'glasses', value: 'dark01' }, 'big-smile': { part: 'accessories', value: 'sunglasses' }, adventurer: { part: 'glasses', value: 'variant01' } } },
-  { id: 'crown', kind: 'face', en: 'Crown', fr: 'Couronne', faces: {'big-smile': { part: 'accessories', value: 'sailormoonCrown' } } },
-  { id: 'cat-ears', kind: 'face', en: 'Cat ears', fr: 'Oreilles de chat', faces: {'big-smile': { part: 'accessories', value: 'catEars' } } },
-  { id: 'moustache', kind: 'face', en: 'Moustache', fr: 'Moustache', faces: {'big-smile': { part: 'accessories', value: 'mustache' }, adventurer: { part: 'features', value: 'mustache' } } },
-  { id: 'clown-nose', kind: 'face', en: 'Clown nose', fr: 'Nez de clown', faces: {'big-smile': { part: 'accessories', value: 'clownNose' } } },
-  { id: 'sleep-mask', kind: 'face', en: 'Sleep mask', fr: 'Masque de nuit', faces: {'big-smile': { part: 'accessories', value: 'sleepMask' } } },
-  { id: 'woolly-hat', kind: 'face', en: 'Woolly hat', fr: 'Bonnet', faces: {'pixel-art': { part: 'hat', value: 'variant01' } } },
-  { id: 'cap', kind: 'face', en: 'Cap', fr: 'Casquette', faces: {'pixel-art': { part: 'hat', value: 'variant02' } } },
-  { id: 'hat', kind: 'face', en: 'Hat', fr: 'Chapeau', faces: {'pixel-art': { part: 'hat', value: 'variant06' } } },
-  { id: 'rosy-cheeks', kind: 'face', en: 'Rosy cheeks', fr: 'Joues roses', faces: {adventurer: { part: 'features', value: 'blush' } } },
-  { id: 'freckles', kind: 'face', en: 'Freckles', fr: 'Taches de rousseur', faces: {adventurer: { part: 'features', value: 'freckles' } } },
-  { id: 'paint-green', kind: 'rocket', en: 'Forest green', fr: 'Vert forêt', free: true, paint: 'var(--rocket-paint-green)' },
-  { id: 'paint-blue', kind: 'rocket', en: 'Sky blue', fr: 'Bleu ciel', free: true, paint: 'var(--rocket-paint-blue)' },
-  { id: 'paint-purple', kind: 'rocket', en: 'Purple', fr: 'Violet', paint: 'var(--rocket-paint-purple)' },
-  { id: 'paint-berry', kind: 'rocket', en: 'Berry', fr: 'Framboise', paint: 'var(--rocket-paint-berry)' },
-  { id: 'paint-orange', kind: 'rocket', en: 'Orange', fr: 'Orange', paint: 'var(--rocket-paint-orange)' },
-  { id: 'paint-midnight', kind: 'rocket', en: 'Midnight', fr: 'Nuit', paint: 'var(--rocket-paint-midnight)' }
+  // ── Fits all three faces ──────────────────────────────────────────────────
+  { id: 'glasses', kind: 'face', en: 'Glasses', fr: 'Lunettes', free: true, cost: 0, faces: { 'pixel-art': { part: 'glasses', value: 'light01', prob: true }, 'big-smile': { part: 'accessories', value: 'glasses', prob: true }, adventurer: { part: 'glasses', value: 'variant05', prob: true } } },
+  { id: 'sunglasses', kind: 'face', en: 'Sunglasses', fr: 'Lunettes de soleil', cost: 40, faces: { 'pixel-art': { part: 'glasses', value: 'dark01', prob: true }, 'big-smile': { part: 'accessories', value: 'sunglasses', prob: true }, adventurer: { part: 'glasses', value: 'variant01', prob: true } } },
+  { id: 'moustache', kind: 'face', en: 'Moustache', fr: 'Moustache', cost: 50, faces: { 'big-smile': { part: 'accessories', value: 'mustache', prob: true }, adventurer: { part: 'features', value: 'mustache', prob: true } } },
+
+  // ── Pixel ─────────────────────────────────────────────────────────────────
+  { id: 'visor', kind: 'face', en: 'Visor', fr: 'Visière', cost: 55, faces: { 'pixel-art': { part: 'glasses', value: 'dark03', prob: true } } },
+  { id: 'goggles', kind: 'face', en: 'Goggles', fr: 'Lunettes de plongée', cost: 60, faces: { 'pixel-art': { part: 'glasses', value: 'dark07', prob: true } } },
+  { id: 'thick-glasses', kind: 'face', en: 'Thick glasses', fr: 'Grosses lunettes', cost: 45, faces: { 'pixel-art': { part: 'glasses', value: 'light07', prob: true } } },
+  { id: 'cap', kind: 'face', en: 'Cap', fr: 'Casquette', cost: 45, faces: { 'pixel-art': { part: 'hat', value: 'variant01', prob: true } } },
+  { id: 'headband-cap', kind: 'face', en: 'Headband cap', fr: 'Casquette à bandeau', cost: 55, faces: { 'pixel-art': { part: 'hat', value: 'variant03', prob: true } } },
+  { id: 'striped-cap', kind: 'face', en: 'Striped cap', fr: 'Casquette à rayures', cost: 60, faces: { 'pixel-art': { part: 'hat', value: 'variant04', prob: true } } },
+  { id: 'twin-stripe-cap', kind: 'face', en: 'Twin-stripe cap', fr: 'Casquette deux bandes', cost: 70, faces: { 'pixel-art': { part: 'hat', value: 'variant09', prob: true } } },
+  { id: 'studs', kind: 'face', en: 'Ear studs', fr: 'Boucles d’oreilles', cost: 35, faces: { 'pixel-art': { part: 'accessories', value: 'variant01', prob: true } } },
+
+  // ── Smile ─────────────────────────────────────────────────────────────────
+  { id: 'crown', kind: 'face', en: 'Crown', fr: 'Couronne', cost: 70, faces: { 'big-smile': { part: 'accessories', value: 'sailormoonCrown', prob: true } } },
+  { id: 'cat-ears', kind: 'face', en: 'Cat ears', fr: 'Oreilles de chat', cost: 55, faces: { 'big-smile': { part: 'accessories', value: 'catEars', prob: true } } },
+  { id: 'clown-nose', kind: 'face', en: 'Clown nose', fr: 'Nez de clown', cost: 45, faces: { 'big-smile': { part: 'accessories', value: 'clownNose', prob: true } } },
+  { id: 'sleep-mask', kind: 'face', en: 'Sleep mask', fr: 'Masque de nuit', cost: 45, faces: { 'big-smile': { part: 'accessories', value: 'sleepMask', prob: true } } },
+  { id: 'face-mask', kind: 'face', en: 'Face mask', fr: 'Masque', cost: 40, faces: { 'big-smile': { part: 'accessories', value: 'faceMask', prob: true } } },
+  { id: 'mohawk', kind: 'face', en: 'Mohawk', fr: 'Crête', cost: 65, faces: { 'big-smile': { part: 'hair', value: 'mohawk' } } },
+  { id: 'braids', kind: 'face', en: 'Braids', fr: 'Tresses', cost: 65, faces: { 'big-smile': { part: 'hair', value: 'braids' } } },
+  { id: 'bun', kind: 'face', en: 'Top bun', fr: 'Chignon', cost: 60, faces: { 'big-smile': { part: 'hair', value: 'bunHair' } } },
+  { id: 'afro-bun', kind: 'face', en: 'Afro bun', fr: 'Chignon afro', cost: 60, faces: { 'big-smile': { part: 'hair', value: 'froBun' } } },
+
+  // ── Adventurer ────────────────────────────────────────────────────────────
+  { id: 'round-glasses', kind: 'face', en: 'Round glasses', fr: 'Lunettes rondes', cost: 55, faces: { adventurer: { part: 'glasses', value: 'variant03', prob: true } } },
+  { id: 'reading-glasses', kind: 'face', en: 'Reading glasses', fr: 'Lunettes de lecture', cost: 45, faces: { adventurer: { part: 'glasses', value: 'variant04', prob: true } } },
+  { id: 'oval-glasses', kind: 'face', en: 'Oval glasses', fr: 'Lunettes ovales', cost: 45, faces: { adventurer: { part: 'glasses', value: 'variant02', prob: true } } },
+  { id: 'freckles', kind: 'face', en: 'Freckles', fr: 'Taches de rousseur', cost: 40, faces: { adventurer: { part: 'features', value: 'freckles', prob: true } } },
+  { id: 'rosy-cheeks', kind: 'face', en: 'Rosy cheeks', fr: 'Joues roses', cost: 40, faces: { adventurer: { part: 'features', value: 'blush', prob: true } } },
+  { id: 'birthmark', kind: 'face', en: 'Birthmark', fr: 'Grain de beauté', cost: 40, faces: { adventurer: { part: 'features', value: 'birthmark', prob: true } } },
+
+  // ── Hair colour: one purchase, all three faces ────────────────────────────
+  ...HAIR_COLOUR_ITEMS,
+
+  // ── The rocket: paint is basic (PLY-002) ──────────────────────────────────
+  { id: 'paint-green', kind: 'rocket', en: 'Forest green', fr: 'Vert forêt', free: true, cost: 0, paint: 'var(--rocket-paint-green)' },
+  { id: 'paint-blue', kind: 'rocket', en: 'Sky blue', fr: 'Bleu ciel', free: true, cost: 0, paint: 'var(--rocket-paint-blue)' },
+  { id: 'paint-purple', kind: 'rocket', en: 'Purple', fr: 'Violet', cost: PAINT_COST, paint: 'var(--rocket-paint-purple)' },
+  { id: 'paint-berry', kind: 'rocket', en: 'Berry', fr: 'Framboise', cost: PAINT_COST, paint: 'var(--rocket-paint-berry)' },
+  { id: 'paint-orange', kind: 'rocket', en: 'Orange', fr: 'Orange', cost: PAINT_COST, paint: 'var(--rocket-paint-orange)' },
+  { id: 'paint-midnight', kind: 'rocket', en: 'Midnight', fr: 'Nuit', cost: PAINT_COST, paint: 'var(--rocket-paint-midnight)' },
+
+  // ── The rocket: the pattern IS the prize (PLY-002, Richard 2026-09-18) ─────
+  { id: 'dots', kind: 'rocket', en: 'Polka dots', fr: 'Pois', cost: PATTERN_COSTS.dots, pattern: 'dots' },
+  { id: 'stripes', kind: 'rocket', en: 'Racing stripes', fr: 'Bandes de course', cost: PATTERN_COSTS.stripes, pattern: 'stripes' },
+  { id: 'checker', kind: 'rocket', en: 'Checkerboard', fr: 'Damier', cost: PATTERN_COSTS.checker, pattern: 'checker' },
+  { id: 'chevron', kind: 'rocket', en: 'Chevrons', fr: 'Chevrons', cost: PATTERN_COSTS.chevron, pattern: 'chevron' },
+  { id: 'flames', kind: 'rocket', en: 'Flames', fr: 'Flammes', cost: PATTERN_COSTS.flames, pattern: 'flames' },
+  { id: 'stars', kind: 'rocket', en: 'Stars', fr: 'Étoiles', cost: PATTERN_COSTS.stars, pattern: 'stars' },
+  { id: 'bolt', kind: 'rocket', en: 'Lightning', fr: 'Éclair', cost: PATTERN_COSTS.bolt, pattern: 'bolt' }
 ];
 
 export const HANGAR_SHELF_JSON = JSON.stringify(HANGAR_SHELF, null, 2);

@@ -69,6 +69,7 @@ import {
   NEW_HUNT_SCRIPT,
   NEW_MONSTER_SCRIPT,
   PARSE_SET_SCRIPT,
+  ROLL_FACE_SCRIPT,
   PICK_ITEM_SCRIPT,
   PICK_QUESTION_SCRIPT,
   SAVE_MODEL_SCRIPT,
@@ -165,6 +166,8 @@ export const C = {
   hangarData: '/Data/Hangar',
   nextPick: '/Game/Next pick',
   hangarTile: '/Hangar/Tile',
+  hangarConfirm: '/Hangar/Confirm',
+  hangarSumRow: '/Hangar/Sum row',
   hangarPreview: '/Hangar/Preview',
   hangarShelf: '/Hangar/Shelf',
   pageHangar: '/Pages/Hangar',
@@ -208,7 +211,9 @@ export const CONTENT_SIZED_TEXTS: Readonly<Record<string, string>> = {
   '/Merge/Tile#mtWord': 'a number on a square, at most four digits',
   '/Monster/Lane#zlHearts': 'three heart emoji',
   '/Monster/Lane#zlLine': 'which monster of three: "Monstre 2 sur 3" at most',
-  '/Monster/Lane#zlPips': 'four dots: the hits a monster has left'
+  '/Monster/Lane#zlPips': 'four dots: the hits a monster has left',
+  '/Hangar/Sum row#srLabel': 'two or three words of the buy question, pushed to the left edge of its row',
+  '/Hangar/Sum row#srValue': 'a number of stars, pushed to the right edge of its row'
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -375,8 +380,8 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   {
     name: 'Logic/Grade answer', script: GRADE_ANSWER_SCRIPT, run: true,
     description: 'Was it right, was it fast, and what the learner model now believes. Publishes the new model — store it.',
-    ins: [['model', 'object'], ['skillId', 'string'], ['level', 'string'], ['lang', 'string'], ['timedOut', 'boolean'], ['answer', 'string'], ['typed', 'string'], ['fluentMs', 'number'], ['itemDiff', 'number'], ['shownAt', 'number'], ['elapsedOverride', 'number'], ['wasDue', 'boolean'], ['strategy', 'string'], ['worked', 'string'], ['raceId', 'string'], ['forB', 'boolean'], ['mistakes', 'number'], ['game', 'string']],
-    outs: [['correct', 'boolean'], ['fluent', 'boolean'], ['outcome', 'string'], ['elapsedMs', 'number'], ['model', 'object'], ['gain', 'number'], ['speed', 'number'], ['boost', 'string'], ['boostPct', 'number'], ['cpuGain', 'number'], ['message', 'string'], ['mastery', 'number'], ['ratingDelta', 'number'], ['streak', 'number'], ['missCount', 'number'], ['starsEarned', 'number'], ['stars', 'number']]
+    ins: [['model', 'object'], ['skillId', 'string'], ['level', 'string'], ['lang', 'string'], ['timedOut', 'boolean'], ['answer', 'string'], ['typed', 'string'], ['fluentMs', 'number'], ['itemDiff', 'number'], ['shownAt', 'number'], ['elapsedOverride', 'number'], ['wasDue', 'boolean'], ['strategy', 'string'], ['worked', 'string'], ['raceId', 'string'], ['forB', 'boolean'], ['mistakes', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['useTurbo', 'boolean'], ['startTurbo', 'number']],
+    outs: [['correct', 'boolean'], ['fluent', 'boolean'], ['outcome', 'string'], ['elapsedMs', 'number'], ['model', 'object'], ['gain', 'number'], ['speed', 'number'], ['boost', 'string'], ['boostPct', 'number'], ['cpuGain', 'number'], ['message', 'string'], ['mastery', 'number'], ['ratingDelta', 'number'], ['streak', 'number'], ['missCount', 'number'], ['starsEarned', 'number'], ['stars', 'number'], ['slip', 'number'], ['slipPct', 'number'], ['behind', 'boolean'], ['turboUsed', 'boolean'], ['chain', 'number'], ['turbo', 'number'], ['chainReady', 'boolean'], ['chainOf', 'number']]
   },
   {
     name: 'Logic/Slide and merge', script: SLIDE_MERGE_SCRIPT, run: true,
@@ -496,7 +501,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Active profile', script: ACTIVE_PROFILE_SCRIPT,
     description: 'The active profile, field by field, and an honest hasProfile=false when there is none. RKT-011: what the face and rocket wear, the 🎁 picks waiting, and the way to the next one.',
     ins: [['app', 'object']],
-    outs: [['hasProfile', 'boolean'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['mergeMode', 'string'], ['model', 'object'], ['due', 'number'], ['days7', 'number'], ['answered', 'number'], ['stars', 'number'], ['faceOptions', 'object'], ['paint', 'string'], ['picks', 'number'], ['hasPicks', 'boolean'], ['nextAt', 'number'], ['nextPct', 'number'], ['nextText', 'string'], ['sets', 'array']]
+    outs: [['hasProfile', 'boolean'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['mergeMode', 'string'], ['model', 'object'], ['due', 'number'], ['days7', 'number'], ['answered', 'number'], ['stars', 'number'], ['faceOptions', 'object'], ['paint', 'string'], ['pattern', 'string'], ['picks', 'number'], ['hasPicks', 'boolean'], ['nextAt', 'number'], ['nextPct', 'number'], ['nextText', 'string'], ['sets', 'array']]
   },
   {
     name: 'Logic/Save model', script: SAVE_MODEL_SCRIPT, run: true,
@@ -520,7 +525,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Pick item', script: PICK_ITEM_SCRIPT, run: true,
     description: 'RKT-011: the store with one 🎁 pick spent on a shelf item, and the item worn at once. Refused, with nothing changed, when the item is free or already owned, does not fit the face, or no pick is left (Why says which).',
     ins: [['app', 'object'], ['profileId', 'string'], ['itemId', 'string'], ['shelf', 'array']],
-    outs: [['app', 'object'], ['picked', 'boolean'], ['why', 'string']]
+    outs: [['app', 'object'], ['picked', 'boolean'], ['why', 'string'], ['cost', 'number'], ['purseBefore', 'number'], ['purseAfter', 'number']]
   },
   {
     name: 'Logic/Wear item', script: WEAR_ITEM_SCRIPT, run: true,
@@ -532,7 +537,13 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Hangar shelf', script: HANGAR_SHELF_SCRIPT,
     description: 'RKT-011: one tab of the shelf (face or rocket) as the active player sees it. Every item is a row, owned, wearable or still to pick, with what a tap would do.',
     ins: [['app', 'object'], ['shelf', 'array'], ['tab', 'string']],
-    outs: [['rows', 'array'], ['count', 'number'], ['picks', 'number'], ['hasPicks', 'boolean']]
+    outs: [['rows', 'array'], ['count', 'number'], ['picks', 'number'], ['hasPicks', 'boolean'], ['purse', 'number'], ['elsewhere', 'number'], ['elsewhereText', 'string']]
+  },
+  {
+    name: 'Logic/Roll face', script: ROLL_FACE_SCRIPT, run: true,
+    description: 'The faces rolled so far, and where in them the child is standing (PLY-005). Action is a parameter, placed once per action: set (start the list at one face), roll (add one and step to it), back, forward. Publishes the History and At to hold in two Variables, the Seed to draw, and whether Back and Forward can be used.',
+    ins: [['history', 'array'], ['at', 'number'], ['action', 'string'], ['seed', 'string']],
+    outs: [['history', 'array'], ['at', 'number'], ['seed', 'string'], ['canBack', 'boolean'], ['canForward', 'boolean'], ['position', 'string']]
   },
   {
     name: 'Logic/Parse question set', script: PARSE_SET_SCRIPT,
@@ -1553,15 +1564,22 @@ const NEW_PLAYER_FORM: Tpl007Component = {
   description: 'The player form: a name, a face (five styles, re-rollable), a class and a language. Publishes Create with every field, or Cancel. RKT-008: with Editing, it is the same form for a player who exists. Fill puts their name, face and class in, the language row steps aside (the menu has it), and Delete asks by name before it publishes Delete.',
   inputs: [port('mounted', 'boolean'), port('nameWord', 'string'), port('faceWord', 'string'), port('rollWord', 'string'), port('levelWord', 'string'), port('langWord', 'string'), port('createWord', 'string'), port('cancelWord', 'string'), port('reset', 'signal'), port('editing', 'boolean'), port('fill', 'signal'), port('name0', 'string'), port('look0', 'string'), port('seed0', 'string'), port('level0', 'string'), port('deleteWord', 'string'), port('askWord', 'string'), port('yesWord', 'string'), port('noWord', 'string')],
   outputs: [port('create', 'signal'), port('cancel', 'signal'), port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('level', 'string'), port('lang', 'string'), port('delete', 'signal')],
-  instantiates: [C.face, C.choiceRow],
+  instantiates: [C.face, C.choiceRow, logicName('Logic/Roll face')],
   nodes: [
     inputs('nfIn', 'The words', [['mounted', 'boolean'], ['nameWord', 'string'], ['faceWord', 'string'], ['rollWord', 'string'], ['levelWord', 'string'], ['langWord', 'string'], ['createWord', 'string'], ['cancelWord', 'string'], ['reset', 'signal'], ['editing', 'boolean'], ['fill', 'signal'], ['name0', 'string'], ['look0', 'string'], ['seed0', 'string'], ['level0', 'string'], ['deleteWord', 'string'], ['askWord', 'string'], ['yesWord', 'string'], ['noWord', 'string']]),
     group('nfCard', 'The form', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['nfNameLabel', 'nfName', 'nfFaceRow', 'nfLook', 'nfLevel', 'nfLangWrap', 'nfActions', 'nfDanger']),
     text('nfNameLabel', 'Your name', 'nfCard', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
     place('nfName', TEXT_INPUT_NODE, 'The name box', 'nfCard', { ...FIELD, fontSize: 'var(--text-xl)' }),
-    group('nfFaceRow', 'The face and the roll', 'nfCard', row({ columnGap: 'var(--space-4)' }), ['nfFace', 'nfRoll']),
+    group('nfFaceRow', 'The face and the roll', 'nfCard', row({ columnGap: 'var(--space-4)' }), ['nfFace', 'nfRollWrap']),
     place('nfFace', C.face, 'The face so far', 'nfFaceRow', { size: 96 }),
-    place('nfRoll', BUTTON_NODE, 'Roll again', 'nfFaceRow', { ...BTN_OUTLINE, label: 'Roll again' }),
+    // PLY-005: Back and Forward walk the faces already rolled. Each shows only when it leads somewhere, so a child
+    // never presses a dead arrow, and the count says a list exists at all.
+    group('nfRollWrap', 'Roll, and the way back', 'nfFaceRow', column({ rowGap: 'var(--space-2)', alignItems: 'flex-start' }), ['nfRoll', 'nfWalk']),
+    place('nfRoll', BUTTON_NODE, 'Roll again', 'nfRollWrap', { ...BTN_OUTLINE, label: 'Roll again' }),
+    group('nfWalk', 'Back and forward', 'nfRollWrap', row({ columnGap: 'var(--space-2)', alignItems: 'center' }), ['nfBack', 'nfPos', 'nfForward']),
+    place('nfBack', BUTTON_NODE, 'The face before', 'nfWalk', { ...BTN_OUTLINE, label: '◀', mounted: false }),
+    text('nfPos', 'Which of the faces rolled', 'nfWalk', '', T_META),
+    place('nfForward', BUTTON_NODE, 'The face after', 'nfWalk', { ...BTN_OUTLINE, label: '▶', mounted: false }),
     place('nfLook', C.choiceRow, 'Which style', 'nfCard'),
     place('nfLevel', C.choiceRow, 'Which class', 'nfCard'),
     // RKT-008: a Group, so editing can take the row away (a Choice row instance has no Mounted of its own).
@@ -1583,6 +1601,19 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     { ...(logic('nfSeedVar', VARIABLE_NODE, 'The face seed', { name: 'newSeed' }) as object), comment: SHARED_DRAFT },
     logic('nfSetSeed', SET_VARIABLE_NODE, 'Roll a seed', { name: 'newSeed' }),
     logic('nfRandom', EXPRESSION_NODE, 'Six random letters', { expression: 'random().toString(36).slice(2, 8)' }),
+    // PLY-005: the faces rolled, and where the child is standing in them. One placement per action (Logic/Hunt move's shape).
+    { ...(logic('nfHistVar', VARIABLE_NODE, 'The faces rolled', { name: 'newSeedHistory' }) as object), comment: SHARED_DRAFT },
+    logic('nfSetHist', SET_VARIABLE_NODE, 'Keep the faces rolled', { name: 'newSeedHistory' }),
+    { ...(logic('nfAtVar', VARIABLE_NODE, 'Which face of them', { name: 'newSeedAt' }) as object), comment: SHARED_DRAFT },
+    logic('nfSetAt', SET_VARIABLE_NODE, 'Keep which face', { name: 'newSeedAt' }),
+    logic('nfRollSet', logicName('Logic/Roll face'), 'Start the list at one face', { action: 'set' }),
+    logic('nfRollRoll', logicName('Logic/Roll face'), 'Roll, and add it', { action: 'roll' }),
+    logic('nfRollBack', logicName('Logic/Roll face'), 'The face before', { action: 'back' }),
+    logic('nfRollFwd', logicName('Logic/Roll face'), 'The face after', { action: 'forward' }),
+    // 🔴 D55: an Expression with no delivered input never evaluates, so both buttons start `mounted: false` and the
+    // form's own Reset is what first delivers these.
+    logic('nfCanBack', EXPRESSION_NODE, 'Is there a face before?', { expression: 'at > 0' }),
+    logic('nfCanFwd', EXPRESSION_NODE, 'Is there a face after?', { expression: 'at >= 0 && at < n - 1' }),
     // Defaults, applied on Reset (the page fires it when the form opens).
     logic('nfDefaultLook', EXPRESSION_NODE, 'pixel-art', { expression: "'pixel-art'" }),
     logic('nfDefaultLevel', EXPRESSION_NODE, 'CE2', { expression: "'CE2'" }),
@@ -1613,7 +1644,6 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     logic('nfAskLine', FUNCTION_NODE, 'The question, with their name', { functionScript: "Outputs.line = String(Inputs.word || '').replace('{name}', String(Inputs.name || ''));" }),
     logic('nfFillLook', SET_VARIABLE_NODE, 'Their style', { name: 'newLook' }),
     logic('nfFillLevel', SET_VARIABLE_NODE, 'Their class', { name: 'newLevel' }),
-    logic('nfFillSeed', SET_VARIABLE_NODE, 'Their face seed', { name: 'newSeed' }),
     outputs('nfOut', 'The new player', [['create', 'signal'], ['cancel', 'signal'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['delete', 'signal']])
   ],
   connections: [
@@ -1643,9 +1673,33 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     // The face: the chosen style, the rolled seed.
     wire('nfLookVar', 'value', 'nfFace', 'look'),
     wire('nfSeedVar', 'value', 'nfFace', 'seed'),
+    // 🔴 PLY-005: Roll used to be `onClick → nfRandom.run` + `onClick → nfSetSeed.do`, which overwrote the seed and
+    // kept nothing. The fresh letters now reach Logic/Roll face, and the seed that comes BACK is what is drawn — so
+    // back, forward and roll all publish through one door.
     wire('nfRoll', 'onClick', 'nfRandom', 'run'),
-    wire('nfRandom', 'result', 'nfSetSeed', 'value'),
-    wire('nfRoll', 'onClick', 'nfSetSeed', 'do'),
+    wire('nfRandom', 'result', 'nfRollRoll', 'seed'),
+    wire('nfRandom', 'result', 'nfRollSet', 'seed'),
+    wire('nfRoll', 'onClick', 'nfRollRoll', 'run'),
+    wire('nfBack', 'onClick', 'nfRollBack', 'run'),
+    wire('nfForward', 'onClick', 'nfRollFwd', 'run'),
+    // Every placement reads the same two Variables and writes the same three (two sources on one input is this
+    // template's own idiom — Monster/Play feeds `limitScale` from two nodes the same way).
+    ...(['nfRollSet', 'nfRollRoll', 'nfRollBack', 'nfRollFwd'] as const).flatMap((n) => [
+      wire('nfHistVar', 'value', n, 'history'),
+      wire('nfAtVar', 'value', n, 'at'),
+      wire(n, 'seed', 'nfSetSeed', 'value'),
+      wire(n, 'history', 'nfSetHist', 'value'),
+      wire(n, 'at', 'nfSetAt', 'value'),
+      wire(n, 'position', 'nfPos', 'text'),
+      wire(n, 'done', 'nfSetSeed', 'do')
+    ]),
+    wire('nfSetSeed', 'done', 'nfSetHist', 'do'),
+    wire('nfSetHist', 'done', 'nfSetAt', 'do'),
+    wire('nfAtVar', 'value', 'nfCanBack', 'at'),
+    wire('nfAtVar', 'value', 'nfCanFwd', 'at'),
+    wire('nfHistVar', 'value', 'nfCanFwd', 'n'),
+    wire('nfCanBack', 'result', 'nfBack', 'mounted'),
+    wire('nfCanFwd', 'result', 'nfForward', 'mounted'),
     // Reset: defaults, and a fresh seed.
     wire('nfDefaultLook', 'result', 'nfResetLook', 'value'),
     wire('nfIn', 'reset', 'nfResetLook', 'do'),
@@ -1654,7 +1708,8 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     wire('nfDefaultLang', 'result', 'nfResetLang', 'value'),
     wire('nfResetLevel', 'done', 'nfResetLang', 'do'),
     wire('nfResetLang', 'done', 'nfRandom', 'run'),
-    wire('nfResetLang', 'done', 'nfSetSeed', 'do'),
+    // PLY-005: a form that opens starts the list at one fresh face, so Back has nothing to go back to yet.
+    wire('nfResetLang', 'done', 'nfRollSet', 'run'),
     wire('nfIn', 'reset', 'nfName', 'clear'),
     // Out.
     wire('nfName', 'onTextChanged', 'nfOut', 'name'),
@@ -1674,8 +1729,9 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     wire('nfIn', 'fill', 'nfFillLook', 'do'),
     wire('nfIn', 'level0', 'nfFillLevel', 'value'),
     wire('nfIn', 'fill', 'nfFillLevel', 'do'),
-    wire('nfIn', 'seed0', 'nfFillSeed', 'value'),
-    wire('nfIn', 'fill', 'nfFillSeed', 'do'),
+    // PLY-005: an existing player's own face is where their list starts, so Back cannot walk off it into a stranger's.
+    wire('nfIn', 'seed0', 'nfRollSet', 'seed'),
+    wire('nfIn', 'fill', 'nfRollSet', 'run'),
     // 🔴 `startValue`, the Text Input's Value. Build 6 wired `text`, a port it does not have: the door passed it (D66), the box opened
     // empty, and only the console said "Invalid connection, input doesn't exist". Fill pulses Set too, so a reopened form shows the name.
     wire('nfIn', 'name0', 'nfName', 'startValue'),
@@ -2308,16 +2364,19 @@ const NEXT_PICK: Tpl007Component = {
 const HANGAR_TILE: Tpl007Component = {
   path: 'Hangar/Tile',
   description: 'One shelf item: the child’s own face wearing it (or the paint as a swatch), its name, and what a tap does. Worn fills it sunshine; Dim greys an item that does not fit today’s face or is still locked, and its note says why. Publishes Pick (a pick to spend on it) or Wear (theirs to put on or take off), with the item id.',
-  inputs: [port('id', 'string'), port('label', 'string'), port('note', 'string'), port('isFace', 'boolean'), port('look', 'string'), port('seed', 'string'), port('options', 'object'), port('paint', 'string'), port('worn', 'boolean'), port('canWear', 'boolean'), port('canPick', 'boolean'), port('dim', 'boolean')],
-  outputs: [port('pick', 'signal'), port('wear', 'signal'), port('id', 'string')],
+  inputs: [port('id', 'string'), port('label', 'string'), port('note', 'string'), port('isFace', 'boolean'), port('look', 'string'), port('seed', 'string'), port('options', 'object'), port('paint', 'string'), port('pattern', 'string', 'PLY-002: the decal this tile shows'), port('cost', 'number'), port('worn', 'boolean'), port('canWear', 'boolean'), port('canPick', 'boolean'), port('dim', 'boolean')],
+  outputs: [port('pick', 'signal'), port('wear', 'signal'), port('id', 'string'), port('label', 'string'), port('cost', 'number')],
   instantiates: [C.face],
   nodes: [
-    inputs('htIn', 'The item', [['id', 'string'], ['label', 'string'], ['note', 'string'], ['isFace', 'boolean'], ['look', 'string'], ['seed', 'string'], ['options', 'object'], ['paint', 'string'], ['worn', 'boolean'], ['canWear', 'boolean'], ['canPick', 'boolean'], ['dim', 'boolean']]),
+    inputs('htIn', 'The item', [['id', 'string'], ['label', 'string'], ['note', 'string'], ['isFace', 'boolean'], ['look', 'string'], ['seed', 'string'], ['options', 'object'], ['paint', 'string'], ['pattern', 'string'], ['cost', 'number'], ['worn', 'boolean'], ['canWear', 'boolean'], ['canPick', 'boolean'], ['dim', 'boolean']]),
     group('htCard', 'The tile', undefined, { ...CARD, width: px(132), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-2)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)', borderWidth: px(3), cssClassName: 'pressable rkt-tile' }, ['htFaceBox', 'htSwatch', 'htLabel', 'htNote']),
     // A placed component has no Mounted of its own, so the face sits in a Group that has one.
     group('htFaceBox', 'The face, wearing it', 'htCard', { sizeMode: 'contentSize' }, ['htFace']),
     place('htFace', C.face, 'The face', 'htFaceBox', { size: 64 }),
-    group('htSwatch', 'The paint', 'htCard', { width: px(64), height: px(64), sizeMode: 'explicit', backgroundColor: ROLE.you, borderRadius: 'var(--radius-full)', borderStyle: 'solid', borderWidth: 'var(--border-1)', borderColor: 'var(--foreground)', mounted: false }),
+    // 🔴 PLY-002: was a coloured dot. A dot could say "green" and nothing else — it had no way at all to show a decal,
+    // which is the thing this task makes the reward. A rocket tile now draws the rocket.
+    group('htSwatch', 'The rocket', 'htCard', { width: pct(100), height: px(64), sizeMode: 'explicit', mounted: false }, ['htRocket']),
+    place('htRocket', KIT_TRACK, 'This paint and decal', 'htSwatch', { progressA: 0.5, showB: false, celebrate: false, aspect: 'wide', rocketSize: 52, goal: '' }),
     text('htLabel', 'Its name', 'htCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
     text('htNote', 'What a tap does', 'htCard', '', { ...T_META, textAlignX: 'center' }),
     logic('htKindOf', EXPRESSION_NODE, 'A face or a paint?', { expression: "isFace === false ? 'paint' : 'face'" }),
@@ -2329,13 +2388,17 @@ const HANGAR_TILE: Tpl007Component = {
     }),
     gate('htCanPick', 'A pick to spend on it?'),
     gate('htCanWear', 'Theirs to put on or take off?'),
-    outputs('htOut', 'Tapped', [['pick', 'signal'], ['wear', 'signal'], ['id', 'string']])
+    outputs('htOut', 'Tapped', [['pick', 'signal'], ['wear', 'signal'], ['id', 'string'], ['label', 'string'], ['cost', 'number']])
   ],
   connections: [
     wire('htIn', 'look', 'htFace', 'look'),
     wire('htIn', 'seed', 'htFace', 'seed'),
     wire('htIn', 'options', 'htFace', 'options'),
-    wire('htIn', 'paint', 'htSwatch', 'backgroundColor'),
+    wire('htIn', 'paint', 'htRocket', 'colorA'),
+    wire('htIn', 'pattern', 'htRocket', 'patternA'),
+    wire('htIn', 'look', 'htRocket', 'styleA'),
+    wire('htIn', 'seed', 'htRocket', 'seedA'),
+    wire('htIn', 'options', 'htRocket', 'optionsA'),
     wire('htIn', 'label', 'htLabel', 'text'),
     wire('htIn', 'note', 'htNote', 'text'),
     wire('htIn', 'isFace', 'htKindOf', 'isFace'),
@@ -2354,7 +2417,107 @@ const HANGAR_TILE: Tpl007Component = {
     wire('htCard', 'onClick', 'htCanWear', 'eval'),
     wire('htCanPick', 'ontrue', 'htOut', 'pick'),
     wire('htCanWear', 'ontrue', 'htOut', 'wear'),
-    wire('htIn', 'id', 'htOut', 'id')
+    wire('htIn', 'id', 'htOut', 'id'),
+    // PLY-002: a confirmation needs the item's own name and price, and the row is what has them.
+    wire('htIn', 'label', 'htOut', 'label'),
+    wire('htIn', 'cost', 'htOut', 'cost')
+  ]
+};
+
+/**
+ * P95 PLY-002 — the confirmation. Richard, 2026-09-18: *"it should have a confirmation popup showing you your
+ * balance, how much it costs, what you'll have left after"*. Three lines and two buttons, and nothing else.
+ *
+ * 🔴 Not a `Modal`. A Modal in this editor keeps a measuring ghost that a programmatic click hits instead of the real
+ * control, and a `Select` inside one closes it. This takes the shelf's place instead: the shelf steps aside, the card
+ * appears under the preview the child is already looking at, and it works at 390px with no overlay and no z-index.
+ */
+/** One line of the confirmation's sum: a word on the left, a number on the right. */
+const HANGAR_SUM_ROW: Tpl007Component = {
+  path: 'Hangar/Sum row',
+  description: 'One line of the hangar’s buy question: a word on the left and a number on the right. Strong draws the total bigger, for the line under the rule.',
+  inputs: [port('label', 'string'), port('value', 'string'), port('strong', 'boolean')],
+  nodes: [
+    inputs('srIn', 'The line', [['label', 'string'], ['value', 'string'], ['strong', 'boolean']]),
+    group('srRow', 'The line', undefined, { width: pct(100), sizeMode: 'contentHeight', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', columnGap: 'var(--space-4)' }, ['srLabel', 'srValue']),
+    // 🔴 Both hug their content. A Text in a row defaults to 100% width, which inside a row means GROW — the two would
+    // have split the row evenly and `space-between` would have distributed nothing (the door said so). Neither wraps,
+    // and neither should: one is two words, the other is a number.
+    text('srLabel', 'The word', 'srRow', '', { ...T_BODY, sizeMode: 'contentSize' }),
+    text('srValue', 'The number', 'srRow', '', { ...T_BODY, fontWeight: 'var(--font-bold)', sizeMode: 'contentSize' }),
+    logic('srToneOf', EXPRESSION_NODE, 'The total, or a line of the sum?', { expression: "strong === true ? 'total' : 'line'" }),
+    withStates('srTone', 'A line, or the total', ['line', 'total'], {
+      size: { type: 'string', by: { line: 'var(--text-base)', total: 'var(--text-xl)' } },
+      weight: { type: 'string', by: { line: 'var(--font-normal)', total: 'var(--font-bold)' } }
+    })
+  ],
+  connections: [
+    wire('srIn', 'label', 'srLabel', 'text'),
+    wire('srIn', 'value', 'srValue', 'text'),
+    wire('srIn', 'strong', 'srToneOf', 'strong'),
+    wire('srToneOf', 'result', 'srTone', 'currentState'),
+    wire('srTone', 'size', 'srValue', 'fontSize'),
+    wire('srTone', 'weight', 'srLabel', 'fontWeight')
+  ]
+};
+
+/**
+ * P95 PLY-002 — the confirmation. Richard, 2026-09-18: *"it should have a confirmation popup showing you your
+ * balance, how much it costs, what you'll have left after"*. Three lines and two buttons, and nothing else.
+ *
+ * 🔴 Not a `Modal`. A Modal in this editor keeps a measuring ghost that a programmatic click hits instead of the real
+ * control, and a `Select` inside one closes it. This takes the shelf's place instead: the shelf steps aside, the card
+ * appears under the preview the child is already looking at, and it works at 390px with no overlay and no z-index.
+ *
+ * 🔴 The three lines are a REPEATER over one Function, not three hand-built rows. The door refused the hand-built
+ * version (`repeated-sibling-subtree`) — and it was right for a second reason it could not know: one function that
+ * returns all three lines is the only shape in which the three numbers cannot disagree with each other.
+ */
+const HANGAR_CONFIRM: Tpl007Component = {
+  path: 'Hangar/Confirm',
+  description: 'Before a purchase: the item’s name, what the child has, what it costs and what they will have left, then Yes and No. Shown only when Mounted. Publishes Yes or No. One Function does the whole sum, so the three numbers on the card can never disagree.',
+  inputs: [port('mounted', 'boolean'), port('title', 'string'), port('haveWord', 'string'), port('costWord', 'string'), port('leftWord', 'string'), port('purse', 'number'), port('cost', 'number'), port('yesWord', 'string'), port('noWord', 'string')],
+  outputs: [port('yes', 'signal'), port('no', 'signal')],
+  repeats: { source: 'array', rowFields: ['label', 'value', 'strong'] },
+  instantiates: [C.hangarSumRow],
+  nodes: [
+    inputs('hcIn', 'What is being bought', [['mounted', 'boolean'], ['title', 'string'], ['haveWord', 'string'], ['costWord', 'string'], ['leftWord', 'string'], ['purse', 'number'], ['cost', 'number'], ['yesWord', 'string'], ['noWord', 'string']]),
+    group('hcCard', 'The question', undefined, { ...CARD, rowGap: 'var(--space-4)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-5)', paddingRight: 'var(--space-5)', maxWidth: px(420), alignItems: 'stretch' }, ['hcTitle', 'hcSums', 'hcButtons']),
+    text('hcTitle', 'Buy it?', 'hcCard', '', { ...T_SECTION, textAlignX: 'center' }),
+    group('hcSums', 'The sum', 'hcCard', column({ width: pct(100), rowGap: 'var(--space-2)' }), ['hcEach']),
+    logic('hcEach', FOR_EACH_NODE, 'One line per number', { template: C.hangarSumRow, templateType: 'explicit' }),
+    group('hcButtons', 'Yes or no', 'hcCard', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center' }), ['hcYes', 'hcNo']),
+    place('hcYes', BUTTON_NODE, 'Buy it', 'hcButtons', { ...BTN_PRIMARY, label: 'Yes' }),
+    place('hcNo', BUTTON_NODE, 'Not now', 'hcButtons', { ...BTN_OUTLINE, label: 'No' }),
+    // 🔴 One sum, computed once. A repeater row needs an id (D57).
+    logic('hcSum', FUNCTION_NODE, 'The three lines of the sum', {
+      functionScript: [
+        "var purse = Math.max(0, Math.floor(Number(Inputs.purse) || 0));",
+        "var cost = Math.max(0, Math.floor(Number(Inputs.cost) || 0));",
+        "Outputs.rows = [",
+        "  { id: 'have', label: String(Inputs.haveWord || ''), value: purse + ' \u2b50', strong: false },",
+        "  { id: 'cost', label: String(Inputs.costWord || ''), value: '\u2212' + cost + ' \u2b50', strong: false },",
+        "  { id: 'left', label: String(Inputs.leftWord || ''), value: Math.max(0, purse - cost) + ' \u2b50', strong: true }",
+        "];"
+      ].join('\n')
+    }),
+    logic('hcShown', EXPRESSION_NODE, 'Only while asking', { expression: 'm === true' }),
+    outputs('hcOut', 'The answer', [['yes', 'signal'], ['no', 'signal']])
+  ],
+  connections: [
+    wire('hcIn', 'mounted', 'hcShown', 'm'),
+    wire('hcShown', 'result', 'hcCard', 'mounted'),
+    wire('hcIn', 'title', 'hcTitle', 'text'),
+    wire('hcIn', 'haveWord', 'hcSum', 'in-haveWord'),
+    wire('hcIn', 'costWord', 'hcSum', 'in-costWord'),
+    wire('hcIn', 'leftWord', 'hcSum', 'in-leftWord'),
+    wire('hcIn', 'purse', 'hcSum', 'in-purse'),
+    wire('hcIn', 'cost', 'hcSum', 'in-cost'),
+    wire('hcSum', 'out-rows', 'hcEach', 'items'),
+    wire('hcIn', 'yesWord', 'hcYes', 'label'),
+    wire('hcIn', 'noWord', 'hcNo', 'label'),
+    wire('hcYes', 'onClick', 'hcOut', 'yes'),
+    wire('hcNo', 'onClick', 'hcOut', 'no')
   ]
 };
 
@@ -2362,11 +2525,11 @@ const HANGAR_TILE: Tpl007Component = {
 const HANGAR_PREVIEW: Tpl007Component = {
   path: 'Hangar/Preview',
   description: 'The child’s face and rocket as they will race, wearing what is on, and one line about picks. Changed (a signal) pops the pair, and reduced motion stills it. Publishes Clicked.',
-  inputs: [port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('options', 'object'), port('paint', 'string'), port('line', 'string'), port('changed', 'signal')],
+  inputs: [port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('options', 'object'), port('paint', 'string'), port('pattern', 'string', 'PLY-002: the decal on the hull'), port('line', 'string'), port('changed', 'signal')],
   outputs: [port('clicked', 'signal')],
   instantiates: [C.face],
   nodes: [
-    inputs('pvIn', 'Who, wearing what', [['name', 'string'], ['look', 'string'], ['seed', 'string'], ['options', 'object'], ['paint', 'string'], ['line', 'string'], ['changed', 'signal']]),
+    inputs('pvIn', 'Who, wearing what', [['name', 'string'], ['look', 'string'], ['seed', 'string'], ['options', 'object'], ['paint', 'string'], ['pattern', 'string'], ['line', 'string'], ['changed', 'signal']]),
     group('pvCard', 'The preview', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['pvPop', 'pvLine']),
     // 🔴 One line at every width. Wrapped, the face took a line of its own on a phone and pushed the first row of tiles to 882 on an
     // 844-tall screen (build 3, FR 390×844). A content-sized face never shrinks, and the course's 100% width is what gives way.
@@ -2391,6 +2554,7 @@ const HANGAR_PREVIEW: Tpl007Component = {
     wire('pvIn', 'seed', 'pvTrack', 'seedA'),
     wire('pvIn', 'options', 'pvTrack', 'optionsA'),
     wire('pvIn', 'paint', 'pvTrack', 'colorA'),
+    wire('pvIn', 'pattern', 'pvTrack', 'patternA'),
     wire('pvIn', 'name', 'pvTrack', 'nameA'),
     wire('pvIn', 'line', 'pvLine', 'text'),
     wire('pvIn', 'changed', 'pvChanges', 'increase'),
@@ -2406,12 +2570,12 @@ const HANGAR_SHELF_PART: Tpl007Component = {
   path: 'Hangar/Shelf',
   description: 'Tabs for Face and Rocket, and a tile for every item on the chosen tab, as Logic/Hangar shelf says the active player sees it. Publishes Pick or Wear with the item id, and whether a pick is waiting.',
   inputs: [port('app', 'object'), port('shelf', 'array'), port('faceWord', 'string'), port('rocketWord', 'string')],
-  outputs: [port('pick', 'signal'), port('wear', 'signal'), port('itemId', 'string'), port('hasPicks', 'boolean')],
-  repeats: { source: 'array', rowFields: ['id', 'label', 'note', 'isFace', 'look', 'seed', 'options', 'paint', 'worn', 'canWear', 'canPick', 'dim'] },
+  outputs: [port('pick', 'signal'), port('wear', 'signal'), port('itemId', 'string'), port('itemLabel', 'string'), port('itemCost', 'number'), port('hasPicks', 'boolean'), port('purse', 'number')],
+  repeats: { source: 'array', rowFields: ['id', 'label', 'note', 'isFace', 'look', 'seed', 'options', 'paint', 'pattern', 'cost', 'worn', 'canWear', 'canPick', 'dim'] },
   instantiates: [C.choiceRow, C.hangarTile, logicName('Logic/Hangar shelf')],
   nodes: [
     inputs('hsIn', 'The store and the shelf', [['app', 'object'], ['shelf', 'array'], ['faceWord', 'string'], ['rocketWord', 'string']]),
-    group('hsWrap', 'The shelf', undefined, column({ alignItems: 'center', rowGap: 'var(--space-4)' }), ['hsTabs', 'hsGrid']),
+    group('hsWrap', 'The shelf', undefined, column({ alignItems: 'center', rowGap: 'var(--space-4)' }), ['hsTabs', 'hsGrid', 'hsElsewhere']),
     place('hsTabs', C.choiceRow, 'Face or rocket', 'hsWrap'),
     group('hsGrid', 'The items', 'hsWrap', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['hsEach']),
     logic('hsEach', FOR_EACH_NODE, 'One tile per item', { template: C.hangarTile, templateType: 'explicit' }),
@@ -2422,7 +2586,10 @@ const HANGAR_SHELF_PART: Tpl007Component = {
     logic('hsSetTab', SET_VARIABLE_NODE, 'Choose a tab', { name: 'hangarTab' }),
     logic('hsFirstTab', EXPRESSION_NODE, 'face', { expression: "'face'" }),
     logic('hsInitTab', SET_VARIABLE_NODE, 'Open on the face tab', { name: 'hangarTab' }),
-    outputs('hsOut', 'What was tapped', [['pick', 'signal'], ['wear', 'signal'], ['itemId', 'string'], ['hasPicks', 'boolean']])
+    // PLY-001 §3.2: what the child owns for another face. A fact under the shelf — never a tile, never an offer, and
+    // it is what stops a bought thing from silently vanishing when they change face.
+    text('hsElsewhere', 'Owned, for other faces', 'hsWrap', '', { ...T_META, textAlignX: 'center' }),
+    outputs('hsOut', 'What was tapped', [['pick', 'signal'], ['wear', 'signal'], ['itemId', 'string'], ['itemLabel', 'string'], ['itemCost', 'number'], ['hasPicks', 'boolean'], ['purse', 'number']])
   ],
   connections: [
     wire('hsFirstTab', 'result', 'hsInitTab', 'value'),
@@ -2438,8 +2605,12 @@ const HANGAR_SHELF_PART: Tpl007Component = {
     wire('hsTab', 'value', 'hsList', 'tab'),
     wire('hsList', 'rows', 'hsEach', 'items'),
     wire('hsList', 'hasPicks', 'hsOut', 'hasPicks'),
+    wire('hsList', 'purse', 'hsOut', 'purse'),
+    wire('hsList', 'elsewhereText', 'hsElsewhere', 'text'),
     // The repeater publishes the row's value before its signal (measured, TPL-006).
     wire('hsEach', 'itemOutput-id', 'hsOut', 'itemId'),
+    wire('hsEach', 'itemOutput-label', 'hsOut', 'itemLabel'),
+    wire('hsEach', 'itemOutput-cost', 'hsOut', 'itemCost'),
     wire('hsEach', 'itemOutputSignal-pick', 'hsOut', 'pick'),
     wire('hsEach', 'itemOutputSignal-wear', 'hsOut', 'wear')
   ]
@@ -2905,19 +3076,28 @@ const PAGE_RACE: Tpl007Component = {
 /** RKT-011 — the hangar: the face and rocket on top, the shelf under them. */
 const PAGE_HANGAR: Tpl007Component = {
   path: 'Pages/Hangar',
-  description: 'The hangar (RKT-011): the child’s face and rocket as they will race, then the shelf. Each 🎁 pick a milestone gives becomes any item that fits; what is theirs goes on or off with a tap. Nothing here is random, time-limited or paid, and nothing is ever taken away.',
-  instantiates: [C.header, C.hangarPreview, C.hangarShelf, C.hangarData, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Pick item'), logicName('Logic/Wear item'), C.words],
+  description: 'The hangar (RKT-011, reshaped by PLY-001 and PLY-002): the child’s face and rocket as they will race, then the shelf — only things the face they chose can wear. Buying spends stars and ASKS FIRST, on a card that says the balance, the price and what is left. What is theirs goes on or off with a tap and costs nothing. Nothing here is random, time-limited or paid, and nothing owned is ever taken away.',
+  instantiates: [C.header, C.hangarPreview, C.hangarShelf, C.hangarConfirm, C.hangarData, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Pick item'), logicName('Logic/Wear item'), C.words],
   nodes: [
     { id: 'hgPage', type: 'Page', label: 'Hangar', parameters: { title: 'Rocket School', urlPath: 'hangar' }, children: ['hgOuter'] },
     group('hgOuter', 'The ground', 'hgPage', column({ alignItems: 'center' }), ['hgWrap']),
-    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgPreview', 'hgShelf']),
+    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgPreview', 'hgShelfBox', 'hgConfirm']),
     place('hgHeader', C.header, 'The bar', 'hgWrap', { showHome: true, showHangar: false }),
     text('hgTitle', 'Hangar', 'hgWrap', '', T_SECTION),
     place('hgPreview', C.hangarPreview, 'Your face and rocket', 'hgWrap'),
-    place('hgShelf', C.hangarShelf, 'The shelf', 'hgWrap'),
+    // A placed component has no Mounted of its own, so the shelf sits in a Group that has one: while the card is
+    // asking, the shelf steps aside and the question is the only thing on the screen under the preview.
+    group('hgShelfBox', 'The shelf, while not asking', 'hgWrap', column({ alignItems: 'stretch' }), ['hgShelf']),
+    place('hgShelf', C.hangarShelf, 'The shelf', 'hgShelfBox'),
+    place('hgConfirm', C.hangarConfirm, 'Buy it?', 'hgWrap', { mounted: false }),
     ...pageCommon('hg').nodes,
     logic('hgItems', C.hangarData, 'What the shelf offers'),
-    logic('hgPick', logicName('Logic/Pick item'), 'Spend a pick'),
+    logic('hgPick', logicName('Logic/Pick item'), 'Buy it'),
+    withStates('hgAsk', 'Shelf, or the question', ['idle', 'asking'], {
+      idle: { type: 'boolean', by: { idle: true, asking: false } },
+      asking: { type: 'boolean', by: { idle: false, asking: true } }
+    }),
+    logic('hgBuyTitle', EXPRESSION_NODE, 'Buy what?', { expression: "String(word || '').replace('{item}', String(label || ''))" }),
     logic('hgWear', logicName('Logic/Wear item'), 'Put it on, or take it off'),
     logic('hgNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
     gate('hgGuard', 'Send them to the profiles?'),
@@ -2940,18 +3120,38 @@ const PAGE_HANGAR: Tpl007Component = {
     wire('hgMe', 'seed', 'hgPreview', 'seed'),
     wire('hgMe', 'faceOptions', 'hgPreview', 'options'),
     wire('hgMe', 'paint', 'hgPreview', 'paint'),
+    wire('hgMe', 'pattern', 'hgPreview', 'pattern'),
     wire('hgMe', 'nextText', 'hgPreview', 'line'),
     // The shelf.
     wire('hgStore', 'app', 'hgShelf', 'app'),
     wire('hgItems', 'items', 'hgShelf', 'shelf'),
     wire('hgT', 'faceTab', 'hgShelf', 'faceWord'),
     wire('hgT', 'rocketTab', 'hgShelf', 'rocketWord'),
-    // A pick: spent and worn, written, and the preview pops.
+    // 🔴 PLY-002: a tap on something not yet owned ASKS. It no longer runs the purchase — that was the "auto-buy".
+    // The item's name, price and the purse come straight off the shelf's live outputs: the repeater publishes the
+    // tapped row's values before its signal, and the shelf is hidden while the card is up, so nothing can change them
+    // underneath the question.
+    wire('hgShelf', 'pick', 'hgAsk', 'to-asking'),
+    wire('hgAsk', 'idle', 'hgShelfBox', 'mounted'),
+    wire('hgAsk', 'asking', 'hgConfirm', 'mounted'),
+    wire('hgT', 'buyTitle', 'hgBuyTitle', 'word'),
+    wire('hgShelf', 'itemLabel', 'hgBuyTitle', 'label'),
+    wire('hgBuyTitle', 'result', 'hgConfirm', 'title'),
+    wire('hgShelf', 'itemCost', 'hgConfirm', 'cost'),
+    wire('hgShelf', 'purse', 'hgConfirm', 'purse'),
+    wire('hgT', 'youHave', 'hgConfirm', 'haveWord'),
+    wire('hgT', 'itCosts', 'hgConfirm', 'costWord'),
+    wire('hgT', 'youllHave', 'hgConfirm', 'leftWord'),
+    wire('hgT', 'yesBuy', 'hgConfirm', 'yesWord'),
+    wire('hgT', 'noThanks', 'hgConfirm', 'noWord'),
+    wire('hgConfirm', 'no', 'hgAsk', 'to-idle'),
+    wire('hgConfirm', 'yes', 'hgAsk', 'to-idle'),
+    // Bought, worn, written, and the preview pops.
     wire('hgStore', 'app', 'hgPick', 'app'),
     wire('hgMe', 'profileId', 'hgPick', 'profileId'),
     wire('hgShelf', 'itemId', 'hgPick', 'itemId'),
     wire('hgItems', 'items', 'hgPick', 'shelf'),
-    wire('hgShelf', 'pick', 'hgPick', 'run'),
+    wire('hgConfirm', 'yes', 'hgPick', 'run'),
     wire('hgPick', 'app', 'hgStore', 'app'),
     wire('hgPick', 'done', 'hgStore', 'write'),
     wire('hgPick', 'done', 'hgPreview', 'changed'),
@@ -3520,17 +3720,24 @@ const MONSTER_LANE: Tpl007Component = {
 
 const MONSTER_SETUP: Tpl007Component = {
   path: 'Monster/Setup',
-  description: 'Before a Monster Gate game: the way to play (Beat it to the gate, or Push it back) and the pace (Practice or Challenge), the chosen pair\'s rule in one line, and Start. Opens on Beat it to the gate and Practice (§16 ruling 3), written once, so coming back keeps the child\'s choices. Publishes Start with Style and Timed.',
-  inputs: [port('mounted', 'boolean'), port('gateWord', 'string'), port('pushWord', 'string'), port('practiceWord', 'string'), port('challengeWord', 'string'), port('startWord', 'string'), port('gatePracticeWord', 'string'), port('gateChallengeWord', 'string'), port('pushPracticeWord', 'string'), port('pushChallengeWord', 'string')],
-  outputs: [port('start', 'signal'), port('style', 'string'), port('timed', 'boolean')],
+  description: 'Before a Monster Gate game: what to answer (Maths or Typing — PLY-004), the way to play (Beat it to the gate, or Push it back) and the pace (Practice or Challenge), the chosen pair\'s rule in one line, and Start. Opens on Maths, Beat it to the gate and Practice (§16 ruling 3), written once, so coming back keeps the child\'s choices. Publishes Start with Mode, Style and Timed.',
+  inputs: [port('mounted', 'boolean'), port('mathsWord', 'string'), port('typingWord', 'string'), port('gateWord', 'string'), port('pushWord', 'string'), port('practiceWord', 'string'), port('challengeWord', 'string'), port('startWord', 'string'), port('gatePracticeWord', 'string'), port('gateChallengeWord', 'string'), port('pushPracticeWord', 'string'), port('pushChallengeWord', 'string')],
+  outputs: [port('start', 'signal'), port('style', 'string'), port('timed', 'boolean'), port('mode', 'string')],
   instantiates: [C.choiceRow],
   nodes: [
-    inputs('zsIn', 'The words', [['mounted', 'boolean'], ['gateWord', 'string'], ['pushWord', 'string'], ['practiceWord', 'string'], ['challengeWord', 'string'], ['startWord', 'string'], ['gatePracticeWord', 'string'], ['gateChallengeWord', 'string'], ['pushPracticeWord', 'string'], ['pushChallengeWord', 'string']]),
-    group('zsCard', 'The setup', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['zsStyle', 'zsTimed', 'zsRule', 'zsStart']),
+    inputs('zsIn', 'The words', [['mounted', 'boolean'], ['mathsWord', 'string'], ['typingWord', 'string'], ['gateWord', 'string'], ['pushWord', 'string'], ['practiceWord', 'string'], ['challengeWord', 'string'], ['startWord', 'string'], ['gatePracticeWord', 'string'], ['gateChallengeWord', 'string'], ['pushPracticeWord', 'string'], ['pushChallengeWord', 'string']]),
+    group('zsCard', 'The setup', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['zsMode', 'zsStyle', 'zsTimed', 'zsRule', 'zsStart']),
+    // PLY-004: Monster Gate asks the race's questions, so it can ask the race's typing questions too. Nothing else had to change.
+    place('zsMode', C.choiceRow, 'Maths or typing', 'zsCard'),
     place('zsStyle', C.choiceRow, 'The way to play', 'zsCard'),
     place('zsTimed', C.choiceRow, 'Practice or challenge', 'zsCard'),
     text('zsRule', 'What the chosen way and pace do', 'zsCard', '', T_META),
     place('zsStart', BUTTON_NODE, 'Start', 'zsCard', { ...BTN_PRIMARY, label: 'Start', fontSize: 'var(--text-lg)' }),
+    logic('zsModeItems', FUNCTION_NODE, 'Maths or typing, in words', { functionScript: "Outputs.items = [{ label: Inputs.maths, value: 'maths' }, { label: Inputs.typing, value: 'typing' }];" }),
+    logic('zsModeVar', VARIABLE_NODE, 'Maths or typing?', { name: 'monsterMode' }),
+    logic('zsSetMode', SET_VARIABLE_NODE, 'Choose maths or typing', { name: 'monsterMode' }),
+    logic('zsDefMode', EXPRESSION_NODE, 'maths', { expression: "'maths'" }),
+    logic('zsInitMode', SET_VARIABLE_NODE, 'Start on Maths', { name: 'monsterMode' }),
     logic('zsStyleItems', FUNCTION_NODE, 'The two ways, in words', { functionScript: "Outputs.items = [{ label: Inputs.gate, value: 'gate' }, { label: Inputs.push, value: 'push' }];" }),
     logic('zsTimedItems', FUNCTION_NODE, 'Practice or challenge, in words', { functionScript: "Outputs.items = [{ label: Inputs.practice, value: 'practice' }, { label: Inputs.challenge, value: 'challenge' }];" }),
     logic('zsStyleVar', VARIABLE_NODE, 'The way to play', { name: 'monsterStyle' }),
@@ -3547,7 +3754,7 @@ const MONSTER_SETUP: Tpl007Component = {
     logic('zsInitTimed', SET_VARIABLE_NODE, 'Start on Practice', { name: 'monsterTimed' }),
     withStates('zsSeeded', 'Defaults written yet?', ['fresh', 'seeded'], { seeded: { type: 'boolean', by: { fresh: false, seeded: true } } }),
     gate('zsFirst', 'The first time the setup shows?'),
-    outputs('zsOut', 'Go', [['start', 'signal'], ['style', 'string'], ['timed', 'boolean']])
+    outputs('zsOut', 'Go', [['start', 'signal'], ['style', 'string'], ['timed', 'boolean'], ['mode', 'string']])
   ],
   connections: [
     wire('zsIn', 'mounted', 'zsShown', 'm'),
@@ -3555,10 +3762,19 @@ const MONSTER_SETUP: Tpl007Component = {
     wire('zsDefStyle', 'result', 'zsInitStyle', 'value'),
     wire('zsSeeded', 'seeded', 'zsFirst', 'condition'),
     wire('zsCard', 'didMount', 'zsFirst', 'eval'),
-    wire('zsFirst', 'onfalse', 'zsInitStyle', 'do'),
+    wire('zsFirst', 'onfalse', 'zsInitMode', 'do'),
+    wire('zsDefMode', 'result', 'zsInitMode', 'value'),
+    wire('zsInitMode', 'done', 'zsInitStyle', 'do'),
     wire('zsDefTimed', 'result', 'zsInitTimed', 'value'),
     wire('zsInitStyle', 'done', 'zsInitTimed', 'do'),
     wire('zsInitTimed', 'done', 'zsSeeded', 'to-seeded'),
+    wire('zsIn', 'mathsWord', 'zsModeItems', 'in-maths'),
+    wire('zsIn', 'typingWord', 'zsModeItems', 'in-typing'),
+    wire('zsModeItems', 'out-items', 'zsMode', 'items'),
+    wire('zsModeVar', 'value', 'zsMode', 'value'),
+    wire('zsMode', 'value', 'zsSetMode', 'value'),
+    wire('zsMode', 'changed', 'zsSetMode', 'do'),
+    wire('zsModeVar', 'value', 'zsOut', 'mode'),
     wire('zsIn', 'gateWord', 'zsStyleItems', 'in-gate'),
     wire('zsIn', 'pushWord', 'zsStyleItems', 'in-push'),
     wire('zsIn', 'practiceWord', 'zsTimedItems', 'in-practice'),
@@ -3587,7 +3803,7 @@ const MONSTER_SETUP: Tpl007Component = {
 };
 
 const MONSTER_PLAY_INPUTS: Array<[string, string]> = [
-  ['start', 'signal'], ['style', 'string'], ['timed', 'boolean'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['soundOn', 'boolean'], ['mounted', 'boolean'],
+  ['start', 'signal'], ['style', 'string'], ['timed', 'boolean'], ['mode', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['soundOn', 'boolean'], ['mounted', 'boolean'],
   ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'],
   ['teachCards', 'array'], ['anExampleWord', 'string'], ['gotItWord', 'string'], ['restartWord', 'string'], ['changeWord', 'string'], ['againWord', 'string'], ['pickWord', 'string'], ['hangarWord', 'string']
 ];
@@ -3610,7 +3826,8 @@ const MONSTER_PLAY: Tpl007Component = {
     place('zpLane', C.monsterLane, 'The lane', 'zpWrap'),
     // The round, the Teach card and the end card take turns in one slot under the lane, as they do under the race's track.
     group('zpRoundSlot', 'While playing', 'zpWrap', column({ alignItems: 'center' }), ['zpRound']),
-    place('zpRound', C.raceRound, 'This question', 'zpRoundSlot', { mode: 'maths' }),
+    // 🔴 PLY-004: was `{ mode: 'maths' }`, hard-coded — which is why Monster Gate had no typing version at all.
+    place('zpRound', C.raceRound, 'This question', 'zpRoundSlot'),
     place('zpTeach', C.teachCard, 'Show me how', 'zpWrap'),
     place('zpResult', C.raceResult, 'How it ended', 'zpWrap'),
     logic('zpNew', logicName('Logic/New monster game'), 'A new game'),
@@ -3668,7 +3885,7 @@ const MONSTER_PLAY: Tpl007Component = {
     wire('zpNew', 'done', 'zpRound', 'ask'),
     wire('zpNew', 'done', 'zpWalkDelay', 'restart'),
     // The round gets the player and the words, and is told which game it grades for.
-    ...(['level', 'lang', 'layout', 'answerMode', 'model', 'curriculum', 'wordLists', 'timed', 'soundOn', 'placeholder', 'checkWord', 'fluentWord', 'correctWord', 'wrongWord', 'timeUpWord', 'nextWord', 'showMeWord'] as const).map((p) => wire('zpIn', p, 'zpRound', p)),
+    ...(['mode', 'level', 'lang', 'layout', 'answerMode', 'model', 'curriculum', 'wordLists', 'timed', 'soundOn', 'placeholder', 'checkWord', 'fluentWord', 'correctWord', 'wrongWord', 'timeUpWord', 'nextWord', 'showMeWord'] as const).map((p) => wire('zpIn', p, 'zpRound', p)),
     wire('zpIn', 'style', 'zpRound', 'game'),
     // A graded answer: the walk stops, and the move turns the verdict into the game after it.
     wire('zpRound', 'graded', 'zpWalkDelay', 'stop'),
@@ -3799,6 +4016,8 @@ const PAGE_MONSTER: Tpl007Component = {
     wire('zgHeader', 'home', 'zgGoHome', 'navigate'),
     wire('zgT', 'gameMonster', 'zgTitle', 'text'),
     // The setup's words.
+    wire('zgT', 'mathsMode', 'zgSetup', 'mathsWord'),
+    wire('zgT', 'typingMode', 'zgSetup', 'typingWord'),
     wire('zgT', 'monsterGate', 'zgSetup', 'gateWord'),
     wire('zgT', 'monsterPush', 'zgSetup', 'pushWord'),
     wire('zgT', 'practice', 'zgSetup', 'practiceWord'),
@@ -3820,6 +4039,7 @@ const PAGE_MONSTER: Tpl007Component = {
     wire('zgPlaying', 'value', 'zgPlay', 'mounted'),
     wire('zgSetup', 'style', 'zgPlay', 'style'),
     wire('zgSetup', 'timed', 'zgPlay', 'timed'),
+    wire('zgSetup', 'mode', 'zgPlay', 'mode'),
     // The game gets the player and the words.
     ...(['level', 'lang', 'layout', 'answerMode', 'model'] as const).map((field) => wire('zgMe', field, 'zgPlay', field)),
     wire('zgMe', 'sound', 'zgPlay', 'soundOn'),
@@ -3881,6 +4101,8 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   KEYBOARD,
   NEXT_PICK,
   HANGAR_TILE,
+  HANGAR_SUM_ROW,
+  HANGAR_CONFIRM,
   HANGAR_PREVIEW,
   HANGAR_SHELF_PART,
   RACE_SETUP,

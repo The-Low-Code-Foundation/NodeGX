@@ -24,6 +24,11 @@
           "type": "boolean"
         },
         {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "level",
           "plug": "output",
           "type": "string"
@@ -312,9 +317,6 @@
       "type": "/Race/Round",
       "label": "This question",
       "parent": "zpRoundSlot",
-      "parameters": {
-        "mode": "maths"
-      },
       "x": 160,
       "y": 760
     },

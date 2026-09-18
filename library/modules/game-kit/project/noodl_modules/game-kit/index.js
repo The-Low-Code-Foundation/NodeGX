@@ -489,7 +489,13 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
   var COMPACT_AT = 1.05;
 
   /** A rocket body is 64 units from nose to tail. */
-  var ROCKET_UNITS = 64;
+  /**
+   * A rocket body is this many units from nose to tail — the number `spriteScale` sizes against, so it must be the
+   * TRUE length of ROCKET_BODY (x −38 … 40). P95 PLY-006 lengthened the hull from 64 to make room for a cockpit and a
+   * decal, and raised ROCKET_SIZE_DEFAULT with it: the face on screen is `size × 2·WINDOW_R ÷ ROCKET_UNITS`, which is
+   * 72 × 25 ÷ 78 ≈ 23px where the first build drew 44 × 18 ÷ 64 ≈ 12px.
+   */
+  var ROCKET_UNITS = 78;
 
   /**
    * Which course a box gets. A Course that is not the default is the author's own, drawn in the
@@ -522,11 +528,92 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
     return Math.max(1, want / (ROCKET_UNITS * unit));
   }
 
-  /** A rocket, pointing right, centred on 0,0, about 64px long. The window is a circle at the middle. */
-  var ROCKET_BODY = 'M -30 0 L -18 -12 L 14 -12 Q 32 0 14 12 L -18 12 Z';
-  var ROCKET_FIN_TOP = 'M -18 -12 L -32 -22 L -24 -6 Z';
-  var ROCKET_FIN_BOTTOM = 'M -18 12 L -32 22 L -24 6 Z';
-  var ROCKET_FLAME = 'M -30 -5 L -44 0 L -30 5 Z';
+  /**
+   * P95 PLY-006 — the rocket, pointing right, centred on 0,0, ROCKET_UNITS long.
+   *
+   * 🔴 Richard, 2026-09-18: *"make them bigger and a tiny bit more detailed, certainly to be able to see your avatar
+   * inside the rocket better."* The first build's window was a 9-unit circle on a 64-unit hull — the face was 14% of
+   * the rocket's length, about **12 screen pixels** at the 44px floor. The hull below is deeper (±15 instead of ±12)
+   * and the window is 13 units, forward of centre where a cockpit belongs: the face is now about 41% of the length,
+   * and the floor moved to ROCKET_SIZE_DEFAULT, so a phone draws a face of about 26px instead of 12.
+   */
+  var ROCKET_BODY = 'M -38 0 L -26 -16 L 20 -16 Q 40 0 20 16 L -26 16 Z';
+  var ROCKET_FIN_TOP = 'M -26 -16 L -38 -27 L -30 -8 Z';
+  var ROCKET_FIN_BOTTOM = 'M -26 16 L -38 27 L -30 8 Z';
+  var ROCKET_FLAME = 'M -38 -7 L -54 0 L -38 7 Z';
+  /** The detail, drawn over the paint: a nose cone at the tip and a band where the hull meets the fins. */
+  var ROCKET_NOSE = 'M 20 -16 Q 40 0 20 16 Z';
+  var ROCKET_BAND = 'M -26 -16 L -21 -16 L -21 16 L -26 16 Z';
+  /** A hotter core inside the flame, so the exhaust reads as exhaust and not as a triangle. */
+  var ROCKET_FLAME_CORE = 'M -38 -3.5 L -47 0 L -38 3.5 Z';
+
+  /** The cockpit: where the avatar sits, and how big it is drawn. */
+  var WINDOW_CX = 15;
+  var WINDOW_R = 12.5;
+
+  /** The shortest a rocket is drawn by default, nose to tail, in screen pixels. */
+  var ROCKET_SIZE_DEFAULT = 72;
+
+  /**
+   * P95 PLY-002 — the decals a rocket can wear over its paint. Richard, 2026-09-18: *"the colour would be a basic
+   * thing, and the reward would be stripes or polkadots or something."* So paint is one port and PATTERN is another,
+   * and these are what the hangar sells. Each is drawn in the body's own coordinates and clipped to the hull, so a
+   * pattern can never spill onto the fins or the sky.
+   *
+   * White at 0.9, with a hairline dark edge, so one set of shapes reads on every `--rocket-paint-*` token; the
+   * template gate holds white to ≥ 3:1 against each paint, exactly as the paints are held against the track.
+   */
+  var PATTERNS = {
+    dots: [
+      ['circle', { cx: -21, cy: -8, r: 3.3 }], ['circle', { cx: -12, cy: 6, r: 3.3 }], ['circle', { cx: -3, cy: -8, r: 3.3 }],
+      ['circle', { cx: -21, cy: 7, r: 3.0 }], ['circle', { cx: -12, cy: -7, r: 3.0 }], ['circle', { cx: -3, cy: 6, r: 3.0 }]
+    ],
+    stripes: [
+      ['rect', { x: -24, y: -17, width: 5, height: 34 }], ['rect', { x: -15, y: -17, width: 5, height: 34 }],
+      ['rect', { x: -6, y: -17, width: 5, height: 34 }]
+    ],
+    checker: [
+      ['rect', { x: -26, y: -16, width: 7, height: 8 }], ['rect', { x: -19, y: -8, width: 7, height: 8 }],
+      ['rect', { x: -12, y: -16, width: 7, height: 8 }], ['rect', { x: -5, y: -8, width: 7, height: 8 }],
+      ['rect', { x: -26, y: 0, width: 7, height: 8 }], ['rect', { x: -19, y: 8, width: 7, height: 8 }],
+      ['rect', { x: -12, y: 0, width: 7, height: 8 }], ['rect', { x: -5, y: 8, width: 7, height: 8 }]
+    ],
+    chevron: [
+      ['path', { d: 'M -26 -16 L -18 0 L -26 16 L -32 16 L -24 0 L -32 -16 Z' }],
+      ['path', { d: 'M -16 -16 L -8 0 L -16 16 L -22 16 L -14 0 L -22 -16 Z' }],
+      ['path', { d: 'M -6 -16 L 2 0 L -6 16 L -12 16 L -4 0 L -12 -16 Z' }]
+    ],
+    flames: [
+      ['path', { d: 'M -38 -16 Q -27 -10 -35 -3 Q -23 -1 -31 5 Q -21 9 -29 16 L -38 16 Z' }],
+      ['path', { d: 'M -22 -16 Q -11 -10 -19 -3 Q -7 -1 -15 5 Q -5 9 -13 16 L -22 16 Z' }]
+    ],
+    stars: [
+      ['path', { d: 'M -20 -8 l 2.4 5.6 l 5.6 2.4 l -5.6 2.4 l -2.4 5.6 l -2.4 -5.6 l -5.6 -2.4 l 5.6 -2.4 Z' }],
+      ['path', { d: 'M -6 -9 l 1.8 4.2 l 4.2 1.8 l -4.2 1.8 l -1.8 4.2 l -1.8 -4.2 l -4.2 -1.8 l 4.2 -1.8 Z' }],
+      ['path', { d: 'M -8 8 l 1.5 3.5 l 3.5 1.5 l -3.5 1.5 l -1.5 3.5 l -1.5 -3.5 l -3.5 -1.5 l 3.5 -1.5 Z' }],
+      ['path', { d: 'M -24 9 l 1.5 3.5 l 3.5 1.5 l -3.5 1.5 l -1.5 3.5 l -1.5 -3.5 l -3.5 -1.5 l 3.5 -1.5 Z' }]
+    ],
+    bolt: [['path', { d: 'M -2 -16 L -20 1 L -11 1 L -18 16 L 3 -3 L -6 -3 L 1 -16 Z' }]]
+  };
+
+  /** The decal ids a Pattern port accepts, in the order the hangar lists them. */
+  var PATTERN_IDS = Object.keys(PATTERNS);
+
+  /** The shapes of one pattern, or none. An unknown id draws nothing rather than throwing. */
+  function patternShapes(id, key) {
+    var list = PATTERNS[id];
+    if (!list) return null;
+    return list.map(function (shape, i) {
+      var props = {};
+      for (var k in shape[1]) props[k] = shape[1][k];
+      props.key = key + i;
+      props.fill = '#ffffff';
+      props.fillOpacity = 0.9;
+      props.stroke = 'rgba(0,0,0,0.28)';
+      props.strokeWidth = 1;
+      return h(shape[0], props);
+    });
+  }
 
   /** P87 RKT-007 — how long the stretch a move just gained stays lit, in ms. */
   var GAIN_MS = 3200;
@@ -634,6 +721,9 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
 
     /** The two decisions the component makes about its box, exposed so a gate can grade them without a browser. */
     layout: { chooseCourse: chooseCourse, spriteScale: spriteScale, courses: COURSES },
+
+    /** PLY-002 / PLY-006: the decals, the cockpit and the size floor, exposed so a gate can grade them without a browser. */
+    rocket: { patterns: PATTERNS, patternIds: PATTERN_IDS, patternShapes: patternShapes, windowR: WINDOW_R, windowCx: WINDOW_CX, units: ROCKET_UNITS, sizeDefault: ROCKET_SIZE_DEFAULT },
 
     /** RKT-002 AC4: the reward moments' stylesheet and the burst rule, exposed so a gate can grade them without a browser. */
     motion: { css: MOTION_CSS, burstRose: burstRose, gainSpan: gainSpan, gainMs: GAIN_MS },
@@ -757,11 +847,15 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
           goal = { x: end.x, y: end.y };
         }
 
-        var sprite = function (id, at, style, seed, colour, label, burst, options) {
+        var sprite = function (id, at, style, seed, colour, label, burst, options, pattern) {
           if (!at) return null;
-          var uri = avatarDataUri(style, seed, 40, options);
-          var clipId = 'gk-clip-' + id + '-' + (props.noodlNode ? props.noodlNode.id : 'x');
-          var labelY = -(14 + labelSize * 0.7);
+          // PLY-006: the window is bigger, so the face is asked for at a size that does not look soft inside it.
+          var uri = avatarDataUri(style, seed, 64, options);
+          var nodeId = props.noodlNode ? props.noodlNode.id : 'x';
+          var clipId = 'gk-clip-' + id + '-' + nodeId;
+          var hullId = 'gk-hull-' + id + '-' + nodeId;
+          var shapes = patternShapes(pattern, 'p' + id);
+          var labelY = -(30 + labelSize * 0.7);
           return h(
             'g',
             {
@@ -776,23 +870,45 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
                   sparks(BURST_SPARKS, props.goalColor, props.laneColor, 'b')
                 )
               : null,
+            h(
+              'defs',
+              null,
+              h('clipPath', { id: clipId }, h('circle', { cx: WINDOW_CX, cy: 0, r: WINDOW_R })),
+              // PLY-002: the hull, so a decal is clipped to the paint and can never spill onto a fin or the sky.
+              h('clipPath', { id: hullId }, h('path', { d: ROCKET_BODY }))
+            ),
             h('path', { d: ROCKET_FLAME, fill: '#ffb347', opacity: 0.9 }),
-            h('path', { d: ROCKET_FIN_TOP, fill: colour }),
-            h('path', { d: ROCKET_FIN_BOTTOM, fill: colour }),
+            h('path', { d: ROCKET_FLAME_CORE, fill: '#fff2c2', opacity: 0.95 }),
+            h('path', { d: ROCKET_FIN_TOP, fill: colour, stroke: 'rgba(0,0,0,0.3)', strokeWidth: 1.2, strokeLinejoin: 'round' }),
+            h('path', { d: ROCKET_FIN_BOTTOM, fill: colour, stroke: 'rgba(0,0,0,0.3)', strokeWidth: 1.2, strokeLinejoin: 'round' }),
             h('path', { d: ROCKET_BODY, fill: colour, stroke: 'rgba(0,0,0,0.25)', strokeWidth: 1.5, 'data-rocket': id }),
-            h('defs', null, h('clipPath', { id: clipId }, h('circle', { cx: -2, cy: 0, r: 9 }))),
-            h('circle', { cx: -2, cy: 0, r: 10.5, fill: '#ffffff' }),
+            // PLY-002: the decal the hangar sold, over the paint and under the cockpit.
+            shapes ? h('g', { clipPath: 'url(#' + hullId + ')', 'data-pattern': pattern }, shapes) : null,
+            // PLY-006: the detail. A lighter nose cone and a darker band, both inside the hull, so the rocket reads as a machine.
+            h('path', { d: ROCKET_NOSE, fill: '#ffffff', opacity: 0.22 }),
+            h('path', { d: ROCKET_BAND, fill: 'rgba(0,0,0,0.22)' }),
+            h('circle', { cx: WINDOW_CX, cy: 0, r: WINDOW_R + 2.5, fill: '#ffffff' }),
+            h('circle', { cx: WINDOW_CX, cy: 0, r: WINDOW_R + 2.5, fill: 'none', stroke: 'rgba(0,0,0,0.35)', strokeWidth: 1.6 }),
             uri
               ? h('image', {
                   href: uri,
-                  x: -12,
-                  y: -10,
-                  width: 20,
-                  height: 20,
+                  x: WINDOW_CX - WINDOW_R,
+                  y: -WINDOW_R,
+                  width: WINDOW_R * 2,
+                  height: WINDOW_R * 2,
                   clipPath: 'url(#' + clipId + ')',
                   preserveAspectRatio: 'xMidYMid slice'
                 })
               : null,
+            // The glass: a highlight across the top of the window, so it reads as a canopy rather than a hole.
+            h('path', {
+              d: 'M ' + (WINDOW_CX - WINDOW_R * 0.8) + ' ' + (-WINDOW_R * 0.45) + ' A ' + WINDOW_R + ' ' + WINDOW_R + ' 0 0 1 ' + (WINDOW_CX + WINDOW_R * 0.2) + ' ' + (-WINDOW_R * 0.92),
+              fill: 'none',
+              stroke: '#ffffff',
+              strokeOpacity: 0.75,
+              strokeWidth: 2.2,
+              strokeLinecap: 'round'
+            }),
             label
               ? h(
                   'text',
@@ -912,8 +1028,8 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
                   )
                 )
               : null,
-            sprite('b', pos.b, props.styleB, props.seedB, props.colorB, props.nameB, seen.nb, props.optionsB),
-            sprite('a', pos.a, props.styleA, props.seedA, props.colorA, props.nameA, seen.na, props.optionsA)
+            sprite('b', pos.b, props.styleB, props.seedB, props.colorB, props.nameB, seen.nb, props.optionsB, props.patternB),
+            sprite('a', pos.a, props.styleA, props.seedA, props.colorA, props.nameA, seen.na, props.optionsA, props.patternA)
           )
         );
       };
@@ -966,7 +1082,7 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
         type: { name: 'number', units: ['px'], defaultUnit: 'px' },
         displayName: 'Rocket Size',
         group: 'Rockets',
-        default: 44,
+        default: ROCKET_SIZE_DEFAULT,
         description:
           'The shortest a rocket is drawn, nose to tail, in screen pixels. On a small track the rockets, the lanes, the names and the planet grow to it; a big track keeps its natural size. 0 turns the floor off.'
       },
@@ -1004,6 +1120,14 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
       seedB: { type: 'string', displayName: 'Avatar Seed B', group: 'Rockets', default: 'Computer' },
       optionsA: { type: 'object', displayName: 'Avatar Options A', group: 'Rockets', description: 'What rocket A’s face wears: the Avatar node’s Options, for Style A.' },
       optionsB: { type: 'object', displayName: 'Avatar Options B', group: 'Rockets', description: 'The same, for rocket B.' },
+      patternA: {
+        type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(PATTERN_IDS.map(function (id) { return { value: id, label: id.charAt(0).toUpperCase() + id.slice(1) }; })) },
+        displayName: 'Pattern A',
+        group: 'Style',
+        default: '',
+        description: 'A decal drawn over rocket A’s paint and clipped to its hull: polka dots, racing stripes, a checkerboard, chevrons, flames, stars or a lightning bolt. None leaves the paint plain.'
+      },
+      patternB: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(PATTERN_IDS.map(function (id) { return { value: id, label: id.charAt(0).toUpperCase() + id.slice(1) }; })) }, displayName: 'Pattern B', group: 'Style', default: '', description: 'The same, for rocket B.' },
       colorA: { type: 'color', displayName: 'Colour A', group: 'Style', default: 'var(--primary)' },
       colorB: { type: 'color', displayName: 'Colour B', group: 'Style', default: 'var(--accent-foreground)' },
       trackColor: { type: 'color', displayName: 'Track', group: 'Style', default: 'var(--surface-raised)' },

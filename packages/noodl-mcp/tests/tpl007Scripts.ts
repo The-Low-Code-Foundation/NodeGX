@@ -54,13 +54,49 @@
  *
  * @module noodl-mcp/tests/tpl007Scripts
  */
-import { LEVELS, WORD_KEYS } from './tpl007Curriculum';
+import { HANGAR_SHELF, LEVELS, WORD_KEYS } from './tpl007Curriculum';
 
 /** How far one correct answer moves a rocket, before the speed factor. Eight fluent answers reach the planet. */
 export const RACE_STEP = 1 / 8;
 
 /** A question with no answer after this many fluent windows times out (challenge mode). */
 export const LIMIT_FACTOR = 3;
+
+/**
+ * 🔴 P95 PLY-006 — the comeback. Richard, 2026-09-18: *"when you've fucked up the beginning and the CPU rocket is at
+ * the middle point, you're fucked and you know it."*
+ *
+ * Measured before anything was written, over 8 000 seeded races: a child 0.3 behind at halfway won **0** of 1 993.
+ * The computer moves on every question including the ones the child gets wrong, and nothing anywhere read the gap.
+ *
+ * Three layers, all earned, all visible, none random — and every one of them MULTIPLIES a gain that is already zero
+ * on a wrong answer, so no layer can ever pay a child for being wrong (the briefing's rule 5).
+ *
+ * - `behindFrom` — one threshold, about a rocket's length. Nothing helps a child who is not behind it.
+ * - `slipMax` / `slipSpan` — the slipstream: a correct answer while behind gains up to +60%, reached at a 0.6 gap,
+ *   and decaying to nothing as the child draws level, so a lead still means something.
+ * - `chainAt` / `turboMult` — the chain: three right answers in a row charge one ⚡, which the CHILD taps to double
+ *   their next correct answer. One held at a time; a wrong answer breaks the chain but never discharges a turbo
+ *   already earned.
+ *
+ * 🔴 Slipstream was measured ALONE first, because it was the obvious design, and it moved the comeback rate from 0%
+ * to 3%: the multiplier decays exactly as the child closes, so it cannot bridge a gap by itself. The chain is what
+ * does the work. Together: 26% of bad starts become comebacks at 75% accuracy, and the overall win rate moves 71% →
+ * 77% — a fix that made the race EASY would not be a fix, so the gate holds both ends.
+ */
+export const COMEBACK = { behindFrom: 0.15, slipMax: 0.6, slipSpan: 0.45, chainAt: 3, turboMult: 2 } as const;
+
+export const COMEBACK_HELPERS = `
+var COMEBACK = ${JSON.stringify(COMEBACK)};
+/** How much further a correct answer carries because the child is behind. 1 when level or ahead; never for the computer. */
+function slipstream(gap) {
+  var g = Number(gap) || 0;
+  if (!(g > COMEBACK.behindFrom)) return 1;
+  return 1 + COMEBACK.slipMax * Math.min(1, (g - COMEBACK.behindFrom) / COMEBACK.slipSpan);
+}
+/** The race's own chain and the turbo it has charged, kept under the race id so a new race starts clean. */
+function chainOf(race) { return { run: Math.max(0, Math.floor(Number(race && race.chain) || 0)), turbo: Math.max(0, Math.floor(Number(race && race.turbo) || 0)) }; }
+`;
 
 /** Profiles per browser. Siblings share a computer; six is a family. */
 export const MAX_PROFILES = 6;
@@ -80,6 +116,8 @@ var STAR_RULE = ${JSON.stringify(STAR_RULE)};
 function withStars(model) {
   if (!model.skills) model.skills = {};
   if (!model.bests || typeof model.bests !== 'object') model.bests = {};
+  // PLY-002: what has been spent in the hangar. A model from the RKT-011 pick era has none, so its old picks are never charged for.
+  if (typeof model.spent !== 'number' || !(model.spent >= 0)) model.spent = 0;
   if (typeof model.stars === 'number') return model;
   var grant = 0;
   for (var id in model.skills) { var lv = Number(model.skills[id].m) || 0; grant += STAR_RULE.level * lv; model.skills[id].paid = lv; }
@@ -89,32 +127,79 @@ function withStars(model) {
 `;
 
 /**
- * P87 RKT-011 — the hangar's milestones. Ruled 2026-09-13: A, one 🎁 pick at each milestone. The numbers are the play-test curve
- * Richard delegated ("pick what makes sense to test it"): a pick at each of these star totals, then one every HANGAR_EVERY after
- * the last. The scripts and the gates read these two, never a literal, so his feedback is a one-line change.
+ * P95 PLY-001 §3.3 / RKT-011 §3.3 — which `<look>/<part>` pairs are OPTIONAL in DiceBear and so need their
+ * `<part>Probability` forced to 100, or the seed decides whether the part draws at all. **Derived from the shelf's
+ * own `prob` flags**, never hand-listed, and the template gate asserts each one against the installed schema.
  */
-export const HANGAR_MILESTONES = [15, 40, 75, 120, 175] as const;
-export const HANGAR_EVERY = 60;
+export const PROB_PARTS: Readonly<Record<string, 1>> = (() => {
+  const out: Record<string, 1> = {};
+  for (const item of HANGAR_SHELF) {
+    if (item.kind !== 'face' || !item.faces) continue;
+    for (const [look, part] of Object.entries(item.faces)) if (part.prob) out[`${look}/${part.part}`] = 1;
+  }
+  return out;
+})();
 
 /**
- * What a profile owns and wears, and the picks its stars have earned. The star total never drops and nothing owned is ever removed,
- * so picks are COUNTED, never stored: earned from the total, spent as the items owned. A free item is never owned, so it spends nothing.
- * `wear.face` is keyed by look, then by DiceBear part, so a hat chosen for the pixel face is still there after a trip to another face.
+ * P95 PLY-002, R1 — **the hangar is a shop.** Richard, 2026-09-18: *"when you choose a colour it sort of 'auto-buys'
+ * it which is strange UX, it should have a confirmation popup showing you your balance, how much it costs, what
+ * you'll have left after"*. That is a price and a purse, so RKT-011's ruling A (one 🎁 pick at each milestone) is
+ * retired here, with `HANGAR_MILESTONES` and `HANGAR_EVERY`.
+ *
+ * 🔴 **`model.stars` still only ever goes UP.** It is what the child has EARNED, and every gate that counts earning
+ * still reads it. Spending is a second number, `model.spent`, and the purse is the difference. So RKT-010's rule
+ * ("nothing is ever taken away") survives a shop: no answer, no race and no save can lower what you earned, and a
+ * price change tomorrow cannot retroactively empty a purse that was already spent at yesterday's price.
+ *
+ * A profile that owns items from the RKT-011 pick era has `spent: 0`. It keeps every one of them and keeps its whole
+ * earned total as its purse — the old picks are not charged for after the fact.
+ *
+ * `wear.face` is keyed by look then by DiceBear part, so a hat chosen for the pixel face is still there after a trip
+ * to another face. `wear.paint` and `wear.pattern` are the rocket's two layers (PLY-002): paint is the hull colour,
+ * pattern is the decal the kit draws over it.
  */
+/** PLY-002: the cheapest thing on the shelf that is not free — what a purse must hold before the hangar is worth opening. */
+export const SHOP_FROM: number = Math.min(...HANGAR_SHELF.filter((i) => i.free !== true).map((i) => i.cost));
+
 export const HANGAR_HELPERS = `
-var HANGAR_MILESTONES = ${JSON.stringify(HANGAR_MILESTONES)};
-var HANGAR_EVERY = ${HANGAR_EVERY};
-function milestoneAt(i) { var last = HANGAR_MILESTONES.length - 1; return i <= last ? HANGAR_MILESTONES[i] : HANGAR_MILESTONES[last] + HANGAR_EVERY * (i - last); }
-function picksEarned(stars) { var s = Number(stars) || 0, n = 0; while (n < 10000 && milestoneAt(n) <= s) n++; return n; }
+var PROB_PARTS = ${JSON.stringify(PROB_PARTS)};
+var SHOP_FROM = ${SHOP_FROM};
 function ownedOf(p) { return p && Array.isArray(p.owned) ? p.owned.filter(function (x) { return typeof x === 'string'; }) : []; }
-function picksLeft(p, stars) { return Math.max(0, picksEarned(stars) - ownedOf(p).length); }
-function wearOf(p) { var w = p && p.wear && typeof p.wear === 'object' ? p.wear : {}; return { face: w.face && typeof w.face === 'object' ? JSON.parse(JSON.stringify(w.face)) : {}, paint: typeof w.paint === 'string' ? w.paint : '' }; }
-function wearOptions(look, wear) { var parts = (wear && wear.face && wear.face[look]) || {}; var o = {}; for (var part in parts) { if (typeof parts[part] !== 'string' || !parts[part]) continue; o[part] = [parts[part]]; o[part + 'Probability'] = 100; } return o; }
+function costOf(item) { var c = item && Number(item.cost); return isFinite(c) && c > 0 ? Math.round(c) : 0; }
+function spentOf(model) { var s = model && Number(model.spent); return isFinite(s) && s > 0 ? Math.round(s) : 0; }
+function purseOf(model) { return Math.max(0, (Number(model && model.stars) || 0) - spentOf(model)); }
+function ownsItem(p, item) { return !!item && (item.free === true || ownedOf(p).indexOf(item.id) !== -1); }
+function canAfford(item, purse) { return costOf(item) <= (Number(purse) || 0); }
+function wearOf(p) { var w = p && p.wear && typeof p.wear === 'object' ? p.wear : {}; return { face: w.face && typeof w.face === 'object' ? JSON.parse(JSON.stringify(w.face)) : {}, paint: typeof w.paint === 'string' ? w.paint : '', pattern: typeof w.pattern === 'string' ? w.pattern : '' }; }
+function wearOptions(look, wear) { var parts = (wear && wear.face && wear.face[look]) || {}; var o = {}; for (var part in parts) { if (typeof parts[part] !== 'string' || !parts[part]) continue; o[part] = [parts[part]]; if (PROB_PARTS[look + '/' + part]) o[part + 'Probability'] = 100; } return o; }
 function itemFits(item, look) { return !!item && (item.kind === 'rocket' || !!(item.faces && item.faces[look])); }
-function itemWorn(item, look, wear) { if (!item) return false; if (item.kind === 'rocket') return wear.paint === item.paint; var o = item.faces && item.faces[look]; return !!o && !!wear.face[look] && wear.face[look][o.part] === o.value; }
-function putOn(item, look, wear) { if (item.kind === 'rocket') { wear.paint = item.paint; return wear; } var o = item.faces[look]; if (!wear.face[look]) wear.face[look] = {}; wear.face[look][o.part] = o.value; return wear; }
-function takeOff(item, look, wear) { if (item.kind === 'rocket') { if (wear.paint === item.paint) wear.paint = ''; return wear; } var o = item.faces[look]; if (wear.face[look] && wear.face[look][o.part] === o.value) delete wear.face[look][o.part]; return wear; }
+function itemLayer(item) { return item && typeof item.pattern === 'string' && item.pattern ? 'pattern' : 'paint'; }
+function itemWorn(item, look, wear) {
+  if (!item) return false;
+  if (item.kind === 'rocket') return itemLayer(item) === 'pattern' ? wear.pattern === item.pattern : wear.paint === item.paint;
+  var o = item.faces && item.faces[look];
+  return !!o && !!wear.face[look] && wear.face[look][o.part] === o.value;
+}
+function putOn(item, look, wear) {
+  if (item.kind === 'rocket') { if (itemLayer(item) === 'pattern') wear.pattern = item.pattern; else wear.paint = item.paint; return wear; }
+  var o = item.faces[look];
+  if (!wear.face[look]) wear.face[look] = {};
+  wear.face[look][o.part] = o.value;
+  return wear;
+}
+function takeOff(item, look, wear) {
+  if (item.kind === 'rocket') { if (itemLayer(item) === 'pattern') { if (wear.pattern === item.pattern) wear.pattern = ''; } else if (wear.paint === item.paint) wear.paint = ''; return wear; }
+  var o = item.faces[look];
+  if (wear.face[look] && wear.face[look][o.part] === o.value) delete wear.face[look][o.part];
+  return wear;
+}
 function shelfItem(shelf, id) { var list = Array.isArray(shelf) ? shelf : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i]; return null; }
+/** PLY-001 §3.2: what a child owns that today's face cannot wear. Never hidden, never offered, never taken away — just counted. */
+function ownedElsewhere(p, shelf, look) {
+  var owned = ownedOf(p), n = 0;
+  for (var i = 0; i < owned.length; i++) { var it = shelfItem(shelf, owned[i]); if (it && it.kind === 'face' && !itemFits(it, look)) n++; }
+  return n;
+}
 `;
 
 /** Elo bases per level. The spread inside a level (×250) is the skill's `diff`. */
@@ -793,7 +878,7 @@ Outputs.shownAt = now;
 
 // ── Grade an answer ─────────────────────────────────────────────────────────
 
-export const GRADE_ANSWER_SCRIPT = `${HELPERS}${STAR_HELPERS}
+export const GRADE_ANSWER_SCRIPT = `${HELPERS}${STAR_HELPERS}${COMEBACK_HELPERS}
 var model = Inputs.model && typeof Inputs.model === 'object' ? JSON.parse(JSON.stringify(Inputs.model)) : { rating: 0, skills: {}, lastSkill: '' };
 if (!model.skills) model.skills = {};
 // RKT-010: migrate BEFORE this answer moves any mastery, so the grant is for levels reached before today.
@@ -859,7 +944,7 @@ var starsEarned = forB ? 0 : rightStars + levelStars;
 model.stars += starsEarned;
 // This race so far, under the id Race/Play mints at every start: the longest run of right answers, and what the answers paid.
 var raceId = String(Inputs.raceId || '');
-if (!model.race || model.race.id !== raceId) model.race = { id: raceId, run: 0, bestRun: 0, rightStars: 0, levelStars: 0 };
+if (!model.race || model.race.id !== raceId) model.race = { id: raceId, run: 0, bestRun: 0, rightStars: 0, levelStars: 0, chain: 0, turbo: Math.max(0, Math.floor(Number(Inputs.startTurbo) || 0)) };
 if (!forB) {
   model.race.run = correct ? model.race.run + 1 : 0;
   model.race.bestRun = Math.max(model.race.bestRun, model.race.run);
@@ -873,7 +958,32 @@ model.lastSkill = skillId;
 model.answered = (Number(model.answered) || 0) + 1;
 
 var speed = fluent ? 1 : Math.max(0.5, 1 - (elapsed - fluentMs) / (2 * fluentMs));
-var gain = correct ? ${RACE_STEP} * speed : 0;
+
+// 🔴 PLY-006, and RKT-007's rule still holds: ONE formula. Everything the verdict line says about this answer is read
+// off the numbers computed here, and nothing downstream recomputes any of it.
+var myAt = Math.max(0, Number(Inputs.myAt) || 0);
+var cpuAt = Math.max(0, Number(Inputs.cpuAt) || 0);
+var gap = cpuAt - myAt;
+var behind = gap >= COMEBACK.behindFrom;
+// The chain lives under the race id, beside the stars this race has paid, so a new race starts it clean.
+var chain = chainOf(model.race);
+if (!forB) {
+  if (correct) {
+    chain.run += 1;
+    if (chain.run >= COMEBACK.chainAt && chain.turbo < 1) { chain.turbo = 1; chain.run = 0; }
+  } else chain.run = 0;
+}
+// A turbo is spent only when the child asks for it, only on a right answer, and only while behind.
+var turboUsed = correct && !forB && Inputs.useTurbo === true && behind && chain.turbo > 0;
+if (turboUsed) chain.turbo -= 1;
+var slip = correct ? slipstream(gap) : 1;
+// 🔴 Not named boost: that name is already the verdict LINE further down, and reusing it made the multiplier a string.
+var turboMult = turboUsed ? COMEBACK.turboMult : 1;
+var gain = correct ? ${RACE_STEP} * speed * slip * turboMult : 0;
+// 🔴 Persisted HERE, not in the stars block above: the chain is computed in this block, and writing it earlier read an
+// undefined chain (var hoists, the value does not).
+model.race.chain = chain.run;
+model.race.turbo = chain.turbo;
 var cpuGain = ${RACE_STEP} * (0.35 + 0.35 * p);
 
 // 🔴 RKT-007: the child is told why the rocket went as far as it did. ONE formula: the percentage said is the \`speed\` that moved
@@ -899,6 +1009,11 @@ if (game === 'gate') {
     : fluent ? '⚡ ' + secs + ' s · ' + (isFr(lang) ? 'poussée à fond' : 'full push')
     : secs + ' s · ' + (isFr(lang) ? 'poussée ' + boostPct + ' %' : 'push ' + boostPct + '%');
 }
+
+// PLY-006: one or two more clauses on the line, each only when it is true. After the gate/push branches, so every
+// game says it the same way.
+if (turboUsed) boost = boost + (isFr(lang) ? ' · ⚡⚡ turbo lancé' : ' · ⚡⚡ turbo fired');
+if (slip > 1) boost = boost + (isFr(lang) ? ' · 🌀 aspiration +' + Math.round((slip - 1) * 100) + ' %' : ' · 🌀 slipstream +' + Math.round((slip - 1) * 100) + '%');
 
 var shownAnswer = String(answer);
 var strategy = String(Inputs.strategy || '');
@@ -933,6 +1048,15 @@ Outputs.boost = boost;
 // The meter is this same number, wired straight into a percentage width.
 Outputs.boostPct = correct ? boostPct : 0;
 Outputs.cpuGain = Math.round(cpuGain * 1000) / 1000;
+// PLY-006: the comeback, said in the same numbers that moved the rocket.
+Outputs.slip = Math.round(slip * 1000) / 1000;
+Outputs.slipPct = slip > 1 ? Math.round((slip - 1) * 100) : 0;
+Outputs.behind = behind;
+Outputs.turboUsed = turboUsed;
+Outputs.chain = chain.run;
+Outputs.turbo = chain.turbo;
+Outputs.chainReady = chain.turbo > 0;
+Outputs.chainOf = COMEBACK.chainAt;
 Outputs.message = message;
 Outputs.mastery = m;
 Outputs.ratingDelta = Math.round(r - before);
@@ -1174,8 +1298,8 @@ Outputs.paid = paid;
 Outputs.model = model;
 Outputs.starsEarned = paid ? total : 0;
 Outputs.stars = model.stars;
-// RKT-011: this board's take crossed a milestone, so the end screen offers the pick.
-Outputs.earnedPick = counted && total > 0 && picksEarned(model.stars) > picksEarned(model.stars - total);
+// PLY-002: the purse can buy something, so the end screen offers the hangar. (Was RKT-011's milestone crossing.)
+Outputs.earnedPick = counted && purseOf(model) >= SHOP_FROM;
 Outputs.won = biggest >= 100;
 Outputs.starsText = total > 0 ? '+' + total + ' ⭐' : '';
 var parts = [];
@@ -1203,42 +1327,130 @@ export const HUNT_HELP_AFTER = 2;
 export const HUNT_STAR_RULE = { way: 1, wayCap: 15, finish: STAR_RULE.finish } as const;
 
 /**
- * The grid (§2.2 C): sixteen numbers and a target with one to three ways to make it, by the level's kinds (add 2, add 3, multiply 2,
- * pairs to 100). `ways` is every set of squares that makes the target, so the child is told how many, and a way can be shown.
- * Only a target with 1–3 ways is chosen: a grid is re-drawn until one has one (the fallback grid has exactly one, 15 + 16).
+ * P95 PLY-003 — the kinds of grid, and which class gets which.
+ *
+ * > "normally you have a 3 numbers addition variant, a multiplication, addition, maybe subtraction variant? In any
+ * > case, more variations would be good, more or less depending on the kid's age" — Richard, 2026-09-18
+ *
+ * The first build had four kinds and three bands, and **CM2 and 6e shared one band** (`li === 0 ? … : li === 1 ? … : …`).
+ * There are now eight kinds and a band per class. `op` is what the squares are joined by; `fixed` is a target that never
+ * changes (pairs to 100, to 1000, to 1); `max` is the biggest number a square may hold, by class.
+ *
+ * Pinned to the 2025 programmes, as TPL-007 §1 requires: CE2 adds and subtracts and knows pairs to 100; CM1 adds the
+ * tables; CM2 adds Euclidean division and pairs to 1000; 6e keeps those and adds tenths. The briefing's §3 has the
+ * BO references.
  */
+export const HUNT_KINDS = {
+  add2: { count: 2, op: 'add', max: [15, 30, 50, 99] },
+  add3: { count: 3, op: 'add', max: [15, 30, 50, 99] },
+  sub2: { count: 2, op: 'sub', max: [20, 60, 100, 999] },
+  mul2: { count: 2, op: 'mul', max: [10, 10, 12, 15] },
+  div2: { count: 2, op: 'div', max: [0, 0, 60, 99] },
+  add100: { count: 2, op: 'add', fixed: 100, max: [99, 99, 99, 99] },
+  add1000: { count: 2, op: 'add', fixed: 1000, max: [0, 0, 950, 950] },
+  /**
+   * 🔴 Not "two tenths that make 1". That was the first try, and it FAILED about four times in five: with sixteen
+   * squares drawn from 0,1–0,9 a grid holds about thirteen pairs that make 1, so it was rejected for having more
+   * than three ways and fell back to `add2` — silently, which is how a 6e class quietly got CE2 sums. The pool is
+   * 0,1–9,9 and the target floats, so the ways are few and the drill is real decimal addition.
+   */
+  dec: { count: 2, op: 'add', tenths: true, max: [0, 0, 99, 99] }
+} as const;
+
+/** The kinds each class draws from, in order CE2 · CM1 · CM2 · 6e. A kind repeated is a kind drawn more often. */
+export const HUNT_LEVEL_KINDS: ReadonlyArray<ReadonlyArray<keyof typeof HUNT_KINDS>> = [
+  ['add2', 'add2', 'add3', 'sub2', 'add100'],
+  ['add2', 'add3', 'sub2', 'sub2', 'mul2', 'add100'],
+  ['add3', 'sub2', 'mul2', 'div2', 'add100', 'add1000'],
+  ['add3', 'sub2', 'mul2', 'div2', 'add1000', 'dec']
+];
+
 export const HUNT_RULE = `
 var HUNT_ROUNDS = ${HUNT_ROUNDS};
 var HUNT_HELP_AFTER = ${HUNT_HELP_AFTER};
+var HUNT_KINDS = ${JSON.stringify(HUNT_KINDS)};
+var HUNT_LEVEL_KINDS = ${JSON.stringify(HUNT_LEVEL_KINDS)};
+function huntSpec(kind) { return HUNT_KINDS[kind] || HUNT_KINDS.add2; }
+function huntRound2(v) { return Math.round(v * 100) / 100; }
 function huntCombos(n, k) {
   var out = [];
   function rec(start, chosen) { if (chosen.length === k) { out.push(chosen.slice()); return; } for (var i = start; i < n; i++) { chosen.push(i); rec(i + 1, chosen); chosen.pop(); } }
   rec(0, []);
   return out;
 }
+/**
+ * What a set of squares makes. 🔴 Subtraction and division are asked of the PAIR, not of the order it was tapped in:
+ * the bigger takes the smaller, so a child who taps 3 then 12 has made the same 9 as one who tapped 12 then 3.
+ * Division that does not come out exactly makes nothing — it can never equal a whole target.
+ */
 function huntValue(kind, values) {
-  var v = kind === 'mul2' ? 1 : 0;
-  for (var i = 0; i < values.length; i++) v = kind === 'mul2' ? v * values[i] : v + values[i];
-  return values.length ? v : 0;
+  var spec = huntSpec(kind);
+  if (!values.length) return 0;
+  if (spec.op === 'mul') { var m = 1; for (var i = 0; i < values.length; i++) m = m * values[i]; return m; }
+  if (spec.op === 'sub' || spec.op === 'div') {
+    var hi = Math.max.apply(null, values), lo = Math.min.apply(null, values);
+    if (spec.op === 'sub') return huntRound2(hi - lo);
+    if (!lo || hi % lo !== 0) return NaN;
+    return hi / lo;
+  }
+  var s = 0;
+  for (var j = 0; j < values.length; j++) s = s + values[j];
+  return huntRound2(s);
+}
+/** One square's value for this kind and class: a tenth for the decimals grid, a whole number otherwise. */
+function huntCell(kind, max) { var spec = huntSpec(kind); return spec.tenths ? huntRound2(rnd(1, max) / 10) : rnd(spec.op === 'mul' ? 2 : 1, max); }
+/**
+ * 🔴 Some kinds will not turn up by chance. Sixteen random numbers almost never hold a pair that divides exactly, or two
+ * multiples of 50 that make 1000, so those grids are PLANTED: one or two true pairs are written in, and the rest of the
+ * grid is filled at random. The ways are then counted honestly over the whole grid, so a pair the filling happened to
+ * create counts exactly like a planted one.
+ */
+function huntPlant(kind, cells, max) {
+  var spec = huntSpec(kind);
+  var pairs = rnd(1, 2);
+  for (var n = 0; n < pairs; n++) {
+    var a, b;
+    if (spec.op === 'div') { var t = rnd(2, 12); b = rnd(2, Math.max(2, Math.floor(max / t))); a = b * t; }
+    else if (spec.fixed === 1000) { b = rnd(1, 19) * 50; a = 1000 - b; }
+    else if (spec.fixed === 100) { b = rnd(1, 99); a = 100 - b; }
+    else continue;
+    if (!(a > 0) || !(b > 0)) continue;
+    var i1 = rnd(0, 15), i2 = rnd(0, 15);
+    while (i2 === i1) i2 = rnd(0, 15);
+    cells[i1] = a;
+    cells[i2] = b;
+  }
+  return cells;
 }
 function huntTry(kind, li) {
-  var count = kind === 'add3' ? 3 : 2;
-  var max = kind === 'add100' ? 90 : kind === 'mul2' ? 12 : li === 0 ? 15 : 30;
+  var spec = huntSpec(kind);
+  var count = spec.count;
+  var max = spec.max[Math.max(0, Math.min(spec.max.length - 1, li))];
+  if (!(max > 0)) return null;
   var all = huntCombos(16, count);
   for (var attempt = 0; attempt < 400; attempt++) {
     var cells = [];
-    for (var i = 0; i < 16; i++) cells.push(rnd(kind === 'mul2' ? 2 : 1, max));
+    for (var i = 0; i < 16; i++) cells.push(huntCell(kind, max));
+    cells = huntPlant(kind, cells, max);
     var byValue = {};
     for (var c = 0; c < all.length; c++) {
       var v = huntValue(kind, all[c].map(function (k) { return cells[k]; }));
+      if (!isFinite(v)) continue;
       if (!byValue[v]) byValue[v] = [];
       byValue[v].push(all[c]);
+    }
+    if (spec.fixed !== undefined) {
+      var ways = byValue[spec.fixed];
+      if (ways && ways.length >= 1 && ways.length <= 3) return { kind: kind, count: count, cells: cells, target: spec.fixed, ways: ways };
+      continue;
     }
     var goods = [];
     for (var key in byValue) {
       var t = Number(key), n = byValue[key].length;
       if (n < 1 || n > 3) continue;
-      if (kind === 'add100' ? t === 100 : kind === 'mul2' ? t >= 12 : t >= 10) goods.push(t);
+      // A target worth hunting: big enough that it is not the first thing you see, and never 1 (every square divides by itself).
+      var floorFor = spec.op === 'mul' ? 12 : spec.op === 'div' ? 2 : spec.op === 'sub' ? 5 : spec.tenths ? 3 : 10;
+      if (t >= floorFor) goods.push(t);
     }
     if (goods.length) { var target = pickOne(goods); return { kind: kind, count: count, cells: cells, target: target, ways: byValue[target] }; }
   }
@@ -1246,15 +1458,30 @@ function huntTry(kind, li) {
 }
 function huntGrid(level) {
   var li = levelIndex(level);
-  // The kinds by level: add 2 / add 3 / multiply 2 / pairs to 100.
-  var kinds = li === 0 ? ['add2', 'add2', 'add3'] : li === 1 ? ['add2', 'add3', 'mul2'] : ['add3', 'mul2', 'add100', 'mul2'];
+  var kinds = HUNT_LEVEL_KINDS[Math.max(0, Math.min(HUNT_LEVEL_KINDS.length - 1, li))];
   var grid = huntTry(pickOne(kinds), li) || huntTry('add2', li);
   if (!grid) grid = { kind: 'add2', count: 2, cells: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], target: 31, ways: [[14, 15]] };
   return grid;
 }
-var HUNT_WORDS = { add2: { en: 'Pick 2 numbers that add up to ', fr: 'Choisis 2 nombres dont la somme fait ' }, add3: { en: 'Pick 3 numbers that add up to ', fr: 'Choisis 3 nombres dont la somme fait ' }, mul2: { en: 'Pick 2 numbers that multiply to ', fr: 'Choisis 2 nombres dont le produit fait ' }, add100: { en: 'Pick 2 numbers that make 100', fr: 'Choisis 2 nombres qui font 100' } };
-function huntInstruction(kind, target, lang) { return pickText(HUNT_WORDS[kind] || HUNT_WORDS.add2, lang) + (kind === 'add100' ? '' : fmtNum(target, lang)); }
-function huntSay(kind, values, lang) { return values.map(function (v) { return fmtNum(v, lang); }).join(kind === 'mul2' ? ' × ' : ' + ') + ' = ' + fmtNum(huntValue(kind, values), lang); }
+var HUNT_WORDS = {
+  add2: { en: 'Pick 2 numbers that add up to ', fr: 'Choisis 2 nombres dont la somme fait ' },
+  add3: { en: 'Pick 3 numbers that add up to ', fr: 'Choisis 3 nombres dont la somme fait ' },
+  sub2: { en: 'Pick 2 numbers with a difference of ', fr: 'Choisis 2 nombres dont la différence fait ' },
+  mul2: { en: 'Pick 2 numbers that multiply to ', fr: 'Choisis 2 nombres dont le produit fait ' },
+  div2: { en: 'Pick 2 numbers where the bigger ÷ the smaller makes ', fr: 'Choisis 2 nombres où le plus grand ÷ le plus petit fait ' },
+  add100: { en: 'Pick 2 numbers that make 100', fr: 'Choisis 2 nombres qui font 100' },
+  add1000: { en: 'Pick 2 numbers that make 1000', fr: 'Choisis 2 nombres qui font 1000' },
+  dec: { en: 'Pick 2 decimals that add up to ', fr: 'Choisis 2 décimaux dont la somme fait ' }
+};
+function huntInstruction(kind, target, lang) { var fixed = huntSpec(kind).fixed !== undefined; return pickText(HUNT_WORDS[kind] || HUNT_WORDS.add2, lang) + (fixed ? '' : fmtNum(target, lang)); }
+function huntSign(kind) { var op = huntSpec(kind).op; return op === 'mul' ? ' × ' : op === 'sub' ? ' − ' : op === 'div' ? ' ÷ ' : ' + '; }
+/** How a way is read back. Subtraction and division are said biggest first, because that is the sum the child did. */
+function huntSay(kind, values, lang) {
+  var op = huntSpec(kind).op;
+  var order = values.slice();
+  if (op === 'sub' || op === 'div') order.sort(function (a, b) { return b - a; });
+  return order.map(function (v) { return fmtNum(v, lang); }).join(huntSign(kind)) + ' = ' + fmtNum(huntValue(kind, values), lang);
+}
 function huntKey(combo) { return combo.slice().sort(function (a, b) { return a - b; }).join('-'); }
 function huntHas(list, combo) { var k = huntKey(combo); for (var i = 0; i < list.length; i++) if (huntKey(list[i]) === k) return true; return false; }
 function huntGot(g) { var n = 0; for (var i = 0; i < g.ways.length; i++) if (huntHas(g.found, g.ways[i]) || huntHas(g.shown, g.ways[i])) n++; return n; }
@@ -1443,7 +1670,7 @@ Outputs.model = model;
 Outputs.starsEarned = paid ? total : 0;
 Outputs.stars = model.stars;
 // RKT-011: this hunt's take crossed a milestone, so the end screen offers the pick.
-Outputs.earnedPick = counted && total > 0 && picksEarned(model.stars) > picksEarned(model.stars - total);
+Outputs.earnedPick = counted && purseOf(model) >= SHOP_FROM;
 // Every finished hunt is a cheer: every grid was cleared.
 Outputs.won = g.over === true;
 Outputs.starsText = total > 0 ? '+' + total + ' ⭐' : '';
@@ -1477,6 +1704,39 @@ export const MONSTER = {
   bigHit: 2,
   smallHit: 1,
   creep: { practice: 1 / 3, challenge: 0.25 },
+  /**
+   * 🔴 P95 PLY-004 — how far a right answer pushes the monster back towards the far side, and WHICH right answer does it.
+   *
+   * > "it's a bit too easy at the moment, you have to really fuck up a lot to have the monster break down your door.
+   * > In the defi mode it works well with the timer adding stakes, but in the entrainement mode it's pretty much
+   * > unlosable. I'm not saying make it as hard as defi, but a good compromise please" — Richard, 2026-09-18
+   *
+   * It was 1, on ANY right answer: the monster was thrown all the way back, so losing a heart needed three wrong
+   * answers **with no right one between them**. Now, in Practice:
+   *   · a wrong answer creeps `creep` closer, and the creeps ACCUMULATE across the whole game
+   *   · a right-but-slow answer holds it exactly where it stands — it neither gains nor loses ground
+   *   · only a QUICK right answer pushes it back, by `back.practice`
+   *
+   * 🔴 The quick/slow half is the part that does the work, and it is why this is not just "a bigger number". Practice
+   * has no visible clock and is not getting one (TPL-007 §1.4, and the briefing's §4 — a soft "fluent" flag, never a
+   * countdown). The flag already exists, the child already sees ⚡ on a fluent answer, and hesitating is the only
+   * thing in Practice that can let a monster gain. Measured over 200 seeded games at each accuracy, half the right
+   * answers quick (engine gate):
+   *
+   * | right | loses the game | hearts lost when they win |
+   * |---|---|---|
+   * | 40% | 59% | 1.3 |
+   * | 50% | 25% | 1.0 |
+   * | 60% |  7% | 0.8 |
+   * | 70% |  1% | 0.5 |
+   * | 80% |  1% | 0.2 |
+   *
+   * 🔴 And the honest part: `Pick next question` serves questions the child gets right about three times in four
+   * (Klinkenberg's ~75%), so a child playing normally should still WIN. That is the pedagogy, not a bug. What this
+   * buys is that they lose half a heart on the way and can see the monster near the gate — stakes, without punishing
+   * a child for being right.
+   */
+  back: { practice: 0.15, challenge: 1 },
   push: 2,
   step: 1.5,
   pushStart: 0.5,
@@ -1537,9 +1797,10 @@ if (g && g.id && g.over !== true) {
     } else {
       if (correct) {
         g.hp = Math.max(0, (Number(g.hp) || 0) - (quick ? MONSTER.bigHit : MONSTER.smallHit));
-        g.start = 1;
+        // PLY-004: a right answer pushes it back by MONSTER.back, not all the way. In Challenge that IS all the way (1).
+        g.start = Math.min(1, (Number(g.start) || 1) + (g.timed === true ? MONSTER.back.challenge : quick ? MONSTER.back.practice : 0));
         g.event = quick ? 'bigHit' : 'hit';
-        if (g.hp <= 0) { g.beaten = (Number(g.beaten) || 0) + 1; g.event = 'beaten'; g.fresh = true; g.hp = MONSTER.hp; }
+        if (g.hp <= 0) { g.beaten = (Number(g.beaten) || 0) + 1; g.event = 'beaten'; g.fresh = true; g.hp = MONSTER.hp; g.start = 1; }
       } else if (outcome === 'timeout') {
         hearts -= 1;
         g.event = 'bang';
@@ -1661,7 +1922,7 @@ Outputs.model = model;
 Outputs.starsEarned = paid ? MONSTER_STAR_RULE.finish : 0;
 Outputs.stars = model.stars;
 // RKT-011: this game's take crossed a milestone, so the end screen offers the pick.
-Outputs.earnedPick = counted && total > 0 && picksEarned(model.stars) > picksEarned(model.stars - total);
+Outputs.earnedPick = counted && purseOf(model) >= SHOP_FROM;
 Outputs.won = won;
 Outputs.starsText = total > 0 ? '+' + total + ' ⭐' : '';
 var parts = [];
@@ -1676,19 +1937,25 @@ Outputs.line = (won
   ' · ' + right + (fr ? (right === 1 ? ' bonne réponse' : ' bonnes réponses') : ' right');
 `;
 
-export const CHECK_HUNT_SCRIPT = `${HELPERS}
+/**
+ * 🔴 PLY-003: this used to compute the running total itself — `kind === 'mul2' ? × : +` — which knew addition and one
+ * multiplication and nothing else. The moment subtraction, division and decimals arrived it would have told a child
+ * their right answer was wrong. It now asks `huntValue`, the same function that grades the move, so the number under
+ * the grid and the verdict on it can never disagree.
+ */
+export const CHECK_HUNT_SCRIPT = `${HELPERS}${HUNT_RULE}
 var cells = Inputs.cells || [];
 var selected = Inputs.selected || [];
 var count = Number(Inputs.count) || 2;
 var target = Number(Inputs.target) || 0;
 var kind = String(Inputs.kind || 'add2');
-var value = kind === 'mul2' ? 1 : 0;
+var values = [];
 for (var i = 0; i < selected.length; i++) {
   var cell = cells[selected[i]];
-  var v = cell && typeof cell === 'object' ? Number(cell.v) : Number(cell);
-  value = kind === 'mul2' ? value * v : value + v;
+  values.push(cell && typeof cell === 'object' ? Number(cell.v) : Number(cell));
 }
-if (!selected.length) value = 0;
+var value = values.length ? huntValue(kind, values) : 0;
+if (!isFinite(value)) value = 0;
 Outputs.value = value;
 Outputs.picked = selected.length;
 Outputs.complete = selected.length >= count;
@@ -1797,22 +2064,21 @@ Outputs.answered = d.answered;
 // RKT-010: the total a profile from before today is granted on its first read, so Home never shows a player behind a newcomer.
 var stars = withStars(JSON.parse(JSON.stringify(p.model || {}))).stars;
 Outputs.stars = stars;
-// RKT-011: what the face and the rocket wear (a part is drawn only on the look it was chosen for), and the picks the stars have earned.
+// RKT-011 / PLY-002: what the face and the rocket wear (a part is drawn only on the look it was chosen for), and the purse.
 var wear = wearOf(p);
 Outputs.faceOptions = wearOptions(p.look, wear);
 Outputs.paint = wear.paint || 'var(--primary)';
-var earned = picksEarned(stars);
-var picks = picksLeft(p, stars);
-var nextAt = milestoneAt(earned);
-var prevAt = earned > 0 ? milestoneAt(earned - 1) : 0;
-Outputs.picks = picks;
-Outputs.hasPicks = picks > 0;
-Outputs.nextAt = nextAt;
-Outputs.nextPct = Math.max(0, Math.min(100, Math.round((100 * (stars - prevAt)) / (nextAt - prevAt))));
+Outputs.pattern = wear.pattern || '';
+var model0 = withStars(JSON.parse(JSON.stringify(p.model || {})));
+var purse = purseOf(model0);
+Outputs.picks = purse;
+Outputs.hasPicks = purse >= SHOP_FROM;
+Outputs.nextAt = SHOP_FROM;
+Outputs.nextPct = purse >= SHOP_FROM ? 100 : Math.max(0, Math.min(100, Math.round((100 * purse) / SHOP_FROM)));
 var frNext = String(p.lang) === 'fr';
-Outputs.nextText = picks > 0
-  ? (frNext ? '🎁 ' + picks + ' choix à faire au hangar' : '🎁 ' + picks + (picks === 1 ? ' pick' : ' picks') + ' to spend in the hangar')
-  : (frNext ? 'Prochain 🎁 dans ' + (nextAt - stars) + ' ⭐' : 'Next 🎁 in ' + (nextAt - stars) + ' ⭐');
+Outputs.nextText = purse >= SHOP_FROM
+  ? (frNext ? '⭐ ' + purse + ' à dépenser au hangar' : '⭐ ' + purse + ' to spend in the hangar')
+  : (frNext ? 'Encore ' + (SHOP_FROM - purse) + ' ⭐ pour ta première peinture' : (SHOP_FROM - purse) + ' ⭐ more for your first paint');
 Outputs.sets = app.sets;
 `;
 
@@ -1863,8 +2129,8 @@ if (race.finishStars) parts.push((fr ? 'arrivée +' : 'landed +') + race.finishS
 if (race.levelStars) parts.push((fr ? 'niveau gagné +' : 'new level +') + race.levelStars);
 if (race.bestStars) parts.push((fr ? 'record +' : 'new best +') + race.bestStars);
 var isBest = (race.bestStars || 0) > 0;
-// RKT-011: this race's take crossed a milestone, so the result screen offers the pick.
-Outputs.earnedPick = total > 0 && picksEarned(model.stars) > picksEarned(model.stars - total);
+// PLY-002: the purse can buy something, so the result screen offers the hangar. (Was RKT-011's milestone crossing.)
+Outputs.earnedPick = purseOf(model) >= SHOP_FROM;
 Outputs.model = model;
 Outputs.starsEarned = earned;
 Outputs.raceStars = total;
@@ -1905,27 +2171,36 @@ Outputs.app = app;
 // ── The hangar (RKT-011) ────────────────────────────────────────────────────
 
 /**
- * Spend one 🎁 pick on a shelf item, and wear it at once. Refused, with nothing changed, when the item is free or already owned,
- * does not fit the face the child has now, or no pick is left. Owned only grows: nothing in any script removes an item.
+ * PLY-002 R1 — **buy a shelf item with stars**, and wear it at once. Refused, with nothing changed, when the item is free or
+ * already owned, does not fit the face the child has now, or the purse cannot cover it. Owned only grows: nothing in any script
+ * removes an item. The cost is added to `model.spent`, so `model.stars` — what was EARNED — never moves.
+ *
+ * 🔴 This script does not ask. The confirmation Richard asked for is a surface (`Hangar/Confirm`), and a tap that reaches here
+ * has already been confirmed. The script still re-checks every condition, because a stale dialog must not be able to overdraw.
  */
 export const PICK_ITEM_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}
 var app = appOf(Inputs.app);
 var id = String(Inputs.profileId || app.activeId);
 var item = shelfItem(Inputs.shelf, String(Inputs.itemId || ''));
-var picked = false, why = 'noProfile';
+var picked = false, why = 'noProfile', cost = 0, before = 0, after = 0;
 for (var i = 0; i < app.profiles.length; i++) {
   var p = app.profiles[i];
   if (p.id !== id) continue;
-  var owned = ownedOf(p);
-  var stars = withStars(JSON.parse(JSON.stringify(p.model || {}))).stars;
+  var model = withStars(JSON.parse(JSON.stringify(p.model || {})));
+  before = purseOf(model);
+  cost = costOf(item);
+  after = before;
   if (!item) why = 'unknown';
   else if (item.free === true) why = 'free';
-  else if (owned.indexOf(item.id) !== -1) why = 'owned';
+  else if (ownedOf(p).indexOf(item.id) !== -1) why = 'owned';
   else if (!itemFits(item, p.look)) why = 'fits';
-  else if (picksLeft(p, stars) < 1) why = 'noPick';
+  else if (!canAfford(item, before)) why = 'tooDear';
   else {
-    p.owned = owned.concat([item.id]);
+    model.spent = spentOf(model) + cost;
+    p.model = model;
+    p.owned = ownedOf(p).concat([item.id]);
     p.wear = putOn(item, p.look, wearOf(p));
+    after = purseOf(model);
     picked = true;
     why = '';
   }
@@ -1933,6 +2208,9 @@ for (var i = 0; i < app.profiles.length; i++) {
 Outputs.app = app;
 Outputs.picked = picked;
 Outputs.why = why;
+Outputs.cost = cost;
+Outputs.purseBefore = before;
+Outputs.purseAfter = after;
 `;
 
 /** Put an item the child has (owned, or free) on, or take it off if it is on. A face item works on the face it fits. */
@@ -1957,9 +2235,15 @@ Outputs.changed = changed;
 `;
 
 /**
- * The shelf, one tab at a time, for the active player: every item is shown (owned, wearable, still to pick), and a face item that
- * does not fit today's face is shown greyed on a face it does fit, saying which faces those are. It is never hidden, so the shelf
- * does not shrink under a child who changed their face.
+ * The shelf, one tab at a time, for the active player.
+ *
+ * 🔴 **PLY-001: a face item the chosen face cannot wear is not on the shelf at all.** RKT-011 §3.2 drew it greyed, on a face it
+ * did fit, captioned "Fits the Pixel and Smile faces" — and Richard's second play test found that is exactly the complaint
+ * ("pixel avatar sunglasses ... offered" to an adventurer child). Every kept look carries ≥ MIN_FACE_ITEMS_PER_LOOK of its own,
+ * so filtering shrinks nothing. What a child owns for another face is counted in `elsewhere`, never hidden and never removed.
+ *
+ * PLY-002: every row carries its price and whether the purse covers it, so the tile can say so before the tap, and the
+ * confirmation can be built from the row without asking a second script.
  */
 export const HANGAR_SHELF_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}
 var app = appOf(Inputs.app);
@@ -1969,41 +2253,90 @@ var look = p ? String(p.look || 'pixel-art') : 'pixel-art';
 var seed = p ? String(p.seed || p.name || 'Rocket') : 'Rocket';
 var fr = !!p && String(p.lang) === 'fr';
 var tab = String(Inputs.tab) === 'rocket' ? 'rocket' : 'face';
-var stars = p ? withStars(JSON.parse(JSON.stringify(p.model || {}))).stars : 0;
-var picks = p ? picksLeft(p, stars) : 0;
-var nextAt = milestoneAt(picksEarned(stars));
+var model = p ? withStars(JSON.parse(JSON.stringify(p.model || {}))) : {};
+var purse = p ? purseOf(model) : 0;
 var owned = ownedOf(p);
 var wear = wearOf(p);
-var LOOK_NAMES = { 'pixel-art': 'Pixel', 'fun-emoji': 'Emoji', thumbs: 'Thumbs', 'big-smile': 'Smile', adventurer: 'Adventurer' };
-function lookList(on) { var names = []; for (var k in on) names.push(LOOK_NAMES[k] || k); if (names.length < 2) return names.join(''); return names.slice(0, -1).join(', ') + (fr ? ' et ' : ' and ') + names[names.length - 1]; }
-var rows = [];
 var list = Array.isArray(Inputs.shelf) ? Inputs.shelf : [];
+var rows = [];
 for (var j = 0; j < list.length; j++) {
   var item = list[j];
   if (!item || item.kind !== tab) continue;
-  var fits = itemFits(item, look);
-  var has = item.free === true || owned.indexOf(item.id) !== -1;
-  var worn = fits && itemWorn(item, look, wear);
-  var shown = look;
-  if (item.kind === 'face' && !fits) for (var k in item.faces) { shown = k; break; }
-  var options = {};
-  if (item.kind === 'face') options = wearOptions(shown, putOn(item, shown, wearOf(p)));
-  var canPick = !has && fits && picks > 0;
+  // 🔴 The filter. A rocket item fits every face; a face item must name this look.
+  if (!itemFits(item, look)) continue;
+  var has = ownsItem(p, item);
+  var worn = itemWorn(item, look, wear);
+  var cost = costOf(item);
+  var afford = canAfford(item, purse);
+  var options = item.kind === 'face' && itemFits(item, look) ? wearOptions(look, putOn(item, look, wearOf(p))) : {};
+  var canBuy = !has && afford;
   var note;
   if (worn) note = fr ? '✓ Sur toi' : '✓ Wearing';
-  else if (!fits) note = fr ? 'Va avec les têtes ' + lookList(item.faces) : 'Fits the ' + lookList(item.faces) + ' faces';
   else if (has) note = fr ? 'À toi · touche pour mettre' : 'Yours · tap to wear';
-  else if (canPick) note = fr ? '🎁 Touche pour choisir' : '🎁 Tap to pick';
-  else note = (fr ? '🔒 Prochain 🎁 à ' : '🔒 Next 🎁 at ') + nextAt + ' ⭐';
-  rows.push({ id: item.id, label: fr ? item.fr : item.en, note: note, isFace: item.kind === 'face', look: shown, seed: seed, options: options, paint: item.paint || '', worn: worn, canWear: has && fits, canPick: canPick, dim: !fits || (!has && !canPick) });
+  else if (canBuy) note = cost + ' ⭐';
+  else note = (fr ? '🔒 ' + cost + ' ⭐ · encore ' + (cost - purse) : '🔒 ' + cost + ' ⭐ · ' + (cost - purse) + ' more');
+  // PLY-002: a rocket tile draws a real rocket. A PAINT is shown plain, so its colour is the whole of it; a PATTERN is
+  // shown on the paint the child is wearing, because that is what buying it would actually look like.
+  var swatchPaint = item.paint || wear.paint || 'var(--primary)';
+  var swatchPattern = item.pattern || '';
+  rows.push({
+    id: item.id, label: fr ? item.fr : item.en, note: note,
+    isFace: item.kind === 'face', look: look, seed: seed, options: options,
+    paint: swatchPaint, pattern: swatchPattern,
+    cost: cost, worn: worn, canWear: has, canPick: canBuy,
+    dim: !has && !afford
+  });
 }
+// PLY-001 §3.2: owned, for a face that is not this one. A fact under the shelf — never a tile, never an offer.
+var elsewhere = tab === 'face' ? ownedElsewhere(p, list, look) : 0;
 Outputs.rows = rows;
 Outputs.count = rows.length;
-Outputs.picks = picks;
-Outputs.hasPicks = picks > 0;
+Outputs.picks = purse;
+Outputs.hasPicks = purse >= SHOP_FROM;
+Outputs.purse = purse;
+Outputs.elsewhere = elsewhere;
+Outputs.elsewhereText = elsewhere > 0
+  ? (fr ? elsewhere + (elsewhere === 1 ? ' objet t’appartient' : ' objets t’appartiennent') + ' pour d’autres têtes.' : elsewhere + (elsewhere === 1 ? ' thing you own is' : ' things you own are') + ' for other faces.')
+  : '';
 `;
 
 // ── Custom question sets ────────────────────────────────────────────────────
+
+/**
+ * P95 PLY-005 — the faces this child has rolled, and where in them they are standing.
+ *
+ * > "if you accidentally roll when you wanted the previous avatar, there should be a 'back' button [...] going back
+ * > and then rolling forward again would be nice" — Richard, 2026-09-18
+ *
+ * Roll wrote a fresh random seed straight over the old one and kept nothing, so an accidental roll lost a face for
+ * good. A roll now APPENDS and steps to the end, and Back and Forward walk the list — the whole list, not one step,
+ * because a list costs the same as a single previous value and a child who rolled four times past the one they
+ * wanted is in exactly the position Richard describes. Nothing is ever discarded: rolling from the middle still
+ * appends at the end, so every face already seen is still reachable with Back.
+ *
+ * Actions, one placement per action (Logic/Hunt move's shape): `set` starts the list at one face (the form opening,
+ * or an existing player's own), `roll` adds one, `back` and `forward` step.
+ */
+export const ROLL_HISTORY = 30;
+
+export const ROLL_FACE_SCRIPT = `
+var ROLL_HISTORY = ${ROLL_HISTORY};
+var hist = Array.isArray(Inputs.history) ? Inputs.history.filter(function (x) { return typeof x === 'string' && x; }) : [];
+var at = Math.floor(Number(Inputs.at));
+if (!(at >= 0) || at > hist.length - 1) at = hist.length - 1;
+var action = String(Inputs.action || 'roll');
+var seed = String(Inputs.seed || '');
+if (action === 'set') { hist = seed ? [seed] : []; at = hist.length - 1; }
+else if (action === 'roll') { if (seed) { hist = hist.concat([seed]).slice(-ROLL_HISTORY); at = hist.length - 1; } }
+else if (action === 'back') { if (at > 0) at -= 1; }
+else if (action === 'forward') { if (at < hist.length - 1) at += 1; }
+Outputs.history = hist;
+Outputs.at = at;
+Outputs.seed = at >= 0 && at < hist.length ? hist[at] : seed;
+Outputs.canBack = at > 0;
+Outputs.canForward = at >= 0 && at < hist.length - 1;
+Outputs.position = hist.length ? (at + 1) + '/' + hist.length : '';
+`;
 
 export const PARSE_SET_SCRIPT = `
 // Accepts the editor's rows OR pasted JSON: [{ "q": "...", "a": "...", "opts": [...] }] — or [["q","a"], ...].
@@ -2091,12 +2424,13 @@ for (var i = 0; i < app.profiles.length; i++) if (app.profiles[i].id === id) p =
 var code = '';
 if (p) {
   var sk = {};
-  // RKT-010, save code v2: the stars, each skill's paid level (index 8) and the personal bests travel too.
+  // RKT-010 v2: the stars, each skill's paid level (index 8) and the personal bests. PLY-002 v3: what has been SPENT, so a
+  // restored profile's purse is its own and not its whole earned total.
   var mdl = withStars(JSON.parse(JSON.stringify(p.model || {})));
   var skills = mdl.skills;
   for (var k in skills) { var s = skills[k]; sk[k] = [Math.round(s.d || 0), s.n || 0, s.streak || 0, Math.round((s.hl || 1) * 4), Math.round((s.due || 0) / 3600000), s.m || 0, Math.round(s.best || 0), s.miss || 0, s.paid || 0]; }
-  // RKT-011: what the child owns and wears travels in the same v2 code.
-  var packed = { v: 2, n: p.name, k: p.look, s: p.seed, l: p.level, g: p.lang, y: p.layout, r: mdl.rating || 0, a: mdl.answered || 0, d: (p.days || []).slice(-14), sk: sk, st: mdl.stars, b: mdl.bests, o: ownedOf(p), w: wearOf(p) };
+  // RKT-011: what the child owns and wears travels in the same code.
+  var packed = { v: 3, n: p.name, k: p.look, s: p.seed, l: p.level, g: p.lang, y: p.layout, r: mdl.rating || 0, a: mdl.answered || 0, d: (p.days || []).slice(-14), sk: sk, st: mdl.stars, b: mdl.bests, o: ownedOf(p), w: wearOf(p), sp: spentOf(mdl) };
   code = 'RS1.' + toB64(JSON.stringify(packed));
 }
 Outputs.code = code;
@@ -2110,14 +2444,17 @@ var ok = false, error = '', profileId = '';
 try {
   if (code.indexOf('RS1.') !== 0) throw new Error('prefix');
   var packed = JSON.parse(fromB64(code.slice(4)));
-  if (!packed || (packed.v !== 1 && packed.v !== 2) || typeof packed.n !== 'string') throw new Error('shape');
-  var v2 = packed.v === 2;
+  if (!packed || [1, 2, 3].indexOf(packed.v) === -1 || typeof packed.n !== 'string') throw new Error('shape');
+  var v2 = packed.v >= 2;
+  var v3 = packed.v >= 3;
   var skills = {};
   // A v1 code carries no stars: its model is migrated on first read, the same as a profile saved before RKT-010.
   for (var k in (packed.sk || {})) { var a = packed.sk[k]; skills[k] = { d: a[0], n: a[1], streak: a[2], hl: a[3] / 4, due: a[4] * 3600000, m: a[5], best: a[6], miss: a[7] || 0, last: [], fluentRun: 0 }; if (v2) skills[k].paid = a[8] || 0; }
   var lang = packed.g === 'fr' ? 'fr' : 'en';
   var profile = { id: 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), name: String(packed.n).slice(0, 24), look: String(packed.k || 'pixel-art'), seed: String(packed.s || packed.n), level: String(packed.l || 'CE2'), lang: lang, layout: String(packed.y || (lang === 'fr' ? 'azerty' : 'qwerty')), sound: true, answerMode: 'auto', created: Date.now(), days: Array.isArray(packed.d) ? packed.d : [], model: { rating: Number(packed.r) || 0, skills: skills, lastSkill: '', answered: Number(packed.a) || 0 } };
   if (v2) { profile.model.stars = Number(packed.st) || 0; profile.model.bests = packed.b && typeof packed.b === 'object' ? packed.b : {}; }
+  // PLY-002: a v2 code was written before prices existed, so it restores with an unspent purse — generous on purpose, never in debt.
+  profile.model.spent = v3 ? Math.max(0, Number(packed.sp) || 0) : 0;
   if (v2 && Array.isArray(packed.o)) profile.owned = ownedOf({ owned: packed.o });
   if (v2 && packed.w && typeof packed.w === 'object') profile.wear = wearOf({ wear: packed.w });
   // The same name already here: replace it rather than make a twin.

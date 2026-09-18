@@ -131,6 +131,12 @@
     },
     {
       "fromId": "zpIn",
+      "fromProperty": "mode",
+      "toId": "zpRound",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "zpIn",
       "fromProperty": "level",
       "toId": "zpRound",
       "toProperty": "level"

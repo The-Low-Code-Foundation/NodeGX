@@ -49,6 +49,16 @@
           "type": "string"
         },
         {
+          "name": "pattern",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cost",
+          "plug": "output",
+          "type": "number"
+        },
+        {
           "name": "worn",
           "plug": "output",
           "type": "boolean"
@@ -151,27 +161,41 @@
     {
       "id": "htSwatch",
       "type": "Group",
-      "label": "The paint",
+      "label": "The rocket",
       "parent": "htCard",
+      "children": [
+        "htRocket"
+      ],
       "parameters": {
         "width": {
-          "value": 64,
-          "unit": "px"
+          "value": 100,
+          "unit": "%"
         },
         "height": {
           "value": 64,
           "unit": "px"
         },
         "sizeMode": "explicit",
-        "backgroundColor": "var(--primary)",
-        "borderRadius": "var(--radius-full)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--foreground)",
         "mounted": false
       },
       "x": 100,
       "y": 400
+    },
+    {
+      "id": "htRocket",
+      "type": "game-kit.RaceTrack",
+      "label": "This paint and decal",
+      "parent": "htSwatch",
+      "parameters": {
+        "progressA": 0.5,
+        "showB": false,
+        "celebrate": false,
+        "aspect": "wide",
+        "rocketSize": 52,
+        "goal": ""
+      },
+      "x": 160,
+      "y": 520
     },
     {
       "id": "htLabel",
@@ -187,7 +211,7 @@
         "textAlignX": "center"
       },
       "x": 100,
-      "y": 520
+      "y": 640
     },
     {
       "id": "htNote",
@@ -202,7 +226,7 @@
         "textAlignX": "center"
       },
       "x": 100,
-      "y": 640
+      "y": 760
     },
     {
       "id": "htKindOf",
@@ -301,6 +325,16 @@
           "name": "id",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cost",
+          "plug": "input",
+          "type": "number"
         }
       ],
       "x": 410,

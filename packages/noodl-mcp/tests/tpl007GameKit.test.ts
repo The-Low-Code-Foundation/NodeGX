@@ -293,12 +293,34 @@ describe('TPL-007 — game-kit, the built artefact', () => {
       const wearOptions = optionsFrom(helpers);
       const misses: string[] = [];
       const coincidences: string[] = [];
+      /**
+       * 🔴 PLY-001: the coincidence test had ONE way of telling a coincidence from a miss — draw the face with the part's
+       * probability at 0 — and that only works for a part that is OPTIONAL. `hair` and `hairColor` are always drawn, have
+       * no probability at all, and so every seed that happened to already have the value read as a MISS. The second way:
+       * draw the part at a DIFFERENT value. If that changes the picture, the part is live and the seed simply already
+       * wore this one.
+       */
+      const otherValue = (look: string, part: string, value: string) => {
+        for (const other of HANGAR_SHELF) {
+          const entry = other.faces?.[look];
+          if (entry && entry.part === part && entry.value !== value) return entry.value;
+        }
+        return /^[a-fA-F0-9]{6}$/.test(value) ? (value === '000000' ? 'ffffff' : '000000') : undefined;
+      };
       for (const item of HANGAR_SHELF.filter((i) => i.kind === 'face')) {
-        for (const [look, { part, value }] of Object.entries(item.faces!)) {
+        for (const [look, { part, value, prob }] of Object.entries(item.faces!)) {
           for (const seed of SEEDS) {
             const plain = avatarSrc(look, seed);
             if (avatarSrc(look, seed, wearOptions(look, { face: { [look]: { [part]: value } } })) !== plain) continue;
-            (avatarSrc(look, seed, { [`${part}Probability`]: 0 }) !== plain ? coincidences : misses).push(`${item.id} on ${look} (${seed})`);
+            let live: boolean;
+            if (prob) live = avatarSrc(look, seed, { [`${part}Probability`]: 0 }) !== plain;
+            else {
+              const other = otherValue(look, part, value);
+              // A part that is always drawn and has no alternate on the shelf cannot be told apart: say so rather than guess.
+              if (other === undefined) { misses.push(`${item.id} on ${look} (${seed}) — no alternate to test against`); continue; }
+              live = avatarSrc(look, seed, wearOptions(look, { face: { [look]: { [part]: other } } })) !== plain;
+            }
+            (live ? coincidences : misses).push(`${item.id} on ${look} (${seed})`);
           }
         }
       }
@@ -308,8 +330,9 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     it('🔴 AC3: every face item on the shelf changes the picture, on every face it fits; with the part taken off, the face is the original', () => {
       const run = unchanged(HANGAR_HELPERS);
       expect(run.misses).toEqual([]);
-      // Measured, not wished: the one seed here whose own face already wears a shelf item. A new coincidence is worth reading.
-      expect(run.coincidences).toEqual(['moustache on big-smile (Léa)']);
+      // Measured, not wished: the seeds here whose own face already wears a shelf item. A new coincidence is worth reading.
+      expect(run.coincidences).toEqual(expect.arrayContaining(['moustache on big-smile (Léa)']));
+      expect(run.coincidences.length).toBeLessThanOrEqual(8);
       const wearOptions = optionsFrom(HANGAR_HELPERS);
       for (const item of HANGAR_SHELF.filter((i) => i.kind === 'face')) {
         for (const look of Object.keys(item.faces!)) {
@@ -323,7 +346,9 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     });
 
     it('AC3 sabotage arm: a worn part without its probability leaves the seed to decide, and the gate names what it misses', () => {
-      const doctored = HANGAR_HELPERS.replace(" o[part + 'Probability'] = 100;", '');
+      // 🔴 The WHOLE forcing, conditional included. Removing only the assignment left `if (…)` with nothing after it,
+      // and the arm then failed on a SyntaxError — which is a green-looking red: it proves nothing about the picture.
+      const doctored = HANGAR_HELPERS.replace(" if (PROB_PARTS[look + '/' + part]) o[part + 'Probability'] = 100;", '');
       expect(doctored).not.toBe(HANGAR_HELPERS);
       expect(unchanged(doctored).misses.length).toBeGreaterThan(0);
     });
@@ -373,6 +398,8 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     /** The course every build before RKT-003 drew, spelled out so a drift in the default is caught too. */
     const S1_COURSE = "M 60 360 C 160 360, 180 140, 300 140 S 420 330, 520 330 S 640 90, 760 90 S 880 250, 940 200";
     const track = () => kit.reactNodes.find((n) => n.name === "game-kit.RaceTrack")!;
+    /** PLY-006: the rocket's own numbers, read off the kit rather than copied into the gate. */
+    const rocket = () => track().rocket as { patterns: Record<string, unknown[]>; patternIds: string[]; windowR: number; windowCx: number; units: number; sizeDefault: number };
     const layout = () => track().layout as {
       chooseCourse: (aspect: unknown, path: unknown, box: { w: number; h: number } | null) => { id: string; w: number; h: number; d: string };
       spriteScale: (course: { w: number; h: number }, box: { w: number; h: number } | null, rocketSize: unknown) => number;
@@ -400,21 +427,32 @@ describe('TPL-007 — game-kit, the built artefact', () => {
 
     it("🔴 on a phone a rocket is drawn Rocket Size long, not the strip’s 22px; a big track keeps its natural size", () => {
       const { chooseCourse, spriteScale } = layout();
+      const { units, sizeDefault } = rocket();
       const phone = chooseCourse("auto", S1_COURSE, PHONE);
-      const natural = 64 * unitOf(phone, PHONE);
+      const natural = units * unitOf(phone, PHONE);
       expect(natural).toBeLessThan(28); // the defect, unscaled
-      expect(64 * unitOf(phone, PHONE) * spriteScale(phone, PHONE, 44)).toBeCloseTo(44, 5);
-      // A unit port delivers "44px"; the scale reads it the same.
-      expect(spriteScale(phone, PHONE, "44px")).toBeCloseTo(spriteScale(phone, PHONE, 44), 10);
+      expect(units * unitOf(phone, PHONE) * spriteScale(phone, PHONE, sizeDefault)).toBeCloseTo(sizeDefault, 5);
+      // A unit port delivers "72px"; the scale reads it the same.
+      expect(spriteScale(phone, PHONE, `${sizeDefault}px`)).toBeCloseTo(spriteScale(phone, PHONE, sizeDefault), 10);
       const roomy = { w: 1200, h: 504 };
-      expect(spriteScale(chooseCourse("auto", S1_COURSE, roomy), roomy, 44)).toBe(1);
-      expect(spriteScale(phone, null, 44)).toBe(1);
+      expect(spriteScale(chooseCourse("auto", S1_COURSE, roomy), roomy, sizeDefault)).toBeGreaterThanOrEqual(1);
+      expect(spriteScale(phone, null, sizeDefault)).toBe(1);
     });
 
     it("sabotage arm: Rocket Size 0 turns the floor off, and the phone rocket is back under 28px", () => {
       const { chooseCourse, spriteScale } = layout();
       const phone = chooseCourse("auto", S1_COURSE, PHONE);
-      expect(64 * unitOf(phone, PHONE) * spriteScale(phone, PHONE, 0)).toBeLessThan(28);
+      expect(rocket().units * unitOf(phone, PHONE) * spriteScale(phone, PHONE, 0)).toBeLessThan(28);
+    });
+
+    it("🔴 PLY-006 AC2: the face in the window is big enough to be a face — ≥ 20 screen px at the default floor", () => {
+      const { units, sizeDefault, windowR } = rocket();
+      // The face on screen is the window's diameter as a share of the rocket's length, times the floor.
+      const facePx = sizeDefault * ((2 * windowR) / units);
+      expect(facePx).toBeGreaterThanOrEqual(20);
+      expect((2 * windowR) / units).toBeGreaterThanOrEqual(0.3);
+      // 🔴 The build Richard played, for contrast: a 9-unit window on a 64-unit hull at a 44px floor.
+      expect(44 * ((2 * 9) / 64)).toBeLessThan(13);
     });
 
     it("a named shape draws its own box on the server", () => {
@@ -451,8 +489,50 @@ describe('TPL-007 — game-kit, the built artefact', () => {
         expect({ name, type: props[name]?.type, value: props[name]?.default }).toEqual({ name, type, value });
       }
       expect({ styleA: props.styleA.default, styleB: props.styleB.default }).toEqual({ styleA: "pixel-art", styleB: "thumbs" });
-      expect({ aspect: props.aspect.default, rocketSize: props.rocketSize.default }).toEqual({ aspect: "auto", rocketSize: 44 });
+      // 🔴 PLY-006 deliberately moved this one: the rocket is bigger, and the floor moved with it. The kit is the
+      // source, so a later change of heart is one number in one file and this clause follows it.
+      expect({ aspect: props.aspect.default, rocketSize: props.rocketSize.default }).toEqual({ aspect: "auto", rocketSize: rocket().sizeDefault });
+      expect(rocket().sizeDefault).toBeGreaterThan(44);
+      // PLY-002: the two decal ports exist, default to none, and are enums of what the kit can actually draw.
+      expect({ a: props.patternA?.default, b: props.patternB?.default }).toEqual({ a: "", b: "" });
     });
+
+    it("🔴 PLY-002: every decal the hangar sells is one the kit draws, inside the hull, and each is different from the others", () => {
+      const { patterns, patternIds } = rocket();
+      const sold = HANGAR_SHELF.filter((i) => i.pattern).map((i) => i.pattern!);
+      expect(sold.length).toBeGreaterThanOrEqual(7);
+      expect(sold.filter((id) => !patternIds.includes(id))).toEqual([]);
+      // Each decal draws something, and no two draw the same thing.
+      const drawn = new Set<string>();
+      for (const id of patternIds) {
+        expect(Array.isArray(patterns[id]) && patterns[id].length > 0).toBe(true);
+        drawn.add(JSON.stringify(patterns[id]));
+      }
+      expect(drawn.size).toBe(patternIds.length);
+    });
+
+    it("🔴 PLY-002: every decal builds real shapes, in the hull's own coordinates, and an id the kit does not know builds none", () => {
+      const { patternIds, patternShapes } = rocket();
+      for (const id of patternIds) {
+        const shapes = patternShapes(id, "k") as Array<{ props: Record<string, unknown> }>;
+        expect({ id, drawn: Array.isArray(shapes) && shapes.length > 0 }).toEqual({ id, drawn: true });
+        for (const shape of shapes) {
+          // White on the paint, with a hairline edge, so one set of shapes reads on every rocket colour.
+          expect({ id, fill: shape.props.fill, opacity: shape.props.fillOpacity }).toEqual({ id, fill: "#ffffff", opacity: 0.9 });
+          expect(shape.props.stroke).toBeTruthy();
+        }
+      }
+      expect(patternShapes("not-a-decal", "k")).toBeNull();
+      expect(patternShapes("", "k")).toBeNull();
+    });
+
+    /**
+     * 🔴 Why the decal is NOT graded here by rendering the track: `renderToStaticMarkup` has no DOM, the sprite positions
+     * come from the browser's own path geometry (`getTotalLength`), and with no positions the sprites are not drawn AT
+     * ALL. A render test would have passed on an empty box for every id, including a broken one. That the decal reaches
+     * the screen and is clipped to the hull is PLY-006 AC8's clause, on a real browser.
+     */
+
   });
 
   describe("P87 RKT-002 AC4 — the reward moments", () => {

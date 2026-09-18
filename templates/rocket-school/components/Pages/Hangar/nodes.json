@@ -46,7 +46,8 @@
         "hgHeader",
         "hgTitle",
         "hgPreview",
-        "hgShelf"
+        "hgShelfBox",
+        "hgConfirm"
       ],
       "parameters": {
         "width": {
@@ -109,74 +110,133 @@
       "y": 640
     },
     {
+      "id": "hgShelfBox",
+      "type": "Group",
+      "label": "The shelf, while not asking",
+      "parent": "hgWrap",
+      "children": [
+        "hgShelf"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
       "id": "hgShelf",
       "type": "/Hangar/Shelf",
       "label": "The shelf",
+      "parent": "hgShelfBox",
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "hgConfirm",
+      "type": "/Hangar/Confirm",
+      "label": "Buy it?",
       "parent": "hgWrap",
+      "parameters": {
+        "mounted": false
+      },
       "x": 220,
-      "y": 760
+      "y": 1000
     },
     {
       "id": "hgStore",
       "type": "/Logic/App store",
       "label": "The store",
-      "x": 470,
+      "x": 530,
       "y": 400
     },
     {
       "id": "hgMe",
       "type": "/Logic/Active profile",
       "label": "Who is playing",
-      "x": 470,
+      "x": 530,
       "y": 520
     },
     {
       "id": "hgWords",
       "type": "/Data/Words",
       "label": "The words",
-      "x": 470,
-      "y": 1360
+      "x": 530,
+      "y": 1600
     },
     {
       "id": "hgT",
       "type": "/Logic/Translate words",
       "label": "In their language",
-      "x": 470,
+      "x": 530,
       "y": 880
     },
     {
       "id": "hgCurriculum",
       "type": "/Data/Curriculum",
       "label": "The skills",
-      "x": 470,
-      "y": 1480
+      "x": 530,
+      "y": 1720
     },
     {
       "id": "hgWordLists",
       "type": "/Data/Word lists",
       "label": "The typing words",
-      "x": 470,
-      "y": 1600
+      "x": 530,
+      "y": 1840
     },
     {
       "id": "hgItems",
       "type": "/Data/Hangar",
       "label": "What the shelf offers",
-      "x": 470,
-      "y": 1240
+      "x": 530,
+      "y": 1360
     },
     {
       "id": "hgPick",
       "type": "/Logic/Pick item",
-      "label": "Spend a pick",
-      "x": 470,
+      "label": "Buy it",
+      "x": 530,
       "y": 1000
+    },
+    {
+      "id": "hgAsk",
+      "type": "States",
+      "label": "Shelf, or the question",
+      "parameters": {
+        "states": "idle,asking",
+        "values": "idle,asking",
+        "useTransitions": false,
+        "type-idle": "boolean",
+        "value-idle-idle": true,
+        "value-asking-idle": false,
+        "type-asking": "boolean",
+        "value-idle-asking": false,
+        "value-asking-asking": true
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "hgBuyTitle",
+      "type": "Expression",
+      "label": "Buy what?",
+      "parameters": {
+        "expression": "String(word || '').replace('{item}', String(label || ''))"
+      },
+      "x": 530,
+      "y": 1480
     },
     {
       "id": "hgWear",
       "type": "/Logic/Wear item",
       "label": "Put it on, or take it off",
-      "x": 470,
+      "x": 530,
       "y": 1120
     },
     {
@@ -186,8 +246,8 @@
       "parameters": {
         "expression": "has === false"
       },
-      "x": 470,
-      "y": 1720
+      "x": 530,
+      "y": 1960
     },
     {
       "id": "hgGuard",
@@ -196,7 +256,7 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 470,
+      "x": 530,
       "y": 40
     },
     {
@@ -207,7 +267,7 @@
         "router": "Main",
         "target": "/Pages/Profiles"
       },
-      "x": 470,
+      "x": 530,
       "y": 640
     },
     {
@@ -218,7 +278,7 @@
         "router": "Main",
         "target": "/Pages/Home"
       },
-      "x": 470,
+      "x": 530,
       "y": 760
     }
   ],

@@ -53,6 +53,24 @@
     },
     {
       "fromId": "pickitemFn",
+      "fromProperty": "out-cost",
+      "toId": "pickitemOut",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-purseBefore",
+      "toId": "pickitemOut",
+      "toProperty": "purseBefore"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-purseAfter",
+      "toId": "pickitemOut",
+      "toProperty": "purseAfter"
+    },
+    {
+      "fromId": "pickitemFn",
       "fromProperty": "success",
       "toId": "pickitemOut",
       "toProperty": "done"

@@ -167,6 +167,18 @@
     },
     {
       "fromId": "zgT",
+      "fromProperty": "mathsMode",
+      "toId": "zgSetup",
+      "toProperty": "mathsWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "typingMode",
+      "toId": "zgSetup",
+      "toProperty": "typingWord"
+    },
+    {
+      "fromId": "zgT",
       "fromProperty": "monsterGate",
       "toId": "zgSetup",
       "toProperty": "gateWord"
@@ -278,6 +290,12 @@
       "fromProperty": "timed",
       "toId": "zgPlay",
       "toProperty": "timed"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "mode",
+      "toId": "zgPlay",
+      "toProperty": "mode"
     },
     {
       "fromId": "zgMe",

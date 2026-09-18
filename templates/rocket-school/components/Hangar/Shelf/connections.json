@@ -82,10 +82,34 @@
       "toProperty": "hasPicks"
     },
     {
+      "fromId": "hsList",
+      "fromProperty": "purse",
+      "toId": "hsOut",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "hsList",
+      "fromProperty": "elsewhereText",
+      "toId": "hsElsewhere",
+      "toProperty": "text"
+    },
+    {
       "fromId": "hsEach",
       "fromProperty": "itemOutput-id",
       "toId": "hsOut",
       "toProperty": "itemId"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutput-label",
+      "toId": "hsOut",
+      "toProperty": "itemLabel"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutput-cost",
+      "toId": "hsOut",
+      "toProperty": "itemCost"
     },
     {
       "fromId": "hsEach",

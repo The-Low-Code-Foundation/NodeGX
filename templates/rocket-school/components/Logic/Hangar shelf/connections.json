@@ -47,6 +47,24 @@
     },
     {
       "fromId": "hangarshelfFn",
+      "fromProperty": "out-purse",
+      "toId": "hangarshelfOut",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-elsewhere",
+      "toId": "hangarshelfOut",
+      "toProperty": "elsewhere"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-elsewhereText",
+      "toId": "hangarshelfOut",
+      "toProperty": "elsewhereText"
+    },
+    {
+      "fromId": "hangarshelfFn",
       "fromProperty": "success",
       "toId": "hangarshelfOut",
       "toProperty": "done"

@@ -95,6 +95,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-buyTitle",
+      "toId": "translateworOut",
+      "toProperty": "buyTitle"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-cancel",
       "toId": "translateworOut",
       "toProperty": "cancel"
@@ -323,6 +329,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-itCosts",
+      "toId": "translateworOut",
+      "toProperty": "itCosts"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-keyboard",
       "toId": "translateworOut",
       "toProperty": "keyboard"
@@ -485,6 +497,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-noThanks",
+      "toId": "translateworOut",
+      "toProperty": "noThanks"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-onePlayer",
       "toId": "translateworOut",
       "toProperty": "onePlayer"
@@ -494,6 +512,12 @@
       "fromProperty": "out-otherRace",
       "toId": "translateworOut",
       "toProperty": "otherRace"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-ownedElsewhere",
+      "toId": "translateworOut",
+      "toProperty": "ownedElsewhere"
     },
     {
       "fromId": "translateworFn",
@@ -725,9 +749,27 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-yesBuy",
+      "toId": "translateworOut",
+      "toProperty": "yesBuy"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-youHave",
+      "toId": "translateworOut",
+      "toProperty": "youHave"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-youWin",
       "toId": "translateworOut",
       "toProperty": "youWin"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-youllHave",
+      "toId": "translateworOut",
+      "toProperty": "youllHave"
     },
     {
       "fromId": "translateworFn",

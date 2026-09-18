@@ -36,6 +36,18 @@
     {
       "fromId": "zsFirst",
       "fromProperty": "onfalse",
+      "toId": "zsInitMode",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zsDefMode",
+      "fromProperty": "result",
+      "toId": "zsInitMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsInitMode",
+      "fromProperty": "done",
       "toId": "zsInitStyle",
       "toProperty": "do"
     },
@@ -56,6 +68,48 @@
       "fromProperty": "done",
       "toId": "zsSeeded",
       "toProperty": "to-seeded"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "mathsWord",
+      "toId": "zsModeItems",
+      "toProperty": "in-maths"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "typingWord",
+      "toId": "zsModeItems",
+      "toProperty": "in-typing"
+    },
+    {
+      "fromId": "zsModeItems",
+      "fromProperty": "out-items",
+      "toId": "zsMode",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "zsModeVar",
+      "fromProperty": "value",
+      "toId": "zsMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsMode",
+      "fromProperty": "value",
+      "toId": "zsSetMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsMode",
+      "fromProperty": "changed",
+      "toId": "zsSetMode",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zsModeVar",
+      "fromProperty": "value",
+      "toId": "zsOut",
+      "toProperty": "mode"
     },
     {
       "fromId": "zsIn",

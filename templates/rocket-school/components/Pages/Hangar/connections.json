@@ -179,6 +179,12 @@
     },
     {
       "fromId": "hgMe",
+      "fromProperty": "pattern",
+      "toId": "hgPreview",
+      "toProperty": "pattern"
+    },
+    {
+      "fromId": "hgMe",
       "fromProperty": "nextText",
       "toId": "hgPreview",
       "toProperty": "line"
@@ -208,6 +214,96 @@
       "toProperty": "rocketWord"
     },
     {
+      "fromId": "hgShelf",
+      "fromProperty": "pick",
+      "toId": "hgAsk",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "hgAsk",
+      "fromProperty": "idle",
+      "toId": "hgShelfBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hgAsk",
+      "fromProperty": "asking",
+      "toId": "hgConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "buyTitle",
+      "toId": "hgBuyTitle",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "itemLabel",
+      "toId": "hgBuyTitle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hgBuyTitle",
+      "fromProperty": "result",
+      "toId": "hgConfirm",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "itemCost",
+      "toId": "hgConfirm",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "purse",
+      "toId": "hgConfirm",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "youHave",
+      "toId": "hgConfirm",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "itCosts",
+      "toId": "hgConfirm",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "youllHave",
+      "toId": "hgConfirm",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "yesBuy",
+      "toId": "hgConfirm",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "noThanks",
+      "toId": "hgConfirm",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "hgConfirm",
+      "fromProperty": "no",
+      "toId": "hgAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "hgConfirm",
+      "fromProperty": "yes",
+      "toId": "hgAsk",
+      "toProperty": "to-idle"
+    },
+    {
       "fromId": "hgStore",
       "fromProperty": "app",
       "toId": "hgPick",
@@ -232,8 +328,8 @@
       "toProperty": "shelf"
     },
     {
-      "fromId": "hgShelf",
-      "fromProperty": "pick",
+      "fromId": "hgConfirm",
+      "fromProperty": "yes",
       "toId": "hgPick",
       "toProperty": "run"
     },

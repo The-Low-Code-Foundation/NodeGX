@@ -25,7 +25,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { CURRICULUM, HANGAR_SHELF, TEACH_CARDS, WORD_KEYS, WORD_LISTS, LEVELS } from './tpl007Curriculum';
+import { CURRICULUM, HANGAR_LOOKS, HANGAR_SHELF, MIN_FACE_ITEMS_PER_LOOK, TEACH_CARDS, WORD_KEYS, WORD_LISTS, LEVELS } from './tpl007Curriculum';
 import {
   ACTIVE_PROFILE_SCRIPT,
   BUILD_HUNT_SCRIPT,
@@ -57,8 +57,8 @@ import {
   MERGE_STAR_RULE,
   FUNCTION_SCRIPTS,
   GRADE_ANSWER_SCRIPT,
-  HANGAR_EVERY,
-  HANGAR_MILESTONES,
+  COMEBACK,
+  SHOP_FROM,
   HANGAR_SHELF_SCRIPT,
   HELPERS,
   LIST_PROFILES_SCRIPT,
@@ -657,9 +657,10 @@ describe('TPL-007 — the engine', () => {
       expect([long.starsEarned, long.why]).toEqual([MERGE_STAR_RULE.joinCap + MERGE_STAR_RULE.finish, expect.stringMatching(/le maximum/)]);
       const abandoned = runScript(FINISH_MERGE_SCRIPT, { model: { ...freshModel(), stars: 3 }, game: { ...over, id: 'm9', over: false }, lang: 'en' });
       expect([abandoned.paid, abandoned.stars]).toEqual([false, 3]);
-      // RKT-011: 10 → 21 crosses the first milestone and offers the pick; 20 → 31 crosses none.
-      expect(HANGAR_MILESTONES.slice(0, 2)).toEqual([15, 40]);
-      expect([first.earnedPick, runScript(FINISH_MERGE_SCRIPT, { model: { ...freshModel(), stars: 20 }, game: { ...over, id: 'm10' }, lang: 'en' }).earnedPick]).toEqual([true, false]);
+      // PLY-002: a purse that can buy the cheapest thing on the shelf offers the hangar; one that cannot, does not.
+      expect(first.earnedPick).toBe(true);
+      expect(runScript(FINISH_MERGE_SCRIPT, { model: { ...freshModel(), stars: 0, spent: 0 }, game: { ...over, id: 'm10', made: 0, over: false }, lang: 'en' }).earnedPick).toBe(false);
+      expect(SHOP_FROM).toBeLessThanOrEqual(first.stars);
       // Sabotage arm: without the board id check, the second Finish pays again.
       const doctored = FINISH_MERGE_SCRIPT.replace('model.lastMergeId !== id', 'true');
       expect(doctored).not.toBe(FINISH_MERGE_SCRIPT);
@@ -668,13 +669,33 @@ describe('TPL-007 — the engine', () => {
   });
 
   describe('Number Hunt', () => {
+    /**
+     * What a set of squares makes, worked out from PLY-003's table rather than read from the script: add, multiply,
+     * the bigger minus the smaller, the bigger over the smaller when it divides exactly. Tenths are rounded, because
+     * 0.1 + 0.2 is not 0.3 in binary.
+     */
+    const huntMade = (kind: string, values: number[]) => {
+      const round2 = (v: number) => Math.round(v * 100) / 100;
+      if (kind === 'mul2') return values.reduce((a, b) => a * b, 1);
+      if (kind === 'sub2') return round2(Math.max(...values) - Math.min(...values));
+      if (kind === 'div2') {
+        const hi = Math.max(...values);
+        const lo = Math.min(...values);
+        return lo && hi % lo === 0 ? hi / lo : NaN;
+      }
+      return round2(values.reduce((a, b) => a + b, 0));
+    };
+
     it.each(LEVELS)('%s builds a grid whose target has 1–3 solutions, and the checker agrees', (level) => {
       for (let i = 0; i < 15; i++) {
-        const h = runScript(BUILD_HUNT_SCRIPT, { level, lang: i % 2 ? 'fr' : 'en', nonce: i });
+        const lang = i % 2 ? 'fr' : 'en';
+        const h = runScript(BUILD_HUNT_SCRIPT, { level, lang, nonce: i });
         expect(h.cells).toHaveLength(16);
         expect(h.solutions).toBeGreaterThanOrEqual(1);
         expect(h.solutions).toBeLessThanOrEqual(3);
-        expect(h.instruction).toContain(String(h.kind === 'add100' ? 100 : h.target));
+        // PLY-003: a fixed-target kind says its number in the sentence; a decimals target is said in the child's own punctuation.
+        const said = h.kind === 'add100' ? '100' : h.kind === 'add1000' ? '1000' : String(h.target).replace('.', lang === 'fr' ? ',' : '.');
+        expect(h.instruction).toContain(said);
         // Count the solutions independently and check one with the checker.
         const idx = [...Array(16).keys()];
         const combos: number[][] = [];
@@ -683,7 +704,7 @@ describe('TPL-007 — the engine', () => {
           for (let k = start; k < 16; k++) { chosen.push(idx[k]); rec(k + 1, chosen); chosen.pop(); }
         };
         rec(0, []);
-        const value = (c: number[]) => c.reduce((acc, j) => (h.kind === 'mul2' ? acc * h.cells[j].v : acc + h.cells[j].v), h.kind === 'mul2' ? 1 : 0);
+        const value = (c: number[]) => huntMade(h.kind, c.map((j) => h.cells[j].v));
         const solutions = combos.filter((c) => value(c) === h.target);
         expect(solutions).toHaveLength(h.solutions);
         const check = runScript(CHECK_HUNT_SCRIPT, { cells: h.cells, selected: solutions[0], count: h.count, target: h.target, kind: h.kind });
@@ -708,6 +729,23 @@ describe('TPL-007 — the engine', () => {
   });
 
   describe('Number Hunt, the game (§12.2)', () => {
+    /**
+     * What a set of squares makes, worked out from PLY-003's table rather than read from the script: add, multiply,
+     * the bigger minus the smaller, the bigger over the smaller when it divides exactly. Tenths are rounded, because
+     * 0.1 + 0.2 is not 0.3 in binary.
+     */
+    const huntMade = (kind: string, values: number[]) => {
+      const round2 = (v: number) => Math.round(v * 100) / 100;
+      if (kind === 'mul2') return values.reduce((a, b) => a * b, 1);
+      if (kind === 'sub2') return round2(Math.max(...values) - Math.min(...values));
+      if (kind === 'div2') {
+        const hi = Math.max(...values);
+        const lo = Math.min(...values);
+        return lo && hi % lo === 0 ? hi / lo : NaN;
+      }
+      return round2(values.reduce((a, b) => a + b, 0));
+    };
+
     // A grid made by hand: the pairs that make 20 are exactly 3 + 17 (squares 0, 1) and 8 + 12 (squares 2, 3).
     const CELLS = [3, 17, 8, 12, 1, 2, 4, 6, 25, 30, 40, 50, 60, 70, 80, 90];
     const hunt = (over: Record<string, unknown> = {}): any => ({ id: 'h1', level: 'CE2', round: 1, rounds: HUNT_ROUNDS, kind: 'add2', count: 2, cells: CELLS, target: 20, ways: [[0, 1], [2, 3]], found: [], shown: [], picked: [], missed: [], lately: [], said: [], note: 'start', made: 0, helped: 0, misses: 0, gridMisses: 0, taps: 0, over: false, ...over });
@@ -720,7 +758,7 @@ describe('TPL-007 — the engine', () => {
       const out: number[][] = [];
       const rec = (start: number, chosen: number[]) => {
         if (chosen.length === count) {
-          const v = chosen.reduce((acc, j) => (kind === 'mul2' ? acc * cells[j] : acc + cells[j]), kind === 'mul2' ? 1 : 0);
+          const v = huntMade(kind, chosen.map((j) => cells[j]));
           if (v === target) out.push([...chosen]);
           return;
         }
@@ -860,8 +898,9 @@ describe('TPL-007 — the engine', () => {
       expect([long.starsEarned, long.why, long.line, long.headline]).toEqual([HUNT_STAR_RULE.wayCap + HUNT_STAR_RULE.finish, 'trouvées +15 (le maximum) · chasse finie +5', '40 trouvées', 'Chasse terminée !']);
       const left = runScript(FINISH_HUNT_SCRIPT, { model: { ...freshModel(), stars: 3 }, game: { ...over, id: 'h9', over: false }, lang: 'en' });
       expect([left.paid, left.stars]).toEqual([false, 3]);
-      // RKT-011: 10 → 21 crosses the first milestone and offers the pick; 20 → 31 crosses none.
-      expect([first.earnedPick, runScript(FINISH_HUNT_SCRIPT, { model: { ...freshModel(), stars: 20 }, game: { ...over, id: 'h10' }, lang: 'en' }).earnedPick]).toEqual([true, false]);
+      // PLY-002: a purse that can buy the cheapest thing offers the hangar; an empty one does not.
+      expect(first.earnedPick).toBe(true);
+      expect(runScript(FINISH_HUNT_SCRIPT, { model: { ...freshModel(), stars: 0, spent: 0 }, game: { ...over, id: 'h10', over: false }, lang: 'en' }).earnedPick).toBe(false);
       // The hunt's id is its own: a Make Ten board paid with the same id does not stop the hunt paying.
       expect(runScript(FINISH_HUNT_SCRIPT, { model: { ...freshModel(), lastMergeId: 'h7' }, game: over, lang: 'en' }).paid).toBe(true);
       // Sabotage arm: without the hunt id check, the second Finish pays again.
@@ -879,7 +918,7 @@ describe('TPL-007 — the engine', () => {
     const draw = (g: any, lang = 'en') => runScript(DRAW_MONSTER_SCRIPT, { game: g, lang });
 
     it('the rule table is the ruling: three monsters, three hearts, four hits, a heart back after three quick answers', () => {
-      expect(MONSTER).toEqual({ monsters: 3, hearts: 3, hp: 4, bigHit: 2, smallHit: 1, creep: { practice: 1 / 3, challenge: 0.25 }, push: 2, step: 1.5, pushStart: 0.5, healRun: 3 });
+      expect(MONSTER).toEqual({ monsters: 3, hearts: 3, hp: 4, bigHit: 2, smallHit: 1, creep: { practice: 1 / 3, challenge: 0.25 }, back: { practice: 0.15, challenge: 1 }, push: 2, step: 1.5, pushStart: 0.5, healRun: 3 });
       expect(MONSTER_LOOKS).toEqual(['horns', 'eye', 'spikes']);
     });
 
@@ -897,8 +936,11 @@ describe('TPL-007 — the engine', () => {
     });
 
     it('🔴 Beat it to the gate: a quick answer is a big hit and a slow one a small hit, each knocks it back; four hits and it runs away, and Next brings the next', () => {
+      // PLY-004: in Practice a right answer pushes it back by MONSTER.back.practice, not all the way.
       const quick = move(game({ start: 0.5, pos: 0.5 }), 'fluent').game;
-      expect([quick.hp, quick.start, quick.pos, quick.event, quick.right, quick.answered]).toEqual([2, 1, 1, 'bigHit', 1, 1]);
+      expect([quick.hp, quick.start, quick.pos, quick.event, quick.right, quick.answered]).toEqual([2, 0.65, 0.65, 'bigHit', 1, 1]);
+      // In Challenge it still is all the way — Richard: "in the defi mode it works well with the timer adding stakes".
+      expect(move(game({ timed: true, start: 0.5, pos: 0.5 }), 'fluent').game.start).toBe(1);
       const slow = move(game(), 'correct').game;
       expect([slow.hp, slow.event]).toEqual([3, 'hit']);
       const beaten = answers(game(), 'fluent', 'correct', 'correct');
@@ -918,8 +960,66 @@ describe('TPL-007 — the engine', () => {
       expect([p3.start, p3.event, p3.hearts]).toEqual([1, 'bang', 2]);
       const c = (n: number) => answers(game({ timed: true }), ...Array(n).fill('wrong'));
       expect([c(1).start, c(2).start, c(3).start, c(3).hearts, c(4).event, c(4).hearts, c(4).start]).toEqual([0.75, 0.5, 0.25, 3, 'bang', 2, 1]);
-      // A right answer knocks a crept monster all the way back.
+      // In Challenge a right answer still knocks a crept monster all the way back (PLY-004 left that alone).
       expect(move(c(3), 'correct').game.start).toBe(1);
+    });
+
+    it('🔴 PLY-004: in Practice only a QUICK right answer pushes it back, a slow one holds it, and wrong answers accumulate', () => {
+      // Slow but right: the hit lands, the monster neither gains nor loses ground. This is the half that makes Practice tense.
+      const slow = move(game({ start: 0.5, pos: 0.5 }), 'correct').game;
+      expect([slow.hp, slow.start, slow.event]).toEqual([3, 0.5, 'hit']);
+      // Quick and right: pushed back by MONSTER.back.practice.
+      const quick = move(game({ start: 0.5, pos: 0.5 }), 'fluent').game;
+      expect([quick.hp, quick.start, quick.event]).toEqual([2, 0.65, 'bigHit']);
+      // 🔴 The finding itself: wrong answers now ACCUMULATE. Wrong, right, wrong leaves it two creeps in — under the
+      // rule Richard played, the right answer in the middle threw it all the way back and it was one creep in.
+      expect(answers(game(), 'wrong', 'correct', 'wrong').start).toBe(0.334);
+      const asShipped = MONSTER_MOVE_SCRIPT.replace('quick ? MONSTER.back.practice : 0', 'MONSTER.back.challenge');
+      expect(asShipped).not.toBe(MONSTER_MOVE_SCRIPT);
+      // 🔴 The whole sequence has to run under the old script — building the prefix with the NEW one and applying
+      // one old move measures a mixture of the two rules, and reads as if nothing had changed.
+      const asShippedRun = ['wrong', 'correct', 'wrong'].reduce((g: any, o) => runScript(asShipped, { game: g, action: 'answer', outcome: o }).game, game());
+      expect(asShippedRun.start).toBe(0.667);
+      // Challenge is untouched: Richard says the clock already carries it.
+      expect(move(game({ timed: true, start: 0.5, pos: 0.5 }), 'correct').game.start).toBe(1);
+    });
+
+    it('🔴 PLY-004: the compromise, measured — a child at 40% right loses the gate, one at 75% wins but feels it', () => {
+      /** 120 seeded Practice games at a fixed accuracy, half the right answers quick. Returns how many were lost, and the hearts a winner spent. */
+      const many = (accuracy: number, script = MONSTER_MOVE_SCRIPT) => {
+        let lost = 0;
+        let heartsSpent = 0;
+        const games = 120;
+        for (let t = 0; t < games; t++) {
+          let seed = 1000 + t * 7919;
+          const rand = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+          let g = runScript(NEW_MONSTER_SCRIPT, { style: 'gate', timed: false }).game;
+          let n = 0;
+          while (!g.over && n < 400) {
+            const outcome = rand() < accuracy ? (rand() < 0.5 ? 'fluent' : 'correct') : 'wrong';
+            g = runScript(script, { game: g, action: 'answer', outcome }).game;
+            if (g.fresh) g = runScript(script, { game: g, action: 'next' }).game;
+            n++;
+          }
+          if (g.over && g.won !== true) lost++;
+          else heartsSpent += MONSTER.hearts - g.hearts;
+        }
+        return { lossPct: Math.round((100 * lost) / games), heartsSpent: heartsSpent / Math.max(1, games - lost) };
+      };
+      const guessing = many(0.4);
+      const learning = many(0.75);
+      // A child guessing loses the gate more often than not.
+      expect(guessing.lossPct).toBeGreaterThan(40);
+      // A child answering the way the selector aims for (~75%) wins — that is the pedagogy, not a bug…
+      expect(learning.lossPct).toBeLessThan(10);
+      // …but they no longer cruise: they spend hearts getting there, which is the "stakes" half of Richard's ask.
+      expect(learning.heartsSpent).toBeGreaterThan(0.25);
+      // 🔴 The arm that reproduces what he played: give a slow right answer the full knock-back, and the same
+      // guessing child is close to safe while the learning child never loses a heart at all.
+      const asShipped = MONSTER_MOVE_SCRIPT.replace('quick ? MONSTER.back.practice : 0', 'MONSTER.back.challenge');
+      expect(asShipped).not.toBe(MONSTER_MOVE_SCRIPT);
+      expect(many(0.4, asShipped).lossPct).toBeLessThan(guessing.lossPct);
+      expect(many(0.75, asShipped).heartsSpent).toBeLessThan(learning.heartsSpent);
     });
 
     it('🔴 out of time it bangs the gate: a heart gone, and it backs off; the next question’s clock is the walk from where it stands (Challenge, the gate way only)', () => {
@@ -1419,7 +1519,8 @@ describe('TPL-007 — the engine', () => {
     });
 
     it('sabotage arm: the rocket moves by a formula of its own, and the gate names it', () => {
-      const sabotaged = GRADE_ANSWER_SCRIPT.replace(`var gain = correct ? ${RACE_STEP} * speed : 0;`, `var gain = correct ? ${RACE_STEP} * (elapsed <= fluentMs ? 1 : 0.5) : 0;`);
+      // PLY-006 added the comeback multipliers to this one formula; the arm still replaces the WHOLE of it.
+      const sabotaged = GRADE_ANSWER_SCRIPT.replace(`var gain = correct ? ${RACE_STEP} * speed * slip * turboMult : 0;`, `var gain = correct ? ${RACE_STEP} * (elapsed <= fluentMs ? 1 : 0.5) : 0;`);
       expect(sabotaged).not.toBe(GRADE_ANSWER_SCRIPT);
       expect(disagreements(sabotaged).length).toBeGreaterThan(0);
     });
@@ -1605,29 +1706,210 @@ describe('TPL-007 — the engine', () => {
     });
   });
 
-  describe('RKT-011 — the hangar: picks follow the curve, and nothing owned is ever taken away', () => {
+  describe('PLY-006 — the comeback: earned, visible, and only when behind', () => {
+    // 🔴 ONE question per answer. Calling the picker twice — `grade(q(), q().answer)` — grades one question against
+    // another one's answer, so every answer is wrong, every gain is 0 and every multiplier reads 1. It looks like the
+    // feature is dead when it is the harness that is.
+    const q = () => pick({ curriculum: CURRICULUM.filter((s) => s.id === 'table-7'), level: 'CE2' });
+    const right = (opts: Record<string, unknown> = {}) => { const one = q(); return grade(one, one.answer, { elapsedOverride: 1200, raceId: 'r1', ...opts }); };
+    const at = (myAt: number, cpuAt: number, extra: Record<string, unknown> = {}) => right({ myAt, cpuAt, ...extra });
+
+    it('🔴 AC4: the slipstream is 1 at and below the threshold, rises with the gap, caps at +60%, and is never given to a wrong answer', () => {
+      // Level, ahead, and just at the threshold: no help at all.
+      expect([at(0.5, 0.5).slip, at(0.8, 0.2).slip, at(0.5, 0.5 + COMEBACK.behindFrom).slip]).toEqual([1, 1, 1]);
+      // Behind: it rises with the gap, and stops at +60%.
+      const small = at(0.2, 0.2 + COMEBACK.behindFrom + 0.15).slip;
+      const big = at(0.1, 0.1 + COMEBACK.behindFrom + 0.3).slip;
+      expect(small).toBeGreaterThan(1);
+      expect(big).toBeGreaterThan(small);
+      expect(at(0, 0.95).slip).toBeCloseTo(1 + COMEBACK.slipMax, 5);
+      // 🔴 Never for a wrong answer: the gain it would multiply is zero, and the number itself stays 1.
+      const missed = grade(q(), 'nonsense', { elapsedOverride: 1200, raceId: 'r1', myAt: 0, cpuAt: 0.8 });
+      expect([missed.slip, missed.gain]).toEqual([1, 0]);
+      // 🔴 And never for the computer: its step is the same however far ahead it is.
+      expect(at(0, 0.9).cpuGain).toBe(at(0.9, 0.9).cpuGain);
+    });
+
+    it('AC4 sabotage arm: give the slipstream to a wrong answer and the gate sees the rocket move on a miss', () => {
+      const doctored = GRADE_ANSWER_SCRIPT.replace('var slip = correct ? slipstream(gap) : 1;', 'var slip = slipstream(gap);');
+      expect(doctored).not.toBe(GRADE_ANSWER_SCRIPT);
+      const one = q();
+      const missed = runScript(doctored, { model: freshModel(), skillId: one.skillId, answer: one.answer, typed: 'nonsense', fluentMs: one.fluentMs, itemDiff: one.itemDiff, level: 'CE2', lang: 'en', elapsedOverride: 1200, raceId: 'r1', myAt: 0, cpuAt: 0.8 });
+      expect(missed.slip).toBeGreaterThan(1);
+    });
+
+    it('🔴 AC5: three right answers in a row charge one ⚡; a wrong answer breaks the chain but never discharges it; it is spent only while behind', () => {
+      const run = (outcomes: Array<'right' | 'wrong'>, opts: Record<string, unknown> = {}) => {
+        let model: any = freshModel();
+        let last: any = {};
+        for (const o of outcomes) {
+          const question = q();
+          last = grade(question, o === 'right' ? question.answer : 'nonsense', { elapsedOverride: 1200, raceId: 'r1', model, myAt: 0, cpuAt: 0.8, ...opts });
+          model = last.model;
+        }
+        return last;
+      };
+      expect(COMEBACK.chainAt).toBe(3);
+      // Two in a row: charging, nothing held.
+      expect([run(['right', 'right']).chain, run(['right', 'right']).turbo]).toEqual([2, 0]);
+      // Three: one held, and the chain starts again.
+      expect([run(['right', 'right', 'right']).chain, run(['right', 'right', 'right']).turbo]).toEqual([0, 1]);
+      // A wrong answer breaks the chain…
+      expect(run(['right', 'right', 'wrong']).chain).toBe(0);
+      // …but never discharges one already earned.
+      expect(run(['right', 'right', 'right', 'wrong']).turbo).toBe(1);
+      // Only one is held at a time.
+      expect(run(['right', 'right', 'right', 'right', 'right', 'right']).turbo).toBe(1);
+    });
+
+    it('🔴 AC5: firing a turbo doubles the answer that spends it, and asking for one you have not got, or while level, does nothing', () => {
+      const charge = (opts: Record<string, unknown> = {}) => {
+        let model: any = freshModel();
+        for (let i = 0; i < 3; i++) { const question = q(); model = grade(question, question.answer, { elapsedOverride: 1200, raceId: 'r1', model, myAt: 0, cpuAt: 0.8, ...opts }).model; }
+        return model;
+      };
+      const held = charge();
+      const plain = right({ model: held, myAt: 0, cpuAt: 0.8 });
+      const fired = right({ model: held, myAt: 0, cpuAt: 0.8, useTurbo: true });
+      expect([plain.turboUsed, fired.turboUsed]).toEqual([false, true]);
+      expect(fired.gain).toBeCloseTo(plain.gain * COMEBACK.turboMult, 5);
+      expect(fired.turbo).toBe(0);
+      // Level with the computer: the turbo is not spent and the answer is a plain one.
+      const level = right({ model: held, myAt: 0.5, cpuAt: 0.5, useTurbo: true });
+      expect([level.turboUsed, level.turbo]).toEqual([false, 1]);
+      // Nothing held: asking changes nothing.
+      expect(right({ model: freshModel(), myAt: 0, cpuAt: 0.8, useTurbo: true }).turboUsed).toBe(false);
+      // A new race id starts the chain clean, and a bought turbo can start it charged.
+      expect(right({ raceId: 'r2', model: held, myAt: 0, cpuAt: 0.8 }).turbo).toBe(0);
+      expect(right({ raceId: 'r3', model: held, myAt: 0, cpuAt: 0.8, startTurbo: 1, useTurbo: true }).turboUsed).toBe(true);
+    });
+
+    it('🔴 AC6: the clause that grades Richard’s sentence — a bad start is recoverable, and the race has not become easy', () => {
+      /**
+       * A whole race through the REAL grader.
+       *
+       * 🔴 `badStart` is defined by the STATE Richard named — *"the CPU rocket is at the middle point"* — not by a
+       * number of missed questions. The child answers wrong until the computer reaches halfway, and only then starts
+       * answering at `accuracy`. Four-wrong-then-play was tried first and was not his scenario at all: four misses
+       * leave the computer at about 0.2, and the child recovers from that without any help (73% of the time).
+       *
+       * The child fires a turbo the moment they hold one: the simplest policy a child could follow, and the least
+       * flattering to the design.
+       */
+      const races = (accuracy: number, badStart: boolean, on: boolean) => {
+        let won = 0;
+        const N = 400;
+        for (let t = 0; t < N; t++) {
+          let seed = 7919 * t + 13;
+          const rand = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+          let me = 0;
+          let cpu = 0;
+          let model: any = freshModel();
+          let n = 0;
+          while (me < 1 && cpu < 1 && n < 120) {
+            const one = q();
+            const isRight = badStart && cpu < 0.5 ? false : rand() < accuracy;
+            const ms = isRight && rand() < 0.5 ? 1200 : Number(one.fluentMs) * 1.4;
+            const r = runScript(GRADE_ANSWER_SCRIPT, {
+              model, skillId: one.skillId, answer: one.answer, typed: isRight ? one.answer : 'nonsense',
+              fluentMs: one.fluentMs, itemDiff: one.itemDiff, level: 'CE2', lang: 'en',
+              elapsedOverride: ms, raceId: 'r' + t,
+              // Off: the grader is told nothing about the gap, which is exactly the build Richard played.
+              myAt: on ? me : 0, cpuAt: on ? cpu : 0, useTurbo: on
+            });
+            model = r.model;
+            me += Number(r.gain) || 0;
+            cpu += Number(r.cpuGain) || 0;
+            n++;
+          }
+          if (me >= 1 && me > cpu) won++;
+        }
+        return Math.round((100 * won) / N);
+      };
+
+      // 🔴 RED first, and this is the whole finding: let the computer reach halfway and the race is over.
+      const badBefore = races(0.75, true, false);
+      expect(badBefore).toBeLessThanOrEqual(2);
+      // With the comeback on, a child who then answers well comes back often enough to believe it is worth trying.
+      const badAfter = races(0.75, true, true);
+      expect(badAfter).toBeGreaterThanOrEqual(15);
+      // …and a clean race has NOT become a gift. A fix that makes winning free is not a fix.
+      const cleanBefore = races(0.75, false, false);
+      const cleanAfter = races(0.75, false, true);
+      expect(cleanAfter).toBeGreaterThanOrEqual(cleanBefore);
+      expect(cleanAfter - cleanBefore).toBeLessThanOrEqual(15);
+      // A child who is guessing still loses, comeback or not.
+      expect(races(0.35, false, true)).toBeLessThanOrEqual(35);
+      // The four numbers this gate is built on, printed so a change of heart is a change of numbers.
+      expect({ badBefore, badAfter, cleanBefore, cleanAfter }).toEqual({ badBefore, badAfter, cleanBefore, cleanAfter });
+    });
+  });
+
+  describe('PLY-001 / PLY-002 — the hangar is a shop, it fits the face you chose, and nothing owned is ever taken away', () => {
     const shelf = HANGAR_SHELF;
     const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
     const newPlayer = (look: string) => runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Léa', lang: 'fr', look }).app;
     const withTotal = (app: any, stars: number) => runScript(SAVE_MODEL_SCRIPT, { app, model: { ...(me(app).model || {}), stars } }).app;
-    /** The ruled curve, worked out from RKT-011 §3.1's words rather than from the script: a pick at each milestone, then one every HANGAR_EVERY. */
-    const onCurve = (stars: number) => {
-      const last = HANGAR_MILESTONES[HANGAR_MILESTONES.length - 1];
-      const early = HANGAR_MILESTONES.filter((m) => m <= stars).length;
-      return stars < last ? early : early + Math.floor((stars - last) / HANGAR_EVERY);
-    };
+    const spent = (app: any) => Number(me(app).model?.spent) || 0;
+    const costOf = (id: string) => shelf.find((i) => i.id === id)?.cost ?? 0;
+    /** The purse, worked out from PLY-002's words rather than from the script: what was earned, less what was spent. */
+    // 🔴 Not clamped at 0 the way the script clamps it: a gate that mirrors the clamp can never SEE an overdraw.
+    const purseOf = (app: any) => (Number(me(app).model?.stars) || 0) - spent(app);
+
+    it('🔴 PLY-001 AC2: the face shelf holds every item that fits the chosen face and NO item that does not', () => {
+      for (const look of HANGAR_LOOKS) {
+        const app = newPlayer(look);
+        const rows = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' }).rows as Array<{ id: string }>;
+        const fits = shelf.filter((i) => i.kind === 'face' && i.faces && (i.faces as any)[look]).map((i) => i.id);
+        expect(rows.map((r) => r.id).sort()).toEqual(fits.sort());
+        // PLY-001 AC3: and a shelf that fits is never a thin one.
+        expect(rows.length).toBeGreaterThanOrEqual(MIN_FACE_ITEMS_PER_LOOK);
+      }
+    });
+
+    it('PLY-001 AC2 sabotage arm: put RKT-011’s “show it greyed” branch back, and a misfit is offered again', () => {
+      const doctored = HANGAR_SHELF_SCRIPT.replace('  if (!itemFits(item, look)) continue;', '');
+      expect(doctored).not.toBe(HANGAR_SHELF_SCRIPT);
+      const app = newPlayer('adventurer');
+      const rows = runScript(doctored, { app, shelf, tab: 'face' }).rows as Array<{ id: string }>;
+      const offered = rows.map((r) => r.id);
+      expect(offered).toContain('cap'); // a pixel-art hat, on an adventurer face — exactly what Richard was shown
+    });
+
+    it('PLY-001 §3.4: a face with nothing to wear offers nothing, says so, and still has its rocket', () => {
+      const app = newPlayer('thumbs');
+      const face = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' });
+      expect(face.rows).toEqual([]);
+      const rocket = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'rocket' });
+      expect(rocket.rows.length).toBe(shelf.filter((i) => i.kind === 'rocket').length);
+    });
+
+    it('PLY-001 §3.2: what is owned for another face is counted, never offered and never removed', () => {
+      let app = withTotal(newPlayer('big-smile'), 500);
+      app = runScript(PICK_ITEM_SCRIPT, { app, itemId: 'crown', shelf }).app;
+      expect(me(app).owned).toEqual(['crown']);
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, look: 'adventurer' }).app;
+      const shown = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' });
+      expect(shown.rows.map((r: any) => r.id)).not.toContain('crown');
+      expect([shown.elsewhere, shown.elsewhereText]).toEqual([1, expect.stringMatching(/1 objet t’appartient/)]);
+      // Still owned, and worn again the moment the face comes back (wear is keyed by look).
+      expect(me(app).owned).toEqual(['crown']);
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, look: 'big-smile' }).app;
+      expect(runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' }).rows.find((r: any) => r.id === 'crown').worn).toBe(true);
+    });
 
     /** 60 seeded races at about 20 ⭐ each. After each one the child changes face now and then, and taps every item on the shelf. */
-    function sixtyRaces(pickScript: string) {
-      let seed = 20260913;
+    function sixtyRaces(buyScript: string) {
+      let seed = 20260918;
       const rand = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
       const LOOKS = ['big-smile', 'pixel-art', 'adventurer', 'thumbs'];
       let app: any = newPlayer('big-smile');
       let stars = 0;
-      let before = { stars: 0, owned: [] as string[] };
+      let before = { stars: 0, owned: [] as string[], spent: 0 };
       const faults: string[] = [];
-      let picked = 0;
+      let bought = 0;
       let retappedOwned = 0;
+      let refusedTooDear = 0;
       let lookChanges = 0;
       for (let race = 1; race <= 60; race++) {
         stars += 13 + Math.floor(rand() * 15);
@@ -1637,58 +1919,71 @@ describe('TPL-007 — the engine', () => {
           lookChanges++;
         }
         const shown = runScript(ACTIVE_PROFILE_SCRIPT, { app });
-        const ownedNow: string[] = me(app).owned || [];
-        if (shown.stars < before.stars) faults.push(`race ${race}: the total dropped, ${before.stars} → ${shown.stars}`);
-        if (shown.picks + ownedNow.length !== onCurve(stars)) faults.push(`race ${race}: ${shown.picks} picks waiting + ${ownedNow.length} owned at ${stars} ⭐, but the curve gives ${onCurve(stars)}`);
+        if (shown.stars < before.stars) faults.push(`race ${race}: what was EARNED dropped, ${before.stars} → ${shown.stars}`);
+        if (spent(app) < before.spent) faults.push(`race ${race}: what was SPENT dropped, ${before.spent} → ${spent(app)}`);
+        if (shown.picks !== purseOf(app)) faults.push(`race ${race}: the purse says ${shown.picks} but earned − spent is ${purseOf(app)}`);
         for (const item of shelf) {
           const was: string[] = me(app).owned || [];
-          const left = runScript(ACTIVE_PROFILE_SCRIPT, { app }).picks;
-          const r = runScript(pickScript, { app, itemId: item.id, shelf });
+          const purseBefore = purseOf(app);
+          const r = runScript(buyScript, { app, itemId: item.id, shelf });
           const now: string[] = me(r.app).owned || [];
           if (was.includes(item.id)) {
             retappedOwned++;
-            if (r.picked) faults.push(`race ${race}: ${item.id} was already owned, and a pick was spent on it again`);
+            if (r.picked) faults.push(`race ${race}: ${item.id} was already owned, and was paid for again`);
           }
+          if (r.why === 'tooDear') refusedTooDear++;
           if (r.picked) {
-            picked++;
-            const leftAfter = runScript(ACTIVE_PROFILE_SCRIPT, { app: r.app }).picks;
-            if (now.length !== was.length + 1 || leftAfter !== left - 1) faults.push(`race ${race}: picking ${item.id} took owned ${was.length} → ${now.length} and picks ${left} → ${leftAfter}`);
-          } else if (JSON.stringify(now) !== JSON.stringify(was)) faults.push(`race ${race}: a refused pick of ${item.id} (${r.why}) changed what is owned`);
+            bought++;
+            const purseAfter = purseOf(r.app);
+            if (purseAfter !== purseBefore - costOf(item.id)) faults.push(`race ${race}: buying ${item.id} (${costOf(item.id)} ⭐) took the purse ${purseBefore} → ${purseAfter}`);
+            if (purseAfter < 0) faults.push(`race ${race}: buying ${item.id} overdrew the purse`);
+            if (now.length !== was.length + 1) faults.push(`race ${race}: buying ${item.id} took owned ${was.length} → ${now.length}`);
+          } else if (JSON.stringify(now) !== JSON.stringify(was) || purseOf(r.app) !== purseBefore) {
+            faults.push(`race ${race}: a refused buy of ${item.id} (${r.why}) changed what is owned or the purse`);
+          }
           if (new Set(now).size !== now.length) faults.push(`race ${race}: owned lists an item twice: ${now.join(', ')}`);
           app = r.app;
         }
         const ownedAfter: string[] = me(app).owned || [];
         const lost = before.owned.filter((id) => !ownedAfter.includes(id));
         if (lost.length) faults.push(`race ${race}: lost ${lost.join(', ')}`);
-        before = { stars: runScript(ACTIVE_PROFILE_SCRIPT, { app }).stars, owned: ownedAfter };
+        before = { stars: runScript(ACTIVE_PROFILE_SCRIPT, { app }).stars, owned: ownedAfter, spent: spent(app) };
       }
-      return { faults: [...new Set(faults)], picked, retappedOwned, lookChanges, stars, owned: before.owned.length };
+      return { faults: [...new Set(faults)], bought, retappedOwned, refusedTooDear, lookChanges, stars, owned: before.owned.length };
     }
 
-    it('🔴 AC5: over 60 seeded races the picks follow the ruled curve, the total never drops, owned only grows, and a pick is spent once', () => {
+    it('🔴 PLY-002 AC: over 60 seeded races every buy costs exactly its price, the purse never goes negative, what was EARNED never drops, and owned only grows', () => {
       const run = sixtyRaces(PICK_ITEM_SCRIPT);
       expect(run.faults).toEqual([]);
-      // Known-firing: picks were really spent, owned items really were tapped again, and the face really changed between races.
-      expect(run.picked).toBeGreaterThanOrEqual(10);
+      // Known-firing: things were really bought, owned items really were tapped again, something really was too dear, and the face really changed.
+      expect(run.bought).toBeGreaterThanOrEqual(10);
       expect(run.retappedOwned).toBeGreaterThan(0);
+      expect(run.refusedTooDear).toBeGreaterThan(0);
       expect(run.lookChanges).toBeGreaterThan(0);
-      expect(run.stars).toBeGreaterThan(HANGAR_MILESTONES[HANGAR_MILESTONES.length - 1] + 2 * HANGAR_EVERY);
+      expect(run.stars).toBeGreaterThan(SHOP_FROM * 20);
     });
 
-    it('AC5 sabotage arm: a pick that does not check what is already owned spends twice, and the gate names the race', () => {
-      const doctored = PICK_ITEM_SCRIPT.replace("else if (owned.indexOf(item.id) !== -1) why = 'owned';", '');
+    it('PLY-002 sabotage arm: a buy that does not charge the purse is caught by the gate, and it names the race', () => {
+      const doctored = PICK_ITEM_SCRIPT.replace('model.spent = spentOf(model) + cost;', 'model.spent = spentOf(model);');
       expect(doctored).not.toBe(PICK_ITEM_SCRIPT);
-      expect(sixtyRaces(doctored).faults.join('\n')).toMatch(/already owned, and a pick was spent on it again/);
+      expect(sixtyRaces(doctored).faults.join('\n')).toMatch(/took the purse/);
     });
 
-    it('a pick is refused, changing nothing, for a free item, an owned one, one that does not fit, and with none left; what it buys is worn at once', () => {
-      let app: any = withTotal(newPlayer('big-smile'), 15);
-      const tryPick = (id: string) => runScript(PICK_ITEM_SCRIPT, { app, itemId: id, shelf });
-      expect([tryPick('glasses').why, tryPick('cap').why, tryPick('nothing-here').why]).toEqual(['free', 'fits', 'unknown']);
-      const got = tryPick('crown');
-      expect([got.picked, me(got.app).owned, me(got.app).wear]).toEqual([true, ['crown'], { face: { 'big-smile': { accessories: 'sailormoonCrown' } }, paint: '' }]);
+    it('PLY-002 sabotage arm: a buy that does not check the purse overdraws, and the gate says so', () => {
+      const doctored = PICK_ITEM_SCRIPT.replace("else if (!canAfford(item, before)) why = 'tooDear';", '');
+      expect(doctored).not.toBe(PICK_ITEM_SCRIPT);
+      expect(sixtyRaces(doctored).faults.join('\n')).toMatch(/overdrew the purse/);
+    });
+
+    it('a buy is refused, changing nothing, for a free item, an owned one, one that does not fit, and one it cannot afford; what it buys is worn at once', () => {
+      let app: any = withTotal(newPlayer('big-smile'), costOf('crown'));
+      const tryBuy = (id: string) => runScript(PICK_ITEM_SCRIPT, { app, itemId: id, shelf });
+      expect([tryBuy('glasses').why, tryBuy('cap').why, tryBuy('nothing-here').why]).toEqual(['free', 'fits', 'unknown']);
+      const got = tryBuy('crown');
+      expect([got.picked, got.cost, got.purseBefore, got.purseAfter]).toEqual([true, costOf('crown'), costOf('crown'), 0]);
+      expect([me(got.app).owned, me(got.app).wear]).toEqual([['crown'], { face: { 'big-smile': { accessories: 'sailormoonCrown' } }, paint: '', pattern: '' }]);
       app = got.app;
-      expect([tryPick('crown').why, tryPick('cat-ears').why]).toEqual(['owned', 'noPick']);
+      expect([tryBuy('crown').why, tryBuy('cat-ears').why]).toEqual(['owned', 'tooDear']);
       // A free paint goes on, and off again, and the rocket is tomato once more.
       const on = runScript(WEAR_ITEM_SCRIPT, { app, itemId: 'paint-green', shelf });
       expect([on.worn, runScript(ACTIVE_PROFILE_SCRIPT, { app: on.app }).paint]).toEqual([true, 'var(--rocket-paint-green)']);
@@ -1698,96 +1993,16 @@ describe('TPL-007 — the engine', () => {
       expect(runScript(WEAR_ITEM_SCRIPT, { app, itemId: 'cat-ears', shelf }).changed).toBe(false);
     });
 
-    it('🔴 AC6: a face the worn item does not fit draws without it and keeps it owned, and going back wears it again', () => {
-      let app: any = runScript(PICK_ITEM_SCRIPT, { app: withTotal(newPlayer('big-smile'), 15), itemId: 'crown', shelf }).app;
-      const on = runScript(ACTIVE_PROFILE_SCRIPT, { app });
-      expect(on.faceOptions).toEqual({ accessories: ['sailormoonCrown'], accessoriesProbability: 100 });
-      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, look: 'pixel-art' }).app;
-      const away = runScript(ACTIVE_PROFILE_SCRIPT, { app });
-      expect([away.look, away.faceOptions, me(app).owned]).toEqual(['pixel-art', {}, ['crown']]);
-      // The shelf still shows the crown, greyed, on a face it fits, saying which one; and it cannot be put on this face.
-      const row = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' }).rows.find((r: any) => r.id === 'crown');
-      expect(row).toMatchObject({ dim: true, canWear: false, canPick: false, worn: false, look: 'big-smile', note: 'Va avec les têtes Smile' });
-      expect(runScript(WEAR_ITEM_SCRIPT, { app, itemId: 'crown', shelf }).changed).toBe(false);
-      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, look: 'big-smile' }).app;
-      expect(runScript(ACTIVE_PROFILE_SCRIPT, { app }).faceOptions).toEqual(on.faceOptions);
-      // The siblings' list draws the same face the child wears (wearing is fine there; the stars never are).
-      expect(runScript(LIST_PROFILES_SCRIPT, { app }).profiles[0].faceOptions).toEqual(on.faceOptions);
-    });
-
-    it('the shelf shows every item of a tab, and says what a tap does: wear it, pick it, or how far to the next pick', () => {
-      const app: any = withTotal(newPlayer('pixel-art'), 20);
-      const rows = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' }).rows;
-      expect(rows.map((r: any) => r.id)).toEqual(shelf.filter((i) => i.kind === 'face').map((i) => i.id));
-      const by = (id: string) => rows.find((r: any) => r.id === id);
-      expect([by('glasses').note, by('cap').note, by('crown').note]).toEqual(['À toi · touche pour mettre', '🎁 Touche pour choisir', 'Va avec les têtes Smile']);
-      expect(runScript(HANGAR_SHELF_SCRIPT, { app: withTotal(app, 10), shelf, tab: 'face' }).rows.find((r: any) => r.id === 'cap').note).toBe('🔒 Prochain 🎁 à 15 ⭐');
-      const paints = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'rocket' }).rows;
-      expect(paints.map((r: any) => [r.id, r.isFace, r.paint.startsWith('var(--rocket-paint-')])).toEqual(shelf.filter((i) => i.kind === 'rocket').map((i) => [i.id, false, true]));
-    });
-
-    it('Home’s line: how far to the next 🎁 in the child’s language, then the picks waiting once there are some', () => {
-      const app = withTotal(newPlayer('pixel-art'), 12);
-      const saving = runScript(ACTIVE_PROFILE_SCRIPT, { app });
-      expect([saving.picks, saving.hasPicks, saving.nextAt, saving.nextPct, saving.nextText]).toEqual([0, false, 15, 80, 'Prochain 🎁 dans 3 ⭐']);
-      const two = runScript(ACTIVE_PROFILE_SCRIPT, { app: withTotal(app, 41) });
-      expect([two.picks, two.hasPicks, two.nextAt, two.nextPct, two.nextText]).toEqual([2, true, 75, 3, '🎁 2 choix à faire au hangar']);
-    });
-
-    it('🔴 a race whose take crosses a milestone says so; a race that stays between two milestones does not', () => {
-      const finishFrom = (stars: number) => {
-        let m: any = { ...freshModel(), stars };
-        for (let i = 0; i < 8; i++) m = runScript(GRADE_ANSWER_SCRIPT, { model: m, skillId: `k${i}`, answer: '4', typed: '4', shownAt: Date.now(), fluentMs: 4000, itemDiff: 1000, level: 'CE2', lang: 'en', timedOut: false, elapsedOverride: 800, raceId: 'rX' }).model;
-        const f = runScript(FINISH_RACE_SCRIPT, { model: m, raceId: 'rX', timed: false, lang: 'en' });
-        return [f.stars, f.earnedPick];
-      };
-      expect([finishFrom(0), finishFrom(10), finishFrom(16), finishFrom(30)]).toEqual([[13, false], [23, true], [29, false], [43, true]]);
-    });
-
-    /**
-     * 🔴 Session 10: every arm above passes the shelf as a plain array, and the browser never does. Static Data hands a Function a
-     * runtime Collection whose rows are Models, and a Model answers its own member names itself. With the field called `on`, the shelf
-     * script threw ("reading 'part'"), picking refused every item as not fitting, and the hangar drew no tile, with every gate green.
-     */
-    const asRuntime = (rows: unknown[]) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const RuntimeCollection = require('../../noodl-runtime/src/collection');
-      const c = RuntimeCollection.get();
-      c.set(JSON.parse(JSON.stringify(rows)));
-      return c;
-    };
-
-    it('🔴 the shelf works as the runtime hands it over: a Collection of Models gives the same tiles, and picking and wearing work', () => {
-      const app = withTotal(newPlayer('pixel-art'), 45);
-      const runtimeShelf = asRuntime(HANGAR_SHELF as unknown[]);
-      // Known-firing: this really is the runtime's shape, not an array that happens to behave.
-      expect([Array.isArray(runtimeShelf), typeof runtimeShelf.find((r: any) => r.id === 'crown').on]).toEqual([true, 'function']);
-      for (const tab of ['face', 'rocket']) {
-        expect(runScript(HANGAR_SHELF_SCRIPT, { app, shelf: runtimeShelf, tab }).rows).toEqual(runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab }).rows);
-      }
-      expect(runScript(PICK_ITEM_SCRIPT, { app, itemId: 'cap', shelf: runtimeShelf })).toMatchObject({ picked: true, why: '' });
-      expect(runScript(WEAR_ITEM_SCRIPT, { app, itemId: 'paint-green', shelf: runtimeShelf })).toMatchObject({ worn: true, changed: true });
-    });
-
-    it('sabotage arm: the old field name, `on`, throws in a runtime Collection exactly as the browser did, while a plain array hides it', () => {
-      const doctoredRows = HANGAR_SHELF.map((i) => {
-        if (!i.faces) return i;
-        const { faces, ...rest } = i;
-        return { ...rest, on: faces };
-      });
-      const doctoredScript = HANGAR_SHELF_SCRIPT.split('item.faces').join('item.on');
-      expect(doctoredScript).not.toBe(HANGAR_SHELF_SCRIPT);
-      const app = withTotal(newPlayer('pixel-art'), 45);
-      expect(runScript(doctoredScript, { app, shelf: doctoredRows, tab: 'face' }).rows.length).toBe(12);
-      expect(() => runScript(doctoredScript, { app, shelf: asRuntime(doctoredRows), tab: 'face' })).toThrow(/reading 'part'/);
-    });
-
-    it('the save code carries what the child owns and wears', () => {
-      let app: any = runScript(PICK_ITEM_SCRIPT, { app: withTotal(newPlayer('big-smile'), 40), itemId: 'crown', shelf }).app;
-      app = runScript(WEAR_ITEM_SCRIPT, { app, itemId: 'paint-blue', shelf }).app;
-      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
-      const back = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code }).app;
-      expect([me(back).owned, me(back).wear, runScript(ACTIVE_PROFILE_SCRIPT, { app: back }).picks]).toEqual([['crown'], { face: { 'big-smile': { accessories: 'sailormoonCrown' } }, paint: 'var(--rocket-paint-blue)' }, 1]);
+    it('🔴 PLY-002: paint and pattern are two layers — a rocket wears one of each, and neither takes the other off', () => {
+      let app: any = withTotal(newPlayer('pixel-art'), 1000);
+      app = runScript(PICK_ITEM_SCRIPT, { app, itemId: 'paint-purple', shelf }).app;
+      app = runScript(PICK_ITEM_SCRIPT, { app, itemId: 'dots', shelf }).app;
+      const shown = runScript(ACTIVE_PROFILE_SCRIPT, { app });
+      expect([shown.paint, shown.pattern]).toEqual(['var(--rocket-paint-purple)', 'dots']);
+      // A second paint replaces the paint and leaves the decal alone.
+      app = runScript(PICK_ITEM_SCRIPT, { app, itemId: 'paint-orange', shelf }).app;
+      const after = runScript(ACTIVE_PROFILE_SCRIPT, { app });
+      expect([after.paint, after.pattern]).toEqual(['var(--rocket-paint-orange)', 'dots']);
     });
   });
 

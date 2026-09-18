@@ -38,7 +38,8 @@
       "label": "The shelf",
       "children": [
         "hsTabs",
-        "hsGrid"
+        "hsGrid",
+        "hsElsewhere"
       ],
       "parameters": {
         "width": {
@@ -178,6 +179,21 @@
       "y": 40
     },
     {
+      "id": "hsElsewhere",
+      "type": "Text",
+      "label": "Owned, for other faces",
+      "parent": "hsWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
       "id": "hsOut",
       "type": "Component Outputs",
       "label": "What was tapped",
@@ -198,9 +214,24 @@
           "type": "string"
         },
         {
+          "name": "itemLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "itemCost",
+          "plug": "input",
+          "type": "number"
+        },
+        {
           "name": "hasPicks",
           "plug": "input",
           "type": "boolean"
+        },
+        {
+          "name": "purse",
+          "plug": "input",
+          "type": "number"
         }
       ],
       "x": 410,

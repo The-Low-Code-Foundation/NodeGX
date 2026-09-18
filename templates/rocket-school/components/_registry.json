@@ -63,7 +63,7 @@
       "path": "Logic/Grade answer",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 37,
+      "connectionCount": 49,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -223,7 +223,7 @@
       "path": "Logic/Active profile",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 27,
+      "connectionCount": 28,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -255,7 +255,7 @@
       "path": "Logic/Pick item",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 9,
+      "connectionCount": 12,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -271,7 +271,15 @@
       "path": "Logic/Hangar shelf",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 8,
+      "connectionCount": 11,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/Roll face": {
+      "path": "Logic/Roll face",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 12,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -327,7 +335,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 125,
+      "connectionCount": 132,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -406,8 +414,8 @@
     "Profiles/New player form": {
       "path": "Profiles/New player form",
       "type": "visual",
-      "nodeCount": 48,
-      "connectionCount": 68,
+      "nodeCount": 62,
+      "connectionCount": 106,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -494,8 +502,24 @@
     "Hangar/Tile": {
       "path": "Hangar/Tile",
       "type": "visual",
-      "nodeCount": 14,
-      "connectionCount": 22,
+      "nodeCount": 15,
+      "connectionCount": 28,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Hangar/Sum row": {
+      "path": "Hangar/Sum row",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 6,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Hangar/Confirm": {
+      "path": "Hangar/Confirm",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 13,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -503,15 +527,15 @@
       "path": "Hangar/Preview",
       "type": "visual",
       "nodeCount": 11,
-      "connectionCount": 14,
+      "connectionCount": 15,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
     "Hangar/Shelf": {
       "path": "Hangar/Shelf",
       "type": "visual",
-      "nodeCount": 12,
-      "connectionCount": 16,
+      "nodeCount": 13,
+      "connectionCount": 20,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -614,8 +638,8 @@
     "Monster/Setup": {
       "path": "Monster/Setup",
       "type": "visual",
-      "nodeCount": 22,
-      "connectionCount": 33,
+      "nodeCount": 28,
+      "connectionCount": 42,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -623,7 +647,7 @@
       "path": "Monster/Play",
       "type": "visual",
       "nodeCount": 31,
-      "connectionCount": 121,
+      "connectionCount": 122,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -654,8 +678,8 @@
     "Pages/Hangar": {
       "path": "Pages/Hangar",
       "type": "page",
-      "nodeCount": 20,
-      "connectionCount": 50,
+      "nodeCount": 24,
+      "connectionCount": 66,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -679,14 +703,14 @@
       "path": "Pages/Monster",
       "type": "page",
       "nodeCount": 28,
-      "connectionCount": 82,
+      "connectionCount": 85,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 85,
-    "totalNodes": 860,
-    "totalConnections": 2103
+    "totalComponents": 88,
+    "totalNodes": 906,
+    "totalConnections": 2238
   }
 }
