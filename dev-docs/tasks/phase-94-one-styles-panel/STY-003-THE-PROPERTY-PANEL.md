@@ -5,11 +5,15 @@ the surface is drawn in s5 and has not yet been looked at.** `models/Looks/field
 the only question this panel asks — *where did this value come from?* — and `tests-unit/sty-003/` is
 now **30 tests green** across the decision and the drawing.
 
-**s5 drew it: AC1, AC2 and AC3 are built in the tree** (§2b). Every row carries its provenance, an
-override says what the Look wanted and offers a revert, the group heading names the Look once, and
-the `Variant` row is the `Look` row with the state it is in written on it. 🔴 **AC5 and AC8 are
-untouched and they are the ones that matter** — nothing has been read off a rendered element, in
-either theme, and Richard has not seen it. **AC6 (the menu) and AC7 (the `⋯`) are not started.**
+**s5 drew it AND drove it.** AC1, AC2, AC3 are built (§2b) and **AC5 is green** — the three states
+read off the **rendered element in both themes**, which found two defects first and both are fixed
+(§2c): the override treatment was **stale**, and the bar **painted over the label**. AC6 and AC7 are
+built but **not opened in a running editor**.
+
+🔴 **AC8 IS THE ONLY THING LEFT, and it is Richard's.** The shots are in
+[`shots/`](./shots/) — `sty003-light-look-with-override.png`, `sty003-dark-look-with-override.png`,
+and the pair with no Look. **Ask him.** §4a names the one place the surface departs from his
+mockup, which is the thing to put in front of him rather than let pass.
 **Design:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §2 (the four rules), §3
 (the panel), §4 (the Look menu) — **ruled by Richard, 2026-09-18**.
 
@@ -110,6 +114,48 @@ suite these files touch; `tsc -p tsconfig.json` and `tsc -p tsconfig.tests.json`
 rebuild, then the peer took it for a 20-minute `test:ci`, and a second heavy job is against the
 standing rule. They are STY-002 AC7's, and they are the next session's first job.
 
+## 2c. 🔴 What the drive found that 30 unit tests could not
+
+The box came free at the end of s5 and the panel was driven for the first time. **It worked — and
+two things were wrong, and neither was visible to any test.**
+
+**1. The treatment was STALE. This is the important one.** A node wearing a Look, given an own
+`fontSize` the Look also offered, kept **six linked rows and no override line** — and it *survived a
+reselect*. The model was right throughout (`readField` read `overridden`; the live check printed
+`owns:true, lookHasFontSize:true, expected:overridden`). **The decision was correct and the panel
+was drawing a stale answer**, which is the failure mode this task can least afford: rule 3's whole
+job is to make an override visible, and it was invisible exactly when it was created.
+
+The cause is a deliberate design this task walked into: **parameter edits do not rebuild rows**,
+because §8 measured what a rebuild costs under a focused field — the caret. `renderGroups`'s
+`_portsHash` hashes ports, the Look, capabilities and the filter; **nothing in it moves when a node
+takes a field over.** The fix is both halves, and it needs both:
+
+- the hash now carries `ownedParams` — the **keys**, never the values, so it is a *guard*;
+- `parametersChanged` calls `renderGroupsIfOwnershipChanged`, which compares the owned-key
+  signature and returns early when it is unchanged — so it is a *trigger that cannot fire on a
+  value edit*.
+
+🔴 **Both halves were then measured in the running editor, including the one that must NOT happen.**
+Taking `letterSpacing` over with the panel open moved 4 linked/2 overridden → **3/3** with the third
+line appearing at once. Editing an **already-owned** field's value left the very same DOM node in
+place (`row === document.querySelector(…)` → `true`), so §8's caret measurement is intact.
+
+⚠️ **Widening the hash alone did nothing**, and the first arm proved it: a guard only permits a
+rebuild, something still has to ask for one ([[verify-the-consequence-not-just-the-mechanism]]).
+
+**2. The bar painted over the label.** An `inset 2px` box-shadow sits *inside* the row, whose box
+begins where the text does — so it clipped the leading glyph of `Font Size`, `Color`, `Letter
+Spacing`. Measured: the rows host starts **16px** inside the panel and the parent is
+`overflow: visible`, so the bar moved to a positioned `::before` at `left:-8px` **in the gutter**.
+🔴 **Only the screenshots showed this** — every assertion about the treatment was green both before
+and after, because a class and an attribute cannot say whether a glyph is legible.
+
+⚠️ **The regression risk is recorded rather than gated:** defect 1 is invisible to all 30 unit
+tests and would be invisible to 30 more of the same kind, because it is a fact about *when the panel
+re-renders*, not about what `readField` returns ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+A guard for it has to drive the editor.
+
 ⚠️ **AC6 and AC7 are BUILT, NOT MEASURED.** Neither has been opened in a running editor. The parts
 most likely to be wrong are the ones a unit test cannot reach: whether the three sections read as
 three, whether `⋯` is discoverable, and whether the copy lands as a Look the person then sees in
@@ -125,7 +171,7 @@ The four rules of design §2 are the criteria. Any surface that breaks one is wr
 | **AC2** | 🔴 **No bare values.** Every style field states where its value came from — the Look's name, or nothing meaning the node's own. **A person must never see `18px` and have to wonder.** The resolved value may appear as a quiet tail, never as the field's primary content | 🟡 **built (s5), and §4a records where it departs from the mockup.** Two halves: the **treatment** (`data-look-treatment` on the row — `linked`, `overridden`, or nothing at all) and the **naming** (`STYLE — from Primary Button` on the group heading, design §3.1's "once, so the per-field labels do not have to shout"). 🔴 The mockup's in-field rendering (`[ Primary Button  18px ]`) is **not** what was built — see §4a |
 | **AC3** | 🔴 **Overrides are loud and reversible.** Overriding one field on a node wearing a Look changes that field's appearance, **states what the Look wanted**, and offers revert | 🟡 **built (s5)** — the row draws `Primary Button says 8px` and a `Revert` that clears the node's own value so the Look's resolves again (`getParameter` is own → variant → port default, so removing the key is what puts the field back). One undo step. ⚠️ A Look value that cannot be quoted as a short string — a colour object — falls back to `Overrides Primary Button` rather than printing `[object Object]`; the treatment and the revert do not depend on it. ⬜ The revert has not been pressed in a running editor |
 | **AC4** | 🔴 **Shipped and homemade behave identically.** Nothing in this surface behaves differently because of where a Look came from | ⬜ |
-| **AC5** | **The three states read correctly on the element a person actually sees**, in **both themes** — linked, overridden, own. 🔴 Read from the rendered element, not from the class it was given ([[a-ring-must-be-read-on-the-element-a-person-sees]]), and check the chosen colours against the editor's existing semantic colours: design §3.3 explicitly does **not** rule them | ⬜ **and it is the next session's first job.** The colours **have** been checked against the editor's palette and the reasoning is in the stylesheet: **amber is kept for overridden because it IS `--theme-color-fg-notice`**, the editor's "caution, not error" — the right weight for a legitimate act the panel wants seen. **Purple has no token at all**, so linked takes `--theme-color-fg-accent`; minting one would start a second palette beside `colors.css` ([[a-second-copy-of-a-palette-drifts-silently]]). Both are theme-aware tokens, so light and dark come from the token layer. 🔴 **But a token's documented 4.5:1 is a fact about the token, not a reading of this row** — nothing has been read off a rendered element yet |
+| **AC5** | **The three states read correctly on the element a person actually sees**, in **both themes** — linked, overridden, own. 🔴 Read from the rendered element, not from the class it was given ([[a-ring-must-be-read-on-the-element-a-person-sees]]), and check the chosen colours against the editor's existing semantic colours: design §3.3 explicitly does **not** rule them | ✅ **GREEN (s5's drive) — read off the rendered element in both themes, and it found two defects first** (§2c). Dark: linked `rgb(157,204,255)`, overridden `rgb(253,176,34)`. Light: `rgb(14,92,202)` / `rgb(147,55,13)` — the token layer swaps both to the darker pair for the lighter ground, so neither was hand-written per theme. A node with no Look reads **0 treatments, 0 group sources, 0 override lines**: design §3.2's "the absence of it is itself the signal", measured rather than assumed. Old note, now superseded: The colours **have** been checked against the editor's palette and the reasoning is in the stylesheet: **amber is kept for overridden because it IS `--theme-color-fg-notice`**, the editor's "caution, not error" — the right weight for a legitimate act the panel wants seen. **Purple has no token at all**, so linked takes `--theme-color-fg-accent`; minting one would start a second palette beside `colors.css` ([[a-second-copy-of-a-palette-drifts-silently]]). Both are theme-aware tokens, so light and dark come from the token layer. 🔴 **But a token's documented 4.5:1 is a fact about the token, not a reading of this row** — nothing has been read off a rendered element yet |
 | **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | 🟡 **built (s5)** — all three sections in that order, off `buildLookMenu`. 🔴 **The save row is not new behaviour; it is a new name and a new place.** `createNewVariant` always did exactly this — copy the node's parameters onto a named Look and put the node in it — but it was labelled *"Create new variant"* at the **top** of the popup, which asks a person to know what a variant is before they can want one. It is now the last row and reads *"Save this button's styles as a new Look…"*. ⬜ Not opened in a running editor |
 | **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | 🟡 **built (s5)** — `PickVariantItem` draws one always-visible `⋯` that opens Rename and Delete in the row. 🔴 **The new control deliberately does not use `.variants-item-icon`**, which is the class carrying the `visibility: hidden` the defect was made of, and the stylesheet carries a note saying nothing below it may re-introduce one. ⬜ **The measurement is NOT done:** §1's control pair has to be re-run at rest on the new element, and that is a drive |
 | **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | ⬜ |

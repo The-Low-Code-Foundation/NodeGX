@@ -58,7 +58,7 @@ does (`v2?.textStyles ?? legacy?.text`) and is the worked example.
 | **AC4** | **"Save this node's styles as a new Look"** creates a Look from a node's current parameters and puts the node in it. This is the entry point the 90-project scan says nobody has ever found (4 Looks across 90 projects, every one a test artefact) | 🟡 **model green (s4)** — `lookFromNode` copies a node's styles minus the preset markers and without aliasing it, pinned against **the shape a real project already holds** (`members area Richard test`'s Look carries `"_variant": "heading-1"`). ⬜ Left: the menu row and wiring the node into the new Look |
 | **AC5** | **`Preset` and `Size` rows are removed from the property panel**, and a project carrying `_variant`/`_size` markers still opens and renders exactly as before — they become inert parameters, not errors | 🟡 **removed (s5); the "still opens" half is AC7's drive.** `renderElementStyleSection`, `onElementVariantChange` and `onElementSizeChange` are gone from `propertyeditor.ts`. The markers are now read by **nothing** — the census's 21 markers in 12 real projects become parameters no port matches and the runtime already drops, which is what makes them inert rather than broken. ⚠️ **That last clause is reasoned, not driven**, and a dozen real projects carry it, so it is AC7's first arm |
 | **AC6** | **`get_style_vocabulary` reports the project's Looks plus the shipped library**, and no longer teaches the sentence at `StyleVocabulary.ts:18-22`, which is false for the surviving concept | ✅ **green (s4)** — the false sentence is replaced by what the two things actually do, `projectLooks` is reported (read from the sidecar, **both** spellings of the state key), the block is `SHIPPED LOOKS` with no sizes half, and `styleLint`'s pointer to a heading that no longer exists is fixed. 3 new specs. **Three budget gates held rather than being raised** (§3b) |
-| **AC7** | **Nothing that exists breaks.** All seven templates and the export corpus render and export unchanged (design §7). 🔴 Graded with the counts, not with a claim — STY-004 §4a is the worked example of separating an inherited red from a caused one | 🟡 **`test:main` run at the end of s5: 501 suites pass, 8,019 tests pass, and the ONE red is not ours** — see §3d. ⬜ **`test:ci` and the templates are still open** s5 changed what a newly created node carries and removed a panel section; `tsc` on both configs is clean and `tests-unit/sty-003` is 30 green, but **`test:main` and `test:ci` have not been run** — the box was at load 24.8 under a peer's cold webpack rebuild all session and a second heavy job is against the standing rule. **Run these before building anything further**, and one of the arms is opening a real project that carries `_variant` (the census names twelve; `members area Richard test` has 4) |
+| **AC7** | **Nothing that exists breaks.** All seven templates and the export corpus render and export unchanged (design §7). 🔴 Graded with the counts, not with a claim — STY-004 §4a is the worked example of separating an inherited red from a caused one | 🟡 **`test:main` is 502/502 suites, 8,020/8,020 — CLEAN** (§3d: it was 501/502 on the run, and the one red was a peer's, now resolved at HEAD by `81da1b317`). ⬜ **`test:ci` and the templates are still open** |
 
 ## 3a. What s4 built, and the defect it had to fix first
 
@@ -178,7 +178,15 @@ is what s5 removed: there is now only one of them.
 **Run at the end of s5, once a peer released the box:** `501 passed / 502 suites`, **8,019 of 8,020
 tests**, exit 1 on a single failure — `tests-unit/exp-013/exportBadge.test.tsx`.
 
-🔴 **It is a peer's uncommitted work, and the attribution is a count rather than a claim**
+✅ **RESOLVED at HEAD by `81da1b317`** — re-measured here after the fix: `tests-unit/exp-013`
+**151/151 green** with the two `scheduled` rows now committed. ⚠️ **And the fix was the right shape
+rather than a raised number:** all five gates across three packages that pinned *"no scheduled row
+remains"* were **restated to pin the scheduled population by name**, so a vague backlog row filed as
+`scheduled` still fails the day it is added — which is what EXP-011 AC4 wanted the phrase to protect
+([[a-red-count-gate-means-count-the-artefact]] in spirit: the constant, never the literal).
+
+🔴 **The attribution below is kept because it is the method, not because the red survived** — it is
+a count rather than a claim
 ([[a-relayed-conclusion-decays-faster-than-a-relayed-measurement]]):
 
 | arm | reading |

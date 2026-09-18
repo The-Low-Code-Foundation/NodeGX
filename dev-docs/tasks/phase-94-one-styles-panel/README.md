@@ -2,12 +2,12 @@
 
 **Scoped:** 2026-09-18, from Richard's ruling at the close of P92 CHR-010, and a code audit taken
 the same hour at `cline-dev` HEAD `884881cff`.
-**Status: 🟡 BUILDING — the design is ruled and the surface now exists, unlooked-at.** After s5 the
-model, the export and the panel are all built; **what is left is measuring them.** Two things gate
-everything below: **STY-002 AC7** (`test:main` and `test:ci`, neither run since s4 — the box was
-held all of s5 by a peer's cold rebuild and then a 20-minute `test:ci`) and **STY-003 AC5/AC8** (the
-treatments read off a rendered element in both themes, and Richard's look). 🔴 **Nothing in this
-phase closes on a passing test.**
+**Status: 🟡 BUILT AND DRIVEN — waiting on Richard.** After s5 the model, the export and the panel
+are all built, `test:main` is **502/502 suites / 8,020 tests clean**, and the panel has been driven:
+the three states are read off the rendered element in **both themes** (STY-003 AC5 ✅), which found
+and fixed two defects no test could see. 🔴 **What is left is STY-003 AC8 — Richard's look**, and
+`test:ci` (STY-002 AC7's other half, the Electron suite where s5's `tests/models/` edits actually
+execute). 🔴 **Nothing in this phase closes on a passing test.**
 
 **Original status: 🟢 RULED — the phase has a design.** STY-001 delivered; Richard ruled its verdict AND the
 redesign that came out of it on 2026-09-18 (*"Yep sold"*). 🔴 **Read

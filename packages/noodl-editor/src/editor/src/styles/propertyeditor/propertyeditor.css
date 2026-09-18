@@ -1028,12 +1028,29 @@
   position: relative;
 }
 
-.property-panel-row[data-look-treatment='linked'] {
-  box-shadow: inset 2px 0 0 0 var(--theme-color-fg-accent);
+/* 🔴 The bar lives in the panel's LEFT GUTTER, not inside the row. An `inset` box-shadow was the
+   first attempt and the drive's screenshots are why it is not the last: a 2px inset bar paints
+   over the leading edge of the label's first glyph — measured, the rows host starts 16px inside
+   the panel and the row's own box begins where the text does, so there is no room on the inside
+   and plenty on the outside. Positioned rather than a wider shadow so the bar keeps its 2px
+   weight, and inset 2px top and bottom so a column of them reads as separate marks rather than
+   one continuous rule. The parent is `overflow: visible`, checked, so nothing clips it. */
+.property-panel-row[data-look-treatment]::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 1px;
 }
 
-.property-panel-row[data-look-treatment='overridden'] {
-  box-shadow: inset 2px 0 0 0 var(--theme-color-fg-notice);
+.property-panel-row[data-look-treatment='linked']::before {
+  background-color: var(--theme-color-fg-accent);
+}
+
+.property-panel-row[data-look-treatment='overridden']::before {
+  background-color: var(--theme-color-fg-notice);
 }
 
 /* Rule 3 — "loud and reversible". The sentence says what the Look wanted; the button puts the

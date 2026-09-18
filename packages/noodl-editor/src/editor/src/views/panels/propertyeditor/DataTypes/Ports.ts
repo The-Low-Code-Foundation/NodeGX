@@ -120,6 +120,8 @@ export class Ports extends View {
   _selectedTabForGroup: TSFixme;
   activePopout: TSFixme;
   _portsHash: TSFixme;
+  /** P94 STY-003 — the owned-parameter keys as last drawn; see `renderGroupsIfOwnershipChanged`. */
+  _ownedSignature: string;
   views: TSFixme = [];
   _toolsType: TSFixme;
   /** FB-017 AC7: the raw text in the filter box. Empty means the tier view. */
@@ -210,6 +212,7 @@ export class Ports extends View {
       'parametersChanged',
       (args) => {
         if (args && HINT_INPUT_PARAMETERS.has(args.name)) this.refreshHints();
+        this.renderGroupsIfOwnershipChanged();
       },
       this
     );
@@ -888,12 +891,54 @@ export class Ports extends View {
     this.renderGroups();
   }
 
+  /**
+   * P94 STY-003 — rebuild the rows when the node TAKES a field over or GIVES it back, and at no
+   * other time.
+   *
+   * 🔴 **Why this exists at all:** parameter edits deliberately do **not** rebuild rows. §8 measured
+   * what a rebuild costs under a focused field — the caret — which is why the structural hint is
+   * re-applied *in place* rather than re-rendered. But the provenance treatments are computed from
+   * ownership, so without this a field that has just become an override keeps drawing `linked`.
+   * Measured in a running editor before the fix: a node wearing a Look, given an own `fontSize`
+   * the Look also offered, kept **six linked rows and no override line**, and it survived a
+   * reselect — the model read `overridden` throughout.
+   *
+   * 🔴 **The signature is the KEYS, so a value edit cannot reach `renderGroups` through here.**
+   * Typing in a field the node already owns leaves the set unchanged and returns early, which is
+   * what keeps §8's measurement intact. Only crossing the owned/not-owned line rebuilds — and that
+   * is a commit, never a keystroke.
+   */
+  private renderGroupsIfOwnershipChanged(): void {
+    const signature = Object.keys(this.model.parameters ?? {})
+      .sort()
+      .join(',');
+    if (signature === this._ownedSignature) return;
+    this._ownedSignature = signature;
+    this.renderGroups();
+  }
+
   renderGroups() {
     if (!this.root) return; // not rendered yet
 
     const inputData = {
       ports: this._getPorts(),
       variant: this.model.variantName,
+      // 🔴 P94 STY-003 — WHICH parameters the node owns, because that is what the provenance
+      // treatments are computed from and nothing else here moves when it changes.
+      //
+      // Measured in a running editor (s5's drive): a node wearing a Look, given an own `fontSize`
+      // the Look also offers, kept **six linked rows and no override line** while the model
+      // correctly read `overridden` — and it survived a reselect, because none of the other
+      // fields below move when ownership does. `variant` catches switching Look; `ports` catches a
+      // port appearing; neither catches the node taking a value over.
+      //
+      // ⚠️ The KEYS, not the values: `readField` decides on ownership alone, so a value edited
+      // from one number to another must NOT rebuild the panel under a focused field — that is the
+      // caret §8 measured. Taking a field over, or giving it back, changes this string; typing in
+      // one that is already owned does not.
+      ownedParams: Object.keys(this.model.parameters ?? {})
+        .sort()
+        .join(','),
       // BCN-010: without this, a probe that settles *after* the panel is open
       // never reaches the screen — the ports have not changed, so the hash has
       // not changed, and `renderGroups` returns early. Subscribe To Changes on
