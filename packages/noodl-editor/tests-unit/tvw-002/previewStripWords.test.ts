@@ -94,15 +94,35 @@ describe('TVW-002 — the preview says what it is not showing', () => {
     });
   });
 
-  describe('shape 2 — nothing places it', () => {
-    it('says so, and offers the Workbench alone', () => {
-      const strip = previewStrip(input({ canvasLabel: 'Price Tag', showingPages: [] }));
+  describe('shape 2 — no screen shows it', () => {
+    it('says nothing places it, and offers the Workbench alone', () => {
+      const strip = previewStrip(input({ canvasLabel: 'Price Tag', showingPages: [], placedIn: [] }));
 
       expect(strip.shape).toBe('unplaced');
       expect(strip.lead).toBe("Price Tag isn't on any page yet");
       expect(strip.rest).toBe('— nothing in the app places it.');
       // No `Go to`: there is nowhere to go. A door to nothing is worse than no door.
       expect(strip.doors).toEqual([{ kind: 'bench', label: OPEN_ON_WORKBENCH }]);
+    });
+
+    it('🔴 a component that IS placed, where no page reaches it, is told the truth instead', () => {
+      // The spec had one sentence here. Measured against the 130 projects on this machine, that
+      // sentence is false for 1094 components: placed — often several times — inside something no
+      // page reaches. 231 of them are inside a popup, the rest inside components as dead as they
+      // are. "Nothing places it" would send someone looking for a use that exists.
+      const strip = previewStrip(
+        input({ canvasLabel: 'Bookmark', showingPages: [], placedIn: [{ label: 'Cards big popup' }] })
+      );
+
+      expect(strip.shape).toBe('unplaced');
+      expect(strip.rest).toBe("— it's only inside Cards big popup, which no page shows.");
+    });
+
+    it('names up to three hosts and counts the rest, like the page list', () => {
+      const hosts = [{ label: 'A' }, { label: 'B' }, { label: 'C' }, { label: 'D' }];
+      const strip = previewStrip(input({ canvasLabel: 'Bookmark', showingPages: [], placedIn: hosts }));
+
+      expect(strip.rest).toBe("— it's only inside A, B, C and 1 more, which no page shows.");
     });
   });
 

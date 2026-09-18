@@ -167,7 +167,11 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
       onScreen,
       isLogic,
       showingPages: renders.map(asPage),
-      runningPages: mounts.map(asPage)
+      runningPages: mounts.map(asPage),
+      // Only consulted when no screen shows it. `it's only inside X, which no page shows` is a
+      // different fact from `nothing places it`, and 1094 components in this machine's corpus are
+      // the first rather than the second.
+      placedIn: (project.parentsOf.get(canvasComponent) ?? []).map(asPage)
     });
   }, [enabled, canvasComponent, screenPage, project, dismissed]);
 
@@ -217,6 +221,8 @@ function routePrefix(): string {
 interface ProjectShape {
   root: string | undefined;
   components: ReachIndex;
+  /** Which components place an instance of each component — `buildUsageIndex`'s own answer. */
+  parentsOf: Map<string, string[]>;
   /** Every page component, in Router order then the unrouted ones — `screensShowing`'s input. */
   pages: string[];
   /** What the Router opens at `/`. */
@@ -226,7 +232,7 @@ interface ProjectShape {
 /** One walk of the project into the shape `pageReach` reads. Memoised on the change counter. */
 function readProject(_counter: number): ProjectShape {
   const project = ProjectModel.instance;
-  if (!project) return { root: undefined, components: new Map(), pages: [], startPage: undefined };
+  if (!project) return { root: undefined, components: new Map(), parentsOf: new Map(), pages: [], startPage: undefined };
 
   const components = project.getComponents();
   const index = new Map<string, ReachComponent>();
@@ -247,9 +253,17 @@ function readProject(_counter: number): ProjectShape {
   for (const router of routers) for (const route of router.routes) if (!pages.includes(route)) pages.push(route);
   for (const [name, entry] of usage) if (entry.hasPageNode && !pages.includes(name)) pages.push(name);
 
+  const parentsOf = new Map<string, string[]>();
+  for (const [name, entry] of usage) {
+    const parents: string[] = [];
+    for (const instance of entry.instances) if (!parents.includes(instance.parent)) parents.push(instance.parent);
+    parentsOf.set(name, parents);
+  }
+
   return {
     root: project.getRootComponent()?.name,
     components: index,
+    parentsOf,
     pages,
     startPage: routers[0]?.startPage
   };

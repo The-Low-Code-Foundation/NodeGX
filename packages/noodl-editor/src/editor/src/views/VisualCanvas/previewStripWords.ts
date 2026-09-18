@@ -91,6 +91,20 @@ export interface StripInput {
   showingPages: readonly { page: string; label: string }[];
   /** Pages whose screen runs it, in Router order. Shape 3 only — logic renders nowhere. */
   runningPages?: readonly { page: string; label: string }[];
+  /**
+   * Components that place an instance of it, when no screen shows it — shape 2's second variant.
+   *
+   * 🔴 **Measured, not imagined.** The spec wrote shape 2 as one sentence, *"nothing in the app
+   * places it"*. Run against the 130 projects on this machine (2026-09-18), that sentence is
+   * **false for 1094 components** across the 57 projects with two or more routed pages: they are
+   * placed — sometimes five or six times — inside something no page reaches. 231 of those are
+   * inside a popup, which is opened rather than placed; the rest are inside components that are
+   * themselves unreachable (a corpus favourite: a folder called `deprecated cards`).
+   *
+   * A strip whose whole job is to stop the editor saying confident wrong things could not ship the
+   * one-sentence version. See {@link previewStrip}.
+   */
+  placedIn?: readonly { label: string }[];
 }
 
 /** Beyond this many page names the sentence stops listing and starts counting. */
@@ -127,10 +141,12 @@ export function previewStrip(input: StripInput): StripModel {
   }
 
   if (showingPages.length === 0) {
+    const placedIn = input.placedIn ?? [];
     return {
       shape: 'unplaced',
       lead: `${canvasLabel} isn't on any page yet`,
-      rest: `— ${NOTHING_PLACES_IT}.`,
+      // The two truths are different truths, and only one of them is "nobody uses this".
+      rest: placedIn.length > 0 ? `— it's only inside ${pageList(placedIn)}, which no page shows.` : `— ${NOTHING_PLACES_IT}.`,
       doors: [benchDoor()]
     };
   }
