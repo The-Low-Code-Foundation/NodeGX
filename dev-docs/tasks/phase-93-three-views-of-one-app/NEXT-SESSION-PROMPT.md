@@ -1,6 +1,6 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 17.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
+**Written 2026-09-18, end of session 17 (revised after Richard's rulings).** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
 s12–13 built and closed TVW-002; s14–16 built TVW-004 and the first slice of TVW-005. **s17 built
 and drove the drop-target strip on the Layers tab header — the one row of TVW-005 §2 with no code
 behind it — closed AC4 with a spy, took AC5's ten photographs, and measured that AC1's preview half
@@ -14,36 +14,48 @@ is blocked by something that is not this phase's.**
 | TVW-002 | The preview says what it is not showing | ✅ | **CLOSED — all 7 ACs** |
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
 | TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6 captured — Richard's verdict is all that is left** |
-| TVW-005 | Layers can move things | **slice 1 + 2** | **25 arms held** (10/11 + 15/15). AC2/3/4 closed. AC6 ✅. **AC1's preview half RED (§9) · AC5 with Richard** |
+| TVW-005 | Layers can move things | **slice 1 + 2 + 3** | **31 arms held** (11/11 + 20/20, each twice). **ALL SIX ACs GREEN** |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
 | TVW-008 | The board (needs 002) | — | — |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 40** (39 at s16, + TVW-005 AC4; TVW-005 AC2 is now whole — its drive half landed).
+**ACs closed: 45** — 39 at s16, plus all six of TVW-005's. **TVW-005 is CLOSED.** The only thing between this phase and TVW-006 is Richard's TVW-004 AC6 look.
 
 ## Start here
 
-1. 🔴 **Two things are owed to Richard and neither can be done by anyone else.** They were sent
-   together at the end of s17 — if he has answered, act on the answers first:
-   - **TVW-004 AC6** — the twenty shots in `verdicts/TVW-004/2026-09-18`, questions in its
-     `manifest.json` under `whatToLookAt` and in TVW-004 §9. It is the only thing between TVW-004
-     and closed.
-   - **TVW-005 AC5 + the §2 question** — the ten shots in `verdicts/TVW-005/2026-09-18` and the two
-     questions in TVW-005 §10. ⚠️ The second one is a *design* question, not a verdict: §2 says the
-     tab must not switch during the drag, which rules out the gesture AC1's third sentence
-     describes. What got built is the other reading. His call decides whether AC1 is already met.
-2. 🔴 **AC1's preview half is red and it is NOT this phase's to fix — do not inherit it by accident.**
-   TVW-005 §9 has the three measurements. Short version: a reorder made straight against
-   `NodeGraphModel.detachNode`/`attachNode` — *the calls `NodeOperations` makes for a canvas drag* —
-   leaves the preview unchanged, while a spy on `ViewerConnection.send` shows the editor does send
-   `nodeDetached` + `nodeAttached` with the right `childIndex`. The runtime has the whole chain for
-   it (`editormodeleventshandler.ts:213` → `ComponentModel.setNodeParent` → `nodescope.ts:464` →
-   `NodeScope.insertNodeInTree`). **Which link drops it is not measured** — that is the first thing
-   to measure, and it wants its own row, in this phase or a runtime one. It is worth a row: it means
-   **no programmatic move of a node is visible in the preview**, including the canvas's own drag.
-3. Then **TVW-006** (the structure lane) or **TVW-007**, neither of which is blocked.
+1. 🔴 **TVW-004 AC6 is the only thing owed to Richard, and nobody else can do it.** The twenty shots
+   are in `verdicts/TVW-004/2026-09-18`; the questions are in its `manifest.json` under
+   `whatToLookAt` and in TVW-004 §9. The PNGs are gitignored, so they have to be **sent**. It is the
+   only thing between TVW-004 and closed — and with TVW-005 closed at s17, between this phase and
+   its second half.
+2. **TVW-006** (the structure lane) or **TVW-007**, neither of which is blocked.
+3. ⚠️ **Re-run `test:ci` before trusting s17's AC6 line if you change anything.** It was measured at
+   `1d342bc6` — the strip commit — and again after the spring; both at the floor.
+
+## 🔴 Read this before you debug anything in the running editor
+
+**An hour of s17 went into three defects that did not exist.** A `dev` stack's webpack watchers had
+been running for hours across a peer's directory add-and-delete, and both the editor and the viewer
+bundles went stale:
+
+- three drive arms went red saying a quick drop on the tab strip placed nothing;
+- a graph reorder did not move the preview — reproduced with the **raw model calls the canvas's own
+  drag makes**, with a spy proving the editor sent the right message — which was filed as a runtime
+  defect, in this file, in the task and in a memory;
+- and the editor bundle reported `TS2307` for modules that were on disk, which got a peer
+  accused of breaking the tree.
+
+**All of it was the bundle.** `tsc -p packages/noodl-editor --noEmit` was exit 0 throughout. After
+`dev:stop`, `rm -rf packages/noodl-editor/.webpack-cache` and a cold relaunch — **no code change** —
+the preview reorders in 800ms, the drive is 20/20 twice, and the drag drive is 11/11.
+
+✅ **The order that would have saved the hour: a renderer behaving impossibly is a question about the
+BUNDLE before it is a question about the code.** `tsc --noEmit` on the tsconfig `ts-loader` uses
+answers it in one command. ⚠️ And `.webpack-cache` is a red herring for a dev stack —
+`webpack.renderer.dev.js` is `cache: false` (line 18); what goes stale is the **in-memory resolver
+of a watcher that has been up for hours**, and the fix is the restart.
 
 ## What s17 found
 
@@ -71,6 +83,26 @@ guard is what caught it — it reported *drawn but not reachable*, which is what
 the product's correct sentence against `"GTM - Send Page Viewunplaced has no screen…"` and called a
 green build red. The name comes off the `title` attribute now. First drives find instrument faults
 ([[a-new-instruments-first-drive-finds-instrument-faults]]) — this was the third of them.
+
+## 🔴 Richard's ruling, and what it changed
+
+Asked whether being able to place a component exactly where it goes in one gesture was worth §2's
+*"the tab does not switch during the drag"*, he said yes — and, asked separately, said **no** to
+dropping inside another component's interior (the band rule stands). So:
+
+- **Resting a component on the Layers tab for 500ms opens Layers under the live drag**, and the row
+  indicators and `planComponentDrop` that slice 1 already built take it from there. Dropping between
+  two rows puts it there; ⌘Z removes it in one step.
+- **The strip keeps both meanings** — let go and it lands at the end of the screen, hold and you aim.
+- **An abandoned spring puts the tab back** where the person was, because the switch was part of a
+  gesture that did nothing.
+- ⚠️ **The dwell is armed only when the drop would LAND**: a page held on the strip for 1.1s does
+  not open a tree that would refuse it. There is an arm for that.
+
+TVW-005 §11 has the three things the spring had to be built around, including the one that bit
+twice: a state update in a **capture-phase** listener re-renders the tab *between the capture and
+bubble phases of the same mouse-up*, so the handler React is about to call can be gone before it
+calls it. Everything in that listener is deferred to a macrotask now.
 
 ## What the strip is, in one paragraph
 
@@ -109,8 +141,8 @@ band, so "the top of Layers" is `/App`, on every page at once.
 
 | script | what it is for |
 |---|---|
-| `drive-tvw005-drag.js` | slice 1's gesture + AC1's preview half. **10/11**; the red is §9's runtime defect |
-| `drive-tvw005-strip.js` | the tab-header strip. **15/15, twice back to back** |
+| `drive-tvw005-drag.js` | slice 1's gesture + AC1's preview half. **11/11** |
+| `drive-tvw005-strip.js` | the tab-header strip and the spring. **20/20, twice back to back** |
 | `shots-tvw005-indicators.js` | AC5's ten photographs, both themes, page proved byte-identical after |
 
 All three take `--dir`; the fixture is a **copy**, `NodeGX test projects/TVW-005 s17 Strip`

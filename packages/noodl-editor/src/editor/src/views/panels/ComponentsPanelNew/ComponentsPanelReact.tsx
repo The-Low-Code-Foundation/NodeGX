@@ -160,12 +160,72 @@ export function ComponentsPanel() {
     },
     [startDrag]
   );
+
+  /**
+   * TVW-005 §11 — the tab this gesture opened, and whether the gesture then did anything.
+   *
+   * Refs rather than state: both are written during a drag by handlers that must not re-render to
+   * see them, and read once, on the mouse-up.
+   */
+  const sprungFrom = useRef<PanelTab | null>(null);
+  const placedInThisDrag = useRef(false);
+
+  /**
+   * 🔴 **Capture phase.** A Layers row that claims a drop calls `stopPropagation`, and React
+   * dispatches from the root container — so a bubbling listener here would not run at all on the
+   * one gesture that matters most. That is the defect this panel already shipped once
+   * ([[stoppropagation-on-a-drop-kills-a-shared-drags-cleanup]]); a capture listener runs before
+   * any handler that could cancel it.
+   */
   useEffect(() => {
     if (!componentDragging) return;
-    const onUp = () => setComponentDragging(false);
-    window.addEventListener('mouseup', onUp);
-    return () => window.removeEventListener('mouseup', onUp);
+    const onUp = () => {
+      /**
+       * 🔴 **EVERYTHING here is deferred to a macrotask, and the drive is what says so.**
+       *
+       * The first version cleared `componentDragging` synchronously. React flushes that update on
+       * the microtask checkpoint between listener callbacks — i.e. **between the capture phase and
+       * the bubble phase of the same mouse-up** — so the tab re-rendered without its `onMouseUp`
+       * prop *before* React dispatched the event to it. A quick drop on the strip did nothing at
+       * all: no node, no call to `createNewNode`, three red arms describing a build that worked
+       * everywhere else.
+       *
+       * So the capture listener's only job is to be un-cancellable; the work happens after the
+       * whole native dispatch — capture, target, bubble and every React handler in it — has
+       * finished. `placedInThisDrag` is written by that dispatch, which is the other reason it
+       * cannot be read any earlier.
+       */
+      setTimeout(() => {
+        setComponentDragging(false);
+        const back = sprungFrom.current;
+        sprungFrom.current = null;
+        // The tab was opened as part of a gesture. If the gesture put something on the screen, it
+        // did what it opened for and stays; if it was abandoned, the panel goes back to where the
+        // person left it rather than keeping a tab they never chose.
+        if (back && !placedInThisDrag.current) setChosenTab(back);
+        placedInThisDrag.current = false;
+      }, 0);
+    };
+    window.addEventListener('mouseup', onUp, true);
+    return () => window.removeEventListener('mouseup', onUp, true);
   }, [componentDragging]);
+
+  /**
+   * TVW-005 §11 — the component has rested on the Layers tab, so Layers opens **under the drag**
+   * (Richard, 2026-09-18). §2 said the tab must not switch during a drag; the ruling is that being
+   * able to place the thing exactly where it goes, in one gesture, is worth more than that.
+   *
+   * The strip keeps both meanings: let go and the component lands at the end of the screen; hold
+   * and the tree it belongs in opens so you can aim.
+   */
+  const handleSpring = useCallback(() => {
+    setChosenTab((current) => {
+      const showing = current ?? defaultTabFor(tabSubject);
+      if (showing === 'layers') return current;
+      sprungFrom.current = showing;
+      return 'layers';
+    });
+  }, [tabSubject]);
 
   /**
    * The component landed. §2: *dropping on it opens Layers with the row selected* — so the tab is
@@ -175,6 +235,7 @@ export function ComponentsPanel() {
    * not in `layers.all` until the tree rebuilds on `Model.nodeAdded`.
    */
   const handlePlaced = useCallback(({ path, owner }: PlacedFromHeader) => {
+    placedInThisDrag.current = true;
     setChosenTab('layers');
     const component = ProjectModel.instance?.getComponentWithName(owner);
     selectionStore.select('layers', component ?? null, [path]);
@@ -201,7 +262,8 @@ export function ComponentsPanel() {
       },
       [layers.all, handleSelectRow]
     ),
-    onPlaced: handlePlaced
+    onPlaced: handlePlaced,
+    onSpring: handleSpring
   });
 
 
@@ -403,8 +465,11 @@ export function ComponentsPanel() {
             >
               {TAB_LABEL[id]}
               {isStrip && (
+                /* Both meanings, because a spring nobody knows about is a spring nobody uses. The
+                   wording does not change between the armed and refused states — text moving under
+                   a moving hand is its own problem. */
                 <span className={css['TabDropHint']} data-test="panel-tab-drop-hint">
-                  drop to place
+                  drop, or hold to open
                 </span>
               )}
             </button>

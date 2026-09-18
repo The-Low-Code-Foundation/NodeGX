@@ -237,7 +237,7 @@ async function main() {
    * threshold in its own `onMouseMove` (the row-local pattern this task's own §7.1 found the defect
    * in), so a first move that leaves the row would never start the drag at all.
    */
-  const dragComponentToStrip = async (row, { release = true } = {}) => {
+  const dragComponentToStrip = async (row, { release = true, dwell = 0 } = {}) => {
     const tab = await tabRect('layers');
     if (!tab) return { ok: false, because: 'no Layers tab on screen' };
     await mouse('mousePressed', row.x, row.y);
@@ -245,16 +245,49 @@ async function main() {
     await mouse('mouseMoved', row.x + 8, row.y);
     await wait(120);
     await mouse('mouseMoved', tab.x, tab.y);
-    await wait(200);
+    await wait(60);
     await mouse('mouseMoved', tab.x, tab.y);
-    await wait(250);
+    await wait(60);
+
+    /**
+     * 🔴 **The sample is taken BEFORE the dwell, and the dwell defaults to nothing.**
+     *
+     * The first version waited 240ms and then sampled, and the sample is a CDP round trip — so a
+     * "quick" drop was released ~500ms after the pointer reached the strip, which is exactly
+     * `SPRING_MS`. The tab sprang open, the strip's handlers came off with it, and the drop landed
+     * on nothing: three arms went red describing a build that was working
+     * ([[a-new-instruments-first-drive-finds-instrument-faults]]). Time spent on the strip is the
+     * thing under test here; it cannot also be instrument overhead.
+     */
     const air = await inTheAir();
+    if (dwell) await wait(dwell);
     if (release) {
       await mouse('mouseReleased', tab.x, tab.y, 0);
       await wait(900);
     }
     return { ok: true, air, tab };
   };
+
+  /** A Layers row, once the spring has opened the tab under the drag. */
+  const layersRow = async (nodeId) =>
+    ev(`(() => {
+      const rows = Array.from(document.querySelectorAll('[data-test="layers-node"], [data-test="layers-instance"]'));
+      const row = rows.find((r) => (r.getAttribute('data-node-path') || '').split('/').pop() === ${JSON.stringify(nodeId)});
+      if (!row) return null;
+      row.scrollIntoView({ block: 'center' });
+      const b = row.getBoundingClientRect();
+      const x = Math.round(b.left + b.width / 2);
+      const y = Math.round(b.top + b.height / 2);
+      const hit = document.elementFromPoint(x, y);
+      return {
+        x,
+        top: Math.round(b.top),
+        bottom: Math.round(b.bottom),
+        height: Math.round(b.height),
+        label: row.textContent.trim().slice(0, 24),
+        reachable: Boolean(hit && row.contains(hit))
+      };
+    })()`);
 
   const pressUndo = async () => {
     await editor.send('Emulation.setFocusEmulationEnabled', { enabled: true });
@@ -402,6 +435,135 @@ async function main() {
     grew ? afterUndo.children.map((c) => c.type.split('/').pop()).join(' | ') : 'UNGRADED: nothing was placed'
   );
 
+  // ------------------------------------------- 3b. the spring (TVW-005 §11)
+  //
+  // Richard, 2026-09-18: being able to put the thing exactly where it goes, in one gesture, is
+  // worth more than §2's "the tab does not switch during the drag". So the strip keeps BOTH
+  // meanings and this is the second one: rest on it, and the tree opens under the drag.
+  await clickTab('components');
+  await settle();
+  await filterTo(SUBJECTS.visual);
+  const forSpring = await componentRow('visual');
+  if (!forSpring || !forSpring.reachable) {
+    arm('holding on the strip opens Layers without ending the drag', null, 'UNGRADED: no reachable visual row');
+  } else {
+    const held = await dragComponentToStrip(forSpring, { release: false, dwell: 1100 });
+    const sprung = await ev(`(() => {
+      const layers = document.querySelector('[data-test="panel-tab-layers"]');
+      const components = document.querySelector('[data-test="panel-tab-components"]');
+      const PopupLayer = window.__wreq('./src/editor/src/views/popuplayer.ts').default;
+      return {
+        layersActive: layers && layers.getAttribute('data-active'),
+        componentsActive: components && components.getAttribute('data-active'),
+        stillDragging: Boolean(PopupLayer.instance.isDragging()),
+        rows: document.querySelectorAll('[data-test="layers-tree"] [data-test="layers-node"], [data-test="layers-tree"] [data-test="layers-instance"]').length
+      };
+    })()`);
+    // ⚠️ What the STRIP said while the pointer was on it, carried into the detail: a spring that
+    // never armed and a spring that armed and did nothing are different failures, and the strip's
+    // own state is what tells them apart.
+    const armedAs = held.ok ? held.air.strip : 'no drag';
+
+    // 🔴 Both halves in one arm, because either alone is a different feature: a tab that opens
+    // AFTER the drag ends is a panel moving on its own, and a drag that survives without the tab
+    // opening is what shipped this morning.
+    arm(
+      'holding on the strip opens Layers WITHOUT ending the drag (§11)',
+      Boolean(held.ok && sprung.layersActive === 'true' && sprung.stillDragging && sprung.rows > 0),
+      `strip said "${armedAs}" → layers=${sprung.layersActive}, components=${sprung.componentsActive}, still dragging=${sprung.stillDragging}, ${sprung.rows} rows`
+    );
+
+    // …and now the thing the ruling was FOR: dropping between two rows, not at the end.
+    const anchor = start.children[start.children.length - 1];
+    const target = await layersRow(anchor.id);
+    let landed = null;
+    let placedRow = null;
+    if (target && target.reachable) {
+      const y = target.top + Math.round(target.height * 0.15); // the "before" third
+      await mouse('mouseMoved', target.x, y);
+      await wait(200);
+      await mouse('mouseMoved', target.x, y);
+      await wait(200);
+      const indicator = await ev(`(() => {
+        const row = document.querySelector('[data-test="layers-node"][data-drop], [data-test="layers-instance"][data-drop]');
+        return row ? row.getAttribute('data-drop') : 'NONE';
+      })()`);
+      await mouse('mouseReleased', target.x, y, 0);
+      await wait(1200);
+      landed = await childrenOfPage();
+      placedRow = { indicator, label: target.label };
+    } else {
+      await mouse('mouseReleased', 10, 400, 0);
+      await wait(600);
+    }
+
+    const sprungPlace = landed && landed.children.length === start.children.length + 1 ? landed.children : null;
+    arm(
+      'and dropping between two rows puts it THERE, not at the end (the point of the ruling)',
+      target && target.reachable
+        ? Boolean(sprungPlace && sprungPlace[sprungPlace.length - 1].id === anchor.id)
+        : null,
+      sprungPlace
+        ? `${placedRow.indicator} above ${placedRow.label}: ${sprungPlace.map((c) => c.type.split('/').pop()).join(' | ')}`
+        : 'UNGRADED: the anchor row was not reachable after the spring'
+    );
+
+    const sprungSelected = await ev(`(() => {
+      const { selectionStore } = window.__wreq('./src/editor/src/models/selection/selectionStore.ts');
+      const s = selectionStore.selection;
+      return JSON.stringify(s.nodes);
+    })()`);
+    arm(
+      'the row placed by a sprung drop is selected too',
+      sprungPlace
+        ? Boolean(String(sprungSelected).includes(sprungPlace[sprungPlace.length - 2].id))
+        : null,
+      String(sprungSelected).slice(0, 110)
+    );
+
+    if (sprungPlace) {
+      await pressUndo();
+      await wait(1200);
+      const back = await childrenOfPage();
+      arm(
+        'one ⌘Z removes a sprung placement too',
+        Boolean(back && back.children.map((c) => c.id).join() === start.children.map((c) => c.id).join()),
+        back.children.map((c) => c.type.split('/').pop()).join(' | ')
+      );
+    } else {
+      arm('one ⌘Z removes a sprung placement too', null, 'UNGRADED: nothing was placed');
+    }
+  }
+
+  // ------------------------------- 3c. an abandoned spring puts the tab back
+  await clickTab('components');
+  await settle();
+  await filterTo(SUBJECTS.visual);
+  const forAbandon = await componentRow('visual');
+  if (!forAbandon || !forAbandon.reachable) {
+    arm('an abandoned spring puts the tab back where the person left it', null, 'UNGRADED: no reachable visual row');
+  } else {
+    const graphBefore = await graphJson(PAGE);
+    await dragComponentToStrip(forAbandon, { release: false, dwell: 1100 });
+    const opened = await ev(`(() => document.querySelector('[data-test="panel-tab-layers"]').getAttribute('data-active'))()`);
+    // Released on the panel header, which is not a target for anything.
+    const nowhere = await ev(`(() => { const b = document.querySelector('[data-test="panel-tabs"]').getBoundingClientRect(); return { x: Math.round(b.left + 6), y: Math.round(b.top - 20) }; })()`);
+    await mouse('mouseMoved', nowhere.x, nowhere.y);
+    await wait(200);
+    await mouse('mouseReleased', nowhere.x, nowhere.y, 0);
+    await wait(900);
+    const after = await ev(`(() => ({
+      layers: document.querySelector('[data-test="panel-tab-layers"]').getAttribute('data-active'),
+      components: document.querySelector('[data-test="panel-tab-components"]').getAttribute('data-active')
+    }))()`);
+    const graphAfter = await graphJson(PAGE);
+    arm(
+      'an abandoned spring puts the tab back where the person left it, and places nothing',
+      Boolean(opened === 'true' && after.components === 'true' && after.layers === 'false' && graphBefore === graphAfter),
+      `opened=${opened} → components=${after.components}, layers=${after.layers}; graph ${graphBefore === graphAfter ? 'unchanged' : 'CHANGED'}`
+    );
+  }
+
   // ------------------------------------------------------- 4. the refusals
   for (const [kind, expected] of [
     ['page', 'Pages go in a Router, not on another page'],
@@ -422,7 +584,10 @@ async function main() {
       continue;
     }
     const before = await graphJson(PAGE);
-    const attempt = await dragComponentToStrip(row);
+    // 🔴 Held PAST the dwell, deliberately: the spring is armed only when the drop would land, so a
+    // refused component must not open the tab however long it rests there. A refusal arm that used
+    // the quick dwell would pass without ever asking the question.
+    const attempt = await dragComponentToStrip(row, { dwell: 1100 });
     const after = await graphJson(PAGE);
     const sentence = expected ?? `${row.name} has no screen. Drop it on the canvas.`;
     arm(
@@ -436,9 +601,9 @@ async function main() {
       attempt.ok ? `${attempt.air.said.visible ? 'shown' : 'hidden'}: "${attempt.air.said.text}" (wanted "${sentence}")` : 'nothing sampled'
     );
     arm(
-      `...and the tab does not open on a refusal`,
-      Boolean(attempt.ok && attempt.air.componentsActive === 'true'),
-      attempt.ok ? `components=${attempt.air.componentsActive}` : 'nothing sampled'
+      `...and it does not SPRING either, held well past the dwell`,
+      Boolean(attempt.ok && attempt.air.componentsActive === 'true' && attempt.air.layersActive === 'false'),
+      attempt.ok ? `after ~1.1s on the strip: components=${attempt.air.componentsActive}, layers=${attempt.air.layersActive}` : 'nothing sampled'
     );
   }
 

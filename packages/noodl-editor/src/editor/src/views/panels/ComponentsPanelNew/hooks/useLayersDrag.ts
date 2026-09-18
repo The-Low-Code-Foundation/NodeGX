@@ -37,7 +37,6 @@ import {
   planKeyboardMove,
   planRowDrag,
   planTabHeaderDrop,
-  screenRootRow,
   type DragPlan,
   type DropSide,
   type Legality
@@ -49,6 +48,19 @@ const PopupLayer = require('@noodl-views/popuplayer').default;
 
 /** How long the refusal shake runs. Matches the stylesheet's animation. */
 const SHAKE_MS = 400;
+
+/**
+ * How long a component has to rest on the Layers tab before the tab opens under it (Richard,
+ * 2026-09-18: *"were it possible to position the element at the right level without the second
+ * drag, that'd be ideal"*).
+ *
+ * 🔴 **Long enough that a DROP is still a drop.** The strip keeps both meanings — let go and the
+ * component lands at the end of the screen; hold and Layers opens so you can put it exactly where
+ * you want. A deliberate press-move-release over the strip is 150–250ms, so the dwell has to sit
+ * clear of that. 500ms is between Figma's layer auto-expand (~500) and macOS's spring-loaded
+ * folders at their default (~600), and it is the number the drive measures against.
+ */
+const SPRING_MS = 500;
 
 export interface LayersDragTarget {
   key: string;
@@ -87,7 +99,7 @@ export interface LayersDragApi {
   onRowDrop(row: LayerRow, side: DropSide, copy: boolean): void;
   /** ⌥↑ / ⌥↓ on the selected row. Returns the node that moved, or null. */
   moveByKeyboard(rowKey: string, direction: 'up' | 'down'): string | null;
-  /** The pointer is over the strip on the Layers tab header. */
+  /** The pointer is over the strip on the Layers tab header — and this is what arms the spring. */
   onTabHeaderOver(): void;
   /** …and has left it again, without dropping. */
   onTabHeaderLeave(): void;
@@ -121,6 +133,12 @@ export interface UseLayersDragOptions {
    * here, from the screen root this drop was planned against.
    */
   onPlaced?(placed: PlacedFromHeader): void;
+  /**
+   * The component has rested on the Layers tab long enough: **open Layers without ending the drag**
+   * (§2's sentence about the tab not switching was overruled — see the task's §11). The hook does
+   * not know this panel has tabs, so the panel does the switching; what the hook owns is the clock.
+   */
+  onSpring?(): void;
 }
 
 export function useLayersDrag({
@@ -128,7 +146,8 @@ export function useLayersDrag({
   canvasComponent,
   editor,
   onMoved,
-  onPlaced
+  onPlaced,
+  onSpring
 }: UseLayersDragOptions): LayersDragApi {
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [target, setTarget] = useState<LayersDragTarget | null>(null);
@@ -140,12 +159,20 @@ export function useLayersDrag({
    */
   const sourceRow = useRef<LayerRow | null>(null);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** The dwell on the tab header that has not yet become a spring. */
+  const springTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** The press that has not yet become a drag, and the listeners watching for it to. */
   const pending = useRef<{ row: LayerRow; element: HTMLElement; x: number; y: number; stop(): void } | null>(null);
+
+  const cancelSpring = useCallback(() => {
+    if (springTimer.current) clearTimeout(springTimer.current);
+    springTimer.current = null;
+  }, []);
 
   useEffect(
     () => () => {
       if (shakeTimer.current) clearTimeout(shakeTimer.current);
+      if (springTimer.current) clearTimeout(springTimer.current);
       pending.current?.stop();
     },
     []
@@ -203,6 +230,23 @@ export function useLayersDrag({
     },
     []
   ) as Legality;
+
+  /**
+   * TVW-003's instance path for a node that did not exist a moment ago: the path of the row that
+   * will hold it, with the new id on the end.
+   *
+   * 🔴 **It has to be composed, not looked up.** `rows` is the list the plan was made against, and
+   * the new node's row does not appear in it until the tree rebuilds on `Model.nodeAdded` — so
+   * `onMoved`'s find-the-row-by-id, which is right for a node that already existed, silently
+   * selects nothing for one that has just been created.
+   */
+  const pathUnder = useCallback(
+    (parentId: string, nodeId: string): string[] | null => {
+      const parent = rows.find((row) => row.path[row.path.length - 1] === parentId);
+      return parent ? [...parent.path, nodeId] : null;
+    },
+    [rows]
+  );
 
   /** What the gesture under the pointer would do, whichever of the two drags it is. */
   const planFor = useCallback(
@@ -328,10 +372,20 @@ export function useLayersDrag({
         editor: editor as never,
         restoreSelection: onMoved && plan.kind === 'move' ? () => onMoved(plan.node.id) : undefined
       });
-      if (result.applied && result.nodeId && onMoved) onMoved(result.nodeId);
+      if (result.applied && result.nodeId) {
+        // A PLACE and a MOVE are selected differently, and the difference is not cosmetic — see
+        // `pathUnder`. This branch only became reachable when the tab learned to open mid-drag:
+        // before that, a component could not be dropped on a row at all.
+        if (plan.kind === 'place') {
+          const path = pathUnder(plan.parentId, result.nodeId);
+          if (path) onPlaced?.({ nodeId: result.nodeId, path, owner: plan.owner });
+        } else if (onMoved) {
+          onMoved(result.nodeId);
+        }
+      }
       endDrag();
     },
-    [planFor, endDrag, shake, editor, onMoved]
+    [planFor, endDrag, shake, editor, onMoved, onPlaced, pathUnder]
   );
 
   /**
@@ -367,19 +421,37 @@ export function useLayersDrag({
     setHeaderTarget('ok');
     PopupLayer.instance.indicateDropType('add');
     PopupLayer.instance.setDragMessage(undefined);
-  }, [planTabHeader]);
+
+    /**
+     * 🔴 **The spring is armed only when the drop would LAND**, which is why it is set here and
+     * not in the refusal branch above. Opening Layers under a page — which no row on the screen
+     * can accept — would move a person somewhere they cannot finish, mid-gesture, and then refuse
+     * them again wherever they let go.
+     *
+     * ⚠️ Armed ONCE. This runs on every `mousemove` over the tab, and a timer restarted by each
+     * one would never fire: resting still is exactly the gesture, and a resting pointer still
+     * emits moves.
+     */
+    if (onSpring && !springTimer.current) {
+      springTimer.current = setTimeout(() => {
+        springTimer.current = null;
+        // Checked again at the moment it fires: the button may have come up 1ms ago, and a spring
+        // that opens a tab after the gesture has ended is a panel moving on its own.
+        if (PopupLayer.instance.isDragging()) onSpring();
+      }, SPRING_MS);
+    }
+  }, [planTabHeader, onSpring]);
 
   const onTabHeaderLeave = useCallback(() => {
+    cancelSpring();
     setHeaderTarget(null);
     PopupLayer.instance.indicateDropType(undefined);
     PopupLayer.instance.setDragMessage(undefined);
-  }, []);
+  }, [cancelSpring]);
 
   const onTabHeaderDrop = useCallback((): boolean => {
+    cancelSpring();
     if (!PopupLayer.instance.isDragging()) return false;
-    // ⚠️ Read BEFORE the plan is applied. `rows` is the list this drop was planned against, and
-    // the moment the node is created the tree starts rebuilding into a different one.
-    const root = canvasComponent ? screenRootRow(rows, canvasComponent) : undefined;
     const plan = planTabHeader();
     PopupLayer.instance.dragCompleted();
     setHeaderTarget(null);
@@ -388,21 +460,28 @@ export function useLayersDrag({
 
     // A refusal has already said why, for as long as the pointer was on the strip. There is no row
     // here to shake — the strip IS the thing that was pointed at — so it simply does not happen.
-    if (!plan || plan.kind !== 'place' || !root) return false;
+    if (!plan || plan.kind !== 'place') return false;
 
     const result = applyDragPlan(plan, { project: ProjectModel.instance, editor: editor as never });
     if (!result.applied || !result.nodeId) return false;
-    onPlaced?.({ nodeId: result.nodeId, path: [...root.path, result.nodeId], owner: plan.owner });
+    const path = pathUnder(plan.parentId, result.nodeId);
+    if (path) onPlaced?.({ nodeId: result.nodeId, path, owner: plan.owner });
     return true;
-  }, [rows, canvasComponent, planTabHeader, editor, onPlaced]);
+  }, [planTabHeader, editor, onPlaced, pathUnder, cancelSpring]);
 
-  // The strip stops being a target the moment the button comes up, wherever it came up.
+  // The strip stops being a target, and the spring disarms, the moment the button comes up —
+  // wherever it came up. Capture phase, deliberately: a row that claims the drop calls
+  // `stopPropagation`, and a bubbling listener here would simply never run
+  // ([[stoppropagation-on-a-drop-kills-a-shared-drags-cleanup]]).
   useEffect(() => {
-    if (!headerTarget) return;
-    const onUp = () => setHeaderTarget(null);
-    window.addEventListener('mouseup', onUp);
-    return () => window.removeEventListener('mouseup', onUp);
-  }, [headerTarget]);
+    if (!headerTarget && !springTimer.current) return;
+    const onUp = () => {
+      cancelSpring();
+      setHeaderTarget(null);
+    };
+    window.addEventListener('mouseup', onUp, true);
+    return () => window.removeEventListener('mouseup', onUp, true);
+  }, [headerTarget, cancelSpring]);
 
   const moveByKeyboard = useCallback(
     (rowKey: string, direction: 'up' | 'down'): string | null => {

@@ -256,41 +256,53 @@ it.**
   pressed; two arms went UNGRADED on it. The reachability guard caught it (it reported *drawn but
   not reachable*, which is what it is for) and the drive now waits it out.
 
-## 9. 🔴 AC1's preview half is blocked, and NOT by this task
+## 9. ⚠️ RETRACTED — AC1's preview half is green, and the retraction is worth more than the finding
 
-AC1 says *"sees the page reorder in the preview"*. It does not.
+**This section said the opposite for most of s17, and the way it was wrong is the useful part.**
 
-**Measured three ways, and the last one is the one that matters:**
+AC1 says *"sees the page reorder in the preview"*. It was filed as **blocked by a runtime defect**,
+on three measurements taken in this order:
 
-1. The drag reorders the **model** (`children[]`), and one ⌘Z restores it — 10 of the drive's 11 arms.
-2. The preview's document order is **unchanged**, 4 seconds later, read through the same fiber →
-   `noodlNode` → `parentNodeScope.componentOwner` walk `drive-tvw004-ac2.js` uses.
-3. 🔴 **The same thing happens with no Layers code involved at all.** A move made straight against
-   `NodeGraphModel.detachNode`/`attachNode` in the renderer — *the very calls
-   `NodeOperations.attachNode` makes for a canvas drag* — leaves the preview exactly as it was. And
-   a spy on `ViewerConnection.send` shows the editor **does** send `nodeDetached` and then
+1. the drag reorders the **model** and one ⌘Z restores it — 10 arms;
+2. the preview's **document order is unchanged**, 4 seconds later, read through the fiber →
+   `noodlNode` → `parentNodeScope.componentOwner` walk;
+3. **the same with no Layers code involved at all** — a move made straight against
+   `NodeGraphModel.detachNode`/`attachNode`, the calls `NodeOperations` makes for a canvas drag —
+   while a spy on `ViewerConnection.send` showed the editor **does** send `nodeDetached` +
    `nodeAttached` with `childIndex: 0`.
 
-So the editor says the right thing and the preview does not act on it. The runtime has the whole
-chain for it — `editormodeleventshandler.ts:213` → `ComponentModel.setNodeParent`
-(`componentmodel.ts:384`) → `nodescope.ts:464` → `NodeScope.insertNodeInTree` (`:251`, which reads
-`parent.children.indexOf(model)`) — so the break is somewhere in there, and **which link** is not
-measured. What is measured is that it is not this task's: the canvas's own node drag produces those
-same two messages.
+That is a careful elimination, and it concluded *"no programmatic move of a node is visible in the
+preview, including the canvas's own drag"*. It was written into this file, into the handoff and into
+a memory.
 
-⚠️ The arm stays **red** in `drive-tvw005-drag.js` rather than being softened to UNGRADED. It is the
-honest state of AC1, and a green suite with a quiet hole in it is the shape this phase keeps being
-bitten by ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+🔴 **It was all one stale webpack watcher.** The dev stack's watchers had been running for hours
+across a peer's directory add-and-delete; the editor bundle was reporting `TS2307` for modules that
+exist while `tsc -p packages/noodl-editor --noEmit` read **0**, and the viewer was stale in the same
+way. After `dev:stop` and a cold relaunch, with **no code change**:
+
+- the same raw-model probe reorders the preview **within 800ms**, and the undo puts it back;
+- `drive-tvw005-drag.js` is **11/11**, the preview arm reading `document order was [5, 17, 86], now
+  [23, 35, 5]`;
+- and three arms of `drive-tvw005-strip.js` that had gone red the same evening — a quick drop on the
+  strip placing nothing at all — are green, taking it to **20/20, twice back to back**.
+
+⚠️ **Nothing in the original measurements was false.** Each one was a real reading of a running
+build; they were readings of a *bundle* that no longer matched the source. Elimination over a
+candidate list cannot save you when the thing missing from the list is the instrument itself
+([[elimination-over-an-unchecked-candidate-list]]). The order that would have cost ten minutes
+instead of an hour: **a renderer behaving impossibly is a question about the bundle before it is a
+question about the code, and `tsc --noEmit` on the tsconfig `ts-loader` uses answers it in one
+command.** See [[the-test-ci-contamination-window-is-the-webpack]], fourth section.
 
 ## 10. Where the ACs stand, and the two questions for Richard
 
 | AC | state |
 |---|---|
-| 1 | the reorder, the refusal and the strip are **driven**; the **preview half is red** (§9) |
-| 2 | decision: 22 specs. Order, parent, byte-identity, one undo step: 10 driven arms |
+| 1 | ✅ all three sentences driven — the reorder, the preview, the refusal, and the strip (§11's positioned drop) |
+| 2 | ✅ decision: 22 specs. Order, parent, byte-identity, one undo step: 11 + 20 driven arms |
 | 3 | driven for a move, for ⌥↓ and for the strip's placement — one ⌘Z each |
 | 4 | **driven by a spy** on `NodeOperations.createNewNode`: one call, `{parent: <page id>, index: 3}` |
-| 5 | **10 shots taken**, both themes, in `verdicts/TVW-005/2026-09-18` — **Richard rules** |
+| 5 | ✅ **WORTHY** (Richard, 2026-09-18: *"Looks good"*). 10 shots, both themes, in `verdicts/TVW-005/2026-09-18` |
 | 6 | ✅ **2985 specs, 8 failures, seed 19733, HEAD `1d342bc6` — the floor BY NAME** (2 NDA-017, 3 SUB-006, 3 SUB-011), readout mtime checked, none mine |
 
 ⚠️ The `test:ci` run at 21:22 is the **second** attempt. The first exited 1 having compiled nothing:
@@ -300,11 +312,85 @@ the editor's `test:ci` webpack typechecks `tests/ai/**`, and the checkout held a
 by them, re-measured here. ⚠️ **The harness reported that first run as exit 0** while the log ended
 `TESTCI_EXIT=1` — gate on the number in the log.
 
-**Q1 — AC5, the verdict.** Five states, two themes each: the 2px line above a row, the line below,
-the `primary-bg` fill for a reparent, and the tab strip armed and hovered. ⚠️ Worth a hard look at
-`3-reparent-fill--light.png`: the fill sits **inside the region TVW-004 already tints**, and in light
-it is a pale purple on a pale purple.
+**Both questions were put to Richard on 2026-09-18 and both are answered.**
 
-**Q2 — AC1's third sentence.** §2 says the tab must not switch during the drag, so the strip places
-at the end of the screen and a person moves it from there (§8.1). AC1's wording ("drop it under the
-work strip") describes the gesture §2 rules out. Which is the one you want?
+- **AC5 — WORTHY.** *"Looks good."* ⚠️ The thing worth flagging was flagged and passed anyway: the
+  reparent fill sits inside the region TVW-004 already tints, so in light theme it is a pale purple
+  on a pale purple (`3-reparent-fill--light.png`).
+- **AC1's third sentence — §11.** The gesture changed rather than the sentence; see below.
+
+## 11. 🔴 RICHARD'S RULING: the tab springs open, and §2's sentence loses (2026-09-18)
+
+Asked which of the two readings §2's fourth row should have, Richard answered:
+
+> *"Were it possible to position the element at the right level of another component's interior
+> elements without the second drag, that'd be ideal no?"*
+
+Asked to choose between spring-loading the tab, revealing Layers inside the Components tab during a
+drag, and keeping the two-step, he chose **spring-load**. Asked whether *"another component's
+interior"* meant dropping INSIDE a placed component — which the band rule refuses — he chose
+**no: position among the rows of the component the canvas is editing.**
+
+**So two things are now settled, and one of them overturns the spec:**
+
+1. 🔴 **§2's *"The tab does not switch during the drag"* is overruled.** Resting a component on the
+   Layers tab for {@link SPRING_MS} (500ms) opens Layers **under the live drag**, and the existing
+   row indicators and `planComponentDrop` take it from there. The strip keeps **both** meanings —
+   let go and it lands at the end of the screen, hold and you aim — so nothing that was driven at
+   s17 stopped being true.
+2. ✅ **The band rule stands, untouched.** A drop into another component's interior is still refused
+   in the same words. What the ruling asked for is the right *level* within the canvas's own
+   component, which is what a positioned drop gives.
+
+### 11.1 The three things the spring had to be built around
+
+- 🔴 **Armed only when the drop would LAND.** The timer is set in `onTabHeaderOver`'s *ok* branch
+  and nowhere else. A page held on the strip must not open a tree that will refuse it wherever it
+  is let go — a drive arm holds one there for 1.1s and asserts the tab does not move.
+- 🔴 **Armed once, not per `mousemove`.** Resting still is the gesture, and a resting pointer still
+  emits moves; a timer restarted by each one never fires.
+- 🔴 **The teardown listener is CAPTURE phase.** A Layers row that claims a drop calls
+  `stopPropagation`, and React dispatches from the root container — so the bubbling listener that
+  clears `componentDragging` would not run on the one gesture that matters most. This is §8.2's
+  defect arriving by a second door, and it was closed before it could ship
+  ([[stoppropagation-on-a-drop-kills-a-shared-drags-cleanup]]).
+
+### 11.2 An abandoned spring puts the tab back
+
+The tab switch is part of a gesture, so a gesture that does nothing undoes it: if the drag ends
+without placing, the panel returns to the tab the person was on. If it places, Layers is where they
+now want to be and it stays. ⚠️ The decision is taken on a **macrotask after** the mouse-up, because
+the capture-phase listener runs *before* the row's drop handler has said whether anything landed.
+
+### 11.3 What became reachable, and what it cost
+
+Dropping a component **on a Layers row** was written in slice 1 (`planComponentDrop`, 4 specs) and
+was **unreachable** until now: the tab it needs could not be open while the drag was alive. Reaching
+it exposed one real gap — a placed node is selected by a **composed** path (`pathUnder`), because
+the row for a node that did not exist a moment ago is not in the list the plan was made against, so
+`onMoved`'s find-the-row-by-id quietly selected nothing.
+
+### 11.4 The drive, and the hour spent measuring a cached module graph
+
+`drive-tvw005-strip.js` grew five arms for the ruling. On the first run against the spring, **three
+arms that had been green all evening went red** — a quick drop on the strip placed nothing at all —
+while every spring arm passed. Four probes went into that before the cause turned up, and none of
+them was the code:
+
+- ⚠️ **The instrument's first fault was real and worth keeping.** The "quick" drop waited 240ms and
+  then took a CDP round trip before releasing, which put the release at ~500ms — exactly
+  `SPRING_MS`. The tab sprang, its handlers came off with it, and the drop landed on nothing. The
+  dwell is a parameter now and the sample is taken *before* it.
+- 🔴 **But the reds survived that fix, and the cause was `packages/noodl-editor/.webpack-cache`.**
+  The renderer was being served a **stale module graph**: it still held a directory a peer had
+  deleted and a resolution cache that predated the one they added, so the editor bundle reported
+  four `TS2307`s for modules that are on disk — while `tsc -p packages/noodl-editor --noEmit` was
+  exit 0 on the same tsconfig `ts-loader` uses. Two sessions' work read as broken; neither was.
+  [[the-test-ci-contamination-window-is-the-webpack]]
+
+🔴 **The lesson is the order of the two checks.** A renderer that behaves impossibly is a question
+about the *bundle* before it is a question about the code, and `tsc --noEmit` against the same
+tsconfig is the one-command way to tell them apart. Four probes, a bisect and a message accusing a
+peer's tree all came before that command. ⚠️ And a probe that does not reload the page measures
+whatever the page still holds — the stale-listener duplicates in the probe's own log said so twice
+before it was noticed ([[a-control-pair-proves-what-you-varied-only]]).
