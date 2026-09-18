@@ -67,6 +67,63 @@ system, correctly separate.
 - ⚠️ `popuplayer.ts:1240-1241` draws a glyph into a string template. A `currentColor` SVG in a
   string needs the surrounding element to set `color`; the FA glyph inherited it for free.
 
+## 7. The drive (s32, 2026-09-18) — `verdicts/CHR-010/2026-09-18/`
+
+Dev build at HEAD `382b716f`, a **scratch copy** of `templates/rocket-school` opened in
+`/private/tmp/…/chr010-proj` (the repo template is clean afterwards — `git status` empty).
+
+⚠️ **The build I shot was NOT only my commit.** P93's TVW-001 changes were sitting uncommitted in
+the shared working tree when my webpack compiled, and were committed as `d541b6442` only after my
+stack was up. It does not move these findings — every AC2 reading is an *absence* of Font Awesome,
+and none of their files (`benchWords`, `componentUsage`, `RowMetaLabel`, `RouterAdapter`,
+`authoredPageUrl`, two `.scss`) references a font, an icon or an `fa-` class — but the isolation
+claim is theirs to make, not mine to assume. 🔴 **I asserted "nothing of theirs was in the tree"
+from the absence of their COMMIT; on a shared checkout that needs a `git status` taken at launch
+time.** Their peer caught it, the second such correction in one session
+([[a-peer-all-clear-is-about-that-peer]]).
+
+**AC2, the absence — CLOSED.** Four readings, and the last one is the one that counts:
+
+| reading | value |
+|---|---|
+| `<link rel=stylesheet>` hrefs | `["../assets/css/style.css"]` — the FA link is gone |
+| `@font-face` families (`document.fonts`) | `["Bricolage Grotesque"]` only |
+| stylesheets whose rule text mentions FontAwesome | **0 of 284** |
+| elements matching `i.fa, .fa, [class*="fa-"]` | **0** |
+
+🔴 **My own drive script's AC2 arm was VACUOUS and the drive found it.** It read
+`performance.getEntriesByType('resource')` for `font-awesome` and got `[]` — but the same call
+returns `[]` for **every** font and **every** stylesheet in this renderer, so it could not have
+reported a Font Awesome request had one existed. The absence only became evidence next to a signal
+that fires: `document.fonts` lists Bricolage, so it *would* have listed FontAwesome had the
+stylesheet still been linked ([[assert-an-absence-with-a-known-firing-signal-beside-it]]). The
+script still carries the dead arm — **fix it to use `document.fonts` + the link list before reusing
+it.**
+
+**AC1, the presence — the mechanism is verified, the surface list is not.** Graded on the glyph
+BOX, not the element count, on two panels in both themes:
+
+| surface | icons drawn | empty hosts | collapsed (0-wide svg) |
+|---|---|---|---|
+| Router panel, dark | 47 | **0** | **0** |
+| Router panel, light | 54 | **0** | **0** |
+| Group properties, dark | 42 | **0** | **0** |
+
+Boxes land on `IconSize`'s ramp (12/14/16/20; one stray **18** exists and is not mine — no call of
+mine passes a size off the ramp). Both `Pages.tsx` conversions measured individually: the
+`Add new page` **+** and the row **⋯** each draw 14×14 with a real SVG, and both **recolour with the
+theme** — `rgb(221,228,236)`/`rgb(196,206,219)` dark → `rgb(74,86,99)`/`rgb(89,98,110)` light.
+Nothing is black in either theme, which is AC1's actual sentence. PNGs read, not just the numbers.
+
+⬜ **Still owed on AC1:** it names *"a node with a `proplist`, a variants editor and the icon
+picker"*. None of those three was reached — `rocket-school` has no colour styles and no variants, so
+the variant popout opens straight into its create-mode branch and never draws the
+`.variants-add-header` **+**; `ComponentPortsView` needs a component with its own ports (and
+[[only-two-projects-have-a-component-with-input-ports]]); the icon picker needs an `Icon` node.
+**Those six conversions are argued statically, not seen.** Pick a project that has all three, or add
+the nodes with `NodeGraphNode.fromJSON` the way `CHR-009/2026-09-17/set/drive-set.js` does.
+And AC1 closes on **Richard's look**, which has not happened.
+
 ## 6. What §2–§5 got wrong, re-derived at HEAD (s32, 2026-09-18)
 
 Measured before building, not read. Six premises were stale or false.

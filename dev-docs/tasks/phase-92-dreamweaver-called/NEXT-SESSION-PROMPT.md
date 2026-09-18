@@ -4,14 +4,15 @@
 `git log -- dev-docs/tasks/phase-92-dreamweaver-called` for the phase's history.
 The platform half (`~/vscode_projects/nodegx-community`, deployed `f39d20f`) was not touched.
 
-s32 in one paragraph: **CHR-010 is built — Font Awesome is gone from the editor — and it is
-UNDRIVEN.** The 1.1 MB vendored FA 4.7 directory, both `<link>`s and all 23 source uses are
-deleted, converted to core-ui `Icon` across 13 files, with a gate (`npm run icons:font`) holding it
-at zero over 3,183 files in 22 packages. Every static reading is green and **not one pixel has been
-looked at**: P93 held the box with a live dev stack for the whole session, so AC1's drive, AC2's
-boot-network reading and `test:ci` are all still owed. Six of the task's own premises were wrong and
-are corrected in CHR-010 §6 — including one, AC3's "there is a spec; keep it green", where the spec
-simply did not exist.
+s32 in one paragraph: **Font Awesome is gone from the editor, and it has been driven.** The 1.1 MB
+vendored FA 4.7 directory, both `<link>`s and all 23 source uses are deleted, converted to core-ui
+`Icon` across 13 files, with a gate (`npm run icons:font`) holding it at zero over 3,183 files in 22
+packages. **AC2 is closed on the live renderer** — no FA link, no `@font-face`, no FontAwesome rule
+across 284 stylesheets, 0 FA-classed elements — and AC1's *mechanism* is verified on two panels in
+both themes: 0 empty hosts, 0 collapsed glyphs, every glyph recolouring with the theme. **AC1 is not
+closed**: three of the surfaces its sentence names were unreachable in the project I drove, and it
+ends on Richard's look. Six of the task's own premises were wrong (CHR-010 §6) — including AC3's
+"there is a spec; keep it green", where the spec did not exist.
 
 ⚠️ Peers work in this checkout: **P88 / GAM** (`viewer-react`, `templates/*`, backend + mcp) and
 **P93 / TVW** (`ComponentsPanelNew/*`, `VisualCanvas/*`, with STAGED deletions in the shared index —
@@ -27,29 +28,28 @@ simply did not exist.
 | CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert**. Left: undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4) |
 | CHR-009 the panel designed | ✅ AC1 WORTHY (s29), **AC5 met except one thing**: a ruling on the `IconInput` placeholder (§24) |
 | CHR-004 the gates measure the scale | 🟡 AC1–AC3 ✅, AC5 RULED + HEAD run ✅. Left: **AC4/§3.3, re-priced in §7.7 — read it before touching** |
-| **CHR-010 the last icon font** | 🟡 **BUILT s32, UNDRIVEN.** AC2 static half ✅, AC3 ✅, AC4's `colors` ✅. Left: **AC1 drive + look, AC2's network reading, `test:ci`** |
+| **CHR-010 the last icon font** | 🟡 **BUILT + DRIVEN s32.** AC2 ✅ (live), AC3 ✅, AC4 ✅ (`colors` 16=16, `test:ci` at the floor). Left: **AC1 — three named surfaces unreached, and Richard's look** |
 | CHR-011 | ⬜ blocked on CHR-010 |
 
 ## What to do next, in order
 
-1. **Take the box and drive CHR-010.** This is the only thing standing between the task and its
-   look, and the instrument is already written and syntax-checked:
-   `verdicts/CHR-010/drive-icons.js`, run as
-   `NOODL_REMOTE_DEBUG_PORT=<port> node drive-icons.js --expect=<scratch copy>`.
-   It grades three things and each is there for a reason:
-   - **the glyph BOX, not the element count.** `Icon` renders an empty `<span>` when its name has
-     no SVG, and a fixed-size `Icon` in a padded box collapses to zero width under the global
-     `box-sizing: border-box` — I hit that second one statically on `.queryeditor-caret-icon`
-     (`padding-left: 15px` would have eaten the whole 12px box) and fixed it, but only a rendered
-     reading can say it is the last one. `44 rows / 44 hosts` is what both defects look like.
-   - **AC2's absence**, from `performance.getEntriesByType('resource')` — a `<link>` can be deleted
-     while a stylesheet or `@font-face` still pulls the font.
-   - **both themes**, because the FA glyphs were `color`-driven text and the SVGs are
-     `currentColor`; "recolours with the theme" is AC1's actual sentence.
-   Then shoot the surfaces AC1 names — a variants editor, the icon picker, a colour style picker,
-   the Router's Pages list, the Component Ports panel, and the drag overlay's drop indicator.
-2. **`test:ci`** (AC4), and the full `npx jest tests-unit` that s31 also deferred. I ran only the
-   28 suites that import the 13 changed files (617 tests, green).
+1. **Finish AC1's surface list.** The mechanism is proven (§7 of the task file: 0 empty hosts, 0
+   collapsed, correct recolouring, both themes, two panels). What is NOT seen is three of the
+   surfaces AC1's sentence names, because `rocket-school` cannot show them:
+   - **a variants editor** — the node has no variants, so the popout opens straight into its
+     create-mode branch and never draws the `.variants-add-header` **+** (the one place my deletion
+     of `.variants-add-header > i.fa` could have moved something; the `+` now rides the existing
+     `.add-button` rule instead, argued but unseen).
+   - **the icon picker** — needs an `Icon` node (`fa-search` → `IconName.Search`).
+   - **a proplist / the Component Ports panel** — `ComponentPortsView`'s six conversions need a
+     component with its own ports, and [[only-two-projects-have-a-component-with-input-ports]].
+   Pick a project that has all three, or add the nodes with `NodeGraphNode.fromJSON` +
+   `graph.addRoot` the way `verdicts/CHR-009/2026-09-17/set/drive-set.js` does. Also unseen: the
+   drag overlay's drop indicator (`iconHost`), and `.queryeditor-caret-icon`, where I fixed a
+   `border-box` collapse statically and nothing has rendered it.
+   🔴 **Fix the drive script's dead arm first if you reuse it** — see the trap list below.
+2. **The full `npx jest tests-unit`**, which s31 also deferred. I ran only the 28 suites that import
+   the 13 changed files (617 tests, green). ✅ `test:ci` is **taken** — see Readings.
 3. **Ask Richard the two questions he owes**, both with a PNG rather than a ratio (s21: *"greyed is
    a picture, not a DOM attribute"*):
    - CHR-009 §24 — `IconInput`'s `None` placeholder at **3.897:1 dark / 3.373:1 light** against
@@ -87,8 +87,24 @@ and downgraded it themselves — neither surface they were shooting references F
 - `npm run colors` **16 = 16** (unchanged with the FA exemption removed, exactly as AC4 predicted:
   FA's CSS was excluded, not counted). `npm run type` −6 vs baseline (that is s31's, not mine).
   `icons:css` and `tokens:css` green.
-- **NOT run, and owed:** the drive, `test:ci`, and the full `npx jest tests-unit`. P93 held a live
-  dev stack on :8080 for the session; load peaked at 10.0.
+- ✅ **`test:ci` AT THE FLOOR, AT MY COMMIT — and I did not run it.** P93 ran it for their own AC8
+  and it landed on HEAD `382b716f` (this session's CHR-010 commit): **2,985 specs / 8 failures,
+  seed 98435, 67s**, and the eight are the standing floor by name (3 SUB-006, 3 SUB-011, 2 NDA-017),
+  none in this phase's surface. That is **a fourth seed agreeing** (46376, 38645, 68399, 98435).
+  ⚠️ Relayed, so relay the MEASUREMENT and not my conclusion: it carries seed, HEAD, duration and
+  the eight by name, which is what makes it checkable
+  ([[a-relayed-conclusion-decays-faster-than-a-relayed-measurement]]). Deleting Font Awesome moved
+  nothing in `test:ci`.
+- ✅ **The drive, dev build at HEAD `382b716f`, scratch copy of `rocket-school`** (repo template
+  clean afterwards). AC2: `<link>`s `["../assets/css/style.css"]`, `@font-face` families
+  `["Bricolage Grotesque"]`, **0 FontAwesome rules across 284 stylesheets**, 0 FA-classed elements.
+  AC1 mechanism: Router panel **47 drawn / 0 empty / 0 collapsed** dark and **54 / 0 / 0** light,
+  Group properties **42 / 0 / 0**; both `Pages.tsx` glyphs 14×14 with real SVGs, recolouring
+  `rgb(221,228,236)`→`rgb(74,86,99)` across the theme flip. PNGs in
+  `verdicts/CHR-010/2026-09-18/`, read not just counted.
+  ⚠️ That build carried **P93's uncommitted TVW-001 delta** (committed after as `d541b6442`) — see
+  the task file's §7 caveat.
+- **NOT run, and owed:** the full `npx jest tests-unit`.
 
 ## 🟡 One unowned failure, measured, NOT inherited
 
@@ -145,6 +161,25 @@ NOODL_REMOTE_DEBUG_PORT=<port> node scripts/look-gate/run.js --surface=launcher 
 ## Traps (s12–s32)
 
 - 🔴 **"Static-only" is about writes, not about runners.** See the section above.
+- 🔴 **`performance.getEntriesByType('resource')` SEES NO FONTS AND NO STYLESHEETS in this
+  renderer.** My AC2 arm read `[]` for `font-awesome` and was **vacuous** — the same call returns
+  `[]` for every font and every CSS file, so it could not have reported a request had one existed.
+  Use `document.fonts` (it lists every `@font-face` a live stylesheet declares, so Bricolage's
+  presence is the signal that makes FontAwesome's absence mean something) plus the `link` list and a
+  rule-text scan **that reports how many rules it scanned**. The script is fixed; the lesson is
+  [[assert-an-absence-with-a-known-firing-signal-beside-it]], and it cost nothing only because I
+  checked the instrument before believing it.
+- 🔴 **"Nothing of theirs was in the tree I shot" needs a `git status` AT LAUNCH TIME, not the
+  absence of their commit.** A peer's work sits uncommitted in a shared checkout and your webpack
+  compiles it. I made this claim twice in one session from commit timing and was corrected twice.
+- ✅ **Opening a scratch project without touching recents or the launcher:** emit
+  `ViewerConnection.openProjectRequested` on `EventDispatcher.instance` with `{directory, requestId,
+  replyTo}` — it runs `performExternalOpen`, which does the load AND the `router.route({to:'editor'})`
+  that `LocalProjectsModel.openProjectFromFolder` alone does **not** (that call resolves a
+  ProjectModel and leaves you on the launcher, which reads exactly like a failure).
+- 🔴 **The panel's tab row and the panel's TITLE both say "Properties".** A click at the title's
+  coordinates silently leaves the wrong tab active and the row census reads `rows: 0` — which looks
+  like a broken panel, not a missed click. The tabs are the y≈145 row; the title is y≈53.
 - 🔴 **A gate's population is exactly what its regex matches** (third time this phase). AC2's three
   strings would have missed the two hardest FA dependencies in the repo: `classList.add('fa-share')`
   in `popuplayer.ts`, and ``className={`fa ${x ? 'fa-caret-up' : …}`}`` in `PortGroup.tsx`, where

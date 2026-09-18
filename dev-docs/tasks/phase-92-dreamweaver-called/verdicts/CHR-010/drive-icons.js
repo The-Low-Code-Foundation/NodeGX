@@ -80,12 +80,24 @@ const readings = {};
   })()`);
 
   // ---- AC2: does anything still ASK for Font Awesome? ----------------------------------------
-  readings.faRequests = await ev(`performance.getEntriesByType('resource')
-    .map((e) => e.name).filter((n) => /font-?awesome/i.test(n))`);
-  readings.faStylesheets = await ev(`[...document.styleSheets]
-    .map((s) => s.href || '').filter((h) => /font-?awesome/i.test(h))`);
-  readings.faFontFaces = await ev(`[...document.fonts].map((f) => f.family)
-    .filter((f) => /font\\s*awesome/i.test(f))`);
+  // 🔴 NOT from `performance.getEntriesByType('resource')`. The first version of this arm did, read
+  // `[]` for font-awesome, and was VACUOUS: that call returns `[]` for EVERY font and EVERY
+  // stylesheet in this renderer, so it could not have reported a Font Awesome request had one
+  // existed. An absence is evidence only beside a signal that fires — and `document.fonts` is that
+  // signal, because it lists every `@font-face` a live stylesheet declares, loaded or not. It reads
+  // `["Bricolage Grotesque"]`, so it would have named FontAwesome had the stylesheet survived.
+  readings.stylesheetLinks = await ev(`[...document.querySelectorAll('link[rel=stylesheet]')]
+    .map((l) => l.getAttribute('href'))`);
+  readings.fontFaceFamilies = await ev(`[...document.fonts].map((f) => f.family)`);
+  readings.faRuleInAnySheet = await ev(`(() => {
+    let scanned = 0, hits = 0;
+    for (const sheet of document.styleSheets) {
+      try { for (const rule of sheet.cssRules) { scanned++; if (/font-?awesome/i.test(rule.cssText)) hits++; } }
+      catch { /* cross-origin sheet: counted as unreadable below */ }
+    }
+    // The population is reported, so "0 hits" can be told apart from "nothing was read".
+    return { sheets: document.styleSheets.length, rulesScanned: scanned, hits };
+  })()`);
   readings.faElementsInDom = await ev(`document.querySelectorAll(${FA_SELECTOR}).length`);
 
   // ---- AC1: every converted glyph draws ------------------------------------------------------
