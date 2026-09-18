@@ -303,7 +303,13 @@ command.** See [[the-test-ci-contamination-window-is-the-webpack]], fourth secti
 | 3 | driven for a move, for ⌥↓ and for the strip's placement — one ⌘Z each |
 | 4 | **driven by a spy** on `NodeOperations.createNewNode`: one call, `{parent: <page id>, index: 3}` |
 | 5 | ✅ **WORTHY** (Richard, 2026-09-18: *"Looks good"*). 10 shots, both themes, in `verdicts/TVW-005/2026-09-18` |
-| 6 | ✅ **2985 specs, 8 failures, seed 19733, HEAD `1d342bc6` — the floor BY NAME** (2 NDA-017, 3 SUB-006, 3 SUB-011), readout mtime checked, none mine |
+| 6 | ✅ **Twice at the floor BY NAME** (2 NDA-017, 3 SUB-006, 3 SUB-011, none mine): 2985 specs / seed 19733 at `1d342bc6` (the strip), and **2978 specs / seed 31629 at `61aa0502`** — which carries the spring — readout 10s old both times |
+
+⚠️ **The spec COUNT moved between the two runs, 2985 → 2978, and the floor did not.** The seven are
+a peer's (P94 was refactoring the property editor between them); the discriminator is that the eight
+failures are the same eight **by name**. A count is not a floor
+([[test-ci-baseline-is-six-at-seed-39386]]) — and the tested HEAD is a peer's commit with this
+task's two as ancestors, which `git merge-base --is-ancestor` is what settles.
 
 ⚠️ The `test:ci` run at 21:22 is the **second** attempt. The first exited 1 having compiled nothing:
 the editor's `test:ci` webpack typechecks `tests/ai/**`, and the checkout held a peer's in-flight

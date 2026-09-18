@@ -31,8 +31,8 @@ is blocked by something that is not this phase's.**
    only thing between TVW-004 and closed — and with TVW-005 closed at s17, between this phase and
    its second half.
 2. **TVW-006** (the structure lane) or **TVW-007**, neither of which is blocked.
-3. ⚠️ **Re-run `test:ci` before trusting s17's AC6 line if you change anything.** It was measured at
-   `1d342bc6` — the strip commit — and again after the spring; both at the floor.
+3. ⚠️ **Re-run `test:ci` before trusting s17's AC6 line if you change anything.** It was measured
+   twice, at `1d342bc6` and at `61aa0502`, both at the floor by name.
 
 ## 🔴 Read this before you debug anything in the running editor
 
@@ -126,9 +126,12 @@ band, so "the top of Layers" is `/App`, on every page at once.
   `tests/ai/authoring-style.test.ts:116,117,119` read `variants` / `sizes` / `variantStyles` off
   `VocabElement`, which **P94 STY-002 removed** (the type's own comment at `StyleVocabulary.ts:95`
   says so). Both files were **uncommitted working-tree edits** at the time.
-- ✅ **`test:ci` — 2985 specs, 8 failures, seed 19733, HEAD `1d342bc6`: THE FLOOR BY NAME**
-  (2 NDA-017, 3 SUB-006, 3 SUB-011), readout mtime checked against the clock, **none of them mine**.
-  TVW-005 AC6 is closed.
+- ✅ **`test:ci` at the floor BY NAME, twice** (2 NDA-017, 3 SUB-006, 3 SUB-011, none of them mine),
+  readout mtime checked against the clock both times: **2985 specs / seed 19733 at `1d342bc6`** (the
+  strip) and **2978 specs / seed 31629 at `61aa0502`** (a peer's commit carrying the spring).
+  ⚠️ The spec **count** moved by seven between them — a peer's property-editor refactor — and the
+  floor did not. The eight failures being the same eight *by name* is what makes that readable;
+  a count alone would have looked like a regression. TVW-005 AC6 is closed.
 - 🔴 **The first attempt exited 1 without running a single spec**, for the reason above: the editor's
   `test:ci` webpack **typechecks `tests/ai/**`**, so it compiles a sibling's in-flight edit
   ([[the-editor-test-ci-webpack-typechecks-a-sibling-packages-tests]]). Reported to `opennoodl-ec`
