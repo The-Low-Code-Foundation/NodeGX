@@ -9,7 +9,7 @@ now **6 of 7 ACs green**. It needs one gate and one look — neither is a build.
 | id | task | built | driven |
 |---|---|---|---|
 | TVW-001 | The panel tells the truth | ✅ six rows + AC7's fixes | **CLOSED — all 8 ACs** |
-| TVW-002 | The preview says what it is not showing | ✅ 6 modules + the row + the outline | **AC1–AC5 ✅. AC6 = Richard's look. AC7 = `test:ci`, NOT RUN** |
+| TVW-002 | The preview says what it is not showing | ✅ 6 modules + the row + the outline | **AC1–AC5 ✅, AC7 ✅. AC6 = Richard's look — the ONLY thing left** |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED — all 6 ACs** |
 | TVW-004 | Layers (**unblocked**) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
@@ -19,24 +19,22 @@ now **6 of 7 ACs green**. It needs one gate and one look — neither is a build.
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 23** (TVW-003 six, TVW-001 eight, TVW-002 five). Two and a half of ten tasks.
+**ACs closed: 24** (TVW-003 six, TVW-001 eight, TVW-002 six). Two and a half of ten tasks.
 
-## Start here — two things, then build TVW-004
+## Start here — one look, then build TVW-004
 
-1. 🔴 **RUN `npm run test:ci`.** This is TVW-002 AC7 and it is the ONLY gate this session did not
-   run — the box went to a peer (opennoodl-5f, Rocket School) before it could. Everything else is
-   green and recorded. Delete `tests/test-results.json` first, gate on the FAILURE NAMES not the
-   count, and expect the floor: **8 by name — 3 SUB-011, 2 NDA-017, 3 SUB-006**. Exit is **1** at
-   the floor. 🔴 Read `$?` directly; a pipe eats it (that bit me this session).
-   ⚠️ I touched `packages/noodl-viewer-react/src/highlighter.ts`, so if anything new is red it is
-   most likely there. `npx jest` in that package was **122 suites / 1627 green** after the change.
-2. **Show Richard `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` for AC6.** `open -a Preview <paths>`
+**Every gate TVW-002 has is green.** `test:ci` ran at the end of s13: **2985 specs, 8 failures, seed
+57873, HEAD `bf1c17c0`** — the floor **by name** (3 SUB-011, 3 SUB-006, 2 NDA-017), none mine, a
+sixth agreeing seed. ⚠️ A **stale `test-results.json` was on disk** and would have read as a pass;
+delete it before every run and check the mtime on what comes back.
+
+1. **Show Richard `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` for AC6.** `open -a Preview <paths>`
    — markdown links open nothing in his VS Code. Three things are written up for him at the end of
    the TVW-002 task file: the detached window is **stuck on the dark theme** (measured: `data-theme`
    is `null` there; pre-existing, the strip inherits it); in the detached window the row sits at the
    **bottom with no node canvas below it**; and the quiet sentence **truncates by 25px** at that
    window's default 372px width.
-3. Then **TVW-004 (Layers)**. It should **import `pageReach.ts`**, not write a second walk — and note
+2. Then **TVW-004 (Layers)**. It should **import `pageReach.ts`**, not write a second walk — and note
    that `firstRendered` now returns a **path to the node that paints**, which is exactly what Layers
    needs to point at something.
 

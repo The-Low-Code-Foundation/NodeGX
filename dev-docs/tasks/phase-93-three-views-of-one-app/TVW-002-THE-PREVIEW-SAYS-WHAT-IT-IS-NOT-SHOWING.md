@@ -355,6 +355,9 @@ scans `elementFromPoint` down a column.
   `pushed ?? local` inline in the JSX was completely ungraded — which is why `stripToRender` exists
   as a function at all. Red now.
 - Drive: both themes, exit status **0** (read directly, not through a pipe — a pipe eats it).
+- `npm run test:ci` — **2985 / 8, seed 57873, HEAD `bf1c17c0`**, the floor BY NAME. ⚠️ A **stale
+  `test-results.json` from an earlier run was still on disk** and would have read as a pass; deleted
+  first and the mtime checked on what came back.
 
 ### AC status
 
@@ -366,7 +369,7 @@ scans `elementFromPoint` down a column.
 | 4 | ✅ |
 | 5 | ✅ **driven in the detached window**: four shapes, `data-detached=true`, and `Go to Design System` pressed *there* moved the preview and returned the correct new quiet sentence — three processes in the loop |
 | 6 | ⏳ **Richard's look.** `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` |
-| 7 | ⏳ `test:ci` — box handed to a peer, to run after |
+| 7 | ✅ **`test:ci` at the floor** — 2985 specs, 8 failures, seed 57873, HEAD `bf1c17c0`, fresh JSON. The same eight **by name**: 3 SUB-011, 3 SUB-006, 2 NDA-017. None mine. A **sixth** agreeing seed. |
 
 ### For Richard, with the shots (AC6)
 
