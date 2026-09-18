@@ -149,7 +149,19 @@ across the two suites, and the bundle budget measured at **+14.8 KB gzipped agai
 4. **Tests are the drive, not the unit.** Each task ships a test in `packages/nodegx-backend/tests/`
    that provisions a backend and exercises the feature over HTTP, in the house style of
    `cloud-http-node.test.ts` and `impersonate-session.test.ts`.
-5. **[PHASE-EXECUTION.md](../../guidelines/PHASE-EXECUTION.md) applies.** A defect found while
+5. 🔴 **A new node type owes FOUR regenerations, and a per-package test run sees NONE of them.**
+   Learned the expensive way in s1: FED-001's suites were green in `noodl-runtime` and
+   `nodegx-backend`, and the nodes still red **two editor gates** that only `test:main` runs. Adding
+   a node type means, in order:
+   `npm run catalog:generate` → `npm run catalog:merge` → `npm run docs:nodes` →
+   `CHR007_WRITE_SNAPSHOT=1 npx jest tests-unit/chr-007/widgetDispatch.test.ts` (from
+   `packages/noodl-editor`). The two gates that catch a miss are
+   `tests-unit/alpha-006/nodeDocs.test.ts` (every catalog node needs a generated docs page on disk)
+   and `tests-unit/chr-007/widgetDispatch.test.ts` (the recorded port-class map must cover every
+   catalog type). **Then run `npm run test:main` before committing** — it is 498 suites in ~35
+   seconds and it is the only run that sees across packages. **FED-003 adds `Model Request`: this
+   is its checklist too.**
+6. **[PHASE-EXECUTION.md](../../guidelines/PHASE-EXECUTION.md) applies.** A defect found while
    driving is filed, with an owner, and the next session builds the next task unless the defect
    carries `BLOCKS <AC>`.
 

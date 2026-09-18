@@ -2,7 +2,7 @@
 title: Node reference
 ---
 
-Every node in the catalog — 177 in total — generated from the same
+Every node in the catalog — 179 in total — generated from the same
 enriched catalog the editor reads for its own in-editor help. Grouped by picker category.
 
 :::info Generated
@@ -102,6 +102,8 @@ This page is generated from `node-catalog-enriched.json`. Do not edit it by hand
 - [Object](./data/model2.md)
 - [Optimistic Update](./data/net-noodl-optimistic-update.md)
 - [Parse CSV](./data/net-noodl-parse-csv.md)
+- [Parse Feed](./data/net-noodl-parse-feed.md)
+- [Parse XML](./data/net-noodl-parse-xml.md)
 - [Pattern Extractor](./data/net-noodl-pattern-extractor.md)
 - [Remove Object From Array](./data/collection-remove.md)
 - [Remove Record Relation](./data/remove-db-model-relation.md)

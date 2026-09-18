@@ -1449,6 +1449,17 @@
       "hasHeader": "BooleanType",
       "text": "CodeEditorType"
     },
+    "net.noodl.ParseFeed": {
+      "maxBytes": "BasicType",
+      "text": "CodeEditorType"
+    },
+    "net.noodl.ParseXML": {
+      "alwaysArray": "BasicType",
+      "attributePrefix": "BasicType",
+      "maxBytes": "BasicType",
+      "text": "CodeEditorType",
+      "trimValues": "BooleanType"
+    },
     "net.noodl.PatternExtractor": {
       "extract": null,
       "extractAll": "BooleanType",

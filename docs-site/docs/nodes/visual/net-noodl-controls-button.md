@@ -74,6 +74,7 @@ Any tap/click affordance with a caption. For a custom-drawn clickable area, a Gr
 | `iconSize` | Number | `16` | Height of the icon |
 | `iconSourceType` | Enum (`image`, `icon`) | `icon` | Whether the icon comes from an installed icon set or from an image file, which decides the source port below |
 | `iconSpacing` | Number | `10` | Gap between the icon and the text beside it |
+| `keepsFocus` | Boolean | `false` | Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into |
 | `label` | String | `Label` | Text shown on this element |
 | `letterSpacing` | Number | `Auto` | Extra space added between characters; leave as Auto to use the spacing built into the font |
 | `lineHeight` | Number | `Auto` | Vertical space each line of text occupies; leave as Auto to follow the font |
