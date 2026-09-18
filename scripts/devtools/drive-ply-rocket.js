@@ -432,8 +432,11 @@ function solveHunt(instruction, tiles) {
   };
   const text = String(instruction || '');
   let op = 'add', count = 2, target = null;
-  if (/make 100|font 100/.test(text)) { op = 'add'; target = 100; }
-  else if (/make 1000|font 1000/.test(text)) { op = 'add'; target = 1000; }
+  // 🔴 1000 BEFORE 100: "make 1000" CONTAINS "make 100", so with the shorter test first a "Pick 2 numbers that
+  // make 1000" grid was hunted for a pair summing to 100, found none, and reported the PRODUCT as broken — the grid
+  // it printed held 600 + 400 and 500 + 500. An instrument fault that reads exactly like a defect.
+  if (/make 1000|font 1000/.test(text)) { op = 'add'; target = 1000; }
+  else if (/make 100|font 100/.test(text)) { op = 'add'; target = 100; }
   else {
     const m = text.match(/([\d.,\s ]+)\s*$/);
     target = m ? asNum(m[1]) : null;

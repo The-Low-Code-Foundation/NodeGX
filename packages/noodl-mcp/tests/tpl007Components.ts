@@ -2845,9 +2845,24 @@ ${MONSTER_CSS}
  * 🔴 R6 — the buy card sits over the shelf instead of replacing it (Pages/Hangar, and the long note there).
  * The card keeps its own width and centres itself; the scrim is faint, because what is underneath is the thing the
  * child just tapped and seeing it is the point. z-index so the tiles cannot draw through the question.
+ *
+ * 🔴 EVERY POSITIONING PROPERTY HERE IS !important, AND THAT IS NOT DECORATION. A Group writes position:
+ * relative as an INLINE style (group.ts defaultCss), and an inline style beats a class — so the first build of this
+ * rule did nothing at all: the card simply flowed BELOW the shelf, and the drive measured it at y=1245 in an
+ * 844-tall viewport. It read as "the buy card is clipped", which is a true sentence about a card that is one whole
+ * shelf further down the page than anyone meant. bottom:auto so the card is its own height at the top of the shelf
+ * rather than being stretched down the length of it.
+ *
+ * 🔴 AND IT IS fixed, NOT absolute — the drive is what said so. Pinned to the top of the STACK, the card sat at
+ * the top of a shelf 17 tiles long: a child on a phone who scrolls down and taps a tile got a card at y = -47, off
+ * the screen above them, and would have seen their tap do nothing at all. Fixed means the question meets the child
+ * where they are looking, which is what "over the shelf" has to mean on a screen you scroll.
+ *
+ * Which is also why there is NO .rkt-shelf-stack rule: a fixed card is positioned against the viewport, so the stack
+ * has no work to do as a containing block. The class stays on the group because it names the pair, and the template
+ * gate reads it to check the shelf and the card really are siblings.
  */
-.rkt-shelf-stack { position: relative; }
-.rkt-buy-over { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 6; justify-content: flex-start; background: color-mix(in srgb, var(--background) 72%, transparent); padding-top: var(--space-2); }
+.rkt-buy-over { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; z-index: 6; justify-content: center !important; align-items: center !important; background: color-mix(in srgb, var(--background) 82%, transparent); padding-left: var(--space-4); padding-right: var(--space-4); }
 @media (prefers-reduced-motion: reduce) {
   .pressable, .game-card { transition: none; }
   .game-card:hover, .pressable:active { transform: none; }

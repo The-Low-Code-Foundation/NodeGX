@@ -1140,9 +1140,12 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       // would be positioned against the page instead.
       const stack = nodesOf(built, C.pageHangar).find((n) => n.id === 'hgStack')!;
       expect((stack.children ?? []).map((c) => c.id)).toEqual(['hgShelfBox', 'hgOver']);
-      // And the CSS that does the stacking really is shipped, on both halves.
-      expect(APP_CSS).toContain('.rkt-shelf-stack { position: relative; }');
-      expect(APP_CSS).toMatch(/\.rkt-buy-over \{[^}]*position: absolute/);
+      // 🔴 The CSS that puts the card over the shelf, and every part of it that the drive proved was load-bearing:
+      // FIXED, because pinned to the tall shelf the card sat above a scrolled phone viewport at y = -47; and
+      // !important, because a Group writes position inline and an inline style beats a class, so without it the rule
+      // did nothing at all and the card flowed below the shelf at y = 1245 in an 844-tall viewport.
+      expect(APP_CSS).toMatch(/\.rkt-buy-over \{[^}]*position: fixed !important/);
+      expect(APP_CSS).toMatch(/\.rkt-buy-over \{[^}]*z-index/);
       // 🔴 The tab the child was on: one node opens the shelf on Face, and it is driven by a didMount that now fires
       // once per visit. If anything ever re-mounts the shelf, clause 1 above is what goes red.
       expect(missing(C.hangarShelf, [['hsWrap', 'didMount', 'hsInitTab', 'do']])).toEqual([]);
