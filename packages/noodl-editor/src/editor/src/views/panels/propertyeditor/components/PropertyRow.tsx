@@ -75,6 +75,48 @@ import { HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
 /** The class CHR-009's row grid hangs off. One per drawn row, whatever produced its control. */
 export const PROPERTY_ROW_CLASS = 'property-panel-row';
 
+// ── P94 STY-003, rules 2 and 3 ───────────────────────────────────────────────
+
+/**
+ * The attribute the row's provenance treatment hangs off — `linked` or `overridden`.
+ *
+ * 🔴 **An attribute, not a second class, and read from the rendered element.** AC5 is graded by
+ * reading the element a person actually sees ([[a-ring-must-be-read-on-the-element-a-person-sees]]),
+ * and a `data-` attribute survives a class list the row already shares with four other decorators.
+ * A `plain` row carries **nothing** — the absence is the signal (design §3.2), so there is no
+ * third value to match and no way for a "none" state to be styled by accident.
+ */
+export const LOOK_TREATMENT_ATTRIBUTE = 'data-look-treatment';
+
+/** The override's own line: what the Look wanted, and the way back to it. */
+export const LOOK_OVERRIDE_CLASS = 'property-look-override';
+/** The revert control inside that line (rule 3: "loud **and** reversible"). */
+export const LOOK_REVERT_CLASS = 'property-look-revert';
+
+/**
+ * Where one row's value came from — `fieldState.readField`'s answer, narrowed to what is drawn.
+ *
+ * 🔴 **Never constructed from a value comparison.** A linked field and an own field can hold the
+ * same resolved value; a treatment that appeared only when they differed would be invisible in
+ * exactly the case a person most needs it, which is the trap STY-003 §2 names
+ * ([[a-css-property-whose-default-equals-the-test-value]]). The caller passes what `readField`
+ * decided on **ownership**, and this component never second-guesses it.
+ *
+ * ⚠️ **And it is not the changed-dot.** The dot means `parameters[name] !== undefined` — "this node
+ * owns this value" — which cannot say where a value came from, and design §2 forbids reusing it
+ * for this.
+ */
+export interface PropertyRowLook {
+  /** `plain` is never passed: a row with nothing to say is given no `look` at all. */
+  treatment: 'linked' | 'overridden';
+  /** The Look's name — the thing rule 2 says every styled field must name. */
+  lookName: string;
+  /** Rule 3 — what the Look wanted, already rendered as text by the caller. */
+  lookValueText?: string;
+  /** Rule 3 — put the field back under the Look. Omitted → no button, rather than a dead one. */
+  onRevert?: () => void;
+}
+
 /** BCN-010, narrowed to what the row draws. `sentence` is `gateSentence`'s answer, resolved by `Ports`. */
 export interface PropertyRowCapability {
   portName: string;
@@ -101,6 +143,8 @@ export interface PropertyRowProps {
   description?: string;
   capability?: PropertyRowCapability;
   gate?: PropertyRowGate;
+  /** P94 STY-003 — where this row's value came from, when there is a Look to attribute it to. */
+  look?: PropertyRowLook;
   /** FB-017 AC4 — the hintable ports this row speaks for; drawn as the marker `refreshHints` finds. */
   hintPorts?: string[];
   /** The control: today an element built by a row class, tomorrow a widget component. */
@@ -196,8 +240,47 @@ function withGate(content: React.ReactNode, gate: PropertyRowGate) {
   );
 }
 
+/**
+ * P94 STY-003 rule 3 — the override's line.
+ *
+ * 🔴 **Drawn for `overridden` only.** A linked row says where it came from through the section
+ * header and its own treatment; adding a line to every linked field would put the Look's name on
+ * ten rows at once, which is the shouting design §3.1 avoids by naming the source once. An
+ * override is the exception because it is the one case where the panel knows something the person
+ * cannot see: a value the Look offered and this node is ignoring.
+ */
+function lookOverrideLine(look: PropertyRowLook) {
+  // `null`, not an empty div: a row with nothing to say must add nothing to the grid.
+  if (look.treatment !== 'overridden') return null;
+
+  const said = look.lookValueText ? `${look.lookName} says ${look.lookValueText}` : `Overrides ${look.lookName}`;
+
+  return (
+    <div className={LOOK_OVERRIDE_CLASS} data-test="look-override-line">
+      {/* Text, never markup: a Look's name is typed by a person. */}
+      <span title={said}>{said}</span>
+      {look.onRevert && (
+        <button
+          type="button"
+          className={LOOK_REVERT_CLASS}
+          data-test="look-revert"
+          title={`Use ${look.lookName}'s value`}
+          onClick={(event) => {
+            // As the gate link does: the wrapper is live even where the control is not, and
+            // without this the click also reaches the group header and folds the group.
+            event.stopPropagation();
+            look.onRevert();
+          }}
+        >
+          Revert
+        </button>
+      )}
+    </div>
+  );
+}
+
 /** One property row: the control, and everything the panel says about it. */
-export function PropertyRow({ description, capability, gate, hintPorts, children }: PropertyRowProps) {
+export function PropertyRow({ description, capability, gate, look, hintPorts, children }: PropertyRowProps) {
   let content: React.ReactNode = children;
 
   // Innermost first, so the nesting matches what `renderParams` built: describe → capability → gate.
@@ -214,8 +297,11 @@ export function PropertyRow({ description, capability, gate, hintPorts, children
       // FB-017 AC4 — recorded whether or not a note is drawn; this is how `refreshHints` finds the
       // row again later, when the condition has changed but the panel has not re-rendered.
       {...(marked ? { [HINT_PORTS_ATTRIBUTE]: marked } : {})}
+      // P94 STY-003 — absent on a plain row, so "no Look" is styled by nothing at all.
+      {...(look ? { [LOOK_TREATMENT_ATTRIBUTE]: look.treatment, 'data-look-name': look.lookName } : {})}
     >
       {content}
+      {look && lookOverrideLine(look)}
     </div>
   );
 }

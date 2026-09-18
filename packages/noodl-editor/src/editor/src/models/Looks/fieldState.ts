@@ -103,6 +103,25 @@ export function readField(node: NodeStyleFacts, look: LookFacts | undefined, nam
   return { source: 'default' };
 }
 
+/**
+ * What a Look's value reads as in the override line — *"Primary Button says **8px**"* — or
+ * `undefined` when there is no short, true way to say it.
+ *
+ * 🔴 **Refuses rather than approximates.** A colour parameter is an object as often as a string
+ * (`{r,g,b,a}`), and putting `[object Object]` or a wall of JSON into a sentence about what the
+ * Look wanted is worse than the shorter sentence the caller falls back to (*"Overrides Primary
+ * Button"*). The override treatment and the revert do not depend on this — only the wording does,
+ * so the field can decline to be quoted without the row losing rule 3.
+ *
+ * ⚠️ `false` and `0` are values, not absences: the guard is on `null`/`undefined` alone.
+ */
+export function displayableValue(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === 'string') return value.length > 0 ? value : undefined;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return undefined;
+}
+
 /** What the panel draws for a reading — `own` and `default` are both plain (design §3.2). */
 export function treatmentOf(source: FieldSource): FieldTreatment {
   return source === 'linked' ? 'linked' : source === 'overridden' ? 'overridden' : 'plain';

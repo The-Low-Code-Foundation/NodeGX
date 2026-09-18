@@ -25,37 +25,6 @@ export const ButtonConfig: ElementConfig = {
     _variant: 'primary'
   },
 
-  sizes: {
-    sm: {
-      paddingTop: 'var(--space-1)',
-      paddingBottom: 'var(--space-1)',
-      paddingLeft: 'var(--space-2)',
-      paddingRight: 'var(--space-2)',
-      fontSize: 'var(--text-xs)'
-    },
-    md: {
-      paddingTop: 'var(--space-2)',
-      paddingBottom: 'var(--space-2)',
-      paddingLeft: 'var(--space-4)',
-      paddingRight: 'var(--space-4)',
-      fontSize: 'var(--text-sm)'
-    },
-    lg: {
-      paddingTop: 'var(--space-3)',
-      paddingBottom: 'var(--space-3)',
-      paddingLeft: 'var(--space-6)',
-      paddingRight: 'var(--space-6)',
-      fontSize: 'var(--text-base)'
-    },
-    xl: {
-      paddingTop: 'var(--space-4)',
-      paddingBottom: 'var(--space-4)',
-      paddingLeft: 'var(--space-8)',
-      paddingRight: 'var(--space-8)',
-      fontSize: 'var(--text-lg)'
-    }
-  },
-
   variants: {
     primary: {
       backgroundColor: 'var(--primary)',

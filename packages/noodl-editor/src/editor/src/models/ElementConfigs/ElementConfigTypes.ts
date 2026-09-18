@@ -29,13 +29,13 @@ export interface VariantConfig {
 }
 
 /**
- * A size preset — a named set of CSS property overrides (typically spacing + font size).
- */
-export type SizePresets = Record<string, Record<string, string>>;
-
-/**
  * Full configuration for a node type.
- * Describes defaults applied on creation, optional size presets, and named style variants.
+ * Describes defaults applied on creation and named style variants.
+ *
+ * 🔴 **P94 STY-002 AC1 removed the size axis.** `_size` occurred **0 times across ~105 real
+ * projects** (`scripts/devtools/sty002-preset-census.js`), so nothing was migrated and nothing was
+ * taken from anyone — and a second styling axis cannot survive rule 1 ("one row decides it")
+ * whatever its usage had been.
  */
 export interface ElementConfig {
   /** Noodl node type identifier (e.g. 'net.noodl.controls.button'). */
@@ -44,15 +44,13 @@ export interface ElementConfig {
   /**
    * Default CSS property values applied when the node is first created.
    * Use `var(--token-name)` references to link to design tokens.
-   * The special key `_variant` sets the initially-selected variant name.
+   * The special key `_variant` names the variant whose styles are seeded on top of these.
+   *
+   * ⚠️ **P94 STY-002 AC1: it is read, never written.** `applyDefaults` seeds the named variant's
+   * values as the node's own and writes no marker — the `Preset` row that needed one is gone, and
+   * a node's styles are either its own or a Look's.
    */
   defaults: Record<string, string>;
-
-  /**
-   * Optional named size presets (e.g. sm, md, lg, xl).
-   * Each preset is a partial set of CSS overrides applied on top of defaults.
-   */
-  sizes?: SizePresets;
 
   /**
    * Named style variants. Keys are variant names (e.g. 'primary', 'card').

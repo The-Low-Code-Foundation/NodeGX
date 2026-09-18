@@ -193,7 +193,7 @@ describe('PLAT-005 executeSuggestionAction — variant-candidate', () => {
 
   it('no longer writes the ElementConfigRegistry _variant marker', () => {
     // The old implementation's ONLY effect. `_variant` is read by
-    // propertyeditor.renderElementStyleSection against a hardcoded, non-
+    // propertyeditor.renderStyleSuggestions against a hardcoded, non-
     // persisted registry, so writing a name into it produced a picker showing
     // an option that did not exist.
     const node = addButton();

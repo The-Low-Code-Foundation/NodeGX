@@ -1,5 +1,6 @@
 import { isEqual } from 'underscore';
 
+import type { LookFacts, NodeStyleFacts } from '@noodl-models/Looks/fieldState';
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
 import { partitionGatedPorts, reasonsForGatedPorts } from '@noodl-models/nodelibrary/portGateReason';
@@ -45,6 +46,37 @@ export class ModelProxy {
    */
   get label() {
     return this.model.label;
+  }
+
+  /**
+   * P94 STY-003 — what `readField` needs to answer *where did this value come from?*, or
+   * `undefined` when the question does not apply.
+   *
+   * 🔴 **Two cases deliberately return `undefined` rather than a guess:**
+   *
+   * - **Editing the Look itself** (`editMode === 'variant'`). Every field on that surface *is* the
+   *   Look's own, so there is no provenance to draw — and reading it through this proxy would be
+   *   actively wrong: {@link parameters} traps only `get`, so `hasOwnProperty` would answer about
+   *   the *node* while the value came from the *Look*, and `readField` decides on ownership.
+   * - **A non-neutral visual state.** `hover` / `pressed` values live in `stateParameters`, which
+   *   is a second axis this task does not draw (`STY-DESIGN-THE-LOOK-MODEL.md` §9 — states are the
+   *   next thing and must not be smuggled in). Saying nothing is the honest answer; saying
+   *   "linked" off the neutral parameters would be a treatment about the wrong value.
+   *
+   * ⚠️ Returns the node's **own** `parameters` bag, never the resolved one. `readField` asks who
+   * owns the key, and the resolved read (`getParameter`) has already merged the Look in.
+   */
+  get lookProvenance(): { node: NodeStyleFacts; look: LookFacts | undefined } | undefined {
+    if (this.editMode === 'variant') return undefined;
+    if (this.visualState !== undefined && this.visualState !== 'neutral') return undefined;
+
+    const variant = this.model.variant;
+    const look =
+      variant && variant.name !== undefined
+        ? { name: variant.name as string, parameters: (variant.parameters ?? {}) as Record<string, unknown> }
+        : undefined;
+
+    return { node: { parameters: this.model.parameters ?? {} }, look };
   }
 
   constructor(args) {

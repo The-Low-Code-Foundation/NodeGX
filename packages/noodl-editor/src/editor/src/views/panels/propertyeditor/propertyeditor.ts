@@ -7,10 +7,9 @@ import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { UndoQueue, UndoActionGroup } from '@noodl-models/undo-queue-model';
 
 import View from '../../../../../shared/ListenableView';
-import { ElementConfigRegistry } from '../../../models/ElementConfigs/ElementConfigRegistry';
 import { ProjectModel } from '../../../models/projectmodel';
 import { ToastLayer } from '../../ToastLayer/ToastLayer';
-import { ElementStyleSectionHost } from './components/ElementStyleSectionHost';
+import { StyleSuggestionHost } from './components/StyleSuggestionHost';
 import { VariantsEditor } from './components/VariantStates';
 import { VisualStates } from './components/VisualStates';
 import { Ports } from './DataTypes/Ports';
@@ -30,15 +29,13 @@ export class PropertyEditor extends View {
   /** The scrolling body — carries the variant edit-mode class. */
   private bodyEl: HTMLElement;
   private variantsEl: HTMLElement;
-  private elementStyleEl: HTMLElement;
+  private styleSuggestionEl: HTMLElement;
   private visualStatesEl: HTMLElement;
   private groupsEl: HTMLElement;
   variantsRoot: Root | null = null;
   visualStatesRoot: Root | null = null;
-  /** React root for the ElementStyleSection (variant + size picker). */
-  elementStyleRoot: Root | null = null;
-  /** Stable group object used to manage undo/redo event subscriptions. */
-  private readonly _elementStyleGroup: Record<string, never> = {};
+  /** React root for the StyleAnalyzer's suggestion banner. */
+  styleSuggestionRoot: Root | null = null;
 
   constructor(args) {
     super();
@@ -114,88 +111,26 @@ export class PropertyEditor extends View {
   }
 
   /**
-   * STYLE-004: Render the ElementStyleSection (variant + size picker) for nodes
-   * that have an ElementConfig registered. Safe to call multiple times — reuses
-   * the existing React root.
+   * P94 STY-002 AC5 — the StyleAnalyzer's suggestion banner, and nothing else.
+   *
+   * 🔴 **This used to be the `Preset` / `Size` picker, and that was the second mechanism that set
+   * a node's styles.** `STY-DESIGN-THE-LOOK-MODEL.md` rule 1 — *"one row decides it"* — is a
+   * statement about there being no second one, so the picker is gone rather than restyled: with it
+   * went `onElementVariantChange` / `onElementSizeChange`, the only two writers of the
+   * `_variant` / `_size` parameters anywhere in the product (counted this session).
+   *
+   * ⚠️ **The banner is why this host survives at all.** `ElementStyleSectionHost` was the sole
+   * mount point of `SuggestionBanner` in the editor, so deleting the file outright would have
+   * taken a live feature out with the presets and nothing would have said so. The suggestions are
+   * about tokens, not presets, and are untouched.
    */
-  renderElementStyleSection() {
-    const typeName: string | undefined = this.model.type?.name;
-    if (!typeName || !ElementConfigRegistry.has(typeName)) return;
+  renderStyleSuggestions() {
+    if (!this.styleSuggestionEl) return;
 
-    const variants = ElementConfigRegistry.getVariantNames(typeName);
-    const sizes = ElementConfigRegistry.getSizeNames(typeName);
-    const currentVariant = this.model.parameters['_variant'] as string | undefined;
-    const currentSize = this.model.parameters['_size'] as string | undefined;
-
-    const props = {
-      variants,
-      currentVariant,
-      onVariantChange: this.onElementVariantChange.bind(this),
-      sizes,
-      currentSize,
-      onSizeChange: sizes.length > 0 ? this.onElementSizeChange.bind(this) : undefined
-    };
-
-    if (!this.elementStyleEl) return;
-
-    if (!this.elementStyleRoot) {
-      this.elementStyleRoot = createRoot(this.elementStyleEl);
+    if (!this.styleSuggestionRoot) {
+      this.styleSuggestionRoot = createRoot(this.styleSuggestionEl);
     }
-    this.elementStyleRoot.render(React.createElement(ElementStyleSectionHost, props));
-  }
-
-  /**
-   * STYLE-004: Apply a new variant to the node with full undo support.
-   * All property changes are batched into a single UndoActionGroup.
-   */
-  onElementVariantChange(variantName: string) {
-    const typeName: string | undefined = this.model.type?.name;
-    if (!typeName) return;
-
-    const resolved = ElementConfigRegistry.resolveVariant(typeName, variantName);
-    if (!resolved) return;
-
-    const undo = new UndoActionGroup({ label: 'change variant' });
-
-    for (const [key, value] of Object.entries(resolved.baseStyles)) {
-      this.model.setParameter(key, value, { undo, label: 'change variant' });
-    }
-    // Persist the active variant marker
-    this.model.setParameter('_variant', variantName, { undo, label: 'change variant' });
-
-    UndoQueue.instance.push(undo);
-
-    // Refresh port list (style changes may affect visible ports)
-    this.scheduleRenderPortsView();
-    // Refresh the picker to reflect the new selection
-    this.renderElementStyleSection();
-  }
-
-  /**
-   * STYLE-004: Apply a size preset to the node with full undo support.
-   * Size overrides are batched into a single UndoActionGroup.
-   */
-  onElementSizeChange(sizeName: string) {
-    const typeName: string | undefined = this.model.type?.name;
-    if (!typeName) return;
-
-    const config = ElementConfigRegistry.get(typeName);
-    if (!config?.sizes) return;
-
-    const sizePreset = config.sizes[sizeName];
-    if (!sizePreset) return;
-
-    const undo = new UndoActionGroup({ label: 'change size' });
-
-    for (const [key, value] of Object.entries(sizePreset)) {
-      this.model.setParameter(key, value, { undo, label: 'change size' });
-    }
-    this.model.setParameter('_size', sizeName, { undo, label: 'change size' });
-
-    UndoQueue.instance.push(undo);
-
-    this.scheduleRenderPortsView();
-    this.renderElementStyleSection();
+    this.styleSuggestionRoot.render(React.createElement(StyleSuggestionHost));
   }
 
   /** Build the panel shell (legacy `propertyeditor.html`). */
@@ -222,7 +157,7 @@ export class PropertyEditor extends View {
     };
 
     this.variantsEl = section('variants');
-    this.elementStyleEl = section('element-style-section');
+    this.styleSuggestionEl = section('style-suggestion-section');
     this.visualStatesEl = section('visual-states');
     this.groupsEl = section('groups');
 
@@ -243,17 +178,10 @@ export class PropertyEditor extends View {
 
     this.renderVisualStates();
 
-    // STYLE-004: Re-render ElementStyleSection on undo/redo so the picker
-    // reflects the restored parameter values.
-    this.model.off(this._elementStyleGroup);
-    this.model.on(
-      ['modelParameterUndo', 'modelParameterRedo'],
-      () => {
-        this.renderElementStyleSection();
-      },
-      this._elementStyleGroup
-    );
-    this.renderElementStyleSection();
+    // STY-002 AC5: no undo/redo subscription here any more. It existed to bring the preset
+    // picker back into line with parameters an undo had restored; the banner reads the project's
+    // tokens, not this node's parameters, and re-rendering it on every undo said nothing.
+    this.renderStyleSuggestions();
 
     this.parent && this.parent.append(this.el);
 

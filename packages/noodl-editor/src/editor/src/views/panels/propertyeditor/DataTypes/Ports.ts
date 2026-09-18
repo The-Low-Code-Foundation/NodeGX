@@ -27,7 +27,8 @@ import PopupLayer from '../../../popuplayer';
 import { CodeEditorType } from '../CodeEditor';
 import { PropertyFilterInput } from '../components/PropertyFilterInput';
 import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups';
-import { ControlHost, PropertyRow, type PropertyRowCapability } from '../components/PropertyRow';
+import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
+import { ControlHost, PropertyRow, type PropertyRowCapability, type PropertyRowLook } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
 import { WIDGET_COMPONENTS } from '../components/widgets';
@@ -558,6 +559,8 @@ export class Ports extends View {
                   quiet
                 }
               : undefined,
+            // P94 STY-003 rules 2 and 3 — where this row's value came from.
+            look: this.rowLook(v.name),
             // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
             // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
             hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
@@ -569,6 +572,47 @@ export class Ports extends View {
       );
     }
     return nodes;
+  }
+
+  /**
+   * P94 STY-003 — what this row says about the Look, or nothing.
+   *
+   * 🔴 **The decision is `readField`'s, on ownership, and is not re-made here.** A field that owns
+   * the same value the Look offers still reads `overridden`: edit the Look and it will not follow,
+   * which is precisely the situation a person cannot see today. Anything that compared values
+   * would go quiet in exactly that case (STY-003 §2).
+   *
+   * Returns `undefined` for `own` and `default` alike — design §3.2's plain row, where the absence
+   * of a treatment is itself the signal. `treatmentOf` collapses the two; `readField` keeps them
+   * apart for anything that reasons.
+   */
+  private rowLook(portName: string | undefined): PropertyRowLook | undefined {
+    if (!portName) return undefined;
+
+    // `undefined` when the question does not apply at all — editing the Look itself, or a
+    // non-neutral visual state, whose values live on an axis this task does not draw.
+    const facts = (this.model as TSFixme).lookProvenance;
+    if (!facts || !facts.look) return undefined;
+
+    const reading = readField(facts.node, facts.look, portName);
+    const treatment = treatmentOf(reading.source);
+    if (treatment === 'plain') return undefined;
+
+    return {
+      treatment,
+      lookName: reading.lookName as string,
+      lookValueText: displayableValue(reading.lookValue),
+      onRevert:
+        treatment === 'overridden'
+          ? () => {
+              // Clearing the node's own value is what puts the field back under the Look:
+              // `getParameter` resolves own → variant → port default, so removing the key makes
+              // the Look's value the one that renders again. Undoable in one step.
+              this.model.setParameter(portName, undefined, { undo: true, label: 'revert to Look' });
+              this.render();
+            }
+          : undefined
+    };
   }
 
   /**
