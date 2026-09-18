@@ -406,3 +406,53 @@ the hook goes "with its geometry moved into the component". Measured:
   `span`, which is why that one *is* visible. Read what a test asserts, not what it is filed under.
 
 AC4's `expect(` counts are therefore still **18 / 24 / 24 / 36, unchanged**.
+
+## 8. The gate run of 2026-09-18 (s33), and three holes it had
+
+Run on a dev build at `f8558113` + the two instrument fixes below, after CHR-010 closed. Readings
+and PNGs: `verdicts/CHR-004/2026-09-18-gate/`.
+
+| surface | reading |
+|---|---|
+| property panel, Group node, both themes | **GREEN, exit 0** — 638 graded, 0 findings, 7 × `panel-field-edge-stays-quiet` |
+| property panel, `Icon` node, both themes | **exit 1, 1 finding** — `button.ColorInput.Swatch` edge **1.499:1** dark / **1.387:1** light vs 3:1. ✅ `unset-field-placeholder-stays-greyed` fires here, once per theme |
+| launcher, both themes, all four states | **exit 1, 10 findings = 2 distinct** (below), 1,688 graded |
+
+**The two the launcher is actually red on**, both text and both for Richard rather than for a
+compliance fix:
+
+1. **The pressed primary button**, dark: `#071627 on #1f6bc4` = **3.433:1** vs 4.5. At rest the same
+   ink sits on `#4da3ff` and passes; only the pressed fill drops it. Shot with the state held —
+   `primary-pressed-dark-active.png`, `primary-rest-dark.png`.
+2. **The selected folder row**, light: `#1570ef on #dae5f4` = **3.589:1** vs 4.5, in all four
+   states. `folder-selected-light.png`.
+
+### The three holes, each found by running it
+
+1. 🔴 **`launcher`'s root is `body`, so with a project open the gate grades the EDITOR and files
+   the findings under "launcher".** I took exactly that reading — it named `SideNavigation`,
+   `PreviewChrome`, `NodeGraphComponentTrail` and the property panel's own fields — and it looks
+   like a launcher regression report. Surfaces now carry `requires`, a selector that must be on
+   screen, and its absence is **exit 2, could not measure**, never a clean run.
+2. 🔴 **The collector took the FIRST `.sidebar-property-editor`, and this editor never unmounts a
+   panel it has shown** — a leftover 0×16 shell matches before the live panel. Grading the shell
+   returns a handful of records and no findings: a silent zero shaped exactly like a clean surface.
+   It now takes the **largest drawn** match, and refuses (exit 2) when every match has a zero box.
+3. 🔴 **A gradient ground was graded as the colour behind it.** The launcher's project placeholder
+   is white on 16% white over a `linear-gradient`; `groundsOf` reads `background-color` only, so the
+   gate composited that white over the CARD and reported **1.08:1** — twice, plus the community
+   avatar at 1.10:1. Three false findings out of the first run's 18. An element whose ground carries
+   an image at or above the first opaque layer is now **refused into `text:ground-is-an-image` /
+   `edge:ground-is-an-image`** and counted, because "could not measure" is an answer and a false
+   finding costs a session the same as a real one.
+   ⚠️ The refusal is bounded on purpose: an image **behind** an opaque fill does not disqualify a
+   reading, or the gate would stop covering its surface.
+
+`tests-unit/chr-004` is **69 tests, exit 0**, with specs for all three; five mutant arms (first
+match, zero-box guard, gradient not marked, opaque-layer stop removed, audit grades it anyway) all
+red and every arm restored byte-identical.
+
+⬜ **Still owed: a popout surface.** The icon picker, the colour style picker, the text style picker
+and the variants popup are drawn in the popup layer, outside `.sidebar-property-editor` — so
+CHR-010's black magnifier would have been green here. The gate cannot see the surfaces where two of
+this phase's last three defects were.

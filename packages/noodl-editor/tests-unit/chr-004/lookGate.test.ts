@@ -243,6 +243,49 @@ describe('CHR-004 the gate', () => {
     expect(population.graded['text-contrast']).toBeUndefined();
   });
 
+  it('🔴 REFUSES a reading whose ground is a gradient, rather than grading the colour behind it', () => {
+    // The finding this prevents was real and false: the launcher's project placeholder is white on
+    // 16% white over a linear-gradient, and the gate composited that white over the CARD behind the
+    // gradient and reported 1.08:1. Refusing puts it in the population, where a person can see how
+    // much of the surface went ungraded — which "no findings" would not have said.
+    const { findings, population } = auditElements(
+      [
+        record({
+          id: 'span.LauncherProjectCard.Initial',
+          fill: 'rgba(255, 255, 255, 0.16)',
+          grounds: ['rgb(244, 246, 247)'],
+          groundUnreadable: true,
+          ownText: 'G',
+          textColor: '#ffffff'
+        })
+      ],
+      { scales: SCALES }
+    );
+    expect(findings).toEqual([]);
+    expect(population.skipped['text:ground-is-an-image']).toBe(1);
+    expect(population.graded['text-contrast']).toBeUndefined();
+  });
+
+  it('🔴 refuses a control EDGE over a gradient for the same reason', () => {
+    const { findings, population } = auditElements(
+      [
+        record({
+          id: 'button.Swatch',
+          role: 'control',
+          edgeColor: 'rgb(90, 90, 90)',
+          edgeWidth: 1,
+          edgeStyle: 'solid',
+          grounds: ['rgb(244, 246, 247)'],
+          groundUnreadable: true
+        })
+      ],
+      { scales: SCALES }
+    );
+    expect(findings).toEqual([]);
+    expect(population.skipped['edge:ground-is-an-image']).toBe(1);
+    expect(population.graded['control-edge']).toBeUndefined();
+  });
+
   it('skips an element the user cannot reach, whole', () => {
     // 🔴 `BaseDialog` renders every dialog twice; the invisible copy computes the same colours as
     // the visible one. A finding about it is a finding about nothing.

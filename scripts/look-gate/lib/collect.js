@@ -76,6 +76,39 @@ function createCollector(dom) {
   }
 
   /**
+   * Is this element painted on something this gate CANNOT read?
+   *
+   * 🔴 The ground chain is `background-color` only, and a gradient or an image is not one. The
+   * launcher's project placeholder is white text on 16% white over a `linear-gradient`, and the
+   * gate composited the white over the CARD behind the gradient and reported 1.08:1 — a finding
+   * about a colour nothing is painted on. A false finding costs a session the same as a real one,
+   * and costs more the second time somebody "fixes" it.
+   *
+   * Reported, never assumed good: the audit skips these into a named bucket, so the population
+   * says how many readings it could not take and why ("could not measure" is a real answer).
+   *
+   * Only layers at or above the first OPAQUE colour matter — an image behind an opaque fill is
+   * invisible, so it must not disqualify a reading that is perfectly measurable.
+   */
+  function groundIsUnreadable(el, style) {
+    let node = el;
+    let nodeStyle = style;
+    while (node) {
+      if (nodeStyle.backgroundImage && nodeStyle.backgroundImage !== 'none') return true;
+      const colour = nodeStyle.backgroundColor || '';
+      // `rgb(...)` with no alpha component, or an explicit alpha of exactly 1, is opaque.
+      const alpha = /rgba?\(([^)]*)\)/.exec(colour);
+      if (alpha) {
+        const parts = alpha[1].split(',');
+        if (parts.length < 4 || parseFloat(parts[3]) === 1) return false;
+      }
+      node = node.parentElement;
+      if (node) nodeStyle = getComputedStyle(node);
+    }
+    return false;
+  }
+
+  /**
    * Can a person see and hit this element?
    *
    * 🔴 Three separate faults this rule exists for: `BaseDialog` renders every dialog twice and the
@@ -125,8 +158,35 @@ function createCollector(dom) {
    */
   function collect(rootSelector, options) {
     const opts = options || {};
-    const root = document.querySelector(rootSelector);
-    if (!root) throw new Error(`Look gate: no element matches ${rootSelector}`);
+    // The LARGEST drawn match, not the first one.
+    //
+    // This editor never unmounts a panel it has shown: `.sidebar-property-editor` matches a hidden
+    // 0x16 shell left behind by a previous selection before it matches the panel a person is
+    // looking at, and `document.querySelector` returns that shell. Grading it yields a handful of
+    // records and NO findings — a silent zero that reads exactly like a clean surface. (P92 s33: a
+    // census written the obvious way read `0 drawn` on a panel full of glyphs.) `offsetParent` is
+    // no help here — it is null for everything under the app's transformed ancestors — so the
+    // rect decides.
+    const matches = Array.prototype.slice.call(document.querySelectorAll(rootSelector));
+    if (!matches.length) throw new Error(`Look gate: no element matches ${rootSelector}`);
+    let root = null;
+    let rootArea = 0;
+    for (const candidate of matches) {
+      const box = candidate.getBoundingClientRect();
+      const area = box.width * box.height;
+      if (area > rootArea) {
+        root = candidate;
+        rootArea = area;
+      }
+    }
+    // No match drew anything, so `root` is still null: the surface is not on screen. That is
+    // "could not measure" (exit 2), never "nothing wrong with it".
+    if (!root) {
+      throw new Error(
+        `Look gate: ${matches.length} element(s) match ${rootSelector} and every one of them has a ` +
+          `zero-sized box — the surface is not on screen, so there is nothing to grade.`
+      );
+    }
 
     const records = [];
     for (const el of [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')))) {
@@ -146,6 +206,7 @@ function createCollector(dom) {
         role: el.matches(CONTROL_SELECTOR) ? 'control' : 'text',
         fill: style.backgroundColor,
         grounds: groundsOf(el),
+        groundUnreadable: groundIsUnreadable(el, style),
         radius: style.borderTopLeftRadius,
         edgeColor: style.borderTopColor,
         edgeWidth: parseFloat(style.borderTopWidth) || 0,

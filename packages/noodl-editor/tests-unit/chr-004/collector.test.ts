@@ -43,6 +43,7 @@ class FakeElement {
     this.style = Object.assign(
       {
         backgroundColor: 'rgba(0, 0, 0, 0)',
+        backgroundImage: 'none',
         color: 'rgb(200, 200, 200)',
         fontSize: '12px',
         fontWeight: '400',
@@ -111,12 +112,24 @@ class FakeElement {
 /**
  * @param hit what `elementFromPoint` returns — the blocker case is the whole point of passing it.
  */
-function collectorFor(root: FakeElement, hit?: FakeElement | null | ((x: number, y: number) => FakeElement | null)) {
+function collectorFor(
+  root: FakeElement | FakeElement[],
+  hit?: FakeElement | null | ((x: number, y: number) => FakeElement | null)
+) {
+  // A selector can match more than one element, and in the real editor it does: every panel this
+  // window has shown is still mounted. The collector picks the one that DREW, so the harness has
+  // to be able to offer it more than one.
+  const roots = Array.isArray(root) ? root : [root];
+  const first = roots[0];
   return createCollector({
-    document: { querySelector: (selector: string) => (selector === '#root' ? root : null) },
+    document: {
+      querySelector: (selector: string) => (selector === '#root' ? first : null),
+      querySelectorAll: (selector: string) => (selector === '#root' ? roots : [])
+    },
     getComputedStyle: (el: FakeElement) => el.style,
     measureText: (text: string) => text.length * 6.7,
-    elementFromPoint: typeof hit === 'function' ? hit : (x: number, y: number) => (hit === undefined ? nearest(root, x, y) : hit)
+    elementFromPoint:
+      typeof hit === 'function' ? hit : (x: number, y: number) => (hit === undefined ? nearest(first, x, y) : hit)
   });
 }
 
@@ -306,5 +319,89 @@ describe('CHR-004 collector — a whole surface', () => {
   it('throws rather than grading nothing when the surface is not on screen', () => {
     const { root } = surface();
     expect(() => collectorFor(root).collect('.not-here')).toThrow(/no element matches/);
+  });
+
+  it('🔴 grades the panel that DREW, not the hidden shell the selector matches first', () => {
+    // This editor never unmounts a panel it has shown, so `.sidebar-property-editor` matches a
+    // leftover 0x16 shell before it matches the panel a person is looking at. Grading the shell
+    // returns a handful of records and no findings — a silent zero that reads like a clean
+    // surface, which is the one outcome a gate must never produce.
+    const shell = new FakeElement('div', {
+      className: 'sidebar-property-editor',
+      rect: { left: 0, top: 0, width: 0, height: 16 }
+    });
+    const { root: drawn } = surface();
+
+    const records = collectorFor([shell, drawn]).collect('#root');
+
+    expect(records).toHaveLength(4);
+    expect(records.map((r: { id: string }) => r.id).join(' ')).toContain('collapsed-section');
+  });
+
+  it('🔴 marks text painted over a GRADIENT, because the ground chain cannot read one', () => {
+    // The launcher's project placeholder is white on 16% white over a linear-gradient. The gate
+    // reads `background-color` only, so it composited that white over the CARD behind the gradient
+    // and reported 1.08:1 — a finding about a colour nothing is painted on.
+    const card = new FakeElement('div', {
+      className: 'Card',
+      style: { backgroundColor: 'rgb(244, 246, 247)' },
+      rect: { left: 0, top: 0, width: 200, height: 120 }
+    });
+    const tile = new FakeElement('div', {
+      className: 'hue-0',
+      style: { backgroundColor: 'rgba(0, 0, 0, 0)', backgroundImage: 'linear-gradient(135deg, rgb(90, 60, 200), rgb(30, 120, 190))' },
+      rect: { left: 0, top: 0, width: 44, height: 44 }
+    });
+    const initial = new FakeElement('span', {
+      className: 'Initial',
+      text: 'G',
+      style: { backgroundColor: 'rgba(255, 255, 255, 0.16)', color: 'rgb(255, 255, 255)' },
+      rect: { left: 0, top: 0, width: 44, height: 44 }
+    });
+    card.append(tile);
+    tile.append(initial);
+
+    const records = collectorFor(card).collect('#root');
+    const byName = (needle: string) => records.find((r: { id: string }) => r.id.startsWith(needle));
+
+    expect(byName('span.Initial').groundUnreadable).toBe(true);
+    // The card itself is an opaque colour with nothing unreadable above it.
+    expect(byName('div.Card').groundUnreadable).toBe(false);
+  });
+
+  it('🔴 does NOT mark an element whose gradient is hidden behind an opaque fill', () => {
+    // An image below an opaque layer is invisible, so it must not disqualify a reading that is
+    // perfectly measurable — refusing too much is how a gate stops covering its surface.
+    const tile = new FakeElement('div', {
+      className: 'hue-0',
+      style: { backgroundColor: 'rgba(0, 0, 0, 0)', backgroundImage: 'linear-gradient(135deg, rgb(90, 60, 200), rgb(30, 120, 190))' },
+      rect: { left: 0, top: 0, width: 200, height: 120 }
+    });
+    const panel = new FakeElement('div', {
+      className: 'Panel',
+      style: { backgroundColor: 'rgb(35, 33, 41)' },
+      rect: { left: 0, top: 0, width: 200, height: 120 }
+    });
+    const label = new FakeElement('span', {
+      className: 'Label',
+      text: 'Opacity',
+      style: { backgroundColor: 'rgba(0, 0, 0, 0)', color: 'rgb(221, 228, 236)' },
+      rect: { left: 0, top: 0, width: 80, height: 16 }
+    });
+    tile.append(panel);
+    panel.append(label);
+
+    const records = collectorFor(tile).collect('#root');
+    const label0 = records.find((r: { id: string }) => r.id.startsWith('span.Label'));
+    expect(label0.groundUnreadable).toBe(false);
+  });
+
+  it('🔴 refuses to grade when EVERY match drew nothing', () => {
+    // "Could not measure" (exit 2) and "measured, nothing wrong" (exit 0) are different answers,
+    // and a zero-box surface is the first one.
+    const shellA = new FakeElement('div', { className: 'x', rect: { left: 0, top: 0, width: 0, height: 16 } });
+    const shellB = new FakeElement('div', { className: 'x', rect: { left: 0, top: 0, width: 0, height: 0 } });
+
+    expect(() => collectorFor([shellA, shellB]).collect('#root')).toThrow(/zero-sized box/);
   });
 });

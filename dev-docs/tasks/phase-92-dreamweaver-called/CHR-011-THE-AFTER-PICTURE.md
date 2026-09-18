@@ -64,3 +64,32 @@ and says WORTHY or not — and if not, the page says which region.**
   before/after is two different surfaces.
 - ⚠️ A WORTHY on dark and a PASSABLE on light is two verdicts, not one. Record both; the phase
   closes on both.
+
+## 6. The static half, taken 2026-09-18 (s33) at `f8558113`
+
+The pictures need a **packaged** build (§3.1, AC3) and this session could not honestly take one:
+two peers hold uncommitted work in this checkout (P88's backend/mcp/template edits, P93's panel
+work), `build-editor.ts` refuses a dirty tree without `--skip-git`, and a build taken with
+`--skip-git` would bake their work into the `.app` whose md5 the manifest is supposed to pin. That
+is the same isolation problem s32 hit with the dev stack, one step worse — so **CHR-011 wants a
+session with a clean tree and the whole box.**
+
+What does NOT need the build is AC2's static half. Taken here, so the picture session only has to
+re-take the rendered rows:
+
+| number | CHR-001 | now | target | verdict |
+|---|---|---|---|---|
+| `fa-` uses editor-wide | 32 | **0** | 0 | ✅ CHR-010; `npm run icons:font` holds it at zero over 3,183 files |
+| `createRoot` files under `propertyeditor/` | 39 | **38** (code calls; a plain grep reads **42**, counting prose) | ≤ 3 | ❌ **CHR-008 stays open** — its §3.1 widget conversions are shipped inert, and the ≤3 target is unreachable while popout roots exist (CHR-008 §10.4). 🔴 Report both counts or the next session re-derives the same trap |
+| `tests-unit` specs parsing CSS/SCSS text | 28 | **24** | ≤ 4 | ❌ **CHR-004 stays open** — s30 deleted the six colour-pinning specs; the rest is §3.3, which s31 re-priced at ~18 call sites and Richard has not ruled |
+| `type` (font-size ratchet) | baseline | **−3 vs baseline**, exit 0 | no regression | ✅ |
+| `colors` (hex ratchet) | 16 = 16 | **holding the line**, exit 0 | no regression | ✅ |
+| `icons:css` | — | **0 url()-to-SVG**, exit 0 | 0 | ✅ |
+| `tokens:css` | — | **every `var(--…)` in 333 stylesheets defined**, exit 0 | green | ✅ |
+
+The four rendered rows — font sizes on the Templates tab and the Group panel, button styles, and
+elements/inline-styled on the Group panel — are the ones the packaged build still owes.
+
+⬜ **Also owed, and cheaper:** CHR-004's look gate over the surfaces CHR-010 changed
+(`node scripts/look-gate/run.js --surface=property-panel --theme=both`). It was not run in s33 —
+a peer held the box for the whole window in which it would have run.

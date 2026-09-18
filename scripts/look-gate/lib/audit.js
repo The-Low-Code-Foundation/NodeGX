@@ -161,6 +161,10 @@ function auditElements(records, options) {
     if (record.ownText && record.textColor) {
       const ink = parseColorAlpha(record.textColor);
       if (!ink) skip(population, 'text:unparseable-colour');
+      // A gradient or an image under the text is a ground this gate cannot read, and compositing
+      // over the colour BEHIND it grades a colour nothing is painted on — the launcher's
+      // gradient-and-initial placeholder was reported at 1.08:1 that way. Refused, and counted.
+      else if (record.groundUnreadable) skip(population, 'text:ground-is-an-image');
       else if (!groundUnder) skip(population, 'text:ground-unknown');
       else {
         count(population, 'text-contrast');
@@ -194,6 +198,9 @@ function auditElements(records, options) {
       // 1.00:1 — which the first drive reported as seven failing buttons. A transparent edge is
       // not a failing edge; it is not an edge.
       else if (edge[3] === 0) skip(population, 'edge:transparent');
+      // Same refusal as the text rule: an edge drawn over a gradient is measured against a ground
+      // this gate cannot read.
+      else if (record.groundUnreadable) skip(population, 'edge:ground-is-an-image');
       else if (!groundBehind) skip(population, 'edge:ground-unknown');
       else {
         count(population, 'control-edge');

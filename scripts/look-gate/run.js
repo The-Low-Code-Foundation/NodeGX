@@ -43,8 +43,13 @@ const opt = (name, fallback) =>
 /** The surfaces this phase rules on. A selector, not a component — the gate reads what is drawn. */
 const SURFACES = {
   'property-panel': { root: '.sidebar-property-editor', target: 'editor' },
-  launcher: { root: 'body', target: 'editor' },
-  'node-picker': { root: '.nodepicker', target: 'editor' }
+  // 🔴 `requires` is what makes the NAME true. The launcher's root is `body`, so with a project
+  // open this surface grades the EDITOR and files the findings under "launcher" — P92 s33 took
+  // exactly that reading and it named `SideNavigation`, `PreviewChrome` and the property panel.
+  // A reading about the wrong window is worse than no reading, so the absence of this selector is
+  // "could not measure" (exit 2), not a clean run.
+  launcher: { root: 'body', target: 'editor', requires: '[class*="LauncherPage-module__"]' },
+  'node-picker': { root: '.nodepicker', target: 'editor', requires: '.nodepicker' }
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -218,6 +223,15 @@ async function main() {
     if (armPath) {
       await arm(client, fs.readFileSync(armPath, 'utf8'));
       console.log(`armed with ${armPath}`);
+    }
+    if (surface.requires) {
+      const present = await evaluate(client, `!!document.querySelector(${JSON.stringify(surface.requires)})`);
+      if (!present) {
+        throw new Error(
+          `Look gate: this window is not showing ${surfaceName} — nothing matches ${surface.requires}. ` +
+            `Its root is ${surface.root}, so grading anyway would report another surface's findings under this name.`
+        );
+      }
     }
     for (const theme of themes) {
       if (theme !== 'current') await setTheme(client, theme);

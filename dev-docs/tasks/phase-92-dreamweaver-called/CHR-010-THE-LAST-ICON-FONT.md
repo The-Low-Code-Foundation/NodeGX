@@ -182,11 +182,23 @@ and are now P94's opening defects (`dev-docs/tasks/phase-94-one-styles-panel/`):
 And the variant/save defect §8 records: *"I reckon this will be part of the new phase I asked to
 have made."* ⇒ P94 STY-005.
 
-⬜ **One reading is still owed and was NOT taken:** CHR-004's look gate over these surfaces
-(`node scripts/look-gate/run.js --surface=property-panel --theme=both`). The box went to a peer
-before I could run it, and it is the instrument that measures "nothing stays black" as CONTRAST
-rather than by eye — which is how the magnifier got past s32. Take it the next time the box is free;
-it grades the surface, not this task's verdict, which Richard has given.
+✅ **The owed reading was taken later the same session** (the box came free): CHR-004's look gate,
+dev build, both themes.
+
+- **`--surface=property-panel` on a Group: GREEN, exit 0** — 638 readings graded over the two
+  themes, 0 findings, 7 ruled exceptions (the quiet field edge, `panel-field-edge-stays-quiet`).
+- **On the `Icon` node's panel: exit 1, one finding** — `button.ColorInput.Swatch`'s edge at
+  **1.499:1 dark / 1.387:1 light** against 3:1 (`#494656 on #2e2c36`, `#c9d2dc on #f2f4f6`). That is
+  the 14px swatch inside the colour field (CHR-009 slice 8), not a panel field, so Richard's
+  "no outlines" ruling does not cover it — a question for him.
+- ✅ The placeholder ruling **fires live**: `unset-field-placeholder-stays-greyed×1` in both themes
+  on that panel, counted in its own bucket rather than folded into `graded`.
+
+🔴 **The gate does not reach the surface this task's defect was on.** Its `property-panel` root is
+`.sidebar-property-editor`, and the icon picker, the colour style picker and the variants popup are
+drawn in the **popup layer**, outside it. So the black magnifier would have been green here too.
+A popout surface is owed — recorded against CHR-004, and it is the same hole in a different place as
+[[a-gate-can-have-a-hole-shaped-like-the-defect]].
 
 ## 8. The surfaces AC1 names (s33, 2026-09-18) — `verdicts/CHR-010/2026-09-18-surfaces/`
 
