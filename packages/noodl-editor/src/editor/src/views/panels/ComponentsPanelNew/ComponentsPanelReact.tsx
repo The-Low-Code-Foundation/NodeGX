@@ -19,9 +19,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { selectionStore } from '@noodl-models/selection/selectionStore';
 
 import { EventDispatcher } from '../../../../../shared/utils/EventDispatcher';
-import { requestBenchMount } from '../../VisualCanvas/benchRequest';
 import { benchTargetLabel } from '../../VisualCanvas/previewScope';
-import { usePreviewStrip } from '../../VisualCanvas/usePreviewStrip';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
 import { LayersTree } from './components/LayersTree';
@@ -89,16 +87,22 @@ export function ComponentsPanel() {
   const layers = useLayersTree();
 
   /**
-   * §2's **note** — when the canvas's component is not on the screen Layers is showing, the header
-   * carries TVW-002's sentence and its doors.
+   * 🔴 **THERE IS NO NOTE IN THIS PANEL, and that is a ruling** (Richard, 2026-09-18).
    *
-   * 🔴 **The same hook, not the same words typed twice.** Every string here comes from
-   * `previewStripWords` through `usePreviewStrip`, so the note and the strip in the preview cannot
-   * drift; only the markup differs, because a note under a header is not a seam between two
-   * surfaces. Gated on the Layers tab: the hook walks every component of the project on each graph
-   * event, and the Components tab has no use for the answer.
+   * §2 asked for one: TVW-002's sentence, under the header, when the canvas's component is not on
+   * the screen Layers is showing. It was built, and the drive's screenshot showed **the identical
+   * sentence and the same two doors twice, 188px apart** — once here and once on the strip at the
+   * preview's edge. Asked why the panel needed its own copy, Richard answered that the strip *is*
+   * the separator between canvas and preview and exists precisely so nobody wonders why they
+   * cannot see the component they have selected.
+   *
+   * ⚠️ **And detaching does not create a case for one**: the detached window renders the strip
+   * itself, with its doors (R-M, 2026-09-18). The sentence is therefore always on screen
+   * somewhere, and a second copy in this panel is a duplicate in every layout there is.
+   *
+   * What the panel says instead is what only the panel can: the **crumb** — where on this screen
+   * the thing you are editing sits, and how many other places it is placed.
    */
-  const { strip, goToPage } = usePreviewStrip(layers.canvasComponent, tab === 'layers');
 
   /** The places the Components tab already counted — the crumb's `in N places` and its popover. */
   const layersPlaces = useMemo(
@@ -351,41 +355,6 @@ export function ComponentsPanel() {
                 >
                   in {layersPlaces.length} places ▾
                 </button>
-              )}
-            </div>
-          )}
-
-          {/* §2: the tree below still shows the screen — the note says where the thing you are
-              editing actually is, which is the teaching, not an error message. */}
-          {strip.tone === 'notice' && (
-            <div className={css['LayersNote']} data-test="layers-note" data-shape={strip.shape}>
-              <span className={css['LayersNoteText']}>
-                <strong>{strip.lead}</strong>
-                {strip.rest ? ' ' : ''}
-                <span>{strip.rest}</span>
-              </span>
-              {strip.doors.map((door) =>
-                door.kind === 'goto' ? (
-                  <button
-                    key={`goto:${door.page}`}
-                    type="button"
-                    className={css['LayersNoteDoor']}
-                    onClick={() => goToPage(door.page)}
-                    data-test="layers-note-goto"
-                  >
-                    {door.label}
-                  </button>
-                ) : (
-                  <button
-                    key="bench"
-                    type="button"
-                    className={css['LayersNoteDoor']}
-                    onClick={() => layers.canvasComponent && requestBenchMount(layers.canvasComponent)}
-                    data-test="layers-note-bench"
-                  >
-                    {door.label}
-                  </button>
-                )
               )}
             </div>
           )}

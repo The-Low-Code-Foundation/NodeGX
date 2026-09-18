@@ -304,3 +304,29 @@ describe('TVW-002 — the preview says what it is not showing', () => {
     });
   });
 });
+
+describe("TVW-002 — a component a repeater draws (Richard, 2026-09-18)", () => {
+  const base = {
+    canvasLabel: 'Checkbox Item',
+    canvasComponent: '/Checkbox Item',
+    screenLabel: 'Home',
+    screenPage: '/Home',
+    onScreen: true,
+    isLogic: false,
+    showingPages: [{ page: '/Home', label: 'Home' }],
+    runningPages: [{ page: '/Home', label: 'Home' }],
+    placedIn: []
+  };
+
+  it('says so, because how many are there depends on data the editor has not run', () => {
+    const strip = previewStrip({ ...base, repeated: true });
+    expect(strip.shape).toBe('agree');
+    expect(strip.lead).toBe('Checkbox Item is on Home — once per item.');
+    expect(strip.rest).toBe('The preview is showing that screen.');
+  });
+
+  it('leaves the plain sentence alone for a component placed once', () => {
+    expect(previewStrip({ ...base, repeated: false }).lead).toBe('Checkbox Item is on Home.');
+    expect(previewStrip(base).lead).toBe('Checkbox Item is on Home.');
+  });
+});

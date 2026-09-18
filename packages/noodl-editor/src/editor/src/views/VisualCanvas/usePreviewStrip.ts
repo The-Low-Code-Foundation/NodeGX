@@ -199,7 +199,7 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
     // `sectionFor`'s own definition of logic: at least one node, and no root that draws.
     const isLogic = Boolean(component) && component.visualRootIds.length === 0 && component.roots.length > 0;
 
-    const { renders, mounts } = screensShowing(canvasComponent, project.root, project.pages, project.components);
+    const { renders, mounts, repeated } = screensShowing(canvasComponent, project.root, project.pages, project.components);
 
     return previewStrip({
       canvasLabel: benchTargetLabel(canvasComponent),
@@ -208,6 +208,10 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
       screenPage,
       onScreen,
       isLogic,
+      // Richard, 2026-09-18 — a component a repeater draws says so. Read off the SCREEN's own walk
+      // rather than `screensShowing`'s any-page answer: a component repeated on Pricing and placed
+      // once on Home must not say "once per item" while the preview is showing Home.
+      repeated: reach.repeated.has(canvasComponent),
       showingPages: renders.map(asPage),
       runningPages: mounts.map(asPage),
       // Only consulted when no screen shows it. `it's only inside X, which no page shows` is a

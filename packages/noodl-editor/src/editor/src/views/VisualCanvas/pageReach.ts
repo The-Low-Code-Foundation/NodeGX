@@ -133,6 +133,16 @@ export interface PageReach {
   /** Components the screen instantiates at all, rendered or not. What runs. */
   mounts: Set<string>;
   /**
+   * Components this screen draws **once per item of a list** — a repeater's template, and
+   * everything inside it.
+   *
+   * Richard ruled on 2026-09-18 that the sentence says so: *"Checkbox Item is on Home — once per
+   * item."* Without it the row claims a single thing on the screen, when what is there is zero,
+   * one or forty of them depending on data the editor has not run. 498 components on this machine
+   * are placed only this way.
+   */
+  repeated: Set<string>;
+  /**
    * A component placed inside itself, directly or through a chain. Illegal but representable, and
    * the walk stops rather than hanging — see TVW-002 §5.
    */
@@ -182,6 +192,7 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
   const reach: PageReach = {
     renders: new Set(),
     mounts: new Set(),
+    repeated: new Set(),
     firstRendered: new Map<string, string[]>(),
     cyclic: false,
     unresolvedRouters: []
@@ -193,9 +204,13 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
    *   component reached only through a Router the walk resolved is still rendered; one reached as a
    *   second root, or through such a component, is not.
    */
-  function enterComponent(name: string, rendered: boolean, depth: number) {
+  function enterComponent(name: string, rendered: boolean, depth: number, repeated = false) {
     const component = components.get(name);
     if (!component) return;
+
+    // Everything inside a repeated component is repeated too: a `Row` drawn per item draws its
+    // `Avatar` per item. Carried down the walk rather than recorded at the template only.
+    if (repeated) reach.repeated.add(name);
 
     // The component itself is on the screen, not only the things it places — the root component and
     // the routed page are both things the canvas can be sitting on while the preview shows them.
@@ -222,17 +237,17 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
     const firstVisualRoot = component.roots.find((root) => visualRoots.has(root.id));
 
     for (const root of component.roots) {
-      visitNode(root, rendered && root === firstVisualRoot, depth);
+      visitNode(root, rendered && root === firstVisualRoot, depth, repeated);
     }
 
     onStack.delete(name);
   }
 
-  function visitNode(node: ReachNode, rendered: boolean, depth: number) {
+  function visitNode(node: ReachNode, rendered: boolean, depth: number, repeated = false) {
     const typename = node.typename;
 
     if (typename === ROUTER_TYPE) {
-      visitRouter(node, rendered, depth);
+      visitRouter(node, rendered, depth, repeated);
     } else if (typename && components.has(typename)) {
       // ⚠️ Recorded on the *instance node*, before descending, and only while `rendered` — the
       // first placement the walk reaches that is actually attached. Recording it inside
@@ -242,12 +257,12 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
         const path = drawnPath(node.id, typename);
         if (path) reach.firstRendered.set(typename, path);
       }
-      enterComponent(typename, rendered, depth + 1);
+      enterComponent(typename, rendered, depth + 1, repeated);
     }
 
     // Children of a component instance are real: they are placed into the component's child-root
     // (`componentinstance.getChildRoot`), so they draw wherever it draws.
-    for (const child of node.children ?? []) visitNode(child, rendered, depth);
+    for (const child of node.children ?? []) visitNode(child, rendered, depth, repeated);
 
     if (typename === FOR_EACH_TYPE) visitRepeater(node, rendered, depth);
   }
@@ -276,10 +291,10 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
     if (typeof template !== 'string' || !template) return;
     if (!components.has(template)) return;
 
-    enterComponent(template, rendered, depth + 1);
+    enterComponent(template, rendered, depth + 1, true);
   }
 
-  function visitRouter(node: ReachNode, rendered: boolean, depth: number) {
+  function visitRouter(node: ReachNode, rendered: boolean, depth: number, repeated = false) {
     const pages = node.parameters?.pages as { routes?: unknown } | undefined;
     const routes = Array.isArray(pages?.routes) ? pages.routes.filter((r): r is string => typeof r === 'string') : [];
 
@@ -287,7 +302,7 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
     // is not showing is neither rendered nor mounted — it is somewhere else, which is the entire
     // point of the strip.
     if (pageName && routes.includes(pageName)) {
-      enterComponent(pageName, rendered, depth + 1);
+      enterComponent(pageName, rendered, depth + 1, repeated);
       return;
     }
 
@@ -352,9 +367,10 @@ export function screensShowing(
   rootName: string,
   pageNames: readonly string[],
   components: ReachIndex
-): { renders: string[]; mounts: string[]; cyclic: boolean } {
+): { renders: string[]; mounts: string[]; repeated: boolean; cyclic: boolean } {
   const renders: string[] = [];
   const mounts: string[] = [];
+  let repeated = false;
   let cyclic = false;
 
   for (const page of pageNames) {
@@ -362,7 +378,8 @@ export function screensShowing(
     cyclic = cyclic || reach.cyclic;
     if (reach.renders.has(target)) renders.push(page);
     if (reach.mounts.has(target)) mounts.push(page);
+    if (reach.repeated.has(target)) repeated = true;
   }
 
-  return { renders, mounts, cyclic };
+  return { renders, mounts, repeated, cyclic };
 }

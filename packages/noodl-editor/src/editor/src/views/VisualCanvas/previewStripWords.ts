@@ -111,6 +111,8 @@ export interface StripInput {
   canvasComponent?: string;
   /** What the preview is showing, as a person reads it. Empty when the route resolves to no page. */
   screenLabel: string;
+  /** The screen draws this component once per item of a list — `PageReach.repeated`. */
+  repeated?: boolean;
   /**
    * The screen's page component, by legacy name.
    *
@@ -223,13 +225,18 @@ export function previewStrip(input: StripInput): StripModel {
  * **screen the preview is showing**, which is exactly what it was unable to say before.
  */
 function agreeing(input: StripInput): StripModel {
-  const { canvasLabel, screenLabel, screenPage, canvasComponent } = input;
+  const { canvasLabel, screenLabel, screenPage, canvasComponent, repeated } = input;
 
   if (canvasComponent && screenPage && canvasComponent === screenPage) {
     return quiet(`${canvasLabel} is the screen the preview is showing.`, '');
   }
 
   if (!screenLabel) return quiet(`${canvasLabel} is on this screen.`, '');
+
+  // 🔴 Richard, 2026-09-18: a component a repeater draws says so. How many are on the screen
+  // depends on the data the list was given — zero, one or forty — and the plain sentence claims a
+  // single thing. 498 components on this machine are placed only as a repeater's template.
+  if (repeated) return quiet(`${canvasLabel} is on ${screenLabel} — once per item.`, 'The preview is showing that screen.');
 
   return quiet(`${canvasLabel} is on ${screenLabel}.`, 'The preview is showing that screen.');
 }

@@ -135,6 +135,30 @@ describe('TVW-002 — a component a repeater draws', () => {
     expect(home.renders.has('/Row')).toBe(false);
   });
 
+  it('marks it, and everything inside it, as drawn once per item', () => {
+    const components = corpusWithRepeaters();
+    // `/Row` draws a `/Card`: a card per row, so the card is repeated too.
+    components.set('/Row', {
+      name: '/Row',
+      roots: [node('rowRoot', 'Group', { children: [node('inner', '/Card')] })],
+      visualRootIds: ['rowRoot']
+    });
+
+    const pricing = reachOfScreen('/App', '/Pricing', components);
+    expect(pricing.repeated.has('/Row')).toBe(true);
+    expect(pricing.repeated.has('/Card')).toBe(true);
+    // 🔴 `/Card` is ALSO placed once, directly, on this same page — and the direct placement is
+    // walked first. The flag is about the path the walk took, so a component reached both ways
+    // ends up marked; the sentence then says "once per item" about something that is also on
+    // screen once. Recorded rather than papered over: the strip's claim is still true.
+    expect(pricing.renders.has('/Card')).toBe(true);
+  });
+
+  it('does not mark a component that only some OTHER screen repeats', () => {
+    const home = reachOfScreen('/App', '/Home', corpusWithRepeaters());
+    expect(home.repeated.has('/Row')).toBe(false);
+  });
+
   it('⚠️ records NO outline path for it — a template has no instance node to point at', () => {
     // The sentence is corrected; the outline is not invented. `firstRendered`'s paths are chains
     // of component-instance ids, and whether the highlighter resolves a repeater's own id is a

@@ -298,3 +298,27 @@ doors**. §2 asked for the note "same words as the strip, doors included" and no
 would be visible at once. Exactly the shape he ruled on at TVW-001 AC7 (*"Sample values."* 44px
 above *"No sample data"* — he cut one). The note earns its place when the preview is **detached**;
 docked, it is a duplicate. [[a-pinned-string-is-blind-to-its-neighbour]]
+
+### 6.10 R-U and R-V — the note is gone, and a repeated component says so (s14)
+
+**R-U — there is no note in this panel.** Shown the duplicate, Richard answered with the question
+that settles it: *"That message was supposed to be a visual separator between the node canvas and
+preview, anchored to the bottom of the preview, so nobody would ever wonder 'why am I not seeing
+this component I have in the canvas / have selected in the left components menu?' — why do we need
+the message duplicated in the left menu at all?"*
+
+We do not. **And detaching does not create a case for one**: the detached window renders the strip
+itself, with its doors (R-M). So the sentence is on screen in every layout there is, and §2's note
+row is a duplicate in all of them. Removed — the JSX, the styles and the second `usePreviewStrip`
+instance, which was also a whole-project walk per graph event for an answer now nobody reads.
+**§2's `the note` row is superseded.** What the panel says instead is the thing only the panel can:
+the **crumb**.
+
+**R-V — a component a repeater draws says so.** *"Checkbox Item is on Home — once per item."*
+Threaded as `PageReach.repeated`, which marks a template **and everything inside it** (a `Row` drawn
+per item draws its `Avatar` per item), read off the **screen's own walk** so a component repeated on
+Pricing does not claim it while the preview is showing Home. 4 specs, 3 mutants, each red.
+
+**Driven after both:** the strip carries `File Selector isn't on Home. It's on New, Update and
+Upload.` with its two doors; the panel carries the header, the crumb (absent here, correctly — the
+component is not on this screen) and `+ 8 logic nodes on the canvas`. One claim, one place.
