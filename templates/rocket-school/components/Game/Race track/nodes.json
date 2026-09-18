@@ -168,8 +168,7 @@
       "parameters": {
         "colorA": "var(--primary)",
         "colorB": "var(--secondary)",
-        "aspect": "auto",
-        "rocketSize": 44
+        "aspect": "auto"
       },
       "x": 100,
       "y": 160

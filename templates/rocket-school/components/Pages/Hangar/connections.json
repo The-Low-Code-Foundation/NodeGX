@@ -221,8 +221,8 @@
     },
     {
       "fromId": "hgAsk",
-      "fromProperty": "idle",
-      "toId": "hgShelfBox",
+      "fromProperty": "asking",
+      "toId": "hgOver",
       "toProperty": "mounted"
     },
     {

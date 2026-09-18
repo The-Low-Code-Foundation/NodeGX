@@ -1108,7 +1108,10 @@ describe('TPL-007 — Rocket School, the artefact', () => {
           ['hgShelf', 'pick', 'hgAsk', 'to-asking'],
           ['hgConfirm', 'yes', 'hgPick', 'run'],
           ['hgConfirm', 'no', 'hgAsk', 'to-idle'],
-          ['hgAsk', 'idle', 'hgShelfBox', 'mounted'],
+          // 🔴 R6 (Richard, 2026-09-18) REPLACES the old `hgAsk → idle → hgShelfBox → mounted` here. The card sits OVER
+          // the shelf now; the shelf is never unmounted, because remounting it re-fired hsInitTab and threw a child
+          // browsing rockets back to the Face tab after every "No thanks".
+          ['hgAsk', 'asking', 'hgOver', 'mounted'],
           ['hgAsk', 'asking', 'hgConfirm', 'mounted']
         ])
       ).toEqual([]);
@@ -1116,6 +1119,33 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect(
         connectionsOf(built, C.pageHangar).filter((w) => w.fromId === 'hgShelf' && w.fromProperty === 'pick' && w.toId === 'hgPick')
       ).toEqual([]);
+      /*
+       * 🔴 R6, graded on the artefact rather than on the absence of one wire:
+       *
+       * 1. NOTHING may unmount the shelf. That is the whole of the lost tab — not a bad tab value, a remount.
+       * 2. The card must be positioned OVER the shelf, which is `.rkt-buy-over` inside `.rkt-shelf-stack`, and both
+       *    classes must be on the nodes that stack, or the card simply draws under the tiles.
+       * 3. The overlay must be unmounted when idle. An always-present absolutely-positioned box over the shelf would
+       *    swallow every tap on the tiles beneath it, which would look exactly like the tiles going dead.
+       */
+      expect(
+        connectionsOf(built, C.pageHangar).filter((w) => w.toId === 'hgShelfBox' && w.toProperty === 'mounted')
+      ).toEqual([]);
+      expect({
+        stack: (params(C.pageHangar, 'hgStack') as { cssClassName?: string }).cssClassName,
+        over: (params(C.pageHangar, 'hgOver') as { cssClassName?: string }).cssClassName,
+        overStartsClosed: (params(C.pageHangar, 'hgOver') as { mounted?: boolean }).mounted
+      }).toEqual({ stack: 'rkt-shelf-stack', over: 'rkt-buy-over', overStartsClosed: false });
+      // The shelf is a child of the stack, and so is the overlay — a card stacked over something it is not inside of
+      // would be positioned against the page instead.
+      const stack = nodesOf(built, C.pageHangar).find((n) => n.id === 'hgStack')!;
+      expect((stack.children ?? []).map((c) => c.id)).toEqual(['hgShelfBox', 'hgOver']);
+      // And the CSS that does the stacking really is shipped, on both halves.
+      expect(APP_CSS).toContain('.rkt-shelf-stack { position: relative; }');
+      expect(APP_CSS).toMatch(/\.rkt-buy-over \{[^}]*position: absolute/);
+      // 🔴 The tab the child was on: one node opens the shelf on Face, and it is driven by a didMount that now fires
+      // once per visit. If anything ever re-mounts the shelf, clause 1 above is what goes red.
+      expect(missing(C.hangarShelf, [['hsWrap', 'didMount', 'hsInitTab', 'do']])).toEqual([]);
     });
 
     it('🔴 the preview keeps the face and the course on one line, so a phone sees the first row of tiles (build 3: 882 on an 844 screen)', () => {
@@ -1399,6 +1429,96 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect(offered('fun-emoji')).toEqual([...HANGAR_LOOKS, 'fun-emoji']);
       // And every face it offers as a new choice really can wear something.
       for (const look of HANGAR_LOOKS) expect({ look, wearable: HANGAR_SHELF.some((i) => i.faces?.[look]) }).toEqual({ look, wearable: true });
+    });
+
+    /**
+     * 🔴 PLY-006 AC9 (s3) — THE CLAUSE THAT WAS MISSING, and the reason finding 6a survived a green AC2.
+     *
+     * AC2 lives in the game-kit gate and is honest: at the kit's own floor the face is ~23px. It says nothing whatever
+     * about what the RACE asks for, and the race asked for 44 — a bare literal on one placement — which draws a 14px
+     * face. Five viewports measured 14, 15, 15, 15 and 19. A budget measured on a fixture bounds the fixture.
+     *
+     * So this gate grades the ARTEFACT the child gets: no placement of the kit's track on a surface a child races on or
+     * inspects their own rocket on may lower the kit's floor. Unset means inherit, and inheriting means there is no
+     * second copy of the number to drift from the one AC2 measures.
+     */
+    it('🔴 PLY-006 AC9: no surface a child races on lowers the kit’s rocket floor — the face AC2 measures is the face they get', () => {
+      const trackPlacements = (name: string) => nodesOf(built, name).filter((n) => n.type === 'game-kit.RaceTrack');
+      // The race and the hangar preview: the two places a child looks at their own rocket. Both inherit.
+      for (const name of [C.track, C.hangarPreview]) {
+        const found = trackPlacements(name);
+        expect({ name, placements: found.length }).toEqual({ name, placements: 1 });
+        expect({ name, rocketSize: (found[0].parameters as Record<string, unknown>).rocketSize }).toEqual({ name, rocketSize: undefined });
+      }
+      // 🔴 And the sweep, so a THIRD surface added later cannot quietly reintroduce the literal: across the whole
+      // built project, the only placement allowed to set its own size is the hangar TILE's thumbnail, which is a swatch
+      // of a paint and not a face a child is looking for themselves in.
+      const overrides: string[] = [];
+      for (const comp of componentsOf(built)) {
+        for (const n of nodesOf(built, comp.name)) {
+          if (n.type !== 'game-kit.RaceTrack') continue;
+          const size = (n.parameters as { rocketSize?: unknown } | undefined)?.rocketSize;
+          if (size !== undefined) overrides.push(`${comp.name}#${n.id}=${String(size)}`);
+        }
+      }
+      expect(overrides).toEqual([`${C.hangarTile}#htRocket=52`]);
+    });
+
+    /**
+     * 🔴 PLY-001 AC8 (s3) — the sentence §3.4 designed and nobody built. It was in no source and no built file, so
+     * a child on a look that can wear nothing opened the face tab to an empty box and was told nothing at all.
+     */
+    it('🔴 PLY-001 AC8: a face that can wear nothing says so, by name, in both languages — and a face that can wear things does not', () => {
+      const shelf = nodesOf(built, '/Logic/Hangar shelf').find((n) => n.type === 'JavaScriptFunction')!;
+      const run = new Function('Inputs', 'Outputs', String(shelf.parameters!.functionScript));
+      const seen = (look: string, lang: string, tab = 'face') => {
+        const app = { activeId: 'p1', profiles: [{ id: 'p1', name: 'Léa', look, seed: 'Léa', lang, model: {}, owned: [], wear: {} }] };
+        const out: Record<string, any> = {};
+        run({ app, shelf: HANGAR_SHELF, tab }, out);
+        return out;
+      };
+      // A dropped look: no tiles, and the reason — naming the face the way the chooser names it.
+      const thumbsEn = seen('thumbs', 'en');
+      expect({ rows: thumbsEn.rows.length, wearsNothing: thumbsEn.wearsNothing }).toEqual({ rows: 0, wearsNothing: true });
+      expect(thumbsEn.emptyText).toBe('The Thumbs face doesn’t wear things. Change your face in the player menu to dress up.');
+      expect(seen('fun-emoji', 'en').emptyText).toContain('Emoji');
+      // 🔴 Both languages: a French child met the same empty box.
+      const thumbsFr = seen('thumbs', 'fr');
+      expect(thumbsFr.emptyText).toBe('La tête Thumbs ne porte rien. Change de tête dans le menu du joueur pour t’habiller.');
+      // 🔴 A kept look says NOTHING — the sentence is not a footer that is always there.
+      for (const look of HANGAR_LOOKS) {
+        const kept = seen(look, 'en');
+        expect({ look, empty: kept.emptyText, wearsNothing: kept.wearsNothing }).toEqual({ look, empty: '', wearsNothing: false });
+        expect(kept.rows.length).toBeGreaterThan(0);
+      }
+      // 🔴 And it is about the FACE tab. A dropped look's ROCKET tab is untouched (§3.4), so it must stay silent
+      // there even though the face still cannot wear anything.
+      const rocketTab = seen('thumbs', 'en', 'rocket');
+      expect({ empty: rocketTab.emptyText, wearsNothing: rocketTab.wearsNothing }).toEqual({ empty: '', wearsNothing: false });
+      expect(rocketTab.rows.length).toBeGreaterThan(0);
+      // The Text that draws it exists, is wired to it, and is NOT content-sized — it is a sentence and must wrap.
+      const node = nodesOf(built, '/Hangar/Shelf').find((n) => n.id === 'hsEmpty')!;
+      expect({ type: node.type, sizeMode: (node.parameters as Record<string, unknown>).sizeMode }).toEqual({ type: 'Text', sizeMode: 'contentHeight' });
+      expect(connectionsOf(built, '/Hangar/Shelf').some((c) => c.fromProperty === 'emptyText' && c.toId === 'hsEmpty' && c.toProperty === 'text')).toBe(true);
+    });
+
+    it('PLY-001 AC8 sabotage arm: a look the shelf CAN dress must never show the sentence', () => {
+      const shelf = nodesOf(built, '/Logic/Hangar shelf').find((n) => n.type === 'JavaScriptFunction')!;
+      const run = new Function('Inputs', 'Outputs', String(shelf.parameters!.functionScript));
+      // The condition is read off the shelf, not off a copied list of dropped looks: hand it a shelf with ONE
+      // pixel-art item and pixel-art goes quiet, while adventurer — which that shelf cannot dress — speaks.
+      // 🔴 It must be an item that fits pixel-art and NOT adventurer. The first pixel-art item is Sunglasses, which
+      // §3.3 gives to all three looks — so the first draft of this arm handed adventurer a shelf it COULD dress and
+      // read the silence as a failure. A hat or a beard is pixel-art's alone.
+      const one = HANGAR_SHELF.filter((i) => i.kind === 'face' && i.faces?.['pixel-art'] && !i.faces?.['adventurer']).slice(0, 1);
+      expect(one).toHaveLength(1);
+      const out = (look: string) => {
+        const o: Record<string, any> = {};
+        run({ app: { activeId: 'p1', profiles: [{ id: 'p1', look, lang: 'en', model: {}, owned: [], wear: {} }] }, shelf: one, tab: 'face' }, o);
+        return o;
+      };
+      expect(out('pixel-art').emptyText).toBe('');
+      expect(out('adventurer').emptyText).toContain('Adventurer face');
     });
   });
 

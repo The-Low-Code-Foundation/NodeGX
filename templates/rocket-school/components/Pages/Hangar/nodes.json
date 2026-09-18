@@ -46,8 +46,7 @@
         "hgHeader",
         "hgTitle",
         "hgPreview",
-        "hgShelfBox",
-        "hgConfirm"
+        "hgStack"
       ],
       "parameters": {
         "width": {
@@ -110,10 +109,32 @@
       "y": 640
     },
     {
+      "id": "hgStack",
+      "type": "Group",
+      "label": "The shelf, and the question over it",
+      "parent": "hgWrap",
+      "children": [
+        "hgShelfBox",
+        "hgOver"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "cssClassName": "rkt-shelf-stack"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
       "id": "hgShelfBox",
       "type": "Group",
-      "label": "The shelf, while not asking",
-      "parent": "hgWrap",
+      "label": "The shelf",
+      "parent": "hgStack",
       "children": [
         "hgShelf"
       ],
@@ -126,82 +147,104 @@
         "flexDirection": "column",
         "alignItems": "stretch"
       },
-      "x": 220,
-      "y": 760
+      "x": 280,
+      "y": 880
     },
     {
       "id": "hgShelf",
       "type": "/Hangar/Shelf",
       "label": "The shelf",
       "parent": "hgShelfBox",
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "hgOver",
+      "type": "Group",
+      "label": "The question, over the shelf",
+      "parent": "hgStack",
+      "children": [
+        "hgConfirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "rkt-buy-over",
+        "mounted": false
+      },
       "x": 280,
-      "y": 880
+      "y": 1120
     },
     {
       "id": "hgConfirm",
       "type": "/Hangar/Confirm",
       "label": "Buy it?",
-      "parent": "hgWrap",
+      "parent": "hgOver",
       "parameters": {
         "mounted": false
       },
-      "x": 220,
-      "y": 1000
+      "x": 340,
+      "y": 1240
     },
     {
       "id": "hgStore",
       "type": "/Logic/App store",
       "label": "The store",
-      "x": 530,
+      "x": 590,
       "y": 400
     },
     {
       "id": "hgMe",
       "type": "/Logic/Active profile",
       "label": "Who is playing",
-      "x": 530,
+      "x": 590,
       "y": 520
     },
     {
       "id": "hgWords",
       "type": "/Data/Words",
       "label": "The words",
-      "x": 530,
+      "x": 590,
       "y": 1600
     },
     {
       "id": "hgT",
       "type": "/Logic/Translate words",
       "label": "In their language",
-      "x": 530,
+      "x": 590,
       "y": 880
     },
     {
       "id": "hgCurriculum",
       "type": "/Data/Curriculum",
       "label": "The skills",
-      "x": 530,
+      "x": 590,
       "y": 1720
     },
     {
       "id": "hgWordLists",
       "type": "/Data/Word lists",
       "label": "The typing words",
-      "x": 530,
+      "x": 590,
       "y": 1840
     },
     {
       "id": "hgItems",
       "type": "/Data/Hangar",
       "label": "What the shelf offers",
-      "x": 530,
-      "y": 1360
+      "x": 590,
+      "y": 1240
     },
     {
       "id": "hgPick",
       "type": "/Logic/Pick item",
       "label": "Buy it",
-      "x": 530,
+      "x": 590,
       "y": 1000
     },
     {
@@ -219,8 +262,8 @@
         "value-idle-asking": false,
         "value-asking-asking": true
       },
-      "x": 530,
-      "y": 1240
+      "x": 590,
+      "y": 1360
     },
     {
       "id": "hgBuyTitle",
@@ -229,14 +272,14 @@
       "parameters": {
         "expression": "String(word || '').replace('{item}', String(label || ''))"
       },
-      "x": 530,
+      "x": 590,
       "y": 1480
     },
     {
       "id": "hgWear",
       "type": "/Logic/Wear item",
       "label": "Put it on, or take it off",
-      "x": 530,
+      "x": 590,
       "y": 1120
     },
     {
@@ -246,7 +289,7 @@
       "parameters": {
         "expression": "has === false"
       },
-      "x": 530,
+      "x": 590,
       "y": 1960
     },
     {
@@ -256,7 +299,7 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 530,
+      "x": 590,
       "y": 40
     },
     {
@@ -267,7 +310,7 @@
         "router": "Main",
         "target": "/Pages/Profiles"
       },
-      "x": 530,
+      "x": 590,
       "y": 640
     },
     {
@@ -278,7 +321,7 @@
         "router": "Main",
         "target": "/Pages/Home"
       },
-      "x": 530,
+      "x": 590,
       "y": 760
     }
   ],

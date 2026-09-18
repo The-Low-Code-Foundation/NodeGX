@@ -40,7 +40,7 @@
  *
  * @module noodl-mcp/tests/tpl007Components
  */
-import { CURRICULUM_JSON, HANGAR_LOOKS, HANGAR_SHELF_JSON, LEVELS, TEACH_CARDS_JSON, WORDS_JSON, WORD_LISTS_JSON } from './tpl007Curriculum';
+import { CURRICULUM_JSON, HANGAR_LOOKS, HANGAR_SHELF_JSON, LEVELS, LOOK_NAMES, TEACH_CARDS_JSON, WORDS_JSON, WORD_LISTS_JSON } from './tpl007Curriculum';
 import {
   ACTIVE_PROFILE_SCRIPT,
   BUILD_HUNT_SCRIPT,
@@ -204,7 +204,10 @@ export const CONTENT_SIZED_TEXTS: Readonly<Record<string, string>> = {
   '/Game/Game card#gcGlyph': 'one emoji',
   '/Game/Stat#stValue': 'a number',
   '/Game/Feedback banner#fbGlyph': 'one emoji',
-  '/Game/Feedback banner#fbBoost': 'a short line beside the glyph: seconds and a percentage, at most "Ta fusée ne bouge pas"',
+  // 🔴 PLY-006 AC8: this justification was written when the line WAS short, and PLY-006 made it three clauses long
+  // without revisiting it — which is how it came to spill off both edges of a phone. It stays content-sized, because
+  // RKT-006 measured what a second row costs on a laptop; `.rkt-boost` lets it wrap under 480px instead (APP_CSS).
+  '/Game/Feedback banner#fbBoost': 'a line beside the glyph: seconds, boost and turbo. Long in FR with a turbo fired, so APP_CSS wraps it under 480px',
   '/Game/Countdown bar#cdSecs': 'a number of seconds',
   '/Game/Countdown bar#cdSecsLast': 'a number of seconds',
   '/Race/Result#rrGlyph': 'one emoji',
@@ -537,7 +540,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Hangar shelf', script: HANGAR_SHELF_SCRIPT,
     description: 'RKT-011: one tab of the shelf (face or rocket) as the active player sees it. Every item is a row, owned, wearable or still to pick, with what a tap would do.',
     ins: [['app', 'object'], ['shelf', 'array'], ['tab', 'string']],
-    outs: [['rows', 'array'], ['count', 'number'], ['picks', 'number'], ['hasPicks', 'boolean'], ['purse', 'number'], ['elsewhere', 'number'], ['elsewhereText', 'string']]
+    outs: [['rows', 'array'], ['count', 'number'], ['picks', 'number'], ['hasPicks', 'boolean'], ['purse', 'number'], ['elsewhere', 'number'], ['elsewhereText', 'string'], ['wearsNothing', 'boolean'], ['emptyText', 'string']]
   },
   {
     name: 'Logic/Roll face', script: ROLL_FACE_SCRIPT, run: true,
@@ -1325,9 +1328,17 @@ const RACE_TRACK: Tpl007Component = {
     logic('rtAnimA', ANIMATE_NODE, 'Rocket A glides', { duration: 700, easingCurve: 'easeOut' }),
     logic('rtAnimB', ANIMATE_NODE, 'Rocket B glides', { duration: 700, easingCurve: 'easeOut' }),
     // 🔴 RKT-003: the course has a height budget — 30% of the screen's height, never taller than 56% of its width (a
-    // phone). The kit fits a course to this box and draws a rocket at least 44px long inside it.
+    // phone). The kit fits a course to this box and draws a rocket at least `rocketSize` long inside it.
+    //
+    // 🔴 PLY-006 AC9 (s3, R4 — Richard, 2026-09-18: face 23px, the kit's own default): `rocketSize` IS NOT SET HERE.
+    // It used to be `44`, and that one literal is what made Richard's finding 6a survive AC2. The face a child sees is
+    // `rocketSize × 2·WINDOW_R ÷ ROCKET_UNITS` = `rocketSize × 25/78` (`kit.js:490`), so 44 draws a **14px** face —
+    // exactly what the five viewports measured (14, 15, 15, 15, 19) — while the kit's own `ROCKET_SIZE_DEFAULT` of 72
+    // draws 23px. `spriteScale` floors the sprite at `rocketSize` whatever the box, so the course box was never the
+    // cap: the override was. Leaving the port unset inherits the kit's default, which means there is NO second copy of
+    // this number to drift, and `tpl007GameKit.test.ts` already pins that default to `rocket().sizeDefault`.
     group('rtRoot', 'The course', undefined, column({ sizeMode: 'explicit', height: { value: 30, unit: 'vh' }, maxHeight: { value: 56, unit: 'vw' } }), ['rtTrack']),
-    place('rtTrack', KIT_TRACK, 'The kit’s track', 'rtRoot', { colorA: ROLE.you, colorB: ROLE.other, aspect: 'auto', rocketSize: 44 }),
+    place('rtTrack', KIT_TRACK, 'The kit’s track', 'rtRoot', { colorA: ROLE.you, colorB: ROLE.other, aspect: 'auto' }),
     logic('rtLandedA', EXPRESSION_NODE, 'A at the planet?', { expression: 'p >= 1' }),
     logic('rtLandedB', EXPRESSION_NODE, 'B at the planet?', { expression: 'p >= 1' }),
     gate('rtGateA', 'Did A land?'),
@@ -1552,14 +1563,6 @@ const KEYBOARD: Tpl007Component = {
  * in the game, and it is not a removal: a player whose own look is not on this list is offered it as a fourth choice
  * and may keep it. Nobody NEW lands in the dead end, and nobody already in it is pushed out of their own face.
  */
-const LOOK_NAMES: Readonly<Record<string, string>> = {
-  'pixel-art': 'Pixel',
-  'fun-emoji': 'Emoji',
-  thumbs: 'Thumbs',
-  'big-smile': 'Smile',
-  adventurer: 'Adventurer'
-};
-
 const LOOK_ITEMS_SCRIPT = [
   `var KEPT = ${JSON.stringify(HANGAR_LOOKS)};`,
   `var NAMES = ${JSON.stringify(LOOK_NAMES)};`,
@@ -1906,8 +1909,12 @@ const RACE_ROUND: Tpl007Component = {
     withStates('rdArmed', 'Is the turbo armed?', ['idle', 'armed'], {
       on: { type: 'boolean', by: { idle: false, armed: true } }
     }),
-    // It can only be fired while it would do something: charged, behind, and the question still open.
-    logic('rdCanFire', EXPRESSION_NODE, 'Can the turbo be fired?', { expression: 'ready === true && behind === true && !open' }),
+    // It can only be fired while it would do something: charged, and the question still open.
+    //
+    // 🔴 R5 (Richard, 2026-09-18): `behind` is GONE from this expression, and the wire that carried it with it. The
+    // button used to require the child to be behind, which meant a turbo earned by three right answers vanished at the
+    // moment it was earned — those same three answers close the gap. The engine's `turboUsed` dropped the same term.
+    logic('rdCanFire', EXPRESSION_NODE, 'Can the turbo be fired?', { expression: 'ready === true && !open' }),
     logic('rdChainLine', FUNCTION_NODE, 'The chain, in words', {
       functionScript: [
         "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));",
@@ -1943,7 +1950,6 @@ const RACE_ROUND: Tpl007Component = {
     wire('rdChainLine', 'out-line', 'rdCharging', 'text'),
     wire('rdIn', 'turboWord', 'rdTurbo', 'label'),
     wire('rdGrade', 'chainReady', 'rdCanFire', 'ready'),
-    wire('rdGrade', 'behind', 'rdCanFire', 'behind'),
     wire('rdBanner', 'isOpen', 'rdCanFire', 'open'),
     wire('rdCanFire', 'result', 'rdTurbo', 'mounted'),
     wire('rdTurbo', 'onClick', 'rdArmed', 'to-armed'),
@@ -2623,7 +2629,10 @@ const HANGAR_PREVIEW: Tpl007Component = {
     place('pvFace', C.face, 'The face', 'pvPop', { size: 96 }),
     // A kit React node takes no size of its own: the Group gives the course its box.
     group('pvTrackBox', 'The rocket', 'pvPop', { width: pct(100), maxWidth: px(420), height: px(120), sizeMode: 'explicit' }, ['pvTrack']),
-    place('pvTrack', KIT_TRACK, 'The rocket on a short course', 'pvTrackBox', { progressA: 0.5, showB: false, celebrate: false, aspect: 'auto', rocketSize: 44, colorA: ROLE.you }),
+    // 🔴 PLY-006 AC9 (s3): `rocketSize` unset here too, for the reason spelled out on `rtTrack`. This is the surface a
+    // child looks AT their rocket on — it is where a bought pattern is inspected — so a 14px face is the same finding
+    // here as in the race. The box is 420×120, and a 72-long rocket is ~28 tall in it.
+    place('pvTrack', KIT_TRACK, 'The rocket on a short course', 'pvTrackBox', { progressA: 0.5, showB: false, celebrate: false, aspect: 'auto', colorA: ROLE.you }),
     text('pvLine', 'Picks, in words', 'pvCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
     logic('pvChanges', COUNTER_NODE, 'Changes so far', { startValue: 0 }),
     logic('pvWhich', EXPRESSION_NODE, 'Which pop', { expression: "n > 0 ? (n % 2 === 1 ? 'a' : 'b') : 'still'" }),
@@ -2659,7 +2668,7 @@ const HANGAR_SHELF_PART: Tpl007Component = {
   instantiates: [C.choiceRow, C.hangarTile, logicName('Logic/Hangar shelf')],
   nodes: [
     inputs('hsIn', 'The store and the shelf', [['app', 'object'], ['shelf', 'array'], ['faceWord', 'string'], ['rocketWord', 'string']]),
-    group('hsWrap', 'The shelf', undefined, column({ alignItems: 'center', rowGap: 'var(--space-4)' }), ['hsTabs', 'hsGrid', 'hsElsewhere']),
+    group('hsWrap', 'The shelf', undefined, column({ alignItems: 'center', rowGap: 'var(--space-4)' }), ['hsTabs', 'hsGrid', 'hsEmpty', 'hsElsewhere']),
     place('hsTabs', C.choiceRow, 'Face or rocket', 'hsWrap'),
     group('hsGrid', 'The items', 'hsWrap', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['hsEach']),
     logic('hsEach', FOR_EACH_NODE, 'One tile per item', { template: C.hangarTile, templateType: 'explicit' }),
@@ -2673,6 +2682,10 @@ const HANGAR_SHELF_PART: Tpl007Component = {
     // PLY-001 §3.2: what the child owns for another face. A fact under the shelf — never a tile, never an offer, and
     // it is what stops a bought thing from silently vanishing when they change face.
     text('hsElsewhere', 'Owned, for other faces', 'hsWrap', '', { ...T_META, textAlignX: 'center' }),
+    // 🔴 PLY-001 §3.4 / AC8: what a look that can wear nothing says in place of tiles. Built now; it was designed in
+    // §3.4 and existed in no source and no built file, so a child on a dropped look opened the face tab to an empty box.
+    // T_BODY, not T_META: it is the only thing on the tab, so it is the tab's content and not a footnote under it.
+    text('hsEmpty', 'Why this face has no things', 'hsWrap', '', { ...T_BODY, textAlignX: 'center', maxWidth: px(420) }),
     outputs('hsOut', 'What was tapped', [['pick', 'signal'], ['wear', 'signal'], ['itemId', 'string'], ['itemLabel', 'string'], ['itemCost', 'number'], ['hasPicks', 'boolean'], ['purse', 'number']])
   ],
   connections: [
@@ -2691,6 +2704,7 @@ const HANGAR_SHELF_PART: Tpl007Component = {
     wire('hsList', 'hasPicks', 'hsOut', 'hasPicks'),
     wire('hsList', 'purse', 'hsOut', 'purse'),
     wire('hsList', 'elsewhereText', 'hsElsewhere', 'text'),
+    wire('hsList', 'emptyText', 'hsEmpty', 'text'),
     // The repeater publishes the row's value before its signal (measured, TPL-006).
     wire('hsEach', 'itemOutput-id', 'hsOut', 'itemId'),
     wire('hsEach', 'itemOutput-label', 'hsOut', 'itemLabel'),
@@ -2807,6 +2821,33 @@ html, body { background: var(--background); }
 .rkt-shake-a { animation: rkt-shake-a 320ms ease-in-out both; }
 .rkt-shake-b { animation: rkt-shake-b 320ms ease-in-out both; }
 ${MONSTER_CSS}
+/*
+ * 🔴 PLY-006 AC8 (s3): the verdict line, on a phone.
+ *
+ * RKT-007 put the boost on the glyph's row on purpose — RKT-006 measured what one more row costs, and it was Next
+ * falling off a 1280×720 screen — so the line is a content-sized Text, which renders white-space: pre and CANNOT
+ * wrap. PLY-006 then made it three clauses long ("⚡ 2,8 s · turbo à fond · ⚡⚡ turbo lancé · 🌀 aspiration +2 %"),
+ * which at FR 390×844 measured left: -7, right: 397 in a 390-wide viewport: its row is centred, so an unwrappable
+ * child spills off BOTH ends and the child loses the leading ⚡ and the trailing figure. innerText holds the whole
+ * string either way, so only a box read or the picture ever sees it.
+ *
+ * The line wraps on a phone and nowhere else: the height RKT-006 was protecting is a height on a LAPTOP, where this
+ * line is short and this rule does not apply. The !important is because content-sizing writes white-space inline, and
+ * an inline style beats a class.
+ *
+ * 🔴 NO BACKTICKS: this comment is inside the APP_CSS template literal. The first build of it had three and ended
+ * the literal early — the same trap as tpl007Scripts.ts, in a second file.
+ */
+@media (max-width: 480px) {
+  .rkt-boost { white-space: normal !important; max-width: 100%; text-align: center; }
+}
+/*
+ * 🔴 R6 — the buy card sits over the shelf instead of replacing it (Pages/Hangar, and the long note there).
+ * The card keeps its own width and centres itself; the scrim is faint, because what is underneath is the thing the
+ * child just tapped and seeing it is the point. z-index so the tiles cannot draw through the question.
+ */
+.rkt-shelf-stack { position: relative; }
+.rkt-buy-over { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 6; justify-content: flex-start; background: color-mix(in srgb, var(--background) 72%, transparent); padding-top: var(--space-2); }
 @media (prefers-reduced-motion: reduce) {
   .pressable, .game-card { transition: none; }
   .game-card:hover, .pressable:active { transform: none; }
@@ -3168,15 +3209,29 @@ const PAGE_HANGAR: Tpl007Component = {
   nodes: [
     { id: 'hgPage', type: 'Page', label: 'Hangar', parameters: { title: 'Rocket School', urlPath: 'hangar' }, children: ['hgOuter'] },
     group('hgOuter', 'The ground', 'hgPage', column({ alignItems: 'center' }), ['hgWrap']),
-    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgPreview', 'hgShelfBox', 'hgConfirm']),
+    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgPreview', 'hgStack']),
     place('hgHeader', C.header, 'The bar', 'hgWrap', { showHome: true, showHangar: false }),
     text('hgTitle', 'Hangar', 'hgWrap', '', T_SECTION),
     place('hgPreview', C.hangarPreview, 'Your face and rocket', 'hgWrap'),
-    // A placed component has no Mounted of its own, so the shelf sits in a Group that has one: while the card is
-    // asking, the shelf steps aside and the question is the only thing on the screen under the preview.
-    group('hgShelfBox', 'The shelf, while not asking', 'hgWrap', column({ alignItems: 'stretch' }), ['hgShelf']),
+    /*
+     * 🔴 R6 (Richard, 2026-09-18) — the buy card sits OVER the shelf, and the shelf keeps the tab the child was on.
+     *
+     * It used to REPLACE the shelf: `hgAsk.idle` drove `hgShelfBox.mounted`, so asking unmounted the whole shelf. Two
+     * things came of that. §3.4 says "over the shelf" and it was not over anything — the screen went blank under the
+     * preview. And unmounting the shelf meant REMOUNTING it on close, which re-fired `hsWrap.didMount` → `hsInitTab`,
+     * the node whose whole job is to open the shelf on the Face tab: a child browsing rockets was thrown back to Face
+     * after every "No thanks". The tab was never stored wrong; it was reset by the remount.
+     *
+     * So the shelf is never unmounted now, and the card is absolutely positioned over it by `.rkt-buy-over` inside
+     * `.rkt-shelf-stack` (APP_CSS). The stack is a plain column whose ONE child in flow is the shelf, so the page is
+     * exactly as tall as it was. The overlay group is mounted with the card, never left in place empty — an empty
+     * absolutely-positioned box over the shelf would swallow every tap on the tiles beneath it.
+     */
+    group('hgStack', 'The shelf, and the question over it', 'hgWrap', { ...column({ alignItems: 'stretch' }), cssClassName: 'rkt-shelf-stack' }, ['hgShelfBox', 'hgOver']),
+    group('hgShelfBox', 'The shelf', 'hgStack', column({ alignItems: 'stretch' }), ['hgShelf']),
     place('hgShelf', C.hangarShelf, 'The shelf', 'hgShelfBox'),
-    place('hgConfirm', C.hangarConfirm, 'Buy it?', 'hgWrap', { mounted: false }),
+    group('hgOver', 'The question, over the shelf', 'hgStack', { ...column({ alignItems: 'center' }), cssClassName: 'rkt-buy-over', mounted: false }, ['hgConfirm']),
+    place('hgConfirm', C.hangarConfirm, 'Buy it?', 'hgOver', { mounted: false }),
     ...pageCommon('hg').nodes,
     logic('hgItems', C.hangarData, 'What the shelf offers'),
     logic('hgPick', logicName('Logic/Pick item'), 'Buy it'),
@@ -3219,7 +3274,9 @@ const PAGE_HANGAR: Tpl007Component = {
     // tapped row's values before its signal, and the shelf is hidden while the card is up, so nothing can change them
     // underneath the question.
     wire('hgShelf', 'pick', 'hgAsk', 'to-asking'),
-    wire('hgAsk', 'idle', 'hgShelfBox', 'mounted'),
+    // 🔴 R6: the shelf is NOT unmounted any more (that is what lost the tab). The overlay and the card inside it are
+    // what appear, and the overlay is unmounted when idle so it cannot swallow taps on the tiles under it.
+    wire('hgAsk', 'asking', 'hgOver', 'mounted'),
     wire('hgAsk', 'asking', 'hgConfirm', 'mounted'),
     wire('hgT', 'buyTitle', 'hgBuyTitle', 'word'),
     wire('hgShelf', 'itemLabel', 'hgBuyTitle', 'label'),

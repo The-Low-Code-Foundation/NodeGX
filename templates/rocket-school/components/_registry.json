@@ -271,7 +271,7 @@
       "path": "Logic/Hangar shelf",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 11,
+      "connectionCount": 13,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -534,8 +534,8 @@
     "Hangar/Shelf": {
       "path": "Hangar/Shelf",
       "type": "visual",
-      "nodeCount": 13,
-      "connectionCount": 20,
+      "nodeCount": 14,
+      "connectionCount": 21,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -551,7 +551,7 @@
       "path": "Race/Round",
       "type": "visual",
       "nodeCount": 23,
-      "connectionCount": 116,
+      "connectionCount": 115,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -678,7 +678,7 @@
     "Pages/Hangar": {
       "path": "Pages/Hangar",
       "type": "page",
-      "nodeCount": 24,
+      "nodeCount": 26,
       "connectionCount": 66,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
@@ -710,7 +710,7 @@
   },
   "stats": {
     "totalComponents": 88,
-    "totalNodes": 912,
-    "totalConnections": 2280
+    "totalNodes": 915,
+    "totalConnections": 2282
   }
 }

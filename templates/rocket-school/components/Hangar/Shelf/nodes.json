@@ -39,6 +39,7 @@
       "children": [
         "hsTabs",
         "hsGrid",
+        "hsEmpty",
         "hsElsewhere"
       ],
       "parameters": {
@@ -189,6 +190,25 @@
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)",
         "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "hsEmpty",
+      "type": "Text",
+      "label": "Why this face has no things",
+      "parent": "hsWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center",
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        }
       },
       "x": 100,
       "y": 520

@@ -329,7 +329,7 @@
       "type": "Expression",
       "label": "Can the turbo be fired?",
       "parameters": {
-        "expression": "ready === true && behind === true && !open"
+        "expression": "ready === true && !open"
       },
       "x": 410,
       "y": 760

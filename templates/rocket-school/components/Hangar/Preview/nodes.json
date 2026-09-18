@@ -169,7 +169,6 @@
         "showB": false,
         "celebrate": false,
         "aspect": "auto",
-        "rocketSize": 44,
         "colorA": "var(--primary)"
       },
       "x": 220,

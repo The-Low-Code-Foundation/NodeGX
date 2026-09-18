@@ -65,6 +65,18 @@
     },
     {
       "fromId": "hangarshelfFn",
+      "fromProperty": "out-wearsNothing",
+      "toId": "hangarshelfOut",
+      "toProperty": "wearsNothing"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-emptyText",
+      "toId": "hangarshelfOut",
+      "toProperty": "emptyText"
+    },
+    {
+      "fromId": "hangarshelfFn",
       "fromProperty": "success",
       "toId": "hangarshelfOut",
       "toProperty": "done"

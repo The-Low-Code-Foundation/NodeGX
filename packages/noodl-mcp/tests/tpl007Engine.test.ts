@@ -1773,7 +1773,7 @@ describe('TPL-007 — the engine', () => {
     });
   });
 
-  describe('PLY-006 — the comeback: earned, visible, and only when behind', () => {
+  describe('PLY-006 — the comeback: earned, visible, and the automatic half only when behind', () => {
     // 🔴 ONE question per answer. Calling the picker twice — `grade(q(), q().answer)` — grades one question against
     // another one's answer, so every answer is wrong, every gain is 0 and every multiplier reads 1. It looks like the
     // feature is dead when it is the harness that is.
@@ -1805,7 +1805,7 @@ describe('TPL-007 — the engine', () => {
       expect(missed.slip).toBeGreaterThan(1);
     });
 
-    it('🔴 AC5: three right answers in a row charge one ⚡; a wrong answer breaks the chain but never discharges it; it is spent only while behind', () => {
+    it('🔴 AC5: three right answers in a row charge one ⚡; a wrong answer breaks the chain but never discharges it; only one is held', () => {
       const run = (outcomes: Array<'right' | 'wrong'>, opts: Record<string, unknown> = {}) => {
         let model: any = freshModel();
         let last: any = {};
@@ -1829,7 +1829,7 @@ describe('TPL-007 — the engine', () => {
       expect(run(['right', 'right', 'right', 'right', 'right', 'right']).turbo).toBe(1);
     });
 
-    it('🔴 AC5: firing a turbo doubles the answer that spends it, and asking for one you have not got, or while level, does nothing', () => {
+    it('🔴 AC5 (R5): firing a turbo doubles the answer that spends it — level or behind — and asking for one you have not got does nothing', () => {
       const charge = (opts: Record<string, unknown> = {}) => {
         let model: any = freshModel();
         for (let i = 0; i < 3; i++) { const question = q(); model = grade(question, question.answer, { elapsedOverride: 1200, raceId: 'r1', model, myAt: 0, cpuAt: 0.8, ...opts }).model; }
@@ -1841,9 +1841,19 @@ describe('TPL-007 — the engine', () => {
       expect([plain.turboUsed, fired.turboUsed]).toEqual([false, true]);
       expect(fired.gain).toBeCloseTo(plain.gain * COMEBACK.turboMult, 5);
       expect(fired.turbo).toBe(0);
-      // Level with the computer: the turbo is not spent and the answer is a plain one.
+      // 🔴 R5 (Richard, 2026-09-18) REVERSES this clause. It used to assert that firing while level did nothing
+      // (`[false, 1]`), and that is the defect driving AC8 found: the three right answers that charge a turbo are the
+      // same three that close the gap, so a child who earned one was level by the time they held it and the button had
+      // already gone. A charged turbo is now spendable whenever it is held.
       const level = right({ model: held, myAt: 0.5, cpuAt: 0.5, useTurbo: true });
-      expect([level.turboUsed, level.turbo]).toEqual([false, 1]);
+      expect([level.turboUsed, level.turbo]).toEqual([true, 0]);
+      expect(level.gain).toBeCloseTo(right({ model: held, myAt: 0.5, cpuAt: 0.5 }).gain * COMEBACK.turboMult, 5);
+      // …and the SLIPSTREAM is still behind-only, which is what keeps the automatic half of the comeback honest: the
+      // same level answer gets no slipstream at all, so firing doubled a plain gain and not an assisted one.
+      expect(level.slip).toBe(1);
+      // A child AHEAD may also spend one they earned. Nothing is given — they answered three in a row for it.
+      const ahead = right({ model: held, myAt: 0.8, cpuAt: 0.2, useTurbo: true });
+      expect([ahead.turboUsed, ahead.slip]).toEqual([true, 1]);
       // Nothing held: asking changes nothing.
       expect(right({ model: freshModel(), myAt: 0, cpuAt: 0.8, useTurbo: true }).turboUsed).toBe(false);
       // A new race id starts the chain clean, and a bought turbo can start it charged.

@@ -100,12 +100,6 @@
       "toProperty": "ready"
     },
     {
-      "fromId": "rdGrade",
-      "fromProperty": "behind",
-      "toId": "rdCanFire",
-      "toProperty": "behind"
-    },
-    {
       "fromId": "rdBanner",
       "fromProperty": "isOpen",
       "toId": "rdCanFire",

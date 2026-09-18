@@ -54,7 +54,7 @@
  *
  * @module noodl-mcp/tests/tpl007Scripts
  */
-import { HANGAR_SHELF, LEVELS, WORD_KEYS } from './tpl007Curriculum';
+import { HANGAR_SHELF, LEVELS, LOOK_NAMES, WORD_KEYS } from './tpl007Curriculum';
 
 /** How far one correct answer moves a rocket, before the speed factor. Eight fluent answers reach the planet. */
 export const RACE_STEP = 1 / 8;
@@ -973,8 +973,18 @@ if (!forB) {
     if (chain.run >= COMEBACK.chainAt && chain.turbo < 1) { chain.turbo = 1; chain.run = 0; }
   } else chain.run = 0;
 }
-// A turbo is spent only when the child asks for it, only on a right answer, and only while behind.
-var turboUsed = correct && !forB && Inputs.useTurbo === true && behind && chain.turbo > 0;
+// A turbo is spent only when the child asks for it, and only on a right answer.
+//
+// 🔴 R5 (Richard, 2026-09-18) — the "and behind" term is GONE. Driving PLY-006 AC8 found a child who earns a
+// turbo and can never spend it: the three right answers that charge it are themselves what closes the gap, so by the
+// third one the slipstream has pulled them back inside the behindFrom threshold and the button is gone. Ruled: "a
+// charged turbo can be fired even when level" — a child never earns something they cannot spend. The SLIPSTREAM is
+// still behind-only (the slipstream call below), so the automatic half of the comeback remains a help only to a child
+// who needs it; the turbo is the earned half, and it is theirs. Re-measured in AC6's 400-race arm.
+//
+// 🔴 NO BACKTICKS IN HERE. This comment is inside a TS template literal: one backtick ends the generated script
+// early, and the first build of this very comment did exactly that ("behind is not defined").
+var turboUsed = correct && !forB && Inputs.useTurbo === true && chain.turbo > 0;
 if (turboUsed) chain.turbo -= 1;
 var slip = correct ? slipstream(gap) : 1;
 // 🔴 Not named boost: that name is already the verdict LINE further down, and reusing it made the multiplier a string.
@@ -2297,6 +2307,23 @@ Outputs.purse = purse;
 Outputs.elsewhere = elsewhere;
 Outputs.elsewhereText = elsewhere > 0
   ? (fr ? elsewhere + (elsewhere === 1 ? ' objet t’appartient' : ' objets t’appartiennent') + ' pour d’autres têtes.' : elsewhere + (elsewhere === 1 ? ' thing you own is' : ' things you own are') + ' for other faces.')
+  : '';
+// 🔴 PLY-001 §3.4 / AC8: the face tab of a look that can wear NOTHING. It used to draw an empty box and say
+// nothing at all, which is how a child on a dropped look met a dead end with no way of knowing why.
+//
+// The condition is read off the SHELF, never from a list of dropped looks copied into this script: if no face item on
+// offer fits this look, there is nothing to sell and the reason is the look itself. That way a look added to or removed
+// from HANGAR_LOOKS, or an item table that grows a row for thumbs one day, needs no change here and cannot go stale.
+var NAMES = ${JSON.stringify(LOOK_NAMES)};
+var dressable = false;
+for (var k = 0; k < list.length; k++) { if (list[k] && list[k].kind === 'face' && itemFits(list[k], look)) { dressable = true; break; } }
+var wearsNothing = tab === 'face' && !dressable;
+var lookName = NAMES[look] || look;
+Outputs.wearsNothing = wearsNothing;
+Outputs.emptyText = wearsNothing
+  ? (fr
+      ? 'La tête ' + lookName + ' ne porte rien. Change de tête dans le menu du joueur pour t’habiller.'
+      : 'The ' + lookName + ' face doesn’t wear things. Change your face in the player menu to dress up.')
   : '';
 `;
 

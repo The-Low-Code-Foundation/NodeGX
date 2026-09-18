@@ -842,6 +842,21 @@ export interface HangarItem {
  */
 export const HANGAR_LOOKS = ['pixel-art', 'big-smile', 'adventurer'] as const;
 
+/**
+ * What a child calls each face. Used by the chooser (`LOOK_ITEMS_SCRIPT`) AND by the shelf, which names the face when
+ * it cannot dress it (PLY-001 §3.4, AC8).
+ *
+ * 🔴 It lives HERE, in the one file both of them import, because a second copy of a name map drifts silently: the
+ * chooser would go on saying "Thumbs" while the shelf said "thumbs", and only a person reading both would ever know.
+ */
+export const LOOK_NAMES: Readonly<Record<string, string>> = {
+  'pixel-art': 'Pixel',
+  'fun-emoji': 'Emoji',
+  thumbs: 'Thumbs',
+  'big-smile': 'Smile',
+  adventurer: 'Adventurer'
+};
+
 /** PLY-001 AC3: no kept style may offer fewer than this. The gate reads it, never a literal. */
 export const MIN_FACE_ITEMS_PER_LOOK = 12;
 

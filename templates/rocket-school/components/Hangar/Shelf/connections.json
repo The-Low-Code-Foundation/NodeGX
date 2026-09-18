@@ -94,6 +94,12 @@
       "toProperty": "text"
     },
     {
+      "fromId": "hsList",
+      "fromProperty": "emptyText",
+      "toId": "hsEmpty",
+      "toProperty": "text"
+    },
+    {
       "fromId": "hsEach",
       "fromProperty": "itemOutput-id",
       "toId": "hsOut",
