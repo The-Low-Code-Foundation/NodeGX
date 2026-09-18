@@ -168,14 +168,19 @@ indexed `published desc` answer in **0.04 ms against a control's 8.92 ms**, with
    `Model Request`: this is its checklist too.**
 
    🔴 **And `test:main` is not the end of it: a new node type also owes `packages/noodl-mcp`,
-   which `test:main` does not run.** Measured at s2 (2026-09-18) on this branch: eight `noodl-mcp`
-   suites are red, and `tests/fld013ExportReach.test.ts` names FED-001's two types outright —
-   `net.noodl.ParseFeed` and `net.noodl.ParseXML` are unclassified against the export coverage
-   ledger (`packages/nodegx-export/coverage-ledger.json`), whose gate refuses an unclassified
-   type. So the fifth step of the checklist is **`npx jest` in `packages/noodl-mcp`**, and the
-   sixth is a ledger row for every type added. See the register's R4: that classification is a
-   **ruling, not a copy-paste** — `Parse CSV`'s row is Richard's own 2026-09-03 ruling, and
-   extending it to feed and XML parsing is his call, not a session's.
+   which `test:main` does not run.** Measured at s2 (2026-09-18): `tests/fld013ExportReach.test.ts`
+   named FED-001's two types outright — unclassified against the export coverage ledger
+   (`packages/nodegx-export/coverage-ledger.json`), whose own gate refuses an unclassified type.
+   So the fifth step of the checklist is **`npx jest` in `packages/noodl-mcp`**, and the sixth is
+   **a ledger row plus `node scripts/export-ledger/check.js` and
+   `node scripts/export-ledger/picker-coverage.js --check`** for every type added. Both gates
+   print the number they measured on a refusal — take it from them, never increment the literal.
+
+   ✅ **Ruled and paid the same day** (register R4). Richard, 2026-09-18: *"I'll likely convert all
+   nodes to code export, so you can add them to the list of exportable ones to work on."* The two
+   parsers are the ledger's first `scheduled` rows. **What this means for FED-003:** `Model Request`
+   is cloud-only, so its row is `backend-only` and the check will insist on exactly that — no
+   ruling needed, but the row is not optional.
 6. **[PHASE-EXECUTION.md](../../guidelines/PHASE-EXECUTION.md) applies.** A defect found while
    driving is filed, with an owner, and the next session builds the next task unless the defect
    carries `BLOCKS <AC>`.

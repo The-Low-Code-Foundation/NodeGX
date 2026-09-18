@@ -94,7 +94,7 @@ describe('FLD-013 AC1/AC5 — the answer that would have prevented #37', () => {
 });
 
 describe('FLD-013 AC2 — every picker row joins the ledger, as a cardinality', () => {
-  it('classifies all 143 of them, and the join is not vacuous', () => {
+  it('classifies all 145 of them, and the join is not vacuous', () => {
     const rows = listNodeTypes();
     // Pinned so "all classified" can never mean "none loaded".
     expect(rows.length).toBeGreaterThanOrEqual(140);
@@ -142,7 +142,10 @@ describe('FLD-013 AC3 — the listing, and what it costs', () => {
     const rows = listNodeTypes();
     const carried = rows.filter((r) => r.export !== undefined);
 
-    // 27 non-translated picker rows, plus nine translated types that still refuse on a wire.
+    // 29 non-translated picker rows, plus nine translated types that still refuse on a wire.
+    // 27 → 29 at P96/FED-002 (2026-09-18): `Parse Feed` and `Parse XML` entered the picker with
+    // FED-001 and were classified the same day — `scheduled`, the ledger's first two commitments
+    // rather than decisions. Both carry a badge, so both are rows with something to say.
     const translatedButRefusing = carried.filter((r) => r.export!.status === 'translated').map((r) => r.typeName);
     expect(translatedButRefusing).toEqual([
       'Circle',
@@ -164,7 +167,7 @@ describe('FLD-013 AC3 — the listing, and what it costs', () => {
     expect(translatedButRefusing).toContain(CIRCLE);
 
     // Two-sided: silence is the common case, and it has to stay the common case.
-    expect(carried.length).toBe(36);
+    expect(carried.length).toBe(29 + translatedButRefusing.length);
     expect(rows.length - carried.length).toBeGreaterThan(100);
   });
 

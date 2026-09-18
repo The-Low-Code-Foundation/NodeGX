@@ -608,7 +608,10 @@ describe('GAM-013 — the ledger', () => {
     expect(String(row.note)).toContain('useRepeat');
     expect(String(row.note)).toContain('What this row cannot see');
     expect(ledger.pickerCoverageFloor).toBe(118); // GAM-013 Repeat (P88)
-    expect(ledger.pickerCoverageTotal).toBe(128); // GAM-013 Repeat (P88) — a new picker node, so the total moved with the floor
+    // 128 → 130 at P96/FED-002 (2026-09-18): `Parse Feed` and `Parse XML` entered the picker with
+    // FED-001 and are `scheduled`, not translated — so the total moved and the floor did not,
+    // which is the opposite of what GAM-013's own row did and is why this line says which.
+    expect(ledger.pickerCoverageTotal).toBe(130); // P96 FED-001's two parsers on top of GAM-013 Repeat (P88)
     expect(String(ledger.$pickerCoverageFloorComment)).toContain('118 of 128 after GAM-013 (P88) Repeat');
   });
 });

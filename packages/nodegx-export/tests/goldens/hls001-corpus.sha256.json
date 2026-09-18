@@ -2,7 +2,7 @@
   "account-desk": {
     ".env.example": "7b616762a2ab2b113cf44e584904d683d9eeacfc786ded45c860175a3c8b2588",
     "EXPORT-REPORT.md": "97414cd54442fd4b3c0dacab712523bf9896e379158c59afae864281e32de3e2",
-    "README.md": "159e359a20363de6a7ca328ae145f40fce5095a33b1b9c05ce54ec335ddb1ac1",
+    "README.md": "44b162cba131e9a46c51ad327dd84867441581440e0a6ed8ca47d2997385a1b6",
     "index.html": "8f06fbcb20edb703b17815a3ef4c29d43f547e5b594fa961b8264e063a8721f9",
     "package.json": "b1352a23a3b3f8c7d273b0658f04ee630390db7281717268c50b8e61a6ed1781",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -23,7 +23,7 @@
   },
   "alarm-desk": {
     "EXPORT-REPORT.md": "92889abe7438ce310d0495f3966846b8216e99bc15e9fc098921829fa4118486",
-    "README.md": "81ea6fa229985270065ea3776bde320811419eb992d86141553a1b8080c539d7",
+    "README.md": "3ceaa8644bc1b5a6aa0b0d7d600ec8d1f126374fe42d6873fc0efd68e445feab",
     "index.html": "171537eda4a55d9efbf91c8afad4dd37bf655fe22a227137c17971328c51201a",
     "package.json": "251cf0a4249a2bb9553ddc6e2676488a27b9f9af4f2e5ccc7fff38fbaed6a112",
     "src/App.tsx": "f102a51e2f6750634553ff7f870cd464bb8dd4be12291b5d6bd5430d168f0f3c",
@@ -44,7 +44,7 @@
   },
   "badge-desk": {
     "EXPORT-REPORT.md": "07775a29626ce87c48ade33a7e8ab5ec9d0bb161f6c8a3b8b38a4872f7cde3aa",
-    "README.md": "fa48f13c3efe3513d0e88383d07e5594b56ee3c253805bf82e2b5533e76b3f8f",
+    "README.md": "f1bd1b45cc97aa1275350035beeceb984e2f74311ee8bf2f07bddf806f77de93",
     "index.html": "ade1d5a45d74260f9d60aa365854676df6cec1fe771c5c690e6f23fe70e130f0",
     "package.json": "9b9d9370d65ceb690eb68454ed744bfd83fe889b7bbdde0e66398720da90010e",
     "src/App.tsx": "06f7914fdfc84542d77b21bd07fac59a62d99296186a392f397d51c6dfb42012",
@@ -63,7 +63,7 @@
   },
   "batch-desk": {
     "EXPORT-REPORT.md": "c64aba208027b15f183d3ef5c583c02e4d34dde320c59860a0dc4d497feab512",
-    "README.md": "32afc3996773b9bfc2cc1b3dcbebd7befc35293c0c4abaadc44fef5c8679d44f",
+    "README.md": "8178ac780f58f1a9febef13d593e9164772b50445c31b713617f9bf7414007c5",
     "index.html": "eca0ce3c37a62ba2eff840f30d31aaa92257d4225aa3a37653efe85386dde8d6",
     "package.json": "cb80698a274a4f18d2a09a62c0ca79394b21b262dbc86cf373e6478a8da68270",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -85,7 +85,7 @@
   },
   "beat-desk": {
     "EXPORT-REPORT.md": "c7cd0854dbbcb0c9a60b3cb961ae4f3588ed039e5508b5a71e63e7f76e400f37",
-    "README.md": "defb555feca80911ff5075ac75e864b6382d0b0864277932f86c22df6cfc1348",
+    "README.md": "7ffa2ccae979423325524a3d935ab54363b30e1627b19b08f9d99504e67155da",
     "index.html": "bee4189daf04c2f23bbe319ce3b22192f4dd392c7d9e6c76980366aa20496984",
     "package.json": "bf5b17d42149741806fbd15cb99f68120cbc54cd9d1387f540520bb489784622",
     "src/App.tsx": "8c2dc5b1ed61766a14f6e5abec8aae0bf7d6c41806f9ba1d165922a4660bb201",
@@ -105,7 +105,7 @@
   },
   "board-desk": {
     "EXPORT-REPORT.md": "f4e23d588c7f4375fa71d53938dff0c4ced27d3807cea7148b981a1e0c6d0d75",
-    "README.md": "adc09d9ebb5e34e95b01d4cecf378569cf7daaeb1196297933879cd0398c8ada",
+    "README.md": "b0babfeb647333278fc53af056639a5845e5d7a4f40be4e286c9a623abd658e5",
     "index.html": "83bc2428e05ea677f2729655514a0eae6f9c18cbff1fb79d46a324f7b732d7b9",
     "package.json": "6abfc99bd8f745d031bcc0e2de1c176ffe883dd210cb22917e45db1a476d8391",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -126,7 +126,7 @@
   },
   "budget-desk": {
     "EXPORT-REPORT.md": "9cbc4520d293618733fec586aa132dff0b3fadedcb7f7e3a2568158383b3a38f",
-    "README.md": "c04f18828ab8a0292c65ea060116f02608c9101b2f5ac139e13ce350bf10eb6f",
+    "README.md": "33dc145844b6fe83fede5b11605ba3c642a518a43ba5366665b3ecafd85a7d5d",
     "index.html": "8d5837b7ee0a9f64f4813eaadf1df6916894c11d3e489d814e7d8c8c0dcebb50",
     "package.json": "41f3989e74eff0ca6db356da46c22ee35d8e2023731643e79b91889490c0ecb8",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -146,7 +146,7 @@
   "call-desk": {
     ".env.example": "d1ac41d2d7c7f6abebefb7b19ef260a41e42d2b6ee5a1da37fc45190ebf15a0d",
     "EXPORT-REPORT.md": "32db15d3bb1ce03b39a37e55cb5d0ce92b8314a4858c41f59e9fd97f986c1c38",
-    "README.md": "65bab90bba62fad701d62675ca8615ead36aedc4bc228ccbddc518cd33648c48",
+    "README.md": "bf8718521f6b174542ec4892a7f0dfd4b3cbfed1dd83688de996f81032e16061",
     "index.html": "bd79e490bb814bd85d8a8ea513e7991fde3c5647ebd80336854177ce6dace581",
     "package.json": "120766363b8e7cc4a29deb0196ed8812e944e27811af68a419933b9604e4edd1",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -167,7 +167,7 @@
   },
   "charts": {
     "EXPORT-REPORT.md": "86e06aaaf4659b904017c7fb7af34976942791bc370255d1822e1cc5a7e108cf",
-    "README.md": "1b689668a090ba7daf7869e274b479dedb6646b4e8da409be6365e94b6780367",
+    "README.md": "4d3389fc05875e9a2056cc7f5925548f9bd7a8caadab1be5b2b9ab7e7a438b06",
     "index.html": "e50d75bd366c4935b5307f338a9823fcdfcc7596d3ffc88982a747ef079110aa",
     "package.json": "2c8b4029a109eb4cbe1e4da309fe52828945d87715e92eab40a72af37690e8d9",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -188,7 +188,7 @@
   },
   "cheer": {
     "EXPORT-REPORT.md": "5fc34705de281a3cf82cd5fcec49d19506b3b555f910d269a75740d1593b7933",
-    "README.md": "ab26e0e064acfbe357905d582da3dde9efa5dbe1c3218f31f53648196ddc9605",
+    "README.md": "42fb3d5ae43c70b567c8e6f9239d63cfd0b995de3137c58d406bfb20a810c075",
     "index.html": "8a70ce1046a7a432650ad4232f05d396b0d9d04a8271259bcf4010f5254954ff",
     "package.json": "75fc0f092eb051838c67f7dc5ab57f01b9cba586711428940663131db08c89be",
     "src/App.tsx": "7d1236e6f69696908eeeb218b428721901273348362e1455c4886084de3311c9",
@@ -227,7 +227,7 @@
   },
   "deadline-desk": {
     "EXPORT-REPORT.md": "f492b39d82131afc4defdcf1905768cd1d7cbd38a1a5ffa70925fcb8634d080a",
-    "README.md": "83f2a9509e46af3c4ce17466b2fd866068861fad5aa81234cc97cf4f9e200e22",
+    "README.md": "8a919212f046437a34ccc39074a4080f990bbd19e0e236cc2a4545542edbd6b0",
     "index.html": "034cf0d76b3addd8d32f6acecafad2e76e2d97dd1b4b31986d39acf2957eb097",
     "package.json": "334e43986b2aa56434dedfb017a00802a9f077eb9b4e9f6b0afc9d3c8f54de4b",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -247,7 +247,7 @@
   "due-desk": {
     ".env.example": "31abeea50106f6862666093c4620efb7df4409a359e6761d8b4d9ceaae72bb0e",
     "EXPORT-REPORT.md": "a19dea81ad281b675afe3c445e6a8ad286c8c85212de038623df3463e9d05a36",
-    "README.md": "60236fc974df352e6841e1ab5a4d2cdb041c950a7529626354d9cddcd94497f5",
+    "README.md": "314b8e471b1da6a3f34d31f19f9f22d5784ad593c75afe7f7a6856820e745e8c",
     "index.html": "bb9a0e62bb7e56de2b517d5e9cc5fef1a0bf45b4eec4dbbbcc11229a6bc4ab23",
     "package.json": "5bd770e41073ff1c4d8c5c4b34dedcf841d2706e750b3af5784f81438003fed4",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -270,7 +270,7 @@
   "gallery-desk": {
     ".env.example": "7831cb72fb2eff63693772e02b5bd74fbefaa6294306a191ed36448c2f763148",
     "EXPORT-REPORT.md": "e23aa975a7928e06466e6d28d83866fedc0956e4bc235dd3e62a1896506a6b1a",
-    "README.md": "2d21c4e7107e51fcb768d737a6956cbc82d0cfee06c5a82a39066577c385ee53",
+    "README.md": "e6ef4eaafcf2468e7de9de32db443f43982a30cd710f2569a099cddb86713554",
     "index.html": "91013ae24f7d43c76e55d05d6615089d70cfb8650df3242d9746f25131171eb0",
     "package.json": "9a5e5a671fab11912ae1859b3140e1154470882d410eaef774f030f20d1b1dea",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -295,7 +295,7 @@
   },
   "glow-desk": {
     "EXPORT-REPORT.md": "e90a5076086ecd82cb15cd442e05ce03ba7a69cde85153bdbe3bb956b6b881af",
-    "README.md": "a1f56e6c5d7edbb84734aaf8a7911c130ec3cb5a182541cade3537c7e4ebcb48",
+    "README.md": "10448e41a6ad5e164623c0776fef2ac9e01d5869067808f1975f085f650c0b40",
     "index.html": "37fa8f4471400be98f88058c4c3fcc56ddd3de322d12646d844bef708af5d404",
     "package.json": "7669ab00ecae8c6cd9066ef97825189c1b58d3bedc8522e6aef101ec53f1f852",
     "src/App.tsx": "791c8de843fcd01e19b8e9657039b3b0454a6b192a157c65d6966e881dbbf99f",
@@ -315,7 +315,7 @@
   },
   "ground-desk": {
     "EXPORT-REPORT.md": "24cfbf2a5ff724888a48bc7cfb3db8c35396094e3e14a408fce54dcc2ff89c4b",
-    "README.md": "6324865f602d17647747b8d31bf122f299d965eef42fdca9fe00d00e1c8050cf",
+    "README.md": "1f7acf3c27765bf7b8e1ed384a52d229d4f3ef517d12eef761fb2252784b0f3f",
     "index.html": "c1a57dc14a7c41f1c9fcd936191b1f444edb84be00ed0ba5fa114ad9951abc93",
     "package.json": "a5c6886e7359dfcb472baee539e8a3e3d3cf722c274139555a909a3a0390fa6a",
     "src/App.tsx": "6c6331eeac817a8943b260cbc1687f97d30eedf06a08d83b5e873b67f8f6ea32",
@@ -332,7 +332,7 @@
   },
   "kit-signals": {
     "EXPORT-REPORT.md": "acee70c3e86e6d6bbdf1a8c4cf6f5da86a221c00b74a7a203e87a37d5719f54d",
-    "README.md": "2d5e5c111a2b5608210203d7a031faf842b2577ddf466cce8b3ff57688cb1432",
+    "README.md": "b5073f30521796134a9ccc52918673b53fefe1409c0425806196968fdfadbdde",
     "index.html": "db7a77f59ac3e9bb31e85adcd992ad9dc1a7395154f4b94404d60f4403e0ec40",
     "package.json": "cd5036f24a26311fa1db98352849e0d9fdbea2f976668b7aa595227aa283338d",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -353,7 +353,7 @@
   },
   "kits": {
     "EXPORT-REPORT.md": "851727c0698ca5f47d67b93841faf49832734917b1f724b95bbae165aa09788d",
-    "README.md": "620c1957a254a9ead3d8117d1d26bf9c884862c84e4a254e314ccff20275752b",
+    "README.md": "05ff0da48612e17473c0334be78004fdf935a5dad4a9677a0fbae3f42dc5dc3e",
     "index.html": "0e0c4559595589f55909e7df2728cd9a7f58e2017b89ba7ec2d79c478a28e804",
     "package.json": "abaa7ee35f5cfada36f1a06d7457dc7be3507716e51cdf9755081c1703a539ea",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -377,7 +377,7 @@
   "link-desk": {
     ".env.example": "361e048b5591953c7dd316408d5b8a66572dc19fe9e3ef5b58bbd5d1c4997d14",
     "EXPORT-REPORT.md": "c273e271cd2154c97e8772bbf409e5300482b1e2b7732fb275907dcbc732b252",
-    "README.md": "e194b665f73e7128e9fd002eb90ef085d38630bf25dd930e2f7f0e36240a2b29",
+    "README.md": "8fdfa8065dbc1183398c604d211bd105c4713f5f52fce2e658f966901071ea72",
     "index.html": "7ca92bbdfb7469668fd653e51c89018c53e446a1150f40879c1e622a8dc60975",
     "package.json": "8b3ad48a4ae988b63b82e8c0c8310f16cc2f01d031184926abb2c8de41a1fcb9",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -400,7 +400,7 @@
   "live-desk": {
     ".env.example": "ab64cf85f30566cd69573a4f52c74b202092a06eeba77a87ab4789f23cc51949",
     "EXPORT-REPORT.md": "1018025cf6df9b6ce20f11eb16049041073a8b3a3b3d72a63835107bfb373e16",
-    "README.md": "31198dd8d632db95025e690302634080950f861e810d5efc2bc84be0d9b40066",
+    "README.md": "2c8a711faa9ee14a76637bf6a70034397ad7aa211dc2fc1671a75b6556b3f35a",
     "index.html": "da30bf1639e7f836e2f6734aa28db4df9af5c2a7da853b20f50a04aebcf5d75e",
     "package.json": "43f437f2916ed4fa854a58020330389d7f42d4454422461db71a893289c6be1d",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -421,7 +421,7 @@
   },
   "look-desk": {
     "EXPORT-REPORT.md": "72e4282e861cf5aae5aa062dab59169237d9c847fa4539624fdf8ddda8ef0d1d",
-    "README.md": "efc3601204852b31a7546afdee47cce208089aa9a828196a7c32f8686cf88647",
+    "README.md": "b7103687d57bfeda7a746c6fba5a667453ae9cf457e8bf0162b63616d21f259e",
     "index.html": "7c8509ad8eb4dc870f436512623d835ecfc6e08413803e6a4a0fdf77fda48402",
     "package.json": "0c4bcfc135a4969eb1d27dcfb241ed1c56e51de911eb8266204ee630f35eeced",
     "src/App.tsx": "6dba18e4b228aeb78826aea817c7c7c60802583cd0b2ca34fda0140cff4d55f4",
@@ -438,7 +438,7 @@
   },
   "mood-desk": {
     "EXPORT-REPORT.md": "20226b24c0a9ac90727c907e0ed4822cfebcfa12cc4fee272bbe17af4f0c0f30",
-    "README.md": "2b3bd9e1cb2d7f9bf28cb088b92bbe035af4f7cbcf8bedd7718b5123c9d91605",
+    "README.md": "7ee8603b4262bc9bfe522119089df7faa4aa3d6419e100023a2eb4794942b752",
     "index.html": "d19a26725e7e4762fd43b97146b3357ee333cc51e3ad3cf7f079cc10fa816141",
     "package.json": "93876d11a706067797e137bdc5422daba46698ef1c3fb0d44d1712118f392427",
     "src/App.tsx": "c20e5c99a38bedbfd95574a66c430d34ffef254cc0d9282b46a6761ca77b1ac9",
@@ -457,7 +457,7 @@
   },
   "note-desk": {
     "EXPORT-REPORT.md": "fc3987152d36f4ba98aa431815acce1845ca22eaef510c9cde6cae2270ecd3ab",
-    "README.md": "9478656cea6f71d42e1991b1b52d92c1a2ea53d37c6d3d478c18c6d2d453be64",
+    "README.md": "69b89f1fae445056d4cee57c9a97ce87e20952a747562d7095451ada7db13f71",
     "index.html": "9d485aacfc60a31d47ab6f93fc3c9229596bcc33ada047b2f2f02535970e6924",
     "package.json": "9c7f11d9b3e4e5fae490cceb673e43e5d5e8c6b057602ccafb732e8c22e24f19",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -478,7 +478,7 @@
   },
   "notice-desk": {
     "EXPORT-REPORT.md": "16db0ef71c75d91cf070d58a436ed8a892b68c7b5646bdd93b55025224cf20c5",
-    "README.md": "d456ceba4bedbe9815ea2baa6032b2a388b5cdb3864e1aefd8ceec50eedf3ee1",
+    "README.md": "8570f4fc1eaf3c5fc514838a17fb7720e346873cb37a5283e7b3cbac6a763ba0",
     "index.html": "128b495e835149c768b465a8c02c0b66e0b89377e175906120b47de6ed0ddd8a",
     "package.json": "465561bb7f5a6cccc956bc9efe4d854624c5fa55f745314cd2d010a8000b2319",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -499,7 +499,7 @@
   "page-desk": {
     ".env.example": "5fe26cc5bb2db20616ce5680104005bd2011272f5f95f7881df6a74ed2699bdd",
     "EXPORT-REPORT.md": "8e02f42310f941f8889c15493d3bf1c3558c570f96fb07791cecc71413c62111",
-    "README.md": "2c4825e0661ec06d3e01677292b96fe5006b1c206764821812af69da7720b2b1",
+    "README.md": "b5950f158962f6412f823a2532f52d753b798d8eaff9c6c2ecf399cac5d0c3d4",
     "index.html": "7b7dbb99b0dbc2e8d42a581ffccaca92b28fa069c0840aeaf68c714d3186f437",
     "package.json": "b447078a5895d5cc54e7c4bb6e5329f7b9f5dbe4fc25739948721a477a1ba2ba",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -520,7 +520,7 @@
   },
   "panel-desk": {
     "EXPORT-REPORT.md": "3f3217bf1ec769fa5be3541e70ca52a927b8621718d57bdfb1a4b903ed624cfe",
-    "README.md": "1d79516be483236336b76914a8ade89986d888c0d1fb30bc2fe5a6121cfc5204",
+    "README.md": "cb65892b51afbd81c39493378237926d0ff5883ae2a9089c51457ca091ddda44",
     "index.html": "b7134be824d3d868b36a042e987b284af707855ddcdb43a95b55928b514727a6",
     "package.json": "4fe4cbc56cddf1d52149d1c33a86846d08a1247080ac3d59a6d5181e78c1fa46",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -545,7 +545,7 @@
   "photo-desk": {
     ".env.example": "cf945f0c9e0ce0d4c8a3c72c445dd40f81f37e39a9854c8f30f30fb7c8eaeda1",
     "EXPORT-REPORT.md": "cc3ab0ead6b226bc755a8c59bbe24f7c2ebea6f588763254feabfb24a03fa192",
-    "README.md": "a2a1919265f0e0ca2ab82a48e7a14568bfc5c7524e9b30765e9e1653a7a2ce1c",
+    "README.md": "bf31dd1cc4dbbb0cecd627542c64e7a0e5bc558ab1e9d6416f97f5a2d356a1f5",
     "index.html": "d86c479d2ad0e167bf854ffd7127384d1c4f1c9137c2c0957bdcbc9820c8b115",
     "package.json": "9737947933087abe19f7fb0a2ac8403f41e1631c1d878bd98fa9d3a0d1b4442d",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -569,7 +569,7 @@
   },
   "picture-desk": {
     "EXPORT-REPORT.md": "206e464087281ef6a45a7eb2ee2dbccf5c46b8a5aec1d10cdc280ab303464e53",
-    "README.md": "6f5ed36c8afaf62d51e21538a109c5a26259973c8941885e35fc93812eee4ba3",
+    "README.md": "0be0575c4e9f8df81936a8cfc195ea25759a4ee660013498c892ebfb47b1af5b",
     "index.html": "f37c04e05cac8020856ad44d6129d7884017ec424443370db349d495880fc295",
     "package.json": "484436ce3ca24490e23a24b4084e2cc8f996d40794343813a8c0accbf3147603",
     "src/App.tsx": "20bcd759fb01a3ea8097526a6cfd4e262e2aaf24039f79605c3eda25e8af5170",
@@ -591,7 +591,7 @@
   },
   "profile-desk": {
     "EXPORT-REPORT.md": "105828562a31d11c7e4121c849170e8598f7309164d84fe61d287fb157513713",
-    "README.md": "9ebbbdeb8e95807dbc7bdc574b40cdff494ec1ce9f4ae5090990909649587e98",
+    "README.md": "cf37f713ab08dae80f5b4311f2c2d0c994bb165af58f1bffe9d6e78e03dfa1ac",
     "index.html": "4b5a6257d3cf7f1c348c9234523ed92278bf6d97b2db7fe0981a6218374d4d91",
     "package.json": "75b7a9e009bff5a72cadcbfed9a3a13f64b9980a83fd94642d9c8b6b56fcb2d1",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -613,7 +613,7 @@
   "puppy-test-3": {
     ".env.example": "700ef659c3c63eec4132b4c684ebc96682ef68ea637d42ce05c7083996830165",
     "EXPORT-REPORT.md": "8b024f63f461fad7ee363edd0e78e8ddfaffbbcf7ceab3d11b166a80591d1999",
-    "README.md": "5d988062166c32ee12cce4070a240a955f839f8b982458b0b4e851fb8632c0e7",
+    "README.md": "4c10f25a7f6668186fa4832c84eb7c0cd537762a830363342a598e3b501349d3",
     "index.html": "1e52767ec6718770c539c6da4708240c2561ef66308b28cd230a83fad8527f9d",
     "package.json": "55bfbd42788bbfc7b44b12b6e437b169a27af2a41b9728454a5e1156076bcfda",
     "src/App.tsx": "132f46e56af1f90c60752877cec941f0460fa8ee5747d437b8252a3ef0d45caa",
@@ -653,7 +653,7 @@
   },
   "quiet-desk": {
     "EXPORT-REPORT.md": "b563c52876ffa61615564ec88096e0d2fbff0f86c0ebaaee27d149973bf4e5eb",
-    "README.md": "042e692724649064f27bf1237847c690451ae846a6583561d7ad572a9f59aece",
+    "README.md": "f442060ea5b15c5a62503e7151637e9478be82aca47d6dbb03baf995d35e6498",
     "index.html": "30a3d05f7ef77a988e9d32410526a5efac97cde18d29920e767fe47555e727ec",
     "package.json": "c78b87d54d148e7fa29facb9070b620c592f1e35c9a082379f88d8cded854528",
     "src/App.tsx": "38b249cfffcb6d85a375ac4d551967241d94976781e965bf5e60c924950b90a7",
@@ -671,7 +671,7 @@
   },
   "quote-desk": {
     "EXPORT-REPORT.md": "53336c83b018e104de55855784a7639b7f563fe78c142562baa70c32ba58770d",
-    "README.md": "7802fb9923fab04fc340c58d2b10eb5c12f722707e41e8a3fa574dbed5b7d21e",
+    "README.md": "3cdc1e4b315dae913a11c63610bdcd31b90bccda249d675094fc375d7cc37d18",
     "index.html": "91c3e11990f425a9b6650a1754dcb55ed28935b230965708d6829d0f15f30da3",
     "package.json": "5ce2c571ca0e8588fd3bf175cdfdfb4b1b4012763f3155dea7b921c4543eb596",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -691,7 +691,7 @@
   },
   "reading-shelf": {
     "EXPORT-REPORT.md": "583ecb65d61f06195973895d546c2d28187918acd2da80a43e0f6d7fa8672804",
-    "README.md": "283faa6b6cf87cbd373155ec129a1b980795d8c77888cd306477deb49b19b4a3",
+    "README.md": "8781dcbcd30727975921c69df8a10f22e601d0a981185d1ecd8a503d5c897479",
     "index.html": "882717e603f357c108d359c5aa5d98beea1cd1fdfb51b38911a3bab6e8246a4e",
     "package.json": "8f215e79a6f07f8422543d346f0a90e6ea341acfb75125525ca42dc1b32de190",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -712,7 +712,7 @@
   },
   "relay-desk": {
     "EXPORT-REPORT.md": "4445962dce316ebc3b693145b09303f022018627ff640d658a98532e5fe2475b",
-    "README.md": "a1d5dd428c14a11f8f886b5d3e4456077ad98d9dd16132c4bdf76731132ad131",
+    "README.md": "fde8706ee851cbf0e18ad67a298b513918e3ab56ea9b4013b174d40e8ab0c7a5",
     "index.html": "89b24bb850d37c91c6640422d478694db7e53b34aefd9f6ef3d661983e26492c",
     "package.json": "3dc72e342ac6060798d6f43ecf1ce01b34091ed8366eea38b578b24106e70da2",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -735,7 +735,7 @@
   },
   "roster-desk": {
     "EXPORT-REPORT.md": "27610eca5492308d718b1aa4a99294ea910f16ef6e6baffa6c65cd3dc6a82bf3",
-    "README.md": "7ad0b8842f3544e96b54e2b015099bbc72c5fb9700fc95130a0f6f77004877a8",
+    "README.md": "45385ed284a530aa1fbfed50c2f245d98389363e4fb4b4affb3715b73b49df4b",
     "index.html": "e58065e172ca11fb5d5cc858bfb3c43e8ea4353797b411837ab31caa801a0cc3",
     "package.json": "f875f4ffbcf8ea7f00081737a722b4fe7bc9f95d051e69bdda27f4bdb15cc135",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -755,7 +755,7 @@
   },
   "script-desk": {
     "EXPORT-REPORT.md": "391de6b5060f7bfaba6c92cf4743d8feeaf653609f518653330fb582775c34b7",
-    "README.md": "ece531feef6dc16668dbf7dd1aad4614da32e812e8c9844d94154a60a7a74847",
+    "README.md": "131be948ef231389028d82f7b0689d7d67f890627ac925651c26ae81c2f87fdb",
     "index.html": "bb19d491ebf4e7083aaac390a672eba75aa05a6a72a3ba9ae391ad77be36ba6f",
     "package.json": "e88c59fcd223bdfc06d437a8fbf681a8181251b633e3f718505d098b18f8d223",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -780,7 +780,7 @@
   "search-desk": {
     ".env.example": "a03ff2c1fd5943a83393d994bea6341aa5db982fd510173da240a752f63118ef",
     "EXPORT-REPORT.md": "8de8f1af7ee0ad5835b379b07e0ac922d8c99b003cd00c7f8aad94cc5265e774",
-    "README.md": "6b6ac17c0308cb07a77b3525dbcdd7877fbe9adc0483fb356feae058581e7d13",
+    "README.md": "246acbe6619a50017ad9bb9f23bb3199bad4c1ddcf859f7ac75dce4c77a490e5",
     "index.html": "dae2389d3e8d210334336fb9a05f50d4f709faaa43a3df2565e64f83fe864a08",
     "package.json": "822fec98b1768f80f5c04e5bd4b2412d93fc2c8b55411e52ece46aa1eeb66182",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -803,7 +803,7 @@
   },
   "slot-desk": {
     "EXPORT-REPORT.md": "597a44c444866716d4c76032345e60f6e29cc643c01a0c442daab5f6c5c338cd",
-    "README.md": "ba8b9ec4c7c07ce31ea4b8690384d78a46ff334c90ac3c1873491e155d2851d3",
+    "README.md": "44173d716a2dfa1714e6c3a41d6a2d5492abeaf8437ab2f53cfc73f6d5252cc9",
     "index.html": "53cad988d2af4adb6f04a04811fdc70dbbad1eda5c14909fbeee31636641d3cd",
     "package.json": "33804ee6d6dcd63dfc88a342e9bb51ad62c9618550c0943a1e02dacb4bb457f6",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -824,7 +824,7 @@
   },
   "snap-desk": {
     "EXPORT-REPORT.md": "b05c9bb7a851f20d2edcd83ad58fea2227b4b50f050cd767041719567f17c976",
-    "README.md": "45b11d316d8bf73980d14e14b1853ad18bd0b53fd5c0da61e779e8100d2e01ee",
+    "README.md": "e9bcbb505279ae00acdbfc60f64bef71061c8e0cd43b6e01eb222dc7a34af4dc",
     "index.html": "c6d2896c12b1eed820a4f3a8bcb5bf328af7e278dcf6909691c9d92a447259ca",
     "package.json": "fd7c23595d83bf894c740d76ecb1d495b31ea6011f9a48a05e2243aa92a5054c",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -846,7 +846,7 @@
   },
   "socket-desk": {
     "EXPORT-REPORT.md": "0b07e6500d1d9a221847ba5c58608e49438d589f649330e4612ede741af7b8ae",
-    "README.md": "467dd5bcfae3ec1bca8f4adb56deb8359e015eec92903ccd258ed19b0957cb82",
+    "README.md": "0393faa6b131198517a6a4c020c6f7287627279f1d1def5df0aba88890cbac45",
     "index.html": "fcc658fb79e2da3af74b178ae384a49dbf10b0e2c436921914a52114bcc994a7",
     "package.json": "da6242397526e06b27d9064f3b24e895f9a85304c69b7c053140cab2f7a28022",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -866,7 +866,7 @@
   },
   "status-rail": {
     "EXPORT-REPORT.md": "61918f94fe885206722bfb30c2c8467c75e9c3ce673eaa6494184b0957450007",
-    "README.md": "dd35f497cd50ca1f842b2d974e0d75c2d3d3f2c482006f875dfa4ca11bbe7536",
+    "README.md": "06c69fabaae954ea9540311129362ca2c444ad2c354f546cdb72b77293b4da1a",
     "index.html": "1d4ab1f10142598d08ccb8d64e74c311194343e43f9dec28f7bf68fdcefce0ff",
     "package.json": "64ee314991610cb3a9747541a7acea07469e8e6ad59da1aabe7de2ddf734eb99",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -885,7 +885,7 @@
   },
   "stream-desk": {
     "EXPORT-REPORT.md": "d6db485ccfe13e0e35de16cf50330add860ed9cd0ea73c0feddafb3c6c0249bb",
-    "README.md": "19c24bda16c7bbbd695adec432f08385640982ca040801524481537af05b4348",
+    "README.md": "2a5e51ba8f6f173d0683e9e6b715f2eb849302ed8566ac5d47411d3d40548186",
     "index.html": "ce5aebadc0b32572703f64c9ea4587578b457c1775111672b1f6ab90771e3ef7",
     "package.json": "9e9e2b8c179656edcf140fa0773c9f3e1bf01e0c45f644bebd290e5873cdd58e",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -905,7 +905,7 @@
   },
   "tag-desk": {
     "EXPORT-REPORT.md": "64965d1614bf2e41c5851f6b4a01750fee03d86b223b92f1623053bd74c21c4a",
-    "README.md": "70df1b8a6462bd85359fb1ba7533f5fc9cbfae7d94511681018f66bd39ce3566",
+    "README.md": "e3e92304da03483560402b0e564dd99ccd8cd8886abdd6d7bdbcb105e6fa1e80",
     "index.html": "7b10361bfaea2731dfc5b650f854d7ff3f85300b324fdcabb1a3bd0b728e1ac2",
     "package.json": "9f359011b90e162db7a287757f38b203e7dd8cfb449abe11358b889735af19d3",
     "src/App.tsx": "61b44a3537880e534f3d5ba895f4a0c1fc11c4d14456717db1e7064512767019",
@@ -922,7 +922,7 @@
   },
   "task-desk": {
     "EXPORT-REPORT.md": "e22d17968b33aabcdb423f57171112c1a9a7802f4e9efcc207aa66d6d38a41b4",
-    "README.md": "bed27c3e25f8ac84727e84a081caf65d09972f7eb81ea1f026f9ab6138ec2d3f",
+    "README.md": "198941737f76373ab0598630cc170d6bd1e687f735fc79cf52aef9f5426ae8eb",
     "index.html": "8bceaddf8679f13011e7450eaf8aaa729e2883462107c2cdf1b2e3b53f7b30ef",
     "package.json": "1094b614a007a97b3571e975297926fd34dbf132a6e11a1cf3df6fc7087ebf4a",
     "src/App.tsx": "5ab68f10486f652d8978fddf17881a3dd1bef172ecea473edcf2a034ac8f05b0",
@@ -940,7 +940,7 @@
   },
   "tick-desk": {
     "EXPORT-REPORT.md": "65863a43a3d3eef569451e529a9633e450b6e84403a14bf334dd6121f249a6f7",
-    "README.md": "cb8c1ae9338288be48ef776c9b60006e8eb26f0aff011b416070b359e37b89f7",
+    "README.md": "124519844818be8ff7dec161a61853a97a518dabea7f0d59ba30df15456fa925",
     "index.html": "22ce0437982ae9023deac9209788a8988a3c50d28d628be6aa993daf627f330c",
     "package.json": "bfba180ca6f2e151ecc723ba2b110d817ae1f30d82d554a7bfe646c3112b4be0",
     "src/App.tsx": "af88894a00e52282a810e62e500c1bc283c43ad6dca28e983fa62b7207861d5b",
@@ -960,7 +960,7 @@
   },
   "ticket-desk": {
     "EXPORT-REPORT.md": "4e00babe8eaca2d60a064e5cf2af3be347e022161b3d02fb1df304bd544daece",
-    "README.md": "95d9fad9f123f2fe8bd40804f08da2d97880f49fd37d03aae33fdcd79cedfeb8",
+    "README.md": "ba24910c16c2fd95341ecca2662a7c23d85eeec735cd1f8bcee5232ba71e66d6",
     "index.html": "19f7da5973ff4fcbd4526b4987cfc352350cfa5e12fb628743c7faf24dad9023",
     "package.json": "1a8aad1de5181460f016f32399bd5a96da8332a0a63f315f3c1574a04e36b1c6",
     "src/App.tsx": "a951b691c4aa5f9851fa38894c29aa345cfd21f54e39ba841868c523ebfd11b6",
@@ -979,7 +979,7 @@
   },
   "token-desk": {
     "EXPORT-REPORT.md": "79f61e26718d8398d89897305086e009ede60cb2f3caaeee672b114a74dea1c4",
-    "README.md": "a48be2fe30d113b6fe9c9b8f8efd970d280a82fa711471a771193721ee423ef1",
+    "README.md": "a941254fc6eae160dd4b16262fb99e1f9150e4b96ab6ba5fec749b81972d898c",
     "index.html": "3ef88d0ff8c11f05720913a1c9a696028a2499119c3b8283359defba8bda640e",
     "package.json": "093aa92a047dc0d83c3f88abe51114e465ebb06138881523563e7eaf6df5e3ac",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -1000,7 +1000,7 @@
   },
   "utility-desk": {
     "EXPORT-REPORT.md": "1e9fb7ab67c6d94afa000f65a4507e6a7ce241028fe45579898f3caefcde6dd7",
-    "README.md": "0621dcfb04ac49d05e6aea77435dc3a9a6ec3a6b36d407276745d4d9aea8329a",
+    "README.md": "5ccb3eebbff2ea10f6f7d7163331da9d5d655d70fe1c39e6770a7369aa213ef2",
     "index.html": "d82bda08e21feb244086c2da6fb6079195f4ac597c211e52377591f406e63dda",
     "package.json": "a718d790be17c1f888a67784ef57dd9c8ac59cca021c9c2f85a7b17dd67194ac",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -1021,7 +1021,7 @@
   },
   "variable-dial": {
     "EXPORT-REPORT.md": "81d957f05c2fe41e5f1388f1f4ff479de9282c149516615d944d287d63a9dc33",
-    "README.md": "198be609b2ec2d97809682a782295864443d5b811cc4fdc10bc0be09bd8f7aa7",
+    "README.md": "ec92da0bb08b0b0a70b17825c6383a2380011e2aa465327ba2d5ad3b9a615465",
     "index.html": "884a32d2080ef615a1286b610469824f2450081049f59f63dbbd5311e190e4b6",
     "package.json": "4674292582288fd986a42d730d6ef07adc1bd224cfb8193ee756bbe18fb7b0d5",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
@@ -1039,7 +1039,7 @@
   },
   "wizard-desk": {
     "EXPORT-REPORT.md": "bfe71afab785b19b7cee7fe1a149b2d730f403845f2855418b8c5e8e180f206e",
-    "README.md": "6e19e8b30a4858d37408d7a688f8c0baaa744a4318cddae3f4cde676c5202428",
+    "README.md": "0fa469dbe44c153c458c5cb93bf52012036ca8a07596cd91da82e6c4f2b00f9e",
     "index.html": "f98d5b377d3b794f23bfde544fafc35ee76d2eac28d282689f690aa97d0751fc",
     "package.json": "44611abdbb56c36fd7b3947b327b5b65a984b159b0cc1fcf2d5c4ed6948c15c8",
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",

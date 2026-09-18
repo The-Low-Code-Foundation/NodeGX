@@ -1013,10 +1013,40 @@ describe('§F the ledger', () => {
     expect(ledger.$pickerCoverageFloorComment).toContain('117 after Tier 3.11 row 3 Subscribe To Changes');
   });
 
-  test('F2 no scheduled row remains: every deferred entry is a decision (deliberately out of scope), and there is at least one — the badge’s out-of-scope kind still has a population', () => {
+  /**
+   * 🔴 **This used to read "no scheduled row remains", and that claim was TRUE until 2026-09-18.**
+   *
+   * At the end of Tier 3.11 the phase had built everything it had committed to, so every deferral
+   * left in the ledger was a *decision* and the `scheduled` half of `exportBadgeOf` had no
+   * population at all. Richard reopened the category (P96/FED-002): *"In the end, to be honest,
+   * I'll likely convert all nodes to code export, so you can add them to the list of exportable
+   * ones to work on."* — `Parse Feed` and `Parse XML` are commitments, not decisions.
+   *
+   * So the gate keeps its teeth rather than losing them: the scheduled population is pinned to
+   * exactly those two, which still fails the day someone files a vague backlog row as `scheduled`
+   * (EXP-011 AC4's whole point), and every other deferral must still be a decision. The two
+   * assertions the old name carried — "at least one deferral" and "the out-of-scope kind has a
+   * population" — are unchanged.
+   */
+  test('F2 every deferred entry is either a decision or one of the two scheduled commitments, and both badge kinds have a population', () => {
     const deferred = ledger.entries.filter((e) => e.status === 'deferred');
     expect(deferred.length).toBeGreaterThan(0);
-    expect(deferred.filter((e) => !(e.exemption ?? '').startsWith('deliberately out of scope — ')).map((e) => e.typeName)).toEqual([]);
-    expect(deferred.every((e) => exportBadgeOf(e.typeName)?.kind === 'out-of-scope')).toBe(true);
+
+    const scheduled = deferred.filter((e) => (e.exemption ?? '').startsWith('scheduled — ')).map((e) => e.typeName);
+    expect(scheduled).toEqual(['net.noodl.ParseFeed', 'net.noodl.ParseXML']);
+
+    const decisions = deferred.filter((e) => (e.exemption ?? '').startsWith('deliberately out of scope — '));
+    expect(decisions.length).toBeGreaterThan(0);
+    // Neither phrase is a backlog line, and a deferral has to be one or the other.
+    expect(deferred.length).toBe(scheduled.length + decisions.length);
+    expect(decisions.every((e) => exportBadgeOf(e.typeName)?.kind === 'out-of-scope')).toBe(true);
+
+    // The `scheduled` branch of `exportBadgeOf` had never had a row to run on until now — this is
+    // the first thing in the repository that exercises it.
+    const badge = exportBadgeOf('net.noodl.ParseFeed');
+    expect(badge?.kind).toBe('scheduled');
+    expect(badge?.label).toBe('Not exportable yet');
+    expect(badge?.reason.startsWith('scheduled')).toBe(false); // the phrase is stripped, not repeated
+    expect(badge?.reason).toContain('EXP-011 Tier 2.8');
   });
 });

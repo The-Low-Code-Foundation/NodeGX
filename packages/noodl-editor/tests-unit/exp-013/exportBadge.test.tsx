@@ -39,7 +39,9 @@ const translated = ledger.entries.filter((e) => e.status === 'translated' && pla
 
 describe('the decision, over the real ledger', () => {
   test('the populations are not empty, so the rows below grade something', () => {
-    // 10 since EXP-011 §66 (session 90) translated the last scheduled row; every one left is a §50 out-of-scope ruling.
+    // 10 from EXP-011 §66 (session 90), which translated the last scheduled row and left only §50
+    // out-of-scope rulings — plus the two P96 reopened (`Parse Feed`, `Parse XML`), so "every one
+    // left is a decision" stopped being true on 2026-09-18. See the population row below.
     expect(deferred.length).toBeGreaterThanOrEqual(1);
     expect(translated.length).toBeGreaterThan(50);
   });
@@ -64,13 +66,23 @@ describe('the decision, over the real ledger', () => {
     expect(exportBadgeFor(typeName)).toBeUndefined();
   });
 
-  test('every deferred row is now a decision: the out-of-scope kind is what the ledger holds, and no scheduled row remains (EXP-011 §66 translated the last one)', () => {
-    // Both kinds existed here until session 90; `SubscribeToChanges` was the last `scheduled` row. The scheduled branch is
-    // graded below on a literal badge (the drawing rows) and on the reader's own phrase test in @nodegx/export, so this
-    // row pins the population rather than pretending a kind the ledger no longer carries.
-    const kinds = new Set(deferred.map((e) => exportBadgeFor(e.typeName)?.kind));
-    expect(kinds).toEqual(new Set(['out-of-scope']));
-    expect(deferred.length).toBeGreaterThan(0);
+  test('both kinds have a population again, and the scheduled one is exactly the two rows Richard reopened (P96, 2026-09-18)', () => {
+    // 🔴 This row read "no scheduled row remains" and was TRUE from session 90 until 2026-09-18:
+    // `SubscribeToChanges` was the last `scheduled` node and §66 translated it, leaving only §50
+    // decisions. Richard reopened the category — *"I'll likely convert all nodes to code export,
+    // so you can add them to the list of exportable ones to work on"* — so `Parse Feed` and
+    // `Parse XML` (P96/FED-001, in the picker since the same phase) are commitments, not decisions.
+    //
+    // The row still pins a population rather than asserting a kind exists somewhere: naming the
+    // two keeps EXP-011 AC4's teeth, because a vague backlog row filed as `scheduled` fails here
+    // the day it is added, which is the failure mode that phrase was invented to stop.
+    const scheduled = deferred.filter((e) => exportBadgeFor(e.typeName)?.kind === 'scheduled').map((e) => e.typeName);
+    expect(scheduled.sort()).toEqual(['net.noodl.ParseFeed', 'net.noodl.ParseXML']);
+
+    const outOfScope = deferred.filter((e) => exportBadgeFor(e.typeName)?.kind === 'out-of-scope');
+    expect(outOfScope.length).toBeGreaterThan(0);
+    // A deferred row is one or the other; nothing is left over and nothing is missing a badge.
+    expect(deferred.length).toBe(scheduled.length + outOfScope.length);
   });
 
   test('the nodes Richard named (EXP-011 §50) read as scheduled, and Sign In With as out of scope', () => {
