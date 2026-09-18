@@ -2,7 +2,14 @@
 
 **Scoped:** 2026-09-18, from Richard's ruling at the close of P92 CHR-010, and a code audit taken
 the same hour at `cline-dev` HEAD `884881cff`.
-**Status: 🟢 RULED — the phase has a design.** STY-001 delivered; Richard ruled its verdict AND the
+**Status: 🟡 BUILDING — the design is ruled and the surface now exists, unlooked-at.** After s5 the
+model, the export and the panel are all built; **what is left is measuring them.** Two things gate
+everything below: **STY-002 AC7** (`test:main` and `test:ci`, neither run since s4 — the box was
+held all of s5 by a peer's cold rebuild and then a 20-minute `test:ci`) and **STY-003 AC5/AC8** (the
+treatments read off a rendered element in both themes, and Richard's look). 🔴 **Nothing in this
+phase closes on a passing test.**
+
+**Original status: 🟢 RULED — the phase has a design.** STY-001 delivered; Richard ruled its verdict AND the
 redesign that came out of it on 2026-09-18 (*"Yep sold"*). 🔴 **Read
 [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) before anything else — it re-scopes
 §5 and supersedes R-C.** Nothing is built. **R1–R7 ALL RULED by Richard, 2026-09-18**
@@ -127,9 +134,9 @@ visible; **build from §8, not from this.**
 | id | task | state |
 |---|---|---|
 | [STY-001](./STY-001-WHAT-A-LOOK-IS-MADE-OF.md) | **The study and the verdict.** Audit in `STY-001-FINDINGS.md`, proposal in `STY-001-VERDICT.md`, ruled design in `STY-DESIGN-THE-LOOK-MODEL.md` | 🟢 **done** |
-| STY-002 | **The Look model** — one concept end to end; `Preset`/`Size` removed | ⬜ |
-| STY-003 | **The property panel** — the four rules and three states. The "clear AF" task | ⬜ |
-| STY-004 | **Export carries Looks** — scope first; blocking for anything that ships | ⬜ 🔴 |
+| [STY-002](./STY-002-THE-LOOK-MODEL.md) | **The Look model** — one concept end to end; `Preset`/`Size` removed | 🟡 **AC2/3/4 model + AC6 green (s4); AC5 and AC1's mechanism closed (s5)** — the `Preset`/`Size` rows and the size axis are deleted, and nothing writes `_variant`/`_size` any more. ⬜ **AC7 is the next session's first job**, and AC1's rename waits on the name |
+| [STY-003](./STY-003-THE-PROPERTY-PANEL.md) | **The property panel** — the four rules and three states. The "clear AF" task | 🟡 **built in s5, not yet looked at.** AC1–AC3, AC6 and AC7 are in the tree: every row says where its value came from, an override says what the Look wanted and offers a revert, the menu is design §4's three sections, and the `⋯` is visible. 🔴 **AC5 (read off the rendered element, both themes) and AC8 (Richard's WORTHY) are untouched and are the only things that close it** |
+| [STY-004](./STY-004-EXPORT-CARRIES-LOOKS.md) | **Export carries Looks** — scope first; blocking for anything that ships | 🟢 **Part A done (s4)** — a Look, a text style and a colour style all reach the emitted CSS and the report names each. Part B (one shared class per Look) is 1 session and not blocking |
 | STY-005 | **The Styles panel in the rail** — colours, text, Looks (R1, R3–R6 as ruled) | ⬜ |
 | STY-006 | **Where it's used** | ⬜ |
 | STY-007 | **The after picture** — both themes, Richard's WORTHY | ⬜ |
