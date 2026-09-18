@@ -376,7 +376,14 @@
   flex: 0 0 auto;
   height: 28px;
   padding: 0 10px;
-  background: var(--theme-color-notice-bg);
+  /* 🔴 OPAQUE BASE UNDER THE WASH, and the drive is what found it.
+     `--theme-color-notice-bg` is `rgba(…, 0.12)`, and this row sits inside `.Background`, whose
+     backdrop is the preview CHECKERBOARD. A 12% wash over a checkerboard is a striped strip: the
+     2026-09-18 shots show the checker squares straight through the amber in both themes, which no
+     geometry reading could have caught (every width measured clean). The surface colour goes
+     underneath as its own layer, the wash on top, both still tokens. */
+  background-color: var(--theme-color-bg-2);
+  background-image: linear-gradient(var(--theme-color-notice-bg), var(--theme-color-notice-bg));
   border-bottom: 1px solid var(--theme-color-bg-3);
   font-size: 11.5px;
   line-height: 1.2;

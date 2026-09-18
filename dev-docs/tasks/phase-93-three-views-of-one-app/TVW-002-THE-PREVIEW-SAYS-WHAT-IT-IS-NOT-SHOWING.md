@@ -198,3 +198,51 @@ nothing about it can be graded without a drive.
 **For Richard, with the other two questions:** in the detached preview, should the strip carry its
 doors, or say the sentence only? The detached window is deliberately close to "just the app", and
 two editor buttons on it is a different promise from a line of explanation.
+
+---
+
+## Driven — session 12 (2026-09-18)
+
+Shots and readings in `verdicts/TVW-002/2026-09-18/` (🔴 PNGs gitignored, `.gitignore:265`;
+`manifest.json` + `numbers.json` carry every measurement and every sentence). Fixture: a **copy** of
+`Prefab marketplace`, 165 components, 11 routed pages.
+
+✅ **Five shapes, five for five, verbatim against the prediction.** The sentences were written down
+*before* the editor was launched, from the pure modules run offline over the project file, and the
+running editor printed exactly those strings. That is the whole point of the pure split.
+
+✅ **AC3 HELD across 7 canvas switches** — `webview.src` and `[data-preview-mode]` identical
+before and after every one, and the canvas moved through the same `ComponentPanel.SwitchToComponent`
+event the panel emits.
+
+🔴 …and **the control is what makes that mean anything.** The first run reported AC3 HELD with
+`known-firing navigation: false` — it looked for the `Go to` door *after* the loop had ended on an
+`agree` component, so no door was on screen. Five HELD readings with nothing to tell them apart from
+a drive that cannot move the preview at all. Fixed, re-run: pressing **Go to Design System** moved
+the preview `/` → `/design-system` and the strip went to `agree`.
+
+✅ **AC1's round trip.** *Open on the Workbench* → mode `app`→`bench`, caption *"Workbench — _DSI
+Atoms on its own, not the app."*, and the app preview **kept its route** (R3). Scope chip →
+*App preview* → back to `app`, same `src`, the same strip returned identically.
+
+### 🔴 The defect the drive found, that no number could
+
+The strip's amber is `--theme-color-notice-bg`, which is `rgba(…, 0.12)` — and the strip sits inside
+`.Background`, whose backdrop is the preview **checkerboard**. The first shots show the checker
+squares straight through the strip, in **both themes**.
+
+Every geometry reading was clean: 28px tall, text 653/653 and 789/789, `scrollWidth === clientWidth`,
+no truncation anywhere. **A translucency defect has no width.** Fixed with an opaque
+`--theme-color-bg-2` base under the wash (both still tokens), and re-shot; the committed images are
+after the fix.
+
+### Still owed
+
+- **AC1's outline-when-agreeing** — the first instance highlighted and labelled in the preview when
+  the two surfaces agree. **Not built.** §2 puts it on the design-mode channel to the app client;
+  §5 warns it must not go on `modelUpdate`, which is broadcast.
+- **AC5** — see the section above: its premise is wrong and the fix is a build.
+- **AC6** — Richard's WORTHY ruling, with the two questions in the section above.
+- A **v2-format** project: the populations quoted throughout are measured on legacy `project.json`
+  files, which is what the offline probe can read. The editor path is the same model either way, but
+  that is reasoning, not a measurement.

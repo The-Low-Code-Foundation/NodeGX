@@ -133,7 +133,21 @@ async function main() {
     if (shots) await shot(client, path.join(shots, `tvw002-${slug(target)}.png`));
   }
 
-  // The known-firing signal: press the last strip's `Go to` door and watch the preview move.
+  // 🔴 The known-firing arm must run while a shape-1 strip is ON SCREEN. The first run of this
+  // script looked for the door after the loop had ended on an `agree` component, found none, and
+  // reported "no control" — an instrument fault that would have left five HELD readings with
+  // nothing to tell them apart from a drive that cannot move the preview at all. So the canvas goes
+  // back to the first target, which is the one chosen to produce shape 1.
+  await ev(`(() => {
+    const { ProjectModel } = window.__wreq('./src/editor/src/models/projectmodel.ts');
+    const { EventDispatcher } = window.__wreq('./src/shared/utils/EventDispatcher.ts');
+    const component = ProjectModel.instance.getComponentWithName(${JSON.stringify(targets[0])});
+    if (component) EventDispatcher.instance.notifyListeners('ComponentPanel.SwitchToComponent', { component, pushHistory: true });
+    return 'ok';
+  })()`);
+  await wait(600);
+
+  // The known-firing signal: press the strip's `Go to` door and watch the preview move.
   const door = await ev(`(() => {
     const b = document.querySelector('[data-test="preview-strip-goto"]');
     if (!b) return null;
