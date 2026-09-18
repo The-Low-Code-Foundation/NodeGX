@@ -177,3 +177,38 @@ real count** — including one for each ruling, so a later session cannot quietl
 ⚠️ **The band is a *sibling* of the rows it introduces, not their parent.** Both hang off the
 instance row, which is what lets one press fold an instance away — and what makes a
 parent-chain visibility check (not an immediate-parent one) load-bearing. Mutant 11.
+
+### 6.7 🔴 A defect in TVW-002's *closed* surface, found by building the note beside it (s14)
+
+§2's **note** must say the same words as TVW-002's strip. Building it meant asking whether the two
+walks agree — and they did not, because `pageReach` never followed a **repeater's template**.
+
+A `For Each` places its template through a **parameter**, not a child (this task's own §5 landmine).
+Measured over the corpus: **498 components are placed only as a `For Each` template**, and for
+**190 of them, in 56 projects, the repeater's own component is on a screen the app shows.** Every
+list row, table row and tab in this corpus is one of these. What the shipped strip said, in these
+exact words, run through the real modules:
+
+    Checkbox Item isn't on any page yet — it's only inside Multi Choice, which no page shows.
+
+…about a component drawn once per row of a list the person is looking at. After the fix, the same
+component on the same screen:
+
+    Checkbox Item is on Home. The preview is showing that screen.
+    Tab Bar Item isn't on Home. It's on Package Details, New, My Packages and 3 more.   [Go to Package Details]
+
+**Fixed in `pageReach.ts`**, because it blocked this task's note rather than because it was found:
+a note that contradicts the tree drawn directly beneath it is worse than no note. 4 new specs in
+`tests-unit/tvw-002/pageReach.test.ts`, 3 mutants, each red.
+
+⚠️ **The outline is deliberately NOT extended.** `firstRendered`'s paths are chains of
+component-instance ids and a template has no instance node of its own, so the only id to point at
+is the repeater's — and whether the highlighter resolves that is a question for the running app.
+TVW-002's own drive is where the last *"this path outlines nothing"* was found, at full price. The
+sentence is corrected; the outline stays `null` until something measures it.
+
+⚠️ **`renders` now means "the app places it on that screen"** for a repeated component. Whether a
+row exists depends on the **data** — an empty list draws none — and no static walk can know that.
+Saying *"it's on Home"* about an empty list is a far smaller error than telling someone their list
+item is on no page at all. **Owed to Richard: is a repeated component's sentence worth a word of
+its own** (*"Checkbox Item is on Home — once per item"*), or is the plain one right?

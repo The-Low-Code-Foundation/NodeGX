@@ -78,9 +78,72 @@ function corpus() {
     component('/Card', [node('g', 'Group')], ['g']),
     component('/Ghost', [node('g', 'Group')], ['g']),
     component('/Format price', [node('js', 'JavaScriptFunction')], []),
-    component('/Orphan', [node('g', 'Group')], ['g'])
+    component('/Orphan', [node('g', 'Group')], ['g']),
+    /**
+     * 🔴 A list item — placed by a **repeater**, through a parameter, and by nothing else.
+     *
+     * Added 2026-09-18 after TVW-004's census measured what this walk had been missing: **498
+     * components on this machine are placed only as a `For Each` template**, and for **190 of
+     * them in 56 projects the repeater's own component is on a screen the app shows**. The strip
+     * told every one of those people *"Row isn't on any page yet"* about a component drawn once
+     * per row of the list they were looking at.
+     */
+    component('/Row', [node('g', 'Group')], ['g']),
+    component('/DynamicRow', [node('g', 'Group')], ['g'])
   ]);
 }
+
+/** `/Pricing` gets a list: an explicit repeater, and a dynamic one that cannot be read. */
+function corpusWithRepeaters() {
+  const components = corpus();
+  components.set('/Pricing', {
+    name: '/Pricing',
+    roots: [
+      node('page', 'Page', {
+        children: [
+          node('grp', 'Group', { children: [node('card', '/Card')] }),
+          node('list', 'For Each', { parameters: { template: '/Row' } }),
+          // ⚠️ A repeater switched to `dynamic` KEEPS its old `template` — 20 of this machine's
+          // 66 dynamic repeaters do. `templateType` is what decides.
+          node('dyn', 'For Each', { parameters: { templateType: 'dynamic', templateScript: 'x', template: '/DynamicRow' } })
+        ]
+      })
+    ],
+    visualRootIds: ['page']
+  });
+  return components;
+}
+
+describe('TVW-002 — a component a repeater draws', () => {
+  it('🔴 counts an explicit template as on the screen — it is a list row a person is looking at', () => {
+    const pricing = reachOfScreen('/App', '/Pricing', corpusWithRepeaters());
+
+    expect(pricing.renders.has('/Row')).toBe(true);
+    expect(pricing.mounts.has('/Row')).toBe(true);
+    // The claim the old walk made instead, and the reason 190 components in 56 projects were told
+    // they were on no page at all.
+    expect(screensShowing('/Row', '/App', ['/Home', '/Pricing'], corpusWithRepeaters()).renders).toEqual(['/Pricing']);
+  });
+
+  it('says nothing about a repeater that picks its template at runtime', () => {
+    const pricing = reachOfScreen('/App', '/Pricing', corpusWithRepeaters());
+    expect(pricing.renders.has('/DynamicRow')).toBe(false);
+  });
+
+  it('is not on a screen whose repeater is somewhere else', () => {
+    const home = reachOfScreen('/App', '/Home', corpusWithRepeaters());
+    expect(home.renders.has('/Row')).toBe(false);
+  });
+
+  it('⚠️ records NO outline path for it — a template has no instance node to point at', () => {
+    // The sentence is corrected; the outline is not invented. `firstRendered`'s paths are chains
+    // of component-instance ids, and whether the highlighter resolves a repeater's own id is a
+    // question for the running app.
+    const pricing = reachOfScreen('/App', '/Pricing', corpusWithRepeaters());
+    expect(pricing.firstRendered.has('/Row')).toBe(false);
+    expect(pricing.firstRendered.get('/Card')).toEqual(['card', 'g']);
+  });
+});
 
 describe('TVW-002 AC1 — where on the screen it is', () => {
   /**

@@ -148,6 +148,24 @@ export interface PageReach {
 
 const ROUTER_TYPE = 'Router';
 
+/**
+ * 🔴 **A repeater places its template through a PARAMETER, and this walk used to miss it entirely.**
+ *
+ * Measured on this machine (2026-09-18, TVW-004's census): **498 components are placed only as a
+ * `For Each` template**, and for **190 of them in 56 projects the repeater's own component is on a
+ * screen the app shows**. For those the strip said, in these exact words:
+ *
+ *     Checkbox Item isn't on any page yet — it's only inside Multi Choice, which no page shows.
+ *
+ * …about a component drawn once per row of a list the person is looking at. Every list item, every
+ * table row, every tab in a tab bar in this corpus is one of these.
+ *
+ * ⚠️ **`templateType` decides, never the presence of `template`.** A repeater switched to
+ * `dynamic` chooses per item at runtime and cannot be read here — and **20 of this machine's 66
+ * dynamic repeaters still carry a stale `template`** from before they were switched.
+ */
+const FOR_EACH_TYPE = 'For Each';
+
 /** A screen is at most this many components deep before the walk gives up. */
 const MAX_DEPTH = 64;
 
@@ -230,6 +248,35 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
     // Children of a component instance are real: they are placed into the component's child-root
     // (`componentinstance.getChildRoot`), so they draw wherever it draws.
     for (const child of node.children ?? []) visitNode(child, rendered, depth);
+
+    if (typename === FOR_EACH_TYPE) visitRepeater(node, rendered, depth);
+  }
+
+  /**
+   * The component a repeater draws once per item — see {@link FOR_EACH_TYPE}.
+   *
+   * ⚠️ **Nothing is recorded in `firstRendered` for it, deliberately.** That map is what the
+   * preview *outlines*, and its paths are chains of component-instance ids; a template has no
+   * instance node of its own, so the only id to point at is the repeater's — and whether the
+   * highlighter can resolve that is a question for the running app, not for this walk. TVW-002's
+   * own drive is where the last "this path outlines nothing" was found, at full price
+   * ([[verify-the-consequence-not-just-the-mechanism]]). The sentence is corrected here; the
+   * outline for a repeated component stays `null` until something measures it.
+   *
+   * ⚠️ `rendered` is passed through unchanged, so the claim is *"the app places it on that
+   * screen"*. Whether a row exists depends on the **data** the repeater is given, which no static
+   * walk can know — an empty list draws none. Saying "it's on Home" about an empty list is a far
+   * smaller error than telling someone their list item is on no page at all.
+   */
+  function visitRepeater(node: ReachNode, rendered: boolean, depth: number) {
+    const templateType = node.parameters?.templateType;
+    if (templateType !== undefined && templateType !== 'explicit') return;
+
+    const template = node.parameters?.template;
+    if (typeof template !== 'string' || !template) return;
+    if (!components.has(template)) return;
+
+    enterComponent(template, rendered, depth + 1);
   }
 
   function visitRouter(node: ReachNode, rendered: boolean, depth: number) {
