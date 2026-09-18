@@ -19,6 +19,8 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { selectionStore } from '@noodl-models/selection/selectionStore';
 
 import { EventDispatcher } from '../../../../../shared/utils/EventDispatcher';
+import { requestBenchMount } from '../../VisualCanvas/benchRequest';
+import { usePreviewStrip } from '../../VisualCanvas/usePreviewStrip';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
 import { LayersTree } from './components/LayersTree';
@@ -83,6 +85,18 @@ export function ComponentsPanel() {
   const tabSubject = useMemo(() => tabSubjectFor(treeData, activeComponentName), [treeData, activeComponentName]);
   const tab: PanelTab = chosenTab ?? defaultTabFor(tabSubject);
   const layers = useLayersTree();
+
+  /**
+   * §2's **note** — when the canvas's component is not on the screen Layers is showing, the header
+   * carries TVW-002's sentence and its doors.
+   *
+   * 🔴 **The same hook, not the same words typed twice.** Every string here comes from
+   * `previewStripWords` through `usePreviewStrip`, so the note and the strip in the preview cannot
+   * drift; only the markup differs, because a note under a header is not a seam between two
+   * surfaces. Gated on the Layers tab: the hook walks every component of the project on each graph
+   * event, and the Components tab has no use for the answer.
+   */
+  const { strip, goToPage } = usePreviewStrip(layers.canvasComponent, tab === 'layers');
 
   /** ⌘⇧L, from the editor's keybinding registry — it opens this panel first, then flips. */
   useEffect(() => {
@@ -299,6 +313,41 @@ export function ComponentsPanel() {
             </span>
             <span className={css['LayersHeaderWhere']}>in the preview</span>
           </div>
+
+          {/* §2: the tree below still shows the screen — the note says where the thing you are
+              editing actually is, which is the teaching, not an error message. */}
+          {strip.tone === 'notice' && (
+            <div className={css['LayersNote']} data-test="layers-note" data-shape={strip.shape}>
+              <span className={css['LayersNoteText']}>
+                <strong>{strip.lead}</strong>
+                {strip.rest ? ' ' : ''}
+                <span>{strip.rest}</span>
+              </span>
+              {strip.doors.map((door) =>
+                door.kind === 'goto' ? (
+                  <button
+                    key={`goto:${door.page}`}
+                    type="button"
+                    className={css['LayersNoteDoor']}
+                    onClick={() => goToPage(door.page)}
+                    data-test="layers-note-goto"
+                  >
+                    {door.label}
+                  </button>
+                ) : (
+                  <button
+                    key="bench"
+                    type="button"
+                    className={css['LayersNoteDoor']}
+                    onClick={() => layers.canvasComponent && requestBenchMount(layers.canvasComponent)}
+                    data-test="layers-note-bench"
+                  >
+                    {door.label}
+                  </button>
+                )
+              )}
+            </div>
+          )}
 
           <div className={classNames(css['Tree'], css['LayersTree'])} data-test="layers-tree">
             <LayersTree
