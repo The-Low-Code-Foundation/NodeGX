@@ -2,8 +2,12 @@
   "label": "Game Kit",
   "description": "Six nodes for small games, no backend and no network: Sound (eight synthesised effects — correct, wrong, tick, win, lose, pop, type, heart — no audio files), Keep Storage (asks the browser to keep localStorage), Avatar (a face generated from a name via the bundled DiceBear library, five styles), Race Track (a winding SVG course with a planet and two rockets at graph-driven progress values), Keyboard Map (an on-screen AZERTY or QWERTY keyboard coloured by finger with the next key lit), and Answer Pad (an answer box with keys to tap — digits for maths, accents for typing — that opens no soft keyboard on a touch screen and reads digits by key code, so AZERTY needs no Shift). DiceBear core is MIT; pixel-art and thumbs are MIT, fun-emoji, big-smile and adventurer are CC BY 4.0 artwork.",
   "type": "module",
-  "tags": ["UI", "Utility"],
+  "tags": [
+    "UI",
+    "Utility"
+  ],
   "version": "1.0.0",
   "minEditorVersion": "0.1.0",
-  "runtimeVersion": "2.7.0"
+  "runtimeVersion": "2.7.0",
+  "icon": "icon.png"
 }
