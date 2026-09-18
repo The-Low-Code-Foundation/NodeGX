@@ -70,13 +70,25 @@ const readings = {};
   // ---- the instrument is armed before it measures -------------------------------------------
   // The renderer must be running the converted modules. If `popuplayer` still carries `fa-share`
   // the bundle is stale and every reading below is about the OLD build.
+  // 🔴 The stale check must read CODE, not prose. The first version tested
+  // `src.includes('fa-share')` and reported TRUE on a correctly-rebuilt dev bundle, because a dev
+  // build keeps comments and the CHR-010 comment in `indicateDropType` names `fa-share` to say what
+  // it replaced. A gate that reddens on the note describing the fix is the same failure the
+  // icon-font gate strips comments to avoid — found by P93's session re-running this drive.
   readings.bundleIsNew = await ev(`(() => {
     let m;
     window.webpackChunknoodl_editor.push([[Symbol()], {}, (r) => { m = r; }]);
     const key = Object.keys(m.m).find((k) => k.includes('views/popuplayer'));
     if (!key) return 'popuplayer module not found';
-    const src = String(m.m[key]);
-    return { hasOldFaShare: src.includes('fa-share'), hasNewIconHost: src.includes('iconHost') };
+    const src = String(m.m[key])
+      .replace(/\\/\\*[\\s\\S]*?\\*\\//g, ' ')
+      .replace(/(^|[^:'"\`])\\/\\/.*$/gm, '$1 ');
+    return {
+      // The new code's own symbol: present iff the converted module is the one running.
+      hasNewIconHost: src.includes('iconHost'),
+      // The OLD runtime construct, not the glyph name — the class string the old code built.
+      hasOldFaClassString: /popup-layer-drop-type-indicator\\s+fa/.test(src)
+    };
   })()`);
 
   // ---- AC2: does anything still ASK for Font Awesome? ----------------------------------------

@@ -96,9 +96,17 @@ time.** Their peer caught it, the second such correction in one session
 returns `[]` for **every** font and **every** stylesheet in this renderer, so it could not have
 reported a Font Awesome request had one existed. The absence only became evidence next to a signal
 that fires: `document.fonts` lists Bricolage, so it *would* have listed FontAwesome had the
-stylesheet still been linked ([[assert-an-absence-with-a-known-firing-signal-beside-it]]). The
-script still carries the dead arm — **fix it to use `document.fonts` + the link list before reusing
-it.**
+stylesheet still been linked ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+✅ **The script is fixed** — it reads `document.fonts` + the link list + a rule-text scan that
+reports how many rules it scanned, so "0 hits" can be told apart from "nothing was read".
+
+🔴 **A second fault in the same script, found by s33 re-running it: the stale-bundle arm read
+PROSE.** It tested `src.includes('fa-share')` against the `popuplayer` module and reported a
+correctly-rebuilt dev bundle as stale, because a dev build keeps comments and the CHR-010 comment in
+`indicateDropType` names `fa-share` to say what it replaced. Same shape as the icon-font gate's own
+comment-stripping rule — a gate that reddens on the note describing the fix. Now strips comments
+and keys on the old runtime construct (`popup-layer-drop-type-indicator fa`) rather than the glyph
+name, plus `iconHost` as the new code's own symbol.
 
 **AC1, the presence — the mechanism is verified, the surface list is not.** Graded on the glyph
 BOX, not the element count, on two panels in both themes:
@@ -113,7 +121,39 @@ Boxes land on `IconSize`'s ramp (12/14/16/20; one stray **18** exists and is not
 mine passes a size off the ramp). Both `Pages.tsx` conversions measured individually: the
 `Add new page` **+** and the row **⋯** each draw 14×14 with a real SVG, and both **recolour with the
 theme** — `rgb(221,228,236)`/`rgb(196,206,219)` dark → `rgb(74,86,99)`/`rgb(89,98,110)` light.
-Nothing is black in either theme, which is AC1's actual sentence. PNGs read, not just the numbers.
+PNGs read, not just the numbers.
+
+🔴 **I wrote "nothing is black in either theme, which is AC1's actual sentence" here, and s33 proved
+it false.** Two errors in one sentence, both worth keeping:
+
+1. **The population was two panels; the claim was the whole conversion.** AC1 names a proplist, a
+   variants editor and the icon picker — and I had said in the same breath that I could not reach
+   any of them. A sentence about "either theme" over a set that excludes three quarters of the
+   surfaces is not a weaker claim, it is a different one.
+2. **I answered a CONTRAST question with a colour-equality test.** I scanned the colour list for
+   literal black and found none. "Nothing stays black" means *nothing is unreadable against its own
+   ground*, which needs each glyph measured against the thing behind it — and this phase built the
+   instrument that does exactly that two sessions earlier (CHR-004's look gate). I did not point it
+   at the glyphs I had just changed. My own dark readout even carried `rgb(7,22,39)` in its colour
+   list, which I passed over.
+
+What it cost: the icon picker's magnifier rendered **black on the dark ground**, because
+`.search-icon { color: var(--theme-color-fg-default) }` (`style.css:727`) and core-ui's
+`.Root { color: inherit }` (`Icon.module.scss:58`) have the **same specificity**, and core-ui is
+injected later — so the conversion silently dropped the colour the Font Awesome `<i>` had inherited
+for free. ⚠️ **I had grepped `.search-icon` and concluded it had no rule at all**; I searched
+`editor/src/styles/` and the rule was in `assets/css/style.css`. A grep's population is what it
+searches ([[ugrep-silently-skips-a-source-file-as-binary]] in its other form).
+✅ Fixed in s33 with `variant={TextType.Default}` at both sites and the orphaned rule deleted.
+That fix is robust rather than a source-order accident: `&.is-variant-default` nests inside `.Root`,
+so it compiles to `.Root.is-variant-default` — specificity (0,2,0) against (0,1,0), which wins
+however the sheets are ordered. Verified by reading the compiled selector, not by re-driving.
+
+⇒ **The general rule this leaves:** converting a glyph from a font to an `<Icon>` moves it from
+`color`-inheriting TEXT to an element with its own `color` rule at `.Root`'s specificity. Any host
+rule that coloured the old `<i>` at a single class **loses**, silently, and the glyph falls back to
+whatever `inherit` reaches. Grep for a colour rule on the host class across **all** stylesheets
+before converting, and pass `variant` where one exists.
 
 ⬜ **Still owed on AC1:** it names *"a node with a `proplist`, a variants editor and the icon
 picker"*. None of those three was reached — `rocket-school` has no colour styles and no variants, so
@@ -123,6 +163,82 @@ the variant popout opens straight into its create-mode branch and never draws th
 **Those six conversions are argued statically, not seen.** Pick a project that has all three, or add
 the nodes with `NodeGraphNode.fromJSON` the way `CHR-009/2026-09-17/set/drive-set.js` does.
 And AC1 closes on **Richard's look**, which has not happened.
+
+## 8. The surfaces AC1 names (s33, 2026-09-18) — `verdicts/CHR-010/2026-09-18-surfaces/`
+
+Dev build at HEAD `382b716f` + `725a0b2b`, a **scratch copy** of `templates/rocket-school` in the
+session scratchpad (`git status templates/rocket-school` empty afterwards). s32 left three of AC1's
+named surfaces unreached because that project has no variants, no colour styles, no `Icon` node and
+no component with ports. **Every one of them is now reached by adding the nodes it needs** — a
+`JavaScriptFunction`, a `net.noodl.visual.icon`, a `Component Inputs`, a `Group` and a
+`DbCollection2`, placed with `NodeGraphNode.fromJSON` + `graph.addRoot` — and then driven through
+the real UI: a port typed into the proplist, a variant created in the popup, two ports added from
+the Ports panel's own `+ Port`, one dragged over the other.
+
+Armed first: the renderer's `ComponentPortsView` module carries `IconName` and no `fa fa-`, so the
+bundle under the camera is the converted one.
+
+| surface | reached by | drawn | empty | collapsed | box | dark → light |
+|---|---|---|---|---|---|---|
+| **proplist** (`Script Inputs`, pencil + trash + `+` + `<>`) | `JavaScriptFunction`, one entry named `speed` | **6** | 0 | 0 | 12×12 | `rgb(221,228,236)` → `rgb(74,86,99)` |
+| **variants editor** (`Create new variant` **+**, `Remove variant` **×**) | a variant created on the `Icon` node, popup reopened | **2** of 4 (2 hover-only) | 0 | 0 | 14×14 | `rgb(221,228,236)`/`rgb(238,242,246)` → `rgb(74,86,99)`/`rgb(46,57,69)` |
+| **icon picker** (the magnifier) | the `Icon` node's `Icon Source` field | **1** | 0 | 0 | 14×14 | see the defect below |
+| **Component Ports panel** (pencil, trash, `+ Port`, `+ Group`) | `Component Inputs` selected, ports `title` + `subtitle` added | **4** | 0 | 0 | 14×14 | `rgb(221,228,236)`/`rgb(196,206,219)` → `rgb(74,86,99)`/`rgb(89,98,110)` |
+| **drag overlay drop indicator** (`iconHost`) | a port row dragged over its neighbour | **1** | 0 | 0 | 14×14 | `rgb(24,33,43)` on the dragger's own pale ground |
+| **colour style picker** (`Create new color style` **+**) | a `Group`'s `Background Color` field | **1** | 0 | 0 | 14×14 | `rgb(221,228,236)` → `rgb(74,86,99)` |
+
+`faLeft` (`i.fa, .fa, [class*="fa-"]`) is **0** inside every one of those scopes. The drag overlay is
+the one that could not be argued from a number: its label and glyph share a line
+(`→ title` in `drag-overlay-move.png`), which is what the `inline-flex` host in §6 was for.
+
+🔴 **The drive found a defect, and it is AC1's own sentence.** The icon picker's magnifier rendered
+**`rgb(0,0,0)` — black — on the dark popout ground** (`icon-picker-dark.png`), about **1.8:1**
+against the header's `bg-4`. Cause, measured rather than guessed: an `<i class="fa fa-search
+search-icon">` took its colour from `style.css:727` `.search-icon { color:
+var(--theme-color-fg-default) }`, but a core-ui `<Icon UNSAFE_className="search-icon">` carries
+`.Root { color: inherit }` (`Icon.module.scss:58`) — **the same specificity, injected after that
+stylesheet, so `inherit` wins** and nothing up the popout chain sets a colour. A probe `<i
+class="search-icon">` appended beside the glyph computed the token (`rgb(74,86,99)`) while the glyph
+itself computed black, in the same eval, which is what made the cause certain.
+
+**Fixed** by asking for the token the house way — `variant={TextType.Default}` at both sites
+(`iconpicker.jsx`, `avatarpicker.tsx`, which had the identical line) — and deleting the rule, whose
+only two consumers those were. Re-driven on the rebuilt renderer: `rgb(221,228,236)` dark,
+`rgb(74,86,99)` light (**5.6:1** against the header), `icon-picker-fixed-{dark,light}.png`.
+⚠️ `avatarpicker`'s copy is the same one-line change but its surface was not reached — argued, not seen.
+
+⬜ **Still unseen:** `.queryeditor-caret-icon`. The visual query editor needs a `DbCollection2` with
+a **class**, and a project with no backend schema has none — the `Filter` row renders as a bare
+select and the editor never mounts. It is a CSS-only change (`padding-left: 15px` → `margin-right`)
+argued in §6.
+
+**Instrument corrections, all of which would have moved a reading:**
+
+- 🔴 **`drive-icons.js`'s `hasOldFaShare` arm reads TRUE on a dev build and means nothing.** The only
+  `fa-share` left in `popuplayer.ts` is inside the CHR-010 comment that documents its removal, and a
+  dev bundle keeps comments. The arm that decides "is this the new module?" was keyed on a string
+  its own changelog contains. Read `dropTypeIcons` / `classList.add('fa` instead — both were checked
+  here and say new / absent. Same shape as §6.5's gate lesson, one layer up.
+- 🔴 **`offsetParent` is `null` for essentially every element in this renderer** (they sit under
+  transformed ancestors), so "visible" filters written with it silently drop the whole surface. Use
+  the rect.
+- 🔴 **`document.querySelector('.sidebar-panel')` returns a hidden 0×16 shell before it returns the
+  panel a person is looking at** — this editor keeps every visited panel mounted. The first census of
+  the Ports panel read **0 drawn**, which is exactly what a surface whose glyphs all failed reads
+  like. `census.js` now reports the scope's own box so the two cannot be confused.
+- The panel scroller matters: a control at `y=1316` in a 784px viewport is not clickable, and
+  `scrollIntoView({behavior:'instant'})` + an `elementFromPoint` check is what makes the click land.
+
+🔴 **One thing found on the way, NOT this task's and NOT fixed:** creating a variant through the
+panel leaves the project **unable to save**. After `Create new variant`, `ProjectModel.instance
+.variants[0]` is a **plain object** with the serialised shape (`typename, name, parameters,
+stateParamaters, stateTransitions`), not a `VariantModel`, so every `doWriteProjectToDisk` throws
+`TypeError: v.toJSON is not a function` at `projectmodel.ts` `toJSON()` (`variants.map(v =>
+v.toJSON())`) — twice in `.logs/dev.log`. The model-level path is innocent: calling
+`ProjectModel.createNewVariant(...)` directly stored a real `VariantModel` in the same session.
+A lead, not a diagnosis: `services/ProjectStructure/projectLevel.ts:179` does
+`target.variants = slice.variants ?? []` on the styles slice. **Richard's call whether this becomes a
+task** (P75/P85 territory); it is recorded here because this drive is where it was measured.
 
 ## 6. What §2–§5 got wrong, re-derived at HEAD (s32, 2026-09-18)
 
