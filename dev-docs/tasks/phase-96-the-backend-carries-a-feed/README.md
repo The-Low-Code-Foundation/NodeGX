@@ -163,9 +163,19 @@ indexed `published desc` answer in **0.04 ms against a control's 8.92 ms**, with
    `packages/noodl-editor`). The two gates that catch a miss are
    `tests-unit/alpha-006/nodeDocs.test.ts` (every catalog node needs a generated docs page on disk)
    and `tests-unit/chr-007/widgetDispatch.test.ts` (the recorded port-class map must cover every
-   catalog type). **Then run `npm run test:main` before committing** — it is 498 suites in ~35
-   seconds and it is the only run that sees across packages. **FED-003 adds `Model Request`: this
-   is its checklist too.**
+   catalog type). **Then run `npm run test:main` before committing** — it is 500 suites in ~48
+   seconds and it is the only run that sees across the editor's packages. **FED-003 adds
+   `Model Request`: this is its checklist too.**
+
+   🔴 **And `test:main` is not the end of it: a new node type also owes `packages/noodl-mcp`,
+   which `test:main` does not run.** Measured at s2 (2026-09-18) on this branch: eight `noodl-mcp`
+   suites are red, and `tests/fld013ExportReach.test.ts` names FED-001's two types outright —
+   `net.noodl.ParseFeed` and `net.noodl.ParseXML` are unclassified against the export coverage
+   ledger (`packages/nodegx-export/coverage-ledger.json`), whose gate refuses an unclassified
+   type. So the fifth step of the checklist is **`npx jest` in `packages/noodl-mcp`**, and the
+   sixth is a ledger row for every type added. See the register's R4: that classification is a
+   **ruling, not a copy-paste** — `Parse CSV`'s row is Richard's own 2026-09-03 ruling, and
+   extending it to feed and XML parsing is his call, not a session's.
 6. **[PHASE-EXECUTION.md](../../guidelines/PHASE-EXECUTION.md) applies.** A defect found while
    driving is filed, with an owner, and the next session builds the next task unless the defect
    carries `BLOCKS <AC>`.
