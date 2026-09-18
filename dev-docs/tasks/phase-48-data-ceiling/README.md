@@ -4,6 +4,9 @@
 **Status:** 📋 Specced, not started — 7 tasks. Post-alpha.
 **Origin:** [NODEGX-VS-CODE-A-REAL-APP.md](../../reviews/NODEGX-VS-CODE-A-REAL-APP.md) §4.3, and the
 follow-up probe that corrected it.
+🔴 **Read [phase 97 — The way out is the reason to stay](../phase-97-the-way-out-is-the-reason-to-stay/README.md) §10
+before starting any `DAT` task.** Six of the seven tasks below interact with it, DAT-005 is
+superseded by it, and neither phase is scheduled — so whichever moves first constrains the other.
 
 ## The finding that reframes the phase
 
@@ -123,10 +126,10 @@ DAT-003 still ships with an adversarial test suite as a gate, not as a follow-up
 | ID | Title | Est. | Notes |
 |---|---|---|---|
 | **DAT-001** | Vector search | 1 wk | `sqlite-vec` as an optional loaded extension; an Embed node (pluggable provider) and a `nearestTo` filter operator. ⚠️ **A native extension costs the zero-ABI-matrix property WF-004 explicitly chose `node:sqlite` to get.** So: optional, per-platform prebuilt, and a backend without it reports the capability as absent rather than failing a query. Closes RAG. |
-| **DAT-002** | Query Views | **3–4 wks** | Definition format, registration, typed column introspection, parameter binding, editor authoring surface, catalog exposure. The centrepiece. |
+| **DAT-002** | Query Views | **3–4 wks** | Definition format, registration, typed column introspection, parameter binding, editor authoring surface, catalog exposure. The centrepiece. ⚠️ **Collides with [phase 97](../phase-97-the-way-out-is-the-reason-to-stay/README.md), ruling R1** — its premise is hand-written SQLite SQL, and phase 97 makes "the app moves to Postgres" a published promise. Re-spec bridge-aware, or defer behind it. Free to decide today; a broken promise later. |
 | **DAT-003** | The view as the NL→SQL boundary | 1 wk | Resolution-level enforcement + adversarial tests as the gate. Depends on DAT-002. ⚠️ Delivers the **privilege** boundary only — the availability boundary needs DAT-005 or an out-of-process worker; see above. |
 | **DAT-004** | Aggregation, revisited | 4 d | CWF-004 ruled aggregation out of *workflow steps* for a good reason (a workflow references and reshapes; it does not compute). Views make the same capability available where it belongs — at rest, in the data layer — without reopening that decision. This task is mostly writing down why those two facts are consistent. |
-| **DAT-005** | The Postgres adapter | 3 wks | For **scale**, not capability. The contract already carries translators for Directus, PostgREST, PocketBase and Parse, so the seam is proven. Views map to real views; DAT-003's boundary can additionally use a real role, belt and braces. |
+| **DAT-005** | The Postgres adapter | 3 wks | ➡️ **Superseded by [phase 97](../phase-97-the-way-out-is-the-reason-to-stay/README.md)**, which measured the seam at HEAD `df60eb6f5` (8 modules touch the adapter, 8 methods, 20 raw-SQL sites, 7 sync calls) and puts the interface, conformance suite and migrator in front of it. Original note: For **scale**, not capability. The contract already carries translators for Directus, PostgREST, PocketBase and Parse, so the seam is proven. Views map to real views; DAT-003's boundary can additionally use a real role, belt and braces. |
 | **DAT-006** | Schema changes as reviewable artifacts | **3 wks** | Today schema evolves through an admin surface with no reviewable record. The reference app has **83** Alembic revisions. A 54-collection project needs an ordered, diffable, replayable change log with data backfills — otherwise "what shape is production" is unanswerable. |
 | **DAT-007** | Capability honesty | 3 d | Every one of the above is optional or backend-dependent. `capabilities.ts` already exists as the place a client asks what a backend can do; each new capability declares itself there, and the editor greys rather than lies. |
 
