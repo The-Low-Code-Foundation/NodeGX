@@ -1,10 +1,11 @@
 # STY-002 — The Look model
 
 **Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟡 **the model is built and gated
-(s4)** — AC2, AC3 and AC4's model half are green in `tests-unit/sty-002/`, and the reload defect that
-made a Look unsavable is fixed. **AC1, AC5, AC6 and AC7 are open**, and AC5 waits on
-[STY-003](./STY-003-THE-PROPERTY-PANEL.md)'s Look row so the panel is never left with no way to
-choose a shipped look.
+(s4); the second styling mechanism is now gone (s5).** AC2, AC3 and AC4's model half are green in
+`tests-unit/sty-002/`, the reload defect that made a Look unsavable is fixed, and **AC5 is closed in
+the tree** — the `Preset` and `Size` rows are deleted along with the only two writers of
+`_variant`/`_size` in the product. **AC1 is half closed** (the mechanism; the naming waits on the
+name), and **AC7 is open and is the thing to run next**.
 **Design:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §1, §5 — **ruled by
 Richard, 2026-09-18** (*"Yep sold"*). This task file adds the measurements the design did not have;
 it re-argues none of its decisions.
@@ -51,13 +52,13 @@ does (`v2?.textStyles ?? legacy?.text`) and is the worked example.
 
 | # | criterion | state |
 |---|---|---|
-| **AC1** | **One word, one meaning.** `_variant`/`_size` parameters and the `ElementConfig` "variant"/"size" vocabulary are gone from the product. Nothing named "variant" remains except the one concept, under whatever name AC6 settles | ⬜ |
+| **AC1** | **One word, one meaning.** `_variant`/`_size` parameters and the `ElementConfig` "variant"/"size" vocabulary are gone from the product. Nothing named "variant" remains except the one concept, under whatever name AC6 settles | 🟡 **the mechanism half is closed (s5)** — see §3c. `_variant` and `_size` are **no longer written anywhere in the product**, and the size axis is deleted outright. ⬜ Left: **the rename**, which is deliberately not done — `VariantModel`, `applyVariant` and the `variant` input port still carry the word, and renaming them now would pick the name before Richard does (design §9 leaves it open; AC6 is where it lands). Doing it speculatively would be a second large rename if he chooses differently |
 | **AC2** | **The shipped Look library exists and is ordinary.** The **22** (not 23 — §1) ElementConfig variants are available as Looks; choosing one **copies it into the project** as a Look the person owns, identical in every respect to one they made, and it does not change under them on an update (design §1.1, rule 4) | 🟡 **model green (s4)** — `shippedLook`/`shippedLooksFor` build a self-contained Look (config `defaults` **plus** the variant, because a node wearing a Look may carry nothing of its own) that **never aliases the shipped config**, so editing your copy cannot change the library. 14 assertions. ⬜ Left: the editor action that puts the copy in the project, which is STY-003's menu row |
 | **AC3** | 🔴 **The library's state data is carried, not discarded.** The 8 configs with `StateStyles` land in `VariantModel.stateParameters`. **Carried, deliberately not rendered** — see §4 | ✅ **green (s4), and it needed a translation rather than a copy** (§1): `active`→`pressed`, `focus`→`focused`, and the two that cannot land (`placeholder` anywhere, `disabled` on a `Text`) are **reported**, with the control that shows a naive copy would have passed. 6 assertions, and the 8 is asserted as 8 |
 | **AC4** | **"Save this node's styles as a new Look"** creates a Look from a node's current parameters and puts the node in it. This is the entry point the 90-project scan says nobody has ever found (4 Looks across 90 projects, every one a test artefact) | 🟡 **model green (s4)** — `lookFromNode` copies a node's styles minus the preset markers and without aliasing it, pinned against **the shape a real project already holds** (`members area Richard test`'s Look carries `"_variant": "heading-1"`). ⬜ Left: the menu row and wiring the node into the new Look |
-| **AC5** | **`Preset` and `Size` rows are removed from the property panel**, and a project carrying `_variant`/`_size` markers still opens and renders exactly as before — they become inert parameters, not errors | ⬜ |
+| **AC5** | **`Preset` and `Size` rows are removed from the property panel**, and a project carrying `_variant`/`_size` markers still opens and renders exactly as before — they become inert parameters, not errors | 🟡 **removed (s5); the "still opens" half is AC7's drive.** `renderElementStyleSection`, `onElementVariantChange` and `onElementSizeChange` are gone from `propertyeditor.ts`. The markers are now read by **nothing** — the census's 21 markers in 12 real projects become parameters no port matches and the runtime already drops, which is what makes them inert rather than broken. ⚠️ **That last clause is reasoned, not driven**, and a dozen real projects carry it, so it is AC7's first arm |
 | **AC6** | **`get_style_vocabulary` reports the project's Looks plus the shipped library**, and no longer teaches the sentence at `StyleVocabulary.ts:18-22`, which is false for the surviving concept | ✅ **green (s4)** — the false sentence is replaced by what the two things actually do, `projectLooks` is reported (read from the sidecar, **both** spellings of the state key), the block is `SHIPPED LOOKS` with no sizes half, and `styleLint`'s pointer to a heading that no longer exists is fixed. 3 new specs. **Three budget gates held rather than being raised** (§3b) |
-| **AC7** | **Nothing that exists breaks.** All seven templates and the export corpus render and export unchanged (design §7). 🔴 Graded with the counts, not with a claim — STY-004 §4a is the worked example of separating an inherited red from a caused one | ⬜ |
+| **AC7** | **Nothing that exists breaks.** All seven templates and the export corpus render and export unchanged (design §7). 🔴 Graded with the counts, not with a claim — STY-004 §4a is the worked example of separating an inherited red from a caused one | ⬜ **and it is now the first job.** s5 changed what a newly created node carries and removed a panel section; `tsc` on both configs is clean and `tests-unit/sty-003` is 30 green, but **`test:main` and `test:ci` have not been run** — the box was at load 24.8 under a peer's cold webpack rebuild all session and a second heavy job is against the standing rule. **Run these before building anything further**, and one of the arms is opening a real project that carries `_variant` (the census names twelve; `members area Richard test` has 4) |
 
 ## 3a. What s4 built, and the defect it had to fix first
 
@@ -143,3 +144,30 @@ and the **Layers drop path is a second caller** to check alongside the canvas on
 - The rail panel — [STY-005](./STY-005). Design §8: it depends on this task existing.
 - Migrating existing projects' inline values into Looks. Design §7: *"a later offer, not a chore,
   and not part of this phase."*
+
+
+## 3c. s5 — the second mechanism, removed
+
+**Commit `6e822e45c`.** The `Preset` / `Size` picker is the thing design rule 1 was written about,
+and it is gone rather than restyled: *"one row decides it"* is a claim about there being no second
+control, so leaving a tidier version of the second control would have failed the rule while looking
+like it passed.
+
+| removed | what it was | what replaced it |
+|---|---|---|
+| `renderElementStyleSection`, `onElementVariantChange`, `onElementSizeChange` | the panel's `Preset` and `Size` rows, and **the only two writers of `_variant`/`_size` anywhere in the product** — counted across `packages/*/src` before removal, not assumed | nothing. The Look row is the one row |
+| `ElementStyleSection` (noodl-core-ui) and its `Host` | the picker itself | 🔴 **the host survives as `StyleSuggestionHost`**, because it was the **sole mount point of `SuggestionBanner` in the editor**. Deleting the file with the picker would have taken a live token-suggestion feature out alongside a retired preset one and nothing in the tree would have said so |
+| `applySize`, `getSizeNames`, `ButtonConfig.sizes`, `SizePresets` | the size axis | nothing. `_size` is **0 uses across ~105 real projects**, so there was nothing to migrate — and a second axis cannot survive rule 1 whatever its usage had been |
+| the `_variant` stamp in `applyDefaults` / `applyVariant` | a marker written onto every Button, Text, Checkbox and TextInput created on canvas | nothing. **The styles are still stamped** — a new Button looks identical — and they are the node's **own**, which is the model's other legal state |
+
+🔴 **The registry tests pin BOTH halves of that last row, and the pairing is the point.** A test
+asserting only `_variant` is `undefined` passes just as well against a function that had stopped
+stamping anything at all ([[a-rule-reading-zero-in-both-arms-grades-nothing]]), so each case asserts
+the styles are still exactly what they were **and** the marker is absent, plus one case that the
+node is not empty — so the two absences cannot be vacuous.
+
+⚠️ **What AC1 deliberately did NOT do: the rename.** `VariantModel`, `applyVariant`, `variantName`
+and the `variant` input port still carry the word. The name is not ruled (design §9), and renaming
+a model, a port and forty call sites to "Look" before Richard picks it would have to be done twice
+if he picks something else. The *collision* AC1 is really about — two storages sharing one word —
+is what s5 removed: there is now only one of them.

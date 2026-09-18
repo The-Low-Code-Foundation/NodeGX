@@ -1493,6 +1493,28 @@ export class ProjectModel extends Model {
     return isUsed;
   }
 
+  /**
+   * P94 STY-003 — how many nodes wear this Look, for the panel's `Worn by 26 buttons`.
+   *
+   * 🔴 **The callback must not return a truthy value.** `forEachNode` treats one as "stop
+   * walking" ([[foreachnode-stops-on-a-truthy-return]]), so a body written as
+   * `n.variant === variant && count++` would abort the walk at the first wearer and report 1 for
+   * every Look that has any. That is also why {@link isVariantUsed} beside it sets a flag instead
+   * of returning — the shape is deliberate, not a style.
+   *
+   * ⚠️ Identity, not name: two Looks of different node types may share a name, and a wearer is a
+   * node holding *this* `VariantModel`.
+   */
+  countVariantWearers(variant): number {
+    let count = 0;
+    this.forEachComponent((c) => {
+      c.forEachNode((n) => {
+        if (n.variant === variant) count++;
+      });
+    });
+    return count;
+  }
+
   addVariant(variant, args?: TSFixme) {
     const _v = this.variants.find((v) => v.name === variant.name && v.typename === variant.typename);
     if (_v !== undefined) return false; // Variant already exists

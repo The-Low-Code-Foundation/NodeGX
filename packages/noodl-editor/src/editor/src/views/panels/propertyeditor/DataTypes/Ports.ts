@@ -575,6 +575,21 @@ export class Ports extends View {
   }
 
   /**
+   * P94 STY-003 rule 2 — the Look a group's rows draw from, or nothing.
+   *
+   * 🔴 **The union of linked *and* overridden**, which is what `styledFieldNames` is built on: a
+   * group whose every row is overridden is still a group the Look has something to say about, and
+   * dropping its heading would take the name away from exactly the rows that most need it.
+   */
+  private groupLookSource(views: TSFixme[]): string | undefined {
+    for (const view of views || []) {
+      const look = this.rowLook(view && view.name);
+      if (look) return look.lookName;
+    }
+    return undefined;
+  }
+
+  /**
    * P94 STY-003 — what this row says about the Look, or nothing.
    *
    * 🔴 **The decision is `readField`'s, on ownership, and is not re-made here.** A field that owns
@@ -948,7 +963,11 @@ export class Ports extends View {
       // cannot become a new hiding place for FB-018's confusion.
       activeCount: this.countActiveInGroup(g),
       rows: this.renderParams(g.views, groupGates),
-      gate: this.groupGateLine(groupGates.get(g.name))
+      gate: this.groupGateLine(groupGates.get(g.name)),
+      // P94 STY-003 rule 2 — the source, named once per group (design §3.1: "so the per-field
+      // labels do not have to shout"). Only on groups that actually hold a row the Look speaks
+      // for, so a node's unrelated sections do not all grow a Look's name.
+      lookSource: this.groupLookSource(g.views)
     });
 
     const notice = this.schemaNotice();

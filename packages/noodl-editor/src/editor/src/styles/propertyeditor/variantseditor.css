@@ -12,7 +12,21 @@
      "separate bars" look the rows replaced. */
   position: relative;
   display: flex;
-  align-items: center;
+  /* P94 STY-003: a column, because the row now has a second line under it — `Worn by 26 nodes`.
+     It was `align-items: center` on a single child, so the row's own centring is unchanged; the
+     inner `.variants-section` still lays itself out as a flex row and CHR-009's row shape is
+     untouched. `stretch` rather than `center` so the field keeps the full panel width. */
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* P94 STY-003 §3.1 — what a change to this row costs. Indented to the field column and quiet:
+   it is a consequence, not a control. */
+.variants-wearer-line {
+  padding: 0 10px 6px 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
 }
 
 .variants-section {

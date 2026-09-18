@@ -1004,3 +1004,85 @@
 .property-port-gate-target:focus-visible {
   outline: 2px solid var(--theme-color-primary);
 }
+
+/* ── P94 STY-003 — where a value came from (design §2 rules 2 and 3) ──────────────────────────
+ *
+ * 🔴 THE COLOURS ARE EXISTING SEMANTIC TOKENS, NOT NEW ONES, and design §3.3 asked for exactly
+ * that check before committing. The mockup used purple for linked and amber for overridden and
+ * left both unruled. Amber is kept — it IS `--theme-color-fg-notice`, the editor's "caution, look
+ * here" that deliberately does not mean "error", which is the right weight for an override: a
+ * legitimate act the panel wants seen, not a fault. Purple has no token at all, so linked takes
+ * `--theme-color-fg-accent`, the azure the editor already uses for text that means "this belongs
+ * to something bigger". Minting a purple here would have started a second palette beside the one
+ * `colors.css` documents ([[a-second-copy-of-a-palette-drifts-silently]]).
+ *
+ * Both tokens are redefined under `:root[data-theme='light']`, so light and dark are carried by
+ * the token layer rather than by a second rule here — and both are FG tokens, which `colors.css`
+ * states are chosen to clear 4.5:1 on bg-0..bg-4. ⚠️ Still to be READ off the rendered element in
+ * a running editor in both themes (AC5) — a token's documented contrast is a fact about the token,
+ * not a reading of this row ([[a-ring-must-be-read-on-the-element-a-person-sees]]).
+ *
+ * An inset shadow rather than a border: `.property-panel-row` carries no box rule today, and a
+ * border would move every control 2px and change a layout CHR-009 closed on Richard's look. */
+.property-panel-row[data-look-treatment] {
+  position: relative;
+}
+
+.property-panel-row[data-look-treatment='linked'] {
+  box-shadow: inset 2px 0 0 0 var(--theme-color-fg-accent);
+}
+
+.property-panel-row[data-look-treatment='overridden'] {
+  box-shadow: inset 2px 0 0 0 var(--theme-color-fg-notice);
+}
+
+/* Rule 3 — "loud and reversible". The sentence says what the Look wanted; the button puts the
+   field back under it. Sits below the control, as the gate and capability reasons do, so the
+   three kinds of thing a row can say about itself read as one family. */
+.property-look-override {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 5px 12px;
+  color: var(--theme-color-fg-notice);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.property-look-override > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.property-look-revert {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: 3px;
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.property-look-revert:hover {
+  border-color: var(--theme-color-border-hover);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* Rule 2's naming half — `STYLE — from Primary Button`, once per group. A treatment can make a
+   row look different; only this can say which Look it came from. */
+.property-group-look-source {
+  margin-left: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--theme-color-fg-accent);
+  font-weight: var(--font-weight-regular);
+  text-transform: none;
+  letter-spacing: 0;
+}

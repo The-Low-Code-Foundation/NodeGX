@@ -1,3 +1,17 @@
+/**
+ * P94 STY-003 — the Look row (design §3.1, §3.2).
+ *
+ * 🔴 **One row decides it** (rule 1). This used to be one of two controls that set a node's
+ * styles: this row, and the `Preset` / `Size` picker below it, which stamped an `ElementConfig`
+ * variant's parameters in place and created nothing. Both were called "variant" and nothing drew a
+ * line between them — the stylesheet next door still carries the note about it. The other one is
+ * gone (STY-002 AC5), so this is now the only control that does this.
+ *
+ * ⚠️ **"Look" is the working name**, from the design Richard ruled; §9 leaves the final name open
+ * and STY-002 AC6 is where a different one would land. It is used here rather than "Variant"
+ * because the word `variant` names two different things in this codebase and the confusion is what
+ * the phase exists to remove.
+ */
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
@@ -84,24 +98,35 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
     let content;
 
     if (this.state.variant === undefined || this.state.variant.name === undefined) {
-      //No variant
-      // CHR-009 §2: a row in the panel's label column — `Variant`, then a field at the control
-      // height — instead of a 50px bar reading "Add style variant" with a FontAwesome plus.
+      // No Look — design §3.2. 🔴 The wording is the point: "Add style variant" described an
+      // action and left the current state unsaid, so a node with no Look and a node whose Look
+      // had been removed read identically to one that had simply not been got to yet. "None —
+      // styles are its own" is the OTHER legal state of the model, stated.
       content = (
         <div className="variants-section panel-head-row">
-          <span className="panel-head-row-label">Variant</span>
-          <button type="button" className="panel-head-row-field" onClick={this.onPickVariant.bind(this)}>
-            <span className="panel-head-row-value is-placeholder">Add style variant</span>
-            <Icon icon={IconName.Plus} UNSAFE_className="panel-head-row-glyph" />
+          <span className="panel-head-row-label">Look</span>
+          <button
+            type="button"
+            className="panel-head-row-field"
+            data-test="look-row-field"
+            onClick={this.onPickVariant.bind(this)}
+          >
+            <span className="panel-head-row-value is-placeholder">None — styles are its own</span>
+            <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
           </button>
         </div>
       );
     } else if (this.state.variant !== undefined && this.state.variant.name !== undefined && !this.state.editMode) {
-      //Variant
+      // Wearing a Look — design §3.1.
       content = (
         <div className="variants-section panel-head-row">
-          <span className="panel-head-row-label">Variant</span>
-          <button type="button" className="panel-head-row-field" onClick={this.onPickVariant.bind(this)}>
+          <span className="panel-head-row-label">Look</span>
+          <button
+            type="button"
+            className="panel-head-row-field"
+            data-test="look-row-field"
+            onClick={this.onPickVariant.bind(this)}
+          >
             <span className="panel-head-row-value">{this.state.variant.name}</span>
             <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
           </button>
@@ -137,6 +162,34 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
         }}
       >
         {content}
+        {this.renderWearerLine()}
+      </div>
+    );
+  }
+
+  /**
+   * P94 STY-003 §3.1 — `Worn by 26 buttons`.
+   *
+   * 🔴 **The reason this line is worth its pixels is that it is the only thing on the panel that
+   * says a change here leaves this node.** Rule 1 makes the Look the single place styles are
+   * decided; the consequence — that deciding here moves 26 other nodes — is invisible without it,
+   * and a person who cannot see it will not trust the row.
+   *
+   * ⚠️ Counted on every render rather than cached: the walk is `isVariantUsed`'s, which the
+   * delete-confirm modal already runs on the same surface, and a stale count here would be worse
+   * than none at all. Drawn only while wearing a Look, and never as `Worn by 0` — a Look the
+   * selected node wears is worn at least once, so a 0 would mean the count is wrong.
+   */
+  renderWearerLine() {
+    const variant = this.state.variant;
+    if (!variant || variant.name === undefined || this.state.editMode) return null;
+
+    const wearers = ProjectModel.instance?.countVariantWearers(variant) ?? 0;
+    if (wearers < 1) return null;
+
+    return (
+      <div className="variants-wearer-line" data-test="look-wearer-count">
+        {wearers === 1 ? 'Worn by this node only' : `Worn by ${wearers} nodes`}
       </div>
     );
   }

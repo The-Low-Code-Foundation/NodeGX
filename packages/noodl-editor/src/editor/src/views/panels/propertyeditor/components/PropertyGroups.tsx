@@ -24,6 +24,15 @@ export interface PropertyGroupModel {
    * `model/groupGate.ts` for when a group gets one.
    */
   gate?: GroupGateLineProps;
+  /**
+   * P94 STY-003 rule 2 — the Look these rows draw from, named once on the heading.
+   *
+   * 🔴 **This is what stops rule 2 from being satisfied by a colour alone.** *"Every style field
+   * states where its value came from"* is a naming requirement; a treatment can make a row look
+   * different but cannot say `Primary Button`. Design §3.1 puts the name here on purpose — once,
+   * above the rows — rather than repeating it down the column.
+   */
+  lookSource?: string;
 }
 
 export interface GroupGateLineProps {
@@ -85,12 +94,15 @@ export function GroupHeading({
   name,
   isExpanded,
   activeCount,
+  lookSource,
   onToggle,
   isFooter = false
 }: {
   name: string;
   isExpanded: boolean;
   activeCount?: number;
+  /** P94 STY-003 — `STYLE — from Primary Button`. Absent on every group with no Look to name. */
+  lookSource?: string;
   onToggle?: (isExpanded: boolean) => void;
   /**
    * CHR-009 §2 (Richard, s20: "match the mockup") — `Advanced CSS` is the panel's footer row, so its count
@@ -115,6 +127,14 @@ export function GroupHeading({
         </svg>
       </span>
       <span className="property-group-name">{name}</span>
+      {/* P94 STY-003 rule 2. Its own element rather than part of the name, so the heading a
+          person reads and the group's identity stay two different strings — `onToggleGroup`,
+          `isGroupExpanded` and the persisted preference are all keyed by `name`. */}
+      {lookSource && (
+        <span className="property-group-look-source" data-test="group-look-source">
+          {`— from ${lookSource}`}
+        </span>
+      )}
       {badge && <span className="property-group-badge">{badge}</span>}
     </button>
   );
@@ -180,6 +200,7 @@ function Group({
         name={group.name}
         isExpanded={group.isExpanded}
         activeCount={group.activeCount}
+        lookSource={group.lookSource}
         onToggle={(next) => onToggleGroup && onToggleGroup(group.name, next)}
       />
 
