@@ -357,3 +357,91 @@
   justify-content: center;
   background-color: var(--theme-color-bg-2);
 }
+
+/* TVW-002 — the sentence between the canvas and the app preview.
+   ───────────────────────────────────────────────────────────────────────────
+   A row in the column, above `.Stages`, so it pushes the preview down rather
+   than covering it. Never an overlay: the thing it is explaining is the app,
+   and an explanation that hides part of what it is explaining is the
+   `DesignToast`'s problem (which is why that one is `pointer-events: none`).
+
+   28px per the spec. The amber wash is `--theme-color-notice-bg`, the token
+   pair the warning surfaces already use, so both themes are answered by the
+   tokens rather than by a second palette (P75's "a second copy of a palette
+   drifts silently"). */
+.Strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--theme-color-notice-bg);
+  border-bottom: 1px solid var(--theme-color-bg-3);
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: var(--theme-color-fg-default);
+}
+
+/* The one element allowed to shrink, and it shrinks LAST — the doors keep
+   their width.
+
+   🔴 This is AC7's ruling applied before the same defect can happen twice. The
+   Workbench caption shipped as the only shrinkable item in its strip and was
+   measured keeping 105px of the 330px it needed while the frame controls beside
+   it kept full width; Richard ruled the controls give way instead. Here the
+   doors are `flex-shrink: 0` and the sentence has a floor, so the sentence is
+   never squeezed to nothing by a button that could have wrapped. */
+.StripText {
+  flex: 1 1 auto;
+  min-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  strong {
+    color: var(--theme-color-fg-highlight);
+    font-weight: 600;
+  }
+}
+
+/* Styled on the `DesignBannerExit` precedent — a way out offered on the surface
+   where the confusion happens, quiet enough that a normal state does not read
+   as an error. */
+.StripDoor {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-notice-dim);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-color-notice-bg-hover);
+  }
+}
+
+.StripDismiss {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--theme-color-fg-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-color-notice-bg-hover);
+    color: var(--theme-color-fg-default);
+  }
+}

@@ -56,6 +56,7 @@ import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './bench
 import { CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
 import { ComponentBench } from './ComponentBench';
 import { BenchFrameControl, PreviewScopeControl } from './PreviewChrome';
+import { usePreviewStrip } from './usePreviewStrip';
 import {
   APP_SCOPE,
   DEFAULT_BENCH_FRAME,
@@ -140,6 +141,15 @@ export function VisualCanvas({
   }, [isBench]);
 
   const diverged = isDivergedFromCanvas(scope, canvasComponent);
+
+  /**
+   * TVW-002 — the sentence between the two surfaces.
+   *
+   * Disabled in bench mode deliberately: the bench already says what it is showing in its caption
+   * and says when the canvas has moved away with its own chip. A third claim on the same surface
+   * is a third answer to "what am I looking at", which is the confusion this phase is closing.
+   */
+  const { strip, goToPage, dismiss } = usePreviewStrip(canvasComponent, !isBench);
 
   /**
    * FIX-011 — the component's own default size, read on the way in and written
@@ -408,6 +418,59 @@ export function VisualCanvas({
           </>
         )}
       </div>
+
+      {/*
+        TVW-002 — what the preview is NOT showing, said under the caption and above the app, never
+        over it. Proposal §2 row 11: the canvas and the preview show two different things and the
+        editor has never had a sentence between them.
+
+        🔴 **This is what is shipped INSTEAD of moving the preview.** The rule is that the app
+        preview never changes route or mode because the canvas did, and every door below is a
+        thing the *user* pressed. See `usePreviewStrip`.
+      */}
+      {strip.shape !== 'agree' && (
+        <div className={css.Strip} data-test="preview-strip" data-shape={strip.shape}>
+          <span className={css.StripText}>
+            <strong>{strip.lead}</strong>
+            {strip.rest ? ' ' : ''}
+            <span>{strip.rest}</span>
+          </span>
+
+          {strip.doors.map((door) =>
+            door.kind === 'goto' ? (
+              <button
+                key={`goto:${door.page}`}
+                className={css.StripDoor}
+                onClick={() => goToPage(door.page)}
+                data-test="preview-strip-goto"
+              >
+                {door.label}
+              </button>
+            ) : (
+              <button
+                key="bench"
+                className={css.StripDoor}
+                onClick={() => canvasComponent && setScope({ mode: 'bench', target: canvasComponent })}
+                data-test="preview-strip-bench"
+              >
+                {door.label}
+              </button>
+            )
+          )}
+
+          {/* Per pair, for the session — `dismissalKey`. Not an icon: a `×` needs no legend and
+              this strip has already spent its width on a sentence. */}
+          <button
+            className={css.StripDismiss}
+            onClick={dismiss}
+            title="Dismiss — until you open this component on this page again"
+            aria-label="Dismiss"
+            data-test="preview-strip-dismiss"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <div className={classNames(css.Stages, showDesignChrome && css['is-design'])}>
         {/* PAR-003: size tag per mock — `1280 × 800 · 100%`, mono, top-right.
