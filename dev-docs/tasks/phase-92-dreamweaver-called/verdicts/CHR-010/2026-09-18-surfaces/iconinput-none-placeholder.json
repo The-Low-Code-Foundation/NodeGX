@@ -1,0 +1,58 @@
+{
+  "name": "iconinput-none-placeholder",
+  "scope": "document.querySelector('[data-chr010=iconrow]')",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "property-panel-row",
+        "scopeBox": [
+          280,
+          30
+        ],
+        "total": 0,
+        "drawn": 0,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [],
+        "colours": [],
+        "faLeft": 0,
+        "glyphs": []
+      },
+      "clip": {
+        "x": 62,
+        "y": 387,
+        "width": 296,
+        "height": 46,
+        "scale": 1
+      },
+      "png": "iconinput-none-placeholder-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "property-panel-row",
+        "scopeBox": [
+          280,
+          30
+        ],
+        "total": 0,
+        "drawn": 0,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [],
+        "colours": [],
+        "faLeft": 0,
+        "glyphs": []
+      },
+      "clip": {
+        "x": 62,
+        "y": 387,
+        "width": 296,
+        "height": 46,
+        "scale": 1
+      },
+      "png": "iconinput-none-placeholder-light.png"
+    }
+  }
+}

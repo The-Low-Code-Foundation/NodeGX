@@ -1,0 +1,70 @@
+{
+  "name": "icon-picker-fixed",
+  "scope": "document.querySelector('.iconpicker-bg')",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "iconpicker-bg",
+        "scopeBox": [
+          470,
+          370
+        ],
+        "total": 1,
+        "drawn": 1,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(221, 228, 236)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(221, 228, 236)"
+        ]
+      },
+      "clip": {
+        "x": 352,
+        "y": 217,
+        "width": 486,
+        "height": 386,
+        "scale": 1
+      },
+      "png": "icon-picker-fixed-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "iconpicker-bg",
+        "scopeBox": [
+          470,
+          370
+        ],
+        "total": 1,
+        "drawn": 1,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(74, 86, 99)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(74, 86, 99)"
+        ]
+      },
+      "clip": {
+        "x": 352,
+        "y": 217,
+        "width": 486,
+        "height": 386,
+        "scale": 1
+      },
+      "png": "icon-picker-fixed-light.png"
+    }
+  }
+}

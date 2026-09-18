@@ -1,0 +1,34 @@
+{
+  "name": "icon-picker-empty",
+  "scope": "document.querySelector('.popup-layer-popouts')",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "popup-layer-popouts",
+        "total": 1,
+        "drawn": 1,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(0, 0, 0)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(0, 0, 0)"
+        ]
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1384,
+        "height": 16,
+        "scale": 1
+      },
+      "png": "icon-picker-empty-dark.png"
+    }
+  }
+}

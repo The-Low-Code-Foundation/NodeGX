@@ -724,9 +724,12 @@ textarea {
   background-color: var(--theme-color-bg-3);
 }
 
-.search-icon {
-  color: var(--theme-color-fg-default);
-}
+/* CHR-010 s33: `.search-icon` stood here for the two Font Awesome magnifiers, and after the
+   conversion it reached neither. A core-ui <Icon> carries `.Root { color: inherit }`
+   (Icon.module.scss:58) at the same specificity as a bare class, injected after this stylesheet,
+   so `inherit` won and the icon picker's magnifier rendered BLACK on the dark popout ground —
+   nothing up that chain sets a colour. The drive caught it; both sites now ask for the token the
+   house way, `variant={TextType.Default}`, and this rule has no consumer left. */
 
 .create-node-path-item {
   color: white;

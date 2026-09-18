@@ -3,6 +3,7 @@ import React from 'react';
 import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+import { TextType } from '@noodl-core-ui/components/typography/Text';
 
 import { iconValueForGlyph } from '../../../../../shared/utils/iconsets';
 import Tooltip from '../../../reactcomponents/tooltip';
@@ -154,7 +155,7 @@ class IconPicker extends React.Component {
           style={{ display: 'flex', paddingRight: '5px', paddingTop: '5px', paddingBottom: '3px' }}
         >
           <div style={{ flexGrow: 0, width: '35px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Icon icon={IconName.Search} size={IconSize.Small} UNSAFE_className="search-icon" />
+            <Icon icon={IconName.Search} size={IconSize.Small} variant={TextType.Default} />
           </div>
 
           <input

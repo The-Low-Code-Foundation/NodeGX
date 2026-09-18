@@ -1,0 +1,66 @@
+{
+  "name": "variants-popout",
+  "scope": "document.querySelector('.popup-layer-popout')",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "popup-layer-popout",
+        "total": 4,
+        "drawn": 2,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(221, 228, 236)",
+          "rgb(238, 242, 246)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          "Create new variant | 14x14 | svg 14x14 | rgb(221, 228, 236)",
+          " | 14x14 | svg 14x14 | rgb(238, 242, 246)"
+        ]
+      },
+      "clip": {
+        "x": 368,
+        "y": 128,
+        "width": 246,
+        "height": 109,
+        "scale": 1
+      },
+      "png": "variants-popout-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "popup-layer-popout",
+        "total": 4,
+        "drawn": 2,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(46, 57, 69)",
+          "rgb(74, 86, 99)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          "Create new variant | 14x14 | svg 14x14 | rgb(74, 86, 99)",
+          " | 14x14 | svg 14x14 | rgb(46, 57, 69)"
+        ]
+      },
+      "clip": {
+        "x": 368,
+        "y": 128,
+        "width": 246,
+        "height": 109,
+        "scale": 1
+      },
+      "png": "variants-popout-light.png"
+    }
+  }
+}
