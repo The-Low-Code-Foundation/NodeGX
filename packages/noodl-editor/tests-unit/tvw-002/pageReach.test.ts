@@ -82,6 +82,96 @@ function corpus() {
   ]);
 }
 
+describe('TVW-002 AC1 — where on the screen it is', () => {
+  /**
+   * The outline-when-agreeing needs a node id, and `firstRendered` is where the walk records it.
+   * These arms exist because the two obvious ways of getting one are both wrong:
+   *
+   * - searching the **page component's** graph misses everything in the app shell;
+   * - searching the **project file** happily returns a placement on a second visual root, which is
+   *   the one placement in the project that nobody can ever see.
+   */
+  it('names the node that places it, not the component that holds the node', () => {
+    const home = reachOfScreen('/App', '/Home', corpus());
+
+    // `hero` is the instance node inside `/Home`'s Page; `/Hero` is the component.
+    expect(home.firstRendered.get('/Hero')).toBe('hero');
+    expect(home.firstRendered.get('/NavBar')).toBe('nav');
+  });
+
+  it('🔴 never names a placement the screen does not draw', () => {
+    // `/Ghost` is placed on Pricing as a SECOND visual root: instantiated, never attached. An
+    // outline pointing at it would be an outline on nothing, under a sentence claiming the person
+    // is looking at the thing — the strip's two halves contradicting each other on one row.
+    const pricing = reachOfScreen('/App', '/Pricing', corpus());
+
+    expect(pricing.mounts.has('/Ghost')).toBe(true);
+    expect(pricing.renders.has('/Ghost')).toBe(false);
+    expect(pricing.firstRendered.has('/Ghost')).toBe(false);
+  });
+
+  it('🔴 has no placement for the two components NOTHING places — the root and the routed page', () => {
+    // Written as "every rendered component has one, except the root", which is what it looks like
+    // from the caller. It failed, and the failure is the finding: a **routed page** is entered
+    // through a `Router` node, not through an instance node, so there is no node in any graph that
+    // places it either. Two exceptions, not one.
+    //
+    // This is exactly the case the quiet row already says differently — "Pricing is the screen the
+    // preview is showing" rather than "Pricing is on Pricing" — so the caller must not ask for an
+    // outline here. The assertion is kept as the NAMED pair rather than loosened to a `for` loop
+    // that skips whatever it finds missing, because the population is the point.
+    const pricing = reachOfScreen('/App', '/Pricing', corpus());
+
+    const unplaceable = new Set(['/App', '/Pricing']);
+    for (const name of pricing.renders) {
+      expect(pricing.firstRendered.has(name)).toBe(!unplaceable.has(name));
+    }
+    // …and the set is not vacuous: the screen really does render things that ARE placed.
+    expect(pricing.renders.size).toBeGreaterThan(unplaceable.size);
+  });
+
+  it('does not name a placement for logic, which draws nothing', () => {
+    const home = reachOfScreen('/App', '/Home', corpus());
+
+    expect(home.mounts.has('/Format price')).toBe(true);
+    expect(home.firstRendered.has('/Format price')).toBe(false);
+  });
+
+  it('keeps the FIRST drawn placement when a screen places the same component twice', () => {
+    const twice = index([
+      component(
+        '/App',
+        [node('page', 'Page', { children: [node('first', '/Card'), node('second', '/Card')] })],
+        ['page']
+      ),
+      component('/Card', [node('g', 'Group')], ['g'])
+    ]);
+
+    expect(reachOfScreen('/App', undefined, twice).firstRendered.get('/Card')).toBe('first');
+  });
+
+  it('🔴 skips an undrawn placement in favour of a later drawn one', () => {
+    // Walk order and render order are not the same order. `stray` comes first in the file and is a
+    // second visual root; `real` is inside the Page. "First" has to mean first among the ones that
+    // draw, or the outline lands on the invisible one every time.
+    const both = index([
+      component(
+        '/App',
+        [
+          node('stray', '/Card'),
+          node('page', 'Page', { children: [node('real', '/Card')] })
+        ],
+        ['page']
+      ),
+      component('/Card', [node('g', 'Group')], ['g'])
+    ]);
+
+    const reach = reachOfScreen('/App', undefined, both);
+    expect(reach.renders.has('/Card')).toBe(true);
+    expect(reach.firstRendered.get('/Card')).toBe('real');
+  });
+});
+
 describe('TVW-002 — what the screen in the preview contains', () => {
   it('a component in the app shell is on every page, though no page places it', () => {
     // The case that makes this a *screen* walk and not a page walk. Walking from `/Pricing` alone,

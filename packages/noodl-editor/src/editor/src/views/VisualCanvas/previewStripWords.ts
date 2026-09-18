@@ -49,10 +49,35 @@ import { OPEN_ON_WORKBENCH } from './benchWords';
 /**
  * Which of the four situations the two surfaces are in.
  *
- * `agree` is the common case and draws nothing: the strip costs the stage no height whenever there
- * is nothing to explain, which is the same reasoning FIX-019's divergence chip was built on.
+ * `agree` is the common case. It used to draw nothing at all — see {@link StripTone} for why that
+ * stopped being true on 2026-09-18, and why it is the row's *tone* rather than its existence that
+ * the four shapes now decide.
  */
 export type StripShape = 'agree' | 'other-screen' | 'unplaced' | 'logic';
+
+/**
+ * How loud the row is — and, therefore, whether it is there at all.
+ *
+ * 🔴 **RULED 2026-09-18 (Richard): the row is ALWAYS drawn.** The first build hid it whenever the
+ * two surfaces agreed, on the reasoning that a strip with nothing to say should cost the stage no
+ * height. The placement ruling earlier the same day retired that reasoning without anyone noticing,
+ * and the re-drive is what made it visible: Richard moved the row to the seam *"as a kind of visual
+ * separator before your eye confuses what's on the node canvas with the preview"*, and
+ * `tvw002-agree-no-strip-light.png` then showed the app's hero image abutting the canvas's dotted
+ * grid with nothing between them. **His reason applied to both cases; the row applied to one.**
+ *
+ * A row that appears only on divergence is a notice. A row that is always there is a seam, and a
+ * seam can carry a notice. So:
+ *
+ * - `quiet` — the two surfaces agree. Surface colour, no wash, no doors, no dismiss. It marks the
+ *   boundary and, when it can, says the reassuring thing in one short sentence.
+ * - `notice` — they disagree. The amber wash, the sentence, and the doors out.
+ *
+ * ⚠️ This is why a dismissed strip does not remove the row: dismissing says *"yes, I know"* about a
+ * **sentence**, and the seam was never the thing being dismissed. `usePreviewStrip`'s `IDLE` is a
+ * `quiet` row with no words for exactly that reason.
+ */
+export type StripTone = 'quiet' | 'notice';
 
 /** A way out of the confusion, drawn as a button. Never more than two. */
 export type StripDoor =
@@ -63,7 +88,9 @@ export type StripDoor =
 
 export interface StripModel {
   shape: StripShape;
-  /** The claim, drawn bold. Empty for `agree`. */
+  /** How loud the row is. `agree` is always `quiet`; every other shape is always `notice`. */
+  tone: StripTone;
+  /** The claim, drawn bold. May be empty on a `quiet` row that has nothing to reassure about. */
   lead: string;
   /** The rest of the sentence, drawn plain. */
   rest: string;
@@ -73,6 +100,15 @@ export interface StripModel {
 export interface StripInput {
   /** The canvas's component, as a person reads it (`benchTargetLabel`). Empty = no canvas. */
   canvasLabel: string;
+  /**
+   * The canvas's component by legacy name, for the one comparison a label cannot carry.
+   *
+   * ⚠️ Same reason as {@link StripInput.screenPage}: two components in two folders can read the
+   * same. Asking "is the canvas sitting on the page the preview is showing?" off the labels would
+   * answer yes for `/Admin/Settings` while the preview showed `/Settings`, and the quiet row would
+   * then claim the person is looking at a page they are not.
+   */
+  canvasComponent?: string;
   /** What the preview is showing, as a person reads it. Empty when the route resolves to no page. */
   screenLabel: string;
   /**
@@ -124,16 +160,22 @@ const NOTHING_PLACES_IT = 'nothing in the app places it';
 export function previewStrip(input: StripInput): StripModel {
   const { canvasLabel, screenLabel, onScreen, isLogic, showingPages } = input;
 
-  if (!canvasLabel || onScreen) return agree();
+  // No canvas to diverge from — the detached window, or a surface that has not resolved yet. The
+  // row is still drawn, because the seam is still there; it simply has nothing to say.
+  if (!canvasLabel) return seam();
+  if (onScreen) return agreeing(input);
 
   if (isLogic) {
     const running = input.runningPages ?? [];
     // A logic component that runs on this screen is not a divergence — `onScreen` is false for it
     // by construction (it renders nowhere), so `runningPages` is what decides.
-    if (input.screenPage && running.some((page) => page.page === input.screenPage)) return agree();
+    if (input.screenPage && running.some((page) => page.page === input.screenPage)) {
+      return quiet(`${canvasLabel} is logic — it draws nothing.`, 'It runs on this screen.');
+    }
 
     return {
       shape: 'logic',
+      tone: 'notice',
       lead: `${canvasLabel} is logic — it draws nothing.`,
       rest: running.length > 0 ? `It runs on ${pageList(running)}.` : `Nothing in the app runs it yet.`,
       doors: [benchDoor()]
@@ -144,6 +186,7 @@ export function previewStrip(input: StripInput): StripModel {
     const placedIn = input.placedIn ?? [];
     return {
       shape: 'unplaced',
+      tone: 'notice',
       lead: `${canvasLabel} isn't on any page yet`,
       // The two truths are different truths, and only one of them is "nobody uses this".
       rest: placedIn.length > 0 ? `— it's only inside ${pageList(placedIn)}, which no page shows.` : `— ${NOTHING_PLACES_IT}.`,
@@ -154,6 +197,7 @@ export function previewStrip(input: StripInput): StripModel {
   const first = showingPages[0];
   return {
     shape: 'other-screen',
+    tone: 'notice',
     lead: screenLabel ? `${canvasLabel} isn't on ${screenLabel}.` : `${canvasLabel} isn't on this screen.`,
     rest: `It's on ${pageList(showingPages)}.`,
     // One `Go to`, for the first page listed — the sentence names the rest. Three doors on a 28px
@@ -162,8 +206,48 @@ export function previewStrip(input: StripInput): StripModel {
   };
 }
 
-function agree(): StripModel {
-  return { shape: 'agree', lead: '', rest: '', doors: [] };
+/**
+ * The quiet row: the two surfaces agree, so the row is a seam that happens to be able to speak.
+ *
+ * Three sentences, because "they agree" is three different facts and only one of them is
+ * "the thing you clicked is somewhere on the page below":
+ *
+ * 1. the canvas is sitting on the **page component itself** — there is no *it* to point at, because
+ *    the thing on the canvas is the thing in the preview;
+ * 2. the canvas's component is **placed on** the screen being shown;
+ * 3. (from {@link previewStrip}) it is **logic that runs on** this screen — it draws nothing, so
+ *    "you're looking at it" would be a lie, and the row says what is actually true instead.
+ *
+ * ⚠️ None of them says *"you're looking at it"*. A component can be on the page and scrolled past,
+ * inside a closed accordion, or behind a popup. The claim the row is entitled to make is about the
+ * **screen the preview is showing**, which is exactly what it was unable to say before.
+ */
+function agreeing(input: StripInput): StripModel {
+  const { canvasLabel, screenLabel, screenPage, canvasComponent } = input;
+
+  if (canvasComponent && screenPage && canvasComponent === screenPage) {
+    return quiet(`${canvasLabel} is the screen the preview is showing.`, '');
+  }
+
+  if (!screenLabel) return quiet(`${canvasLabel} is on this screen.`, '');
+
+  return quiet(`${canvasLabel} is on ${screenLabel}.`, 'The preview is showing that screen.');
+}
+
+/** A quiet row with words. Never has doors: there is nothing to get out of. */
+function quiet(lead: string, rest: string): StripModel {
+  return { shape: 'agree', tone: 'quiet', lead, rest, doors: [] };
+}
+
+/**
+ * The seam with nothing to say — the boundary drawn, and not one word on it.
+ *
+ * Used for "there is no canvas" here, and by `usePreviewStrip` for a **dismissed** strip and for
+ * bench mode. In all three the row exists because the two surfaces still meet; what varies is
+ * whether this module has anything it is entitled to put on it.
+ */
+export function seam(): StripModel {
+  return { shape: 'agree', tone: 'quiet', lead: '', rest: '', doors: [] };
 }
 
 function benchDoor(): StripDoor {

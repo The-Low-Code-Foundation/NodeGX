@@ -29,6 +29,7 @@ import {
 } from '../../panels/propertyeditor/transformOriginFocus';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { BENCH_MOUNT_EVENT } from '../../VisualCanvas/benchRequest';
+import { onPlacementOutline, type PlacementOutline } from '../../VisualCanvas/placementOutline';
 import { useCanvasView } from './hooks/UseCanvasView';
 import { useCaptureThumbnails } from './hooks/UseCaptureThumbnails';
 import { useImportNodeset } from './hooks/UseImportNodeset';
@@ -196,10 +197,29 @@ function EditorDocument() {
     }
   }, [previewMode, canvasView]);
 
+  /**
+   * TVW-002 AC1 — where the canvas's component sits on the screen the preview is showing, published
+   * by the strip.
+   *
+   * 🔴 **This document is the single writer of the preview's outline, and that is the whole reason
+   * the value arrives here instead of being drawn where it was computed.** The guest holds one
+   * selection with no notion of who asked; two writers means the outline lands on whichever effect
+   * ran last. See `placementOutline.ts`.
+   */
+  const [placementOutline, setPlacementOutline] = useState<PlacementOutline>(null);
+  useEffect(() => onPlacementOutline(setPlacementOutline), []);
+
   useEffect(() => {
     if (!previewMode) {
-      canvasView?.setNodeSelected(selectedNodePath);
-      ipcRenderer.send('viewer-select-node', selectedNodePath);
+      /**
+       * **A real selection always wins.** The placement outline is what the preview says when the
+       * author has not selected anything — the quiet strip row says *"Hero is on Pricing"* and this
+       * is the line that says *there*. The moment they select something, that is what they are
+       * asking about, and the answer to a different question stops being drawn.
+       */
+      const path = selectedNodePath ?? (placementOutline ? [placementOutline] : null);
+      canvasView?.setNodeSelected(path);
+      ipcRenderer.send('viewer-select-node', path);
     }
 
     // FB-016 scope 4 — a new selection rebuilds the properties panel, which is exactly the case
@@ -207,7 +227,7 @@ function EditorDocument() {
     // back on dispose; this is the belt to that pair of braces, and it is also simply correct:
     // the crosshair described the node that is no longer selected.
     transformOriginFocus.reset();
-  }, [selectedNodePath, canvasView, previewMode]);
+  }, [selectedNodePath, canvasView, previewMode, placementOutline]);
 
   const onRouteChanged = useCallback(
     (route) => {

@@ -56,6 +56,7 @@ import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './bench
 import { CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
 import { ComponentBench } from './ComponentBench';
 import { BenchFrameControl, PreviewScopeControl } from './PreviewChrome';
+import { publishPlacementOutline } from './placementOutline';
 import { usePreviewStrip } from './usePreviewStrip';
 import {
   APP_SCOPE,
@@ -149,7 +150,21 @@ export function VisualCanvas({
    * and says when the canvas has moved away with its own chip. A third claim on the same surface
    * is a third answer to "what am I looking at", which is the confusion this phase is closing.
    */
-  const { strip, goToPage, dismiss } = usePreviewStrip(canvasComponent, !isBench);
+  const { strip, outline, goToPage, dismiss } = usePreviewStrip(canvasComponent, !isBench);
+
+  /**
+   * TVW-002 AC1 — publish where the canvas's component sits on the screen, for `EditorDocument` to
+   * merge with the author's own selection. See `placementOutline.ts` for why this surface publishes
+   * rather than draws.
+   *
+   * ⚠️ The cleanup publishes `null`. This component unmounts on every layout change (the reason
+   * `benchRequest.ts` decouples the bench at all), and an outline left behind would sit on the app
+   * with nothing on screen still claiming it.
+   */
+  useEffect(() => {
+    publishPlacementOutline(outline);
+    return () => publishPlacementOutline(null);
+  }, [outline]);
 
   /**
    * FIX-011 — the component's own default size, read on the way in and written
@@ -500,39 +515,50 @@ export function VisualCanvas({
         🔴 **This is what is shipped INSTEAD of moving the preview.** The rule is that the app
         preview never changes route or mode because the canvas did, and every door below is a
         thing the *user* pressed. See `usePreviewStrip`.
+
+        🔴 **UNCONDITIONAL — ruled by Richard on 2026-09-18, and the re-drive is what asked him.**
+        The row used to render only when the two surfaces disagreed. Moving it to the seam made a
+        separator of it, and a separator that comes and goes is not one: `tvw002-agree-no-strip`
+        shows the app's hero image abutting the canvas's dotted grid with nothing between them, in
+        the case that is the COMMON one. The shape decides the row's `tone` now, not its existence
+        — `quiet` when they agree (surface colour, a short reassuring sentence, no doors), `notice`
+        when they do not. See `StripTone`.
       */}
-      {strip.shape !== 'agree' && (
-        <div className={css.Strip} data-test="preview-strip" data-shape={strip.shape}>
-          <span className={css.StripText}>
-            <strong>{strip.lead}</strong>
-            {strip.rest ? ' ' : ''}
-            <span>{strip.rest}</span>
-          </span>
+      <div className={css.Strip} data-test="preview-strip" data-shape={strip.shape} data-tone={strip.tone}>
+        <span className={css.StripText}>
+          <strong>{strip.lead}</strong>
+          {strip.rest ? ' ' : ''}
+          <span>{strip.rest}</span>
+        </span>
 
-          {strip.doors.map((door) =>
-            door.kind === 'goto' ? (
-              <button
-                key={`goto:${door.page}`}
-                className={css.StripDoor}
-                onClick={() => goToPage(door.page)}
-                data-test="preview-strip-goto"
-              >
-                {door.label}
-              </button>
-            ) : (
-              <button
-                key="bench"
-                className={css.StripDoor}
-                onClick={() => canvasComponent && setScope({ mode: 'bench', target: canvasComponent })}
-                data-test="preview-strip-bench"
-              >
-                {door.label}
-              </button>
-            )
-          )}
+        {strip.doors.map((door) =>
+          door.kind === 'goto' ? (
+            <button
+              key={`goto:${door.page}`}
+              className={css.StripDoor}
+              onClick={() => goToPage(door.page)}
+              data-test="preview-strip-goto"
+            >
+              {door.label}
+            </button>
+          ) : (
+            <button
+              key="bench"
+              className={css.StripDoor}
+              onClick={() => canvasComponent && setScope({ mode: 'bench', target: canvasComponent })}
+              data-test="preview-strip-bench"
+            >
+              {door.label}
+            </button>
+          )
+        )}
 
-          {/* Per pair, for the session — `dismissalKey`. Not an icon: a `×` needs no legend and
-              this strip has already spent its width on a sentence. */}
+        {/* Per pair, for the session — `dismissalKey`. Not an icon: a `×` needs no legend and
+            this strip has already spent its width on a sentence.
+
+            ⚠️ On the `quiet` row there is nothing to dismiss, and offering the button anyway would
+            invite someone to press it to get rid of a separator that is deliberately permanent. */}
+        {strip.tone === 'notice' && (
           <button
             className={css.StripDismiss}
             onClick={dismiss}
@@ -542,8 +568,8 @@ export function VisualCanvas({
           >
             ×
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {Boolean(crashed) && (
         <div className={css.Crashed}>

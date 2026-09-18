@@ -34,7 +34,7 @@ import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import { buildUsageIndex, type RouterPages } from '../panels/ComponentsPanelNew/componentUsage';
 import { reachOfScreen, screensShowing, type ReachComponent, type ReachIndex } from './pageReach';
 import { benchTargetLabel } from './previewScope';
-import { previewStrip, type StripModel } from './previewStripWords';
+import { previewStrip, seam, type StripModel } from './previewStripWords';
 import { pageForRoute, type ScreenPage } from './screenRoute';
 
 /** The events after which a component's placement, its Router or its roots can have changed. */
@@ -44,6 +44,19 @@ const AFTER_GRAPH_TYPE_UPDATE_MS = 20;
 
 export interface PreviewStrip {
   strip: StripModel;
+  /**
+   * TVW-002 AC1 — the node id the preview should outline, or `null`.
+   *
+   * Set only when the two surfaces **agree** and the canvas's component is placed somewhere on the
+   * screen being shown: the quiet row says *"Hero is on Pricing"* and this says **where**. The
+   * caller pushes it down the editor's existing selection channel, so the outline is the one the
+   * preview already draws for a selected node rather than a fourth kind of line over the app.
+   *
+   * 🔴 **This hook does not push it.** Two writers to one guest highlight is a race, and the
+   * editor already has a single writer for it (`EditorDocument`). See {@link PreviewStrip}'s
+   * module note: the strip reads both surfaces and writes neither.
+   */
+  outline: string | null;
   /** Navigate the app preview to a page, from a door the user pressed. */
   goToPage: (page: string) => void;
   /** Hide this strip for this (component, screen) pair until the editor is restarted. */
@@ -148,11 +161,27 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
     [route, pages, project.startPage]
   );
 
+  /**
+   * One walk of the screen, shared by the sentence and the outline.
+   *
+   * ⚠️ Hoisted out of the strip memo when AC1 landed, so that both answers come from the **same**
+   * walk. Computed twice, the sentence could say "Hero is on Pricing" off one pass while the
+   * outline pointed at a node id from another — and the two would disagree only in the window
+   * between a graph edit and a re-render, which is the hardest kind of wrong to see.
+   */
+  const reach = useMemo(
+    () => (project.root ? reachOfScreen(project.root, screenPage, project.components) : undefined),
+    [project.root, project.components, screenPage]
+  );
+
   const strip = useMemo(() => {
-    if (!enabled || !canvasComponent || !project.root) return IDLE;
+    if (!enabled || !canvasComponent || !project.root || !reach) return IDLE;
+    // 🔴 A dismissal removes the SENTENCE, not the SEAM. Richard ruled the row always drawn on
+    // 2026-09-18, so the dismissed state is the quiet row rather than no row — otherwise pressing
+    // `×` would silently delete the separator he had asked for the same morning, and the boundary
+    // would be there or not depending on which components you had already acknowledged.
     if (dismissed.has(dismissalKey(canvasComponent, screenPage))) return IDLE;
 
-    const reach = reachOfScreen(project.root, screenPage, project.components);
     const onScreen = reach.renders.has(canvasComponent);
     const component = project.components.get(canvasComponent);
     // `sectionFor`'s own definition of logic: at least one node, and no root that draws.
@@ -162,6 +191,7 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
 
     return previewStrip({
       canvasLabel: benchTargetLabel(canvasComponent),
+      canvasComponent,
       screenLabel: screenPage ? benchTargetLabel(screenPage) : '',
       screenPage,
       onScreen,
@@ -173,7 +203,24 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
       // the first rather than the second.
       placedIn: (project.parentsOf.get(canvasComponent) ?? []).map(asPage)
     });
-  }, [enabled, canvasComponent, screenPage, project, dismissed]);
+  }, [enabled, canvasComponent, screenPage, project, dismissed, reach]);
+
+  /**
+   * Where to draw it — `null` unless the strip is quiet *and* there is a drawn placement to point
+   * at.
+   *
+   * ⚠️ **Gated on the strip's own shape, not on `renders` alone.** The two cases with no placement
+   * — the root component and the routed page — are exactly the two the quiet row words as *"X is
+   * the screen the preview is showing"*, and `firstRendered` has no entry for either
+   * (`pageReach`'s own note). Reading `renders` directly here would ask for an outline in the one
+   * case where there is nothing that could be outlined.
+   */
+  const outline = useMemo(() => {
+    if (!enabled || !canvasComponent || !reach) return null;
+    if (strip.shape !== 'agree' || strip.tone !== 'quiet') return null;
+
+    return reach.firstRendered.get(canvasComponent) ?? null;
+  }, [enabled, canvasComponent, reach, strip]);
 
   const goToPage = useCallback(
     (page: string) => {
@@ -193,10 +240,18 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
     setDismissed((current) => new Set(current).add(dismissalKey(canvasComponent, screenPage)));
   }, [canvasComponent, screenPage]);
 
-  return { strip, goToPage, dismiss };
+  return { strip, outline, goToPage, dismiss };
 }
 
-const IDLE: StripModel = { shape: 'agree', lead: '', rest: '', doors: [] };
+/**
+ * The seam with no sentence on it — bench mode, no project, and a dismissed pair.
+ *
+ * ⚠️ **Bench mode gets the wordless row deliberately.** The Workbench caption already says what it
+ * is showing, one row above; a second claim on the same surface is the "two answers to *what am I
+ * looking at*" defect this file's `enabled` flag exists to prevent. The boundary still needs
+ * marking there, so the row stays and the words go.
+ */
+const IDLE: StripModel = seam();
 
 const asPage = (name: string) => ({ page: name, label: benchTargetLabel(name) });
 

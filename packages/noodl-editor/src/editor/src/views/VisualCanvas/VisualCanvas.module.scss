@@ -383,14 +383,23 @@
      geometry reading could have caught (every width measured clean). The surface colour goes
      underneath as its own layer, the wash on top, both still tokens. */
   background-color: var(--theme-color-bg-2);
-  background-image: linear-gradient(var(--theme-color-notice-bg), var(--theme-color-notice-bg));
   /* The rule goes on the APP side, because that is the edge this row is separating you from. It is
      the last row of the preview column (Richard, 2026-09-18), directly above the frame divider —
      the divider draws the other edge, so a second bottom rule here would be two lines in one seam. */
   border-top: 1px solid var(--theme-color-bg-3);
   font-size: 11.5px;
   line-height: 1.2;
-  color: var(--theme-color-fg-default);
+  /* 🔴 THE ROW IS ALWAYS HERE — the amber is what comes and goes (Richard, 2026-09-18).
+     It is drawn as a SEPARATOR first and a notice second, so the base state is surface colour and
+     a muted sentence; `data-tone="notice"` washes it. Built the other way round — the notice being
+     the thing that exists — the separator vanished in the common case, which is the defect the
+     re-drive found and he ruled on. See `StripTone`. */
+  color: var(--theme-color-fg-muted);
+
+  &[data-tone='notice'] {
+    background-image: linear-gradient(var(--theme-color-notice-bg), var(--theme-color-notice-bg));
+    color: var(--theme-color-fg-default);
+  }
 }
 
 /* The one element allowed to shrink, and it shrinks LAST — the doors keep
@@ -410,8 +419,15 @@
   white-space: nowrap;
 
   strong {
-    color: var(--theme-color-fg-highlight);
+    /* The quiet row's bold half is one step down from the notice's: it is the same sentence shape
+       (a claim, then the detail) said in a voice that does not ask to be read. `fg-highlight` on a
+       row that is on screen permanently is a surface competing with the app above it. */
+    color: inherit;
     font-weight: 600;
+  }
+
+  [data-tone='notice'] & strong {
+    color: var(--theme-color-fg-highlight);
   }
 }
 

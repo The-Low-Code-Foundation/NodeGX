@@ -76,6 +76,32 @@ export interface ReachComponent {
 export interface PageReach {
   /** Components an instance of which is attached to the rendered tree. What a person can see. */
   renders: Set<string>;
+  /**
+   * TVW-002 AC1 — for each component in {@link PageReach.renders}, the node id of the **first
+   * placement of it that the screen actually draws**, in walk order.
+   *
+   * This is what the preview outlines when the two surfaces agree: the strip says *"Hero is on
+   * Pricing"* and this says **where**. Recorded in the same pass rather than by a second search,
+   * because "first" has to mean first *by the walk that decided it renders at all* — a separate
+   * search over the project file would happily return a placement sitting on a second visual root,
+   * which is the one placement nobody can see (see this module's header).
+   *
+   * 🔴 **TWO rendered components have no entry, and it is not only the root.** Nothing *places* the
+   * root — it is the screen. But nothing places a **routed page** either: it is entered through a
+   * `Router` node rather than through an instance node, so no graph in the project holds a node
+   * that puts it there. A caller that assumed `renders.has(x)` implied an entry would be wrong on
+   * every page in every project. Graded in `tests-unit/tvw-002/pageReach.test.ts`.
+   *
+   * Both cases are ones the quiet strip row already words differently — *"Pricing is the screen the
+   * preview is showing"*, not *"Pricing is on Pricing"* — so there is nothing to point at anyway.
+   *
+   * ⚠️ **A node id addresses a PLACEMENT, not an occurrence on screen.** If the component holding
+   * the placement is itself placed three times, the running app has three nodes carrying this id
+   * and the highlighter outlines all three (`selectNodesAtPath([id])` — its documented behaviour
+   * for a canvas showing a definition). That is the editor's existing selection semantics, not a
+   * new rule invented here.
+   */
+  firstRendered: Map<string, string>;
   /** Components the screen instantiates at all, rendered or not. What runs. */
   mounts: Set<string>;
   /**
@@ -107,7 +133,13 @@ export type ReachIndex = ReadonlyMap<string, ReachComponent>;
  *   the route resolves to nothing (then a Router descends nowhere and every Router is unresolved).
  */
 export function reachOfScreen(rootName: string, pageName: string | undefined, components: ReachIndex): PageReach {
-  const reach: PageReach = { renders: new Set(), mounts: new Set(), cyclic: false, unresolvedRouters: [] };
+  const reach: PageReach = {
+    renders: new Set(),
+    mounts: new Set(),
+    firstRendered: new Map(),
+    cyclic: false,
+    unresolvedRouters: []
+  };
   const onStack = new Set<string>();
 
   /**
@@ -156,6 +188,11 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
     if (typename === ROUTER_TYPE) {
       visitRouter(node, rendered, depth);
     } else if (typename && components.has(typename)) {
+      // ⚠️ Recorded on the *instance node*, before descending, and only while `rendered` — the
+      // first placement the walk reaches that is actually attached. Recording it inside
+      // `enterComponent` instead would have nothing to record: that function knows the component
+      // it is entering, not the node that placed it.
+      if (rendered && !reach.firstRendered.has(typename)) reach.firstRendered.set(typename, node.id);
       enterComponent(typename, rendered, depth + 1);
     }
 

@@ -16,6 +16,7 @@ import {
   MAX_NAMED_PAGES,
   pageList,
   previewStrip,
+  seam,
   StripInput
 } from '../../src/editor/src/views/VisualCanvas/previewStripWords';
 
@@ -168,16 +169,125 @@ describe('TVW-002 — the preview says what it is not showing', () => {
     });
   });
 
-  describe('when they agree', () => {
-    it('draws nothing when the canvas component is on the screen', () => {
-      expect(previewStrip(input({ onScreen: true })).shape).toBe('agree');
-      expect(previewStrip(input({ onScreen: true })).doors).toEqual([]);
+  /**
+   * 🔴 RULED 2026-09-18 (Richard): **the row is always drawn.**
+   *
+   * These arms exist because the opposite was shipped first and was *correct against its own spec*
+   * — §2 says "when they agree: no strip". What retired that was a different ruling the same day:
+   * once the row moved to the seam it was a separator, and the agree shot showed the app's hero
+   * image abutting the canvas grid with nothing between them. His stated reason applied to both
+   * cases; the row applied to one.
+   *
+   * So `agree` is now about TONE. The assertions below are on the words, because the whole point of
+   * a quiet row is that it says something, and a string nobody pins sits a ruling behind.
+   */
+  describe('when they agree — the quiet row', () => {
+    it('is still drawn, without doors and without an amber wash', () => {
+      const strip = previewStrip(input({ onScreen: true }));
+
+      expect(strip.shape).toBe('agree');
+      expect(strip.tone).toBe('quiet');
+      expect(strip.doors).toEqual([]);
     });
 
-    it('draws nothing when there is no canvas at all', () => {
+    it('names the component and the screen the preview is showing', () => {
+      const strip = previewStrip(input({ onScreen: true }));
+
+      expect(strip.lead).toBe('Hero is on Pricing.');
+      expect(strip.rest).toBe('The preview is showing that screen.');
+    });
+
+    it('🔴 never claims the person can SEE it', () => {
+      // A component can be on the page and scrolled past, inside a closed accordion, or behind a
+      // popup. The row is entitled to a claim about the SCREEN, not about the retina. "You're
+      // looking at it" was the phrasing this arm exists to keep out.
+      const strip = previewStrip(input({ onScreen: true }));
+      const everything = `${strip.lead} ${strip.rest}`.toLowerCase();
+
+      expect(everything.length).toBeGreaterThan(20);
+      expect(everything).not.toContain('looking at it');
+      expect(everything).not.toContain('you can see');
+    });
+
+    it('🔴 says something DIFFERENT when the canvas is sitting on the page itself', () => {
+      // There is no *it* to point at: the thing on the canvas IS the thing in the preview. "Home is
+      // on Home" is the sentence this arm exists to prevent.
+      const strip = previewStrip(
+        input({ canvasLabel: 'Pricing', canvasComponent: '/Pages/Pricing', onScreen: true })
+      );
+
+      expect(strip.lead).toBe('Pricing is the screen the preview is showing.');
+      expect(strip.rest).toBe('');
+    });
+
+    it('🔴 compares the PAGE, not the label, to decide that', () => {
+      // Two components in two folders can read the same. `/Admin/Settings` on the canvas while the
+      // preview shows `/Settings` is two different pages, and a label comparison calls them one.
+      const strip = previewStrip(
+        input({
+          canvasLabel: 'Settings',
+          canvasComponent: '/Admin/Settings',
+          screenLabel: 'Settings',
+          screenPage: '/Settings',
+          onScreen: true
+        })
+      );
+
+      expect(strip.lead).toBe('Settings is on Settings.');
+      expect(strip.rest).toBe('The preview is showing that screen.');
+    });
+
+    it('logic that runs on this screen says so, rather than saying nothing', () => {
+      const strip = previewStrip(
+        input({
+          canvasLabel: 'Format price',
+          isLogic: true,
+          screenPage: '/Pages/Pricing',
+          showingPages: [],
+          runningPages: [page('Pricing')]
+        })
+      );
+
+      expect(strip.shape).toBe('agree');
+      expect(strip.tone).toBe('quiet');
+      // Not "you're looking at it": it draws nothing, so there is nothing to look at.
+      expect(strip.lead).toBe('Format price is logic — it draws nothing.');
+      expect(strip.rest).toBe('It runs on this screen.');
+    });
+
+    it('is a wordless seam when there is no canvas at all', () => {
       // The detached preview window has no node graph — `activeCanvasComponentName()` is
-      // `undefined` there, and "nothing to diverge from" is not a divergence.
-      expect(previewStrip(input({ canvasLabel: '' })).shape).toBe('agree');
+      // `undefined` there, and "nothing to diverge from" is not a divergence. The boundary is still
+      // a boundary, so the row is there and empty.
+      const strip = previewStrip(input({ canvasLabel: '' }));
+
+      expect(strip.shape).toBe('agree');
+      expect(strip.tone).toBe('quiet');
+      expect(strip.lead).toBe('');
+      expect(strip.rest).toBe('');
+      expect(strip).toEqual(seam());
+    });
+  });
+
+  describe('tone', () => {
+    it('🔴 every shape that is not `agree` is a notice, and every `agree` is quiet', () => {
+      // The pairing is what the view keys its wash, its doors and its dismiss button off. A shape
+      // that arrived as a notice with no doors, or as quiet with a wash, would be a row that looks
+      // like it can be acted on and cannot.
+      const shapes: StripInput[] = [
+        input(),
+        input({ showingPages: [], placedIn: [] }),
+        input({ isLogic: true, showingPages: [], runningPages: [] }),
+        input({ onScreen: true }),
+        input({ canvasLabel: '' })
+      ];
+
+      for (const one of shapes) {
+        const strip = previewStrip(one);
+        expect(strip.tone).toBe(strip.shape === 'agree' ? 'quiet' : 'notice');
+        // Only a notice is ever escapable. A quiet row with a door is a door out of nothing.
+        expect(strip.doors.length > 0).toBe(strip.shape !== 'agree');
+      }
     });
   });
 
