@@ -12,7 +12,7 @@ showed up because Layers was being built next to it.
 | TVW-001 | The panel tells the truth | ✅ six rows + AC7's fixes | **CLOSED — all 8 ACs** |
 | TVW-002 | The preview says what it is not showing | ✅ + s14's repeater fix | **CLOSED — all 7 ACs** |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED — all 6 ACs** |
-| TVW-004 | Layers | ✅ the walk, the tabs, the rows, the note | **AC4 green. AC1–3, 5–7 open** — one drive done, seven arms held, the shot failed them |
+| TVW-004 | Layers | ✅ the walk, the tabs, the rows, the crumb, the footer | **AC3, AC4, AC7 green.** AC1, 2, 5, 6 open — driven twice, 9/9 arms, and the shots found three things the arms did not |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
@@ -20,24 +20,23 @@ showed up because Layers was being built next to it.
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 26.** Three of ten tasks; the fourth is the phase's centrepiece and is now real
-enough to look at.
+**ACs closed: 29.** Three of ten tasks; the fourth is the phase's centrepiece, is on screen, and
+has had six rulings of its own (R-R…R-V plus §2's note retired).
 
-## Start here — finish TVW-004's drive
+## Start here — AC1, AC2 and AC6
 
-Everything left on TVW-004 needs **the box**, which a peer held for the second half of s14.
+The surface is built and driven; what is left is the **evidence** and Richard's verdict.
 
-1. **Re-drive.** `node scripts/devtools/drive-tvw004-layers.js --json <file> --shots <dir>` against a
-   copy of `Prefab marketplace`. It resets itself now, so two runs must compare identical.
-   The arms that have never been read: the **panel-still-on-screen** arm (s14's fix, built but not
-   seen working) and the **path-inside-a-band** arm.
-2. **⚠️ The note has never been rendered.** `[data-test="layers-note"]`, its doors and their
-   wrapping are graded by the words' specs only. Its first drive is its first look — the phase has
-   been here three times ([[a-new-instruments-first-drive-finds-instrument-faults]]).
-3. **Then AC1's five states, AC2's independent DOM walk, AC6's screenshots** (both themes, 300px and
-   240px), and **AC7** — `test:ci` at the floor, which s14 could not run beside a peer's stack.
-4. **Still to build:** §2's **containment crumb** (`Home › Hero · in N places`) and the **footer**
-   (`+ 14 logic nodes on the canvas`). Both are header/footer rows around a tree that already works.
+1. **AC1's five states**, in one run: canvas on Home; double-click `Hero`; click a row inside a
+   band; navigate the preview to another page; a component that is on no screen. The drive script
+   already resets itself, so it can be extended rather than restarted.
+2. **AC2** — the row count against an **independent DOM walk of the preview**, on three projects
+   (corpus, QA fixture, TPL-008), plus every row's glyph colour read off the rendered element and
+   compared with the canvas's colour for that category.
+3. **AC6** — screenshots of all five states, both themes, 300px and 240px, into
+   `verdicts/TVW-004/<date>/`. **Richard rules WORTHY.** This is the phase's centrepiece surface.
+4. **AC5's remainder** — the ⌘⇧L flip and the cold-start default on each of the four component
+   kinds, driven rather than specced.
 
 ## What s14 settled, and what it cost to find
 
@@ -83,12 +82,13 @@ not the drawn root in **572 of 5,039 components**; **20 of 66 dynamic repeaters 
 - `tests-unit/tvw-004` — 2 suites, 29 specs, **13 mutants** on `layersTree` and 3 on `pageReach`,
   each proven applied by a byte compare and each red with a real count.
 
-## Gates at s14
+## Gates at s14 (all re-run after the last change)
 
-`jest tests-unit/tvw-002 + tvw-004` **6 suites / 101**; `+ tvw-003` **71** in the pair;
-`test:main` **497 suites / 7,919** green, re-run after the `pageReach` change (**7,923**);
-`tsc --noEmit` **0** on the editor package. **`test:ci` was NOT run** — a peer held the box for the
-second half of the session, and it is AC7's gate.
+`test:ci` **2985 specs, 8 failures, seed 86492, HEAD `1ecd432e` = the floor BY NAME** (3 SUB-006,
+3 SUB-011, 2 NDA-017), none mine — an **eighth** agreeing seed, from a readout whose mtime was
+checked. `test:main` **497 suites / 7,934** green. `jest tests-unit/tvw-004` **2 suites / 36**,
+`tvw-002` **4 / 74**. `tsc --noEmit` **0**. **20 mutants across the two modules**, each proven
+applied by byte compare and each red with a real count. **AC7 is green.**
 
 ## The box
 
@@ -108,8 +108,5 @@ were there all session. Commit by **explicit pathspec**; add untracked files fir
 
 ## Owed to Richard
 
-1. **The repeated-component sentence.** A component a repeater draws now reads *"Checkbox Item is on
-   Home."* Worth a word of its own — *"— once per item"* — or is the plain sentence right? (Whether
-   a row exists at all depends on the data, which no static walk can know.)
-2. **AC6's look**, once the remaining drive is done. This is the phase's centrepiece surface and its
-   verdict is his.
+**AC6's look**, once AC1's states are captured. Nothing else is outstanding: he ruled six times in
+s14 (R-R…R-V and the note's removal), and every one is built and driven.
