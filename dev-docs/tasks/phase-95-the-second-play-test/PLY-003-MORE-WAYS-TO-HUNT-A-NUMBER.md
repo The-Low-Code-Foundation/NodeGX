@@ -58,5 +58,5 @@ kind each level actually produced over 600 draws, not by reading the code.
 | AC3 | ✅ (s1) Engine gate: every grid's target has 1–3 ways, and each way is independently re-derived from PLY-003's table (not read from the script) and agrees. |
 | AC4 | ✅ (s1) Engine gate: `Logic/Check hunt pick` agrees with the grader on every kind. |
 | AC5 | ✅ (s1) Engine gate: the instruction says the target in the child's own punctuation — `5,3` in French, `5.3` in English. |
-| AC6 | Drive, FR and EN: play a hunt at CE2 and at 6e; the instructions read correctly and a correct pick is accepted on every kind. |
+| AC6 | ✅ (s2) **DRIVEN GREEN, both languages and both ends of the range.** `--scenario ply003`, 8/8, exit 0. CE2 asked *Choisis 2 nombres qui font 100* and *Pick 2 numbers that make 100*; 6e asked *dont le produit fait 18*, *multiply to 63* and *where the bigger ÷ the smaller makes 6* — so the kinds do differ by class on the screen, not only in the table. In every case the drive read the instruction, found a true pair on the grid, tapped it, and the `found n of m` count went up. |
 | AC7 | Richard plays a hunt at two classes and says whether the range and the age-fit are right. |

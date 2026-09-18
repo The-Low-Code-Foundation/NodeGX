@@ -414,8 +414,8 @@
     "Profiles/New player form": {
       "path": "Profiles/New player form",
       "type": "visual",
-      "nodeCount": 62,
-      "connectionCount": 107,
+      "nodeCount": 60,
+      "connectionCount": 110,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -710,7 +710,7 @@
   },
   "stats": {
     "totalComponents": 88,
-    "totalNodes": 914,
-    "totalConnections": 2277
+    "totalNodes": 912,
+    "totalConnections": 2280
   }
 }

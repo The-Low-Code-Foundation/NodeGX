@@ -1631,10 +1631,9 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     logic('nfRollRoll', logicName('Logic/Roll face'), 'Roll, and add it', { action: 'roll' }),
     logic('nfRollBack', logicName('Logic/Roll face'), 'The face before', { action: 'back' }),
     logic('nfRollFwd', logicName('Logic/Roll face'), 'The face after', { action: 'forward' }),
-    // 🔴 D55: an Expression with no delivered input never evaluates, so both buttons start `mounted: false` and the
-    // form's own Reset is what first delivers these.
-    logic('nfCanBack', EXPRESSION_NODE, 'Is there a face before?', { expression: 'at > 0' }),
-    logic('nfCanFwd', EXPRESSION_NODE, 'Is there a face after?', { expression: 'at >= 0 && at < n - 1' }),
+    // 🔴 D55 still applies: both arrows start `mounted: false`, and the form's own
+    // Reset is what first delivers a value — now `Logic/Roll face`'s own
+    // canBack/canForward rather than two Expressions recomputing them.
     // Defaults, applied on Reset (the page fires it when the form opens).
     logic('nfDefaultLook', EXPRESSION_NODE, 'pixel-art', { expression: "'pixel-art'" }),
     logic('nfDefaultLevel', EXPRESSION_NODE, 'CE2', { expression: "'CE2'" }),
@@ -1713,15 +1712,20 @@ const NEW_PLAYER_FORM: Tpl007Component = {
       wire(n, 'history', 'nfSetHist', 'value'),
       wire(n, 'at', 'nfSetAt', 'value'),
       wire(n, 'position', 'nfPos', 'text'),
+      // 🔴 PLY-005, found by driving: the arrows mount from the SCRIPT'S OWN
+      // `canBack`/`canForward`, which is the only place either is worked out.
+      // They used to come from two Expression nodes beside it, and the forward
+      // one was fed the history ARRAY as `n` and asked `at < n - 1` — an array
+      // minus a number is NaN, every comparison against it is false, and ▶
+      // could therefore never mount at all. ◀ survived only because `at > 0`
+      // needs nothing but `at`. RKT-007's rule is the fix: one formula, and
+      // nothing downstream recomputes it.
+      wire(n, 'canBack', 'nfBack', 'mounted'),
+      wire(n, 'canForward', 'nfForward', 'mounted'),
       wire(n, 'done', 'nfSetSeed', 'do')
     ]),
     wire('nfSetSeed', 'done', 'nfSetHist', 'do'),
     wire('nfSetHist', 'done', 'nfSetAt', 'do'),
-    wire('nfAtVar', 'value', 'nfCanBack', 'at'),
-    wire('nfAtVar', 'value', 'nfCanFwd', 'at'),
-    wire('nfHistVar', 'value', 'nfCanFwd', 'n'),
-    wire('nfCanBack', 'result', 'nfBack', 'mounted'),
-    wire('nfCanFwd', 'result', 'nfForward', 'mounted'),
     // Reset: defaults, and a fresh seed.
     wire('nfDefaultLook', 'result', 'nfResetLook', 'value'),
     wire('nfIn', 'reset', 'nfResetLook', 'do'),

@@ -227,6 +227,18 @@
     },
     {
       "fromId": "nfRollSet",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollSet",
       "fromProperty": "done",
       "toId": "nfSetSeed",
       "toProperty": "do"
@@ -266,6 +278,18 @@
       "fromProperty": "position",
       "toId": "nfPos",
       "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
     },
     {
       "fromId": "nfRollRoll",
@@ -311,6 +335,18 @@
     },
     {
       "fromId": "nfRollBack",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollBack",
       "fromProperty": "done",
       "toId": "nfSetSeed",
       "toProperty": "do"
@@ -350,6 +386,18 @@
       "fromProperty": "position",
       "toId": "nfPos",
       "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
     },
     {
       "fromId": "nfRollFwd",
@@ -368,36 +416,6 @@
       "fromProperty": "done",
       "toId": "nfSetAt",
       "toProperty": "do"
-    },
-    {
-      "fromId": "nfAtVar",
-      "fromProperty": "value",
-      "toId": "nfCanBack",
-      "toProperty": "at"
-    },
-    {
-      "fromId": "nfAtVar",
-      "fromProperty": "value",
-      "toId": "nfCanFwd",
-      "toProperty": "at"
-    },
-    {
-      "fromId": "nfHistVar",
-      "fromProperty": "value",
-      "toId": "nfCanFwd",
-      "toProperty": "n"
-    },
-    {
-      "fromId": "nfCanBack",
-      "fromProperty": "result",
-      "toId": "nfBack",
-      "toProperty": "mounted"
-    },
-    {
-      "fromId": "nfCanFwd",
-      "fromProperty": "result",
-      "toId": "nfForward",
-      "toProperty": "mounted"
     },
     {
       "fromId": "nfDefaultLook",

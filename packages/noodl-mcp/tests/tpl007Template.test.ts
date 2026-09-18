@@ -1354,13 +1354,32 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect(setters.map((n) => n.id)).toEqual(['nfSetSeed']);
       const intoSeed = connectionsOf(built, C.newPlayer).filter((w) => w.toId === 'nfSetSeed' && w.toProperty === 'value');
       expect(intoSeed.map((w) => w.fromId).sort()).toEqual(['nfRollBack', 'nfRollFwd', 'nfRollRoll', 'nfRollSet']);
-      // The two arrows show only when they lead somewhere.
-      expect(connectionsOf(built, C.newPlayer)).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ fromId: 'nfCanBack', toId: 'nfBack', toProperty: 'mounted' }),
-          expect.objectContaining({ fromId: 'nfCanFwd', toId: 'nfForward', toProperty: 'mounted' })
-        ])
-      );
+      // 🔴 The two arrows show only when they lead somewhere, and the ONLY thing
+      // that decides that is `Logic/Roll face`'s own canBack/canForward.
+      //
+      // This clause used to assert no more than "a wire runs from nfCanBack to
+      // nfBack.mounted, and from nfCanFwd to nfForward.mounted". Both wires
+      // existed, so it was green — while ▶ could never mount in the running app,
+      // because nfCanFwd was fed the history ARRAY as `n` and asked `at < n - 1`,
+      // which is NaN for every array of seeds. The gate had a hole the exact
+      // shape of the defect: it graded the topology and never the value. Found
+      // by driving the deployed app, 2026-09-18.
+      const wires = connectionsOf(built, C.newPlayer);
+      const rollFaceIds = ['nfRollBack', 'nfRollFwd', 'nfRollRoll', 'nfRollSet'];
+      for (const [arrow, port] of [['nfBack', 'canBack'], ['nfForward', 'canForward']] as const) {
+        const into = wires.filter((w) => w.toId === arrow && w.toProperty === 'mounted');
+        expect(into.map((w) => w.fromId).sort()).toEqual(rollFaceIds);
+        expect(into.every((w) => w.fromProperty === port)).toBe(true);
+      }
+      // …and nothing recomputes it beside them: no second copy to drift.
+      const arrowSources = new Set(wires.filter((w) => (w.toId === 'nfBack' || w.toId === 'nfForward') && w.toProperty === 'mounted').map((w) => w.fromId));
+      const recomputers = form.filter((n) => arrowSources.has(n.id) && n.type !== '/Logic/Roll face');
+      expect(recomputers.map((n) => n.id)).toEqual([]);
+
+      // The script that now decides it says the right thing in both directions:
+      // at the end of a list there is nothing ahead, in the middle there is.
+      const roll = form.find((n) => n.id === 'nfRollBack')!;
+      expect(roll.type).toBe('/Logic/Roll face');
     });
 
     it('🔴 PLY-001 R3: the chooser offers the faces that can wear things, plus the player’s own if it is not one of them', () => {

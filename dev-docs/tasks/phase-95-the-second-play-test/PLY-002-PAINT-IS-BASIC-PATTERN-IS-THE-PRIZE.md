@@ -100,7 +100,17 @@ Buy Polka dots?
 | AC3 | ✅ (s1) Engine gate: paint and pattern are two layers — a second paint replaces the paint and leaves the decal alone. |
 | AC4 | Kit gate: each of the seven decals draws shapes that are inside the hull path, differ from no-pattern, and differ from each other. Sabotage: drop the hull clip and a decal spills onto the fins. |
 | AC5 | Template gate: every price is `PAINT_COST`, `PATTERN_COSTS` or the shelf's own `cost`; a `free` item costs 0 and nothing else does; white passes ≥ 3:1 against every paint token. |
-| AC6 | Drive, FR 390×844 and EN 1366×768: tap an unowned pattern → the dialog says balance, cost and what is left, and **the three numbers add up** → No changes nothing → Yes buys it, the purse drops by exactly the price, and the next race's rocket wears it. **Read on the screenshot.** |
-| AC7 | Drive: a tap on an OWNED item wears it with no dialog; a tap on one too dear opens no dialog. |
+| AC6 | ✅ (s2) **DRIVEN GREEN, both arms.** `drive-ply-rocket.js --scenario ply002`, 44/44 clauses, exit 0, on the deployed build of `a85a74be7`+. Read on the screenshot: the FR card at 390×844 says *Acheter Pois ? · Tu as 500 ⭐ · Ça coûte −120 ⭐ · Il te restera 380 ⭐*, whole and unclipped; 500 − 120 = 380; No changes nothing (`spent` 0 → 0); Yes charges exactly 120, `stars` never drops, the item lands in `owned`, the purse on screen reads 380, and the next race's rocket carries `data-pattern` — the dots are visible on the hull in `13-ply002-en-race-decal.png`. |
+| AC7 | ✅ (s2) **DRIVEN GREEN, both arms.** An owned tile opens no card; with a purse of 100 the 220 ⭐ tile reads `🔒 220 ⭐ · 120 more` / `🔒 220 ⭐ · encore 120`, opens no card, and charges nothing. |
 | AC8 | Engine gate: a v2 save code restores with `spent: 0` and every item still owned; a v3 code round-trips the purse. |
 | AC9 | Richard buys something he had to save for, and says whether the prices and the dialog feel right. |
+
+## 5. What the drive found that no gate could
+
+Both are for Richard, not defects that block AC6:
+
+- **The shelf disappears behind the card.** §3.4 says the confirm surface sits *over the shelf*; it replaces it. On a
+  laptop the card then sits alone in the top-left of an otherwise empty page (`09-ply002-en-buy-card.png`).
+- 🔴 **Closing the card returns the shelf to the FACE tab**, losing the tab the child was browsing. This cost the
+  drive two cycles and one wrong reading: the first run pressed No, re-tapped at the same place, and bought a 40 ⭐
+  face item while believing it was grading a 120 ⭐ pattern.

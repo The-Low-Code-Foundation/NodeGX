@@ -113,6 +113,51 @@ filling. A charged turbo is a button beside Next, not a hidden state.
 | AC5 | ✅ (s1) Engine gate: the chain charges at exactly 3 in a row, holds one, survives a wrong answer once charged, and is spent only while behind. Sabotage: let it charge at 2. |
 | AC6 | ✅ (s1) Engine gate, the one that grades Richard's sentence: a bad start wins ≥ 15% with the comeback on and ≤ 2% with it off, **and** a clean race rises by no more than 15 points, **and** a child guessing still wins ≤ 35%. Four clauses, because a fix that makes the race easy is not a fix. *As built: 1% → 57%, clean 98% → 98%, guessing 13%.* |
 | AC7 | 🔜 **Not built.** Layer 3 (the bought Starter turbo) is designed in §3.2 and nothing of it exists yet: no shelf row, no `boosts` count on the profile, no consume at the start of a race. Layers 1 and 2 deliver the comeback without it, so this is a task and not a hole. Its clause: layer 3 is off in a two-player race, and a bought turbo is consumed exactly once. |
-| AC8 | Drive, FR 390×844 and EN 1366×768 — **the whole of what is left to prove.** Lose the first four answers on purpose, then answer three right → the pips fill → the turbo button appears → fire it → the next right answer moves the rocket **twice** the distance the line says a plain one would, and the line says why. **Read on the screenshot.** |
-| AC9 | Drive: the avatar is legible in the rocket window at all five viewports. |
+| AC8 | 🟡 (s2) **DRIVEN — the comeback works, at SIX misses not four, and the line that says why is clipped on the phone.** `--scenario ply006`. The chain line counts `1/3 → 2/3`, the turbo charges on the third right answer, `⚡ Fire the turbo!` appears and is reachable (not behind a blocker), firing it puts `⚡⚡ turbo fired` / `turbo lancé` in the line, and the answer it grades wins **1.81–1.85×** the distance of the preceding plain right answer — read from the kit's own `data-gain` dasharray, which is the app's own arithmetic. Not exactly 2× because `gain = RACE_STEP × speed × slip × turboMult` and the slipstream shrinks as the gap closes. **Two findings, both in §5.** |
+| AC9 | 🔴 **RED (s2) at ALL FIVE viewports.** Measured on the rendered `<image>` in a real race: **15, 15, 15, 19 and 14 px** at 1366×768, 1280×720, 1024×768, 768×1024 and 390×844 — short of 20 by 1 to 6 px. See §5. |
 | AC10 | Richard comes back from a bad start, and says whether it felt earned or given. |
+
+## 5. What driving found that the gates could not (s2, 2026-09-18)
+
+### 5.1 🔴 AC2's ≥ 20 px is true of the kit and false of the race
+
+AC2 is green and honest: it reads the kit's own exported `rocket` seam at `ROCKET_SIZE_DEFAULT = 72`, where the face
+is `72 × 2·12.5 ÷ 78 ≈ 23 px`. **The race never draws at that size.** Its course box is `30vh` capped at `56vw`
+(`rtRoot`), and the sprite is fitted to that box, so what a child actually sees is:
+
+| viewport | course svg | rocket hull | face | AC2 wants |
+|---|---|---|---|---|
+| 1366×768 | 928×230 | 39×19 | **15 px** | ≥ 20 |
+| 1280×720 | 928×216 | 39×19 | **15 px** | ≥ 20 |
+| 1024×768 | 928×230 | 39×19 | **15 px** | ≥ 20 |
+| 768×1024 | 736×307 | 50×25 | **19 px** | ≥ 20 |
+| 390×844 | 358×218 | 39×18 | **14 px** | ≥ 20 |
+
+The hull is 39 px for a sprite that is 78 units long — the race draws the rocket at **half** unit scale. `kit.js:533`
+claims "a phone draws a face of about 26px instead of 12"; the measured phone face is **14 px**. Richard's finding 6a
+("too small to see yourself in") is **not fixed on the screen**, only in the kit's geometry. A budget measured on a
+fixture bounds the fixture. At 390×844 the two rockets also start stacked on each other with their name labels
+overlapping them (`29-ply006-face-390x844.png`).
+
+### 5.2 🔴 The verdict line is clipped at both ends on the phone
+
+At FR 390×844 the fired-turbo line runs off **both** edges. Measured on its own box:
+
+```
+text  : "⚡ 2,8 s · turbo à fond · ⚡⚡ turbo lancé · 🌀 aspiration +2 %"
+left  : -7      right: 397      innerWidth: 390      (overflows 7 px each side)
+```
+
+so the leading ⚡ is cut off the left and the slipstream figure off the right
+(`05-ply006-fr-turbo-fired.png`). AC8 asks that the line **say why**, and on a phone a child cannot read the whole
+why. EN 1366×768 is clean. This is the longest the line ever gets — speed, turbo and slipstream at once — and it
+exists for exactly one answer per race, which is why no earlier drive met it. `innerText` holds the whole string
+either way, so only a box measurement or the picture can see it.
+
+### 5.3 AC8's "four" should be six
+
+After **four** misses the chain still charges (`race.turbo` → 1 on the third right answer) but the button never
+appears: by then the slipstream has pulled the child back inside `BEHIND_FROM` (0.15), and `rdCanFire` requires
+`behind`. The turbo is not lost — it waits for the next time they fall behind — but AC8's sequence cannot be
+completed at four. At **six** the gap survives three right answers and the button appears. Either the AC's number
+moves to six, or a charged turbo becomes spendable while level; **Richard's call.**
