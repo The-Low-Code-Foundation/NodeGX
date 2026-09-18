@@ -64,8 +64,14 @@
       "toProperty": "label"
     },
     {
+      "fromId": "nfIn",
+      "fromProperty": "look0",
+      "toId": "nfLookItems",
+      "toProperty": "in-look"
+    },
+    {
       "fromId": "nfLookItems",
-      "fromProperty": "items",
+      "fromProperty": "out-items",
       "toId": "nfLook",
       "toProperty": "items"
     },

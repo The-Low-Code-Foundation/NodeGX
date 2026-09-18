@@ -70,7 +70,7 @@ back; a slow one only holds it."*
 | AC2 | ✅ (s1) Engine gate: a slow right answer holds it, a quick one pushes it back, wrong answers accumulate. Sabotage arm: restore the full knock-back and the same sequence reads one creep in. |
 | AC3 | ✅ (s1) Engine gate: measured over 120 seeded games, a child at 40% right loses >40% of games, a child at 75% loses <10% **but spends >0.25 hearts**. Sabotage arm: restore the full knock-back and both numbers fall. |
 | AC4 | ✅ (s1) Engine gate: Challenge is unchanged — a right answer still knocks it all the way back, and the creep is still a quarter. |
-| AC5 | Template gate: `Monster/Play` has a `mode` input, wired from the setup, and **no node in the template places `Race/Round` with a literal mode**. Sabotage arm. |
+| AC5 | ✅ (s1) Template gate: `Monster/Play` has a `mode` input, wired from the setup, and **no node in the template places `Race/Round` with a literal mode**. Sabotage arm. |
 | AC6 | Drive, FR 390×844: start a Monster game in **Typing**, Practice — words are asked, the keyboard shows, and the lane behaves. |
 | AC7 | Drive: answer slowly and correctly three times in Practice → the monster has not moved back; answer quickly → it does. **Read on the screenshot.** |
 | AC8 | Richard plays Entraînement and says whether it is now losable without being Défi. |

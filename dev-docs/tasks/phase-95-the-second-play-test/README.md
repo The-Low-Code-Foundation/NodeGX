@@ -4,7 +4,24 @@
 **hangar, Number Hunt and Monster Gate**, all of which shipped in [P87](../phase-87-the-first-play-test/README.md)
 and [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) without a child ever touching them.
 
-**Status: 🏗️ IN PROGRESS — 0/6 closed.**
+**Status: 🏗️ IN PROGRESS — 0/6 closed** (every close waits on Richard's replay).
+
+**Session 1 built the engine of all six and the surfaces of four.** 344 gates green
+(`tpl007Engine` 200, `tpl007GameKit` 47, `tpl007Template` 97 — up from 322), and
+`npm run template:rocket` reproduces the template byte-for-byte on a second run.
+
+| | built | gated | driven |
+|---|---|---|---|
+| [PLY-001](PLY-001-THE-HANGAR-FITS-THE-FACE-YOU-CHOSE.md) the shelf fits the face | ✅ | ✅ AC2–AC6 | — |
+| [PLY-002](PLY-002-PAINT-IS-BASIC-PATTERN-IS-THE-PRIZE.md) paint basic, pattern the prize | ✅ | ✅ AC2, AC3 | — |
+| [PLY-003](PLY-003-MORE-WAYS-TO-HUNT-A-NUMBER.md) more ways to hunt | ✅ | ✅ AC2–AC5 | — |
+| [PLY-004](PLY-004-THE-MONSTER-CAN-TYPE-AND-PRACTICE-CAN-BE-LOST.md) the monster types, and can win | ✅ | ✅ AC2–AC5 | — |
+| [PLY-005](PLY-005-A-STEP-BACK-IN-THE-FACE-ROLL.md) a step back in the roll | ✅ | ✅ AC2–AC5 | — |
+| [PLY-006](PLY-006-BIGGER-ROCKETS-AND-A-WAY-BACK-INTO-THE-RACE.md) bigger rockets, a way back | 🟡 layers 1–2 | ✅ AC2–AC6 | — |
+
+🔴 **Nothing here has been driven.** Every AC that says "Drive" is open, and a green gate
+closes nothing in this phase (§6). **The one thing still unbuilt is PLY-006's layer 3**, the
+bought Starter turbo (R2) — designed, not written; the comeback works without it.
 
 **Prefix: `PLY`.**
 

@@ -160,6 +160,66 @@
       "toProperty": "showMeWord"
     },
     {
+      "fromId": "rpIn",
+      "fromProperty": "turboWord",
+      "toId": "rpRound",
+      "toProperty": "turboWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "chargingWord",
+      "toId": "rpRound",
+      "toProperty": "chargingWord"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpMineAt",
+      "toProperty": "a"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpMineAt",
+      "toProperty": "b"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpMineAt",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpTheirsAt",
+      "toProperty": "a"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpTheirsAt",
+      "toProperty": "b"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpTheirsAt",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpMineAt",
+      "fromProperty": "result",
+      "toId": "rpRound",
+      "toProperty": "myAt"
+    },
+    {
+      "fromId": "rpTheirsAt",
+      "fromProperty": "result",
+      "toId": "rpRound",
+      "toProperty": "cpuAt"
+    },
+    {
       "fromId": "rpA",
       "fromProperty": "value",
       "toId": "rpTrack",
@@ -194,6 +254,12 @@
       "fromProperty": "seedA",
       "toId": "rpTrack",
       "toProperty": "seedA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "patternA",
+      "toId": "rpTrack",
+      "toProperty": "patternA"
     },
     {
       "fromId": "rpIn",

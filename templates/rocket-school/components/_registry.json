@@ -335,7 +335,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 132,
+      "connectionCount": 134,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -415,7 +415,7 @@
       "path": "Profiles/New player form",
       "type": "visual",
       "nodeCount": 62,
-      "connectionCount": 106,
+      "connectionCount": 107,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -463,7 +463,7 @@
       "path": "Game/Race track",
       "type": "visual",
       "nodeCount": 12,
-      "connectionCount": 28,
+      "connectionCount": 29,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -550,8 +550,8 @@
     "Race/Round": {
       "path": "Race/Round",
       "type": "visual",
-      "nodeCount": 17,
-      "connectionCount": 95,
+      "nodeCount": 23,
+      "connectionCount": 116,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -566,8 +566,8 @@
     "Race/Play": {
       "path": "Race/Play",
       "type": "visual",
-      "nodeCount": 51,
-      "connectionCount": 166,
+      "nodeCount": 53,
+      "connectionCount": 177,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -671,7 +671,7 @@
       "path": "Pages/Race",
       "type": "page",
       "nodeCount": 31,
-      "connectionCount": 109,
+      "connectionCount": 112,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -710,7 +710,7 @@
   },
   "stats": {
     "totalComponents": 88,
-    "totalNodes": 906,
-    "totalConnections": 2238
+    "totalNodes": 914,
+    "totalConnections": 2277
   }
 }

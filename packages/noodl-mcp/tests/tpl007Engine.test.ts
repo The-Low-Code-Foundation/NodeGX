@@ -58,6 +58,8 @@ import {
   FUNCTION_SCRIPTS,
   GRADE_ANSWER_SCRIPT,
   COMEBACK,
+  ROLL_FACE_SCRIPT,
+  ROLL_HISTORY,
   SHOP_FROM,
   HANGAR_SHELF_SCRIPT,
   HELPERS,
@@ -1703,6 +1705,71 @@ describe('TPL-007 — the engine', () => {
       expect(Object.keys(row).filter((k) => /star/i.test(k))).toEqual([]);
       // Known-firing: the same filter finds the field in the profile itself.
       expect(Object.keys(row.model).filter((k) => /star/i.test(k))).toEqual(['stars']);
+    });
+  });
+
+  describe('PLY-005 — the faces rolled, and the way back through them', () => {
+    const roll = (inputs: Record<string, unknown>) => runScript(ROLL_FACE_SCRIPT, inputs);
+    /** Walk a list of actions the way the form does: each move's history and place feed the next. */
+    const walk = (moves: Array<[string, string?]>) => {
+      let state: Record<string, any> = { history: [], at: -1 };
+      const seen: Array<Record<string, any>> = [];
+      for (const [action, seed] of moves) {
+        state = roll({ history: state.history, at: state.at, action, seed });
+        seen.push(state);
+      }
+      return { last: state, seen };
+    };
+
+    it('🔴 AC2: roll five, walk back five, and the faces come back in reverse; forward returns', () => {
+      const five: Array<[string, string?]> = [['set', 'a'], ['roll', 'b'], ['roll', 'c'], ['roll', 'd'], ['roll', 'e']];
+      const rolled = walk(five);
+      expect([rolled.last.seed, rolled.last.history, rolled.last.canBack, rolled.last.canForward]).toEqual(['e', ['a', 'b', 'c', 'd', 'e'], true, false]);
+      let state = rolled.last;
+      const back: string[] = [];
+      for (let i = 0; i < 6; i++) { state = roll({ ...state, action: 'back' }); back.push(state.seed); }
+      // 🔴 Five steps back reach the first face, and a sixth changes nothing — Back at the start is not an error.
+      expect(back).toEqual(['d', 'c', 'b', 'a', 'a', 'a']);
+      expect([state.canBack, state.canForward, state.position]).toEqual([false, true, '1/5']);
+      const forward: string[] = [];
+      for (let i = 0; i < 6; i++) { state = roll({ ...state, action: 'forward' }); forward.push(state.seed); }
+      expect(forward).toEqual(['b', 'c', 'd', 'e', 'e', 'e']);
+      expect([state.canBack, state.canForward, state.position]).toEqual([true, false, '5/5']);
+    });
+
+    it('🔴 AC3: a roll from the middle appends at the end and loses nothing — every earlier face is still reachable', () => {
+      let state: Record<string, any> = walk([['set', 'a'], ['roll', 'b'], ['roll', 'c']]).last;
+      state = roll({ ...state, action: 'back' });
+      state = roll({ ...state, action: 'back' });
+      expect([state.seed, state.at]).toEqual(['a', 0]);
+      // Rolling from the first face keeps b and c, and steps to the new one.
+      state = roll({ ...state, action: 'roll', seed: 'd' });
+      expect([state.seed, state.history, state.at]).toEqual(['d', ['a', 'b', 'c', 'd'], 3]);
+      // And b and c are still there to walk back to.
+      const walked: string[] = [];
+      for (let i = 0; i < 3; i++) { state = roll({ ...state, action: 'back' }); walked.push(state.seed); }
+      expect(walked).toEqual(['c', 'b', 'a']);
+    });
+
+    it('AC4: set starts the list at exactly one face, so a form that has just opened has nothing to go back to', () => {
+      const opened = roll({ history: ['x', 'y', 'z'], at: 2, action: 'set', seed: 'fresh' });
+      expect([opened.history, opened.at, opened.seed, opened.canBack, opened.canForward, opened.position]).toEqual([['fresh'], 0, 'fresh', false, false, '1/1']);
+      // An existing player's own face is where their list starts.
+      expect(roll({ history: [], at: -1, action: 'set', seed: 'Léa' }).history).toEqual(['Léa']);
+    });
+
+    it('the history is capped, and a move that cannot apply changes nothing', () => {
+      let state: Record<string, any> = roll({ history: [], at: -1, action: 'set', seed: 's0' });
+      for (let i = 1; i <= ROLL_HISTORY + 10; i++) state = roll({ ...state, action: 'roll', seed: `s${i}` });
+      expect(state.history.length).toBe(ROLL_HISTORY);
+      // The cap drops the OLDEST, and the newest is what is drawn.
+      expect([state.history[state.history.length - 1], state.history[0]]).toEqual([`s${ROLL_HISTORY + 10}`, `s${11}`]);
+      // A roll with no seed, and an action that is not one, leave the list exactly as it was.
+      const before = { history: state.history, at: state.at };
+      expect(roll({ ...before, action: 'roll', seed: '' }).history).toEqual(before.history);
+      expect(roll({ ...before, action: 'sideways' }).at).toBe(before.at);
+      // Junk in: no crash, and an empty list is honest about having nothing to walk.
+      expect(roll({ history: 'not a list', at: 'nowhere', action: 'back' })).toEqual(expect.objectContaining({ history: [], canBack: false, canForward: false, position: '' }));
     });
   });
 

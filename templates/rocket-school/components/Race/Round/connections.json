@@ -5,6 +5,132 @@
   "connections": [
     {
       "fromId": "rdIn",
+      "fromProperty": "myAt",
+      "toId": "rdGrade",
+      "toProperty": "myAt"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "cpuAt",
+      "toId": "rdGrade",
+      "toProperty": "cpuAt"
+    },
+    {
+      "fromId": "rdArmed",
+      "fromProperty": "on",
+      "toId": "rdGrade",
+      "toProperty": "useTurbo"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "slipPct",
+      "toId": "rdOut",
+      "toProperty": "slipPct"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chain",
+      "toId": "rdOut",
+      "toProperty": "chain"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainOf",
+      "toId": "rdOut",
+      "toProperty": "chainOf"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainReady",
+      "toId": "rdOut",
+      "toProperty": "chainReady"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "turboUsed",
+      "toId": "rdOut",
+      "toProperty": "turboUsed"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "behind",
+      "toId": "rdOut",
+      "toProperty": "behind"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chain",
+      "toId": "rdChainLine",
+      "toProperty": "in-n"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainOf",
+      "toId": "rdChainLine",
+      "toProperty": "in-of"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainReady",
+      "toId": "rdChainLine",
+      "toProperty": "in-ready"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "chargingWord",
+      "toId": "rdChainLine",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "rdChainLine",
+      "fromProperty": "out-line",
+      "toId": "rdCharging",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "turboWord",
+      "toId": "rdTurbo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainReady",
+      "toId": "rdCanFire",
+      "toProperty": "ready"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "behind",
+      "toId": "rdCanFire",
+      "toProperty": "behind"
+    },
+    {
+      "fromId": "rdBanner",
+      "fromProperty": "isOpen",
+      "toId": "rdCanFire",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "rdCanFire",
+      "fromProperty": "result",
+      "toId": "rdTurbo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rdTurbo",
+      "fromProperty": "onClick",
+      "toId": "rdArmed",
+      "toProperty": "to-armed"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "done",
+      "toId": "rdArmed",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rdIn",
       "fromProperty": "ask",
       "toId": "rdNonce",
       "toProperty": "increase"

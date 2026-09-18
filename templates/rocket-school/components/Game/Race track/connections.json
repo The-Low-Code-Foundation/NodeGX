@@ -83,6 +83,12 @@
     },
     {
       "fromId": "rtIn",
+      "fromProperty": "patternA",
+      "toId": "rtTrack",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "rtIn",
       "fromProperty": "lookB",
       "toId": "rtTrack",
       "toProperty": "styleB"

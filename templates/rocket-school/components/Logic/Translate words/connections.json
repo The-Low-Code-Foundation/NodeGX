@@ -719,6 +719,18 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-turboCharging",
+      "toId": "translateworOut",
+      "toProperty": "turboCharging"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-turboReady",
+      "toId": "translateworOut",
+      "toProperty": "turboReady"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-twoPlayers",
       "toId": "translateworOut",
       "toProperty": "twoPlayers"

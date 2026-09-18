@@ -38,11 +38,11 @@ the position he describes. `ROLL_HISTORY = 30`.
 
 | AC | Clause |
 |---|---|
-| AC1 | **RED on today's build:** roll twice, and the first face is unreachable. Recorded. |
-| AC2 | Engine gate: roll ×5 then back ×5 gives the five faces in reverse; forward ×5 returns; back at the start and forward at the end change nothing. |
-| AC3 | Engine gate: a roll from the middle appends at the end and loses nothing — every earlier face is still reachable with Back. |
-| AC4 | Engine gate: `set` starts the list at exactly one face, so a form that has just opened has nothing to go back to. |
-| AC5 | Template gate: the form places `Logic/Roll face` once per action and nothing writes `newSeed` outside it. |
+| AC1 | ✅ (s1) **RED on today's build:** roll twice, and the first face is unreachable. Recorded. |
+| AC2 | ✅ (s1) Engine gate: roll ×5 then back ×5 gives the five faces in reverse; forward ×5 returns; back at the start and forward at the end change nothing. |
+| AC3 | ✅ (s1) Engine gate: a roll from the middle appends at the end and loses nothing — every earlier face is still reachable with Back. |
+| AC4 | ✅ (s1) Engine gate: `set` starts the list at exactly one face, so a form that has just opened has nothing to go back to. |
+| AC5 | ✅ (s1) Template gate: the form places `Logic/Roll face` once per action and nothing writes `newSeed` outside it. |
 | AC6 | Drive, FR 390×844 and EN 1366×768: roll three times, press ◀ twice → the second face is drawn and the counter reads `2/4`; ▶ returns; create the player and the face created is the one shown. |
 | AC7 | Drive: open Edit player on an existing child → the face shown is theirs and ◀ is not offered until they roll. |
 | AC8 | Richard rolls past one on purpose and says whether getting back to it is obvious. |

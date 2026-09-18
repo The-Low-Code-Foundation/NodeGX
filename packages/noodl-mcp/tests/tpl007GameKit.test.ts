@@ -399,7 +399,7 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     const S1_COURSE = "M 60 360 C 160 360, 180 140, 300 140 S 420 330, 520 330 S 640 90, 760 90 S 880 250, 940 200";
     const track = () => kit.reactNodes.find((n) => n.name === "game-kit.RaceTrack")!;
     /** PLY-006: the rocket's own numbers, read off the kit rather than copied into the gate. */
-    const rocket = () => track().rocket as { patterns: Record<string, unknown[]>; patternIds: string[]; windowR: number; windowCx: number; units: number; sizeDefault: number };
+    const rocket = () => track().rocket as { patterns: Record<string, unknown[]>; patternIds: string[]; patternShapes: (id: string, key: string) => Array<{ props: Record<string, unknown> }> | null; windowR: number; windowCx: number; units: number; sizeDefault: number };
     const layout = () => track().layout as {
       chooseCourse: (aspect: unknown, path: unknown, box: { w: number; h: number } | null) => { id: string; w: number; h: number; d: string };
       spriteScale: (course: { w: number; h: number }, box: { w: number; h: number } | null, rocketSize: unknown) => number;

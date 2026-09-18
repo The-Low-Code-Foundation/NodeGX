@@ -340,6 +340,24 @@
       "toProperty": "paintA"
     },
     {
+      "fromId": "rcMe",
+      "fromProperty": "pattern",
+      "toId": "rcPlay",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "turboReady",
+      "toId": "rcPlay",
+      "toProperty": "turboWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "turboCharging",
+      "toId": "rcPlay",
+      "toProperty": "chargingWord"
+    },
+    {
       "fromId": "rcCurriculum",
       "fromProperty": "skills",
       "toId": "rcPlay",

@@ -729,6 +729,9 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   yesBuy: s('Yes, buy it', 'Oui, achète'),
   noThanks: s('No', 'Non'),
   ownedElsewhere: s('for other faces', 'pour d’autres têtes'),
+  // P95 PLY-006: the chain, and the turbo it charges. The child fires it — that choice is the point.
+  turboReady: s('⚡ Fire the turbo!', '⚡ Lance le turbo !'),
+  turboCharging: s('⚡ {n}/{of} right in a row', '⚡ {n}/{of} bonnes de suite'),
   hangarBlurb: s('Dress up your face and paint your rocket.', 'Habille ta tête et peins ta fusée.'),
   faceTab: s('Face', 'Visage'),
   rocketTab: s('Rocket', 'Fusée'),

@@ -28,7 +28,7 @@ import { execSync } from 'child_process';
 
 import type { LegacyConnection, LegacyNode } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 
-import { CURRICULUM, HANGAR_SHELF, HangarItem, WORDS } from './tpl007Curriculum';
+import { CURRICULUM, HANGAR_LOOKS, HANGAR_SHELF, HangarItem, WORDS } from './tpl007Curriculum';
 import { APP_CSS, C, CONTENT_SIZED_TEXTS, DATA_COMPONENTS, LOGIC_COMPONENTS, MONSTER_PIXELS, PAGES, REQUIRED_MODULES, TPL007_COMPONENTS } from './tpl007Components';
 import { buildEffectiveTokens, checkFontFaces } from '../src/editor-deps';
 import { reducedMotionReport } from './reducedMotion';
@@ -1309,6 +1309,77 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       expect([params(C.huntPlay, 'hpNote').color, connectionsOf(built, C.huntPlay).filter((c) => c.toId === 'hpNote' && c.toProperty === 'color')]).toEqual([ROLE.ink, []]);
       expect(reducedMotionReport(APP_CSS)).toMatchObject({ unstilled: [] });
       expect(reducedMotionReport(APP_CSS).animated).toEqual(expect.arrayContaining(['rkt-shake-a', 'rkt-shake-b']));
+    });
+  });
+
+  describe('P95 — what PLY-005 and PLY-006 wired into the graph', () => {
+    it('🔴 PLY-006: the race tells the grader the gap, and it tells it from the rocket that is ANSWERING', () => {
+      // Race/Round hands the gap and the armed turbo straight to the grader — nothing downstream recomputes any of it.
+      expect(connectionsOf(built, C.raceRound)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ fromId: 'rdIn', fromProperty: 'myAt', toId: 'rdGrade', toProperty: 'myAt' }),
+          expect.objectContaining({ fromId: 'rdIn', fromProperty: 'cpuAt', toId: 'rdGrade', toProperty: 'cpuAt' }),
+          expect.objectContaining({ fromId: 'rdArmed', fromProperty: 'on', toId: 'rdGrade', toProperty: 'useTurbo' })
+        ])
+      );
+      // 🔴 The armed turbo is per instance. Race/Round is placed twice (Race/Play and Monster/Play), so a Variable
+      // would have been one flag shared between a race and a monster game — the door says so, and this holds it.
+      const armed = nodesOf(built, C.raceRound).find((n) => n.id === 'rdArmed')!;
+      expect(armed.type).toBe('States');
+      expect(nodesOf(built, C.raceRound).filter((n) => n.type === 'Variable' || n.type === 'Set Variable')).toEqual([]);
+      // 🔴 And the pair is SWAPPED on player two's turn: B's "behind" is behind A, not behind the computer.
+      const play = nodesOf(built, C.racePlay);
+      expect(play.find((n) => n.id === 'rpMineAt')!.parameters!.expression).toBe('isB ? b : a');
+      expect(play.find((n) => n.id === 'rpTheirsAt')!.parameters!.expression).toBe('isB ? a : b');
+      expect(connectionsOf(built, C.racePlay)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ fromId: 'rpMineAt', toId: 'rpRound', toProperty: 'myAt' }),
+          expect.objectContaining({ fromId: 'rpTheirsAt', toId: 'rpRound', toProperty: 'cpuAt' }),
+          expect.objectContaining({ fromId: 'rpTurnIsB', toId: 'rpMineAt', toProperty: 'isB' })
+        ])
+      );
+      // 🔴 Monster Gate wires NO gap, so the comeback is a race feature and cannot leak into a monster game.
+      const monsterWires = connectionsOf(built, C.monsterPlay).filter((w) => w.toId === 'zpRound' && (w.toProperty === 'myAt' || w.toProperty === 'cpuAt'));
+      expect(monsterWires).toEqual([]);
+    });
+
+    it('🔴 PLY-005: every face the chooser shows comes from one place, and nothing else writes the seed', () => {
+      const form = nodesOf(built, C.newPlayer);
+      // One Logic/Roll face per action, and no other action.
+      const placements = form.filter((n) => n.type === '/Logic/Roll face');
+      expect(placements.map((n) => n.parameters!.action).sort()).toEqual(['back', 'forward', 'roll', 'set']);
+      // 🔴 The seed is written by exactly one node, and it is fed by the roll-face placements. Before PLY-005 the Roll
+      // button wrote it directly, which is precisely why nothing could be walked back to.
+      const setters = form.filter((n) => n.type === 'Set Variable' && n.parameters!.name === 'newSeed');
+      expect(setters.map((n) => n.id)).toEqual(['nfSetSeed']);
+      const intoSeed = connectionsOf(built, C.newPlayer).filter((w) => w.toId === 'nfSetSeed' && w.toProperty === 'value');
+      expect(intoSeed.map((w) => w.fromId).sort()).toEqual(['nfRollBack', 'nfRollFwd', 'nfRollRoll', 'nfRollSet']);
+      // The two arrows show only when they lead somewhere.
+      expect(connectionsOf(built, C.newPlayer)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ fromId: 'nfCanBack', toId: 'nfBack', toProperty: 'mounted' }),
+          expect.objectContaining({ fromId: 'nfCanFwd', toId: 'nfForward', toProperty: 'mounted' })
+        ])
+      );
+    });
+
+    it('🔴 PLY-001 R3: the chooser offers the faces that can wear things, plus the player’s own if it is not one of them', () => {
+      const items = nodesOf(built, C.newPlayer).find((n) => n.id === 'nfLookItems')!;
+      // It is computed, not a fixed list: an existing thumbs player has to be able to keep their face.
+      expect(items.type).toBe('JavaScriptFunction');
+      const run = new Function('Inputs', 'Outputs', String(items.parameters!.functionScript));
+      const offered = (look: string) => {
+        const out: Record<string, any> = {};
+        run({ look }, out);
+        return out.items.map((i: { value: string }) => i.value);
+      };
+      expect(offered('')).toEqual([...HANGAR_LOOKS]);
+      expect(offered('pixel-art')).toEqual([...HANGAR_LOOKS]);
+      // 🔴 Nobody NEW lands in a dead end; nobody already in one is pushed out of their own face.
+      expect(offered('thumbs')).toEqual([...HANGAR_LOOKS, 'thumbs']);
+      expect(offered('fun-emoji')).toEqual([...HANGAR_LOOKS, 'fun-emoji']);
+      // And every face it offers as a new choice really can wear something.
+      for (const look of HANGAR_LOOKS) expect({ look, wearable: HANGAR_SHELF.some((i) => i.faces?.[look]) }).toEqual({ look, wearable: true });
     });
   });
 

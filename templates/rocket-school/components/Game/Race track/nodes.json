@@ -77,6 +77,11 @@
           "name": "paintA",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "patternA",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 350,

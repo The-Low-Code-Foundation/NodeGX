@@ -554,14 +554,29 @@
     },
     {
       "id": "nfLookItems",
-      "type": "Static Data",
-      "label": "The five styles",
+      "type": "JavaScriptFunction",
+      "label": "The faces on offer",
       "parameters": {
-        "type": "json",
-        "json": "[{\"label\":\"Pixel\",\"value\":\"pixel-art\"},{\"label\":\"Emoji\",\"value\":\"fun-emoji\"},{\"label\":\"Thumbs\",\"value\":\"thumbs\"},{\"label\":\"Smile\",\"value\":\"big-smile\"},{\"label\":\"Adventurer\",\"value\":\"adventurer\"}]"
+        "functionScript": "var KEPT = [\"pixel-art\",\"big-smile\",\"adventurer\"];\nvar NAMES = {\"pixel-art\":\"Pixel\",\"fun-emoji\":\"Emoji\",\"thumbs\":\"Thumbs\",\"big-smile\":\"Smile\",\"adventurer\":\"Adventurer\"};\nvar items = KEPT.map(function (id) { return { id: id, label: NAMES[id] || id, value: id }; });\nvar mine = String(Inputs.look || '');\n// Their own face, kept, when it is one the shelf can no longer dress.\nif (mine && KEPT.indexOf(mine) === -1) items.push({ id: mine, label: NAMES[mine] || mine, value: mine });\nOutputs.items = items;"
       },
       "x": 530,
-      "y": 1720
+      "y": 1720,
+      "ports": [
+        {
+          "name": "in-look",
+          "displayName": "look",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
     },
     {
       "id": "nfLevelItems",

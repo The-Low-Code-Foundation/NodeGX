@@ -40,7 +40,7 @@
  *
  * @module noodl-mcp/tests/tpl007Components
  */
-import { CURRICULUM_JSON, HANGAR_SHELF_JSON, LEVELS, TEACH_CARDS_JSON, WORDS_JSON, WORD_LISTS_JSON } from './tpl007Curriculum';
+import { CURRICULUM_JSON, HANGAR_LOOKS, HANGAR_SHELF_JSON, LEVELS, TEACH_CARDS_JSON, WORDS_JSON, WORD_LISTS_JSON } from './tpl007Curriculum';
 import {
   ACTIVE_PROFILE_SCRIPT,
   BUILD_HUNT_SCRIPT,
@@ -1317,7 +1317,7 @@ const RACE_TRACK: Tpl007Component = {
   inputs: [port('progressA', 'number'), port('progressB', 'number'), port('nameA', 'string'), port('nameB', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('lookB', 'string'), port('seedB', 'string'), port('showB', 'boolean'), port('burstA', 'signal'), port('burstB', 'signal'), port('compact', 'boolean', 'A shorter course (18% of the screen height, not 30%), so the typing keyboard fits under it'), port('optionsA', 'object', 'RKT-011: what rocket A’s face wears'), port('paintA', 'string', 'RKT-011: rocket A’s paint, a colour token; unfed, it stays tomato')],
   outputs: [port('reachedA', 'signal'), port('reachedB', 'signal')],
   nodes: [
-    inputs('rtIn', 'Who is where', [['progressA', 'number'], ['progressB', 'number'], ['nameA', 'string'], ['nameB', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['lookB', 'string'], ['seedB', 'string'], ['showB', 'boolean'], ['burstA', 'signal'], ['burstB', 'signal'], ['compact', 'boolean'], ['optionsA', 'object'], ['paintA', 'string']]),
+    inputs('rtIn', 'Who is where', [['progressA', 'number'], ['progressB', 'number'], ['nameA', 'string'], ['nameB', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['lookB', 'string'], ['seedB', 'string'], ['showB', 'boolean'], ['burstA', 'signal'], ['burstB', 'signal'], ['compact', 'boolean'], ['optionsA', 'object'], ['paintA', 'string'], ['patternA', 'string']]),
     // 🔴 RKT-005 (RKT-003 §3's unbuilt half): in a typing race the on-screen keyboard ended at 793 on a 768px screen and 779 on 720.
     // The course gives it room. A number reaching a units port keeps the port's unit, so 18 stays vh.
     logic('rtCompact', EXPRESSION_NODE, 'Full or compact?', { expression: "compact === true ? 'compact' : 'full'" }),
@@ -1348,6 +1348,7 @@ const RACE_TRACK: Tpl007Component = {
     wire('rtIn', 'seedA', 'rtTrack', 'seedA'),
     wire('rtIn', 'optionsA', 'rtTrack', 'optionsA'),
     wire('rtIn', 'paintA', 'rtTrack', 'colorA'),
+    wire('rtIn', 'patternA', 'rtTrack', 'patternA'),
     wire('rtIn', 'lookB', 'rtTrack', 'styleB'),
     wire('rtIn', 'seedB', 'rtTrack', 'seedB'),
     wire('rtIn', 'showB', 'rtTrack', 'showB'),
@@ -1542,13 +1543,33 @@ const KEYBOARD: Tpl007Component = {
 
 // ── Profiles/New player form ────────────────────────────────────────────────
 
-const LOOK_ITEMS = JSON.stringify([
-  { label: 'Pixel', value: 'pixel-art' },
-  { label: 'Emoji', value: 'fun-emoji' },
-  { label: 'Thumbs', value: 'thumbs' },
-  { label: 'Smile', value: 'big-smile' },
-  { label: 'Adventurer', value: 'adventurer' }
-]);
+/**
+ * P95 PLY-001 R3 — the faces the chooser offers.
+ *
+ * 🔴 Not the kit's five. `fun-emoji` and `thumbs` have `eyes`, `mouth`, `face` and `shape` in DiceBear 9.4.2 and
+ * nothing wearable at all, so a child who picked one had a hangar that fitted nothing. The KIT still draws all five —
+ * it is a library node other projects use, and a profile already on one must keep its face — so the narrowing is here,
+ * in the game, and it is not a removal: a player whose own look is not on this list is offered it as a fourth choice
+ * and may keep it. Nobody NEW lands in the dead end, and nobody already in it is pushed out of their own face.
+ */
+const LOOK_NAMES: Readonly<Record<string, string>> = {
+  'pixel-art': 'Pixel',
+  'fun-emoji': 'Emoji',
+  thumbs: 'Thumbs',
+  'big-smile': 'Smile',
+  adventurer: 'Adventurer'
+};
+
+const LOOK_ITEMS_SCRIPT = [
+  `var KEPT = ${JSON.stringify(HANGAR_LOOKS)};`,
+  `var NAMES = ${JSON.stringify(LOOK_NAMES)};`,
+  "var items = KEPT.map(function (id) { return { id: id, label: NAMES[id] || id, value: id }; });",
+  "var mine = String(Inputs.look || '');",
+  "// Their own face, kept, when it is one the shelf can no longer dress.",
+  "if (mine && KEPT.indexOf(mine) === -1) items.push({ id: mine, label: NAMES[mine] || mine, value: mine });",
+  "Outputs.items = items;"
+].join('\n');
+
 const LEVEL_ITEMS = JSON.stringify(LEVELS.map((l) => ({ label: l, value: l })));
 const LANG_ITEMS = JSON.stringify([{ label: 'English', value: 'en' }, { label: 'Français', value: 'fr' }]);
 
@@ -1588,7 +1609,7 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     group('nfActions', 'The two buttons', 'nfCard', row(), ['nfCreate', 'nfCancel']),
     place('nfCreate', BUTTON_NODE, 'Create', 'nfActions', { ...BTN_PRIMARY, label: 'Let’s go!' }),
     place('nfCancel', BUTTON_NODE, 'Cancel', 'nfActions', { ...BTN_OUTLINE, label: 'Cancel' }),
-    { id: 'nfLookItems', type: STATIC_DATA_NODE, label: 'The five styles', parameters: { type: 'json', json: LOOK_ITEMS } },
+    logic('nfLookItems', FUNCTION_NODE, 'The faces on offer', { functionScript: LOOK_ITEMS_SCRIPT }),
     { id: 'nfLevelItems', type: STATIC_DATA_NODE, label: 'The four classes', parameters: { type: 'json', json: LEVEL_ITEMS } },
     { id: 'nfLangItems', type: STATIC_DATA_NODE, label: 'The two languages', parameters: { type: 'json', json: LANG_ITEMS } },
     // The four choices, each held in a Variable and wired back (P2, the controlled value).
@@ -1657,7 +1678,8 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     wire('nfIn', 'langWord', 'nfLang', 'label'),
     wire('nfIn', 'createWord', 'nfCreate', 'label'),
     wire('nfIn', 'cancelWord', 'nfCancel', 'label'),
-    wire('nfLookItems', 'items', 'nfLook', 'items'),
+    wire('nfIn', 'look0', 'nfLookItems', 'in-look'),
+    wire('nfLookItems', 'out-items', 'nfLook', 'items'),
     wire('nfLevelItems', 'items', 'nfLevel', 'items'),
     wire('nfLangItems', 'items', 'nfLang', 'items'),
     // Each choice row: value in from the variable, changes written back.
@@ -1855,12 +1877,18 @@ const RACE_SETUP: Tpl007Component = {
 const RACE_ROUND: Tpl007Component = {
   path: 'Race/Round',
   description: 'One question of a race: Ask picks it, the box or the clock answers it, the grader scores it, the banner shows it. Publishes Graded with the gains and the new model, then Next or ShowMe when the banner is dismissed. Abandon stops the clock, so a question left behind never grades.',
-  inputs: [port('ask', 'signal'), port('abandon', 'signal'), port('raceId', 'string'), port('forB', 'boolean'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('soundOn', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('limitScale', 'number', 'TPL-007 §16: the clock as a share of the skill’s; the race sends none'), port('game', 'string', 'TPL-007 §16: gate or push, so the verdict says a hit or a push; the race sends none')],
-  outputs: [port('graded', 'signal'), port('correct', 'boolean'), port('gain', 'number'), port('cpuGain', 'number'), port('model', 'object'), port('outcome', 'string'), port('teach', 'string'), port('next', 'signal'), port('showMe', 'signal'), port('isTyping', 'boolean'), port('nextKey', 'string'), port('missCount', 'number'), port('worked', 'string'), port('prompt', 'string'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal'), port('clockLeft', 'number')],
+  inputs: [port('ask', 'signal'), port('abandon', 'signal'), port('raceId', 'string'), port('forB', 'boolean'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('soundOn', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('limitScale', 'number', 'TPL-007 §16: the clock as a share of the skill’s; the race sends none'), port('game', 'string', 'TPL-007 §16: gate or push, so the verdict says a hit or a push; the race sends none'), port('myAt', 'number', 'PLY-006: where this player’s rocket is, so the grader can see the gap'), port('cpuAt', 'number', 'PLY-006: where the other rocket is'), port('turboWord', 'string'), port('chargingWord', 'string')],
+  outputs: [port('graded', 'signal'), port('correct', 'boolean'), port('gain', 'number'), port('cpuGain', 'number'), port('slipPct', 'number'), port('chain', 'number'), port('chainOf', 'number'), port('chainReady', 'boolean'), port('turboUsed', 'boolean'), port('behind', 'boolean'), port('model', 'object'), port('outcome', 'string'), port('teach', 'string'), port('next', 'signal'), port('showMe', 'signal'), port('isTyping', 'boolean'), port('nextKey', 'string'), port('missCount', 'number'), port('worked', 'string'), port('prompt', 'string'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal'), port('clockLeft', 'number')],
   instantiates: [C.questionBox, C.countdown, C.banner, C.keyboard, logicName('Logic/Pick next question'), logicName('Logic/Grade answer'), C.sounds],
   nodes: [
-    inputs('rdIn', 'The profile and the words', [['ask', 'signal'], ['abandon', 'signal'], ['raceId', 'string'], ['forB', 'boolean'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['soundOn', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['limitScale', 'number'], ['game', 'string']]),
-    group('rdWrap', 'The round', undefined, column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['rdClock', 'rdBox', 'rdBanner', 'rdKeys']),
+    inputs('rdIn', 'The profile and the words', [['ask', 'signal'], ['abandon', 'signal'], ['raceId', 'string'], ['forB', 'boolean'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['soundOn', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['limitScale', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['turboWord', 'string'], ['chargingWord', 'string']]),
+    group('rdWrap', 'The round', undefined, column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['rdClock', 'rdChainRow', 'rdBox', 'rdBanner', 'rdKeys']),
+    // 🔴 PLY-006: the chain, above the question where the child is already looking. It says how far along they are, and
+    // when it is charged it becomes the button that spends it. The turbo is never spent for them: firing it is the
+    // decision that makes a comeback theirs.
+    group('rdChainRow', 'The chain, and the turbo it charges', 'rdWrap', column({ alignItems: 'center', rowGap: 'var(--space-2)' }), ['rdCharging', 'rdTurbo']),
+    text('rdCharging', 'Right answers in a row', 'rdChainRow', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
+    place('rdTurbo', BUTTON_NODE, 'Fire the turbo', 'rdChainRow', { ...BTN_PRIMARY, label: '⚡', mounted: false }),
     place('rdClock', C.countdown, 'The clock', 'rdWrap'),
     place('rdBox', C.questionBox, 'The question', 'rdWrap'),
     place('rdBanner', C.banner, 'What happened', 'rdWrap'),
@@ -1868,6 +1896,22 @@ const RACE_ROUND: Tpl007Component = {
     logic('rdNonce', COUNTER_NODE, 'How many asked', { startValue: 0 }),
     logic('rdPick', logicName('Logic/Pick next question'), 'Pick the next question'),
     logic('rdGrade', logicName('Logic/Grade answer'), 'Grade the answer'),
+    // 🔴 The armed turbo is a States node, not a Variable. D56: a Variable is global BY NAME, and Race/Round is placed
+    // twice — once by Race/Play and once by Monster/Play — so one name would have been one flag shared between a race
+    // and a monster game. The door said so; this is per instance.
+    withStates('rdArmed', 'Is the turbo armed?', ['idle', 'armed'], {
+      on: { type: 'boolean', by: { idle: false, armed: true } }
+    }),
+    // It can only be fired while it would do something: charged, behind, and the question still open.
+    logic('rdCanFire', EXPRESSION_NODE, 'Can the turbo be fired?', { expression: 'ready === true && behind === true && !open' }),
+    logic('rdChainLine', FUNCTION_NODE, 'The chain, in words', {
+      functionScript: [
+        "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));",
+        "var of = Math.max(1, Math.floor(Number(Inputs.of) || 3));",
+        "// Nothing to say before the first right answer of a run, or once it is charged (the button speaks then).",
+        "Outputs.line = n > 0 && Inputs.ready !== true ? String(Inputs.word || '').replace('{n}', n).replace('{of}', of) : '';"
+      ].join('\n')
+    }),
     logic('rdSounds', C.sounds, 'The sounds'),
     // The live typing feeds the lit key: the next character of the answer.
     logic('rdNextKey', EXPRESSION_NODE, 'The next key to press', { expression: "((answer || '') + '').charAt(((typed || '') + '').length)" }),
@@ -1879,9 +1923,29 @@ const RACE_ROUND: Tpl007Component = {
     // RKT-004: Show me only after a wrong or timed-out answer, on a skill that has a card. It showed after "Fast and correct!" too.
     logic('rdCanTeach', EXPRESSION_NODE, 'Something to teach?', { expression: "correct !== true && ((teach || '') + '').length > 0" }),
     gate('rdRight', 'Right or wrong?'),
-    outputs('rdOut', 'The verdict', [['graded', 'signal'], ['correct', 'boolean'], ['gain', 'number'], ['cpuGain', 'number'], ['model', 'object'], ['outcome', 'string'], ['teach', 'string'], ['next', 'signal'], ['showMe', 'signal'], ['isTyping', 'boolean'], ['nextKey', 'string'], ['missCount', 'number'], ['worked', 'string'], ['prompt', 'string'], ['layoutSeen', 'string'], ['layoutSeenNow', 'signal'], ['layoutPick', 'string'], ['layoutPickNow', 'signal'], ['clockLeft', 'number']])
+    outputs('rdOut', 'The verdict', [['graded', 'signal'], ['correct', 'boolean'], ['gain', 'number'], ['cpuGain', 'number'], ['model', 'object'], ['outcome', 'string'], ['teach', 'string'], ['next', 'signal'], ['showMe', 'signal'], ['isTyping', 'boolean'], ['nextKey', 'string'], ['missCount', 'number'], ['worked', 'string'], ['prompt', 'string'], ['layoutSeen', 'string'], ['layoutSeenNow', 'signal'], ['layoutPick', 'string'], ['layoutPickNow', 'signal'], ['clockLeft', 'number'], ['slipPct', 'number'], ['chain', 'number'], ['chainOf', 'number'], ['chainReady', 'boolean'], ['turboUsed', 'boolean'], ['behind', 'boolean']])
   ],
   connections: [
+    // 🔴 PLY-006: the grader is the only thing that knows the comeback, and it can only know it if it is told the gap.
+    wire('rdIn', 'myAt', 'rdGrade', 'myAt'),
+    wire('rdIn', 'cpuAt', 'rdGrade', 'cpuAt'),
+    wire('rdArmed', 'on', 'rdGrade', 'useTurbo'),
+    // The chain and the turbo, back out and onto the screen.
+    ...(['slipPct', 'chain', 'chainOf', 'chainReady', 'turboUsed', 'behind'] as const).map((p) => wire('rdGrade', p, 'rdOut', p)),
+    wire('rdGrade', 'chain', 'rdChainLine', 'in-n'),
+    wire('rdGrade', 'chainOf', 'rdChainLine', 'in-of'),
+    wire('rdGrade', 'chainReady', 'rdChainLine', 'in-ready'),
+    wire('rdIn', 'chargingWord', 'rdChainLine', 'in-word'),
+    wire('rdChainLine', 'out-line', 'rdCharging', 'text'),
+    wire('rdIn', 'turboWord', 'rdTurbo', 'label'),
+    wire('rdGrade', 'chainReady', 'rdCanFire', 'ready'),
+    wire('rdGrade', 'behind', 'rdCanFire', 'behind'),
+    wire('rdBanner', 'isOpen', 'rdCanFire', 'open'),
+    wire('rdCanFire', 'result', 'rdTurbo', 'mounted'),
+    wire('rdTurbo', 'onClick', 'rdArmed', 'to-armed'),
+    // 🔴 Disarmed the moment the answer is graded, whether or not it was spent: an armed turbo must never carry into a
+    // question the child did not choose it for.
+    wire('rdGrade', 'done', 'rdArmed', 'to-idle'),
     // Ask: nudge the picker.
     wire('rdIn', 'ask', 'rdNonce', 'increase'),
     wire('rdNonce', 'currentCount', 'rdPick', 'nonce'),
@@ -2067,11 +2131,11 @@ const MINT_RACE_SCRIPT = "Outputs.raceId = 'r' + Date.now().toString(36) + Math.
 const RACE_PLAY: Tpl007Component = {
   path: 'Race/Play',
   description: 'The race itself: rounds until a rocket reaches the planet. One player races the computer (its speed follows the player\'s rating); two players take turns on one keyboard. Publishes Finished with the winner, and the model after every round. RKT-002: a right answer bursts sparks from the rocket it moved; when a rocket lands, Race/Result takes the round\'s place under the track, Cheer or Sigh says which fanfare, and ChangeRace hands back to setup. RKT-004: Show me puts the missed skill\'s Teach card where the round was, and Got it asks the next question. RKT-006: Restart (while racing or teaching) sends both rockets home through the same reset as Start, and Change the race stops the clock and hands back to setup. The rockets\' progress lives in the Variables raceProgressA/B, global by name (D57): harmless with one race per page. RKT-010: every start mints a race id; answers pay stars as they are graded (none on player two\'s turns), and a landing runs Logic/Finish race once, whose model goes out through Model and Graded like a round\'s, and whose take the result screen shows.',
-  inputs: [port('start', 'signal'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('players', 'number'), port('soundOn', 'boolean'), port('nameA', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('nameB', 'string'), port('mounted', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('yourTurnWord', 'string'), port('youWinWord', 'string'), port('computerWinsWord', 'string'), port('winsWord', 'string'), port('againWord', 'string'), port('otherRaceWord', 'string'), port('rightAnswersWord', 'string'), port('teachCards', 'array'), port('anExampleWord', 'string'), port('gotItWord', 'string'), port('restartWord', 'string'), port('optionsA', 'object'), port('paintA', 'string'), port('pickWord', 'string'), port('hangarWord', 'string')],
+  inputs: [port('start', 'signal'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('players', 'number'), port('soundOn', 'boolean'), port('nameA', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('nameB', 'string'), port('mounted', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('yourTurnWord', 'string'), port('youWinWord', 'string'), port('computerWinsWord', 'string'), port('winsWord', 'string'), port('againWord', 'string'), port('otherRaceWord', 'string'), port('rightAnswersWord', 'string'), port('teachCards', 'array'), port('anExampleWord', 'string'), port('gotItWord', 'string'), port('restartWord', 'string'), port('optionsA', 'object'), port('paintA', 'string'), port('patternA', 'string'), port('pickWord', 'string'), port('hangarWord', 'string'), port('turboWord', 'string'), port('chargingWord', 'string')],
   outputs: [port('finished', 'signal'), port('winner', 'string'), port('model', 'object'), port('graded', 'signal'), port('rounds', 'number'), port('showMe', 'signal'), port('teach', 'string'), port('cheer', 'signal'), port('sigh', 'signal'), port('changeRace', 'signal'), port('hangar', 'signal'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal')],
   instantiates: [C.raceRound, C.track, C.raceResult, C.teachCard, logicName('Logic/Teach card'), logicName('Logic/Finish race')],
   nodes: [
-    inputs('rpIn', 'The race', [['start', 'signal'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['players', 'number'], ['soundOn', 'boolean'], ['nameA', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['nameB', 'string'], ['mounted', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['yourTurnWord', 'string'], ['youWinWord', 'string'], ['computerWinsWord', 'string'], ['winsWord', 'string'], ['againWord', 'string'], ['otherRaceWord', 'string'], ['rightAnswersWord', 'string'], ['teachCards', 'array'], ['anExampleWord', 'string'], ['gotItWord', 'string'], ['restartWord', 'string'], ['optionsA', 'object'], ['paintA', 'string'], ['pickWord', 'string'], ['hangarWord', 'string']]),
+    inputs('rpIn', 'The race', [['start', 'signal'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['players', 'number'], ['soundOn', 'boolean'], ['nameA', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['nameB', 'string'], ['mounted', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['yourTurnWord', 'string'], ['youWinWord', 'string'], ['computerWinsWord', 'string'], ['winsWord', 'string'], ['againWord', 'string'], ['otherRaceWord', 'string'], ['rightAnswersWord', 'string'], ['teachCards', 'array'], ['anExampleWord', 'string'], ['gotItWord', 'string'], ['restartWord', 'string'], ['optionsA', 'object'], ['paintA', 'string'], ['patternA', 'string'], ['pickWord', 'string'], ['hangarWord', 'string'], ['turboWord', 'string'], ['chargingWord', 'string']]),
     group('rpWrap', 'The race', undefined, column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['rpControls', 'rpTrack', 'rpTurn', 'rpRoundSlot', 'rpTeach', 'rpResult']),
     // RKT-006: the way out of a race that is going badly, above the course and away from the answer and Next.
     group('rpControls', 'Restart, or change the race', 'rpWrap', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'flex-end', columnGap: 'var(--space-2)' }), ['rpRestart', 'rpSettings']),
@@ -2094,6 +2158,11 @@ const RACE_PLAY: Tpl007Component = {
     logic('rpZero', EXPRESSION_NODE, 'Zero', { expression: '0' }),
     logic('rpRounds', COUNTER_NODE, 'Rounds played', { startValue: 0 }),
     logic('rpTurnIsB', EXPRESSION_NODE, 'Is it B\'s turn? (two players, odd rounds)', { expression: 'players === 2 && rounds % 2 === 1' }),
+    // 🔴 PLY-006: the gap is read from the rocket that is ANSWERING. In a two-player race B's "behind" is behind A, not
+    // behind the computer, so the pair is swapped on B's turn — otherwise the child in front would be handed the
+    // slipstream meant for the child behind.
+    logic('rpMineAt', EXPRESSION_NODE, 'Where the answering rocket is', { expression: 'isB ? b : a' }),
+    logic('rpTheirsAt', EXPRESSION_NODE, 'Where the other one is', { expression: 'isB ? a : b' }),
     logic('rpTurnText', EXPRESSION_NODE, 'Whose turn, in words', { expression: "players === 2 ? (isB ? nameB : nameA) + ' — ' + word : ''" }),
     logic('rpNextA', EXPRESSION_NODE, 'Where A would be', { expression: 'min(1, a + gain)' }),
     logic('rpNextB', EXPRESSION_NODE, 'Where B would be', { expression: 'min(1, b + (players === 2 ? gain : cpu))' }),
@@ -2166,6 +2235,16 @@ const RACE_PLAY: Tpl007Component = {
     wire('rpIn', 'timeUpWord', 'rpRound', 'timeUpWord'),
     wire('rpIn', 'nextWord', 'rpRound', 'nextWord'),
     wire('rpIn', 'showMeWord', 'rpRound', 'showMeWord'),
+    wire('rpIn', 'turboWord', 'rpRound', 'turboWord'),
+    wire('rpIn', 'chargingWord', 'rpRound', 'chargingWord'),
+    wire('rpA', 'value', 'rpMineAt', 'a'),
+    wire('rpB', 'value', 'rpMineAt', 'b'),
+    wire('rpTurnIsB', 'result', 'rpMineAt', 'isB'),
+    wire('rpA', 'value', 'rpTheirsAt', 'a'),
+    wire('rpB', 'value', 'rpTheirsAt', 'b'),
+    wire('rpTurnIsB', 'result', 'rpTheirsAt', 'isB'),
+    wire('rpMineAt', 'result', 'rpRound', 'myAt'),
+    wire('rpTheirsAt', 'result', 'rpRound', 'cpuAt'),
     // The track.
     wire('rpA', 'value', 'rpTrack', 'progressA'),
     wire('rpB', 'value', 'rpTrack', 'progressB'),
@@ -2173,6 +2252,7 @@ const RACE_PLAY: Tpl007Component = {
     wire('rpIn', 'nameB', 'rpTrack', 'nameB'),
     wire('rpIn', 'lookA', 'rpTrack', 'lookA'),
     wire('rpIn', 'seedA', 'rpTrack', 'seedA'),
+    wire('rpIn', 'patternA', 'rpTrack', 'patternA'),
     // RKT-011: rocket A wears what the child chose in the hangar.
     wire('rpIn', 'optionsA', 'rpTrack', 'optionsA'),
     wire('rpIn', 'paintA', 'rpTrack', 'paintA'),
@@ -3011,6 +3091,9 @@ const PAGE_RACE: Tpl007Component = {
     wire('rcMe', 'seed', 'rcPlay', 'seedA'),
     wire('rcMe', 'faceOptions', 'rcPlay', 'optionsA'),
     wire('rcMe', 'paint', 'rcPlay', 'paintA'),
+    wire('rcMe', 'pattern', 'rcPlay', 'patternA'),
+    wire('rcT', 'turboReady', 'rcPlay', 'turboWord'),
+    wire('rcT', 'turboCharging', 'rcPlay', 'chargingWord'),
     wire('rcCurriculum', 'skills', 'rcPlay', 'curriculum'),
     wire('rcWordLists', 'lists', 'rcPlay', 'wordLists'),
     wire('rcSetup', 'mode', 'rcPlay', 'mode'),
