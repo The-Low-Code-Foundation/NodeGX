@@ -66,6 +66,11 @@ export interface LayersDragApi {
    * `PopupLayer` is the only channel that knows the second kind, and a row cannot see it.
    */
   isDragging(): boolean;
+  /**
+   * The mouse went down on a row. The drag starts from here if the pointer travels far enough —
+   * see the note on the implementation for why the row cannot decide that itself.
+   */
+  onRowPress(row: LayerRow, element: HTMLElement, x: number, y: number): void;
   onRowDragStart(row: LayerRow, element: HTMLElement): void;
   onRowDragOver(row: LayerRow, side: DropSide, copy: boolean): void;
   onRowDrop(row: LayerRow, side: DropSide, copy: boolean): void;
@@ -93,10 +98,13 @@ export function useLayersDrag({ rows, canvasComponent, editor, onMoved }: UseLay
    */
   const sourceRow = useRef<LayerRow | null>(null);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** The press that has not yet become a drag, and the listeners watching for it to. */
+  const pending = useRef<{ row: LayerRow; element: HTMLElement; x: number; y: number; stop(): void } | null>(null);
 
   useEffect(
     () => () => {
       if (shakeTimer.current) clearTimeout(shakeTimer.current);
+      pending.current?.stop();
     },
     []
   );
@@ -198,6 +206,44 @@ export function useLayersDrag({ rows, canvasComponent, editor, onMoved }: UseLay
     [endDrag]
   );
 
+  /**
+   * 🔴 **The 5px threshold is watched on the WINDOW, not on the row that was pressed** — and that
+   * is a defect this surface had until it was driven.
+   *
+   * The Components tab measures the threshold inside its own row's `onMouseMove`, so the gesture
+   * only begins if the pointer is *still over the row you pressed* when it has travelled far
+   * enough. A row here is 26px high: press in the middle, move 13px **down**, and the next move
+   * belongs to the row below — which has no press of its own to compare against. The drag never
+   * starts, and the person is left having done nothing. Measured: a drag dispatched as
+   * `(x + 10, y + 10)` produced `isDragging(): false` with the handlers demonstrably bound.
+   *
+   * Downward is the commonest direction there is in a tree, so this is not a corner.
+   */
+  const onRowPress = useCallback(
+    (row: LayerRow, element: HTMLElement, x: number, y: number) => {
+      pending.current?.stop();
+      const onMove = (event: MouseEvent) => {
+        const at = pending.current;
+        if (!at) return;
+        const dx = event.clientX - at.x;
+        const dy = event.clientY - at.y;
+        if (Math.sqrt(dx * dx + dy * dy) <= 5) return;
+        at.stop();
+        onRowDragStart(at.row, at.element);
+      };
+      const onUp = () => pending.current?.stop();
+      const stop = () => {
+        window.removeEventListener('mousemove', onMove, true);
+        window.removeEventListener('mouseup', onUp, true);
+        pending.current = null;
+      };
+      pending.current = { row, element, x, y, stop };
+      window.addEventListener('mousemove', onMove, true);
+      window.addEventListener('mouseup', onUp, true);
+    },
+    [onRowDragStart]
+  );
+
   const onRowDragOver = useCallback(
     (row: LayerRow, side: DropSide, copy: boolean) => {
       if (!PopupLayer.instance.isDragging()) return;
@@ -267,5 +313,15 @@ export function useLayersDrag({ rows, canvasComponent, editor, onMoved }: UseLay
 
   const isDragging = useCallback(() => Boolean(PopupLayer.instance.isDragging()), []);
 
-  return { draggingKey, target, shakingKey, isDragging, onRowDragStart, onRowDragOver, onRowDrop, moveByKeyboard };
+  return {
+    draggingKey,
+    target,
+    shakingKey,
+    isDragging,
+    onRowPress,
+    onRowDragStart,
+    onRowDragOver,
+    onRowDrop,
+    moveByKeyboard
+  };
 }

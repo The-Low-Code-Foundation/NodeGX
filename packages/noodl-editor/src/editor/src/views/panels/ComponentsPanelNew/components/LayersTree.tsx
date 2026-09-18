@@ -148,33 +148,27 @@ function LayerRowItem({
    * the two trees in this panel behave identically under the hand.
    */
   const itemRef = useRef<HTMLDivElement>(null);
-  const pressedAt = useRef<{ x: number; y: number } | null>(null);
 
-  const handleMouseDown = useCallback((event: React.MouseEvent) => {
-    pressedAt.current = { x: event.clientX, y: event.clientY };
-  }, []);
+  const handleMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      // ⚠️ The threshold is the hook's, watched on the window: a row cannot see the mouse once the
+      // pointer has left it, and leaving it is what dragging in a tree IS.
+      if (drag && itemRef.current) drag.onRowPress(row, itemRef.current, event.clientX, event.clientY);
+    },
+    [drag, row]
+  );
 
   const handleMouseMove = useCallback(
     (event: React.MouseEvent) => {
-      if (!drag) return;
-      if (pressedAt.current && !drag.draggingKey && itemRef.current) {
-        const dx = event.clientX - pressedAt.current.x;
-        const dy = event.clientY - pressedAt.current.y;
-        if (Math.sqrt(dx * dx + dy * dy) > 5) {
-          drag.onRowDragStart(row, itemRef.current);
-          pressedAt.current = null;
-        }
-        return;
-      }
+      if (!drag || !itemRef.current) return;
       // Hovering during a drag — including a drag that started in the Components tab.
-      if (itemRef.current) drag.onRowDragOver(row, sideFromPointer(itemRef.current, event.clientY), event.altKey);
+      drag.onRowDragOver(row, sideFromPointer(itemRef.current, event.clientY), event.altKey);
     },
     [drag, row]
   );
 
   const handleMouseUp = useCallback(
     (event: React.MouseEvent) => {
-      pressedAt.current = null;
       if (!drag || !itemRef.current) return;
       // A mouse-up that is not the end of a drag is a click, and a click is TVW-003's selection.
       if (!drag.isDragging()) return;

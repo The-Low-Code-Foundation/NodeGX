@@ -132,3 +132,59 @@ So AC2 splits: the **decision** for every row of the table is graded by `tests-u
 (15 specs, 8 mutants), and the **resulting `children[]` order, the parent, the byte-identity of a
 refused graph and the single undo step** are graded by the drive against the live `ProjectModel` —
 which is the stronger half of the two anyway, since it uses the real models and the real undo queue.
+
+## 7. Slice 1, driven — `drive-tvw005-drag.js`, 9 arms, 9 held (s16)
+
+The gesture is dispatched as **mouse events**, not as calls into the hook: the 5px threshold, which
+third of a row's height the pointer is in, and the row that stops propagation on mouse-up are the
+claim. Against the corpus project, canvas on `/Pages/Main/Home`, whose `Page` node has three
+instances under it.
+
+| arm | reading |
+|---|---|
+| a legal drag carries no refusal sentence | hidden — the known-firing control for the two below |
+| drag `Main Footer` above `Main Navbar` | `Main Footer \| Main Navbar \| Page Main` in the **model** |
+| one ⌘Z puts it back | the three ids in their original order |
+| a row **inside a band** refuses | `Header` (owned by `Main Navbar`): both graphs byte-identical |
+| …and it says so | *This is part of Main Navbar — edit Main Navbar to change it* |
+| a row **in the app shell** refuses | `Group` (owned by `/App`): both graphs byte-identical |
+| …and it says so | *This is part of App — edit App to change it* |
+| ⌥↓ on a focused row | `Page Main \| Main Navbar \| Main Footer` |
+| the drive left the page as it found it | the original three |
+
+### 7.1 🔴 The defect the drive found: the drag would not start if you moved DOWN
+
+The 5px threshold was measured inside the pressed row's own `onMouseMove` — which is how the
+Components tab does it, so it looked like the house pattern. A Layers row is **26px** high. Press in
+the middle, move 13px *down*, and the next mouse event belongs to the row below, which has no press
+of its own to compare against: the drag never begins and the person has done nothing. Downward is
+the commonest direction there is in a tree.
+
+**Measured**, not reasoned: a drag dispatched as `(x + 10, y + 10)` left `PopupLayer.isDragging()`
+`false` with the handlers demonstrably bound to the row (`onMouseDown`, `onMouseMove`, `onMouseUp`
+all present in its React props). The threshold is watched on the **window** now, from the press
+until it is crossed or the button comes up. ⚠️ The same shape is still in `ComponentItem`; it is
+not this task's to fix, and it is written down here because the next person to copy that pattern
+should know.
+
+### 7.2 What the instrument got wrong first, twice
+
+- 🔴 **A row scrolled out of the panel answers `getBoundingClientRect()` with perfectly plausible
+  coordinates**, and a press at them lands on `<html>`. Two runs read as *the drag will not start*
+  when what was wrong was where the drive was pressing — `Main Footer` sits hundreds of rows below
+  `Main Navbar` while `Page Main` is expanded. The drive now **collapses the siblings** (which is
+  also what a person would do), scrolls each row into view, and refuses the arm unless
+  `elementFromPoint` lands inside the row.
+  [[a-rendered-surface-can-be-behind-a-blocker]]
+- ⚠️ **The refusal arm's first version read an absence that was its own.** It looked for the drag
+  message with a guessed selector and found nothing — which is indistinguishable from a build that
+  says nothing. The class names are in `popuplayer.ts:363`. And the arm only means something beside
+  the legal drag that shows **no** message, which is why that control is the first row of the table
+  ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+
+### 7.3 Where AC1 stands
+
+AC1's first two sentences are green — the reorder in the model, the canvas, and one ⌘Z; the refusal
+with its sentence. Its third needs the **drop-target strip on the Layers tab header** (§6), which is
+not built. The preview half of AC1 ("the preview shows the cards above the hero") is not yet an arm:
+the reorder is read in the model, not in the viewer's DOM.
