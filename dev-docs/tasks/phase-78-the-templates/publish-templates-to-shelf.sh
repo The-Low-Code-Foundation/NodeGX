@@ -21,6 +21,11 @@
 # not the one measured at commit `3206e12e5` — a count that moved means somebody opened or regenerated it,
 # and the right response is to look, not to publish.
 #
+# ✅ ROCKET SCHOOL IS 285 SINCE `5ca1192ae` (P95, 2026-09-18), AND THE MOVE WAS LOOKED AT: the eleven
+# are `Hangar/Confirm`, `Hangar/Sum row` and `Logic/Roll face` (three files each) plus the Nunito faces
+# moving out of `rocket-school-fonts` into a shared `preset-font-nunito` module. `npm run template:rocket`
+# reproduces the directory byte for byte, and none of the three editor-written files is in it.
+#
 # ⚠️ These templates install into v0.2.4, whose runtime lacks GAM-006: every States node in them keeps
 # `useTransitions: false` (tpl005/tpl006 gates). And v0.2.4's community route does not carry
 # `needsBackend`, so the todo list installs WITHOUT the automatic backend setup — its START-HERE says how.
@@ -35,7 +40,7 @@ COMMUNITY="${NODEGX_COMMUNITY_DIR:-$HOME/vscode_projects/nodegx-community}"
 
 # slug | directory under templates/ | category | expected files | title | summary
 TEMPLATES=(
-  "rocket-school|rocket-school|game|274|Rocket School|Maths and typing practice for ages 8 to 12, in English and French: four games, 62 skills from CE2 to 6e, and progress kept in the browser."
+  "rocket-school|rocket-school|game|285|Rocket School|Maths and typing practice for ages 8 to 12, in English and French: four games, 62 skills from CE2 to 6e, and progress kept in the browser."
   "pixel-dungeon|pixel-game|game|34|Pixel dungeon|A turn-based dungeon played with the arrow keys. The five rooms are one list in one node, so a sixth room is one more entry."
   "story-engine|story-engine|game|30|Story engine|A branching story where choices hand you things and some only appear once you carry them. The whole story is one list you can rewrite."
   "todo-list|todo-list|data-app|112|Todo list|One list in the order you will do things, with deadlines, next actions and a history nothing is deleted from. Needs a NodeGX backend."
