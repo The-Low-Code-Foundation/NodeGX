@@ -1,5 +1,5 @@
 import type { ComponentModel } from '../../models/componentmodel';
-import { pathsOfCanvasSelection, resolveCanvasMove } from '../../models/selection/canvasSelection';
+import { keepsSidePanel, pathsOfCanvasSelection, resolveCanvasMove } from '../../models/selection/canvasSelection';
 import { samePath, Selection, SelectionStore } from '../../models/selection/selectionStore';
 
 import type { NodeGraphEditor } from '../nodegrapheditor';
@@ -42,6 +42,9 @@ export function bindSelectionStore(editor: NodeGraphEditor, store: SelectionStor
       selectedIds: editor.selector.nodes.map((node) => node.model.id)
     });
 
+    // TVW-004 — a selection made in a panel must not replace that panel with Properties.
+    const keepSidePanel = keepsSidePanel(selection.source);
+
     applying = true;
     try {
       switch (move.kind) {
@@ -54,7 +57,10 @@ export function bindSelectionStore(editor: NodeGraphEditor, store: SelectionStor
           if (move.nodeIds.length === 1) {
             // The same door as today's preview click on this component: selects, opens the
             // node's properties and centres it.
-            editor.switchToComponent(editor.activeComponent, { node: editor.findNodeWithId(move.nodeIds[0]).model });
+            editor.switchToComponent(editor.activeComponent, {
+              node: editor.findNodeWithId(move.nodeIds[0]).model,
+              keepSidePanel
+            });
           } else {
             editor.clearSelection({ disableHidePanels: true });
             editor.selector.select(move.nodeIds.map((id) => editor.findNodeWithId(id)));
@@ -64,7 +70,7 @@ export function bindSelectionStore(editor: NodeGraphEditor, store: SelectionStor
 
         case 'switch': {
           const node = move.nodeId ? move.component.graph?.findNodeWithId(move.nodeId) : undefined;
-          editor.switchToComponent(move.component, { node, pushHistory: true });
+          editor.switchToComponent(move.component, { node, pushHistory: true, keepSidePanel });
           break;
         }
       }

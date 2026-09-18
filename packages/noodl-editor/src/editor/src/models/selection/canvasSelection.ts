@@ -1,4 +1,4 @@
-import type { NodePath, Selection } from './selectionStore';
+import type { NodePath, Selection, SelectionSource } from './selectionStore';
 
 /**
  * TVW-003 — what the canvas does with a selection another surface wrote.
@@ -71,4 +71,21 @@ export function pathsOfCanvasSelection(selectedIds: readonly string[]): NodePath
 
 function sameIds(a: readonly string[], b: readonly string[]): boolean {
   return a.length === b.length && a.every((id, i) => id === b[i]);
+}
+
+/**
+ * TVW-004 — whether applying this selection should leave the side panel alone.
+ *
+ * 🔴 Selecting a node on the canvas opens its **Properties** in the side panel, which is right
+ * when you clicked the node on the canvas or in the running app. It is wrong when you clicked a
+ * row in a **panel**: the Project panel then replaces itself with Properties, and the Layers tree
+ * a person is navigating disappears on their first click in it.
+ *
+ * Found by reading a screenshot. Seven arms of the drive were green — the row was selected, the
+ * path was right, the store said `layers` — and the shot showed the Properties panel where Layers
+ * had been ([[a-rendered-surface-can-be-behind-a-blocker]] is the same family: every number was
+ * about the thing, and the thing was not on screen).
+ */
+export function keepsSidePanel(source: SelectionSource | null): boolean {
+  return source === 'layers' || source === 'panel';
 }

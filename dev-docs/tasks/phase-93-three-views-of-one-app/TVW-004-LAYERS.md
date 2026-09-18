@@ -212,3 +212,44 @@ row exists depends on the **data** — an empty list draws none — and no stati
 Saying *"it's on Home"* about an empty list is a far smaller error than telling someone their list
 item is on no page at all. **Owed to Richard: is a repeated component's sentence worth a word of
 its own** (*"Checkbox Item is on Home — once per item"*), or is the plain one right?
+
+### 6.8 The first drive — seven green arms, and the screenshot that failed them (s14)
+
+`scripts/devtools/drive-tvw004-layers.js`, against a copy of `Prefab marketplace`
+(`NodeGX test projects/TVW-004 s14 Drive`, 165 components, root `/App`). Every arm held:
+
+| arm | reading |
+|---|---|
+| the panel is titled `Project` and carries two tabs | `Layers*` `Components`, header `Layers · Home` |
+| Layers drew rows | 6 visible — the shell, `SHOWING HOME`, the Page, a `Loader` |
+| the indent stops at 90px however deep the row is | deepest row **level 9**, widest padding **90px** of a 90px cap |
+| one level of nesting is 10px | every step seen: 10 |
+| the canvas component is a tinted region with an EDITING band | `EDITING MAIN NAVBAR` · **16 tinted rows** |
+| double-clicking an instance row opens it on the canvas | `…/Main Navbar` → `…/Atoms/Layout/Limiter` |
+| clicking a row writes the shared selection | `{source: 'layers', component: '/App', nodes: [1]}` |
+
+🔴 **And then the screenshot showed the Properties panel where Layers had been.** Selecting a node
+opens its properties in the side panel (`SelectionActions.selectNode` → `SidebarModel.switchToNode`,
+and it is right to do that when you clicked the node itself). Written from Layers it means **the
+tree removes itself on the first click in it** — the surface this task exists to build, deleting
+itself the moment it is used. Every number above was about the row; none was about the panel.
+
+Fixed with a rule rather than a deletion: `keepsSidePanel(source)` in `canvasSelection.ts`, threaded
+as `keepSidePanel` through `switchToComponent` → `selectNode`. A selection from `layers` or `panel`
+leaves the panel alone; one from `canvas` or `preview` still opens Properties, which is TVW-003's
+shipped behaviour and the right answer for those two.
+
+⚠️ **The selection arm could not have failed as written.** It clicked the first row in the tree —
+which belongs to the root component, so its path is a single id, and a build that had lost the
+instance trail entirely would produce exactly that and pass. It now clicks a row **inside a band**
+and asserts a path longer than one. Same family as s13's chip arm that fired on all seven rows.
+
+⚠️ The drive also **ends by moving state** (canvas switched, every reachable caret opened). It now
+resets to the root component and asserts the reset, as TVW-002's does.
+
+⚠️ **A pre-existing duplicate-key warning sits on the launcher** (`Encountered two children with the
+same key` for a project guid, 9 times before any project is open). Not this task's, not filed —
+recorded so the next reader does not attribute it to Layers.
+
+**Left to drive** (the box went to a peer mid-run): the fixed panel behaviour on screen, AC1's five
+states, both themes at 300px and 240px, AC2's independent DOM walk, and the detached preview.

@@ -569,6 +569,8 @@ export class NodeGraphEditor extends View {
     component?: ComponentModel,
     args?: {
       node?: NodeGraphNode;
+      /** TVW-004 — keep the side panel the selection was made in; see `SelectionActions.selectNode`. */
+      keepSidePanel?: boolean;
       pushHistory?: boolean;
       replaceHistory?: boolean;
     }
@@ -655,7 +657,7 @@ export class NodeGraphEditor extends View {
       const node = this.findNodeWithId(args.node.id);
       if (node) {
         this.clearSelection();
-        this.selectNode(node);
+        this.selectNode(node, { keepSidePanel: args.keepSidePanel });
 
         this.relayout(); // Need to relayout twice the first time a new model is set...
         this.layout();
@@ -677,8 +679,8 @@ export class NodeGraphEditor extends View {
     return this.activeComponent;
   }
 
-  selectNode(node: NodeGraphEditorNode) {
-    this.selectionActions.selectNode(node);
+  selectNode(node: NodeGraphEditorNode, options?: { keepSidePanel?: boolean }) {
+    this.selectionActions.selectNode(node, options);
   }
 
   setHighlightedNode(node: NodeGraphEditorNode, atPosition?) {

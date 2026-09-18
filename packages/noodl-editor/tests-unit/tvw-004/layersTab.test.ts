@@ -10,6 +10,7 @@ import {
   tabSubjectFor
 } from '../../src/editor/src/views/panels/ComponentsPanelNew/layersTab';
 import type { TreeNode } from '../../src/editor/src/views/panels/ComponentsPanelNew/types';
+import { keepsSidePanel } from '../../src/editor/src/models/selection/canvasSelection';
 
 describe('TVW-004 — the tab that opens', () => {
   it('opens Layers on a page and on the home component', () => {
@@ -94,5 +95,26 @@ describe('TVW-004 — reading the canvas component off the rows the panel alread
     expect(tabSubjectFor(tree, undefined)).toEqual({ kind: undefined, isPlaced: false });
     expect(tabSubjectFor(tree, '/Gone')).toEqual({ kind: undefined, isPlaced: false });
     expect(defaultTabFor(tabSubjectFor(tree, '/Gone'))).toBe('components');
+  });
+});
+
+describe('TVW-004 — a selection made in a panel does not replace that panel', () => {
+  /**
+   * 🔴 Found by reading a screenshot, not by a number. Seven arms of the drive were green — the
+   * row was selected, the path was right, the store said `layers` — and the shot showed the
+   * **Properties** panel where Layers had been: `SelectionActions.selectNode` always called
+   * `SidebarModel.switchToNode`, so the tree removed itself on the first click in it.
+   */
+  it('keeps the side panel for a selection written by Layers or the Components tree', () => {
+    expect(keepsSidePanel('layers')).toBe(true);
+    expect(keepsSidePanel('panel')).toBe(true);
+  });
+
+  it('still opens Properties for a selection made on the canvas or in the running app', () => {
+    // The behaviour TVW-003 shipped, and the reason this is a rule rather than a deletion: you
+    // clicked the node itself, so its properties are what you asked for.
+    expect(keepsSidePanel('canvas')).toBe(false);
+    expect(keepsSidePanel('preview')).toBe(false);
+    expect(keepsSidePanel(null)).toBe(false);
   });
 });

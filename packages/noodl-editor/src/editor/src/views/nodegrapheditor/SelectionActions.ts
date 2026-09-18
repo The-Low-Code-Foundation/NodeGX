@@ -165,7 +165,13 @@ export class SelectionActions {
     editor.repaint();
   }
 
-  selectNode(node: NodeGraphEditorNode) {
+  /**
+   * @param options.keepSidePanel TVW-004 — do not replace the side panel with the node's
+   *   properties. Passed when the selection was made **in a panel**: a Layers row click used to
+   *   swap the Project panel out for Properties, so the tree the person was navigating removed
+   *   itself on first use. Measured in the drive, invisible to every count that graded it.
+   */
+  selectNode(node: NodeGraphEditorNode, options?: { keepSidePanel?: boolean }) {
     const editor = this.editor;
 
     if (editor.readOnly) {
@@ -184,8 +190,9 @@ export class SelectionActions {
       });
     }
 
-    // Always switch to the node in the sidebar (fixes property panel stuck issue)
-    SidebarModel.instance.switchToNode(node.model);
+    // Always switch to the node in the sidebar (fixes property panel stuck issue) — unless the
+    // selection came from a panel, which would then be replacing itself. See `keepSidePanel`.
+    if (!options?.keepSidePanel) SidebarModel.instance.switchToNode(node.model);
 
     // Handle double-click navigation
     if (editor.interaction.leftButtonIsDoubleClicked) {
