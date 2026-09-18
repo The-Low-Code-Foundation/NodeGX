@@ -14,7 +14,7 @@
  * served at `/`, a `--base-url` build asks for `/templates/<slug>/index-<hash>.js` and renders
  * blank. Every clause here needs the example list on screen, so a blank page fails all of them.
  *
- * Clicks are real CDP mouse events. Exits 0 when every clause passed, 1 when any did.
+ * Clicks are real CDP mouse events — the deadline is pressed out of the Date Picker's calendar. Exits 0 when every clause passed, 1 when any did.
  */
 const path = require('path');
 const { withDeployedSite } = require('./drive-deployed.js');
@@ -153,6 +153,50 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   const reset = await until(openTitles, (t) => t.length === 3 && !t.includes(ADDED));
   const resetText = await until(text, (s) => !s.includes(ADDED));
   check('Reset demo puts the example list back', JSON.stringify(reset) === JSON.stringify(SEEDED) && !resetText.includes(ADDED), JSON.stringify(reset));
+
+  // ── A deadline, from the calendar (2026-09-16: the field became the Date Picker) ─
+  // Five days out: always in the future, at most one calendar page away, and inside "Due in N days".
+  const soon = new Date();
+  soon.setDate(soon.getDate() + 5);
+  const SOON = `${soon.getFullYear()}-${String(soon.getMonth() + 1).padStart(2, '0')}-${String(soon.getDate()).padStart(2, '0')}`;
+  const centre = (selector) =>
+    page.evaluate(`(() => {
+      const e = document.querySelector(${JSON.stringify(selector)});
+      if (!e) return null;
+      e.scrollIntoView({ block: 'center', behavior: 'instant' });
+      const r = e.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    })()`);
+  const titleAt = await page.evaluate(`(() => {
+    const leaf = [...document.querySelectorAll('body *')].find((e) => e.children.length === 0 && (e.textContent || '').trim() === ${JSON.stringify(SEEDED[0])});
+    if (!leaf) return null;
+    const r = leaf.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  })()`);
+  if (titleAt) await press(titleAt);
+  const fieldAt = await until(() => centre('.ndg-dp-input'), (v) => !!v, 5000);
+  const inputType = await page.evaluate(`(document.querySelector('.ndg-dp-input') || {}).type || 'absent'`);
+  if (fieldAt) await press(fieldAt);
+  const calendar = await until(() => page.evaluate(`!!document.querySelector('.ndg-dp-pop')`), (v) => v === true, 5000);
+  await shot('2b-calendar');
+  for (let i = 0; calendar && i < 3; i++) {
+    const day = await centre(`.ndg-dp-pop [data-day="${SOON}"]`);
+    if (day) {
+      await press(day);
+      break;
+    }
+    const next = await centre('.ndg-dp-pop [data-nav="1"]');
+    if (next) await press(next);
+  }
+  const written = await until(async () => ((await store())?.Task || []).find((t) => t.title === SEEDED[0])?.deadline, (d) => d === SOON);
+  const said = await until(text, (s) => s.includes('Due in 5 days'));
+  check(
+    'a deadline is picked from a calendar, stored, and said in words',
+    inputType === 'date' && calendar === true && written === SOON && said.includes('Due in 5 days'),
+    JSON.stringify({ inputType, calendar, written, wanted: SOON, said: said.includes('Due in 5 days') })
+  );
+  await clickButton('Reset demo', null);
+  await until(openTitles, (t) => JSON.stringify(t) === JSON.stringify(SEEDED));
 
   // ── Light and dark (the system decides, the switch at the top right overrides) ─
   // `THEME_STORAGE_KEY` in `packages/noodl-mcp/tests/tpl008Theme.ts`; the grounds are `--background` of each palette.

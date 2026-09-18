@@ -40,6 +40,14 @@ The access rules ship as `nodegx.security.json`:
 - **Light and dark.** The page follows your system until you press the moon or sun at the top right
   (`Todo/Theme switch`). Pick the theme your system already uses and it goes back to following it.
   Both palettes are in `App`'s CSS Definition; `App` also puts your choice back when the app opens.
+- **Deadline reminders.** `Todo/Reminders switch` is a bell that shows only when the page the app is served
+  from sets `data-reminders` on the root and provides `window.todoReminders` — a service worker, a push key
+  and a server that sends at 9am on the day a task is due. This project sends nothing by itself, so without
+  that host there is no bell. The host keeps each device in `PushSubscription`.
+- **The deadline field** is `Todo/Date picker`, the same part as the library's Date Picker: a real date
+  input with a calendar that drops down on a computer, and the device's own date picker on a phone. It
+  hands `Commands/Set deadline` a `YYYY-MM-DD` day when a date is picked, typed (on Enter or leaving the
+  field) or cleared.
 
 ## The data
 
@@ -48,4 +56,5 @@ The access rules ship as `nodegx.security.json`:
 | `Task` | `title`, `position` (lower = sooner), `status` (`open`/`done`), `deadline` (`YYYY-MM-DD`), `closingNote`, `closedAt` |
 | `Action` | `taskId`, `title`, `position`, `done`, `note`, `description` |
 | `Event` | `taskId`, `kind`, `summary`, `body`, `at` |
+| `PushSubscription` | `endpoint`, `p256dh`, `auth`, `timeZone`, `enabled`, `device` — one per device with reminders on |
 

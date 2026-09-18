@@ -1,0 +1,100 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9c14b616-b593-5d5a-8f05-a990b3d9f23c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rmRoot",
+      "type": "Group",
+      "label": "Reminders switch",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "rmTurnOn",
+        "rmTurnOff"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rmTurnOn",
+      "type": "net.noodl.controls.button",
+      "label": "Turn reminders on",
+      "parent": "rmRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "sizeMode": "contentSize",
+        "label": "Turn reminders on",
+        "styleCss": "font-size: 0;",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-bell-off",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": 0,
+        "iconColor": "var(--muted-foreground)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "cssClassName": "todo-reminders-turn-on"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rmTurnOff",
+      "type": "net.noodl.controls.button",
+      "label": "Turn reminders off",
+      "parent": "rmRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "sizeMode": "contentSize",
+        "label": "Turn reminders off",
+        "styleCss": "font-size: 0;",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-bell-ring",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": 0,
+        "iconColor": "var(--muted-foreground)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "cssClassName": "todo-reminders-turn-off"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rmToggle",
+      "type": "JavaScriptFunction",
+      "label": "Ask the host to turn reminders on or off",
+      "parameters": {
+        "functionScript": "if (window.todoReminders && typeof window.todoReminders.toggle === 'function') window.todoReminders.toggle();"
+      },
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "rmRoot"
+  ]
+}

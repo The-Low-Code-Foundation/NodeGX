@@ -300,7 +300,8 @@
                     "parameters": {
                       "text": "Label",
                       "textStyle": "Label Medium",
-                      "color": "var(--foreground)"
+                      "color": "var(--foreground)",
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -318,7 +319,8 @@
                         "value": 4,
                         "unit": "px"
                       },
-                      "visible": false
+                      "visible": false,
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -741,7 +743,8 @@
                     "parameters": {
                       "text": "Label",
                       "textStyle": "Label Medium",
-                      "color": "var(--foreground)"
+                      "color": "var(--foreground)",
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -759,7 +762,8 @@
                         "value": 4,
                         "unit": "px"
                       },
-                      "visible": false
+                      "visible": false,
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -1187,7 +1191,8 @@
                     "parameters": {
                       "text": "Label",
                       "textStyle": "Label Medium",
-                      "color": "var(--foreground)"
+                      "color": "var(--foreground)",
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -1205,7 +1210,8 @@
                         "value": 4,
                         "unit": "px"
                       },
-                      "visible": false
+                      "visible": false,
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -1676,7 +1682,8 @@
                     "parameters": {
                       "text": "Label",
                       "textStyle": "Label Medium",
-                      "color": "var(--foreground)"
+                      "color": "var(--foreground)",
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -1694,7 +1701,8 @@
                         "value": 4,
                         "unit": "px"
                       },
-                      "visible": false
+                      "visible": false,
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],
@@ -2154,7 +2162,8 @@
                         "value": 4,
                         "unit": "px"
                       },
-                      "visible": false
+                      "visible": false,
+                      "sizeMode": "contentSize"
                     },
                     "ports": [],
                     "dynamicports": [],

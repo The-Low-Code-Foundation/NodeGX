@@ -37,11 +37,24 @@
  *
  * @module noodl-mcp/tests/tpl008Components
  */
-import { composition, THEME_BOOT_SCRIPT, THEME_FLIP_SCRIPT, THEME_TO_DARK_CLASS, THEME_TO_LIGHT_CLASS, themeCss } from './tpl008Theme';
+import {
+  composition,
+  REMINDERS_TOGGLE_SCRIPT,
+  REMINDERS_TURN_OFF_CLASS,
+  REMINDERS_TURN_ON_CLASS,
+  THEME_BOOT_SCRIPT,
+  THEME_FLIP_SCRIPT,
+  THEME_TO_DARK_CLASS,
+  THEME_TO_LIGHT_CLASS,
+  themeCss
+} from './tpl008Theme';
+import { DATE_PICKER_DESCRIPTION, DATE_PICKER_INPUTS, DATE_PICKER_OUTPUTS, datePickerGraph } from './datePicker';
 
 export const ROUTER = 'Main';
 export const APP_COMPONENT = 'App';
 export const COLLECTIONS = ['Task', 'Action', 'Event'] as const;
+/** One row per device with reminders on (s6). Written by the host's script, read by its sender — not part of the list. */
+export const REMINDER_COLLECTION = 'PushSubscription';
 
 export interface Tpl008Component {
   path: string;
@@ -58,6 +71,8 @@ export interface Tpl008Component {
 
 export const C = {
   themeSwitch: '/Todo/Theme switch',
+  remindersSwitch: '/Todo/Reminders switch',
+  datePicker: '/Todo/Date picker',
   header: '/Todo/Header',
   problem: '/Todo/Problem banner',
   taskRow: '/Todo/Task row',
@@ -375,10 +390,46 @@ const THEME_SWITCH: Tpl008Component = {
   connections: [wire('thToDark', 'onClick', 'thFlip', 'run'), wire('thToLight', 'onClick', 'thFlip', 'run')]
 };
 
+/**
+ * Richard (s6): *"push notifications that come when deadlines are coming … at 9am on the day of the
+ * deadline"*. The bell beside the theme switch, built the theme switch's way: two icon buttons, and the
+ * stylesheet shows at most one — and none unless the host set `data-reminders` (`tpl008Theme.ts`). The
+ * crossed-out bell says reminders are off and turns them on; the ringing bell says they are on.
+ * Only in the Header: a device's subscription belongs to whoever is signed in.
+ */
+const REMINDERS_SWITCH: Tpl008Component = {
+  path: 'Todo/Reminders switch',
+  description:
+    'The bell at the top right: turns deadline reminders on or off for this device. Shown only when the server the app is served from can send them.',
+  nodes: [
+    // `rm`: node ids are unique across the whole project.
+    group('rmRoot', 'Reminders switch', undefined, { flexDirection: 'row', alignItems: 'center', sizeMode: 'contentSize' }),
+    place('rmTurnOn', BUTTON, 'Turn reminders on', 'rmRoot', { ...BTN_ICON('icon-bell-off', 'Turn reminders on'), cssClassName: REMINDERS_TURN_ON_CLASS }),
+    place('rmTurnOff', BUTTON, 'Turn reminders off', 'rmRoot', { ...BTN_ICON('icon-bell-ring', 'Turn reminders off'), cssClassName: REMINDERS_TURN_OFF_CLASS }),
+    logic('rmToggle', FUNCTION, 'Ask the host to turn reminders on or off', { functionScript: REMINDERS_TOGGLE_SCRIPT })
+  ],
+  connections: [wire('rmTurnOn', 'onClick', 'rmToggle', 'run'), wire('rmTurnOff', 'onClick', 'rmToggle', 'run')]
+};
+
+/**
+ * The deadline field (Richard, 2026-09-16: *"the date field in the task details doesn't have a date
+ * picker"*). The library's Date Picker, built from the same source (`datePicker.ts`) so the shelf
+ * part and this one cannot drift: a real date input, a calendar on a computer, the phone's own
+ * picker on a phone. `dp` ids — unique across the project.
+ */
+const DATE_PICKER: Tpl008Component = {
+  path: 'Todo/Date picker',
+  description: DATE_PICKER_DESCRIPTION,
+  inputs: DATE_PICKER_INPUTS.map(({ name, type, description }) => ({ name, type, description })),
+  outputs: DATE_PICKER_OUTPUTS.map(({ name, type, description }) => ({ name, type, description })),
+  ...datePickerGraph('dp')
+};
+
 const HEADER: Tpl008Component = {
   path: 'Todo/Header',
-  description: 'The app name, the three views (List, Done, Log), Sign out and the theme switch. Tab is the view that is showing.',
-  instantiates: [C.themeSwitch],
+  description:
+    'The app name, the three views (List, Done, Log), Sign out, the reminders bell and the theme switch. Tab is the view that is showing.',
+  instantiates: [C.remindersSwitch, C.themeSwitch],
   ...iface(
     [['tab', 'string'], ['listLabel', 'string'], ['doneLabel', 'string']],
     [['pickList', 'signal'], ['pickDone', 'signal'], ['pickLog', 'signal'], ['signOut', 'signal']]
@@ -393,6 +444,7 @@ const HEADER: Tpl008Component = {
     place('hdDone', BUTTON, 'Done', 'hdNav', { ...BTN_GHOST, label: 'Done' }),
     place('hdLog', BUTTON, 'Log', 'hdNav', { ...BTN_GHOST, label: 'Log' }),
     place('hdSignOut', BUTTON, 'Sign out', 'hdNav', { ...BTN_GHOST, label: 'Sign out', color: 'var(--muted-foreground)' }),
+    place('hdReminders', C.remindersSwitch, 'Deadline reminders', 'hdNav'),
     place('hdTheme', C.themeSwitch, 'Light or dark', 'hdNav'),
     logic('hdLook', STATES, 'Which view is showing', {
       states: 'list,done,log',
@@ -711,6 +763,7 @@ const TASK_SUMMARY: Tpl008Component = {
   description:
     'The top of an open task: its title (edit it in place), where it is in the list, its deadline, and Move to #1 / Close task / Reopen. A closed task shows what happened.',
   ...iface(SUMMARY_INS, SUMMARY_OUTS),
+  instantiates: [C.datePicker],
   nodes: [
     inputs('tsIn', 'The task', SUMMARY_INS),
     outputs('tsOut', 'What you did', SUMMARY_OUTS),
@@ -739,7 +792,7 @@ const TASK_SUMMARY: Tpl008Component = {
     group('tsDeadline', 'Deadline', 'tsBar', COLUMN('var(--space-1)')),
     text('tsDeadlineLabel', 'Deadline label', 'tsDeadline', 'Deadline', { ...T_META, sizeMode: 'contentSize' }),
     group('tsDeadlineRow', 'Deadline field', 'tsDeadline', { ...ROW('var(--space-3)'), flexWrap: 'wrap' }),
-    place('tsDeadlineField', TEXT_INPUT, 'Deadline field', 'tsDeadlineRow', { ...FIELD, width: px(150), placeholder: 'YYYY-MM-DD' }),
+    place('tsDeadlineField', C.datePicker, 'Deadline field', 'tsDeadlineRow', { Label: 'Deadline', Width: px(200) }),
     text('tsDue', 'How long until it is due', 'tsDeadlineRow', '', { ...T_META, sizeMode: 'contentSize' }),
     text('tsDeadlineError', 'A deadline that is not a date', 'tsDeadline', '', { ...wide(T_ERROR), mounted: false }),
     group('tsButtons', 'Buttons', 'tsBar', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
@@ -753,7 +806,7 @@ const TASK_SUMMARY: Tpl008Component = {
   connections: [
     wire('tsIn', 'title', 'tsTitle', 'startValue'),
     wire('tsIn', 'rankLine', 'tsMeta', 'text'),
-    wire('tsIn', 'deadline', 'tsDeadlineField', 'startValue'),
+    wire('tsIn', 'deadline', 'tsDeadlineField', 'Value'),
     wire('tsIn', 'dueText', 'tsDue', 'text'),
     wire('tsIn', 'dueColor', 'tsDue', 'color'),
     wire('tsIn', 'deadlineError', 'tsDeadlineError', 'text'),
@@ -769,9 +822,9 @@ const TASK_SUMMARY: Tpl008Component = {
     wire('tsTitle', 'onTextChanged', 'tsOut', 'newTitle'),
     wire('tsTitle', 'onEnter', 'tsTitle', 'blur'),
     wire('tsTitle', 'onBlur', 'tsOut', 'rename'),
-    wire('tsDeadlineField', 'onTextChanged', 'tsOut', 'deadlineText'),
-    wire('tsDeadlineField', 'onEnter', 'tsDeadlineField', 'blur'),
-    wire('tsDeadlineField', 'onBlur', 'tsOut', 'setDeadline'),
+    // The picker commits on a decision (a day picked, Enter, leaving the field), never per keystroke.
+    wire('tsDeadlineField', 'Value', 'tsOut', 'deadlineText'),
+    wire('tsDeadlineField', 'Changed', 'tsOut', 'setDeadline'),
     wire('tsMakeNext', 'onClick', 'tsOut', 'makeNext'),
     wire('tsClose', 'onClick', 'tsOut', 'close'),
     wire('tsReopen', 'onClick', 'tsOut', 'reopen'),
@@ -1720,7 +1773,7 @@ Outputs.go();`;
 
 const SET_DEADLINE = command({
   path: 'Commands/Set deadline',
-  description: 'Sets or clears a task’s deadline from what was typed (YYYY-MM-DD, "today" or "tomorrow"). Anything else is refused with a sentence saying so.',
+  description: 'Sets or clears a task’s deadline from the date picker (YYYY-MM-DD; "today" and "tomorrow" also work). Anything else is refused with a sentence saying so.',
   ins: [['taskId', 'string'], ['text', 'string'], ['current', 'string']],
   extraOuts: [['error', 'string'], ['hasError', 'boolean']],
   guard: DEADLINE_SCRIPT,
@@ -2406,7 +2459,7 @@ export const APP_NODES = [
   // ground stopped under a short list and the rest of the window was white. Found by
   // LOOKING at the drive's screenshots; no check in either suite could see it.
   // The same stylesheet holds the dark palette and decides which theme icon shows.
-  logic('app_css', 'CSS Definition', 'The page ground, the dark palette, and which theme icon shows', { style: themeCss() }),
+  logic('app_css', 'CSS Definition', 'The page ground, the dark palette, which theme icon shows and whether the bell does', { style: themeCss() }),
   // Nothing wired into it, so it runs once at load: a theme the person chose is put back on every page.
   logic('app_theme', FUNCTION, 'Put back the theme the person chose', { functionScript: THEME_BOOT_SCRIPT })
 ];
@@ -2436,6 +2489,8 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   LOG_ROWS,
   TODO_DATA,
   THEME_SWITCH,
+  REMINDERS_SWITCH,
+  DATE_PICKER,
   HEADER,
   PROBLEM_BANNER,
   TASK_ROW,

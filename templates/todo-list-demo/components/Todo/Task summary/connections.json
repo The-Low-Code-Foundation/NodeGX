@@ -19,7 +19,7 @@
       "fromId": "tsIn",
       "fromProperty": "deadline",
       "toId": "tsDeadlineField",
-      "toProperty": "startValue"
+      "toProperty": "Value"
     },
     {
       "fromId": "tsIn",
@@ -101,19 +101,13 @@
     },
     {
       "fromId": "tsDeadlineField",
-      "fromProperty": "onTextChanged",
+      "fromProperty": "Value",
       "toId": "tsOut",
       "toProperty": "deadlineText"
     },
     {
       "fromId": "tsDeadlineField",
-      "fromProperty": "onEnter",
-      "toId": "tsDeadlineField",
-      "toProperty": "blur"
-    },
-    {
-      "fromId": "tsDeadlineField",
-      "fromProperty": "onBlur",
+      "fromProperty": "Changed",
       "toId": "tsOut",
       "toProperty": "setDeadline"
     },

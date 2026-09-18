@@ -112,6 +112,7 @@
         "hdDone",
         "hdLog",
         "hdSignOut",
+        "hdReminders",
         "hdTheme"
       ],
       "x": 100,
@@ -206,12 +207,20 @@
       "y": 760
     },
     {
+      "id": "hdReminders",
+      "type": "/Todo/Reminders switch",
+      "label": "Deadline reminders",
+      "parent": "hdNav",
+      "x": 160,
+      "y": 880
+    },
+    {
       "id": "hdTheme",
       "type": "/Todo/Theme switch",
       "label": "Light or dark",
       "parent": "hdNav",
       "x": 160,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "hdLook",

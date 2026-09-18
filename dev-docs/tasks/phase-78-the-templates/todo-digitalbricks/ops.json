@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "logging": {
+    "level": "info",
+    "format": "auto",
+    "requests": true
+  },
+  "rateLimit": {
+    "enabled": true,
+    "trustedProxies": [
+      "loopback"
+    ],
+    "policies": {
+      "auth": {
+        "ratePerMinute": 60,
+        "burst": 30
+      },
+      "admin": {
+        "ratePerMinute": 300,
+        "burst": 100
+      },
+      "data": {
+        "ratePerMinute": 1200,
+        "burst": 400
+      },
+      "files": {
+        "ratePerMinute": 300,
+        "burst": 100
+      },
+      "hooks": {
+        "ratePerMinute": 300,
+        "burst": 150
+      },
+      "functions": {
+        "ratePerMinute": 600,
+        "burst": 200
+      },
+      "realtime": {
+        "ratePerMinute": 0,
+        "burst": 0
+      },
+      "public": {
+        "ratePerMinute": 600,
+        "burst": 200
+      }
+    },
+    "realtimeMaxConnections": 500
+  },
+  "cors": {
+    "origins": [
+      "https://todo.digitalbricks.io"
+    ],
+    "credentials": false
+  },
+  "audit": {
+    "enabled": true,
+    "retentionDays": 90
+  },
+  "executions": {
+    "retentionDays": 30,
+    "idempotencyTtlHours": 24
+  },
+  "metrics": {
+    "enabled": false,
+    "allowLoopback": false
+  }
+}

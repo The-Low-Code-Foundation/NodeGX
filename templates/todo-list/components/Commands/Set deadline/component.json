@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "Sets or clears a task’s deadline from what was typed (YYYY-MM-DD, \"today\" or \"tomorrow\"). Anything else is refused with a sentence saying so."
+  "description": "Sets or clears a task’s deadline from the date picker (YYYY-MM-DD; \"today\" and \"tomorrow\" also work). Anything else is refused with a sentence saying so."
 }

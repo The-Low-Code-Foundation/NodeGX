@@ -41,6 +41,16 @@
         "delete": "nobody"
       },
       "creatorOwns": true
+    },
+    "PushSubscription": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
     }
   },
   "functions": {},

@@ -134,6 +134,20 @@ export const THEME_TO_DARK_CLASS = 'todo-theme-to-dark';
 export const THEME_TO_LIGHT_CLASS = 'todo-theme-to-light';
 
 /**
+ * Deadline reminders (s6). The template draws a bell and nothing else: what turns reminders on
+ * belongs to the HOST — a service worker, a push key and a server that sends at 9am — so the bell
+ * shows only when the page it is served in says it can, by setting `data-reminders` on the root
+ * (`off`, `on`, or `install` on an iPhone that has not added the app to its Home Screen) and
+ * providing `window.todoReminders`. The demo, the editor and a server with no sender set neither,
+ * so none of them draws a bell that does nothing.
+ */
+export const REMINDERS_ATTRIBUTE = 'data-reminders';
+export const REMINDERS_TURN_ON_CLASS = 'todo-reminders-turn-on';
+export const REMINDERS_TURN_OFF_CLASS = 'todo-reminders-turn-off';
+/** The press hands over to the host. Where there is no host there is no bell to press. */
+export const REMINDERS_TOGGLE_SCRIPT = `if (window.todoReminders && typeof window.todoReminders.toggle === 'function') window.todoReminders.toggle();`;
+
+/**
  * The App's stylesheet: the page ground, the dark tokens under both conditions, and
  * which switch icon shows. Which icon shows is decided by the SAME conditions as the
  * palette, so a system that turns dark at sunset changes the icon with the colours,
@@ -165,7 +179,12 @@ export function themeCss(): string {
     '@media not all and (prefers-color-scheme: dark) {',
     `  :root:not([data-theme="dark"]) ${hide(THEME_TO_LIGHT_CLASS)}`,
     '}',
-    `:root[data-theme="light"] ${hide(THEME_TO_LIGHT_CLASS)}`
+    `:root[data-theme="light"] ${hide(THEME_TO_LIGHT_CLASS)}`,
+    '',
+    '/* Reminders: no bell unless the host can send them; then the one that changes the state. */',
+    `:root:not([${REMINDERS_ATTRIBUTE}]) ${hide(REMINDERS_TURN_ON_CLASS)}`,
+    `:root:not([${REMINDERS_ATTRIBUTE}="on"]) ${hide(REMINDERS_TURN_OFF_CLASS)}`,
+    `:root[${REMINDERS_ATTRIBUTE}="on"] ${hide(REMINDERS_TURN_ON_CLASS)}`
   ].join('\n');
 }
 

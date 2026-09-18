@@ -300,28 +300,15 @@
     },
     {
       "id": "tsDeadlineField",
-      "type": "net.noodl.controls.textinput",
+      "type": "/Todo/Date picker",
       "label": "Deadline field",
       "parent": "tsDeadlineRow",
       "parameters": {
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 150,
+        "Label": "Deadline",
+        "Width": {
+          "value": 200,
           "unit": "px"
-        },
-        "type": "text",
-        "backgroundColor": "var(--background)",
-        "color": "var(--foreground)",
-        "fontSize": "var(--text-base)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "placeholder": "YYYY-MM-DD"
+        }
       },
       "x": 280,
       "y": 1000

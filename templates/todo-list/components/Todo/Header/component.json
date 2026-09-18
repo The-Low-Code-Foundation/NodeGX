@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The app name, the three views (List, Done, Log), Sign out and the theme switch. Tab is the view that is showing."
+  "description": "The app name, the three views (List, Done, Log), Sign out, the reminders bell and the theme switch. Tab is the view that is showing."
 }

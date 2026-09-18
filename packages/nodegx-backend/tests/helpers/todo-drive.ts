@@ -158,3 +158,39 @@ export const buttonDisabled = async (page: RenderedPage, label: string): Promise
     });
     return b.length === 0 ? 'absent' : b[b.length - 1].disabled;
   })()`);
+
+/** A pointer press on the centre of the first element matching `selector`, scrolled into view. */
+async function pressSelector(page: RenderedPage, selector: string): Promise<boolean> {
+  const at = String(
+    await page.evaluate(`(function () {
+      var e = document.querySelector(${JSON.stringify(selector)});
+      if (!e) return 'absent';
+      e.scrollIntoView({ block: 'center', behavior: 'instant' });
+      var r = e.getBoundingClientRect();
+      return JSON.stringify({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    })()`)
+  );
+  if (at === 'absent') return false;
+  const { x, y } = JSON.parse(at) as { x: number; y: number };
+  await clickAt(page, x, y);
+  return true;
+}
+
+/**
+ * Set the deadline the way a person with a mouse does (2026-09-16: the field became the Date
+ * Picker): press the field, page the calendar forward until the day is there, press the day.
+ * Returns what the page showed on the way, so the drive can assert it was a calendar at all.
+ */
+export async function pickDate(page: RenderedPage, iso: string): Promise<{ inputType: string; calendarOpened: boolean }> {
+  const inputType = String(await page.evaluate(`(document.querySelector('.ndg-dp-input') || {}).type || 'absent'`));
+  if (!(await pressSelector(page, '.ndg-dp-input'))) throw new Error('pickDate: no date picker field on the page');
+  const calendarOpened = await until('calendar open', () => page.evaluate(`!!document.querySelector('.ndg-dp-pop')`), (v) => v === true, 5_000)
+    .then(() => true)
+    .catch(() => false);
+  if (!calendarOpened) return { inputType, calendarOpened };
+  for (let i = 0; i < 24; i++) {
+    if (await pressSelector(page, `.ndg-dp-pop [data-day="${iso}"]`)) return { inputType, calendarOpened };
+    if (!(await pressSelector(page, '.ndg-dp-pop [data-nav="1"]'))) break;
+  }
+  throw new Error(`pickDate: ${iso} never appeared in the calendar`);
+}

@@ -335,3 +335,151 @@ nothing else pending. Old folder moved aside, not deleted. `deploy.sh`: neighbou
   `scripts/devtools/drive-tpl008-demo.js`, `templates/todo-list/`, `templates/todo-list-demo/`, this file, and one hunk of
   `NEXT-SESSION-PROMPT.md` (which also holds a peer's uncommitted hunk — commit from a private index).
 - `test:ci` / `test:main` not run.
+
+### s5 — 2026-09-15: hosted at <https://todo.digitalbricks.io> (R11's "later phase", at Richard's request)
+
+**Ask:** *"a version of our todo list app published to any VM we have easily available … maybe nexus-1, and I'll point
+todo.digitalbricks.io at it"*. Read as the **real template with its backend**, not the demo: the demo is already public on
+nodegx.io and keeps its list in one browser, which is the opposite of §1a's reason for a server.
+
+**Shape** (files: `todo-digitalbricks/` beside this file — `provision.sh`, `ops.json`, `README.md`):
+- Frontend: `templates/todo-list` (committed, `8d046807b`) + starter `noodl_modules`, `cloudservices` →
+  `{appId: todo-list, endpoint: https://todo.digitalbricks.io, type: nodegx}`, built with the Sep 11 `nodegx-deploy.cjs`
+  (production engine, 0 warnings) → `/srv/todo/site`. **One origin**: Caddy proxies the backend's route families (the list
+  `deploy/nginx.conf` keeps, test-enforced) and falls back to `index.html` for the rest, so a reload on `/todo-list` works.
+- Backend: `dist/cli.js` from **Sep 9** — packaged with `package-deploy.js --skip-build` (sourcemap dropped, credential scan
+  passed), deliberately **not rebuilt** over today's uncommitted SYN-003 edits in `nodegx-backend/src/server`. systemd
+  `todo-backend`, user `todo`, `127.0.0.1:8690`, `--no-admin`, data `/var/lib/todo/data`, the template's policy installed
+  before first start (**ENFORCED**, `devOpen: false`, `signup: public`). `ops.json`: CORS = the app origin, metrics off.
+- 🔴 **Behind a same-host proxy every request is loopback.** Measured what that changes: only `clientIp` (X-Forwarded-For
+  trust, which Caddy sets) and `metrics.allowLoopback`. So `/_admin`, `/admin`, `/executions`, `/metrics` are answered **404
+  by Caddy** and never reach the backend.
+- Additive on a shared box (nexus, digitalbricks.io, nodegx.io, community): only new paths plus `conf.d/todo.caddy`, which the
+  script deletes if `caddy validate` fails. Four neighbours 200 before and after.
+
+**Graded:**
+- Server-side REST: unauthenticated `find` 403 · sign-up OK · A sees 1, B sees 0, B `get` of A's row 404 · owner `DELETE` 403.
+- Public (from the box — this laptop's VPN resolver cached the NXDOMAIN): Let's Encrypt cert (to Dec 14) · `/`, `/sign-in`,
+  `/todo-list` 200 · `/health` 200 · the four closed routes 404.
+- Headless Chrome on the live host (`--host-resolver-rules` to the IP): sign-in drawn → account created → lands on
+  `/todo-list` → task added (server holds the Task and its "Added at #1" Event) → **reload keeps it** → 390px has no
+  horizontal overflow → every backend request same-origin → **0 console errors, 0 failed or ≥400 requests**.
+- The 4 probe accounts were the only rows; the database was deleted and the service restarted — **0 users** at handoff.
+
+⚠️ **Open:** `signup` is `public` so Richard can make his account. After he has, set it to `nobody` in
+`/var/lib/todo/data/security.json` and `systemctl restart todo-backend` (the admin surface is off, so the file is the switch —
+command in `todo-digitalbricks/README.md`). No backups are scheduled for `/var/lib/todo` yet (`nodegx-backend backup` exists).
+
+### s6 — 2026-09-15: a PWA, and a push at 9am on the day a task is due
+
+**Ask:** *"Can we make it a PWA please? With push notifications that come when deadlines are coming? Maybe at 9am on the day
+of the deadline?"* Scoped against P89 first: BOX-013 (installable deployed apps) is an unstarted index row and push is in no
+phase, so this is built for the hosted list and recorded here, not as BOX-013.
+
+**The split.** The template carries only what every copy can have; the host carries the rest.
+- **Template** (`tpl008Components.ts`, `tpl008Theme.ts`): `Todo/Reminders switch`, placed in `Todo/Header` only — two icon buttons
+  (`rmTurnOn` crossed-out bell, `rmTurnOff` ringing bell) and a Function that calls `window.todoReminders.toggle()` if it exists.
+  **The stylesheet shows neither unless the root has `data-reminders`** (`off`/`install` → turn on; `on` → turn off), so the demo,
+  the editor and a server without a sender draw no bell. Policy gains `PushSubscription` (same rules as Task: owner-only, delete
+  `nobody` — off is `enabled: false`). START-HERE says all of this. 37 components / demo 36.
+- **Host** (`todo-digitalbricks/`): `apply-pwa.js` adds `pwa/manifest.webmanifest`, icons, `sw.js` (no caching — a stale shell
+  after a redeploy asks for bundles that are gone), `pwa/reminders.js`, and swaps `black-translucent` for `default` so an installed
+  app's header is not under the iPhone status bar. `todo-push` (systemd) reads the backend's SQLite READ-ONLY once a minute and
+  sends with a bundled `web-push@3.6.7`; the VAPID key pair is made on the box and never leaves it.
+- **When:** 09:00–12:00 in the device's own time zone (stored per device, refreshed on each open), once a day, the person's open
+  tasks due that day. 12:00 is catch-up after downtime, so turning reminders on at 10pm does not fire at once.
+
+**Graded:**
+- Gates `tpl008Template.test.ts` + `tpl008Demo.test.ts` **43/43** (new §4b test: buttons, classes, the hand-over script against
+  a host and no host, placed only in Header, the three hide rules; §2 names the fourth collection). Regenerated: only App,
+  Header, registry, START-HERE, policy and the new component changed in both artefacts; 0 warnings.
+- Sender on a fixture: done / other person's / disabled rows skipped, per-zone date (Auckland already tomorrow), bad zone → UTC,
+  08:59 no / 09:00 yes / 12:00 no, `--only`.
+- **FCM for real, from this laptop**: headless Chrome subscribes; the bundle's push → 201 → the service worker showed it.
+- **Local staging of the whole shape** (`staging-e2e.js`: one origin, SPA fallback, the Sep 9 backend, headless Chrome) **18/18**:
+  manifest no errors · SW active · no installability errors · no bell on Sign in · after sign-up the crossed bell only · press →
+  "Reminders are on" notification, one enabled row with zone + endpoint, the ringing bell only · tasks due today / closed today /
+  due later → a `--once` tick sends ONE push (201) that arrives as "Due today | <the open one>" · a second tick sends nothing ·
+  press → row kept `enabled: false`, crossed bell back, not reminded · no attribute → no bell · 0 dialogs, 0 console errors.
+  🔴 **It found a bug first:** `reminders.js` padded the 87-character key to 89 (`'===='.slice(...)`), `atob` threw, and the
+  failure `alert()` froze the page — the harness now records and dismisses dialogs.
+- **Production**: rsynced (`--exclude pwa/vapid-public-key.txt`), `push/provision-push.sh` (policy + old file kept, Caddy headers
+  with its old drop-in kept, backend restarted, `todo-push` up). Live headless Chrome on Sign in (no account): manifest no
+  errors, SW active, **no installability errors**, `data-reminders=off`, status bar `default`, 0 console errors. Richard's data
+  before/after: 1 user, 8 tasks, 9 events, 1 session. Neighbours 200 before and after. The old site is `/srv/todo/site.before-pwa`.
+
+🔴 **The shared viewer engine was a DEVELOPMENT build** at deploy time — a peer's editor `test-ci` webpack rewrote
+`packages/noodl-editor/src/external/deploy/noodl.deploy.js` at 21:50. Not rebuilt and not shipped: a control build of the
+unchanged s5 project with `--allow-development-engine` was **byte-identical in every file except `noodl.deploy.js`**, so the
+site was built that way and the production engine copied in (md5 `43041dd…`, the one live since s5).
+
+⚠️ **Not done:** a push to a real phone (Richard: add to Home Screen on iOS 16.4+, press the bell;
+`sender.js --test <email>` on the box sends one on demand) · the backend drives (`tpl008-todo-drive`, `tpl008-theme-drive`,
+`tpl008-todo-demo-drive`) were not re-run — the staging drive covers the built template, not those suites · sign-up is still
+`public` · nothing committed.
+
+### s7 — 2026-09-16: the deadline field gets a date picker, and the library's Date Picker is rewritten
+
+**Ask:** *"the date field in the task details doesn't have a date picker … unfuck the current date picker prefab, and fix the
+todo app at the same time … the template AND todo.digitalbricks.io AND the template demo"*, then *"bin the existing date picker
+prefab and start from scratch, with default fallback to the system date picker if it fucks up"*.
+
+**What was wrong with the old prefab** (measured on its script): it fetched `vanillajs-datepicker` from jsdelivr at run time;
+the popup was removed on the field's `blur`, and pressing a day blurs the field first, so a click never picked a day; its
+colours were palette names pasted into CSS; its touch path read `new Date('YYYY-MM-DD')` (UTC) and wrote `getMonth()` unpadded;
+an empty blur called `null.getFullYear()`.
+
+**The new part — one source, two consumers:** `packages/noodl-mcp/tests/datePicker.ts` (script, CSS, graph).
+`npm run library:date-picker` writes `library/prefabs/date-picker/project/project.json` (`--check` gates drift; v2.0.0, README,
+the unused Inter font dropped); `tpl008Components.ts` builds `Todo/Date picker` from the same graph and places it in Task summary
+(`Value` ← deadline; `Value` → deadlineText; `Changed` → setDeadline).
+- A real `<input type="date">` holds the value (`YYYY-MM-DD`, a LOCAL day). On `pointer: fine` a dependency-free calendar drops
+  down (tokens with fallbacks, keyboard: Alt+↓/F4, arrows, PgUp/PgDn, Home/End, Enter, Esc; Today/Clear). The native calendar
+  button is hidden only after the calendar has rendered once; if opening it throws, the enhancement is removed and
+  `showPicker()` is tried. On touch the system picker is the picker.
+- `Changed` fires on a decision: a picked day at once, typing on Enter/blur (a date input fires `change` per completed segment).
+  A half-deleted date (`badInput`, value `''`) is put back, never written as a clear.
+- 🔴 **Two runtime facts it needed.** (1) `Outputs.changed()` is only callable for an output the SAVED node declares a signal —
+  a prefab never re-saved by the editor must carry the Function's `dynamicports`, or it throws "not a function". (2) The D71 gate
+  forbids a wired `run` on a Function whose inputs run on change, and this script must run on change — so the host Group's
+  `didMount` drives a tiny "count mounts" Function whose count is an ordinary input. A remount is a new element and rebuilds.
+
+**Graded:**
+- `scripts/library/drives/date-picker.js` **27/27**, real CDP mouse and keys: incoming value, no CDN request, a mouse press on a
+  day picks it and `Changed` sees the NEW value, Escape, keyboard across a month, typed change commits on blur not keystroke,
+  Clear, half-deleted restore, forced throw → system picker, unmount/remount keeps the date, touch → no enhancement. Mutation
+  control: without the mount-count wire the field never draws (reds).
+- `tpl008Template.test.ts` + `tpl008Demo.test.ts` **43/43**; `library:check` date-picker OK. Regenerated artefacts: only
+  `Todo/Date picker` (new), Task summary, Set deadline's description, registry, START-HERE changed. 38 components / demo 37.
+- `tpl008-todo-drive` **14/14** — §5 now presses the calendar (5 days out) and reads the stored deadline and "Due in 5 days";
+  the "Use a date like" refusal clause is gone (a date input cannot hold "next week-ish"). `tpl008-todo-demo-drive` **10/10**.
+- Not mine, red before this session: `cmp004Parts` export-vs-shipped (the three parts gained `icon.png` in `1fad0cad7`) and
+  `cmp001` corpus publish rate 33→37 (reads `node-catalog-enriched.json`).
+
+**Deployed:**
+- **todo.digitalbricks.io** — s6 recipe: the shared `noodl.deploy.js` was again a DEVELOPMENT build, so built with
+  `--allow-development-engine` and the live production engine (md5 `43041dd…`) copied in. Diff vs live: index hash, `index.html`
+  (that hash only), one bundle. rsync `--delete` excluding `nodegx.security.json` and `pwa/vapid-public-key.txt`; backend untouched.
+  `live-pwa.js`: manifest ok, SW active, installable, `data-reminders=off`, 0 console errors. Not driven signed in (would need an
+  account on Richard's list).
+- **nodegx.io/templates/todo-list/** — built with `--base-url`, the demo's own live engine (md5 `ab1982c…`) kept, Inter's
+  `LICENSE.txt` carried over (today's starter modules lack it). Only that folder rsynced (the other four demos md5-identical local
+  vs live; homepage not rebuilt). Neighbours 200 before/after. nodegx-web's local copy replaced (old one in the session scratchpad).
+  `drive-tpl008-demo.js` gained a clause (calendar press → stored → "Due in 5 days"): **17/17 on the public URL**; control: the
+  OLD build fails exactly that clause.
+
+⚠️ **Not done:** Richard's own copy (`NodeGX test projects/Todo list`) still has the text field · the library shelf's published
+zip is not rebuilt/published (`library:build`) · `Form Fields/Labelled Date` is a separate date field, untouched · nothing committed.
+
+**s7b — Richard, same day, screenshot: *"there's two date icons in the date field now"*.** It was **Firefox** (`17 / 09 / 2026`
+spacing): its calendar button sits inside the field and `::-webkit-calendar-picker-indicator` cannot reach it, so the picker's own
+button drew beside it. Every drive had been headless Chrome. Reproduced in Playwright Firefox 148 (both icons, `enhanced: true`).
+- **Fix: Firefox is not enhanced** — it keeps its own picker, one icon. 🔴 Two detections were tried and measured FALSE in Chrome
+  before shipping (the library drive went 27 → 4 on each): `CSS.supports('selector(::-webkit-calendar-picker-indicator)')`, and
+  `getComputedStyle(input, '::-webkit-calendar-picker-indicator').display` (neither engine reads the pseudo). What ships is an engine
+  check, `'mozInnerScreenX' in window` (Firefox true, Chrome false, both measured).
+- Graded: library drive **27/27** (Chrome), TPL gates **43/43**, demo drive **17/17** local and on nodegx.io; new
+  `scripts/devtools/drive-date-picker-firefox.js` (needs `PLAYWRIGHT_CORE`) **4/4 on nodegx.io**: no enhancement, no popup of ours,
+  a keyboard change stored when the field is left (🔴 Tab moves between Firefox's date segments — leaving needs a click), no errors.
+- Redeployed both (same recipe, engines unchanged: todo `43041dd…`, demo `ab1982c…`); neighbours 200 before/after; `live-pwa.js` clean.
+- ⚠️ Safari desktop not driven (no WebKit here): it takes the enhanced path and relies on `::-webkit-calendar-picker-indicator`.

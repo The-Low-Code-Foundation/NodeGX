@@ -29,6 +29,7 @@ import {
   LOG_ROWS_SCRIPT,
   MERGE_WINDOW_MS,
   MOVE_SCRIPT,
+  REMINDER_COLLECTION,
   SELECTED_SCRIPT,
   TASK_ROWS_SCRIPT,
   TPL008_COMPONENTS
@@ -36,6 +37,10 @@ import {
 import { AuthoredTemplate, buildTodoTemplateProject, POLICY_FILE, prepareTodoArtefact, TEMPLATE_ID } from './tpl008Template';
 import {
   CONTRAST_PAIRS,
+  REMINDERS_ATTRIBUTE,
+  REMINDERS_TOGGLE_SCRIPT,
+  REMINDERS_TURN_OFF_CLASS,
+  REMINDERS_TURN_ON_CLASS,
   THEME_BOOT_SCRIPT,
   THEME_FLIP_SCRIPT,
   THEME_STORAGE_KEY,
@@ -137,10 +142,11 @@ describe('§2 the policy', () => {
     expect(fs.readFileSync(path.join(ARTEFACT, POLICY_FILE), 'utf8')).toBe(fs.readFileSync(POLICY_SOURCE, 'utf8'));
   });
 
-  it('is enforced, names exactly the three collections, keeps rows private and refuses every delete', () => {
+  it('is enforced, names exactly the three collections and the reminders one, keeps rows private and refuses every delete', () => {
     expect(policy.devOpen).toBe(false);
-    expect(Object.keys(policy.collections).sort()).toEqual([...COLLECTIONS].sort());
-    for (const name of COLLECTIONS) {
+    expect(Object.keys(policy.collections).sort()).toEqual([...COLLECTIONS, REMINDER_COLLECTION].sort());
+    // s6: turning reminders off keeps the device's row with `enabled: false`, so nothing needs a delete there either.
+    for (const name of [...COLLECTIONS, REMINDER_COLLECTION]) {
       expect(`${name} creatorOwns:${policy.collections[name].creatorOwns}`).toBe(`${name} creatorOwns:true`);
       expect(`${name} delete:${policy.collections[name].permissions.delete}`).toBe(`${name} delete:nobody`);
       expect(`${name} find:${policy.collections[name].permissions.find}`).toBe(`${name} find:authenticated`);
@@ -231,7 +237,7 @@ describe('§4 the look Richard approved', () => {
       }
     }
     // The control: the rule reached every icon button there is — two moves and a tick box per
-    // row kind, and the theme switch's moon and sun.
+    // row kind, the theme switch's moon and sun, and (s6) the reminders bell's two.
     expect(seen.sort()).toEqual(
       [
         '/Todo/Action row arCheck',
@@ -240,6 +246,8 @@ describe('§4 the look Richard approved', () => {
         '/Todo/Task row trClose',
         '/Todo/Task row trDown',
         '/Todo/Task row trUp',
+        '/Todo/Reminders switch rmTurnOff',
+        '/Todo/Reminders switch rmTurnOn',
         '/Todo/Theme switch thToDark',
         '/Todo/Theme switch thToLight'
       ].sort()
@@ -319,6 +327,42 @@ describe('§4b light and dark — following the system, and the switch at the to
     ).toEqual(['thToDark.onClick → run', 'thToLight.onClick → run']);
     const placedIn = allNodes().filter((n) => n.node.type === C.themeSwitch).map((n) => n.component).sort();
     expect(placedIn).toEqual([C.header, C.pageSignIn].sort());
+  });
+
+  it('s6: the reminders bell is two icon buttons that only hand the press to the host, placed only in the Header, hidden without a host', () => {
+    const sw = component(C.remindersSwitch);
+    const buttons = nodesOf(sw).filter((n) => n.type === 'net.noodl.controls.button');
+    expect(
+      buttons.map((b) => {
+        const p = b.parameters as { cssClassName?: string; label?: string };
+        return [b.id, p.cssClassName, p.label];
+      })
+    ).toEqual([
+      ['rmTurnOn', REMINDERS_TURN_ON_CLASS, 'Turn reminders on'],
+      ['rmTurnOff', REMINDERS_TURN_OFF_CLASS, 'Turn reminders off']
+    ]);
+    const toggle = nodesOf(sw).find((n) => n.type === 'JavaScriptFunction');
+    expect((toggle?.parameters as { functionScript?: string })?.functionScript).toBe(REMINDERS_TOGGLE_SCRIPT);
+    expect(
+      (sw.graph?.connections ?? []).filter((w) => w.toId === toggle?.id).map((w) => `${w.fromId}.${w.fromProperty} → ${w.toProperty}`).sort()
+    ).toEqual(['rmTurnOff.onClick → run', 'rmTurnOn.onClick → run']);
+    // A subscription belongs to whoever is signed in, so not on Sign in.
+    expect(allNodes().filter((n) => n.node.type === C.remindersSwitch).map((n) => n.component)).toEqual([C.header]);
+
+    // Which bell shows is the stylesheet's: none without the host's attribute; `on` hides "turn on"; anything else hides "turn off".
+    const style = themeCss();
+    const hide = (root: string, cls: string) => `${root} .${cls} { display: none !important; }`;
+    expect(style).toContain(hide(`:root:not([${REMINDERS_ATTRIBUTE}])`, REMINDERS_TURN_ON_CLASS));
+    expect(style).toContain(hide(`:root:not([${REMINDERS_ATTRIBUTE}="on"])`, REMINDERS_TURN_OFF_CLASS));
+    expect(style).toContain(hide(`:root[${REMINDERS_ATTRIBUTE}="on"]`, REMINDERS_TURN_ON_CLASS));
+
+    // The press: nothing where there is no host (the demo, the editor), one hand-over where there is.
+    const calls: string[] = [];
+    const press = (win: unknown) => new Function('window', REMINDERS_TOGGLE_SCRIPT)(win);
+    press({});
+    press({ todoReminders: {} });
+    press({ todoReminders: { toggle: () => calls.push('toggle') } });
+    expect(calls).toEqual(['toggle']);
   });
 
   it('the scripts: the other theme, remembered only when it differs from the system, and working with storage blocked', () => {

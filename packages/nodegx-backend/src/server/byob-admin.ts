@@ -25,7 +25,7 @@ import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
 import type { SchemaColumnLike } from '../persistence/SchemaManagerLike';
 import { validateAclShape } from '../security/model';
-import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { createErrorToHttp, HttpError, readJSONBody, sendJSON } from './http-util';
 
 function parseJSON(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -140,7 +140,12 @@ export class ByobAdminRoutes {
   async create(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
     ctx.stampCreate(ctx.params.table, data);
-    const record = await this.facade.rawCreate(ctx.params.table, data);
+    let record: Record<string, unknown>;
+    try {
+      record = await this.facade.rawCreate(ctx.params.table, data);
+    } catch (e) {
+      throw createErrorToHttp(e);
+    }
     sendJSON(ctx.res, 201, record);
   }
 

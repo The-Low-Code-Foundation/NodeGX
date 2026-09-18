@@ -973,11 +973,30 @@ class LocalSQLAdapter {
    */
   create(options: CreateOptions): void {
     try {
+      // SYN-003: a caller may name its own record. The id is settled before
+      // anything is written, so a refused one leaves no table, column or row.
+      const requestedId = options.data.objectId;
+      const hasClientId = requestedId !== undefined && requestedId !== null;
+      if (hasClientId && !QueryBuilder.isClientObjectId(requestedId)) {
+        throw new Error(QueryBuilder.CLIENT_OBJECT_ID_INVALID);
+      }
+      const data: Record<string, unknown> = { ...options.data };
+      delete data.objectId;
+
       this._ensureTable(options.collection);
+
+      if (
+        hasClientId &&
+        this.db
+          .prepare(`SELECT 1 FROM ${QueryBuilder.escapeTable(options.collection)} WHERE "objectId" = ?`)
+          .get(requestedId)
+      ) {
+        throw new Error(QueryBuilder.clientObjectIdTaken(options.collection, requestedId as string));
+      }
 
       // Auto-add columns for new fields
       if (this.options.autoCreateTables && this.schemaManager) {
-        for (const [key, value] of Object.entries(options.data)) {
+        for (const [key, value] of Object.entries(data)) {
           if (key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
             const type = this._inferType(value);
             const column: { name: string; type: string; targetClass?: string } = { name: key, type };
@@ -991,8 +1010,8 @@ class LocalSQLAdapter {
         }
       }
 
-      const recordId = generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert(options, recordId);
+      const recordId = hasClientId ? (requestedId as string) : generateUUID();
+      const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
 
       this.db.prepare(sql).run(...params);
 
@@ -1012,7 +1031,9 @@ class LocalSQLAdapter {
         collection: options.collection
       });
     } catch (e) {
-      console.error('LocalSQLAdapter.create error:', e);
+      // A refused client objectId is the caller's mistake, answered as a 409 or
+      // 400 by the HTTP layer — not a server fault worth an error log line.
+      if (!QueryBuilder.clientObjectIdProblem(e.message)) console.error('LocalSQLAdapter.create error:', e);
       options.error(e.message);
     }
   }

@@ -9,6 +9,10 @@ import type * as http from 'http';
 
 import { requestIdOf } from '../ops/request-id';
 
+// The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
+
 const MAX_JSON_BODY = 10 * 1024 * 1024; // 10MB, matching the old server
 const MAX_FILE_BODY = 50 * 1024 * 1024; // uploads get more headroom
 
@@ -134,6 +138,20 @@ export class HttpError extends Error {
     this.status = status;
     this.parseCode = parseCode;
   }
+}
+
+/**
+ * A create the adapter refused because of the caller's own `objectId` (P90
+ * SYN-003) is the caller's mistake: a taken id is 409 with Parse's
+ * DUPLICATE_VALUE (137), a malformed one is 400. Any other error passes through
+ * unchanged, to be answered as before.
+ */
+export function createErrorToHttp(e: unknown): unknown {
+  const message = e instanceof Error ? e.message : String(e);
+  const problem = QueryBuilder.clientObjectIdProblem(message);
+  if (problem === 'taken') return new HttpError(409, message, 137);
+  if (problem === 'invalid') return new HttpError(400, message);
+  return e;
 }
 
 /**

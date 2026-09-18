@@ -27,7 +27,7 @@
 import type { AdapterFacade, QueryOptions } from '../persistence/AdapterFacade';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
-import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { createErrorToHttp, HttpError, readJSONBody, sendJSON } from './http-util';
 
 function parseJSONParam(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -199,7 +199,12 @@ export class ParseWireRoutes {
     // Control Rules emit them). stampCreate validates the shape and applies
     // owner + template ACL per the collection's creator-owns setting.
     ctx.stampCreate(collection, body);
-    const record = await this.facade.rawCreate(collection, body);
+    let record: Record<string, unknown>;
+    try {
+      record = await this.facade.rawCreate(collection, body);
+    } catch (e) {
+      throw createErrorToHttp(e);
+    }
     // Parse's create response: objectId + createdAt only. The client merges its
     // own data over this — returning wire-typed fields here would leak `__type`
     // envelopes into model data un-deserialized (create responses skip

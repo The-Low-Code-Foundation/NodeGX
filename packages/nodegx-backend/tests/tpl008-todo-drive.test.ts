@@ -35,7 +35,7 @@ import { request } from './helpers/http';
 import { placeStarterAssets } from './helpers/judge';
 import { clickButton, currentSession, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
-import { blur, buttonDisabled, clickButtonBeside, clickButtonByField, clickWords, pathname, text, themeSwitches, until, wait } from './helpers/todo-drive';
+import { blur, buttonDisabled, clickButtonBeside, clickButtonByField, clickWords, pathname, pickDate, text, themeSwitches, until, wait } from './helpers/todo-drive';
 
 jest.setTimeout(600_000);
 
@@ -58,6 +58,11 @@ const DESCRIPTION = 'Lead with the templates, not the fixes.';
 const NOTE = 'The draft is in the shared folder.';
 const UNTICK_NOTE = 'Two fixes were missing from the list.';
 const REOPEN_NOTE = 'The garage cancelled.';
+const DEADLINE = (() => {
+  const d = new Date();
+  d.setDate(d.getDate() + 5);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+})();
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -295,21 +300,19 @@ describe('TPL-008 — the todo list, driven', () => {
         await blur(page);
         await until('rename written', () => openTitles(tk), (t) => t.includes(NOTES_RENAMED));
         await wait(1500);
-        step('§5 bad deadline');
-        await fill(page, 'yyyy-mm-dd', 'next week-ish');
-        await blur(page);
-        R.deadlineRefusal = await until('refusal shown', () => text(page), (s) => s.includes('Use a date like'));
+        // The deadline is picked from the calendar (2026-09-16). Five days out, so the day is always in
+        // the future, at most one page of the calendar away, and inside `due()`'s "Due in N days" week.
         step('§5 deadline');
-        await fill(page, 'yyyy-mm-dd', '2026-09-30');
-        await blur(page);
+        R.deadlineWanted = DEADLINE;
+        R.deadlinePicker = await pickDate(page, DEADLINE);
         const dated = await until(
           'deadline written',
           async () => (await rows('Task', tk)).find((t) => t.title === NOTES_RENAMED),
-          (t) => !!t && t.deadline === '2026-09-30'
+          (t) => !!t && t.deadline === DEADLINE
         );
         R.deadline = dated?.deadline;
         await wait(1500);
-        R.refusalGone = !(await text(page)).includes('Use a date like');
+        R.deadlineDue = (await text(page)).match(/Due in \d+ days/)?.[0] ?? '';
         R.historyKinds = (await eventsFor(tk, NOTES_RENAMED)).map((e) => String(e.kind)).sort();
         R.detailText = await text(page);
         await page.evaluate('(function () { window.scrollTo(0, 0); return true; })()');
@@ -456,10 +459,11 @@ describe('TPL-008 — the todo list, driven', () => {
     ]);
   });
 
-  it('§5 a note, a rename and a deadline each leave a line; a deadline that is not a date is refused in words', () => {
-    expect(String(R.deadlineRefusal)).toContain('Use a date like 2026-09-30');
-    expect(R.deadline).toBe('2026-09-30');
-    expect(R.refusalGone).toBe(true);
+  it('§5 a note, a rename and a deadline each leave a line; the deadline is picked from a calendar', () => {
+    // A date input with the calendar opening on a press — not a text box asking for YYYY-MM-DD.
+    expect(R.deadlinePicker).toEqual({ inputType: 'date', calendarOpened: true });
+    expect(R.deadline).toBe(R.deadlineWanted);
+    expect(R.deadlineDue).toBe('Due in 5 days');
     expect(R.historyKinds).toEqual(
       ['action-added', 'action-described', 'action-done', 'action-undone', 'created', 'deadline', 'moved', 'note', 'renamed'].sort()
     );

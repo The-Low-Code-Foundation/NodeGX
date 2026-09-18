@@ -737,18 +737,51 @@ export function buildCount(options: QueryOptionsBase, schema?: unknown, scope?: 
 }
 
 /**
+ * A caller may name its own record (P90 SYN-003): an id a device made offline
+ * has to survive the trip, or anything pointing at it breaks. It is used in URL
+ * paths (`/classes/:c/:id`), so it is held to URL-safe characters.
+ */
+const CLIENT_OBJECT_ID = /^[A-Za-z0-9_-]{1,128}$/;
+
+export const CLIENT_OBJECT_ID_INVALID = 'objectId must be a string of 1 to 128 letters, digits, "-" or "_".';
+
+export function isClientObjectId(value: unknown): value is string {
+  return typeof value === 'string' && CLIENT_OBJECT_ID.test(value);
+}
+
+export function clientObjectIdTaken(collection: string, id: string): string {
+  return `objectId "${id}" is already used in "${collection}".`;
+}
+
+/**
+ * Which refusal a create's error message is, so the HTTP layer can answer 409
+ * or 400 without reading SQLite's wording. `null` for every other error.
+ */
+export function clientObjectIdProblem(message: string): 'taken' | 'invalid' | null {
+  if (message === CLIENT_OBJECT_ID_INVALID) return 'invalid';
+  if (/^objectId ".*" is already used in ".*"\.$/.test(message)) return 'taken';
+  return null;
+}
+
+/**
  * Build an INSERT query
  */
 export function buildInsert(options: { collection: string; data: Record<string, unknown> }, id: string): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
 
+  // The id this is given is the id it writes. Spreading the data over it let a
+  // caller's `objectId` win the INSERT while `create()` read the row back by
+  // the id it passed here — the row existed and the caller got `null` (SYN-003).
+  const rest: Record<string, unknown> = { ...options.data };
+  delete rest.objectId;
+
   const now = new Date().toISOString();
   const data: Record<string, unknown> = {
     objectId: id,
     createdAt: now,
     updatedAt: now,
-    ...options.data
+    ...rest
   };
 
   // Remove protected fields

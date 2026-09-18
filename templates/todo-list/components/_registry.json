@@ -155,10 +155,26 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Todo/Reminders switch": {
+      "path": "Todo/Reminders switch",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Date picker": {
+      "path": "Todo/Date picker",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 22,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Todo/Header": {
       "path": "Todo/Header",
       "type": "visual",
-      "nodeCount": 11,
+      "nodeCount": 12,
       "connectionCount": 10,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
@@ -223,7 +239,7 @@
       "path": "Todo/Task summary",
       "type": "visual",
       "nodeCount": 20,
-      "connectionCount": 23,
+      "connectionCount": 22,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -293,8 +309,8 @@
     }
   },
   "stats": {
-    "totalComponents": 36,
-    "totalNodes": 338,
-    "totalConnections": 630
+    "totalComponents": 38,
+    "totalNodes": 350,
+    "totalConnections": 653
   }
 }
