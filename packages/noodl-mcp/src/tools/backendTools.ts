@@ -390,7 +390,9 @@ export function registerBackendReadTools(server: McpServer): void {
         'Compute the dev->prod promotion diff between a SOURCE schema snapshot and a running (target) backend ' +
         '(BAK-007): which tables/columns and which permission/trigger/template config would be added or changed, ' +
         'and whether any change is destructive. Read-only — nothing is applied. The `source` is a snapshot ' +
-        '{ tables:[{name,columns}], permissions?, triggers?, templates? } (e.g. from a dev backend or archive).',
+        '{ tables:[{name,columns,indexes}], permissions?, triggers?, templates? } (e.g. from a dev backend or ' +
+        'archive). A collection\'s declared indexes (FED-002) are part of the shape and are diffed as a whole ' +
+        'list: a source that omits `indexes` is saying the collection declares none.',
       inputSchema: {
         backendId: z.string().optional().describe('The TARGET backend to diff against'),
         source: z.record(z.unknown()).describe('The source schema snapshot { tables: [...], permissions?, triggers?, templates? }')
@@ -1424,8 +1426,10 @@ export function registerBackendWriteTools(server: McpServer): void {
     {
       title: 'Apply a schema promotion to a backend',
       description:
-        'Promote a SOURCE schema snapshot onto a running (target) backend (BAK-007): additive tables/columns and ' +
-        'permission/trigger/template config apply automatically; DATA is never touched. Destructive changes (dropped ' +
+        'Promote a SOURCE schema snapshot onto a running (target) backend (BAK-007): additive tables/columns, ' +
+        'declared indexes (FED-002) and permission/trigger/template config apply automatically; DATA is never ' +
+        'touched — a unique index the target\'s rows would refuse is SKIPPED with the duplicate count, never ' +
+        'forced by deleting rows. Destructive changes (dropped ' +
         'tables/columns, type changes) are REFUSED unless allowDestructive is true — and then a fresh pre-apply ' +
         'backup is taken first (enforced). Run diff_backend_schema first to preview.',
       inputSchema: {

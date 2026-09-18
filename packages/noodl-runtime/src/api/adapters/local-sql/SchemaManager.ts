@@ -25,8 +25,141 @@ interface SchemaColumn {
 interface TableSchema {
   name: string;
   columns?: SchemaColumn[];
+  /** FED-002: the indexes this collection declares, beyond the built-in pair. */
+  indexes?: IndexDecl[];
   [extra: string]: unknown;
 }
+
+/**
+ * One declared index on a collection, as `schema.json` carries it (FED-002).
+ *
+ * `fields` is one to four property names of that collection; `unique` defaults
+ * to false; `order` applies to every field of the index and defaults to `asc`.
+ * There is no `name` — it is derived, so that the same fields are the same
+ * index however two people spelled the declaration.
+ */
+interface IndexDecl {
+  fields: string[];
+  unique?: boolean;
+  order?: 'asc' | 'desc';
+}
+
+/** An index SQLite actually has, as the pragmas report it. */
+interface BuiltIndex {
+  name: string;
+  fields: string[];
+  unique: boolean;
+  order: 'asc' | 'desc';
+}
+
+/** A declared index and whether it is built — plus drift, which is neither. */
+interface IndexStatus extends BuiltIndex {
+  built: boolean;
+  /** False for an index that exists but nothing declares (hand-made, or drift). */
+  declared: boolean;
+}
+
+/** What a reconcile did, and what the audit record of a schema push names. */
+interface IndexReconcileReport {
+  created: string[];
+  dropped: string[];
+  kept: string[];
+  /** The declaration as it was stored, normalized. */
+  indexes: IndexDecl[];
+}
+
+/**
+ * A unique index refused by the rows already in the table (FED-002 AC4).
+ *
+ * Carries the numbers rather than a sentence because the caller has to put them
+ * in front of a person: how many values are duplicated, and three of them, so
+ * "your feed table has 412 items sharing 3 guids" can be said instead of
+ * "UNIQUE constraint failed".
+ */
+class IndexDuplicatesError extends Error {
+  code: string;
+  table: string;
+  fields: string[];
+  duplicates: number;
+  samples: unknown[][];
+
+  constructor(table: string, fields: string[], duplicates: number, samples: unknown[][]) {
+    super(
+      `Cannot make (${fields.join(', ')}) unique on "${table}": ${duplicates} ` +
+        `value${duplicates === 1 ? '' : 's'} already appear${duplicates === 1 ? 's' : ''} more than once ` +
+        `(${samples.map((s) => JSON.stringify(s.length === 1 ? s[0] : s)).join(', ')}). ` +
+        'Nothing was changed and no row was deleted.'
+    );
+    this.name = 'IndexDuplicatesError';
+    this.code = 'INDEX_DUPLICATES';
+    this.table = table;
+    this.fields = fields;
+    this.duplicates = duplicates;
+    this.samples = samples;
+  }
+}
+
+/** The identifier rule `escapeTable`/`escapeColumn` already apply, for names. */
+function sanitizeIdent(name: string): string {
+  return String(name).replace(/[^a-zA-Z0-9_]/g, '');
+}
+
+/**
+ * Read an `indexes` declaration, or refuse it. Loud rather than lenient: an
+ * index declaration that is quietly dropped because it was mis-shaped is a
+ * collection that quietly full-scans, and a `unique` that was quietly ignored
+ * is a dedupe guarantee that quietly is not one.
+ */
+function normalizeIndexDecls(raw: unknown): IndexDecl[] {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) throw new Error('"indexes" must be an array of index declarations');
+
+  return raw.map((entry, i) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error(`indexes[${i}] must be an object like { "fields": ["id"], "unique": true }`);
+    }
+    const e = entry as Record<string, unknown>;
+    for (const key of Object.keys(e)) {
+      if (key !== 'fields' && key !== 'unique' && key !== 'order') {
+        throw new Error(`indexes[${i}]: unknown key "${key}" (expected fields, unique, order)`);
+      }
+    }
+    if (!Array.isArray(e.fields) || e.fields.length === 0 || e.fields.length > 4) {
+      throw new Error(`indexes[${i}].fields must be an array of one to four property names`);
+    }
+    const fields = e.fields.map((f) => {
+      if (typeof f !== 'string' || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(f)) {
+        throw new Error(`indexes[${i}].fields: ${JSON.stringify(f)} is not a valid property name`);
+      }
+      return f;
+    });
+    if (new Set(fields).size !== fields.length) {
+      throw new Error(`indexes[${i}].fields names the same property twice`);
+    }
+    if (e.unique !== undefined && typeof e.unique !== 'boolean') {
+      throw new Error(`indexes[${i}].unique must be true or false`);
+    }
+    if (e.order !== undefined && e.order !== 'asc' && e.order !== 'desc') {
+      throw new Error(`indexes[${i}].order must be "asc" or "desc"`);
+    }
+
+    const decl: IndexDecl = { fields };
+    if (e.unique === true) decl.unique = true;
+    if (e.order === 'desc') decl.order = 'desc';
+    return decl;
+  });
+}
+
+/** Whether a built index is the index a declaration asks for. */
+function sameIndexSignature(built: BuiltIndex, decl: IndexDecl): boolean {
+  return (
+    built.unique === (decl.unique === true) &&
+    built.order === (decl.order === 'desc' ? 'desc' : 'asc') &&
+    built.fields.length === decl.fields.length &&
+    built.fields.every((f, i) => f === decl.fields[i])
+  );
+}
+
 
 /**
  * Map Noodl/Parse types to SQLite types
@@ -64,6 +197,13 @@ const POSTGRES_TYPE_MAP: Record<string, string | null> = {
  * SchemaManager class
  */
 class SchemaManager {
+  /**
+   * Exposed as a static so a caller across the package edge (nodegx-backend
+   * requires this module untyped) can identify the refusal without matching on
+   * a sentence. `err.code === 'INDEX_DUPLICATES'` is the supported check.
+   */
+  static IndexDuplicatesError = IndexDuplicatesError;
+
   db: EngineDatabase;
   _schemaCache: Map<string, TableSchema>;
 
@@ -145,6 +285,14 @@ class SchemaManager {
       .run(tableName, JSON.stringify(schema));
 
     this._schemaCache.set(tableName, schema);
+
+    // FED-002: the indexes the schema declares, applied to a table that is one
+    // statement old and therefore empty — no unique declaration can be refused
+    // by data here. `createTable` is create-if-absent, so a push against a
+    // table that already exists reconciles through `reconcileIndexes` instead.
+    if (schema.indexes !== undefined) {
+      this.reconcileIndexes(tableName, schema.indexes);
+    }
 
     return true;
   }
@@ -690,6 +838,307 @@ class SchemaManager {
       }
       throw e;
     }
+  }
+
+  // ===========================================================================
+  // Declared indexes (FED-002)
+  //
+  // Until this section existed a collection had exactly two indexes —
+  // `createdAt` and `updatedAt` — and no way to declare a third. A feed's item
+  // table keyed on a guid full-scanned on every poll, and "write this item
+  // once" was a query-then-insert with a race in the gap between them.
+  //
+  // The declaration lives in the collection's `_Schema` row — and therefore in
+  // the schema export, the backup and a promotion — rather than in a file
+  // beside it the way the FTS5 opt-in does. An index is a property of the
+  // collection's *shape* in a way a search opt-in is not: a promotion that
+  // carried columns but not their unique constraints would promote a dedupe
+  // guarantee into a hope.
+  //
+  // 🔴 Reconciliation reads what SQLite ACTUALLY has (`PRAGMA index_list` /
+  // `PRAGMA index_xinfo`), never what `_Schema` last claimed — the same choice,
+  // for the same reason, that `_columnScope` makes about `PRAGMA table_info`
+  // (DEF-014): the tracking row records what someone meant, and the only thing
+  // a reconcile may act on is what is there.
+  // ===========================================================================
+
+  /** The two indexes every table gets on creation. They cannot be declared away. */
+  builtInIndexNames(tableName: string): string[] {
+    const t = sanitizeIdent(tableName);
+    return [`idx_${t}_createdAt`, `idx_${t}_updatedAt`];
+  }
+
+  /**
+   * The derived name of a declared index — never written by a person, so that
+   * two declarations of the same fields are the same index however they were
+   * spelled, and a declaration removed from `schema.json` has a name to drop.
+   */
+  indexName(tableName: string, fields: string[]): string {
+    return `idx_${sanitizeIdent(tableName)}_${fields.map(sanitizeIdent).join('_')}`;
+  }
+
+  /** The indexes a collection's `_Schema` row declares (normalized, never null). */
+  declaredIndexes(tableName: string): IndexDecl[] {
+    const schema = this.getTableSchema(tableName);
+    return normalizeIndexDecls(schema ? schema.indexes : undefined);
+  }
+
+  /**
+   * Every index SQLite currently has on this table that THIS class manages:
+   * `origin = 'c'` (a real `CREATE INDEX`, not a PK or a table-level UNIQUE),
+   * named in the derived form, and not one of the two built-ins.
+   *
+   * Reads `index_xinfo` rather than `index_info` for one reason: it is the only
+   * pragma that reports `desc`, and an index declared `desc` that was built
+   * `asc` has to come back as a difference or the reconcile silently keeps the
+   * wrong one.
+   */
+  builtIndexes(tableName: string): BuiltIndex[] {
+    let list: Array<{ name?: string; unique?: number; origin?: string }>;
+    try {
+      list = this.db.prepare(`PRAGMA index_list(${escapeTable(tableName)})`).all() as typeof list;
+    } catch (e) {
+      // No such table, or an engine with no pragma support (the ephemeral mock).
+      return [];
+    }
+    if (!Array.isArray(list)) return [];
+
+    const builtIn = new Set(this.builtInIndexNames(tableName));
+    const prefix = `idx_${sanitizeIdent(tableName)}_`;
+    const out: BuiltIndex[] = [];
+
+    for (const row of list) {
+      const name = row && row.name;
+      if (typeof name !== 'string') continue;
+      if (row.origin !== 'c') continue;
+      if (!name.startsWith(prefix) || builtIn.has(name)) continue;
+
+      const cols = this.db.prepare(`PRAGMA index_xinfo(${escapeTable(name)})`).all() as Array<{
+        name?: string | null;
+        desc?: number;
+        key?: number;
+      }>;
+      const keyCols = (Array.isArray(cols) ? cols : []).filter((c) => c && c.key === 1);
+
+      out.push({
+        name,
+        fields: keyCols.map((c) => String(c.name)),
+        unique: row.unique === 1,
+        order: keyCols.length > 0 && keyCols[0].desc === 1 ? 'desc' : 'asc'
+      });
+    }
+
+    return out;
+  }
+
+  /**
+   * What a person is shown: every declared index and whether it is actually
+   * built, plus anything built that nothing declares (drift — a hand-made index,
+   * or a failed reconcile).
+   */
+  indexStatus(tableName: string): IndexStatus[] {
+    const built = new Map(this.builtIndexes(tableName).map((b) => [b.name, b]));
+    const out: IndexStatus[] = [];
+
+    for (const decl of this.declaredIndexes(tableName)) {
+      const name = this.indexName(tableName, decl.fields);
+      const b = built.get(name);
+      out.push({
+        name,
+        fields: [...decl.fields],
+        unique: decl.unique === true,
+        order: decl.order === 'desc' ? 'desc' : 'asc',
+        built: Boolean(b && sameIndexSignature(b, decl)),
+        declared: true
+      });
+      built.delete(name);
+    }
+
+    for (const b of built.values()) {
+      out.push({ name: b.name, fields: b.fields, unique: b.unique, order: b.order, built: true, declared: false });
+    }
+
+    return out;
+  }
+
+  /**
+   * The rows that would refuse a unique index, for the collection and fields
+   * given: how many distinct key values appear more than once, and the first
+   * three of them.
+   *
+   * ⚠️ Rows with a NULL in any indexed field are excluded, and that is not
+   * tidiness — SQLite treats NULLs as distinct in a unique index, so two rows
+   * with no `guid` do not collide. `GROUP BY` disagrees: it puts every NULL in
+   * one group, and a check that trusted it would refuse a push over data the
+   * index would have accepted.
+   */
+  duplicateValues(
+    tableName: string,
+    fields: string[],
+    sampleLimit = 3
+  ): { duplicates: number; samples: unknown[][] } {
+    const cols = fields.map((f) => escapeColumn(f)).join(', ');
+    const notNull = fields.map((f) => `${escapeColumn(f)} IS NOT NULL`).join(' AND ');
+    const table = escapeTable(tableName);
+    const limit = Math.max(0, Math.floor(sampleLimit));
+
+    const total = this.db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM (SELECT 1 FROM ${table} WHERE ${notNull} GROUP BY ${cols} HAVING COUNT(*) > 1)`
+      )
+      .get() as { n?: number } | undefined;
+
+    const rows = this.db
+      .prepare(
+        `SELECT ${cols}, COUNT(*) AS __n FROM ${table} WHERE ${notNull} ` +
+          `GROUP BY ${cols} HAVING COUNT(*) > 1 ORDER BY __n DESC, ${cols} LIMIT ${limit}`
+      )
+      .all() as Array<Record<string, unknown>>;
+
+    return {
+      duplicates: total && typeof total.n === 'number' ? total.n : 0,
+      samples: (Array.isArray(rows) ? rows : []).map((r) => fields.map((f) => r[f]))
+    };
+  }
+
+  /**
+   * Make SQLite's indexes match the declaration. The whole of FED-002's §3.2.
+   *
+   * Every check runs BEFORE any DDL does, because AC4's promise is that a
+   * refused push changes nothing: a unique declaration over duplicate rows
+   * refuses the *push*, it does not drop the other three indexes first and then
+   * refuse. Nothing here ever deletes a row — the only way a unique index and
+   * existing data are reconciled is by the person fixing the data.
+   *
+   * @param indexes - The FULL declaration for this collection. A declaration
+   *   that is gone from this list is an index that gets dropped; passing `[]`
+   *   removes every declared index and keeps the two built-ins.
+   * @throws IndexDuplicatesError when a unique index would refuse rows the
+   *   table already holds — carrying the count and the first three values.
+   */
+  reconcileIndexes(tableName: string, indexes: unknown): IndexReconcileReport {
+    const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
+    if (!exists) throw new Error(`Table "${tableName}" does not exist`);
+
+    const desired = normalizeIndexDecls(indexes);
+    const built = new Map(this.builtIndexes(tableName).map((b) => [b.name, b]));
+    const builtIn = new Set(this.builtInIndexNames(tableName));
+
+    // ---- Checks. All of them, before anything is created or dropped. -------
+    const columns = this.tableColumns(tableName);
+    const seen = new Set<string>();
+
+    for (const decl of desired) {
+      const name = this.indexName(tableName, decl.fields);
+      if (builtIn.has(name)) {
+        throw new Error(
+          `"${decl.fields.join(', ')}" is always indexed on "${tableName}" — createdAt and updatedAt ` +
+            'cannot be declared, and cannot be declared away.'
+        );
+      }
+      if (seen.has(name)) {
+        throw new Error(`"${tableName}" declares the index on (${decl.fields.join(', ')}) twice.`);
+      }
+      seen.add(name);
+
+      for (const field of decl.fields) {
+        if (!columns.has(field)) {
+          throw new Error(
+            `Cannot index "${field}" on "${tableName}": the collection has no such property. ` +
+              'A column here exists once something has written it, so declare the column first.'
+          );
+        }
+      }
+
+      // Only a unique index that is not ALREADY built in this exact shape can
+      // be refused by the data: one that is built has been enforcing itself.
+      const already = built.get(name);
+      if (decl.unique === true && !(already && sameIndexSignature(already, decl))) {
+        const report = this.duplicateValues(tableName, decl.fields);
+        if (report.duplicates > 0) {
+          throw new IndexDuplicatesError(tableName, decl.fields, report.duplicates, report.samples);
+        }
+      }
+    }
+
+    // ---- Apply -------------------------------------------------------------
+    const created: string[] = [];
+    const dropped: string[] = [];
+    const kept: string[] = [];
+
+    // 🔴 A SAVEPOINT, not `BEGIN`. `createTable` calls this, and `createTable` is
+    // reached from inside an open transaction on at least one path (an import
+    // ensures the shape, then writes every row in one) — `BEGIN` there is
+    // "cannot start a transaction within a transaction", which would turn a
+    // declaration into a failed import. A savepoint nests either way.
+    this.db.exec('SAVEPOINT nodegx_reconcile_indexes');
+    try {
+      for (const [name] of built) {
+        if (!seen.has(name)) {
+          this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(name)}`);
+          dropped.push(name);
+        }
+      }
+
+      for (const decl of desired) {
+        const name = this.indexName(tableName, decl.fields);
+        const already = built.get(name);
+        if (already && sameIndexSignature(already, decl)) {
+          kept.push(name);
+          continue;
+        }
+        // A changed signature is a drop and a create under one name. It is
+        // reported as `created` only — the index that was there is gone.
+        if (already) this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(name)}`);
+
+        const order = decl.order === 'desc' ? 'DESC' : 'ASC';
+        const cols = decl.fields.map((f) => `${escapeColumn(f)} ${order}`).join(', ');
+        this.db.exec(
+          `CREATE ${decl.unique === true ? 'UNIQUE ' : ''}INDEX IF NOT EXISTS ${escapeTable(name)} ` +
+            `ON ${escapeTable(tableName)} (${cols})`
+        );
+        created.push(name);
+      }
+
+      this.persistIndexDecls(tableName, desired);
+      this.db.exec('RELEASE nodegx_reconcile_indexes');
+    } catch (e) {
+      this.db.exec('ROLLBACK TO nodegx_reconcile_indexes');
+      this.db.exec('RELEASE nodegx_reconcile_indexes');
+      throw e;
+    }
+
+    return { created, dropped, kept, indexes: desired };
+  }
+
+  /** The columns a table actually has, from the live connection (see DEF-014). */
+  tableColumns(tableName: string): Set<string> {
+    try {
+      const rows = this.db.prepare(`PRAGMA table_info(${escapeTable(tableName)})`).all() as Array<{ name?: string }>;
+      return new Set((Array.isArray(rows) ? rows : []).map((r) => r.name).filter((n): n is string => typeof n === 'string'));
+    } catch (e) {
+      return new Set<string>();
+    }
+  }
+
+  /**
+   * Write the declaration into the `_Schema` row so it survives a restart, a
+   * schema export and a backup. Called inside `reconcileIndexes`'s transaction.
+   *
+   * @private
+   */
+  persistIndexDecls(tableName: string, indexes: IndexDecl[]): void {
+    this.ensureSchemaTable();
+    const schema = this.getTableSchema(tableName) || { name: tableName };
+    if (indexes.length > 0) schema.indexes = indexes;
+    else delete schema.indexes;
+    this.db
+      .prepare(
+        `INSERT INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT("name") DO UPDATE SET "schema" = excluded."schema", "updatedAt" = CURRENT_TIMESTAMP`
+      )
+      .run(tableName, JSON.stringify(schema));
+    this._schemaCache.set(tableName, schema);
   }
 
   // ===========================================================================

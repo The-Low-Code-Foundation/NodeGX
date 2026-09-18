@@ -703,7 +703,8 @@
     "NewDbModelProperties": {
       "accessControl": "PropListType",
       "sourceObjectId": "BasicType",
-      "store": null
+      "store": null,
+      "upsertOn": "BasicType"
     },
     "NewModel": {
       "new": null,

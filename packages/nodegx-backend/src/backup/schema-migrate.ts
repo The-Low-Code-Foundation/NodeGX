@@ -24,7 +24,7 @@ import * as path from 'path';
 
 import { readArchive } from './archive';
 import type { BackupManager } from './BackupManager';
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IndexDeclLike, SchemaManagerLike } from '../persistence/SchemaManagerLike';
 
 export interface ColumnDef {
   name: string;
@@ -36,6 +36,14 @@ export interface ColumnDef {
 export interface TableDef {
   name: string;
   columns: ColumnDef[];
+  /**
+   * FED-002 — the indexes this collection declares.
+   *
+   * Part of the snapshot, and therefore of a promotion, because a unique index
+   * is a rule about what may be written: a promotion that carried the columns
+   * but not their constraints would move a dedupe guarantee into a hope.
+   */
+  indexes?: IndexDeclLike[];
 }
 
 export interface SchemaSnapshot {
@@ -53,6 +61,14 @@ export interface TableChange {
   addedColumns: ColumnDef[];
   removedColumns: string[];
   typeChanges: { name: string; from: string; to: string }[];
+  /**
+   * FED-002 — the collection's index declaration, when the two sides disagree.
+   *
+   * A whole-list difference rather than added/removed entries, because that is
+   * what `reconcileIndexes` takes: the declaration is applied entire, and half
+   * of it is not a state the backend can be put into.
+   */
+  indexChange?: { from: IndexDeclLike[]; to: IndexDeclLike[] };
 }
 
 export interface SchemaDiff {
@@ -71,6 +87,26 @@ export interface SchemaDiff {
 }
 
 const SYSTEM_COLUMNS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL']);
+
+/** One index declaration, in the order and shape the diff compares. */
+function normalizeForDiff(indexes: IndexDeclLike[] | undefined): IndexDeclLike[] {
+  return (indexes || [])
+    .map((i) => {
+      const out: IndexDeclLike = { fields: [...(i.fields || [])] };
+      if (i.unique === true) out.unique = true;
+      if (i.order === 'desc') out.order = 'desc';
+      return out;
+    })
+    .sort((a, b) => a.fields.join(',').localeCompare(b.fields.join(',')));
+}
+
+/** `(id unique), (published desc)` — what the promotion summary prints. */
+function describeIndexes(indexes: IndexDeclLike[]): string {
+  if (indexes.length === 0) return 'none';
+  return indexes
+    .map((i) => `(${i.fields.join(', ')}${i.unique ? ' unique' : ''}${i.order === 'desc' ? ' desc' : ''})`)
+    .join(', ');
+}
 
 // ============================================================================
 // Snapshot extraction
@@ -107,7 +143,11 @@ export function tablesFromDbFile(dbPath: string): TableDef[] {
       .all() as { name: string; schema: string }[];
     return rows.map((r) => {
       const parsed = JSON.parse(r.schema);
-      return { name: r.name, columns: (parsed.columns || []) as ColumnDef[] };
+      return {
+        name: r.name,
+        columns: (parsed.columns || []) as ColumnDef[],
+        indexes: (parsed.indexes || []) as IndexDeclLike[]
+      };
     });
   } catch {
     return [];
@@ -146,7 +186,7 @@ export function snapshotFromArchive(archivePath: string): SchemaSnapshot {
   if (schemaJson) {
     try {
       const arr = JSON.parse(schemaJson.data.toString('utf-8'));
-      if (Array.isArray(arr)) tables = arr.map((t) => ({ name: t.name, columns: t.columns || [] }));
+      if (Array.isArray(arr)) tables = arr.map((t) => ({ name: t.name, columns: t.columns || [], indexes: t.indexes || [] }));
     } catch {
       /* fall through */
     }
@@ -175,7 +215,11 @@ export function snapshotFromLiveDir(
   const triggersFile = readJsonIf(path.join(dataDir, 'triggers.json'));
   const email = readJsonIf(path.join(dataDir, 'email.json'));
   return {
-    tables: schemaManager.exportSchemas().map((t) => ({ name: t.name, columns: t.columns || [] })),
+    tables: schemaManager.exportSchemas().map((t) => ({
+      name: t.name,
+      columns: t.columns || [],
+      indexes: t.indexes || []
+    })),
     permissions: security,
     triggers: (triggersFile && (triggersFile.triggers as { id: string }[])) || [],
     templates: (email && (email.templates as Record<string, unknown>)) || {}
@@ -190,7 +234,11 @@ export function snapshotFromLive(
   templates?: Record<string, unknown>
 ): SchemaSnapshot {
   return {
-    tables: schemaManager.exportSchemas().map((t) => ({ name: t.name, columns: t.columns || [] })),
+    tables: schemaManager.exportSchemas().map((t) => ({
+      name: t.name,
+      columns: t.columns || [],
+      indexes: (t as TableDef).indexes || []
+    })),
     permissions,
     triggers: triggers || [],
     templates: templates || {}
@@ -230,8 +278,16 @@ export function diffSchema(source: SchemaSnapshot, target: SchemaSnapshot): Sche
       if (SYSTEM_COLUMNS.has(cn)) continue;
       if (!srcCols.has(cn)) removedColumns.push(cn);
     }
-    if (addedColumns.length || removedColumns.length || typeChanges.length) {
-      changed.push({ name, addedColumns, removedColumns, typeChanges });
+    // FED-002: the declaration compared as a whole, normalized so that a
+    // `unique: false` written out by hand does not read as a difference from
+    // the same declaration with the key left off.
+    const srcIdx = normalizeForDiff(st.indexes);
+    const tgtIdx = normalizeForDiff(tt.indexes);
+    const indexChange =
+      JSON.stringify(srcIdx) === JSON.stringify(tgtIdx) ? undefined : { from: tgtIdx, to: srcIdx };
+
+    if (addedColumns.length || removedColumns.length || typeChanges.length || indexChange) {
+      changed.push({ name, addedColumns, removedColumns, typeChanges, indexChange });
     }
   }
   for (const [name] of tgtTables) if (!srcTables.has(name)) removed.push(name);
@@ -243,11 +299,15 @@ export function diffSchema(source: SchemaSnapshot, target: SchemaSnapshot): Sche
     changed.some((c) => c.removedColumns.length > 0 || c.typeChanges.length > 0);
 
   const summary: string[] = [];
-  for (const t of added) summary.push(`+ table ${t.name} (${t.columns.length} columns)`);
+  for (const t of added) {
+    const withIndexes = (t.indexes || []).length > 0 ? `, ${(t.indexes || []).length} indexes` : '';
+    summary.push(`+ table ${t.name} (${t.columns.length} columns${withIndexes})`);
+  }
   for (const c of changed) {
     for (const col of c.addedColumns) summary.push(`+ column ${c.name}.${col.name} (${col.type || 'String'})`);
     for (const col of c.removedColumns) summary.push(`- column ${c.name}.${col} [DESTRUCTIVE]`);
     for (const tc of c.typeChanges) summary.push(`~ column ${c.name}.${tc.name}: ${tc.from} -> ${tc.to} [DESTRUCTIVE, manual]`);
+    if (c.indexChange) summary.push(`~ indexes ${c.name}: ${describeIndexes(c.indexChange.from)} -> ${describeIndexes(c.indexChange.to)}`);
   }
   for (const t of removed) summary.push(`- table ${t} [DESTRUCTIVE]`);
   summary.push(...config.permissions, ...config.triggers, ...config.templates);
@@ -326,9 +386,41 @@ export interface ApplyResult {
   appliedColumns: string[];
   droppedTables: string[];
   droppedColumns: string[];
+  /** FED-002 — `Table.idx_Table_field` for each index this promotion created. */
+  appliedIndexes: string[];
+  /** FED-002 — and each one it dropped, because the source no longer declares it. */
+  droppedIndexes: string[];
   configApplied: string[];
   preApplyBackup: string | null;
   skipped: string[];
+}
+
+/**
+ * FED-002 — reconcile one promoted table's indexes, recording the outcome.
+ *
+ * A refusal (duplicates in the target's data, or a declaration the adapter
+ * cannot honour) is a `skipped` line, not a thrown error: the rest of the
+ * promotion is valid and the operator needs to be told which constraint did not
+ * come across, with the reason, rather than having the whole apply unwind.
+ */
+function applyIndexes(
+  sm: SchemaManagerLike,
+  table: string,
+  indexes: IndexDeclLike[] | undefined,
+  result: ApplyResult
+): void {
+  if (!indexes || indexes.length === 0) return;
+  if (typeof sm.reconcileIndexes !== 'function') {
+    result.skipped.push(`indexes on ${table} (this adapter cannot declare indexes)`);
+    return;
+  }
+  try {
+    const report = sm.reconcileIndexes(table, indexes);
+    for (const name of report.created) result.appliedIndexes.push(`${table}.${name}`);
+    for (const name of report.dropped) result.droppedIndexes.push(`${table}.${name}`);
+  } catch (e) {
+    result.skipped.push(`indexes on ${table} (${e instanceof Error ? e.message : String(e)})`);
+  }
 }
 
 export async function applySchema(
@@ -349,6 +441,8 @@ export async function applySchema(
     appliedColumns: [],
     droppedTables: [],
     droppedColumns: [],
+    appliedIndexes: [],
+    droppedIndexes: [],
     configApplied: [],
     preApplyBackup: null,
     skipped: []
@@ -369,6 +463,10 @@ export async function applySchema(
   for (const t of diff.tables.added) {
     sm.createTable({ name: t.name, columns: t.columns.filter((c) => !SYSTEM_COLUMNS.has(c.name)) });
     result.appliedTables.push(t.name);
+    // FED-002: a promoted table arrives with its constraints or the promotion
+    // has moved a guarantee into a hope. The table is one statement old, so no
+    // unique declaration can be refused by data here.
+    applyIndexes(sm, t.name, t.indexes, result);
   }
   for (const c of diff.tables.changed) {
     for (const col of c.addedColumns) {
@@ -377,6 +475,11 @@ export async function applySchema(
     }
     // Type changes are never auto-applied (table-rebuild territory).
     for (const tc of c.typeChanges) result.skipped.push(`type change ${c.name}.${tc.name} (${tc.from}->${tc.to})`);
+    // FED-002: an index declaration that differs is applied AFTER the columns,
+    // because a new index usually names one of them. A unique index the target's
+    // rows refuse is SKIPPED with the reason — never applied halfway, and never
+    // by deleting rows.
+    if (c.indexChange) applyIndexes(sm, c.name, c.indexChange.to, result);
   }
 
   // Destructive: drops (only reached with allowDestructive).

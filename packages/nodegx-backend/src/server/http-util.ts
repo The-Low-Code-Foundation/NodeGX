@@ -131,12 +131,21 @@ export function sendJSON(
 export class HttpError extends Error {
   status: number;
   parseCode?: number;
+  /**
+   * Extra fields merged into the response body beside `error` and `code`.
+   *
+   * Added by FED-002, whose 409 has to say WHICH field collided and with what
+   * value — a refusal a graph can branch on rather than a sentence a person has
+   * to read. Everything else still answers with the two fields it always did.
+   */
+  extra?: Record<string, unknown>;
 
-  constructor(status: number, message: string, parseCode?: number) {
+  constructor(status: number, message: string, parseCode?: number, extra?: Record<string, unknown>) {
     super(message);
     this.name = 'HttpError';
     this.status = status;
     this.parseCode = parseCode;
+    this.extra = extra;
   }
 }
 
@@ -146,12 +155,41 @@ export class HttpError extends Error {
  * DUPLICATE_VALUE (137), a malformed one is 400. Any other error passes through
  * unchanged, to be answered as before.
  */
-export function createErrorToHttp(e: unknown): unknown {
+export function createErrorToHttp(e: unknown, values?: Record<string, unknown>): unknown {
   const message = e instanceof Error ? e.message : String(e);
   const problem = QueryBuilder.clientObjectIdProblem(message);
   if (problem === 'taken') return new HttpError(409, message, 137);
   if (problem === 'invalid') return new HttpError(400, message);
-  return e;
+  return uniqueViolationToHttp(message, values) || e;
+}
+
+/**
+ * FED-002: a write refused by a declared unique index.
+ *
+ * SQLite names the table and the columns and stops there; the VALUE is in the
+ * request body, which is why this is composed here and not in the adapter. The
+ * result is a 409 whose body carries `{ code, field, value }` — the shape the
+ * `Create Record` node puts on `Failure`, and the shape a feed graph tests to
+ * tell "already had this item" from "the write broke".
+ *
+ * `field` is a single name for the ordinary one-field index and a
+ * comma-separated list for a composite one; `value` matches it (a scalar, or an
+ * array in the same order).
+ */
+export function uniqueViolationToHttp(message: string, values?: Record<string, unknown>): HttpError | null {
+  const conflict = QueryBuilder.uniqueConstraintProblem(message) as { collection: string; fields: string[] } | null;
+  if (!conflict) return null;
+
+  const { collection, fields } = conflict;
+  const value = fields.map((f) => (values ? values[f] : undefined));
+  const shown = fields.length === 1 ? value[0] : value;
+  return new HttpError(
+    409,
+    `"${fields.join(', ')}" is unique in "${collection}" and ${JSON.stringify(shown)} is already used. ` +
+      'Send X-NodeGX-Upsert to update the existing record instead.',
+    137,
+    { field: fields.join(', '), value: shown, fields, collection: collection }
+  );
 }
 
 /**
@@ -166,6 +204,7 @@ export function sendError(res: http.ServerResponse, err: unknown): void {
   if (err instanceof HttpError) {
     const body: Record<string, unknown> = { error: err.message };
     if (err.parseCode !== undefined) body.code = err.parseCode;
+    if (err.extra) Object.assign(body, err.extra);
     if (requestId) body.requestId = requestId;
     // A 413 is raised while the body is still arriving, so the rest of it is
     // still in flight on this socket. Keeping the connection alive would leave

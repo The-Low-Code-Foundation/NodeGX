@@ -96,6 +96,19 @@ export interface CreateOptions extends AdapterCallbacks<(record: AdapterRecord) 
   collection: string;
   data: Record<string, unknown>;
   acl?: Acl;
+  /**
+   * FED-002 — write this record once, matched on the named property.
+   *
+   * The property must be covered by a single-field UNIQUE index on the
+   * collection; the backend refuses the request otherwise rather than updating
+   * an arbitrary one of several matches. When a row already holds the value the
+   * create becomes an update of that row.
+   *
+   * Honoured by `ParseWireAdapter` (as the `X-NodeGX-Upsert` header). The REST
+   * adapters refuse it loudly — Directus, PostgREST and PocketBase each spell
+   * upsert differently and none of them can be given this meaning by accident.
+   */
+  upsertOn?: string;
 }
 
 export interface SaveOptions extends AdapterCallbacks<(record: AdapterRecord) => void> {

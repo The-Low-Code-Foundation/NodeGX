@@ -42,6 +42,36 @@ export interface TableSchemaLike {
   name: string;
   columns?: SchemaColumnLike[];
   createdAt?: string;
+  /** FED-002 — the indexes this collection declares, beyond createdAt/updatedAt. */
+  indexes?: IndexDeclLike[];
+}
+
+/**
+ * One declared index (FED-002), as `schema.json` carries it and as the adapter
+ * reads it back. `fields` is one to four property names; the name is derived.
+ */
+export interface IndexDeclLike {
+  fields: string[];
+  unique?: boolean;
+  order?: 'asc' | 'desc';
+}
+
+/** A declared index and whether SQLite has it — what the dashboard lists. */
+export interface IndexStatusLike extends IndexDeclLike {
+  name: string;
+  unique: boolean;
+  order: 'asc' | 'desc';
+  built: boolean;
+  /** False for an index that exists and nothing declares (drift). */
+  declared: boolean;
+}
+
+/** What a reconcile did, and what the audit entry of a schema push names. */
+export interface IndexReconcileReportLike {
+  created: string[];
+  dropped: string[];
+  kept: string[];
+  indexes: IndexDeclLike[];
 }
 
 export interface SchemaManagerLike {
@@ -71,6 +101,18 @@ export interface SchemaManagerLike {
   // --- export --------------------------------------------------------------
   generatePostgresSQL(): string;
   generateSupabaseSQL(): string;
+
+  // --- declared indexes (FED-002) ------------------------------------------
+  //
+  // Optional and feature-detected at their call sites, for the same reason
+  // `changeColumnType` is: this interface describes whatever adapter the
+  // service was handed, and an older one predates the methods. A route that
+  // assumed them would fail with `is not a function` at request time; instead
+  // the two that are reachable over HTTP answer 501.
+  /** Make SQLite's indexes match this declaration. Throws `code: 'INDEX_DUPLICATES'`. */
+  reconcileIndexes?(table: string, indexes: unknown): IndexReconcileReportLike;
+  /** Every declared index and whether it is built, plus anything built nobody declared. */
+  indexStatus?(table: string): IndexStatusLike[];
 
   // --- FTS5 (BAK-008) ------------------------------------------------------
   hasFts5Support(): boolean;

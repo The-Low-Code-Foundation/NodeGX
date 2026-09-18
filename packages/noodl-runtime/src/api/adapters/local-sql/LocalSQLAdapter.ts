@@ -1033,7 +1033,12 @@ class LocalSQLAdapter {
     } catch (e) {
       // A refused client objectId is the caller's mistake, answered as a 409 or
       // 400 by the HTTP layer — not a server fault worth an error log line.
-      if (!QueryBuilder.clientObjectIdProblem(e.message)) console.error('LocalSQLAdapter.create error:', e);
+      // FED-002 adds the second of these: a write refused by a unique index is
+      // the caller colliding with a row that is already there — a 409 upstream,
+      // and no more a server fault than a taken objectId is.
+      if (!QueryBuilder.clientObjectIdProblem(e.message) && !QueryBuilder.uniqueConstraintProblem(e.message)) {
+        console.error('LocalSQLAdapter.create error:', e);
+      }
       options.error(e.message);
     }
   }
@@ -1090,7 +1095,7 @@ class LocalSQLAdapter {
         collection: options.collection
       });
     } catch (e) {
-      console.error('LocalSQLAdapter.save error:', e);
+      if (!QueryBuilder.uniqueConstraintProblem(e.message)) console.error('LocalSQLAdapter.save error:', e);
       options.error(e.message);
     }
   }

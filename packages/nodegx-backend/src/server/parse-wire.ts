@@ -3,7 +3,7 @@
  * (`cloudstore.js`; sessions live in ./users.ts, functions in the HttpServer
  * against the WorkflowRunner):
  *
- *   POST   /classes/:c            query (body._method === 'GET') or create
+ *   POST   /classes/:c            query (body._method === 'GET'), create, or upsert
  *   GET    /classes/:c            query via query-string (count calls)
  *   GET    /classes/:c/:id        fetch (include=)
  *   PUT    /classes/:c/:id        save / Increment / AddRelation / RemoveRelation
@@ -27,7 +27,24 @@
 import type { AdapterFacade, QueryOptions } from '../persistence/AdapterFacade';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
-import { createErrorToHttp, HttpError, readJSONBody, sendJSON } from './http-util';
+import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
+
+/**
+ * FED-002 — the upsert header: `X-NodeGX-Upsert: <field>` on a create.
+ *
+ * A header rather than a body key or a query param because it is a property of
+ * the REQUEST, not of the record: everything in the body is stored, and a
+ * `__upsertOn` key in there would be a field a caller could not name. Node's
+ * header names arrive lower-cased.
+ */
+const UPSERT_HEADER = 'x-nodegx-upsert';
+
+/** One request header, trimmed, or '' — Node lower-cases the names it parses. */
+function headerValue(ctx: RequestContext, name: string): string {
+  const raw = ctx.req.headers[name];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return typeof value === 'string' ? value.trim() : '';
+}
 
 function parseJSONParam(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -195,6 +212,17 @@ export class ParseWireRoutes {
     }
 
     delete body._method;
+
+    // FED-002: `X-NodeGX-Upsert: <field>` turns this create into "make sure
+    // there is exactly one row with this value". It is checked before anything
+    // is stamped, because the update half must not have a create's ACL applied
+    // over the owner the row already has.
+    const upsertOn = headerValue(ctx, UPSERT_HEADER);
+    if (upsertOn) {
+      await this.classesUpsert(ctx, collection, body, upsertOn);
+      return;
+    }
+
     // Client-supplied ACLs are accepted (the Create Record node's Access
     // Control Rules emit them). stampCreate validates the shape and applies
     // owner + template ACL per the collection's creator-owns setting.
@@ -203,13 +231,180 @@ export class ParseWireRoutes {
     try {
       record = await this.facade.rawCreate(collection, body);
     } catch (e) {
-      throw createErrorToHttp(e);
+      throw createErrorToHttp(e, body);
     }
     // Parse's create response: objectId + createdAt only. The client merges its
     // own data over this — returning wire-typed fields here would leak `__type`
     // envelopes into model data un-deserialized (create responses skip
     // _deserializeJSON on the client).
     sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt });
+  }
+
+  /**
+   * FED-002 §3.3 — the whole dedupe story: `Parse Feed` → `for-each` →
+   * `Create Record (upsertOn: id)` writes each item once however many times the
+   * schedule fires and however many people follow the source.
+   *
+   * Four things this deliberately does NOT do:
+   *
+   *  - **It does not accept any field.** The named field must be covered by a
+   *    single-field UNIQUE index that is actually built. Without one, "the row
+   *    that already has this value" is not a single row, and an upsert over a
+   *    non-unique column is a silent data-loser: it would update an arbitrary
+   *    one of the matches and leave the rest. That is AC3's 400.
+   *  - **It does not widen access.** The request is gated as a `create` by the
+   *    dispatcher; the update half asks for `update` as well, here, because it
+   *    can update a row. A caller with create and no update gets a 403 rather
+   *    than an update it was not entitled to make.
+   *  - **It does not read past the ACL.** The lookup runs with the caller's
+   *    WRITE predicate, so a row it may not write is a row it does not find —
+   *    and the create that follows then hits the unique index and answers 409,
+   *    which is the same answer it would get without the header. No existence
+   *    oracle appears.
+   *  - **It does not trust the gap.** Between the lookup and the insert another
+   *    writer can land the same value; the index catches it, and the retry
+   *    turns that into the update it was always going to be. One retry, not a
+   *    loop: a second failure is a real conflict and is answered as one.
+   */
+  private async classesUpsert(
+    ctx: RequestContext,
+    collection: string,
+    body: Record<string, unknown>,
+    field: string
+  ): Promise<void> {
+    this.assertUpsertable(collection, field);
+
+    const value = body[field];
+    if (value === undefined || value === null) {
+      throw new HttpError(
+        400,
+        `X-NodeGX-Upsert names "${field}", but this record has no value for it. ` +
+          'A record with nothing in the unique field cannot be matched against the rows already there.'
+      );
+    }
+    if (typeof value === 'object') {
+      throw new HttpError(400, `X-NodeGX-Upsert: "${field}" must hold a plain value, not an object or array.`);
+    }
+
+    // The update half of the operation is an update, and is gated as one.
+    ctx.checkData(collection, 'update');
+
+    const existing = await this.findByUnique(ctx, collection, field, value);
+    if (existing) {
+      await this.upsertUpdate(ctx, collection, existing, body);
+      return;
+    }
+
+    ctx.stampCreate(collection, body);
+    let record: Record<string, unknown>;
+    try {
+      record = await this.facade.rawCreate(collection, body);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, body);
+      if (!conflict) throw createErrorToHttp(e, body);
+
+      // Lost the race. The row exists now; if it is one this caller may write,
+      // the request is the update it asked for. If it is not, the 409 stands.
+      const raced = await this.findByUnique(ctx, collection, field, value);
+      if (!raced) throw conflict;
+      await this.upsertUpdate(ctx, collection, raced, body);
+      return;
+    }
+    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, upsert: 'created' });
+  }
+
+  /**
+   * The row this upsert targets, or null. Runs with the caller's WRITE
+   * predicate — see `classesUpsert`'s third note.
+   *
+   * @private
+   */
+  private async findByUnique(
+    ctx: RequestContext,
+    collection: string,
+    field: string,
+    value: unknown
+  ): Promise<Record<string, unknown> | null> {
+    const { results } = await this.facade.rawQuery(collection, {
+      where: { [field]: value },
+      limit: 1,
+      acl: ctx.acl('write')
+    });
+    return results && results.length > 0 ? results[0] : null;
+  }
+
+  /**
+   * Apply the create's payload to the row that already exists, and answer 200.
+   *
+   * `createdAt` comes back from the row rather than from the clock, because a
+   * client merges this response over its own data: a create's answer that said
+   * the record was made just now would move an item's date every poll.
+   *
+   * @private
+   */
+  private async upsertUpdate(
+    ctx: RequestContext,
+    collection: string,
+    existing: Record<string, unknown>,
+    body: Record<string, unknown>
+  ): Promise<void> {
+    const objectId = String(existing.objectId);
+    const data: Record<string, unknown> = { ...body };
+    delete data.objectId;
+    delete data.createdAt;
+    delete data.updatedAt;
+
+    // An ACL the caller sent explicitly is applied (it is what the node's
+    // Access Control Rules emit); one it did not send leaves the row's alone.
+    // `stampCreate` is never run on this path — an owner stamped over an
+    // existing row's ACL would quietly hand the record to whoever polled last.
+    if (Object.prototype.hasOwnProperty.call(data, 'ACL')) {
+      const aclError = validateAclShape(data.ACL);
+      if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
+      if (data.ACL === undefined || data.ACL === null) delete data.ACL;
+    }
+
+    let updated: Record<string, unknown> | null = null;
+    try {
+      updated = await this.facade.rawSave(collection, objectId, data, ctx.acl('write'));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, data);
+      if (conflict) throw conflict;
+      throw new HttpError(404, 'Object not found.', 101);
+    }
+
+    sendJSON(ctx.res, 200, {
+      objectId,
+      createdAt: existing.createdAt,
+      updatedAt: (updated && updated.updatedAt) || new Date().toISOString(),
+      upsert: 'updated'
+    });
+  }
+
+  /**
+   * AC3 — refuse an upsert on a field no unique index covers, and say why in
+   * the sentence that tells the person what to declare.
+   *
+   * @private
+   */
+  private assertUpsertable(collection: string, field: string): void {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.indexStatus !== 'function') {
+      throw new HttpError(501, 'This backend cannot upsert: its adapter does not declare indexes.');
+    }
+    const covered = sm
+      .indexStatus(collection)
+      .some((i) => i.unique && i.built && i.fields.length === 1 && i.fields[0] === field);
+    if (covered) return;
+
+    throw new HttpError(
+      400,
+      `X-NodeGX-Upsert: "${field}" is not a unique-indexed property of "${collection}". ` +
+        'An upsert needs one, because without it "the row that already has this value" may be several rows. ' +
+        `Declare { "fields": ["${field}"], "unique": true } on the collection and push the schema first.`
+    );
   }
 
   /** GET /classes/:collection — used by count() with where/limit/count params. */
@@ -271,7 +466,12 @@ export class ParseWireRoutes {
       if (Object.keys(increments).length > 0) {
         updated = await this.facade.rawIncrement(collection, objectId, increments, acl);
       }
-    } catch {
+    } catch (e) {
+      // FED-002: an update refused by a unique index is a conflict, not a
+      // missing row. Answering 404 here would tell a person their record had
+      // vanished when what actually happened is that another one has the value.
+      const conflict = uniqueViolationToHttp(e instanceof Error ? e.message : String(e), plain);
+      if (conflict) throw conflict;
       throw new HttpError(404, 'Object not found.', 101);
     }
     for (const rel of addRelations) {

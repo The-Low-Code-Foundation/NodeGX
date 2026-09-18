@@ -23,9 +23,9 @@ import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
-import type { SchemaColumnLike } from '../persistence/SchemaManagerLike';
+import type { IndexStatusLike, SchemaColumnLike } from '../persistence/SchemaManagerLike';
 import { validateAclShape } from '../security/model';
-import { createErrorToHttp, HttpError, readJSONBody, sendJSON } from './http-util';
+import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
 
 function parseJSON(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -67,6 +67,12 @@ export interface SchemaTable {
   name: string;
   columns: unknown[];
   createdAt: string | null;
+  /**
+   * FED-002 — every declared index and whether SQLite has it, plus anything
+   * built that nothing declares. Absent (not empty) on an adapter too old to
+   * answer, which is a different fact from "this collection has no indexes".
+   */
+  indexes?: IndexStatusLike[];
 }
 
 /** `GET /admin/schema` and `GET /api/_schema`. */
@@ -78,12 +84,14 @@ export interface SchemaResponse {
 export interface TableSchemaResponse {
   name: string;
   columns: unknown[];
+  /** FED-002 — see {@link SchemaTable.indexes}. */
+  indexes?: IndexStatusLike[];
 }
 
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
@@ -97,6 +105,19 @@ export interface SchemaMutationResponse {
   rebuilt?: boolean;
   /** How many non-null values went through `CAST`, and so could have been lost. */
   convertedValues?: number;
+  // ── setIndexes (FED-002) ──────────────────────────────────────────────────
+  //
+  // Prefixed, because `created` was already taken by createTable and means a
+  // boolean there. Two fields a wire-reader has to tell apart by the action
+  // they arrived with is exactly the drift PLAT-004 keeps finding.
+  /** Derived names of the indexes this push created (a changed one is here, not in `indexesDropped`). */
+  indexesCreated?: string[];
+  /** Derived names it dropped — a declaration that is gone from the list. */
+  indexesDropped?: string[];
+  /** Already built in exactly this shape, so nothing was done to them. */
+  indexesKept?: string[];
+  /** Every declared index on the collection afterwards, and whether it is built. */
+  indexes?: IndexStatusLike[];
 }
 
 export class ByobAdminRoutes {
@@ -144,7 +165,11 @@ export class ByobAdminRoutes {
     try {
       record = await this.facade.rawCreate(ctx.params.table, data);
     } catch (e) {
-      throw createErrorToHttp(e);
+      // FED-002: `data` is passed so a unique-index refusal can name the value
+      // as well as the field. This is the door the Data Browser writes through,
+      // and a 500 saying `UNIQUE constraint failed: Item.id` in a panel is not
+      // something a person can act on.
+      throw createErrorToHttp(e, data);
     }
     sendJSON(ctx.res, 201, record);
   }
@@ -155,7 +180,11 @@ export class ByobAdminRoutes {
     try {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
       sendJSON(ctx.res, 200, record);
-    } catch {
+    } catch (e) {
+      // FED-002: an edit refused by a unique index is a conflict, not a missing
+      // row — the same distinction `classPut` draws.
+      const conflict = uniqueViolationToHttp(e instanceof Error ? e.message : String(e), data);
+      if (conflict) throw conflict;
       throw new HttpError(404, 'Record not found');
     }
   }
@@ -245,7 +274,12 @@ export class ByobAdminRoutes {
     sendJSON(res, 200, {
       tables: tables.map((name) => {
         const schema = schemas.find((s) => s.name === name);
-        return { name, columns: schema?.columns || [], createdAt: schema?.createdAt || null };
+        return {
+          name,
+          columns: schema?.columns || [],
+          createdAt: schema?.createdAt || null,
+          ...this.indexesOf(name)
+        };
       })
     } satisfies SchemaResponse);
   }
@@ -255,10 +289,44 @@ export class ByobAdminRoutes {
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const schema = sm.getTableSchema(tableName);
     if (!schema) throw new HttpError(404, `No such table: ${tableName}`);
-    sendJSON(res, 200, { name: tableName, columns: schema.columns || [] } satisfies TableSchemaResponse);
+    sendJSON(res, 200, {
+      name: tableName,
+      columns: schema.columns || [],
+      ...this.indexesOf(tableName)
+    } satisfies TableSchemaResponse);
   }
 
-  async mutateSchema(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+  /**
+   * FED-002 — `{ indexes: [...] }` for a collection, or `{}` on an adapter that
+   * cannot answer. The two are deliberately different on the wire: an empty
+   * array says "this collection declares no indexes", and an absent key says
+   * "this backend cannot tell you", which is what the dashboard has to render
+   * differently.
+   */
+  private indexesOf(tableName: string): { indexes?: IndexStatusLike[] } {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.indexStatus !== 'function') return {};
+    try {
+      return { indexes: sm.indexStatus(tableName) };
+    } catch {
+      // A table listed by `_Schema` that no longer exists reads as no indexes,
+      // not as a 500 on the whole schema listing.
+      return { indexes: [] };
+    }
+  }
+
+  /**
+   * `POST /admin/schema` — one of the six mutation actions.
+   *
+   * Takes the whole context since FED-002: a schema push has to be able to
+   * ENRICH its audit entry (`ctx.audit`) with the index names it created or
+   * dropped, which is §3.4's "the execution record of a schema push names the
+   * indexes it created or dropped". The dispatcher still writes the entry;
+   * handlers never create one.
+   */
+  async mutateSchema(ctx: RequestContext): Promise<void> {
+    const req = ctx.req;
+    const res = ctx.res;
     const body = await readJSONBody(req);
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
@@ -269,11 +337,34 @@ export class ByobAdminRoutes {
     const table = body.table as string;
     switch (body.action) {
       case 'createTable': {
+        // FED-002: `indexes` rides along with the columns, because that is how
+        // a schema is pushed — one declaration per collection, not a table
+        // created here and its unique constraints remembered somewhere else.
+        // `createTable` is create-if-absent, so the reconcile runs afterwards
+        // either way: a push against a table that already exists is exactly the
+        // case where a declaration has CHANGED.
         const created = sm.createTable({
           name: table,
           columns: (body.columns as SchemaColumnLike[] | undefined) || []
         });
-        sendJSON(res, 200, { success: true, action: 'createTable', created, table } satisfies SchemaMutationResponse);
+        const report = body.indexes === undefined ? null : this.applyIndexes(ctx, table, body.indexes);
+        sendJSON(res, 200, {
+          success: true,
+          action: 'createTable',
+          created,
+          table,
+          ...(report || {})
+        } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setIndexes': {
+        const report = this.applyIndexes(ctx, table, body.indexes);
+        sendJSON(res, 200, {
+          success: true,
+          action: 'setIndexes',
+          table,
+          ...report
+        } satisfies SchemaMutationResponse);
         return;
       }
       case 'addColumn':
@@ -310,8 +401,61 @@ export class ByobAdminRoutes {
         return;
       }
       default:
-        throw new HttpError(400, `Unknown schema action: ${String(body.action)}`);
+        throw new HttpError(
+          400,
+          `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
+            'renameColumn, changeColumnType, deleteTable, setIndexes.'
+        );
     }
+  }
+
+  /**
+   * FED-002 — reconcile one collection's indexes and report what happened.
+   *
+   * Three refusals, each answered as the caller's mistake rather than a 500:
+   * a mis-shaped declaration (400), an adapter that cannot do indexes at all
+   * (501), and — the one that matters — a unique index the rows already in the
+   * table would refuse (409, carrying the duplicate count and three of the
+   * offending values). The last one changes nothing: no index is created, none
+   * is dropped, and no row is deleted to make room.
+   *
+   * @private
+   */
+  private applyIndexes(
+    ctx: RequestContext,
+    table: string,
+    indexes: unknown
+  ): { indexesCreated: string[]; indexesDropped: string[]; indexesKept: string[]; indexes: IndexStatusLike[] } {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.reconcileIndexes !== 'function') {
+      throw new HttpError(501, 'This adapter cannot declare indexes.');
+    }
+
+    let report;
+    try {
+      report = sm.reconcileIndexes(table, indexes);
+    } catch (e) {
+      const err = e as { code?: string; message?: string; duplicates?: number; samples?: unknown[][] };
+      if (err && err.code === 'INDEX_DUPLICATES') {
+        // AC4. The push is REFUSED, and the audit entry says so with the
+        // numbers — an operator who reads "refused" without them has to go and
+        // find the duplicates themselves.
+        ctx.audit({ indexesRefused: { table, duplicates: err.duplicates, samples: err.samples } });
+        throw new HttpError(409, String(err.message), 137, {
+          duplicates: err.duplicates,
+          samples: err.samples
+        });
+      }
+      throw new HttpError(400, e instanceof Error ? e.message : String(e));
+    }
+
+    ctx.audit({ indexesCreated: report.created, indexesDropped: report.dropped });
+    return {
+      indexesCreated: report.created,
+      indexesDropped: report.dropped,
+      indexesKept: report.kept,
+      indexes: this.indexesOf(table).indexes || []
+    };
   }
 
   exportSchema(res: http.ServerResponse, format: string): void {

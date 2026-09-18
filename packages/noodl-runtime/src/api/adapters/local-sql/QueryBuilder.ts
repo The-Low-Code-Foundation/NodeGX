@@ -764,6 +764,38 @@ export function clientObjectIdProblem(message: string): 'taken' | 'invalid' | nu
 }
 
 /**
+ * A write refused by a unique index (FED-002), decoded from SQLite's own text.
+ *
+ * SQLite says `UNIQUE constraint failed: Item.guid` (and, for a composite
+ * index, `Item.sourceId, Item.guid`) — which names the table and the columns
+ * but not the offending value, and reads like a stack trace. It is decoded
+ * rather than rewritten because the HTTP layer is the only place that knows the
+ * value: it has the request body in its hand, and the adapter does not keep it.
+ *
+ * Returns `null` for every other error, including a failed PRIMARY KEY, which
+ * is the objectId case {@link clientObjectIdProblem} already owns.
+ */
+export function uniqueConstraintProblem(message: string): { collection: string; fields: string[] } | null {
+  const m = /^UNIQUE constraint failed: (.+)$/.exec(String(message || '').trim());
+  if (!m) return null;
+
+  const parts = m[1].split(',').map((s) => s.trim());
+  const collections = new Set<string>();
+  const fields: string[] = [];
+  for (const part of parts) {
+    const dot = part.lastIndexOf('.');
+    if (dot <= 0) return null;
+    collections.add(part.slice(0, dot));
+    fields.push(part.slice(dot + 1));
+  }
+  if (collections.size !== 1 || fields.length === 0) return null;
+  // The PRIMARY KEY is `objectId`; that refusal has its own, earlier reading.
+  if (fields.length === 1 && fields[0] === 'objectId') return null;
+
+  return { collection: [...collections][0], fields };
+}
+
+/**
  * Build an INSERT query
  */
 export function buildInsert(options: { collection: string; data: Record<string, unknown> }, id: string): BuiltQuery {

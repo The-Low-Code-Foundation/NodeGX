@@ -74,3 +74,99 @@ record of a schema push names the indexes it created or dropped.
 6. **AC6** — Removing a declaration and pushing drops the index; `createdAt`/`updatedAt` survive.
 7. **AC7** — The `Create New Record` node's `upsertOn` port exists, is documented, and a cloud
    function using it passes AC2 over the node path, not only raw HTTP.
+
+---
+
+## 5. Built — session 2 (2026-09-18)
+
+**All seven ACs green.** The drive is `packages/nodegx-backend/tests/fed-002-indexes.test.ts`
+(26 specs, over HTTP against a real service on a real database); the SQL semantics are pinned
+beside the code that emits them in
+`packages/noodl-runtime/test/adapters/SchemaManager.indexes.test.js` (14 specs).
+
+### 5.1 Where each piece landed
+
+| piece | file |
+|---|---|
+| The declaration, its validation, the derived name, reconcile, the duplicate report | `noodl-runtime/src/api/adapters/local-sql/SchemaManager.ts` (new "Declared indexes" section) |
+| `UNIQUE constraint failed: T.c` decoded into `{ collection, fields }` | `local-sql/QueryBuilder.ts` — `uniqueConstraintProblem` |
+| 409 with `{ code, field, value }`, and `HttpError` learning to carry extra body fields | `nodegx-backend/src/server/http-util.ts` — `uniqueViolationToHttp` |
+| `X-NodeGX-Upsert`, the lookup, the update, the race retry | `nodegx-backend/src/server/parse-wire.ts` — `classesUpsert` |
+| `setIndexes` action, `indexes` on `createTable`, index status on every schema read | `nodegx-backend/src/server/byob-admin.ts` |
+| Declared indexes listed and editable in `/_admin` | `nodegx-backend/src/admin/ui/index.html` (Schema view) |
+| Index drift in the schema diff, and applied on promotion | `nodegx-backend/src/backup/schema-migrate.ts` |
+| `Upsert On` port; `upsertOn` on the adapter contract; the REST adapters refusing it | `newdbmodelpropertiesnode.ts`, `nodegx-backend-contract/src/data.ts`, `ParseWireAdapter.ts`, `RestDataAdapter.ts` |
+
+### 5.2 Three decisions the task file did not settle, and the reading taken
+
+1. **The declaration lives in the collection's `_Schema` row, not in a file beside it.** FED-002 §2
+   names `search.json` as "the pattern to match", and it is the pattern for *validation* and for
+   *a person editing it* — but not for *where it lives*. An index is part of a collection's shape
+   in a way a full-text opt-in is not: it travels with the schema through an export, a backup and a
+   promotion, and a promotion that carried the columns but not their unique constraints would have
+   moved a dedupe guarantee into a hope. So `schema.indexes` it is, exactly as §3.1 writes it, and
+   `schema-migrate` carries it.
+2. **Reconciliation reads `PRAGMA index_list` / `index_xinfo`, never the `_Schema` row.** Same
+   choice, for the same reason, that `_columnScope` makes about `PRAGMA table_info` (DEF-014): the
+   tracking row records what somebody *meant*. `indexStatus` therefore reports drift — an index
+   that exists and nothing declares — as `declared: false` rather than hiding it.
+3. **`field` and `value` reach the WIRE; the node's `Error` port gets the sentence.** §3.2 says the
+   Create Record node surfaces the refusal "with that shape". Its `Error` port is a `string` and
+   `setError(err: string)` is the family's one funnel, so the structured `{ code, field, value }`
+   is on the 409 body (where an HTTP client, a workflow step or another app reads it) and the node
+   shows `"id" is unique in "Item" and "guid-1" is already used. Send X-NodeGX-Upsert to update the
+   existing record instead.` Widening the whole Record family's error channel to an object is a
+   change to five nodes' contract and is not this task's.
+
+### 5.3 What the ACs measured
+
+- **AC1** — `PRAGMA index_list` read off the database file through a second, read-only connection:
+  three indexes with the derived names, `unique` correct, `desc` correct, and the built-in pair
+  still there. A re-push of the same declaration creates and drops nothing.
+- **AC2** — second create → 409 `{ code: 137, field: 'id', value: 'guid-1' }`; with the header →
+  200, one row, `createdAt` unmoved (a re-poll must not move an item's date). Plus an arm the AC
+  does not ask for: **twenty concurrent upserts of one id leave one row**, exactly one of them a
+  201. That is the gap between "is it there?" and "insert", which is the whole reason the guarantee
+  is an index and not a query in a function.
+- **AC3** — 400 naming the rule and printing the declaration to add; and a second 400 for a record
+  with no value in the named field.
+- **AC4** — 409 with `duplicates: 2` and `samples: [['dup-a'], ['dup-b']]`; the index list and all
+  five rows unchanged; the audit entry present with `outcome: failure`, `status: 409` and the
+  numbers in `detail.indexesRefused`. Then the same push accepted once the duplicates are gone.
+- **AC5** — 20,000 rows. **`EXPLAIN QUERY PLAN` names `idx_Item_published`** for
+  `ORDER BY published DESC LIMIT 50`, and `SCAN` for the control collection with the same rows and
+  no declared index. Measured: **indexed 0.04 ms, control 8.92 ms** (~220×). The plan is what
+  carries the AC — a duration is a statement about the box the suite ran on, the plan is a
+  statement about the index.
+- **AC6** — removing a declaration drops exactly that index; `[]` drops them all and leaves the
+  built-in pair; and with the unique index gone the duplicate it refused is writable again, which
+  is the pair that shows the guarantee lives in the index.
+- **AC7** — a cloud function `request → Create Record (Upsert On: id) → Response`, driven over
+  `POST /functions/storeItem`: two calls with the same id, one row. **Negative control:** the same
+  graph with the port empty fails on the second call with the 409's sentence on `Error`.
+
+### 5.4 One defect the drive found — filed, not fixed
+
+**`id` is a reserved property name at the adapter layer, in three places and nowhere written
+down.** The drive met it twice:
+
+1. **It is never auto-created as a column.** Importing 20,000 feed-shaped rows into a collection
+   nothing had declared rolled the whole import back with `table Control has no column named id`:
+   `AdapterFacade.ensureImportShape` skips five names when it infers columns from the data —
+   `objectId`, `createdAt`, `updatedAt`, `ACL` and **`id`** — and `LocalSQLAdapter.create`'s
+   auto-add loop skips the same one.
+2. **It cannot be changed by an update.** `QueryBuilder.buildUpdate` deletes `data.id` the way it
+   deletes `createdAt`, so `PUT` with a new `id` answers **200 and writes nothing** but
+   `updatedAt`. Found by a spec written to prove the update path's 409 mapping: the edit that
+   should have collided did not, because it was never applied. The spec now pins the real
+   behaviour, and the 409 arm was rewritten against a collection whose unique property is called
+   `code`.
+
+Historical and defensible — `id` is the Model layer's alias for `objectId` — but undocumented, and
+it lands squarely on this phase's path: `Parse Feed`'s stable identity output is called `id`, and
+FED-002's headline declaration is `{"fields": ["id"], "unique": true}`.
+
+**It does not block FED-002 or FED-006.** A collection that carries a unique index has been
+declared, and a declared `id` column is written on create and matched on by the upsert — which is
+what every AC above drives through. An upsert never needs to change its own match key. Filed as
+**R3** in the phase register.

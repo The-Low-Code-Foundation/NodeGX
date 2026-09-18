@@ -794,7 +794,7 @@ export class HttpServer {
         method: 'POST',
         pattern: 'api/_schema',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.mutateSchema(ctx.req, ctx.res)
+        handler: (ctx) => byob.mutateSchema(ctx)
       },
       { method: 'POST', pattern: 'api/_batch', access: { kind: 'data-perOp' }, handler: (ctx) => byob.batch(ctx) },
       {
@@ -835,7 +835,7 @@ export class HttpServer {
         method: 'POST',
         pattern: 'admin/schema',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.mutateSchema(ctx.req, ctx.res)
+        handler: (ctx) => byob.mutateSchema(ctx)
       },
       {
         method: 'GET',

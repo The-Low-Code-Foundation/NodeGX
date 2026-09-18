@@ -177,6 +177,19 @@ export interface CreateOptions extends Callbacks<(record: AdapterRecord) => void
    * silent no-op.
    */
   acl?: Acl;
+  /**
+   * FED-002 — write this record once, matched on the named property.
+   *
+   * The property must be covered by a single-field UNIQUE index on the
+   * collection; a backend that has one turns the create into an update of the
+   * row that already holds the value. It is `unsupported` off the Parse family
+   * for the same reason `acl` is: Directus, PostgREST and PocketBase each spell
+   * conflict handling differently, and none of them can be given this meaning
+   * by accident. Those adapters REFUSE the option rather than dropping it — a
+   * silently ignored upsert writes the duplicate row the caller asked not to
+   * have.
+   */
+  upsertOn?: string;
 }
 
 export interface SaveOptions extends Callbacks<(record: AdapterRecord) => void> {

@@ -28,6 +28,8 @@ interface NewDbModelPropertiesInstance
     AccessControlInstance['_internal'] & {
       /** Seeds the new record from an existing one's data. */
       sourceObjectId?: string;
+      /** FED-002 — the unique property this record is written once against. */
+      upsertOn?: string;
     };
   storageInsert(): void;
 }
@@ -78,6 +80,32 @@ const NewDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
           if (value instanceof Model) value = value.getId(); // Can be passed as model as well
           this._internal.sourceObjectId = value as string; // Wait to fetch data
         }
+      },
+      /**
+       * FED-002 §3.3 — "there is one record with this value, whatever happens".
+       *
+       * The property named here must carry a unique index the collection declares (Data →
+       * the collection's Indexes). The backend refuses the write otherwise, rather than
+       * updating an arbitrary one of several matches — an upsert on a non-unique property
+       * is a silent data-loser, so it is a refusal and not a warning.
+       *
+       * With it set, a second `Do` carrying the same value UPDATES the record that is
+       * already there instead of failing; with it empty the node behaves exactly as it
+       * always has, and a collision on a unique index fires `Failure`.
+       *
+       * It is the whole of a feed's dedupe: `Parse Feed` → `Repeat` → this node with
+       * `Upsert On: id`, and an item lands once however often the schedule runs.
+       */
+      upsertOn: {
+        type: 'string',
+        displayName: 'Upsert On',
+        group: 'General',
+        description:
+          'Name of a unique-indexed property. When a record already holds this value the ' +
+          'write updates that record instead of creating a second one. Leave empty to always create.',
+        set: function (this: NewDbModelPropertiesInstance, value: unknown) {
+          this._internal.upsertOn = typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
+        }
       }
     },
     // ERG-001 §4: the outcome ports are declared once in `dbmodelcrudbase.addBaseInfo`, for the
@@ -116,6 +144,9 @@ const NewDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
             collection: internal.collectionId,
             data: initValues,
             acl: this._getACL(),
+            // Absent unless the port is set, so a graph that does not use it sends exactly
+            // the request it sent before FED-002.
+            upsertOn: internal.upsertOn,
             success: (data: Record<string, unknown>) => {
               // Successfully created
               // `_fromJSON` is an instance field the constructor binds to the scope, not the

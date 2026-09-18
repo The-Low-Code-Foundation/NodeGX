@@ -549,8 +549,10 @@
             el('b', { text: t.name, style: 'color:#eef2f6' }),
             system ? chip('system', 'warn') : null,
             chip((t.columns || []).length + ' column(s)'),
+            chip(declaredCount(t) + ' index(es)'),
             el('span', { style: 'flex:1' }),
             writeButton('Add column', null, function () { addColumn(t.name); }),
+            writeButton('Indexes', null, function () { editIndexes(t); }),
             system ? null : writeButton('Delete table', 'danger', function () { deleteTable(t.name); })
           )
         );
@@ -567,7 +569,81 @@
             })
           );
         }
+        // FED-002. Listed beside the columns because that is where a person looks
+        // for "what shape is this collection": an index is part of the shape,
+        // and a `unique` one is a rule about what may be written.
+        var indexes = t.indexes || [];
+        if (indexes.length) {
+          card.appendChild(el('div', { style: 'height:8px' }));
+          card.appendChild(
+            table(['Index', 'Properties', 'Unique', 'Order', 'State'], indexes, function (i) {
+              return el('tr', {},
+                el('td', { text: i.name }),
+                el('td', { text: (i.fields || []).join(', ') }),
+                el('td', { text: i.unique ? 'yes' : '' }),
+                el('td', { text: i.order || 'asc' }),
+                el('td', {}, i.declared === false
+                  ? chip('not declared', 'warn')
+                  : (i.built ? chip('built', 'ok') : chip('missing', 'bad')))
+              );
+            })
+          );
+        }
         return card;
+      }
+
+      /** Declared indexes only — drift is listed but is not part of the count. */
+      function declaredCount(t) {
+        var declared = 0;
+        (t.indexes || []).forEach(function (i) { if (i.declared !== false) declared++; });
+        return declared;
+      }
+
+      /**
+       * FED-002 — the declaration edited as what it is: a small piece of JSON
+       * that lives in the collection's schema. Names are derived, so there is
+       * nothing to name here; the whole list is sent, so removing an entry
+       * drops its index.
+       */
+      function editIndexes(t) {
+        var ref = {};
+        var declared = (t.indexes || [])
+          .filter(function (i) { return i.declared !== false; })
+          .map(function (i) {
+            var out = { fields: i.fields };
+            if (i.unique) out.unique = true;
+            if (i.order === 'desc') out.order = 'desc';
+            return out;
+          });
+        var area = el('textarea', { rows: 8, style: 'width:100%;font-family:monospace' });
+        area.value = JSON.stringify(declared, null, 2);
+        ref.ref = modal('Indexes on ' + t.name, [
+          el('p.sub', {
+            text: 'One entry per index: { "fields": ["id"], "unique": true, "order": "desc" }. ' +
+              'createdAt and updatedAt are always indexed and are not listed. Removing an entry drops that index; ' +
+              'a unique index over rows that already hold duplicates is refused and nothing is changed.'
+          }),
+          area
+        ], [
+          cancelButton(ref),
+          el('button.btn.primary', {
+            type: 'button', text: 'Apply',
+            onclick: function () {
+              var parsed;
+              try { parsed = JSON.parse(area.value); }
+              catch (e) { return void toast('That is not valid JSON: ' + e.message, 'bad'); }
+              api('POST', '/admin/schema', { action: 'setIndexes', table: t.name, indexes: parsed })
+                .then(function (result) {
+                  ref.ref.close();
+                  var created = (result && result.indexesCreated) || [];
+                  var dropped = (result && result.indexesDropped) || [];
+                  toast('Indexes applied: ' + created.length + ' created, ' + dropped.length + ' dropped.', 'ok');
+                  load();
+                })
+                .catch(fail);
+            }
+          })
+        ]);
       }
 
       function createTable() {

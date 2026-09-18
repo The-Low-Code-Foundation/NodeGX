@@ -492,6 +492,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
   create(handle: BackendHandle, options: CreateOptions): void {
     this._makeRequest(handle, '/classes/' + options.collection, {
       method: 'POST',
+      // FED-002. A header, not a body key: everything in the body is stored, so
+      // an `__upsertOn` in there would be a property no caller could then name.
+      // The same route answers 201 for a create and 200 for the update, and
+      // both land on `success` (`_makeRequest` accepts either).
+      headers: options.upsertOn ? { 'X-NodeGX-Upsert': options.upsertOn } : undefined,
       content: Object.assign(
         _removeProtectedFields(this.serializeObject(options.data, options.collection), options.collection),
         { ACL: options.acl }

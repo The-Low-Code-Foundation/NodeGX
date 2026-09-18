@@ -19256,6 +19256,17 @@
           },
           "isSignal": true,
           "description": "Creates a record in the chosen Class from the property inputs and sends it to the backend"
+        },
+        {
+          "name": "upsertOn",
+          "displayName": "Upsert On",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Name of a unique-indexed property. When a record already holds this value the write updates that record instead of creating a second one. Leave empty to always create."
         }
       ],
       "outputs": [

@@ -4,7 +4,7 @@
 NodeGX app at distraction.digitalbricks.io), and a capability survey of `packages/nodegx-backend`,
 `packages/noodl-viewer-cloud` and `packages/noodl-runtime` taken the same afternoon at `cline-dev`
 HEAD `f3f67874d`.
-**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 is next.** **Prefix: `FED`.**
+**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 is next.** **Prefix: `FED`.**
 
 > "I'd really like the NodeGX backend to be able to handle this stuff. I want people to see NodeGX as
 > an alternative to tools like Supabase and n8n as well as a front end builder. The old Noodl made the
@@ -114,15 +114,20 @@ Asked in plain words, answered in one pass, 2026-09-18 (session 1).
 | task | one line | built | gated | driven |
 |---|---|---|---|---|
 | [FED-001](FED-001-A-FEED-IS-A-THING-YOU-CAN-PARSE.md) | `Parse XML` and `Parse Feed` nodes; RSS 2.0, Atom, RDF, YouTube, Reddit, podcasts → one item shape | ✅ | ✅ 6/6 | ✅ |
-
-**FED-001 is CLOSED (s1):** built, gated, driven over HTTP on a provisioned backend, 53 tests green
-across the two suites, and the bundle budget measured at **+14.8 KB gzipped against 50 KB**.
-
-| [FED-002](FED-002-A-COLLECTION-DECLARES-ITS-INDEXES.md) | `indexes` per collection in `schema.json`, unique included; upsert-on-unique on create | ⬜ | ⬜ | ⬜ |
+| [FED-002](FED-002-A-COLLECTION-DECLARES-ITS-INDEXES.md) | `indexes` per collection in `schema.json`, unique included; upsert-on-unique on create | ✅ | ✅ 7/7 | ✅ |
 | [FED-003](FED-003-A-FUNCTION-CALLS-A-MODEL.md) | `Model Request` cloud node: key from `Secret`, structured JSON out, usage counted, no SDK | ⬜ | ⬜ | ⬜ |
 | [FED-004](FED-004-A-SCHEDULE-DOES-NOT-TRIP-OVER-ITSELF.md) | `overlapPolicy` on schedules; conditional GET (ETag / 304) on the HTTP node; a `User-Agent` | ⬜ | ⬜ | ⬜ |
 | [FED-005](FED-005-A-BACKEND-SPEAKS-MCP.md) | `/mcp` on the backend: functions and collections as tools, scoped by API key | ⬜ | ⬜ | ⬜ |
 | [FED-006](FED-006-THE-DRIVE-ONE-FEED-END-TO-END.md) | the drive: fixture feeds → schedule → parse → dedupe → tag → per-user read, on a provisioned backend | ⬜ | ⬜ | ⬜ |
+
+**FED-001 is CLOSED (s1):** built, gated, driven over HTTP on a provisioned backend, 53 tests green
+across the two suites, and the bundle budget measured at **+14.8 KB gzipped against 50 KB**.
+
+**FED-002 is CLOSED (s2):** built, gated, driven over HTTP on a provisioned backend, 40 tests green
+across the two suites (26 over HTTP, 14 against the SQL). Twenty concurrent upserts of one id leave one row; 20,000 rows sorted by an
+indexed `published desc` answer in **0.04 ms against a control's 8.92 ms**, with
+`EXPLAIN QUERY PLAN` naming the index. One defect filed (R3: a property called `id` is never
+*auto*-created as a column — declared ones are fine, which is what every AC drives through).
 
 ## 6. Out of scope, and why
 
