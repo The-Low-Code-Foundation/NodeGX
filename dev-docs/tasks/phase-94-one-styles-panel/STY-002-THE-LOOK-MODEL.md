@@ -123,7 +123,10 @@ is no `cursor` input on either control. They reach real project files (`members 
 carries both in `nodes.json`), where the runtime drops them. TextConfig labels its pair *"BUG FIX:
 Proper flex participation"* — a fix that has never once applied. **Removing them from the configs
 changes what a newly created node carries and wants a drive**, so s4 stopped the *teaching* of them
-and filed the rest here.
+and filed the rest here. ⚠️ **And there are two doors, not one** — relayed by the P93 session, which
+was editing that function the same day: `NodeOperations.createNewNode` is where the stamp comes from,
+and the **Layers drop path is a second caller** to check alongside the canvas one
+([[a-check-in-a-second-pipeline-is-a-duplicate-first]]).
 
 ## 4. Out of scope
 
