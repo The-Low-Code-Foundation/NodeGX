@@ -132,11 +132,30 @@ export interface ProjectLevelTarget {
  * Copies the fields owned by one project-level file from `slice` (a project
  * reconstructed from the files on disk) onto `target`, and leaves every other
  * field alone.
+ *
+ * 🔴 **`hydrateVariant` is required, and the reason is a defect this parameter
+ * exists to make impossible** (P94 STY-002). `slice.variants` are *plain
+ * JSON objects*, while `ProjectModel.variants` must hold `VariantModel`
+ * instances, because `ProjectModel.toJSON()` calls `v.toJSON()` on every one of
+ * them. Assigning the slice straight across left the project unable to save at
+ * all — `TypeError: v.toJSON is not a function` on every `doWriteProjectToDisk`
+ * after a styles-file reload, which is the shape P92 CHR-010 saw and filed as
+ * "creating a variant breaks saving". `ProjectModel.fromJSON` had it right all
+ * along (`json.variants.map(VariantModel.fromJSON)`); this path did not, and an
+ * optional parameter defaulting to identity would let the next caller repeat it
+ * silently.
+ *
+ * The slice's variants arrive in the **legacy** shape — `ProjectImporter.reconstructVariants`
+ * deliberately reverses the v2 file's `stateParameters` back to the legacy
+ * `stateParamaters` (sic) — which is the shape `VariantModel.fromJSON` reads.
+ * Passing a hydrator that expects the v2 spelling would silently drop every
+ * Look's state data instead.
  */
 export function applyProjectLevelSlice(
   target: ProjectLevelTarget,
   slice: LegacyProject,
-  key: ProjectLevelKey
+  key: ProjectLevelKey,
+  hydrateVariant: (raw: unknown) => unknown
 ): void {
   const sliceMetadata = (slice.metadata ?? {}) as Record<string, unknown>;
 
@@ -176,5 +195,5 @@ export function applyProjectLevelSlice(
   } else {
     delete target.metadata.styles;
   }
-  target.variants = slice.variants ?? [];
+  target.variants = (slice.variants ?? []).map(hydrateVariant);
 }

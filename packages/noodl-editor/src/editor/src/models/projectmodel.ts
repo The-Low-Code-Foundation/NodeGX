@@ -986,7 +986,11 @@ export class ProjectModel extends Model {
         // `metadata`, `rootNodeId`, …) — it IS the legacy project shape with
         // behaviour on top — but it declares them rather than an index
         // signature, which is what this cast bridges.
-        applyProjectLevelSlice(this as unknown as ProjectLevelTarget, slice, key);
+        // P94 STY-002: the variants in a slice are plain JSON and this model's
+        // `variants` must be `VariantModel`s — see `applyProjectLevelSlice`.
+        applyProjectLevelSlice(this as unknown as ProjectLevelTarget, slice, key, (raw) =>
+          raw instanceof VariantModel ? raw : VariantModel.fromJSON(raw)
+        );
         projectStructureService.markProjectLevelBaseline(key, raw[key] ?? null, this.toJSON());
         outcomes[key] = 'reloaded';
         reloaded.push(key);
