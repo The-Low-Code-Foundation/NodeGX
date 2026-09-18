@@ -104,3 +104,34 @@ function isPlaced(meta: { tone: string } | null | undefined, instances: readonly
   if (instances && instances.length > 0) return true;
   return meta?.tone === 'count';
 }
+
+/**
+ * The places a component is instantiated, as the Components tab already counted them — what the
+ * crumb's `in N places` names and what its `▾` lists (TVW-001's `×N` popover, reused rather than
+ * recounted).
+ */
+export function instancesOf(nodes: readonly TreeNode[], componentName: string | undefined): readonly unknown[] {
+  if (!componentName) return [];
+  let found: readonly unknown[] = [];
+
+  const visit = (list: readonly TreeNode[]) => {
+    for (const node of list) {
+      if (found.length) return;
+      if (node.type === 'component' && node.data.name === componentName) {
+        found = node.data.instances ?? [];
+        return;
+      }
+      if (node.type === 'folder') {
+        if (node.data.isComponentFolder && node.data.component?.name === componentName) {
+          found = node.data.instances ?? [];
+          return;
+        }
+        visit(node.data.children);
+      }
+      if (node.type === 'section') visit(node.data.children);
+    }
+  };
+
+  visit(nodes);
+  return found;
+}

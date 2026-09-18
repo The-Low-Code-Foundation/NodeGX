@@ -478,6 +478,24 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
 
   tree.screen = screenPage ?? root;
   enterComponent(root, 0, undefined, 0);
+
+  /**
+   * 🔴 **A TINT WITH NO BAND TO EXPLAIN IT IS THREE HIGHLIGHTED ROWS AND NO REASON.**
+   *
+   * Seen in the drive's screenshot, asked for by no arm: with the canvas on the **root**, the
+   * shell's own rows tinted and nothing on screen said why — the root is entered by the walk
+   * itself, not through an instance, so it has no band. §2 half-anticipated this ("when the
+   * canvas's component *is* the page, nothing is tinted") but named the page, which under R-R is
+   * now a **region with a band** and reads perfectly well tinted. The rule the spec was reaching
+   * for is about the explanation, not about which component it is: **tint only what a band names.**
+   *
+   * A post-pass rather than a condition inside the walk, because "is there a band for it" is a
+   * fact about the finished list — the band for a component can be emitted after rows it owns.
+   */
+  if (!rows.some((row) => row.kind === 'band' && row.editing)) {
+    for (const row of rows) row.tinted = false;
+  }
+
   return tree;
 }
 
@@ -568,4 +586,104 @@ export function visibleRows(rows: readonly LayerRow[], expanded: ReadonlySet<str
   }
 
   return out;
+}
+
+/**
+ * §2's **containment crumb** — `Home › Hero`, the chain of components from the screen down to the
+ * one the canvas is editing.
+ *
+ * 🔴 Read off the **rows**, not from a fresh walk of usages. The crumb has to name the copy the
+ * person is looking at: a component placed in three parents has three chains, and a walk upward
+ * through `instances` would pick one of them by accident. The rows already know which, because the
+ * walk that made them came down that path — `parentKey` is the way back up it.
+ *
+ * @returns the owners from the outermost inwards, ending on `canvasComponent`; empty when the
+ *   canvas's component is not on this screen, and a single entry when it IS the screen (nothing
+ *   contains it, so §2 draws no crumb).
+ */
+export function containmentCrumb(rows: readonly LayerRow[], canvasComponent: string | undefined): string[] {
+  if (!canvasComponent) return [];
+
+  const byKey = new Map(rows.map((row) => [row.key, row]));
+  const band = rows.find((row) => row.kind === 'band' && row.editing);
+  if (!band) return [];
+
+  const chain: string[] = [];
+  let current: LayerRow | undefined = band;
+  while (current) {
+    // A band's owner is the component it introduces; a node's owner is the graph it is drawn in.
+    // Both are "whose file is this row in", which is exactly what a crumb step means.
+    if (!chain.length || chain[0] !== current.owner) {
+      if (current.owner) chain.unshift(current.owner);
+    }
+    current = current.parentKey ? byKey.get(current.parentKey) : undefined;
+  }
+
+  return chain;
+}
+
+/**
+ * §2's **footer** — how many nodes of the canvas's component are not on screen, and therefore not
+ * in Layers.
+ *
+ * ⚠️ **Counted as "everything the graph holds, minus what the screen draws"**, rather than by
+ * asking each node whether it is logic. A node under the *second* visual root is not logic and is
+ * still not on screen (its component renders `roots[0]` of the visual roots and nothing else), and
+ * a count that called those rows logic would be telling a small lie to avoid a longer sentence.
+ * The caller words it; this counts.
+ */
+export interface LayersFooter {
+  count: number;
+  text: string;
+}
+
+/**
+ * §2's footer, worded from what is actually in the count.
+ *
+ * 🔴 §2 says *"+ 14 **logic** nodes on the canvas"*, and for **268 of this machine's 5,173
+ * components (5.2%) that is false**: they hold a second visual root, whose **1,579 nodes** draw
+ * nothing only because a component instance renders `roots[0]` of its visual roots and nothing
+ * else. Calling those logic would be a small lie told to keep a shorter sentence — and the panel's
+ * whole claim is that it says which surface shows which thing.
+ *
+ * So the word follows the measurement: `logic nodes` when the graph has at most one visual root,
+ * and `nodes … that nothing draws` when it has more. The median component has **5** of these and
+ * only 5% have none, so this line is on screen nearly always.
+ */
+export function offScreenFooter(component: LayerComponent | undefined): LayersFooter | null {
+  const count = offScreenNodeCount(component);
+  if (!count || !component) return null;
+
+  const plural = count === 1 ? '' : 's';
+  const what =
+    component.visualRootIds.length > 1
+      ? `${count} node${plural} on the canvas that nothing draws`
+      : `${count} logic node${plural} on the canvas`;
+
+  return { count, text: `+ ${what} — not on screen, so not in Layers` };
+}
+
+export function offScreenNodeCount(component: LayerComponent | undefined): number {
+  if (!component) return 0;
+
+  const visual = new Set(component.visualRootIds);
+  const first = component.roots.find((node) => visual.has(node.id));
+
+  let total = 0;
+  const count = (node: LayerNode) => {
+    total++;
+    for (const child of node.children ?? []) count(child);
+  };
+  for (const root of component.roots) count(root);
+
+  let drawn = 0;
+  if (first) {
+    const drawnCount = (node: LayerNode) => {
+      drawn++;
+      for (const child of node.children ?? []) drawnCount(child);
+    };
+    drawnCount(first);
+  }
+
+  return total - drawn;
 }

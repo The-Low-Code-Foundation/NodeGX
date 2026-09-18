@@ -30,10 +30,13 @@ import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher'
 import { benchTargetLabel } from '../../../VisualCanvas/previewScope';
 import { pageForRoute, type ScreenPage } from '../../../VisualCanvas/screenRoute';
 import {
+  containmentCrumb,
   expandedForEditing,
   layersOfScreen,
+  offScreenFooter,
   rowsWithChildren,
   visibleRows,
+  type LayersFooter,
   type LayerComponent,
   type LayerNode,
   type LayerRow,
@@ -61,6 +64,10 @@ export interface LayersView {
   canvasComponent: string | undefined;
   /** True when the canvas's component is nowhere on this screen — the note's condition (§2). */
   canvasOffScreen: boolean;
+  /** §2's containment crumb: the components from the screen down to the one being edited. */
+  crumb: string[];
+  /** §2's footer: what the canvas's component holds that this screen does not draw. */
+  footer: LayersFooter | null;
   cyclic: boolean;
 }
 
@@ -192,9 +199,17 @@ export function useLayersTree(): LayersView {
     [expanded]
   );
 
+  const crumb = useMemo(() => containmentCrumb(tree.rows, canvasComponent), [tree, canvasComponent]);
+  const footer = useMemo(
+    () => (canvasComponent ? offScreenFooter(project.components.get(canvasComponent)) : null),
+    [project, canvasComponent]
+  );
+
   return {
     rows,
     all: tree.rows,
+    crumb,
+    footer,
     expanded,
     withChildren,
     toggle,

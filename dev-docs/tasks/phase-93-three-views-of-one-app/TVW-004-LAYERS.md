@@ -253,3 +253,48 @@ recorded so the next reader does not attribute it to Layers.
 
 **Left to drive** (the box went to a peer mid-run): the fixed panel behaviour on screen, AC1's five
 states, both themes at 300px and 240px, AC2's independent DOM walk, and the detached preview.
+
+### 6.9 The second drive — the surface works, and the shot found two more things (s14)
+
+`9/9` arms held, including the two the first run could not fail (a path **inside a band**, and the
+**panel still on screen** after a click) and the reset. `/tmp` shots read back, not assumed.
+
+**On screen and correct:** the panel titled `Project` with `Layers | Components`; `Layers · Home ·
+in the preview`; the crumb `App › Home › Main Navbar · in 7 places ▾`; rows `Group → Group → Page
+Router → SHOWING HOME → Page → Main Navbar → INSIDE MAIN NAVBAR → …`; the footer `+ 27 logic nodes
+on the canvas — not on screen, so not in Layers`; and the note
+`File Selector isn't on Home. It's on New, Update and Upload.` with both doors.
+
+✅ **The tint's boundary is right, and the screenshot is what proves it.** Read off the rendered
+rows: `EDITING MAIN NAVBAR`, `Header`, `Limiter` tinted — then `INSIDE LIMITER` and the rows under
+it **not** tinted — then `Group`, `Logo`, `Icon Button` tinted again. The region is *discontinuous*,
+because an instance's insides belong to another component's file and the rows after it come back to
+this one. That is §2's rule visible as a shape.
+
+🔴 **A TINT WITH NO BAND TO EXPLAIN IT.** With the canvas on the **root**, the shell's own rows
+tinted and nothing said why — the root is entered by the walk itself, so it has no band. Nine arms
+held through it; the shot is what showed it. §2 half-anticipated this ("when the canvas's component
+*is* the page, nothing is tinted") but named the **page**, which under R-R now has a band and reads
+perfectly well tinted. The rule the spec was reaching for is **tint only what a band names**, and
+that is what is built. Companion to R-N: *a ruling that changes what a surface is retires the spec
+lines that assumed what it was.*
+
+🔴 **The tint was the SELECTION colour.** `--theme-color-primary-bg` — `rgba(77, 163, 255, 0.13)`,
+which is what `.Selected` paints a row with eleven lines below in the same stylesheet. A region
+*being edited* read as a row you had *clicked*. Now the component hue at 9%
+(`color-mix(… var(--theme-color-node-category-component) 9% …)`), which is the hue the band label
+above it already uses. §2 said "component-hue 9% tint" and the first build quietly used the token
+that was nearest to hand.
+
+⚠️ **THE RENDERER RAN THE OLD MODULE FOR THREE READINGS.** The tint fix appeared not to work; the
+module in the renderer still had the previous source (`String(layersOfScreen).includes(…)` is how
+that was settled, rather than by re-reading the DOM a fourth time). HMR had not applied it. A
+`cdp reload` fixed it. **When a change appears to have no effect, ask the renderer which source it
+is running** before doubting the change.
+
+🔴 **Owed to Richard — the same sentence is on screen twice, 188px apart.** With the preview docked,
+the note in the panel and the strip at the seam carry the **identical words and the same two
+doors**. §2 asked for the note "same words as the strip, doors included" and nobody noticed both
+would be visible at once. Exactly the shape he ruled on at TVW-001 AC7 (*"Sample values."* 44px
+above *"No sample data"* — he cut one). The note earns its place when the preview is **detached**;
+docked, it is a duplicate. [[a-pinned-string-is-blind-to-its-neighbour]]

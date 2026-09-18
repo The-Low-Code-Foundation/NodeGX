@@ -20,12 +20,14 @@ import { selectionStore } from '@noodl-models/selection/selectionStore';
 
 import { EventDispatcher } from '../../../../../shared/utils/EventDispatcher';
 import { requestBenchMount } from '../../VisualCanvas/benchRequest';
+import { benchTargetLabel } from '../../VisualCanvas/previewScope';
 import { usePreviewStrip } from '../../VisualCanvas/usePreviewStrip';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
 import { LayersTree } from './components/LayersTree';
 import { useLayersTree } from './hooks/useLayersTree';
-import { defaultTabFor, flipTab, PANEL_TITLE, TAB_LABEL, tabSubjectFor, type PanelTab } from './layersTab';
+import { defaultTabFor, flipTab, instancesOf, PANEL_TITLE, TAB_LABEL, tabSubjectFor, type PanelTab } from './layersTab';
+import { showUsedInPopover } from './showUsedInPopover';
 import type { LayerRow } from './layersTree';
 import css from './ComponentsPanel.module.scss';
 import { buildCreateMenuItems, CreateContext, createMenuTitle } from './createMenu';
@@ -97,6 +99,12 @@ export function ComponentsPanel() {
    * event, and the Components tab has no use for the answer.
    */
   const { strip, goToPage } = usePreviewStrip(layers.canvasComponent, tab === 'layers');
+
+  /** The places the Components tab already counted — the crumb's `in N places` and its popover. */
+  const layersPlaces = useMemo(
+    () => instancesOf(treeData, layers.canvasComponent),
+    [treeData, layers.canvasComponent]
+  );
 
   /** ⌘⇧L, from the editor's keybinding registry — it opens this panel first, then flips. */
   useEffect(() => {
@@ -314,6 +322,39 @@ export function ComponentsPanel() {
             <span className={css['LayersHeaderWhere']}>in the preview</span>
           </div>
 
+          {/* §2's containment crumb — the "go to parent" the canvas does not have. Read back up the
+              rows, so it names the copy on screen rather than one of the component's parents
+              picked from a usage walk. */}
+          {layers.crumb.length > 1 && (
+            <div className={css['LayersCrumb']} data-test="layers-crumb">
+              <span className={css['LayersCrumbPath']}>
+                {layers.crumb.map((component, index) => (
+                  <React.Fragment key={component}>
+                    {index > 0 && <span className={css['LayersCrumbSep']}>›</span>}
+                    <button
+                      type="button"
+                      className={css['LayersCrumbStep']}
+                      onClick={() => handleEditComponent(component)}
+                      data-test="layers-crumb-step"
+                    >
+                      {benchTargetLabel(component)}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </span>
+              {layersPlaces.length > 1 && (
+                <button
+                  type="button"
+                  className={css['LayersCrumbPlaces']}
+                  onClick={(e) => showUsedInPopover(layersPlaces as TSFixme, e.currentTarget)}
+                  data-test="layers-crumb-places"
+                >
+                  in {layersPlaces.length} places ▾
+                </button>
+              )}
+            </div>
+          )}
+
           {/* §2: the tree below still shows the screen — the note says where the thing you are
               editing actually is, which is the teaching, not an error message. */}
           {strip.tone === 'notice' && (
@@ -357,6 +398,15 @@ export function ComponentsPanel() {
               onHoverRow={handleHoverRow}
             />
           </div>
+
+          {/* §2's footer. Its WORDING follows a measurement, not the spec's phrase: 268 of this
+              machine's components hold a second visual root whose nodes are not logic and are
+              still not on screen. See `offScreenFooter`. */}
+          {layers.footer && (
+            <div className={css['LayersFooter']} data-test="layers-footer">
+              {layers.footer.text}
+            </div>
+          )}
         </>
       ) : (
         <>

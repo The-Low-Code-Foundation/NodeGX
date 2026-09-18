@@ -19,7 +19,10 @@ import {
   LayerComponent,
   LayerNode,
   LayerRow,
+  containmentCrumb,
   MAX_INDENT_LEVEL,
+  offScreenFooter,
+  offScreenNodeCount,
   REPEATED_BY,
   ROUTER_PAGES_NOTE,
   rowsWithChildren,
@@ -472,5 +475,67 @@ describe('TVW-004 layersTree — the screen, expanded through instances', () => 
       const tree = layersOfScreen({ root, screenPage: page as string | undefined, components });
       expect(tree.rows.length).toBe(independentCount(root, page as string | undefined, components));
     });
+  });
+});
+
+describe('TVW-004 — the crumb and the footer', () => {
+  const nodeOf = (id: string, typename: string, extra: Partial<LayerNode> = {}): LayerNode => ({ id, typename, ...extra });
+
+  it('names the chain from the screen down to what the canvas is editing', () => {
+    const tree = layersOfScreen({ root: '/App', screenPage: '/Home', canvasComponent: '/Hero', components: corpus() });
+    // 🔴 The chain of the copy on screen, read back up `parentKey` — not one of the component's
+    // parents picked from a usage walk, which would name a different copy on a component placed
+    // in three parents.
+    expect(containmentCrumb(tree.rows, '/Hero')).toEqual(['/App', '/Home', '/Hero']);
+  });
+
+  it('has no crumb when the canvas is showing something that is not on this screen', () => {
+    const tree = layersOfScreen({ root: '/App', screenPage: '/Home', canvasComponent: '/Card', components: corpus() });
+    // `/Card` is the repeater's template on Home, so it IS on screen and does get a crumb…
+    expect(containmentCrumb(tree.rows, '/Card').length).toBeGreaterThan(0);
+    const elsewhere = layersOfScreen({ root: '/App', screenPage: '/Pricing', canvasComponent: '/Hero', components: corpus() });
+    expect(containmentCrumb(elsewhere.rows, '/Hero')).toEqual([]);
+    expect(containmentCrumb(elsewhere.rows, undefined)).toEqual([]);
+  });
+
+  it('counts what the screen does not draw, and says logic only when it IS logic', () => {
+    const components = corpus();
+
+    // `/Home` holds one logic root (`/Format price`) beside its Page.
+    expect(offScreenNodeCount(components.get('/Home'))).toBe(1);
+    expect(offScreenFooter(components.get('/Home')).text).toBe('+ 1 logic node on the canvas — not on screen, so not in Layers');
+
+    // 🔴 `/Pricing` has a SECOND VISUAL ROOT (`/Ghost`): instantiated, never attached, and not
+    // logic. 268 of this machine's 5,173 components are like this, holding 1,579 nodes between
+    // them — §2's "logic nodes" would be false for every one of them.
+    expect(offScreenFooter(components.get('/Pricing')).text).toBe(
+      '+ 1 node on the canvas that nothing draws — not on screen, so not in Layers'
+    );
+
+    // A component whose graph is entirely on screen says nothing at all.
+    expect(offScreenFooter(components.get('/Hero'))).toBeNull();
+    expect(offScreenFooter(undefined)).toBeNull();
+  });
+});
+
+describe('TVW-004 — the tint is only ever drawn where a band explains it', () => {
+  it('tints nothing when the canvas is on the ROOT, which no band names', () => {
+    // 🔴 The root is entered by the walk itself, not through an instance, so it has no band. The
+    // first drive's screenshot showed three highlighted shell rows with nothing saying why —
+    // asked for by none of its nine arms, all of which held.
+    const tree = layersOfScreen({ root: '/App', screenPage: '/Home', canvasComponent: '/App', components: corpus() });
+
+    expect(tree.rows.some((r) => r.owner === '/App')).toBe(true);
+    expect(tree.rows.some((r) => r.tinted)).toBe(false);
+  });
+
+  it('still tints the page, because under R-R the page HAS a band', () => {
+    // §2 said "when the canvas's component is the page, nothing is tinted" — written when Layers
+    // showed the page alone and the tint would have been the whole tree. With the shell above it
+    // the page is a region like any other, and `EDITING HOME` is on screen to say so.
+    const tree = layersOfScreen({ root: '/App', screenPage: '/Home', canvasComponent: '/Home', components: corpus() });
+
+    expect(tree.rows.some((r) => r.kind === 'band' && r.editing && r.label === 'EDITING HOME')).toBe(true);
+    expect(tree.rows.filter((r) => r.tinted).length).toBeGreaterThan(1);
   });
 });
