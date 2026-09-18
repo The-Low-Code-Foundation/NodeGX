@@ -297,8 +297,10 @@ export type {
   VocabComposition,
   VocabCompositionGroup,
   VocabElement,
+  VocabLook,
   VocabParamValue,
   VocabPreset,
+  VocabProjectLook,
   VocabToken,
   VocabTokenCategory
 } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/StyleVocabulary';

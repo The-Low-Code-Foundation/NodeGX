@@ -1,6 +1,10 @@
 # STY-004 — Export carries Looks
 
-**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟢 **Part A done, s3 — AC1–AC7 all green.** Part B not started (§3).
+**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟢 **Part A done and committed (`a6335ef1`) — AC1–AC7 all green, 32 tests.** Part B not started (§3).
+🔴 **s4 found Part A was green on its own spec but left the package red**: the full `nodegx-export` suite
+had 3 failures in `hls001-corpus-identity`, two of them caused by the new fixture joining the corpus.
+A per-file run could not see it ([[harness-and-gates-pointers]]). Now 106 suites / 3644 tests green,
+`tsc --noEmit` clean.
 **Blocking** for anything this phase ships — `STY-DESIGN-THE-LOOK-MODEL.md` §6.
 
 > Under the Look model every styled thing is a link. Shipping that design while the exporter drops
@@ -140,7 +144,18 @@ fixture. **None does** — across 48 projects the only differing file is the one
 explains. In particular no fixture's `EXPORT-REPORT.md` moved, which is the direct confirmation that
 `stylesReport` returns undefined for a project with no styles and prints nothing at all.
 
-⚠️ **The golden is NOT regenerated here, deliberately.** Regenerating it would bake in two things
+✅ **REGENERATED (s4), and the corpus was quiet when it happened.** The peer's uncommitted
+`node-catalog.json` edit that s3 held back for landed as `c3754c6e1` (P96 FED-001), so the shared
+artefact was no longer in flight. Re-measured independently before the literal moved — 48 differing,
+**every one a `tokens.css`**, nothing else — and then **attributed by control rather than by
+argument**: for `cheer`, `tick-desk`, `socket-desk` and `task-desk`, deleting just the two lines
+`--ring-width` contributes from the freshly emitted `tokens.css` reproduces the *old* golden hash
+exactly, **4 of 4**. Regenerating moved exactly what was counted: one project added (15 keys under
+`look-desk`), 48 existing hashes changed, 0 non-`tokens.css`. `hls001-corpus-identity` is **4/4** and
+the regeneration is recorded in the test's own header as the file's convention requires. Committed as
+`a6335ef1`.
+
+~~⚠️ **The golden is NOT regenerated here, deliberately.**~~ (s3's reasoning, kept so the change is visible:) Regenerating it would bake in two things
 that are not this task's to decide: P88's uncounted `--ring-width` change, and — more sharply — the
 working tree currently carries a **peer's uncommitted edit to `packages/noodl-types/src/node-catalog.json`**,
 which is the artefact this exporter loads. A wholesale rewrite of a shared golden over another

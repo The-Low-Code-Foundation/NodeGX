@@ -16,10 +16,28 @@
  * (`backgroundColor: 'var(--primary)'`). The runtime resolves it against the
  * `:root { --token: … }` block that ProjectTokenCss stamps into preview and
  * deployed builds. So the agent must emit `var(--token-name)` — not the token
- * name bare, and not the resolved hex. The `_variant`/`_size` markers store the
- * bare name, but variants are stamped into concrete params at author time (the
- * viewer does not expand them), so the reliable emission is the concrete
- * token-referenced params, which is what this vocabulary hands over.
+ * name bare, and not the resolved hex.
+ *
+ * 🔴 **P94 STY-002 replaced the sentence that used to stand here, because it was
+ * false of the concept that survives.** It read: *"the `_variant`/`_size` markers
+ * store the bare name, but variants are stamped into concrete params at author
+ * time (the viewer does not expand them)"* — and that is a statement about two
+ * different things that shared one word:
+ *
+ *   - a **Look** (`VariantModel`, stored in `nodegx.styles.json` → `variants[]`,
+ *     referenced by the node's top-level `variant` field) IS expanded by the
+ *     viewer, on every node, every render: `mergeDeep(variant.parameters)` then
+ *     `mergeDeep(model.parameters)` (`react-component-node.ts:1811-1838`). It is
+ *     a live reference, and the exporter now carries it too (STY-004);
+ *   - the old `_variant`/`_size` **preset markers** were the stamped ones, and
+ *     they are what P94 removes. Nothing reads them at runtime — measured: they
+ *     appear nowhere in `noodl-viewer-react/src` or `noodl-runtime/src`.
+ *
+ * So the vocabulary hands over concrete token-referenced params for a *shipped
+ * Look you copy in*, which is still the reliable emission for an agent — not
+ * because a Look is a stamp, but because the `variant` input port is
+ * `allowConnectionsOnly` (`react-component-node.ts:1993-2008`) and **no MCP tool
+ * writes a node's Look yet** (its own phase, README §4.1).
  *
  * PURE by construction — no ProjectModel, no editor Model, no Electron. It reads
  * project overrides through the same `MetaDataSource` seam ProjectTokenCss uses,
@@ -32,6 +50,7 @@
  */
 
 import { ElementConfigRegistry } from '../ElementConfigs/ElementConfigRegistry';
+import { shippedLooksFor, stripPresetMarkers } from '../Looks/looks';
 import { buildEffectiveTokens, MetaDataSource, readStoredTokens } from './ProjectTokenCss';
 import { formatCompositionValue, STYLE_COMPOSITIONS, VocabComposition } from './StyleCompositions';
 import {
@@ -60,15 +79,54 @@ export interface VocabTokenCategory {
   tokens: VocabToken[];
 }
 
-/** The variants/sizes a single element type supports, with the styles they imply. */
+/** One shipped Look: a coherent set of parameters a node of this type can wear. */
+export interface VocabLook {
+  /** The library's own id (`primary`, `heading-1`) — what `copy_look` would name. */
+  id: string;
+  /** What a person sees, and the name the copy takes in the project (`Heading 1`). */
+  name: string;
+  /**
+   * What this Look adds **on top of its element type's `defaults`** — not the whole of it.
+   *
+   * 🔴 **Factored deliberately, and the number is why.** A complete copy per Look reads better in
+   * isolation but repeats the type's defaults 22 times over the library: measured on the wire it
+   * cost **prompt 5,023 / full 15,741** against ceilings of 4,400 / 14,400, where the same content
+   * factored costs less than it did before this task. An agent must copy the defaults *and* these;
+   * both halves are in the same block and the prompt text says so.
+   */
+  parameters: Record<string, string>;
+}
+
+/**
+ * The shipped Looks a single element type has.
+ *
+ * 🔴 **`sizes` are gone (P94 STY-002 AC1/AC5), and the measurement is why.** The four size presets
+ * were a second axis on top of variants, and `_size` occurs **0 times** across the seven shipped
+ * templates and 0 times across 105 real projects on this machine. A second axis cannot survive the
+ * design's rule 1 ("one row decides it") without multiplying the library by four, so a person who
+ * wants a larger Primary edits their copy of it.
+ */
 export interface VocabElement {
   nodeType: string;
-  variants: string[];
-  sizes: string[];
-  /** variantName → the token-referenced style params that variant stamps. */
-  variantStyles: Record<string, Record<string, string>>;
-  /** sizeName → the token-referenced style params that size stamps. */
-  sizeStyles: Record<string, Record<string, string>>;
+  /** What every node of this type gets on creation, and the floor each Look sits on. */
+  defaults: Record<string, string>;
+  /** The shipped Looks for this type, in the order the config declares them. */
+  looks: VocabLook[];
+}
+
+/**
+ * A Look this project actually holds — the thing nodes in it wear.
+ *
+ * Read from `nodegx.styles.json` by the caller rather than from a token source, for the same reason
+ * `icons` and `imagery` are: what a project holds is a fact about a directory, not about the product.
+ */
+export interface VocabProjectLook {
+  name: string;
+  /** The node type it dresses. A Look is identified by name **and** type, everywhere. */
+  typename: string;
+  parameters: Record<string, unknown>;
+  /** Visual states it styles (`hover`, `pressed`, …), when it has any. */
+  states?: string[];
 }
 
 export interface VocabPreset {
@@ -80,8 +138,14 @@ export interface VocabPreset {
 export interface StyleVocabulary {
   /** Design tokens, grouped by category, in category-declaration order. */
   categories: VocabTokenCategory[];
-  /** Element types with a variant/size registry (Button, Text, …). */
+  /** Element types with a shipped Look library (Button, Text, …). */
   elements: VocabElement[];
+  /**
+   * P94 STY-002 AC6 — the Looks this project holds, which nodes in it can wear. Absent (rather
+   * than empty) when the caller did not supply them, so "none supplied" and "this project has
+   * none" stay different readings.
+   */
+  projectLooks?: VocabProjectLook[];
   /**
    * DSG-005 — named parameter sets to reuse verbatim, and the recipe that shows
    * each one arranged. Tokens and variants are the paint; this is the only
@@ -145,6 +209,8 @@ function toPortParameters(styles: Record<string, string>): Record<string, string
       continue;
     }
 
+    if (NO_SUCH_PORT.has(key)) continue;
+
     out[key] = value;
   }
 
@@ -152,11 +218,42 @@ function toPortParameters(styles: Record<string, string>): Record<string, string
 }
 
 /**
+ * P94 STY-002 — CSS properties an element config stamps that **no node type declares a port for**,
+ * so the vocabulary must not teach them.
+ *
+ * 🔴 **Found by widening `tests-unit/aib-001/styleVocabularyPorts.test.ts` to the type `defaults`,
+ * which it had never seen.** Under the old shape the defaults were folded into a node by the
+ * editor's stamp and never reached this document, so the gate — whose whole doctrine is *"it is the
+ * catalog, not a reviewer, deciding what the vocabulary is allowed to say"* — could not see them.
+ * Measured against the catalog and the viewer: `Text` has no `flexGrow`/`flexShrink` input and
+ * neither node file mentions either word; `Button` and `Checkbox` have no `cursor` input.
+ *
+ * ⚠️ **These are dead stamps in the product, not only in this document, and that is a separate
+ * defect this task does not fix.** `applyDefaults` writes all three onto every `Text`, `Button` and
+ * `Checkbox` created on canvas, and they reach real project files — `members area Richard test`
+ * carries both `flexShrink` and `cursor` in `nodes.json`, where the runtime drops them. TextConfig
+ * even labels its pair *"BUG FIX: Proper flex participation"*, which is a fix that has never
+ * applied. Removing them from the configs changes what a newly created node carries and wants a
+ * drive to confirm; filed in STY-002 rather than smuggled in here. What this list does is stop the
+ * **teaching** of them, which is the half that costs an authoring model real output.
+ */
+const NO_SUCH_PORT = new Set(['cursor', 'flexGrow', 'flexShrink']);
+
+/**
  * Build the full style vocabulary. Pass a metadata source (ProjectModel, a
  * serialized project's `{ getMetaData }`, or the MCP project file) to reflect a
  * project's custom token overrides; omit it for the shipped defaults.
  */
-export function buildStyleVocabulary(source?: MetaDataSource | null): StyleVocabulary {
+export function buildStyleVocabulary(
+  source?: MetaDataSource | null,
+  /**
+   * P94 STY-002 AC6 — the Looks this project holds, read from `nodegx.styles.json` by the caller.
+   * Omitted leaves `projectLooks` absent rather than empty: a caller that cannot see the file and a
+   * project that has no Looks are two different readings, and reporting them the same way is how
+   * "0 text styles in 90 projects" got claimed twice in this phase from a wrong key.
+   */
+  projectLooks?: readonly VocabProjectLook[]
+): StyleVocabulary {
   const tokenMap = buildEffectiveTokens(readStoredTokens(source));
 
   const byCategory = new Map<TokenCategory, VocabToken[]>();
@@ -182,26 +279,21 @@ export function buildStyleVocabulary(source?: MetaDataSource | null): StyleVocab
 
   const elements: VocabElement[] = ElementConfigRegistry.getAll().map((config) => {
     const nodeType = config.nodeType;
-    const variants = ElementConfigRegistry.getVariantNames(nodeType);
-    const sizes = ElementConfigRegistry.getSizeNames(nodeType);
-    const variantStyles: Record<string, Record<string, string>> = {};
-    for (const variant of variants) {
-      const resolved = ElementConfigRegistry.resolveVariant(nodeType, variant);
-      if (resolved) variantStyles[variant] = toPortParameters(resolved.baseStyles);
-    }
-    const sizeStyles: Record<string, Record<string, string>> = {};
-    for (const size of sizes) {
-      const applied: Record<string, string> = {};
-      // resolveVariant does not cover sizes; read them off the config directly.
-      const sizePreset = (config.sizes ?? {})[size];
-      if (sizePreset) {
-        for (const [k, v] of Object.entries(sizePreset)) {
-          if (typeof v === 'string') applied[k] = v;
-        }
+    // 🔴 A Look *stored in a project* is self-contained — the config's `defaults` merged with the
+    // variant's own properties — because a node wearing one may carry no style parameters at all.
+    // That is what `shippedLook` builds and what `copy this Look into the project` must store.
+    // **Here the two halves are reported separately**, because repeating the defaults under each of
+    // 22 Looks cost 900 prompt tokens of pure duplication on a surface with 290 to spare.
+    const defaults = toPortParameters(stripPresetMarkers(config.defaults) as Record<string, string>);
+    const looks: VocabLook[] = shippedLooksFor(config).map((look) => {
+      const delta: Record<string, string> = {};
+      const full = toPortParameters(look.parameters as Record<string, string>);
+      for (const [key, value] of Object.entries(full)) {
+        if (defaults[key] !== value) delta[key] = value;
       }
-      sizeStyles[size] = toPortParameters(applied);
-    }
-    return { nodeType, variants, sizes, variantStyles, sizeStyles };
+      return { id: look.shippedFrom, name: look.name, parameters: delta };
+    });
+    return { nodeType, defaults, looks };
   });
 
   const presets = listVocabularyPresets();
@@ -211,7 +303,13 @@ export function buildStyleVocabulary(source?: MetaDataSource | null): StyleVocab
   // those are already reflected in `categories`. Nothing here reads `source`.
   const compositions = STYLE_COMPOSITIONS;
 
-  return { categories, elements, compositions, presets };
+  return {
+    categories,
+    elements,
+    ...(projectLooks === undefined ? {} : { projectLooks: [...projectLooks] }),
+    compositions,
+    presets
+  };
 }
 
 /**
@@ -289,6 +387,22 @@ export function renderStyleVocabulary(vocab: StyleVocabulary, options: RenderVoc
     }
   }
 
+  // P94 STY-002 AC6. What this project already holds comes BEFORE the shipped library, for the
+  // same reason the tokens do: a Look somebody already made is the house style, and an agent that
+  // reads the library first invents a second one beside it.
+  if (vocab.projectLooks !== undefined && vocab.projectLooks.length > 0) {
+    lines.push('');
+    lines.push(
+      "THIS PROJECT'S LOOKS — named styles nodes here already wear. A Look is identified by its name AND the " +
+        'node type it dresses. Match one rather than inventing a parallel style; to give a node this look, copy ' +
+        'the parameters listed for it:'
+    );
+    for (const look of vocab.projectLooks) {
+      const states = look.states && look.states.length > 0 ? ` (+ states: ${look.states.join(', ')})` : '';
+      lines.push(`- ${look.name} · ${look.typename}${states}: ${formatStyleMap(look.parameters)}`);
+    }
+  }
+
   if (vocab.elements.length > 0) {
     lines.push('');
     // The old wording offered two routes — "set the element type via the marker
@@ -298,22 +412,27 @@ export function renderStyleVocabulary(vocab: StyleVocabulary, options: RenderVoc
     // `variant: "heading-1"` on every Text, set no font size or colour, and
     // shipped a page that rendered entirely at browser defaults. There is only
     // one route now, and the validator errors on the other.
+    //
+    // P94 STY-002: the block is the shipped **Look library** now, and the sizes half is gone
+    // (`_size`: 0 uses in 105 real projects). The one-route warning stands unchanged and for the
+    // unchanged reason — the `variant` port is connection-only, so parameters are still the only
+    // way an agent dresses a node.
     lines.push(
-      'ELEMENT VARIANTS & SIZES — a catalogue of coherent styles, NOT settable parameters. ' +
-        '"variant" and "size" are connection-only ports: setting either as a parameter is discarded and is a ' +
-        'validation error. To use one, copy the parameters it lists onto the node:'
+      'SHIPPED LOOKS — a library of coherent styles per element type, NOT settable parameters. ' +
+        '"variant" is a connection-only port: setting it as a parameter is discarded and is a validation ' +
+        'error. To give a node one of these looks, copy BOTH its element type\'s defaults AND the look\'s own ' +
+        'parameters onto the node (the look lists only what it changes):'
     );
     const spellOut = options.elementTypes ? new Set(options.elementTypes) : null;
     for (const el of vocab.elements) {
-      const head = `- ${el.nodeType}: variants [${el.variants.join(', ') || 'none'}], sizes [${
-        el.sizes.join(', ') || 'none'
-      }]`;
-      lines.push(head);
+      lines.push(`- ${el.nodeType}: ${el.looks.map((l) => l.name).join(', ') || 'none'}`);
       if (spellOut && !spellOut.has(el.nodeType)) continue;
-      for (const variant of el.variants) {
-        const styles = el.variantStyles[variant];
-        if (styles && Object.keys(styles).length > 0) {
-          lines.push(`    · ${variant}: ${formatStyleMap(styles)}`);
+      if (Object.keys(el.defaults).length > 0) {
+        lines.push(`    defaults: ${formatStyleMap(el.defaults)}`);
+      }
+      for (const look of el.looks) {
+        if (Object.keys(look.parameters).length > 0) {
+          lines.push(`    · ${look.name}: ${formatStyleMap(look.parameters)}`);
         }
       }
     }
@@ -333,9 +452,14 @@ function formatCompositionParams(composition: VocabComposition): string {
     .join(', ');
 }
 
-function formatStyleMap(styles: Record<string, string>): string {
+/**
+ * `prop=value, prop=value`. Values arrive as `unknown` for a project's own Looks, whose parameters
+ * are whatever a person set on a node — a number, a boolean, an object for a colour with an alpha —
+ * so they are stringified rather than assumed to be CSS strings.
+ */
+function formatStyleMap(styles: Record<string, unknown>): string {
   return Object.entries(styles)
-    .map(([k, v]) => `${k}=${v}`)
+    .map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`)
     .join(', ');
 }
 

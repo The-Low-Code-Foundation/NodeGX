@@ -22,7 +22,8 @@ import {
   renderStyleVocabulary,
   type StyleTokenRecord,
   type StyleTokensData,
-  type TokenCategory
+  type TokenCategory,
+  type VocabProjectLook
 } from '../editor-deps';
 import { applyPresetFonts } from '../presetFontFiles';
 import { ToolError } from '../errors';
@@ -91,7 +92,10 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
       title: 'Get style vocabulary',
       description:
         "This project's design system: design tokens by category (semantic colours, spacing, typography, " +
-        'radius, borders, shadows), the legal variants/sizes per element type, and the named COMPOSITIONS — ' +
+        // P94 STY-002 AC6. 🔴 Says the new thing in FEWER characters than the old line, because the
+        // resident surface has 5 tokens of headroom: naming Looks at the old length read 8,285 of the
+        // 8,280 budget (`toolDisclosure`), and a budget is not answered by raising it.
+        'radius, borders, shadows), its Looks and the shipped Look library, and the named COMPOSITIONS — ' +
         'ready-made parameter sets for a card, a shell, a section head, the buttons and the type ramp, each ' +
         'naming the recipe that shows it assembled, the icon sets installed here with a copyable ' +
         'iconIconSource value, and the bundled stock photographs. ' +
@@ -107,7 +111,7 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
     },
     guarded((args: { detail?: 'full' | 'prompt' }) => {
       const store = binding.require();
-      const vocab = buildStyleVocabulary(store.designTokenMetaSource());
+      const vocab = buildStyleVocabulary(store.designTokenMetaSource(), readProjectLooks(store));
 
       // VIB-003. Read here rather than inside `buildStyleVocabulary`: that function is pure and
       // takes a token source, while the installed sets are a fact about a directory on disk. The
@@ -128,6 +132,44 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
       return jsonResult({ ...vocab, icons, imagery });
     })
   );
+}
+
+/**
+ * P94 STY-002 AC6 — the Looks this project holds.
+ *
+ * Read here rather than inside `buildStyleVocabulary` for the reason `icons` and `imagery` are:
+ * that function is pure and takes a token source, while what a project holds is a fact about a
+ * directory on disk.
+ *
+ * 🔴 **Both spellings of the second key are accepted, and this phase has three scars that say why.**
+ * The sidecar's keys are `colors` / `textStyles` / `variants`; the legacy `metadata.styles` shape
+ * spells the second one `text`, and `VariantModel.toJSON` spells state parameters `stateParamaters`
+ * (sic). STY-001 read a wrong key twice in one session and reported a populated project as empty
+ * both times. An absence here must mean an absence.
+ *
+ * Returns `undefined` — not `[]` — when the project has no styles file at all, so that
+ * "nothing to report" and "no Looks" stay different readings on the wire.
+ */
+function readProjectLooks(store: ProjectStore): VocabProjectLook[] | undefined {
+  const styles = store.readStyles();
+  if (styles === undefined) return undefined;
+
+  const variants = Array.isArray(styles.variants) ? styles.variants : [];
+  return variants
+    .filter((v) => typeof v?.name === 'string' && typeof v?.typename === 'string')
+    .map((v) => {
+      const states = Object.keys(
+        (v.stateParameters as Record<string, unknown> | undefined) ??
+          ((v as Record<string, unknown>).stateParamaters as Record<string, unknown> | undefined) ??
+          {}
+      );
+      return {
+        name: v.name,
+        typename: v.typename,
+        parameters: (v.parameters ?? {}) as Record<string, unknown>,
+        ...(states.length > 0 ? { states } : {})
+      };
+    });
 }
 
 /** Write tools — only when --allow-writes. */

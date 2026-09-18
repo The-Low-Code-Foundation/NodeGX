@@ -211,9 +211,9 @@ The board in `README.md` §5 was scoped against the old model. Revised:
 | id | task | state |
 |---|---|---|
 | STY-001 | The study and the verdict | 🟢 done |
-| [STY-002](./STY-002-THE-LOOK-MODEL.md) | **The Look model** — one concept end to end: the data, shipped-Look library, "save as a Look", `Preset`/`Size` removed | ⬜ **task file written (s3)**, 7 ACs, measurements at HEAD |
+| [STY-002](./STY-002-THE-LOOK-MODEL.md) | **The Look model** — one concept end to end: the data, shipped-Look library, "save as a Look", `Preset`/`Size` removed | 🟡 **model built and gated (s4, `0ef525ae`)** — AC3 ✅, AC2/AC4 model halves green (27 tests), and the reload defect that made a Look unsavable is fixed. AC1/AC5/AC6/AC7 open; the library is **22 Looks, not 23** |
 | [STY-003](./STY-003-THE-PROPERTY-PANEL.md) | **The property panel** — §2's four rules and §3's three states. This is the "clear AF" task | ⬜ **task file written (s3)**, 8 ACs, closes on Richard's look |
-| [STY-004](./STY-004-EXPORT-CARRIES-LOOKS.md) | **Export carries Looks** (§6) | 🟡 **Part A done (s3)** — nothing vanishes any more: the exporter reads `nodegx.styles.json`, carries `node.variant`, resolves the runtime's own cascade, and names every Look in the report. AC1–AC7 green. **Part B — one shared class per Look across components — is the number: one further session** |
+| [STY-004](./STY-004-EXPORT-CARRIES-LOOKS.md) | **Export carries Looks** (§6) | 🟡 **Part A done, committed and the corpus golden regenerated (s3+s4, `a6335ef1`)** — nothing vanishes any more: the exporter reads `nodegx.styles.json`, carries `node.variant`, resolves the runtime's own cascade, and names every Look in the report. AC1–AC7 green. **Part B — one shared class per Look across components — is the number: one further session** |
 | STY-005 | **The Styles panel in the rail** — colours, text, Looks, as ruled in R1/R3–R6 | ⬜ |
 | STY-006 | **Where it's used** — a Look names what wears it and takes you there | ⬜ |
 | STY-007 | **The after picture** — before/after of every surface, both themes, Richard's WORTHY | ⬜ |

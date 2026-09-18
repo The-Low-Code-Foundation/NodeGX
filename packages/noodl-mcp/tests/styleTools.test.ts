@@ -65,8 +65,84 @@ describe('AIX-006 style MCP tools', () => {
     expect(tokenNames).toContain('--space-4');
     const button = data.elements.find((e) => e.nodeType === 'net.noodl.controls.button');
     expect(button).toBeDefined();
-    expect(button!.variants).toContain('primary');
+    // P94 STY-002 AC6: the shipped library is Looks now — named as a person reads them, and each
+    // one self-contained (the config `defaults` are in it, not only the variant's own properties).
+    expect(button!.looks.map((l) => l.id)).toContain('primary');
+    const primary = button!.looks.find((l) => l.id === 'primary')!;
+    expect(primary.name).toBe('Primary');
+    // A Look lists what it CHANGES…
+    expect(primary.parameters.backgroundColor).toBe('var(--primary)');
+    // …and the type's floor is reported once, beside it, rather than 6 times over the library.
+    expect(primary.parameters.borderRadius).toBeUndefined();
+    expect(button!.defaults.borderRadius).toBe('var(--radius-md)');
     expect(data.presets.map((p) => p.id)).toContain('minimal');
+  });
+
+  /**
+   * P94 STY-002 AC6 — what this tool teaches about the one surviving style concept.
+   *
+   * 🔴 The sentence this replaces was **false of the concept that survives**: it said variants "are
+   * stamped into concrete params at author time (the viewer does not expand them)", which is true of
+   * the `_variant` preset marker and false of a Look, which the viewer merges on every render. An
+   * agent reading the old text had no reason to believe a project's Looks meant anything.
+   */
+  it('reports the Looks the project itself holds, both key spellings of their states', async () => {
+    fs.writeFileSync(
+      path.join(projectDir, 'nodegx.styles.json'),
+      JSON.stringify({
+        $schema: 'https://opennoodl.dev/schemas/styles-v2.json',
+        version: 1,
+        colors: { Brand: '#7c3aed' },
+        variants: [
+          {
+            name: 'Card',
+            typename: 'Group',
+            parameters: { backgroundColor: 'var(--card)', borderRadius: 'var(--radius-lg)' },
+            stateParameters: { hover: { backgroundColor: 'var(--accent)' } }
+          },
+          // the legacy spelling `VariantModel.toJSON` writes — an absence here must mean an absence
+          {
+            name: 'Pressable',
+            typename: 'net.noodl.controls.button',
+            parameters: { backgroundColor: 'var(--primary)' },
+            stateParamaters: { pressed: { transform: 'scale(0.98)' } }
+          }
+        ]
+      })
+    );
+    const fresh = await connect(projectDir, true);
+    await reveal(fresh, 'theme');
+    try {
+      const { data } = await call<StyleVocabulary>(fresh, 'get_style_vocabulary', {});
+      expect(data.projectLooks?.map((l) => `${l.name}/${l.typename}`)).toEqual([
+        'Card/Group',
+        'Pressable/net.noodl.controls.button'
+      ]);
+      const card = data.projectLooks!.find((l) => l.name === 'Card')!;
+      expect(card.parameters.borderRadius).toBe('var(--radius-lg)');
+      expect(card.states).toEqual(['hover']);
+      // read through the legacy key, which is the one the editor actually writes
+      expect(data.projectLooks!.find((l) => l.name === 'Pressable')!.states).toEqual(['pressed']);
+
+      const { data: prompt } = await call<{ vocabulary: string }>(fresh, 'get_style_vocabulary', {
+        detail: 'prompt'
+      });
+      expect(prompt.vocabulary).toContain("THIS PROJECT'S LOOKS");
+      expect(prompt.vocabulary).toContain('Card · Group');
+      // and the shipped library is no longer taught as "variants & sizes"
+      expect(prompt.vocabulary).toContain('SHIPPED LOOKS');
+      expect(prompt.vocabulary).not.toContain('ELEMENT VARIANTS & SIZES');
+    } finally {
+      await fresh.close();
+    }
+  });
+
+  it('a project with no styles file reports no Looks field at all, rather than an empty one', async () => {
+    // "nothing to report" and "this project has no Looks" are different readings, and this phase
+    // has already reported a populated project as empty twice from a wrong key.
+    expect(fs.existsSync(path.join(projectDir, 'nodegx.styles.json'))).toBe(false);
+    const { data } = await call<StyleVocabulary>(session, 'get_style_vocabulary', {});
+    expect('projectLooks' in data).toBe(false);
   });
 
   it('get_style_vocabulary detail=prompt returns the compact block', async () => {
@@ -224,6 +300,17 @@ describe('AIX-006 style MCP tools', () => {
       // tasks whose authors never run this package, and a gate that only says "within budget"
       // hides the trend the comment above says to watch. Read 2026-09-11, before FLD-005's
       // thirteen `sizeMode` lines: 4,032 / 13,869. After: 4,110 / 13,989.
+      // P94 STY-002 AC6 (2026-09-18): **4,224 / 14,253**, from 4,110 / 13,989. The block became the
+      // shipped **Look** library, gained "this project's Looks", lost the sizes half, and stopped
+      // teaching three properties no node has a port for (`cursor`, `flexGrow`, `flexShrink` — see
+      // `NO_SUCH_PORT`), which is the -14 / -28 between this reading and the one before that fix.
+      //
+      // 🔴 **The first shape of that change did NOT fit, and the gate is the only reason it was
+      // rewritten rather than the ceiling raised.** Emitting each Look complete — the element type's
+      // `defaults` merged into all 22 of them — read **5,023 / 15,741**, over both ceilings, because
+      // it repeats a Button's padding and radius six times and a Text's twelve. Reporting `defaults`
+      // once per element type and each Look as the delta it actually is costs the readings above.
+      // A red count gate is answered by counting the artefact, never by bumping the literal.
       // eslint-disable-next-line no-console
       console.log('        BUDGET READING prompt=' + promptTokens + ' full=' + fullTokens);
       expect({
