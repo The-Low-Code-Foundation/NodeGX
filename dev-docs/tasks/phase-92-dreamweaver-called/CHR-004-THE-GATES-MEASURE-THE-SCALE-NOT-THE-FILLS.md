@@ -525,16 +525,40 @@ the finding clear on the rendered surface. Not run here — P93 held the box and
 and two dev stacks do not coexist. **Until it is, §8's `Icon`-node row is "fixed at the token level",
 not "green"** ([[verify-the-consequence-not-just-the-mechanism]]).
 
-### 9.2 §3.3 — Richard ruled it IN
+### 9.2 §3.3 — asked badly, re-asked from §7.7, and CLOSED
 
-Asked as *"18 places check a CSS class name instead of what a person sees; the styles-panel phase is
-about to rework the pickers where several of them sit."* Options put: rewrite only the ones in P94's
-way, leave them all and close the row, or rewrite all 18. **He ruled: rewrite all 18.**
+🔴 **The first question I put to Richard described §3.3 from the task's headline and not from §7.7,
+which had already measured it — and he ruled on that description.** The headline says *"18 places
+check a CSS class name"*. §7.7 says that is two different things and neither is 18:
 
-So AC4 is live work, not a question — `groupHeading`, `portHint`, `bindingChipRows`, `nodeCommentRow`
-and the `:global(.sidebar-property-editor)` hook in `PropertyPanelInput.module.scss:76`, per §3.3.
-Every behavioural assertion is kept; only the class-name ones move to behaviour or a `data-test`
-attribute the component owns. The `expect(` counts to beat are §7.7's **18 / 24 / 24 / 36**.
+- The **class-name assertions** are `byClass(node, '<product class>')`, **the house style of this
+  runner: ~180 call sites across ~40 spec files**, documented in `renderElements.ts`. Converting the
+  four §3.3 names would leave the codebase *less* consistent, not more.
+- The **18** is the `:global(.sidebar-property-editor)` removal — 18 call sites that would each need
+  to opt in, because `showPopout` appends rows into the popup layer, **outside** that selector.
+  Dropping the hook without the opt-in gives every popout row a 118px label column, a 30px
+  min-height and absolutely-positioned gutter dots: a look change to four surfaces (colour picker,
+  code editor, curve editor, image picker) Richard has never been shown.
+- The one item §7.7 called *genuinely worth fixing and small* — `portHint.test.ts`'s stale
+  `'property-row'` literal — **is already fixed**; the sentinel is neutral and its comment says why.
 
-🔴 **Do this before P94 reworks the pickers, not after** — that is the argument he ruled on, and it
-expires when P94 starts.
+So his first answer (*"rewrite all 18"*) was given about work that does not exist in that shape.
+**Re-asked in those measured terms, he ruled: close the row — it is priced and not worth it.**
+
+✅ **§3.3 / AC4 is CLOSED as measured-and-declined, not as done.** What it was really protecting —
+that a redesign must not redden a test about a fill, and that a control must clear its contrast — is
+what §8's rendered look gate now measures. If P94 reworks the pickers it will be inside that popout
+geometry anyway, and **that** is the cheap moment to take the opt-in, with Richard looking at the
+four surfaces.
+
+🔴 **The lesson, and it is the third time this repo has paid for it:** a task's headline is a
+session's summary of its own reading; §7.7 was the measurement. Asking Richard from the headline
+spent one of his rulings on a fiction ([[measure-the-artefact-before-believing-the-task-file]],
+[[a-recommendation-carries-a-measurement-of-some-property-not-the-right-one]]).
+
+### 9.3 What CHR-004 still has open
+
+⬜ **A popout surface for the look gate** (§8's last line) — unchanged and still the one that
+matters: the icon, colour and text-style pickers and the variants popup are where two of this
+phase's last three defects were, and the gate cannot see them.
+⬜ **The look-gate re-run** for §9.1's swatch fix.

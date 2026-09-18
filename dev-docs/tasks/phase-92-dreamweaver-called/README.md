@@ -11,7 +11,7 @@ matters now lives in each task's own §, which is where a session should read it
 | CHR-001 | ✅ | the baseline every later number is read against |
 | CHR-002 | ✅ | Richard: *"looks good"* |
 | CHR-003 | ✅ | — |
-| CHR-004 | 🟡 | **AC4 / §3.3 is now WORK, not a question — Richard ruled 2026-09-18: rewrite all 18** class-name assertions, and **before P94 reworks the pickers** (§9.2). Also open: **a popout surface for the look gate** (§8's last line) — the icon, colour and text-style pickers and the variants popup draw outside `.sidebar-property-editor`, so the gate cannot see where two of this phase's last three defects were. ✅ §8's swatch-edge finding is **built** (§9.1); its look-gate re-run is owed |
+| CHR-004 | 🟡 | ✅ **AC4 / §3.3 CLOSED 2026-09-18 as measured-and-declined** — the "18" was never 18 tests, and re-asked from §7.7's measurement Richard ruled *close the row* (§9.2). ✅ §8's swatch-edge finding **built** (§9.1). Left: **a popout surface for the look gate** — the pickers and the variants popup draw outside `.sidebar-property-editor`, so the gate cannot see where two of this phase's last three defects were; and the look-gate **re-run** for the swatch fix |
 | CHR-005 | ✅ | — |
 | CHR-006 | ✅ | Richard: **WORTHY** |
 | CHR-007 | ✅ | built s4, invisible by design |
@@ -247,12 +247,12 @@ phase's open questions:**
 
 1. **CHR-011's eight pictures** — blocked on a packaged build of a clean HEAD; he ruled *wait until
    the machine is free*. Everything else CHR-011 owes is done.
-2. **CHR-004 §3.3** — *rewrite all 18* class-name assertions, and before P94 reworks the pickers.
+2. **CHR-004** — §3.3 is **closed** (measured and declined); what is left is **a popout surface for
+   the look gate**, and a re-run of the gate over the swatch fix.
 3. **CHR-008 §3.1** — *fix undo and convert all 37* widgets, the undo re-seed defect first.
 
-🔴 **Neither 2 nor 3 is a question any more, and neither is small.** This phase's close condition is
-CHR-011's two WORTHY verdicts; 2 and 3 are ruled work that will outlive it, so a session that closes
-the phase must hand them on rather than let them read as closed with it
-([[an-unowned-row-gets-rediscovered-at-full-price]]).
+🔴 **3 is ruled work that will outlive this phase.** The close condition is CHR-011's two WORTHY
+verdicts, so a session that closes the phase must hand CHR-008 on rather than let it read as closed
+with the phase ([[an-unowned-row-gets-rediscovered-at-full-price]]).
 
 Not when the suite is green. It was green on the day this was scoped.
