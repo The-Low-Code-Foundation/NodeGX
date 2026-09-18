@@ -237,6 +237,15 @@ that created the state it had already passed. It was caught on the second consec
 two consecutive runs *with no rebuild between them*, because a reload resets React state and would
 have proved the remount rather than the fix ([[a-control-pair-proves-what-you-varied-only]]).
 
+⚠️ **The same shape is still on a Layers ROW's `onMouseUp`** (`LayersTree.tsx`), and it was left
+alone deliberately. There the hook calls `PopupLayer.dragCompleted()` and `endDrag()` itself, so no
+*state* is stranded; what is stranded is `PopupLayer`'s `dragListeners.abort()`, which means the
+body-level `mousemove` that carries the drag ghost keeps running until the next drag replaces it.
+One leaked listener, invisible, and fixing it costs a re-drive of two green suites — so it is
+written down rather than changed. The rule is the general one: **before `stopPropagation()` in a
+mouse-up that ends a drag, name the handler you are stopping. If you cannot name one, do not stop
+it.**
+
 ### 8.3 What the instrument got wrong, and what was over the panel
 
 - A row's `textContent` carries its usage meta as well as its name, so the drive compared the
@@ -282,7 +291,14 @@ bitten by ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
 | 3 | driven for a move, for ⌥↓ and for the strip's placement — one ⌘Z each |
 | 4 | **driven by a spy** on `NodeOperations.createNewNode`: one call, `{parent: <page id>, index: 3}` |
 | 5 | **10 shots taken**, both themes, in `verdicts/TVW-005/2026-09-18` — **Richard rules** |
-| 6 | `test:ci` — run at the end of s17 |
+| 6 | ✅ **2985 specs, 8 failures, seed 19733, HEAD `1d342bc6` — the floor BY NAME** (2 NDA-017, 3 SUB-006, 3 SUB-011), readout mtime checked, none mine |
+
+⚠️ The `test:ci` run at 21:22 is the **second** attempt. The first exited 1 having compiled nothing:
+the editor's `test:ci` webpack typechecks `tests/ai/**`, and the checkout held a peer's in-flight
+`VocabElement` change that spec had not caught up with
+([[the-editor-test-ci-webpack-typechecks-a-sibling-packages-tests]]). Reported with file:line, fixed
+by them, re-measured here. ⚠️ **The harness reported that first run as exit 0** while the log ended
+`TESTCI_EXIT=1` — gate on the number in the log.
 
 **Q1 — AC5, the verdict.** Five states, two themes each: the 2px line above a row, the line below,
 the `primary-bg` fill for a reparent, and the tab strip armed and hovered. ⚠️ Worth a hard look at

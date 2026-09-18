@@ -1,9 +1,10 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 16.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
-s12–13 built and closed TVW-002; s14–15 built and drove TVW-004. **s16 closed TVW-004 AC5 (10/10
-arms, no product code changed) and built and drove the first slice of TVW-005 — a drag in Layers
-now reorders the page, and the drive found the defect that stopped it starting at all.**
+**Written 2026-09-18, end of session 17.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
+s12–13 built and closed TVW-002; s14–16 built TVW-004 and the first slice of TVW-005. **s17 built
+and drove the drop-target strip on the Layers tab header — the one row of TVW-005 §2 with no code
+behind it — closed AC4 with a spy, took AC5's ten photographs, and measured that AC1's preview half
+is blocked by something that is not this phase's.**
 
 ## The board, re-derived from the task files
 
@@ -12,114 +13,124 @@ now reorders the page, and the drive found the defect that stopped it starting a
 | TVW-001 | The panel tells the truth | ✅ | **CLOSED — all 8 ACs** |
 | TVW-002 | The preview says what it is not showing | ✅ | **CLOSED — all 7 ACs** |
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
-| TVW-004 | Layers | ✅ | **AC1–5 and AC7 green. AC6 captured — Richard's verdict is the only thing left** |
-| TVW-005 | Layers can move things | **slice 1** | **9/9 arms.** AC1 needs the tab-header drop strip; AC5's shots and AC6's `test:ci` not yet taken as the task's own |
+| TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6 captured — Richard's verdict is all that is left** |
+| TVW-005 | Layers can move things | **slice 1 + 2** | **25 arms held** (10/11 + 15/15). AC2/3/4 closed. AC6 ✅. **AC1's preview half RED (§9) · AC5 with Richard** |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
 | TVW-008 | The board (needs 002) | — | — |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 39** (33 + TVW-004 AC5, + TVW-005's AC2 decision half and AC3, driven).
+**ACs closed: 40** (39 at s16, + TVW-005 AC4; TVW-005 AC2 is now whole — its drive half landed).
 
 ## Start here
 
-1. 🔴 **AC6 is still owed to Richard, and it is the only thing between TVW-004 and closed.** Seven
-   of the twenty shots were sent to him in s16 (the five states in dark at 298px, plus
-   `3-selected--light--238px` and `2-editing--light--238px`, which carry the two questions). The
-   PNGs are gitignored, so they have to be *sent*, not linked. The questions are in
-   `verdicts/TVW-004/2026-09-18/manifest.json` under `whatToLookAt` and in TVW-004 §9.
-2. **Finish TVW-005.** In dependency order:
-   - the **drop-target strip on the Layers tab header** (§2 row 4, §6) — the one §2 row with no code
-     behind it, and what AC1's third sentence drives;
-   - the **preview half of AC1** — the reorder is read in the model today, not in the viewer's DOM.
-     `drive-tvw004-ac2.js` already walks the viewer's tree through `noodlNode`; reuse it rather than
-     writing a third walk;
-   - **AC4** — assert the placement goes through `NodeOperations.createNewNode` by spying it, not by
-     comparing results. The `placement` parameter is already on that door.
-   - **AC5's shots** of the three indicators, both themes, for Richard.
+1. 🔴 **Two things are owed to Richard and neither can be done by anyone else.** They were sent
+   together at the end of s17 — if he has answered, act on the answers first:
+   - **TVW-004 AC6** — the twenty shots in `verdicts/TVW-004/2026-09-18`, questions in its
+     `manifest.json` under `whatToLookAt` and in TVW-004 §9. It is the only thing between TVW-004
+     and closed.
+   - **TVW-005 AC5 + the §2 question** — the ten shots in `verdicts/TVW-005/2026-09-18` and the two
+     questions in TVW-005 §10. ⚠️ The second one is a *design* question, not a verdict: §2 says the
+     tab must not switch during the drag, which rules out the gesture AC1's third sentence
+     describes. What got built is the other reading. His call decides whether AC1 is already met.
+2. 🔴 **AC1's preview half is red and it is NOT this phase's to fix — do not inherit it by accident.**
+   TVW-005 §9 has the three measurements. Short version: a reorder made straight against
+   `NodeGraphModel.detachNode`/`attachNode` — *the calls `NodeOperations` makes for a canvas drag* —
+   leaves the preview unchanged, while a spy on `ViewerConnection.send` shows the editor does send
+   `nodeDetached` + `nodeAttached` with the right `childIndex`. The runtime has the whole chain for
+   it (`editormodeleventshandler.ts:213` → `ComponentModel.setNodeParent` → `nodescope.ts:464` →
+   `NodeScope.insertNodeInTree`). **Which link drops it is not measured** — that is the first thing
+   to measure, and it wants its own row, in this phase or a runtime one. It is worth a row: it means
+   **no programmatic move of a node is visible in the preview**, including the canvas's own drag.
 3. Then **TVW-006** (the structure lane) or **TVW-007**, neither of which is blocked.
 
-## What s16 found
+## What s17 found
 
-**AC5 did not need what §8.2 said it needed.** Not a fresh renderer per component kind — a
-**launcher round trip**: `route({to:'projects'})` and back remounts `EditorPage`, so `chosenTab` is
-`null` again. ~20s, no webpack race, and it is a door a person has. Two things the first pass would
-have got away with, both now in the drive:
+🔴 **`stopPropagation` on the drop killed the cleanup everybody else's drag relies on.** The strip's
+`onMouseUp` stopped propagation, for tidiness — nothing else wants that mouse-up. React dispatches
+from the root container, so stopping there stops the **native** event before `body`, and `body` is
+where `PopupLayer` ends its own drag and where the panel clears the state that draws the strip. One
+drop left the strip **armed for the life of the panel**.
 
-- **The canvas comes back where it was left**, so three of the four readings began on the tab they
-  expected. Each subject is **primed** on a component whose default is the other tab, so the arm
-  watches the tab *arrive*.
-- The four subjects are classified off **`project.json`**, not off `buildKindIndex` — which is the
-  pipeline the tab decision itself reads. The runtime's kind is a **precondition**: the
-  unplaced-visual arm goes UNGRADED if the runtime calls it a logic component, because then
-  `Components` would be the right answer for the wrong reason.
+⚠️ **Two things about how it was caught, because both will recur:**
+- It is **invisible inside a single run**. The drive's at-rest control is its first arm and had
+  already passed on the run that created the state. It took a **second consecutive run**
+  ([[a-post-drive-control-reads-the-state-the-drive-leaves]]).
+- The fix then had to be proved on **two consecutive runs with no rebuild between them**. A green
+  first arm after a reload proves the remount, not the fix
+  ([[a-control-pair-proves-what-you-varied-only]]). The first "it's fixed" reading here was exactly
+  that, and it was wrong — the renderer was still running the pre-edit bundle.
 
-**🔴 TVW-005's drag would not start if you moved down.** The 5px threshold was measured inside the
-pressed row's own `onMouseMove` — the Components tab's own pattern, so it looked like the house
-style. A Layers row is 26px: press in the middle, move 13px *down*, and the next mouse event belongs
-to the row below, which has no press to compare against. Measured, not reasoned: `(x+10, y+10)` left
-`PopupLayer.isDragging()` **false** with all three handlers bound. It is watched on the **window**
-now. ⚠️ `ComponentItem.tsx` still has the row-local version.
+🔴 **webpack-dev-server's overlay is an `about:blank` iframe the size of the window at
+z-index 2147483647.** While it is up, every row in the panel is drawn and none of them can be
+pressed. Two arms went UNGRADED on it before the drive learned to wait it out. The reachability
+guard is what caught it — it reported *drawn but not reachable*, which is what it is for.
 
-**The instrument was wrong twice before it measured anything.**
-- A row scrolled out of the panel answers `getBoundingClientRect()` with plausible coordinates and a
-  press there lands on `<html>`. Two runs read as *the drag will not start*. The drive collapses the
-  siblings, scrolls into view, and refuses unless `elementFromPoint` lands inside the row.
-- The refusal arm's first version guessed the drag-message selector, found nothing, and could not
-  tell a silent build from its own bad selector. It reads `.popup-layer-drag-message` now, and the
-  **legal drag that shows no message** is the first row of the table so the absence has a
-  known-firing signal beside it.
+⚠️ **A row's `textContent` is not its name.** It carries the usage meta too, so the drive compared
+the product's correct sentence against `"GTM - Send Page Viewunplaced has no screen…"` and called a
+green build red. The name comes off the `title` attribute now. First drives find instrument faults
+([[a-new-instruments-first-drive-finds-instrument-faults]]) — this was the third of them.
 
-**Filed, not fixed:** §2 of TVW-004 says the tab is *"remembered per session, not per project"*. It
-is remembered per project **visit** — `chosenTab` is `useState` and `EditorPage` unmounts on the way
-to the launcher. It does not block AC5, whose sentence is the default and the flip. TVW-004 §9.4 has
-the fix and the warning that doing it breaks the drive's own cold start.
+## What the strip is, in one paragraph
 
-## The model traps TVW-005 is built around
+The two tabs are exclusive: a component row and the rows it could be dropped between are **never on
+screen together**, so without a target on the tab header there is no gesture at all. §2 rules out the
+other way to build it in its own sentence — *"the tab does not switch during the drag"* — so the
+strip is a **destination, not a spring-loaded doorway**. A drop places the component at the end of
+the screen's root and opens Layers with the new row selected; moving it from there is ⌥↑/⌥↓ or a
+second drag, both of which slice 1 already built. 🔴 The root it lands in is the first row the
+**canvas's** component owns, which is rarely the top of the tree — the app shell is drawn above every
+band, so "the top of Layers" is `/App`, on every page at once.
 
-Read §6.1 of the task before touching the applier. In short: `attachNode` **silently no-ops** unless
-the child is a root (detach first, resolve the index after); `NodeOperations.attachNode/detachNode`
-**record no undo at all** outside a canvas drag; an `UndoActionGroup` *constructed* with `do`/`undo`
-cannot be undone; and a plan must name an **anchor**, never an index, because the tree draws visual
-nodes only.
+## Gates at s17
 
-## Gates at s16
+- `tests-unit/tvw-003` + `tvw-004` + `tvw-005` — **7 suites / 103 specs, green.** tvw-005 is 22 specs
+  (15 + 7 new), and the seven were mutation-tested: **4 mutants, each caught**. ⚠️ One proposed
+  mutant was *equivalent* (it moved a computation, not a decision) and had to be rewritten as the
+  real ordering swap before it meant anything.
+- `tsc -p packages/noodl-editor --noEmit` **0**.
+- `tsc -p packages/noodl-editor/tsconfig.tests.json --noEmit` — **three errors, all a peer's**:
+  `tests/ai/authoring-style.test.ts:116,117,119` read `variants` / `sizes` / `variantStyles` off
+  `VocabElement`, which **P94 STY-002 removed** (the type's own comment at `StyleVocabulary.ts:95`
+  says so). Both files were **uncommitted working-tree edits** at the time.
+- ✅ **`test:ci` — 2985 specs, 8 failures, seed 19733, HEAD `1d342bc6`: THE FLOOR BY NAME**
+  (2 NDA-017, 3 SUB-006, 3 SUB-011), readout mtime checked against the clock, **none of them mine**.
+  TVW-005 AC6 is closed.
+- 🔴 **The first attempt exited 1 without running a single spec**, for the reason above: the editor's
+  `test:ci` webpack **typechecks `tests/ai/**`**, so it compiles a sibling's in-flight edit
+  ([[the-editor-test-ci-webpack-typechecks-a-sibling-packages-tests]]). Reported to `opennoodl-ec`
+  with file:line; fixed by them within the hour and re-measured here.
+- ⚠️ **The harness reported the `test:ci` run as exit 0 while the log ended `TESTCI_EXIT=1`.** The
+  `echo "TESTCI_EXIT=$?" | tee -a` is what caught it. Gate on the number in the log, never on the
+  run list ([[a-run-list-is-not-a-log]]).
 
-`test:ci` **2985 specs, 8 failures, seed 99341, HEAD `061d03f4` = the floor BY NAME** (3 SUB-006,
-3 SUB-011, 2 NDA-017), none mine — a **tenth** agreeing seed, from a readout whose mtime was checked
-(14 seconds old). ⚠️ The log ends `lerna ERR! exited 1` while the harness reported 0, again: **read
-the log and the JSON, never the status.** `tsc --noEmit` **0**. `tests-unit/tvw-004` + `tvw-005`
-**3 suites / 56 specs**; tvw-005 is 15 specs with **8 mutants, each caught**.
+## The drives
 
-🔴 **`test:main` is 496/498 and the two reds are NOT this phase's** — and they are worth knowing
-about, because they are the shape the harness memory warns of: a peer's additive runtime change
-(P96's `net.noodl.ParseFeed` / `net.noodl.ParseXML`, commit `c3754c6e1`) passed its own package's
-suite and reds two **editor** gates that only a whole-repo run reaches —
-`tests-unit/alpha-006/nodeDocs.test.ts:139` (every catalog node owes a docs page) and
-`tests-unit/chr-007/widgetDispatch.test.ts:301` (the dispatch map must cover the catalog). Reported
-to `opennoodl-62` with the file:line, **fixed by them in `09b286e69`, and re-measured here after
-their commit: both suites 28/28 green.** Neither was a defect in the nodes — both were
-regenerations that a per-package run gives no reason to do (`docs:nodes` for the pages,
-`CHR007_WRITE_SNAPSHOT=1` for the port-class map).
+| script | what it is for |
+|---|---|
+| `drive-tvw005-drag.js` | slice 1's gesture + AC1's preview half. **10/11**; the red is §9's runtime defect |
+| `drive-tvw005-strip.js` | the tab-header strip. **15/15, twice back to back** |
+| `shots-tvw005-indicators.js` | AC5's ten photographs, both themes, page proved byte-identical after |
 
-⚠️ **The lesson is the one to keep, because it will recur:** a new node type owes two *editor*
-artefacts, and the package suite that proves the node works cannot see either. ⚠️ Their regeneration
-also swept up a `keepsFocus` row on the button docs page that **GAM-027 (`238c455e9`) should have
-written and did not** — it updated `node-catalog.json` and the widget snapshot but neither the
-enriched catalog nor the docs pages. Nothing of this phase's is involved in either.
+All three take `--dir`; the fixture is a **copy**, `NodeGX test projects/TVW-005 s17 Strip`
+(s16's `TVW-004 s15 Drive`, copied). ⚠️ One probe left a stray `Divider` in it during s17 and it was
+removed from `project.json` by hand — if a run ever starts from four children, that is what happened.
 
 ## The box
 
-s16 left it **free** and said so to `opennoodl-ec` and `opennoodl-62`. 62 is on P96 (backend feeds)
-and added two suites — `noodl-runtime/test/fed-001-feed.test.ts` and
-`nodegx-backend/tests/cloud-feed-nodes.test.ts` — which a `test:main` run now picks up. ec is on
-P94/STY-004 (nodegx-export unit tests). Announce before launching `dev`.
+s17 launched the editor, announced it to `opennoodl-ec` and `opennoodl-62`, and **left it down**.
+62 is on P96/FED-002 (backend + runtime) and is **holding `test:main` until pinged**. ec is on
+P94/STY-002-004 and wants the box for an STY-003 drive. Announce before launching `dev`, and tell
+both when you are done.
 
 ## Committing
 
-🔴 The working tree carries **three** other sessions' work — P78's TPL-009, P94's STY-001/STY-004
-and P96's directory. Commit by explicit pathspec, `git add` untracked files first, and put
-`-F <file>` **before** the `--`. s16's commits are `31d89a153`, `ea3ee7a5d`, `061d03f48`.
+🔴 The working tree carries **three** other sessions' work — P78's TPL-009, P94's STY-002/004 (which
+includes `StyleVocabulary.ts` and `tests/ai/authoring-style.test.ts`) and P96's FED-002. Commit by
+explicit pathspec, `git add` untracked files first, and put `-F <file>` **before** the `--`.
+⚠️ `scripts/devtools/` holds a peer's untracked census script — never `git add` that directory.
+s17's commit is `1d342bc67`.
 
-🔴 **Verdict PNGs are gitignored** (`.gitignore:265`). The tracked artefact is `manifest.json`.
+🔴 **Verdict PNGs are gitignored** (`.gitignore:265`). The tracked artefact is `manifest.json`, and
+the shots have to be **sent** to Richard, not linked.
