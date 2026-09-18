@@ -31,6 +31,7 @@ import { BackendServicesPanel } from './views/panels/BackendServicesPanel/Backen
 import { installBackendSurfacePanels } from './views/panels/BackendServicesPanel/LocalBackendCard/backendSurfaces';
 import { ComponentPortsComponent } from './views/panels/componentports';
 import { ComponentsPanel } from './views/panels/componentspanel';
+import { PANEL_TITLE } from './views/panels/ComponentsPanelNew/layersTab';
 import { ComponentXRayPanel } from './views/panels/ComponentXRayPanel';
 // DataLineagePanel retired from reach (DEBT-012) — registration below is dead;
 // import kept commented so the panel code (one release cycle) still compiles.
@@ -101,7 +102,12 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     // the divider — and the canvas with it — on every select and deselect. It
     // used to declare 280 against the Properties panel's implicit 328, which
     // jittered the canvas 48px. Both now take DEFAULT_PANEL_WIDTH.
-    name: 'Components',
+    /**
+     * TVW-004 (R-E) — the rail entry is titled after the **thing**, not after one of its two
+     * views: the panel now holds `Layers` and `Components` as tabs, and naming the rail after one
+     * of them would say the other is somewhere else. `PANEL_TITLE` is the one copy of the word.
+     */
+    name: PANEL_TITLE,
     order: 1,
     icon: IconName.Components,
     onOpen: () => {

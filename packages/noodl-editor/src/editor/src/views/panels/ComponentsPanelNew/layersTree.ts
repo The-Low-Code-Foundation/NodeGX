@@ -181,6 +181,17 @@ export interface LayersOptions {
   components: LayersIndex;
   /** How a component's name is shortened for a row — `benchTargetLabel` in the editor. */
   labelOf?: (componentName: string) => string;
+  /**
+   * What a node's row says, when the caller can answer better than the node's own field.
+   *
+   * ⚠️ The editor passes a **guarded** read of `NodeGraphNode.label`, which is a getter that falls
+   * through to `type.labelForNode(node)` — a call on a type that a failed module leaves
+   * unresolved. A throw inside this walk would take the whole panel's React tree down, which is
+   * the failure `componentKind.ts` already guards `ComponentModel.color` against.
+   */
+  labelOfNode?: (node: LayerNode) => string | undefined;
+  /** The canvas category of a node — the editor passes a guarded read of `node.type.color`. */
+  categoryOfNode?: (node: LayerNode) => string | undefined;
 }
 
 /**
@@ -195,6 +206,8 @@ export interface LayersOptions {
 export function layersOfScreen(options: LayersOptions): LayersTree {
   const { root, screenPage, canvasComponent, components } = options;
   const labelOf = options.labelOf ?? defaultLabel;
+  const labelOfNode = options.labelOfNode ?? ((node: LayerNode) => node.label);
+  const categoryOfNode = options.categoryOfNode ?? ((node: LayerNode) => node.category);
 
   const rows: LayerRow[] = [];
   const tree: LayersTree = { rows, screen: undefined, cyclic: false, unresolvedRouters: [] };
@@ -244,9 +257,9 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       kind: 'node',
       depth,
       parentKey,
-      label: node.label || typename || 'Node',
+      label: labelOfNode(node) || typename || 'Node',
       typename,
-      category: node.category ?? 'visual',
+      category: categoryOfNode(node) ?? 'visual',
       owner,
       path: [...trail, node.id],
       tinted: owner === canvasComponent
@@ -291,9 +304,9 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       kind: 'instance',
       depth,
       parentKey,
-      label: node.label || labelOf(name),
+      label: labelOfNode(node) || labelOf(name),
       typename: name,
-      category: node.category ?? 'component',
+      category: categoryOfNode(node) ?? 'component',
       owner,
       path: [...trail, node.id],
       component: name,
@@ -374,7 +387,7 @@ export function layersOfScreen(options: LayersOptions): LayersTree {
       // instance node of its own, so a path through one cannot be built.
       path: [...trail, node.id],
       component: template,
-      repeatedBy: node.label || 'Repeater',
+      repeatedBy: labelOfNode(node) || 'Repeater',
       tinted: owner === canvasComponent
     });
 

@@ -7,15 +7,24 @@
  * @module noodl-editor
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
 import { SearchInput } from '@noodl-core-ui/components/inputs/SearchInput';
 import { MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 import { BasePanel } from '@noodl-core-ui/components/sidebar/BasePanel';
 
+import { ProjectModel } from '@noodl-models/projectmodel';
+import { selectionStore } from '@noodl-models/selection/selectionStore';
+
+import { EventDispatcher } from '../../../../../shared/utils/EventDispatcher';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
+import { LayersTree } from './components/LayersTree';
+import { useLayersTree } from './hooks/useLayersTree';
+import { defaultTabFor, flipTab, PANEL_TITLE, TAB_LABEL, tabSubjectFor, type PanelTab } from './layersTab';
+import type { LayerRow } from './layersTree';
 import css from './ComponentsPanel.module.scss';
 import { buildCreateMenuItems, CreateContext, createMenuTitle } from './createMenu';
 import { useComponentActions } from './hooks/useComponentActions';
@@ -62,6 +71,48 @@ export function ComponentsPanel() {
    */
   const [filterQuery, setFilterQuery] = useState('');
   const filtered = useComponentFilter(treeData, filterQuery, expandedFolders);
+
+  /**
+   * TVW-004 — which of the two tabs is showing.
+   *
+   * `null` means *nobody has chosen*, and then §2's rule decides from what the canvas has open:
+   * Layers for a page or a placed visual, Components otherwise. A person's choice is remembered
+   * for the session (R-E) and from then on the canvas no longer moves the tab under them.
+   */
+  const [chosenTab, setChosenTab] = useState<PanelTab | null>(null);
+  const tabSubject = useMemo(() => tabSubjectFor(treeData, activeComponentName), [treeData, activeComponentName]);
+  const tab: PanelTab = chosenTab ?? defaultTabFor(tabSubject);
+  const layers = useLayersTree();
+
+  /** ⌘⇧L, from the editor's keybinding registry — it opens this panel first, then flips. */
+  useEffect(() => {
+    const group = { id: 'ComponentsPanel.flipTab' };
+    EventDispatcher.instance.on('componentsPanel.flipTab', () => setChosenTab((current) => flipTab(current ?? tab)), group);
+    return () => {
+      EventDispatcher.instance.off(group);
+    };
+  }, [tab]);
+
+  /** A Layers row's `›`, double-click or `Enter`: open that component on the canvas. */
+  const handleEditComponent = useCallback((componentName: string) => {
+    const component = ProjectModel.instance?.getComponentWithName(componentName);
+    if (!component) return;
+    EventDispatcher.instance.notifyListeners('ComponentPanel.SwitchToComponent', { component, pushHistory: true });
+  }, []);
+
+  /**
+   * A Layers row is a node **in a particular instance of a component**, which is what TVW-003's
+   * path identity is for: the canvas highlights the definition's node, the preview outlines only
+   * the one copy the whole path names.
+   */
+  const handleSelectRow = useCallback((row: LayerRow) => {
+    const component = row.owner ? ProjectModel.instance?.getComponentWithName(row.owner) : undefined;
+    selectionStore.select('layers', component ?? null, [row.path]);
+  }, []);
+
+  const handleHoverRow = useCallback((row: LayerRow | null) => {
+    selectionStore.setHover('layers', row ? row.path : null);
+  }, []);
 
   // Handle rename action from context menu
   const handleRename = useCallback(
@@ -198,7 +249,7 @@ export function ComponentsPanel() {
        edge); PNL-006 owns the tree itself and can take the inset back if it
        wants one. */
     <BasePanel
-      title="Components"
+      title={PANEL_TITLE}
       isFill
       UNSAFE_content_style={{ paddingInline: 0, paddingTop: 0 }}
       headerSlot={
@@ -220,6 +271,46 @@ export function ComponentsPanel() {
         </>
       }
     >
+      {/* TVW-004 — two tabs, one panel. The rail entry and the panel are titled `Project`; the
+          tab says which of the two views of it you are looking at. Not two rail entries: the
+          hinge actions jump between the two trees, and a jump between tabs in one panel is a
+          thing a person can see happen (proposal §4.1). */}
+      <div className={css['TabBar']} data-test="panel-tabs">
+        {(['layers', 'components'] as PanelTab[]).map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={classNames(css['Tab'], { [css['TabActive']]: tab === id })}
+            onClick={() => setChosenTab(id)}
+            data-test={`panel-tab-${id}`}
+            data-active={tab === id ? 'true' : 'false'}
+          >
+            {TAB_LABEL[id]}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'layers' ? (
+        <>
+          {/* §2's header: which screen these rows are, and which surface it is the screen of. */}
+          <div className={css['LayersHeader']} data-test="layers-header">
+            <span className={css['LayersHeaderScreen']} data-test="layers-header-screen">
+              Layers · {layers.screenLabel || 'no screen'}
+            </span>
+            <span className={css['LayersHeaderWhere']}>in the preview</span>
+          </div>
+
+          <div className={classNames(css['Tree'], css['LayersTree'])} data-test="layers-tree">
+            <LayersTree
+              view={layers}
+              onEditComponent={handleEditComponent}
+              onSelectRow={handleSelectRow}
+              onHoverRow={handleHoverRow}
+            />
+          </div>
+        </>
+      ) : (
+        <>
       {/* PNL-006: the filter is pinned under the shared header — it does not
           scroll with the tree, and it is name-only. The Search panel searches
           parameter values and CSS; this does not duplicate it. */}
@@ -285,6 +376,8 @@ export function ComponentsPanel() {
           </div>
         )}
       </div>
+        </>
+      )}
     </BasePanel>
   );
 }

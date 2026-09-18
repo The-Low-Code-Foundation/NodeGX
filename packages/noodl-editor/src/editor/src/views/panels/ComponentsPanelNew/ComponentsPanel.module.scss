@@ -547,3 +547,187 @@
     color: var(--theme-color-on-primary);
   }
 }
+
+/* -----------------------------------------------------------------------------
+ * TVW-004 — the Layers tab.
+ *
+ * Every row here is the Components tab's `.TreeItem`: same height, same caret
+ * slot, same glyph box, same category colours, same indent guides. What differs
+ * is the arithmetic, and only because it was measured:
+ *
+ *   --tree-indent: 10px  — Richard, 2026-09-18. At the Components tab's 12px,
+ *   28% of the 47,494 rows on this machine sat past the right edge of a 240px
+ *   panel with no room left for a name. The step was reduced AND the depth the
+ *   row is drawn at is capped at 8 levels in `layersTree.ts` (`indentFor`), so
+ *   the widest indent a Layers row can ever carry is 80px. `data-level` keeps
+ *   the true depth for anything that needs to read it.
+ * -------------------------------------------------------------------------- */
+.LayersTree {
+  --tree-indent: 10px;
+}
+
+/* The band: `INSIDE MAIN NAVBAR` / `EDITING HERO` / `SHOWING HOME`.
+   A heading over the rows it introduces, not a row: it names the boundary
+   between two components' files, and there is nothing there to select. */
+.LayerBand {
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.LayerBandLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-family-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-node-category-component);
+}
+
+/* The editing region: the canvas's own component, wherever it sits on this
+   screen. A tint rather than a selection fill — the rows inside it are still
+   individually selectable, and two accent fills on one row cannot be told
+   apart. */
+.LayerTint {
+  background-color: var(--theme-color-primary-bg);
+
+  &:hover {
+    background-color: var(--theme-color-primary-bg);
+  }
+}
+
+/* An instance row: the thing that places another component's file. */
+.LayerInstance .Label {
+  color: var(--theme-color-node-category-component);
+}
+
+/* `Edit ›` on a band, `›` on an instance row. Invisible until the row is
+   hovered or focused, so the tree reads as names rather than as controls. */
+.LayerEdit {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  padding: 0 var(--spacing-1);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-node-category-component);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--speed-turbo) var(--easing-base);
+
+  .TreeItem:hover &,
+  .TreeItem:focus-within & {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+/* `one per item` — what a repeated instance says instead of a count it cannot
+   have. Sits where a Components row's meta sits, in the same quiet ink. */
+.LayerRepeat {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  color: var(--theme-color-fg-muted);
+}
+
+/* `↻ places itself` and `pages are in Components → Pages`: statements about the
+   tree, not things in it. */
+.LayerNote {
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.LayerNoteLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-fg-muted);
+}
+
+/* -----------------------------------------------------------------------------
+ * The two tabs. One panel, two views of one project — the rail entry and the
+ * panel are titled `Project` (R-E), and the tab says which of the two you are
+ * looking at.
+ * -------------------------------------------------------------------------- */
+.TabBar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3) 0;
+}
+
+.Tab {
+  flex: 0 0 auto;
+  padding: var(--spacing-1) var(--spacing-2);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font: 12px/1.35 var(--font-family);
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.TabActive {
+  border-bottom-color: var(--theme-color-primary);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* `Layers · Home` with `in the preview` at the right — the one line that says
+   which of the three things this surface is showing. */
+.LayersHeader {
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-default);
+}
+
+.LayersHeaderScreen {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.LayersHeaderWhere {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-fg-muted);
+}
