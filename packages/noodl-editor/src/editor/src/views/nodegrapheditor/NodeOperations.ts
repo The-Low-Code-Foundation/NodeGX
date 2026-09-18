@@ -21,7 +21,24 @@ import type { NodeGraphEditor } from '../nodegrapheditor';
 export class NodeOperations {
   constructor(private editor: NodeGraphEditor) {}
 
-  createNewNode(type: ComponentModel, pos: IVector2, options: Partial<NodeGraphNodeJSON> = {}) {
+  /**
+   * @param placement  TVW-005 — where the node goes, for a caller that has a parent and an index
+   *                   rather than a point on the canvas (a drop into the Layers tab). Omitted, the
+   *                   canvas's own rule stands: under whatever is highlighted, appended last.
+   *
+   *                   ⚠️ **Deliberately a parameter on this door rather than a second door.** §2
+   *                   asks the Layers drop to take "the same create path as dragging onto the
+   *                   canvas", and the reason is in the comment below: the defaults, the seed and
+   *                   the undo label all live here, and the one other place that mints nodes
+   *                   (`NodePicker.utils.createNodeFunction`) already had to be taught each of
+   *                   them separately.
+   */
+  createNewNode(
+    type: ComponentModel,
+    pos: IVector2,
+    options: Partial<NodeGraphNodeJSON> = {},
+    placement?: { parent: NodeGraphNode; index?: number }
+  ) {
     const editor = this.editor;
 
     const node = NodeGraphNode.fromJSON({
@@ -57,7 +74,15 @@ export class NodeOperations {
      */
     ElementConfigRegistry.applyDefaults(node, type.name);
 
-    if (editor.highlighted) {
+    if (placement?.parent) {
+      // `insertChild`'s undo is the same `removeNode` as `addChild`'s — both are creations, and a
+      // creation is undone by deleting the node, not by detaching it.
+      if (typeof placement.index === 'number') {
+        placement.parent.insertChild(node, placement.index, { undo: true, label: 'create' });
+      } else {
+        placement.parent.addChild(node, { undo: true, label: 'create' });
+      }
+    } else if (editor.highlighted) {
       editor.highlighted.model.addChild(node, { undo: true, label: 'create' });
     } else {
       editor.model.addRoot(node, { undo: true, label: 'create' });

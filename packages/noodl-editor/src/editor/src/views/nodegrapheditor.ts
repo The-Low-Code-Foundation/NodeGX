@@ -549,8 +549,14 @@ export class NodeGraphEditor extends View {
     this.viewportActions.moveRoots(dx, dy);
   }
 
-  createNewNode(type: ComponentModel, pos: IVector2, options: Partial<NodeGraphNodeJSON> = {}) {
-    this.nodeOperations.createNewNode(type, pos, options);
+  createNewNode(
+    type: ComponentModel,
+    pos: IVector2,
+    options: Partial<NodeGraphNodeJSON> = {},
+    /** TVW-005: a parent and an index, for a drop that has no point on the canvas. */
+    placement?: { parent: NodeGraphNode; index?: number }
+  ) {
+    this.nodeOperations.createNewNode(type, pos, options, placement);
   }
 
   deselect(args?: { disableHidePanels: boolean }) {

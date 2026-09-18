@@ -55,3 +55,80 @@ in Layers (rows show the node's label; rename lives in the property panel, PNL-0
   page-owned row) resolves to the page-owned position; the band's tail is not a slot.
 - Reordering under a `For Each`'s template is reordering the *template component's* children — that
   is inside a band and refused.
+
+## 6. Slice 1 — the decision, the mutation, and the gesture (s16, 2026-09-18)
+
+Built: `layersDrag.ts` (pure), `layersDragApply.ts` (the two model calls), `useLayersDrag.ts` (the
+gesture and the real legality gate), the row wiring and the three indicators in `LayersTree.tsx` /
+`ComponentsPanel.module.scss`, `componentKind` on the Components tab's drag payload, and an
+optional `placement` on the canvas's own `createNewNode`. `tests-unit/tvw-005` — **15 specs, 8
+mutants, each caught**. `tsc --noEmit` 0.
+
+**Not built, and it is the one §2 row with no code behind it:** the *drop-target strip on the Layers
+tab header*. A component can be dragged from the Components tab into Layers only while the Layers
+tab is the one showing. AC1's sentence drives the strip, so AC1 cannot close until it exists.
+
+### 6.1 What the model made us do, in the order it made us do it
+
+Four things the code had to be written around, each measured in the source rather than assumed:
+
+- 🔴 **`NodeGraphModel.attachNode` begins `this.roots.indexOf(child)` and silently does nothing
+  when the child is not a root.** A node must be **detached first**, always — there is no "move"
+  call. And since detaching removes it from its old parent's `children[]`, the anchor's index is
+  resolved **after** the detach, which makes a move within one parent and a move across two parents
+  the same two lines.
+- 🔴 **`NodeOperations.attachNode` / `detachNode` record NO undo outside a canvas drag.** They read
+  `editor.interaction.dragNodesUndoGroup`, which exists only between `startDraggingNodes` and the
+  mouse-up that ends it; anywhere else `args.undo` is falsy and the model writes nothing. A Layers
+  drag routed through the editor's own helpers would move the node and leave **nothing to undo** —
+  and would have looked completely correct until somebody pressed ⌘Z. The applier calls the model's
+  `attachNode`/`detachNode` with its own `UndoActionGroup` instead.
+- ⚠️ **An `UndoActionGroup` *constructed* with `do`/`undo` cannot be undone** (its pointer stays at
+  0 — `undo-queue-model.ts:85`). The group is built empty and filled by the calls that already
+  happened, which is what the model does with the group it is handed.
+- 🔴 **`createNewNode` had no way to say where.** Its parent is whatever the canvas has
+  `highlighted` and it appends last. §2 asks the Layers drop to use *the same create path*, so the
+  door gained an optional `placement: { parent, index }` rather than growing a second creation
+  function — the defaults (`ElementConfigRegistry.applyDefaults`), the seed (`seedNewNode`) and the
+  `create` undo label all live behind that one door, and the editor's only other creation path
+  (`NodePicker.utils.createNodeFunction`) has had to be taught each of them separately already.
+
+### 6.2 A plan names an anchor, never an index
+
+The tree draws **visual nodes only**; the graph's `children[]` can hold a `States` or a `Function`
+parked under a Group. So a position computed from row positions is right on every fixture and wrong
+on the first component that keeps a logic node under a visual one. A plan says *before this node* /
+*after this node* / *append*, and the applier resolves it with `children.indexOf`.
+
+### 6.3 The rule the refusals are actually made of
+
+§2 says *a row inside a band is refused*. The rule that got built is one step wider and one step
+simpler: **a row can be moved only while the canvas is editing the component that owns it** — which
+is exactly the set TVW-004 already tints (AC3). It matters, and a spec holds it: the app **shell**
+is drawn *above* every band in the tree, so a rule written as "rows below a band" would let a person
+rearrange the shell from a page's Layers tab. It is refused with the same sentence the band gets,
+naming its own component.
+
+⚠️ **`LayerRow.tinted` is deliberately not what the decision reads.** It is computed the same way
+today, and it is a *display* property: a structural rule that read it would follow the tint the day
+the tint changes ([[a-client-property-read-as-a-fact-about-the-source]]).
+
+### 6.4 Where the refusal is spoken
+
+On the drag, not on the row: `PopupLayer.setDragMessage` writes on the thing following the cursor,
+and a tooltip anchored to the row a person is dragging *away* from would be behind their own hand.
+The row shakes on the drop, which is §2's word for it.
+
+### 6.5 AC2 cannot be a jest spec, and here is the measurement that says so
+
+AC2 asks for "a spec [that] drives every row of the §2 table against `ProjectModel`". It cannot:
+`NodeGraphNode` imports `projectmodel` → `bugtracker`, which calls `platform.getUserDataPath()` at
+module scope, so a spec that imports it reports **`Tests: 0 total`** — it fails to *run*
+([[tests-0-total-can-mean-the-wrong-directory]]). Measured, not guessed: the probe is in this
+session's scratchpad and every existing spec in `tests-unit` that touches this area imports a
+*leaf* module for the same reason.
+
+So AC2 splits: the **decision** for every row of the table is graded by `tests-unit/tvw-005`
+(15 specs, 8 mutants), and the **resulting `children[]` order, the parent, the byte-identity of a
+refused graph and the single undo step** are graded by the drive against the live `ProjectModel` —
+which is the stronger half of the two anyway, since it uses the real models and the real undo queue.

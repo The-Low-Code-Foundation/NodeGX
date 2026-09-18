@@ -15,6 +15,7 @@ import { SearchInput } from '@noodl-core-ui/components/inputs/SearchInput';
 import { MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 import { BasePanel } from '@noodl-core-ui/components/sidebar/BasePanel';
 
+import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphContext';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { selectionStore } from '@noodl-models/selection/selectionStore';
 
@@ -23,6 +24,7 @@ import { benchTargetLabel } from '../../VisualCanvas/previewScope';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
 import { LayersTree } from './components/LayersTree';
+import { useLayersDrag } from './hooks/useLayersDrag';
 import { useLayersTree } from './hooks/useLayersTree';
 import { defaultTabFor, flipTab, instancesOf, PANEL_TITLE, TAB_LABEL, tabSubjectFor, type PanelTab } from './layersTab';
 import { showUsedInPopover } from './showUsedInPopover';
@@ -139,6 +141,30 @@ export function ComponentsPanel() {
   const handleHoverRow = useCallback((row: LayerRow | null) => {
     selectionStore.setHover('layers', row ? row.path : null);
   }, []);
+
+  /**
+   * TVW-005 — the rows can be rearranged, and the plan is made against ALL of them.
+   *
+   * ⚠️ `layers.rows` is what is *visible*; a collapsed parent still owns its children, and every
+   * decision here walks parent chains (is this inside a band? is this its own ancestor?). Planning
+   * against the visible list would answer those questions about a tree with holes in it.
+   */
+  const layersDrag = useLayersDrag({
+    rows: layers.all,
+    canvasComponent: layers.canvasComponent,
+    editor: NodeGraphContextTmp.nodeGraph,
+    onMoved: useCallback(
+      (nodeId: string) => {
+        // The moved node keeps the selection — which is also what an undo puts back (AC3). The row
+        // is found again after the move, because its path is what addresses it and its position is
+        // exactly what changed.
+        const row = layers.all.find((candidate) => candidate.path[candidate.path.length - 1] === nodeId);
+        if (row) handleSelectRow(row);
+      },
+      [layers.all, handleSelectRow]
+    )
+  });
+
 
   // Handle rename action from context menu
   const handleRename = useCallback(
@@ -362,6 +388,7 @@ export function ComponentsPanel() {
           <div className={classNames(css['Tree'], css['LayersTree'])} data-test="layers-tree">
             <LayersTree
               view={layers}
+              drag={layersDrag}
               onEditComponent={handleEditComponent}
               onSelectRow={handleSelectRow}
               onHoverRow={handleHoverRow}

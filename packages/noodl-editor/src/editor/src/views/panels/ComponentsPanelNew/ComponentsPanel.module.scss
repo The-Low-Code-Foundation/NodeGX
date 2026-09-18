@@ -608,6 +608,52 @@
   }
 }
 
+/* ---------------------------------------------------------------- TVW-005
+   Dragging in Layers: three indicators, and one refusal.
+
+   🔴 The three are DIFFERENT SHAPES, not three colours of one shape. A reorder
+   is a position between two rows and is drawn as a line between them; a
+   reparent is a containment and is drawn as a fill over the row that would
+   contain it. A person reading a 2px line at the top of a row and a 2px line
+   at the bottom of the row above has to know which row owns it — a fill cannot
+   be misread that way.
+
+   ⚠️ The line is drawn with an inset box-shadow rather than a border or a
+   pseudo-element: the row's own geometry (`--level`, the indent guides) is
+   already carrying padding and background layers, and a border changes the
+   row's height, which moves every row below it by 2px at the moment a person
+   is aiming at a 4px gap. */
+.LayerDropBefore {
+  box-shadow: inset 0 2px 0 0 var(--theme-color-primary);
+}
+
+.LayerDropAfter {
+  box-shadow: inset 0 -2px 0 0 var(--theme-color-primary);
+}
+
+.LayerDropInto {
+  background-color: var(--theme-color-primary-bg);
+}
+
+/* The row that is being carried. Not hidden: Figma keeps it in place and
+   dims it, so the tree does not reflow under a moving hand. */
+.LayerDragging {
+  opacity: 0.45;
+}
+
+/* §2's refusal: the row shakes. The sentence is on the drag, where the eye is. */
+.LayerRefused {
+  animation: layer-refused 0.4s ease-in-out;
+}
+
+@keyframes layer-refused {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-3px); }
+  35% { transform: translateX(3px); }
+  55% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
 /* An instance row: the thing that places another component's file. */
 .LayerInstance .Label {
   color: var(--theme-color-node-category-component);

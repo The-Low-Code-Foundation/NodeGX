@@ -15,16 +15,38 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
 
 import css from '../ComponentsPanel.module.scss';
+import type { DropSide } from '../layersDrag';
 import type { LayerRow } from '../layersTree';
+import type { LayersDragApi } from '../hooks/useLayersDrag';
 import type { LayersView } from '../hooks/useLayersTree';
+
+/**
+ * TVW-005 — where in a row's height the three drop meanings live.
+ *
+ * ⚠️ **Not a third each.** A reparent is the destructive one — it changes what a node is inside,
+ * not just what it is next to — so the two reorder bands are widened to give it a smaller target
+ * than the gesture a person makes most. The canvas's own attach uses the same asymmetry
+ * (`nodeAttachment.ts` measures against the node's top and bottom edges, not its middle).
+ */
+const REORDER_BAND = 0.32;
+
+function sideFromPointer(element: HTMLElement, clientY: number): DropSide {
+  const rect = element.getBoundingClientRect();
+  const at = rect.height ? (clientY - rect.top) / rect.height : 0.5;
+  if (at < REORDER_BAND) return 'before';
+  if (at > 1 - REORDER_BAND) return 'after';
+  return 'inside';
+}
 
 export interface LayersTreeProps {
   view: LayersView;
+  /** TVW-005. Absent while the tab is read-only — every row then behaves as TVW-004 drew it. */
+  drag?: LayersDragApi;
   /** Open this component on the canvas — `Edit ›`, double-click, or `Enter` on an instance row. */
   onEditComponent(componentName: string): void;
   /** The person selected this row. The path is TVW-003's instance-path identity. */
@@ -33,7 +55,7 @@ export interface LayersTreeProps {
   onHoverRow(row: LayerRow | null): void;
 }
 
-export function LayersTree({ view, onEditComponent, onSelectRow, onHoverRow }: LayersTreeProps) {
+export function LayersTree({ view, drag, onEditComponent, onSelectRow, onHoverRow }: LayersTreeProps) {
   const { rows, expanded, withChildren, toggle } = view;
 
   if (!rows.length) {
@@ -53,6 +75,7 @@ export function LayersTree({ view, onEditComponent, onSelectRow, onHoverRow }: L
         <LayerRowItem
           key={row.key}
           row={row}
+          drag={drag}
           isOpen={expanded.has(row.key)}
           hasChildren={withChildren.has(row.key)}
           onToggle={toggle}
@@ -67,6 +90,7 @@ export function LayersTree({ view, onEditComponent, onSelectRow, onHoverRow }: L
 
 interface LayerRowItemProps {
   row: LayerRow;
+  drag?: LayersDragApi;
   isOpen: boolean;
   hasChildren: boolean;
   onToggle(key: string): void;
@@ -77,6 +101,7 @@ interface LayerRowItemProps {
 
 function LayerRowItem({
   row,
+  drag,
   isOpen,
   hasChildren,
   onToggle,
@@ -107,8 +132,56 @@ function LayerRowItem({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (event.key === 'Enter' && row.component) onEditComponent(row.component);
+      // TVW-005 §3: ⌥↑ / ⌥↓ reorders the selected row. The refusal is the same one a drag gets.
+      if (drag && event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+        event.preventDefault();
+        event.stopPropagation();
+        drag.moveByKeyboard(row.key, event.key === 'ArrowUp' ? 'up' : 'down');
+      }
     },
-    [onEditComponent, row.component]
+    [drag, onEditComponent, row.component, row.key]
+  );
+
+  /**
+   * The drag, in the Components tab's own protocol: a 5px threshold on `mousemove`, `PopupLayer`
+   * carrying the ghost, and `dragCompleted()` on the way out — mirrored from `ComponentItem` so
+   * the two trees in this panel behave identically under the hand.
+   */
+  const itemRef = useRef<HTMLDivElement>(null);
+  const pressedAt = useRef<{ x: number; y: number } | null>(null);
+
+  const handleMouseDown = useCallback((event: React.MouseEvent) => {
+    pressedAt.current = { x: event.clientX, y: event.clientY };
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      if (!drag) return;
+      if (pressedAt.current && !drag.draggingKey && itemRef.current) {
+        const dx = event.clientX - pressedAt.current.x;
+        const dy = event.clientY - pressedAt.current.y;
+        if (Math.sqrt(dx * dx + dy * dy) > 5) {
+          drag.onRowDragStart(row, itemRef.current);
+          pressedAt.current = null;
+        }
+        return;
+      }
+      // Hovering during a drag — including a drag that started in the Components tab.
+      if (itemRef.current) drag.onRowDragOver(row, sideFromPointer(itemRef.current, event.clientY), event.altKey);
+    },
+    [drag, row]
+  );
+
+  const handleMouseUp = useCallback(
+    (event: React.MouseEvent) => {
+      pressedAt.current = null;
+      if (!drag || !itemRef.current) return;
+      // A mouse-up that is not the end of a drag is a click, and a click is TVW-003's selection.
+      if (!drag.isDragging()) return;
+      event.stopPropagation();
+      drag.onRowDrop(row, sideFromPointer(itemRef.current, event.clientY), event.altKey);
+    },
+    [drag, row]
   );
 
   /**
@@ -157,6 +230,13 @@ function LayerRowItem({
   const isInstance = row.kind === 'instance';
 
   /**
+   * Which indicator this row draws, if any. Only a drop that would actually do something draws one:
+   * a refused hover leaves the row alone and puts its sentence on the drag instead, so the panel
+   * never shows a line where nothing can land.
+   */
+  const dropSide = drag?.target && drag.target.key === row.key && drag.target.ok ? drag.target.side : null;
+
+  /**
    * `data-node-path` is AC2's seam. The row's identity is its instance path, and the preview's own
    * inspector addresses a rendered element by exactly the same path (`instancePathOf`) — so the two
    * walks can be compared element for element rather than by counting. A bare node id would not do
@@ -164,20 +244,30 @@ function LayerRowItem({
    */
   return (
     <div
+      ref={itemRef}
       className={classNames(css['TreeItem'], {
         [css['LayerTint']]: row.tinted,
-        [css['LayerInstance']]: isInstance
+        [css['LayerInstance']]: isInstance,
+        [css['LayerDragging']]: drag?.draggingKey === row.key,
+        [css['LayerRefused']]: drag?.shakingKey === row.key,
+        [css['LayerDropBefore']]: dropSide === 'before',
+        [css['LayerDropAfter']]: dropSide === 'after',
+        [css['LayerDropInto']]: dropSide === 'inside'
       })}
       style={{ '--level': String(row.indent) } as React.CSSProperties}
       data-test={isInstance ? 'layers-instance' : 'layers-node'}
       data-level={row.depth}
       data-component={row.component ?? undefined}
       data-node-path={row.path.join('/')}
+      data-drop={dropSide ?? undefined}
       title={row.typename ? `${row.label} · ${row.typename}` : row.label}
       tabIndex={0}
       onClick={() => onSelectRow(row)}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onMouseEnter={() => onHoverRow(row)}
       onMouseLeave={() => onHoverRow(null)}
     >

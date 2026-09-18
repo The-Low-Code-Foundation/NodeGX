@@ -41,6 +41,15 @@ export function useDragDrop({ guardCloudBoundary = false }: { guardCloudBoundary
       type: item.type,
       dragTarget: sourceElement,
       component: item.type === 'component' ? item.data.component : undefined,
+      /**
+       * TVW-005 — what `componentKind` calls it, carried on the drag.
+       *
+       * A drop into Layers has to tell a page from a visual from a logic component, and it has to
+       * do it while the pointer is moving. The tab has already classified every row; recomputing
+       * the kind at the drop would be a second answer to a question already answered
+       * ([[a-check-in-a-second-pipeline-is-a-duplicate-first]]).
+       */
+      componentKind: item.type === 'component' ? item.data.kind : undefined,
       folder: item.type === 'folder' ? item.data : undefined,
       onDragEnd: () => {
         setDraggedItem(null);
