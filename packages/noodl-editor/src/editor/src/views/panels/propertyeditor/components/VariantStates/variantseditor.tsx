@@ -178,13 +178,14 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
    * ⚠️ Counted on every render rather than cached: the walk is `isVariantUsed`'s, which the
    * delete-confirm modal already runs on the same surface, and a stale count here would be worse
    * than none at all. Drawn only while wearing a Look, and never as `Worn by 0` — a Look the
-   * selected node wears is worn at least once, so a 0 would mean the count is wrong.
+   * selected node wears is worn at least once, so a 0 would mean the count is wrong, and saying
+   * nothing is better than saying something false.
    */
   renderWearerLine() {
     const variant = this.state.variant;
     if (!variant || variant.name === undefined || this.state.editMode) return null;
 
-    const wearers = ProjectModel.instance?.countVariantWearers(variant) ?? 0;
+    const wearers = ProjectModel.instance?.variantWearerCounts(variant.typename)[variant.name] ?? 0;
     if (wearers < 1) return null;
 
     return (

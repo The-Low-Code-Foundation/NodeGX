@@ -361,3 +361,93 @@
   border-color: var(--theme-color-border-strong);
   color: var(--theme-color-fg-highlight);
 }
+
+/* ── P94 STY-003 AC6/AC7 — the Look menu (design §4) ──────────────────────────────────────────
+ *
+ * 🔴 NOTE WHAT IS NOT HERE: a `visibility: hidden`. `.variants-item-icon` above is the rule AC7
+ * exists to remove — two icons revealed only by `:hover`, confirmed at rest and under a real hover
+ * with a control pair on the same element. The row's actions now hang off one always-visible `⋯`
+ * (R6: "it says 'there are actions here' without putting two bins in your eyeline on every row"),
+ * and nothing below may re-introduce a hover-gated affordance. */
+
+.variants-section-heading {
+  padding: 8px 10px 4px 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Rule 4, said out loud — "it won't change under you later" is the opposite of what a person
+   expects a shipped thing to do, so it is stated rather than implied. */
+.variants-section-note {
+  padding: 4px 10px 8px 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+/* Design §4's `26`. A fact about the Look, on the trailing edge, like the panel's group badges. */
+.variant-item-count {
+  flex-shrink: 0;
+  padding: 0 8px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+}
+
+.variant-item-current {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+  color: var(--theme-color-fg-accent);
+}
+
+/* R6's one visible control. No `visibility` rule, deliberately — see the note above. */
+.variants-row-menu-button {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-right: 4px;
+  border: none;
+  border-radius: 3px;
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-md);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.variants-row-menu-button:hover,
+.variants-row-menu-button[aria-expanded='true'] {
+  background-color: var(--theme-color-bg-4);
+  color: var(--theme-color-fg-highlight);
+}
+
+.variants-row-actions {
+  display: flex;
+  gap: 4px;
+  padding: 4px 10px 6px 10px;
+  background-color: var(--theme-color-bg-2);
+}
+
+.variants-row-action {
+  padding: 2px 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: 3px;
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.variants-row-action:hover {
+  border-color: var(--theme-color-border-hover);
+  color: var(--theme-color-fg-highlight);
+}
+
+.variants-row-action.is-danger:hover {
+  border-color: var(--theme-color-danger);
+  color: var(--theme-color-fg-danger);
+}

@@ -1494,25 +1494,34 @@ export class ProjectModel extends Model {
   }
 
   /**
-   * P94 STY-003 — how many nodes wear this Look, for the panel's `Worn by 26 buttons`.
+   * P94 STY-003 — how many nodes wear each Look of one node type, in **one** walk.
+   *
+   * Feeds both the panel's `Worn by 26 nodes` line and the Look menu's per-row counts (design §4).
+   * One function rather than a single-Look counter beside a bulk one: a caller wanting one number
+   * would walk the whole project anyway, so the two would have been the same cost and two places
+   * to get the identity rule wrong.
    *
    * 🔴 **The callback must not return a truthy value.** `forEachNode` treats one as "stop
    * walking" ([[foreachnode-stops-on-a-truthy-return]]), so a body written as
-   * `n.variant === variant && count++` would abort the walk at the first wearer and report 1 for
-   * every Look that has any. That is also why {@link isVariantUsed} beside it sets a flag instead
-   * of returning — the shape is deliberate, not a style.
+   * `n.variant && counts[...]++` would abort at the first wearer and report 1 for every Look that
+   * has any. That is also why {@link isVariantUsed} beside it sets a flag instead of returning —
+   * the shape is deliberate, not a style.
    *
-   * ⚠️ Identity, not name: two Looks of different node types may share a name, and a wearer is a
-   * node holding *this* `VariantModel`.
+   * ⚠️ **Scoped by `typename`, because a name alone is not an identity.** Two node types may each
+   * hold a Look called `Primary`, and bucketing by name across both would report one number for
+   * two different things.
    */
-  countVariantWearers(variant): number {
-    let count = 0;
+  variantWearerCounts(typename): Record<string, number> {
+    const counts: Record<string, number> = {};
     this.forEachComponent((c) => {
       c.forEachNode((n) => {
-        if (n.variant === variant) count++;
+        const variant = n.variant;
+        if (variant !== undefined && variant.name !== undefined && variant.typename === typename) {
+          counts[variant.name] = (counts[variant.name] ?? 0) + 1;
+        }
       });
     });
-    return count;
+    return counts;
   }
 
   addVariant(variant, args?: TSFixme) {

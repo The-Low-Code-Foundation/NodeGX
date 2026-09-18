@@ -97,9 +97,23 @@ with one that drew only `linked` turned **exactly those two tests red and nothin
 again on restore; and the linked control sits in the same run, so a component that marked every row
 `overridden` could not pass ([[a-negative-arm-needs-its-control-in-the-same-run]]).
 
-**Gates:** `tests-unit/sty-003` **30/30**; `tsc -p tsconfig.json` and `tsc -p tsconfig.tests.json`
-both exit 0. ⚠️ **`test:main` and `test:ci` were NOT run** — the box sat at load 24.8 under a peer's
-cold webpack rebuild and a second heavy job is against the standing rule. They are STY-002 AC7's.
+**AC6 and AC7 too, later in s5:** the menu is design §4's three sections off `buildLookMenu`, and
+the row's actions hang off one always-visible `⋯`. **Picking a library Look copies it** — a
+`VariantModel` the project owns outright, in **one undo group** with wearing it, because two
+entries would let Ctrl+Z leave a Look nothing wears and no row explains. A library Look whose
+states the node has no room for is **reported** (`showInfo`, not the sticky `showActivity` spinner),
+because a dropped `placeholder` block should not be discovered months later.
+
+**Gates:** `tests-unit/sty-002` + `sty-003` **57/57**; 34 suites / 482 tests green across every jest
+suite these files touch; `tsc -p tsconfig.json` and `tsc -p tsconfig.tests.json` both exit 0.
+⚠️ **`test:main` and `test:ci` were NOT run** — the box sat at load 24.8 under a peer's cold webpack
+rebuild, then the peer took it for a 20-minute `test:ci`, and a second heavy job is against the
+standing rule. They are STY-002 AC7's, and they are the next session's first job.
+
+⚠️ **AC6 and AC7 are BUILT, NOT MEASURED.** Neither has been opened in a running editor. The parts
+most likely to be wrong are the ones a unit test cannot reach: whether the three sections read as
+three, whether `⋯` is discoverable, and whether the copy lands as a Look the person then sees in
+the project section.
 
 ## 3. Acceptance criteria
 
@@ -112,8 +126,8 @@ The four rules of design §2 are the criteria. Any surface that breaks one is wr
 | **AC3** | 🔴 **Overrides are loud and reversible.** Overriding one field on a node wearing a Look changes that field's appearance, **states what the Look wanted**, and offers revert | 🟡 **built (s5)** — the row draws `Primary Button says 8px` and a `Revert` that clears the node's own value so the Look's resolves again (`getParameter` is own → variant → port default, so removing the key is what puts the field back). One undo step. ⚠️ A Look value that cannot be quoted as a short string — a colour object — falls back to `Overrides Primary Button` rather than printing `[object Object]`; the treatment and the revert do not depend on it. ⬜ The revert has not been pressed in a running editor |
 | **AC4** | 🔴 **Shipped and homemade behave identically.** Nothing in this surface behaves differently because of where a Look came from | ⬜ |
 | **AC5** | **The three states read correctly on the element a person actually sees**, in **both themes** — linked, overridden, own. 🔴 Read from the rendered element, not from the class it was given ([[a-ring-must-be-read-on-the-element-a-person-sees]]), and check the chosen colours against the editor's existing semantic colours: design §3.3 explicitly does **not** rule them | ⬜ **and it is the next session's first job.** The colours **have** been checked against the editor's palette and the reasoning is in the stylesheet: **amber is kept for overridden because it IS `--theme-color-fg-notice`**, the editor's "caution, not error" — the right weight for a legitimate act the panel wants seen. **Purple has no token at all**, so linked takes `--theme-color-fg-accent`; minting one would start a second palette beside `colors.css` ([[a-second-copy-of-a-palette-drifts-silently]]). Both are theme-aware tokens, so light and dark come from the token layer. 🔴 **But a token's documented 4.5:1 is a fact about the token, not a reading of this row** — nothing has been read off a rendered element yet |
-| **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | ⬜ |
-| **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | ⬜ |
+| **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | 🟡 **built (s5)** — all three sections in that order, off `buildLookMenu`. 🔴 **The save row is not new behaviour; it is a new name and a new place.** `createNewVariant` always did exactly this — copy the node's parameters onto a named Look and put the node in it — but it was labelled *"Create new variant"* at the **top** of the popup, which asks a person to know what a variant is before they can want one. It is now the last row and reads *"Save this button's styles as a new Look…"*. ⬜ Not opened in a running editor |
+| **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | 🟡 **built (s5)** — `PickVariantItem` draws one always-visible `⋯` that opens Rename and Delete in the row. 🔴 **The new control deliberately does not use `.variants-item-icon`**, which is the class carrying the `visibility: hidden` the defect was made of, and the stylesheet carries a note saying nothing below it may re-introduce one. ⬜ **The measurement is NOT done:** §1's control pair has to be re-run at rest on the new element, and that is a drive |
 | **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | ⬜ |
 
 ## 4a. 🔴 Where the surface departs from the mockup, and why
