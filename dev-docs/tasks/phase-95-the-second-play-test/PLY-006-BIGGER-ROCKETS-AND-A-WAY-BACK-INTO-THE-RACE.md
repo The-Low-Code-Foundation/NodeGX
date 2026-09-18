@@ -113,8 +113,8 @@ filling. A charged turbo is a button beside Next, not a hidden state.
 | AC5 | ✅ (s1) Engine gate: the chain charges at exactly 3 in a row, holds one, survives a wrong answer once charged, and is spent only while behind. Sabotage: let it charge at 2. |
 | AC6 | ✅ (s1) Engine gate, the one that grades Richard's sentence: a bad start wins ≥ 15% with the comeback on and ≤ 2% with it off, **and** a clean race rises by no more than 15 points, **and** a child guessing still wins ≤ 35%. Four clauses, because a fix that makes the race easy is not a fix. *As built: 1% → 57%, clean 98% → 98%, guessing 13%.* |
 | AC7 | 🔜 **Not built.** Layer 3 (the bought Starter turbo) is designed in §3.2 and nothing of it exists yet: no shelf row, no `boosts` count on the profile, no consume at the start of a race. Layers 1 and 2 deliver the comeback without it, so this is a task and not a hole. Its clause: layer 3 is off in a two-player race, and a bought turbo is consumed exactly once. |
-| AC8 | 🟡 (s2/s3) **DRIVEN — the comeback works; the clipped line is fixed in source and the "four" question is answered by R5.** `--scenario ply006`. The chain line counts `1/3 → 2/3`, the turbo charges on the third right answer, `⚡ Fire the turbo!` appears and is reachable (not behind a blocker), firing it puts `⚡⚡ turbo fired` / `turbo lancé` in the line, and the answer it grades wins **1.81–1.85×** the distance of the preceding plain right answer — read from the kit's own `data-gain` dasharray, which is the app's own arithmetic. Not exactly 2× because `gain = RACE_STEP × speed × slip × turboMult` and the slipstream shrinks as the gap closes. **Two findings, both in §5.** |
-| AC9 | 🟡 **FIXED IN SOURCE (s3), NOT YET DRIVEN.** Was RED at all five viewports — **15, 15, 15, 19 and 14 px** on the rendered `<image>` in a real race. **The cause was not the course box.** `Game/Race track` placed the kit's track with `rocketSize: 44`, a bare literal; the kit documents the relation itself (`kit.js:490`) as `rocketSize × 2·WINDOW_R ÷ ROCKET_UNITS` = `rocketSize × 25/78`, so 44 draws **14.1 px** — which is what the phone measured, with the roomier viewports landing a little above the floor. `spriteScale` floors the sprite at `rocketSize` **whatever the box is**, so the box never capped anything. R4 (Richard, 2026-09-18): the face is 23 px, the kit's own default. The override is **deleted** rather than raised, here and on `Hangar/Preview`, so the kit's `ROCKET_SIZE_DEFAULT` applies and there is no second copy of the number to drift from the one AC2 measures. Predicted face: **23.1 px at every viewport**. 🔴 Re-drive to confirm, and watch the phone: at 390×844 the two rockets already started stacked with their labels overlapping, and a longer rocket has more to stack. |
+| AC8 | ✅ **GREEN, DRIVEN (s3), 20/20 both languages.** The chain counts, the turbo charges on the third right answer, the button is reachable, firing it says so, and the answer it grades wins **1.84×** the preceding plain one (read from the kit's own `data-gain` dasharray). **The clipped line is fixed**: it is whole at 390×844 now, wrapping onto two lines under 480px and nowhere else — see §5.2. **§5.3's "four" question is answered by R5**, which makes a charged turbo spendable while level, so a child can no longer earn one they cannot spend — see §5.5. |
+| AC9 | ✅ **GREEN, DRIVEN (s3) at all five viewports: 24, 24, 24, 24 and 23 px**, where s2 measured 15, 15, 15, 19 and 14. Read from the rendered `<image>` in a real race. **The cause was not the course box.** `Game/Race track` placed the kit's track with `rocketSize: 44`, a bare literal; the kit gives the arithmetic itself (`kit.js:490`) as `rocketSize × 2·WINDOW_R ÷ ROCKET_UNITS` = `rocketSize × 25/78`, so 44 draws **14.1 px** — which is what the phone measured. `spriteScale` floors the sprite at `rocketSize` **whatever the box is**, so the box never capped anything. R4: the override is **deleted** rather than raised, here and on `Hangar/Preview`, so the kit's `ROCKET_SIZE_DEFAULT` applies and no second copy of the number exists. A new template clause reads the BUILT artefact and fails if any placement lowers the floor — verified RED by restoring the 44. 🔴 See §5.6: the drive's pictures found something the clause could not. |
 | AC10 | Richard comes back from a bad start, and says whether it felt earned or given. |
 
 ## 5. What driving found that the gates could not (s2, 2026-09-18)
@@ -231,3 +231,33 @@ theirs.
 🔴 These are not §3.3's numbers and do not replace them: §3.3 was measured with a different harness (its bad-start
 "after" was 57%). **The columns above are comparable with each other and with nothing else** — which is the only way
 this question could be answered, because what was being measured was a difference.
+
+### 5.6 🔴 s3, NEW — the two rockets overlap, and the AC9 clause cannot see it
+
+**AC9 passed at all five viewports and the pictures show a defect anyway.** The faces are legible now, and the two
+rockets sit on top of each other with their name labels overlapping — at 1366×768 as much as at 390×844
+(`01-ply006-face-1366x768.png`, `05-ply006-face-390x844.png`). "CPU" is drawn half behind Lea's hull.
+
+It is not a phone problem and it is not new to R4 — it is a **ratio**, fixed in the kit's geometry:
+
+| | units | at `rocketSize` 44 | at 72 |
+|---|---|---|---|
+| lane separation (`lane = 14 × k`, one either side) | 28 | 16 px | 26 px |
+| rocket height, fin to fin (±27) | 54 | 30 px | 50 px |
+| hull height (±16) | 32 | 18 px | 30 px |
+| **fins overlap by** | **26** | **15 px** | **24 px** |
+| **hulls overlap by** | **4** | **2 px** | **4 px** |
+
+So the lanes were always too close together and R4 made the overlap bigger in pixels while leaving it identical in
+proportion. PLY-006 §3.1 is where it came from: the hull was deepened to ±15 and fins added out to ±27, and `lane`
+stayed at the 14 it had when the sprite was shallower. **To clear the fins the lane offset has to be ≥ 27 units; to
+clear the hulls alone, ≥ 16.**
+
+🔴 **Not fixed, and deliberately.** It blocks no AC — AC9 is about the face and is green — and it is a change to the
+KIT's look, which is Richard's call: two lanes further apart means a taller course for the same rockets, or the same
+course with less room on it. **Ask him before moving it.** What is recorded here is the measurement, so nobody has to
+re-derive it.
+
+🔴 And the general lesson, which is the third time this phase has taught it: **the clause was true and the picture
+was the evidence.** AC9 asked "is the face ≥ 20 px" and got a truthful yes about a race that still looks wrong. See
+[[verify-the-consequence-not-just-the-mechanism]].
