@@ -7,7 +7,7 @@ the end condition, the register.
 
 | task | state |
 |---|---|
-| FED-001 Parse XML / Parse Feed | 🟢 **built, gated and driven.** AC1–AC4 + AC6 green; **AC5 not measured** |
+| FED-001 Parse XML / Parse Feed | ✅ **CLOSED.** All six ACs green; bundle delta +14.8 KB gzipped vs a 50 KB budget |
 | FED-002 Indexes a collection declares | ⬜ never built |
 | FED-003 A function calls a model | ⬜ never built |
 | FED-004 A schedule does not trip over itself | ⬜ never built |
@@ -18,20 +18,21 @@ the end condition, the register.
 with a provider dropdown; MCP stays in this phase and is built last; this phase runs beside 94/95.
 **Nothing is gated on a ruling any more.**
 
-## 2. First job, then the next task
+## 2. The next task to build
 
-**First, and it is fifteen minutes when the box is quiet: FED-001 AC5.** Two
-`noodl-viewer-react` production builds — one with `noodl-runtime.ts:304-305` (the two new
-`require` lines) commented out, one as it is — and the gzipped delta written into FED-001 §6.
-The budget is 50 KB and the evidence says it will come in far under, but *will come in under* is a
-prediction and AC5 asks for a number. **Check `uptime` first**: s1 stopped at load 18.9 with a peer
-running three webpack watchers, which is exactly when not to start this.
+**FED-002 — a collection declares its indexes.** Nothing is outstanding from FED-001 and there is
+no first job ahead of this: build it.
 
-**Then build FED-002** — `indexes` per collection in `schema.json`, unique included, and
-upsert-on-unique on create. It is what makes `Parse Feed`'s `Id` output worth having: FED-001
-guarantees the id is stable across polls, and FED-002 is what turns that into "the item lands once".
-Read FED-001 §5.2 before starting — the `id` ladder's last rung (a hash of title + published) is
-reached by real feeds and there is a fixture for it.
+`indexes` per collection in `schema.json`, unique included, and upsert-on-unique on create. It is
+what makes `Parse Feed`'s `Id` output worth having — FED-001 guarantees the id is stable across
+polls, and FED-002 is what turns that into "the item lands in the collection exactly once, however
+many people follow the source and however often the schedule fires". Today `SchemaManager` indexes
+only `createdAt` and `updatedAt`, there is no unique constraint, and dedupe is a query-then-insert
+race.
+
+**Read first:** FED-001 §5.2 — the `id` ladder's last rung is a hash of title + published, reached
+by real feeds, and `test/fixtures/feeds/no-identity.xml` is the fixture for it. An index design
+that assumes every item has a `guid` is designed against a feed that does not exist.
 
 ## 3. The phase's end condition
 

@@ -1,8 +1,7 @@
 # FED-001 — A feed is a thing you can parse
 
-**Status: 🟢 BUILT AND GATED, 2026-09-18 (s1). AC1, AC2, AC3, AC4, AC6 green. AC5 NOT MEASURED —
-it needs two webpack production builds and the box was at load 18.9 under a peer's dev stack
-(§6). It is the only thing between this row and closed.**
+**Status: ✅ CLOSED, 2026-09-18 (s1). All six ACs green, built, gated and driven over HTTP.**
+**AC5 measured: +14.8 KB gzipped against a 50 KB budget (§6).**
 
 > "It couldn't really help you keep up with your subscriptions in Reddit or Youtube or social media so
 > you don't doom scroll several platforms every day wondering if anyone has done anything new."
@@ -152,17 +151,46 @@ node's own `failure` fixed it and the case now answers in 131 ms. **This is a re
 building a feed graph, not a test artefact**, so it is written into both node docs as a pattern and
 into the worked example as two wired failure paths.
 
-## 6. What is left: AC5, and only AC5
+## 6. AC5 — measured
 
-**AC5 — "the browser bundle grows by no more than 50 KB gzipped; the number is in the task file
-when it closes."** Not measured. It needs two `noodl-viewer-react` production builds (one with the
-two `require` lines in `noodl-runtime.ts` commented out, one without) and at the point the rest of
-the work finished the box was at **load average 18.9** with a peer session's three webpack watchers
-at ~55% CPU driving phase 93. Starting two more production builds there breaks the standing
-one-heavy-job rule, and the number it produced would not be trustworthy anyway.
+Taken 2026-09-18 once the peer session tore its stack down and the box was verified free
+(`uptime`, no webpack, no Electron). Two `noodl-viewer-react` production builds, differing **only**
+in whether `noodl-runtime.ts` registers the two nodes.
 
-**What is already known about the answer:** the parser path imported is 69 KB of unminified source,
-16 KB gzipped before webpack minifies it, plus `strnum` at 19 KB unpacked, plus `xml.ts` and
-`feed.ts`. That is comfortably inside 50 KB gzipped — but *comfortably inside* is a prediction, and
-AC5 asks for a measurement. **Take it first in the next session, when the box is quiet.**
+| bundle | gzipped, without | gzipped, with | delta |
+|---|---|---|---|
+| `deploy/noodl.deploy.js` | 396,541 | 411,717 | **+15,176 B = +14.8 KB** |
+| `viewer/noodl.viewer.js` | 396,583 | 411,760 | **+15,177 B = +14.8 KB** |
+| `ssr/noodl.deploy.js` | 393,839 | 409,040 | **+15,201 B = +14.8 KB** |
 
+**+14.8 KB gzipped against a 50 KB budget — 30% of it.** That is `fast-xml-parser`'s parser path
+plus `strnum` plus `xml.ts`, `feed.ts` and the two nodes, after webpack minified all of it.
+
+### 6.1 Both arms carry a control, because a size delta is easy to fake
+
+A build that silently failed to include the parser would produce a *smaller* number and read as a
+better result. So each arm was probed for markers that exist only if the parser was actually
+bundled — `xml/entity-declaration`, `Always Array`, `attributeNamePrefix`:
+
+- **without:** all three absent (0 hits), as required.
+- **with:** all three present (1 hit each).
+
+⚠️ **The obvious probe does not work.** Grepping the control arm for `net.noodl.ParseFeed` returns
+**1**, not 0 — `nodelibraryexport.ts` carries the type name as a string literal in the add-node
+picker index, and that literal ships whether or not the node module is registered. A control built
+on that string would have read "the node is in the bundle" for an arm that contains none of its
+code. Probe for code, not for a name.
+
+Restoring `noodl-runtime.ts` afterwards was verified with `git diff HEAD`, not `git diff` — see
+§6.2.
+
+### 6.2 One process note worth the next person's time
+
+The commit was made through a temporary index (the recipe for committing only your own delta on a
+shared checkout). Its **last step — `git reset -q -- <your paths>` on the REAL index — was skipped**,
+and the consequence was immediate and misleading: `git diff` on a correctly-restored file showed
+seven phantom insertions, because `git diff` compares the working tree to the **index**, and the
+real index was still pinned at the pre-commit base. `git diff HEAD` was empty, which is the true
+answer. Left unfixed it is worse than confusing: the stale index held **37 files as staged
+deletions**, which is exactly the shape that lets a sibling's pathspec commit revert someone's
+slice. Refreshed, and the peer's 28 uncommitted files were confirmed intact afterwards.

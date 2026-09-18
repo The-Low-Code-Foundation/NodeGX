@@ -4,7 +4,7 @@
 NodeGX app at distraction.digitalbricks.io), and a capability survey of `packages/nodegx-backend`,
 `packages/noodl-viewer-cloud` and `packages/noodl-runtime` taken the same afternoon at `cline-dev`
 HEAD `f3f67874d`.
-**Status: 🚧 R1–R4 RULED (§4). FED-001 BUILT AND DRIVEN, AC5 outstanding. FED-002 is next.** **Prefix: `FED`.**
+**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 is next.** **Prefix: `FED`.**
 
 > "I'd really like the NodeGX backend to be able to handle this stuff. I want people to see NodeGX as
 > an alternative to tools like Supabase and n8n as well as a front end builder. The old Noodl made the
@@ -113,9 +113,10 @@ Asked in plain words, answered in one pass, 2026-09-18 (session 1).
 
 | task | one line | built | gated | driven |
 |---|---|---|---|---|
-| [FED-001](FED-001-A-FEED-IS-A-THING-YOU-CAN-PARSE.md) | `Parse XML` and `Parse Feed` nodes; RSS 2.0, Atom, RDF, YouTube, Reddit, podcasts → one item shape | ✅ | 🟢 5/6 | ✅ | 
+| [FED-001](FED-001-A-FEED-IS-A-THING-YOU-CAN-PARSE.md) | `Parse XML` and `Parse Feed` nodes; RSS 2.0, Atom, RDF, YouTube, Reddit, podcasts → one item shape | ✅ | ✅ 6/6 | ✅ |
 
-**FED-001, s1:** built, driven over HTTP on a real backend, 53 tests green across the two suites. **AC5 (browser bundle ≤ 50 KB gzipped) is the one thing left** — it needs two webpack production builds and the box was at load 18.9 under a peer's stack. See FED-001 §6.
+**FED-001 is CLOSED (s1):** built, gated, driven over HTTP on a provisioned backend, 53 tests green
+across the two suites, and the bundle budget measured at **+14.8 KB gzipped against 50 KB**.
 
 | [FED-002](FED-002-A-COLLECTION-DECLARES-ITS-INDEXES.md) | `indexes` per collection in `schema.json`, unique included; upsert-on-unique on create | ⬜ | ⬜ | ⬜ |
 | [FED-003](FED-003-A-FUNCTION-CALLS-A-MODEL.md) | `Model Request` cloud node: key from `Secret`, structured JSON out, usage counted, no SDK | ⬜ | ⬜ | ⬜ |
