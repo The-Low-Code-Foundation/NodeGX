@@ -1,19 +1,18 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 11.** s1–5 built and drove TVW-003. s6–s10 built TVW-001's six
-rows and closed AC1–AC6. **Session 11 drove AC7, found three defects, took Richard's rulings on all
-three, built the fixes, re-drove — and he ruled: *"looks good, all fine"*. AC7 ✅ AC8 ✅, so
-TVW-001 is CLOSED.** Two tasks unblock. Detail in TVW-001 §"AC7 — the screenshot pass",
-§"AC7 — Richard's rulings, built and re-driven" and §"AC7 ✅ and AC8 ✅".
+**Written 2026-09-18, end of session 12.** s1–5 built and drove TVW-003; s6–s11 built TVW-001 and
+closed it. **Session 12 built TVW-002 and drove it.** The strip is on screen, all four shapes, both
+themes, and the drive found one defect that no measurement could have. TVW-002 is **not closed**:
+three ACs remain and two of them need Richard, not code.
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
 | TVW-001 | The panel tells the truth | ✅ six rows + AC7's three fixes | **CLOSED — all 8 ACs** |
-| TVW-002 | The preview says what it is not showing (**unblocked**) | — | — |
+| TVW-002 | The preview says what it is not showing | ✅ 4 modules + the row | **AC3 ✅ AC4 ✅ AC7 ✅; AC1 partial, AC2 ✅, AC5 ✗, AC6 owes Richard** |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** |
-| TVW-004 | Layers (**unblocked** — 001 + 003 both closed) | — | — |
+| TVW-004 | Layers (**unblocked**) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
@@ -21,151 +20,98 @@ TVW-001 is CLOSED.** Two tasks unblock. Detail in TVW-001 §"AC7 — the screens
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 14** (TVW-003 all six; TVW-001 all eight). Two of the ten tasks are done.
+**ACs closed: 18** (TVW-003 six, TVW-001 eight, TVW-002 four). Two and a half of ten tasks.
 
-## What s11 settled
+## Start here — TVW-002's remaining three, in order
 
-**The 13 shots are in `verdicts/TVW-001/2026-09-17/`**, named `ac7-*`. 🔴 **The PNGs are
-gitignored** (`.gitignore:265`, `dev-docs/tasks/**/verdicts/**/*.png`) — they exist on this
-machine only, so a fresh clone or worktree will not have them. What *is* committed is the
-`manifest.json` (surface / state / viewport / theme / build sha per image) and the `numbers.json`
-the verdicts README requires for TVW-001, which carry every measurement quoted below. The eight AC7 asks for
-(`{corpus,cloud}-{300,240}-{light,dark}`) plus five first looks. Both widths were set by dragging
-the **real divider**, so they are the product's own clamps: `MIN_PANEL_WIDTH` is **240**, which makes
-AC7's narrow case the enforced minimum rather than an arbitrary number.
+1. 🔴 **AC6 needs Richard, and the questions are already written** — TVW-002 §"For Richard, when it
+   is driven". Show him `verdicts/TVW-002/2026-09-18/` with `open -a Preview <paths>` (markdown
+   links open nothing in his VS Code). Three things: the rewritten wording of all three shapes; the
+   **popup** question (231 corpus components live only inside a popup — is such a thing "on" the
+   page that opens it? saying yes gives it a `Go to` door that will not show it); and whether the
+   **detached** preview carries the doors or the sentence only.
+2. **AC1's outline-when-agreeing is NOT BUILT** — when the two surfaces agree, the first instance
+   should be outlined and labelled in the preview. §2 puts it on the **design-mode channel** to the
+   app client; §5 warns it must not go on `modelUpdate`, which is broadcast. Everything else in AC1
+   is driven and passing.
+3. 🔴 **AC5 is a BUILD, not a drive.** §3's citation is wrong — see TVW-002 §"AC5's premise is
+   wrong". The shape of the fix is DES-001's toast; the doors are the part that is not free.
 
-**Slice 5's JSX was correct on its first sight** — the two-element caption, the `.ScopeHeading`
-(DOM `Workbench`, CSS-uppercased, `--font-size-xs`), and *Open on the Workbench* under *Open*. The
-`MenuDialog` measuring ghost reproduced exactly as the handoffs describe.
+Then TVW-004 (Layers) is unblocked and should **import `pageReach.ts`**, not write a second walk.
 
-🔴 **The previous handoff's narrow-width worry was the wrong question.** It said to check the caption
-"does not wrap badly at 240px (that is what `CAPTION_JOIN`'s nbsp is for)". **The caption cannot
-wrap** — `white-space: nowrap` + `text-overflow: ellipsis`, and it is the only flex-shrinkable item
-in the strip. It truncates. That is the third handoff in a row whose most confident sentence was its
-wrong one; keep reading these as claims to measure, not as facts.
+## What s12 settled
 
-## Rulings — all settled
+**Four modules; three of them pure and graded.**
 
-**All four AC7 questions were ruled on 2026-09-18, all are built, and Richard closed AC7 with
-*"looks good, all fine"*.** Nothing is owed on TVW-001.
+| module | what it is |
+|---|---|
+| `pageReach.ts` | the walk: `renders` (what you can see) vs `mounts` (what runs), one pass |
+| `previewStripWords.ts` | the three shapes and every word in them |
+| `screenRoute.ts` | the preview's route → the page component it is showing |
+| `usePreviewStrip.ts` | subscriptions, the project walk, the one navigation |
 
-1. ✅ Cut "Sample values." from the caption — the second meaning of *sample* on one surface.
-2. ✅ The size controls shrink, not the sentence (`.FrameRoot` `flex-shrink: 0 → 100`, 96px floor).
-3. ✅ Stop inventing a route from the page title — **display only**, in `authoredPageUrl.ts`.
-   ⚠️ He was **re-asked** after the fallback turned out to be written out **three** times, two of
-   which decide URLs a deployed app and the dev preview actually serve. Those are deliberately
-   untouched. Do not "finish the job" there — it is a routing change and needs its own ruling.
-4. ✅ WORTHY.
+🔴 **Three measurements changed the design before a line of UI existed**, all by running the pure
+modules **offline over the 130 projects on disk**. Do this again — it is cheap, it needs no stack,
+and it caught three wrong sentences before a user could read them:
 
-**Still open, and NOT TVW-001's:** whether the Blockly logic bench gets a name of its own. It shares
-no vocabulary with the Workbench and says "test values", but still calls itself "the bench" in its
-own prose. Ask in plain words if a task needs it; do not rename it in passing.
+1. **`componentinstance.render()` returns `roots[0].render()` and nothing else.** "In the graph" is
+   not "on screen": 592 of 1504 corpus placements sit outside the page's `Page` root, **71 of them
+   components that draw**.
+2. **A screen is not one component.** Walk from the ROOT with the Router resolved, or an app shell's
+   nav bar gets a strip saying it is elsewhere while the person looks straight at it.
+3. **Shape 2's specced sentence was false for 1094 components.** *"Nothing in the app places it"*
+   over components that are placed, inside something no page reaches.
 
-## Next, in order
+✅ **The drive printed all five sentences verbatim against a prediction written before launch.**
 
-1. **Pick up TVW-002 or TVW-004** — both unblocked. TVW-002 (the preview strip) is the one the
-   phase's foundational confusion lives in (proposal §2 row 11); TVW-004 (Layers) is the bigger
-   build and needs 001 + 003, both now closed.
-2. 🔴 **Whichever you pick, open it for Richard the way s11 did** — `open -a Preview <paths>` for
-   any images. Markdown links do not open anything in his VS Code.
-4. 🔴 **TVW-002 and TVW-008 both contain wording AC7 has already ruled against** — four places:
-   TVW-002's person sentence and its shape-1 string, TVW-008 §1 and its honesty caption, all saying
-   *"sample values"* / *"not the app's data"*. That phrasing was cut from the Workbench on
-   2026-09-18 because it collides with the bench summary's "No sample data". **Both task files have
-   been annotated in place** with a section at the end, so you will see it where you build rather
-   than only here. Say the data thing once, in one vocabulary.
+## The defect the drive found, and the one the drive nearly missed
 
-## Gates at s11 (with the AC7 fixes in)
+🔴 **A translucency defect has no width.** The strip's amber is `rgba(…, 0.12)` and the row sits
+inside `.Background`, whose backdrop is the preview **checkerboard** — the checker squares showed
+straight through, in both themes. Every geometry reading was clean (28px, 653/653, 789/789, no
+truncation). Fixed with an opaque `--theme-color-bg-2` base under the wash. **Read the shot.**
 
-- `npm run test:ci`: **2985 specs, 8 failures, seed 98435, HEAD 382b716f, 67s** — the floor, the
-  same eight **by name** (3 SUB-006, 2 NDA-017, 3 SUB-011), none of them TVW's. That is now a
-  **fourth** seed agreeing (s9 46376, s10 38645, a peer's 68399, this one).
-  🔴 Exit is **1** at the floor, exactly as a real regression exits. Gate on the names in
-  `tests/test-results.json`, and delete that file first or a stale one reads as a pass.
-- `npx jest tests-unit/tvw-001`: **7 suites / 63** (was 6/54). `tvw-001 + vfn-011`: **11 / 118**.
-- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**. 🔴 zsh does not give you `PIPESTATUS` through a
-  pipe — redirect to a file and read `$?`, or you will gate on nothing.
-- CHR-002's scale gate (font-size ratchet) **−6**; hex ratchet **16/16**; `chr-004` + `chr-009`
-  **14 suites / 155** (s10 read 13/134 — the growth is a peer's).
-- Mutants: **3 red and `cmp`-proven**. ⚠️ A 4th reported `Tests: 0 total`, which is a suite that
-  **failed to compile** — not a pass. 🔴 An earlier mutant attempt *silently did not apply* (bad
-  shell escaping) and the suite passed: that is the false green the `cmp` check exists to catch.
+🔴 **AC3 first reported HELD ×5 with its known-firing control absent** — the run looked for the
+`Go to` door after the loop had ended on an `agree` component. Five negative readings with nothing
+to tell them from a drive that cannot move the preview at all. The script now re-establishes the
+door's precondition and exits non-zero if the control did not fire.
 
-## Measured this session, reusable
+## Gates at s12
 
-- ✅ **The route chip is truthful, even when it is ugly.** Driving the app to the chip's own 57-char
-  URL renders the whole Home page (4892 chars); a nonsense path renders **0**. The control is what
-  makes that a finding — a catch-all router would have rendered Home either way.
-- ✅ **s8's meta alignment holds.** At 240px every `[data-test="component-tree-meta"]` has right edge
-  **258**, warning-dot row included.
-- ✅ ***Used in* on the right fixture.** `/Components/Logic/Scroll to section` is the only corpus
-  component with 2+ **parents** (×8 over 3). Heading `Used in 3 places · 8 times`; rows 2+1+5. The
-  recorded unevenness now has a number: a row with a count is **51px**, without is **29px**.
-- ⚠️ **`Duplicate component name /#__cloud__/test` on opening the cloud fixture is NOT ours** — it is
-  `phase-80/UNOWNED-ROWS-TO-MEASURE.md:114-125`, whose reading says no editor code is implicated.
-  One fresh measurement for that row: it claims the editor sees only `TypeError: fetch failed`, but
-  here the editor showed the real cause, so either that is fixed or the `backend:update-workflow`
-  IPC is a different path from the PUT sequence it describes.
+- `npm run test:ci`: **2985 specs, 8 failures, seed 41423, HEAD 12dfbb78d, 66s** — the floor, the
+  same eight **by name** (3 SUB-011, 2 NDA-017, 3 SUB-006), a **fifth** agreeing seed.
+  🔴 Exit is **1** at the floor. Delete `tests/test-results.json` first and gate on the names; the
+  file's shape is `{overallStatus, totalCount, failedCount, failures[], seed, gitHead}`.
+- `npx jest tests-unit/tvw-002`: **3 suites / 40**. `tsc -p packages/noodl-editor --noEmit` EXIT=0.
+- **8 mutants**, each `cmp`-proven to have applied, each red with a real count. 🔴 `Tests: 0 total`
+  is a suite that failed to COMPILE, not a pass.
 
-## How the drive was done (reuse it — corrected at s11)
+## Driving TVW-002 again (reuse)
 
-Scratch profile: the live profile is `~/Library/Application Support/NodeGX/`. Copy its
-`firstRunLegal.json` into `<scratch>/profile` and write a `recently_opened_project.json` whose
-`recentProjects[]` rows carry `retainedProjectDirectory`, `latestAccessed`, `id`, `name` — pointing
-at **copies** of the projects. Then, backgrounded **as the call's own command**:
+Fixture picked by measurement: **`Prefab marketplace`** — of 57 candidate projects it is the only
+one producing all four shapes. Drive a **copy**; opening a project writes into it.
 
 ```bash
 NOODLPORT=8680 NOODL_REMOTE_DEBUG_PORT=9444 NOODL_USER_DATA_DIR=<scratch>/profile \
-  npm run dev:debug -- --quiet
+  npm run dev:debug -- --quiet        # backgrounded as the call's own command; gate on the CDP port
+node scripts/devtools/drive-tvw002-strip.js --components "…" --shots <dir> --json <file>
 ```
 
-Gate on the CDP port, never the launcher's exit code. **Warm, it was up in 60s, not 6 minutes.**
-
-**Helper (`drive.js`), worth rewriting — it is four commands over `scripts/devtools/cdp.js`:**
-`ev <expr>`, `click x y`, `rclick x y`, `drag x1 y1 x2 y2`, `shot <file>`.
-- 🔴 `cdp.js` reads `NOODL_REMOTE_DEBUG_PORT` **at require time** — set it before requiring.
-- 🔴 `dispatchClick(client, {x, y})` takes an **object**, not two numbers. `dispatchDrag` is **not
-  exported** — copy its press/move/release shape via `client.send('Input.dispatchMouseEvent', …)`.
-- 🔴 Resolve every click point with `document.elementFromPoint` first; a `MenuDialog` renders every
-  row twice, ~36px apart.
-- 🔴 `elementFromPoint` returning `NOTHING` usually means **below the fold** — the viewport is 784px
-  and the tree scrolls; set `[data-test="component-tree"]`'s `scrollTop` and re-measure.
-
-**Levers, with citations:**
-- Theme: `__wreq('./src/editor/src/models/ThemeManager.ts').ThemeManager.setMode('light'|'dark')` —
-  the persisted path. Get `__wreq` with
-  `webpackChunknoodl_editor.push([[Symbol()],{},(r)=>{window.__wreq=r;}])`. Read the result in a
-  **separate eval** from the write.
-- Panel width: drag the tall `[class*="FrameDivider-module__Divider"]`; panel width = divider x − 52
-  (`RAIL_WIDTH`). Stored **per project** in `EditorSettings` under `editor-sidebar-widths` /
-  `selection-slot`, so **it resets when you switch projects** — re-drag after every switch.
-- Selectors: panel `[data-panel-id="components"]`; rows `[data-test="component-tree-item"]`; metas
-  `[data-test="component-tree-meta"][data-tone=…]`; sections `[data-test="component-tree-section"]`;
-  caption `[data-test="bench-caption"]` (`>strong` + `>span`); summary `[data-test="bench-summary"]`;
-  scope chip `[data-test="preview-scope-chip"]`, targets `[data-test="preview-scope-target-<name>"]`.
-- Exit to launcher: the brand dot, `[class*="BrandExit"]` at ~(26,61).
+- Warm launch ≈ **60s**. The launcher opens first: click the project card (`LauncherCard-module__Title`).
+- 🔴 The scope picker's way back to app mode is the **"App preview"** row.
+  `preview-scope-target-/App` is a COMPONENT named `/App`, and the first match is the **measuring
+  ghost at y=3508** — filter to the copy inside the viewport and confirm with `elementFromPoint`.
+- 🔴 **Write drive probes to a FILE, never `node -e`.** A `\s` inside a template literal in a
+  shell-quoted argument collapses to `s`: a probe read the strip as `_DSI Atom  i n't on Home`.
+- Theme: `ThemeManager.setMode('light'|'dark')` via `__wreq`, read in a **separate** eval.
 
 ## The box
 
-**Only one dev stack per checkout** (`webpack-dev-server` hardcodes 8080; `NOODLPORT` does not move
-it). Check `node scripts/devtools/stop-dev.js --list` and `lsof -nP -iTCP:8080 -sTCP:LISTEN`, and
-**ask the peer holding it** — s9 did, s11 did, both got the box in minutes. Announce before
-teardown; it sweeps the whole checkout. `test:ci` is plain Node and safe beside a live stack;
-launching an *editor* is what kills a running `test:ci`. `dev-debug.js` truncates `.logs/dev.log`.
+One dev stack per checkout. `node scripts/devtools/stop-dev.js --list`, `lsof -nP -iTCP:8080
+-sTCP:LISTEN`, and **ask the peer** — s12 did, twice, and got the box both times within minutes.
+Announce the teardown to everyone you announced the launch to.
 
 ## Committing
 
-🔴 **The working tree carries other sessions' work.** Commit by **explicit pathspec only**; add
-untracked files first (a pathspec commit skips them). `git commit -- <paths> -F msg` fails —
-everything after `--` is a pathspec, so put `-F <file>` **before** the `--`.
-
-## Read first
-
-1. `future-projects/THREE-VIEWS-OF-ONE-APP.md` §4.3; TVW-001 §2 and §7 (the AC7 section is last).
-2. README §2 and §6. TVW-003 §6 has the selection plumbing map.
-
-## The rule that will be tempting to break
-
-**The app preview never moves because the canvas did.** s11 moved it deliberately, twice, to test
-whether the route chip named a real URL — and put it back. That is a probe, not a canvas-driven
-move; the rule is about what the *editor* does on its own.
+🔴 The working tree carries other sessions' work. Commit by **explicit pathspec**; add untracked
+files first; put `-F <file>` **before** the `--`.
