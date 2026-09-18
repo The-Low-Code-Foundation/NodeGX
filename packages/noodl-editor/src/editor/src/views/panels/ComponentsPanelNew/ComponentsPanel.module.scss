@@ -754,6 +754,55 @@
   color: var(--theme-color-fg-highlight);
 }
 
+/* TVW-005 §2 — the Layers tab while a component is being carried out of the
+   Components tab. The two tabs are exclusive, so this is the ONLY target the
+   gesture has: the rows it could be dropped between are on the tab that is not
+   showing.
+
+   🔴 Drawn with `outline`, not `border`. `.Tab` has a 2px bottom border and no
+   others; giving it a real border here would resize the tab the instant a drag
+   started, moving the target out from under a hand that is already on its way to
+   it. An outline occupies no space. */
+.TabDropStrip {
+  outline: 1px dashed var(--theme-color-primary);
+  outline-offset: -1px;
+  color: var(--theme-color-fg-default);
+}
+
+/* Over it, and it would land. The fill is `LayerDropInto`'s — one colour means
+   "this is where it goes" on both surfaces. */
+.TabDropOk {
+  outline-style: solid;
+  background-color: var(--theme-color-primary-bg);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* Over it and it would not. Deliberately quiet: the sentence saying WHY is on
+   the drag, under the cursor, and a second alarm here would compete with it. */
+.TabDropRefused {
+  outline-color: var(--theme-color-fg-muted);
+  color: var(--theme-color-fg-muted);
+}
+
+/* Says what the outline means, because an outline alone is a shape a person has
+   to have seen before. It only exists during a drag, so it cannot be clutter at
+   rest — and the wording never changes between the armed and refused states,
+   which would be text moving under a moving hand. */
+.TabDropHint {
+  margin-left: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
+
+  /* 🔴 The separator is here and not in the markup, and a photograph is why: without it the tab
+     read as the single run-on phrase "Layers drop to place". `·` is this panel's own separator —
+     `Layers · Home` in the header, `label · type` on every row — so the tab says the same thing the
+     rest of the panel would. Decoration, so the element's text stays the sentence a drive reads. */
+  &::before {
+    content: '·';
+    margin-right: var(--spacing-1);
+  }
+}
+
 /* `Layers · Home` with `in the preview` at the right — the one line that says
    which of the three things this surface is showing. */
 .LayersHeader {

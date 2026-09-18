@@ -17,6 +17,8 @@ import {
   planComponentDrop,
   planKeyboardMove,
   planRowDrag,
+  planTabHeaderDrop,
+  screenRootRow,
   shortName,
   type Legality
 } from '../../src/editor/src/views/panels/ComponentsPanelNew/layersDrag';
@@ -334,6 +336,154 @@ describe('TVW-005 layersDrag — dragging a component in from the Components tab
     });
 
     expect(plan).toEqual({ kind: 'refuse', reason: 'band', sentence: bandRefusal('/Hero') });
+  });
+});
+
+describe('TVW-005 layersDrag — the drop-target strip on the Layers tab header', () => {
+  /**
+   * 🔴 The measurement the next four cases rest on: **the first row of the tree is not the
+   * canvas's**. The app shell is drawn above every band, so a strip that dropped into "the top of
+   * the tree" would put the component in `/App` — on every page of the project at once, and in a
+   * component the canvas is not showing, which is the one thing this phase exists to stop.
+   */
+  it('drops into the root of the component the CANVAS has open, which is not the top of the tree', () => {
+    const rows = rowsOnHome();
+
+    expect(rows[0].owner).toBe('/App');
+    expect(screenRootRow(rows, CANVAS)?.path.slice(-1)[0]).toBe('page');
+  });
+
+  it('places at the END of that root — the position a drop with no row under it can honestly mean', () => {
+    const rows = rowsOnHome();
+    const plan = planTabHeaderDrop({
+      rows,
+      canvasComponent: CANVAS,
+      component: { name: '/Price Tag', kind: 'visual' },
+      canParent: allowed
+    });
+
+    expect(plan).toEqual({
+      kind: 'place',
+      component: '/Price Tag',
+      parentId: 'page',
+      owner: '/Home',
+      anchor: null,
+      side: 'end'
+    });
+  });
+
+  /**
+   * The canvas is on `/Hero` while the preview is showing Home, so every row `/Hero` owns is
+   * *inside a band*. It is still the component being edited, and a component dropped on the strip
+   * belongs to it — the band rule is about editing somebody else's file, and this is not that.
+   */
+  it('follows the canvas into a band, because the band is the thing being edited', () => {
+    const rows = rowsOnHome();
+    const plan = planTabHeaderDrop({
+      rows,
+      canvasComponent: '/Hero',
+      component: { name: '/Price Tag', kind: 'visual' },
+      canParent: allowed
+    });
+
+    expect(plan).toEqual({
+      kind: 'place',
+      component: '/Price Tag',
+      parentId: 'heroRoot',
+      owner: '/Hero',
+      anchor: null,
+      side: 'end'
+    });
+  });
+
+  it('refuses a page and a logic component in the words the tree refuses them in', () => {
+    const rows = rowsOnHome();
+    const page = planTabHeaderDrop({
+      rows,
+      canvasComponent: CANVAS,
+      component: { name: '/Pages/Checkout', kind: 'page' },
+      canParent: allowed
+    });
+    const logic = planTabHeaderDrop({
+      rows,
+      canvasComponent: CANVAS,
+      component: { name: '/Format price', kind: 'component' },
+      canParent: allowed
+    });
+
+    // Not "the same shape" — the same sentences, asserted against the drop that already had them,
+    // so a reworded refusal cannot end up meaning two things on two surfaces.
+    expect(page).toEqual(
+      planComponentDrop({
+        rows,
+        canvasComponent: CANVAS,
+        target: { key: rowFor(rows, 'strip').key, side: 'after' },
+        component: { name: '/Pages/Checkout', kind: 'page' },
+        canParent: allowed
+      })
+    );
+    expect(logic).toEqual({
+      kind: 'refuse',
+      reason: 'no-screen',
+      sentence: 'Format price has no screen. Drop it on the canvas.'
+    });
+  });
+
+  /**
+   * The canvas is on a logic component: nothing it owns is on this screen, so there is no root to
+   * drop into. A real state — it is exactly what TVW-002's strip is for — and the refusal names the
+   * *destination*, which is why it has its own reason code.
+   */
+  it('refuses when the canvas component has no screen to put it on', () => {
+    const rows = rowsOnHome();
+    const plan = planTabHeaderDrop({
+      rows,
+      canvasComponent: '/Format price',
+      component: { name: '/Price Tag', kind: 'visual' },
+      canParent: allowed
+    });
+
+    expect(screenRootRow(rows, '/Format price')).toBeUndefined();
+    expect(plan).toEqual({
+      kind: 'refuse',
+      reason: 'no-canvas-screen',
+      sentence: 'Format price has no screen. Open a page to place it.'
+    });
+  });
+
+  /**
+   * ⚠️ The order of the two questions is load-bearing. A page dropped while the canvas is on a
+   * logic component is refused *as a page* — tell someone the screen has no room for a thing that
+   * could never go on a screen and they will go looking for a different screen.
+   */
+  it('asks what the thing IS before it asks where it would go', () => {
+    const plan = planTabHeaderDrop({
+      rows: rowsOnHome(),
+      canvasComponent: '/Format price',
+      component: { name: '/Pages/Checkout', kind: 'page' },
+      canParent: allowed
+    });
+
+    expect(plan).toEqual({
+      kind: 'refuse',
+      reason: 'page',
+      sentence: 'Pages go in a Router, not on another page'
+    });
+  });
+
+  it('asks the canvas own legality rule about the root, and repeats its answer exactly', () => {
+    const plan = planTabHeaderDrop({
+      rows: rowsOnHome(),
+      canvasComponent: CANVAS,
+      component: { name: '/Price Tag', kind: 'visual' },
+      canParent: refused
+    });
+
+    expect(plan).toEqual({
+      kind: 'refuse',
+      reason: 'illegal',
+      sentence: 'This node cannot be a child of the selected node.'
+    });
   });
 });
 

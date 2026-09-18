@@ -36,6 +36,8 @@ import {
   planComponentDrop,
   planKeyboardMove,
   planRowDrag,
+  planTabHeaderDrop,
+  screenRootRow,
   type DragPlan,
   type DropSide,
   type Legality
@@ -55,10 +57,19 @@ export interface LayersDragTarget {
   ok: boolean;
 }
 
+/** What the strip on the Layers tab header is showing, if anything. */
+export type HeaderTargetState = 'ok' | 'refused';
+
 export interface LayersDragApi {
   /** The row being dragged out of Layers, if any. */
   draggingKey: string | null;
   target: LayersDragTarget | null;
+  /**
+   * The tab header's own drop target (§2's fourth row). `null` when the pointer is not on it —
+   * whether the strip is *drawn* at all is the panel's question, because only the panel knows a
+   * component drag has started.
+   */
+  headerTarget: HeaderTargetState | null;
   /** The row refusing right now, for the shake. */
   shakingKey: string | null;
   /**
@@ -76,6 +87,21 @@ export interface LayersDragApi {
   onRowDrop(row: LayerRow, side: DropSide, copy: boolean): void;
   /** ⌥↑ / ⌥↓ on the selected row. Returns the node that moved, or null. */
   moveByKeyboard(rowKey: string, direction: 'up' | 'down'): string | null;
+  /** The pointer is over the strip on the Layers tab header. */
+  onTabHeaderOver(): void;
+  /** …and has left it again, without dropping. */
+  onTabHeaderLeave(): void;
+  /** Dropped on the strip. True when something was placed — which is when the tab should open. */
+  onTabHeaderDrop(): boolean;
+}
+
+/** What the caller is told about a component that has just been placed from the tab header. */
+export interface PlacedFromHeader {
+  nodeId: string;
+  /** TVW-003's instance path for the new row: the screen root's path with the new id on the end. */
+  path: string[];
+  /** The component whose graph gained the node — the canvas's. */
+  owner: string;
 }
 
 export interface UseLayersDragOptions {
@@ -86,11 +112,27 @@ export interface UseLayersDragOptions {
   editor: unknown;
   /** Select the row that ended up moved, and put the selection back on an undo. */
   onMoved?(nodeId: string): void;
+  /**
+   * A component was placed by a drop on the tab header.
+   *
+   * ⚠️ **It is not `onMoved`, and the difference is not cosmetic.** `onMoved` hands back an id and
+   * lets the panel find the row — which works because a moved row already existed. A row that was
+   * created a moment ago is not in `rows` at all until the tree rebuilds, so the path is composed
+   * here, from the screen root this drop was planned against.
+   */
+  onPlaced?(placed: PlacedFromHeader): void;
 }
 
-export function useLayersDrag({ rows, canvasComponent, editor, onMoved }: UseLayersDragOptions): LayersDragApi {
+export function useLayersDrag({
+  rows,
+  canvasComponent,
+  editor,
+  onMoved,
+  onPlaced
+}: UseLayersDragOptions): LayersDragApi {
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [target, setTarget] = useState<LayersDragTarget | null>(null);
+  const [headerTarget, setHeaderTarget] = useState<HeaderTargetState | null>(null);
   const [shakingKey, setShakingKey] = useState<string | null>(null);
   /**
    * The row a drag started on, read during the drag by handlers that must not re-render to see it.
@@ -292,6 +334,76 @@ export function useLayersDrag({ rows, canvasComponent, editor, onMoved }: UseLay
     [planFor, endDrag, shake, editor, onMoved]
   );
 
+  /**
+   * §2's fourth row: the drop-target strip on the Layers tab header.
+   *
+   * The two tabs are exclusive, so the rows this component could be dropped between are not on the
+   * screen while it is being dragged. The strip is the destination that exists instead — **not** a
+   * doorway that opens the tab mid-drag, which §2 rules out in its own sentence ("the tab does not
+   * switch during the drag").
+   */
+  const planTabHeader = useCallback((): DragPlan | null => {
+    if (!canvasComponent) return null;
+    const dragItem = PopupLayer.instance.dragItem;
+    if (!dragItem?.component) return null;
+    return planTabHeaderDrop({
+      rows,
+      canvasComponent,
+      component: { name: dragItem.component.name, kind: dragItem.componentKind },
+      canParent
+    });
+  }, [rows, canvasComponent, canParent]);
+
+  const onTabHeaderOver = useCallback(() => {
+    if (!PopupLayer.instance.isDragging()) return;
+    const plan = planTabHeader();
+    if (!plan) return;
+    if (plan.kind === 'refuse') {
+      setHeaderTarget('refused');
+      PopupLayer.instance.indicateDropType(undefined);
+      PopupLayer.instance.setDragMessage(plan.sentence ?? undefined);
+      return;
+    }
+    setHeaderTarget('ok');
+    PopupLayer.instance.indicateDropType('add');
+    PopupLayer.instance.setDragMessage(undefined);
+  }, [planTabHeader]);
+
+  const onTabHeaderLeave = useCallback(() => {
+    setHeaderTarget(null);
+    PopupLayer.instance.indicateDropType(undefined);
+    PopupLayer.instance.setDragMessage(undefined);
+  }, []);
+
+  const onTabHeaderDrop = useCallback((): boolean => {
+    if (!PopupLayer.instance.isDragging()) return false;
+    // ⚠️ Read BEFORE the plan is applied. `rows` is the list this drop was planned against, and
+    // the moment the node is created the tree starts rebuilding into a different one.
+    const root = canvasComponent ? screenRootRow(rows, canvasComponent) : undefined;
+    const plan = planTabHeader();
+    PopupLayer.instance.dragCompleted();
+    setHeaderTarget(null);
+    PopupLayer.instance.indicateDropType(undefined);
+    PopupLayer.instance.setDragMessage(undefined);
+
+    // A refusal has already said why, for as long as the pointer was on the strip. There is no row
+    // here to shake — the strip IS the thing that was pointed at — so it simply does not happen.
+    if (!plan || plan.kind !== 'place' || !root) return false;
+
+    const result = applyDragPlan(plan, { project: ProjectModel.instance, editor: editor as never });
+    if (!result.applied || !result.nodeId) return false;
+    onPlaced?.({ nodeId: result.nodeId, path: [...root.path, result.nodeId], owner: plan.owner });
+    return true;
+  }, [rows, canvasComponent, planTabHeader, editor, onPlaced]);
+
+  // The strip stops being a target the moment the button comes up, wherever it came up.
+  useEffect(() => {
+    if (!headerTarget) return;
+    const onUp = () => setHeaderTarget(null);
+    window.addEventListener('mouseup', onUp);
+    return () => window.removeEventListener('mouseup', onUp);
+  }, [headerTarget]);
+
   const moveByKeyboard = useCallback(
     (rowKey: string, direction: 'up' | 'down'): string | null => {
       if (!canvasComponent) return null;
@@ -316,12 +428,16 @@ export function useLayersDrag({ rows, canvasComponent, editor, onMoved }: UseLay
   return {
     draggingKey,
     target,
+    headerTarget,
     shakingKey,
     isDragging,
     onRowPress,
     onRowDragStart,
     onRowDragOver,
     onRowDrop,
-    moveByKeyboard
+    moveByKeyboard,
+    onTabHeaderOver,
+    onTabHeaderLeave,
+    onTabHeaderDrop
   };
 }

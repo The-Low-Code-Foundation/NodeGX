@@ -1,0 +1,67 @@
+{
+ "page": "/Pages/Main/Home",
+ "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/TVW-005 s17 Strip",
+ "clean": true,
+ "shots": [
+  {
+   "state": "1-reorder-line-above",
+   "theme": "dark",
+   "indicator": "row:before",
+   "file": "1-reorder-line-above--dark.png"
+  },
+  {
+   "state": "1-reorder-line-above",
+   "theme": "light",
+   "indicator": "row:before",
+   "file": "1-reorder-line-above--light.png"
+  },
+  {
+   "state": "2-reorder-line-below",
+   "theme": "dark",
+   "indicator": "row:after",
+   "file": "2-reorder-line-below--dark.png"
+  },
+  {
+   "state": "2-reorder-line-below",
+   "theme": "light",
+   "indicator": "row:after",
+   "file": "2-reorder-line-below--light.png"
+  },
+  {
+   "state": "3-reparent-fill",
+   "theme": "dark",
+   "indicator": "row:inside",
+   "file": "3-reparent-fill--dark.png"
+  },
+  {
+   "state": "3-reparent-fill",
+   "theme": "light",
+   "indicator": "row:inside",
+   "file": "3-reparent-fill--light.png"
+  },
+  {
+   "state": "4-tab-strip-armed",
+   "theme": "dark",
+   "indicator": "strip:armed",
+   "file": "4-tab-strip-armed--dark.png"
+  },
+  {
+   "state": "4-tab-strip-armed",
+   "theme": "light",
+   "indicator": "strip:armed",
+   "file": "4-tab-strip-armed--light.png"
+  },
+  {
+   "state": "5-tab-strip-over",
+   "theme": "dark",
+   "indicator": "strip:ok",
+   "file": "5-tab-strip-over--dark.png"
+  },
+  {
+   "state": "5-tab-strip-over",
+   "theme": "light",
+   "indicator": "strip:ok",
+   "file": "5-tab-strip-over--light.png"
+  }
+ ]
+}

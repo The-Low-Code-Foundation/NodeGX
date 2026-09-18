@@ -95,6 +95,11 @@ export class NodeOperations {
     editor.clearSelection();
     editor.relayout();
     editor.repaint();
+
+    // TVW-005: the node is returned so a caller that had no pointer can select what it just made.
+    // The canvas's own drop had no use for it — it selects by hit-testing the point the mouse was
+    // at — and a drop on the Layers tab header has no point to hit-test.
+    return node;
   }
 
   detachNode(node) {

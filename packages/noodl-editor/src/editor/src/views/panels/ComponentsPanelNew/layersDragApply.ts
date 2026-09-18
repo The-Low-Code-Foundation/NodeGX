@@ -132,6 +132,9 @@ function applyPlace(plan: PlacePlan, context: ApplyContext): ApplyResult {
   //
   // The position is the parent's: a child is laid out by the canvas, so x/y only decide where it
   // would sit if it were ever detached, and the parent's corner is the least surprising answer.
-  editor.createNewNode(type, { x: parent.x, y: parent.y }, {}, { parent, index: indexFor(parent, plan) });
-  return { applied: true };
+  const node = editor.createNewNode(type, { x: parent.x, y: parent.y }, {}, { parent, index: indexFor(parent, plan) });
+  // The id is what the tab-header drop selects with: the row for a node that did not exist a
+  // moment ago is not in the rows this drag was planned against, so the caller composes its path
+  // from the parent's rather than looking it up in a list that is one rebuild behind.
+  return { applied: true, nodeId: node?.id };
 }

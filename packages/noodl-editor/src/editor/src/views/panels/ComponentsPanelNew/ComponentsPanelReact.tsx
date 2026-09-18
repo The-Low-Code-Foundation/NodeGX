@@ -24,7 +24,7 @@ import { benchTargetLabel } from '../../VisualCanvas/previewScope';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
 import { LayersTree } from './components/LayersTree';
-import { useLayersDrag } from './hooks/useLayersDrag';
+import { useLayersDrag, type PlacedFromHeader } from './hooks/useLayersDrag';
 import { useLayersTree } from './hooks/useLayersTree';
 import { defaultTabFor, flipTab, instancesOf, PANEL_TITLE, TAB_LABEL, tabSubjectFor, type PanelTab } from './layersTab';
 import { showUsedInPopover } from './showUsedInPopover';
@@ -143,6 +143,44 @@ export function ComponentsPanel() {
   }, []);
 
   /**
+   * TVW-005 §2 — a component is being dragged out of the Components tab right now, which is the
+   * only condition under which the Layers tab header is a place to drop something.
+   *
+   * 🔴 **`useDragDrop`'s own `draggedItem` cannot answer this.** `PopupLayer` never calls the
+   * `onDragEnd` that would clear it — `dragCompleted` (`popuplayer.ts:1294`) ends the drag without
+   * touching it — so `draggedItem` stays set for the life of the panel after the first drag, and a
+   * strip drawn from it would appear once and never leave. This is cleared on the window's own
+   * mouse-up, which is the event that genuinely ends the gesture.
+   */
+  const [componentDragging, setComponentDragging] = useState(false);
+  const handleComponentDragStart = useCallback(
+    (item: TSFixme, element: HTMLElement) => {
+      startDrag(item, element);
+      setComponentDragging(item?.type === 'component');
+    },
+    [startDrag]
+  );
+  useEffect(() => {
+    if (!componentDragging) return;
+    const onUp = () => setComponentDragging(false);
+    window.addEventListener('mouseup', onUp);
+    return () => window.removeEventListener('mouseup', onUp);
+  }, [componentDragging]);
+
+  /**
+   * The component landed. §2: *dropping on it opens Layers with the row selected* — so the tab is
+   * opened here rather than by the hook, which does not know this panel has tabs.
+   *
+   * ⚠️ The path is composed by the hook, not looked up: the row for a node created a moment ago is
+   * not in `layers.all` until the tree rebuilds on `Model.nodeAdded`.
+   */
+  const handlePlaced = useCallback(({ path, owner }: PlacedFromHeader) => {
+    setChosenTab('layers');
+    const component = ProjectModel.instance?.getComponentWithName(owner);
+    selectionStore.select('layers', component ?? null, [path]);
+  }, []);
+
+  /**
    * TVW-005 — the rows can be rearranged, and the plan is made against ALL of them.
    *
    * ⚠️ `layers.rows` is what is *visible*; a collapsed parent still owns its children, and every
@@ -162,7 +200,8 @@ export function ComponentsPanel() {
         if (row) handleSelectRow(row);
       },
       [layers.all, handleSelectRow]
-    )
+    ),
+    onPlaced: handlePlaced
   });
 
 
@@ -328,18 +367,49 @@ export function ComponentsPanel() {
           hinge actions jump between the two trees, and a jump between tabs in one panel is a
           thing a person can see happen (proposal §4.1). */}
       <div className={css['TabBar']} data-test="panel-tabs">
-        {(['layers', 'components'] as PanelTab[]).map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={classNames(css['Tab'], { [css['TabActive']]: tab === id })}
-            onClick={() => setChosenTab(id)}
-            data-test={`panel-tab-${id}`}
-            data-active={tab === id ? 'true' : 'false'}
-          >
-            {TAB_LABEL[id]}
-          </button>
-        ))}
+        {(['layers', 'components'] as PanelTab[]).map((id) => {
+          /* TVW-005 §2's fourth row: the Layers tab becomes a drop target while a component is in
+             the hand, because the rows it could be dropped between are on the tab that is not
+             showing. It is a destination, not a doorway — the tab does not switch until the drop. */
+          const isStrip = id === 'layers' && tab !== 'layers' && componentDragging;
+          return (
+            <button
+              key={id}
+              type="button"
+              className={classNames(css['Tab'], {
+                [css['TabActive']]: tab === id,
+                [css['TabDropStrip']]: isStrip,
+                [css['TabDropOk']]: isStrip && layersDrag.headerTarget === 'ok',
+                [css['TabDropRefused']]: isStrip && layersDrag.headerTarget === 'refused'
+              })}
+              onClick={() => setChosenTab(id)}
+              onMouseMove={isStrip ? layersDrag.onTabHeaderOver : undefined}
+              onMouseLeave={isStrip ? layersDrag.onTabHeaderLeave : undefined}
+              /**
+               * 🔴 **It must NOT stop propagation, and the drive is what says so.** The first
+               * version did, for tidiness — nothing else wants this mouse-up. But React dispatches
+               * from the root container, so a `stopPropagation()` here stops the NATIVE event
+               * before `body`, and `body` is where `PopupLayer` ends its own drag: it aborts the
+               * listeners it attached and clears `noodl-dragging`, and this panel clears the state
+               * that draws the strip on a window-level mouse-up. With the call in, one drop on the
+               * strip left it armed **for the life of the panel** — invisible inside a single run,
+               * and caught only because the drive's at-rest control ran again on a second one
+               * ([[a-post-drive-control-reads-the-state-the-drive-leaves]]).
+               */
+              onMouseUp={isStrip ? () => layersDrag.onTabHeaderDrop() : undefined}
+              data-test={`panel-tab-${id}`}
+              data-active={tab === id ? 'true' : 'false'}
+              data-drop-strip={isStrip ? (layersDrag.headerTarget ?? 'armed') : undefined}
+            >
+              {TAB_LABEL[id]}
+              {isStrip && (
+                <span className={css['TabDropHint']} data-test="panel-tab-drop-hint">
+                  drop to place
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {tab === 'layers' ? (
@@ -438,7 +508,7 @@ export function ComponentsPanel() {
             onDuplicate={handleDuplicate}
             onRename={handleRename}
             onOpen={handleOpen}
-            onDragStart={startDrag}
+            onDragStart={handleComponentDragStart}
             onDrop={handleDirectDrop}
             canAcceptDrop={canDrop}
             onAddComponent={handleAddComponent}

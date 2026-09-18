@@ -34,12 +34,90 @@ const opt = (n, fallback = null) => {
 const { appTarget, connect, evaluate } = require('./cdp.js');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * AC1's preview half: **where the runtime actually drew each of these nodes**, in document order.
+ *
+ * 🔴 Document order, not vertical position. A reorder that the preview honoured would move the
+ * elements in the tree whatever the layout does with them afterwards, and a `top` comparison would
+ * silently grade the CSS instead — on a row layout it would read as "nothing moved" while the DOM
+ * had been rebuilt correctly.
+ *
+ * The walk is `drive-tvw004-ac2.js`'s, reused rather than written a third time (§ the handoff):
+ * up the fibers to the first `noodlNode`, then out through `parentNodeScope.componentOwner` for the
+ * instance path. An oracle that called the viewer's own `instancePathOf` would cancel out a bug in
+ * it on both sides.
+ */
+const PREVIEW_ORDER = `(() => {
+  const fiberOf = (el) => {
+    for (const key in el) {
+      if (key.startsWith('__reactFiber$') || key.startsWith('__reactInternalInstance$')) return el[key];
+    }
+    return undefined;
+  };
+  const composite = (fiber) => {
+    let f = fiber && fiber.return;
+    while (f && typeof f.type === 'string') f = f.return;
+    return f;
+  };
+  const noodlOf = (el) => {
+    const fiber = fiberOf(el);
+    if (!fiber) return undefined;
+    let f = composite(fiber);
+    let guard = 0;
+    while (f && guard++ < 512) {
+      const props = f.stateNode && f.stateNode.props;
+      if (props && props.noodlNode) return props.noodlNode;
+      f = composite(f);
+    }
+    return undefined;
+  };
+  // 🔴 The instance node itself is never the \`noodlNode\` of an element — the component's ROOT is,
+  // and the instance appears only as an owner on the way out. So the reading is the PATH, and a
+  // sibling is located by the first element whose path passes through it. The first version of this
+  // oracle looked for the ids among the nodes and found none of the three.
+  const pathOf = (node) => {
+    const path = [node.id];
+    let cur = node;
+    for (let d = 0; d < 256; d++) {
+      const scope = cur.parentNodeScope || cur.nodeScope;
+      const owner = scope && scope.componentOwner;
+      if (!owner || owner === cur || !owner.parentNodeScope) break;
+      path.unshift(owner.id);
+      cur = owner;
+    }
+    return path;
+  };
+  const order = [];
+  const seen = new Set();
+  const all = document.querySelectorAll('*');
+  for (let i = 0; i < all.length; i++) {
+    const node = noodlOf(all[i]);
+    if (!node || !node.id) continue;
+    const path = pathOf(node);
+    const key = path.join('/');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    order.push(path);
+  }
+  return order;
+})()`;
+
 const PROJECT_DIR = opt('dir', '/Users/richardosborne/vscode_projects/NodeGX test projects/TVW-004 s15 Drive');
 /** A page with three instances under its `Page` node — the reorder is visible in the preview. */
 const PAGE = '/Pages/Main/Home';
 
 async function main() {
   const editor = await connect(await appTarget('editor'));
+  /**
+   * The preview is a second renderer and a second CDP target. It is optional: every model arm below
+   * stands without it, and an absent preview makes AC1's preview half UNGRADED rather than red.
+   */
+  let viewer = null;
+  try {
+    viewer = await connect(await appTarget('viewer'));
+  } catch (error) {
+    console.log(`(no viewer target — the preview arms will be ungraded: ${error.message})`);
+  }
   const BOOT = `(() => { if (typeof window.__wreq !== 'function' && typeof webpackChunknoodl_editor !== 'undefined') { webpackChunknoodl_editor.push([[Symbol()], {}, (r) => { window.__wreq = r; }]); } })();`;
   const ev = (expr) => evaluate(editor, `${BOOT}${expr}`);
 
@@ -240,6 +318,18 @@ async function main() {
   }
   console.log(`page ${start.pageId}: ${start.children.map((c) => c.type.split('/').pop()).join(' | ')}\n`);
 
+  /**
+   * The order the three siblings are drawn in, as the PREVIEW has it. Read before anything moves,
+   * so the claim after the drag is a change and not a shape.
+   */
+  const previewOrder = async () => {
+    if (!viewer) return null;
+    const drawn = await evaluate(viewer, PREVIEW_ORDER);
+    const ours = start.children.map((c) => drawn.findIndex((path) => path.includes(c.id)));
+    return ours.some((i) => i < 0) ? null : { ids: start.children.map((c) => c.id), at: ours };
+  };
+  const drawnBefore = await previewOrder();
+
   // ------------------------------------------------- 1. a reorder, and one undo
   const last = start.children[start.children.length - 1];
   const first = start.children[0];
@@ -260,6 +350,25 @@ async function main() {
       : moved.because
   );
 
+  /**
+   * 🔴 AC1's own words: *"sees the page reorder in the preview"*. The model arm above is about the
+   * graph; this is about what the runtime drew, and they are two claims. The drag moved the LAST
+   * sibling above the FIRST, so the element that was drawn last must now be drawn first.
+   */
+  const drawnAfter = await previewOrder();
+  arm(
+    'the PREVIEW draws them in the new order — AC1 first sentence, second half',
+    drawnBefore && drawnAfter
+      ? Boolean(
+          drawnBefore.at[drawnBefore.at.length - 1] > drawnBefore.at[0] &&
+            drawnAfter.at[drawnAfter.at.length - 1] < drawnAfter.at[0]
+        )
+      : null,
+    drawnBefore && drawnAfter
+      ? `document order was [${drawnBefore.at.join(', ')}], now [${drawnAfter.at.join(', ')}]`
+      : 'UNGRADED: the preview did not draw all three siblings'
+  );
+
   const reordered = Boolean(afterMove && afterMove.children[0].id === last.id);
   await pressUndo();
   await wait(900);
@@ -275,6 +384,15 @@ async function main() {
     reordered
       ? afterUndo.children.map((c) => c.type.split('/').pop()).join(' | ')
       : 'UNGRADED: nothing moved, so there was nothing to undo'
+  );
+
+  const drawnUndone = await previewOrder();
+  arm(
+    'and the PREVIEW goes back with it',
+    reordered && drawnBefore && drawnUndone
+      ? Boolean(drawnUndone.at.join() === drawnBefore.at.join() || drawnUndone.at[drawnUndone.at.length - 1] > drawnUndone.at[0])
+      : null,
+    drawnUndone ? `document order [${drawnUndone.at.join(', ')}]` : 'UNGRADED: no preview reading'
   );
 
   // --------------------------------------- 2. a row inside a band cannot move
@@ -395,6 +513,7 @@ async function main() {
   const failed = graded.filter((a) => !a.held);
   console.log(`\n${graded.length - failed.length}/${graded.length} graded arms held; ${result.arms.length - graded.length} ungraded.`);
   editor.close();
+  if (viewer) viewer.close();
   process.exit(failed.length ? 1 : 0);
 }
 

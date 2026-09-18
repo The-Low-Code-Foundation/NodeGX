@@ -188,3 +188,107 @@ AC1's first two sentences are green — the reorder in the model, the canvas, an
 with its sentence. Its third needs the **drop-target strip on the Layers tab header** (§6), which is
 not built. The preview half of AC1 ("the preview shows the cards above the hero") is not yet an arm:
 the reorder is read in the model, not in the viewer's DOM.
+
+## 8. Slice 2 — the strip, and the one thing that turned out not to be ours (s17, 2026-09-18)
+
+Built: `planTabHeaderDrop` / `screenRootRow` / `refuseByKind` in `layersDrag.ts`, the three header
+handlers in `useLayersDrag.ts`, the strip itself in `ComponentsPanelReact.tsx` and
+`ComponentsPanel.module.scss`, and a return value on `NodeOperations.createNewNode` so a caller with
+no pointer can select what it made. `tests-unit/tvw-005` is **22 specs** (was 15); the seven new ones
+were mutation-tested, **4 mutants, each caught**. `tsc --noEmit` 0.
+
+### 8.1 What the strip means, and the door §2 closed
+
+§2's fourth row asks for a drop-target strip on the Layers tab header, and the sentence beside it —
+*"the tab does not switch during the drag"* — rules out the other way to build it. A spring-loaded
+header (open Layers on hover, let the drag carry on into the tree) is the gesture AC1's third
+sentence literally describes, and it is the one §2 says no to. So **the strip is a destination, not
+a doorway**: dropping on it places the component at the **end of the screen's root** and opens
+Layers with the new row selected, and moving it from there is ⌥↑/⌥↓ or a second drag — both of which
+slice 1 already built.
+
+⚠️ **AC1's third sentence should be read against that.** "Drop it under the work strip" cannot
+happen in one gesture while the two tabs are exclusive; what a person does is drop on the strip and
+then move it. Richard's call if that is not what §2 meant — the question is in §10.
+
+🔴 **The root a drop lands in is the first row the CANVAS's component owns, and it is rarely the
+top of the tree.** The app shell is drawn above every band, so "the top of Layers" is `/App` — a
+component the canvas is not showing, on every page at once. It is also `find`, not `filter`: a
+component may hold more than one visual root and only the first is ever drawn
+([[a-component-instance-renders-only-its-first-visual-root]]). A spec holds both.
+
+⚠️ **The refusals are the tree's own**, reached through `refuseByKind` and `planComponentDrop`
+rather than written again — a page dropped on the strip is refused in the words it is refused in
+anywhere else, and a spec asserts the two plans are `toEqual`, not merely the same shape. The one
+new sentence is for the one new case: the canvas's component has **no screen to put it on**
+(`no-canvas-screen`, its own code so a spec cannot confuse it with the dragged component having
+none).
+
+### 8.2 🔴 `stopPropagation` on the drop killed the cleanup everybody else's drag relies on
+
+The strip's `onMouseUp` stopped propagation, for tidiness — nothing else wants that mouse-up. But
+React dispatches from the root container, so stopping there stops the **native** event before
+`body`, and `body` is where `PopupLayer` ends its own drag and where this panel clears the state
+that draws the strip. One drop on the strip left it **armed for the life of the panel**.
+
+**It is invisible inside a single run.** The drive's at-rest control is its first arm, and on the run
+that created the state it had already passed. It was caught on the second consecutive run
+([[a-post-drive-control-reads-the-state-the-drive-leaves]]) — and then the fix had to be proved on
+two consecutive runs *with no rebuild between them*, because a reload resets React state and would
+have proved the remount rather than the fix ([[a-control-pair-proves-what-you-varied-only]]).
+
+### 8.3 What the instrument got wrong, and what was over the panel
+
+- A row's `textContent` carries its usage meta as well as its name, so the drive compared the
+  product's correct sentence against `"GTM - Send Page Viewunplaced has no screen…"` and called a
+  green build red. The name comes off the `title` attribute now.
+- 🔴 **webpack-dev-server's overlay is an `about:blank` iframe the size of the window at
+  z-index 2147483647.** While it is up every row in the panel is drawn and none of them can be
+  pressed; two arms went UNGRADED on it. The reachability guard caught it (it reported *drawn but
+  not reachable*, which is what it is for) and the drive now waits it out.
+
+## 9. 🔴 AC1's preview half is blocked, and NOT by this task
+
+AC1 says *"sees the page reorder in the preview"*. It does not.
+
+**Measured three ways, and the last one is the one that matters:**
+
+1. The drag reorders the **model** (`children[]`), and one ⌘Z restores it — 10 of the drive's 11 arms.
+2. The preview's document order is **unchanged**, 4 seconds later, read through the same fiber →
+   `noodlNode` → `parentNodeScope.componentOwner` walk `drive-tvw004-ac2.js` uses.
+3. 🔴 **The same thing happens with no Layers code involved at all.** A move made straight against
+   `NodeGraphModel.detachNode`/`attachNode` in the renderer — *the very calls
+   `NodeOperations.attachNode` makes for a canvas drag* — leaves the preview exactly as it was. And
+   a spy on `ViewerConnection.send` shows the editor **does** send `nodeDetached` and then
+   `nodeAttached` with `childIndex: 0`.
+
+So the editor says the right thing and the preview does not act on it. The runtime has the whole
+chain for it — `editormodeleventshandler.ts:213` → `ComponentModel.setNodeParent`
+(`componentmodel.ts:384`) → `nodescope.ts:464` → `NodeScope.insertNodeInTree` (`:251`, which reads
+`parent.children.indexOf(model)`) — so the break is somewhere in there, and **which link** is not
+measured. What is measured is that it is not this task's: the canvas's own node drag produces those
+same two messages.
+
+⚠️ The arm stays **red** in `drive-tvw005-drag.js` rather than being softened to UNGRADED. It is the
+honest state of AC1, and a green suite with a quiet hole in it is the shape this phase keeps being
+bitten by ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+## 10. Where the ACs stand, and the two questions for Richard
+
+| AC | state |
+|---|---|
+| 1 | the reorder, the refusal and the strip are **driven**; the **preview half is red** (§9) |
+| 2 | decision: 22 specs. Order, parent, byte-identity, one undo step: 10 driven arms |
+| 3 | driven for a move, for ⌥↓ and for the strip's placement — one ⌘Z each |
+| 4 | **driven by a spy** on `NodeOperations.createNewNode`: one call, `{parent: <page id>, index: 3}` |
+| 5 | **10 shots taken**, both themes, in `verdicts/TVW-005/2026-09-18` — **Richard rules** |
+| 6 | `test:ci` — run at the end of s17 |
+
+**Q1 — AC5, the verdict.** Five states, two themes each: the 2px line above a row, the line below,
+the `primary-bg` fill for a reparent, and the tab strip armed and hovered. ⚠️ Worth a hard look at
+`3-reparent-fill--light.png`: the fill sits **inside the region TVW-004 already tints**, and in light
+it is a pale purple on a pale purple.
+
+**Q2 — AC1's third sentence.** §2 says the tab must not switch during the drag, so the strip places
+at the end of the screen and a person moves it from there (§8.1). AC1's wording ("drop it under the
+work strip") describes the gesture §2 rules out. Which is the one you want?

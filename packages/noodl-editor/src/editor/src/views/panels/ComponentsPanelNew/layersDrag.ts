@@ -58,7 +58,13 @@ export type RefusalReason =
   /** A page is a Router's child, never a node on a screen. */
   | 'page'
   /** A component with no visual root has nothing to draw on a screen. */
-  | 'no-screen';
+  | 'no-screen'
+  /**
+   * The *canvas's* component has no screen to put it on — the other end of `no-screen`, and a
+   * separate code because a spec that could not tell them apart would read a refusal about the
+   * destination as one about the thing being dragged.
+   */
+  | 'no-canvas-screen';
 
 export interface Refusal {
   kind: 'refuse';
@@ -275,9 +281,19 @@ export interface ComponentDropInput {
  * dropped on a page is not "illegal here" — a page is a Router's child anywhere, and a person who
  * is told *where* it cannot go will try somewhere else.
  */
-export function planComponentDrop(input: ComponentDropInput): DragPlan {
-  const { rows, canvasComponent, target, component, canParent } = input;
-
+/**
+ * §2's fifth and sixth rows: the two refusals that are about **what the component is**, and
+ * therefore have no opinion about where the pointer was.
+ *
+ * They are lifted out of {@link planComponentDrop} because the tab header's strip asks the same
+ * question of the same payload, and a second copy of two sentences is a second rule
+ * ([[a-check-in-a-second-pipeline-is-a-duplicate-first]]).
+ *
+ * ⚠️ The sentences are written from what the thing IS, not from where it was dropped. A page
+ * dropped on a page is not "illegal here" — a page is a Router's child *anywhere*, and a person
+ * told *where* it cannot go will simply try somewhere else.
+ */
+export function refuseByKind(component: { name: string; kind: string | undefined }): Refusal | null {
   if (component.kind === 'page' || component.kind === 'home') {
     return { kind: 'refuse', reason: 'page', sentence: 'Pages go in a Router, not on another page' };
   }
@@ -290,6 +306,14 @@ export function planComponentDrop(input: ComponentDropInput): DragPlan {
       sentence: `${shortName(component.name)} has no screen. Drop it on the canvas.`
     };
   }
+  return null;
+}
+
+export function planComponentDrop(input: ComponentDropInput): DragPlan {
+  const { rows, canvasComponent, target, component, canParent } = input;
+
+  const wrongKind = refuseByKind(component);
+  if (wrongKind) return wrongKind;
 
   const targetRow = rowByKey(rows, target.key);
   if (!targetRow) return { kind: 'refuse', reason: 'not-a-node', sentence: null };
@@ -333,6 +357,74 @@ export function planComponentDrop(input: ComponentDropInput): DragPlan {
     anchor: nodeIdOf(anchorRow),
     side
   };
+}
+
+export interface TabHeaderDropInput {
+  rows: readonly LayerRow[];
+  canvasComponent: string;
+  component: { name: string; kind: string | undefined };
+  canParent: Legality;
+}
+
+/**
+ * The row the strip drops **into**: the outermost row of the tree that the canvas's own component
+ * owns.
+ *
+ * 🔴 **The first one in the list, deliberately.** The rows are in document order and a component
+ * may hold more than one visual root — and only the first of them is ever drawn
+ * ([[a-component-instance-renders-only-its-first-visual-root]]). So the first row the canvas owns
+ * is the root of the thing a person can actually see, which is the only root a drop meaning *"put
+ * it on this screen"* can mean. Note this is rarely depth 0: the app shell is drawn above every
+ * band, so on a page the outermost row the page owns sits several levels in.
+ */
+export function screenRootRow(rows: readonly LayerRow[], canvasComponent: string): LayerRow | undefined {
+  return rows.find((row) => row.owner === canvasComponent && NODE_KINDS.has(row.kind));
+}
+
+/**
+ * §2's fourth row, second half: **the drop-target strip on the Layers tab header**.
+ *
+ * ## Why the gesture needs a strip at all
+ *
+ * The two tabs are exclusive. A component row lives in the Components tab and the rows it could be
+ * dropped between live in Layers, and **they are never on screen together** — so without a target
+ * on the tab header there is no gesture at all, which is exactly the state slice 1 shipped in.
+ *
+ * 🔴 **The tab does not switch under a moving hand** (§2). A spring-loaded header — open Layers on
+ * hover and let the drag continue into the tree — was the other way to build this and §2 rules it
+ * out in its own sentence. So the strip is a *destination*, not a doorway: dropping on it places
+ * the component and opens Layers with the new row selected. The position it lands in is the end of
+ * the screen's root, which is what a drop with no row under it can honestly mean; ⌥↑/⌥↓ and a
+ * second drag — both already built — are how it is moved from there.
+ *
+ * ⚠️ The refusals are {@link planComponentDrop}'s own, reached through the same two functions, so
+ * a page and a logic component are refused here in the words they are refused in the tree.
+ */
+export function planTabHeaderDrop(input: TabHeaderDropInput): DragPlan {
+  const { rows, canvasComponent, component, canParent } = input;
+
+  // What the thing IS, before where it would go: a page is refused in the same words wherever it
+  // is dropped, and telling someone the screen has no room for a thing that could never go on a
+  // screen would send them looking for a different screen.
+  const wrongKind = refuseByKind(component);
+  if (wrongKind) return wrongKind;
+
+  const root = screenRootRow(rows, canvasComponent);
+  if (!root) {
+    return {
+      kind: 'refuse',
+      reason: 'no-canvas-screen',
+      sentence: `${shortName(canvasComponent)} has no screen. Open a page to place it.`
+    };
+  }
+
+  return planComponentDrop({
+    rows,
+    canvasComponent,
+    target: { key: root.key, side: 'inside' },
+    component,
+    canParent
+  });
 }
 
 /**
