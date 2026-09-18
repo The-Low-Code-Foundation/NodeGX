@@ -7,7 +7,9 @@ import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import View from '../../../../shared/ListenableView';
 import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { VisualCanvas } from './VisualCanvas';
+import { PREVIEW_STRIP_ACTION, type StripAction } from './detachedStrip';
 import { previewRoutePath } from './previewRoutePath';
+import type { StripModel } from './previewStripWords';
 
 /** What the preview outlines: a TVW-003 selection path, a bare node id, or nothing. */
 type NodeSelection = readonly string[] | string | null;
@@ -33,6 +35,10 @@ export class CanvasView extends View {
     designMode?: boolean;
     onExitDesignMode?: () => void;
     designSelection?: { label: string; seq: number };
+    /** TVW-002 AC5 — the strip the editor computed, pushed into the detached window. */
+    previewStrip?: StripModel | null;
+    /** TVW-002 AC5 — set only in the detached window; a door press travels back to the editor. */
+    onStripAction?: (action: StripAction) => void;
   };
 
   /** Bumped per selection so the toast re-fires when the same node is clicked twice. */
@@ -196,6 +202,34 @@ export class CanvasView extends View {
     }
     this.root.render(React.createElement(VisualCanvas, this.props as any));
   }
+  /**
+   * TVW-002 AC5 — this copy is the detached preview window's, so it can act like it.
+   *
+   * ⚠️ **Told, never detected.** `onExitDesignMode` above fires both the bus and the IPC precisely
+   * because this view "does not know which window it is in", and that is the right answer for an
+   * idempotent request. A `Go to Home` is not idempotent: sent twice it loads the page twice. So
+   * the one renderer that *does* know — `viewer-frame/src/views/viewer.js`, which exists only in
+   * the detached window — says so once, at construction.
+   */
+  setDetachedWindow() {
+    this.props.onStripAction = (action: StripAction) => {
+      ipcRenderer.send(PREVIEW_STRIP_ACTION, action);
+    };
+    this.renderReact();
+  }
+
+  /**
+   * TVW-002 AC5 — the sentence, computed in the editor window and pushed here.
+   *
+   * ⚠️ Unlike `showDesignSelection` there is no `seq`, and deliberately: a toast is an *event* that
+   * must re-fire when the same node is clicked twice, and this is a *state* that must not re-fire
+   * when it has not changed. The row is on screen permanently now.
+   */
+  showPreviewStrip(strip: StripModel | null) {
+    this.props.previewStrip = strip;
+    this.renderReact();
+  }
+
   setCurrentRoute(route: string) {
     const protocol = process.env.ssl ? 'https://' : 'http://';
     const port = process.env.NOODLPORT || 8574;

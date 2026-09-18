@@ -28,8 +28,18 @@ import {
   transformOriginFocus
 } from '../../panels/propertyeditor/transformOriginFocus';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
-import { BENCH_MOUNT_EVENT } from '../../VisualCanvas/benchRequest';
+import {
+  activeCanvasComponentName,
+  BENCH_MOUNT_EVENT,
+  requestBenchMount
+} from '../../VisualCanvas/benchRequest';
+import {
+  PREVIEW_STRIP_ACTION,
+  PREVIEW_STRIP_PUSH,
+  type StripAction
+} from '../../VisualCanvas/detachedStrip';
 import { onPlacementOutline, type PlacementOutline } from '../../VisualCanvas/placementOutline';
+import { usePreviewStrip } from '../../VisualCanvas/usePreviewStrip';
 import { useCanvasView } from './hooks/UseCanvasView';
 import { useCaptureThumbnails } from './hooks/UseCaptureThumbnails';
 import { useImportNodeset } from './hooks/UseImportNodeset';
@@ -196,6 +206,74 @@ function EditorDocument() {
       ipcRenderer.send('viewer-select-node', null);
     }
   }, [previewMode, canvasView]);
+
+  /**
+   * TVW-002 AC5 — the strip for the **detached** window, computed here because this is the window
+   * that can compute it.
+   *
+   * 🔴 **The task file's §3 was wrong about where this lives, and the correction is structural.**
+   * It said the detached window should render the strip "reading `activeCanvasComponentName()`" —
+   * the one function that returns `undefined` there, because that window has no node graph. The
+   * editor owns the graph, the project model and the route table; the viewer owns the pixels. So
+   * this document computes the sentence and pushes it, exactly as DES-001's design toast does.
+   *
+   * ⚠️ **Only while detached.** Docked, `VisualCanvas` runs its own copy of this hook and this one
+   * is disabled — which now costs nothing, because the hook skips the project walk when it is off.
+   * Two live walks of a 165-component project on every graph event is the thing being avoided.
+   */
+  const [detachedCanvasComponent, setDetachedCanvasComponent] = useState(activeCanvasComponentName);
+
+  useEffect(() => {
+    if (!viewerDetached) return undefined;
+
+    const eventGroup = {};
+    EventDispatcher.instance.on(
+      'activeComponentChanged',
+      () => setDetachedCanvasComponent(activeCanvasComponentName()),
+      eventGroup
+    );
+    // Seeded as well as subscribed: detaching does not move the canvas, so without this the strip
+    // would be blank until the author next navigated — which is the moment they are least likely to
+    // need an explanation of where they are.
+    setDetachedCanvasComponent(activeCanvasComponentName());
+    return () => EventDispatcher.instance.off(eventGroup);
+  }, [viewerDetached]);
+
+  const {
+    strip: detachedStrip,
+    goToPage: detachedGoToPage,
+    dismiss: detachedDismiss
+  } = usePreviewStrip(detachedCanvasComponent, viewerDetached);
+
+  useEffect(() => {
+    if (!viewerDetached) return;
+    ipcRenderer.send(PREVIEW_STRIP_PUSH, detachedStrip);
+  }, [viewerDetached, detachedStrip]);
+
+  /**
+   * The return leg — ruled by Richard on 2026-09-18: the detached strip **carries its doors**.
+   *
+   * The alternative was the sentence alone, on the grounds that the detached window is deliberately
+   * close to "just the app". He ruled against a surface that explains less than another. A press
+   * therefore travels viewer → main → here, on the `viewer-request-preview-mode` precedent.
+   */
+  useEffect(() => {
+    const onAction = (_event: unknown, action: StripAction) => {
+      if (action?.kind === 'goto') detachedGoToPage(action.page);
+      else if (action?.kind === 'dismiss') detachedDismiss();
+      else if (action?.kind === 'bench' && detachedCanvasComponent) {
+        // BEN-004: the bench is a mode of the DOCKED surface. `requestBenchMount` parks the target
+        // and the handler below re-attaches, which is what this door has always meant — it is the
+        // menu item's behaviour, reached from a second place.
+        requestBenchMount(detachedCanvasComponent);
+      }
+    };
+
+    ipcRenderer.on(PREVIEW_STRIP_ACTION, onAction);
+    return () => {
+      ipcRenderer.off(PREVIEW_STRIP_ACTION, onAction);
+    };
+  }, [detachedGoToPage, detachedDismiss, detachedCanvasComponent]);
 
   /**
    * TVW-002 AC1 — where the canvas's component sits on the screen the preview is showing, published

@@ -56,6 +56,7 @@ import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './bench
 import { CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
 import { ComponentBench } from './ComponentBench';
 import { BenchFrameControl, PreviewScopeControl } from './PreviewChrome';
+import { stripToRender, type DetachedStripProps } from './detachedStrip';
 import { publishPlacementOutline } from './placementOutline';
 import { usePreviewStrip } from './usePreviewStrip';
 import {
@@ -80,14 +81,22 @@ export interface VisualCanvasProps {
   designSelection?: { label: string; seq: number };
 }
 
+/**
+ * TVW-002 AC5 — the two props that are set only when this copy is the **detached** preview
+ * window's. See `detachedStrip.ts`; the same component renders in both windows.
+ */
+export type VisualCanvasAllProps = VisualCanvasProps & DetachedStripProps;
+
 export function VisualCanvas({
   onWebView,
   deviceName,
   zoom,
   designMode,
   onExitDesignMode,
-  designSelection
-}: VisualCanvasProps) {
+  designSelection,
+  previewStrip,
+  onStripAction
+}: VisualCanvasAllProps) {
   const webviewRef = useRef<Electron.WebviewTag>(null);
   const containerRef = useRef(null);
 
@@ -150,7 +159,22 @@ export function VisualCanvas({
    * and says when the canvas has moved away with its own chip. A third claim on the same surface
    * is a third answer to "what am I looking at", which is the confusion this phase is closing.
    */
-  const { strip, outline, goToPage, dismiss } = usePreviewStrip(canvasComponent, !isBench);
+  const { strip: localStrip, outline, goToPage, dismiss } = usePreviewStrip(canvasComponent, !isBench);
+
+  /**
+   * TVW-002 AC5 — the detached window renders the editor's answer; the docked one computes its own.
+   *
+   * 🔴 **`undefined` is not `null`.** `previewStrip === undefined` means nobody is pushing to this
+   * copy, so it is the docked one and `localStrip` is the answer. `null` means the editor pushed
+   * and had nothing to say — which still draws the wordless seam, because the seam belongs to the
+   * boundary and not to the sentence. Written `?? localStrip` rather than `|| localStrip` for
+   * exactly that distinction.
+   *
+   * ⚠️ In the detached window `localStrip` is always `IDLE` anyway (no node graph, no project
+   * model), so this is not a race between two live answers — it is one answer and one placeholder.
+   */
+  const isDetached = Boolean(onStripAction);
+  const strip = stripToRender(previewStrip, localStrip);
 
   /**
    * TVW-002 AC1 — publish where the canvas's component sits on the screen, for `EditorDocument` to
@@ -524,7 +548,13 @@ export function VisualCanvas({
         — `quiet` when they agree (surface colour, a short reassuring sentence, no doors), `notice`
         when they do not. See `StripTone`.
       */}
-      <div className={css.Strip} data-test="preview-strip" data-shape={strip.shape} data-tone={strip.tone}>
+      <div
+        className={css.Strip}
+        data-test="preview-strip"
+        data-shape={strip.shape}
+        data-tone={strip.tone}
+        data-detached={isDetached ? 'true' : undefined}
+      >
         <span className={css.StripText}>
           <strong>{strip.lead}</strong>
           {strip.rest ? ' ' : ''}
@@ -536,7 +566,9 @@ export function VisualCanvas({
             <button
               key={`goto:${door.page}`}
               className={css.StripDoor}
-              onClick={() => goToPage(door.page)}
+              onClick={() =>
+                onStripAction ? onStripAction({ kind: 'goto', page: door.page }) : goToPage(door.page)
+              }
               data-test="preview-strip-goto"
             >
               {door.label}
@@ -545,7 +577,16 @@ export function VisualCanvas({
             <button
               key="bench"
               className={css.StripDoor}
-              onClick={() => canvasComponent && setScope({ mode: 'bench', target: canvasComponent })}
+              /* Detached, the bench cannot be shown in this window at all: BEN-004 made it a mode of
+                 the DOCKED surface, and `VisualCanvas` is not rendered in the editor while the
+                 preview is detached. The editor's own handler re-attaches and mounts it, which is
+                 the behaviour the menu item has had since BEN-004 — the door inherits it rather
+                 than growing a second answer. */
+              onClick={() =>
+                onStripAction
+                  ? onStripAction({ kind: 'bench' })
+                  : canvasComponent && setScope({ mode: 'bench', target: canvasComponent })
+              }
               data-test="preview-strip-bench"
             >
               {door.label}
@@ -561,7 +602,7 @@ export function VisualCanvas({
         {strip.tone === 'notice' && (
           <button
             className={css.StripDismiss}
-            onClick={dismiss}
+            onClick={() => (onStripAction ? onStripAction({ kind: 'dismiss' }) : dismiss())}
             title="Dismiss — until you open this component on this page again"
             aria-label="Dismiss"
             data-test="preview-strip-dismiss"

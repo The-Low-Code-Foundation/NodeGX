@@ -27,6 +27,10 @@ class Viewer extends View {
       }
     });
 
+    // TVW-002 AC5 — this file exists only in the detached preview's renderer, so it is the one
+    // place in the tree that can say so without guessing. The view itself deliberately cannot tell.
+    this.canvasView.setDetachedWindow();
+
     ipcRenderer.on('viewer-refresh', () => {
       this.canvasView.refresh();
       ipcRenderer.send('viewer-refreshed');
@@ -73,6 +77,14 @@ class Viewer extends View {
     // window (it owns the project model) and shown here, where the click was.
     ipcRenderer.on('viewer-design-selection', (sender, label) => {
       this.canvasView.showDesignSelection(label);
+    });
+
+    // TVW-002 AC5 — the preview strip, computed by the editor window (it owns the node graph and
+    // the project model; neither exists here) and rendered by the same React row this window
+    // already hosts. Richard ruled on 2026-09-18 that it carries its doors here too, which is what
+    // `setDetachedWindow` below is for. See `detachedStrip.ts`.
+    ipcRenderer.on('viewer-preview-strip', (sender, strip) => {
+      this.canvasView.showPreviewStrip(strip);
     });
 
     ipcRenderer.on('viewer-set-viewport-size', (sender, viewportSize) => {

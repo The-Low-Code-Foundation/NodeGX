@@ -154,7 +154,14 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
     };
   }, [counter]);
 
-  const project = useMemo(() => readProject(counter), [counter]);
+  /**
+   * ⚠️ **Gated on `enabled`, and that is not a micro-optimisation.** Since AC5 this hook runs in two
+   * places — `VisualCanvas` for the docked preview and `EditorDocument` for the detached one — and
+   * exactly one of them is live at a time. Ungated, the other would walk every component of the
+   * project on every graph event for an answer nobody reads. On the corpus fixture that is 165
+   * components per keystroke-shaped edit.
+   */
+  const project = useMemo(() => (enabled ? readProject(counter) : EMPTY_PROJECT), [counter, enabled]);
 
   const screenPage = useMemo(
     () => pageForRoute(route, pages, project.startPage),
@@ -253,6 +260,14 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
  */
 const IDLE: StripModel = seam();
 
+const EMPTY_PROJECT: ProjectShape = {
+  root: undefined,
+  components: new Map(),
+  parentsOf: new Map(),
+  pages: [],
+  startPage: undefined
+};
+
 const asPage = (name: string) => ({ page: name, label: benchTargetLabel(name) });
 
 /**
@@ -287,7 +302,7 @@ interface ProjectShape {
 /** One walk of the project into the shape `pageReach` reads. Memoised on the change counter. */
 function readProject(_counter: number): ProjectShape {
   const project = ProjectModel.instance;
-  if (!project) return { root: undefined, components: new Map(), parentsOf: new Map(), pages: [], startPage: undefined };
+  if (!project) return EMPTY_PROJECT;
 
   const components = project.getComponents();
   const index = new Map<string, ReachComponent>();

@@ -1073,7 +1073,13 @@ function launchApp() {
       'viewer-inspect-node',
       // DES-001: "Preview" on the detached preview's design-mode banner. The
       // editor window owns the mode, so the request has to travel back to it.
-      'viewer-request-preview-mode'
+      'viewer-request-preview-mode',
+      // TVW-002 AC5: a door on the detached preview's strip. Richard ruled on
+      // 2026-09-18 that the strip carries its doors there too, and the editor
+      // window is the only one that can act on one — it owns the node graph,
+      // the project model and the route table. Forwarded with its `...args`,
+      // which is what lets `Go to Home` name its page.
+      'viewer-preview-strip-action'
     ]);
 
     //events to forward from main window to viewer
@@ -1093,6 +1099,9 @@ function launchApp() {
       'viewer-hover-node',
       'viewer-transform-origin-focus',
       'viewer-design-selection',
+      // TVW-002 AC5: the strip's sentence, computed in the editor window
+      // because the detached renderer has no node graph and no project model.
+      'viewer-preview-strip',
       'viewer-capture-thumb',
       'viewer-show-inspect-menu',
       'editor-api-response'
