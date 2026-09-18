@@ -1,0 +1,132 @@
+{
+  "id": "bubble-read-a-feed-into-a-list",
+  "title": "Show the latest posts from a feed",
+  "description": "The whole of 'read a feed' with no Function node: HTTP Request fetches, Parse Feed normalises, a Repeater draws a row per item. Two things in this graph are not decoration and both cost an afternoon if you leave them out. First, HTTP Request's Response Type is set to Text rather than Auto. Auto decides what to do from the server's content-type header, and feeds are served as application/rss+xml, text/xml, application/xml and — from some real sources — text/html; worse, a server that mislabels an XML body as application/json makes Auto try to parse it as JSON and fail at the FETCH, before Parse Feed ever runs. Text says 'hand me the bytes' and is right for every feed. Second, BOTH failure paths are wired: the HTTP node's and the parser's. They are different failures — one is 'the server did not answer usably', the other is 'the answer was not a feed' — and a graph that wires only the second sits silently when the first happens. Everything after that is ordinary: items all have the same shape whether this feed was RSS, Atom or RDF, so the Repeater's Text nodes read Title and Published without knowing or caring which. Published is an ISO 8601 string, or null when the feed carried no usable date — it is left null rather than guessed, because an invented date sorts wrongly forever and silently. Note what is NOT wired: Content goes nowhere here. It is the publisher's HTML, unsanitised, and putting it straight into an HTML surface is how you inherit someone else's tracking pixels and script tags.",
+  "demonstrates": ["net.noodl.ParseFeed", "net.noodl.HTTP", "net.noodl.Log", "For Each", "Text"],
+  "components": [
+    {
+      "name": "/Latest Posts",
+      "nodes": [
+        {
+          "id": "root",
+          "type": "Group",
+          "label": "Latest posts",
+          "parameters": {
+            "flexDirection": "column"
+          },
+          "children": ["feed_title", "list"]
+        },
+        {
+          "id": "feed_title",
+          "type": "Text",
+          "label": "The feed's own title",
+          "parent": "root"
+        },
+        {
+          "id": "list",
+          "type": "For Each",
+          "label": "One row per item",
+          "parent": "root",
+          "children": ["row"]
+        },
+        {
+          "id": "row",
+          "type": "Group",
+          "label": "Row",
+          "parameters": {
+            "flexDirection": "column"
+          },
+          "parent": "list",
+          "children": ["row_title", "row_date"]
+        },
+        {
+          "id": "row_title",
+          "type": "Text",
+          "label": "Title",
+          "parent": "row"
+        },
+        {
+          "id": "row_date",
+          "type": "Text",
+          "label": "Published",
+          "parent": "row"
+        },
+        {
+          "id": "fetch",
+          "type": "net.noodl.HTTP",
+          "label": "Fetch the feed as TEXT, not Auto",
+          "parameters": {
+            "url": "https://example.com/feed.xml",
+            "method": "GET",
+            "responseType": "text"
+          }
+        },
+        {
+          "id": "parse",
+          "type": "net.noodl.ParseFeed",
+          "label": "RSS, Atom or RDF — one item shape"
+        },
+        {
+          "id": "fetch_failed_log",
+          "type": "net.noodl.Log",
+          "label": "The server did not answer usably",
+          "parameters": {
+            "level": "warning"
+          }
+        },
+        {
+          "id": "parse_failed_log",
+          "type": "net.noodl.Log",
+          "label": "The answer was not a feed",
+          "parameters": {
+            "level": "warning"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "fetch",
+          "fromProperty": "response",
+          "toId": "parse",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "parse",
+          "fromProperty": "items",
+          "toId": "list",
+          "toProperty": "items"
+        },
+        {
+          "fromId": "parse",
+          "fromProperty": "feedTitle",
+          "toId": "feed_title",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "fetch",
+          "fromProperty": "error",
+          "toId": "fetch_failed_log",
+          "toProperty": "message"
+        },
+        {
+          "fromId": "fetch",
+          "fromProperty": "failure",
+          "toId": "fetch_failed_log",
+          "toProperty": "log"
+        },
+        {
+          "fromId": "parse",
+          "fromProperty": "error",
+          "toId": "parse_failed_log",
+          "toProperty": "message"
+        },
+        {
+          "fromId": "parse",
+          "fromProperty": "failure",
+          "toId": "parse_failed_log",
+          "toProperty": "log"
+        }
+      ]
+    }
+  ]
+}

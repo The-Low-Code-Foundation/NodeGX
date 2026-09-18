@@ -133,6 +133,8 @@ export type NodeTypeName =
   | 'net.noodl.OptimisticUpdate'
   | 'net.noodl.ParentComponentObject'
   | 'net.noodl.ParseCSV'
+  | 'net.noodl.ParseFeed'
+  | 'net.noodl.ParseXML'
   | 'net.noodl.PatternExtractor'
   | 'net.noodl.RandomBytes'
   | 'net.noodl.SSE'

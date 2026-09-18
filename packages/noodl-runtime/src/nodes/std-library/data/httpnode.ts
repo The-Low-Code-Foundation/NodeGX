@@ -177,6 +177,8 @@ interface HttpNodeInstance extends NodeInstance {
     bodyType?: string;
     authType?: string;
     timeout?: number;
+    /** FED-001 §3.2 — `auto` (today's behaviour), `json` or `text`. */
+    responseType?: string;
     response?: unknown;
     statusCode?: number;
     responseHeaders?: Record<string, string>;
@@ -213,6 +215,7 @@ interface HttpNodeInstance extends NodeInstance {
   setAuthType(value: unknown): void;
   setMethod(value: unknown): void;
   setTimeout(value: unknown): void;
+  setResponseType(value: unknown): void;
 }
 
 const HttpNode: NodeDefinitionOptions = {
@@ -285,7 +288,9 @@ const HttpNode: NodeDefinitionOptions = {
       displayName: 'Response',
       group: 'Response',
       description:
-        'Body the server sent, parsed as JSON when it said so and as text otherwise; it keeps the previous body when a request never reached the server',
+        'Body the server sent, read the way Response Type says: Auto parses JSON when the server ' +
+        'said application/json and hands over text otherwise, Text always hands over text, JSON always ' +
+        'parses; it keeps the previous body when a request never reached the server',
       getter: function (this: HttpNodeInstance) {
         return this._internal.response;
       }
@@ -392,7 +397,8 @@ const HttpNode: NodeDefinitionOptions = {
         bodyType: this.setBodyType.bind(this),
         bodyFields: this.setBodyFields.bind(this),
         authType: this.setAuthType.bind(this),
-        responseMapping: this.setResponseMapping.bind(this)
+        responseMapping: this.setResponseMapping.bind(this),
+        responseType: this.setResponseType.bind(this)
       };
 
       if (configSetters[name]) {
@@ -704,13 +710,33 @@ const HttpNode: NodeDefinitionOptions = {
           clearTimeout(timeoutId);
           this._internal.abortController = null;
 
-          // Parse response based on content type
+          // FED-001 §3.2 — Response Type decides, and `auto` is what this node always did.
+          const responseType = this._internal.responseType || 'auto';
+
+          if (responseType === 'text') {
+            return response.text().then((text) => ({ response, body: text }));
+          }
+
+          if (responseType === 'json') {
+            // Asked for JSON explicitly: a body that is not JSON is an error the author wants to
+            // hear about, not a string that fails silently three nodes later.
+            return response.text().then((text) => {
+              try {
+                return { response, body: JSON.parse(text) };
+              } catch (e) {
+                throw new Error(
+                  'Response Type is JSON but the body is not JSON: ' +
+                    (e && (e as Error).message ? (e as Error).message : String(e))
+                );
+              }
+            });
+          }
+
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
             return response.json().then((json) => ({ response, body: json }));
-          } else {
-            return response.text().then((text) => ({ response, body: text }));
           }
+          return response.text().then((text) => ({ response, body: text }));
         })
         .then(({ response, body }) => {
           this.processResponse(response, body);
@@ -796,6 +822,10 @@ const HttpNode: NodeDefinitionOptions = {
 
     setTimeout: function (this: HttpNodeInstance, value: unknown) {
       this._internal.timeout = (value as number) || 30000;
+    },
+
+    setResponseType: function (this: HttpNodeInstance, value: unknown) {
+      this._internal.responseType = (value as string) || 'auto';
     }
   }
 };
@@ -1099,6 +1129,35 @@ function updatePorts(nodeId: string, parameters: Record<string, unknown>, editor
     group: 'Request',
     description:
       'Time before the request is abandoned, in milliseconds; abandoning it fires Failure, not Canceled, and 0 or blank means 30000'
+  });
+
+  /**
+   * FED-001 §3.2 — how to read the body.
+   *
+   * `auto` is what this node has always done and stays the default, so no existing graph changes.
+   * `text` exists because feeds are served as `application/rss+xml`, `text/xml`, `application/xml`
+   * and, from some sources, `text/html`, and a `Parse Feed` node downstream needs the bytes the
+   * server sent rather than this node's opinion about them.
+   */
+  ports.push({
+    name: 'responseType',
+    displayName: 'Response Type',
+    type: {
+      name: 'enum',
+      enums: [
+        { label: 'Auto', value: 'auto' },
+        { label: 'JSON', value: 'json' },
+        { label: 'Text', value: 'text' }
+      ],
+      allowEditOnly: true
+    },
+    default: 'auto',
+    plug: 'input',
+    group: 'Response',
+    description:
+      'How to read the body. Auto parses JSON when the server says application/json and hands over ' +
+      'text otherwise. Text always hands over text, whatever the server claimed — which is what an ' +
+      'XML or feed parser downstream needs. JSON always parses, and fires Failure when the body is not JSON'
   });
 
   // Response mapping - add output names, then specify JSONPath for each

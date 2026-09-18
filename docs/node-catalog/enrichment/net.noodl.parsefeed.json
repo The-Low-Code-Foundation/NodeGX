@@ -1,0 +1,43 @@
+{
+  "typeName": "net.noodl.ParseFeed",
+  "summary": "Reads an RSS, Atom or RDF feed and gives every item one shape — blog, YouTube channel, subreddit or podcast alike.",
+  "description": "Parse Feed takes a feed document and hands back Items, always an array, whatever format the feed used and however many items it carried. Each item has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. The point of the node is that the mapping is the hard part: the body is description, or content:encoded, or <content>, or buried inside <media:group> on YouTube; the date is RFC 822 on RSS and ISO 8601 on Atom and dc:date on RDF, and Published is converted to ISO 8601 or left null rather than guessed; Atom's <link> is a family of links whose first entry is usually the feed's own XML address, so a naive reader shows that to a person instead of the article; and RDF puts <item> beside <channel> rather than inside it, so a naive reader gets a title and zero items. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — because that is what lets a collection store each item exactly once however often you poll. Content is NOT sanitised: it is whatever HTML the feed shipped, tracking pixels and all, and sanitising belongs to whatever renders it. Kind tells you which format this was (rss, atom, rdf) and Source is a hint at where it came from (youtube, reddit, podcast, generic) for a graph that wants to branch. Anything the shape does not cover — yt:videoId, itunes:duration — is on Raw.",
+  "whenToUse": "Any time you are reading a feed: a blog, a news site, a YouTube channel's /feeds/videos.xml, a subreddit's .rss, a podcast, an OPML import's worth of all of them. Put an HTTP Request node in front with Response Type set to Text. For XML that is not a feed, use Parse XML.",
+  "ports": {
+    "text": "The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with Response Type set to Text.",
+    "maxBytes": "Refuse a document larger than this, before parsing it. Default 5 MB.",
+    "items": "The feed's items, always an array. Id is never empty, which is what lets a collection store each item once. Left unchanged when a parse fails.",
+    "count": "How many items the last successful parse produced.",
+    "feedTitle": "The title of the feed itself, not of any item.",
+    "feedLink": "The site the feed belongs to — its alternate link, never its own XML address.",
+    "feedDescription": "The feed's description, or an Atom feed's subtitle.",
+    "feedUpdated": "When the feed last changed, as an ISO 8601 string. Empty when it did not say.",
+    "kind": "Which format this was: rss, atom or rdf.",
+    "source": "A hint at where the feed came from: youtube, reddit, podcast or generic. A hint, not a promise.",
+    "changed": "Fires once Items and the Feed outputs hold the freshly parsed feed.",
+    "failure": "Fires when the feed could not be read, leaving Items and Count as they were.",
+    "error": "Why the feed could not be read. Empty until a parse fails.",
+    "errorCode": "feed/unrecognised when the document is XML but not a feed, otherwise the Parse XML codes."
+  },
+  "patterns": [
+    "HTTP Request (Response Type: Text) → Parse Feed `text` → For Each over `items`: the whole 'poll a source' shape, with no Function node.",
+    "Store items keyed on Id. It is stable across polls by design, so the same item does not arrive twice however often the schedule fires.",
+    "Wire BOTH failure paths — the HTTP node's and this node's. A graph that wires only the parser's Failure still hangs when the fetch itself fails, which is what a mislabelled content-type does (CWF-018).",
+    "Branch on `source` when a YouTube video and a blog post should be shown differently, and read the rest off `raw`."
+  ],
+  "antiPatterns": [
+    "Rendering `content` without sanitising it. It is the publisher's HTML, unaltered, and this node says so rather than quietly changing it.",
+    "Leaving Response Type on Auto. It works for honestly-labelled feeds and fails on the ones that are not, which includes sources that serve XML as text/html.",
+    "Treating `published` as always present. It is null when the feed carried no usable date, on purpose — an invented date sorts wrongly forever and silently.",
+    "Using `title` as the identity. Titles get edited after publication; Id does not."
+  ],
+  "relatedNodes": [
+    "net.noodl.ParseXML",
+    "net.noodl.HTTP",
+    "net.noodl.ParseCSV",
+    "For Each"
+  ],
+  "examples": [
+    "bubble-read-a-feed-into-a-list"
+  ]
+}

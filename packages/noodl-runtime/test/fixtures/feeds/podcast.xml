@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 fixture: RSS 2.0 with the itunes: vocabulary and audio enclosures. Synthetic. -->
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Two Hours On A Bench</title>
+    <link>https://twohours.example/</link>
+    <description>Long conversations with people who fix things</description>
+    <language>en-gb</language>
+    <itunes:author>Two Hours</itunes:author>
+    <itunes:image href="https://twohours.example/art/cover.jpg"/>
+    <lastBuildDate>Thu, 17 Sep 2026 06:00:00 +0100</lastBuildDate>
+    <item>
+      <title>Episode 62 — The last typewriter mechanic</title>
+      <link>https://twohours.example/62</link>
+      <guid isPermaLink="false">twohours-062</guid>
+      <pubDate>Thu, 17 Sep 2026 06:00:00 +0100</pubDate>
+      <itunes:author>Two Hours</itunes:author>
+      <itunes:duration>01:52:10</itunes:duration>
+      <itunes:image href="https://twohours.example/art/062.jpg"/>
+      <itunes:keywords>repair, typewriters, obsolescence</itunes:keywords>
+      <description>Forty years of ribbons, platens and people who would not let go.</description>
+      <content:encoded><![CDATA[<p>Forty years of ribbons, platens &amp; people who would not let go.</p>]]></content:encoded>
+      <enclosure url="https://twohours.example/audio/062.mp3" length="91234567" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 61 — Bicycle wheels, by hand</title>
+      <link>https://twohours.example/61</link>
+      <guid isPermaLink="false">twohours-061</guid>
+      <pubDate>Thu, 10 Sep 2026 06:00:00 +0100</pubDate>
+      <itunes:duration>02:04:41</itunes:duration>
+      <itunes:image href="https://twohours.example/art/061.jpg"/>
+      <description>Spoke tension is a feeling before it is a number.</description>
+      <enclosure url="https://twohours.example/audio/061.mp3" length="104112233" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>

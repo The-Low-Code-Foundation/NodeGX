@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 fixture: the shape reddit.com/r/<sub>/.rss emits — Atom with HTML-escaped bodies
+     and a rel="self" on every entry. Synthetic: invented subreddit, invented authors. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <category term="fixtureworkshop" label="r/fixtureworkshop"/>
+  <updated>2026-09-17T08:14:22+00:00</updated>
+  <icon>https://www.redditstatic.com/icon.png/</icon>
+  <id>/r/fixtureworkshop/.rss</id>
+  <link rel="self" href="https://www.reddit.com/r/fixtureworkshop/.rss" type="application/atom+xml"/>
+  <link rel="alternate" href="https://www.reddit.com/r/fixtureworkshop" type="text/html"/>
+  <subtitle>Tools, jigs and the things we make with them</subtitle>
+  <title>Workshop</title>
+  <entry>
+    <author><name>/u/fixture_user_one</name><uri>https://www.reddit.com/user/fixture_user_one</uri></author>
+    <category term="fixtureworkshop" label="r/fixtureworkshop"/>
+    <content type="html">&lt;!-- SC_OFF --&gt;&lt;div class="md"&gt;&lt;p&gt;Finally squared the fence &amp;amp; it cuts true.&lt;/p&gt;&lt;/div&gt;&lt;!-- SC_ON --&gt;</content>
+    <id>t3_fixture01</id>
+    <link href="https://www.reddit.com/r/fixtureworkshop/comments/fixture01/squared_the_fence/"/>
+    <updated>2026-09-17T07:50:10+00:00</updated>
+    <published>2026-09-17T07:50:10+00:00</published>
+    <title>Squared the fence at last</title>
+  </entry>
+  <entry>
+    <author><name>/u/fixture_user_two</name></author>
+    <category term="fixtureworkshop" label="r/fixtureworkshop"/>
+    <content type="html">&lt;div class="md"&gt;&lt;p&gt;What grit do you stop at?&lt;/p&gt;&lt;/div&gt;</content>
+    <id>t3_fixture02</id>
+    <link href="https://www.reddit.com/r/fixtureworkshop/comments/fixture02/what_grit/"/>
+    <updated>2026-09-16T19:02:00+00:00</updated>
+    <published>2026-09-16T19:02:00+00:00</published>
+    <title>What grit do you stop at?</title>
+  </entry>
+</feed>

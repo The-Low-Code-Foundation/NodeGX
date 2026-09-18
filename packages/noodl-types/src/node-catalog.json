@@ -35293,7 +35293,7 @@
             "name": "*"
           },
           "isSignal": false,
-          "description": "Body the server sent, parsed as JSON when it said so and as text otherwise; it keeps the previous body when a request never reached the server"
+          "description": "Body the server sent, read the way Response Type says: Auto parses JSON when the server said application/json and hands over text otherwise, Text always hands over text, JSON always parses; it keeps the previous body when a request never reached the server"
         },
         {
           "name": "responseHeaders",
@@ -36663,6 +36663,323 @@
           },
           "isSignal": false,
           "description": "The parsed rows — records when Has Header is ticked, arrays of cells when it is not. Every cell is a string, including columns that look numeric. Unchanged while the CSV cannot be parsed"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null
+    },
+    {
+      "typeName": "net.noodl.ParseFeed",
+      "displayName": "Parse Feed",
+      "category": "Data",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "browser",
+        "cloud"
+      ],
+      "providedBy": "noodl-runtime",
+      "ssr": {
+        "compat": "safe"
+      },
+      "docs": "https://docs.noodl.net/nodes/data/array/parse-feed",
+      "inputs": [
+        {
+          "name": "maxBytes",
+          "displayName": "Max Bytes",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 5242880,
+          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file"
+        },
+        {
+          "name": "text",
+          "displayName": "Feed",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "isSignal": false,
+          "description": "The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with its Response Type set to Text: feeds are served as application/rss+xml, text/xml and, from some sources, text/html, and Text is what guarantees the body arrives untouched"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "changed",
+          "displayName": "Changed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once Items and the Feed outputs hold the freshly parsed feed"
+        },
+        {
+          "name": "count",
+          "displayName": "Count",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "How many items the last successful parse produced"
+        },
+        {
+          "name": "error",
+          "displayName": "Error",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Why the feed could not be read; empty until a parse fails"
+        },
+        {
+          "name": "errorCode",
+          "displayName": "Error Code",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A stable code for the failure, for a graph that branches rather than reads: feed/unrecognised when the document is XML but not a feed, otherwise the Parse XML codes (xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty)"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when the feed could not be read, leaving Items and Count as they were"
+        },
+        {
+          "name": "feedDescription",
+          "displayName": "Feed Description",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The feed's description, or an Atom feed's subtitle"
+        },
+        {
+          "name": "feedLink",
+          "displayName": "Feed Link",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The site the feed belongs to — its alternate link, never its own XML address"
+        },
+        {
+          "name": "feedTitle",
+          "displayName": "Feed Title",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The title of the feed itself, not of any item"
+        },
+        {
+          "name": "feedUpdated",
+          "displayName": "Feed Updated",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "When the feed last changed, as an ISO 8601 string; empty when it did not say"
+        },
+        {
+          "name": "items",
+          "displayName": "Items",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "array"
+          },
+          "isSignal": false,
+          "description": "The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Unchanged while the feed cannot be parsed"
+        },
+        {
+          "name": "kind",
+          "displayName": "Kind",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Which format this was: rss, atom or rdf"
+        },
+        {
+          "name": "source",
+          "displayName": "Source",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A hint at where the feed came from, for a graph that wants to branch: youtube, reddit, podcast or generic. A hint, not a promise — generic is what an unrecognised source gets and it is not a failure"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null
+    },
+    {
+      "typeName": "net.noodl.ParseXML",
+      "displayName": "Parse XML",
+      "category": "Data",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "browser",
+        "cloud"
+      ],
+      "providedBy": "noodl-runtime",
+      "ssr": {
+        "compat": "safe"
+      },
+      "docs": "https://docs.noodl.net/nodes/data/array/parse-xml",
+      "inputs": [
+        {
+          "name": "alwaysArray",
+          "displayName": "Always Array",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "",
+          "description": "Comma-separated tag names that are always an array, however many times they appear. Without this, a document with one <item> and a document with ten have different shapes and everything downstream needs a branch"
+        },
+        {
+          "name": "attributePrefix",
+          "displayName": "Attribute Prefix",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "@",
+          "description": "What an attribute's key starts with, so it cannot collide with a child element of the same name. With the default, <a href=\"x\"/> is { \"@href\": \"x\" }"
+        },
+        {
+          "name": "maxBytes",
+          "displayName": "Max Bytes",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 5242880,
+          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
+        },
+        {
+          "name": "text",
+          "displayName": "XML",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "isSignal": false,
+          "description": "The XML text to parse. Wire an HTTP Request node's Response here with its Response Type set to Text, so the body reaches this node untouched whatever content-type the server claimed"
+        },
+        {
+          "name": "trimValues",
+          "displayName": "Trim Values",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Strip leading and trailing whitespace from text. Untick it to keep a document's indentation"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "changed",
+          "displayName": "Changed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once Result holds the freshly parsed document"
+        },
+        {
+          "name": "error",
+          "displayName": "Error",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Why the XML could not be read; empty until a parse fails"
+        },
+        {
+          "name": "errorCode",
+          "displayName": "Error Code",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A stable code for the failure, for a graph that branches rather than reads: xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when the XML could not be parsed or was refused, leaving Result as it was"
+        },
+        {
+          "name": "result",
+          "displayName": "Result",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "object"
+          },
+          "isSignal": false,
+          "description": "The document as an object. Every value is a string, including ones that look numeric — an id of 0123 stays \"0123\". A tag carrying both attributes and text becomes { \"@attr\": \"…\", \"#text\": \"…\" }. Unchanged while the XML cannot be parsed"
         }
       ],
       "dynamicPorts": null,

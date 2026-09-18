@@ -765,7 +765,11 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
             // these two would have been registered and invisible — which is exactly how the
             // parser inside Static Array stayed authoring-only for years.
             'net.noodl.ParseCSV',
-            'net.noodl.ToCSV'
+            'net.noodl.ToCSV',
+            // FED-001, and the same sentence applies: a type absent from this index is
+            // unreachable in the add-node picker however well it is registered.
+            'net.noodl.ParseXML',
+            'net.noodl.ParseFeed'
           ]
         },
         {

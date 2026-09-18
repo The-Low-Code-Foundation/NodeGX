@@ -12,6 +12,7 @@
   "dependencies": {
     "@nodegx/project-contract": "file:../nodegx-project-contract",
     "@noodl/backend-contract": "file:../nodegx-backend-contract",
+    "fast-xml-parser": "^4.5.7",
     "lodash.difference": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   },

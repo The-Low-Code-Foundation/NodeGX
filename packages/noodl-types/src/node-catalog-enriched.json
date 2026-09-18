@@ -38398,7 +38398,7 @@
             "name": "*"
           },
           "isSignal": false,
-          "description": "Body the server sent, parsed as JSON when it said so and as text otherwise; it keeps the previous body when a request never reached the server"
+          "description": "Body the server sent, read the way Response Type says: Auto parses JSON when the server said application/json and hands over text otherwise, Text always hands over text, JSON always parses; it keeps the previous body when a request never reached the server"
         },
         {
           "name": "responseHeaders",
@@ -40055,6 +40055,404 @@
           "Static Data",
           "Filter Collection",
           "Map Collection"
+        ]
+      }
+    },
+    {
+      "typeName": "net.noodl.ParseFeed",
+      "displayName": "Parse Feed",
+      "category": "Data",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "browser",
+        "cloud"
+      ],
+      "providedBy": "noodl-runtime",
+      "ssr": {
+        "compat": "safe"
+      },
+      "docs": "https://docs.noodl.net/nodes/data/array/parse-feed",
+      "inputs": [
+        {
+          "name": "maxBytes",
+          "displayName": "Max Bytes",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 5242880,
+          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file"
+        },
+        {
+          "name": "text",
+          "displayName": "Feed",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "isSignal": false,
+          "description": "The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with its Response Type set to Text: feeds are served as application/rss+xml, text/xml and, from some sources, text/html, and Text is what guarantees the body arrives untouched"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "changed",
+          "displayName": "Changed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once Items and the Feed outputs hold the freshly parsed feed"
+        },
+        {
+          "name": "count",
+          "displayName": "Count",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "How many items the last successful parse produced"
+        },
+        {
+          "name": "error",
+          "displayName": "Error",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Why the feed could not be read; empty until a parse fails"
+        },
+        {
+          "name": "errorCode",
+          "displayName": "Error Code",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A stable code for the failure, for a graph that branches rather than reads: feed/unrecognised when the document is XML but not a feed, otherwise the Parse XML codes (xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty)"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when the feed could not be read, leaving Items and Count as they were"
+        },
+        {
+          "name": "feedDescription",
+          "displayName": "Feed Description",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The feed's description, or an Atom feed's subtitle"
+        },
+        {
+          "name": "feedLink",
+          "displayName": "Feed Link",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The site the feed belongs to — its alternate link, never its own XML address"
+        },
+        {
+          "name": "feedTitle",
+          "displayName": "Feed Title",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The title of the feed itself, not of any item"
+        },
+        {
+          "name": "feedUpdated",
+          "displayName": "Feed Updated",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "When the feed last changed, as an ISO 8601 string; empty when it did not say"
+        },
+        {
+          "name": "items",
+          "displayName": "Items",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "array"
+          },
+          "isSignal": false,
+          "description": "The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Unchanged while the feed cannot be parsed"
+        },
+        {
+          "name": "kind",
+          "displayName": "Kind",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Which format this was: rss, atom or rdf"
+        },
+        {
+          "name": "source",
+          "displayName": "Source",
+          "group": "Feed",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A hint at where the feed came from, for a graph that wants to branch: youtube, reddit, podcast or generic. A hint, not a promise — generic is what an unrecognised source gets and it is not a failure"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null,
+      "enrichment": {
+        "typeName": "net.noodl.ParseFeed",
+        "summary": "Reads an RSS, Atom or RDF feed and gives every item one shape — blog, YouTube channel, subreddit or podcast alike.",
+        "description": "Parse Feed takes a feed document and hands back Items, always an array, whatever format the feed used and however many items it carried. Each item has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. The point of the node is that the mapping is the hard part: the body is description, or content:encoded, or <content>, or buried inside <media:group> on YouTube; the date is RFC 822 on RSS and ISO 8601 on Atom and dc:date on RDF, and Published is converted to ISO 8601 or left null rather than guessed; Atom's <link> is a family of links whose first entry is usually the feed's own XML address, so a naive reader shows that to a person instead of the article; and RDF puts <item> beside <channel> rather than inside it, so a naive reader gets a title and zero items. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — because that is what lets a collection store each item exactly once however often you poll. Content is NOT sanitised: it is whatever HTML the feed shipped, tracking pixels and all, and sanitising belongs to whatever renders it. Kind tells you which format this was (rss, atom, rdf) and Source is a hint at where it came from (youtube, reddit, podcast, generic) for a graph that wants to branch. Anything the shape does not cover — yt:videoId, itunes:duration — is on Raw.",
+        "whenToUse": "Any time you are reading a feed: a blog, a news site, a YouTube channel's /feeds/videos.xml, a subreddit's .rss, a podcast, an OPML import's worth of all of them. Put an HTTP Request node in front with Response Type set to Text. For XML that is not a feed, use Parse XML.",
+        "ports": {
+          "text": "The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with Response Type set to Text.",
+          "maxBytes": "Refuse a document larger than this, before parsing it. Default 5 MB.",
+          "items": "The feed's items, always an array. Id is never empty, which is what lets a collection store each item once. Left unchanged when a parse fails.",
+          "count": "How many items the last successful parse produced.",
+          "feedTitle": "The title of the feed itself, not of any item.",
+          "feedLink": "The site the feed belongs to — its alternate link, never its own XML address.",
+          "feedDescription": "The feed's description, or an Atom feed's subtitle.",
+          "feedUpdated": "When the feed last changed, as an ISO 8601 string. Empty when it did not say.",
+          "kind": "Which format this was: rss, atom or rdf.",
+          "source": "A hint at where the feed came from: youtube, reddit, podcast or generic. A hint, not a promise.",
+          "changed": "Fires once Items and the Feed outputs hold the freshly parsed feed.",
+          "failure": "Fires when the feed could not be read, leaving Items and Count as they were.",
+          "error": "Why the feed could not be read. Empty until a parse fails.",
+          "errorCode": "feed/unrecognised when the document is XML but not a feed, otherwise the Parse XML codes."
+        },
+        "examples": [
+          "bubble-read-a-feed-into-a-list"
+        ],
+        "patterns": [
+          "HTTP Request (Response Type: Text) → Parse Feed `text` → For Each over `items`: the whole 'poll a source' shape, with no Function node.",
+          "Store items keyed on Id. It is stable across polls by design, so the same item does not arrive twice however often the schedule fires.",
+          "Wire BOTH failure paths — the HTTP node's and this node's. A graph that wires only the parser's Failure still hangs when the fetch itself fails, which is what a mislabelled content-type does (CWF-018).",
+          "Branch on `source` when a YouTube video and a blog post should be shown differently, and read the rest off `raw`."
+        ],
+        "antiPatterns": [
+          "Rendering `content` without sanitising it. It is the publisher's HTML, unaltered, and this node says so rather than quietly changing it.",
+          "Leaving Response Type on Auto. It works for honestly-labelled feeds and fails on the ones that are not, which includes sources that serve XML as text/html.",
+          "Treating `published` as always present. It is null when the feed carried no usable date, on purpose — an invented date sorts wrongly forever and silently.",
+          "Using `title` as the identity. Titles get edited after publication; Id does not."
+        ],
+        "relatedNodes": [
+          "net.noodl.ParseXML",
+          "net.noodl.HTTP",
+          "net.noodl.ParseCSV",
+          "For Each"
+        ]
+      }
+    },
+    {
+      "typeName": "net.noodl.ParseXML",
+      "displayName": "Parse XML",
+      "category": "Data",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "browser",
+        "cloud"
+      ],
+      "providedBy": "noodl-runtime",
+      "ssr": {
+        "compat": "safe"
+      },
+      "docs": "https://docs.noodl.net/nodes/data/array/parse-xml",
+      "inputs": [
+        {
+          "name": "alwaysArray",
+          "displayName": "Always Array",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "",
+          "description": "Comma-separated tag names that are always an array, however many times they appear. Without this, a document with one <item> and a document with ten have different shapes and everything downstream needs a branch"
+        },
+        {
+          "name": "attributePrefix",
+          "displayName": "Attribute Prefix",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "@",
+          "description": "What an attribute's key starts with, so it cannot collide with a child element of the same name. With the default, <a href=\"x\"/> is { \"@href\": \"x\" }"
+        },
+        {
+          "name": "maxBytes",
+          "displayName": "Max Bytes",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 5242880,
+          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
+        },
+        {
+          "name": "text",
+          "displayName": "XML",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "isSignal": false,
+          "description": "The XML text to parse. Wire an HTTP Request node's Response here with its Response Type set to Text, so the body reaches this node untouched whatever content-type the server claimed"
+        },
+        {
+          "name": "trimValues",
+          "displayName": "Trim Values",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Strip leading and trailing whitespace from text. Untick it to keep a document's indentation"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "changed",
+          "displayName": "Changed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once Result holds the freshly parsed document"
+        },
+        {
+          "name": "error",
+          "displayName": "Error",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Why the XML could not be read; empty until a parse fails"
+        },
+        {
+          "name": "errorCode",
+          "displayName": "Error Code",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A stable code for the failure, for a graph that branches rather than reads: xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when the XML could not be parsed or was refused, leaving Result as it was"
+        },
+        {
+          "name": "result",
+          "displayName": "Result",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "object"
+          },
+          "isSignal": false,
+          "description": "The document as an object. Every value is a string, including ones that look numeric — an id of 0123 stays \"0123\". A tag carrying both attributes and text becomes { \"@attr\": \"…\", \"#text\": \"…\" }. Unchanged while the XML cannot be parsed"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null,
+      "enrichment": {
+        "typeName": "net.noodl.ParseXML",
+        "summary": "Turns XML text that arrived at runtime into an object, with attributes prefixed and hostile documents refused rather than parsed.",
+        "description": "Parse XML reads XML text into a plain object. An element's attributes arrive under keys prefixed with @ (so <a href=\"x\"/> is { \"@href\": \"x\" }) and a tag that carries both attributes and text keeps its text under #text — which is the shape that catches everyone, because String(node.title) on such a tag gives [object Object] and not the words. Namespace prefixes are kept, deliberately: content:encoded and yt:videoId are how you tell one kind of item from another, and stripping the prefix would collide media:title with title. Every value is a string, the same rule Parse CSV set — an id of 0123 stays \"0123\" and never becomes the number 123. Always Array names tags that must be an array however many times they appear, so a document with one <item> and a document with ten have the same shape and nothing downstream needs a branch. Two guards run before parsing rather than during it: a document over Max Bytes is refused, and a document that declares its own entities (<!ENTITY>, or a DOCTYPE with an inline subset) is refused outright — that is the billion-laughs attack, where a dozen lines expand to gigabytes, and no feed or document format legitimately needs it. Both fail on Failure with a code on Error Code, in milliseconds, leaving the process alive.",
+        "whenToUse": "XML arriving from anywhere at runtime: an RSS or Atom feed, a SOAP or sitemap response, a supplier's export, an upload. For a feed specifically, use Parse Feed instead — it is this node plus the mapping that turns four incompatible feed formats into one item shape. Pair either with an HTTP Request node whose Response Type is Text, so the body reaches you untouched whatever content-type the server claimed.",
+        "ports": {
+          "text": "The XML text to parse. Wire an HTTP Request node's Response here with Response Type set to Text.",
+          "attributePrefix": "What an attribute's key starts with, so it cannot collide with a child element of the same name. Default '@'.",
+          "alwaysArray": "Comma-separated tag names that are always an array, however many times they appear.",
+          "trimValues": "Strip leading and trailing whitespace from text. Untick to keep a document's indentation.",
+          "maxBytes": "Refuse a document larger than this, before parsing it. Default 5 MB.",
+          "result": "The document as an object. Every value is a string. A tag with attributes and text becomes { \"@attr\": \"…\", \"#text\": \"…\" }. Left unchanged when a parse fails.",
+          "changed": "Fires once Result holds the freshly parsed document.",
+          "failure": "Fires when the XML could not be parsed or was refused, leaving Result as it was.",
+          "error": "Why the XML could not be read. Empty until a parse fails.",
+          "errorCode": "A stable code for the failure: xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty."
+        },
+        "examples": [
+          "bubble-read-an-xml-response"
+        ],
+        "patterns": [
+          "HTTP Request (Response Type: Text) → Parse XML `text`. Text is what guarantees the body arrives untouched — a server that labels XML as application/json will otherwise break the fetch itself, before this node runs.",
+          "Set Always Array for any tag you will loop over. Without it, a document that happens to carry one of something gives you an object where you expected a list.",
+          "Wire `failure` somewhere that answers the caller. A cloud function whose only wired path is the happy one hangs forever when the document is bad (CWF-018)."
+        ],
+        "antiPatterns": [
+          "Expecting numbers. Every value is a string; convert explicitly where you need one.",
+          "Reading a tag's text with String(node.tag) when the tag also has attributes — that gives [object Object]. Read node.tag['#text'].",
+          "Raising Max Bytes to take any document a server offers. The object costs several times the text in memory, and a server can always send more than you expected.",
+          "Using this for a feed and writing the RSS-versus-Atom mapping by hand. Parse Feed already did it, including the four cases that are easy to get wrong."
+        ],
+        "relatedNodes": [
+          "net.noodl.ParseFeed",
+          "net.noodl.ParseCSV",
+          "net.noodl.HTTP",
+          "Static Data"
         ]
       }
     },
@@ -44658,6 +45056,18 @@
           "description": "Gap between the icon and the text beside it",
           "index": 24,
           "allowVisualStates": true
+        },
+        {
+          "name": "keepsFocus",
+          "displayName": "Keeps Focus",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into"
         },
         {
           "name": "label",
@@ -63043,8 +63453,8 @@
     "version": "1.0.0",
     "docs": "docs/node-catalog/ENRICHMENT.md",
     "coverage": {
-      "documented": 177,
-      "total": 177
+      "documented": 179,
+      "total": 179
     }
   },
   "compatibility": {
@@ -65312,6 +65722,152 @@
       ]
     },
     {
+      "id": "bubble-read-a-feed-into-a-list",
+      "title": "Show the latest posts from a feed",
+      "description": "The whole of 'read a feed' with no Function node: HTTP Request fetches, Parse Feed normalises, a Repeater draws a row per item. Two things in this graph are not decoration and both cost an afternoon if you leave them out. First, HTTP Request's Response Type is set to Text rather than Auto. Auto decides what to do from the server's content-type header, and feeds are served as application/rss+xml, text/xml, application/xml and — from some real sources — text/html; worse, a server that mislabels an XML body as application/json makes Auto try to parse it as JSON and fail at the FETCH, before Parse Feed ever runs. Text says 'hand me the bytes' and is right for every feed. Second, BOTH failure paths are wired: the HTTP node's and the parser's. They are different failures — one is 'the server did not answer usably', the other is 'the answer was not a feed' — and a graph that wires only the second sits silently when the first happens. Everything after that is ordinary: items all have the same shape whether this feed was RSS, Atom or RDF, so the Repeater's Text nodes read Title and Published without knowing or caring which. Published is an ISO 8601 string, or null when the feed carried no usable date — it is left null rather than guessed, because an invented date sorts wrongly forever and silently. Note what is NOT wired: Content goes nowhere here. It is the publisher's HTML, unsanitised, and putting it straight into an HTML surface is how you inherit someone else's tracking pixels and script tags.",
+      "demonstrates": [
+        "net.noodl.ParseFeed",
+        "net.noodl.HTTP",
+        "net.noodl.Log",
+        "For Each",
+        "Text"
+      ],
+      "components": [
+        {
+          "name": "/Latest Posts",
+          "nodes": [
+            {
+              "id": "root",
+              "type": "Group",
+              "label": "Latest posts",
+              "parameters": {
+                "flexDirection": "column"
+              },
+              "children": [
+                "feed_title",
+                "list"
+              ]
+            },
+            {
+              "id": "feed_title",
+              "type": "Text",
+              "label": "The feed's own title",
+              "parent": "root"
+            },
+            {
+              "id": "list",
+              "type": "For Each",
+              "label": "One row per item",
+              "parent": "root",
+              "children": [
+                "row"
+              ]
+            },
+            {
+              "id": "row",
+              "type": "Group",
+              "label": "Row",
+              "parameters": {
+                "flexDirection": "column"
+              },
+              "parent": "list",
+              "children": [
+                "row_title",
+                "row_date"
+              ]
+            },
+            {
+              "id": "row_title",
+              "type": "Text",
+              "label": "Title",
+              "parent": "row"
+            },
+            {
+              "id": "row_date",
+              "type": "Text",
+              "label": "Published",
+              "parent": "row"
+            },
+            {
+              "id": "fetch",
+              "type": "net.noodl.HTTP",
+              "label": "Fetch the feed as TEXT, not Auto",
+              "parameters": {
+                "url": "https://example.com/feed.xml",
+                "method": "GET",
+                "responseType": "text"
+              }
+            },
+            {
+              "id": "parse",
+              "type": "net.noodl.ParseFeed",
+              "label": "RSS, Atom or RDF — one item shape"
+            },
+            {
+              "id": "fetch_failed_log",
+              "type": "net.noodl.Log",
+              "label": "The server did not answer usably",
+              "parameters": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "parse_failed_log",
+              "type": "net.noodl.Log",
+              "label": "The answer was not a feed",
+              "parameters": {
+                "level": "warning"
+              }
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "fetch",
+              "fromProperty": "response",
+              "toId": "parse",
+              "toProperty": "text"
+            },
+            {
+              "fromId": "parse",
+              "fromProperty": "items",
+              "toId": "list",
+              "toProperty": "items"
+            },
+            {
+              "fromId": "parse",
+              "fromProperty": "feedTitle",
+              "toId": "feed_title",
+              "toProperty": "text"
+            },
+            {
+              "fromId": "fetch",
+              "fromProperty": "error",
+              "toId": "fetch_failed_log",
+              "toProperty": "message"
+            },
+            {
+              "fromId": "fetch",
+              "fromProperty": "failure",
+              "toId": "fetch_failed_log",
+              "toProperty": "log"
+            },
+            {
+              "fromId": "parse",
+              "fromProperty": "error",
+              "toId": "parse_failed_log",
+              "toProperty": "message"
+            },
+            {
+              "fromId": "parse",
+              "fromProperty": "failure",
+              "toId": "parse_failed_log",
+              "toProperty": "log"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "bubble-read-a-pasted-csv",
       "title": "Let someone paste a CSV and read it into records",
       "description": "Parse CSV is the node for CSV that ARRIVES at runtime — pasted, uploaded or fetched — as opposed to Static Data, which is for CSV you type into the graph while building. With Has Header ticked the first row names the properties and Items is an array of records; untick it and Items is an array of rows, each an array of cells. The one thing to plan for is that every cell comes out a STRING: there is no type inference, so a column that looks numeric gives you \"42\" and not 42, and a comparison against a number will be false everywhere until you convert. That is a deliberate choice rather than an omission — guessing types is how a column of postcodes loses its leading zeros. Two more behaviours that save a support ticket each: a leading byte-order mark, which is exactly what Excel writes when it saves UTF-8, is stripped so the first column keeps its name rather than becoming a field nothing matches; and Delimiter needs changing to `;` for many European exports, where a comma is the decimal separator. Failure leaves Items and Count holding what they held before, which is why the error is logged rather than ignored — without that wire, a paste that fails to parse looks exactly like a paste that did nothing, and the person tries again with the same file.",
@@ -65397,6 +65953,119 @@
             {
               "fromId": "parse",
               "fromProperty": "error",
+              "toId": "parse_failed_log",
+              "toProperty": "message"
+            },
+            {
+              "fromId": "parse",
+              "fromProperty": "failure",
+              "toId": "parse_failed_log",
+              "toProperty": "log"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bubble-read-an-xml-response",
+      "title": "Read an XML response that is not a feed",
+      "description": "A supplier's export, a sitemap, a SOAP reply: XML that arrives at runtime and is not a feed. Parse XML turns it into a plain object and then it is ordinary graph work. Three things about the shape it hands you, each of which catches people once. Attributes arrive under keys prefixed with @, so <tool id=\"t1\"> becomes { \"@id\": \"t1\" } and cannot collide with a child element called id. A tag that carries BOTH attributes and text keeps its text under #text — so <name lang=\"en\">Bench tools</name> is { \"@lang\": \"en\", \"#text\": \"Bench tools\" }, and reading it as if it were a plain string gives you [object Object] rather than the words. And every value is a string, the same rule Parse CSV set: an id of 0123 stays \"0123\" and never silently becomes the number 123. Always Array is set to 'tool' here, and that is the setting worth understanding. XML has no way to say 'this is a list', so a document with ten <tool> elements gives you an array and a document with one gives you a single object — and the graph that worked all week breaks on the day a supplier ships one item. Naming the tag in Always Array makes it an array in both cases. Max Bytes is left at its default: a document larger than it is refused BEFORE parsing, as is any document that declares its own entities, which is the billion-laughs attack. Both fail on Failure with a code on Error Code, in milliseconds, rather than taking the process with them — so wiring Failure somewhere is what turns that guard into something a person finds out about.",
+      "demonstrates": [
+        "net.noodl.ParseXML",
+        "net.noodl.HTTP",
+        "net.noodl.Log",
+        "For Each",
+        "Text"
+      ],
+      "components": [
+        {
+          "name": "/Supplier Catalogue",
+          "nodes": [
+            {
+              "id": "root",
+              "type": "Group",
+              "label": "Catalogue",
+              "parameters": {
+                "flexDirection": "column"
+              },
+              "children": [
+                "list"
+              ]
+            },
+            {
+              "id": "list",
+              "type": "For Each",
+              "label": "One row per tool",
+              "parent": "root",
+              "children": [
+                "row_label"
+              ]
+            },
+            {
+              "id": "row_label",
+              "type": "Text",
+              "label": "Tool label",
+              "parent": "list"
+            },
+            {
+              "id": "fetch",
+              "type": "net.noodl.HTTP",
+              "label": "Fetch as TEXT, whatever the server claims",
+              "parameters": {
+                "url": "https://example.com/catalogue.xml",
+                "method": "GET",
+                "responseType": "text"
+              }
+            },
+            {
+              "id": "parse",
+              "type": "net.noodl.ParseXML",
+              "label": "tool is ALWAYS an array, even when there is one",
+              "parameters": {
+                "alwaysArray": "tool",
+                "attributePrefix": "@",
+                "trimValues": true
+              }
+            },
+            {
+              "id": "fetch_failed_log",
+              "type": "net.noodl.Log",
+              "label": "The server did not answer usably",
+              "parameters": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "parse_failed_log",
+              "type": "net.noodl.Log",
+              "label": "Refused or unreadable — read Error Code",
+              "parameters": {
+                "level": "warning"
+              }
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "fetch",
+              "fromProperty": "response",
+              "toId": "parse",
+              "toProperty": "text"
+            },
+            {
+              "fromId": "fetch",
+              "fromProperty": "error",
+              "toId": "fetch_failed_log",
+              "toProperty": "message"
+            },
+            {
+              "fromId": "fetch",
+              "fromProperty": "failure",
+              "toId": "fetch_failed_log",
+              "toProperty": "log"
+            },
+            {
+              "fromId": "parse",
+              "fromProperty": "errorCode",
               "toId": "parse_failed_log",
               "toProperty": "message"
             },
