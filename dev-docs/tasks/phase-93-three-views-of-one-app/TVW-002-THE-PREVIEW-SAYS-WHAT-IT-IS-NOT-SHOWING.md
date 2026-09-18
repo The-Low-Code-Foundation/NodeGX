@@ -146,7 +146,8 @@ All three are downstream of TVW-001 AC7's rulings; none is a matter of taste.
 
 ### Next
 
-AC1, AC2, AC5 and AC6 need the drive; AC3 is instrumented in it. The fixture is picked by
+AC1, AC2 and AC6 need the drive; AC3 is instrumented in it. **AC5 needs a build first — see
+below.** The fixture is picked by
 measurement, not by guess: **`Noodl projects/Prefab marketplace`** (165 components, 11 routed
 pages) produces all four shapes, with these exact sentences —
 
@@ -165,3 +166,35 @@ that control, "the preview did not move" cannot be told apart from "this drive c
 ⚠️ **Drive a COPY.** ⚠️ The probe that picked the fixture reads legacy `project.json` files only, so
 the populations above are measured on legacy projects; a v2 project goes through the same model and
 is worth one look in the drive.
+
+### 🔴 AC5's premise is wrong, and the correction is a build, not a drive
+
+§3 says the strip "must render in the detached window too, reading `activeCanvasComponentName()`
+`:67-69`". Measured, that is the one function that cannot work there — and `benchRequest.ts` says so
+in its own doc comment, four lines further down than the citation.
+
+What is actually true:
+
+- the detached preview is a **separate `BrowserWindow`** (`main.js:551`, `FloatingWindow`) loading
+  `src/frames/viewer-frame/index.html`, a different renderer;
+- that renderer **does** build a `CanvasView`, so `VisualCanvas` — and therefore the strip's host —
+  really is rendered there. §3's instinct was right;
+- but it has **no node graph and no project**: `NodeGraphContextTmp.nodeGraph` is `null` and
+  `ProjectModel.instance` is not that window's. So `usePreviewStrip` correctly computes *nothing*
+  there, and the strip is absent rather than wrong. ✅ No crash — `NodeLibrary.instance` is a static
+  initialiser, so the subscriptions are safe in that renderer.
+
+**The buildable shape, with a precedent already in the tree.** DES-001's design-mode toast has this
+exact problem and solves it: the editor window owns the project model, resolves the click to a
+label, and pushes it with `viewer-design-selection`, which `viewer.js:74` renders. The strip is the
+same shape — the editor computes the `StripModel` (the hook already does) and pushes it on a
+`viewer-preview-strip` channel added to `forwardIpcEvents` (`main.js:1080`).
+
+⚠️ **The doors are the part that is not free.** A toast is one-way; the strip has two buttons. A
+click in the viewer renderer has to travel back — `viewer.js` already sends upward
+(`viewer-navigation-state`), so the channel exists, but it is a third process in the loop and
+nothing about it can be graded without a drive.
+
+**For Richard, with the other two questions:** in the detached preview, should the strip carry its
+doors, or say the sentence only? The detached window is deliberately close to "just the app", and
+two editor buttons on it is a different promise from a line of explanation.
