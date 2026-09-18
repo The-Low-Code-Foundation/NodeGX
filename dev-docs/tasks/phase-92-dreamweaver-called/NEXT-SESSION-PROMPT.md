@@ -60,8 +60,12 @@ afterwards**. Three commits this session did exactly that and the index was empt
   tpl008-todo-drive **21/21** (64 s), `noodl-runtime` LocalSQLAdapter **90/90**,
   `library:date-picker -- --check` and `library:check` exit 0, `typecheck:mcp` / `typecheck:runtime`
   / backend `tsc` exit 0.
-- ⚠️ **`library:icons:check` exits 1** — `no icon: modules/game-kit`, **P95's**, from `fd7cc4700`.
-  Attributed, not inherited, not fixed. Both peers told.
+- ⚠️ **`library:icons:check` exited 1** — `no icon: modules/game-kit`. ✅ **Fixed by P95 in `a85a74be7`,
+  79/79, exit 0.** 🔴 **My attribution was wrong and P95 measured it:** I named `fd7cc4700`, which
+  touches only `kit.js` and its generated index. The icon gate (`45d8f4c66`) predates game-kit's shelf
+  entry (`6384bf321`), and `game-kit/icon.png` has never existed in git history — so the entry was one
+  short from the day it was added, not from P95's work. **A red gate plus a recent commit in the same
+  area is not attribution** ([[a-url-filtered-capture-attributes-nothing-to-a-producer]]).
 - **NOT run:** `test:ci`, and no drive of any kind — P93 held the box and had a dev stack up for the
   window in which either would have run.
 

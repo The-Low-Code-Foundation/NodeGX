@@ -213,8 +213,10 @@ The intent was never guessed: TPL-008's own s5–s7b notes were in the pile, and
 built, graded and deployed. Graded again here before committing rather than inherited: tpl008 gates
 **43/43**, backend **21/21**, runtime adapters **90/90**, the date-picker drift gate and
 `library:check` **exit 0**, `typecheck:mcp` / `typecheck:runtime` / backend `tsc` clean.
-⚠️ `library:icons:check` is red on `no icon: modules/game-kit` — **P95's**, from `fd7cc4700`,
-attributed and not fixed here.
+⚠️ `library:icons:check` was red on `no icon: modules/game-kit` — ✅ fixed by P95 in `a85a74be7`.
+🔴 I first blamed `fd7cc4700`; P95 measured that the entry has been short since `6384bf321` and that
+`game-kit/icon.png` has never existed in git history. A red gate beside a recent commit is a
+coincidence until someone reads the history.
 
 **So the working tree now holds nothing but P93's seven in-flight TVW-002 files.** The moment those
 are committed, `build-editor.ts` will run without `--skip-git` and the `.app` this task photographs
