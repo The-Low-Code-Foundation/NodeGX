@@ -17,11 +17,17 @@
   padding: 3px;
 }
 
+/* CHR-010: was `text-align: center` with the glyph inline and a hardcoded
+   `marginRight: 10px` at the call site. A core-ui <Icon> is `display: block`,
+   so the row is a centred flex line and the gap is a token. */
 .queryeditor-add-filter-group-inner {
   background-color: var(--theme-color-bg-2);
   color: var(--theme-color-fg-default-shy);
   padding: 10px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2-5);
   flex-grow: 1;
 }
 
@@ -193,10 +199,14 @@
   color: var(--theme-color-fg-highlight);
 }
 
+/* CHR-010: the caret is a core-ui <Icon> with a fixed 12px box, and the global
+   `box-sizing: border-box` (style.css:26) would spend that whole box on a
+   `padding-left` — a zero-width glyph. `margin-left: auto` already pushes it to
+   the right edge, so the separation is a margin, outside the box. */
 .queryeditor-caret-icon {
   margin-left: auto;
   align-self: center;
-  padding-left: 15px;
+  margin-right: var(--spacing-0-5);
 }
 
 .queryeditor-dropdown {

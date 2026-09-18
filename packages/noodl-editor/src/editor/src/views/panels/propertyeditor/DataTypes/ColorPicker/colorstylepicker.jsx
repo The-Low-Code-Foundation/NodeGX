@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { StylesModel } from '@noodl-models/StylesModel';
 
-import { IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
 import { IconButtonVariant, IconButton } from '@noodl-core-ui/components/inputs/IconButton';
 
 import { escapeHtml } from '../../../../../utils/escapeHtml';
@@ -290,10 +290,10 @@ function ColorStyleItem(props) {
     >
       <div className="variant-item-name">{props.style.name}</div>
       <div className="variants-item-icon" onClick={onEditClicked}>
-        <i className="fa fa-edit" />
+        <Icon icon={IconName.Pencil} size={IconSize.Small} />
       </div>
       <div className="variants-item-icon" onClick={onDeleteClicked}>
-        <i className="fa fa-trash" />
+        <Icon icon={IconName.Trash} size={IconSize.Small} />
       </div>
       <div className="color-thumbnail" onClick={onColorClicked}>
         <div className="color-thumbnail-content" style={{ backgroundColor: props.style.style }} />

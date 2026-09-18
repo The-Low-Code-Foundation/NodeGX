@@ -27,8 +27,8 @@
  * against it, so the number is comparable even if not philosophically exact.
  *
  * Permanent exemptions (never counted, listed in `exclude` below):
- *   - Vendored third-party CSS we do not own or edit: Font Awesome.
- *     (`packages/noodl-editor/src/assets/lib/fontawesome/`)
+ *   - `colors.css`, where the palette's hex literals are DEFINED.
+ *     (Font Awesome's vendored CSS stood here until CHR-010 deleted it.)
  *
  * Documented in-source exemptions (counted, but explained where they live):
  *   - The Lessons tutorial popup's light cream card + sage-teal accent in

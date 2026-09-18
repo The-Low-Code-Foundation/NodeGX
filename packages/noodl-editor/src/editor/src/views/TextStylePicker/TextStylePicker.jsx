@@ -243,10 +243,10 @@ function TextStyleItem(props) {
         <span style={css}>{props.style.name}</span>
       </div>
       <div className="variants-item-icon" onClick={onEditClicked}>
-        <i className="fa fa-edit" />
+        <Icon icon={IconName.Pencil} size={IconSize.Small} />
       </div>
       <div className="variants-item-icon" onClick={onDeleteClicked}>
-        <i className="fa fa-trash" />
+        <Icon icon={IconName.Trash} size={IconSize.Small} />
       </div>
       <div className="textstyles-edit-style" onClick={onEditStyleClicked} ref={popupAnchorRef}>
         <Icon icon={IconName.Sliders} UNSAFE_style={{ width: 20, height: 20 }} />

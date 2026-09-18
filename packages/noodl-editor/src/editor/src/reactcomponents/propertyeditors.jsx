@@ -8,6 +8,7 @@ const ColorPicker = require('../views/panels/propertyeditor/DataTypes/ColorPicke
 const { ContentPicker } = require('../views/panels/propertyeditor/components/ContentPicker');
 const { loadFontItems } = require('../views/panels/propertyeditor/components/fontItems');
 const PopupLayer = require('../views/popuplayer').default;
+const { Icon, IconName, IconSize } = require('@noodl-core-ui/components/common/Icon');
 
 require('./propertyeditors.css');
 
@@ -278,7 +279,12 @@ function EnumProperty(props) {
         style={{ display: 'flex', alignItems: 'center', flexGrow: 1, position: 'relative' }}
       >
         {labelForCurrentValue}
-        <i className="property-input-dropdown-arrow fa fa-caret-down" style={{ position: 'absolute', right: '10px' }} />
+        <Icon
+          icon={IconName.CaretDown}
+          size={IconSize.Tiny}
+          UNSAFE_className="property-input-dropdown-arrow"
+          UNSAFE_style={{ position: 'absolute', right: '10px' }}
+        />
         {dropdown}
       </div>
     </div>

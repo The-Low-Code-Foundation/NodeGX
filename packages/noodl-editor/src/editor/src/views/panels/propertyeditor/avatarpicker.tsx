@@ -3,6 +3,8 @@ import React from 'react';
 import { AVATAR_VARIATIONS, avatarSeed, requiresAttribution } from '@noodl-utils/avatargenerator';
 import { generateAvatar, installedAvatarStyles } from '@noodl-utils/avatarstyles';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 import Tooltip from '../../../reactcomponents/tooltip';
 
 // Styles — the search header and the popout chrome are the icon picker's, deliberately: this is the
@@ -89,7 +91,7 @@ export function AvatarPicker({ initialKeyword, onAvatarSelected }: AvatarPickerP
         style={{ display: 'flex', paddingRight: '5px', paddingTop: '5px', paddingBottom: '3px' }}
       >
         <div style={{ flexGrow: 0, width: '35px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <i style={{ verticalAlign: 'middle', margin: '0 auto' }} className="fa fa-search search-icon" />
+          <Icon icon={IconName.Search} size={IconSize.Small} UNSAFE_className="search-icon" />
         </div>
         <input
           className="iconpicker-search-input"

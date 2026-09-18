@@ -122,7 +122,7 @@ function BigPageItem(props) {
             ref={popupAnchor}
             onClick={(evt) => props.onPageActionsClicked(popupAnchor.current, evt)}
           >
-            <i className="fa fa-ellipsis-h"></i>
+            <Icon icon={IconName.DotsThreeHorizontal} size={IconSize.Small} />
           </div>
         </div>
       </div>
@@ -303,7 +303,8 @@ export class Pages extends React.Component {
           // @ts-expect-error
           ref={(el) => (this.popupAnchor = el)}
         >
-          <i className="fa fa-plus" style={{ marginRight: '5px' }}></i>Add new page
+          <Icon icon={IconName.Plus} size={IconSize.Small} UNSAFE_style={{ marginRight: 'var(--spacing-1-5)' }} />
+          Add new page
         </div>
       </div>
     );

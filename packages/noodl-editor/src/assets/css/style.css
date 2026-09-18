@@ -542,12 +542,17 @@ textarea {
   justify-content: flex-end;
 }
 
+/* CHR-010: the glyph is a core-ui <Icon> (`display: block`), so a button can no
+   longer rely on Chromium centring inline content. Centre it explicitly. */
 .sidebar-panel-edit-button {
   width: 33px;
   height: 33px;
   background-color: transparent;
   color: var(--theme-color-fg-default);
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-fullwidth-button {
@@ -666,12 +671,19 @@ textarea {
   display: flex;
 }
 
+/* CHR-010: glyph + label, with the glyph now a `display: block` <Icon>. The row
+   is an explicit centred flex line and the gap is a token, not a hardcoded
+   margin at the call site. */
 .sidebar-panel-footer-button {
   background-color: var(--theme-color-bg-2);
   color: var(--theme-color-fg-muted);
   height: 100%;
   flex-grow: 1;
   border: 1px solid var(--base-color-neutral-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
   /* border-top-width: 2px;*/
 }
 

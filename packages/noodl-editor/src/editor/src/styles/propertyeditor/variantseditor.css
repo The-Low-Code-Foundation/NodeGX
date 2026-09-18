@@ -90,15 +90,11 @@
   font-size: var(--font-size-sm);
 }
 
-.variants-header .fa {
-  padding-top: 2px;
-}
-
-.variants-add-header > i.fa {
-  margin-left: auto;
-  margin-right: 3px;
-}
-
+/* CHR-010: the two rules that stood here keyed on Font Awesome's `.fa` class —
+   a `padding-top: 2px` baseline nudge for a glyph drawn as text, and the
+   right-push for the header's `+`. Both are gone with the font: a core-ui
+   <Icon> is centred by the header's own flex box, and the `+` now shares the
+   `.add-button` rule below with the identical "Create new page" header. */
 .variants-add-header .add-button {
   margin-left: auto;
   margin-right: 0px;

@@ -55,7 +55,6 @@ const HOST_SUPPLIED = new Set([
 const EXCLUDE = [
   'index.bundle.js',
   'main.bundle.js',
-  '/assets/lib/fontawesome/',
   '/node_modules/',
   '/dist/'
 ];

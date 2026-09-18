@@ -4,8 +4,6 @@
     "packages/noodl-core-ui/src"
   ],
   "exclude": [
-    "packages/noodl-editor/src/assets/lib/fontawesome/css/font-awesome.css",
-    "packages/noodl-editor/src/assets/lib/fontawesome/css/font-awesome.min.css",
     "packages/noodl-core-ui/src/styles/custom-properties/colors.css",
     "packages/noodl-core-ui/src/styles/custom-properties/fonts.css"
   ],

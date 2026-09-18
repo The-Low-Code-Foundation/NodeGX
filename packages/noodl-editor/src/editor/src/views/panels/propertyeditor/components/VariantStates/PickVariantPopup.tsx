@@ -2,6 +2,8 @@ import React from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { PickVariantItem } from './PickVariantItem';
 
@@ -151,7 +153,7 @@ export class PickVariantPopup extends React.Component<PickVariantPopupProps, Sta
       header = (
         <div onClick={this.onCreateNewVariantClicked.bind(this)} className="variants-header variants-add-header">
           <div>Create new variant</div>
-          <i className="fa fa-plus" />
+          <Icon icon={IconName.Plus} size={IconSize.Small} UNSAFE_className="add-button" />
         </div>
       );
     }
@@ -171,7 +173,7 @@ export class PickVariantPopup extends React.Component<PickVariantPopupProps, Sta
             }}
           >
             <div className="variants-add-icon" style={{ marginLeft: '10px', opacity: 1 }}>
-              <i className="fa fa-close" />
+              <Icon icon={IconName.Close} size={IconSize.Small} />
             </div>
             <div className="variant-item-name" style={{ paddingLeft: '0px' }}>
               Remove variant from node

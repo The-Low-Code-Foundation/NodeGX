@@ -151,7 +151,7 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
 | [CHR-007](./CHR-007-THE-ROWS-BECOME-DESCRIPTORS.md) ✅ | The dispatch is `WIDGET_RULES` (an ordered table, no imports) and `describeRows` answers a node's rows without a DOM; `renderParams` draws descriptors. Characterisation committed first (`e3bafda8d`, 176 types / 1,982 ports / 43 synthetic). **20/20 panels identical** before/after; `test:ci` at the eight. Not built, by measurement: the `groupKey` migration (no slot exists), `TabGroup.name` (would badge a non-port), the one-clear hash (§6.2) | audit §4 | CHR-001 |
 | [CHR-008](./CHR-008-THE-PANEL-IS-ONE-TREE.md) 🟡 | Rows render as siblings in one React tree from those descriptors; the four decorators become props on one `PropertyRow`; the panel is keyed by node id and stops remounting; group-level gating (R8). **Slice 1 built s8: R8** — a group with two or more switched-off rows draws ONE line (+ `Turn on` where one press has one meaning); Richard's condition *"no same error repeated on 5 lines successively"* is a catalog gate (`chr-008/repeatedSentences`, 13 offending groups → 0) and driven (most gate texts in any group: 1; §6.4–6.5). **Slice 2 built s9: §3.4 identity** — measured first on 0.2.4: the remount never lost the panel's place (FB-017 restores it), it cost a **blink** (blank, rows at scroll 0, jump: 8 / 4 in-between frames per reselect); now **0 / 0**, and the reverted arm reads 8 / 4 again on the same build (§7). **Slice 3 built s10: §3.2 + the §3.1 scaffold** — the four decorators become props on one `PropertyRow`, `RowHost` is deleted and the rows are siblings in one tree (§9). §3.5 measured first (§8): a rebuild takes the **caret**, not the scroll. 🔴 The first commit of slice 3 shipped a half-broken FB-017 AC4 that jest and `tsc` both passed — the drive caught it (§9.6). §3.1's widget conversions, §3.6, §3.8 not built | audit §4 | CHR-007 |
 | [CHR-009](./CHR-009-THE-PANEL-DESIGNED.md) 🟡 | The mockup, built: one label column, one control height, units in the field, gutter dot, paired rows, a real chevron (R6, R7). Slices 1–9 approved; §16 greyed per-side hint **approved** (s23). **s23: §3.6's verdict set shot for the first time** (8 fresh nodes × docked/wide × both themes, §18) — it found STYLE-004's `Style` block on Text/Button untouched ⇒ **slice 10: `Preset` (Richard's label) and `Size` as rows**, driven, awaits his look. AC2 over the set: 2 sizes and one label x everywhere; fills ≤3 / radii ≤2 unmet (§18.6) | mockup | CHR-002, CHR-003, CHR-004, CHR-008 |
-| [CHR-010](./CHR-010-THE-LAST-ICON-FONT.md) | The 22 Font Awesome glyphs become `Icon`; the FA stylesheet is unlinked; the text-glyph chevron goes | audit §4 | CHR-008 |
+| [CHR-010](./CHR-010-THE-LAST-ICON-FONT.md) 🟡 | **Built s32, UNDRIVEN.** Font Awesome 4.7 is deleted — the 1.1 MB vendored directory, **both** `<link>`s (the viewer frame's too, which used no FA glyph at all) and all **23** source uses, converted to core-ui `Icon` across 13 files. No new art needed: all ten glyphs already existed. Gate `scripts/icon-font-gate.js` (`npm run icons:font`, in `pr.yml`) at **zero over 3,183 files / 22 packages**, 4 mutant arms red. AC3's spec did not exist — written (`tests-unit/chr-010/`, 3 tests, 3 mutants red). `colors` **16 = 16** as AC4 predicted. **Left: AC1's drive + Richard's look, and AC2's boot-network reading — the box was held by P93 all session.** Six task premises were wrong: see §6 | audit §4 | CHR-008 |
 
 ### Track C — the palette
 
@@ -202,8 +202,14 @@ verdict needs a before picture ([[a-read-before-pointer-is-a-precondition-not-a-
 - 🔴 **The close condition is Richard's look.** A task that touches a surface ends with a screenshot
   in `verdicts/<task>/<date>/` and a verdict written with the image in context, per P81 VIB-001 §5.
 - 🔴 **Do not scope by time.** Dependency order only, no estimates.
-- The hex ratchet, the icon-url gate and the token check stay green at every commit.
-- `test:ci` floor is 4 by name (AIX-006); a fifth red is yours.
+- The hex ratchet, the icon-url gate, the **icon-font gate** (CHR-010) and the token check stay
+  green at every commit.
+- `test:ci` floor is **8 by name** — 3 SUB-006, 3 SUB-011, 2 NDA-017, all attributable to P88's GAM
+  commits, agreeing across four seeds (46376, 38645, 68399, and s32's). A ninth red, or a different
+  name among the eight, is yours. ⚠️ This line read *"floor is 4 by name (AIX-006); a fifth red is
+  yours"* until s32: AIX-006 was fixed and the floor moved, so the rule every task inherited would
+  have made a session claim four regressions it did not cause. Grade by NAME, never by count, and
+  re-derive the set from [[test-ci-baseline-is-six-at-seed-39386]] rather than from this line.
 
 ## 8. The end condition
 

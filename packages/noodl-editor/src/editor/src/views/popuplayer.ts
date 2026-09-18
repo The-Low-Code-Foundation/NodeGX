@@ -5,6 +5,8 @@ import { webUtils } from 'electron';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 import FileSystem from '@noodl-utils/filesystem';
 import { KeyCode } from '@noodl-utils/keyboard/KeyCode';
 import KeyboardHandler from '@noodl-utils/keyboardhandler';
@@ -141,6 +143,32 @@ function el(tag: string, className?: string): HTMLElement {
   return node;
 }
 
+/**
+ * CHR-010: the drag chrome's glyphs, drawn from core-ui's `Icon` set like the
+ * rest of the editor. This file is imperative, so the icon is hosted in a plain
+ * element with its own React root — the pattern `showReactModal` already uses.
+ *
+ * The host is `inline-flex` on purpose. `Icon` is `display: block`, and the
+ * glyph it replaced was an inline `<i>` sitting on a text line beside a label;
+ * blockifying it would have dropped the label onto its own line. Colour needs
+ * nothing: the SVGs paint with `currentColor`, which is what the Font Awesome
+ * glyph inherited too, so `.popup-layer-dragger`'s `color` still drives both.
+ */
+function iconHost(className: string): { node: HTMLElement; setIcon(icon?: IconName): void } {
+  const node = el('span', className);
+  node.style.display = 'inline-flex';
+  node.style.alignItems = 'center';
+  node.style.verticalAlign = 'middle';
+
+  const root = createRoot(node);
+  return {
+    node,
+    setIcon(icon?: IconName) {
+      root.render(icon ? React.createElement(Icon, { icon, size: IconSize.Small }) : null);
+    }
+  };
+}
+
 /** Border box size, plus margins when `includeMargin` — jQuery's outerWidth(true). */
 function outerSize(node: HTMLElement, includeMargin: boolean): { width: number; height: number } {
   const rect = node.getBoundingClientRect();
@@ -259,6 +287,7 @@ export class PopupLayer {
   private draggerEl: HTMLElement;
   private draggerLabel: HTMLElement;
   private dropTypeIndicator: HTMLElement;
+  private dropTypeIcon: { node: HTMLElement; setIcon(icon?: IconName): void };
   private dragMessage: HTMLElement;
   private dragMessageText: HTMLElement;
   private tooltipEl: HTMLElement;
@@ -328,14 +357,17 @@ export class PopupLayer {
     this.el.appendChild(this.toastEl);
 
     this.draggerEl = el('div', 'popup-layer-dragger');
-    this.dropTypeIndicator = el('i', 'popup-layer-drop-type-indicator fa');
+    this.dropTypeIcon = iconHost('popup-layer-drop-type-indicator');
+    this.dropTypeIndicator = this.dropTypeIcon.node;
     this.draggerLabel = el('span', 'popup-layer-dragger-label');
     this.dragMessage = el('div', 'popup-layer-drag-message');
     this.dragMessage.style.display = 'none';
     this.dragMessageText = el('span', 'popup-layer-drag-message-text');
     const dragMessageSmall = el('small');
     dragMessageSmall.appendChild(this.dragMessageText);
-    this.dragMessage.append(el('i', 'fa fa-exclamation-triangle'), dragMessageSmall);
+    const dragWarning = iconHost('popup-layer-drag-message-icon');
+    dragWarning.setIcon(IconName.WarningTriangle);
+    this.dragMessage.append(dragWarning.node, dragMessageSmall);
     this.draggerEl.append(this.dropTypeIndicator, this.draggerLabel, this.dragMessage);
     this.el.appendChild(this.draggerEl);
 
@@ -1236,13 +1268,18 @@ export class PopupLayer {
   }
 
   public indicateDropType(type?: string) {
-    const dropTypeClasses = {
-      move: 'fa-share',
-      add: 'fa-plus'
+    // CHR-010: was two Font Awesome classes toggled on an `<i>`. `fa-share` (a
+    // right-curving arrow) becomes `ArrowRight` — the house set has no "share"
+    // glyph and the mark means "this goes there".
+    const dropTypeIcons: Record<string, IconName> = {
+      move: IconName.ArrowRight,
+      add: IconName.Plus
     };
-    Object.values(dropTypeClasses).forEach((cls) => this.dropTypeIndicator.classList.remove(cls));
 
-    if (type) this.dropTypeIndicator.classList.add(dropTypeClasses[type]);
+    // `indicateDropType('none')` is a real caller (ComponentPortsView's
+    // `onMouseOut`). The old code let it through the `if (type)` guard and added
+    // a literal `undefined` class; an unmapped type now simply draws nothing.
+    this.dropTypeIcon.setIcon(type ? dropTypeIcons[type] : undefined);
   }
 
   public setDragMessage(message?: string) {

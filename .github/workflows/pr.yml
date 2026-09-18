@@ -98,6 +98,13 @@ jobs:
       # so it silently breaks the light theme. There is no legacy tail left to
       # burn down, so any reintroduction is a straight regression.
       - run: npm run icons:css
+      # A gate at zero again (CHR-010). The editor linked Font Awesome 4.7 on
+      # every window to draw 23 glyphs beside core-ui's Icon set — two icon
+      # systems sharing one column, with two stroke weights, two grids and two
+      # colour mechanisms, and nothing measuring that they did not match. The
+      # font is deleted; this keeps it deleted. Comments are stripped before
+      # counting, or the gate reddens on the notes describing its own history.
+      - run: npm run icons:font
       # A gate at zero for the same reason (POL-004). `var(--theme-color-fg-subtle,
       # #7c7c7c)` names nothing, renders its fallback, and is the most reviewable
       # way to ship a hardcoded colour — CSS has no undefined-custom-property

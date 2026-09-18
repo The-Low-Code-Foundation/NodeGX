@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 export interface PickVariantItemProps {
   variant: TSFixme;
 
@@ -71,7 +73,7 @@ export class PickVariantItem extends React.Component<PickVariantItemProps, State
             e.stopPropagation();
           }}
         >
-          <i className="fa fa-edit" />
+          <Icon icon={IconName.Pencil} size={IconSize.Small} />
         </div>
         <div
           className="variants-item-icon"
@@ -80,7 +82,7 @@ export class PickVariantItem extends React.Component<PickVariantItemProps, State
             e.stopPropagation();
           }}
         >
-          <i className="fa fa-trash" />
+          <Icon icon={IconName.Trash} size={IconSize.Small} />
         </div>
       </div>
     );

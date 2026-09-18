@@ -66,3 +66,51 @@ system, correctly separate.
   the size that renders — measure one, do not trust the prop.
 - ⚠️ `popuplayer.ts:1240-1241` draws a glyph into a string template. A `currentColor` SVG in a
   string needs the surrounding element to set `color`; the FA glyph inherited it for free.
+
+## 6. What §2–§5 got wrong, re-derived at HEAD (s32, 2026-09-18)
+
+Measured before building, not read. Six premises were stale or false.
+
+1. **The census was 32 uses in 16 files; it is 23 in 13.** CHR-009's slices retired nine on their
+   way past. The glyph list was stale in both directions: `fa-code` and `fa-check` are gone from
+   source entirely (they survive only in the gitignored `index.bundle.js`, which a repo-wide grep
+   counts — the same miscount CHR-003 §2 made), while `fa-exclamation-triangle` was never listed.
+2. **§3.2 is unnecessary work.** "Expect ≤ 4 missing `IconName`s" — there are **none**. All ten
+   glyphs the 23 sites need already exist, with SVGs on disk: `Pencil`, `Trash`, `Plus`, `Search`,
+   `CaretDown`, `CaretUp`, `Close`, `DotsThreeHorizontal`, `WarningTriangle`, `ArrowRight`. No new
+   art, no `LICENSES.md` change.
+3. **§2 names one `<link>`; there are two.** `frames/viewer-frame/index.html:6` links Font Awesome
+   as well, and the viewer frame uses **no** FA glyph at all — it was pure boot cost on the surface
+   that renders the user's app.
+4. **AC3's spec does not exist.** "there is a spec; keep it green" — nothing outside `Icon.tsx`
+   referenced the icon directory. The invariant held (168 `IconName`s, 170 SVGs, **0** names without
+   a file; 2 orphan SVGs), but nothing guarded it. Written now as
+   `tests-unit/chr-010/iconInventory.test.ts`, 3 tests, 3 mutants red. It matters more than a tidy
+   count: a name with no file makes `Icon` render an **empty span**, silently — CHR-008 §10.4's
+   "drew nothing ≠ never ran" in a second place.
+5. **AC2's three strings would have missed the two hardest dependencies**, both found by widening
+   the gate's population rather than by the grep:
+   - `popuplayer.ts` held FA through `classList.add('fa-share')` — a quoted glyph token, never
+     adjacent to the word `fa`. It had **three** FA dependencies, not the one `fa fa-` finds: a bare
+     `fa` class on the drop indicator and two glyph classes toggled at runtime.
+   - `PortGroup.tsx` wrote ``className={`fa ${x ? 'fa-caret-up' : 'fa-caret-down'}`}`` — the pair
+     split by an interpolation. §2 listed the file; a `fa fa-` recount dropped it.
+   ⇒ the gate matches four shapes, not three. **A gate's population is exactly what its regex
+   matches** ([[a-gate-can-have-a-hole-shaped-like-the-defect]], third time in this phase).
+6. **§5's first trap is inverted.** There is no jest `moduleNameMapper` stub for `Icon` — CHR-008
+   never added one, and 23 specs carry a per-file `jest.mock` instead. It did not bite: none of the
+   13 converted files is imported by a spec that renders it. The new spec reads `Icon.tsx` as
+   **text** for exactly this reason — importing it needs the stub, and the stub is what would hide
+   the defect the spec exists to catch.
+
+**Two layout facts the conversion turned up**, both invisible to a passing number:
+
+- `Icon` is `display: block`. Four containers relied on inline flow (`sidebar-panel-edit-button`,
+  `sidebar-panel-footer-button`, `queryeditor-add-filter-group-inner`, and the drag overlay's
+  inline `<i>`). Each is now explicitly centred, with the hardcoded `marginRight: '5px'`/`'10px'`
+  at the call sites replaced by a token `gap`. The drag overlay keeps inline flow via an
+  `inline-flex` host, because blockifying it would have dropped the drag label onto its own line.
+- 🔴 **A fixed-size `Icon` inside a padded box loses the padding to `border-box`.**
+  `.queryeditor-caret-icon` had `padding-left: 15px`; with the global `box-sizing: border-box`
+  (`style.css:26`) and `Icon`'s 12px width, the whole box would have gone to padding and the glyph
+  would have rendered **zero wide**. Now a margin. Nothing would have reported this but the picture.
