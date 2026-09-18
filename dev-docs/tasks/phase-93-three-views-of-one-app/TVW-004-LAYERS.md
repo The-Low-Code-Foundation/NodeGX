@@ -67,3 +67,83 @@ not this task).
   not in Layers. A Component Stack's pages likewise. Say so in the empty band if someone expands a
   Router: `pages are in Components → Pages`.
 - `useSidePanelLayout`'s shared width: the tab must not change the panel's width.
+
+---
+
+## 6. Slice 1 — the walk, and what measuring it first changed (s14, 2026-09-18)
+
+`layersTree.ts` (pure, `tests-unit/tvw-004`, 17 specs, 9 mutants each `cmp`-proven applied and each
+red with a real count). Before any UI, it was run over **every project on this machine** — 117 with
+a readable `project.json`, 514 screens, **47,494 rows** — the technique that changed TVW-002's
+design before a pixel existed. Four things came back.
+
+### 6.1 🔴 The spec's scope is wrong in 94% of routed projects — and the walk was built to the screen
+
+§2 says Layers shows *"the page the preview is showing"*. Of the **78 routed projects, 73 have a
+root component that draws something besides the Router** (median 2 rows, p90 **21**). Those rows —
+an app shell's nav bar, a toast layer, a modal host — are **on the screen the person is looking at**
+and are named by no page's graph. A Layers built from the page alone would omit them, which is
+exactly row 11's disorientation with a new surface drawn around it.
+
+So the walk starts at the **root** and descends the Router into the routed page, as `pageReach`'s
+`reachOfScreen` does, and the page arrives under a `SHOWING HOME` band with the shell above it.
+**Owed to Richard: is that right, or does he want the page only?** (§6.5, Q1.)
+
+### 6.2 🔴 The indent in §2 does not fit the panel — 28% of rows have no room for a label
+
+Row depth over the corpus: **p50 12, p75 19, p90 26, max 41**. At §2's *14px per level*:
+
+| | depth | indent | panel at 240px |
+|---|---|---|---|
+| median row | 12 | 168px | 72px left for the label |
+| p75 | 19 | 266px | **past the right edge** |
+| p90 | 26 | 364px | **past the right edge** |
+
+**48.5% of all rows are deeper than 12 levels; 28.0% are deeper than 17** — 17 being where a 240px
+panel runs out. A third of that depth is this task's own doing: an instance costs **two** levels
+(the purple row, then the band), p50 4 of 12 and p90 10 of 26. Removing one is available; it does
+not fix it. (§6.5, Q3.)
+
+### 6.3 🔴 Nothing in §2 or the proposal collapses, and one modest page is 330 rows
+
+`Prefab marketplace` → `Home` is **330 rows** fully expanded. Across the corpus: p50 24, p90 189,
+**49 of 514 screens over 200**, max **2,994** (`Erleah-2` → `Discover`). §2 asks for virtualisation
+above 200 rows, which answers *drawing* cost but not *reading* cost: a person opening Layers to
+find the thing they are editing would arrive at a 2,994-row list. Building the whole tree is free
+(**1.15ms** for the 2,888-row worst case), so this is purely a question about what is open when the
+tab opens. (§6.5, Q2.)
+
+### 6.4 What the walk settles, measured
+
+- **A repeater's template is drawn, and 92% of repeaters can be read statically** — 770 of 836 name
+  their template in a parameter. The row says **how** it repeats (the repeater's own label), never
+  `× n`: the count is a runtime fact about data, and §2's `× n` would be an invention. **20 of the
+  66 dynamic repeaters still carry a stale `template` parameter**, so `templateType` is the field
+  that decides, not the presence of `template` — a mutant survived until the fixture kept the stale
+  one.
+- **`roots[0]` is not the root that draws in 572 of 5,039 components** (11%). A fixture whose first
+  root happened to be visual graded both readings identically; the mutant survived until `/Home`
+  authored its logic root first.
+- **Logic needs no filter.** A child is visual *by construction* — `canCreateNode` refuses a parent
+  for a type whose `allowAsChild` is false — so walking `children[]` from the first visual root
+  excludes logic without a single type read, and therefore without inheriting
+  `allowaschild-is-stale-until-the-node-library-loads`.
+- **No project on this machine contains a cycle.** AC4's fixture must be built, as its spec says.
+- **731 instances carry children of their own** (slotted content). They are drawn at the instance's
+  depth, outside the band, because they belong to the *placing* graph.
+
+⚠️ **The census's first run said 57 screens were empty. That was the instrument** — project files
+written before the `visualRoots` field existed have none, and the editor computes it live. Replaced
+with a visual-type set derived from the corpus itself (every type that appears as a child anywhere
+is provably `allowAsChild`); 57 → 4.
+
+### 6.5 Owed to Richard before the UI is drawn
+
+1. **Q1 — the shell.** Layers shows the **screen** (shell rows, then `SHOWING HOME`, then the page)
+   rather than the page alone. 73 of 78 routed projects have shell rows. Right?
+2. **Q2 — what is open when the tab opens.** Fully expanded is 330 rows on a modest page and 2,994
+   at worst. Proposal: open with **only the path to the editing region expanded**, everything else
+   collapsed, carets on every row that has children.
+3. **Q3 — the indent.** 28% of rows are past the right edge of a 240px panel at 14px/level.
+   Proposal: cap the indent (it stops growing after N levels, the guides carry the rest), and drop
+   the band's extra level so an instance costs one, not two.
