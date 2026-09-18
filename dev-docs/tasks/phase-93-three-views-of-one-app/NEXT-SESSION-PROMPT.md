@@ -1,17 +1,16 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 12.** s1–5 built and drove TVW-003; s6–s11 built TVW-001 and
-closed it. **Session 12 built TVW-002 and drove it.** The strip is on screen, all four shapes, both
-themes, and the drive found one defect that no measurement could have. TVW-002 is **not closed**:
-three ACs remain and two of them need Richard, not code.
+**Written 2026-09-18, end of session 13.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
+s12 built TVW-002; **s13 got Richard's four rulings, built them, and drove the lot.** TVW-002 is
+now **6 of 7 ACs green**. It needs one gate and one look — neither is a build.
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | ✅ six rows + AC7's three fixes | **CLOSED — all 8 ACs** |
-| TVW-002 | The preview says what it is not showing | ✅ 4 modules + the row | **AC3 ✅ AC4 ✅ AC7 ✅; AC1 partial, AC2 ✅, AC5 ✗, AC6 owes Richard** |
-| TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** |
+| TVW-001 | The panel tells the truth | ✅ six rows + AC7's fixes | **CLOSED — all 8 ACs** |
+| TVW-002 | The preview says what it is not showing | ✅ 6 modules + the row + the outline | **AC1–AC5 ✅. AC6 = Richard's look. AC7 = `test:ci`, NOT RUN** |
+| TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED — all 6 ACs** |
 | TVW-004 | Layers (**unblocked**) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
@@ -20,96 +19,100 @@ three ACs remain and two of them need Richard, not code.
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 18** (TVW-003 six, TVW-001 eight, TVW-002 four). Two and a half of ten tasks.
+**ACs closed: 23** (TVW-003 six, TVW-001 eight, TVW-002 five). Two and a half of ten tasks.
 
-## Start here — TVW-002's remaining three, in order
+## Start here — two things, then build TVW-004
 
-1. 🔴 **AC6 needs Richard, and the questions are already written** — TVW-002 §"For Richard, when it
-   is driven". Show him `verdicts/TVW-002/2026-09-18/` with `open -a Preview <paths>` (markdown
-   links open nothing in his VS Code). Three things: the rewritten wording of all three shapes; the
-   **popup** question (231 corpus components live only inside a popup — is such a thing "on" the
-   page that opens it? saying yes gives it a `Go to` door that will not show it); and whether the
-   **detached** preview carries the doors or the sentence only.
-2. **AC1's outline-when-agreeing is NOT BUILT** — when the two surfaces agree, the first instance
-   should be outlined and labelled in the preview. §2 puts it on the **design-mode channel** to the
-   app client; §5 warns it must not go on `modelUpdate`, which is broadcast. Everything else in AC1
-   is driven and passing.
-3. 🔴 **AC5 is a BUILD, not a drive.** §3's citation is wrong — see TVW-002 §"AC5's premise is
-   wrong". The shape of the fix is DES-001's toast; the doors are the part that is not free.
+1. 🔴 **RUN `npm run test:ci`.** This is TVW-002 AC7 and it is the ONLY gate this session did not
+   run — the box went to a peer (opennoodl-5f, Rocket School) before it could. Everything else is
+   green and recorded. Delete `tests/test-results.json` first, gate on the FAILURE NAMES not the
+   count, and expect the floor: **8 by name — 3 SUB-011, 2 NDA-017, 3 SUB-006**. Exit is **1** at
+   the floor. 🔴 Read `$?` directly; a pipe eats it (that bit me this session).
+   ⚠️ I touched `packages/noodl-viewer-react/src/highlighter.ts`, so if anything new is red it is
+   most likely there. `npx jest` in that package was **122 suites / 1627 green** after the change.
+2. **Show Richard `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` for AC6.** `open -a Preview <paths>`
+   — markdown links open nothing in his VS Code. Three things are written up for him at the end of
+   the TVW-002 task file: the detached window is **stuck on the dark theme** (measured: `data-theme`
+   is `null` there; pre-existing, the strip inherits it); in the detached window the row sits at the
+   **bottom with no node canvas below it**; and the quiet sentence **truncates by 25px** at that
+   window's default 372px width.
+3. Then **TVW-004 (Layers)**. It should **import `pageReach.ts`**, not write a second walk — and note
+   that `firstRendered` now returns a **path to the node that paints**, which is exactly what Layers
+   needs to point at something.
 
-Then TVW-004 (Layers) is unblocked and should **import `pageReach.ts`**, not write a second walk.
+## What s13 settled
 
-## What s12 settled
+**Richard ruled four things** (R-K…R-N, all in the task file). The one to carry forward:
 
-**Four modules; three of them pure and graded.**
+🔴 **R-N — his own earlier ruling had retired a spec line and nobody noticed.** §2 said "when they
+agree: no strip", and the build was correct against it. But his placement ruling four hours earlier
+had made the row a **separator**, and a separator that comes and goes is not one. So the row is now
+drawn **always**; `agree` is a `quiet` *tone* with a short sentence, not an absence. **When a ruling
+changes what a surface IS, re-read every spec line that assumed what it was.**
 
-| module | what it is |
-|---|---|
-| `pageReach.ts` | the walk: `renders` (what you can see) vs `mounts` (what runs), one pass |
-| `previewStripWords.ts` | the three shapes and every word in them |
-| `screenRoute.ts` | the preview's route → the page component it is showing |
-| `usePreviewStrip.ts` | subscriptions, the project walk, the one navigation |
+The quiet sentences, all pinned:
 
-🔴 **Three measurements changed the design before a line of UI existed**, all by running the pure
-modules **offline over the 130 projects on disk**. Do this again — it is cheap, it needs no stack,
-and it caught three wrong sentences before a user could read them:
+    Main Navbar is on Home. The preview is showing that screen.
+    Home is the screen the preview is showing.              (the canvas IS the page)
+    Algolia Search is logic — it draws nothing. It runs on this screen.
 
-1. **`componentinstance.render()` returns `roots[0].render()` and nothing else.** "In the graph" is
-   not "on screen": 592 of 1504 corpus placements sit outside the page's `Page` root, **71 of them
-   components that draw**.
-2. **A screen is not one component.** Walk from the ROOT with the Router resolved, or an app shell's
-   nav bar gets a strip saying it is elsewhere while the person looks straight at it.
-3. **Shape 2's specced sentence was false for 1094 components.** *"Nothing in the app places it"*
-   over components that are placed, inside something no page reaches.
+None claims the person can **see** it — a component can be on the page and scrolled past, inside a
+closed accordion, or behind a popup.
 
-✅ **The drive printed all five sentences verbatim against a prediction written before launch.**
+## What the drive found, and what it nearly reported instead
 
-## The defect the drive found, and the one the drive nearly missed
+🔴 **The count said 1 and nothing was on screen.** AC1's outline pointed at the node that *places*
+the component. `getRef` is only the highlighter's existence filter; the element comes from
+`getDOMElement()`, which an instance does not have. `selectedNodes.size` read a healthy **1** and
+nothing was ever drawn. **A count is the mechanism; a rect is the consequence** — the arm asserts a
+measured box now. ⚠️ My first *explanation* was also wrong ("getRef drops instances" — it does not).
 
-🔴 **A translucency defect has no width.** The strip's amber is `rgba(…, 0.12)` and the row sits
-inside `.Background`, whose backdrop is the preview **checkerboard** — the checker squares showed
-straight through, in both themes. Every geometry reading was clean (28px, 653/653, 789/789, no
-truncation). Fixed with an opaque `--theme-color-bg-2` base under the wash. **Read the shot.**
+🔴 **The outline dragged the box-model chip over the running app** — five lines of CSS facts over the
+hero, because §2 had it travel down the **selection** channel and `updateHighlights` takes inspector
+focus from the selection. Every number was clean; the **screenshot** showed it. **Sending a new
+meaning down an existing channel inherits everything else that channel pulls.**
 
-🔴 **AC3 first reported HELD ×5 with its known-firing control absent** — the run looked for the
-`Go to` door after the loop had ended on an `agree` component. Five negative readings with nothing
-to tell them from a drive that cannot move the preview at all. The script now re-establishes the
-door's precondition and exits non-zero if the control did not fire.
+🔴 **The drive was not idempotent.** It *ends* by pressing its known-firing `Go to` door, so it left
+the preview elsewhere; run again it read five different sentences about the wrong screen — all
+correct answers, nothing broken. It resets and asserts the reset now, and two runs compare identical.
 
-## Gates at s12
-
-- `npm run test:ci`: **2985 specs, 8 failures, seed 41423, HEAD 12dfbb78d, 66s** — the floor, the
-  same eight **by name** (3 SUB-011, 2 NDA-017, 3 SUB-006), a **fifth** agreeing seed.
-  🔴 Exit is **1** at the floor. Delete `tests/test-results.json` first and gate on the names; the
-  file's shape is `{overallStatus, totalCount, failedCount, failures[], seed, gitHead}`.
-- `npx jest tests-unit/tvw-002`: **3 suites / 40**. `tsc -p packages/noodl-editor --noEmit` EXIT=0.
-- **8 mutants**, each `cmp`-proven to have applied, each red with a real count. 🔴 `Tests: 0 total`
-  is a suite that failed to COMPILE, not a pass.
+⚠️ **Two instrument faults that looked like defects:** the first AC1 drive read NOTHING because the
+editor was in **Preview** mode (no outline is pushed there at all), and the chip arm first asked
+whether the chip *element* existed — it always does, sized to nothing — so it fired on all seven rows.
 
 ## Driving TVW-002 again (reuse)
 
-Fixture picked by measurement: **`Prefab marketplace`** — of 57 candidate projects it is the only
-one producing all four shapes. Drive a **copy**; opening a project writes into it.
-
 ```bash
 NOODLPORT=8680 NOODL_REMOTE_DEBUG_PORT=9444 NOODL_USER_DATA_DIR=<scratch>/profile \
-  npm run dev:debug -- --quiet        # backgrounded as the call's own command; gate on the CDP port
+  npm run dev:debug -- --quiet        # backgrounded; gate on the CDP port, ~40s
 node scripts/devtools/drive-tvw002-strip.js --components "…" --shots <dir> --json <file>
 ```
 
-- Warm launch ≈ **60s**. The launcher opens first: click the project card (`LauncherCard-module__Title`).
-- 🔴 The scope picker's way back to app mode is the **"App preview"** row.
-  `preview-scope-target-/App` is a COMPONENT named `/App`, and the first match is the **measuring
-  ghost at y=3508** — filter to the copy inside the viewport and confirm with `elementFromPoint`.
-- 🔴 **Write drive probes to a FILE, never `node -e`.** A `\s` inside a template literal in a
-  shell-quoted argument collapses to `s`: a probe read the strip as `_DSI Atom  i n't on Home`.
-- Theme: `ThemeManager.setMode('light'|'dark')` via `__wreq`, read in a **separate** eval.
+- 🔴 **A fresh user-data-dir means the launcher has NO projects** and *Open project…* is a native
+  dialog CDP cannot drive. Open it with the MCP server's own path:
+  `EventDispatcher.emit('ViewerConnection.openProjectRequested', {directory, requestId, replyTo})`.
+- 🔴 **Design mode, or there is no outline at all.** The segmented control is at **x≈1245,y=56**.
+- 🔴 Corpus page names are `/Pages/Main/Home`, **not** `/Pages/Home` — probe the Router.
+- 🔴 **Detach** = the layout dropdown at **x≈1178,y=56**, then scan `elementFromPoint` **down the
+  column** for `Detached`. `MenuDialog` keeps a measuring ghost one row above the real rows, and a
+  probe that collects rows by text and **dedupes** keeps the ghost.
+- `ThemeManager` is `./src/editor/src/models/ThemeManager.ts`; read the applied theme in a
+  **separate** eval.
+- Fixture: a **copy** of `Noodl projects/Prefab marketplace`. This session's copy is at
+  `NodeGX test projects/TVW-002 s13 Drive`.
 
 ## The box
 
-One dev stack per checkout. `node scripts/devtools/stop-dev.js --list`, `lsof -nP -iTCP:8080
--sTCP:LISTEN`, and **ask the peer** — s12 did, twice, and got the box both times within minutes.
-Announce the teardown to everyone you announced the launch to.
+One dev stack per checkout. `node scripts/devtools/stop-dev.js --list`, and **ask the peer**.
+At handoff time **opennoodl-5f** (P95 Rocket School) has the box for a `build.mjs` +
+`template:rocket` run and will ping when done; **opennoodl-14** (P92/CHR-011) is waiting on a clean
+tree for a packaged build.
+
+🔴 **The 09-16 dirty pile is still unowned and still uncommitted** — `templates/todo-list*`,
+`library/prefabs/date-picker`, `packages/nodegx-backend/src`, `packages/noodl-mcp/tests/tpl008*`,
+`packages/noodl-runtime` local-sql, plus staged deletions of two Inter fonts. **Three sessions have
+now disowned it** (this one, opennoodl-14, opennoodl-5f), and 5f identified it as **P78/TPL-008's
+todo-list work**. It blocks CHR-011. It needs Richard, not a fourth guess.
 
 ## Committing
 

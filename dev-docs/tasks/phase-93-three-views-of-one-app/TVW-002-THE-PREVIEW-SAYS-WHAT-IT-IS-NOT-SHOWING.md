@@ -278,3 +278,106 @@ row. Not solved, recorded: if it matters, it is a second placement rule, and it 
 
 The border moved with it — the rule is drawn on the **app** side, because that is the edge the row
 separates you from; the frame divider already draws the other one.
+
+
+---
+
+## Session 13 (2026-09-18) — Richard's four rulings, built and driven
+
+Commits `49eb2256f` (the quiet row + AC1), `1757f0bd6` (AC5), `0b46a67f0` (what the drive found).
+
+### The rulings, asked and answered
+
+| # | question | ruled |
+|---|---|---|
+| R-K | the wording of all five sentences | **"All five read right."** Shipped unchanged. |
+| R-L | a component that lives only inside a **popup** (231 corpus cases) | **Keep the true sentence** — *"isn't on any page yet — it's only inside X, which no page shows."* The built wording was already the option he picked; no change. |
+| R-M | the **detached** preview: doors, or the sentence only? | **Carry the doors too.** *No surface that explains less than another.* |
+| R-N | the row only appeared on divergence, so the seam he had asked for vanished in the common case | **Always draw the bar, with a quiet agree sentence.** |
+
+R-N is the one worth remembering. **His own placement ruling four hours earlier had retired the
+"no strip when they agree" spec without anyone noticing.** A row that is a separator cannot come and
+going; `tvw002-agree-no-strip-light.png` showed the app's hero image abutting the canvas's dotted
+grid with nothing between them. His stated reason applied to both cases; the row applied to one.
+
+So `agree` is now a **tone**, not an absence. Three quiet sentences, because "they agree" is three
+different facts, and **none of them claims the person can see it** (a component can be on the page
+and scrolled past, inside a closed accordion, or behind a popup — the row is entitled to a claim
+about the *screen*). A dismissal removes the **sentence**, not the **seam**.
+
+### What the drive found that no number did
+
+🔴 **The AC1 outline pointed at a node that cannot be drawn, and the count said 1.**
+
+    placement id  →  found 1,  getRef ✅,  getDOMElement **absent**
+    painting  id  →  found 1,  getRef ✅,  getDOMElement → DIV 973×72
+
+`getRef` is only the highlighter's *existence filter*; the element comes from `getDOMElement()` in
+`updateHighlights`. A component instance passes the filter, enters `selectedNodes` — so
+`selectedNodes.size` reads a healthy **1** — and then yields no element. **A count-based arm would
+have reported AC1 green over an outline nobody could see.** The arm reads the measured rect now.
+
+⚠️ I nearly shipped the wrong *explanation* for it. First theory: "the `getRef` filter drops
+instances." That fits, and is false — the instance passes `getRef`. Only asking the guest for both
+ids side by side separated the two. See [[a-reading-that-fits-is-not-one-that-excludes]].
+
+🔴 **The outline dragged the box-model inspector chip over the running app** — five lines of CSS
+facts over the hero, because the author changed which component the canvas was on. Every geometry
+reading was clean; the **screenshot** is what showed it. It is the exact thing
+`Highlighter.designMode`'s own comment says its gate exists to prevent, and the cause is that §2
+specified this outline travel down the design-mode **selection** channel. The placement outline is
+now its own thing end to end (`placedNodes`, `showPlacement`, `viewer-placement-outline`), drawing
+the same teal line and nothing else. It is a graded arm.
+
+🔴 **The drive was not idempotent** — it *ends* by pressing a `Go to` door, so it left the preview on
+another page. Run again it read five different sentences, one fewer agree row, no outline and "no
+`Go to` door was on screen": every one a correct answer about the wrong screen, nothing broken. It
+resets first now and exits 2 if the reset did not take. Two consecutive runs then compare identical.
+
+⚠️ **Two instrument faults of mine, both of which looked like defects.** AC1's first drive read
+NOTHING because the editor was in **Preview** mode, where no outline is pushed at all by design. And
+the chip arm's first version asked whether the chip *element* was in the DOM — it always is, sized to
+nothing — so it reported the defect on all seven rows, four of which never had an outline. **An arm
+that fires everywhere is not measuring its subject.**
+
+🔴 **A `MenuDialog` keeps a measuring ghost**, one row above the real rows. A probe that collected
+rows by text and deduped kept the ghost, so every rect was 29px off and `elementFromPoint` reported
+the row *above* the one it had matched — which reads exactly like an animation that has not settled.
+The only reading that cannot be fooled is what the compositor says is under a pixel; the detach probe
+scans `elementFromPoint` down a column.
+
+### Gates at s13
+
+- `npx jest tests-unit/tvw-002` — **4 suites / 62** (was 3 / 40).
+- `npx jest` in `noodl-viewer-react` — **122 suites / 1627**, the highlighter's own neighbourhood.
+- `tsc --noEmit` EXIT=0 on `noodl-editor` and on `noodl-viewer-react`.
+- **7 mutants**, each `cmp`-proven to have applied. Six red first time; the seventh **survived** —
+  `pushed ?? local` inline in the JSX was completely ungraded — which is why `stripToRender` exists
+  as a function at all. Red now.
+- Drive: both themes, exit status **0** (read directly, not through a pipe — a pipe eats it).
+
+### AC status
+
+| AC | state |
+|---|---|
+| 1 | ✅ built and driven, **including the outline**, which had never been built |
+| 2 | ✅ |
+| 3 | ✅ HELD across 7 canvas switches per run, both themes, control firing in each |
+| 4 | ✅ |
+| 5 | ✅ **driven in the detached window**: four shapes, `data-detached=true`, and `Go to Design System` pressed *there* moved the preview and returned the correct new quiet sentence — three processes in the loop |
+| 6 | ⏳ **Richard's look.** `verdicts/TVW-002/2026-09-18-s13/{light,dark}/` |
+| 7 | ⏳ `test:ci` — box handed to a peer, to run after |
+
+### For Richard, with the shots (AC6)
+
+1. **The detached preview is stuck on the dark theme.** Measured: `data-theme` is `null` in that
+   window. `ThemeManager` stamps it on the editor renderer only, and its `backgroundColor` is
+   hard-coded `#131313`. **Pre-existing — the strip inherits it, it does not cause it.** The fix is a
+   theme push on the forward list the strip's own channel now uses, i.e. cheap, but it is a change to
+   the *window*, not to this task. Worth a ruling on whether it belongs to P93 at all.
+2. **In the detached window the row sits at the bottom, where there is no node canvas below it.**
+   The seam it was moved to marks the boundary with the graph — and in that window there is no
+   graph. It is simply the preview's last row there, the same situation as the `vertical` layout.
+3. **The quiet sentence truncates in the detached window at its default width** (377px needed,
+   352 available — by 25px). The ellipsis is AC7's ruled shrink behaviour working correctly, but the
+   detached window opens narrow, so it is the common case there rather than the squeezed one.
