@@ -679,3 +679,26 @@ were in my build. Measured rather than assumed: neither `ComponentsPanelNew` nor
 references `fontawesome`/`font-awesome`/`fa-`, so the shots are unaffected; their touched surfaces
 (property panel, Ports panel, drag overlay) appear in none of them, and nothing here is evidence
 about that work.
+
+### AC7 ✅ and AC8 ✅ — TVW-001 is CLOSED (2026-09-18)
+
+**Richard's verdict on the `ac7b-*` re-shoot, verbatim: *"looks good, all fine"*.** That is AC7's
+WORTHY ruling. Recorded as said — he was shown the eight images in Preview (markdown links do not
+open in his VS Code) after the three findings were fixed and re-driven.
+
+**AC8's gates, re-read at close with the fixes in:**
+
+- `npm run test:ci` — **2985 specs, 8 failures, seed 98435, HEAD 382b716f, 67s**. The floor **by
+  name**: 3 SUB-006, 2 NDA-017, 3 SUB-011. None of them TVW's. A **fourth** seed agreeing with
+  s9 (46376), s10 (38645) and a peer's (68399). 🔴 Exit is 1 at the floor, as always — gated on the
+  names in a readout whose mtime was checked, not on the code.
+- CHR-002's scale gate (`font-size-ratchet`): **−6 under baseline**. Hex ratchet: **16/16 holding**.
+- `chr-004` + `chr-009`: **14 suites / 155** green (s10 read 13/134; the growth is a peer's, not
+  this task's).
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**.
+- `tests-unit/tvw-001`: **7 suites / 63**. With `vfn-011`: **11 / 118**.
+
+**All eight acceptance criteria are met. TVW-001 is closed.** Six rows built across slices 1–5, plus
+AC7's three ruled fixes. TVW-002 (the preview strip) and TVW-004 (Layers) are now unblocked —
+⚠️ both TVW-002 and TVW-008 carry wording this task's final ruling retired; see the annotation at
+the end of each.

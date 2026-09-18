@@ -1,20 +1,19 @@
 # Phase 93 — next session
 
 **Written 2026-09-18, end of session 11.** s1–5 built and drove TVW-003. s6–s10 built TVW-001's six
-rows (slices 1–5) and closed AC1–AC6. **Session 11 drove AC7, found three defects, took Richard's
-rulings on all of them, built the fixes and re-drove.** He ruled **"worthy once the above are
-done"** — they are done, so AC7 needs only his look at the `ac7b-*` re-shoot. Both passes are
-written up in TVW-001 §"AC7 — the screenshot pass" and §"AC7 — Richard's rulings, built and
-re-driven".
+rows and closed AC1–AC6. **Session 11 drove AC7, found three defects, took Richard's rulings on all
+three, built the fixes, re-drove — and he ruled: *"looks good, all fine"*. AC7 ✅ AC8 ✅, so
+TVW-001 is CLOSED.** Two tasks unblock. Detail in TVW-001 §"AC7 — the screenshot pass",
+§"AC7 — Richard's rulings, built and re-driven" and §"AC7 ✅ and AC8 ✅".
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | 🟡 all six rows built + AC7's three fixes | **AC1–AC6 ✅** · **AC7: ruled, fixed, re-driven — needs only his look at `ac7b-*`** · AC8 re-read green at s11 |
-| TVW-002 | The preview says what it is not showing (needs 001) | — | — |
+| TVW-001 | The panel tells the truth | ✅ six rows + AC7's three fixes | **CLOSED — all 8 ACs** |
+| TVW-002 | The preview says what it is not showing (**unblocked**) | — | — |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** |
-| TVW-004 | Layers (needs 001, 003) | — | — |
+| TVW-004 | Layers (**unblocked** — 001 + 003 both closed) | — | — |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
@@ -22,8 +21,7 @@ re-driven".
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 12** (TVW-003 all six; TVW-001 AC1–AC6). Unchanged by s11 — a screenshot pass closes
-nothing by itself.
+**ACs closed: 14** (TVW-003 all six; TVW-001 all eight). Two of the ten tasks are done.
 
 ## What s11 settled
 
@@ -46,31 +44,30 @@ wrap** — `white-space: nowrap` + `text-overflow: ellipsis`, and it is the only
 in the strip. It truncates. That is the third handoff in a row whose most confident sentence was its
 wrong one; keep reading these as claims to measure, not as facts.
 
-## Rulings owed by Richard
+## Rulings — all settled
 
-**All four AC7 questions were ruled on 2026-09-18 and all are built.** What is left is his look at
-the `ac7b-*` re-shoot, since he ruled *"worthy once the above are done"*.
+**All four AC7 questions were ruled on 2026-09-18, all are built, and Richard closed AC7 with
+*"looks good, all fine"*.** Nothing is owed on TVW-001.
 
-1. ✅ **Cut "Sample values." from the caption** — done. It was the second meaning of *sample* on one
-   surface, ~44px above the summary's "No sample data".
-2. ✅ **The size controls shrink, not the sentence** — done. `.FrameRoot` `flex-shrink: 0 → 100`
-   with a 96px floor. At the same 646px panel the caption went from 105px of the 330px it needed to
-   247 of 248; at 300px it is whole.
-3. ✅ **Stop inventing a route from the page title — DISPLAY ONLY** — done, in the pure
-   `authoredPageUrl.ts`. ⚠️ He was **re-asked** after the first question turned out to be
-   under-measured: the fallback is written out in **three** places, and two of them decide the URLs
-   a deployed app and the dev preview actually serve. Those were left alone deliberately. Do not
-   "finish the job" by changing them — that is a routing change and needs its own ruling.
-4. ⏳ **The WORTHY look** on `verdicts/TVW-001/2026-09-18/`.
+1. ✅ Cut "Sample values." from the caption — the second meaning of *sample* on one surface.
+2. ✅ The size controls shrink, not the sentence (`.FrameRoot` `flex-shrink: 0 → 100`, 96px floor).
+3. ✅ Stop inventing a route from the page title — **display only**, in `authoredPageUrl.ts`.
+   ⚠️ He was **re-asked** after the fallback turned out to be written out **three** times, two of
+   which decide URLs a deployed app and the dev preview actually serve. Those are deliberately
+   untouched. Do not "finish the job" there — it is a routing change and needs its own ruling.
+4. ✅ WORTHY.
 
-Still open from s10, and **not** TVW-001's: whether the Blockly logic bench gets a name of its own.
+**Still open, and NOT TVW-001's:** whether the Blockly logic bench gets a name of its own. It shares
+no vocabulary with the Workbench and says "test values", but still calls itself "the bench" in its
+own prose. Ask in plain words if a task needs it; do not rename it in passing.
 
 ## Next, in order
 
-1. **Richard's WORTHY look** at `verdicts/TVW-001/2026-09-18/` (`ac7b-*`). Open them for him —
-   markdown links do not work in his VS Code (`open -a Preview <paths>`).
-2. Then **close TVW-001**. AC8 was re-read at s11 with the fixes in and is green (below).
-3. Then TVW-002 (the preview strip) unblocks; TVW-004 (Layers) needs 001 + 003, both met.
+1. **Pick up TVW-002 or TVW-004** — both unblocked. TVW-002 (the preview strip) is the one the
+   phase's foundational confusion lives in (proposal §2 row 11); TVW-004 (Layers) is the bigger
+   build and needs 001 + 003, both now closed.
+2. 🔴 **Whichever you pick, open it for Richard the way s11 did** — `open -a Preview <paths>` for
+   any images. Markdown links do not open anything in his VS Code.
 4. 🔴 **TVW-002 and TVW-008 both contain wording AC7 has already ruled against** — four places:
    TVW-002's person sentence and its shape-1 string, TVW-008 §1 and its honesty caption, all saying
    *"sample values"* / *"not the app's data"*. That phrasing was cut from the Workbench on
@@ -88,7 +85,8 @@ Still open from s10, and **not** TVW-001's: whether the Blockly logic bench gets
 - `npx jest tests-unit/tvw-001`: **7 suites / 63** (was 6/54). `tvw-001 + vfn-011`: **11 / 118**.
 - `tsc -p packages/noodl-editor --noEmit` **EXIT=0**. 🔴 zsh does not give you `PIPESTATUS` through a
   pipe — redirect to a file and read `$?`, or you will gate on nothing.
-- Font-size ratchet **−6**; hex ratchet **16/16**.
+- CHR-002's scale gate (font-size ratchet) **−6**; hex ratchet **16/16**; `chr-004` + `chr-009`
+  **14 suites / 155** (s10 read 13/134 — the growth is a peer's).
 - Mutants: **3 red and `cmp`-proven**. ⚠️ A 4th reported `Tests: 0 total`, which is a suite that
   **failed to compile** — not a pass. 🔴 An earlier mutant attempt *silently did not apply* (bad
   shell escaping) and the suite passed: that is the false green the `cmp` check exists to catch.
