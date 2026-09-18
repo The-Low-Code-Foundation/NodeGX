@@ -34,6 +34,7 @@ import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import { buildUsageIndex, type RouterPages } from '../panels/ComponentsPanelNew/componentUsage';
 import { reachOfScreen, screensShowing, type ReachComponent, type ReachIndex } from './pageReach';
 import { benchTargetLabel } from './previewScope';
+import type { PlacementOutline } from './placementOutline';
 import { previewStrip, seam, type StripModel } from './previewStripWords';
 import { pageForRoute, type ScreenPage } from './screenRoute';
 
@@ -45,18 +46,22 @@ const AFTER_GRAPH_TYPE_UPDATE_MS = 20;
 export interface PreviewStrip {
   strip: StripModel;
   /**
-   * TVW-002 AC1 — the node id the preview should outline, or `null`.
+   * TVW-002 AC1 — the path the preview should outline, or `null`.
    *
    * Set only when the two surfaces **agree** and the canvas's component is placed somewhere on the
    * screen being shown: the quiet row says *"Hero is on Pricing"* and this says **where**. The
    * caller pushes it down the editor's existing selection channel, so the outline is the one the
    * preview already draws for a selected node rather than a fourth kind of line over the app.
    *
+   * 🔴 A **path**, ending on the node that paints — not the id of the instance that places it. An
+   * instance node has no DOM, so the obvious answer outlines nothing at all, silently. See
+   * `pageReach`'s note on `firstRendered`; the drive is what found it.
+   *
    * 🔴 **This hook does not push it.** Two writers to one guest highlight is a race, and the
    * editor already has a single writer for it (`EditorDocument`). See {@link PreviewStrip}'s
    * module note: the strip reads both surfaces and writes neither.
    */
-  outline: string | null;
+  outline: PlacementOutline;
   /** Navigate the app preview to a page, from a door the user pressed. */
   goToPage: (page: string) => void;
   /** Hide this strip for this (component, screen) pair until the editor is restarted. */

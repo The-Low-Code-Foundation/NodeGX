@@ -63,6 +63,24 @@ if (typeof window !== 'undefined' && window.NoodlEditor) {
       }
     },
     /**
+     * TVW-002 AC1 — where the canvas's component sits on this screen, outlined without anyone
+     * having selected it. A path (`null` to clear).
+     *
+     * 🔴 Deliberately NOT `selectNode`. It draws the same line, but a selection also feeds the
+     * box-model chip, and TVW-002's drive photographed five lines of CSS facts appearing over the
+     * running app merely because the author changed which component the canvas was on.
+     */
+    showPlacement(pathOrNull) {
+      if (!this.highlighter) return;
+
+      const path = Array.isArray(pathOrNull) ? pathOrNull : pathOrNull && pathOrNull !== 'null' ? [pathOrNull] : null;
+      if (path && path.length) {
+        this.highlighter.showPlacementAtPath(path);
+      } else {
+        this.highlighter.clearPlacement();
+      }
+    },
+    /**
      * TVW-003 — the editor's hover, as a path (`null` to clear). Replaces the relay's
      * `hoverStart`/`hoverEnd`, which every viewer received and only this one could draw. Outlines;
      * never scrolls.

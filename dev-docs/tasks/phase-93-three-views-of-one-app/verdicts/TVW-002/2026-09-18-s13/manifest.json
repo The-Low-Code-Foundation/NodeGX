@@ -1,0 +1,49 @@
+{
+  "task": "TVW-002",
+  "date": "2026-09-18",
+  "session": 13,
+  "supersedes": "../2026-09-18-at-the-seam — same fixture, before Richard's four rulings of this morning",
+  "fixture": "a COPY of Noodl projects/Prefab marketplace, at NodeGX test projects/TVW-002 s13 Drive — 165 components, 11 routed pages",
+  "note": "PNGs are gitignored (.gitignore:265). light/numbers.json and dark/numbers.json carry every sentence and every measurement.",
+  "whatChanged": [
+    "R-N: the row is drawn in EVERY case; agree is a QUIET tone with a short sentence rather than no row",
+    "AC1: the outline-when-agreeing, which had never been built",
+    "AC5: the strip in the detached window, doors and all"
+  ],
+  "arms": {
+    "AC3 preview did not move": "HELD across 7 canvas switches, both themes, with the known-firing Go to door firing in each run",
+    "the row is drawn on every reading": "7/7, both themes",
+    "agree rows are quiet and say something": "3/3, both themes",
+    "AC1 outline drawn": "Main Navbar — a measured 973x72 box, both themes",
+    "no inspector chip over the app": "true, both themes"
+  },
+  "idempotence": "two consecutive runs compared field by field: identical. The script now RESETS the preview to the start page first and refuses if the reset did not take — see findings.",
+  "findings": [
+    {
+      "what": "the outline pointed at the node that PLACES the component, and drew nothing",
+      "measured": "placement id -> found 1, getRef present, getDOMElement ABSENT. painting id -> found 1, getDOMElement -> DIV 973x72.",
+      "whyItHid": "getRef is only the highlighter's existence filter; the element comes from getDOMElement in updateHighlights. The instance passes the filter, so selectedNodes.size reads a healthy 1 and NOTHING is on screen. A count-based arm would have called AC1 green.",
+      "status": "FIXED — firstRendered now returns a PATH ending on the node that paints. The drive arm now reads the rect."
+    },
+    {
+      "what": "the outline dragged the box-model inspector chip over the running app",
+      "measured": "five lines of CSS facts over the hero, in the shot. Every geometry reading was clean.",
+      "whyItHid": "no number in the drive looked for it. The highlighter takes its inspector focus from the selected and hovered maps, and the outline was being sent down the selection channel — which is what TVW-002 section 2 specified.",
+      "status": "FIXED — placedNodes is a third map, excluded from focus, on its own guest API and its own IPC channel. It is a graded arm now."
+    },
+    {
+      "what": "the drive was not idempotent",
+      "measured": "run twice, the second run read five different sentences, one fewer agree row, no outline and 'no Go to door was on screen' — all correct answers about the wrong screen.",
+      "whyItHid": "the script ENDS by pressing a Go to door, which is its own known-firing control, so it leaves the preview on another page.",
+      "status": "FIXED — it resets to the start page first and exits 2 if the reset did not take."
+    },
+    {
+      "what": "AC1's first drive read NOTHING because the editor was in Preview mode",
+      "measured": "the guest reported designMode=false; EditorDocument deliberately pushes no outline in preview mode.",
+      "status": "instrument fault, not a defect. The drive now reports designMode and says so when it is off."
+    }
+  ],
+  "openForRichard": {
+    "detachedTheme": "the detached preview window never receives data-theme, so it sits on the dark :root defaults whatever the editor is set to. Pre-existing; the strip inherits it. Not fixed here."
+  }
+}

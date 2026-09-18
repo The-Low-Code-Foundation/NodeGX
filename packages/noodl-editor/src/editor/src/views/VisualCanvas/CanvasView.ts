@@ -25,6 +25,8 @@ export class CanvasView extends View {
 
   inspectMode: boolean;
   selectedNodeId: NodeSelection;
+  /** TVW-002 AC1 — re-applied on `dom-ready`, like the selection, so a reload keeps the line. */
+  placementOutline: NodeSelection = null;
 
   private root: Root | null = null;
 
@@ -139,6 +141,15 @@ export class CanvasView extends View {
 
       if (this.selectedNodeId) {
         this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode(${JSON.stringify(this.selectedNodeId)})`);
+      }
+
+      // ⚠️ Re-applied here for the same reason the selection is: the app reloads on every save, and
+      // an outline that only survived until the next edit would be a line that came and went for
+      // reasons the author could not see.
+      if (this.placementOutline) {
+        this.webview.executeJavaScript(
+          `NoodlEditorHighlightAPI.showPlacement(${JSON.stringify(this.placementOutline)})`
+        );
       }
 
       // Inject project design tokens into the preview so var(--token-name) resolves correctly.
@@ -395,6 +406,21 @@ export class CanvasView extends View {
     this.selectedNodeId = nodeId;
     this.tryWebviewCall(() => {
       this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode(${JSON.stringify(nodeId)})`);
+    });
+  }
+
+  /**
+   * TVW-002 AC1 — outline where the canvas's component sits on the screen the preview is showing.
+   *
+   * 🔴 A channel of its own, not `setNodeSelected`. Sent as a selection it draws the same line AND
+   * brings the box-model chip with it — the drive photographed five lines of CSS facts over the
+   * running app because the author had merely changed which component the canvas was on. See
+   * `Highlighter.placedNodes`.
+   */
+  setPlacementOutline(path: NodeSelection) {
+    this.placementOutline = path;
+    this.tryWebviewCall(() => {
+      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.showPlacement(${JSON.stringify(path)})`);
     });
   }
 

@@ -91,12 +91,45 @@ describe('TVW-002 AC1 — where on the screen it is', () => {
    * - searching the **project file** happily returns a placement on a second visual root, which is
    *   the one placement in the project that nobody can ever see.
    */
-  it('names the node that places it, not the component that holds the node', () => {
+  it('🔴 ends the path on the node that PAINTS, not on the instance that places it', () => {
+    // The whole finding, in one assertion. `hero` is the instance node inside `/Home`'s Page; `g`
+    // is the Group inside `/Hero` that actually draws.
+    //
+    // 🔴 A component instance passes the highlighter's `getRef` filter and then has no
+    // `getDOMElement` — measured in the running app: the placement id yielded NO element, the
+    // painting id a DIV of 973×72. So a path ending on `hero` enters `selectedNodes` (the count
+    // reads a healthy 1) and draws nothing, on every frame, in silence.
     const home = reachOfScreen('/App', '/Home', corpus());
 
-    // `hero` is the instance node inside `/Home`'s Page; `/Hero` is the component.
-    expect(home.firstRendered.get('/Hero')).toBe('hero');
-    expect(home.firstRendered.get('/NavBar')).toBe('nav');
+    expect(home.firstRendered.get('/Hero')).toEqual(['hero', 'g']);
+    expect(home.firstRendered.get('/NavBar')).toEqual(['nav', 'g']);
+  });
+
+  it('🔴 keeps the placement id in front, so it is THAT copy and not every copy', () => {
+    // `[visualNodeId]` alone is the highlighter's "a canvas showing the definition" case: it
+    // outlines every instance in the app. The quiet row says "Main Navbar is on Home", singular.
+    const home = reachOfScreen('/App', '/Home', corpus());
+    const path = home.firstRendered.get('/Hero');
+
+    expect(path).toHaveLength(2);
+    expect(path[0]).toBe('hero');
+  });
+
+  it('descends THROUGH a component whose visual root is another component', () => {
+    // A wrapper that draws only by drawing something else. Stopping at the wrapper's root would
+    // end the path on another instance — the same defect one level down, and the one a fix that
+    // only handled the first hop would ship.
+    const nested = index([
+      component('/App', [node('page', 'Page', { children: [node('placed', '/Wrapper')] })], ['page']),
+      component('/Wrapper', [node('inner', '/Leaf')], ['inner']),
+      component('/Leaf', [node('box', 'Group')], ['box'])
+    ]);
+
+    expect(reachOfScreen('/App', undefined, nested).firstRendered.get('/Wrapper')).toEqual([
+      'placed',
+      'inner',
+      'box'
+    ]);
   });
 
   it('🔴 never names a placement the screen does not draw', () => {
@@ -147,7 +180,7 @@ describe('TVW-002 AC1 — where on the screen it is', () => {
       component('/Card', [node('g', 'Group')], ['g'])
     ]);
 
-    expect(reachOfScreen('/App', undefined, twice).firstRendered.get('/Card')).toBe('first');
+    expect(reachOfScreen('/App', undefined, twice).firstRendered.get('/Card')).toEqual(['first', 'g']);
   });
 
   it('🔴 skips an undrawn placement in favour of a later drawn one', () => {
@@ -168,7 +201,7 @@ describe('TVW-002 AC1 — where on the screen it is', () => {
 
     const reach = reachOfScreen('/App', undefined, both);
     expect(reach.renders.has('/Card')).toBe(true);
-    expect(reach.firstRendered.get('/Card')).toBe('real');
+    expect(reach.firstRendered.get('/Card')).toEqual(['real', 'g']);
   });
 });
 

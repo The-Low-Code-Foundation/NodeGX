@@ -69,9 +69,67 @@ const SURFACES = `(() => {
     mode: bg ? bg.getAttribute('data-preview-mode') : null,
     src: webview ? webview.src || webview.getAttribute('src') : null,
     shape: strip ? strip.getAttribute('data-shape') : 'agree',
+    tone: strip ? strip.getAttribute('data-tone') : null,
+    stripPresent: !!strip,
+    stripHeight: strip ? Math.round(strip.getBoundingClientRect().height) : 0,
+    dismissable: strip ? !!strip.querySelector('[data-test="preview-strip-dismiss"]') : false,
     text: text ? text.innerText.replace(/\\s+/g, ' ').trim() : '',
     doors: strip ? Array.from(strip.querySelectorAll('button')).map((b) => b.innerText.trim()) : []
   };
+})()`;
+
+/**
+ * TVW-002 AC1 — what the RUNNING APP is actually outlining, asked of the app itself.
+ *
+ * 🔴 **Read in the guest, not in the editor.** The editor can tell you what it *sent*; only the
+ * running app can tell you what is *drawn*, and this drive exists because the two are different
+ * questions.
+ *
+ * 🔴 **AND IT READS THE RECT, NOT THE COUNT — because the count was true of the broken version.**
+ * Session 13's first AC1 build pointed the outline at the node that *places* the component. That
+ * node passes the highlighter's `getRef` filter, so it enters `selectedNodes` and
+ * `selectedNodes.size` reads a healthy **1**; it then has no `getDOMElement`, so `updateHighlights`
+ * removes the div again on the very next frame and nothing is ever on screen. A count-based arm
+ * would have reported AC1 green over an outline nobody could see.
+ *
+ * So this returns the measured box of the outline div itself — `w`/`h` greater than zero is the
+ * only reading that means a person can see a line. `verify-the-consequence-not-just-the-mechanism`.
+ *
+ * ⚠️ **No backticks in the guest source.** It travels inside a template literal in this file; a
+ * backtick would end the literal. Single quotes and concatenation only.
+ */
+const OUTLINE = `(async () => {
+  const w = document.querySelector('[data-test="app-preview"] webview');
+  if (!w) return { error: 'no webview' };
+  const probe = '(() => {' +
+    ' const api = window.NoodlEditorHighlightAPI;' +
+    ' if (!api || !api.highlighter) return { api: false };' +
+    ' const h = api.highlighter;' +
+    ' const boxes = [];' +
+    ' const kids = h.highlightRootDiv ? h.highlightRootDiv.children : [];' +
+    ' for (var i = 0; i < kids.length; i++) {' +
+    '   var r = kids[i].getBoundingClientRect();' +
+    '   boxes.push({ w: Math.round(r.width), h: Math.round(r.height), x: Math.round(r.x), y: Math.round(r.y) });' +
+    ' }' +
+    ' var drawn = boxes.filter(function (b) { return b.w > 0 && b.h > 0; });' +
+    ' var chip = document.querySelector("[data-noodl-box-overlay-chip]");' +
+    ' var cr = chip ? chip.getBoundingClientRect() : null;' +
+    ' var chipRect = cr && cr.width > 0 && cr.height > 0 ? cr : null;' +
+    ' return {' +
+    '   api: true,' +
+    '   placed: h.placedNodes ? h.placedNodes.size : -1,' +
+    '   selected: h.selectedNodes ? h.selectedNodes.size : -1,' +
+    '   drawn: drawn.length,' +
+    '   boxes: drawn.slice(0, 3),' +
+    '   designMode: h.designMode,' +
+    '   chip: chipRect ? { w: Math.round(chipRect.width), h: Math.round(chipRect.height) } : null' +
+    ' };' +
+    '})()';
+  try {
+    return await w.executeJavaScript(probe);
+  } catch (e) {
+    return { error: String(e && e.message ? e.message : e) };
+  }
 })()`;
 
 async function main() {
@@ -123,6 +181,31 @@ async function main() {
     process.exit(2);
   }
 
+  /**
+   * 🔴 **PUT THE PREVIEW BACK BEFORE READING IT.**
+   *
+   * This script ENDS by pressing a `Go to` door — that is its known-firing control — so it leaves
+   * the preview on another page. Run twice, the second run reads a different screen from the first:
+   * session 13 got five different sentences, one fewer agree row, no outline, and `no Go to door
+   * was on screen`, all of them correct answers to a question nobody had asked. Nothing was broken.
+   *
+   * A drive whose own exit state changes its next result is not an instrument. So it resets, and
+   * the reset is ASSERTED — a navigation that silently did not happen would put the whole run back
+   * where it started, invisibly.
+   */
+  const startRoute = await ev(`(() => {
+    const { EventDispatcher } = window.__wreq('./src/shared/utils/EventDispatcher.ts');
+    EventDispatcher.instance.emit('setPreviewRoute', { url: '/#/' });
+    return 'asked';
+  })()`);
+  await wait(1500);
+  const atStart = await ev(SURFACES);
+  console.log(`reset to the start page: ${startRoute} -> ${atStart.src}`);
+  if (!atStart.src || /\/(?!#?\/?$)[a-z]/i.test(new URL(atStart.src).pathname + new URL(atStart.src).hash.replace('#', ''))) {
+    console.error(`refusing: the preview is on ${atStart.src}, not the start page. Every sentence below would be about the wrong screen.`);
+    process.exit(2);
+  }
+
   const targets = (opt('components') || '').split(',').filter(Boolean);
   if (targets.length === 0) {
     console.error('pass --components "/A,/B" — pick them with the fixture probe, not by guessing');
@@ -148,14 +231,17 @@ async function main() {
     await wait(500);
 
     const after = await ev(SURFACES);
+    // AC1 — when the two surfaces agree the preview should be pointing at the placement. Read after
+    // the switch has settled, from the guest.
+    const outline = await ev(OUTLINE);
     // Both sides must be REAL, not merely equal — see the refusal above for why `null === null` is
     // the failure this guards.
     const read = Boolean(before.src && after.src && before.mode && after.mode);
     const held = read && before.src === after.src && before.mode === after.mode;
 
-    rows.push({ target, before, after, ac3: held });
+    rows.push({ target, before, after, outline, ac3: held });
     console.log(
-      `${held ? '✅' : '🔴'} ${target}\n    shape=${after.shape}  "${after.text}"\n    doors=[${after.doors.join(' | ')}]\n    src ${before.src} -> ${after.src}  mode ${before.mode} -> ${after.mode}`
+      `${held ? '✅' : '🔴'} ${target}\n    shape=${after.shape} tone=${after.tone} present=${after.stripPresent} h=${after.stripHeight}px\n    "${after.text}"\n    doors=[${after.doors.join(' | ')}]\n    outline=${JSON.stringify(outline)}\n    src ${before.src} -> ${after.src}  mode ${before.mode} -> ${after.mode}`
     );
 
     if (shots) await shot(client, path.join(shots, `tvw002-${slug(target)}.png`));
@@ -188,6 +274,9 @@ async function main() {
     await dispatchClick(client, { x: door.x, y: door.y });
     await wait(1200);
     const after = await ev(SURFACES);
+    // AC1 — when the two surfaces agree the preview should be pointing at the placement. Read after
+    // the switch has settled, from the guest.
+    const outline = await ev(OUTLINE);
     navigationSeen = before.src !== after.src;
     console.log(
       `${navigationSeen ? '✅' : '🔴'} known-firing arm: pressed "${door.label}" — src ${before.src} -> ${after.src}, strip now ${after.shape}`
@@ -205,7 +294,60 @@ async function main() {
   const ac3Held = ac3Rows.length > 0 && ac3Rows.every((r) => r.ac3);
   console.log(`\nAC3 (preview did not move on any canvas switch): ${ac3Held ? 'HELD' : 'BROKEN'}`);
   console.log(`known-firing navigation seen: ${navigationSeen}`);
-  process.exit(ac3Held && navigationSeen ? 0 : 1);
+
+  /**
+   * 🔴 **Richard's 2026-09-18 ruling, as an arm rather than as a screenshot.** The row is drawn in
+   * EVERY case now, including `agree` — the seam is the point, and the first build's whole defect
+   * was that the separator went away in the common case. A run where some row is missing is a run
+   * where the ruling has been undone.
+   */
+  const everyRowPresent = ac3Rows.every((r) => r.after.stripPresent && r.after.stripHeight > 0);
+  const agreeRows = ac3Rows.filter((r) => r.after.shape === 'agree');
+  console.log(`the row is drawn on every reading: ${everyRowPresent} (${ac3Rows.length} readings)`);
+  console.log(`  of which agree: ${agreeRows.length} — tones ${JSON.stringify(agreeRows.map((r) => r.after.tone))}`);
+
+  /**
+   * ⚠️ The agree arm needs its own known-firing signal: `quiet` tone AND words. A quiet row that is
+   * present but silent is exactly what a broken sentence looks like, and it is also a legitimate
+   * state (bench mode, no canvas) — so this asserts the population that should SPEAK.
+   */
+  const agreeSpeaks = agreeRows.length > 0 && agreeRows.every((r) => r.after.tone === 'quiet' && r.after.text.length > 0);
+  console.log(`agree rows are quiet and say something: ${agreeSpeaks}`);
+
+  /**
+   * 🔴 `selected > 0` is NOT the arm — see `OUTLINE`. A drawn box is one with a non-zero rect.
+   *
+   * The agree rows are the population that should have one: the divergent shapes are about things
+   * that are *not* on this screen, so an outline on one of those would be a defect of its own.
+   */
+  const drawnOn = ac3Rows.filter((r) => r.outline && r.outline.drawn > 0);
+  const claimedOn = ac3Rows.filter((r) => r.outline && r.outline.placed > 0);
+  console.log(`AC1 outline DRAWN (non-zero box) on: ${drawnOn.map((r) => r.target).join(', ') || 'NOTHING'}`);
+  console.log(`   …placement merely CLAIMED on: ${claimedOn.map((r) => r.target).join(', ') || 'NOTHING'}`);
+  if (claimedOn.length > drawnOn.length) {
+    console.log('   🔴 a claimed placement with no box is the instance-node trap — read the rect, not the count');
+  }
+
+  /**
+   * ⚠️ **The chip ELEMENT always exists** — `BoxModelOverlay` builds it in its constructor and
+   * sizes it to nothing when cleared. A first version of this arm asked whether the element was in
+   * the DOM and reported the defect on all seven rows, including the four that never had an
+   * outline at all. An arm that fires everywhere is not measuring the thing it is named after.
+   *
+   * 🔴 **The defect the FIRST drive found, kept as an arm.** Sent down the selection channel the
+   * outline drew the right line and brought the box-model chip with it — five lines of CSS facts
+   * over the running app, because the author changed which component the canvas was on. No number
+   * in this script saw it; the screenshot did. It is a number now.
+   */
+  const chipped = ac3Rows.filter((r) => r.outline && r.outline.chip);
+  const chipOk = chipped.length === 0;
+  console.log(`no inspector chip over the app: ${chipOk}${chipOk ? '' : ' — 🔴 on ' + chipped.map((r) => r.target).join(', ')}`);
+  const designMode = ac3Rows.some((r) => r.outline && r.outline.designMode);
+  if (!designMode) {
+    console.log('   ⚠️ the app reports designMode=false — no outline is pushed in Preview mode at all');
+  }
+
+  process.exit(ac3Held && navigationSeen && everyRowPresent && agreeSpeaks && chipOk ? 0 : 1);
 }
 
 async function shot(client, file) {

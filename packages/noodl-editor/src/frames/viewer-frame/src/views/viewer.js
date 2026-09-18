@@ -55,6 +55,13 @@ class Viewer extends View {
       this.canvasView.setNodeHovered(path);
     });
 
+    // TVW-002 AC1 — where the canvas's component sits on this screen. Computed in the editor
+    // window (this one has no node graph) and drawn here, on its own channel rather than as a
+    // selection: a selection also brings the box-model chip, and this is not an inspection.
+    ipcRenderer.on('viewer-placement-outline', (sender, path) => {
+      this.canvasView.setPlacementOutline(path);
+    });
+
     // FB-016 scope 4 — the crosshair follows a field in the editor window's properties panel,
     // so the detached preview can only hear about it through main.
     ipcRenderer.on('viewer-transform-origin-focus', (sender, enabled) => {

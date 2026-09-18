@@ -287,17 +287,28 @@ function EditorDocument() {
   const [placementOutline, setPlacementOutline] = useState<PlacementOutline>(null);
   useEffect(() => onPlacementOutline(setPlacementOutline), []);
 
+  /**
+   * TVW-002 AC1 — the placement outline, on its OWN channel.
+   *
+   * 🔴 It used to be merged into the selection above (`selectedNodePath ?? placementOutline`),
+   * which drew the right line and, the drive showed, also dropped the box-model chip over the
+   * running app — because the highlighter takes its inspector focus from the selection. It is not
+   * an inspection request. See `CanvasView.setPlacementOutline`.
+   *
+   * **A real selection still wins**, and now for a plain reason rather than a merge: the outline is
+   * cleared while one exists, so the preview is never drawing a line about a question the author
+   * has stopped asking. In preview mode nothing is drawn at all, as before.
+   */
+  useEffect(() => {
+    const path = previewMode || selectedNodePath ? null : placementOutline;
+    canvasView?.setPlacementOutline(path);
+    ipcRenderer.send('viewer-placement-outline', path);
+  }, [placementOutline, selectedNodePath, previewMode, canvasView]);
+
   useEffect(() => {
     if (!previewMode) {
-      /**
-       * **A real selection always wins.** The placement outline is what the preview says when the
-       * author has not selected anything — the quiet strip row says *"Hero is on Pricing"* and this
-       * is the line that says *there*. The moment they select something, that is what they are
-       * asking about, and the answer to a different question stops being drawn.
-       */
-      const path = selectedNodePath ?? (placementOutline ? [placementOutline] : null);
-      canvasView?.setNodeSelected(path);
-      ipcRenderer.send('viewer-select-node', path);
+      canvasView?.setNodeSelected(selectedNodePath);
+      ipcRenderer.send('viewer-select-node', selectedNodePath);
     }
 
     // FB-016 scope 4 — a new selection rebuilds the properties panel, which is exactly the case
@@ -305,7 +316,7 @@ function EditorDocument() {
     // back on dispose; this is the belt to that pair of braces, and it is also simply correct:
     // the crosshair described the node that is no longer selected.
     transformOriginFocus.reset();
-  }, [selectedNodePath, canvasView, previewMode, placementOutline]);
+  }, [selectedNodePath, canvasView, previewMode]);
 
   const onRouteChanged = useCallback(
     (route) => {

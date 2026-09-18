@@ -77,8 +77,8 @@ export interface PageReach {
   /** Components an instance of which is attached to the rendered tree. What a person can see. */
   renders: Set<string>;
   /**
-   * TVW-002 AC1 — for each component in {@link PageReach.renders}, the node id of the **first
-   * placement of it that the screen actually draws**, in walk order.
+   * TVW-002 AC1 — for each component in {@link PageReach.renders}, the **path to the thing on
+   * screen that the first drawn placement of it actually paints**, in walk order.
    *
    * This is what the preview outlines when the two surfaces agree: the strip says *"Hero is on
    * Pricing"* and this says **where**. Recorded in the same pass rather than by a second search,
@@ -95,13 +95,41 @@ export interface PageReach {
    * Both cases are ones the quiet strip row already words differently — *"Pricing is the screen the
    * preview is showing"*, not *"Pricing is on Pricing"* — so there is nothing to point at anyway.
    *
-   * ⚠️ **A node id addresses a PLACEMENT, not an occurrence on screen.** If the component holding
-   * the placement is itself placed three times, the running app has three nodes carrying this id
-   * and the highlighter outlines all three (`selectNodesAtPath([id])` — its documented behaviour
-   * for a canvas showing a definition). That is the editor's existing selection semantics, not a
-   * new rule invented here.
+   * 🔴 **A PATH, AND THE LAST ID IS NOT THE PLACEMENT — measured in the running app.**
+   *
+   * The first build recorded the id of the node that *places* the component, which is the obvious
+   * answer and draws nothing at all. Asked of the guest, for the same placement on the same screen:
+   *
+   *     placement id  →  found 1,  getRef ✅,  getDOMElement **absent**
+   *     painting id   →  found 1,  getRef ✅,  getDOMElement → DIV 973×72 at (0,0)
+   *
+   * ⚠️ **And the first reading of that is a trap.** `getRef` is only the highlighter's *existence
+   * filter* (`selectNodesAtPath`); the element it actually draws on comes from `getDOMElement()` in
+   * `updateHighlights`. A component instance passes the filter — so `selectedNodes.size` goes to
+   * **1**, and every count-based check reports a healthy selection — and then yields no element, so
+   * the div is `remove()`d on the next frame. Nothing appears, nothing errors.
+   *
+   * 🔴 It is worse than silent: the highlighter's own note says a *selected* node whose element has
+   * gone is never removed from `selectedNodes`, so it is revisited and its div `remove()`d on every
+   * subsequent frame, for ever.
+   *
+   * **A count is the mechanism; a rect is the consequence.** The drive now reads the outline's
+   * measured box, because `selected: 1` was true of the broken version too.
+   *
+   * TVW-003 had already learned the same shape in this phase: *"instance nodes have no DOM — drive
+   * outlines on visual nodes"*. It was rediscovered here at full price because AC1 asked for "the
+   * instance" and the instance is not a thing you can point at.
+   *
+   * So the path descends from the placement to the node that paints: the placement's id, then the
+   * first **visual** root inside it, and again through any of those that are themselves component
+   * instances. `[placementId, …, visualNodeId]` is what `selectNodesAtPath` wants — the last id
+   * addresses the element, the earlier ones say **which** copy of it, via `pathAddresses`.
+   *
+   * ⚠️ Without the leading placement id, a component placed three times would light up all three:
+   * a bare `[visualNodeId]` is "every instance", which is the editor's selection semantics for a
+   * canvas showing a definition, and not what the quiet row is saying.
    */
-  firstRendered: Map<string, string>;
+  firstRendered: Map<string, string[]>;
   /** Components the screen instantiates at all, rendered or not. What runs. */
   mounts: Set<string>;
   /**
@@ -136,7 +164,7 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
   const reach: PageReach = {
     renders: new Set(),
     mounts: new Set(),
-    firstRendered: new Map(),
+    firstRendered: new Map<string, string[]>(),
     cyclic: false,
     unresolvedRouters: []
   };
@@ -192,7 +220,10 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
       // first placement the walk reaches that is actually attached. Recording it inside
       // `enterComponent` instead would have nothing to record: that function knows the component
       // it is entering, not the node that placed it.
-      if (rendered && !reach.firstRendered.has(typename)) reach.firstRendered.set(typename, node.id);
+      if (rendered && !reach.firstRendered.has(typename)) {
+        const path = drawnPath(node.id, typename);
+        if (path) reach.firstRendered.set(typename, path);
+      }
       enterComponent(typename, rendered, depth + 1);
     }
 
@@ -217,6 +248,44 @@ export function reachOfScreen(rootName: string, pageName: string | undefined, co
       const name = (node.parameters?.name as string) || 'Main';
       if (!reach.unresolvedRouters.includes(name)) reach.unresolvedRouters.push(name);
     }
+  }
+
+  /**
+   * From a placement down to the node that actually paints, following {@link PageReach.firstRendered}'s
+   * rule: a component instance renders its first *visual* root and nothing else, so if that root is
+   * itself an instance the descent continues.
+   *
+   * @returns `undefined` when nothing on this chain draws — which is a real answer, not a failure:
+   *   a component with no visual root is logic, and logic is shape 3's population.
+   */
+  function drawnPath(placementId: string, componentName: string): string[] | undefined {
+    const path = [placementId];
+    let name = componentName;
+
+    // Bounded by the same depth the walk uses. A component placed inside itself would otherwise
+    // descend for ever here even though `enterComponent`'s `onStack` guard caught it — two
+    // recursions, two cycle guards.
+    for (let depth = 0; depth <= MAX_DEPTH; depth++) {
+      const component = components.get(name);
+      if (!component) return undefined;
+
+      const visual = new Set(component.visualRootIds);
+      const root = component.roots.find((candidate) => visual.has(candidate.id));
+      if (!root) return undefined;
+
+      path.push(root.id);
+
+      // A root that is itself a component instance has no DOM either — keep going until the path
+      // ends on something the highlighter can get a ref for.
+      if (root.typename && components.has(root.typename)) {
+        name = root.typename;
+        continue;
+      }
+
+      return path;
+    }
+
+    return undefined;
   }
 
   enterComponent(rootName, true, 0);

@@ -1097,6 +1097,9 @@ function launchApp() {
       'viewer-set-inspect-mode',
       'viewer-select-node',
       'viewer-hover-node',
+      // TVW-002 AC1: the placement outline. Its own channel rather than the selection's, because a
+      // selection also draws the box-model chip and this is not an inspection request.
+      'viewer-placement-outline',
       'viewer-transform-origin-focus',
       'viewer-design-selection',
       // TVW-002 AC5: the strip's sentence, computed in the editor window
