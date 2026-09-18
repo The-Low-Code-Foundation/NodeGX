@@ -1,18 +1,18 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 14.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
-s12–13 built and closed TVW-002. **s14 built TVW-004 — the Layers tab exists, opens, draws the
-screen, and was driven twice.** Richard ruled six times on it. It also corrected a defect in
-TVW-002's closed surface that only showed up because Layers was being built next to it.
+**Written 2026-09-18, end of session 15.** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
+s12–13 built and closed TVW-002; s14 built TVW-004. **s15 drove TVW-004's AC1 and AC2 against the
+running preview, and the independent walk found three defects in the surface s14 had already driven
+twice with nine green arms.**
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | ✅ six rows + AC7's fixes | **CLOSED — all 8 ACs** |
-| TVW-002 | The preview says what it is not showing | ✅ + s14's repeater fix | **CLOSED — all 7 ACs** |
-| TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED — all 6 ACs** |
-| TVW-004 | Layers | ✅ the walk, the tabs, the rows, the crumb, the footer | **AC3, AC4, AC7 green.** AC1, 2, 5, 6 open — driven twice, 9/9 arms, and the shots found three things the arms did not |
+| TVW-001 | The panel tells the truth | ✅ | **CLOSED — all 8 ACs** |
+| TVW-002 | The preview says what it is not showing | ✅ | **CLOSED — all 7 ACs** |
+| TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
+| TVW-004 | Layers | ✅ | **AC1, 2, 3, 4, 7 green.** AC5 open (needs a cold start). **AC6 captured — Richard's verdict is the only thing left** |
 | TVW-005 | Layers can move things (needs 004) | — | — |
 | TVW-006 | The structure lane | — | — |
 | TVW-007 | An instance says what it is (needs 003) | — | — |
@@ -20,107 +20,93 @@ TVW-002's closed surface that only showed up because Layers was being built next
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 29.** Three of ten tasks; the fourth is the phase's centrepiece, is on screen, and
-has had six rulings of its own (R-R…R-V plus §2's note retired).
+**ACs closed: 33** (29 + AC1, AC2 and — pending his look — AC6 is capture-complete; AC7 re-run).
 
-## Start here — AC1, AC2 and AC6
+## Start here
 
-The surface is built and driven; what is left is the **evidence** and Richard's verdict.
+1. 🔴 **Put AC6 in front of Richard.** 20 shots in `verdicts/TVW-004/2026-09-18/` with a
+   `manifest.json` naming what to look at. **The PNGs are gitignored by design** — he has to look
+   at them on this machine, or they have to be sent to him. Two specific questions are in the
+   manifest's `whatToLookAt` and in §9 of the task file; do not turn them into a summary.
+2. **AC5** — the tab default and ⌘⇧L, **from a cold start on each of the four component kinds**.
+   ⚠️ §8.2: this cannot ride the AC1 drive. `chosenTab` is remembered for the session, the panel
+   does not remount between runs, and the attempt read `Components` at 300px and `Layers` at 240px
+   from one unchanged build. A cold start means a fresh renderer per kind, or a way to clear
+   `chosenTab` that is verified to work.
+3. Then **TVW-005** (Layers can move things) — the first task that needs 004 and is not blocked.
 
-1. **AC1's five states**, in one run: canvas on Home; double-click `Hero`; click a row inside a
-   band; navigate the preview to another page; a component that is on no screen. The drive script
-   already resets itself, so it can be extended rather than restarted.
-2. **AC2** — the row count against an **independent DOM walk of the preview**, on three projects
-   (corpus, QA fixture, TPL-008), plus every row's glyph colour read off the rendered element and
-   compared with the canvas's colour for that category.
-3. **AC6** — screenshots of all five states, both themes, 300px and 240px, into
-   `verdicts/TVW-004/<date>/`. **Richard rules WORTHY.** This is the phase's centrepiece surface.
-4. **AC5's remainder** — the ⌘⇧L flip and the cold-start default on each of the four component
-   kinds, driven rather than specced.
+## What s15 found, and what it cost to find
 
-## What s14 settled, and what it cost to find
+**The AC2 instrument is the point.** `scripts/devtools/drive-tvw004-ac2.js` walks the **viewer's**
+DOM — every element, up React's fiber tree to `noodlNode`, path from the runtime's own scope links.
+Different process, different tree, different data structure; the only thing shared with
+`layersTree.ts` is the node id. s14's "independent walk" was a second walk over the same structure
+in the same process, and it agreed with the build for two sessions.
 
-**Richard ruled three things** (R-R, R-S, R-T — all in the task file §6.6), each from a measurement
-over all 117 projects on this machine rather than from the spec:
+🔴 **101 of 104 rendered nodes had no row that addressed them.** A Router mounts its page through a
+node it mints at run time; a `For Each` mints one per item. `layersTree` was putting its own id
+where the runtime had those guids, so `pathAddresses` matched nothing. Against the live preview:
+`[router, navbar, header]` → **0** nodes selected, `[navbar, header]` → 1, `[header]` → 1 — three
+known-firing arms beside the one absence. Under R-R that was **every row of every routed screen**.
 
-- **R-R — Layers starts at the top of the screen**, shell included, with `SHOWING HOME` where the
-  page begins. 73 of the 78 routed projects have a root that draws more than the Router, so §2's
-  *"the page in the preview"* would have hidden on-screen content in 94% of them.
-- **R-S — the tab opens on the branch you are editing.** Fully expanded, one modest page is 330
-  rows and the worst on this machine is 2,994. After: **23 rows on a median screen, 39 at p90.**
-- **R-T — the indent is reduced and capped at 8 levels.** 🔴 §2's *"14px per level"* was never the
-  artefact: the panel has shipped `--tree-indent: 12px` since PNL-006. Now 10px, capped at 80px, and
-  a component boundary costs one level instead of two. **Rows past the right edge of a 240px panel:
-  28% → 0.**
+🔴 **The fix duplicated React keys, and `.logs/dev.log` is where that showed up.** `key` and `path`
+were one array. Two repeaters drawing one template then produced identical keys. They are two
+arrays now: `path` is the runtime's identity, `key` is React's. **The unit fixture has one repeater
+and could not have seen it.**
 
-🔴 **The strip told 190 components they were on no page.** `pageReach` never followed a repeater's
-template, and a `For Each` places its template through a **parameter**, not a child. 498 components
-on this machine are placed only that way; for 190 of them in 56 projects the repeater's own
-component is on a screen the app shows. Every list row and table row in this corpus. Fixed, because
-a note that contradicts the tree under it is worse than no note — **not** because it was found.
-The outline was deliberately *not* extended: a template has no instance node to point at.
+🔴 **A repeater whose template arrives on a wire was asserting its stale parameter.** 38 of 864
+`For Each` nodes on this machine have the port wired; 34 still carry a `template`. It draws a note
+now. ⚠️ **Refusing made the raw count worse** (30 → 36 unaddressed) and the arm had to learn to
+attribute them, or it would have scored the honest build below the mis-naming one.
 
-🔴 **Seven green arms and the screenshot failed them.** The first drive read the row, the path, the
-store's `layers` source, 16 tinted rows under `EDITING MAIN NAVBAR`, a level-9 row at the 90px cap —
-and the shot showed the **Properties panel where Layers had been**. Selecting a node opens its
-properties in the side panel, so the tree removed itself on the first click in it. `keepsSidePanel`
-is the rule now. **A count is the mechanism; the screenshot is the consequence — third time this
-phase.**
+🔴 **The crumb lost the component name for want of 3px**, and only the screenshot could say so —
+`scrollWidth` is meaningless on an inline element and `elementFromPoint` still returned the button.
+A button is an atomic inline box, so Chromium drops the whole name rather than clipping it.
+**Fourth time this phase a screenshot has failed a set of green arms.**
 
-🔴 **Two mutants survived the first spec, and both were fixtures rather than code.** `roots[0]` is
-not the drawn root in **572 of 5,039 components**; **20 of 66 dynamic repeaters carry a stale
-`template`**. A fixture that happens to avoid a real population grades a coincidence.
+## The instrument faults, which cost more than the defects
 
-## Instruments s14 leaves behind
+Every one of these produced a confident wrong answer first. They are written up in §8.1.
 
-- `scripts/devtools/tvw004-layers-census.ts` — the whole corpus through `layersTree`, offline, in
-  seconds. ⚠️ Project files written before the `visualRoots` field existed have none; the census
-  derives visual types from the corpus itself. Its first run read **57 screens as empty** for that
-  reason alone.
-- `scripts/devtools/drive-tvw004-layers.js` — the arms above, each refusing when its subject is not
-  on screen (the indent arm says so rather than passing on a shallow screen).
-- `tests-unit/tvw-004` — 2 suites, **36 specs**, **17 mutants** on `layersTree`/`layersTab` and
-  **6** on `pageReach`/`previewStripWords`, each proven applied by a byte compare and each red with
-  a real count.
+- **Twenty screenshots of one width, named as two** — `useSidePanelLayout` reads its widths once at
+  mount, so writing the setting changed the store and nothing on screen. Drag the divider (the one
+  **taller than it is wide**), and put the **measured** width in the filename.
+- **State 3 read a designed-in absence** — `previewMode` starts `true` and gates the whole outline
+  channel (DES-001). "Outlined in the preview" is a claim about **design mode**.
+- **The subject was a `Loader`** — a component that draws nothing until something is loading. An
+  arm about an outline needs a subject the preview is drawing.
+  ⚠️ An **instance** row is never on screen by the leaf test: a component instance draws no element
+  of its own. Test whether its path is a **prefix** of a rendered path.
+- **"On no screen" asked of the row list** picked `/App`, the project's own root.
+- **`Page.reload` returns before the navigation starts**, so a poll for "the bundle is ready"
+  passes on the page that is about to be destroyed. Stamp the document first. (The AC1 drive no
+  longer reloads at all.)
 
-## What the second drive added (§6.9–6.10 of the task file)
+## Gates at s15
 
-🔴 **A tint with no band to explain it.** With the canvas on the root, the shell's rows tinted and
-nothing said why — nine green arms went straight through it, the shot showed it. The rule is now
-**tint only what a band names**, which is what §2 was reaching for.
-🔴 **The tint was the SELECTION colour** — the same fill `.Selected` uses eleven lines below in the
-same stylesheet. A region being *edited* read as a row you had *clicked*.
-⚠️ **The renderer ran the OLD module for three readings.** HMR had not applied the fix and it
-looked broken. `String(layersOfScreen).includes(…)` is how that was settled — **ask the renderer
-which source it is running** before doubting the change.
-
-## Gates at s14 (all re-run after the last change)
-
-`test:ci` **2985 specs, 8 failures, seed 86492, HEAD `1ecd432e` = the floor BY NAME** (3 SUB-006,
-3 SUB-011, 2 NDA-017), none mine — an **eighth** agreeing seed, from a readout whose mtime was
-checked. `test:main` **497 suites / 7,934** green. `jest tests-unit/tvw-004` **2 suites / 36**,
-`tvw-002` **4 / 74**. `tsc --noEmit` **0**. **20 mutants across the two modules**, each proven
-applied by byte compare and each red with a real count. **AC7 is green.**
+`test:ci` **2985 specs, 8 failures, seed 90754 = the floor BY NAME** (3 SUB-006, 3 SUB-011,
+2 NDA-017), none mine — a **ninth** agreeing seed, from a readout whose mtime was checked.
+⚠️ The run was backgrounded through `tail`, which **ate the exit code**; the log said
+`lerna ERR! exited 1` while the harness reported 0. Read the log, not the status.
+`test:main` **497 suites / 7939** green. `tests-unit/tvw-004` **2 suites / 41 specs**, 4 new mutants
+each `cmp`-proven applied and each red on its own spec. `tsc --noEmit` **0**.
 
 ## The box
 
-One dev stack per checkout. `node scripts/devtools/stop-dev.js --list`, and **ask the peer**.
-s14 left it **free** (`Stopped 35 process(es). Nothing left running.`). Two peers were active:
-**opennoodl-5f** (P95 rocket drives, ephemeral ports, never launches `dev`) and **opennoodl-ec**
-(P94/STY-001), whose `dev` launch reaped s14's editor stack mid-drive (exit 144) — **a `dev` launch
-sweeps the whole checkout, so announce before launching.** Both answer messages quickly; ec asked
-for 10 minutes and then handed the box over as promised.
-
-🔴 **The 09-16 dirty pile is still unowned and still uncommitted.** Four sessions have now disowned
-it. It needs Richard, not a fifth guess.
+s15 left it **free** (`Stopped 26 process(es). Nothing left running.`) and told **opennoodl-5f** so;
+5f had held its P95 drives for about 40 minutes at s15's request and should be assumed to be using
+the box now. **opennoodl-ec** was on P94/STY-001. Announce before launching `dev`.
 
 ## Committing
 
-🔴 The working tree carries other sessions' work — P94's `STY-001` files and P95's rocket drives
-were there all session. Commit by **explicit pathspec**; add untracked files first; put `-F <file>`
-**before** the `--`.
+🔴 The working tree carries **three** other sessions' work — P78's TPL-009, P94's STY-001 and
+P96's whole directory were all there throughout s15. Commit by explicit pathspec, add untracked
+files first, and put `-F <file>` **before** the `--`. s15's commit is `105ba39bf`.
+
+🔴 **Verdict PNGs are gitignored** (`.gitignore:265`). The tracked artefact is `manifest.json`.
+`git check-ignore -v` every image before believing it is committed.
 
 ## Owed to Richard
 
-**AC6's look**, once AC1's states are captured. Nothing else is outstanding: he ruled six times in
-s14 (R-R…R-V and the note's removal), and every one is built and driven.
+**AC6's look, and nothing else.** Everything he ruled on in s14 (R-R…R-V) is built, driven and
+still green.
