@@ -2,8 +2,11 @@
 
 **Scoped:** 2026-09-18, from Richard's ruling at the close of P92 CHR-010, and a code audit taken
 the same hour at `cline-dev` HEAD `884881cff`.
-**Status: ⬜ SCOPED, NOT STARTED.** Nothing here is built. **R1–R7 are proposals, none ruled.**
-**Prefix: `STY`.**
+**Status: 🟢 RULED — the phase has a design.** STY-001 delivered; Richard ruled its verdict AND the
+redesign that came out of it on 2026-09-18 (*"Yep sold"*). 🔴 **Read
+[`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) before anything else — it re-scopes
+§5 and supersedes R-C.** Nothing is built. **R1–R7 ALL RULED by Richard, 2026-09-18**
+(§4), and his general note widened STY-001's mandate — see §4.1. **Prefix: `STY`.**
 
 > "When you add a new colour to the colour style picker, no matter what colour you choose it adds it
 > transparent and you have to set it again once it's in the list. Also how TF do you delete colours?
@@ -30,9 +33,11 @@ before building on it.**
 
 | | reading | where |
 |---|---|---|
-| ✔ | **A Design Tokens panel ALREADY EXISTS in the rail, registered `experimental: true`** — `id: 'design-tokens'`, order 20, `IconName.Palette`, with a **Colors tab** and a **Design Tokens tab**, 399 LOC over 4 files. Experimental panels are per-panel checkboxes in Settings → Editor settings, so it is one switch away from visible | `router.setup.ts:434-441`; `views/panels/DesignTokenPanel/**`; `SettingsPanel/EditorSettingsTab.tsx:36-57` |
+| ✔ | ~~**A Design Tokens panel ALREADY EXISTS in the rail, registered `experimental: true`** … one switch away from visible~~ **WRONG — corrected 2026-09-18 s2, read at HEAD.** The registration sits inside **`if (config.devMode)`** at `router.setup.ts:424`, and `devMode` is declared **only** in `shared/config/config-dev.js`, which nothing in the repo ever loads (`build-editor.ts:20-21` swaps in `config-dist.js`, which does not declare it). The flag is `undefined` in every build, so **that branch has never run and the panel has never reached anyone's rail** — there is no Settings checkbox for it, because a panel must register to get one. `bugtracker.ts:211-230` already documents the identical trap for the same flag. **This was the evidence R3 rested on** | `router.setup.ts:424-441`; `shared/config/config.js`, `config-dev.js:9`; `bugtracker.ts:211-230` |
+| ✔ | **Its Colors tab is scaffolding, not a working tab** — 69 LOC, and every row's `ContextMenu` carries placeholder items labelled `Another Action` / `Success` / `Danger` / `With subtitle`, with no handlers. The panel shell is 35 LOC. So the "399 LOC over 4 files" head start is a rail registration that never fires, a tab shell, and a colour list with a fake menu attached | `DesignTokenPanel.tsx` (35), `components/ColorsTab/ColorsTab.tsx` (69) |
 | ✔ | **There are TWO parallel systems for "the look of this app", and the pickers manage only one.** `metadata.styles` (`{colors, text}`, driven by `StylesModel`) is what the colour and text-style pickers read and write. `metadata.designTokens` (`{version, customTokens}`, `StyleTokensModel`) is what phase 9 built and what the Design Tokens panel edits | `models/StylesModel.ts:54-127`; `models/StyleTokensModel/` |
-| ✔ | 🔴 **Every shipped template has ZERO colour styles, ZERO text styles and ZERO variants** — all seven carry `designTokens.customTokens` instead. So the three things this phase wants in one panel are, in the corpus we ship, entirely unused, and the system people actually meet is the other one | `templates/*/nodegx.project.json`, all 7 read |
+| ✔ | 🔴 **Every shipped template has ZERO colour styles, ZERO text styles and ZERO variants** — all seven carry `designTokens.customTokens` instead: **251 tokens across the seven** (34/34/36/41/36/35/35), against 0/0/0. Re-measured 2026-09-18 s2: the string `"variants"` occurs **zero times** in all seven project files (the key is *absent*, not empty) and `"variant"` occurs nowhere under `templates/` at all. So the three things this phase wants in one panel are, in the corpus we ship, entirely unused | `templates/*/nodegx.project.json`, all 7 read |
+| ✔ | **How the templates got discipline without variants: tokens, not components.** In `todo-list` (38 components): **26 `net.noodl.controls.button` nodes each carry their own `backgroundColor`/`cornerRadius`**, 8 text inputs and 5 Groups likewise — every one styled individually. But **526 parameters resolve to `var(--token)` and there is not one raw colour literal**. Change a token and all 26 buttons change; change what a button *is* (padding, radius, hover, disabled) and you edit 26 nodes by hand. **That gap is what variants exist to fill, and nothing in the corpus fills it** | `templates/todo-list/components/**/nodes.json`, counted |
 | ✔ | **Richard's defect, and its mechanism: a new colour style is created from the PORT's committed value, not from the colour the person picked.** `<CreateNewStyle color={props.inputValue} …>`, then `resolveColor(props.color)` at create time. An unset colour port resolves to transparent, so "no matter what colour you choose it adds it transparent" | `DataTypes/ColorPicker/colorstylepicker.jsx:162, 330-352` |
 | ✔ | **Delete and rename DO exist on a colour style, and are invisible until hover.** Each row draws a pencil and a trash in `.variants-item-icon`, which is `visibility: hidden` and revealed only by `.variants-pick-variant-item:hover`. Delete even counts what it would break first ("used by N nodes and M variants", a confirm modal). The capability is there; the affordance is not | `colorstylepicker.jsx:289-298`; `styles/propertyeditor/variantseditor.css:220-233` |
 | ✔ | 🔴 **Creating a variant leaves the project unable to save.** After the panel's `Create new variant`, `ProjectModel.instance.variants[0]` is a **plain object** with the serialised shape, not a `VariantModel`, so `toJSON()`'s `variants.map(v => v.toJSON())` throws `v.toJSON is not a function` on every `doWriteProjectToDisk` — twice in one session's log. The model path is innocent: calling `ProjectModel.createNewVariant()` directly stored a real `VariantModel` in the same session. Lead, not diagnosis: `services/ProjectStructure/projectLevel.ts:179` does `target.variants = slice.variants ?? []` | measured live, P92 CHR-010 §8 |
@@ -54,29 +59,84 @@ before building on it.**
 that R1 may decide should stop being the place you manage styles at all, and a fix inside it could
 be thrown away by the panel. Take STY-001 first, ask the rulings, then build.
 
-## 4. Rulings to ask — **none of these is ruled**
+## 4. Rulings — **ALL SEVEN RULED, Richard, 2026-09-18 10:59**
 
-| # | question | proposal | task |
-|---|---|---|---|
-| R1 | Does the panel **replace** the in-node pickers, or sit beside them? | **Beside.** The picker stays for *picking* on a selected node (it is the right place to choose); the panel is for *managing* — create, rename, delete, see what uses it. Replacing the picker means a person picking a colour has to leave the node | STY-002 |
-| R2 | **Which of the two systems does the panel manage** — `metadata.styles` (colours + text styles, what the pickers write) or `metadata.designTokens` (what phase 9 built and every template carries)? | **Both, in one panel, honestly labelled** — the panel Richard asked for is "everything that decides the look", and a person does not know which of our two systems a colour came from. Needs its own slice; it is the biggest open question here | STY-001, STY-002 |
-| R3 | The existing experimental **Design Tokens panel**: extend it, or start a new Styles panel and retire it? | **Extend it and rename it `Styles`.** It already has the rail registration, an icon, a tab shell and a Colors tab; starting again spends that twice | STY-002 |
-| R4 | What lives in the panel in v1 | **Colours, text styles, variants** — the three Richard named. Fonts and spacing follow the same shape later if he wants them | STY-002 |
-| R5 | Where in the rail | **Directly under Components**, above Search: it is a thing about the project, not a tool | STY-002 |
-| R6 | Should **delete and rename be always visible** on a row, or stay on hover? | **Always visible**, at the panel's size — hover-only is what produced "how TF do you delete colours?". In the narrow picker popout they may stay on hover | STY-003 |
-| R7 | When you create a colour style from the picker, **which colour does it take** — the one in the wheel, or the port's committed value? | **The one in the wheel.** That is what a person means by "create a style from this colour". If the wheel has nothing, the port's value is the sensible fallback, and if that is empty the field should say so rather than silently creating transparent | STY-003 |
+| # | question | **RULED** | was proposed | task |
+|---|---|---|---|---|
+| R1 | Does the panel **replace** the in-node pickers, or sit beside them? | 🟢 **BESIDE.** The picker stays for *picking* on a selected node; the panel is for *managing* — create, rename, delete, see what uses it | same (beside) | STY-002 |
+| R2 | **Which of the two systems does the panel manage** — `metadata.styles` or `metadata.designTokens`? | 🟢 **BOTH, in one panel, each row badged with which system it came from.** A person does not know we have two systems and should not have to. **But see §4.1** — Richard's note puts the existence of two systems itself in scope for STY-001 | same (both) | STY-001, STY-002 |
+| R3 | The existing experimental **Design Tokens panel**: extend it, or start a new Styles panel and retire it? | 🟢 **FRESH PANEL, DELETE THE OLD ONE.** ⚠️ *Overruled the proposal* — and correctly: §2 now shows the old panel never registered in any build and its Colors tab is placeholder scaffolding, so there was far less to extend than the proposal assumed | extend + rename | STY-002 |
+| R4 | What lives in the panel in v1 | 🟢 **COLOURS, TEXT STYLES, VARIANTS** — the three he named. Radius, shadow and spacing follow the same shape later | same (three) | STY-002 |
+| R5 | Where in the rail | 🟢 **DIRECTLY UNDER COMPONENTS**, above Search: it is a thing about the project, not a tool | same | STY-002 |
+| R6 | Should **delete and rename be always visible** on a row, or stay on hover? | 🟢 **A VISIBLE `⋯` MENU ON EVERY ROW.** ⚠️ *Overruled the proposal.* One mark per row instead of two: it says "there are actions here" without putting two bins in your eyeline on every row. The hover-only affordance — the actual complaint — still goes | always visible (two icons) | STY-003 |
+| R7 | When you create a colour style from the picker, **which colour does it take** — the wheel, or the port's committed value? | 🟢 **THE ONE IN THE WHEEL.** Fall back to the port if the wheel has nothing; if that is empty too, say so rather than silently creating transparent | same (wheel) | STY-003 |
+
+### 4.1 What Richard's general note added — **STY-001's mandate is now wider than an inventory**
+
+Verbatim, 2026-09-18, answering "anything else before I start":
+
+> "I think mainly just feel free to redesign this properly. It's something that has been a huge
+> oversight in the Noodl world since the early days. The Noodl team were of the opinion of 'why not
+> just have everything with inline styles, it costs a few KB of HTML text rather than making
+> classes, and makes the whole design job faster' and I think we're well beyond that now, with MCP
+> and AI help, in view of code export and making production applications using NodeGX. So feel free
+> to say 'hold on, this whole style system is dumb, let's review the whole thing'. It must still be
+> possible for people to be lazy and just manually style everything, but I'll be making tutorial
+> videos specifically advising people to do the style system as they go along, making sure every
+> button they put down has the style they like, a variant set, tokens added, hover and disabled
+> modes looked at, making sure the colour pallet fits their design vision, etc etc so this will be a
+> big boost to 'make your app the right way' mentality and the opinionatedness of NodeGX against the
+> original Noodl team's vision."
+
+And on R2, on variants:
+
+> "It seems like we might have to teach the MCP about using Variants though, since you measured that
+> none of the tables have them, which is strange because how did they manage button styles and
+> stuff? … Variants are like CSS classes for NodeGX nodes, it's worrying that the templates haven't
+> used them. … before creating a nodeGX app via MCP, the AI coder should be forcing the user to pass
+> through a mockup and design stage, where previsional tokens, styles and variants are proposed, and
+> then the build starts and the MCP uses the variants throughout so we have as few manually styled
+> things as possible. Visual components with states is another hack to make very specific variants
+> of more complex creations … More thinking and research needed here."
+
+**What this changes, ruled by Richard 2026-09-18 s2** (*"Should we start STY-001 to get to where you
+audit and propose how you'd fix the whole styles system?"*):
+
+1. 🔴 **STY-001 stops being an inventory and becomes an audit that owes a VERDICT.** It must end
+   with a proposal for what the style system *should* be, including the option "the two-system split
+   is wrong, here is what replaces it" — not merely a description of what exists. R2's "both,
+   badged" stands as the ruling **for the panel**, and is explicitly not a ruling that two systems
+   should continue to exist.
+2. 🔴 **Two constraints the proposal must satisfy, both from the note:** (a) a person must still be
+   able to be lazy and style everything by hand — the opinionated path is a default, never a gate;
+   (b) the target is production apps and **code export** (P18), so a style system that cannot export
+   as classes is a worse answer than one that can.
+3. 🔴 **The MCP authoring side is NAMED here and is NOT a phase-94 task.** Teaching the MCP to
+   author variants, and a mockup/design stage before an MCP build, are real work that STY-001's
+   verdict must scope — but they belong to their own phase off the back of it.
+   ([[a-finding-may-already-be-another-tasks-acceptance-criterion]] — grep before opening it.)
+4. **The variants question is now a first-class question of the audit**, not a footnote: §2 shows
+   the corpus got colour discipline from tokens and component discipline from nothing.
 
 ## 5. The tasks
 
+🔴 **This table is superseded by [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md)
+§8**, which re-scoped it after Richard ruled the redesign. It is kept here only so the change is
+visible; **build from §8, not from this.**
+
 | id | task | state |
 |---|---|---|
-| [STY-001](./STY-001-WHAT-A-LOOK-IS-MADE-OF.md) | **The study.** One measured inventory of everything that decides an app's look today — the two systems, who writes each, what a project file carries, which surfaces reach them, what a person cannot do at all. Ends in a page Richard reads and the R1–R7 rulings | ⬜ |
-| STY-002 | **One panel in the rail.** The shell: `Styles` in the left rail (R3/R5), sections for colours, text styles and variants (R4), reachable with nothing selected | ⬜ blocked on R1–R5 |
-| STY-003 | **Colours.** Create with the colour you picked (R7), delete and rename visible (R6), and what a style is used by before you delete it | ⬜ blocked on R6/R7 |
-| STY-004 | **Text styles.** The same list and the same affordances; `TextStylePicker` already has delete and rename — this is mostly moving them where they can be found | ⬜ |
-| STY-005 | **Variants.** The list, rename, delete — and the save defect (§3.3), which must be fixed before anyone is invited to create variants from a panel | ⬜ |
-| STY-006 | **Where it is used.** A style or variant names the nodes and components using it, and takes you there. The delete modal already counts them, so the data exists | ⬜ |
-| STY-007 | **The after picture.** Before/after of every surface this phase touched, both themes, and Richard's WORTHY | ⬜ |
+| [STY-001](./STY-001-WHAT-A-LOOK-IS-MADE-OF.md) | **The study and the verdict.** Audit in `STY-001-FINDINGS.md`, proposal in `STY-001-VERDICT.md`, ruled design in `STY-DESIGN-THE-LOOK-MODEL.md` | 🟢 **done** |
+| STY-002 | **The Look model** — one concept end to end; `Preset`/`Size` removed | ⬜ |
+| STY-003 | **The property panel** — the four rules and three states. The "clear AF" task | ⬜ |
+| STY-004 | **Export carries Looks** — scope first; blocking for anything that ships | ⬜ 🔴 |
+| STY-005 | **The Styles panel in the rail** — colours, text, Looks (R1, R3–R6 as ruled) | ⬜ |
+| STY-006 | **Where it's used** | ⬜ |
+| STY-007 | **The after picture** — both themes, Richard's WORTHY | ⬜ |
+
+~~The original seven tasks (one panel / colours / text styles / variants / where used / after
+picture) were scoped against a model in which presets and variants were separate systems. Richard
+ruled that model away.~~
 
 ## 6. Out of scope
 

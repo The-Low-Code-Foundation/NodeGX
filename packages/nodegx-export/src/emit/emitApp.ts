@@ -43,7 +43,7 @@ import { DRAG_LIB_PATH, dragLibSource } from './dragLib';
 import { PAGE_STACK_LIB_PATH, pageStackLibSource } from './pageStackLib';
 import { EmittedCopy, emitKits } from './kits';
 import { README_PATH, renderReadme } from './readme';
-import { ExportReportData, REPORT_PATH, ReportComponent, renderReport, stripScope } from './report';
+import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
 import { emitScaffold } from './scaffold';
 import { emitStateModules } from './state';
 
@@ -398,6 +398,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
           components: [...new Set(settledWrites.map((w) => stripScope(w.component, w.component)))].sort()
         };
 
+  const styles = stylesReport(ir);
+
   const report: ExportReportData = {
     projectName: ir.project.name,
     // ⚠️ Both generated files are in their own count. Neither exists as a key yet — they are
@@ -408,6 +410,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     modules: moduleFailures,
     project: projectNotes,
     ...(settled ? { settled } : {}),
+    ...(styles ? { styles } : {}),
     backendEndpoint: ir.project.cloudservices?.endpoint ?? null,
     usesBackend: api.usesBackend,
     httpModule: api.files.some(([path]) => path === 'src/api/http.ts'),
@@ -1851,3 +1854,55 @@ function envExample(backend: CloudServicesIR): string {
   );
 }
 
+
+/**
+ * STY-004 AC6 — what the export resolved out of the project's style dictionary.
+ *
+ * 🔴 **Counted off the IR, not off the emitted CSS, and the difference is deliberate.** Counting
+ * occurrences of a Look's declarations in the output would report a Look as carried whenever its
+ * values happened to match something else — the `a-css-property-whose-default-equals-the-test-value`
+ * shape. This counts the nodes that *point at* each style, which is the claim the paragraph makes.
+ *
+ * A node wearing a Look no node's type matches is not counted, because no such node exists: the
+ * pair (`name`, `typename`) is how a `variant` resolves at parse, in the runtime, and here.
+ */
+function stylesReport(ir: ExportIR): StylesReport | undefined {
+  const styles = ir.project.styles;
+  if (styles === undefined) return undefined;
+
+  const nodes = ir.components.flatMap((component) => component.nodes);
+
+  const looks = styles.variants
+    .map((variant) => ({
+      name: variant.name,
+      typename: variant.typename,
+      nodes: nodes.filter((node) => node.variant === variant.name && node.type === variant.typename).length
+    }))
+    .filter((look) => look.nodes > 0)
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
+  // A text style is reached through any `<prefix>textStyle` parameter, on the node itself or lent
+  // to it by its Look — the same two sources the parser expands, so the count matches the CSS.
+  const textStyleNamesOf = (node: (typeof nodes)[number]): string[] =>
+    [...node.parameters, ...(node.inheritedParameters ?? [])]
+      .filter((p) => p.name.endsWith('textStyle') && p.value.kind === 'literal' && typeof p.value.value === 'string')
+      .map((p) => String((p.value as { value: unknown }).value));
+
+  const textStyles = Object.keys(styles.textStyles)
+    .map((name) => ({ name, nodes: nodes.filter((node) => textStyleNamesOf(node).includes(name)).length }))
+    .filter((style) => style.nodes > 0)
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
+  const looksWithUnemittedStates = styles.variants
+    .filter((variant) => Object.keys(variant.stateParameters).length > 0)
+    .filter((variant) => looks.some((look) => look.name === variant.name && look.typename === variant.typename))
+    .map((variant) => variant.name)
+    .sort();
+
+  return {
+    looks,
+    textStyles,
+    colors: Object.keys(styles.colors).sort(),
+    looksWithUnemittedStates
+  };
+}

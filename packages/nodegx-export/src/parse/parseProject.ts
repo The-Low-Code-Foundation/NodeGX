@@ -47,7 +47,9 @@ import {
   ParamValue,
   PortIR,
   ProjectIR,
-  RouterIR
+  RouterIR,
+  StylesIR,
+  VariantIR
 } from '../ir/types';
 import { parseModules } from './parseModules';
 
@@ -72,6 +74,8 @@ interface RawNode {
   metadata?: { comment?: string };
   parent?: string;
   children?: string[];
+  /** STY-004. The Look this node wears — a top-level field, not a parameter. */
+  variant?: string;
 }
 
 export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
@@ -90,9 +94,12 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
   // report can say what the file did not, rather than the export quietly reading a better graph.
   const settled: RunOnChangeWrite[] = [];
 
+  // STY-004. Read before the components, because every node that wears a Look resolves against it.
+  const styles = parseStyles(projectDir, projectFile);
+
   const components = findComponentDirs(componentsDir)
     .filter((dir) => !path.relative(componentsDir, dir).split(path.sep).includes('__cloud__'))
-    .map((dir) => parseComponent(dir, index, settled))
+    .map((dir) => parseComponent(dir, index, settled, styles))
     // D1: components sort by path, codepoint order.
     .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 
@@ -115,7 +122,75 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
   const cloudservices = parseCloudServices(projectFile.metadata?.cloudservices);
   if (cloudservices !== undefined) project.cloudservices = cloudservices;
 
+  if (styles !== undefined) project.styles = styles;
+
   return { project, components };
+}
+
+/**
+ * STY-004 AC1 — the project's style dictionary, from whichever of the two shapes is on disk.
+ *
+ * 🔴 **This file was never opened before.** `parseProject` read four files and `nodegx.styles.json`
+ * was not one of them, so every colour style, text style and Look was a name pointing at a
+ * dictionary the exporter did not hold — and the export dropped all three without a word
+ * (STY-001-FINDINGS §8.4b).
+ *
+ * The two shapes, and which field is which, are transcribed from the editor's own reader
+ * (`ProjectImporter.reconstructMetadata` / `reconstructVariants`,
+ * `noodl-editor/src/editor/src/io/ProjectImporter.ts:422-455`) rather than inferred from a sample:
+ *
+ * - **v2** — `nodegx.styles.json`, `{ colors, textStyles, variants[] }`.
+ * - **legacy** — `nodegx.project.json`, `{ metadata: { styles: { colors, text } }, variants[] }`.
+ *   The text-preset map is named `text` there and `textStyles` in v2; the importer maps exactly
+ *   that pair, so this reads `text` into `textStyles` and nothing else changes name.
+ *
+ * Returns undefined when the project declares no styles at all — which is every fixture in this
+ * package and all seven shipped templates, so that arm is the one carrying the load. An *empty*
+ * dictionary and an *absent* one are deliberately the same answer: neither can resolve anything,
+ * and a present-but-empty `styles` on the IR would make every downstream `if (styles)` lie.
+ */
+function parseStyles(projectDir: string, projectFile: any): StylesIR | undefined {
+  const stylesPath = path.join(projectDir, 'nodegx.styles.json');
+  const v2 = fs.existsSync(stylesPath) ? readJson(stylesPath) : undefined;
+  const legacy = projectFile.metadata?.styles;
+
+  const colors: Record<string, string> = {};
+  for (const [name, value] of Object.entries((v2?.colors ?? legacy?.colors ?? {}) as Record<string, unknown>)) {
+    if (typeof value === 'string') colors[name] = value;
+  }
+
+  const textStyles: Record<string, Record<string, unknown>> = {};
+  for (const [name, value] of Object.entries(
+    (v2?.textStyles ?? legacy?.text ?? {}) as Record<string, unknown>
+  )) {
+    if (value !== null && typeof value === 'object') textStyles[name] = value as Record<string, unknown>;
+  }
+
+  // The v2 file carries the Looks; the legacy shape carries them on the project file's own
+  // `variants` key. Same array either way.
+  const rawVariants: unknown[] = Array.isArray(v2?.variants)
+    ? v2.variants
+    : Array.isArray(projectFile.variants)
+      ? projectFile.variants
+      : [];
+  const variants: VariantIR[] = [];
+  for (const raw of rawVariants as any[]) {
+    // A Look is addressed by the pair. One without either half can never be the answer to a
+    // node's `variant`, so it is not a row — it would only widen every lookup.
+    if (typeof raw?.name !== 'string' || typeof raw?.typename !== 'string') continue;
+    variants.push({
+      name: raw.name,
+      typename: raw.typename,
+      parameters: raw.parameters ?? {},
+      stateParameters: raw.stateParameters ?? {},
+      stateTransitions: raw.stateTransitions ?? {}
+    });
+  }
+
+  if (Object.keys(colors).length === 0 && Object.keys(textStyles).length === 0 && variants.length === 0) {
+    return undefined;
+  }
+  return { colors, textStyles, variants };
 }
 
 /**
@@ -231,7 +306,12 @@ function settleComponent(
   return applyRunOnValueChangeMigration({ components: [component] }).writes;
 }
 
-function parseComponent(dir: string, catalog: CatalogIndex, settled: RunOnChangeWrite[]): ComponentIR {
+function parseComponent(
+  dir: string,
+  catalog: CatalogIndex,
+  settled: RunOnChangeWrite[],
+  styles: StylesIR | undefined
+): ComponentIR {
   const meta = readJson(path.join(dir, 'component.json'));
   const nodesFile = readJson(path.join(dir, 'nodes.json'));
   const connectionsPath = path.join(dir, 'connections.json');
@@ -245,7 +325,7 @@ function parseComponent(dir: string, catalog: CatalogIndex, settled: RunOnChange
     ...settleComponent(String(meta.path ?? meta.name ?? ''), rawNodes, connectionsFile.connections ?? [])
   );
 
-  const nodes = rawNodes.map((raw) => parseNode(raw, catalog));
+  const nodes = rawNodes.map((raw) => parseNode(raw, catalog, styles));
   const nodeById = new Map(rawNodes.map((raw) => [raw.id, raw]));
 
   const connections: ConnectionIR[] = (connectionsFile.connections ?? []).map((raw: any) => {
@@ -287,7 +367,7 @@ function parseComponent(dir: string, catalog: CatalogIndex, settled: RunOnChange
   };
 }
 
-function parseNode(raw: RawNode, catalog: CatalogIndex): NodeIR {
+function parseNode(raw: RawNode, catalog: CatalogIndex, styles: StylesIR | undefined): NodeIR {
   // The fixture corpus contains real editor debris: a node with only an id and a position.
   // Parse never fails on content — an empty type parses to catalogRef null and analysis
   // dispositions it as unknown-type (and the report says so).
@@ -332,6 +412,7 @@ function parseNode(raw: RawNode, catalog: CatalogIndex): NodeIR {
     .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 
   const scriptSources = parameters.filter((p) => p.value.kind === 'script' && jsScriptParamNames.has(p.name));
+  const inherited = inheritedParametersOf(raw, type, styles);
 
   return {
     id: raw.id,
@@ -343,8 +424,93 @@ function parseNode(raw: RawNode, catalog: CatalogIndex): NodeIR {
     portKnowledge: portKnowledgeOf(type, isComponentInstance, catalogEntry?.dynamicPorts ?? null),
     ...(scriptSources.length > 0 ? { sourceText: (scriptSources[0].value as { source: string }).source } : {}),
     ...(raw.parent !== undefined ? { parent: raw.parent } : {}),
-    ...(raw.children !== undefined ? { children: raw.children } : {})
+    ...(raw.children !== undefined ? { children: raw.children } : {}),
+    // STY-004 AC2. Verbatim, and only when the file said so — an absent field must stay absent, so
+    // that "wears no Look" and "wears a Look named empty string" are different states downstream.
+    ...(typeof raw.variant === 'string' && raw.variant.length > 0 ? { variant: raw.variant } : {}),
+    ...(inherited.length > 0 ? { inheritedParameters: inherited } : {})
   };
+}
+
+/** The `textStyle` port's nine child ports, in the order `node-shared-port-definitions.ts:2122-2133`
+ * declares them. A text style's stored object holds exactly these keys. */
+const TEXT_STYLE_CHILD_PORTS = [
+  'fontFamily',
+  'fontSize',
+  'fontWeight',
+  'fontStyle',
+  'color',
+  'letterSpacing',
+  'lineHeight',
+  'textTransform',
+  'fontVariantNumeric'
+] as const;
+
+/**
+ * STY-004 AC3/AC4 — everything this node's Look and text style lend it, beneath its own parameters.
+ *
+ * 🔴 **Transcribed from three runtime sites, not designed here.** Getting this order wrong produces
+ * an export that renders differently from the editor, which is worse than the silent drop it
+ * replaces, so each layer names where it comes from:
+ *
+ * 1. **the text style, lowest** — `Text.tsx:48-51` and `Button.tsx:41-44` both build the element's
+ *    style as `{...props.textStyle, ...props.style}`. `props.style` is what the individual font
+ *    ports wrote. So the bundle loses to any individual port, **whichever layer supplied it** —
+ *    which is why the text style is expanded first and the Look's parameters are laid over it,
+ *    rather than each being resolved independently.
+ * 2. **the Look** — `react-component-node.ts:1817-1822` does `mergeDeep(params, variant.parameters)`
+ *    then `mergeDeep(params, this.model.parameters)`.
+ * 3. **the node's own** — not here; they stay in `parameters` and win at the style layer.
+ *
+ * A `<prefix>textStyle` parameter expands to `<prefix>`-prefixed child ports: the ports are
+ * declared as `portPrefix + 'fontSize'` beside `portPrefix + 'textStyle'`, so a control's
+ * `labeltextStyle` lends `labelfontSize`, not `fontSize`. Reading the prefix off the parameter name
+ * keeps one rule for every prefix the library declares instead of a list of known ones.
+ */
+function inheritedParametersOf(
+  raw: RawNode,
+  type: string,
+  styles: StylesIR | undefined
+): ParamIR[] {
+  if (styles === undefined) return [];
+
+  const own = raw.parameters ?? {};
+  const look =
+    typeof raw.variant === 'string' && raw.variant.length > 0
+      ? styles.variants.find((v) => v.name === raw.variant && v.typename === type)
+      : undefined;
+
+  const merged = new Map<string, unknown>();
+
+  // 1. Every text style named by either layer, expanded under its own prefix. The Look's choice of
+  //    text style is read from the same merged view the runtime would see — the node's own name for
+  //    a given port wins, exactly as it does for any other parameter.
+  const textStyleNames = new Map<string, string>(); // prefix -> style name
+  for (const source of [look?.parameters ?? {}, own]) {
+    for (const [name, value] of Object.entries(source)) {
+      if (!name.endsWith('textStyle') || typeof value !== 'string' || value.length === 0) continue;
+      textStyleNames.set(name.slice(0, -'textStyle'.length), value);
+    }
+  }
+  for (const [prefix, styleName] of textStyleNames) {
+    const bundle = styles.textStyles[styleName];
+    if (bundle === undefined) continue; // an unresolvable name stays unhandled and gets reported
+    for (const child of TEXT_STYLE_CHILD_PORTS) {
+      if (bundle[child] === undefined || bundle[child] === '') continue;
+      merged.set(prefix + child, bundle[child]);
+    }
+  }
+
+  // 2. The Look's own parameters, over the bundle.
+  for (const [name, value] of Object.entries(look?.parameters ?? {})) merged.set(name, value);
+
+  // 3. Anything the node states itself is not inherited — it already lives in `parameters`, and
+  //    leaving a duplicate here would make the report claim a Look lent a value the person typed.
+  for (const name of Object.keys(own)) merged.delete(name);
+
+  return [...merged]
+    .map(([name, value]) => ({ name, value: classifyParam(value, false) }))
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
 function portKnowledgeOf(

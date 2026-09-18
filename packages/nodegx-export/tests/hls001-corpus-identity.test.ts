@@ -214,7 +214,27 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // exactly one existing file changed in each of the two projects that carry a kit (`kits`, `charts`):
     // `src/kits/runtime.tsx`, which now seeds a signal prop and runs `valueChangedToTrue` on a rising count. Zero other
     // hashes moved.
-    expect(corpusProjects().length).toBe(48);
+    //
+    // 48 → 49 on 2026-09-18 (P94 STY-004 Part A): `look-desk` is the first project in the corpus
+    // with a `nodegx.styles.json` at all — a Look, a text style and a colour style, which is the
+    // dictionary the exporter had never opened. 15 keys added, counted off `ls tests/fixtures/`.
+    //
+    // 🔴 **Not additive, and the 48 that moved are NOT this task's:** every one of them is
+    // `<project>/src/styles/tokens.css` and nothing else. `git log 99522fd72..HEAD --
+    // packages/nodegx-project-contract/tokens.ts` names exactly one commit, `19b3517d3`
+    // (P88 GAM-026), which adds `--ring-width` to the shared vocabulary and did not regenerate
+    // this golden; `git merge-base --is-ancestor 99522fd72 19b3517d3` is true, so the golden was
+    // older than the token. **Attributed by a control rather than by that argument:** for `cheer`,
+    // `tick-desk`, `socket-desk` and `task-desk`, deleting just the two lines that token
+    // contributes from the freshly emitted `tokens.css` reproduces the *old* golden hash exactly,
+    // 4 of 4. The header's own prediction — "changing one value in `@nodegx/project-contract/tokens`
+    // moves 42 of these hashes (every project's `tokens.css`)" — is the shape that was seen.
+    //
+    // ✅ **And that is the strongest form of STY-004's own AC7 available:** carrying Looks, text
+    // styles and colour styles into the emitter moved **zero** existing bytes in 48 projects — no
+    // `.module.css`, no `.tsx`, no `EXPORT-REPORT.md`, which is what says `stylesReport` prints
+    // nothing for a project with no style dictionary.
+    expect(corpusProjects().length).toBe(49);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

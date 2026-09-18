@@ -366,7 +366,7 @@ export function emitComponent(
   for (const id of styledIds) {
     const node = nodeById.get(id)!;
     const role = plan.roleOf[id] as StyleRole;
-    const style = computeNodeStyle(node, role, catalog);
+    const style = computeNodeStyle(node, role, catalog, ir.project.styles);
     for (const name of style.unhandled) {
       if (name === 'visible' || name === 'mounted') continue; // §4b: handled by the render wrap / class toggle
       if (name === 'cssClassName' && authoredClassName(node) !== undefined) continue; // §48: folded into className
@@ -374,7 +374,7 @@ export function emitComponent(
       unmappedParams.push({ id, name });
     }
     for (const note of style.notes) notes.push(`${plan.path}: node ${id}: ${note}`);
-    const roleCss = computeRoleCss(node, role, catalog);
+    const roleCss = computeRoleCss(node, role, catalog, ir.project.styles);
     for (const note of roleCss.notes) notes.push(`${plan.path}: ${note}`);
     roleCssOf.set(id, roleCss);
     let decls = style.decls;
@@ -382,7 +382,7 @@ export function emitComponent(
     // declarations the Group does not already set (none in practice — Page style params are rare).
     if (id === plan.rootId && plan.collapsedGroupId) {
       const group = nodeById.get(plan.collapsedGroupId)!;
-      const groupStyle = computeNodeStyle(group, 'group', catalog);
+      const groupStyle = computeNodeStyle(group, 'group', catalog, ir.project.styles);
       for (const name of groupStyle.unhandled) {
         if (name === 'visible' || name === 'mounted') continue;
         if (name === 'cssClassName' && authoredClassName(group) !== undefined) continue; // §48: onto the page div
