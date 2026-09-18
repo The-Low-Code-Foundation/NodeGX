@@ -192,3 +192,31 @@ same thing — expect the first run to find instrument faults before it finds pr
 4. `NOODL_REMOTE_DEBUG_PORT=9333 node verdicts/CHR-011/capture.js <theme> verdicts/CHR-011/<date>`
 5. Write `<date>/manifest.json` with the HEAD sha, the app version and the **`app.asar` md5** (AC3),
    then `node verdicts/CHR-011/build-page.js <date>` and `open` the page for Richard.
+
+### 7.6 The blocker moved, later the same session — the tree is no longer the problem
+
+§7.1 says the build was blocked by an unowned pile and by P93's hours. **Half of that is gone.**
+
+Put to Richard in plain words — *fifty files of unfinished work from 16 September, three sessions
+have each said it is not theirs, and it is what blocks the screenshot build* — he ruled: **it is
+wanted; check it holds together and commit it properly.** Done, in three commits:
+
+| commit | what |
+|---|---|
+| `ad40fc9cb` | P78/TPL-008 s5–s7b: the `date-picker` prefab rewritten at v2.0.0, `Todo/Date picker` and `Todo/Reminders switch` in both templates, the `todo-digitalbricks/` ops dir, SYN-003's `clientObjectId` |
+| `e1352b58a` | the P89 / P90 / P91 scoping READMEs that were loose with it, and the two pointers that redirect to them |
+| `ca37d40bd` | §9.2's correction |
+
+🔴 **Nobody recognised it because it predates all three of us and had been LIVE since 09-16** — on
+todo.digitalbricks.io and nodegx.io/templates/todo-list/ — while existing only in one working tree.
+The intent was never guessed: TPL-008's own s5–s7b notes were in the pile, and they say what was
+built, graded and deployed. Graded again here before committing rather than inherited: tpl008 gates
+**43/43**, backend **21/21**, runtime adapters **90/90**, the date-picker drift gate and
+`library:check` **exit 0**, `typecheck:mcp` / `typecheck:runtime` / backend `tsc` clean.
+⚠️ `library:icons:check` is red on `no icon: modules/game-kit` — **P95's**, from `fd7cc4700`,
+attributed and not fixed here.
+
+**So the working tree now holds nothing but P93's seven in-flight TVW-002 files.** The moment those
+are committed, `build-editor.ts` will run without `--skip-git` and the `.app` this task photographs
+will genuinely be HEAD. The remaining cost is the hour of box, which is what Richard ruled to wait
+for.

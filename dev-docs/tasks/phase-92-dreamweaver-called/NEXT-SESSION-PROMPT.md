@@ -1,115 +1,101 @@
 # Phase 92 — next session
 
-**Written 2026-09-18 at the end of s33.** Branch `cline-dev`, HEAD `be435477`.
+**Written 2026-09-18 at the end of s34.** Branch `cline-dev`, HEAD `ca37d40bd`.
 `git log -- dev-docs/tasks/phase-92-dreamweaver-called` for the phase's history.
 
-s33 in one paragraph: **CHR-010 and CHR-009 are closed on Richard's rulings, the look gate has been
-run over the surfaces CHR-010 changed for the first time, and the phase has one task left.** The
-three surfaces AC1 named were driven (and three more with them), which found a defect every count
-had passed — the icon picker's magnifier rendered **black** on the dark ground, because a core-ui
-`<Icon>` brings its own `color: inherit` that beats any single-class host rule. Richard closed
-CHR-010, ruled the `None` placeholder as placeholder text, ruled the gate's two launcher findings
-(both built and re-driven green), and asked for **a new phase**: one styles panel in the left rail,
-scoped as `../phase-94-one-styles-panel/`.
+s34 in one paragraph: **Richard ruled every open question the phase had, one of them twice, and the
+thing that blocked CHR-011's build for two sessions is gone.** The swatch-edge finding is built; §3.3
+is closed as measured-and-declined; CHR-008's conversions are ruled back IN and now outlive the
+phase; the unowned 09-16 pile turned out to be P78/TPL-008's date-picker work — live in production
+and never committed — and Richard ruled it wanted, so it is committed. **The working tree now holds
+nothing but P93's in-flight TVW-002 files.** CHR-011 is still the only task between this phase and
+its close, and what it needs is now one hour of a free box, not a negotiation.
 
-⚠️ Peers work in this checkout: **P88 / GAM** (backend, mcp, `templates/*`, `library/prefabs`) and
-**P93 / TVW** (`ComponentsPanelNew`, `VisualCanvas`, `scripts/devtools/drive-tvw002-strip.js`).
-P88 still holds **staged deletions** in the real index (`library/prefabs/date-picker/.../Inter-Medium.ttf`).
+⚠️ Peers: **P93 / TVW** (finishing `VisualCanvas`, `ThemeManager`, `main.js`, the viewer frame —
+said ~15 minutes at 13:10) and **P95 / Rocket School** (`library/modules/game-kit`,
+`templates/rocket-school/**`, repeated generator runs — heavy, and queued behind P93).
 🔴 Commit through a temporary index and **`git reset -q -- <your paths>` on the real index
-afterwards** — every commit of mine this session left stale entries there until I did, and a peer's
-plain `git commit` would have swept them.
+afterwards**. Three commits this session did exactly that and the index was empty after each.
 
 ## The board, re-derived from the task files
 
 | id | state |
 |---|---|
-| CHR-001, 002, 003, 005, 006, 012, 013 | ✅ closed on Richard's look |
-| CHR-007 | ✅ built s4, invisible by design |
-| **CHR-009** | ✅ **CLOSED s33** — the `IconInput` placeholder ruling was its last open item |
-| **CHR-010** | ✅ **CLOSED s33** on Richard's look. §9 |
-| CHR-008 the panel is one tree | 🟡 R8, identity, scaffold, 1 widget **inert**. Left: the undo re-seed defect, 37 widgets, AC3/AC4 wrong as written (§10.4). **Richard has not said whether the conversions resume** |
-| CHR-004 the gates measure the scale | 🟡 §8 is new. Panel green, launcher green after two ruled fixes, three instrument holes closed. Left: **AC4/§3.3** (ask before starting — §7.7 re-priced it) and **a popout surface** |
-| **CHR-011 the after picture** | ⬜ **THE ONLY THING BETWEEN THIS PHASE AND ITS CLOSE.** Static half taken (§6); the pictures need a packaged build |
+| CHR-001, 002, 003, 005, 006, 007, 012, 013 | ✅ closed |
+| CHR-009, CHR-010 | ✅ closed s33 on Richard's look |
+| CHR-004 | 🟡 ✅ §3.3 **closed s34** (§9.2), ✅ swatch edge **built s34** (§9.1). Left: **a popout surface for the look gate**, and the gate **re-run** over the swatch fix |
+| CHR-008 | 🟡 **Richard ruled s34: fix undo and convert all 37** (§11). The undo re-seed defect is the first job. **This outlives the phase** |
+| **CHR-011** | ⬜ **STILL THE ONLY THING BETWEEN THIS PHASE AND ITS CLOSE** — and now it is just the build |
 
 ## What to do next, in order
 
-1. **CHR-011 — and Richard chose it over the alternatives** ("CHR-011 when the box is clear").
-   🔴 It needs **a clean tree and the whole box**: `build-editor.ts` refuses a dirty tree, and
-   `--skip-git` would bake two peers' uncommitted work into the `.app` whose md5 the manifest is
-   supposed to pin. So **check `git status` first** and ask the peers before building. The static
-   half is already in §6 — what is owed is the eight before/after pairs and the four rendered rows.
-   Two of AC2's rows will not have moved, and §6 already names the task each one leaves open
-   (`createRoot` → CHR-008, CSS-parsing specs → CHR-004); that is what AC2 allows, not a failure.
-2. **Ask Richard the two questions the phase still owes**, both with a picture:
-   - CHR-004 §8: the `ColorInput` swatch edge at **1.499:1 dark / 1.387:1 light** against 3:1. It is
-     a swatch inside a field, not a panel field, so his "no outlines" ruling does not cover it.
-   - CHR-008: do the §3.1 widget conversions resume, or only where a region needs one?
-3. **The popout surface for the look gate** (CHR-004 §8's last line). The icon picker, the colour
-   and text style pickers and the variants popup are drawn in the popup layer, outside
-   `.sidebar-property-editor`, so **the gate cannot see where two of this phase's last three defects
-   were**. P94 is about to rework exactly those surfaces, which is the argument for doing it soon.
-4. Then **P94 STY-001** — the study Richard asked for. It needs no build and no box.
+1. **CHR-011 — take the pictures.** Read **§7.5**, which is the recipe, and **§7.4**, which lists
+   what is already written and committed so this session is short:
+   - `verdicts/CHR-011/capture.js` — CHR-001's flow, reading CHR-001's own `measure.js` so the two
+     runs cannot drift, counting both shadow sentences, asserting its preconditions.
+   - `verdicts/CHR-011/build-page.js` and `verdicts/CHR-011/2026-09-18/index.html`, which already
+     says **0 of 14 after-shots taken** and carries the before column and both number tables.
+   ⚠️ **Neither script has met a running renderer.** Expect the first run to find instrument faults
+   before product ones. 🔴 `git status` first: the tree must be clean, or the `.app` is not HEAD.
+2. **The look gate re-run** over the swatch fix (`--surface=property-panel` on an `Icon` node, both
+   themes). Until it is run, CHR-004 §8's `Icon` row is *fixed at the token level*, not green.
+3. **A popout surface for the look gate** (CHR-004 §8's last line) — P94 is about to rework exactly
+   those pickers, which is the argument for doing it before P94 rather than after.
+4. **CHR-008's undo defect** — §10.8 names the next diagnostic: a render counter inside
+   `TextAreaWidget`, then the same undo. It separates *never re-rendered* from *re-rendered with a
+   stale parameter* in one run. 🔴 Do not start a second conversion first.
 
-## Readings at the end of s33 (2026-09-18)
+## Readings at the end of s34 (2026-09-18, at `24d2a282c` unless said otherwise)
 
-- `npx jest tests-unit` **from `packages/noodl-editor`: 472 suites / 7,564 tests, exit 0**, 76s.
-  🔴 Name the command with the count — this is a different population from a plain `npx jest`.
-  ✅ **`tests-unit/property-editor/portWireShape.test.ts` PASSES**, so s32's unowned "fails to run:
-  Cannot find name 'Noodl'" is gone at this HEAD. Re-measured, not inherited.
-- `npx jest tests-unit/chr-004` — **69 tests, exit 0**; five mutant arms red, all restored
-  byte-identical.
-- `npm run typecheck:editor` clean · `icons:font` 0 findings · `colors` **16 = 16** · `type` −3 vs
-  baseline · `icons:css` 0 · `tokens:css` green over 333 stylesheets.
-- **The look gate**, dev build, both themes:
-  `--surface=property-panel` on a Group **GREEN** (638 readings, 7 ruled exceptions);
-  on an `Icon` node **exit 1** (the swatch edge above) with the new placeholder ruling firing once
-  per theme; `--surface=launcher --state=all` **GREEN after the two fixes**, 2,026 readings.
-- **NOT run:** `test:ci`. P93 took it at `12dfbb78` — 2,985 specs / 8 failures, seed 41423, 66s, the
-  standing floor by name (3 SUB-011, 2 NDA-017, 3 SUB-006). Relayed, so that is the measurement, not
-  my conclusion; nothing of mine is in that surface.
+- **All five ratchets green, gated on the exit status with no pipe:** `type` −3 raw px vs baseline ·
+  `colors` 16 = 16 · `icons:css` 0 over 332 stylesheets · `icons:font` 0 over 3,187 files ·
+  `tokens:css` green over 333 stylesheets. `typecheck:editor` clean.
+- `npx jest tests-unit/nat-001` from **`packages/noodl-editor`**: **260 tests, exit 0**, with the new
+  swatch row; its mutant reddens both theme arms and the distinct-pairings guard.
+  `tests-unit/chr-004` + `nat-001` + `nat-003`: **332 tests, 5 suites, exit 0**.
+  `tests-unit/chr-009` + `fb-018`: **114 tests, 13 suites, exit 0**.
+  🔴 Name the directory with the count — a root `npx jest` reads **`Tests: 0 total`**, which is the
+  wrong runner, not a clean board.
+- For the committed orphan pile: `noodl-mcp` tpl008 gates **43/43**, `nodegx-backend` syn003 +
+  tpl008-todo-drive **21/21** (64 s), `noodl-runtime` LocalSQLAdapter **90/90**,
+  `library:date-picker -- --check` and `library:check` exit 0, `typecheck:mcp` / `typecheck:runtime`
+  / backend `tsc` exit 0.
+- ⚠️ **`library:icons:check` exits 1** — `no icon: modules/game-kit`, **P95's**, from `fd7cc4700`.
+  Attributed, not inherited, not fixed. Both peers told.
+- **NOT run:** `test:ci`, and no drive of any kind — P93 held the box and had a dev stack up for the
+  window in which either would have run.
 
-## Rulings Richard gave in s33
+## Rulings Richard gave in s34
 
-1. **CHR-010: closed.** *"Let's close CHR 010."*
-2. **The `None` placeholder stays** — placeholder text, not a value. Recorded as
-   `unset-field-placeholder-stays-greyed` in `scripts/look-gate/rulings.js`, matched on the measured
-   colour pair.
-3. **The pressed CTA:** *"The darker pressed fill is ok, making the pressed font white will help
-   with contrast and close this task."* Built.
-4. **The selected folder row:** *"Darken the text, add a border around the fill, whatever, contrast
-   is key here for accessibility."* Built as `--theme-color-primary-as-fg`.
-5. **A new phase** for styles/colours/variants/font styles in one left panel — `phase-94-one-styles-panel/`,
-   scoped, **R1–R7 proposed and none ruled**. Two defects he found while looking, and the variant
-   one from CHR-010 §8, are its opening §3.
-6. **Next in P92: CHR-011, when the box is clear.**
+1. **CHR-011's build WAITS for a free machine** — over building a private clone now (~1 hour of the
+   box) or packaging the checkout as it stands.
+2. **The colour swatch gets a visible edge.** Built: `border-strong` → `border-control`,
+   1.499:1 → 3.897:1 dark, 1.387:1 → 3.373:1 light.
+3. **CHR-008: fix undo and convert all 37** widgets.
+4. **CHR-004 §3.3: rewrite all 18** — *then, re-asked from §7.7's measurement,* **close the row.**
+   See the trap below; the second ruling is the one that stands.
+5. **The 09-16 orphan pile is wanted** — checked and committed as `ad40fc9cb` + `e1352b58a`.
 
-## Traps (s33's own, on top of s12–s32's in the git history of this file)
+## Traps (s34's own)
 
-- 🔴 **A core-ui `<Icon>` defeats any single-class colour rule.** `.Root { color: inherit }` is
-  (0,1,0), the same as `.search-icon`, and core-ui is injected later. Before converting a glyph,
-  grep its host class for a colour rule **across all stylesheets** — I found the rule in
-  `assets/css/style.css` only after the drive showed the glyph black. Fix with
-  `variant={TextType.Default}` (compiles to `.Root.is-variant-default`, (0,2,0)).
-- 🔴 **`offsetParent` is `null` for essentially every element in this renderer** (transformed
-  ancestors). Any "is it visible" filter written with it drops the whole surface silently.
-- 🔴 **This editor never unmounts a panel it has shown.** `document.querySelector('.sidebar-panel')`
-  and `.sidebar-property-editor` both return a hidden 0×16 shell before the live panel. Sort matches
-  by rect area. A census scoped to the shell reads **0 drawn**, which is what a broken surface reads
-  like. `verdicts/CHR-010/census.js` now reports the scope's own box.
-- 🔴 **The look gate's `launcher` surface is `body`** — with a project open it grades the EDITOR and
-  files the findings under "launcher". Now guarded by `requires`, exit 2.
-- 🔴 **A gradient ground was graded as the colour behind it** — three false findings in one run.
-  Refused into `text:ground-is-an-image` now, but only above the first opaque layer.
-- 🔴 **Measure a contrast fix AFTER every opacity in its own rule.** The folder row's count sat at
-  `opacity: 0.75`, which composited the fixed ink back to 3.755:1.
-- 🔴 **The hex ratchet counted its own prose** (`//` comments unstripped in `.scss`). Third time this
-  phase has met a gate that reddens on its changelog.
-- 🔴 **A `//` comment inside a JS template literal that contains a backtick ends the string.**
-  `census.js` failed to parse that way; the emitted code must not carry backticks.
-- ⚠️ A drive that adds nodes and creates a variant leaves the scratch project **unable to save**
-  (P94 §3.3). Expect the project not to persist what the drive made.
-- ✅ **Reaching the panel's popup surfaces**: `JavaScriptFunction` → a proplist; `net.noodl.visual.icon`
-  → the icon picker; `Component Inputs` → the Ports panel (and dragging one port row over another is
-  what draws the drag overlay's glyph); a `Group` → the variants popup (create one and REOPEN, or it
-  opens straight into its create field); a colour field → the colour style picker. `DbCollection2`
-  does **not** get you the query editor — that needs a DB class.
+- 🔴 **I asked Richard from a task's HEADLINE and he ruled on a fiction.** CHR-004 §3.3's headline
+  says "18 places check a CSS class name"; §7.7, in the same file, had already measured that as two
+  different things and neither was 18 (~180 `byClass` call sites across ~40 files, which is the
+  runner's house style; and 18 opt-in sites for the `:global` hook, whose removal changes the look
+  of four popout surfaces). One of his rulings was spent before the re-ask. **Read the measurement
+  section, not the headline, before quoting a number to him.**
+- 🔴 **A "clean worktree build" would build the PRIMARY tree.** `make-worktree.sh`'s own header says
+  `lerna exec` resolves the package root to primary even when launched from a worktree, and
+  `build-editor.ts` is `npx lerna clean --yes` + `npx lerna exec --scope noodl-editor`. A standalone
+  `git clone` is the correct isolation; a worktree is not.
+- 🔴 **`build-editor.ts` gates on `git diff --numstat`** — *unstaged tracked* changes only. Untracked
+  and staged files do not refuse it. And the box-taking step is not electron-builder: it is
+  `build:editor:_editor` doing `npx rimraf ./node_modules` + `npm install` at the repo root.
+- 🔴 **Two peers answered the same question with opposite facts** — one said the box was theirs for
+  hours, the other offered me the next 40 minutes, within a minute of each other. Neither was lying;
+  neither knew about the other. **Ask all of them, and reconcile before acting on either.**
+- 🔴 **An unowned pile is not evidence of abandonment.** This one was in production. Three sessions
+  disowned it and each was right; what none of us did was READ it — TPL-008's own notes were sitting
+  inside the pile, saying what it was, what it graded and where it was deployed.
+- ⚠️ `verdicts/CHR-011/capture.js` and `build-page.js` were written from the source, never run
+  against a renderer. Treat their first run as an instrument drive.
