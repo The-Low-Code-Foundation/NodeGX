@@ -67,3 +67,19 @@ Out: Layers (the strip's second door in shape 2 changes wording when TVW-004 lan
 - "The page the preview is showing" is not always a page: a Component Stack proxy path
   (`UseRoutes.ts:63-86`) resolves to a stack's current component. Resolve it, or say
   `isn't on this screen` and offer the doors without a page name.
+
+## ⚠️ Wording in this task that AC7 has already ruled against (added s11, 2026-09-18)
+
+🔴 **"sample values" / "not the app's data" must not be used on this surface as written.** Richard
+ruled on 2026-09-18 (TVW-001 AC7) that the word *sample* was doing two jobs at once on the Workbench:
+the caption said **"Sample values."** (synthesised *input port* values) while the bench summary, ~44px
+below it, said **"No sample data"** (`sandboxData.ts:580`, about *backend records*) — in the
+empty-data branch that every project without a backend shows. The caption's claim was **cut**; the
+summary line now owns the data story alone.
+
+This task's strings were written before that ruling and still carry the retired phrasing. Rewrite
+them when you build it: say the data thing **once**, in **one** vocabulary, and check what renders
+*beside* your string, not just the string. Otherwise this re-opens the exact defect AC7 closed.
+
+See TVW-001 §"AC7 — Richard's rulings, built and re-driven", and
+`a-pinned-string-is-blind-to-its-neighbour`.

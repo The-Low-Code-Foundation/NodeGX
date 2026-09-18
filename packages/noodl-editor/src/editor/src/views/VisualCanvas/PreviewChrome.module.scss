@@ -131,11 +131,30 @@
   padding: 10px;
 }
 
+/* 🔴 **The strip's shrink order, reversed by Richard at P93 AC7 (2026-09-18).**
+   These controls used to be `flex-shrink: 0`, which made the caption beside them
+   the only thing that could give way — so a narrow stage kept `Small/Medium/Large`
+   and `768 × Fill` at full width and ellipsised the sentence that says you are not
+   looking at your app (measured: 105px of the 330px it needed). The size presets
+   are a convenience; the sentence is the phase's whole point.
+
+   `100` rather than `1` because shrinkage is distributed in proportion to
+   `flex-shrink × flex-basis`: an equal factor just shrinks both together, and
+   the point is an *order*, not a ratio. Driven at a 646px panel — the width AC7
+   measured the old behaviour at — a factor of `8` still left the caption paying
+   11px of the deficit while these controls had 136px of give left above their
+   floor, so the number was raised until the caption pays nothing until the
+   controls have bottomed out. The `min-width` floor keeps the row usable rather
+   than clipping it to nothing — the width field stays reachable, and the presets
+   (which have a keyboard-free equivalent in that field) are what get clipped
+   first. `overflow: hidden` so this can never widen the 30px strip. */
 .FrameRoot {
   display: flex;
   align-items: center;
   gap: 4px;
-  flex-shrink: 0;
+  flex-shrink: 100;
+  min-width: 96px;
+  overflow: hidden;
 }
 
 .FrameChip {

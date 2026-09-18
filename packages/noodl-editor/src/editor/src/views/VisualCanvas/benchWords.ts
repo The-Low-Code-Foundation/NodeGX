@@ -45,14 +45,24 @@ export const CAPTION_JOIN = ' ';
 /**
  * What the caption says after the name.
  *
- * ⚠️ **"Sample values." is a claim about this surface, and it is checked.** `ComponentBench` mounts
- * its viewer with `useSampleData: true` hardcoded and offers no toggle, so the sentence is true
- * wherever this caption is drawn. The AI authoring sandbox *can* be pointed at a real backend and
- * says so in its own summary line — it does not use this caption. If a data toggle ever reaches this
- * surface, this sentence becomes a lie and must take a parameter.
+ * 🔴 **"Sample values." used to be here, and Richard ruled it out on 2026-09-18.** It was not
+ * wrong — `ComponentBench` really does mount with `useSampleData: true` hardcoded — but it was the
+ * *second* meaning of *sample* on this surface. The bench summary sits ~44px below this caption and
+ * says **"No sample data"** (`sandboxData.ts`, about backend *records*, in the empty-data branch
+ * that every project without a backend shows). Two green specs, one contradicting screen: a person
+ * read "Sample values." directly above "No sample data" and had no way to know the two words meant
+ * different things. The row f sweep unified *Workbench* across three dialects and never saw it,
+ * because a sweep greps for the word it is unifying, not for the words already present.
+ *
+ * ⚠️ **The data story now belongs to one sentence, not two.** The summary line owns it. If this
+ * caption ever needs to talk about data again, it has to say something the summary does not
+ * already say, in a word the summary does not already use.
+ *
+ * Cutting it also bought back width on the one element in the strip that is allowed to shrink —
+ * see `VisualCanvas.module.scss`, where the size controls now give way before this sentence does.
  */
 export function benchCaptionRest(targetLabel: string): string {
-  return `— ${targetLabel} on its own, not the app. Sample values.`;
+  return `— ${targetLabel} on its own, not the app.`;
 }
 
 /**

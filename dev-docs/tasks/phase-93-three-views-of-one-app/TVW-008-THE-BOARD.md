@@ -65,3 +65,19 @@ Out: editing scenarios from the board (bench one component for that). Arranging 
   export. Cap a frame's depth at the component's own tree and let nested instances render as they
   do in the app; do not clone.
 - The viewer webpack build is pre-ES2015 for iteration: `Array.from`, never `[...set]`.
+
+## ⚠️ Wording in this task that AC7 has already ruled against (added s11, 2026-09-18)
+
+🔴 **"sample values" / "not the app's data" must not be used on this surface as written.** Richard
+ruled on 2026-09-18 (TVW-001 AC7) that the word *sample* was doing two jobs at once on the Workbench:
+the caption said **"Sample values."** (synthesised *input port* values) while the bench summary, ~44px
+below it, said **"No sample data"** (`sandboxData.ts:580`, about *backend records*) — in the
+empty-data branch that every project without a backend shows. The caption's claim was **cut**; the
+summary line now owns the data story alone.
+
+This task's strings were written before that ruling and still carry the retired phrasing. Rewrite
+them when you build it: say the data thing **once**, in **one** vocabulary, and check what renders
+*beside* your string, not just the string. Otherwise this re-opens the exact defect AC7 closed.
+
+See TVW-001 §"AC7 — Richard's rulings, built and re-driven", and
+`a-pinned-string-is-blind-to-its-neighbour`.

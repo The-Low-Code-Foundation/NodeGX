@@ -179,11 +179,31 @@
    the strip.
 
    FIX-019's chip is affordable at all because it is assertive: it appears only
-   on divergence and costs zero width in the common case. */
+   on divergence and costs zero width in the common case.
+
+   🔴 **REVERSED by Richard at P93 AC7, 2026-09-18 — the size controls give way
+   before the sentence does.** The settlement above reasoned that the caption is
+   "the one genuinely redundant thing" because the name is also in the scope
+   chip. That is true of the *name* — and the name is the half that `ellipsis`
+   KEEPS, because it truncates from the end. What it actually dropped first was
+   `not the app.`, the one clause in the strip that nothing else says and the
+   whole reason the surface has a caption. AC7's drive measured it: at a
+   squeezed stage the caption held **105px of the 330px it needed** and read
+   `Workbench — Filt…`, while `Small / Medium / Large` and `768 × Fill` beside
+   it kept every pixel. A strip that sheds its only disclaimer to keep three
+   size presets has its priorities the wrong way round.
+
+   So the shrink order is now: **the frame controls first** (`.FrameRoot` in
+   `PreviewChrome.module.scss`, which shrinks 8× faster and stops at a floor
+   that keeps the width field reachable), **then** the caption. Cutting
+   "Sample values." in the same pass (see `benchWords.ts`) bought ~70px back,
+   so the sentence now fits where it used to clip. */
 .BenchCaption {
-  /* The shrink zone. `1 1 auto` rather than the default `0 1 auto` so it also
-     takes the *slack* — otherwise a wide panel leaves a gap between the caption
-     and the controls, and the strip reads as two clumps rather than one row. */
+  /* Takes the slack (`1 1 auto`, not `0 1 auto`) so a wide strip reads as one
+     row rather than two clumps — and still shrinks, but now it is no longer the
+     *first* thing to. `min-width: 0` stays: a floor here would make the caption
+     able to force the strip to overflow, which is a worse failure than an
+     ellipsis. The ordering is done with shrink factors instead. */
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;

@@ -2,6 +2,7 @@ import Utils from '../../utils/utils';
 import { ComponentModel } from '../componentmodel';
 import { NodeGraphModel } from '../nodegraphmodel';
 import { ProjectModel } from '../projectmodel';
+import { authoredPageUrl } from './authoredPageUrl';
 import { readNameList } from './nameListParameter.warnings';
 import NodeTypeAdapter from './NodeTypeAdapter';
 import { pagesAfterComponentRemoved } from './routerRouteRemoval';
@@ -155,8 +156,6 @@ export class RouterAdapter extends NodeTypeAdapter {
         const titleParts = c.split('/');
         title = titleParts[titleParts.length - 1];
       }
-      let urlPath = page.parameters['urlPath'] || title.replace(/\s+/g, '-').toLowerCase();
-
       const pageInputs = _c.getNodesWithType('PageInputs');
       const pathParams = [];
       pageInputs.forEach((pi) => {
@@ -164,9 +163,10 @@ export class RouterAdapter extends NodeTypeAdapter {
         readNameList(pi, 'pathParams').forEach((p) => pathParams.indexOf(p) === -1 && pathParams.push(p));
       });
 
-      pathParams.forEach((p) => {
-        if (urlPath.indexOf('{' + p + '}') === -1) urlPath = urlPath + '/{' + p + '}';
-      });
+      // 🔴 **No longer invents a URL out of the page's title** (Richard, P93 AC7, 2026-09-18). The
+      // rule — and the reason the export and preview copies of it were deliberately NOT changed —
+      // is written out in `authoredPageUrl`, where a spec can reach it.
+      const urlPath = authoredPageUrl(page.parameters['urlPath'], pathParams);
 
       pageInfo.push({
         path: urlPath,

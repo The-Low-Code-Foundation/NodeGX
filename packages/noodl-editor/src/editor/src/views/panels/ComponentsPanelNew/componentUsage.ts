@@ -146,7 +146,13 @@ export function rowMetaFor(
 
   if (kind === 'page' || (kind === 'home' && usage.routedBy.length > 0)) {
     if (usage.routedBy.length === 0) return { tone: 'unrouted', text: 'not in a router' };
-    return { tone: 'route', text: route ? '/' + route.replace(/^\/+/, '') : '/' };
+    // 🔴 **No route, no chip** (Richard, P93 AC7, 2026-09-18). This used to render `/` for a page
+    // whose `urlPath` was never set — which was the adapter's title-slug invention replaced by a
+    // second, smaller invention at this layer: `/` claims the page is served at the root, and only
+    // the start page is. A row that says nothing here is not a gap, it is the honest answer to
+    // "what URL did you set?" — and the `start` chip beside it still says which page opens first.
+    if (!route) return null;
+    return { tone: 'route', text: '/' + route.replace(/^\/+/, '') };
   }
 
   const count = usage.instances.length;

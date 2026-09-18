@@ -35,10 +35,18 @@ export function RowMetaLabel({
    */
   onUsedIn?: (anchor: HTMLElement) => void;
 }) {
-  if (!meta) return null;
+  // 🔴 **`start` is not part of the meta, and this used to return before drawing it.**
+  // P93 AC7 made `rowMetaFor` answer `null` for a page whose URL was never set (it used to invent
+  // one from the page title). That is right — but this early return then took the `start` chip out
+  // with it, and the start marker is a different fact from a different source: it says which page
+  // the Router opens first, which is true whether or not anybody set a URL. The corpus's `Home` row
+  // went from `Home · start · /halden-…` to bare `Home` in one step, losing a fact nobody had ruled
+  // on. Caught by looking at it — `rowMetaFor` returning `null` is exactly what its spec asserts, so
+  // no unit test was ever going to see this. See `verify-the-consequence-not-just-the-mechanism`.
+  if (!meta && !isStart) return null;
 
-  const isButton = meta.tone === 'count' && !!onUsedIn;
-  const title = isButton ? `${TITLE.count(meta)} — click to see where` : TITLE[meta.tone](meta);
+  const isButton = !!meta && meta.tone === 'count' && !!onUsedIn;
+  const title = !meta ? '' : isButton ? `${TITLE.count(meta)} — click to see where` : TITLE[meta.tone](meta);
 
   return (
     <>
@@ -47,7 +55,7 @@ export function RowMetaLabel({
           start
         </span>
       )}
-      {isButton ? (
+      {!meta ? null : isButton ? (
         <button
           type="button"
           className={classNames(css['Meta'], css[`Meta-${meta.tone}`], css['MetaButton'])}

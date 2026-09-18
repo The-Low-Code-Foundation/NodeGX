@@ -584,3 +584,98 @@ re-derive it.
 
 **AC7 is therefore built but NOT closed: the WORTHY ruling is Richard's, and two of the findings
 above are wording/layout questions that are his to settle, not mine.**
+
+### AC7 — Richard's rulings, built and re-driven (s11, 2026-09-18)
+
+He ruled all four questions, then **"worthy once the above are done"**. Shots in
+`verdicts/TVW-001/2026-09-18/`, named `ac7b-*`.
+
+**1. "Sample values." is cut from the caption.** Not because it was false — `ComponentBench` really
+does mount with `useSampleData: true` hardcoded — but because it was the *second* meaning of
+*sample* on one surface. The caption now reads `Workbench — <name> on its own, not the app.`
+⚠️ The old spec's note said a data toggle would be the only reason to change this and that the fix
+would be a parameter, "never to delete the sentence". That note anticipated the wrong reason, and
+the replacement says so: the defect was **adjacency, not accuracy**.
+
+**2. The strip's shrink order is reversed.** `.FrameRoot` was `flex-shrink: 0`, which made the
+caption the only thing that could give way. It is now `flex-shrink: 100` with a `min-width: 96px`
+floor. 🔴 **The old rule's reasoning had a hole worth recording**: the settlement in
+`VisualCanvas.module.scss` argued the caption was "the one genuinely redundant thing" because the
+component's name is also in the scope chip. That is true of the *name* — and the name is the half
+`text-overflow: ellipsis` **keeps**, because it truncates from the end. What it actually dropped
+first was `not the app.`, the one clause nothing else in the strip says.
+
+Driven at **the same 646px panel width AC7 measured the old behaviour at**, so the comparison is
+like-for-like:
+
+| | caption available | caption needs | frame controls | reads |
+|---|---|---|---|---|
+| before | 105px | 330px | 363px (untouched) | `Workbench — Filt…` |
+| after | 247px | 248px | 221px (shed `× Fill`, `Stretch`) | `Workbench — FilterPill on its own, not the ap…` |
+
+At the normal 300px panel the caption is **whole and untruncated** (451px available, 451 needed).
+⚠️ A factor of `8` was tried first and still left the caption paying 11px while the controls had
+136px of give above their floor; `100` is the number that makes the caption pay last, not less.
+
+🔴 **A measurement of mine was wrong in this pass, and the picture caught it.** `canvas.measureText`
+said the squeezed caption needed 243.8px in a 246.8px box — i.e. it fits. The screenshot shows
+`not the ap…`. The error: the caption is drawn as `<strong>` + `<span>`, and measuring
+`textContent` with the *container's* computed font under-measures the bold half. Related to, but not
+the same as, P92's integer-`scrollWidth` trap — `scrollWidth` also lied here, in the other direction
+(248 > 247 on text that was 3px clear). **Two instruments disagreed with each other and both
+disagreed with the screen.** The screen won.
+
+**3. The invented URL is gone from display, and only display.** `RouterAdapter` read
+`urlPath || title.replace(/\s+/g,'-').toLowerCase()`. The rule now lives in the pure
+`authoredPageUrl.ts` (`tests-unit/tvw-001/authoredPageUrl.test.ts`, 7 assertions), the same
+extraction `pagesAfterComponentRemoved` uses next door and for the same reason — the adapter reaches
+`ProjectModel`, so nothing in it was gradeable, which is how one `||` sat unguarded for its whole
+life.
+
+⚠️ **Two other copies of the same invention were deliberately left alone** —
+`utils/exporter/router.ts` (deployed apps) and `utils/compilation/context/pages-helper.ts`
+(dev preview, and the topbar route pill). Removing them changes real URLs, and `pages.ts` drops a
+page whose path is empty, so every un-authored page would stop being routed. Richard was re-asked
+once the three copies were found and ruled **display only**, knowing the editor and the app would
+then answer two different questions: *"what did you set?"* versus *"where is the app?"*.
+
+🔴 **A second, smaller invention was hiding underneath the first.** `rowMetaFor` answered
+`{tone:'route', text:'/'}` for a falsy route — which claims the page is served at the root, and only
+the start page is. Fixed in the same pass, or the change would have swapped a long lie for a short
+one.
+
+🔴 **The drive caught a regression the unit test could not, and this is the clearest example the
+phase has produced.** Making `rowMetaFor` return `null` is exactly what its spec asserts — green,
+correct, and it silently took the **`start` chip** with it, because `RowMetaLabel` returned early on
+a null meta and the start marker is drawn inside that same guard. The corpus's `Home` row went from
+`Home · start · /halden-…` to bare `Home`: a different fact, from a different source, that nobody
+ruled on. `RowMetaLabel` now renders `start` independently of the meta. Nothing in a jsdom spec on a
+pure function could have seen it — see `verify-the-consequence-not-just-the-mechanism`.
+
+**What the re-shoot shows.** Corpus at 240px: the `Home` label now gets **117px and is not clipped**
+(it was **19px, clipped to `H…`**), the route chip is gone, and `start` is still there.
+
+⚠️ **The two AC7 projects are an unrepresentative sample, and the reach was measured rather than
+guessed.** Both `Landing page test V2` and `nodegx-qa-fixture` turn out to author **no** `urlPath` at
+all — the fixture's tidy-looking `/home`, `/catalog`, `/settings` were invented from the titles too,
+which is why they vanished. Across **130 projects on this machine: 221 Page nodes DO author a
+`urlPath`, 41 do not.** So authoring is the norm (84%) and the ruling costs the route chip on ~16% of
+pages — the ones where it was never real. A third project was added to the set for exactly this
+reason (`ac7b-routed-control-*`, a copy of `SBR-015 AC1 Refusal`): six authored routes all still
+render, including the path-parameter forms `/{slug}` and `/admin/page/{pageId}`, proving the
+`{param}` appending survived. It is also a better AC7 fixture than either original — 6 routed pages
+and 7 cloud functions.
+
+**Gates after the rulings:** `npx jest tests-unit/tvw-001 tests-unit/vfn-011` **11 suites / 118**
+(was 10/109); `tvw-001` alone **7 suites / 63** (was 6/54). `tsc -p packages/noodl-editor --noEmit`
+**EXIT=0**. Font-size ratchet **−6**; hex ratchet **16/16**. Three mutants proven red and restored
+`cmp`-clean (the caption's claim restored; the `'/'` fallback restored; the empty-path guard
+dropped). ⚠️ A fourth mutant — dropping the non-string guard — reported `Tests: 0 total`, which is a
+suite that **failed to compile**, not a pass: that guard is enforced by the type checker, and the
+spec documents the intent rather than grading it.
+
+⚠️ **A peer was deleting Font Awesome from the editor during this drive.** Their working-tree changes
+were in my build. Measured rather than assumed: neither `ComponentsPanelNew` nor `VisualCanvas`
+references `fontawesome`/`font-awesome`/`fa-`, so the shots are unaffected; their touched surfaces
+(property panel, Ports panel, drag overlay) appear in none of them, and nothing here is evidence
+about that work.

@@ -1,15 +1,17 @@
 # Phase 93 — next session
 
-**Written 2026-09-17, end of session 11.** s1–5 built and drove TVW-003. s6–s10 built TVW-001's six
-rows (slices 1–5) and closed AC1–AC6. **Session 11 drove AC7 — the screenshot set exists and the
-drive is written up (TVW-001 §"AC7 — the screenshot pass"). AC7 is NOT closed: the WORTHY ruling is
-Richard's, and s11 found three things he has to rule on before it can be.**
+**Written 2026-09-18, end of session 11.** s1–5 built and drove TVW-003. s6–s10 built TVW-001's six
+rows (slices 1–5) and closed AC1–AC6. **Session 11 drove AC7, found three defects, took Richard's
+rulings on all of them, built the fixes and re-drove.** He ruled **"worthy once the above are
+done"** — they are done, so AC7 needs only his look at the `ac7b-*` re-shoot. Both passes are
+written up in TVW-001 §"AC7 — the screenshot pass" and §"AC7 — Richard's rulings, built and
+re-driven".
 
 ## The board, re-derived from the task files
 
 | id | task | built | driven |
 |---|---|---|---|
-| TVW-001 | The panel tells the truth | 🟡 all six rows built (a,b,d,c,e,f) | **AC1–AC6 ✅** · **AC7 shots captured, awaiting Richard** · AC8 green at s10, unchanged at s11 |
+| TVW-001 | The panel tells the truth | 🟡 all six rows built + AC7's three fixes | **AC1–AC6 ✅** · **AC7: ruled, fixed, re-driven — needs only his look at `ac7b-*`** · AC8 re-read green at s11 |
 | TVW-002 | The preview says what it is not showing (needs 001) | — | — |
 | TVW-003 | One selection, three surfaces | ✅ slices 1–6 | **CLOSED** |
 | TVW-004 | Layers (needs 001, 003) | — | — |
@@ -44,40 +46,52 @@ wrap** — `white-space: nowrap` + `text-overflow: ellipsis`, and it is the only
 in the strip. It truncates. That is the third handoff in a row whose most confident sentence was its
 wrong one; keep reading these as claims to measure, not as facts.
 
-## Rulings owed by Richard — these block AC7
+## Rulings owed by Richard
 
-1. **AC7's WORTHY ruling** on TVW-001, now that the shots exist.
-2. **"Sample values." sits directly above "No sample data".** The caption says the first
-   (`benchWords.ts`, about synthesised *input port* values); the bench summary says the second
-   (`sandboxData.ts:580`, about *backend records*), ~44px below it, whenever a project has no
-   backend — the common case. Two meanings of *sample* on one surface. Row f unified *Workbench*
-   and did not notice. **A wording question, so not settled in passing.** Evidence:
-   `ac7-workbench-caption-light.png`.
-3. **The disclaimer is the first thing truncation drops.** At a squeezed stage the caption gets
-   105px of the 330px it needs and reads `Workbench — Filt…`, losing *"not the app. Sample values."*
-   while the Small/Medium/Large and frame-size controls keep full width. Is the sentence or the size
-   control the thing that should shrink? Evidence: `ac7-workbench-caption-truncated.png`.
-4. **A page's name loses its row to a machine-derived URL at 240px.** `Home` clips to `H…` (19px
-   allotted, 33px needed) while its route meta takes 88px and is itself unreadable. Cause is an
-   empty `urlPath` falling back to a slugified 57-character title
-   (`RouterAdapter.getPageInfoForComponents:158`) — pre-existing, but the panel is the first surface
-   to put it in a narrow row. ⚠️ **Control:** the cloud fixture at 240px truncates nothing, so this
-   is the long route, not the width. Fix direction if he wants one: a floor on the label or a cap on
-   the route meta. Evidence: `ac7-corpus-240-dark.png`.
+**All four AC7 questions were ruled on 2026-09-18 and all are built.** What is left is his look at
+the `ac7b-*` re-shoot, since he ruled *"worthy once the above are done"*.
 
-Also still open from s10, and **not** TVW-001's: whether the Blockly logic bench gets a name of its
-own. It no longer shares vocabulary with the Workbench and says "test values", but it still calls
-itself "the bench" in its own prose.
+1. ✅ **Cut "Sample values." from the caption** — done. It was the second meaning of *sample* on one
+   surface, ~44px above the summary's "No sample data".
+2. ✅ **The size controls shrink, not the sentence** — done. `.FrameRoot` `flex-shrink: 0 → 100`
+   with a 96px floor. At the same 646px panel the caption went from 105px of the 330px it needed to
+   247 of 248; at 300px it is whole.
+3. ✅ **Stop inventing a route from the page title — DISPLAY ONLY** — done, in the pure
+   `authoredPageUrl.ts`. ⚠️ He was **re-asked** after the first question turned out to be
+   under-measured: the fallback is written out in **three** places, and two of them decide the URLs
+   a deployed app and the dev preview actually serve. Those were left alone deliberately. Do not
+   "finish the job" by changing them — that is a routing change and needs its own ruling.
+4. ⏳ **The WORTHY look** on `verdicts/TVW-001/2026-09-18/`.
+
+Still open from s10, and **not** TVW-001's: whether the Blockly logic bench gets a name of its own.
 
 ## Next, in order
 
-1. **Take Richard's rulings above.** 2–4 are cheap to act on once ruled; none needs a re-drive except
-   to re-shoot the surface that changed.
-2. Re-read AC8's gates **only if a ruling changes code** — s11 changed no source, so s10's readings
-   stand (`test:ci` 2985/8 at seed 38645 = the floor, same eight by name; `tsc --noEmit` 0;
-   tvw-001 6 suites/54; vfn-011+tvw-001 10/109; hex 16/16; font-size −6; chr-004+chr-009 13/134).
-3. Close TVW-001.
-4. Then TVW-002 (the preview strip) unblocks; TVW-004 (Layers) needs 001 + 003, both met.
+1. **Richard's WORTHY look** at `verdicts/TVW-001/2026-09-18/` (`ac7b-*`). Open them for him —
+   markdown links do not work in his VS Code (`open -a Preview <paths>`).
+2. Then **close TVW-001**. AC8 was re-read at s11 with the fixes in and is green (below).
+3. Then TVW-002 (the preview strip) unblocks; TVW-004 (Layers) needs 001 + 003, both met.
+4. 🔴 **TVW-002 and TVW-008 both contain wording AC7 has already ruled against** — four places:
+   TVW-002's person sentence and its shape-1 string, TVW-008 §1 and its honesty caption, all saying
+   *"sample values"* / *"not the app's data"*. That phrasing was cut from the Workbench on
+   2026-09-18 because it collides with the bench summary's "No sample data". **Both task files have
+   been annotated in place** with a section at the end, so you will see it where you build rather
+   than only here. Say the data thing once, in one vocabulary.
+
+## Gates at s11 (with the AC7 fixes in)
+
+- `npm run test:ci`: **2985 specs, 8 failures, seed 98435, HEAD 382b716f, 67s** — the floor, the
+  same eight **by name** (3 SUB-006, 2 NDA-017, 3 SUB-011), none of them TVW's. That is now a
+  **fourth** seed agreeing (s9 46376, s10 38645, a peer's 68399, this one).
+  🔴 Exit is **1** at the floor, exactly as a real regression exits. Gate on the names in
+  `tests/test-results.json`, and delete that file first or a stale one reads as a pass.
+- `npx jest tests-unit/tvw-001`: **7 suites / 63** (was 6/54). `tvw-001 + vfn-011`: **11 / 118**.
+- `tsc -p packages/noodl-editor --noEmit` **EXIT=0**. 🔴 zsh does not give you `PIPESTATUS` through a
+  pipe — redirect to a file and read `$?`, or you will gate on nothing.
+- Font-size ratchet **−6**; hex ratchet **16/16**.
+- Mutants: **3 red and `cmp`-proven**. ⚠️ A 4th reported `Tests: 0 total`, which is a suite that
+  **failed to compile** — not a pass. 🔴 An earlier mutant attempt *silently did not apply* (bad
+  shell escaping) and the suite passed: that is the false green the `cmp` check exists to catch.
 
 ## Measured this session, reusable
 

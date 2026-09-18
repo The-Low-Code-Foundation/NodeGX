@@ -137,6 +137,25 @@ describe('TVW-001 row meta', () => {
     expect(rowMetaFor('page', index.get('/Unlisted'))).toEqual({ tone: 'unrouted', text: 'not in a router' });
   });
 
+  it('says NOTHING for a routed page whose URL was never set — it does not invent one', () => {
+    // 🔴 Richard, P93 AC7 (2026-09-18). Two inventions were stacked here. `RouterAdapter` turned an
+    // empty `urlPath` into the slugified page *title* — on the corpus that is a 57-character route
+    // that squeezed the row's own name down to `H…` at the panel's minimum width. And when that
+    // adapter is given nothing, this function used to answer `/`, which is a *second* invention:
+    // only the start page is served at the root, so `/` on any other page is simply false.
+    //
+    // The page is still routed — `routedBy` is non-empty, so this is not the `not in a router`
+    // case — it just has no URL of its own to show. The `start` chip beside it still says which
+    // page opens first, which is the fact a person actually wanted from `/`.
+    //
+    // ⚠️ Display only. The app still serves these pages at the derived path (`exporter/router.ts`
+    // and `pages-helper.ts` keep their own copies of the fallback, deliberately untouched), so this
+    // asserts what the panel *claims*, not where the app routes.
+    expect(rowMetaFor('page', index.get('/Home'), undefined)).toBeNull();
+    expect(rowMetaFor('page', index.get('/Home'), '')).toBeNull();
+    expect(rowMetaFor('home', index.get('/Home'), undefined)).toBeNull();
+  });
+
   it('says nothing for home, a popup nothing places, or a cloud function', () => {
     expect(rowMetaFor('home', index.get('/App'))).toBeNull();
     expect(rowMetaFor('popup', index.get('/Orphan'))).toBeNull();

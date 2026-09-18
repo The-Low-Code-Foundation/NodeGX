@@ -49,7 +49,7 @@ describe('TVW-001 (f) — the caption', () => {
   it('leads with the surface, then the subject', () => {
     // The order is the point: FIX-019's caption led with the component name and never said where it
     // was, so the one word a person needs in order to ask for this surface again was absent.
-    expect(benchCaption('Card')).toBe('Workbench — Card on its own, not the app. Sample values.');
+    expect(benchCaption('Card')).toBe('Workbench — Card on its own, not the app.');
   });
 
   it('joins its two drawn halves with the non-breaking space it is drawn with', () => {
@@ -61,22 +61,36 @@ describe('TVW-001 (f) — the caption', () => {
   });
 
   it('says the component is on its own and that the app is not what is running', () => {
-    expect(benchCaptionRest('Card')).toBe('— Card on its own, not the app. Sample values.');
+    expect(benchCaptionRest('Card')).toBe('— Card on its own, not the app.');
   });
 
   it('carries whatever label it is handed, including one that needs no shortening', () => {
     expect(benchCaption('Really Long Component Name')).toContain('Really Long Component Name on its own');
   });
 
-  it('claims sample values — which is true of this surface, and checked', () => {
-    // 🔴 This sentence is a **claim about the mount**, not decoration. `ComponentBench` calls
-    // `buildBenchExport` without `useSampleData` (whose default is `true`) and mounts the viewer
-    // with `useSampleData: true` hardcoded, with no toggle on the surface — two independent reads
-    // agreeing. The authoring sandbox, which *can* be pointed at a real backend, says so in its own
-    // summary line and does not draw this caption.
+  it('does NOT claim sample values — the line beneath owns the data story', () => {
+    // 🔴 **Richard ruled this sentence out on 2026-09-18, and the reason is not that it was false.**
+    // `ComponentBench` really does mount with `useSampleData: true` hardcoded. It was cut because it
+    // was the *second* meaning of *sample* on one surface: the bench summary renders ~44px below
+    // this caption and says **"No sample data"** (`sandboxData.ts`, about backend *records*) in the
+    // empty-data branch that every project without a backend shows. A person read one directly
+    // above the other with no way to tell the two words apart.
     //
-    // If a data toggle ever reaches this surface, this assertion is the one that should fail, and
-    // the fix is to give `benchCaptionRest` a parameter — never to delete the sentence.
-    expect(benchCaptionRest('Card')).toContain('Sample values.');
+    // ⚠️ **This supersedes the note that used to live here**, which said a data toggle would be the
+    // only reason to change this sentence and that the fix would be a parameter, "never to delete
+    // the sentence". That note anticipated the wrong reason: the defect was adjacency, not accuracy.
+    // If data ever needs saying here again, it must say something the summary does not already say,
+    // in a word the summary does not already use.
+    expect(benchCaptionRest('Card')).not.toContain('Sample values');
+    expect(benchCaption('Card').toLowerCase()).not.toContain('sample');
+  });
+
+  it('still says the two things it is for: whose it is, and that it is not the app', () => {
+    // What survived the cut. These are the words that stop someone reading the Workbench as their
+    // running app — the confusion the whole phase exists to close — so they are pinned separately
+    // from the caption's exact wording.
+    const caption = benchCaption('Card');
+    expect(caption).toContain('Card on its own');
+    expect(caption).toContain('not the app.');
   });
 });
