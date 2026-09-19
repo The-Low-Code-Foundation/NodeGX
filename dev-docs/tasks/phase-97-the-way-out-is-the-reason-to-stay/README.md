@@ -5,8 +5,9 @@ logical path to moving from SQLite to another DB type"* — and a measurement of
 taken the same afternoon at `cline-dev` HEAD `df60eb6f5`.
 **Status: 🏗 In progress, s2 (2026-09-19). All 5 rulings taken (§4); R2 taken as recommended.
 BRG-001 built. BRG-002 §3.1 and §3.3 built — nothing in the backend reaches past the storage
-interface any more; §3.2 (`IOperationalStore`) is the remainder. BRG-003 is next and unowned.**
-**Prefix: `BRG`.**
+interface any more; §3.2 (`IOperationalStore`) is the remainder. BRG-003 has a running suite — 53
+cases, green against SQLite, proven able to fail by six mutants — with the CI gate (AC6/AC7) and
+three uncovered §3.2 areas left.** **Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
 > reasonably complex app using workflows and cloud functions, and they deploy and one day start
@@ -164,7 +165,7 @@ still `📋 Specced, not started`.
 |---|---|---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20** + 22 + 16 methods that already exist | ✅ s1 | 🏗 | n/a |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | 🏗 s1-s2 — §3.1 + §3.3; §3.2 left | 🏗 AC5 AC6 | n/a |
-| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | ⬜ | ⬜ | ⬜ |
+| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | 🏗 s2 — 53 cases, 5 areas | 🏗 AC1 AC3 AC4 | n/a |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | ⬜ | ⬜ | ⬜ |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) | `PostgresAdapter` implementing the BRG-001 interface until BRG-003 is green | ⬜ | ⬜ | ⬜ |
 | [BRG-006](BRG-006-THE-DRIVE.md) | The drive: a real app with workflows, cloud functions, triggers and ACLs moved end to end, graph untouched | ⬜ | ⬜ | ⬜ |

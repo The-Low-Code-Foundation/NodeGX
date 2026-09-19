@@ -56,6 +56,25 @@ A pool, sized from config, with the pool's saturation exposed on `/health` along
 persistence status. The single most common way a migration like this disappoints is an
 under-configured pool being blamed on the database.
 
+**Sized deliberately, and the arithmetic published.** Raised 2026-09-19 by a peer session from a
+survey of n8n field reports, where exhausting `max_connections` because every process opens its own
+pool is the *second* most common production failure. The ask, and it is cheap only while this task
+is unwritten:
+
+- a **conservative default**, not the library's;
+- the formula stated where an operator reads it — `replicas × pool_size ≤ max_connections −
+  headroom`, with the headroom named (superuser slots, `pg_dump`, the migrator's own connection
+  during BRG-004);
+- **PgBouncer** guidance, including the one thing that bites: transaction-mode pooling does not
+  carry session state, so anything this adapter does with session-scoped settings has to be stated
+  or avoided.
+
+⚠️ **The formula's `replicas` term is where this task touches the phase's honesty problem.** The
+published claim (R2) is *"one app process, a real database behind it"*, so `replicas` is 1 — and
+writing the formula with a replicas term in it is the first place a reader could infer otherwise.
+It is written as a formula anyway because an operator running two processes *deliberately* needs the
+arithmetic; what BRG-006 must not do is present that as supported. See README §3 and §6.
+
 ## 4. Acceptance criteria
 
 1. **AC1** — `runConformance()` is green against `PostgresAdapter`, including every ACL case, on a
@@ -72,3 +91,10 @@ under-configured pool being blamed on the database.
    cases assert correct rows while permitting different ranking.
 7. **AC7** — The SQLite path is untouched: the full `nodegx-backend` suite and `test:main` are green
    with no Postgres present, and `noodl-mcp` is green.
+8. **AC8** — The pool default, the `replicas × pool_size ≤ max_connections − headroom` formula and
+   the PgBouncer transaction-mode caveat are published where an operator reads them (§3.5), and the
+   default is stated here with the reasoning for the number chosen.
+9. **AC9** 🔴 — The conformance suite is run against this adapter **and against the six mutants of
+   `conformance/mutants.ts`**. Passing the suite is necessary and not sufficient: an adapter that
+   also passes as a mutant means the suite stopped discriminating, and that is a BRG-003 defect
+   filed before this task closes. Both numbers are recorded here.

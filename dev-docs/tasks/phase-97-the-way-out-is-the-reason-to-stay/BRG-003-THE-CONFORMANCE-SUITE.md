@@ -1,6 +1,9 @@
 # BRG-003 — The conformance suite
 
-**Status: ⬜ Not started. Follows BRG-002. The centrepiece.**
+**Status: 🏗 s2 (2026-09-19). The suite exists and runs: 53 cases across five areas, green
+against SQLite, and proven able to fail by six mutants. AC1, AC3 and AC4 closed. Left: the CI
+gate (AC6/AC7), the declaration mechanism exercised (AC5), and three §3.2 areas with no cases
+yet — see §5.5.**
 
 ## 1. The person sentence
 
@@ -127,3 +130,107 @@ adapter. FED-002's index declaration would have tripped it (BRG-D2).
    either given a case or declared**. The list of what needed declaring is recorded here — that list
    is the honest measure of how far the product had already drifted.
 8. **AC8** — BRG-D4 closed: the two SQL generators either have tests or no longer exist (per R3).
+
+
+## 5. As built, s2 — 2026-09-19
+
+### 5.1 What landed
+
+| file | what |
+|---|---|
+| `nodegx-backend-contract/conformance/index.ts` | `runConformance(makeAdapter, decl)`, the case registry, the §3.4 declaration vocabulary |
+| `conformance/context.ts` | the promisified data plane every case is written against |
+| `conformance/assert.ts` | four assertions — deliberately not jest's `expect` |
+| `conformance/cases/{records,filters,acl,relations,schema}.ts` | **53 cases** |
+| `conformance/mutants.ts` | six deliberately-broken adapters (AC3) |
+| `nodegx-backend/tests/brg-003-conformance-sqlite.test.ts` | AC1 — the suite against SQLite |
+| `nodegx-backend/tests/brg-003-conformance-mutants.test.ts` | AC3 — the proof it can fail |
+
+**AC2 — the case count, by area: `records 13, filters 10, acl 15, relations 6, schema 9` = 53.**
+The count is printed by the run from `CONFORMANCE_CASES.length` rather than kept by hand here: a
+hand-maintained count drifts the first time a case lands.
+
+### 5.2 AC3 — the six mutations, and what caught each
+
+Every mutation is a plausible way a second adapter gets it wrong, not a cartoon break. Each is
+caught by a **distinct** set of cases, which is asserted — six mutations all caught by one case
+would mean the suite has one real assertion and fifty-two decorations.
+
+| mutation | cases that caught it |
+|---|---|
+| `drop-acl-on-reads` | **9** — every read shape: query, count, distinct, aggregate, the empty-key-set case and the write-grant-does-not-confer-read case |
+| `drop-acl-on-writes` | **3** — `a-non-owner-cannot-{save,delete,increment}` |
+| `count-returns-page-length` | **2** — `records/count-matches-the-visible-set`, `acl/count-counts-only-visible-rows` |
+| `ignore-unique` | **3** — `unique-index-refuses-a-duplicate`, `compound-index-is-unique-over-the-tuple`, `index-declaration-survives-a-reread` |
+| `relation-inverse-ignores-target` | **2** — both `inverse-lookup-*` cases |
+| `aggregate-ignores-acl` | **1** — `acl/aggregate-computes-only-over-visible-rows` |
+
+🔴 **`ignore-unique` is BRG-D2 itself.** It is not a hypothetical: `generatePostgresSQL()` drops
+every declared index at HEAD, so the mutant models the exporter that is live right now. The suite
+catches it in three places, which is what makes BRG-004's fix checkable rather than assertable.
+
+Two controls run in the same file, because a detector that fires on everything detects nothing:
+the **unmutated** adapter passes all 53, and **no** mutation reds the whole suite.
+
+### 5.3 What the first drive found, and it was the instrument
+
+The first run reported 22 failures. **One was the adapter's; twenty-one were the harness's.**
+`ctx.collection('Flt')` keyed only on the run, so every case asking for the same base name got the
+same table and ran against the accumulated fixtures of all the others — which surfaced as
+`["ada","ada","ada"]` rather than as an error, because piling rows into a shared table breaks no
+invariant the adapter has. A suite whose cases are not isolated measures the adapter's behaviour
+plus its own execution order, and the second is not in the promise. `collection()` is now unique
+per *call*.
+
+🔴 **And a second instrument fault that jest could not see.** `mutants.ts` typed its call-shape
+helper as `Record<string, unknown>`, widening all seven mutated call sites. Every test stayed green,
+because these files run under the backend's ts-jest with `isolatedModules: true`, which transpiles
+without typechecking. `tsc --noEmit` on the contract package is what caught it — so **the suite's
+own gate is two commands, not one**, and a BRG-005 session that runs only jest has not gated its
+adapter. `tsconfig.json`'s `include` also needed `conformance/**/*.ts` added, or the directory is
+invisible to `tsc` entirely.
+
+### 5.3.1 ⚠️ `npx jest` in `nodegx-backend` does not terminate — and it is not this task
+
+Gating the suite meant running the whole backend package, which sat at **142 of 143 suites for 17
+minutes**. The straggler is `tests/ac2-page-editor-drag-drive.test.ts` (SBR-007 AC2, phase 77,
+unmodified since 2026-09-11). It hangs **standalone** too, with `--testTimeout=45000 --forceExit`,
+for over five minutes: the log shows it provisioning a backend and running `claimSite` successfully
+and then stopping, because it drives the real `/Pages/PageEditor` and needs a live editor that a
+plain `jest` run has not started.
+
+So: **142/143 green, 0 failed**, and the one that did not report is environment-dependent and
+predates this task. Recorded because the next session to gate a `BRG` task will otherwise spend the
+same 17 minutes discovering it — and because a run that never prints `Tests:` looks exactly like a
+run that is still working.
+
+🔴 Kill such a run by **PPID**, never `pkill -f jest`: two peer sessions had their own suites running
+on this box at the time.
+
+### 5.4 Acceptance criteria
+
+| | criterion | |
+|---|---|---|
+| AC1 | `runConformance()` runs against SQLite via `createAdapter` and is green | ✅ 53/53 |
+| AC2 | every §3.2 area has cases; the count is recorded | 🏗 five areas, 53 cases. **Changes, transactions and `IOperationalStore` have none** — see 5.5 |
+| AC3 | a mutant fails, one distinct failure per mutation, each recorded by name | ✅ six mutations, six distinct signatures, both controls green |
+| AC4 | the ACL cases are adversarial | ✅ 15 cases; every read and write shape a non-owner can reach |
+| AC5 | the declaration mechanism works | ⬜ the vocabulary is implemented and `unsupported` inverts correctly, but nothing declares yet, so it is **unexercised** |
+| AC6 | the §3.5 CI gate | ⬜ not built. The structural half is done — `ConformanceContext` exposes no `getDatabase`, asserted |
+| AC7 | the gate run against HEAD; everything uncovered declared | ⬜ blocked on AC6 |
+| AC8 | BRG-D4 closed | ⬜ BRG-004's business |
+
+### 5.5 What is deliberately not covered yet, and why it is not a silent gap
+
+Rule 2 of the phase README: *"nothing may be in the promise that is not in the suite."* Three §3.2
+areas have **no cases**, and they are named here rather than left to be discovered as an absence:
+
+| area | why not yet |
+|---|---|
+| **Transactions and rollback** | `IStorageAdapter.transaction()` is still synchronous, and BRG-002 §3.1 moved the only caller to `upsertBatch` — which is the one facade method whose implementation is still SQLite-specific. Testing rollback portably needs that resolved first |
+| **The change tap** (ordering, commit-boundary, none on rollback) | `on`/`off` are optional and feature-detected; `ChangeBus` is the real consumer and it lives in `nodegx-backend`, not behind the adapter interface. This wants a case that drives the bus, not the adapter |
+| **`IOperationalStore`** (claim, CAS, release, sweep) | **does not exist yet** — BRG-002 §3.2 |
+
+The `wire*` envelopes and `include=` expansion are also uncovered: they live on `IStorageFacade`,
+not on the adapter, so they need a second harness taking a facade. That is the largest remaining
+piece of AC2.
