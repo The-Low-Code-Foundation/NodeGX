@@ -20,8 +20,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import type { IOperationalStore } from '@noodl/backend-contract';
+
 import { logger } from '../ops/logger';
-import type { SqlDatabase } from './IdempotencyStore';
+import { SqliteOperationalStore, SqlDatabase } from '../persistence/SqliteOperationalStore';
 
 // Bundled from noodl-viewer-cloud/src/execution-history by esbuild (test-time:
 // jest moduleNameMapper), so the CONSTRUCTION stays a runtime `require` — this
@@ -77,12 +79,17 @@ export interface ExecutionListQuery {
 /** A retention pass some other table rides on this one's clock. See `registerSweep`. */
 interface RegisteredSweep {
   name: string;
-  run: () => number;
+  /**
+   * Promise-returning since BRG-002 §3.2: the tables that ride this clock now
+   * reach their rows through `IOperationalStore`, and that interface is async
+   * because a synchronous call cannot be served over a socket by any adapter.
+   */
+  run: () => number | Promise<number>;
 }
 
 export class ExecutionHistory {
   private store: CloudExecutionStore | null = null;
-  private db: SqlDatabase | null = null;
+  private operational: IOperationalStore | null = null;
   private status: ExecutionHistoryStatus = { enabled: false, dbPath: null, error: null };
   private getRetentionDays: (() => number) | null = null;
   private lastPrune = 0;
@@ -100,12 +107,12 @@ export class ExecutionHistory {
       const store = new executionHistory.ExecutionStore(db);
       store.initSchema();
       this.store = store;
-      this.db = db as SqlDatabase;
+      this.operational = new SqliteOperationalStore(db as SqlDatabase);
       this.status = { enabled: true, dbPath, error: null };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       this.store = null;
-      this.db = null;
+      this.operational = null;
       this.status = { enabled: false, dbPath, error: message };
     }
     return this.status;
@@ -116,17 +123,23 @@ export class ExecutionHistory {
   }
 
   /**
-   * The open handle, for a table that lives beside the execution history in the
-   * same file (CWF-016's idempotency keys).
+   * The operational store over this history's own file, for a subsystem whose
+   * table lives beside the execution history (CWF-016's idempotency claims).
    *
-   * One file and ONE connection is the point: a second `DatabaseSync` on the
-   * same path is a second writer contending for a lock nobody has a plan for,
-   * and a second file is a second thing to back up and to forget to back up.
-   * `null` when history is disabled — which is the honest answer, because a
-   * table needs the same sqlite the history needed.
+   * 🔴 **This replaced `getDatabase()` at BRG-002 §3.2.** Handing out the raw
+   * `node:sqlite` handle was the last `getDatabase()` escape outside
+   * `persistence/`, and it is what let the claim table grow ten prepared
+   * statements in a module that has no business knowing which database it is
+   * talking to. What a borrower needs is a store; what it was given was SQLite.
+   *
+   * One file and ONE connection is still the point: a second `DatabaseSync` on
+   * the same path is a second writer contending for a lock nobody has a plan
+   * for, and a second file is a second thing to back up and to forget to back
+   * up. `null` when history is disabled — which is the honest answer, because a
+   * table needs the same storage the history needed.
    */
-  getDatabase(): SqlDatabase | null {
-    return this.db;
+  getOperationalStore(): IOperationalStore | null {
+    return this.operational;
   }
 
   /**
@@ -140,7 +153,7 @@ export class ExecutionHistory {
    * every execution forever" and must not be read as "keep every idempotency
    * key forever" too.
    */
-  registerSweep(name: string, run: () => number): void {
+  registerSweep(name: string, run: () => number | Promise<number>): void {
     this.sweeps.push({ name, run });
   }
 
@@ -192,9 +205,22 @@ export class ExecutionHistory {
     // Registered sweeps run whatever the execution retention says — see
     // `registerSweep`. Each is isolated so one broken table cannot stop another.
     for (const sweep of this.sweeps) {
+      // ⚠️ Started, not awaited. `prune()` is called from `createLogger()`,
+      // which is synchronous because every execution record is born there and
+      // an await on that path would put a retention DELETE in front of a
+      // function run. Nothing reads a sweep's count but this log line, so the
+      // promise is allowed to land on its own — with a `catch`, because an
+      // unhandled rejection here would take the process with it, which is
+      // exactly what "one broken table cannot stop another" was written
+      // against.
       try {
-        const swept = sweep.run();
-        if (swept > 0) logger.info(`${sweep.name}.pruned`, { removed: swept });
+        Promise.resolve(sweep.run())
+          .then((swept) => {
+            if (swept > 0) logger.info(`${sweep.name}.pruned`, { removed: swept });
+          })
+          .catch((e) => {
+            logger.warn(`${sweep.name}.prune-failed`, { error: e instanceof Error ? e.message : String(e) });
+          });
       } catch (e) {
         logger.warn(`${sweep.name}.prune-failed`, { error: e instanceof Error ? e.message : String(e) });
       }

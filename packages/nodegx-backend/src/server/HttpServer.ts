@@ -2124,7 +2124,7 @@ export class HttpServer {
     const deadline = Date.now() + waitMs;
 
     for (;;) {
-      const claim = this.idempotency.claim(name, identity, requestHash);
+      const claim = await this.idempotency.claim(name, identity);
 
       if (claim.outcome === 'replay') {
         ctx.res.writeHead(claim.statusCode, {
@@ -2150,18 +2150,18 @@ export class HttpServer {
           // The graph blew up in a way `run()` did not turn into a response.
           // The claim goes back: nothing was answered, so nothing may be
           // replayed.
-          this.idempotency.release(name, identity, claim.claimId);
+          await this.idempotency.release(name, identity, claim.claimId);
           throw e;
         }
 
         const success = response.statusCode >= 200 && response.statusCode < 300;
         if (success) {
-          this.idempotency.complete(name, identity, claim.claimId, response.statusCode, response.body);
+          await this.idempotency.complete(name, identity, claim.claimId, response.statusCode, response.body);
         } else {
           // ⚠️ A 500 must not be cached. Replaying a failure for 24 hours is
           // worse than running twice, and the caller retrying is exactly the
           // behaviour that fixes a transient failure.
-          this.idempotency.release(name, identity, claim.claimId);
+          await this.idempotency.release(name, identity, claim.claimId);
         }
         ctx.res.writeHead(response.statusCode, {
           'Content-Type': 'application/json',

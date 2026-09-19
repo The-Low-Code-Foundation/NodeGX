@@ -376,14 +376,14 @@ export class BackendService {
     //     than growing a fourth timer, and its first act is to release every
     //     claim a prior process left `running` — the same doctrine as 5.5 below:
     //     a claim that outlived its process is a key nothing could ever retry.
-    const db = this.executions.getDatabase();
-    if (db) {
+    const operational = this.executions.getOperationalStore();
+    if (operational) {
       try {
-        this.idempotency.open(db, {
+        this.idempotency.open(operational, {
           getTtlMs: () => this.ops!.config.executions.idempotencyTtlHours * 3_600_000
         });
         this.executions.registerSweep('idempotency', () => this.idempotency.sweep());
-        const releasedClaims = this.idempotency.releaseInFlight();
+        const releasedClaims = await this.idempotency.releaseInFlight();
         if (releasedClaims > 0) {
           // eslint-disable-next-line no-console
           console.warn(

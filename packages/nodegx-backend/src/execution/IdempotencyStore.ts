@@ -95,27 +95,25 @@
 
 import { randomUUID } from 'crypto';
 
+import type { IOperationalStore } from '@noodl/backend-contract';
+
 /**
- * The slice of `node:sqlite` this store uses.
+ * The namespace this store owns in the shared operational table.
  *
- * Structural, and declared here rather than imported: `@types/node` at the
- * version this package pins has no `node:sqlite` declarations, and
- * {@link ExecutionHistory} already keeps the module a runtime `require` so the
- * cloud runtime does not enter this package's module graph. Naming the three
- * methods used is more honest than `any` and costs one interface.
+ * Every `sweep` and `count` below is scoped to it, so CWF-016's retention can
+ * never reach another subsystem's rows — see `operational.ts` on why the
+ * namespace is the owning subsystem and not the function name.
  */
-export interface SqlStatement {
-  run(...params: unknown[]): { changes: number | bigint };
-  get(...params: unknown[]): Record<string, unknown> | undefined;
-  all(...params: unknown[]): Record<string, unknown>[];
-}
+const NAMESPACE = 'idempotency';
 
-export interface SqlDatabase {
-  prepare(sql: string): SqlStatement;
-  exec(sql: string): void;
-}
+/**
+ * The two states a claim can be in. The store does not interpret them; this
+ * module does, and these two strings are the whole vocabulary.
+ */
+const RUNNING = 'running';
+const DONE = 'done';
 
-/** A row as this module thinks of it, in camelCase rather than the table's snake. */
+/** A row as this module thinks of it, in the shape the claim loop reasons about. */
 export interface IdempotencyRow {
   scope: string;
   key: string;
@@ -125,7 +123,6 @@ export interface IdempotencyRow {
   completedAt: number | null;
   statusCode: number | null;
   body: string | null;
-  requestHash: string | null;
 }
 
 export type IdempotencyClaim =
@@ -172,96 +169,96 @@ export const DEFAULT_STALE_CLAIM_MS = 600_000;
 /** How many times `claim` re-reads before giving up and reporting contention. */
 const CLAIM_ATTEMPTS = 4;
 
-const SCHEMA = `
-CREATE TABLE IF NOT EXISTS idempotency_keys (
-  scope        TEXT    NOT NULL,
-  idem_key     TEXT    NOT NULL,
-  state        TEXT    NOT NULL,
-  claim_id     TEXT    NOT NULL,
-  claimed_at   INTEGER NOT NULL,
-  completed_at INTEGER,
-  status_code  INTEGER,
-  body         TEXT,
-  request_hash TEXT,
-  PRIMARY KEY (scope, idem_key)
-);
-CREATE INDEX IF NOT EXISTS idx_idempotency_state ON idempotency_keys (state, claimed_at);
-CREATE INDEX IF NOT EXISTS idx_idempotency_completed ON idempotency_keys (completed_at);
-`;
+/**
+ * The store's key for one `(scope, key)` pair.
+ *
+ * `IOperationalStore` identifies a record by `(namespace, key)` and the
+ * namespace is the owning subsystem, so this module's two-part key is composed
+ * into one. ` ` is the separator because it is the one character a
+ * function name provably cannot contain — the guard below is what makes that a
+ * fact rather than an assumption, and it is on `scope` because `scope` is the
+ * half that comes first and therefore the half whose ambiguity would matter.
+ * (The `key` half is caller-supplied and may contain anything; it cannot create
+ * a collision, because everything after the first separator is the key.)
+ */
+function recordKey(scope: string, key: string): string {
+  if (scope.indexOf(' ') !== -1) {
+    throw new Error(`idempotency scope must not contain a NUL character: ${JSON.stringify(scope)}`);
+  }
+  return `${scope} ${key}`;
+}
 
-function toNumber(changes: number | bigint): number {
-  return typeof changes === 'bigint' ? Number(changes) : changes;
+/**
+ * What a completed claim stores, encoded into the operational record's one
+ * opaque value slot.
+ *
+ * Short names because this is written on every completed function call and read
+ * on every replay, and it is never read by a human without this type beside it.
+ */
+interface StoredAnswer {
+  s: number;
+  b: string;
+}
+
+function encodeAnswer(statusCode: number, body: string): string {
+  const answer: StoredAnswer = { s: statusCode, b: body };
+  return JSON.stringify(answer);
+}
+
+/**
+ * Decode a stored answer, tolerating a value this module did not write.
+ *
+ * A record written by an older or newer build — or a value truncated by a disk
+ * that filled — must not throw on the request path. An undecodable answer is
+ * treated as no answer, which means the delivery runs the graph again: the
+ * failure mode this whole table exists to reduce, rather than a 500 it exists
+ * to prevent.
+ */
+function decodeAnswer(value: string | null): StoredAnswer | null {
+  if (value === null) return null;
+  try {
+    const parsed = JSON.parse(value) as Partial<StoredAnswer>;
+    if (typeof parsed.s !== 'number' || typeof parsed.b !== 'string') return null;
+    return { s: parsed.s, b: parsed.b };
+  } catch {
+    return null;
+  }
 }
 
 export class IdempotencyStore {
-  private db: SqlDatabase | null = null;
+  private store: IOperationalStore | null = null;
   private getTtlMs: (() => number) | null = null;
   private staleClaimMs = DEFAULT_STALE_CLAIM_MS;
-  private stmt: {
-    insert: SqlStatement;
-    select: SqlStatement;
-    complete: SqlStatement;
-    release: SqlStatement;
-    dropDone: SqlStatement;
-    takeover: SqlStatement;
-    sweepDone: SqlStatement;
-    sweepRunning: SqlStatement;
-    releaseInFlight: SqlStatement;
-    count: SqlStatement;
-  } | null = null;
 
   /**
-   * Attach to an already-open database and create the table.
+   * Attach to an operational store.
    *
-   * Takes a handle rather than a path because the handle is
-   * {@link ExecutionHistory}'s — one file, one connection, one thing to back up.
+   * 🔴 **Takes an {@link IOperationalStore}, not a database handle** (BRG-002
+   * §3.2). Before that this module held ten prepared statements against its own
+   * `idempotency_keys` table, which is how a claim mechanism that is supposed
+   * to survive a move to Postgres ended up being the single least portable
+   * thing in the backend. It no longer knows SQLite exists.
+   *
    * Throwing here is the caller's to catch: the service treats a store that
    * would not open exactly as it treats execution history that would not open —
    * DISABLED with a loud line, never a silent fall back to memory, and never a
    * reason a real function call fails.
    */
-  open(db: SqlDatabase, options: IdempotencyOpenOptions = {}): void {
-    db.exec(SCHEMA);
-    this.db = db;
+  open(store: IOperationalStore, options: IdempotencyOpenOptions = {}): void {
+    this.store = store;
     this.getTtlMs = options.getTtlMs || null;
     if (typeof options.staleClaimMs === 'number' && options.staleClaimMs > 0) {
       this.staleClaimMs = options.staleClaimMs;
     }
-    this.stmt = {
-      insert: db.prepare(
-        `INSERT INTO idempotency_keys (scope, idem_key, state, claim_id, claimed_at, request_hash)
-         VALUES (?, ?, 'running', ?, ?, ?)`
-      ),
-      select: db.prepare(`SELECT * FROM idempotency_keys WHERE scope = ? AND idem_key = ?`),
-      complete: db.prepare(
-        `UPDATE idempotency_keys SET state = 'done', completed_at = ?, status_code = ?, body = ?
-         WHERE scope = ? AND idem_key = ? AND claim_id = ? AND state = 'running'`
-      ),
-      release: db.prepare(
-        `DELETE FROM idempotency_keys WHERE scope = ? AND idem_key = ? AND claim_id = ? AND state = 'running'`
-      ),
-      dropDone: db.prepare(
-        `DELETE FROM idempotency_keys WHERE scope = ? AND idem_key = ? AND claim_id = ? AND state = 'done'`
-      ),
-      takeover: db.prepare(
-        `UPDATE idempotency_keys SET claim_id = ?, claimed_at = ?
-         WHERE scope = ? AND idem_key = ? AND claim_id = ? AND state = 'running' AND claimed_at <= ?`
-      ),
-      sweepDone: db.prepare(`DELETE FROM idempotency_keys WHERE state = 'done' AND completed_at <= ?`),
-      sweepRunning: db.prepare(`DELETE FROM idempotency_keys WHERE state = 'running' AND claimed_at <= ?`),
-      releaseInFlight: db.prepare(`DELETE FROM idempotency_keys WHERE state = 'running'`),
-      count: db.prepare(`SELECT COUNT(*) AS n FROM idempotency_keys`)
-    };
   }
 
-  /** Detach. The database handle belongs to `ExecutionHistory`, so this closes nothing. */
+  /** Detach. The operational store's connection belongs to `ExecutionHistory`. */
   close(): void {
-    this.db = null;
-    this.stmt = null;
+    this.store = null;
   }
 
   get enabled(): boolean {
-    return this.stmt !== null;
+    return this.store !== null;
   }
 
   private ttlMs(): number {
@@ -270,21 +267,29 @@ export class IdempotencyStore {
     return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : DEFAULT_IDEMPOTENCY_TTL_MS;
   }
 
-  /** Read a row without touching it. Diagnostics, and the claim loop's re-read. */
-  peek(scope: string, key: string): IdempotencyRow | null {
-    if (!this.stmt) return null;
-    const row = this.stmt.select.get(scope, key);
-    if (!row) return null;
+  /**
+   * Read a row without touching it. Diagnostics, and the claim loop's re-read.
+   *
+   * `completedAt` is the record's `updatedAt` once it is `done` and `null`
+   * before that — one timestamp carrying the two ages, which is the shape
+   * `OperationalRecord.updatedAt` documents and the reason there is no second
+   * column here either.
+   */
+  async peek(scope: string, key: string): Promise<IdempotencyRow | null> {
+    if (!this.store) return null;
+    const record = await this.store.read(NAMESPACE, recordKey(scope, key));
+    if (!record) return null;
+    const done = record.state === DONE;
+    const answer = done ? decodeAnswer(record.value) : null;
     return {
-      scope: String(row.scope),
-      key: String(row.idem_key),
-      state: row.state === 'done' ? 'done' : 'running',
-      claimId: String(row.claim_id),
-      claimedAt: Number(row.claimed_at),
-      completedAt: row.completed_at === null || row.completed_at === undefined ? null : Number(row.completed_at),
-      statusCode: row.status_code === null || row.status_code === undefined ? null : Number(row.status_code),
-      body: row.body === null || row.body === undefined ? null : String(row.body),
-      requestHash: row.request_hash === null || row.request_hash === undefined ? null : String(row.request_hash)
+      scope,
+      key,
+      state: done ? 'done' : 'running',
+      claimId: record.token,
+      claimedAt: record.claimedAt,
+      completedAt: done ? record.updatedAt : null,
+      statusCode: answer ? answer.s : null,
+      body: answer ? answer.b : null
     };
   }
 
@@ -297,37 +302,33 @@ export class IdempotencyStore {
   /**
    * Try to become the one delivery that runs the graph.
    *
-   * The INSERT is the whole mechanism: it either succeeds (nobody held the key)
-   * or it violates the primary key (somebody does). There is deliberately no
-   * SELECT-then-INSERT anywhere in this method's happy path, because that is the
-   * shape that loses the race.
+   * The `acquire` is the whole mechanism: it either lands (nobody held the key)
+   * or it does not (somebody does). There is deliberately no read-then-write
+   * anywhere in this method's happy path, because that is the shape that loses
+   * the race.
    *
-   * The loop exists for the two ways a re-read can be out of date — the row was
-   * swept, or its stale claim was taken over by a third delivery, between the
-   * failed insert and the select. It is bounded: contention that survives four
-   * attempts is reported as in-flight, which makes the caller wait, rather than
-   * as claimed, which would run the graph.
+   * The loop exists for the two ways a re-read can be out of date — the record
+   * was swept, or its stale claim was taken over by a third delivery, between
+   * the failed acquire and the read. It is bounded: contention that survives
+   * four attempts is reported as in-flight, which makes the caller wait, rather
+   * than as claimed, which would run the graph.
    */
-  claim(scope: string, key: string, requestHash?: string): IdempotencyClaim {
-    if (!this.stmt) return { outcome: 'disabled' };
+  async claim(scope: string, key: string): Promise<IdempotencyClaim> {
+    if (!this.store) return { outcome: 'disabled' };
+    const id = recordKey(scope, key);
 
-    let insertError: unknown = null;
     for (let attempt = 0; attempt < CLAIM_ATTEMPTS; attempt++) {
       const now = Date.now();
       const claimId = randomUUID();
-      try {
-        this.stmt.insert.run(scope, key, claimId, now, requestHash === undefined ? null : requestHash);
+      if (await this.store.acquire(NAMESPACE, id, { token: claimId, state: RUNNING, now })) {
         return { outcome: 'claimed', claimId };
-      } catch (e) {
-        insertError = e;
       }
 
-      const row = this.peek(scope, key);
+      const row = await this.peek(scope, key);
       if (!row) {
-        // The insert failed and there is no row: not contention. Something else
-        // is wrong with the statement or the database, and swallowing it would
-        // turn a broken table into "every request runs the graph twice".
-        if (attempt === CLAIM_ATTEMPTS - 1) throw insertError;
+        // The acquire was refused and there is no record: the holder's row went
+        // between the two calls (a sweep, or a losing race with a discard).
+        // Going again is right; giving up silently would not be.
         continue;
       }
 
@@ -336,31 +337,45 @@ export class IdempotencyStore {
           // Past its TTL and the write-driven sweep has not come round. Drop it
           // and go again — enforcing the TTL on read as well as on sweep is what
           // keeps "24h" from meaning "24h, or up to an hour more".
-          this.stmt.dropDone.run(scope, key, row.claimId);
+          await this.store.discard(NAMESPACE, id, row.claimId, DONE);
+          continue;
+        }
+        if (row.body === null) {
+          // `done` with no decodable answer: there is nothing to replay, so the
+          // honest move is to drop it and let this delivery run the graph,
+          // rather than replay an empty body as if it were the first answer.
+          await this.store.discard(NAMESPACE, id, row.claimId, DONE);
           continue;
         }
         return {
           outcome: 'replay',
           statusCode: row.statusCode === null ? 200 : row.statusCode,
-          body: row.body === null ? '' : row.body,
+          body: row.body,
           completedAt: row.completedAt === null ? 0 : row.completedAt
         };
       }
 
       if (now - row.claimedAt >= this.staleClaimMs) {
-        const taken = toNumber(
-          this.stmt.takeover.run(claimId, now, scope, key, row.claimId, now - this.staleClaimMs).changes
-        );
-        if (taken === 1) return { outcome: 'claimed', claimId };
+        const taken = await this.store.retake(NAMESPACE, id, {
+          fromToken: row.claimId,
+          toToken: claimId,
+          state: RUNNING,
+          updatedAtOrBefore: now - this.staleClaimMs,
+          now
+        });
+        if (taken) return { outcome: 'claimed', claimId };
         continue;
       }
 
       return { outcome: 'inflight', claimId: row.claimId, claimedAt: row.claimedAt };
     }
 
-    const row = this.peek(scope, key);
+    const row = await this.peek(scope, key);
     if (row) return { outcome: 'inflight', claimId: row.claimId, claimedAt: row.claimedAt };
-    throw insertError;
+    throw new Error(
+      `idempotency claim for ${JSON.stringify(scope)}/${JSON.stringify(key)} was refused ` +
+        `${CLAIM_ATTEMPTS} times and no record holds it — the operational store is not behaving.`
+    );
   }
 
   /**
@@ -371,19 +386,25 @@ export class IdempotencyStore {
    * the caller still sends its own response to its own client, it simply does
    * not get to be the stored one.
    */
-  complete(scope: string, key: string, claimId: string, statusCode: number, body: string): boolean {
-    if (!this.stmt) return false;
-    return toNumber(this.stmt.complete.run(Date.now(), statusCode, body, scope, key, claimId).changes) === 1;
+  async complete(scope: string, key: string, claimId: string, statusCode: number, body: string): Promise<boolean> {
+    if (!this.store) return false;
+    return this.store.settle(NAMESPACE, recordKey(scope, key), claimId, {
+      fromState: RUNNING,
+      toState: DONE,
+      value: encodeAnswer(statusCode, body),
+      now: Date.now()
+    });
   }
 
   /**
-   * Give the key back. The row is DELETED rather than marked failed: "released"
-   * has exactly one meaning — the next delivery with this key runs the graph —
-   * and a tombstone row would be a second state to interpret at every read.
+   * Give the key back. The record is DELETED rather than marked failed:
+   * "released" has exactly one meaning — the next delivery with this key runs
+   * the graph — and a tombstone would be a second state to interpret at every
+   * read.
    */
-  release(scope: string, key: string, claimId: string): boolean {
-    if (!this.stmt) return false;
-    return toNumber(this.stmt.release.run(scope, key, claimId).changes) === 1;
+  async release(scope: string, key: string, claimId: string): Promise<boolean> {
+    if (!this.store) return false;
+    return this.store.discard(NAMESPACE, recordKey(scope, key), claimId, RUNNING);
   }
 
   /**
@@ -397,11 +418,11 @@ export class IdempotencyStore {
    * ownership of `executions.sqlite` (`ExecutionStore`'s module note). Two
    * backends started on one data directory would each release the other's live
    * claims — but they would also be fighting over the execution history, so the
-   * fix is not here.
+   * fix is not here. Phase 97 §3 is where that ceiling is written down.
    */
-  releaseInFlight(): number {
-    if (!this.stmt) return 0;
-    return toNumber(this.stmt.releaseInFlight.run().changes);
+  async releaseInFlight(): Promise<number> {
+    if (!this.store) return 0;
+    return this.store.sweep(NAMESPACE, RUNNING);
   }
 
   /**
@@ -413,19 +434,18 @@ export class IdempotencyStore {
    * fourth timer next to the trigger scheduler, the backup scheduler and the
    * realtime heartbeat, one of which already hangs `server.close()`.
    */
-  sweep(now: number = Date.now()): number {
-    if (!this.stmt) return 0;
+  async sweep(now: number = Date.now()): Promise<number> {
+    if (!this.store) return 0;
     const ttl = this.ttlMs();
     let removed = 0;
-    if (ttl > 0) removed += toNumber(this.stmt.sweepDone.run(now - ttl).changes);
-    removed += toNumber(this.stmt.sweepRunning.run(now - this.staleClaimMs).changes);
+    if (ttl > 0) removed += await this.store.sweep(NAMESPACE, DONE, now - ttl);
+    removed += await this.store.sweep(NAMESPACE, RUNNING, now - this.staleClaimMs);
     return removed;
   }
 
   /** Rows currently held. Diagnostics and tests. */
-  count(): number {
-    if (!this.stmt) return 0;
-    const row = this.stmt.count.get();
-    return row ? Number(row.n) : 0;
+  async count(): Promise<number> {
+    if (!this.store) return 0;
+    return this.store.count(NAMESPACE);
   }
 }

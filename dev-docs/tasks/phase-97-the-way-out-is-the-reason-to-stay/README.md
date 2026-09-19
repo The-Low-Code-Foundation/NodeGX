@@ -3,11 +3,12 @@
 **Scoped:** 2026-09-18, from Richard's question in session — *"what would be the easiest, most
 logical path to moving from SQLite to another DB type"* — and a measurement of the persistence seam
 taken the same afternoon at `cline-dev` HEAD `df60eb6f5`.
-**Status: 🏗 In progress, s2 (2026-09-19). All 5 rulings taken (§4); R2 taken as recommended.
-BRG-001 built. BRG-002 §3.1 and §3.3 built — nothing in the backend reaches past the storage
-interface any more; §3.2 (`IOperationalStore`) is the remainder. BRG-003 has a running suite — 53
-cases, green against SQLite, proven able to fail by six mutants — with the CI gate (AC6/AC7) and
-three uncovered §3.2 areas left.** **Prefix: `BRG`.**
+**Status: 🏗 In progress, s3 (2026-09-19). All 5 rulings taken (§4); R2 taken as recommended.
+BRG-001 built. BRG-002 **fully built** — nothing in the backend reaches past the storage interface
+any more, and `execution/` is at zero raw statements now that `IOperationalStore` exists. BRG-003
+has a running suite — 53 cases, green against SQLite, proven able to fail by six mutants — with the
+CI gate (AC6/AC7) left, and one of its three uncovered areas (`IOperationalStore`) now buildable.**
+**Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
 > reasonably complex app using workflows and cloud functions, and they deploy and one day start
@@ -164,7 +165,7 @@ still `📋 Specced, not started`.
 | task | one line | built | gated | driven |
 |---|---|---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20** + 22 + 16 methods that already exist | ✅ s1 | 🏗 | n/a |
-| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | 🏗 s1-s2 — §3.1 + §3.3; §3.2 left | 🏗 AC5 AC6 | n/a |
+| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | ✅ s1-s3 — §3.1 + §3.2 + §3.3 | 🏗 AC1 AC4 AC5 AC6; AC7 left | n/a |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | 🏗 s2 — 53 cases, 5 areas | 🏗 AC1 AC3 AC4 | n/a |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | ⬜ | ⬜ | ⬜ |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) | `PostgresAdapter` implementing the BRG-001 interface until BRG-003 is green | ⬜ | ⬜ | ⬜ |
@@ -245,6 +246,7 @@ and names it. Richard has read the published sentence about what the bridge does
 | **BRG-D3** 🔴 | `POSTGRES_TYPE_MAP.Relation = null` causes relation columns to be skipped by `if (pgType)` and vanish from the export with no error | BRG-004 |
 | **BRG-D4** | The two generators' only coverage is one smoke assertion — `service-http.test.ts:503` checks the `format=postgres` body contains `CREATE TABLE`, which stays true with every relation dropped, every unique index missing and every row ACL replaced by `USING (true)`. A test that cannot fail on D1, D2 or D3 is the same absence with a green tick on it | BRG-003 |
 | **BRG-D5** · | `GeoPoint → POINT` may not answer `QueryBuilder`'s SQL distance queries without PostGIS. **Not verified** — measure before building on it | BRG-005 |
+| **BRG-D6** 🔴 | **There is no shutdown path for `executions.sqlite`.** `ExecutionHistory` has no close method and `BackendService.stop()` does not release the handle — which is free on SQLite (process exit does it) and a connection-pool leak on Postgres. Found at BRG-002 §7.5 while looking for a caller for `IOperationalStore.close()`, which was therefore **not declared**: the method and its caller land together at BRG-005 | BRG-005 |
 
 ## 10. Phase 48 is not optional reading
 

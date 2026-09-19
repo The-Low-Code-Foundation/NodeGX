@@ -75,6 +75,15 @@ writing the formula with a replicas term in it is the first place a reader could
 It is written as a formula anyway because an operator running two processes *deliberately* needs the
 arithmetic; what BRG-006 must not do is present that as supported. See README §3 and §6.
 
+🔴 **There is a SECOND pool and it has no shutdown, which BRG-D6 filed 2026-09-19 (BRG-002 §7.5).**
+`IOperationalStore` gets its own Postgres implementation — CWF-016's claim table is not a user
+collection and does not travel through the adapter facade — so this task opens a pool there too.
+And there is **nowhere to release either of them**: `ExecutionHistory` has no close method and
+`BackendService.stop()` does not release `executions.sqlite`'s handle, because on SQLite process
+exit does it for free. `IOperationalStore.close()` was written at BRG-002 and **taken back off**
+for exactly that reason — no caller. So this task owes the method *and* the shutdown path that
+calls it, and the shutdown path is the part that does not exist yet.
+
 ## 4. Acceptance criteria
 
 1. **AC1** — `runConformance()` is green against `PostgresAdapter`, including every ACL case, on a

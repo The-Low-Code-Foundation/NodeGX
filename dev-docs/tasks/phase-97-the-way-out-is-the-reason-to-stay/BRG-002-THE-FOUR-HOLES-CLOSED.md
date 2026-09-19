@@ -1,7 +1,8 @@
 # BRG-002 — The holes, closed
 
-**Status: 🏗 §3.1 and §3.3 done s1 (2026-09-19). Nothing in the backend reaches past the storage
-interface any more. §3.2 (`IOperationalStore`) is what remains.**
+**Status: 🏗 §3.1, §3.2 and §3.3 all built (s1-s3, 2026-09-19). Nothing in the backend reaches past
+the storage interface any more, and `execution/` is at ZERO raw statements. AC1, AC4, AC5 and AC6
+are closed; AC7 (`test:main` + `noodl-mcp`) is the remainder — see §7.**
 
 ## 1. The person sentence
 
@@ -230,3 +231,145 @@ measured a win. Assuming it had one would have been the easy mistake.
 
 **§3.2 (`IOperationalStore` for `IdempotencyStore` and `ExecutionStore`) is what remains**, plus AC4
 and AC7.
+
+---
+
+## 7. §3.2 as built, s3 — 2026-09-19
+
+`IOperationalStore` is declared, implemented for SQLite, and `IdempotencyStore` is on it.
+**`execution/` is at zero prepared statements, down from ten**, and `ExecutionHistory.getDatabase()`
+— the last raw-handle escape outside `persistence/` — is gone.
+
+| | file | what it is |
+|---|---|---|
+| new | `nodegx-backend-contract/src/operational.ts` | the interface — 7 methods, 3 payload types + the record |
+| new | `nodegx-backend/src/persistence/SqliteOperationalStore.ts` | the SQLite implementation — 8 prepared statements, all of them here |
+| edit | `nodegx-backend/src/execution/IdempotencyStore.ts` | rewritten onto the interface; no longer knows SQLite exists |
+| edit | `nodegx-backend/src/execution/ExecutionStore.ts` | `getDatabase()` becomes `getOperationalStore()`; the sweep registry takes a promise |
+| edit | `HttpServer.ts`, `service.ts` | the five call sites await |
+| new | `tests/brg002-operational-store.test.ts` | 17 cases (§7.3) |
+
+### 7.1 🔴 The interface had to be async, and §3.1's sentence was narrower than it read
+
+§3.1 called the seven synchronous facade methods *"the only **structural** blocker in the whole
+phase"*. That sentence is true about the facade and **false about the phase**, and §3.2 is where it
+would have been found out: the ten statements it replaces sit behind a synchronous `claim()`,
+`complete()`, `release()`, `sweep()` and `count()`, and declaring `IOperationalStore` in that shape
+would have written the phase's one structural blocker into a brand-new file the same week it was
+closed in the old one.
+
+So every method on the interface returns a promise, `IdempotencyStore`'s surface is async, and five
+call sites gained an `await`. The reasoning is §3.1's, unchanged: *a synchronous call cannot be
+served over a socket, at any cost, by any adapter.* That is a statement about calls, not about one
+class.
+
+**The one place it was not a one-word change:** `ExecutionHistory.prune()` runs the registered
+sweeps, and it is called from `createLogger()`, which is synchronous because **every execution
+record is born there**. Awaiting a retention DELETE on that path would put it in front of a function
+run. So `registerSweep` now accepts `() => number | Promise<number>` and `prune()` **starts** each
+sweep without awaiting it — with a `.catch`, because an unhandled rejection there would take the
+process down, which is precisely what *"one broken table cannot stop another"* was written against.
+Nothing but a log line ever read a sweep's count.
+
+### 7.2 The shape, and the two things it deliberately does not carry
+
+Key-value, plus compare-and-set, plus a sweep — §3.2's own words. The ten statements reduce to seven
+methods with nothing left over, which is the evidence that the concept was already there and only
+the interface was missing.
+
+**One timestamp, not two.** The table had `claimed_at` and `completed_at` and swept on whichever
+suited. The record now has `claimedAt` (when the token took it) and `updatedAt` (when it last
+changed), and **every** sweep and every takeover compares `updatedAt` only. That works because the
+two ages are never live at once: while a record is `running`, `updatedAt` *is* its claim time; once
+it is `done`, `updatedAt` *is* its settle time. A second column would carry the same two numbers and
+one more way for them to disagree. `tests/brg002-operational-store.test.ts` pins that equivalence
+directly rather than leaving it as a comment.
+
+🔴 **`request_hash` is dropped, and this is the measurement that made that safe.** It was written on
+every claim and read by **nothing**: `grep -rna 'requestHash|request_hash'` over `src/` and `tests/`
+returns hits in `IdempotencyStore.ts` alone, and its only reader there was `peek()`, whose only
+callers are inside the same file. The `requestHash` argument to `claim()` went with it — `HttpServer`
+still computes the hash, because it folds it into the *identity* when `hashBody` is on, which is the
+half that was ever load-bearing. Carrying a write-only column into the interface would have meant
+every future adapter implementing a field nobody reads (phase rule 2, from the other direction).
+**Reversible:** re-adding it is a column and a parameter, and this paragraph is the record of why it
+went.
+
+⚠️ **Identity is two parts and the owner composes the second.** A record is `(namespace, key)`, and
+the namespace is the **owning subsystem** (`'idempotency'`), not the function name — so `sweep` and
+`count` cannot reach another subsystem's rows. CWF-016's `(scope, key)` is composed into one key with
+a NUL separator, guarded by a throw on a scope containing one. The alternative, a three-part
+identity, is a column added for one caller's convenience.
+
+🔴 **A new table, and the old one is left behind.** Column renames cannot be
+`CREATE TABLE IF NOT EXISTS`-ed over an existing table — the statement is a no-op, every prepare then
+fails on an unknown column, and the upgrade boots straight into `CWF-016 idempotency DISABLED`. So
+`operational_records` is new and `idempotency_keys` is **left in `executions.sqlite` rather than
+dropped**: a few KB that make a downgrade a downgrade rather than a data loss. The consequence,
+recorded rather than argued: every `running` claim is already released on every start by design, so
+the genuinely new loss is *completed* replay records — at most one duplicate run per key, once, on
+the boot that upgrades.
+
+### 7.3 🔴 The namespace argument was invisible to every existing test, and one mutant proves it
+
+`idempotency-store.test.ts` drives this store hard, but through one caller, which uses **one**
+namespace and **two** states. So namespace isolation — the entire reason `sweep` and `count` take a
+namespace — was a write nobody read.
+
+Measured rather than asserted. Both `namespace = ?` predicates in the sweep statements were replaced
+with `? IS NOT NULL` (the argument still bound, still ignored) and the two suites re-run:
+
+| suite | unmutated | mutated |
+|---|---|---|
+| `idempotency-store.test.ts` (15) | green | **still green** — it cannot see the defect |
+| `brg002-operational-store.test.ts` (17) | green | 🔴 **2 failed** — both namespace-isolation cases |
+
+That is what the new spec is for. Its 17 cases cover the refusals (`settle`, `discard` and `retake`
+each resolving `false` rather than throwing — two plausible implementations of a failed CAS, and only
+one of them is this contract), namespace isolation on every sweep, the single-timestamp equivalence,
+and the fail-closed path: a dropped table rethrows rather than reading as contention, because
+reported as contention a broken table becomes "every delivery waits for a claim nobody holds".
+
+### 7.4 Acceptance criteria
+
+| | criterion | |
+|---|---|---|
+| AC1 | `.prepare(` only under `persistence/` and the operational store | ✅ **with one wording correction** — see below |
+| AC4 | `IOperationalStore` declared in the contract, implemented for SQLite, `IdempotencyStore` + `ExecutionStore` on it; `cwf-016-idempotency.test.ts` green **unchanged** | ✅ — that file is untouched in the diff and its cases are green |
+| AC6 | every remaining `nativeHandle` / `getDatabase()` site listed | ✅ — outside `persistence/`, **none**. `AdapterFacade.upsertBatch` and its helper are the only two left, both inside |
+| AC7 | `test:main` green, `noodl-mcp` green | 🏗 — see §7.5 |
+
+🔴 **AC1's wording missed an exemption the task file already carried.** Measured with `grep -rna`
+(the `-a` matters — plain `grep` silently skips a `.ts` file it reads as binary, which is how a
+`HttpServer.ts` caller nearly went unseen this session):
+
+| where | before | after |
+|---|---|---|
+| `src/execution/` | **10** | **0** |
+| `src/persistence/` | 2 (`AdapterFacade`) | **10** (2 + the 8 that are the implementation) |
+| `src/backup/` | 2 | 2 — `snapshot.ts` and `schema-migrate.ts` |
+
+The two `backup/` sites are **not** holes and §2 of this file says so in as many words: on Postgres
+those files are `pg_dump` and `pg_restore`, not a port. AC1's sentence simply did not carry the
+exemption its own task file had already granted, so it is recorded here rather than counted as red —
+the criterion is **`.prepare(` only under `src/persistence/` and in the two declared-SQLite-specific
+backup modules**, and at HEAD that is exactly where they are.
+
+### 7.5 🔴 One finding, handed to BRG-005: there is no shutdown path to hang `close()` on
+
+`IOperationalStore` was written with a `close()` and it was **taken back off**, because measuring
+for its caller found none: `ExecutionHistory` has no shutdown method at all, `BackendService.stop()`
+does not close `executions.sqlite`, and the SQLite handle is released by process exit. Declaring a
+method nothing reaches is rule 1 of the phase README in as many words — *a method that exists
+because it would be nicer is a method the conformance suite will not gate, and therefore a method
+that is not part of the promise.*
+
+⚠️ **It stops being free at BRG-005.** A Postgres operational store holds a connection pool, and a
+pool nothing releases is a leak the SQLite implementation structurally cannot have — which is
+exactly the class of difference this phase exists to surface before it is expensive. So BRG-005 adds
+`close()` **together with the caller**, and the caller does not exist yet: giving `ExecutionHistory`
+a shutdown and wiring it into `BackendService.stop()` is a prerequisite, not a detail. That is a
+finding about the service, not about the interface, and it is filed here rather than left to be
+rediscovered at full price.
+
+**Filed as BRG-D6** (see phase README §9).

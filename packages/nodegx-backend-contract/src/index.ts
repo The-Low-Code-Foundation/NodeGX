@@ -22,3 +22,4 @@ export * from './wire';
 export * from './nodeCapabilities';
 export * from './probes';
 export * from './storage';
+export * from './operational';

@@ -229,7 +229,7 @@ areas have **no cases**, and they are named here rather than left to be discover
 |---|---|
 | **Transactions and rollback** | `IStorageAdapter.transaction()` is still synchronous, and BRG-002 §3.1 moved the only caller to `upsertBatch` — which is the one facade method whose implementation is still SQLite-specific. Testing rollback portably needs that resolved first |
 | **The change tap** (ordering, commit-boundary, none on rollback) | `on`/`off` are optional and feature-detected; `ChangeBus` is the real consumer and it lives in `nodegx-backend`, not behind the adapter interface. This wants a case that drives the bus, not the adapter |
-| **`IOperationalStore`** (claim, CAS, release, sweep) | **does not exist yet** — BRG-002 §3.2 |
+| **`IOperationalStore`** (claim, CAS, release, sweep) | ~~does not exist yet~~ — **built 2026-09-19 s3** (BRG-002 §7). It is now the cheapest of the three to cover: the interface is 7 methods with no I/O of its own, and `nodegx-backend/tests/brg002-operational-store.test.ts` already has 17 SQLite-bound cases to lift into an adapter-agnostic harness |
 
 The `wire*` envelopes and `include=` expansion are also uncovered: they live on `IStorageFacade`,
 not on the adapter, so they need a second harness taking a facade. That is the largest remaining
