@@ -4,7 +4,7 @@
 NodeGX app at distraction.digitalbricks.io), and a capability survey of `packages/nodegx-backend`,
 `packages/noodl-viewer-cloud` and `packages/noodl-runtime` taken the same afternoon at `cline-dev`
 HEAD `f3f67874d`.
-**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 ✅ CLOSED. FED-004 is next.** **Prefix: `FED`.**
+**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 ✅ CLOSED. FED-004 ✅ CLOSED. FED-005 is next.** **Prefix: `FED`.**
 
 > "I'd really like the NodeGX backend to be able to handle this stuff. I want people to see NodeGX as
 > an alternative to tools like Supabase and n8n as well as a front end builder. The old Noodl made the
@@ -116,7 +116,7 @@ Asked in plain words, answered in one pass, 2026-09-18 (session 1).
 | [FED-001](FED-001-A-FEED-IS-A-THING-YOU-CAN-PARSE.md) | `Parse XML` and `Parse Feed` nodes; RSS 2.0, Atom, RDF, YouTube, Reddit, podcasts → one item shape | ✅ | ✅ 6/6 | ✅ |
 | [FED-002](FED-002-A-COLLECTION-DECLARES-ITS-INDEXES.md) | `indexes` per collection in `schema.json`, unique included; upsert-on-unique on create | ✅ | ✅ 7/7 | ✅ |
 | [FED-003](FED-003-A-FUNCTION-CALLS-A-MODEL.md) | `Model Request` cloud node: key from `Secret`, structured JSON out, usage counted, no SDK | ⬜ | ⬜ | ⬜ |
-| [FED-004](FED-004-A-SCHEDULE-DOES-NOT-TRIP-OVER-ITSELF.md) | `overlapPolicy` on schedules; conditional GET (ETag / 304) on the HTTP node; a `User-Agent` | ⬜ | ⬜ | ⬜ |
+| [FED-004](FED-004-A-SCHEDULE-DOES-NOT-TRIP-OVER-ITSELF.md) | `overlapPolicy` on schedules; conditional GET (ETag / 304) on the HTTP node; a `User-Agent` | ✅ | ✅ 7/7 | ✅ |
 | [FED-005](FED-005-A-BACKEND-SPEAKS-MCP.md) | `/mcp` on the backend: functions and collections as tools, scoped by API key | ⬜ | ⬜ | ⬜ |
 | [FED-006](FED-006-THE-DRIVE-ONE-FEED-END-TO-END.md) | the drive: fixture feeds → schedule → parse → dedupe → tag → per-user read, on a provisioned backend | ⬜ | ⬜ | ⬜ |
 
@@ -128,6 +128,19 @@ across the two suites (26 over HTTP, 14 against the SQL). Twenty concurrent upse
 indexed `published desc` answer in **0.04 ms against a control's 8.92 ms**, with
 `EXPLAIN QUERY PLAN` naming the index. One defect filed (R3: a property called `id` is never
 *auto*-created as a column — declared ones are fine, which is what every AC drives through).
+
+**FED-004 is CLOSED (s4):** built, gated and driven, **26 specs across three suites** — a
+timeline on fake timers, a provisioned backend over real HTTP, and a `node:http` fixture that
+honours `If-None-Match`. `overlapPolicy` (`skip` default, `queue-one`, `allow`), conditional GET
+through a `_HttpCache` validator table that is deliberately **not a cache**, a `Not Modified`
+output, and `User-Agent: NodeGX/<version> (+<publicUrl>)` on every outbound request the graph did
+not name one for. 🔴 **And the run s3 owed: `nodegx-backend` WHOLE at 149/149 suites / 1758
+tests**, plus `test:main` at **504/504 suites, 8065/8065**.
+
+🔴 **One deliberate behaviour change, recorded here because it is the only one in the phase:** a
+`triggers.json` written before FED-004 now gets `overlapPolicy: skip` rather than the `allow` it
+had. §3.1 asked for it and FED-004 §5.1 says why. BAK-007's backup schedule and the file orphan
+sweep inherit the same guard.
 
 ## 6. Out of scope, and why
 
@@ -181,6 +194,15 @@ indexed `published desc` answer in **0.04 ms against a control's 8.92 ms**, with
    parsers are the ledger's first `scheduled` rows. **What this means for FED-003:** `Model Request`
    is cloud-only, so its row is `backend-only` and the check will insist on exactly that — no
    ruling needed, but the row is not optional.
+   ✅ **What a new PORT costs, measured at FED-004 (s4), because rule 5 is written about a new
+   TYPE and a port is the commoner case.** Two ports on `net.noodl.HTTP`: `catalog:generate`
+   catalogues the static OUTPUT and does **not** catalogue the dynamic INPUT (this node
+   catalogues only `cancel`/`fetch`/`url` statically, so FED-001's `responseType` is absent too —
+   not a miss); `catalog:merge` and `docs:nodes` move one documentation line; **the CHR-007
+   snapshot regenerates to a ZERO delta**, because it records port CLASSES for inputs and a
+   signal output adds none; and **no ledger row is owed**, because a row follows a TYPE. The
+   `noodl-mcp` run is still owed and still worth doing — it is what confirmed R4's floor held.
+
    🔴 **And there is a SEVENTH step none of the six catch, found at FED-003 (s3): registering a
    node is not OFFERING it.** `Model Request` was registered in
    `noodl-viewer-cloud/src/nodes/index.ts`, both its suites were green, all nine of its ACs were
