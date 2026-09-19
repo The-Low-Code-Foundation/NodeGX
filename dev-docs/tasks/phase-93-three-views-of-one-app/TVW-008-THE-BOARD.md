@@ -262,3 +262,71 @@ single `bench.board` record. That is the smallest thing that can be built and dr
 is shaped as an object (`{ frames: [...] }`) rather than a bare array **so a `boards: []` key can be
 added later without a migration**. Ask before building the second one — a named-board picker is its
 own surface, and the single board has to earn it first.
+
+## 8. Slice 1 — built 2026-09-19 (s19). The offline-gradeable half
+
+**`fb82d4fa2`.** Everything here is graded without the box; slice 2 is the surface and needs a drive.
+
+| built | where |
+|---|---|
+| the third mode + the exhaustiveness guard | `previewScope.ts` — `{ mode: 'board' }`, `BOARD_SCOPE`, `assertNeverScope`, `showsAppPreview` / `showsBench` / `showsBoard`, `scopeChipLabel`, `scopeChipIconKind` |
+| the six `!isBench` sites, closed | `VisualCanvas.tsx` (strip, design chrome, viewport read-out, webview hidden class), `PreviewChrome.tsx` (chip label + icon) |
+| the board's name | `benchWords.ts` — `BOARD`, `OPEN_BOARD` |
+| the board's rules | `benchBoard.ts` — read/write of `bench.board`, add / remove / move, `canAddAll`, `boardFramesPresentIn` |
+| the export | `componentBench.ts` — `boardBounds`, `boardHarness`, `buildBoardExport` |
+| specs | `tests-unit/tvw-008/` (58) + `tests/canvas/board-export.test.ts`, registered in `tests/canvas/index.ts` |
+
+### 8.1 🔴 §6.5 was right, and the compiler proved it by saying nothing
+
+Adding the variant left `tsc -p packages/noodl-editor --noEmit` at **exit 0**. Six behaviours had
+changed and nothing flagged one. They are closed now behind `showsAppPreview`, which switches
+exhaustively — a fourth mode is six compile errors.
+
+⚠️ **The one that would have been seen by a person first**: `PreviewChrome`'s
+`isBench ? benchTargetLabel(scope.target) : 'App'` labels the board **App** — on the single control
+whose entire job is to say which of three things you are looking at.
+
+⚠️ **`isBench` must stay `scope.mode === 'bench'` and NOT be tidied into `showsBench(scope)`.**
+TypeScript narrows a union through a `const` aliasing a discriminant check, so `scope.target` type
+checks inside `isBench && …`. A helper returning `boolean` throws the narrowing away and four reads
+of `scope.target` stop compiling. The predicate is for callers that want only the answer; that one
+wants the narrowing too. It is commented in place, because it reads like a missed cleanup.
+
+### 8.2 🔴 The frame wrapper — BEN-001's refusal, answered rather than inherited
+
+BEN-001 would not build a Group sized to the frame, because `sizeMode` silently voids
+`width`/`height` and a wrapper that gets it wrong makes a correct component look broken inside the
+tool built to tell you whether it is. The single bench sidestepped it by letting the **surface** be
+the frame; a board has N frames in one document and cannot. Both failure modes are answered against
+the real port definitions rather than guessed, and both are pinned by a spec:
+
+- **`sizeMode` is NAMED** (`'explicit'`, or `'contentHeight'` when no height was authored), because
+  that is the only thing that decides whether `width`/`height` are read at all (`layout.ts:60`).
+- 🔴 **Sizes are `{ value, unit: 'px' }`, never a bare number.** `width`/`height` are `dimension`
+  ports whose **`defaultUnit` is `'%'`** and whose default is `100`
+  (`node-shared-port-definitions.ts:1183`). **A bare `768` is 768 _percent_** — a frame seven times
+  its parent, which reads on screen as *the board is broken* and in the graph as correct. Verified
+  against the corpus: every stored `width` in 129 projects is `{"value":N,"unit":"px"}`.
+- **`layout: 'none'` on the root** is what makes the frames absolutely positioned at all
+  (`layout.ts:56`), and the offsets are therefore `marginLeft`/`marginTop` from an implicit
+  `left:0/top:0` (`layout.ts:120`) — **there are no `left`/`top` ports.**
+
+✅ **A frame with no authored height takes its CONTENT's height.** §6.4 measured 3 stored frames in
+5,922 components, so this is the overwhelming case; drawing every unmeasured component as a 768px
+box would be the tool stating a size the component never claimed.
+
+### 8.3 ⚠️ `tests/` is jasmine, not jest
+
+`toHaveLength` and `toHaveProperty` do not exist there, and neither does `it.each`. The board export
+spec was written in jest dialect and **`tsc -p packages/noodl-editor/tsconfig.tests.json --noEmit`
+caught all twelve before a CI run did** — which is the argument for running that typecheck as a
+matter of course on any new `tests/` spec. `tests-unit/` is jest and the two dialects sit two
+directories apart.
+
+### 8.4 Still to build — slice 2, and it needs the box
+
+The picker (multi-select over `benchTargets`), the board surface itself, the drag, the editor-drawn
+captions, zoom/pan, click-through to the single bench, the empty state, and the wiring of
+`bench.board` through `ProjectModel.setMetaData`. AC1, AC4, AC5, AC6 and AC7 all need a drive.
+🔴 **AC5 is the one that can regress quietly** — a drag that writes through dirties the project on
+every pixel, and only a control on `project.json`'s mtime can see it.

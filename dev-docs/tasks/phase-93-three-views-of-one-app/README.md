@@ -108,13 +108,13 @@ without shared selection is a second list, not a view.
 | id | task | depends on |
 |---|---|---|
 | [TVW-006](./TVW-006-THE-STRUCTURE-LANE.md) | The lane drawn around the stack wherever it is, the eyebrow, and the `All · Structure · Logic` filter that dims (R-F, R-J) | — |
-| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance | TVW-003 |
+| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. Unblocked, not started | TVW-003 |
 
 ### Track D — the Workbench
 
 | id | task | depends on |
 |---|---|---|
-| [TVW-008](./TVW-008-THE-BOARD.md) | *All components* as a third Workbench target: one export, one harness, N instances, each framed and captioned (R-I) | TVW-002 |
+| [TVW-008](./TVW-008-THE-BOARD.md) | **Reshaped by R-7 (s19): a PICKED set, placed by hand** — a third Workbench target holding the components you chose, side by side at their authored sizes, arrangement remembered. *Not* every component; §6 is why (0 of 99 projects fit at 100%). Slice 1 built | TVW-002 |
 
 ### The words, and the verdict
 
@@ -130,6 +130,9 @@ without shared selection is a second list, not a view.
   rows and adds nothing to the scale. CHR-011's after picture and TVW-010's are different corpora.
 - **P25 PNL-006** restyled the Components panel; its kind glyphs and indent guides are kept. Its
   "warning dot routes to Problems" follow-up is still open and is not this phase's.
+- ⚠️ **TVW-008 stores a board in `project.metadata['bench.board']` — R5's THIRD knowing exception**,
+  argued on the same test `bench.scenarios` and `bench.frame` passed: an arrangement someone made is
+  authored intent, not session state.
 - **P56 BEN** owns the bench. R1–R5 hold. TVW-002 and TVW-008 change the *scope control* and add a
   target; they do not touch the harness, inputs, outputs or scenarios. **BEN-007 §C closes here.**
 - **P66 FIX-019** ruled the word *workbench* to one string. **R-G reverses that**; TVW-001 does the

@@ -130,8 +130,14 @@ describe('TVW-008 — the harness graph', () => {
   });
 
   it('instantiates each picked component by its legacy name', () => {
+    // ⚠️ `typename`, not `type`. `ComponentModel.fromJSON` resolves a node's type
+    // through the global `NodeLibrary`, so a project component this fixture does
+    // not define comes back as `UnknownNodeType` — which is the resolution, not
+    // the authored value. `typename` is the string the board wrote; the string
+    // the runtime finally reads is the `type` in the exported JSON, asserted in
+    // the AC2 block below.
     const root = boardHarness([mount({ target: '/Sections/Hero' })]).graph.roots[0];
-    expect(root.children[0].children[0].type).toBe('/Sections/Hero');
+    expect(root.children[0].children[0].typename).toBe('/Sections/Hero');
   });
 
   it('carries each frame own parameters through to its instance', () => {
@@ -188,9 +194,26 @@ describe('TVW-008 — the harness graph', () => {
 
   describe('positions', () => {
     it('offsets a frame with margins, because there are no left/top ports', () => {
-      const frame = boardHarness([mount({ x: 120, y: 340, height: 200 })]).graph.roots[0].children[0];
-      expect(frame.parameters.marginLeft).toEqual({ value: 120, unit: 'px' });
-      expect(frame.parameters.marginTop).toEqual({ value: 340, unit: 'px' });
+      // Measured from the board's own top-left, which is why there are two
+      // frames here: a lone frame IS the top-left. See the next spec.
+      const root = boardHarness([
+        mount({ target: '/A', x: 0, y: 0, height: 200 }),
+        mount({ target: '/B', x: 120, y: 340, height: 200 })
+      ]).graph.roots[0];
+      expect(root.children[1].parameters.marginLeft).toEqual({ value: 120, unit: 'px' });
+      expect(root.children[1].parameters.marginTop).toEqual({ value: 340, unit: 'px' });
+    });
+
+    it('draws a LONE frame at the document origin, wherever it was dragged to', () => {
+      // 🔴 The first cut of the spec above asserted a 120px margin on a SINGLE
+      // frame and went red on a correct build. Normalisation makes the
+      // leftmost/topmost frame the origin by definition, so a board of one sits
+      // at 0,0 however far it was dragged — its stored x/y still change, and the
+      // editor places the whole document through `boardBounds`. Absolute
+      // position is the surface's business; the graph carries the arrangement.
+      const frame = boardHarness([mount({ x: 4000, y: -900, height: 200 })]).graph.roots[0].children[0];
+      expect(frame.parameters.marginLeft).toEqual({ value: 0, unit: 'px' });
+      expect(frame.parameters.marginTop).toEqual({ value: 0, unit: 'px' });
     });
 
     it('🔴 normalises a negative position instead of emitting a negative margin', () => {
