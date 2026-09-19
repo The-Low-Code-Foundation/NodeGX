@@ -50,3 +50,40 @@ Out: the panel's containment crumb (TVW-004). Any change to what the trail's `+`
   navigation goes through `switchToComponent`.
 - The painter's text measurement is per frame; cache the eyebrow's measured width per node like the
   name.
+
+## 6. Scoping census — §2's eyebrow does not fit, in any form
+
+**Measured 2026-09-19 (s18) before anything was built**, over 128 projects / 5,558 components.
+Script: `scripts/devtools/tvw007-instance-census.js`. ⚠️ Text width is ESTIMATED at 6.0px/char for
+`CanvasFonts.portLabel` (10.5px mono); a string this estimate calls 3× too wide **is** too wide, and
+the near-fits would need the editor's real `measureText`. There are no near-fits.
+
+| what | number |
+|---|---|
+| instance nodes in the corpus | **8,833**, in 2,570 components |
+| distinct placed components (each would get an eyebrow) | 2,385 |
+| available width on a 150px node (less insets and FIX-018's chip) | **114px** |
+| §2's `INSTANCE · <path> · used N×` — **fits** | **0** |
+| — overflows | **2,385 (100%)**, p50 **396px**, p90 516px, max 846px |
+| the same sentence with the path reduced to its last segment — fits | **0** |
+
+🔴 **R-Z needed — the eyebrow's fixed chrome alone is wider than the node.** `INSTANCE · ` plus
+` · used 1×` is 21 characters ≈ 126px before a single character of the component's name. So this is
+not "long paths overflow"; **no component name can fit**, and shortening the path does not help.
+§2's format has to change, not be truncated. The options, in ascending order of how much they give
+up:
+
+1. **Drop the word `INSTANCE`.** FIX-018's chip and diamond already say it — the eyebrow would read
+   `Sections/Hero · 3×`. Still over at p50, but the leaf-name form (`Hero · 3×`) fits.
+2. **Two lines** — the path on one, `used 3×` on the next. Costs 12px of node height on 8,833 nodes.
+3. **The count only** (`· 3×`) on the node, with the path on hover. Cheapest, says least.
+
+🔴 **A placed component usually has MORE THAN ONE parent.** 424 have two and **632 have three or
+more** — 1,056 of 2,385 (44%). §2 treats `in 3 places ▾` as the exceptional case and "the parent
+crumb is the one you came through" as the ordinary one; it is the other way round for nearly half
+of them.
+
+⚠️ **This corrects a number carried since s8.** TVW-004's notes record that *"5 of the 6 corpus
+components with 2+ instances have them all in ONE parent"* — true, and about **six components in
+one project**. Across 128 projects the ratio inverts. Neither measurement is wrong; the first one's
+population was never the corpus ([[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]]).
