@@ -337,7 +337,7 @@ reported as contention a broken table becomes "every delivery waits for a claim 
 | AC1 | `.prepare(` only under `persistence/` and the operational store | ✅ **with one wording correction** — see below |
 | AC4 | `IOperationalStore` declared in the contract, implemented for SQLite, `IdempotencyStore` + `ExecutionStore` on it; `cwf-016-idempotency.test.ts` green **unchanged** | ✅ — that file is untouched in the diff and its cases are green |
 | AC6 | every remaining `nativeHandle` / `getDatabase()` site listed | ✅ — outside `persistence/`, **none**. `AdapterFacade.upsertBatch` and its helper are the only two left, both inside |
-| AC7 | `test:main` green, `noodl-mcp` green | 🏗 — see §7.5 |
+| AC7 | `test:main` green, `noodl-mcp` green | 🏗 — package suite **141/144, 1692 passed**, every spec touching this change green; 3 reds attributed in §7.6 (2 re-run green, 1 drive owes a quiet re-run). `test:main` + `noodl-mcp` still owed |
 
 🔴 **AC1's wording missed an exemption the task file already carried.** Measured with `grep -rna`
 (the `-a` matters — plain `grep` silently skips a `.ts` file it reads as binary, which is how a
@@ -373,3 +373,41 @@ finding about the service, not about the interface, and it is filed here rather 
 rediscovered at full price.
 
 **Filed as BRG-D6** (see phase README §9).
+
+### 7.6 AC7 — the package suite at `ef772b0b1`, and the three reds that are not the change
+
+`nodegx-backend`, 144 files, run at HEAD after the commit:
+
+**`Test Suites: 3 failed, 141 passed, 144 total` · `Tests: 30 failed, 10 skipped, 1692 passed, 1732 total`**
+
+🔴 **Every spec that touches this change is green** — `cwf-016-idempotency`, `idempotency-store`,
+`brg002-operational-store`, `execution-retention`, `def004-execution-steps`,
+`sbr015-execution-steps-drive`. The three reds are attributed below rather than waved at, because
+"none of them are mine" is a reading that fits and not one that excludes.
+
+| failures | spec | what the log actually says | resolution |
+|---|---|---|---|
+| **28** | `ac2-page-editor-drag-drive` (SBR-007) | **one `beforeAll` hook, `Exceeded timeout of 1800000 ms`.** Every test in the file then reports failed because the hook never completed — including all nine CONTROLs, which is the tell: when the *controls* fail the instrument never got its subject on screen | ⬜ **unresolved** — owes a quiet re-run |
+| 1 | `def009-public-write-default` | a token-bucket threshold: `statuses[30]` expected `429`, received `200` | ✅ **passes on re-run** |
+| 1 | `fed-002-indexes` | `TypeError: fetch failed` at `helpers/http.ts:57` — connection-level, not an assertion | ✅ **passes on re-run** |
+
+**The contamination was measured, not inferred.** A peer launched an editor stack during the run:
+at the moment the suite finished, `start-electron-dev` was 8 minutes old and three `webpack`
+processes were 23–24 minutes old — i.e. two of them started *inside* my run's window. The two cheap
+specs were then re-run **with that stack still up** and both passed, 40/40, which is the stronger
+result: they are load-sensitive rather than stack-sensitive.
+
+⚠️ **The drive is NOT claimed green.** `grep -acE "idempot|getDatabase|getOperationalStore|registerSweep|ExecutionHistory|OperationalStore"`
+over that spec returns **0**, and a starved `beforeAll` is not a behaviour, but neither of those is a
+passing run. It is re-run on a quiet box before AC7 closes.
+
+🔴 **And the suite reported itself dead when it was not.** The background wrapper exited `144` with
+the log 11 minutes in and no `Tests:` line — which is exactly the shape of a swept suite
+([[launching-an-editor-kills-a-running-test-ci]]: `EXIT=137`, no summary, the tail all ticks). It was
+alive: 7 workers running, log mtime 8 seconds old. **A missing summary line cannot separate "killed"
+from "still running"** — the three fields that can are worker count, log mtime, and PASS count
+against the file count on disk. Same family as
+[[a-backgrounded-command-exit-code-can-lie]], different mechanism: there `;` hands you the last
+command's code, here the wrapper died out from under live work that had inherited the redirect.
+
+**AC7 remains 🏗:** `test:main` and the `noodl-mcp` suite are still owed, plus the one drive re-run.
