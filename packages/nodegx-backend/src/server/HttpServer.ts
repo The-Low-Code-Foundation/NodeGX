@@ -29,7 +29,8 @@ import * as http from 'http';
 
 import type { BackendServiceOptions } from '../config';
 import type { PersistenceHandle } from '../persistence/createAdapter';
-import type { AdapterFacade, AclOption } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
+import type { AclOption } from '../persistence/AdapterFacade';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
@@ -258,7 +259,7 @@ interface RouteDef extends RouteInfo {
 export interface HttpServerDeps {
   options: BackendServiceOptions;
   persistence: PersistenceHandle;
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   executions: ExecutionHistory;
   /** CWF-016: the idempotency claim table. Disabled when sqlite is unavailable. */
   idempotency: IdempotencyStore;
@@ -346,7 +347,7 @@ export interface ListenInfo {
 export class HttpServer {
   private readonly options: BackendServiceOptions;
   private readonly persistence: PersistenceHandle;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly security: SecurityState;
   private readonly getRunner: () => WorkflowRunner | null;
   private readonly realtime: RealtimeHub;

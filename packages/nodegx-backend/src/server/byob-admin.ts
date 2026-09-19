@@ -5,7 +5,7 @@
  * nodes and the Data Browser speak — moved from the in-editor
  * `LocalBackendServer.js`, with one fix: the old handlers `await`ed the
  * adapter's callback-style methods (which return undefined), so they could
- * never actually answer with data. They now go through AdapterFacade.
+ * never actually answer with data. They now go through IStorageFacade.
  * Responses stay storage-shaped (no Parse `__type` envelopes) — that is the
  * shape these clients have always been written against.
  *
@@ -18,12 +18,12 @@
 
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
-import type { IndexStatusLike, SchemaColumnLike } from '../persistence/SchemaManagerLike';
+import type { StorageColumn, StorageIndexStatus } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
 
@@ -72,7 +72,7 @@ export interface SchemaTable {
    * built that nothing declares. Absent (not empty) on an adapter too old to
    * answer, which is a different fact from "this collection has no indexes".
    */
-  indexes?: IndexStatusLike[];
+  indexes?: StorageIndexStatus[];
 }
 
 /** `GET /admin/schema` and `GET /api/_schema`. */
@@ -85,7 +85,7 @@ export interface TableSchemaResponse {
   name: string;
   columns: unknown[];
   /** FED-002 — see {@link SchemaTable.indexes}. */
-  indexes?: IndexStatusLike[];
+  indexes?: StorageIndexStatus[];
 }
 
 /** `POST /admin/schema` — one of the five mutation actions. */
@@ -117,15 +117,15 @@ export interface SchemaMutationResponse {
   /** Already built in exactly this shape, so nothing was done to them. */
   indexesKept?: string[];
   /** Every declared index on the collection afterwards, and whether it is built. */
-  indexes?: IndexStatusLike[];
+  indexes?: StorageIndexStatus[];
 }
 
 export class ByobAdminRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly executions: ExecutionHistory;
   private readonly getRunner: () => WorkflowRunner | null;
 
-  constructor(facade: AdapterFacade, executions: ExecutionHistory, getRunner: () => WorkflowRunner | null) {
+  constructor(facade: IStorageFacade, executions: ExecutionHistory, getRunner: () => WorkflowRunner | null) {
     this.facade = facade;
     this.executions = executions;
     this.getRunner = getRunner;
@@ -303,7 +303,7 @@ export class ByobAdminRoutes {
    * "this backend cannot tell you", which is what the dashboard has to render
    * differently.
    */
-  private indexesOf(tableName: string): { indexes?: IndexStatusLike[] } {
+  private indexesOf(tableName: string): { indexes?: StorageIndexStatus[] } {
     const sm = this.facade.schemaManager;
     if (!sm || typeof sm.indexStatus !== 'function') return {};
     try {
@@ -345,7 +345,7 @@ export class ByobAdminRoutes {
         // case where a declaration has CHANGED.
         const created = sm.createTable({
           name: table,
-          columns: (body.columns as SchemaColumnLike[] | undefined) || []
+          columns: (body.columns as StorageColumn[] | undefined) || []
         });
         const report = body.indexes === undefined ? null : this.applyIndexes(ctx, table, body.indexes);
         sendJSON(res, 200, {
@@ -368,7 +368,7 @@ export class ByobAdminRoutes {
         return;
       }
       case 'addColumn':
-        sm.addColumn(table, body.column as SchemaColumnLike);
+        sm.addColumn(table, body.column as StorageColumn);
         sendJSON(res, 200, { success: true, action: 'addColumn', table } satisfies SchemaMutationResponse);
         return;
       case 'renameColumn':
@@ -425,7 +425,7 @@ export class ByobAdminRoutes {
     ctx: RequestContext,
     table: string,
     indexes: unknown
-  ): { indexesCreated: string[]; indexesDropped: string[]; indexesKept: string[]; indexes: IndexStatusLike[] } {
+  ): { indexesCreated: string[]; indexesDropped: string[]; indexesKept: string[]; indexes: StorageIndexStatus[] } {
     const sm = this.facade.schemaManager;
     if (!sm || typeof sm.reconcileIndexes !== 'function') {
       throw new HttpError(501, 'This adapter cannot declare indexes.');
@@ -462,10 +462,30 @@ export class ByobAdminRoutes {
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
 
+    // BRG-001: both generators are OPTIONAL on `IStorageSchema` — they are a
+    // migration concern that only the SQLite schema manager implements, and an
+    // adapter without them must answer rather than crash. Same 501 the index
+    // routes above give, for the same reason.
+    //
+    // 🔴 What they EMIT is wrong today and stays wrong until BRG-004: relation
+    // columns vanish (BRG-D3), declared indexes vanish (BRG-D2), and the
+    // Supabase policies grant every authenticated user every row (BRG-D1).
+    // Richard ruled 2026-09-19 (phase 97 R3) that they are repaired in place
+    // rather than removed.
     let content: string;
-    if (format === 'postgres') content = sm.generatePostgresSQL();
-    else if (format === 'supabase') content = sm.generateSupabaseSQL();
-    else content = JSON.stringify(sm.exportSchemas(), null, 2);
+    if (format === 'postgres') {
+      if (typeof sm.generatePostgresSQL !== 'function') {
+        throw new HttpError(501, 'This adapter cannot export PostgreSQL schema.');
+      }
+      content = sm.generatePostgresSQL();
+    } else if (format === 'supabase') {
+      if (typeof sm.generateSupabaseSQL !== 'function') {
+        throw new HttpError(501, 'This adapter cannot export Supabase schema.');
+      }
+      content = sm.generateSupabaseSQL();
+    } else {
+      content = JSON.stringify(sm.exportSchemas(), null, 2);
+    }
 
     sendJSON(res, 200, { format: format || 'json', content });
   }

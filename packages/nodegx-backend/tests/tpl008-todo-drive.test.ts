@@ -35,7 +35,7 @@ import { request } from './helpers/http';
 import { placeStarterAssets } from './helpers/judge';
 import { clickButton, currentSession, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
-import { blur, buttonDisabled, clickButtonBeside, clickButtonByField, clickWords, pathname, pickDate, text, themeSwitches, until, wait } from './helpers/todo-drive';
+import { blur, buttonDisabled, clickButtonBeside, clickButtonByField, clickWords, pathname, pickDate, text, themeSwitches, until } from './helpers/todo-drive';
 
 jest.setTimeout(600_000);
 
@@ -64,6 +64,10 @@ const DEADLINE = (() => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 })();
 
+// P97 s1: this file imported `wait` from `./helpers/todo-drive` AND declared it
+// here, which is TS2440 and the only error in `typecheck:backend-tests`. The two
+// are character-for-character the same function (`helpers/todo-drive.ts:11`), so
+// the import was dropped rather than this line — what jest executes is unchanged.
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 interface Row {

@@ -15,7 +15,7 @@
  * @module nodegx-backend/server/admin-search
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { SearchState } from '../search/SearchState';
 import type { CollectionSearchConfig, SearchConfig } from '../search/model';
 import { SearchIndexer, SearchCapabilityError, RebuildReport } from '../search/SearchIndexer';
@@ -42,10 +42,10 @@ export interface SearchCollectionResponse {
 
 export class AdminSearchRoutes {
   private readonly search: SearchState;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly indexer: SearchIndexer;
 
-  constructor(search: SearchState, facade: AdapterFacade) {
+  constructor(search: SearchState, facade: IStorageFacade) {
     this.search = search;
     this.facade = facade;
     this.indexer = new SearchIndexer(facade.schemaManager);

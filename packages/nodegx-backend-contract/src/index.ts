@@ -21,3 +21,4 @@ export * from './descriptors';
 export * from './wire';
 export * from './nodeCapabilities';
 export * from './probes';
+export * from './storage';

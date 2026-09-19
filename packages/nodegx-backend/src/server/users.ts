@@ -16,7 +16,7 @@
  *
  * Storage: `_User` rows via the same adapter as everything else, passwords as
  * `scrypt$<salt>$<hash>` in `_hashed_password` (never sent over the wire —
- * AdapterFacade strips it). Sessions in `_Session` rows with Parse-style
+ * IStorageFacade strips it). Sessions in `_Session` rows with Parse-style
  * revocable tokens (`r:<random>`). Error code 209 (invalid session) is
  * load-bearing: it is what makes the client drop a stale local session.
  *
@@ -26,7 +26,7 @@
 import * as crypto from 'crypto';
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { SecurityState } from '../security/state';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { EmailRoutes } from './email-routes';
@@ -115,7 +115,7 @@ export function isSessionExpired(session: Record<string, unknown>, now: number =
 }
 
 export class UserRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   // Reserved for session-policy decisions (the signup rule itself is enforced
   // by the dispatcher's route gate).
   private readonly security: SecurityState | null;
@@ -125,7 +125,7 @@ export class UserRoutes {
   private readonly emailConfig: EmailConfigState | null;
   private readonly emailRoutes: EmailRoutes | null;
 
-  constructor(facade: AdapterFacade, security?: SecurityState, emailConfig?: EmailConfigState, emailRoutes?: EmailRoutes) {
+  constructor(facade: IStorageFacade, security?: SecurityState, emailConfig?: EmailConfigState, emailRoutes?: EmailRoutes) {
     this.facade = facade;
     this.security = security || null;
     this.emailConfig = emailConfig || null;

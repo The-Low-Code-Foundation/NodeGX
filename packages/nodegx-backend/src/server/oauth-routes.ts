@@ -49,7 +49,7 @@
 
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AuthConfigState } from '../auth/AuthConfigState';
 import type { AuthProvider } from '../auth/model';
 import type { EmailConfigState } from '../email/EmailConfigState';
@@ -120,7 +120,7 @@ function redirectTo(res: http.ServerResponse, url: string): void {
 }
 
 export interface OAuthRoutesDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   auth: AuthConfigState;
   emailConfig: EmailConfigState;
   mailer: Mailer;

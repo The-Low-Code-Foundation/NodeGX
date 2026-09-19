@@ -24,6 +24,8 @@ import * as path from 'path';
 
 import { BackendServiceOptions, resolveOptions, requiresAuth } from './config';
 import { createAdapter, PersistenceHandle } from './persistence/createAdapter';
+import type { IStorageFacade } from '@noodl/backend-contract';
+
 import { AdapterFacade } from './persistence/AdapterFacade';
 import { ExecutionHistory, ExecutionHistoryStatus } from './execution/ExecutionStore';
 import { IdempotencyStore } from './execution/IdempotencyStore';
@@ -115,7 +117,7 @@ export interface StartedService {
 export class BackendService {
   readonly options: BackendServiceOptions;
   private persistence: PersistenceHandle | null = null;
-  private facade: AdapterFacade | null = null;
+  private facade: IStorageFacade | null = null;
   private http: HttpServer | null = null;
   private runner: WorkflowRunner | null = null;
   private workflows: WorkflowSubsystem | null = null;
@@ -241,7 +243,10 @@ export class BackendService {
       cliToken: this.options.authToken,
       readonlyToken: this.options.readonlyToken,
       deployedFunctions,
-      facade: this.facade
+      facade: this.facade,
+      // BRG-001: the raw handle, named. See SecurityStateDeps.adapter — the one
+      // reach past the storage interface left in the service, and BRG-002's job.
+      adapter: this.persistence.adapter
     });
 
     // DEF-009 AC4. Deliberately OUTSIDE the non-loopback block above: those

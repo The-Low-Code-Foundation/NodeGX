@@ -24,6 +24,8 @@ import * as path from 'path';
 
 import { BackendService } from './service';
 import { createAdapter } from './persistence/createAdapter';
+import type { IStorageFacade } from '@noodl/backend-contract';
+
 import { AdapterFacade } from './persistence/AdapterFacade';
 import { BackendServiceOptions, resolveOptions } from './config';
 import { ExecutionHistory } from './execution/ExecutionStore';
@@ -198,7 +200,7 @@ function snapshotFromPath(p: string): SchemaSnapshot {
   return snapshotFromDataDir(p);
 }
 
-async function withFacade<T>(dataDir: string, fn: (facade: AdapterFacade) => Promise<T> | T): Promise<T> {
+async function withFacade<T>(dataDir: string, fn: (facade: IStorageFacade) => Promise<T> | T): Promise<T> {
   const handle = await createAdapter({ dataDir });
   const facade = new AdapterFacade(handle.adapter);
   try {

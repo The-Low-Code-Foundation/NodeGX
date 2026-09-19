@@ -21,6 +21,7 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
+    "@noodl/backend-contract": "file:../nodegx-backend-contract",
     "@noodl/runtime": "file:../noodl-runtime",
     "nodemailer": "^9.0.3"
   },

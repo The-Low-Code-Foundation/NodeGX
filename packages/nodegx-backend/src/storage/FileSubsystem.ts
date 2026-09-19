@@ -144,7 +144,7 @@ class SweepScheduleDispatcher implements SchedulerDispatcher {
 
 export interface FileSubsystemDeps {
   dataDir: string;
-  facade: import('../persistence/AdapterFacade').AdapterFacade;
+  facade: import('@noodl/backend-contract').IStorageFacade;
   secrets: SecretsStore;
   executions: ExecutionHistory;
   backendId: string;

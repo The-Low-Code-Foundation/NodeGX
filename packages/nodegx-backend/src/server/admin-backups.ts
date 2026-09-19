@@ -22,7 +22,7 @@
  */
 
 import type { RequestContext } from './HttpServer';
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { BackupSubsystem } from '../backup/BackupSubsystem';
 import type { BackupListItem } from '../backup/BackupManager';
 import type { BackupConfig } from '../backup/config';
@@ -39,7 +39,7 @@ import { HttpError, readJSONBody, sendJSON } from './http-util';
 
 export interface AdminBackupDeps {
   backups: BackupSubsystem;
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   dataDir: string;
 }
 

@@ -3,7 +3,8 @@
 **Scoped:** 2026-09-18, from Richard's question in session — *"what would be the easiest, most
 logical path to moving from SQLite to another DB type"* — and a measurement of the persistence seam
 taken the same afternoon at `cline-dev` HEAD `df60eb6f5`.
-**Status: 📋 Specced, not started. 5 rulings open (§4) — R1 and R3 gate BRG-001.** **Prefix: `BRG`.**
+**Status: 🏗 In progress, s1 (2026-09-19). 4 of 5 rulings taken (§4); R2 taken as recommended.
+BRG-001 building.** **Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
 > reasonably complex app using workflows and cloud functions, and they deploy and one day start
@@ -35,8 +36,8 @@ building on it.**
 
 | | reading | where |
 |---|---|---|
-| ✔ | **Exactly 8 modules** in the backend touch `adapter.` at all | `src/{security/state,triggers/dbchange,server/http-util,service,cli,realtime/ChangeBus,persistence/AdapterFacade,persistence/createAdapter}.ts` |
-| ✔ | The whole adapter surface those 8 use is **8 names**: `connect`, `disconnect`, `getDatabase`, `getPersistenceStatus`, `on`, `off`, `schemaManager`, `transaction` | grep `adapter\.[a-zA-Z_]*` over `src/` |
+| ⚠️ | **Exactly 8 modules** in the backend touch `adapter.` at all — **6 at HEAD; `triggers/dbchange.ts` and `server/http-util.ts` touch none** (BRG-001 §5.1) | `src/{security/state,triggers/dbchange,server/http-util,service,cli,realtime/ChangeBus,persistence/AdapterFacade,persistence/createAdapter}.ts` |
+| ⚠️ | The whole adapter surface those 8 use is **8 names**: `connect`, `disconnect`, `getDatabase`, `getPersistenceStatus`, `on`, `off`, `schemaManager`, `transaction` — 🔴 **wrong, corrected by BRG-001 s1: it is 20.** `AdapterFacade.call()` dispatches twelve more BY STRING (`this.adapter[method]`), so the grep below could not see the entire data plane. See BRG-001 §5.1 | grep `adapter\.[a-zA-Z_]*` over `src/` — **the grep is what was measured, not the adapter** |
 | ✔ | Everything else — every HTTP route, the workflow engine, cloud functions, auth, realtime, backup — goes through **`AdapterFacade`'s ~22 methods**, which are already promise-shaped and already split `raw*` (storage-shaped) from `wire*` (Parse-wire-shaped) | `persistence/AdapterFacade.ts:112-425` |
 | ✔ | `SchemaManagerLike` already declares **14 methods** of the schema surface, written down *because* five modules had each independently typed it `any`. Its own docstring calls itself "a stand-in, and it says so on purpose" | `persistence/SchemaManagerLike.ts:1-25, 99-103` |
 | ✔ | The adapter stack is **4,383 lines** across 6 files, with **8 test files** against it | `noodl-runtime/src/api/adapters/local-sql/`; `noodl-runtime/test/adapters/` |
@@ -51,7 +52,7 @@ measurement and is probably pessimistic for the adapter and optimistic for every
 | | reading | where |
 |---|---|---|
 | ✔ | 🔴 **`generatePostgresSQL()` and `generateSupabaseSQL()` already exist and are already reachable**, at an admin route taking `format=postgres \| supabase \| json` | `SchemaManager.ts:582, 641`; `server/byob-admin.ts:466-468` |
-| ✔ | 🔴 **They have zero tests.** Not one test file in the monorepo calls either | grep over all `*.test.ts` / `*.test.js`: **0 hits** |
+| ⚠️ | 🔴 **They have zero tests.** Not one test file in the monorepo calls either — **corrected 2026-09-19, see §4.1: there is exactly one, and it asserts `toContain('CREATE TABLE')`** | `tests/service-http.test.ts:503` |
 | ✔ | 🔴 **The exporter ignores declared indexes.** It hardcodes `createdAt` and `updatedAt` and emits nothing else — so FED-002's `indexes` declaration, **closed two days ago**, does not cross. A collection whose `id` is `unique: true` exports as a Postgres table with no unique constraint, and the dedupe guarantee silently becomes false | `SchemaManager.ts:614-617` vs `phase-96/FED-002-*.md` §3.1 |
 | ✔ | 🔴 **`Relation: null` in the type map** — a relation column is skipped by `if (pgType)` and vanishes from the export with no warning, no comment and no error | `SchemaManager.ts:191, 601-607` |
 | ✔ | 🔴 **The generated Supabase RLS grants everything to everyone.** Four policies per table, all `TO authenticated`, all `USING (true)` / `WITH CHECK (true)` — on a backend whose default is `creatorOwns` with the ACL predicate compiled **into the SQL**. The export converts a row-ACL'd collection into one where any logged-in user reads, updates and deletes any row. Two of the four even carry the comment *"(customize based on ACL)"* | `SchemaManager.ts:658-679` vs `security/model.ts:164, 294`; `local-sql/QueryBuilder.ts:241` |
@@ -68,7 +69,7 @@ running behind a live admin route is the proof that "we'll do the adapter later"
 |---|---|---|
 | Raw SQL outside `persistence/` | 12 | `execution/IdempotencyStore.ts:176, 231-253` (its own `idempotency_keys` table) |
 | Raw SQL outside `persistence/` | 8 | `security/state.ts:392-471` (`_Role` and `_ApiKey` reads/writes) |
-| `getDatabase()` raw-handle escape | 5 | `service.ts:377`; `security/state.ts:386`; `execution/ExecutionStore.ts:128`; `AdapterFacade.ts:410, 426` |
+| `getDatabase()` raw-handle escape | ~~5~~ **3** | `security/state.ts:386`; `AdapterFacade.ts:410, 426`. `service.ts:377` and `ExecutionStore.ts:128` are `ExecutionStore`'s **own** handle over its own file, not the adapter's (BRG-001 §5.1) — **after BRG-001 the adapter count is 1**, `security/state.ts`, through a named dep |
 | **Synchronous** facade methods — structurally impossible over a socket | 7 | `backup/dataio.ts:62, 305, 338, 351, 352, 354`; `server/admin-search.ts:77` |
 | Untyped `schemaManager` | 13 | across `src/`, against `SchemaManagerLike`'s 14 declared names |
 
@@ -129,25 +130,37 @@ shared rate-limit and flow state) is a real phase and it is **not this one** —
 
 ### The rulings as given
 
-*(empty — to be filled when Richard rules, in plain words, in this table)*
+**Ruled by Richard 2026-09-19, s1**, from the re-measurement in §4.1 below — not from the scoping
+session's readings, two of which had drifted.
 
 | | asked | **ruled** |
 |---|---|---|
-| **R1** | DAT-002 re-specced bridge-aware, or deferred behind this phase | ⬜ |
-| **R2** | the bounded wording of the claim | ⬜ |
-| **R3** | the live `format=postgres\|supabase` route: remove, stamp, or fix in place | ⬜ |
-| **R4** | whether the editor's local backend is in conformance scope | ⬜ |
-| **R5** | Postgres only, or a family of targets | ⬜ |
+| **R1** | DAT-002 re-specced bridge-aware, or deferred behind this phase | ✅ **Views wait for the bridge.** Nobody writes a hand-written SQL view until the portability suite exists to catch an unportable one. DAT-002 is **blocked on BRG-003**, and phase 48's own table now says so. The interface carries **no** view concept. |
+| **R2** | the bounded wording of the claim | ✅ **Taken as recommended** (not put to Richard — the honest form is the only one): *"one app process, a real database behind it."* Published by BRG-006, and printed by the migrator itself. |
+| **R3** | the live `format=postgres\|supabase` route: remove, stamp, or fix in place | ✅ **Fixed in place.** The route, the IPC channel and the hook function all stay; **BRG-004 repairs what they emit** — relations, declared indexes, and the row-ACL translation. Consequence, recorded rather than argued: the four `USING (true)` policies remain reachable by an admin-token holder until BRG-004 lands. The generators therefore **stay on the schema interface** in BRG-001 rather than moving out of it. |
+| **R4** | whether the editor's local backend is in conformance scope | ✅ **No.** The editor's local backend is SQLite forever. The interface is declared at the `nodegx-backend` seam, and this phase touches no editor file. |
+| **R5** | Postgres only, or a family of targets | ✅ **Postgres only**, and the docs say so. MySQL, libsql, Turso and D1 stay out of scope (§6) and are not described as coming. |
 
-**BRG-001 is gated on R1 and R3.** R1 decides whether the interface must carry a view concept at
-all; R3 decides whether BRG-001 inherits a live route or a deleted one. R2, R4 and R5 can be ruled
-any time before BRG-003.
+### 4.1 What re-measuring moved, 2026-09-19 (HEAD `c7fe1a1da`)
+
+Everything in §2 re-read before the rulings were asked — a task file is a claim, not a reading, and
+a ruling taken on a drifted number is a ruling spent on work that does not exist. Two changes:
+
+| | §2 said | measured at HEAD |
+|---|---|---|
+| 🔴 | *"They have zero tests. Not one test file in the monorepo calls either"* | **Not quite — there is one.** `tests/service-http.test.ts:503` calls `GET /admin/schema-export?format=postgres` and asserts the body `toContain('CREATE TABLE')`. It is a smoke assertion over the route, it calls neither generator by name, and it would pass unchanged with every relation dropped, every unique index missing and every ACL replaced by `USING (true)` — which is exactly what it does today. **BRG-D4 is re-worded, not withdrawn.** |
+| 🆕 | *"already reachable"* / *"routed to users"* | **Reachable, but nothing can produce it by clicking.** The chain is `byob-admin.ts:465` ← `BackendManager.js:966` ← ipc `backend:export-schema` (`BackendManager.js:176`) ← `useLocalBackends.ts:263`, which returns `exportSchema` from the hook — **and no component consumes it.** Grep for `exportSchema` across every `.ts`/`.tsx` in `noodl-editor/src` returns three hits, all inside that one hook file. So the live surface is the admin HTTP route (admin token) and a dead IPC channel. This is what made R3 answerable cheaply. |
+
+Unchanged and re-confirmed at HEAD: the 8 adapter names; `POSTGRES_TYPE_MAP.Relation = null`
+(`SchemaManager.ts:191`); indexes hardcoded to `createdAt`/`updatedAt` only (`SchemaManager.ts:614-616`);
+four `TO authenticated ... USING (true)` policies per table (`SchemaManager.ts:658-679`); phase 48
+still `📋 Specced, not started`.
 
 ## 5. The tasks
 
 | task | one line | built | gated | driven |
 |---|---|---|---|---|
-| [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — 8 + ~22 + 14 methods that already exist | ⬜ | ⬜ | ⬜ |
+| [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20** + 22 + 16 methods that already exist | ✅ s1 | 🏗 | n/a |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | ⬜ | ⬜ | ⬜ |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | ⬜ | ⬜ | ⬜ |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | ⬜ | ⬜ | ⬜ |
@@ -224,10 +237,10 @@ and names it. Richard has read the published sentence about what the bridge does
 
 | id | reading | owner |
 |---|---|---|
-| **BRG-D1** 🔴 | `generateSupabaseSQL()` emits four `USING (true)` / `WITH CHECK (true)` policies per table on a backend enforcing `creatorOwns` row ACLs — a silent authorization downgrade from a live admin route | BRG-004, gated by R3 |
+| **BRG-D1** 🔴 | `generateSupabaseSQL()` emits four `USING (true)` / `WITH CHECK (true)` policies per table on a backend enforcing `creatorOwns` row ACLs — a silent authorization downgrade from a live admin route. **R3 ruled: fixed in place by BRG-004**, so it stays reachable by an admin-token holder until then. No editor screen can produce it (§4.1) | BRG-004 |
 | **BRG-D2** 🔴 | `generatePostgresSQL()` emits only `createdAt`/`updatedAt` indexes, dropping every FED-002 declared index including `unique: true` — the dedupe guarantee does not cross | BRG-004 |
 | **BRG-D3** 🔴 | `POSTGRES_TYPE_MAP.Relation = null` causes relation columns to be skipped by `if (pgType)` and vanish from the export with no error | BRG-004 |
-| **BRG-D4** | Both generators have zero test coverage and are reachable at `byob-admin.ts:466-468` | BRG-003 |
+| **BRG-D4** | The two generators' only coverage is one smoke assertion — `service-http.test.ts:503` checks the `format=postgres` body contains `CREATE TABLE`, which stays true with every relation dropped, every unique index missing and every row ACL replaced by `USING (true)`. A test that cannot fail on D1, D2 or D3 is the same absence with a green tick on it | BRG-003 |
 | **BRG-D5** · | `GeoPoint → POINT` may not answer `QueryBuilder`'s SQL distance queries without PostGIS. **Not verified** — measure before building on it | BRG-005 |
 
 ## 10. Phase 48 is not optional reading
@@ -240,7 +253,7 @@ so every one of these is a free decision today and an expensive one later.
 | phase 48 task | how it touches phase 97 | who moves first |
 |---|---|---|
 | **DAT-001** Vector search | `sqlite-vec` as a loaded native extension. Phase 48 already flags that this *"costs the zero-ABI-matrix property WF-004 explicitly chose `node:sqlite` to get"* — and it also creates the first capability with **no** Postgres equivalent except `pgvector`. It must declare itself through BRG-003 §3.4 or vector search silently stops working on the far side of the bridge | either, **if** DAT-001 declares |
-| **DAT-002** Query Views | 🔴 **Direct collision — ruling R1.** Author-written SQLite SQL, and phase 48 concedes *"every view is a hand-port, and that is uncosted"*. The one place a graph-level promise ("your app moves") is broken by a feature that sits below the graph | **97 first**, or DAT-002 re-specced bridge-aware |
+| **DAT-002** Query Views | ✅ **Ruled 2026-09-19 (R1): views wait for the bridge.** DAT-002 is **blocked on BRG-003** and phase 48's table now carries that. When it is unblocked it is re-specced bridge-aware | **97 first**, by ruling |
 | **DAT-003** The view as the NL→SQL boundary | Runs the other way: phase 48 says its *availability* boundary *"needs DAT-005 or an out-of-process worker"* — a real role and a real `statement_timeout`, which only Postgres has. **BRG-005 is a prerequisite for half of DAT-003**, and phase 48 says that work "is not costed in this phase" | **97 first** |
 | **DAT-004** Aggregation, revisited | Built on DAT-002, so it inherits R1 wholesale | follows DAT-002 |
 | **DAT-006** Schema changes as reviewable artifacts | The closest ally. A migration is only as safe as the ability to answer "what shape is production" — BRG-004's carry report and DAT-006's change log are two views of one artifact, and building them apart means building the schema-diff twice (`backup/schema-migrate.ts` is already a third) | **either, but not independently** |

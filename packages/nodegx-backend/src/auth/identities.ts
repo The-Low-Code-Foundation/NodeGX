@@ -62,9 +62,9 @@
 
 import * as crypto from 'crypto';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { ProviderIdentity } from './oidc';
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IStorageSchema } from '@noodl/backend-contract';
 
 export const IDENTITY_COLLECTION = '_UserIdentity';
 
@@ -85,7 +85,7 @@ export function isFlagSet(value: unknown): boolean {
 }
 
 /** Created up front like `_Session`/`_EmailToken`: a `where` on a missing table is a SQL error. */
-export function ensureIdentityTable(schemaManager: SchemaManagerLike | undefined): void {
+export function ensureIdentityTable(schemaManager: IStorageSchema | undefined): void {
   if (!schemaManager) return;
   schemaManager.createTable({
     name: IDENTITY_COLLECTION,
@@ -151,7 +151,7 @@ export interface ResolveOptions {
 }
 
 export class IdentityStore {
-  constructor(private readonly facade: AdapterFacade) {}
+  constructor(private readonly facade: IStorageFacade) {}
 
   async findBySubject(provider: string, subject: string): Promise<IdentityRow | null> {
     const { results } = await this.facade.rawQuery(IDENTITY_COLLECTION, {

@@ -34,7 +34,7 @@
 
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { Mailer } from '../email/Mailer';
 import { EmailTokenStore, RESET_TTL_MS, VERIFY_TTL_MS } from '../email/tokens';
@@ -90,7 +90,7 @@ function escapeHtml(s: string): string {
 }
 
 export interface EmailRoutesDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   emailConfig: EmailConfigState;
   mailer: Mailer;
   tokens: EmailTokenStore;
@@ -105,7 +105,7 @@ export interface EmailRoutesDeps {
 }
 
 export class EmailRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly emailConfig: EmailConfigState;
   private readonly mailer: Mailer;
   private readonly tokens: EmailTokenStore;

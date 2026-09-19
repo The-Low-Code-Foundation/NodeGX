@@ -56,7 +56,7 @@ import {
   AUDIT_SYSTEM_ROLE_USER_ADD,
   AUDIT_SYSTEM_ROLE_USER_REMOVE
 } from '../ops/audit-actions';
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import { ROLE_NAME_RULE, RoleStore, isValidRoleName } from './RoleStore';
 
 /**
@@ -119,7 +119,7 @@ export interface SystemRoleResult {
 }
 
 export interface SystemRolesDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   /**
    * ⚠️ Must be `SecurityState.rolesForUser` itself, not a re-implementation.
    * The `Roles` output exists to answer "did the membership take effect?", and
@@ -177,7 +177,7 @@ function boundedInt(value: unknown, fallback: number, minimumMeaningful: number)
  */
 export class SystemRoles {
   private readonly roles: RoleStore;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly rolesForUser: SystemRolesDeps['rolesForUser'];
   private readonly onAudit: SystemRolesDeps['onAudit'];
 

@@ -64,7 +64,7 @@
  * @module nodegx-backend/users/SystemUsers
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import {
   AUDIT_SYSTEM_USER_CREATE,
   AUDIT_SYSTEM_USER_DELETE,
@@ -129,7 +129,7 @@ export const PROTECTED_PROPERTY_KEYS: Record<string, string> = {
 const CREATE_RESERVED_KEYS = ['username', 'email', 'emailVerified'];
 
 export interface SystemUsersDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   /** Called after every write, for the audit trail. Never throws. */
   onAudit?(entry: { action: string; outcome: 'success' | 'failure'; target: Record<string, unknown> }): void;
 }
@@ -207,7 +207,7 @@ function checkProperties(
  * still sees whoever called it — asserted, not assumed.
  */
 export class SystemUsers {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly onAudit: SystemUsersDeps['onAudit'];
 
   constructor(deps: SystemUsersDeps) {

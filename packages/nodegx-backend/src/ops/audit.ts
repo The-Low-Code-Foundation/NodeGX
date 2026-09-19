@@ -30,9 +30,9 @@
  * @module nodegx-backend/ops/audit
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import { logger } from './logger';
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IStorageSchema } from '@noodl/backend-contract';
 import { redact } from './redact';
 
 export const AUDIT_COLLECTION = '_Audit';
@@ -88,7 +88,7 @@ export interface AuditQuery {
 }
 
 /** Ensure `_Audit` exists. Idempotent — called from ensureSystemTables. */
-export function ensureAuditTable(schemaManager: SchemaManagerLike | null | undefined): void {
+export function ensureAuditTable(schemaManager: IStorageSchema | null | undefined): void {
   if (!schemaManager) return;
   schemaManager.createTable({
     name: AUDIT_COLLECTION,
@@ -110,13 +110,13 @@ export function ensureAuditTable(schemaManager: SchemaManagerLike | null | undef
 }
 
 export interface AuditLogDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   /** Live ops config — enabled/retention are editable without a restart. */
   getConfig: () => { enabled: boolean; retentionDays: number };
 }
 
 export class AuditLog {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly getConfig: () => { enabled: boolean; retentionDays: number };
   private lastPrune = 0;
 

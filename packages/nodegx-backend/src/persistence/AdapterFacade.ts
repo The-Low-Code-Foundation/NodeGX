@@ -23,7 +23,29 @@
 
 import * as crypto from 'crypto';
 
-import type { SchemaManagerLike } from './SchemaManagerLike';
+import type {
+  IStorageAdapter,
+  IStorageDataPlane,
+  IStorageFacade,
+  IStorageSchema,
+  StorageAclOption,
+  StorageImportColumn,
+  StorageQueryOptions,
+  StorageQueryResult,
+  StorageSearchOptions
+} from '@noodl/backend-contract';
+
+/**
+ * BRG-001 — the five shapes below moved to `@noodl/backend-contract/storage`,
+ * where a second adapter and the BRG-003 conformance suite can both see them.
+ * They are re-exported under the names twenty modules already import, because
+ * renaming a type in twenty files is churn and not a seam.
+ */
+export type AclOption = StorageAclOption;
+export type QueryOptions = StorageQueryOptions;
+export type SearchOptions = StorageSearchOptions;
+export type WireQueryResult = StorageQueryResult;
+export type ImportColumn = StorageImportColumn;
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
 // BAK-007 import writes serialize values EXACTLY as create()/save() do (JSON
@@ -37,13 +59,6 @@ interface AdapterCallbacks {
   error(err: unknown): void;
 }
 
-/** Column type descriptor exposed for import coercion (BAK-007). */
-export interface ImportColumn {
-  name: string;
-  type?: string;
-  targetClass?: string;
-}
-
 /** Minimal column shape from SchemaManager.getTableSchema(). */
 interface SchemaColumn {
   name: string;
@@ -51,47 +66,19 @@ interface SchemaColumn {
   targetClass?: string;
 }
 
-/**
- * Row-level ACL context (BAK-003) passed through to the adapter, which
- * compiles it into the SQL statement (QueryBuilder.buildAclPredicate).
- * Absent = no row filtering (dev-open, admin, scoped API keys).
- */
-export interface AclOption {
-  access: 'read' | 'write';
-  keys: string[];
-}
-
-export interface QueryOptions {
-  where?: Record<string, unknown>;
-  sort?: string[] | string;
-  limit?: number;
-  skip?: number;
-  select?: string[] | string;
-  include?: string[];
-  count?: boolean;
-  acl?: AclOption;
-}
-
-export interface WireQueryResult {
-  results: Record<string, unknown>[];
-  count?: number;
-}
-
-/** BAK-008: query options plus the required FTS5 search term. */
-export interface SearchOptions extends QueryOptions {
-  search: string;
-}
-
 /** Fields never sent over the wire for `_User` records. */
 const USER_PROTECTED_FIELDS = ['_hashed_password', '_email_verify_token', '_perishable_token'];
 
-export class AdapterFacade {
-  // The adapter is plain untyped CommonJS from @noodl/runtime.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly adapter: any;
+export class AdapterFacade implements IStorageFacade {
+  /**
+   * BRG-001: was `any`. The adapter is still plain CommonJS from
+   * `@noodl/runtime` with no declaration file, so the type is a *claim* about
+   * what it provides rather than a check on it — but it is now a claim written
+   * down in one place, and `createAdapter` makes the same one at the boundary.
+   */
+  readonly adapter: IStorageAdapter;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(adapter: any) {
+  constructor(adapter: IStorageAdapter) {
     this.adapter = adapter;
   }
 
@@ -99,13 +86,29 @@ export class AdapterFacade {
   // Promise wrappers (storage-shaped, "raw")
   // ==========================================================================
 
-  private call<T>(method: string, options: Record<string, unknown>, mapSuccess?: (...args: unknown[]) => T): Promise<T> {
+  /**
+   * The one dynamic dispatch in this file, and the reason phase 97's
+   * `adapter\.<name>` grep reported eight names when there are twenty: these
+   * twelve are reached by string, so no literal `adapter.query` exists to find.
+   * `method` is now `keyof IStorageDataPlane` rather than `string`, so a typo
+   * is a compile error and the twelve are enumerable from the type.
+   *
+   * The cast is the callback-shaped call itself — every one of the twelve takes
+   * a different options object and they share only their two callbacks, so
+   * indexing the union gives `never`. It is confined to this one line.
+   */
+  private call<T>(
+    method: keyof IStorageDataPlane,
+    options: Record<string, unknown>,
+    mapSuccess?: (...args: unknown[]) => T
+  ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       const cb: AdapterCallbacks = {
         success: (...args: unknown[]) => resolve(mapSuccess ? mapSuccess(...args) : (args[0] as T)),
         error: (err: unknown) => reject(err instanceof Error ? err : new Error(String(err)))
       };
-      this.adapter[method]({ ...options, ...cb });
+      const invoke = this.adapter[method] as unknown as (o: Record<string, unknown>) => void;
+      invoke.call(this.adapter, { ...options, ...cb });
     });
   }
 
@@ -197,7 +200,7 @@ export class AdapterFacade {
    * changing fifteen call sites' behaviour under what is meant to be a typing
    * change. Recorded in PLAT-004-NOTES §14 as a finding rather than fixed here.
    */
-  get schemaManager(): SchemaManagerLike {
+  get schemaManager(): IStorageSchema {
     return this.adapter.schemaManager;
   }
 
@@ -404,10 +407,33 @@ export class AdapterFacade {
     }
   }
 
+  /**
+   * BRG-001 §3.3 — the escape hatch, in the open.
+   *
+   * `getDatabase()` is optional on `IStorageAdapter` and returns `unknown`, so
+   * that a non-SQLite adapter can simply not have it and BRG-003 can assert
+   * nothing in the promise depends on it. The two callers below are the only
+   * ones in this file and both are import-path writes; BRG-002 removes them
+   * along with the rest of the synchronous surface.
+   *
+   * It throws rather than returning null because both callers would otherwise
+   * fail one line later with `Cannot read properties of null`, which names the
+   * wrong thing.
+   */
+  private sqliteHandle(): { prepare(sql: string): { get(...a: unknown[]): unknown; run(...a: unknown[]): unknown } } {
+    const db = this.adapter.getDatabase?.();
+    if (!db) {
+      throw new Error(
+        'This adapter has no direct SQLite handle, and the synchronous import path requires one (BRG-002).'
+      );
+    }
+    return db as { prepare(sql: string): { get(...a: unknown[]): unknown; run(...a: unknown[]): unknown } };
+  }
+
   /** True if a row with this objectId exists (synchronous). */
   existsSync(collection: string, objectId: string): boolean {
     try {
-      const db = this.adapter.getDatabase();
+      const db = this.sqliteHandle();
       const row = db
         .prepare(`SELECT 1 FROM ${QueryBuilder.escapeTable(collection)} WHERE "objectId" = ?`)
         .get(objectId);
@@ -423,7 +449,7 @@ export class AdapterFacade {
    * already called for this collection.
    */
   upsertSync(collection: string, objectId: string | undefined, data: Record<string, unknown>): 'created' | 'updated' {
-    const db = this.adapter.getDatabase();
+    const db = this.sqliteHandle();
     const clean: Record<string, unknown> = { ...data };
     delete clean.objectId;
     if (objectId && this.existsSync(collection, objectId)) {

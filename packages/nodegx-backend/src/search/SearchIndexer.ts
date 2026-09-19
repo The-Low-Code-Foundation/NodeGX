@@ -14,7 +14,7 @@
  * @module nodegx-backend/search/SearchIndexer
  */
 
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IStorageSchema } from '@noodl/backend-contract';
 import type { SearchState } from './SearchState';
 import type { CollectionSearchConfig } from './model';
 
@@ -35,15 +35,15 @@ export class SearchCapabilityError extends Error {
 }
 
 // The four methods this class needs are declared on the shared
-// `SchemaManagerLike` (PLAT-004). This file used to carry its own copy of that
+// `IStorageSchema` (PLAT-004). This file used to carry its own copy of that
 // interface — the second such copy in the package — which is how the same
 // adapter got described twice, differently.
 
 export class SearchIndexer {
-  private readonly schemaManager: SchemaManagerLike | null;
+  private readonly schemaManager: IStorageSchema | null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(schemaManager: SchemaManagerLike | null) {
+  constructor(schemaManager: IStorageSchema | null) {
     this.schemaManager = schemaManager || null;
   }
 
@@ -52,7 +52,7 @@ export class SearchIndexer {
     return Boolean(this.schemaManager && this.schemaManager.hasFts5Support());
   }
 
-  private assertReady(): SchemaManagerLike {
+  private assertReady(): IStorageSchema {
     if (!this.schemaManager) {
       throw new Error('No schema manager available (persistence has not connected).');
     }

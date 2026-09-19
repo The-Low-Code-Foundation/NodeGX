@@ -22,7 +22,7 @@
 
 import type { BackendServiceOptions } from '../config';
 import { requiresAuth } from '../config';
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import { DEFAULT_FUNCTION_TIMEOUT_MS } from '../workflow/WorkflowRunner';
 import type { SecurityState } from '../security/state';
@@ -59,7 +59,7 @@ export type { RoleRecord };
 
 export class AdminSecurityRoutes {
   private readonly security: SecurityState;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly options: BackendServiceOptions;
   private readonly getRunner: () => WorkflowRunner | null;
   /** Read through a getter so an ops.json edit shows up without a restart. */
@@ -74,7 +74,7 @@ export class AdminSecurityRoutes {
 
   constructor(
     security: SecurityState,
-    facade: AdapterFacade,
+    facade: IStorageFacade,
     options: BackendServiceOptions,
     getRunner: () => WorkflowRunner | null,
     getFunctionClassPolicy: () => RateLimitPolicy,

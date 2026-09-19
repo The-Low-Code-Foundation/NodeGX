@@ -24,7 +24,7 @@ import * as path from 'path';
 
 import { readArchive } from './archive';
 import type { BackupManager } from './BackupManager';
-import type { IndexDeclLike, SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IStorageSchema, StorageIndexDecl } from '@noodl/backend-contract';
 
 export interface ColumnDef {
   name: string;
@@ -43,7 +43,7 @@ export interface TableDef {
    * is a rule about what may be written: a promotion that carried the columns
    * but not their constraints would move a dedupe guarantee into a hope.
    */
-  indexes?: IndexDeclLike[];
+  indexes?: StorageIndexDecl[];
 }
 
 export interface SchemaSnapshot {
@@ -68,7 +68,7 @@ export interface TableChange {
    * what `reconcileIndexes` takes: the declaration is applied entire, and half
    * of it is not a state the backend can be put into.
    */
-  indexChange?: { from: IndexDeclLike[]; to: IndexDeclLike[] };
+  indexChange?: { from: StorageIndexDecl[]; to: StorageIndexDecl[] };
 }
 
 export interface SchemaDiff {
@@ -89,10 +89,10 @@ export interface SchemaDiff {
 const SYSTEM_COLUMNS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL']);
 
 /** One index declaration, in the order and shape the diff compares. */
-function normalizeForDiff(indexes: IndexDeclLike[] | undefined): IndexDeclLike[] {
+function normalizeForDiff(indexes: StorageIndexDecl[] | undefined): StorageIndexDecl[] {
   return (indexes || [])
     .map((i) => {
-      const out: IndexDeclLike = { fields: [...(i.fields || [])] };
+      const out: StorageIndexDecl = { fields: [...(i.fields || [])] };
       if (i.unique === true) out.unique = true;
       if (i.order === 'desc') out.order = 'desc';
       return out;
@@ -101,7 +101,7 @@ function normalizeForDiff(indexes: IndexDeclLike[] | undefined): IndexDeclLike[]
 }
 
 /** `(id unique), (published desc)` — what the promotion summary prints. */
-function describeIndexes(indexes: IndexDeclLike[]): string {
+function describeIndexes(indexes: StorageIndexDecl[]): string {
   if (indexes.length === 0) return 'none';
   return indexes
     .map((i) => `(${i.fields.join(', ')}${i.unique ? ' unique' : ''}${i.order === 'desc' ? ' desc' : ''})`)
@@ -146,7 +146,7 @@ export function tablesFromDbFile(dbPath: string): TableDef[] {
       return {
         name: r.name,
         columns: (parsed.columns || []) as ColumnDef[],
-        indexes: (parsed.indexes || []) as IndexDeclLike[]
+        indexes: (parsed.indexes || []) as StorageIndexDecl[]
       };
     });
   } catch {
@@ -208,7 +208,7 @@ export function snapshotFromArchive(archivePath: string): SchemaSnapshot {
  * the admin diff/apply routes where the target is this very backend.
  */
 export function snapshotFromLiveDir(
-  schemaManager: Pick<SchemaManagerLike, 'exportSchemas'>,
+  schemaManager: Pick<IStorageSchema, 'exportSchemas'>,
   dataDir: string
 ): SchemaSnapshot {
   const security = readJsonIf(path.join(dataDir, 'security.json'));
@@ -370,7 +370,7 @@ export function renderDiff(diff: SchemaDiff): string {
 
 export interface ApplyTarget {
   /** SchemaManager of the target (createTable/addColumn/deleteTable). */
-  schemaManager: SchemaManagerLike;
+  schemaManager: IStorageSchema;
   /** Target data dir — config files are written here. */
   dataDir: string;
 }
@@ -404,9 +404,9 @@ export interface ApplyResult {
  * come across, with the reason, rather than having the whole apply unwind.
  */
 function applyIndexes(
-  sm: SchemaManagerLike,
+  sm: IStorageSchema,
   table: string,
-  indexes: IndexDeclLike[] | undefined,
+  indexes: StorageIndexDecl[] | undefined,
   result: ApplyResult
 ): void {
   if (!indexes || indexes.length === 0) return;

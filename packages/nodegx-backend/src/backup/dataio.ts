@@ -21,7 +21,7 @@
  * @module nodegx-backend/backup/dataio
  */
 
-import type { AdapterFacade, ImportColumn } from '../persistence/AdapterFacade';
+import type { IStorageFacade, StorageImportColumn as ImportColumn } from '@noodl/backend-contract';
 
 export type DataFormat = 'json' | 'csv';
 
@@ -34,7 +34,7 @@ export interface ExportResult {
 
 const SYSTEM_KEYS = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
 
-async function readAll(facade: AdapterFacade, collection: string): Promise<Record<string, unknown>[]> {
+async function readAll(facade: IStorageFacade, collection: string): Promise<Record<string, unknown>[]> {
   // Page through so a large collection does not rely on one huge query.
   const page = 1000;
   const out: Record<string, unknown>[] = [];
@@ -54,7 +54,7 @@ async function readAll(facade: AdapterFacade, collection: string): Promise<Recor
 // ============================================================================
 
 export async function exportCollection(
-  facade: AdapterFacade,
+  facade: IStorageFacade,
   collection: string,
   format: DataFormat
 ): Promise<ExportResult> {
@@ -278,7 +278,7 @@ function coerce(value: unknown, type: string | undefined, fromCsv: boolean): { v
 }
 
 export function importCollection(
-  facade: AdapterFacade,
+  facade: IStorageFacade,
   collection: string,
   content: string,
   options: ImportOptions

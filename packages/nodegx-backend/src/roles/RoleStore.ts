@@ -27,7 +27,7 @@
  * @module nodegx-backend/roles/RoleStore
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 
 /** A `_Role` row. Stored fields stay open; the two anything reads do not. */
 export interface RoleRecord {
@@ -67,7 +67,7 @@ export function asRole(row: Record<string, unknown>): RoleRecord {
 
 /** The role table and its membership junction. One reader, two callers. */
 export class RoleStore {
-  constructor(private readonly facade: AdapterFacade) {}
+  constructor(private readonly facade: IStorageFacade) {}
 
   /** The role with this name, or null. Never throws for "no such role". */
   async find(name: string): Promise<RoleRecord | null> {

@@ -24,7 +24,7 @@
  * @module nodegx-backend/server/parse-wire
  */
 
-import type { AdapterFacade, QueryOptions } from '../persistence/AdapterFacade';
+import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
 import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
@@ -173,10 +173,10 @@ export function visibleConfigParams(
 }
 
 export class ParseWireRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly getConfigParams: () => Record<string, unknown>;
 
-  constructor(facade: AdapterFacade, getConfigParams: () => Record<string, unknown>) {
+  constructor(facade: IStorageFacade, getConfigParams: () => Record<string, unknown>) {
     this.facade = facade;
     this.getConfigParams = getConfigParams;
   }

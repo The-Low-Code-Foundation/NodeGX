@@ -21,7 +21,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type * as http from 'http';
 
-import type { AdapterFacade, AclOption } from '../persistence/AdapterFacade';
+import type { IStorageAdapter, IStorageFacade } from '@noodl/backend-contract';
+import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
 import {
   ClpOp,
@@ -141,7 +142,25 @@ export interface SecurityDeps {
    * site says which one it means.
    */
   deployedFunctions: DeployedFunction[];
-  facade: AdapterFacade;
+  facade: IStorageFacade;
+  /**
+   * 🔴 BRG-001 — the one dependency in the service that is not the facade.
+   *
+   * This module is the only consumer outside `persistence/` that reaches past
+   * `IStorageFacade` to the database itself: `_Role` and `_ApiKey` are read
+   * with prepared statements on the raw handle, because the adapter's query API
+   * cannot express the junction join and these run on every request.
+   *
+   * It is a **separate, named dependency** rather than a reach through
+   * `facade.adapter`, so that the reach is visible at every construction site
+   * instead of hidden one property deep — and so that the other seventeen
+   * facade consumers stay closed over the interface, which is what makes the
+   * BRG-003 conformance suite meaningful.
+   *
+   * BRG-002 §3.3 deletes this line and moves the eight statements onto
+   * ordinary facade calls.
+   */
+  adapter: IStorageAdapter;
 }
 
 export class SecurityState {
@@ -383,7 +402,14 @@ export class SecurityState {
   // adapter's query API can't express joins, and these run on every request.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private get db(): any {
-    return this.deps.facade.adapter.getDatabase();
+    // BRG-001: `getDatabase()` is optional on `IStorageAdapter` — a Postgres
+    // adapter has no SQLite handle to give — so the absence is answered with a
+    // sentence rather than `undefined is not a function`. See `deps.adapter`.
+    const db = this.deps.adapter.getDatabase?.();
+    if (!db) {
+      throw new Error('The security state needs a direct SQLite handle (BRG-002 removes this).');
+    }
+    return db;
   }
 
   rolesForUser(userId: string): string[] {

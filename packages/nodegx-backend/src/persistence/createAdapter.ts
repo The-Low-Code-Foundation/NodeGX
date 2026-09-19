@@ -19,6 +19,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import type { IStorageAdapter } from '@noodl/backend-contract';
+
 // The adapter stack is plain CommonJS JS without type declarations; require it
 // through the package's public subpath. This is the declared dependency edge —
 // no relative reach into another package's internals.
@@ -30,8 +32,18 @@ const { LocalSQLAdapter, LocalBackendPersistenceError } = localSql;
 export { LocalBackendPersistenceError };
 
 export interface PersistenceHandle {
-  /** The connected LocalSQLAdapter instance (CloudStore-shaped API). */
-  adapter: any;
+  /**
+   * The connected adapter.
+   *
+   * BRG-001: was `any`. This is the boundary where the untyped CommonJS
+   * `LocalSQLAdapter` becomes a declared `IStorageAdapter`, and it is the only
+   * place in the service that the claim is made — everything downstream is
+   * checked against it. No cast: `require()` hands back `any`, so the
+   * annotation alone is what narrows it, which means the *next* adapter
+   * (BRG-005, written in TypeScript) gets a real check here rather than this
+   * one's honour system.
+   */
+  adapter: IStorageAdapter;
   /** Absolute path to the SQLite file backing this data-dir. */
   dbPath: string;
   /** { mode, persistent, ephemeral, engine, error } from the adapter. */
@@ -65,7 +77,7 @@ export async function createAdapter(options: CreateAdapterOptions): Promise<Pers
   fs.mkdirSync(path.join(options.dataDir, 'data'), { recursive: true });
   const dbPath = path.join(options.dataDir, 'data', 'local.db');
 
-  const adapter = new LocalSQLAdapter(dbPath, {
+  const adapter: IStorageAdapter = new LocalSQLAdapter(dbPath, {
     allowEphemeral: !!options.allowEphemeral,
     collections: options.collections || {}
   });

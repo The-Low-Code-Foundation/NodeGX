@@ -7,7 +7,7 @@
  *   - HASHED at rest (sha256; only the hash is ever persisted — the plaintext
  *     token exists only in memory long enough to put it in the email)
  *
- * Storage: a plain `_EmailToken` collection via AdapterFacade, auto-created
+ * Storage: a plain `_EmailToken` collection via IStorageFacade, auto-created
  * on first write exactly like every other BYOB collection (LocalSQLAdapter's
  * `_ensureTable` + column inference) — no schema migration needed.
  *
@@ -16,7 +16,7 @@
 
 import * as crypto from 'crypto';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 
 export type TokenKind = 'reset' | 'verify' | 'magic';
 
@@ -43,9 +43,9 @@ function newPlaintextToken(): string {
 }
 
 export class EmailTokenStore {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
 
-  constructor(facade: AdapterFacade) {
+  constructor(facade: IStorageFacade) {
     this.facade = facade;
   }
 
