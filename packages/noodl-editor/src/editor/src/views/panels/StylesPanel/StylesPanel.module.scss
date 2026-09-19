@@ -1,0 +1,54 @@
+.SectionSubtitle {
+  padding: 2px 12px 8px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.InlineInputRow {
+  padding: 4px 12px 6px;
+}
+
+.InlineInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 3px 6px;
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  background-color: var(--theme-color-bg-1);
+  border: 1px solid var(--theme-color-primary);
+  border-radius: 2px;
+  outline: none;
+}
+
+.AddButton {
+  /**
+   * The create door in each section. Deliberately a full-width row under the list rather than a
+   * `+` in the section header: the header's `actions` slot collapses with the section, and
+   * "how do I make one" must not be a thing you find by expanding something first — that is the
+   * same class of defect as the hover-only delete this panel exists to remove.
+   */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+  text-align: left;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-default);
+  }
+}
+
+.NoProject {
+  padding: 24px 16px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--theme-color-fg-default-shy);
+}

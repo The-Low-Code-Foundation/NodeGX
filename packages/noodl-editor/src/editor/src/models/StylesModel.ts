@@ -3,6 +3,10 @@ import { UndoQueue } from '@noodl-models/undo-queue-model';
 import Model from '../../../shared/model';
 import { EventDispatcher } from '../../../shared/utils/EventDispatcher';
 import { ProjectModel } from './projectmodel';
+import { STYLE_PORT_TYPES, StyleUsage, styleUsageIn } from './StylesModel.usage';
+
+export { STYLE_PORT_TYPES, styleUsageIn } from './StylesModel.usage';
+export type { StyleUsage } from './StylesModel.usage';
 
 export class StylesModel extends Model {
   styles: any;
@@ -153,6 +157,19 @@ export class StylesModel extends Model {
         });
     }
   }
+
+  /**
+   * P94 STY-005 AC3 — what uses each style of `type`, in one walk.
+   *
+   * The panel's rows have to say what uses a style before anyone will believe a Delete that offers
+   * to remove it. See {@link styleUsageIn} for why this is a map rather than a per-name
+   * call, and for the walk itself.
+   */
+  styleUsageCounts(type: string): Record<string, StyleUsage> {
+    const portType = STYLE_PORT_TYPES[type];
+    if (portType === undefined) return {};
+    return styleUsageIn(ProjectModel.instance, portType);
+  }
 }
 
 function renameStyle(nodeOrVariant, portType, name, newName) {
@@ -182,18 +199,8 @@ function renameStyle(nodeOrVariant, portType, name, newName) {
 
 //TODO: this needs to work with variants and states as well
 function renameStylesOnNodes(styleType, name, newName) {
-  let portType;
-
-  switch (styleType) {
-    case 'text':
-      portType = 'textStyle';
-      break;
-    case 'colors':
-      portType = 'color';
-      break;
-    default:
-      return;
-  }
+  const portType = STYLE_PORT_TYPES[styleType];
+  if (portType === undefined) return;
 
   //look in parameters, variants, and all visual states
   const components = ProjectModel.instance.getComponents();

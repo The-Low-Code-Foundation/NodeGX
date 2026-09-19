@@ -1,42 +1,19 @@
+/**
+ * P94 STY-005: this file used to hold its own walk over every component and every Look, asking
+ * "does anything name this one style?". `StylesModel.usage` now answers the same question for every
+ * style at once, because the Styles panel lists thirty rows and needs all thirty counts.
+ *
+ * 🔴 Both readings had to stay identical or the delete-confirm modals here and the usage column in
+ * the panel would have disagreed about the same project, so there is now ONE implementation and
+ * this delegates to it. `styleUsageIn` preserves the two properties the modals depend on: a node is
+ * counted once however many of its ports name the style, and nodes and Looks are counted separately.
+ */
 const { ProjectModel } = require('../../models/projectmodel');
-
-function isStyleUsedByNodeOrVariant(nodeOrVariant, portType, styleName) {
-  const stylePortNames = nodeOrVariant
-    .getPorts('input')
-    .filter((p) => (p.type.name || p.type) === portType)
-    .map((p) => p.name);
-
-  return stylePortNames.some((portName) => {
-    if (nodeOrVariant.parameters[portName] === styleName) return true;
-
-    if (nodeOrVariant.stateParameters) {
-      for (const state of Object.keys(nodeOrVariant.stateParameters)) {
-        if (nodeOrVariant.stateParameters[state][portName] === styleName) return true;
-      }
-    }
-
-    return false;
-  });
-}
+const { styleUsageIn } = require('../../models/StylesModel.usage');
 
 function getStyleUsage(portType, styleName) {
-  //check if any nodes are using the style
-  //look in parameters, variants, and all visual states
-  const components = ProjectModel.instance.getComponents();
-
-  let nodeCount = 0;
-  components.forEach((c) => {
-    c.graph.forEachNode((node) => {
-      if (isStyleUsedByNodeOrVariant(node, portType, styleName)) {
-        nodeCount++;
-      }
-    });
-  });
-
-  const variants = ProjectModel.instance.getAllVariants();
-  const variantCount = variants.filter((variant) => isStyleUsedByNodeOrVariant(variant, portType, styleName)).length;
-
-  return { nodeCount, variantCount };
+  const usage = styleUsageIn(ProjectModel.instance, portType)[styleName];
+  return usage ?? { nodeCount: 0, variantCount: 0 };
 }
 
 module.exports = {

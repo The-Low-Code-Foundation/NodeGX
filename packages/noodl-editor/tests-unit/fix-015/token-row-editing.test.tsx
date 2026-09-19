@@ -20,7 +20,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { TokenCategorySection } from '../../src/editor/src/views/panels/DesignTokenPanel/components/TokenCategorySection/TokenCategorySection';
+import { TokenCategorySection } from '../../src/editor/src/views/panels/StylesPanel/components/TokenCategorySection/TokenCategorySection';
 
 type Token = {
   name: string;

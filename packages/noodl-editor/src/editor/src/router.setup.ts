@@ -36,7 +36,6 @@ import { ComponentXRayPanel } from './views/panels/ComponentXRayPanel';
 // DataLineagePanel retired from reach (DEBT-012) — registration below is dead;
 // import kept commented so the panel code (one release cycle) still compiles.
 // import { DataLineagePanel } from './views/panels/DataLineagePanel';
-import { DesignTokenPanel } from './views/panels/DesignTokenPanel/DesignTokenPanel';
 import { CommunityPanel, CommunityPanel_ID } from './views/panels/CommunityPanel';
 import { installCommunityRailGate } from './utils/community/communityRailGate';
 import { DocsPanel, DocsPanel_ID } from './views/panels/DocsPanel';
@@ -52,6 +51,7 @@ import { PropertyEditor } from './views/panels/propertyeditor';
 import { ProvenancePanel } from './views/panels/ProvenancePanel';
 import { SearchPanel } from './views/panels/search-panel/search-panel';
 import { SETTINGS_PANEL_ID, SettingsPanel } from './views/panels/SettingsPanel';
+import { StylesPanel, StylesPanel_ID } from './views/panels/StylesPanel';
 // import { TopologyMapPanel } from './views/panels/TopologyMapPanel'; // Disabled - shelved feature
 import { UndoQueuePanel } from './views/panels/UndoQueuePanel/UndoQueuePanel';
 import { VersionControlPanel_ID } from './views/panels/VersionControlPanel';
@@ -116,6 +116,30 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
       }
     },
     panel: ComponentsPanel
+  });
+
+  /**
+   * P94 STY-005 — the Styles panel, at R5's slot.
+   *
+   * Richard ruled **directly under Components, above Search**: *"it is a thing about the project,
+   * not a tool"*. Components is `order: 1` and Search is `order: 2`, so the ruling is this number.
+   *
+   * 🔴 **NOT `experimental`, and that is the point of the task.** The surface this replaces —
+   * `design-tokens` — registered only inside `if (config.devMode)`, a flag declared solely in
+   * `shared/config/config-dev.js`, which no build loads. It was `undefined` everywhere, so that
+   * branch never ran and the panel never reached a single person's rail. An experimental flag here
+   * would ship the identical nothing with a nicer changelog entry.
+   */
+  SidebarModel.instance.register({
+    id: StylesPanel_ID,
+    defaultWidth: 340,
+    name: 'Styles',
+    description:
+      "This project's colours, text styles and Looks, with what uses each one — create, rename and " +
+      'delete them without finding a node first.',
+    order: 1.5,
+    icon: IconName.Palette,
+    panel: StylesPanel
   });
 
   SidebarModel.instance.register({
@@ -437,14 +461,10 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
       panel: FileExplorerPanel
     });
 
-    SidebarModel.instance.register({
-      experimental: true,
-      id: 'design-tokens',
-      name: 'Design Tokens',
-      order: 20,
-      icon: IconName.Palette,
-      panel: DesignTokenPanel
-    });
+    // P94 STY-005 (R3): the `design-tokens` slot that stood here is gone — a fresh Styles panel
+    // replaces it, registered unconditionally above. Its token editor was not thrown away: it is
+    // the Tokens section of that panel, and the `TokenCategorySection` under it still answers to
+    // `tests-unit/fix-015`. What went is the shell and the placeholder Colors tab.
 
     SidebarModel.instance.register({
       experimental: true,

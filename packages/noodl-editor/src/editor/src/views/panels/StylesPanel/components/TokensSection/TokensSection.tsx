@@ -1,8 +1,13 @@
 /**
- * STYLE-001: Design Tokens Tab
+ * P94 STY-005: the Tokens section of the Styles panel.
  *
- * Main tab showing all design tokens grouped by category (Colors, Spacing, etc.).
+ * Shows every design token grouped by category (Colors, Spacing, etc.).
  * Each group is collapsible. Token rows show a visual preview and the current value.
+ *
+ * Moved here from `DesignTokenPanel/components/DesignTokensTab` when STY-005 retired that panel
+ * (R3). 🔴 It was NOT scaffolding like the `ColorsTab` beside it: it is a working, undoable token
+ * editor, and `TokenCategorySection` under it is held by `tests-unit/fix-015/token-row-editing`.
+ * The retirement deleted the shell and the placeholder tab; this survived the move.
  */
 
 import { useProjectDesignTokenContext } from '@noodl-contexts/ProjectDesignTokenContext';
@@ -15,8 +20,21 @@ import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
 
 import { TokenCategorySection } from '../TokenCategorySection';
 
-export function DesignTokensTab() {
+export interface TokensSectionProps {
+  /**
+   * Groups the Styles panel already draws elsewhere, beside the styles they collide with. Left
+   * out here so that no token is editable in two places on one screen — see `StylesPanel.tsx`.
+   * Omitted entirely, this renders every group, which is what it did as a tab of its own.
+   */
+  excludeGroups?: TokenCategoryGroup[];
+}
+
+export function TokensSection({ excludeGroups }: TokensSectionProps = {}) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
+  const shownGroups = React.useMemo(
+    () => TOKEN_CATEGORY_GROUPS.filter((g) => !(excludeGroups ?? []).includes(g)),
+    [excludeGroups]
+  );
 
   // Group tokens by their display group
   const grouped = React.useMemo(() => {
@@ -41,7 +59,13 @@ export function DesignTokensTab() {
     <div>
       {customCount > 0 && (
         <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--theme-color-fg-default-shy)' }}>
-          {customCount} token{customCount !== 1 ? 's' : ''} overriding defaults
+          {/*
+            🔴 Counts and resets EVERY token, including the groups this section is not drawing —
+            `resetAllToDefaults` has no group argument and inventing a filtered count here would
+            put a number next to a button that does something larger than the number describes.
+            The sentence says which it is.
+          */}
+          {customCount} token{customCount !== 1 ? 's' : ''} overriding defaults, across all groups
           <button
             onClick={() => styleTokensModel?.resetAllToDefaults({ undo: true })}
             style={{
@@ -59,7 +83,7 @@ export function DesignTokensTab() {
         </div>
       )}
 
-      {TOKEN_CATEGORY_GROUPS.map((group) => {
+      {shownGroups.map((group) => {
         const tokens = grouped[group] ?? [];
         if (tokens.length === 0) return null;
 
@@ -68,7 +92,7 @@ export function DesignTokensTab() {
             key={group}
             title={group}
             variant={SectionVariant.Panel}
-            UNSAFE_style={{ marginTop: group === TOKEN_CATEGORY_GROUPS[0] ? '16px' : '8px' }}
+            UNSAFE_style={{ marginTop: group === shownGroups[0] ? '16px' : '8px' }}
           >
             <TokenCategorySection
               tokens={tokens}

@@ -1,0 +1,111 @@
+.Root {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 12px;
+  min-height: 28px;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
+.Swatch {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--theme-color-bg-4);
+
+  /**
+   * 🔴 The checkerboard is deliberate and is the whole point of drawing one.
+   * Every `var(--token)` row in the old colour picker rendered as a transparent
+   * swatch in both themes — 8 of 11 rows showed nothing at all — and a flat
+   * white square would have hidden exactly that. A colour that resolves to
+   * nothing now reads as *nothing*, visibly, instead of as white.
+   */
+  background-image: linear-gradient(45deg, var(--theme-color-bg-4) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--theme-color-bg-4) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--theme-color-bg-4) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--theme-color-bg-4) 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+}
+
+.SwatchFill {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.Text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.Name {
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Value {
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * R-D: the row says what LAYER it is. Two storage blocks are visible in one
+ * list — `metadata.styles` and `metadata.designTokens` — and without this a
+ * colour style called `primary` and a token called `--primary` read as the same
+ * kind of thing. They are not: `resolveColor` checks styles FIRST, so the style
+ * silently shadows the token.
+ */
+.Badge {
+  flex: 0 0 auto;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background-color: var(--theme-color-bg-4);
+  color: var(--theme-color-fg-default-shy);
+}
+
+/** R-D's other half: what uses it. A zero is drawn, not hidden — see StyleRow.tsx. */
+.Usage {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-variant-numeric: tabular-nums;
+}
+
+.is-unused {
+  color: var(--theme-color-notice);
+}
+
+/**
+ * R6: one visible `⋯` per row, NEVER hover-revealed. The hover-only affordance
+ * in `variantseditor.css` (`.variants-item-icon { visibility: hidden }`) is the
+ * defect Richard reported as "how TF do you delete colours?" — so this slot has
+ * no `visibility` rule of any kind, and a spec counts `.variants-item-icon` on
+ * this surface expecting zero.
+ */
+.MenuSlot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.Empty {
+  padding: 6px 12px 10px;
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+}
