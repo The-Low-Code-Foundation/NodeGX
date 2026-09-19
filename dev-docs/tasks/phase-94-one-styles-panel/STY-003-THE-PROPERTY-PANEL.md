@@ -368,13 +368,32 @@ still focused, caret at 17.
    produces the FLD-009 *refusal*, which logs. So the silent skip does not mean *"the file has not
    changed"* — it means **"the content WE BUILD has not changed"**.
 
-   🔴 **Which moves the next question off the baseline entirely.** Every rename in this section was
-   issued through `window.__wreq(...).ProjectModel.instance`. If that is not the same singleton
-   `saveProject` serialises, then the built styles content genuinely never moved — **and the same
-   duplication would also explain defect 1**, a node holding a `VariantModel` that is not in
-   `ProjectModel.instance.variants`. One hypothesis, both findings, and it is cheap: compare the
-   instance `__wreq` hands back with the one the editor's own code holds, **before** treating these
-   as two bugs. ⚠️ **Not measured** — it is precisely the assumption every reading above rested on.
+   🔴 **The module-duplication worry this section briefly carried is DEAD, and both findings stand
+   as measured.** Retracted the same session it was raised, on three readings: (a) the renderer
+   page loads exactly **one** bundle — measured here, `scripts: ['http://localhost:8080/src/editor/
+   index.bundle.js']` — and no renderer config splits a `runtimeChunk`, so there is one webpack
+   runtime; (b) `webpackChunknoodl_editor.push([[Symbol()], {}, r => window.__wreq = r])` hands
+   back **the app's own `__webpack_require__`**, which resolves through the app's module cache —
+   that is why the trick is used instead of re-importing, and it makes a second instance
+   impossible rather than merely unlikely; (c) `ProjectModel`'s `instance` setter
+   (`projectmodel.ts:118-131`) **unregisters the outgoing project from `NodeLibrary`** before
+   registering the new one, so the "an older project answers `findVariant` first" variant of the
+   same story is closed too.
+
+   ⚠️ **Recorded because the retraction is the lesson:** the hedge was reasoned from webpack's
+   behaviour in general, while a measurement already in this session's own log settled it. A worry
+   that downgrades a measured finding needs a measurement of its own
+   ([[a-reading-that-fits-is-not-one-that-excludes]]).
+
+   🔴 **What that leaves as the live candidate for defect 1, and it is one this phase has already
+   touched:** `applyProjectLevelSlice` does `target.variants = (slice.variants ?? []).map(hydrateVariant)`
+   — it rebuilds the array with **new `VariantModel` objects** while every node keeps the
+   `_variant` it cached, and nothing re-points them. One module, one class, one singleton, and the
+   node still ends up holding a Look the project has not got. That is a **different fix** from
+   anything to do with bundling: re-point wearers when variants are rehydrated. ⚠️ Still not
+   measured — the `projectLevelReloadedFromDisk` listener was only armed late in the session, so
+   "no reload fired" is known for **one save**, not for the window in which the divergence
+   appeared.
 
 ## 3. Acceptance criteria
 
