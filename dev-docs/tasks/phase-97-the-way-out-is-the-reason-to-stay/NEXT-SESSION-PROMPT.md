@@ -13,7 +13,8 @@ agree is Richard's call. The other is **BRG-D9**: `migrate` could not run at all
 2 GiB, because AC7's hash used `readFileSync` — found by AC9's 8 GB run and by nothing smaller, and
 fixed.
 
-**Where it is:** `cline-dev`, commit `7ba47bde9` (s8 was `4226a6c68`).
+**Where it is:** `cline-dev`, commits `7ba47bde9` (the data plane) and `f89a6a81a` (a pool a refusal
+leaked) — s8 was `4226a6c68`.
 
 ## The board, re-derived from the task files
 
