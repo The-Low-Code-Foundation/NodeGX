@@ -1,10 +1,9 @@
 # Phase 93 — next session
 
-**Written 2026-09-18, end of session 17 (revised after Richard's rulings).** s1–5 drove TVW-003; s6–11 built and closed TVW-001;
-s12–13 built and closed TVW-002; s14–16 built TVW-004 and the first slice of TVW-005. **s17 built
-and drove the drop-target strip on the Layers tab header — the one row of TVW-005 §2 with no code
-behind it — closed AC4 with a spy, took AC5's ten photographs, and measured that AC1's preview half
-is blocked by something that is not this phase's.**
+**Written 2026-09-19, end of session 18.** s1–5 drove TVW-003; s6–11 closed TVW-001; s12–13 closed
+TVW-002; s14–17 built and closed TVW-004 (bar Richard's AC6 look) and TVW-005. **s18 sent Richard
+TVW-004's twenty AC6 shots, built TVW-006 slice 1 end to end, and censused TVW-007 before anyone
+builds it.**
 
 ## The board, re-derived from the task files
 
@@ -13,26 +12,67 @@ is blocked by something that is not this phase's.**
 | TVW-001 | The panel tells the truth | ✅ | **CLOSED — all 8 ACs** |
 | TVW-002 | The preview says what it is not showing | ✅ | **CLOSED — all 7 ACs** |
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
-| TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6 captured — Richard's verdict is all that is left** |
-| TVW-005 | Layers can move things | **slice 1 + 2 + 3** | **31 arms held** (11/11 + 20/20, each twice). **ALL SIX ACs GREEN** |
-| TVW-006 | The structure lane | — | — |
-| TVW-007 | An instance says what it is (needs 003) | — | — |
+| TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6's 20 shots SENT to Richard at s18 — his verdict is the only thing left** |
+| TVW-005 | Layers can move things | ✅ | **CLOSED — all 6 ACs** |
+| TVW-006 | The structure lane | **slice 1** | **43 specs, 17/17 mutants, tsc 0. NOT DRIVEN — the box was a peer's all session** |
+| TVW-007 | An instance says what it is | — | **censused, not built. 🔴 §2's eyebrow does not fit — see its §6** |
 | TVW-008 | The board (needs 002) | — | — |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 45** — 39 at s16, plus all six of TVW-005's. **TVW-005 is CLOSED.** The only thing between this phase and TVW-006 is Richard's TVW-004 AC6 look.
+**ACs closed: 45.** TVW-006 adds none yet — everything it has is offline.
 
-## Start here
+## 🔴 Start here: TVW-006 needs the box, and nothing else
 
-1. 🔴 **TVW-004 AC6 is the only thing owed to Richard, and nobody else can do it.** The twenty shots
-   are in `verdicts/TVW-004/2026-09-18`; the questions are in its `manifest.json` under
-   `whatToLookAt` and in TVW-004 §9. The PNGs are gitignored, so they have to be **sent**. It is the
-   only thing between TVW-004 and closed — and with TVW-005 closed at s17, between this phase and
-   its second half.
-2. **TVW-006** (the structure lane) or **TVW-007**, neither of which is blocked.
-3. ⚠️ **Re-run `test:ci` before trusting s17's AC6 line if you change anything.** It was measured
-   twice, at `1d342bc6` and at `61aa0502`, both at the floor by name.
+Slice 1 is committed (`4fe5a5645`, `80107d9ce`) and compiles. **Four of its six ACs are waiting on a
+drive that could not happen**: a peer (`opennoodl-ec`, P94/STY-003) held the only dev stack for the
+whole session. Both scripts are written, syntax-checked and committed:
+
+| script | what it grades |
+|---|---|
+| `drive-tvw006-lane.js` | AC1 (the lane follows a 200px drag, live), AC3 (a dimmed node is still selectable), the filter control being reachable and wired |
+| `drive-tvw006-lane.js --perf` | **AC6** — `painter.paint()` timed over 60 forced repaints |
+| `shots-tvw006-lane.js` | AC5's 18 photographs, three lane shapes × both themes × three filters |
+
+🔴 **AC6 needs a BEFORE reading and the wiring is already applied**, so take it by swapping the two
+files out and back:
+```
+S=<scratchpad>/pristine        # CanvasRenderer.ts + CanvasPainter.ts, pre-wiring
+W=<scratchpad>/wired           # the same two, wired
+```
+Those scratchpad copies die with the session. **Recreate them from git instead**: the pre-wiring
+versions are `4fe5a5645^` and the wired ones are `4fe5a5645`. `git show <sha>:<path> > <path>`, let
+the dev stack rebuild, run `--perf`, then put the wired ones back. **Never `git checkout --`**.
+
+⚠️ **`test:ci` was NOT run at s18** — ec held the box and asked to be told before a second heavy job
+started. It must be run before TVW-006 is called closed.
+## What s18 measured, and what it changed
+
+🔴 **TVW-006 — three of §2's rows were wrong, and the census found it before a pixel was drawn.**
+128 projects, 5,558 components (`scripts/devtools/tvw006-lane-census.js`). 667 components get
+THREE OR MORE lanes, not the two §2 mentions; 1,012 (18%) get none, so the logic-only eyebrow is a
+common sight; **838 logic roots in 386 components are drawn INSIDE where their lane would be**; and
+**221 pairs of lanes overlap each other** in 117 components. Richard ruled all three at TVW-006 §7
+(**R-W/R-X/R-Y**) and all three matched what was already built, so nothing was rewritten to suit a
+ruling.
+
+🔴 **TVW-007 — §2's instance eyebrow does not fit on a node, and truncation does not answer it.**
+A 150px node leaves **114px**. `INSTANCE · <path> · used N×` fits **0 of 2,385** placed components
+(p50 396px). The leaf-name form fits **0 too**, because the fixed chrome alone is ~126px *before*
+the component's name. Three options are filed as **R-Z** at TVW-007 §6; the format has to change.
+The same census corrects a number this phase has carried since s8 — *"5 of 6 components have all
+their instances in one parent"* was six components in ONE project; across the corpus **44% of placed
+components have two or more parents**, so `in 3 places ▾` is nearer the rule than the exception.
+
+✅ **The paint seam moved after scoping, in our favour.** TVW-006 §2 names `nodegrapheditor.ts`
+`paint()`; PLAT-001 has since extracted it to `canvas/CanvasRenderer.paint(ctx, frame)` fed a plain
+`FrameState`. AC4's "record the draw calls" seam therefore already exists, and the paint ORDER is
+graded offline against a recording context instead of against pixels.
+
+⚠️ **A spec that grades something which cannot break is worse than no spec.** "The filter must not
+leak into the drag ghost" is vacuous — `globalAlpha` is absolute, so the ghost's `0.5` overwrites
+it. The real leak is the insert indicator and multiselect box, drawn *after* the node pass with no
+alpha of their own. Check which way round a property can actually fail before asserting it.
 
 ## 🔴 Read this before you debug anything in the running editor
 
@@ -115,7 +155,7 @@ second drag, both of which slice 1 already built. 🔴 The root it lands in is t
 **canvas's** component owns, which is rarely the top of the tree — the app shell is drawn above every
 band, so "the top of Layers" is `/App`, on every page at once.
 
-## Gates at s17
+## Gates at s17 (s18 ran no `test:ci` — the box was ec's)
 
 - `tests-unit/tvw-003` + `tvw-004` + `tvw-005` — **7 suites / 103 specs, green.** tvw-005 is 22 specs
   (15 + 7 new), and the seven were mutation-tested: **4 mutants, each caught**. ⚠️ One proposed
@@ -154,10 +194,16 @@ removed from `project.json` by hand — if a run ever starts from four children,
 
 ## The box
 
-s17 launched the editor, announced it to `opennoodl-ec` and `opennoodl-62`, and **left it down**.
-62 is on P96/FED-002 (backend + runtime) and is **holding `test:main` until pinged**. ec is on
-P94/STY-002-004 and wants the box for an STY-003 drive. Announce before launching `dev`, and tell
-both when you are done.
+🔴 **s18 never got it.** `opennoodl-ec` (P94/STY-003) launched a `dev` stack at 13:58 and still had
+it at the end of the session. Everything TVW-006 has left is a drive, so **check the box first**:
+`lsof -nP -iTCP:8080 -sTCP:LISTEN`, and if it is up, walk the pid to its owner
+(`ps -o ppid=` up the chain to a `claude` pid, then `/tmp/cc-socks/<pid>.sock`) and ask that session
+— do not launch a second stack.
+
+⚠️ **A peer's all-clear is about that peer.** `opennoodl-0b` answered "no dev stack, the box is free"
+while the stack was measurably up on :8080 — they were right about themselves and wrong about the
+box ([[a-peer-all-clear-is-about-that-peer]]). Measure it yourself; the process chain names the
+owner.
 
 ## Committing
 
