@@ -2316,6 +2316,20 @@
       "skip": "BasicType",
       "treatUnchangedAs": "EnumType"
     },
+    "noodl.cloud.modelrequest": {
+      "apiKeySecret": "BasicType",
+      "baseUrl": "BasicType",
+      "effort": "EnumType",
+      "input": "CodeEditorType",
+      "instructions": "CodeEditorType",
+      "maxTokens": "BasicType",
+      "messages": "ListValueType",
+      "model": "BasicType",
+      "outputSchema": "ListValueType",
+      "provider": "EnumType",
+      "send": null,
+      "timeoutMs": "BasicType"
+    },
     "noodl.cloud.removeuserfromrole": {
       "remove": null,
       "role": "BasicType",

@@ -111,8 +111,8 @@ not a kit's.
 ## 5. Built — s3, 2026-09-19
 
 **All nine ACs green.** 24 specs across two suites, plus the six regenerations a new node type owes
-(README §7 rule 5), a seventh step they do not name (decision 4), and one gate that could not be
-run (R5 below).
+(README §7 rule 5), a seventh step they do not name (decision 4), and the `CHR007_WRITE_SNAPSHOT`
+regeneration, which had to wait for another session to un-break the suite that runs it (R5).
 
 | | where | what it grades |
 |---|---|---|
@@ -127,12 +127,12 @@ run (R5 below).
 
 ### 5.1 Measurements
 
-- **`test:main`: 8055/8055 tests pass, 503/504 suites** — measured over a shared checkout that
-  was also carrying another session's in-flight P94 editor edits, which is exactly what the one
-  failing suite turned out to be. `chr-007/widgetDispatch` **fails to RUN**, caused by an
-  uncommitted `Ports.ts` import that does not exist on HEAD (R5). s3 first called that red
-  "pre-existing" on the strength of a control that swapped only the catalog files — the peer's
-  edit stood in both arms, so it proved nothing about the cause. Corrected in R5.
+- **`test:main`: 504/504 suites, 8063/8063 tests** — final, after R5 closed. It read 503/504 and
+  **8055** for most of this session because `chr-007/widgetDispatch` could not START (an
+  uncommitted `Ports.ts` import belonging to another session's P94 work), which meant one of the
+  two gates rule 5 names for a new node type was grading nothing. Its owner fixed it at
+  `13d60a921`; the `CHR007_WRITE_SNAPSHOT=1` regeneration this task owed was then run here, and
+  the eight tests that appear in the new total are the ones that could not run before.
 - **`noodl-mcp`: back to R4's recorded floor — 7 suites / 8 tests**, the same seven names, and
   `nodeDocBudget` still reds on `Group` at exactly **14,315**, the figure R4 recorded. `Model
   Request` is not what moves it.
