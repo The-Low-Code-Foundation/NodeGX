@@ -109,6 +109,17 @@ graph answered on `resErr`, the row still said `success`, and the item count was
 reads the STEPS — which Response node ran, and whether any step errored — which is the same thing
 §3.4 asks Richard to rule legible.
 
+### One flake, found and closed
+
+The drive went red ONCE, on a spec two immediate re-runs did not reproduce — the worst kind of
+result to leave lying. The cause is real and is now fixed rather than re-run away: the trigger's
+cron is a genuine `* * * * *`, and the suite was leaving the scheduler ARMED between assertions,
+so a minute boundary could land a THIRD poll mid-suite and move both the model-call count and
+AC3's "exactly one run was added". `armAndWaitForOnePoll` now disarms the trigger the moment the
+fire it asked for has finished. The cron stays minutely on disk — the execution record still reads
+`schedule * * * * *`, which is the point — it is simply not armed except while the helper is
+waiting. Three consecutive clean runs after: 24/24, 33–40 s.
+
 ### Two traps that will cost the next person time
 
 ⚠️ **`timeout` does not exist on macOS.** `timeout 300 npx jest …` exits instantly with `command

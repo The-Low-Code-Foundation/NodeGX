@@ -387,7 +387,22 @@ describe('FED-006 — one feed reader, end to end', () => {
     const deadline = Date.now() + 90_000;
     for (;;) {
       const finished = (await runs()).filter((r) => r.completedAt);
-      if (finished.length > before) return;
+      if (finished.length > before) {
+        // 🔴 Disarm again before returning, and this is not tidiness.
+        //
+        // The cron is a real `* * * * *`, so leaving the scheduler armed between assertions means
+        // a minute boundary can land a THIRD poll in the middle of the suite — which moves the
+        // model-call count and AC3's "exactly one run was added". Seen once, as a single red that
+        // two re-runs did not reproduce: the worst kind. The trigger keeps its minutely cron on
+        // disk (the execution record says `schedule * * * * *`, which is the point); it is simply
+        // not armed except while this helper is waiting for the fire it asked for.
+        const disarmed = await client.request('POST', `/admin/triggers/${TRIGGER_ID}/enabled`, {
+          body: { enabled: false },
+          headers: asAdmin()
+        });
+        expect(disarmed.status).toBe(200);
+        return;
+      }
       if (Date.now() > deadline) {
         // R1's shape from the outside: say what WAS there rather than timing out mutely.
         throw new Error(
