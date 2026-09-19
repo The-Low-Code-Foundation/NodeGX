@@ -108,7 +108,7 @@ without shared selection is a second list, not a view.
 | id | task | depends on |
 |---|---|---|
 | [TVW-006](./TVW-006-THE-STRUCTURE-LANE.md) | The lane drawn around the stack wherever it is, the eyebrow, and the `All · Structure · Logic` filter that dims (R-F, R-J) | — |
-| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. **Slice 1 built (s20): the rules, the shared count source, the painter. 🔴 R-Z settled the text, not the ROW — four placements photographed and WITH RICHARD; `hover-only` ships meanwhile.** Slice 2 built (s21): the TRAIL — **AC3 ✅ AC4 ✅**, 53 specs / 12 mutants killed. Left: AC1/AC5 (a drive), AC2b (the hover), the `Edit ›` door | TVW-003 |
+| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. **Slice 1 built (s20): the rules, the shared count source, the painter. 🔴 R-Z settled the text, not the ROW — four placements photographed and WITH RICHARD; `hover-only` ships meanwhile.** Slice 2 built (s21): the TRAIL — **AC3 ✅ AC4 ✅**, 53 specs / 12 mutants killed. Slice 3 built (s22): the HOVER and the `Edit ›` door, one surface — 80 specs / 16 mutants killed; 🔴 the door is NOT in the node's top-right 20×20, which is the connection-drag zone on 9,634 nodes. Left: AC1/AC2b/AC5 — all three need the drive (`drive-tvw007-hover.js`, written and UNRUN) | TVW-003 |
 
 ### Track D — the Workbench
 
@@ -182,7 +182,7 @@ This phase closes when:
 
 Not when the suite is green. It was green on the day this was scoped.
 
-## 5. Where the phase stands (updated s21, 2026-09-19)
+## 5. Where the phase stands (updated s22, 2026-09-19)
 
 | id | built | driven |
 |---|---|---|
@@ -192,11 +192,11 @@ Not when the suite is green. It was green on the day this was scoped.
 | TVW-004 | ✅ | AC1–5, AC7 green; **AC6's 20 shots SENT s18 — awaits Richard's look** |
 | TVW-005 | ✅ | CLOSED — 6 ACs |
 | TVW-006 | ✅ | AC1–4, AC6 green; **AC5's 18 shots SENT s18 — awaits Richard's look** |
-| TVW-007 | slices 1–2 | **AC2, AC3, AC4 green.** AC1/AC5 need a drive; the placement's 4 shots are WITH RICHARD |
+| TVW-007 | slices 1–3 | **AC2, AC3, AC4 green.** AC2b BUILT s22 (hover + door) but **graded on the rendered surface, so it needs the drive** — as do AC1 and AC5; the placement's 4 shots are WITH RICHARD |
 | TVW-008 | slice 1 | reshaped by R-7; slice 2 is the surface |
 | TVW-009, TVW-010 | — | — |
 
-**52 ACs closed.** 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
+**52 ACs closed** (s22 closed none: it built AC2b, whose criterion is a photograph). 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
 TVW-004 AC6 (20 shots, s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placements (s20). The
 first two close their tasks on the spot. **Do not re-send them.** The board is re-derived from the task files each session; this table is a
 convenience, and the task files win where they disagree.

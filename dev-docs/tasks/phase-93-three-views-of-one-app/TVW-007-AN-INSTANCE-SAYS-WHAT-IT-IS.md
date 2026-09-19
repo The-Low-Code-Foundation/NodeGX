@@ -258,3 +258,94 @@ AC3/AC4 close on specs. **AC1 is the person sentence end to end** (the eyebrow's
 ordering is right by inspection — `activeComponent = component` → `push(component, via)` →
 `bindModel` → `updateTitle` — so `updateTitle` reads the fresh entry against the fresh component.
 That is an argument, not a photograph ([[verify-the-consequence-not-just-the-mechanism]]).
+
+## 10 — s22: the hover and the door (AC2b built, AC5's shots still owed)
+
+`hover-only` is still what ships (§8's verdict has not arrived), so this session built the surface
+that ruling made load-bearing: **the hover**, together with **`Edit ›`**, because §2 puts both on
+the same gesture at the same corner and §7 asked for them to be resolved together.
+
+**What a person gets.** Hovering an instance node — visual or logic — raises a one-line card just
+above it reading `Sections/Hero · 3×`, with `Edit ›` at its right end. Pressing that opens the
+component, and the trail then reads `[◆ Account] › Hero`, because the door passes `viaInstance`
+like the other two.
+
+**Built:** `canvas/instanceHover.ts` (pure: the close condition as a state machine, the content,
+the anchor, the graph→pane transform), `InstanceHoverController.ts` (the timer, the slot, the
+coordinates — no rules), `CanvasOverlays/InstanceHoverCard/` (the view + its stylesheet), a new
+`instanceHoverRoot` layer in `CanvasShell` at `INSTANCE_HOVER_Z = 8`, and the four wiring points:
+`NodeGraphEditorNode.mouse` (`move`, `move-out`, `down`), `ViewportActions.setPanAndScale` and
+`switchToComponent`.
+
+### 🔴 The door is NOT painted at the node's top-right, and that is a measurement
+
+§2 asks for `Edit ›` "at the node's top-right on hover". Those pixels are already spoken for:
+`NodeGraphEditorNode.ts:263` reads `pos.x > width - 20 && pos.y < 20` as the **connection-drag
+zone**, and a `down` there starts a wire. A control painted in that rectangle — or a DOM element
+floating over it — takes that gesture away from all **9,634 instance nodes** in the corpus, and
+takes it silently: the same pixels, a different result.
+
+So the door rides on the hover surface, anchored *outside* the card, which is where §2 was
+pointing and none of the pixels the canvas has already promised. Two consequences worth having:
+it is a real `<button>` (keyboard-reachable, announced, and a hit target the canvas cannot make —
+there is still **no click dispatch for sub-regions**, and this task no longer needs one), and
+AC2b can be graded the way it asks to be, with `elementFromPoint`.
+
+### 🔴 A hover surface over a canvas must own its close condition
+
+The obvious implementation hides the card on the node's `move-out`. The pointer has to cross
+`InstanceHover.gap` px of canvas to reach the button, and that boundary crossing *is* `move-out` —
+so the door would be drawn and unpressable ([[correct-and-usable-were-never-the-same-criterion]],
+fifth repeat). Hence a grace window (`graceMs: 220`) and a visible-while rule of **on the node OR
+on the card**.
+
+⚠️ **And the spec found the second half of it.** Writing the arm for "pointer leaves both surfaces"
+turned up a state the canvas actually produces and the first implementation could not represent:
+the card is a DOM element **above** the canvas, so a pointer that lands on it stops generating
+canvas mouse events **entirely** — the node's `move-out` never arrives. A machine that only
+cleared `overNode` on `node-leave` would go on believing the pointer was on the node and would
+survive every later `card-leave`: a box left on screen with the pointer elsewhere. So an arrival is
+also a departure, stated in both directions.
+
+### What the numbers say
+
+- `tests-unit/tvw-007` — **80 specs, 6 suites green** (+27 specs, +2 suites on s21).
+- **16 mutants, 16 killed, none survived**: the id-guarded leave, the immediate hide (the
+  unpressable door), the arrival-that-is-not-a-departure, the pointer carried across subjects, the
+  unconditional grace, the no-op dismiss, a count formatted here instead of by `eyebrowText`, the
+  path losing its folder, an unscaled screen rect, the card that never flips, right-alignment
+  without its off-the-left guard, room measured from the node instead of the clamped card edge,
+  identity-only state equality, a view ignoring its vertical anchor, a `<div>` door, and an empty
+  count drawn anyway.
+- 🔴 **Two of those survived first.** `M11` (the off-the-left guard) and `M16` (room read from the
+  node) both passed because the arm written for them **read the same answer in both arms** — a
+  narrow pane alone never reaches either branch ([[a-rule-reading-zero-in-both-arms-grades-nothing]]).
+  Two new cases, chosen so the correct and mutant answers differ, kill them.
+- ✅ **`test:main` — 520 suites, 8,292 specs, all green, exit 0**, beside a peer's live `dev` stack.
+- `typecheck:editor` **0**; `typecheck:editor-tests` **0**. `tsconfig.tests-main.json` still reports
+  the same 3 pre-existing errors in `erg-005/componentContract.pending.ts` and
+  `rel-004/webpackHeapCeiling.test.ts` — files this session never touched, in a config no
+  `typecheck:*` script runs.
+- 🔴 `test:ci` **NOT run** — a peer held a `dev` stack on this checkout for the whole session, and
+  AC6 still owes it.
+
+### What only a drive can settle, and the instrument for it
+
+`scripts/devtools/drive-tvw007-hover.js` is written and **UNRUN** — a peer's editor held 9222 from
+before this session started until after it ended, two dev stacks cannot coexist on this checkout
+(webpack-dev-server hardcodes 8080), and driving a stack you have not attributed is what cost a
+peer three misread runs at s20. It carries the PPID ownership guard, fails closed, and is guarded
+by `require.main === module`; `node --check` passes.
+
+Its arms, which are AC1's and AC2b's remainder: the card appears on hover and its path is
+**reachable by `elementFromPoint`** (not merely rendered); the door is a `BUTTON` and reachable;
+the count equals `buildUsageIndex`'s for the same component, read in the same run; the card
+**survives the pointer's journey** to the door and the press then lands on the component, with the
+trail's diamond crumb read off the DOM; the card does not outlive the canvas; a non-instance node
+gets **no** card (the control, in the same run); the second instance kind carries it too; and the
+path is still reachable at **50% zoom**, where the painted count is gated off — the arm R-Z's
+ruling makes load-bearing. Then both themes, shot.
+
+⚠️ **One thing no spec here covers**: that the door passes `viaInstance`. It is an options object
+in the controller, which needs a renderer to reach, so the trail's diamond after pressing `Edit ›`
+is the only place it is graded — the drive's job, exactly as the crumb's appearance was at s21.
