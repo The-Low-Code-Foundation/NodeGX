@@ -2,8 +2,7 @@
 
 **Written 2026-09-19, end of session 18.** s1–5 drove TVW-003; s6–11 closed TVW-001; s12–13 closed
 TVW-002; s14–17 built and closed TVW-004 (bar Richard's AC6 look) and TVW-005. **s18 sent Richard
-TVW-004's twenty AC6 shots, built TVW-006 slice 1 end to end, and censused TVW-007 before anyone
-builds it.**
+TVW-004's twenty AC6 shots, built AND DROVE TVW-006 slice 1, and censused TVW-007.**
 
 ## The board, re-derived from the task files
 
@@ -12,41 +11,72 @@ builds it.**
 | TVW-001 | The panel tells the truth | ✅ | **CLOSED — all 8 ACs** |
 | TVW-002 | The preview says what it is not showing | ✅ | **CLOSED — all 7 ACs** |
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
-| TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6's 20 shots SENT to Richard at s18 — his verdict is the only thing left** |
+| TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6's 20 shots SENT at s18 — Richard's verdict is all that is left** |
 | TVW-005 | Layers can move things | ✅ | **CLOSED — all 6 ACs** |
-| TVW-006 | The structure lane | **slice 1** | **43 specs, 17/17 mutants, tsc 0. NOT DRIVEN — the box was a peer's all session** |
-| TVW-007 | An instance says what it is | — | **censused, not built. 🔴 §2's eyebrow does not fit — see its §6** |
+| TVW-006 | The structure lane | ✅ slice 1 | **AC1 (canvas half), AC2, AC3, AC4, AC6 green — 9/9 twice. AC5's 18 shots SENT. Left: Richard's AC5 verdict + `test:ci`** |
+| TVW-007 | An instance says what it is | — | **censused. 🔴 §2's eyebrow does not fit — R-Z at its §6** |
 | TVW-008 | The board (needs 002) | — | — |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 45.** TVW-006 adds none yet — everything it has is offline.
+**ACs closed: 50** — 45 at s17 plus TVW-006's AC1–AC4 and AC6.
 
-## 🔴 Start here: TVW-006 needs the box, and nothing else
+## 🔴 Start here
 
-Slice 1 is committed (`4fe5a5645`, `80107d9ce`) and compiles. **Four of its six ACs are waiting on a
-drive that could not happen**: a peer (`opennoodl-ec`, P94/STY-003) held the only dev stack for the
-whole session. Both scripts are written, syntax-checked and committed:
+1. **`test:ci` was NOT run at s18** and TVW-006 cannot be called closed without it. A peer held the
+   box for the first half of the session and wanted it back for a drive at the end, so it never had
+   a quiet window. Run it first.
+2. **Two verdicts are with Richard**: TVW-004 AC6 (20 shots) and TVW-006 AC5 (18 shots, in
+   `verdicts/TVW-006/2026-09-19`). Both sets are gitignored; only the manifests are tracked.
+3. Then **TVW-007** — but read its §6 first: §2's eyebrow cannot fit on a node in any form, and
+   **R-Z is unanswered**, so the eyebrow cannot be built until Richard picks a format.
 
-| script | what it grades |
-|---|---|
-| `drive-tvw006-lane.js` | AC1 (the lane follows a 200px drag, live), AC3 (a dimmed node is still selectable), the filter control being reachable and wired |
-| `drive-tvw006-lane.js --perf` | **AC6** — `painter.paint()` timed over 60 forced repaints |
-| `shots-tvw006-lane.js` | AC5's 18 photographs, three lane shapes × both themes × three filters |
+## 🔴 Drive levers that each cost a run at s18 — read before driving the canvas
 
-🔴 **AC6 needs a BEFORE reading and the wiring is already applied**, so take it by swapping the two
-files out and back:
-```
-S=<scratchpad>/pristine        # CanvasRenderer.ts + CanvasPainter.ts, pre-wiring
-W=<scratchpad>/wired           # the same two, wired
-```
-Those scratchpad copies die with the session. **Recreate them from git instead**: the pre-wiring
-versions are `4fe5a5645^` and the wired ones are `4fe5a5645`. `git show <sha>:<path> > <path>`, let
-the dev stack rebuild, run `--perf`, then put the wired ones back. **Never `git checkout --`**.
+- **A hidden Electron window never fires `requestAnimationFrame`.** `repaint()` therefore does
+  nothing and every arm that mutates-then-waits reads as a dead feature on a working build.
+  `Page.bringToFront` does **not** fix it. `Page.setWebLifecycleState {state:'active'}` +
+  `Emulation.setFocusEmulationEnabled {enabled:true}` does. `drive-tvw006-lane.js` now asserts rAF
+  fires as a precondition and exits 2 otherwise — copy that guard into any new canvas drive.
+- **There is no `window.NodeGraphEditor`.** The canvas is `NodeGraphContextTmp.nodeGraph` through
+  `__wreq`. Both new scripts had the wrong assumption and both had to be fixed mid-drive.
+- **A pixel scan row must be inside the lane AND the viewport.** `Home`'s stack is 1,650px tall and
+  opens 740px above the canvas; an off-canvas scan was reported as *"no ink found"*, which reads as
+  a missing feature and is really *"I did not look"*. Name that case separately.
+- **`centerToFit` computes a pan that belongs to the scale it chose.** Resetting the scale
+  afterwards without recomputing the pan photographs an empty canvas — 18 times, in one run.
+- **A 364-component project hangs a single `evaluate` that materialises every graph.** It sat at 0%
+  CPU for ten minutes while the editor answered everything else instantly. Shortlist from
+  `project.json` on disk, then verify the few candidates against the runtime.
 
-⚠️ **`test:ci` was NOT run at s18** — ec held the box and asked to be told before a second heavy job
-started. It must be run before TVW-006 is called closed.
 ## What s18 measured, and what it changed
+
+🔴 **THE SCREENSHOT FOUND A DEFECT 45 GREEN SPECS COULD NOT — fourth time this phase.** Pressing
+`Logic` dimmed a page stack's **top card only**; every child stayed bright inside the dimmed lane.
+`NodeGraphEditorNodePainter` sets `ctx.globalAlpha = 1` at three points meaning *back to opaque*,
+and `node.paint` recurses into children, so the renderer's per-root alpha died at the first reset.
+The specs could not see it because the recording context **stubs `node.paint`** — nothing in them
+ever clobbered an alpha. ✅ The painter restores to a declared baseline now (`setBaseAlpha` /
+`normalAlpha` / `scaledAlpha`); the wire-label chip had the identical bug. A spy spec gates it, but
+the honest gate is the photograph. `809b63501`.
+
+🔴 **THE CENSUS THIS TASK LEANED ON WAS WRONG, AND THE DRIVE IS WHAT EXPOSED IT.** The offline
+guess at visual-ness — *any type seen as a child anywhere* — said 11 lanes where `isVisualRoot`
+says 5, and 6 where it says 1. Re-keyed on the recorded **`visualRoots`** field (96.9% coverage;
+the 180 without it excluded and counted): **multi-lane is 5.8%, not the 26% first reported**, and
+3+ lanes is **165, not 667**. **R-1 is retracted** — §2's wording was fairer than the first run
+claimed. ⚠️ The two rows the rulings rest on held or grew (918 logic roots inside a lane in 448
+components; 210 overlapping pairs in 81), so **R-W and R-X are unaffected**. The wrong numbers are
+kept beside the right ones in TVW-006 §6 so nobody re-derives them.
+
+⚠️ **AC5's subjects are runtime-verified now, because the first set was mislabelled** — the disk
+shortlist called a component `one-lane` that the runtime gives **zero**, so six photographs
+asserted in their filename the very thing they did not show.
+
+🔴 **A real canvas does not fit on screen, and that is a finding about the lane** (TVW-006 §6, R-6).
+No multi-lane component in either project fits above 40% zoom — the corpus's worst (29 lanes, 242
+nodes) fits at **4%** — and §3 hides the eyebrow below 50%. So on a large component you never see a
+whole lane or its label. AC5's shots are framed at **true size** for that reason.
 
 🔴 **TVW-006 — three of §2's rows were wrong, and the census found it before a pixel was drawn.**
 128 projects, 5,558 components (`scripts/devtools/tvw006-lane-census.js`). 667 components get
