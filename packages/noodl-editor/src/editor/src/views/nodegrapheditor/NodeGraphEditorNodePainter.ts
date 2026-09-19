@@ -6,6 +6,43 @@ import { fillRoundRect, roundRect, strokeRoundRect, truncateText } from './canva
 import { NodeGraphEditorNode } from './NodeGraphEditorNode';
 import { arrowheadPolygon, diamondPolygon, glyphForPlugIcon, glyphScaleFor, WIRE_ENDPOINT } from './wireEndpoints';
 
+/**
+ * TVW-006 — the alpha the painter treats as "fully opaque".
+ *
+ * 🔴 **`ctx.globalAlpha = 1` in this file means *back to normal*, not literally one**, and the
+ * structure lane's filter made that distinction load-bearing. The renderer dims a whole root by
+ * setting `globalAlpha` before calling `node.paint`; the painter then resets to `1` at three
+ * points, so the root's own card dimmed and **everything painted after the first reset — its
+ * children, its ports, its plugs — came back at full brightness**. On a page stack that is the
+ * entire stack.
+ *
+ * ⚠️ It passed 43 specs. The recording-context spec stubs `node.paint`, so nothing in it ever
+ * clobbered the alpha; the defect is only visible in a photograph of the real painter
+ * ([[verify-the-consequence-not-just-the-mechanism]]).
+ *
+ * `baseAlpha` is what "normal" currently is. The renderer sets it around each root and puts it
+ * back; every reset in this file goes through {@link normalAlpha} rather than the literal.
+ */
+let baseAlpha = 1;
+
+/** Set the alpha that counts as fully opaque for subsequent paints. Returns the previous one. */
+export function setBaseAlpha(alpha: number): number {
+  const previous = baseAlpha;
+  baseAlpha = alpha;
+  return previous;
+}
+
+/** "Fully opaque", relative to the current base. */
+export function normalAlpha(): number {
+  return baseAlpha;
+}
+
+/** A deliberate partial alpha (e.g. the 0.7 warning ring), scaled by the current base so it
+ *  stays *relatively* fainter when the whole root is dimmed rather than jumping brighter. */
+export function scaledAlpha(alpha: number): number {
+  return alpha * baseAlpha;
+}
+
 function _getColorForAnnotation(annotation) {
   const theme = CanvasTheme.instance.colors;
   if (annotation === 'Deleted') return theme.annotationDeleted;
@@ -366,7 +403,7 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
 
     if (isHighligthed) {
       ctx.fillStyle = node.borderHighlighted ? theme.selection : theme.portText;
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = normalAlpha();
       ctx.beginPath();
       ctx.arc(x + node.nodeSize.width, y + titlebarHeight / 2, 4, 0, 2 * Math.PI, false);
       ctx.fill();
@@ -390,7 +427,7 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
       ctx.setLineDash([5]);
       ctx.lineWidth = 1;
       ctx.strokeStyle = health.level === 'warning' ? theme.warning : theme.danger;
-      ctx.globalAlpha = 0.7;
+      ctx.globalAlpha = scaledAlpha(0.7);
       strokeRoundRect(
         ctx,
         x - 1,
@@ -400,7 +437,7 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
         NodeGraphEditorNode.cornerRadius + 1
       );
       ctx.setLineDash([]); // Restore line dash
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = normalAlpha();
     }
 
     // Selection: accent ring + soft outer glow (mock: accent border +
@@ -516,7 +553,7 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
     function drawPlugs(plugs, offset) {
       ctx.font = CanvasFonts.portLabel;
       ctx.textBaseline = 'middle';
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = normalAlpha();
 
       for (const i in plugs) {
         const p = plugs[i];

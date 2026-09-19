@@ -35,6 +35,14 @@ const opt = (n, fallback = null) => {
 const { appTarget, connect, evaluate } = require('./cdp.js');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * 🔴 There is no `window.NodeGraphEditor` — the canvas is `NodeGraphContextTmp.nodeGraph`, reached
+ * through the webpack runtime. The same wrong assumption cost the drive a run; it was in this file
+ * too ([[a-new-instruments-first-drive-finds-instrument-faults]]).
+ */
+const BOOT = `(() => { if (typeof window.__wreq !== 'function' && typeof webpackChunknoodl_editor !== 'undefined') { webpackChunknoodl_editor.push([[Symbol()], {}, (r) => { window.__wreq = r; }]); } })();`;
+const ED = `window.__wreq('./src/editor/src/contexts/NodeGraphContext/NodeGraphContext.tsx').NodeGraphContextTmp.nodeGraph`;
+
 const PROJECT_DIR = opt('dir', '/Users/richardosborne/vscode_projects/NodeGX test projects/TVW-004 s15 Drive');
 const OUT = opt(
   'out',
@@ -46,6 +54,17 @@ const FILTERS = ['all', 'structure', 'logic'];
 async function main() {
   const editor = await connect(await appTarget('editor'));
   const ev = (expression) => evaluate(editor, expression);
+
+  await ev(BOOT);
+  // 🔴 A hidden Electron window never fires rAF, so `repaint()` does nothing and every shot is of
+  // a stale canvas. This pair wakes it; `Page.bringToFront` alone does not.
+  for (const [method, params] of [
+    ['Page.setWebLifecycleState', { state: 'active' }],
+    ['Emulation.setFocusEmulationEnabled', { enabled: true }]
+  ]) {
+    try { await editor.send(method, params); } catch (error) { /* older target, fall through */ }
+  }
+  await wait(500);
   const json = async (expression) => {
     const raw = await ev(expression);
     try {
@@ -67,40 +86,120 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
 
   /**
-   * Every component in the project, with the number of roots the RUNTIME calls visual.
+   * Shortlist the three subjects from `project.json` on disk, then VERIFY each one against the
+   * runtime.
    *
-   * ⚠️ `isVisualRoot` lives on the graph model, so each component's graph has to be materialised.
-   * `component.graph` is lazy; reading `.roots` is what builds it.
+   * 🔴 The obvious version — ask the editor to classify all 364 components — materialises 364
+   * lazy graphs inside one `evaluate` and never returns. Measured: the call sat at 0% CPU for ten
+   * minutes while the editor answered every other query instantly.
+   *
+   * ⚠️ So disk PICKS and the runtime DECIDES: the number written into the manifest beside each
+   * photograph is `isVisualRoot`'s, read on the component that is actually on screen. If the two
+   * disagree the shot is still labelled with the runtime's answer, and `shapeSource` says
+   * `disk-shortlist, runtime-verified` so nobody reads the label as a disk fact
+   * ([[a-client-property-read-as-a-fact-about-the-source]]).
    */
-  const shapes = await json(`JSON.stringify((() => {
-    const { ProjectModel } = window.__wreq('./src/editor/src/models/projectmodel.ts');
-    const out = [];
-    for (const c of ProjectModel.instance.getComponents()) {
-      try {
-        const graph = c.graph;
-        const roots = graph.roots || [];
-        if (!roots.length) continue;
-        const visual = roots.filter((r) => graph.isVisualRoot(r)).length;
-        out.push({ name: c.name, roots: roots.length, visual });
-      } catch (e) { /* a component whose graph will not build is not a subject */ }
-    }
-    return out;
-  })())`);
+  const disk = JSON.parse(fs.readFileSync(path.join(PROJECT_DIR, 'project.json'), 'utf8'));
+  const diskNames = new Set(disk.components.map((c) => c.name));
+  const shapes = [];
+  for (const component of disk.components) {
+    const roots = (component.graph && component.graph.roots) || [];
+    if (!roots.length) continue;
+    const recorded = new Set((component.graph && component.graph.visualRoots) || []);
+    const visual = roots.filter((r) => {
+      const t = typeof r.type === 'string' ? r.type : r.type && r.type.name;
+      return recorded.has(r.id) || (t && diskNames.has(t));
+    }).length;
+    shapes.push({ name: component.name, roots: roots.length, visual });
+  }
 
-  const pick = (predicate) => shapes.find(predicate);
-  const subjects = [
-    { kind: 'one-lane', component: pick((s) => s.visual === 1) },
-    { kind: 'many-lanes', component: pick((s) => s.visual >= 2) },
-    { kind: 'no-lane', component: pick((s) => s.visual === 0) }
+  // 🔴 The many-lanes subject is the WORST case in the project, not the first one found. R-X ruled
+  // that overlapping lanes are left overlapping; the photograph that ruling has to answer for is
+  // the busiest canvas there is, not a tidy three-root one.
+  const rankedFor = (predicate) =>
+    shapes.filter(predicate).sort((a, b) => b.visual - a.visual || b.roots - a.roots);
+
+  /** Open a component and ask the RUNTIME how many lanes it has. */
+  const switchTo = async (name) => {
+    await ev(`(() => {
+      const { ProjectModel } = window.__wreq('./src/editor/src/models/projectmodel.ts');
+      const { EventDispatcher } = window.__wreq('./src/shared/utils/EventDispatcher.ts');
+      const c = ProjectModel.instance.getComponentWithName(${JSON.stringify(name)});
+      if (!c) return 'MISSING';
+      EventDispatcher.instance.notifyListeners('ComponentPanel.SwitchToComponent', { component: c, pushHistory: false });
+      return 'ok';
+    })()`);
+    await wait(700);
+    // Fit the whole graph, then report the zoom that took — a candidate is only usable if the
+    // result is legible.
+    await ev(`(() => { const ed = ${ED}; ed.centerToFit && ed.centerToFit(1); ed.repaint(); return 'ok'; })()`);
+    await wait(500);
+    return json(`JSON.stringify((() => {
+      const ed = ${ED};
+      if (!ed || !ed.model) return { lanes: -1, roots: -1, fitScale: 0 };
+      return {
+        component: ed.model.owner ? ed.model.owner.name : 'ABSENT',
+        lanes: (ed.roots || []).filter((r) => ed.model.isVisualRoot(r.model)).length,
+        roots: (ed.roots || []).length,
+        fitScale: +ed.getPanAndScale().scale.toFixed(3)
+      };
+    })())`);
+  };
+
+  /**
+   * 🔴 **A shot nobody can read is not evidence for anything.** The corpus's worst canvas — 29
+   * lanes, 242 nodes — fits only at **4% zoom**, where the lane is a hairline and the eyebrow is
+   * deliberately hidden (§3 hides it below 50%). The first reframed set photographed exactly that:
+   * every lane in frame, not one of them legible. So a candidate must also FIT AT >= 50%, and the
+   * many-lanes subject is the busiest canvas that does. The extreme case is recorded as a number in
+   * the manifest instead of as a picture of nothing.
+   */
+  /**
+   * 🔴 **No real canvas fits legibly, so the shots are at TRUE SIZE.** Measured across two
+   * projects: every multi-lane component fits only below 40% zoom (the corpus's worst — 29 lanes,
+   * 242 nodes — at **4%**), and §3 hides the eyebrow below 50%. A "fit everything" frame therefore
+   * photographs a hairline and no label: all the lanes in shot, not one of them readable. Framing
+   * is `centerToFit` followed by a reset to 100%, which is what a person actually looks at.
+   */
+  const SHOOT_SCALE = 1;
+
+  /**
+   * 🔴 **Disk shortlists; the RUNTIME decides — and it disagrees.** The first run of this script
+   * labelled a subject `one-lane` off the disk heuristic and photographed a canvas the runtime
+   * gives **zero** lanes: six shots whose filename asserted the very thing they did not show.
+   * So each candidate is opened and counted before it is accepted, and a shape with no candidate
+   * that survives verification is REFUSED rather than mislabelled.
+   */
+  const wanted = [
+    { kind: 'one-lane', predicate: (s) => s.visual === 1, matches: (r) => r.lanes === 1 },
+    { kind: 'many-lanes', predicate: (s) => s.visual >= 2, matches: (r) => r.lanes >= 2 },
+    { kind: 'no-lane', predicate: (s) => s.visual === 0, matches: (r) => r.lanes === 0 }
   ];
 
-  const missing = subjects.filter((s) => !s.component);
-  if (missing.length) {
-    console.error(
-      `refusing: this project has no example of ${missing.map((m) => m.kind).join(', ')}. ` +
-        `Shapes present: ${JSON.stringify(shapes.reduce((a, s) => ((a[s.visual] = (a[s.visual] || 0) + 1), a), {}))}`
-    );
-    process.exit(2);
+  const subjects = [];
+  for (const want of wanted) {
+    const candidates = rankedFor(want.predicate).slice(0, 40);
+    let chosen = null;
+    let rejected = 0;
+    for (const candidate of candidates) {
+      const runtime = await switchTo(candidate.name);
+      if (want.matches(runtime)) {
+        chosen = {
+          kind: want.kind,
+          component: { name: candidate.name, roots: runtime.roots, visual: runtime.lanes, fitScale: runtime.fitScale }
+        };
+        break;
+      }
+      rejected++;
+    }
+    if (!chosen) {
+      console.error(
+        `refusing: no component in this project verified as ${want.kind} — ${rejected} disk candidates all disagreed with the runtime.`
+      );
+      process.exit(2);
+    }
+    if (rejected) console.log(`(${want.kind}: ${rejected} disk candidate(s) rejected by the runtime)`);
+    subjects.push(chosen);
   }
 
   console.log(
@@ -119,8 +218,53 @@ async function main() {
     })()`);
     await wait(600);
 
-    // Frame the graph the same way for every subject, so three shots are comparable.
-    await ev(`(() => { const ed = window.NodeGraphEditor.instance; ed.centerToFit && ed.centerToFit(0); ed.repaint(); return 'ok'; })()`);
+    /**
+     * Frame the WHOLE graph, the same way for every subject.
+     *
+     * 🔴 `CenterToFitMode.RootNodes` (0) is not the right mode here and the first set of shots
+     * proved it: on a 29-lane canvas it framed the roots and left most of the lanes outside the
+     * viewport, so the photographs of the thing being ruled on did not contain it.
+     * `AllNodes` (1) is what a person pressing "fit" means.
+     */
+    /**
+     * Frame the SUBJECT'S OWN LANE at true size.
+     *
+     * 🔴 `centerToFit` computes a pan that belongs to the scale it chose. Setting the scale back to
+     * 1 afterwards without recomputing the pan puts the graph off-screen entirely — the first
+     * true-size set photographed an empty canvas, eighteen times. The pan is derived here from the
+     * transform the renderer actually uses, `screen = (graph + pan) * scale`, so the lane's
+     * top-left lands at a fixed inset and the eyebrow is always in frame.
+     */
+    await ev(`(() => {
+      const ed = ${ED};
+      const root = (ed.roots || []).find((r) => ed.model.isVisualRoot(r.model)) || (ed.roots || [])[0];
+      if (!root) return 'NO_ROOT';
+      const scale = ${SHOOT_SCALE};
+      const inset = 90;
+      ed.setPanAndScale({ x: inset / scale - (root.x - 12), y: inset / scale - (root.y - 34), scale });
+      ed.repaint();
+      return 'ok';
+    })()`);
+    await wait(800);
+    const framedAt = await ev(`String(${ED}.getPanAndScale().scale.toFixed(3))`);
+    console.log(`  ${subject.kind}: ${subject.component.name} — ${subject.component.visual} lanes at ${framedAt}x`);
+
+    /**
+     * Put the sidebar back on the components panel and drop any selection before the shutter.
+     *
+     * ⚠️ A verdict shot is read whole. An earlier set caught the PROPERTIES panel and an unrelated
+     * "Save as a token?" toast, because a previous drive had left a node selected and
+     * `SelectionActions.selectNode` switches the sidebar. The canvas was right and the frame was
+     * still noise ([[verify-the-consequence-not-just-the-mechanism]]).
+     */
+    await ev(`(() => {
+      const ed = ${ED};
+      ed.selector && ed.selector.deselectAll && ed.selector.deselectAll();
+      const { SidebarModel } = window.__wreq('./src/editor/src/models/sidebar/index.ts');
+      SidebarModel.instance && SidebarModel.instance.switch('components');
+      ed.repaint();
+      return 'ok';
+    })()`);
     await wait(500);
 
     for (const theme of THEMES) {
@@ -135,14 +279,14 @@ async function main() {
         const pressed = await json(`JSON.stringify((() => {
           const el = document.querySelector('[data-test="lane-filter-${filter}"]');
           if (el) { el.click(); return { via: 'click' }; }
-          window.NodeGraphEditor.instance.setLaneFilter(${JSON.stringify(filter)});
+          ${ED}.setLaneFilter(${JSON.stringify(filter)});
           return { via: 'CONTROL_ABSENT' };
         })())`);
         await wait(450);
 
         // Read back what is actually on screen, in a separate eval, before the shutter.
         const applied = await json(`JSON.stringify((() => {
-          const ed = window.NodeGraphEditor.instance;
+          const ed = ${ED};
           return {
             theme: document.documentElement.getAttribute('data-theme') || 'ABSENT',
             laneFilter: ed.laneFilter || 'ABSENT',
@@ -161,6 +305,7 @@ async function main() {
           subject: subject.kind,
           component: applied.component,
           visualRoots: applied.visualRoots,
+          fitScale: subject.component.fitScale,
           roots: applied.roots,
           theme: applied.theme,
           laneFilter: applied.laneFilter,
@@ -181,6 +326,7 @@ async function main() {
     criterion: 'AC5 — three lane shapes, both themes, three filter states. Richard rules WORTHY.',
     date: new Date().toISOString().slice(0, 10),
     project: PROJECT_DIR,
+    shapeSource: 'disk-shortlist, runtime-verified — the number beside each shot is isVisualRoot on the component actually on screen',
     subjectsChosenBy:
       'SHAPE, from the corpus census: one lane (56% of components), two or more (26%), none (18%). ' +
       'Each shape is read off the editor’s own isVisualRoot, not off project.json.',

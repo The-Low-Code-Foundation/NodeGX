@@ -61,45 +61,58 @@ The picker. The property panel.
 ## 6. What the corpus census found — three things §2 assumed
 
 **Measured 2026-09-19 (s18), before a pixel was drawn**, by the s12/s14 technique: the pure module
-run offline over every project on this machine. **128 projects, 5,558 components, 5,527 of them
-non-empty.** Script: `scripts/devtools/tvw006-lane-census.js` — committed, so AC6 and TVW-010 can re-measure
-rather than trust this table (`node scripts/devtools/tvw006-lane-census.js`).
+run offline over every project on this machine. Script: `scripts/devtools/tvw006-lane-census.js`.
 
-⚠️ The box is a **lower bound** — the editor's real `measure()` needs port counts and fonts, so the
-census uses `width >= 150 + depth*20`, `height >= 36 + (subtree-1)*46`. **An overlap it counts is
-real; one it misses may still happen.** Every number below is therefore a floor.
+🔴 **CORRECTED the same session, after the drive.** The first run guessed at visual-ness — *any type
+seen as a child anywhere in the corpus, or any project component name* — and **overcounted badly**:
+driven against the editor it said 11 lanes where `isVisualRoot` says 5, and 6 where it says 1. The
+census now keys on the recorded **`visualRoots`** field, which the editor writes and which
+`NodeGraphModel.isVisualRoot` itself falls back to. **96.9% of non-empty components carry it**
+(5,711 of 5,891); the 180 that do not are excluded and counted rather than guessed at. Every number
+below is the corrected one, and the row that moved most is the one this task leaned on hardest.
 
-| what | number |
-|---|---|
-| components with **one** lane | 3,103 (56%) |
-| components with **two** lanes | 745 |
-| components with **three or more** lanes | **667** |
-| components with **no** lane — the logic-only eyebrow | **1,012 (18%)** |
-| empty components (no lane, and **not** logic-only) | 31 |
-| 🔴 logic roots drawn **inside** a lane | **838, in 386 components (7%)** |
-| 🔴 pairs of lanes that **overlap each other** | **221, in 117 components** |
-| logic roots fully left of the stack / fully right | 13,133 / 10,858 |
-| logic roots to the right with **under 12px** clearance | 93 (329 under 34px) |
+| what | corrected | first (wrong) run |
+|---|---|---|
+| components with **one** lane | 3,816 (66.8%) | 3,103 (56%) |
+| components with **two** lanes | **164** | 745 |
+| components with **three or more** lanes | **165** | 667 |
+| **multi-lane, as a share** | **329 — 5.8%** | *26%* |
+| components with **no** lane — the logic-only eyebrow | **1,566 (27.4%)** | 1,012 (18%) |
+| 🔴 logic roots drawn **inside** a lane | **918, in 448 components** | 838 / 386 |
+| 🔴 pairs of lanes that **overlap each other** | **210, in 81 components** | 221 / 117 |
+| excluded — no `visualRoots` field | 180 | — |
 
-**R-1 — §2's "a component with two roots has two lanes" undercounts.** More than a quarter of the
-corpus (1,412 components) gets more than one lane, and 667 get three or more. Multi-lane is not the
-edge case the sentence implies, and the specs are written against three roots, not two.
+⚠️ The box is still a **lower bound** for the two geometric rows: the editor's real `measure()`
+needs port counts and fonts, so the census uses `width >= 150 + depth*20`,
+`height >= 36 + (subtree-1)*46`. An overlap it counts is real; one it misses may still happen.
 
-**R-2 — the logic-only eyebrow is a common sight, not a rarity.** 18% of components never draw a
-lane at all. It is worth the same care as the lane.
+**R-1 — 🔴 RETRACTED.** The first run said *"more than a quarter of the corpus gets more than one
+lane, so multi-lane is not the edge case §2 implies"*. It is **5.8%**. §2's *"a component with two
+roots has two lanes"* is a fair description of the corpus after all, and **165 components with three
+or more** is the part worth building for — real, but not the common case. The fixtures still carry
+a three-root component, which costs nothing and is the honest worst shape.
 
-**R-3 🔴 — R-J's freedom means a lane is sometimes drawn OVER a logic node.** 838 logic roots, in
-386 components, sit inside where their component's lane would be — commonest by far is `PageInputs`,
-which people park at the top-left of a page stack. The lane keys on the model (`isVisualRoot`) and
-the region is geometric, so the two disagree in 7% of components: under `Logic` a bright logic node
-sits inside a dimmed region, and under `Structure` the reverse. **Ruling needed — §7.**
+**R-2 — the logic-only eyebrow is MORE common than first measured, not less.** **27.4%** of
+components never draw a lane. It deserves the same care as the lane itself.
 
-**R-4 🔴 — two lanes in one component sometimes overlap.** 221 pairs in 117 components: two dashed
-regions intersecting, each with its own `STRUCTURE` eyebrow. **Ruling needed — §7.**
+**R-3 🔴 — R-J's freedom means a lane is sometimes drawn OVER a logic node.** **918** logic roots,
+in **448** components, sit inside where their component's lane would be — commonest by far is
+`PageInputs`, parked at the top-left of a page stack. **Ruled: R-W.**
+
+**R-4 🔴 — two lanes in one component sometimes overlap.** **210** pairs in **81** components.
+**Ruled: R-X.**
 
 **R-5 — the MCP guidance's "logic nodes in a right column" is not what the corpus does.** Logic sits
-fully *left* of the stack more often than fully right (13,133 vs 10,858). The note to P85's next
-loop should say the editor draws the lane wherever the stack is, and should not imply a side.
+fully *left* of the stack more often than fully right. The note to P85's next loop should say the
+editor draws the lane wherever the stack is, and should not imply a side.
+
+**R-6 🔴 — a real canvas does not fit on screen, and the lane is what pays for it.** Measured during
+the drive, not predicted: across two projects, **no multi-lane component fits at a zoom above 40%**
+(the corpus's worst — 29 lanes, 242 nodes — fits at **4%**), and §3 deliberately hides the eyebrow
+below 50%. So on a large component **you never see a whole lane, and you never see its label**. The
+lane still works as a local cue at the edge of the stack you are looking at, but any claim that it
+gives you the shape of the component *at a glance* is false for anything but a small one. AC5's
+photographs are therefore framed at **true size**, not fitted.
 
 ## 7. The three rulings — Richard, 2026-09-19
 
@@ -160,3 +173,40 @@ filter is on. That is what the spec asserts now, and mutant N3 (delete the reset
 ✅ **The words on the control are *dim*, never *hide* or *only*.** R-F is a promise about what the
 canvas still lets you do; a segment labelled "Only structure" would make someone who clicked a
 dimmed node think the filter was broken.
+
+**s18 part 2 — DRIVEN. AC1 (canvas half), AC2, AC3, AC4, AC6 green; AC5's 18 shots taken.**
+`drive-tvw006-lane.js` **9/9, twice back to back**; `shots-tvw006-lane.js` 18 shots in
+`verdicts/TVW-006/2026-09-19`.
+
+🔴 **THE SCREENSHOT FOUND A DEFECT 45 GREEN SPECS COULD NOT — fourth time this phase.** Pressing
+`Logic` dimmed a page stack's **top card only**; `Main Navbar`, `Page Main` and every port under
+them stayed at full brightness inside a dimmed lane. `NodeGraphEditorNodePainter` sets
+`ctx.globalAlpha = 1` at three points meaning *back to opaque*, and `node.paint` **recurses into
+children** — so the renderer's per-root alpha was destroyed by the first reset. The specs could not
+see it because the recording context **stubs `node.paint`**, so nothing in them ever clobbered an
+alpha ([[verify-the-consequence-not-just-the-mechanism]]).
+✅ Fixed by giving the painter a declared baseline: `setBaseAlpha()` / `normalAlpha()` /
+`scaledAlpha()`, with every reset going through them instead of the literal. The wire-label chip in
+`NodeGraphEditorConnection` had the identical bug and is fixed the same way. A **spy spec** on
+`setBaseAlpha` now gates it, but the honest gate is the photograph.
+
+🔴 **Drive levers, all four of which cost a run each:**
+- **There is no `window.NodeGraphEditor`** — the canvas is `NodeGraphContextTmp.nodeGraph` through
+  `__wreq`. Both scripts had the wrong assumption.
+- 🔴 **A hidden Electron window never fires `requestAnimationFrame`**, so `repaint()` does nothing
+  and every arm reads as a dead feature. `Page.bringToFront` does **not** fix it;
+  `Page.setWebLifecycleState {state:'active'}` + `Emulation.setFocusEmulationEnabled` does. The
+  drive now asserts rAF fires as a **precondition** and exits 2 if it does not.
+- **A scan row must be inside the lane AND the viewport.** `Home`'s stack is 1,650px tall and opens
+  with its top 740px above the canvas; the first run reported off-canvas as *"no ink found"*, which
+  reads as a missing lane and is really *"I did not look"*.
+- **`centerToFit` computes a pan that belongs to the scale it chose.** Resetting the scale
+  afterwards without recomputing the pan photographs an empty canvas — eighteen times.
+
+⚠️ **AC5's subjects are verified against the runtime, and the first set was mislabelled.** The disk
+shortlist called a component `one-lane` that `isVisualRoot` gives **zero** lanes: six photographs
+whose filename asserted the thing they did not show. Each candidate is now opened and counted
+before it is accepted.
+
+**Gates s18 part 2:** `tests-unit/tvw-006` **45 specs / 2 suites green**, 17 mutants still caught;
+`tsc -p packages/noodl-editor --noEmit` **0**. ⚠️ **`test:ci` still NOT RUN.**

@@ -2,6 +2,7 @@ import _ from 'underscore';
 
 import type { NodeGraphEditorConnection } from '../NodeGraphEditorConnection';
 import { NodeGraphEditorNode } from '../NodeGraphEditorNode';
+import { setBaseAlpha } from '../NodeGraphEditorNodePainter';
 import { CanvasFonts, CanvasTheme } from './CanvasTheme';
 import {
   dashPattern,
@@ -161,13 +162,25 @@ export class CanvasRenderer {
     _.each(frame.roots, function (node) {
       if (!frame.draggingNodes || frame.draggingNodes.indexOf(node) === -1) {
         // 🔴 R-W: the alpha is decided per ROOT, off the MODEL's verdict. A logic node that
-        // happens to sit inside a lane's rectangle — 838 of them in the corpus — stays bright,
+        // happens to sit inside a lane's rectangle — 918 of them, in 448 components — stays bright,
         // because `Logic` means "show me the logic" and where someone parked it is not what it is.
-        if (inLane) ctx.globalAlpha = rootAlpha(inLane.has(node.id), frame.laneFilter);
+        //
+        // 🔴 `setBaseAlpha` is what makes it reach the whole subtree. `node.paint` recurses into
+        // children and the node painter resets `globalAlpha` to "opaque" at three points; without
+        // a declared baseline those resets go to a literal 1 and every child comes back bright,
+        // so a dimmed page stack dimmed only its top card.
+        if (inLane) {
+          const alpha = rootAlpha(inLane.has(node.id), frame.laneFilter);
+          ctx.globalAlpha = alpha;
+          setBaseAlpha(alpha);
+        }
         node.paint(ctx, paintRect);
       }
     });
-    if (inLane) ctx.globalAlpha = 1;
+    if (inLane) {
+      setBaseAlpha(1);
+      ctx.globalAlpha = 1;
+    }
 
     if (frame.insertLocation) {
       // Indicate that we have an insert location when
@@ -225,7 +238,7 @@ export class CanvasRenderer {
    * it, and a `STRUCTURE` eyebrow in the 22px the lane adds above the stack. A component with no
    * visual root at all gets the logic-only eyebrow instead, once, at the top-left of the viewport.
    *
-   * 🔴 **R-X: lanes that overlap are left overlapping.** 221 pairs in the corpus do. Merging them
+   * 🔴 **R-X: lanes that overlap are left overlapping.** 210 pairs, in 81 components, do. Merging them
    * would draw one box claiming the space between two stacks — and any logic node parked in that
    * gap — as structure.
    */

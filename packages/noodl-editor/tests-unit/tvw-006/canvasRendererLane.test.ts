@@ -26,6 +26,19 @@ jest.mock('../../src/editor/src/views/nodegrapheditor/NodeGraphEditorNode', () =
   }
 }));
 
+/**
+ * 🔴 The painter is mocked so `setBaseAlpha` can be SPIED ON. It is not decoration: the renderer
+ * setting `ctx.globalAlpha` dims only the first thing a root draws, because the real painter
+ * resets the alpha to "opaque" at three points while recursing into children. Declaring the
+ * baseline is the whole fix, and this spy is the only thing standing between it and a silent
+ * regression — the recording context cannot see it, since it stubs `node.paint`.
+ */
+jest.mock('../../src/editor/src/views/nodegrapheditor/NodeGraphEditorNodePainter', () => ({
+  setBaseAlpha: jest.fn(),
+  normalAlpha: () => 1,
+  scaledAlpha: (a: number) => a
+}));
+
 jest.mock('../../src/editor/src/views/nodegrapheditor/canvas/CanvasTheme', () => ({
   CanvasFonts: { portLabel: '10.5px mono' },
   CanvasTheme: {
@@ -49,6 +62,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { CanvasRenderer, type FrameState } from '../../src/editor/src/views/nodegrapheditor/canvas/CanvasRenderer';
+import { setBaseAlpha } from '../../src/editor/src/views/nodegrapheditor/NodeGraphEditorNodePainter';
 import { StructureLane, type LaneRoot } from '../../src/editor/src/views/nodegrapheditor/canvas/structureLane';
 
 type Call = { op: string; args: unknown[] };
@@ -161,6 +175,10 @@ const render = (f: FrameState) => {
   new CanvasRenderer().paint(ctx, f);
   return ctx.calls;
 };
+
+beforeEach(() => {
+  (setBaseAlpha as jest.Mock).mockClear();
+});
 
 const indexOf = (calls: Call[], pred: (c: Call) => boolean) => calls.findIndex(pred);
 
@@ -373,6 +391,25 @@ describe('AC3 — the filter dims what it should, and only that', () => {
 
     const logic = render(frame({ laneFilter: 'logic', connections: [fakeConnection('inside', PAGE, child)] }));
     expect(alphaOf(logic, 'paintWire', 'inside')).toBe(StructureLane.dimAlpha);
+  });
+
+  it('declares the dimmed alpha as the painter’s BASELINE, not just on the context', () => {
+    // 🔴 The defect a photograph caught and 43 green specs did not: `ctx.globalAlpha` alone dims
+    // the root's own card and nothing else, because the painter resets to "opaque" three times on
+    // its way down the children. A page stack dimmed its top node and left the whole stack bright.
+    render(frame({ laneFilter: 'logic' }));
+
+    const calls = (setBaseAlpha as jest.Mock).mock.calls.map((c) => c[0]);
+
+    expect(calls).toContain(StructureLane.dimAlpha); // the stack
+    expect(calls).toContain(1); // the logic root, and the reset afterwards
+    expect(calls[calls.length - 1]).toBe(1); // never left dimmed for the next frame
+  });
+
+  it('does not touch the painter’s baseline when the filter is off', () => {
+    render(frame({ laneFilter: 'all' }));
+
+    expect(setBaseAlpha as jest.Mock).not.toHaveBeenCalled();
   });
 
   it('does not leak a dimmed alpha into the decorations painted after the nodes', () => {

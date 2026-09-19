@@ -806,10 +806,14 @@ export class NodeGraphEditorConnection {
 
     // A chip behind the text: a bare glyph over a dot-grid at low zoom is
     // unreadable, and the wire itself runs under it.
+    // ⚠️ TVW-006: the chip is drawn RELATIVE to the caller's alpha and restores to it, not to a
+    // literal 1. A dimmed wire whose label reset the alpha would leave every later stroke on the
+    // frame bright — the same defect the node painter had.
+    const labelOuterAlpha = ctx.globalAlpha;
     ctx.fillStyle = CanvasTheme.instance.colors.cardBg;
-    ctx.globalAlpha = WireLabel.chipAlpha;
+    ctx.globalAlpha = labelOuterAlpha * WireLabel.chipAlpha;
     ctx.fillRect(a.x - width / 2, a.y - height / 2, width, height);
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = labelOuterAlpha;
 
     ctx.fillStyle = strokeColor;
     lines.forEach((line, index) => {

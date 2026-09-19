@@ -60,12 +60,22 @@ function typeName(n) {
   return typeof n.type === 'string' ? n.type : n.type && n.type.name;
 }
 
+/**
+ * 🔴 **The recorded `visualRoots` field, and nothing else.**
+ *
+ * The first version of this census guessed: *any type seen as a child anywhere in the corpus, or
+ * any project component name*. Driven against the editor, that **overcounts badly** — 11 against
+ * the runtime's 5 on `/Pages/Main/Package Details`, 6 against 1 on three others. A component
+ * whose type appears as a child SOMEWHERE is not thereby visual here.
+ *
+ * `visualRoots` is written by the editor itself and is exactly what `NodeGraphModel.isVisualRoot`
+ * falls back to when a type is unresolved, so it is the model's own answer rather than a proxy for
+ * it. **96.9% of non-empty components carry it** (5,711 of 5,891); the 180 that do not are
+ * EXCLUDED and counted, rather than guessed at — a guess on 3% would buy nothing and would put the
+ * old error back in.
+ */
 function isVisual(root, componentNames, recorded) {
-  if (recorded && recorded.has(root.id)) return true;
-  const t = typeName(root);
-  if (!t) return false;
-  if (CHILD_TYPES.has(t)) return true;
-  return componentNames.has(t);
+  return !!(recorded && recorded.has(root.id));
 }
 
 /** depth and node count of a subtree — the two numbers the lower-bound box needs. */
@@ -107,6 +117,7 @@ const stats = {
   projects: 0,
   components: 0,
   empty: 0,
+  noVisualRootsField: 0,
   laneCounts: {},
   logicOnly: 0,
   logicOnlyWithNodes: 0,
@@ -150,7 +161,8 @@ for (const { file, json } of parsed) {
       stats.empty++;
       continue;
     }
-    const recorded = new Set(graph.visualRoots || []);
+    if (!Array.isArray(graph.visualRoots)) { stats.noVisualRootsField++; continue; }
+    const recorded = new Set(graph.visualRoots);
     const visual = roots.filter((r) => isVisual(r, componentNames, recorded));
     const logic = roots.filter((r) => !isVisual(r, componentNames, recorded));
 

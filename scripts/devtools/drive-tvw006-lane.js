@@ -35,6 +35,16 @@ const has = (n) => args.includes(`--${n}`);
 const { appTarget, connect, evaluate } = require('./cdp.js');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * 🔴 There is no `window.NodeGraphEditor`. The canvas is reached through the webpack runtime:
+ * `__wreq` is seeded by pushing an empty chunk, and the live editor is
+ * `NodeGraphContextTmp.nodeGraph` — the same door every other P93 drive uses. The first version of
+ * this script assumed a global and every arm would have gone UNGRADED against a working build
+ * ([[a-new-instruments-first-drive-finds-instrument-faults]]).
+ */
+const BOOT = `(() => { if (typeof window.__wreq !== 'function' && typeof webpackChunknoodl_editor !== 'undefined') { webpackChunknoodl_editor.push([[Symbol()], {}, (r) => { window.__wreq = r; }]); } })();`;
+const ED = `window.__wreq('./src/editor/src/contexts/NodeGraphContext/NodeGraphContext.tsx').NodeGraphContextTmp.nodeGraph`;
+
 const PROJECT_DIR = opt('dir', '/Users/richardosborne/vscode_projects/NodeGX test projects/TVW-004 s15 Drive');
 
 const arms = [];
@@ -51,7 +61,7 @@ const record = (name, ok, detail) => {
  * absent element (s14 again). Everything below returns JSON text and names its absences.
  */
 const CANVAS_STATE = `JSON.stringify((() => {
-  const ed = window.NodeGraphEditor && window.NodeGraphEditor.instance;
+  const ed = ${ED};
   if (!ed) return { error: 'NO_EDITOR' };
   const roots = (ed.roots || []).map((r) => ({
     id: r.id,
@@ -76,7 +86,7 @@ const CANVAS_STATE = `JSON.stringify((() => {
  */
 function scanRow(cssY, fromX, toX) {
   return `JSON.stringify((() => {
-    const ed = window.NodeGraphEditor && window.NodeGraphEditor.instance;
+    const ed = ${ED};
     if (!ed || !ed.canvas || !ed.canvas.ctx) return { error: 'NO_CANVAS' };
     const ctx = ed.canvas.ctx;
     const ratio = ed.canvas.ratio || 1;
@@ -101,9 +111,18 @@ function scanRow(cssY, fromX, toX) {
   })())`;
 }
 
+/** The canvas's pan, scale and CSS size — everything needed to put a graph point on screen. */
+const VIEWPORT = `JSON.stringify((() => {
+  const ed = ${ED};
+  if (!ed || !ed.canvas) return { error: 'NO_CANVAS' };
+  const ps = ed.getPanAndScale();
+  const ratio = ed.canvas.ratio || 1;
+  return { panX: ps.x, panY: ps.y, scale: ps.scale, cssWidth: ed.canvas.width / ratio, cssHeight: ed.canvas.height / ratio };
+})())`;
+
 /** Graph coordinates → CSS pixels on the canvas, using the editor's own pan and scale. */
 const TO_SCREEN = (gx, gy) => `JSON.stringify((() => {
-  const ed = window.NodeGraphEditor && window.NodeGraphEditor.instance;
+  const ed = ${ED};
   if (!ed) return { error: 'NO_EDITOR' };
   const ps = ed.getPanAndScale();
   return { x: (${gx} + ps.x) * ps.scale, y: (${gy} + ps.y) * ps.scale };
@@ -126,7 +145,7 @@ async function readJson(target, expression) {
  * [[a-rule-reading-zero-in-both-arms-grades-nothing]] would apply exactly.
  */
 const FRAME_TIME = (samples) => `JSON.stringify((() => {
-  const ed = window.NodeGraphEditor && window.NodeGraphEditor.instance;
+  const ed = ${ED};
   if (!ed || !ed.painter) return { error: 'NO_EDITOR' };
   const times = [];
   for (let i = 0; i < ${samples}; i++) {
@@ -148,6 +167,71 @@ const FRAME_TIME = (samples) => `JSON.stringify((() => {
 
 async function main() {
   const editor = await connect(await appTarget('editor'));
+
+  /**
+   * 🔴 **An Electron window nobody is looking at is `document.hidden`, and `requestAnimationFrame`
+   * NEVER FIRES in it.** The canvas repaints through `repaint()` → rAF, so every arm that mutates
+   * the graph and waits reads "nothing happened" — a green build reported as a dead feature.
+   * `Page.bringToFront` does NOT fix it. This pair does, and it is what makes AC1's *live* gradable
+   * rather than something a forced `painter.paint()` has to stand in for.
+   */
+  for (const [method, params] of [
+    ['Page.setWebLifecycleState', { state: 'active' }],
+    ['Emulation.setFocusEmulationEnabled', { enabled: true }]
+  ]) {
+    try {
+      await editor.send(method, params);
+    } catch (error) {
+      console.log(`(${method} failed: ${error.message})`);
+    }
+  }
+  await wait(600);
+
+  // Seed `__wreq` before anything reads through it. Idempotent, so a re-run is free.
+  await evaluate(editor, BOOT);
+
+  // The instrument's own precondition: if rAF is dead, the repaint arms grade nothing, so they
+  // must not be allowed to report a colour at all.
+  const raf = await readJson(
+    editor,
+    `new Promise((res) => { let n = 0; const t = () => { n++; if (n < 3) requestAnimationFrame(t); }; requestAnimationFrame(t); setTimeout(() => res(JSON.stringify({ frames: n, hidden: document.hidden })), 900); })`
+  );
+  record('instrument: the window is awake and rAF fires', raf.frames >= 2, `frames=${raf.frames}, hidden=${raf.hidden}`);
+  if (!(raf.frames >= 2)) {
+    console.error('UNGRADABLE: rAF is not firing — every repaint arm below would read as a dead feature.');
+    process.exit(2);
+  }
+
+  /**
+   * 🔴 Put the canvas on a component that can actually grade this drive.
+   *
+   * The arms below need a stack AND logic beside it. Depending on wherever the canvas happens to
+   * be left is how a run ends UNGRADABLE for a reason that has nothing to do with the build — the
+   * previous run left it on a logic-only component and the whole drive refused. Disk shortlists,
+   * the runtime decides.
+   */
+  const pick = await readJson(
+    editor,
+    `JSON.stringify((() => {
+      const { ProjectModel } = window.__wreq('./src/editor/src/models/projectmodel.ts');
+      const { EventDispatcher } = window.__wreq('./src/shared/utils/EventDispatcher.ts');
+      for (const c of ProjectModel.instance.getComponents()) {
+        try {
+          const g = c.graph;
+          const roots = g.roots || [];
+          if (roots.length < 2) continue;
+          const visual = roots.filter((r) => g.isVisualRoot(r)).length;
+          if (visual >= 1 && visual < roots.length) {
+            EventDispatcher.instance.notifyListeners('ComponentPanel.SwitchToComponent', { component: c, pushHistory: false });
+            return { picked: c.name, visual, roots: roots.length };
+          }
+        } catch (e) { /* a graph that will not build is not a subject */ }
+      }
+      return { picked: 'NONE' };
+    })())`
+  );
+  console.log(`subject: ${pick.picked}${pick.visual !== undefined ? ` (${pick.visual}/${pick.roots} visual)` : ''}`);
+  await wait(1200);
 
   const state = await readJson(editor, CANVAS_STATE);
   if (state.error) {
@@ -182,37 +266,74 @@ async function main() {
 
   const stack = visual[0];
 
-  // ── Arm 1 (AC2): the lane is drawn, and its left edge is 12px left of the stack.
-  const mid = await readJson(editor, TO_SCREEN(stack.x, stack.y + Math.min(80, stack.measured.height / 2)));
-  const leftScan = await readJson(editor, scanRow(mid.y, mid.x - 60, mid.x + 10));
-  const laneEdge = leftScan.runs && leftScan.runs.length ? leftScan.runs[0] : null;
-  record(
-    'AC2: a lane edge is painted to the left of the stack',
-    !!laneEdge,
-    laneEdge ? `ink at x=${laneEdge[0]}..${laneEdge[1]} (stack left is ${Math.round(mid.x)})` : 'no ink found'
-  );
+  /**
+   * 🔴 A scan row has to be inside the LANE **and** inside the VIEWPORT, and on a real project it
+   * is usually neither by default: `Home`'s stack is 1,650px tall and opens with its top 740px
+   * ABOVE the canvas, so the obvious choice — a little below the stack's top — is off-canvas. The
+   * first run of this script reported that as *"no ink found"*, which reads as a missing lane and
+   * is really "I did not look" ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+   */
+  const view = await readJson(editor, VIEWPORT);
+  const laneTop = (stack.y - 12 - 22 + view.panY) * view.scale;
+  const laneBottom = (stack.y + stack.measured.height + 12 + view.panY) * view.scale;
+  const bandTop = Math.max(8, laneTop);
+  const bandBottom = Math.min(view.cssHeight - 8, laneBottom);
+  const scanY = Math.round((bandTop + bandBottom) / 2);
+  const stackLeftCss = (stack.x + view.panX) * view.scale;
+  const expectedEdge = Math.round(stackLeftCss - 12 * view.scale);
+
+  if (bandBottom <= bandTop) {
+    record('AC2: a lane edge is painted 12px left of the stack', null, 'the lane is entirely off-canvas — pan first');
+  } else {
+    const leftScan = await readJson(editor, scanRow(scanY, Math.max(0, expectedEdge - 40), expectedEdge + 60));
+    if (leftScan.error) {
+      record('AC2: a lane edge is painted 12px left of the stack', null, `scan failed: ${leftScan.error}`);
+    } else {
+      const laneEdge = leftScan.runs && leftScan.runs.length ? leftScan.runs[0] : null;
+      // 🔴 The edge is asserted at the PREDICTED x, not merely "some ink exists". Ink anywhere in a
+      // 100px window is also what a node's own border looks like.
+      const hit = laneEdge && Math.abs(laneEdge[0] - expectedEdge) <= 2;
+      record(
+        'AC2: a lane edge is painted 12px left of the stack',
+        !!hit,
+        laneEdge
+          ? `ink starts x=${laneEdge[0]}, predicted ${expectedEdge} (row y=${scanY})`
+          : `no ink in x=${Math.max(0, expectedEdge - 40)}..${expectedEdge + 60} at y=${scanY}`
+      );
+    }
+  }
 
   // ── Arm 2 (AC1): the lane follows the root when it moves, live.
-  const before = await readJson(editor, scanRow(mid.y, mid.x - 60, mid.x + 10));
   await evaluate(
     editor,
-    `(() => { const ed = window.NodeGraphEditor.instance; const r = ed.roots.find(n => n.id === ${JSON.stringify(
+    `(() => { const ed = ${ED}; const r = ed.roots.find(n => n.id === ${JSON.stringify(
       stack.id
     )}); r.x += 200; r.setPosition(r.x, r.y); ed.relayout(); ed.repaint(); return 'moved'; })()`
   );
-  await wait(250);
-  const moved = await readJson(editor, scanRow(mid.y, mid.x + 140, mid.x + 260));
+  await wait(300);
+  const movedExpected = expectedEdge + Math.round(200 * view.scale);
+  const moved = await readJson(editor, scanRow(scanY, Math.max(0, movedExpected - 40), movedExpected + 60));
   const movedEdge = moved.runs && moved.runs.length ? moved.runs[0] : null;
+  const movedHit = movedEdge && Math.abs(movedEdge[0] - movedExpected) <= 2;
   record(
     'AC1: the lane follows the stack 200px right, live',
-    !!movedEdge && !!before.runs.length,
-    movedEdge ? `edge now at x=${movedEdge[0]}` : 'no ink 200px right'
+    !!movedHit,
+    movedEdge ? `edge now x=${movedEdge[0]}, predicted ${movedExpected}` : `no ink near ${movedExpected}`
+  );
+
+  // The OLD position must now be clear — a lane that was drawn twice, or never cleared, passes the
+  // arm above while looking wrong on screen.
+  const vacated = await readJson(editor, scanRow(scanY, Math.max(0, expectedEdge - 8), expectedEdge + 8));
+  record(
+    'AC1: the lane no longer paints where the stack used to be',
+    !vacated.error && (!vacated.runs || vacated.runs.length === 0),
+    vacated.error ? `scan failed: ${vacated.error}` : `runs at old edge: ${JSON.stringify(vacated.runs)}`
   );
 
   // Put it back — a drive that leaves the fixture moved poisons the next run.
   await evaluate(
     editor,
-    `(() => { const ed = window.NodeGraphEditor.instance; const r = ed.roots.find(n => n.id === ${JSON.stringify(
+    `(() => { const ed = ${ED}; const r = ed.roots.find(n => n.id === ${JSON.stringify(
       stack.id
     )}); r.x -= 200; r.setPosition(r.x, r.y); ed.relayout(); ed.repaint(); return 'restored'; })()`
   );
@@ -242,7 +363,7 @@ async function main() {
     const selected = await readJson(
       editor,
       `JSON.stringify((() => {
-        const ed = window.NodeGraphEditor.instance;
+        const ed = ${ED};
         const node = ed.roots.find(n => n.id === ${JSON.stringify(stack.id)});
         if (!node) return { error: 'NO_NODE' };
         ed.selectionActions ? ed.selectionActions.selectNode(node, {}) : ed.selector.selectNode(node);

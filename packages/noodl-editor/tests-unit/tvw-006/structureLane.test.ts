@@ -6,11 +6,13 @@
  * asserted, because asserting a decision nobody has made is how a guess becomes a gate
  * ([[a-gate-can-have-a-hole-shaped-like-the-defect]]). They are §6 of the task file.
  *
- * 🔴 **The fixtures carry the populations the census found, not convenient ones.** 26% of the
- * corpus's 5,527 non-empty components have TWO OR MORE visual roots (745 with two, 667 with three
- * or more) and 18% have NONE. A fixture with one tidy visual root and one logic node beside it
- * would grade a shape that four components in five are not
- * ([[a-fixture-that-avoids-a-real-population-grades-a-coincidence]]).
+ * 🔴 **The fixtures carry the populations the census found, not convenient ones** — and the census
+ * itself was CORRECTED mid-session, which is the sharper lesson. Keyed on the editor's own
+ * `visualRoots`: **66.8%** of components have one visual root, **27.4% have NONE**, and only
+ * **5.8% (329)** have two or more, of which **165** have three or more. The first run of the
+ * census guessed at visual-ness and reported that last figure as *26%* — a 4.5x overcount that
+ * a drive against the real editor exposed. The three-root fixture below is kept anyway: it costs
+ * nothing and 165 components is not zero ([[a-fixture-that-avoids-a-real-population-grades-a-coincidence]]).
  */
 
 import {
@@ -87,7 +89,7 @@ describe('which lanes a frame draws', () => {
     expect(lanes.map((l) => l.id)).toEqual(['page']);
   });
 
-  it('draws THREE lanes for a three-root component — 667 in the corpus', () => {
+  it('draws THREE lanes for a three-root component — 165 in the corpus', () => {
     const roots = [
       root('a', 0, 0, 150, 200, true),
       root('b', 400, 0, 150, 200, true),
@@ -139,7 +141,7 @@ describe('which lanes a frame draws', () => {
   });
 });
 
-describe('a component with nothing that draws — 1,012 in the corpus, 18%', () => {
+describe('a component with nothing that draws — 1,566 in the corpus, 27.4%', () => {
   it('is logic-only when it has roots and none of them is visual', () => {
     expect(isLogicOnly([LOGIC, root('sort', 0, 0, 150, 60, false)])).toBe(true);
   });
