@@ -28,7 +28,6 @@ import { CodeEditorType } from '../CodeEditor';
 import { PropertyFilterInput } from '../components/PropertyFilterInput';
 import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups';
 import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
-import { ProjectModel } from '@noodl-models/projectmodel';
 import { ControlHost, PropertyRow, type PropertyRowCapability, type PropertyRowLook } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
@@ -103,6 +102,24 @@ const SCROLL_BIND_ATTEMPTS = 5;
  * cannot scroll, so a 900-character description arrives as a wall of text pinned to the pointer.
  */
 const MAX_DESCRIPTION_TITLE = 400;
+
+/**
+ * The project singleton, fetched at the point of use rather than imported at the top of this file.
+ *
+ * 🔴 **A top-level `import { ProjectModel }` here makes a suite fail to RUN, not fail.** Measured
+ * 2026-09-19 after landing exactly that: `projectmodel.ts:5` pulls in `warningsmodel`, whose module
+ * body constructs a `WarningsModel` that reads `NodeLibrary.instance.on` — and under jest there is
+ * no `NodeLibrary.instance` yet, so `tests-unit/chr-007/widgetDispatch.test.ts` reported
+ * **`Tests: 0 total`** with a `TypeError` from a file it never meant to load. A suite that cannot
+ * start grades nothing ([[tests-0-total-can-mean-the-wrong-directory]]), so this is worse than a
+ * red: it is a gate silently switched off, and it reached a peer before it reached me.
+ *
+ * Deferring the `require` to call time is enough, because every caller here runs long after the
+ * editor has booted. `PickerTypeView` defers `@electron/remote` the same way.
+ */
+function projectModel(): TSFixme | undefined {
+  return require('@noodl-models/projectmodel').ProjectModel?.instance;
+}
 
 /** The node behind the panel's model: a `ModelProxy` wraps it, a bare model is its own node. */
 function nodeOf(model: TSFixme): TSFixme {
@@ -235,7 +252,7 @@ export class Ports extends View {
     // 🔴 The same shape as the ownership defect below, and the same lesson: `variant` is ALREADY in
     // `renderGroups`'s hash, so a guard was never the missing half — asking is. The hash is what
     // keeps this cheap when some *other* Look is renamed.
-    ProjectModel.instance?.on(
+    projectModel()?.on(
       ['variantRenamed', 'variantDeleted'],
       () => {
         this.renderGroups();
@@ -299,7 +316,7 @@ export class Ports extends View {
     EventDispatcher.instance.off(this);
     // May be torn down after the project singleton has been cleared, as `variantseditor` also
     // guards for.
-    ProjectModel.instance?.off(this);
+    projectModel()?.off(this);
 
     this.views.forEach((v) => v.dispose && v.dispose());
     this.disposeTabGroups();
