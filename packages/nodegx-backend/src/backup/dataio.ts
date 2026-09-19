@@ -59,7 +59,7 @@ export async function exportCollection(
   format: DataFormat
 ): Promise<ExportResult> {
   const records = await readAll(facade, collection);
-  const columns = facade.getColumns(collection);
+  const columns = await facade.getColumns(collection);
 
   if (format === 'json') {
     const content =
@@ -277,12 +277,12 @@ function coerce(value: unknown, type: string | undefined, fromCsv: boolean): { v
   }
 }
 
-export function importCollection(
+export async function importCollection(
   facade: IStorageFacade,
   collection: string,
   content: string,
   options: ImportOptions
-): ImportReport {
+): Promise<ImportReport> {
   const dryRun = !!options.dryRun;
   let parsed: ParsedPayload;
   try {
@@ -302,7 +302,7 @@ export function importCollection(
 
   // Effective type map: JSON schema (if any) overlaid on the target's schema.
   const typeMap = new Map<string, string>();
-  for (const c of facade.getColumns(collection)) if (c.type) typeMap.set(c.name, c.type);
+  for (const c of await facade.getColumns(collection)) if (c.type) typeMap.set(c.name, c.type);
   if (parsed.schemaColumns) for (const c of parsed.schemaColumns) if (c.type) typeMap.set(c.name, c.type);
   typeMap.set('ACL', 'Object');
 
@@ -332,10 +332,19 @@ export function importCollection(
   });
 
   // Classify created vs updated (read-only; safe in dry-run too).
+  //
+  // BRG-002 §3.1: this was one query per row. It is now one call for the whole
+  // import — which on SQLite is worth little (measured: see the task file) and
+  // on an out-of-process adapter is the difference between one round trip and
+  // ten thousand.
+  const existing = await facade.existingIds(
+    collection,
+    valid.map((v) => v.objectId).filter((id): id is string => !!id)
+  );
   let created = 0;
   let updated = 0;
   for (const v of valid) {
-    if (v.objectId && facade.existsSync(collection, v.objectId)) updated++;
+    if (v.objectId && existing.has(v.objectId)) updated++;
     else created++;
   }
 
@@ -348,11 +357,13 @@ export function importCollection(
   try {
     if (valid.length > 0) {
       const sample = valid[0].data;
-      const schemaCols = parsed.schemaColumns || facade.getColumns(collection);
-      facade.ensureImportShape(collection, schemaCols, sample);
-      facade.transaction(() => {
-        for (const v of valid) facade.upsertSync(collection, v.objectId, v.data);
-      });
+      const schemaCols = parsed.schemaColumns || (await facade.getColumns(collection));
+      await facade.ensureImportShape(collection, schemaCols, sample);
+      // One awaitable call that owns the all-or-nothing transaction internally —
+      // BRG-002 §3.1. The `created`/`updated` it returns are deliberately NOT
+      // used: the counts reported to the caller are the ones classified above,
+      // which are also what a dry run reports, so the two agree by construction.
+      await facade.upsertBatch(collection, valid);
     }
     return { collection, dryRun: false, total, created, updated, rejected, applied: true };
   } catch (e) {

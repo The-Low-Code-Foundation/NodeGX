@@ -143,7 +143,7 @@ export class AdminBackupRoutes {
     const format = (body.format || 'json') as DataFormat;
     if (format !== 'json' && format !== 'csv') throw new HttpError(400, 'format must be json or csv');
     if (typeof body.content !== 'string') throw new HttpError(400, 'content (string) is required');
-    const report = importCollection(this.deps.facade, ctx.params.collection, body.content, {
+    const report = await importCollection(this.deps.facade, ctx.params.collection, body.content, {
       format,
       dryRun: !!body.dryRun
     });

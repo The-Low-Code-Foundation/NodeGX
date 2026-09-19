@@ -555,13 +555,11 @@ export interface IStorageAdapter extends IStorageDataPlane {
  * the canvas receives the `wire*` shape, so a difference there is a visibly
  * broken app, and BRG-003 §3.2 gates it.
  *
- * 🔴 **Four members are synchronous and cannot survive a socket** —
- * `getColumns`, `transaction`, `ensureImportShape`, `existsSync`, `upsertSync`.
- * They are transcribed here as they are, because this file describes what
- * exists. BRG-002 is the task that makes them awaitable, and until it lands,
- * this interface cannot be implemented by an out-of-process adapter. That is
- * the single structural blocker in the whole phase, and it is written down here
- * rather than discovered at BRG-005.
+ * ✅ **Every member returns a Promise** (BRG-002). Five of them did not when the
+ * interface was first transcribed — `getColumns`, `transaction`,
+ * `ensureImportShape`, `existsSync`, `upsertSync` — and that was the single
+ * structural blocker in the whole phase: a synchronous call cannot be served
+ * over a socket at any cost, by any adapter. It is closed.
  */
 export interface IStorageFacade {
   // --- storage-shaped reads and writes -------------------------------------
@@ -648,24 +646,50 @@ export interface IStorageFacade {
    */
   readonly schemaManager: IStorageSchema;
 
-  // --- import support (BAK-007) — 🔴 synchronous, BRG-002 closes these ------
+  // --- import support (BAK-007) — de-synchronised by BRG-002 ---------------
+  //
+  // ✅ **Every member of this interface now returns a Promise**, which is what
+  // makes it implementable by an adapter that is not in this process. Before
+  // BRG-002 five of them were synchronous, and that was the one STRUCTURAL
+  // blocker in phase 97: a synchronous call cannot be served over a socket at
+  // any cost, by any adapter.
+  //
+  // The shape that removed it is the batch. `transaction(fn)` could not survive
+  // — a caller cannot hold a synchronous SQLite transaction open across an
+  // `await` — so the transaction moved INSIDE `upsertBatch`, which owns the
+  // all-or-nothing guarantee the import path needs and exposes one awaitable
+  // call instead of a sync callback wrapping N sync writes.
 
-  /** `AdapterFacade.ts:354`. Called from `backup/dataio.ts:62`. */
-  getColumns(collection: string): StorageImportColumn[];
-  /** `AdapterFacade.ts:360`. Called from `backup/dataio.ts:305`. */
-  transaction<T>(fn: () => T): T;
-  /** `AdapterFacade.ts:380`. Called from `backup/dataio.ts:338`. */
+  /** Schema column descriptors ([] when the table is unknown). `AdapterFacade.ts`. */
+  getColumns(collection: string): Promise<StorageImportColumn[]>;
+
+  /**
+   * Which of these objectIds already exist — one call, not one per id.
+   *
+   * Replaces the per-row `existsSync`, whose only caller classified an import
+   * as created-vs-updated in a loop (`backup/dataio.ts`). N round trips became
+   * one, which matters far more to an out-of-process adapter than it does to
+   * SQLite — see BRG-002 §4 AC3 for the measurement, which is the honest one.
+   */
+  existingIds(collection: string, objectIds: string[]): Promise<Set<string>>;
+
+  /** Ensure the table and a column for every data key exists (idempotent). */
   ensureImportShape(
     collection: string,
     columns: StorageImportColumn[],
     sampleData: Record<string, unknown>
-  ): void;
-  /** `AdapterFacade.ts:408`. Called from `backup/dataio.ts:351-352`, `server/admin-search.ts:77`. */
-  existsSync(collection: string, objectId: string): boolean;
-  /** `AdapterFacade.ts:425`. Called **per row** from `backup/dataio.ts:354` — BRG-002 §3.1 batches it. */
-  upsertSync(
+  ): Promise<void>;
+
+  /**
+   * Insert-or-update every row in ONE transaction: all of them, or none.
+   *
+   * 🔴 The all-or-nothing guarantee is part of the contract, not an
+   * implementation detail — `backup/dataio.ts` reports `applied: false` and
+   * "import rolled back (no rows written)" on a throw, and a half-written
+   * import would make that report a lie. BRG-003 gates the rollback.
+   */
+  upsertBatch(
     collection: string,
-    objectId: string | undefined,
-    data: Record<string, unknown>
-  ): 'created' | 'updated';
+    rows: { objectId?: string; data: Record<string, unknown> }[]
+  ): Promise<{ created: number; updated: number }>;
 }

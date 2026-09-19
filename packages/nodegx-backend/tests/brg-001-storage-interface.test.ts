@@ -64,10 +64,9 @@ function makeFacadeMock(): IStorageFacade {
     wireRecord: notCalled('wireRecord'),
     schemaManager: {} as IStorageSchema,
     getColumns: notCalled('getColumns'),
-    transaction: notCalled('transaction'),
+    existingIds: notCalled('existingIds'),
     ensureImportShape: notCalled('ensureImportShape'),
-    existsSync: notCalled('existsSync'),
-    upsertSync: notCalled('upsertSync')
+    upsertBatch: notCalled('upsertBatch')
   } as IStorageFacade;
 }
 
@@ -97,10 +96,9 @@ const FACADE_MEMBERS = [
   'wireSearch',
   'wireRecord',
   'getColumns',
-  'transaction',
+  'existingIds',
   'ensureImportShape',
-  'existsSync',
-  'upsertSync'
+  'upsertBatch'
 ];
 
 /**

@@ -353,15 +353,10 @@ export class AdapterFacade implements IStorageFacade {
   // writes synchronously via the same QueryBuilder the adapter uses.
   // ==========================================================================
 
-  /** Schema column descriptors for a collection ({} when the table is unknown). */
-  getColumns(collection: string): ImportColumn[] {
+  /** Schema column descriptors for a collection ([] when the table is unknown). */
+  async getColumns(collection: string): Promise<ImportColumn[]> {
     const schema = this.schemaManager && this.schemaManager.getTableSchema(collection);
     return schema && Array.isArray(schema.columns) ? (schema.columns as ImportColumn[]) : [];
-  }
-
-  /** Run `fn` inside a single SQLite transaction (commit on return, rollback on throw). */
-  transaction<T>(fn: () => T): T {
-    return this.adapter.transaction(fn) as T;
   }
 
   private inferColumnType(value: unknown): string {
@@ -380,11 +375,15 @@ export class AdapterFacade implements IStorageFacade {
   }
 
   /** Ensure the table + a column for every data key exists (idempotent). */
-  ensureImportShape(collection: string, columns: ImportColumn[], sampleData: Record<string, unknown>): void {
+  async ensureImportShape(
+    collection: string,
+    columns: ImportColumn[],
+    sampleData: Record<string, unknown>
+  ): Promise<void> {
     const sm = this.schemaManager;
     if (!sm) return;
     sm.createTable({ name: collection, columns: [] });
-    const existing = new Set(this.getColumns(collection).map((c) => c.name));
+    const existing = new Set((await this.getColumns(collection)).map((c) => c.name));
     // Explicit schema first (correct types), then anything the data implies.
     for (const col of columns) {
       if (col.name && !existing.has(col.name) && col.type !== 'Relation') {
@@ -430,36 +429,101 @@ export class AdapterFacade implements IStorageFacade {
     return db as { prepare(sql: string): { get(...a: unknown[]): unknown; run(...a: unknown[]): unknown } };
   }
 
-  /** True if a row with this objectId exists (synchronous). */
-  existsSync(collection: string, objectId: string): boolean {
-    try {
-      const db = this.sqliteHandle();
-      const row = db
-        .prepare(`SELECT 1 FROM ${QueryBuilder.escapeTable(collection)} WHERE "objectId" = ?`)
-        .get(objectId);
-      return !!row;
-    } catch {
-      return false;
+  /**
+   * BRG-002 §3.1 — which of these objectIds already exist, in one call.
+   *
+   * This replaced a per-row `existsSync` that reached for the raw SQLite handle
+   * and ran `SELECT 1 ... WHERE objectId = ?` once per row. It now goes through
+   * `rawQuery`, which means it is **portable**: this is one of the two raw-handle
+   * reaches BRG-002 removed outright rather than merely making awaitable.
+   *
+   * Chunked because a parameter list is not unbounded — `$in` becomes one bound
+   * parameter per id, and every engine has a ceiling (SQLite's default is 999
+   * on older builds). 500 is comfortably under every one of them and costs two
+   * queries per thousand rows.
+   *
+   * Errors are swallowed to `has nothing`, exactly as `existsSync` returned
+   * `false` on a throw: an unknown table is the normal case on a first import,
+   * and it means "no row exists", not "the import failed".
+   */
+  async existingIds(collection: string, objectIds: string[]): Promise<Set<string>> {
+    const found = new Set<string>();
+    const ids = objectIds.filter((id) => typeof id === 'string' && id.length > 0);
+    const CHUNK = 500;
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const slice = ids.slice(i, i + CHUNK);
+      try {
+        const { results } = await this.rawQuery(collection, {
+          where: { objectId: { $in: slice } },
+          select: ['objectId'],
+          limit: slice.length
+        });
+        for (const row of results) {
+          const id = row.objectId;
+          if (typeof id === 'string') found.add(id);
+        }
+      } catch {
+        // An unknown collection reads as "nothing exists" — see above.
+        return found;
+      }
     }
+    return found;
   }
 
   /**
-   * Insert or update a record by objectId, synchronously (for transactional
-   * import). Returns which action occurred. Assumes ensureImportShape was
-   * already called for this collection.
+   * BRG-002 §3.1 — insert or update every row, in ONE transaction.
+   *
+   * This is the shape that removed phase 97's single structural blocker. The
+   * import path used to call `facade.transaction(fn)` with a synchronous
+   * callback and run one `upsertSync` per row inside it; a caller cannot hold a
+   * synchronous SQLite transaction open across an `await`, so no amount of
+   * making `upsertSync` promise-returning would have helped. Moving the
+   * transaction *inside* one awaitable call is what makes the interface
+   * implementable by an adapter that is not in this process.
+   *
+   * 🔴 **All-or-nothing is part of the contract, not an implementation detail.**
+   * `backup/dataio.ts` reports "import rolled back (no rows written)" on a
+   * throw, and a partially-written import makes that report a lie.
+   *
+   * ⚠️ **The one method on this facade whose implementation is SQLite-specific.**
+   * It reaches `sqliteHandle()` because `adapter.transaction()` takes a
+   * synchronous callback and the writes are built with the adapter's own
+   * `QueryBuilder`, so `create`/`save` cannot be used without giving up the
+   * single transaction. **BRG-005 owes either a batch write on `IStorageAdapter`
+   * or its own facade**, and BRG-003 is what will catch it if neither arrives:
+   * the rollback case is a conformance test, not a comment.
    */
-  upsertSync(collection: string, objectId: string | undefined, data: Record<string, unknown>): 'created' | 'updated' {
+  async upsertBatch(
+    collection: string,
+    rows: { objectId?: string; data: Record<string, unknown> }[]
+  ): Promise<{ created: number; updated: number }> {
+    if (rows.length === 0) return { created: 0, updated: 0 };
+
+    const ids = rows.map((r) => r.objectId).filter((id): id is string => typeof id === 'string' && id.length > 0);
+    const existing = await this.existingIds(collection, ids);
+
     const db = this.sqliteHandle();
-    const clean: Record<string, unknown> = { ...data };
-    delete clean.objectId;
-    if (objectId && this.existsSync(collection, objectId)) {
-      const { sql, params } = QueryBuilder.buildUpdate({ collection, objectId, data: clean });
-      db.prepare(sql).run(...params);
-      return 'updated';
-    }
-    const id = objectId || crypto.randomUUID();
-    const { sql, params } = QueryBuilder.buildInsert({ collection, data: clean }, id);
-    db.prepare(sql).run(...params);
-    return 'created';
+    let created = 0;
+    let updated = 0;
+
+    this.adapter.transaction(() => {
+      for (const row of rows) {
+        const clean: Record<string, unknown> = { ...row.data };
+        delete clean.objectId;
+
+        if (row.objectId && existing.has(row.objectId)) {
+          const { sql, params } = QueryBuilder.buildUpdate({ collection, objectId: row.objectId, data: clean });
+          db.prepare(sql).run(...params);
+          updated++;
+        } else {
+          const id = row.objectId || crypto.randomUUID();
+          const { sql, params } = QueryBuilder.buildInsert({ collection, data: clean }, id);
+          db.prepare(sql).run(...params);
+          created++;
+        }
+      }
+    });
+
+    return { created, updated };
   }
 }

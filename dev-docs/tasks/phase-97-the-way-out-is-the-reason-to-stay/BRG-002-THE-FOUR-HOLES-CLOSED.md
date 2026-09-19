@@ -1,6 +1,6 @@
 # BRG-002 — The holes, closed
 
-**Status: ⬜ Not started. Follows BRG-001.**
+**Status: 🏗 §3.1 done s1 (2026-09-19) — the structural blocker is closed. §3.2 and §3.3 open.**
 
 ## 1. The person sentence
 
@@ -74,3 +74,82 @@ here by line, and BRG-003 asserts nothing in the promise depends on it.
 6. **AC6** — Every remaining `nativeHandle` site is listed in this file with its reason.
 7. **AC7** — `test:main` green, and the `noodl-mcp` suite green (it consumes the backend's admin
    routes and is not run by `test:main`).
+
+
+## 5. §3.1 as built, s1 — 2026-09-19
+
+### 5.1 The count was 8, not 7 — and the missing one was the important one
+
+`grep -a` for the facade's synchronous calls (⚠️ `-a`, because plain `grep -rn` skips `.ts` files in
+this repo as binary, and `fs.existsSync` dominates the output and must be filtered out by hand):
+
+| site | call |
+|---|---|
+| `backup/dataio.ts:82` | `getColumns` (in `exportCollection`) |
+| `backup/dataio.ts:305` | `getColumns` |
+| `backup/dataio.ts:338` | `existsSync` — **per row** |
+| `backup/dataio.ts:351` | `getColumns` |
+| `backup/dataio.ts:352` | `ensureImportShape` |
+| **`backup/dataio.ts:353`** | **`transaction`** — 🔴 **absent from §2's list**, and the only one that could not be fixed by making a method awaitable |
+| `backup/dataio.ts:354` | `upsertSync` — **per row**, inside that transaction |
+| `server/admin-search.ts:77` | `getColumns` |
+
+**Why the missing one mattered.** §3.1 says the four methods "become promise-returning and lose the
+`Sync` suffix". That would not have worked: the caller was
+`facade.transaction(() => { for (…) facade.upsertSync(…) })`, and **a caller cannot hold a
+synchronous SQLite transaction open across an `await`**. Promise-returning writes inside a sync
+callback is a contradiction, so the transaction had to move.
+
+### 5.2 The shape that closed it
+
+`IStorageFacade`'s five synchronous members became four, **every one returning a Promise**:
+
+| was | is |
+|---|---|
+| `getColumns(c): ImportColumn[]` | `getColumns(c): Promise<…>` |
+| `existsSync(c, id): boolean` — per row | `existingIds(c, ids[]): Promise<Set<string>>` — one call |
+| `ensureImportShape(…): void` | `ensureImportShape(…): Promise<void>` |
+| `transaction(fn): T` + `upsertSync(…)` per row | `upsertBatch(c, rows[]): Promise<{created, updated}>` — **owns the transaction internally** |
+
+✅ **`existingIds` also removed a raw-handle reach rather than merely making it awaitable**: it goes
+through `rawQuery` with `{ objectId: { $in: … } }`, chunked at 500 ids, so it is **portable** where
+`existsSync` was prepared SQL on the raw handle. Two of the three `getDatabase()` sites are now one.
+
+⚠️ **`upsertBatch` is the one facade method whose implementation is still SQLite-specific** — it
+needs `adapter.transaction()`'s synchronous callback and the adapter's own `QueryBuilder` to keep
+all-or-nothing. **BRG-005 owes either a batch write on `IStorageAdapter` or its own facade**, and
+BRG-003 is what catches it if neither arrives, because the rollback is a conformance case rather
+than a comment. Recorded here rather than solved, because solving it needs the second adapter to
+exist.
+
+### 5.3 🔴 AC3's prediction was wrong, and the honest number is worth more
+
+§3.1 predicted the batch would be *"a performance improvement on SQLite too"*, and AC3 says
+**"expected: faster"**. Measured on `tests/brg-002-import-throughput.test.ts`, 10,000 rows, same
+machine, before and after:
+
+| | first import (all new) | re-import (all existing) |
+|---|---|---|
+| **before** (per-row `existsSync` + per-row `upsertSync`) | 169 ms | 170 ms |
+| **after** (one `existingIds`, one `upsertBatch`) | 120–130 ms | 118–127 ms |
+
+**~28% faster, and 17 µs per row before.** So the per-row loop was never a bottleneck on SQLite —
+a prepared statement against a local file costs almost nothing, and anyone reading "N queries per
+import" as a performance problem would have been reasoning about a cost that was not there.
+
+✅ **The reason to do this was never performance — it is that the interface could not otherwise be
+implemented over a socket.** The number that will actually move is the out-of-process one: 10,000
+round trips become 1, and that is the case nobody can measure until BRG-005 exists. Recorded so that
+BRG-005 measures it rather than assuming it.
+
+### 5.4 Acceptance criteria touched
+
+| | criterion | |
+|---|---|---|
+| AC2 | no `Sync`-suffixed method on the facade; the call sites await; `backup-roundtrip.test.ts` green | ✅ — 8 sites, not 7 |
+| AC3 | `upsert` takes a batch; 10,000 rows measured before and after | ✅ — and the prediction it carried was wrong (§5.3) |
+| AC7 | `test:main` green | 🏗 — `nodegx-backend` is **139/139 files, 1673 passed, 0 failed**; both typechecks green. `test:main` and `noodl-mcp` still owed |
+
+**Still open: §3.2 (`IOperationalStore`), §3.3 (`security/state.ts` onto the facade), AC1, AC4, AC5,
+AC6.** `security/state.ts` remains the one module reaching past the interface, through the named
+`adapter` dependency BRG-001 gave it.

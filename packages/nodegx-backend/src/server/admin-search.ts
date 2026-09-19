@@ -74,7 +74,7 @@ export class AdminSearchRoutes {
     }
 
     // Validate the fields are real columns on the collection before touching SQL.
-    const columns = new Set(this.facade.getColumns(name).map((c) => c.name));
+    const columns = new Set((await this.facade.getColumns(name)).map((c) => c.name));
     const unknown = fields.filter((f) => !columns.has(f));
     if (enabled && unknown.length > 0) {
       throw new HttpError(400, `Unknown column(s) for "${name}": ${unknown.join(', ')}. Create the field(s) first.`);

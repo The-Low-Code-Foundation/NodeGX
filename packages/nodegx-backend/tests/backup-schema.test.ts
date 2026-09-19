@@ -93,7 +93,7 @@ describe('backup/schema-migrate apply', () => {
     const users = (await facade.rawQuery('User', { limit: 10 })).results;
     expect(users.length).toBe(1);
     expect(users[0].email).toBe('a@b.co');
-    expect(facade.getColumns('User').map((c) => c.name)).toContain('age');
+    expect((await facade.getColumns('User')).map((c) => c.name)).toContain('age');
     expect(facade.schemaManager.listTables()).toContain('Post');
 
     // Permission promoted into security.json.
