@@ -3,14 +3,17 @@
 **Session 9 built the data plane. `nodegx-backend migrate --to postgres://…` now takes a consistent
 snapshot, creates the schema, copies every table in checkpointed batches, and then VERIFIES its own
 work by reading both sides back through their adapters — and refuses to say "cut over" if anything
-differs. BRG-004 is closed: AC1–AC8 green, AC9 measured. `brg-004-data-plane.test.ts` is 17/17.**
+differs. BRG-004 is closed: AC1–AC9. `brg-004-data-plane.test.ts` is 19/19, the three BRG-004 specs 39/39.**
 
-**It also found a product defect that 56/56 conformance could not see** — a `Boolean` reads `0` on
+**It also found two defects, each invisible to everything that ran before it.** One is a product
+defect 56/56 conformance could not see — a `Boolean` reads `0` on
 SQLite and `false` on PostgreSQL, over HTTP, in the same app. Filed as **BRG-D8** (README §9),
 declared in the adapter's divergence register, and NOT silently repaired: which way the two should
-agree is Richard's call.
+agree is Richard's call. The other is **BRG-D9**: `migrate` could not run at all on a database over
+2 GiB, because AC7's hash used `readFileSync` — found by AC9's 8 GB run and by nothing smaller, and
+fixed.
 
-**Where it is:** `cline-dev`, commit `<S9-COMMIT>` (s8 was `4226a6c68`).
+**Where it is:** `cline-dev`, commit `7ba47bde9` (s8 was `4226a6c68`).
 
 ## The board, re-derived from the task files
 
@@ -19,15 +22,15 @@ agree is Richard's call.
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) the interface | ✅ | — |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`noodl-mcp` — red for peers' reasons, re-measured at s9) |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | ⚠️ **it has no boolean round-trip case** — BRG-D8 got past it |
-| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ **AC1–AC8 closed, AC9 recorded** | — (§7.6's 5 GB variant, if someone wants the bigger number) |
+| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ **AC1–AC9 closed** | — |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ all but AC7 | **AC7** — `noodl-mcp` green is not this phase's to make true (§7.5) |
 | [BRG-006](BRG-006-THE-DRIVE.md) the drive | ⬜ **next** | the whole task |
 
-**Readings taken this session** (2026-09-20): `brg-004-data-plane` **17/17 exit 0**; `test:main`
+**Readings taken this session** (2026-09-20): `brg-004` specs **39/39 exit 0**; `test:main`
 **520 suites / 8292 tests exit 0**; full `nodegx-backend` **161 suites / 1920 tests, 1 failed — the
 peer's new `POST admin/executions/compact` route moving BAK-009's reviewed tally 79→80**; `noodl-mcp`
 **129 suites / 2193 tests, 8 suites red — the same eight as s7**, one of them failing on an untracked
-peer template; `nodegx-backend` typecheck exit 0. AC9: **2,000,000 rows / 1.36 GB in 50.7 s**.
+peer template; `nodegx-backend` typecheck exit 0. AC9: **2,000,000 rows / 8.07 GB in 107.6 s**, verify clean.
 
 ## 1. First job — BRG-006, the drive
 
