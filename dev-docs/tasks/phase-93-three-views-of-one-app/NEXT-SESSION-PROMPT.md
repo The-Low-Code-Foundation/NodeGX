@@ -13,7 +13,7 @@ TVW-004's twenty AC6 shots, built AND DROVE TVW-006 slice 1, and censused TVW-00
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
 | TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6's 20 shots SENT at s18 — Richard's verdict is all that is left** |
 | TVW-005 | Layers can move things | ✅ | **CLOSED — all 6 ACs** |
-| TVW-006 | The structure lane | ✅ slice 1 | **AC1 (canvas half), AC2, AC3, AC4, AC6 green — 9/9 twice. AC5's 18 shots SENT. Left: Richard's AC5 verdict + `test:ci`** |
+| TVW-006 | The structure lane | ✅ slice 1 | **AC1 (canvas half), AC2, AC3, AC4, AC6 green — 9/9 twice. `test:ci` at the floor. AC5's 18 shots SENT — Richard's verdict is ALL that is left** |
 | TVW-007 | An instance says what it is | — | **censused. 🔴 §2's eyebrow does not fit — R-Z at its §6** |
 | TVW-008 | The board (needs 002) | — | — |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
@@ -23,9 +23,11 @@ TVW-004's twenty AC6 shots, built AND DROVE TVW-006 slice 1, and censused TVW-00
 
 ## 🔴 Start here
 
-1. **`test:ci` was NOT run at s18** and TVW-006 cannot be called closed without it. A peer held the
-   box for the first half of the session and wanted it back for a drive at the end, so it never had
-   a quiet window. Run it first.
+1. ✅ **`test:ci` IS at the floor by name** — seed 13542, 2,978 specs, gitHead `ea94c205b` (carries
+   both TVW-006 commits, checked with `git merge-base --is-ancestor`), eight failures = 3 SUB-006 /
+   3 SUB-011 / 2 NDA-017, readout mtime checked against the clock. Run by `opennoodl-ec` and
+   **re-read off the artefact here** — ⚠️ their harness reported that run as exit 0 while the log
+   ended `TESTCI_EXIT=1`.
 2. **Two verdicts are with Richard**: TVW-004 AC6 (20 shots) and TVW-006 AC5 (18 shots, in
    `verdicts/TVW-006/2026-09-19`). Both sets are gitignored; only the manifests are tracked.
 3. Then **TVW-007** — but read its §6 first: §2's eyebrow cannot fit on a node in any form, and

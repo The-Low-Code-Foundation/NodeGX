@@ -209,4 +209,15 @@ whose filename asserted the thing they did not show. Each candidate is now opene
 before it is accepted.
 
 **Gates s18 part 2:** `tests-unit/tvw-006` **45 specs / 2 suites green**, 17 mutants still caught;
-`tsc -p packages/noodl-editor --noEmit` **0**. ⚠️ **`test:ci` still NOT RUN.**
+`tsc -p packages/noodl-editor --noEmit` **0**.
+
+✅ **`test:ci` AT THE FLOOR BY NAME**, seed **13542**, 2,978 specs, gitHead **`ea94c205b`** — which
+carries both this task's commits (`809b63501`, `bcee156fc`), verified with `git merge-base
+--is-ancestor` rather than taken on trust. The eight are **3 SUB-006, 3 SUB-011, 2 NDA-017**, none
+of them ours. Readout mtime 18:22:39 against a clock of 18:24:35, so not a stale JSON.
+
+⚠️ **Run by a peer (`opennoodl-ec`), and the numbers above were re-read off the artefact here** —
+a relayed *"it passed"* is not a measurement, and the exit line proves why: the harness reported
+that run as exit 0 while the log ended **`TESTCI_EXIT=1`** ([[a-run-list-is-not-a-log]]).
+
+**So the only thing between TVW-006 and closed is Richard's AC5 verdict.**
