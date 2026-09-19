@@ -92,5 +92,25 @@ it, and Richard has ruled the execution record legible. Distance: FED-005, then 
   clean; CHR-007's snapshot regenerates to a **zero delta**.
 - Two dashboard assertions **mutant-checked** rather than trusted (FED-004 §5.2).
 
+### 🔴 A recorded trap that is WRONG, corrected in place
+
+The shared harness notes said *"`npx jest` in `packages/nodegx-backend` NEVER TERMINATES — it sits
+at 142 of 143 suites indefinitely"*, naming `tests/ac2-page-editor-drag-drive.test.ts`, and
+concluded **"never a bare `npx jest` in that package"**. That advice is why the whole-package run
+went undone for two sessions.
+
+**Measured 2026-09-19:** the package runs **149/149 in 506 s** at `--maxWorkers=2`, and the named
+straggler **passes standalone in 284 s** — eleven specs, all green. It is a real editor drive, and
+284 s is what that costs. The rule of thumb attached to it ("no `Tests:` line after ~2 min is hung")
+is simply the wrong threshold here.
+
+⚠️ The original observation was probably still real, but the likely mechanism is **contention, not
+a dead suite**: that spec drives a real editor, and a peer holding the CDP port would stall it
+indefinitely. So: **check no peer is driving an editor, budget ten minutes, and run it.**
+
+⚠️ **And the instrument nearly produced the opposite finding.** `timeout` does not exist on macOS:
+`timeout 300 npx jest …` exits instantly with `command not found`, and a `| grep` swallows it —
+which reads exactly like a hang. Use `time npx jest …` and read the duration.
+
 **Nothing is outstanding.** No suite was skipped, no gate was waved at, and no defect was left
 unfiled.
