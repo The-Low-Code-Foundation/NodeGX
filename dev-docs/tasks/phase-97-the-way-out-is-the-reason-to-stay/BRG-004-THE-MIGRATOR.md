@@ -419,6 +419,21 @@ decision. The verifier treats `0`↔`false` as the same value *with a note*, and
 ⚠️ And the reason it survived 56/56 conformance: **BRG-003 has no case that round-trips a boolean**.
 A suite with a hole shaped like the defect ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
 
+### 7.5b ⚠️ A refusal that had already connected did not release the pool
+
+Four `nodegx_brg004_other_*` databases outlived the suite's teardown, 7.6 MB each. The cause: the
+target is reached **before** the snapshot is taken (so an unreachable host does not cost an eight
+gigabyte copy), and the refusals that come after it — a checkpoint belonging to another target, a
+keyless table — threw past the pool. `DROP DATABASE` then failed with *"other session using the
+database"*, and a real `migrate` refusing this way **would not have exited**, because an open pool
+keeps the loop alive.
+
+Fixed by giving the pool exactly one owner: `migrateToPostgres` connects and hands the phases to an
+inner function inside a `try/finally` that always ends it. The case asserts
+`pg_stat_activity` is empty for the refused target — ✅ **a leak is only visible as a reading about
+the SERVER, never as one about the client**, which is why nothing in the spec saw it until the
+databases piled up.
+
 ### 7.6 AC9 — how long it takes, measured
 
 `node scripts/migrate-bench.js --rows 2000000 --width 600`, PostgreSQL 16.11 on the same machine

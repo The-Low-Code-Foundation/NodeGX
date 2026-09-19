@@ -525,6 +525,18 @@ suite('BRG-004 — the data plane (AC5, AC6, AC7)', () => {
     await expect(migrateToPostgres({ dataDir, target: otherUrl, checkpointPath, resume: true })).rejects.toThrow(
       /belongs to a migration into/
     );
+
+    // 🔴 And the refusal RELEASED the connection it had already opened. Four
+    // databases outliving this suite's teardown is what found the leak: a
+    // refusal after connecting left an open pool, so `DROP DATABASE` failed
+    // with "other session using the database" and the CLI would not exit.
+    const stillAttached = Number(
+      psqlRead(
+        ADMIN_URL,
+        `SELECT COUNT(*) FROM pg_stat_activity WHERE datname = '${new URL(otherUrl).pathname.slice(1)}'`
+      )
+    );
+    expect(stillAttached).toBe(0);
   });
 
   // =========================================================================

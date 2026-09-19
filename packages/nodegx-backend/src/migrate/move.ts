@@ -255,11 +255,36 @@ export async function migrateToPostgres(options: MigrateOptions): Promise<Migrat
   // host costs a full copy and leaves it behind.
   const pool: PgPoolLike = new PgConnectionPool({ url: options.target, max: 4, label: 'migrate' });
   try {
-    await pool.query('SELECT 1');
-  } catch (e) {
+    return await runMigration(options, pool, { dbPath, checkpointPath, batchSize, fingerprint, redacted, progress, sourceSha256Before, started });
+  } finally {
+    // 🔴 EVERY exit ends the pool, refusals included. A `migrate` that refused
+    // after connecting — a checkpoint for another target, a keyless table —
+    // used to leave an open connection behind: the CLI would not exit, and the
+    // database could not be dropped. Found by four test databases that outlived
+    // their suite's teardown.
     await pool.end().catch(() => undefined);
-    throw e;
   }
+}
+
+interface MigrationContext {
+  dbPath: string;
+  checkpointPath: string;
+  batchSize: number;
+  fingerprint: string;
+  redacted: string;
+  progress: (p: MigrateProgress) => void;
+  sourceSha256Before: string;
+  started: number;
+}
+
+/** The phases themselves, with the pool's lifetime owned by the caller. */
+async function runMigration(
+  options: MigrateOptions,
+  pool: PgPoolLike,
+  ctx: MigrationContext
+): Promise<MigrateResult> {
+  const { dbPath, checkpointPath, batchSize, fingerprint, redacted, progress, sourceSha256Before, started } = ctx;
+  await pool.query('SELECT 1');
 
   // ---------------------------------------------------------------- snapshot
   let checkpoint = options.resume ? readCheckpoint(checkpointPath) : null;
@@ -452,7 +477,6 @@ export async function migrateToPostgres(options: MigrateOptions): Promise<Migrat
   } finally {
     const closable = snapshotDb as unknown as { close?: () => void };
     if (typeof closable.close === 'function') closable.close();
-    await pool.end().catch(() => undefined);
   }
 }
 
