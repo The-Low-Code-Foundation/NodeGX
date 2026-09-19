@@ -12,6 +12,7 @@
  * A migration built on either carries an app across with no accounts in it and
  * reports success.
  */
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -229,11 +230,26 @@ describe('BRG-004 AC1 — the command a person runs', () => {
     expect(report.target).toBe('postgres://app:***@db.example.com:5432/appdb');
   });
 
-  it('🔴 without --dry-run it refuses, rather than starting a move it cannot finish', async () => {
-    await run(['migrate', '--data-dir', dataDir, '--to', TARGET]);
-    expect(err).toContain('only --dry-run is built');
-    expect(err).toContain('BRG-005');
-    expect(code).toBe(2);
+  /**
+   * ⚠️ **This case used to assert the opposite, and the change is the point.**
+   * At s5 the only honest answer to `migrate` without `--dry-run` was a
+   * refusal — *"only --dry-run is built"*, exit 2 — because the phases that
+   * move data did not exist. s9 built them (BRG-004 §7), so the refusal is
+   * gone and what is asserted now is the thing that replaced it: a move to a
+   * target it cannot reach fails **loudly, by name, before anything is
+   * written**, and the source database is untouched afterwards.
+   */
+  it('🔴 without --dry-run it MOVES — and an unreachable target fails by name, having written nothing', async () => {
+    const dbPath = path.join(dataDir, 'data', 'local.db');
+    const sha = (): string => crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+    const before = sha();
+
+    await expect(run(['migrate', '--data-dir', dataDir, '--to', TARGET])).rejects.toThrow(/db\.example\.com/);
+
+    expect(sha()).toBe(before);
+    // Nothing half-done is left behind to be resumed into a database that
+    // was never reached.
+    expect(fs.existsSync(path.join(dataDir, 'migration.checkpoint.json'))).toBe(false);
   });
 
   it('R5 — a non-PostgreSQL destination is refused by name', async () => {

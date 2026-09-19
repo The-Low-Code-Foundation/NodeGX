@@ -405,15 +405,48 @@ file, then `IOperationalStore` on Postgres with its `close()` and the shutdown p
 | AC | state | evidence |
 |---|---|---|
 | **AC1** `runConformance()` green on Postgres | ✅ **56/56, 0 skipped, 0 failed-as-declared** | `tests/brg-005-conformance-postgres.test.ts` — builds through `createAdapter({ storageUrl })`, never names the class |
-| **AC2** divergences declared | ✅ **16 entries**, 8 `degraded`/`unsupported` + 8 measured translations, each with the spec that measured it | `postgres/divergences.ts`; the spec assigns the register to `ConformanceDeclaration` (compile-time shape check) and asserts every declared case id exists and every `degraded` case still PASSED |
+| **AC2** divergences declared | ✅ **17 entries** (s8: 16; BRG-D8's boolean added at s9), 9 `degraded`/`unsupported` + 8 measured translations, each with the spec that measured it | `postgres/divergences.ts`; the spec assigns the register to `ConformanceDeclaration` (compile-time shape check) and asserts every declared case id exists and every `degraded` case still PASSED |
 | **AC3** mutants fail on Postgres | ✅ **6/6 caught, 6 distinct signatures, none wholesale** | same file; the record is in §7.2 |
 | **AC4** URL starts the service, `/health`, drain | ✅ | `tests/brg-005-service-postgres.test.ts` — real `BackendService.start()`, `_User`/`_Role`/`_Schema` on PostgreSQL, no `local.db` written, `/health.persistence.pool`, `stop()` |
 | AC5 AC6 AC8 | ✅ s6/s7 | unchanged |
-| **AC7** SQLite untouched | 🟡 **adapter specs 292/292, phase backend specs 50/50 + 36 + 3 + 13, `service-http` 24/24, `typecheck:runtime`/`backend`/`backend-tests`/`contract` all exit 0.** 🔴 `test:main`, `noodl-mcp` and the full backend suite NOT run: a peer had two jest runs, a `tsc` and three webpack builds live for the whole session ([[do-not-pile-cpu-work-on-a-shared-box]]) | owed by s9 |
+| **AC7** SQLite untouched | 🟡 s8: adapter specs 292/292, phase backend specs 50/50 + 36 + 3 + 13, `service-http` 24/24, typechecks exit 0. **s9 RAN THE SWEEP — §7.5.** `test:main` **520/8292 exit 0** ✅; full `nodegx-backend` **161 suites / 1920 tests, ONE red, measured to be a peer's** ✅-for-this-phase; `noodl-mcp` **still red, 8 suites, the same list as s7** 🔴 — not this phase's to make green | §7.5 |
 | **AC9** suite + six mutants, both numbers | ✅ **56 passed; mutants caught by 11 / 3 / 2 / 3 / 2 / 1 cases** | §7.2 |
 
 Runtime: `npx jest --config packages/nodegx-backend/jest.config.js --rootDir packages/nodegx-backend brg-005`
 — conformance ≈110 s (seven connected adapters, ~90 tables each, on a fresh database it creates and drops).
+
+### 7.5 AC7's sweep, run at s9 (2026-09-20) — and what each red belongs to
+
+The three wide runs s8 could not take, taken. The box was checked first (`ps` for `jest|webpack|tsc`:
+a peer's dev stack was watching, no peer suite was up — `test:main` is plain Node and is the one full
+gate that is safe beside a live stack).
+
+| gate | reading | verdict |
+|---|---|---|
+| `npm run test:main` | **520 suites / 8292 tests / 0 failed / exit 0**, 41 s (s7: 514 / 8223 — the delta is peers' new specs) | ✅ green |
+| full `nodegx-backend` (`npx jest`) | **161 suites / 1920 tests / 1 failed / 10 skipped** | 🟡 the one red is a **peer's**, below |
+| `noodl-mcp` (`npx jest`) | **129 suites / 2193 tests / 8 suites, 11 tests failed** (s7: 8 suites, 10 tests) | 🔴 still red, still not this phase's |
+
+**The backend red is `tests/ops-rate-limit.test.ts`** — BAK-009's route-tally drift guard, reading
+`admin: 80` where the reviewed number is 79. 🔴 **Attributed, not assumed**: the 80th route is
+`POST admin/executions/compact`, which `git grep` finds **nowhere at HEAD** and in the working tree
+only inside the peer's uncommitted PRD-003 hunks. That is the drift guard doing exactly its job on
+somebody else's change — the review sentence that moves the literal is theirs to write, and bumping
+it from here would discard the thing the ledger exists for
+([[a-gate-can-have-a-hole-shaped-like-the-defect]], and `test-main`'s "repair a stale count WITH ITS
+REASON").
+
+**`noodl-mcp`'s eight are the same eight s7 measured** (node id allocation, the response budget, theme
+preset chips, template settling, two CMP export suites, `cn004`, and a live-backend spec). One of them
+names its cause outright: `def038SettledTemplates` fails on **`templates/digital-bricks-training`**,
+a directory that is **untracked in this checkout** — a peer's new template that has never been
+settled. A suite cannot fail at HEAD on a template that does not exist at HEAD.
+
+🔴 **So AC7 stays 🟡 and this task cannot close it.** It is written as *"the full `nodegx-backend`
+suite and `test:main` are green with no Postgres present, and `noodl-mcp` is green"*. Two of the three
+are green or green-but-for-a-peer; the third is red for six or seven reasons that belong to phases 78,
+94 and 98. Closing it needs those landed, not more work here — and the honest record of that is this
+table rather than a green tick.
 
 ### 7.1 🔴 The finding: `IStorageSchema` is synchronous, and that is the seam's second half
 
@@ -512,7 +545,9 @@ Same signatures as SQLite's run. The suite discriminates on both engines.
   is on `IOperationalStore` (optional) and **`ExecutionHistory.close()` calls it** — the shutdown path
   `operational.ts` said did not exist exists since PRD-003 gave the history a `close()`.
 - **AC2's register** is `POSTGRES_DIVERGENCES`; `POSTGRES_CONFORMANCE_DECLARATION` is derived from it
-  so the two cannot disagree. Sixteen entries, listed in the file with the spec behind each.
+  so the two cannot disagree. Sixteen entries at s8, seventeen at s9 — the one added is BRG-D8's
+  `types/boolean-reads-as-0-1-on-sqlite`, which no conformance case covers because BRG-003 has none
+  that round-trips a boolean. Each is listed in the file with the spec behind it.
 
 ### 7.4 Owed, with the reason
 

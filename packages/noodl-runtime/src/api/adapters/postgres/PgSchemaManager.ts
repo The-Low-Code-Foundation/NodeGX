@@ -131,7 +131,12 @@ export class SchemaQueueError extends Error {
   }
 }
 
-const META_DDL = `
+/**
+ * The two meta tables. **Exported** because BRG-004's migrator creates them on
+ * a database this adapter has never opened, and a second copy of this DDL is
+ * how the two silently stop agreeing about what `_Schema` looks like.
+ */
+export const META_DDL = `
 CREATE TABLE IF NOT EXISTS "_Schema" (
   "name" TEXT PRIMARY KEY,
   "schema" TEXT NOT NULL,

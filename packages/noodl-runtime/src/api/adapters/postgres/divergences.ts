@@ -179,6 +179,21 @@ export const POSTGRES_DIVERGENCES: readonly Divergence[] = Object.freeze([
     evidence: 'brg-005-conformance-postgres.test.ts (records area: scores compare with ===)'
   },
   {
+    id: 'types/boolean-reads-as-0-1-on-sqlite',
+    state: 'degraded',
+    reason:
+      '🔴 A `Boolean` column reads back DIFFERENTLY on the two engines, and neither adapter is at fault in the ' +
+      'place it looks: SQLite stores it as INTEGER and hands back `0`/`1`, PostgreSQL stores it as BOOLEAN and ' +
+      'hands back `false`/`true`. Both adapters try to apply the declared type in `_rowToRecord` by reading ' +
+      '`schema.properties[key].type` — and `SchemaManager.getTableSchema()` returns a `TableSchema`, which has ' +
+      'no `properties` member, so on a service-opened backend (no `collections` config is passed) the declared ' +
+      'type is never seen on either side and each driver wins. An app testing `x === true` works on PostgreSQL ' +
+      'and not on SQLite; `x === 1` the other way round. Measured at the FACADE and over HTTP by BRG-004 s9 ' +
+      '(brg-004-data-plane.test.ts), filed as BRG-D8, and NOT silently repaired here: making the two agree ' +
+      'changes what every existing SQLite app reads back, which is a product decision and not an adapter one.',
+    evidence: 'nodegx-backend/tests/brg-004-data-plane.test.ts (the boolean block); BRG-004 §7, BRG-D8'
+  },
+  {
     id: 'errors/unique-violation-wording',
     state: 'supported',
     reason:

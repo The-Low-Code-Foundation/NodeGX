@@ -36,6 +36,8 @@ import { AuditLog, ensureAuditTable } from './ops/audit';
 import { OpsState } from './ops/OpsState';
 import { exportCollection, importCollection, DataFormat } from './backup/dataio';
 import { formatCarryReport, redactTarget, surveyForMigration } from './migrate/survey';
+import { cutoverAdvice, migrateToPostgres } from './migrate/move';
+import { formatVerifyReport, verifyMigration } from './migrate/verify';
 import {
   applySchema,
   diffSchema,
@@ -114,10 +116,26 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--dry-run':
         extras.dryRun = true;
         break;
-      // BRG-004: the migration destination.
+      // BRG-004: the migration destination and the four flags that govern a move.
       case '--to':
         extras.to = next();
         break;
+      case '--resume':
+        extras.resume = true;
+        break;
+      case '--keep-snapshot':
+        extras.keepSnapshot = true;
+        break;
+      case '--verify-only':
+        extras.verifyOnly = true;
+        break;
+      case '--batch-size':
+        extras.batchSize = next();
+        break;
+      case '--sample':
+        extras.sample = next();
+        break;
+
       case '--json':
         extras.json = true;
         break;
@@ -233,7 +251,9 @@ Usage:
   nodegx-backend import  <collection> <file> --data-dir <dir> [--format json|csv] [--dry-run]
   nodegx-backend schema  diff  <source> <target>
   nodegx-backend schema  apply <source> --data-dir <target> [--allow-destructive]
-  nodegx-backend migrate --data-dir <dir> --to <postgres-url> --dry-run [--json]
+  nodegx-backend migrate --data-dir <dir> --to <postgres-url>
+                        [--dry-run | --resume | --verify-only]
+                        [--batch-size <n>] [--sample <n>] [--keep-snapshot] [--json]
 
 Commands:
   serve    Start the service and stay running: BYOB /api routes, the Parse-wire
@@ -248,11 +268,15 @@ Commands:
   import   Import one collection (upsert by objectId; --dry-run previews).
   schema   diff/apply schema + config promotion (dev -> prod). Additive applies
            automatically; destructive needs --allow-destructive (backs up first).
-  migrate  --dry-run prints the CARRY REPORT: every construct in this backend
-           and whether it crosses to PostgreSQL, crosses degraded, or does not
-           cross. Reads and writes nothing. The phases that move data are not
-           built yet (BRG-004), and migrate without --dry-run says so rather
-           than starting something it cannot finish.
+  migrate  Move this backend's database to PostgreSQL. --dry-run prints the
+           CARRY REPORT — every construct, and whether it crosses, crosses
+           degraded, or does not cross — and touches nothing. Without it the
+           move runs: a consistent snapshot, the schema, the rows in
+           checkpointed batches, then VERIFICATION through the adapter on each
+           side, which must be clean or the command says do not cut over. The
+           source database is opened READ-ONLY throughout and is byte-identical
+           afterwards. --resume continues an interrupted run from its
+           checkpoint; --verify-only re-runs the comparison alone.
 
 Options:
   --data-dir <dir>       Directory for the SQLite files, uploads, and workflows.
@@ -524,7 +548,10 @@ async function runSchema(
  * started copying and stopped halfway would be the failure mode the whole phase
  * exists to remove.
  */
-function runMigrate(options: Partial<BackendServiceOptions>, extras: Record<string, string | boolean>): void {
+async function runMigrate(
+  options: Partial<BackendServiceOptions>,
+  extras: Record<string, string | boolean>
+): Promise<void> {
   const dataDir = options.dataDir;
   if (!dataDir) throw new Error('migrate requires --data-dir');
   const to = typeof extras.to === 'string' ? extras.to : '';
@@ -542,19 +569,94 @@ function runMigrate(options: Partial<BackendServiceOptions>, extras: Record<stri
     process.stdout.write(`${formatCarryReport(report)}\n`);
   }
 
-  if (!extras.dryRun) {
-    process.stderr.write(
-      '\nmigrate: only --dry-run is built. The schema, data, verify and cutover phases need the PostgreSQL\n' +
-        'adapter (BRG-005) and are not written yet, so this command will not start a move it cannot finish.\n'
-    );
-    process.exitCode = 2;
+  if (extras.dryRun) {
+    // A dry run that found a refusal is still a successful dry run — it did
+    // exactly what it was asked to. The exit code says whether the MIGRATION
+    // would start, because that is what a script wants to branch on.
+    if (!report.clean) process.exitCode = 1;
     return;
   }
 
-  // A dry run that found a refusal is still a successful dry run — it did
-  // exactly what it was asked to. The exit code says whether the MIGRATION
-  // would start, because that is what a script wants to branch on.
-  if (!report.clean) process.exitCode = 1;
+  // 🔴 The survey is a precondition, not a preamble: a construct that cannot
+  // cross is a refusal BEFORE any row moves (AC8). Nothing overrides it here —
+  // an override belongs to whoever is willing to name what they are losing.
+  if (!report.clean) {
+    process.stderr.write(
+      '\nmigrate: the carry report is not clean — the constructs above marked `cannot-cross` would be\n' +
+        'silently approximated by a move. Refusing to start one.\n'
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const sample = typeof extras.sample === 'string' ? parseInt(extras.sample, 10) : undefined;
+
+  if (extras.verifyOnly) {
+    // Verifying reads the LIVE database on the source side, because there is no
+    // snapshot from a run that is not happening — and says so, since a source
+    // that has moved on since the migration is a difference that is not damage.
+    const verified = await verifyMigration({ sourceDataDir: dataDir, target: to, sample });
+    process.stdout.write(`${extras.json ? JSON.stringify(verified, null, 2) : formatVerifyReport(verified)}\n`);
+    if (!verified.ok) process.exitCode = 1;
+    return;
+  }
+
+  const result = await migrateToPostgres({
+    dataDir,
+    target: to,
+    resume: !!extras.resume,
+    batchSize: typeof extras.batchSize === 'string' ? parseInt(extras.batchSize, 10) : undefined,
+    onProgress: (p) => {
+      if (p.phase === 'data' && p.copied !== undefined) {
+        process.stderr.write(`\r  ${p.table}: ${p.copied}/${p.rows}   `);
+      } else if (p.message) {
+        process.stderr.write(`  ${p.phase}: ${p.message}\n`);
+      }
+    }
+  });
+  process.stderr.write('\n');
+
+  // The snapshot the copy read is the thing verification compares against: the
+  // live file may have moved on, and a difference from THAT is not damage.
+  const verified = await verifyMigration({
+    sourceDataDir: path.dirname(path.dirname(result.snapshotPath)),
+    target: to,
+    sample
+  });
+
+  if (extras.json) {
+    process.stdout.write(`${JSON.stringify({ migration: result, verify: verified }, null, 2)}\n`);
+  } else {
+    process.stdout.write(`${formatVerifyReport(verified)}\n\n`);
+    process.stdout.write(
+      `Copied ${result.tables.reduce((n, t) => n + t.copied, 0)} rows in ${result.batches} batches, ` +
+        `${(result.elapsedMs / 1000).toFixed(1)}s.\n`
+    );
+    process.stdout.write(
+      `Source unchanged: sha256 ${result.sourceSha256Before.slice(0, 16)} before and after (AC7).\n\n`
+    );
+    process.stdout.write(`${cutoverAdvice(to, path.join(dataDir, 'data', 'local.db'))}\n`);
+  }
+
+  if (!verified.ok) {
+    process.stderr.write(
+      '\nmigrate: verification found differences (above). The source database is untouched — do not cut over.\n'
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  // Only a verified migration deletes its checkpoint: while one exists, the
+  // move is resumable, and a resumable move is not one that has been finished.
+  // The snapshot goes with it — it is a whole second copy of the database, and
+  // leaving it in the temp directory is how a migration fills a disk a week
+  // later. A FAILED run keeps both, because that is what --resume reads.
+  if (fs.existsSync(result.checkpointPath)) fs.unlinkSync(result.checkpointPath);
+  if (!extras.keepSnapshot) {
+    fs.rmSync(path.dirname(path.dirname(result.snapshotPath)), { recursive: true, force: true });
+  } else {
+    process.stdout.write(`\nSnapshot kept: ${result.snapshotPath}\n`);
+  }
 }
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
@@ -585,7 +687,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
       await runSchema(positionals, options, extras);
       break;
     case 'migrate':
-      runMigrate(options, extras);
+      await runMigrate(options, extras);
       break;
     case 'help':
     case '--help':

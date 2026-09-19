@@ -1,80 +1,85 @@
 # Phase 97 — next session
 
-**Session 8 built the adapter. `PostgresAdapter` and `PgSchemaManager` pass BRG-003's conformance suite
-56/56 on a real PostgreSQL 16.11, all six mutants are caught by six distinct case sets, the real service
-boots on `NODEGX_STORAGE_URL=postgres://…`, `/health` carries the pool, and `stop()` drains it.
-BRG-005 has one criterion open — AC7's sweep — and BRG-D6 is closed.**
+**Session 9 built the data plane. `nodegx-backend migrate --to postgres://…` now takes a consistent
+snapshot, creates the schema, copies every table in checkpointed batches, and then VERIFIES its own
+work by reading both sides back through their adapters — and refuses to say "cut over" if anything
+differs. BRG-004 is closed: AC1–AC8 green, AC9 measured. `brg-004-data-plane.test.ts` is 17/17.**
 
-**On the way it found the seam's second synchronous half** — `IStorageSchema` — and served it from a
-per-process model with queued DDL rather than pretending. That is filed as **BRG-D7** (README §9) and
-declared as three divergences, not hidden.
+**It also found a product defect that 56/56 conformance could not see** — a `Boolean` reads `0` on
+SQLite and `false` on PostgreSQL, over HTTP, in the same app. Filed as **BRG-D8** (README §9),
+declared in the adapter's divergence register, and NOT silently repaired: which way the two should
+agree is Richard's call.
 
-**Where it is:** `cline-dev`, commit `4226a6c68` (s7 was `afead5e9d`).
+**Where it is:** `cline-dev`, commit `<S9-COMMIT>` (s8 was `4226a6c68`).
 
 ## The board, re-derived from the task files
 
 | task | state | what is left |
 |---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) the interface | ✅ | — |
-| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`noodl-mcp` — red for a peer's reason, measured at s7) |
-| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | — |
-| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | 🏗 export half + carry report | **AC5 AC6 AC9** — the data plane exists now; nothing is in front of them |
-| [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ **AC1 AC2 AC3 AC4 AC5 AC6 AC8 AC9** | **AC7's sweep** (§1) and §7.4's owed list |
-| [BRG-006](BRG-006-THE-DRIVE.md) the drive | ⬜ | — |
+| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`noodl-mcp` — red for peers' reasons, re-measured at s9) |
+| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | ⚠️ **it has no boolean round-trip case** — BRG-D8 got past it |
+| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ **AC1–AC8 closed, AC9 recorded** | — (§7.6's 5 GB variant, if someone wants the bigger number) |
+| [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ all but AC7 | **AC7** — `noodl-mcp` green is not this phase's to make true (§7.5) |
+| [BRG-006](BRG-006-THE-DRIVE.md) the drive | ⬜ **next** | the whole task |
 
-**Readings taken this session** (2026-09-19): `brg-005-conformance-postgres` **13/13 — 56 cases passed,
-0 failed, 0 skipped**; mutants caught by 11 / 3 / 2 / 3 / 2 / 1 cases; `brg-005-service-postgres` 3/3;
-`brg-005-operational-store-postgres` + `brg002-operational-store` **36/36** on one shared runner;
-runtime adapter specs **292/292** (was 287; 5 new both-engine cases); phase backend specs **50/50**;
-`service-http` + `idempotency-store` 44/44; `typecheck:runtime` / `nodegx-backend` / `backend-tests` /
-`contract` **all exit 0**.
+**Readings taken this session** (2026-09-20): `brg-004-data-plane` **17/17 exit 0**; `test:main`
+**520 suites / 8292 tests exit 0**; full `nodegx-backend` **161 suites / 1920 tests, 1 failed — the
+peer's new `POST admin/executions/compact` route moving BAK-009's reviewed tally 79→80**; `noodl-mcp`
+**129 suites / 2193 tests, 8 suites red — the same eight as s7**, one of them failing on an untracked
+peer template; `nodegx-backend` typecheck exit 0. AC9: **2,000,000 rows / 1.36 GB in 50.7 s**.
 
-## 1. First job — AC7's sweep, before anything new
+## 1. First job — BRG-006, the drive
 
-🔴 A peer held two jest runs, a `tsc` and three webpack builds for the whole of s8, so nothing wide was
-run ([[do-not-pile-cpu-work-on-a-shared-box]]). Before any build work:
+Everything it depends on now exists. §3 of that file is the scope; the three things s9 leaves it:
 
-1. `dev:stop --list`, then `ps` for `jest|webpack|tsc` — wait if a peer suite is up.
-2. `npm run test:main` (8223 at s7; exit 0 is the gate — read the DURATION).
-3. `noodl-mcp` (8 suites red at s7 for a peer's reason — re-measure with HEAD restored by `cp` if red).
-4. The full `nodegx-backend` suite, once the peer's `src` edits have landed (twelve+ files were live).
+1. **The PostgreSQL specs are skipped when no server is reachable** (`brg-004-data-plane`,
+   `brg-005-*`, `SchemaManager.export.postgres`, `QueryBuilder.dialect`, `postgres.geo`). That is a
+   hole in CI written down in four places and closed in none. BRG-006's AC is where it becomes a gate.
+2. **Operator docs** — `NODEGX_STORAGE_URL`, the pool arithmetic, PgBouncer, `pg_dump`, and now
+   `migrate`'s five phases and what `--resume` promises. `docs/runtime/SELF-HOSTING.md` and
+   `BACKEND-OPERATIONS.md` were peer-held at s8 and s9; check before editing.
+3. **Backups on PostgreSQL** — `BackupManager` snapshots a SQLite file (`engine: 'node:sqlite'`
+   hardcoded). On a storage URL a scheduled backup fails at backup time, not at start. Ruling needed:
+   `pg_dump` is the operator's job (recommended — say so in the docs) or the service learns it.
 
-Then record the three numbers in BRG-005 §7 and close AC7 — or record which red is whose.
+## 2. 🔴 Two things in the working tree that are NOT at HEAD
 
-## 2. Second job — BRG-004's data plane (AC5 verify, AC6 resume, AC9 5 GB)
+Unchanged from s8, and s9 added a third:
 
-The four phases that move data were all waiting on a driver and an adapter. Both exist. The migrator
-opens `PgConnectionPool` + `PgSchemaManager` on `--to`, applies `tableDDL` (already its own generator),
-and copies rows with `PostgresAdapter.upsertBatch` — one transaction per batch, the shape BRG-002 made.
-`_Schema` and `_SearchIndex` are TEXT-JSON on both engines by design so the meta rows copy verbatim.
-
-## 3. 🔴 Two things in the working tree that are NOT at HEAD
-
-- **`packages/nodegx-backend/src/execution/ExecutionStore.ts`** — the `PgOperationalStore` wiring and
-  the `close()` call sit on the peer's uncommitted PRD-003 `close()` method, so the hunk has no HEAD
-  context and could not be committed alone. Commit it after theirs lands. The boot spec is green
-  against the working tree.
+- **`packages/nodegx-backend/src/execution/ExecutionStore.ts`** — the `PgOperationalStore` wiring
+  sits on the peer's uncommitted PRD-003 `close()`. Commit it once theirs lands.
 - **`packages/nodegx-backend/src/server/HttpServer.ts`** — only the four-line `pool:` hunk in
-  `healthBody()` is this phase's; the rest of that file's diff is the peer's. It was committed through a
-  temporary index; check `git show HEAD --stat` shows the file with **+4** and nothing else.
+  `healthBody()` is this phase's; it was committed through a temporary index at s8.
+- **`packages/nodegx-backend/src/cli.ts`** — s9's `migrate` hunks were committed through a temporary
+  index (the file also holds the peer's PRD-005 `--require-secrets` work). If a `git diff` on it
+  looks strange, that is why: what is at HEAD is HEAD + this phase's hunks only.
 
-## 4. What s8 settled
+## 3. What s9 settled, including where s8's handoff was wrong
 
-- **The order §6.2 gave was right, and the seam held.** Nothing in `QueryBuilder` needed a third
-  translation site beyond the two the first conformance run found (`$in: []` → `FALSE`, `LIKE` → `ILIKE`),
-  both armed on both engines in `QueryBuilder.dialect.test.js`.
-- **DDL has one source** (`postgres/ddl.ts`), the shared schema vocabulary is `schemaCommon.ts`, and the
-  BRG-004 export specs did not change by a byte.
-- **The model + queue is the honest shape for a synchronous schema interface on a socket** — and the
-  honest fix is to de-synchronise it (BRG-D7). Six callers. Not this session's: a peer was live in that
-  package throughout.
-- **`Object.create` wrappers split state on assignment.** `conformance/mutants.ts` wraps the schema
-  manager that way; `PgSchemaManager` keeps every mutable field in one `this.s` object for that reason.
-  A second adapter that forgets this passes the plain run and fails the `ignore-unique` mutant strangely.
+- 🔴 **s8 said the migrator would copy rows with `PostgresAdapter.upsertBatch`. It must not.**
+  `upsertBatch`'s update path re-stamps `updatedAt` and drops `createdAt` — correct for an app write,
+  a falsification for a migration, and invisible except on the resume. The writer is
+  `INSERT … ON CONFLICT DO UPDATE` over the source's own values, and a case states that property on
+  its own so the swap back fails with a sentence. (BRG-004 §7.2)
+- **An FTS5 index is not data.** `sqlite_master` lists the virtual table and its shadow tables; a
+  migrator reading the table list copies an index as a collection. They are excluded and the field
+  list is carried instead, to be rebuilt.
+- **A zoneless SQLite timestamp is UTC, and PostgreSQL will not assume that.** `_Schema`'s stamps are
+  written with `CURRENT_TIMESTAMP`; handed to a `TIMESTAMPTZ` as-is they shift by the server's UTC
+  offset. Verify compares instants, never spellings — and the obvious "compare the first 19
+  characters" repair would have passed exactly the damage AC5.4 mutates in.
+- **The verifier compares RECORDS through both adapters, not SQL.** That is what found BRG-D8, and it
+  is why every declared divergence is exercised by verification rather than described by it.
 
-## 5. Richard's calls — none outstanding
+## 4. Richard's calls — two, neither blocking
 
-R1–R6 stand. Two things are worth a sentence from him when convenient, neither blocking:
-- BRG-D7's owner — BRG-006, or a task of its own.
-- Backups on PostgreSQL — `pg_dump` is the operator's job (recommended, say so in the docs) or the
-  service's `BackupManager` learns a database that is not a file (BRG-005 §7.4).
+R1–R6 stand. Outstanding:
+
+- 🔴 **BRG-D8: which way should the two engines agree about a Boolean?** PostgreSQL's `true` is the
+  better answer and SQLite's `0`/`1` is what every existing app has been reading. The repair is one
+  of: teach `_rowToRecord` the declared type (changes SQLite's answers), or make the Postgres adapter
+  hand back `0`/`1` (keeps the old answer, and is the wrong-looking one). Either way BRG-003 needs a
+  boolean round-trip case, which is the cheap part.
+- **Backups on PostgreSQL** — `pg_dump` as the operator's job, or `BackupManager` learns a database
+  that is not a file.

@@ -301,3 +301,175 @@ The `.postgres.` spec carries both forms, one row each.
 AC5 (verify catches damage), AC6 (resumable), AC7 (the full-migration hash) and AC9 (5 GB) — all
 four need the data plane, and the data plane needs a driver. **BRG-005 first.** AC3's second half
 (the same traversal through the facade on both sides) is the same dependency.
+
+---
+
+## 7. As built, s9 — 2026-09-20: **the data plane**
+
+**Status: ✅ AC1–AC8 closed; AC9 measured (§7.6).** The four phases that move data exist, the
+migration verifies its own work through the adapter on each side, and an interrupted run resumes to a
+result identical to one that was not interrupted. What was owed by §6.4 — AC5, AC6, AC7's full-run
+hash, AC9, and AC3's second half — is closed or recorded below.
+
+| AC | state | where it was measured |
+|---|---|---|
+| AC1 carry report / `--dry-run` | ✅ s5 | §6 |
+| AC2 declared indexes incl. `unique` | ✅ s5 | §5.4 |
+| **AC3 relations survive, through the facade on both sides** | ✅ | `_Join_tags_Note` carries as a table in its own right and every sampled edge is checked on the other side (`compareJunction`); the junction's rows are the relation |
+| AC4 the RLS path | ✅ s5 | §5.3 |
+| **AC5 verify catches damage** | ✅ **four mutants, one case each, each with its control in the same run** | §7.3 |
+| **AC6 resumable** | ✅ **interrupted mid-copy, resumed, and compared row for row against an uninterrupted run into a second database** | §7.4 |
+| **AC7 source unchanged** | ✅ **sha256 identical before and after a full migration** — asserted in the spec AND inside `migrateToPostgres`, so a production run holds the promise the spec does | §7.2 |
+| AC8 a refusal names the construct | ✅ | s5's five, plus the migrator's own two: a table with **no primary key**, and a virtual table it does not understand |
+| **AC9 5 GB / 2 M rows** | ✅ **recorded** | §7.6 |
+
+**Readings, 2026-09-20:** `tests/brg-004-data-plane.test.ts` **17/17, exit 0** against PostgreSQL
+16.11; `nodegx-backend` typecheck exit 0.
+
+### 7.1 What landed
+
+| file | what |
+|---|---|
+| `nodegx-backend/src/migrate/plan.ts` | the plan: every table off `sqlite_master` + `PRAGMA table_info`, its kind, its primary key, the DDL that creates it, and the per-column coercion into PostgreSQL |
+| `nodegx-backend/src/migrate/move.ts` | phases 2, 3 and 5 — snapshot, schema, batched checkpointed copy, cutover advice |
+| `nodegx-backend/src/migrate/verify.ts` | phase 4 — both sides opened through `createAdapter` and compared as **records** |
+| `nodegx-backend/src/cli.ts` | `migrate` without `--dry-run` now runs; `--resume`, `--verify-only`, `--batch-size`, `--sample` |
+| `nodegx-backend/scripts/migrate-bench.js` | AC9's harness, in the repo so the number can be re-taken |
+| `noodl-runtime/…/postgres/index.ts` | exports `tableDDL`, `junctionDDL`, `META_DDL`, `POSTGRES_TYPE_MAP`, `SYSTEM_COLUMNS` — the migrator is the **second** caller of the adapter's own DDL, which is the only reason a database one fills can be served by the other |
+| `noodl-runtime/…/postgres/divergences.ts` | one new entry: `types/boolean-reads-as-0-1-on-sqlite` (BRG-D8) |
+
+### 7.2 🔴 Four decisions, and the one the handoff got wrong
+
+1. **The copy reads a snapshot, never the live file.** `snapshotDatabase()` (BAK-007) from a fresh read
+   connection, so a concurrent writer cannot tear a record — and AC7 is held by never opening the
+   source for writing at all. The snapshot lands at `<tmp>/data/local.db` so that **verification can
+   open it as a data directory**: the source side of the comparison is then the bytes that were
+   copied, not a live file that has moved on since.
+
+2. 🔴 **Rows are written verbatim, NOT through `PostgresAdapter.upsertBatch` — and s8's handoff said
+   they would be.** `upsertBatch`'s *update* path goes through `QueryBuilder.buildUpdate`, which
+   stamps `updatedAt = new Date()` and **deletes** `createdAt`. That is right for a write from the
+   app and a silent falsification for a migration. It is invisible on a clean run — every row takes
+   the INSERT path, which keeps both columns, because `buildInsert` spreads the caller's data over
+   its defaults — and it appears on **the resume**, where the in-flight batch is re-applied. So the
+   writer is `INSERT … ON CONFLICT (pk) DO UPDATE SET` over the source's own values. A case states
+   the property on its own (*a re-run over rows that are already there leaves `updatedAt` alone*) so
+   that a future swap back to `upsertBatch` fails with a sentence rather than as an AC6 puzzle.
+
+3. **Checkpoint after the commit, never before.** One transaction per batch; the checkpoint file is
+   written (tmp + rename) only once the batch has committed, so a crash loses at most one batch and
+   the resume re-applies it idempotently onto rows that are already correct.
+
+4. 🔴 **A table with no primary key is refused BY NAME, before a row moves.** No `ON CONFLICT` target
+   means no idempotent write, which means a resume would duplicate. Refusing is BRG-003 §3.4's answer;
+   a plausible half-copy is the thing this phase exists to delete.
+
+### 7.3 AC5 — the four mutants, each with its control
+
+Each case damages the **PostgreSQL side of a clean migration**, asserts the verification names it,
+then repairs it and asserts the verification goes quiet again. The repair is the control, in the same
+run: a verifier that always complained would fail the second half of every case
+([[a-negative-arm-needs-its-control-in-the-same-run]]).
+
+| mutant | what verify says |
+|---|---|
+| `DELETE` one row | `row-count` — *"25 rows in the source and 24 in PostgreSQL — 1 missing"* — **and** `missing-row` naming the objectId |
+| `left("body", 20)` | `field-mismatch` — *"…is TRUNCATED: 78 characters in the source, 20 in PostgreSQL"* |
+| `"ACL" - 'u8'` | `acl-mismatch` — *"…This changes who can read or write the row"*, with both ACLs shown |
+| `"dueAt" + interval '2 hours'` | `timestamp-mismatch` — *"…is 7200s away from the source"* |
+
+🔴 **A timestamp is compared as an INSTANT, and that is load-bearing in both directions.** SQLite
+writes `_Schema`'s stamps as naive UTC (`2026-07-25 16:19:32`) and a record's as ISO with
+milliseconds; PostgreSQL returns both through one parser as `…T16:19:32.000Z`. String equality would
+fail on a *correct* migration — and the obvious repair (compare the first 19 characters) would **pass
+a row read in the wrong timezone**, which is precisely the damage the fourth mutant is. The spelling
+difference is reported as a note; the instant is what is asserted.
+
+### 7.4 AC6 — interrupted, resumed, and identical to a run that was not
+
+The copy is stopped by throwing from the batch hook after the third commit, which leaves exactly what
+a killed process leaves: the rows of three committed batches and a checkpoint naming them. The
+checkpoint is asserted **partial** first — a resume onto a finished table proves nothing. Then
+`--resume` finishes it, verification is clean, and the two databases are compared with
+`json_agg(t ORDER BY t::text)` over `Note`, `_User`, `_Schema` and `_Join_tags_Note`: every column of
+every row, `createdAt` and `updatedAt` included.
+
+A resume also refuses two things by name: a checkpoint written for **a different target** (*"belongs
+to a migration into …"*), and a snapshot that has **changed or gone** since the checkpoint was
+written — a second snapshot of a live database is a different set of rows, and continuing a copy into
+one from the other would produce a database that never existed.
+
+### 7.5 🔴 What the cross-engine comparison found: BRG-D8
+
+Reading the same rows back through **both** facades — which nothing had ever done — produced 236
+findings on a migration that was otherwise perfect, and all 236 were one thing: **a `Boolean` column
+reads `0`/`1` on SQLite and `false`/`true` on PostgreSQL.** Measured again over HTTP, two
+`BackendService`s on the same data directory, and the same `GET /api/Note` answers `"pinned": 1` on
+one engine and `"pinned": true` on the other. The cause is in neither adapter's Postgres-specific
+code: both call `deserializeValue(value, schema.properties[key].type)`, and
+`SchemaManager.getTableSchema()` returns a `TableSchema`, which **has no `properties` member** — so on
+a service-opened backend (`BackendService` passes no `collections`) the declared type is never seen
+and each driver's own answer wins.
+
+It is **declared** (`types/boolean-reads-as-0-1-on-sqlite`), **filed** (BRG-D8), and **not repaired
+here**: making the two agree changes what every existing SQLite app reads back, which is a product
+decision. The verifier treats `0`↔`false` as the same value *with a note*, and still reports
+`null` against `false`, which is damage.
+
+⚠️ And the reason it survived 56/56 conformance: **BRG-003 has no case that round-trips a boolean**.
+A suite with a hole shaped like the defect ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+### 7.6 AC9 — how long it takes, measured
+
+`node scripts/migrate-bench.js --rows 2000000 --width 600`, PostgreSQL 16.11 on the same machine
+(M1 Air, 16 GB, a peer's dev stack watching):
+
+| | narrow rows | **the AC's size** |
+|---|---|---|
+| command | `--rows 2000000 --width 600` | `--rows 2000000 --width 2600` |
+| rows | **2,000,000** | **2,000,000** |
+| source | 1,356.9 MB SQLite | **8,070.1 MB SQLite** |
+| target | 1,221.5 MB PostgreSQL | 519.4 MB PostgreSQL ⚠️ |
+| copy | **50.7 s — 39,444 rows/s, 26.8 MB/s** | **107.6 s — 18,580 rows/s, 75.0 MB/s** |
+| verify (500 records) | 6.7 s, clean | 4.9 s, clean |
+| batches | 4,001 of 500 | 4,001 of 500 |
+| rate across the run | 49k → 56k → 48k → 41k → 45k rows/s | 35k → 34k → 33k → 24k rows/s |
+
+**So: a 2-million-row, 8 GB migration takes under two minutes on a laptop**, next to a peer's dev
+stack, and verifies clean. That is the number the docs can quote — and it is a good deal better than
+the sentence BRG-006 would otherwise have to write.
+
+⚠️ **The 519 MB target is an artefact of the fixture, not a finding about PostgreSQL.** The bench's
+`body` column is one repeated character, which TOAST compresses to almost nothing; real text will not
+shrink 16×. Read the **MB/s** (a read rate off SQLite) and the **rows/s**, not the ratio.
+
+🔴 **Read the rate, not the total.** It sags by roughly a fifth between the first and last fifth of
+the table — index maintenance on a growing table — so a rate measured small is a *floor* for a bigger
+one, not a multiplier. It does not collapse, which is the thing worth knowing: the copy is
+throughput-bound, not degrading.
+
+#### 🔴 And the reason AC9 is a criterion and not a nice-to-have: it found a defect no smaller run could
+
+The **5 GB** variant (`--width 2600`) did not report a slow migration. It reported **no migration
+at all**:
+
+```
+ERR_FS_FILE_TOO_LARGE: File size (5537792000) is greater than 2 GiB
+    at sha256File (src/migrate/move.ts:141)
+    at migrateToPostgres (src/migrate/move.ts:238)
+```
+
+`sha256File` was `createHash('sha256').update(fs.readFileSync(file))`, and **`readFileSync` refuses
+anything over 2 GiB**. It is the FIRST thing `migrateToPostgres` does — AC7's promise, taken before
+the snapshot — so `migrate` **could not run at all on a database larger than 2 GiB**. Which is to
+say: it worked on every database nobody needs to migrate, and failed on every database somebody does.
+
+Every other reading in this file was taken below that size and every one of them was green. A spec
+cannot carry a 5 GB fixture, so what the spec now asserts is the **mechanism** — that the function
+that hashes a database file streams and does not call `readFileSync` — and AC9's harness is what
+asserts the size. Fixed by streaming through `pipeline(createReadStream(file), hash)`.
+
+⚠️ A second, smaller thing the same failure exposed: the harness left **7.9 GB** in the temp
+directory, because a script that only cleans up on success does not clean up. It now cleans up on the
+way out of a failure too.
+
