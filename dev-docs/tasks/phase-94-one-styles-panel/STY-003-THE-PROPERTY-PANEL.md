@@ -358,9 +358,23 @@ still focused, caret at 17.
    on disk naming a Look the sidecar does not contain — and on the next open it resolves to
    nothing and the next save writes the node **without a `variant` key at all**, which is what
    happened at 18:04 and is unrecoverable without undo. Not the FLD-009 refusal path: no refusal
-   warning reached the console, only `Project saved`. `saveProjectLevel`'s
-   `hash === projectLevelHashes.get(key) → continue` is where to start. The driven project was
-   repaired by hand afterwards.
+   warning reached the console, only `Project saved`. The driven project was repaired by hand
+   afterwards.
+
+   **Where the baselines come from, read at HEAD (`ProjectStructure/index.ts:225-236`, `:430-441`):**
+   `projectLevelHashes` — the one whose `hash === get(key) → continue` short-circuits the save — is
+   seeded **at load from the RE-EXPORT of the imported project** (`buildStylesV2File(project)`),
+   not from the bytes; `projectLevelDiskHashes` is seeded from the bytes just read and only ever
+   produces the FLD-009 *refusal*, which logs. So the silent skip does not mean *"the file has not
+   changed"* — it means **"the content WE BUILD has not changed"**.
+
+   🔴 **Which moves the next question off the baseline entirely.** Every rename in this section was
+   issued through `window.__wreq(...).ProjectModel.instance`. If that is not the same singleton
+   `saveProject` serialises, then the built styles content genuinely never moved — **and the same
+   duplication would also explain defect 1**, a node holding a `VariantModel` that is not in
+   `ProjectModel.instance.variants`. One hypothesis, both findings, and it is cheap: compare the
+   instance `__wreq` hands back with the one the editor's own code holds, **before** treating these
+   as two bugs. ⚠️ **Not measured** — it is precisely the assumption every reading above rested on.
 
 ## 3. Acceptance criteria
 
