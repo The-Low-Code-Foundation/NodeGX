@@ -108,7 +108,7 @@ without shared selection is a second list, not a view.
 | id | task | depends on |
 |---|---|---|
 | [TVW-006](./TVW-006-THE-STRUCTURE-LANE.md) | The lane drawn around the stack wherever it is, the eyebrow, and the `All · Structure · Logic` filter that dims (R-F, R-J) | — |
-| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. **Slice 1 built (s20): the rules, the shared count source, the painter. 🔴 R-Z settled the text, not the ROW — four placements photographed and WITH RICHARD; `hover-only` ships meanwhile** | TVW-003 |
+| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. **Slice 1 built (s20): the rules, the shared count source, the painter. 🔴 R-Z settled the text, not the ROW — four placements photographed and WITH RICHARD; `hover-only` ships meanwhile.** Slice 2 built (s21): the TRAIL — **AC3 ✅ AC4 ✅**, 53 specs / 12 mutants killed. Left: AC1/AC5 (a drive), AC2b (the hover), the `Edit ›` door | TVW-003 |
 
 ### Track D — the Workbench
 
@@ -182,16 +182,21 @@ This phase closes when:
 
 Not when the suite is green. It was green on the day this was scoped.
 
-## 5. Where the phase stands (updated s16, 2026-09-18)
+## 5. Where the phase stands (updated s21, 2026-09-19)
 
 | id | built | driven |
 |---|---|---|
 | TVW-001 | ✅ | CLOSED — 8 ACs |
 | TVW-002 | ✅ | CLOSED — 7 ACs |
 | TVW-003 | ✅ | CLOSED — 6 ACs |
-| TVW-004 | ✅ | AC1–5, AC7 green; **AC6 awaits Richard's look** |
-| TVW-005 | slice 1 | 9/9 arms; AC1 needs the tab-header drop strip |
-| TVW-006…010 | — | — |
+| TVW-004 | ✅ | AC1–5, AC7 green; **AC6's 20 shots SENT s18 — awaits Richard's look** |
+| TVW-005 | ✅ | CLOSED — 6 ACs |
+| TVW-006 | ✅ | AC1–4, AC6 green; **AC5's 18 shots SENT s18 — awaits Richard's look** |
+| TVW-007 | slices 1–2 | **AC2, AC3, AC4 green.** AC1/AC5 need a drive; the placement's 4 shots are WITH RICHARD |
+| TVW-008 | slice 1 | reshaped by R-7; slice 2 is the surface |
+| TVW-009, TVW-010 | — | — |
 
-**39 ACs closed.** The board is re-derived from the task files each session; this table is a
+**52 ACs closed.** 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
+TVW-004 AC6 (20 shots, s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placements (s20). The
+first two close their tasks on the spot. **Do not re-send them.** The board is re-derived from the task files each session; this table is a
 convenience, and the task files win where they disagree.

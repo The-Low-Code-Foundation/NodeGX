@@ -186,3 +186,75 @@ components at 10–99, **two over 100**, max 140).
 2. `hover-only` is what ships until then — it is the only placement that moves nothing.
 3. Then the hover (AC2b) and the trail (AC3/AC4), which R-Z did not touch and which are independent
    of the placement.
+
+## 9. s21 — the trail (AC3 ✅ AC4 ✅), built while the placement is still with Richard
+
+`931f817a0f`. The placement verdict (§8) was still unanswered, so this session built the half of
+the task it does not block: **the trail's containment form**. Nothing here touches the eyebrow, the
+painter or `titlebarHeight()` — a peer was in `NodeGraphEditorNode.ts` the same evening and the two
+sets of files do not intersect.
+
+**What a person gets.** Double-click the `Hero` node on Home's canvas and the trail reads
+`[◆ Home] › Hero` — the component you came *through*, drawn as a crumb with a diamond, followed by
+where you are. Open the same component from the Components panel and it reads `Sections › Hero`,
+exactly as before. ⌘[ and ⌘] rebuild whichever trail was on screen at that step.
+
+**Built:** `instanceTrail.ts` (pure: `instanceParentCrumb`, `leafName`, `buildComponentTrail`),
+`NavigationHistory` entries as `{name, via}` + `currentEntry()`, `switchToComponent`'s
+`viaInstance` arg, the instance crumb in `NodeGraphComponentTrail.tsx` + its styling.
+**53 specs / 4 suites green in `tests-unit/tvw-007`; TWELVE mutants killed, none survived.**
+✅ **`test:main` — 517 suites / 8,258 specs all green, exit 0.** `typecheck:editor` 0,
+`typecheck:editor-tests` 0. 🔴 `test:ci` NOT run — six live sessions, four `dev` stacks; AC6 owes it.
+
+### 🔴 AC3's last clause, changed by building it
+
+§4 asked for `discardInvalidEntries` to **drop entries whose `via` component is deleted**. It now
+**clears the `via` and keeps the entry**, and the difference is worth the words:
+
+after deleting `Home`, the entry for `Hero` still names a component that exists and is still
+perfectly reachable. Dropping it makes ⌘[ skip a valid destination because something *else* was
+deleted. What is actually broken is the **route**, not the entry: the trail would draw a `Home`
+crumb wired to `switchToComponent(undefined)` — a crumb that looks live and does nothing. Clearing
+the route fixes exactly that and falls back to the folder path, which is what every other route
+shows anyway.
+
+⚠️ The spec arms **both halves** — the entry survives *and* its `via` is null — because asserting
+only the second would pass just as happily on an implementation that threw the entry away. The
+`§4`-as-written behaviour is mutant M5 and it is killed.
+
+### 🔴 Thirty lines that only a drive could have graded
+
+The trail construction was inside `OverlayViews.updateTitle()`. It is a **choice between two
+plausible trails for the same component**, and in there it needed Electron, a renderer and a live
+`ProjectModel` to run at all — so in practice it would have been graded by looking at it. It is now
+`buildComponentTrail`, called from the one place, and **the folder-path cases are a regression
+floor**: the containment branch cannot quietly become the only branch
+([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+### What was deliberately NOT done
+
+- ⚠️ **Only the instance crumb is a real `<button>`.** Every clickable crumb in that bar should be
+  one — a `<div onClick>` is unreachable by keyboard and silent to a screen reader — but that is a
+  change to the look of a surface P92/P94/P78 are all editing this week, and it needs a photograph
+  before it ships. The new crumb has nothing to regress, and it is what makes the two crumb kinds
+  differ in the **rendered DOM** rather than only in a class name, which is what AC4 asks to read.
+- **The component-port branch of the double-click does not pass `viaInstance`.** That node *names*
+  a component in a parameter; it does not contain one. The diamond is a containment claim that
+  relationship never makes.
+- **`in 3 places ▾`** (§2's multi-parent popover) — §6 measured that 44% of placed components have
+  2+ parents, so this is the ordinary case, not the exceptional one. The crumb drawn is the one you
+  came through, which is always right; what is missing is the way to see the others.
+- **`getTopComponent` deleted** — no callers anywhere in the repo.
+
+### AC1 and AC5 still need a drive
+
+AC3/AC4 close on specs. **AC1 is the person sentence end to end** (the eyebrow's `· 1×`, the hover,
+`Edit ›`, the trail, ⌘[/⌘]) and **AC5 is Richard's WORTHY on screenshots** — both need the editor.
+🔴 Not driven this session: **six Claude sessions were live on this box**, four of them holding
+`dev` stacks, and the s20 handoff records what an unattributed drive cost a peer. Use
+`drive-tvw007-eyebrow.js`'s PPID ownership check.
+
+**What a drive must actually confirm**, because no spec here does: that the crumb *appears*. The
+ordering is right by inspection — `activeComponent = component` → `push(component, via)` →
+`bindModel` → `updateTitle` — so `updateTitle` reads the fresh entry against the fresh component.
+That is an argument, not a photograph ([[verify-the-consequence-not-just-the-mechanism]]).
