@@ -191,19 +191,30 @@ suite(`the export applied to PostgreSQL (${PG_URL})`, () => {
       fs.writeFileSync(file, sm.generateSupabaseSQL({ security: security(), userIdClaim: 'nodegx_user_id' }));
       psqlFile(file);
 
-      // Three rows, written as the owner (the migrator's own connection):
-      // one owned by u1, one owned by u2, one public.
+      // Four rows, written as the owner (the migrator's own connection).
+      //
+      // 🔴 `r1` and `r2` carry the flags as **booleans**, because that is what
+      // the product writes: the wire refuses anything else ("ACL flag *.read
+      // must be a boolean") and the JSON on disk reads
+      // `{"*":{"read":true}}`. SQLite's `json_extract` returns 1 for that, which
+      // is why its predicate compares to 1 — and PostgreSQL's `->>` returns
+      // 'true', which is why the generated policy accepts both. A policy written
+      // from the SQLite predicate alone would deny every ACL'd row in every real
+      // database. `r4` is the numeric form, so both are measured rather than
+      // one assumed.
       psql(
         `INSERT INTO "Item" ("objectId", "guid", "ACL") VALUES
-           ('r1', 'g1', '{"u1":{"read":1,"write":1}}'::jsonb),
-           ('r2', 'g2', '{"u2":{"read":1,"write":1}}'::jsonb),
-           ('r3', 'g3', NULL);`
+           ('r1', 'g1', '{"u1":{"read":true,"write":true}}'::jsonb),
+           ('r2', 'g2', '{"u2":{"read":true,"write":true}}'::jsonb),
+           ('r3', 'g3', NULL),
+           ('r4', 'g4', '{"u1":{"read":1,"write":1}}'::jsonb);`
       );
     });
 
     it('a user reads their own rows and the public one, and not the other user’s', () => {
       const seen = asUser('u1', `SELECT string_agg("objectId", ',' ORDER BY "objectId") FROM "Item";`).trim();
-      expect(seen).toBe('r1,r3');
+      // r1 (boolean flags), r3 (no ACL), r4 (numeric flags) — and NOT r2.
+      expect(seen).toBe('r1,r3,r4');
     });
 
     it('a non-owner cannot UPDATE another user’s row', () => {

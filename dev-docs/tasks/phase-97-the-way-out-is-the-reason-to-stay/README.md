@@ -13,7 +13,8 @@ jest by name. 22 of 61 members are declared uncovered, held by a ratchet. AC5 wa
 mechanism **did not hold** — `unsupported` covered an adapter that answered wrongly; fixed. **AC8 was all that remained on BRG-003 and it belonged to BRG-004 — s5 closed it**: the two
 SQL generators are repaired and held by 36 cases and four mutants, with the adversarial half measured
 on a real PostgreSQL 16.11. BRG-D1, D2, D3 and D4 are all closed. What BRG-004 still owes is **the
-`migrate` command itself**.
+`migrate` command's data phases** — `--dry-run` and its carry report landed in the same session, and
+every criterion still open needs a PostgreSQL driver, so **BRG-005 comes next, not later**.
 **Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
@@ -173,7 +174,7 @@ still `📋 Specced, not started`.
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20 + 21 + 20** members that already exist (s1 recorded 20 + 22 + 16; **two of the three were wrong**, found when BRG-003's gate counted the artefact at s4) | ✅ s1 | ✅ s4 — `typecheck:contract` is now a CI job; the package had a `typecheck` script no workflow had ever called | n/a |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | ✅ s1-s3 — §3.1 + §3.2 + §3.3 | 🏗 AC1 AC4 AC5 AC6; AC7 left | n/a |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | ✅ s2-s4 — 56 cases, 5 areas, **+ the gate** | ✅ AC1 AC3 AC4 **AC5 AC6 AC7**; **only AC8 left, and it is BRG-004's** | n/a |
-| [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | 🏗 s5 — **the export half**: D1, D2, D3 closed, measured on PostgreSQL 16.11 | ✅ AC2 AC4; 🟡 AC3 AC8 | ⬜ AC1 AC5 AC6 AC7 AC9 — **the command itself** |
+| [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | 🏗 s5 — **the export half** (D1, D2, D3, measured on PostgreSQL 16.11) **+ the carry report** | ✅ AC1 AC2 AC4; 🟡 AC3 AC7 AC8 | ⬜ AC5 AC6 AC9 — the four phases that move data, all behind **BRG-005's driver** |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) | `PostgresAdapter` implementing the BRG-001 interface until BRG-003 is green | ⬜ | ⬜ | ⬜ |
 | [BRG-006](BRG-006-THE-DRIVE.md) | The drive: a real app with workflows, cloud functions, triggers and ACLs moved end to end, graph untouched | ⬜ | ⬜ | ⬜ |
 

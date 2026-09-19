@@ -35,6 +35,7 @@ import { ARCHIVE_EXT } from './backup/archive';
 import { AuditLog, ensureAuditTable } from './ops/audit';
 import { OpsState } from './ops/OpsState';
 import { exportCollection, importCollection, DataFormat } from './backup/dataio';
+import { formatCarryReport, redactTarget, surveyForMigration } from './migrate/survey';
 import {
   applySchema,
   diffSchema,
@@ -112,6 +113,13 @@ function parseArgs(argv: string[]): ParsedArgs {
         break;
       case '--dry-run':
         extras.dryRun = true;
+        break;
+      // BRG-004: the migration destination.
+      case '--to':
+        extras.to = next();
+        break;
+      case '--json':
+        extras.json = true;
         break;
       case '--allow-destructive':
         extras.allowDestructive = true;
@@ -225,6 +233,7 @@ Usage:
   nodegx-backend import  <collection> <file> --data-dir <dir> [--format json|csv] [--dry-run]
   nodegx-backend schema  diff  <source> <target>
   nodegx-backend schema  apply <source> --data-dir <target> [--allow-destructive]
+  nodegx-backend migrate --data-dir <dir> --to <postgres-url> --dry-run [--json]
 
 Commands:
   serve    Start the service and stay running: BYOB /api routes, the Parse-wire
@@ -239,6 +248,11 @@ Commands:
   import   Import one collection (upsert by objectId; --dry-run previews).
   schema   diff/apply schema + config promotion (dev -> prod). Additive applies
            automatically; destructive needs --allow-destructive (backs up first).
+  migrate  --dry-run prints the CARRY REPORT: every construct in this backend
+           and whether it crosses to PostgreSQL, crosses degraded, or does not
+           cross. Reads and writes nothing. The phases that move data are not
+           built yet (BRG-004), and migrate without --dry-run says so rather
+           than starting something it cannot finish.
 
 Options:
   --data-dir <dir>       Directory for the SQLite files, uploads, and workflows.
@@ -501,6 +515,48 @@ async function runSchema(
   throw new Error('schema requires a subcommand: diff | apply');
 }
 
+/**
+ * BRG-004 phase 1 — the carry report, and nothing else yet.
+ *
+ * The four phases after it (schema, data, verify, cutover) need a PostgreSQL
+ * driver, which is BRG-005's decision to make. Until then this command does the
+ * one thing it can do honestly: survey, and refuse to pretend. A `migrate` that
+ * started copying and stopped halfway would be the failure mode the whole phase
+ * exists to remove.
+ */
+function runMigrate(options: Partial<BackendServiceOptions>, extras: Record<string, string | boolean>): void {
+  const dataDir = options.dataDir;
+  if (!dataDir) throw new Error('migrate requires --data-dir');
+  const to = typeof extras.to === 'string' ? extras.to : '';
+  if (!to) throw new Error('migrate requires --to <postgres://…>');
+  if (!/^postgres(ql)?:\/\//.test(to)) {
+    // R5: Postgres only, and said out loud rather than discovered at phase 3.
+    throw new Error(`Only PostgreSQL destinations are supported: ${redactTarget(to)}`);
+  }
+
+  const report = surveyForMigration(dataDir, to);
+
+  if (extras.json) {
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  } else {
+    process.stdout.write(`${formatCarryReport(report)}\n`);
+  }
+
+  if (!extras.dryRun) {
+    process.stderr.write(
+      '\nmigrate: only --dry-run is built. The schema, data, verify and cutover phases need the PostgreSQL\n' +
+        'adapter (BRG-005) and are not written yet, so this command will not start a move it cannot finish.\n'
+    );
+    process.exitCode = 2;
+    return;
+  }
+
+  // A dry run that found a refusal is still a successful dry run — it did
+  // exactly what it was asked to. The exit code says whether the MIGRATION
+  // would start, because that is what a script wants to branch on.
+  if (!report.clean) process.exitCode = 1;
+}
+
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const { command, positionals, options, extras } = parseArgs(argv);
 
@@ -527,6 +583,9 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
       break;
     case 'schema':
       await runSchema(positionals, options, extras);
+      break;
+    case 'migrate':
+      runMigrate(options, extras);
       break;
     case 'help':
     case '--help':

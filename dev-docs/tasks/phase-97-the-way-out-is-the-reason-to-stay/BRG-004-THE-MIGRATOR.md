@@ -1,9 +1,10 @@
 # BRG-004 — The migrator
 
-**Status: 🏗 In progress (s5, 2026-09-19) — the EXPORT half is built, the migrator command is not.**
+**Status: 🏗 In progress (s5, 2026-09-19) — the EXPORT half and the CARRY REPORT are built; the four
+phases that move data are not.**
 BRG-D1, BRG-D2 and BRG-D3 are closed and measured against a real PostgreSQL 16.11; AC2 and AC4 are
-green, AC3 and AC8 half, and AC1/AC5/AC6/AC7/AC9 untouched. **See §5.** BRG-005 is no longer purely
-parallel: the data phases need its driver.
+green, AC1 green (§6), AC3/AC7/AC8 half, and AC5/AC6/AC9 untouched. **See §5 and §6.** BRG-005 is no
+longer purely parallel: every remaining criterion needs its driver.
 
 ## 1. The person sentence
 
@@ -110,13 +111,13 @@ AC5, AC6, AC7 and AC9 are untouched, and AC3 and AC8 are half.
 
 | AC | state | where it was measured |
 |---|---|---|
-| AC1 — carry report / `--dry-run` | ⬜ | the command does not exist |
+| **AC1 — carry report / `--dry-run`** | 🟢 | §6 — `migrate --dry-run`, 14 cases, source file hashed before and after |
 | **AC2 — BRG-D2, declared indexes incl. `unique`** | 🟢 | `pg_indexes` on PostgreSQL 16.11, §5.4 |
 | AC3 — BRG-D3, relations survive | 🟡 | junction table + traversal measured in PostgreSQL; **"through the facade on both sides" needs BRG-005** |
 | **AC4 — BRG-D1, the RLS path** | 🟢 | a non-owner denied SELECT/UPDATE/DELETE on a real server, with the owner as the control |
-| AC5 — verify catches damage | ⬜ | the command does not exist |
+| AC5 — verify catches damage | ⬜ | needs the data plane, which needs BRG-005's driver |
 | AC6 — resumable | ⬜ | " |
-| AC7 — source file unchanged | ⬜ | " |
+| AC7 — source file unchanged | 🟡 | the survey is measured byte-identical; a full migration cannot be |
 | **AC8 — a refusal names the construct** | 🟡 | five refusals on the export path, one of them over HTTP; the migrator's own are owed |
 | AC9 — 5 GB / 2 M rows | ⬜ | " |
 
@@ -235,3 +236,68 @@ say when it called them parallel.
 ⚠️ One consequence to carry: `BackendManager.js:968`'s dead IPC channel passes `format` only, so a
 `format=supabase` call through it now answers **409** instead of permissive SQL. Nothing in the
 editor consumes it (README §4.1), and 409 is the correct answer to that request.
+
+---
+
+## 6. As built, s5 (second slice) — **AC1, the carry report**
+
+`nodegx-backend migrate --data-dir <dir> --to postgres://… --dry-run [--json]`.
+Phase 1 of §3.1 and nothing else: it reads, prints, and touches nothing. 14 cases in
+`nodegx-backend/tests/brg-004-carry-report.test.ts`.
+
+🔴 **Without `--dry-run` the command refuses** — exit 2, naming BRG-005 — rather than starting four
+phases it cannot finish. A `migrate` that copied and stopped halfway is the failure mode this whole
+phase was created by.
+
+### 6.1 The finding: both schema readers are blind to every account
+
+`exportSchemas()` and `listTables()` **both** filter `name NOT LIKE '\_%'`, and they are right to —
+nobody browsing their collections wants `_Session` in the list. But those are the two readers a
+migrator reaches for first, and a migration built on either **carries an app across with no user
+accounts in it and reports success**. The survey therefore reads `sqlite_master` and names all
+thirteen internal tables, each with what it holds:
+
+| | |
+|---|---|
+| `_User` `_Session` `_Role` `_ApiKey` | accounts, live sessions, roles, hashed keys |
+| `_UserIdentity` `_EmailToken` | OAuth identities; reset/verification tokens |
+| `_Files` | file **records** — 🔴 the bytes live on disk beside the database, not in it |
+| `_Audit` `_HttpCache` `_Schema` | the audit log; a cache that rebuilds itself (skippable); the adapter's own schema table |
+| `_Join_*` | one per relation, including `_Join_users__Role` — roles are a relation |
+
+Each meaning is read off the constant that names the table (`AUDIT_COLLECTION`,
+`FILES_COLLECTION`, `IDENTITY_COLLECTION`, `HTTP_CACHE_COLLECTION`), not from memory.
+
+### 6.2 What else it does that a smaller version would not
+
+- **The password is redacted** in every rendering, including `--json`. A carry report is printed to
+  a terminal, written to an execution record and pasted into an issue; a password that reached any
+  of those has been disclosed, and "we only printed it once" is not a mitigation.
+- **It says where the permissions came from** — `security.json`, or the built-in defaults — because
+  `SecurityState`'s constructor **writes** a config when there is none, and a survey must not. Read
+  directly, validated, never written.
+- **Verdicts use BRG-003 §3.4's three words**: `carries`, `degraded`, `cannot-cross`. FTS5 search is
+  `degraded` (matching carries, ranking differs, owed by BRG-005); `GeoPoint` is `degraded` (the
+  value carries as JSONB, the distance function is owed); a `Relation` with no `targetClass` is
+  `cannot-cross`, and the report is then not clean.
+- **AC7's shape, early**: the survey opens the file `readOnly` and the spec hashes the database
+  before and after. The cheapest way to hold a promise about not writing is to be unable to.
+
+### 6.3 🔴 The measurement that would have broken the Supabase policies in every real database
+
+The wire refuses an ACL flag that is not a boolean (*"ACL flag \*.read must be a boolean"*), so what
+is on disk is `{"*":{"read":true}}`. SQLite's `json_extract` returns **1** for that JSON `true` —
+which is why `QueryBuilder`'s predicate compares to `1`, and why a policy translated from that
+predicate alone would compare `->> 'read'` to `'1'`, match **nothing**, and lock every user out of
+every ACL'd row while looking exactly right.
+
+The generated policy accepts `('1', 'true')`. That was written defensively before this was measured;
+the measurement is what makes it load-bearing, and **a fifth mutant** now holds it: dropping
+`'true'` reddens exactly the rows whose flags are booleans, which is all of them in a real database.
+The `.postgres.` spec carries both forms, one row each.
+
+### 6.4 Still owed by BRG-004
+
+AC5 (verify catches damage), AC6 (resumable), AC7 (the full-migration hash) and AC9 (5 GB) — all
+four need the data plane, and the data plane needs a driver. **BRG-005 first.** AC3's second half
+(the same traversal through the facade on both sides) is the same dependency.
