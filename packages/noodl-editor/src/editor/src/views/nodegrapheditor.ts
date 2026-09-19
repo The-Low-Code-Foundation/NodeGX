@@ -36,6 +36,7 @@ import { InteractionController } from './nodegrapheditor/canvas/InteractionContr
 import { NodeSelector } from './nodegrapheditor/canvas/NodeSelector';
 import { AABB, CenterToFitMode, IVector2, MouseEventType, PanAndScale } from './nodegrapheditor/canvas/types';
 import { OverlayHost } from './nodegrapheditor/canvas/OverlayHost';
+import { InstanceHoverController } from './nodegrapheditor/InstanceHoverController';
 import { bindNodeGraphCanvas } from './nodegrapheditor/CanvasDOMBindings';
 import { CanvasPainter } from './nodegrapheditor/CanvasPainter';
 import { CanvasShell, createCanvasShell } from './nodegrapheditor/CanvasShell';
@@ -134,6 +135,14 @@ export class NodeGraphEditor extends View {
 
   /** Debug-inspector hover/show behaviour and inspector registry (PLAT-001 wave 2 extraction). */
   inspectorActions = new InspectorActions(this);
+
+  /**
+   * TVW-007 AC2b — the hover surface an instance node carries (its path, its count, `Edit ›`).
+   *
+   * R-Z took the component's name off the card, so this is the only place an instance says what
+   * it is; the rules it runs on are in `canvas/instanceHover.ts`.
+   */
+  instanceHover = new InstanceHoverController(this);
 
   /** Model mutations from canvas gestures: create/attach/detach/commit-move (PLAT-001 wave 2 extraction). */
   nodeOperations = new NodeOperations(this);
@@ -286,6 +295,8 @@ export class NodeGraphEditor extends View {
     // Clean up React roots. Pre-PLAT-001 this only unmounted the highlight
     // overlay and canvas tabs roots; the banner, execution overlay and title
     // roots leaked. unmountAll covers every root registered with the host.
+    this.instanceHover.dispose();
+
     this.overlays.unmountAll();
     this.contextMenu.releaseToolbarHandle();
 
@@ -607,6 +618,11 @@ export class NodeGraphEditor extends View {
       viaInstance?: boolean;
     }
   ) {
+    // TVW-007: whatever the hover card was anchored to is not on the canvas after this call —
+    // including the instance whose `Edit ›` may be what made it. Before the early return, so a
+    // canvas being closed drops it too.
+    this.instanceHover?.dismiss();
+
     if (!component) {
       this.activeComponent?.off(this);
       this.activeComponent = undefined;

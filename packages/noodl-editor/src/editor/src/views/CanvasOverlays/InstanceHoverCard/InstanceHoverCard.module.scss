@@ -1,0 +1,79 @@
+/* TVW-007 AC2b — the instance hover surface.
+
+   The host layer (.instance-hover-root) is pointer-events: none; this card turns them back on,
+   because the close condition depends on the pointer being able to REACH it (`nextHoverState`:
+   visible while the pointer is on the node or on the card). A card that ignored the pointer
+   would draw a door nobody can press.
+
+   Height is set inline from INSTANCE_HOVER_CARD_HEIGHT — the placement maths is computed against
+   that number, and a second copy here is the drift the painter and titlebarLabelHeight() were
+   caught in at s20. */
+
+.Card {
+  position: absolute;
+  pointer-events: all;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 420px;
+  padding: 0 4px 0 10px;
+  background-color: var(--theme-color-bg-1);
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-default);
+  box-shadow: var(--shadow-float);
+  font-family: var(--font-family);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--theme-color-fg-default);
+}
+
+.Path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--theme-color-fg-highlight);
+}
+
+/* The same token the painter fills the `· 3×` with (`cat.accent` resolves
+   `--theme-color-node-category-component`), so the count on the hover and the count on the card
+   are one hue by construction rather than by two hand-picked colours. */
+.Count {
+  font-family: var(--font-family-code);
+  font-size: 10px;
+  color: var(--theme-color-node-category-component);
+}
+
+/* §2: `primary` on `primary-bg` — the same pair the instance crumb this door produces is drawn
+   in (NodeGraphComponentTrail `.is-instance`), so pressing it lands somewhere that looks like
+   where it came from. */
+.Edit {
+  appearance: none;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 4px 8px;
+  border-radius: var(--radius-default);
+  background-color: var(--theme-color-primary-bg);
+  color: var(--theme-color-primary);
+  font-family: var(--font-family);
+  font-size: 11.5px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-primary);
+    color: var(--theme-color-on-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.Chevron {
+  font-size: 13px;
+  line-height: 1;
+}

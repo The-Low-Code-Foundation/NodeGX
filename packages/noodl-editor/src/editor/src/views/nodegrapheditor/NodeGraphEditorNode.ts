@@ -260,6 +260,14 @@ export class NodeGraphEditorNode {
           }
         }
 
+        /**
+         * TVW-007 AC2b — the hover surface, on every move over the node.
+         *
+         * Not only on `move-in`: the pointer can enter this node from a card belonging to the
+         * one next to it, and the controller is idempotent for a subject it already holds.
+         */
+        this.owner.instanceHover?.onNodeHover(this);
+
         this.connectionDragAreaHighlighted = pos.x > this.nodeSize.width - 20 && pos.y < 20;
 
         const showCrosshairCursor = this.connectionDragAreaHighlighted || this.borderHighlighted;
@@ -279,12 +287,19 @@ export class NodeGraphEditorNode {
 
         this.connectionDragAreaHighlighted = false;
         this.borderHighlighted = false;
+        // TVW-007: the card outlives this by `InstanceHover.graceMs`, which is the window the
+        // pointer needs to cross the gap and reach `Edit ›`.
+        this.owner.instanceHover?.onNodeLeave(this);
         this.owner.repaint();
 
         this.owner.setPreviewHover?.(this.model.id, false);
         break;
       case 'down':
         PopupLayer.instance.hideTooltip();
+
+        // TVW-007: a press starts a drag, a connection or a selection — the card is anchored to
+        // a rectangle that is about to move, and none of those gestures wants it in the way.
+        this.owner.instanceHover?.dismiss();
 
         if (this.owner.highlighted === this) {
           if (this.borderHighlighted || this.connectionDragAreaHighlighted) {

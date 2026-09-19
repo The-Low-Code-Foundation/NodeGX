@@ -185,6 +185,10 @@ export class ViewportActions {
     editor.overlayViews.updateRecordingOverlay();
     // PAR-003: keep the HUD zoom percentage live.
     editor.overlayViews.updateCanvasHud();
+    // TVW-007: the hover card is anchored to a screen rectangle that pan and zoom have just
+    // moved. Dismissed rather than re-anchored: the pointer is on a wheel or a trackpad, not on
+    // the node, and a card that chased the graph would be a second thing moving under it.
+    editor.instanceHover?.dismiss();
   }
 
   clampPanAndScale(panAndScale: PanAndScale) {
