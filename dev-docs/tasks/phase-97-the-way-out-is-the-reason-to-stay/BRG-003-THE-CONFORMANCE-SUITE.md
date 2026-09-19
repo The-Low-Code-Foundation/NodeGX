@@ -1,10 +1,10 @@
 # BRG-003 — The conformance suite
 
 **Status: 🏗 s4 (2026-09-19). The suite is 56 cases across five areas, green against SQLite and
-proven able to fail by six mutants — and **the §3.5 gate is built and in CI**. AC1, AC3, AC4, AC6
-and AC7 closed. Left: AC5 (the declaration mechanism unexercised), AC8 (BRG-004's), and the three
-§3.2 areas with no cases — all now *declared* rather than merely absent, and counted by a ratchet.
-The gate's first run found three things nobody had noticed; they are in §5.6.**
+proven able to fail by six mutants — and **the §3.5 gate is built and in CI**. AC1, AC3, AC4, AC5,
+AC6 and AC7 closed. **AC8 is the only criterion left, and it is BRG-004's.** The three §3.2 areas
+with no cases are now *declared* rather than merely absent, and counted by a ratchet. Exercising the
+two mechanisms found four things nobody had noticed — §5.6 and §5.7.**
 
 ## 1. The person sentence
 
@@ -217,7 +217,7 @@ on this box at the time.
 | AC2 | every §3.2 area has cases; the count is recorded | 🏗 five areas, 53 cases. **Changes, transactions and `IOperationalStore` have none** — see 5.5 |
 | AC3 | a mutant fails, one distinct failure per mutation, each recorded by name | ✅ six mutations, six distinct signatures, both controls green |
 | AC4 | the ACL cases are adversarial | ✅ 15 cases; every read and write shape a non-owner can reach |
-| AC5 | the declaration mechanism works | ⬜ the vocabulary is implemented and `unsupported` inverts correctly, but nothing declares yet, so it is **unexercised** |
+| AC5 | the declaration mechanism works | ✅ s4 — exercised against three limited adapters, and **it did not work**: `unsupported` covered a wrong answer. Fixed and proved (§5.7) |
 | AC6 | the §3.5 CI gate | ✅ s4 — two mechanisms, both in CI, both **measured failing** on a real injected method (§5.6) |
 | AC7 | the gate run against HEAD; everything uncovered declared | ✅ s4 — **22 of 61** members declared uncovered, each with a reason and an owing task, held by a ratchet |
 | AC8 | BRG-D4 closed | ⬜ BRG-004's business |
@@ -320,3 +320,63 @@ declaration would have tripped this gate; these two entries are what that looks 
 The 22 is a **ceiling**, asserted `toBeLessThanOrEqual`, never an equality — a session that closes a
 gap must not also have to come here and edit a literal to make a gate green, because that reflex is
 the one that ships the drift.
+
+## 5.7 As built, s4 — the declaration mechanism (AC5)
+
+**AC5 asked whether the mechanism works. Exercised, it did not.**
+
+s2 recorded the criterion honestly — *"the vocabulary is implemented and `unsupported` inverts
+correctly, but nothing declares yet, so it is unexercised"* — and that was the right call to write
+down. What it could not know is that the inversion it described was only half the property.
+
+### The hole, and how it was found
+
+§3.4's sentence is *"a case marked `unsupported` must fail loudly, never return a wrong answer
+quietly."* The runner satisfied it with **any** throw. But a case's own assertions throw too — and
+`ConformanceError` was the class for both an adapter refusing and an assertion failing, so nothing
+downstream could tell them apart.
+
+🔴 **So an adapter that answered, and answered wrongly, was recorded `failed-as-declared` and
+travelled as an accepted divergence.** That is precisely the failure mode the phase names in its
+own README §2: *silence*. A declaration meant to say "I cannot do this" could be used to say "do not
+look at what I do here."
+
+Measured, not reasoned. `conformance/limited.ts` adds three adapters that are **limited rather than
+broken** — the distinction matters, and it is why they do not live in `mutants.ts`, where every
+entry is an adapter that is simply wrong:
+
+| adapter | what it models | what must happen |
+|---|---|---|
+| `no-search` | an engine with no full-text index — Postgres without `tsvector` | declared `unsupported`: fails loudly, **accepted** |
+| `search-ignores-the-term` | "supports" search by returning every row | declared `unsupported`: **rejected** — it answered |
+| `reordered-reads` | ranking and collation that genuinely differ | declared `degraded`: correct rows, different order, all green |
+
+Run before the fix: the wrong-answer adapter produced **1** failure where three were owed. Two of
+the three search cases were laundered.
+
+### The fix
+
+`AdapterRefusal extends ConformanceError`, thrown only where the adapter's own `error` callback
+fires. `unsupported` is now satisfied by a refusal and by nothing else; an assertion failure under
+an `unsupported` declaration is a genuine failure whose message says so — *"the adapter did not
+refuse — it answered, and the answer was wrong."*
+
+⚠️ **The same conflation was in `ctx.refused()` and is closed with it.** It returned the message of
+*any* error, so an assertion failing inside the callback read as the refusal the case was looking
+for — an expectation satisfied by its own collapse. It now rethrows anything that is not an
+`AdapterRefusal`. Both of its call sites (`schema.ts:129, 175`) were unaffected, checked before the
+change rather than after.
+
+### And one thing the mechanism got right
+
+🟢 **`degraded` holds by construction, and the first attempt to prove it was wrong instead.**
+`reordered-reads` initially reversed *every* read, and two cases went red —
+`records/sort-ascending-and-descending` and `records/limit-skip-and-count-compose`. That is the
+suite being correct: **reversing a `sort` the caller asked for is not a divergence in ranking, it is
+an adapter getting `sort` wrong**, and `degraded` has no business covering it. §3.4 says *"may
+differ in order"*, and an order the caller specified is not one the adapter may differ on. The model
+was corrected to vary order only where none was requested; `assert.ts`'s `pluck()` sorts, so every
+other read case is order-tolerant already — an s2 decision that paid off here without being asked
+to.
+
+`conditional` was checked too: reported `skipped`, never `passed`, never counted as green.

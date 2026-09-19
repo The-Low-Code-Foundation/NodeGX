@@ -36,10 +36,10 @@ import { filterCases } from './cases/filters';
 import { recordCases } from './cases/records';
 import { relationCases } from './cases/relations';
 import { schemaCases } from './cases/schema';
-import { makeContext, type ConformanceContext } from './context';
+import { AdapterRefusal, makeContext, type ConformanceContext } from './context';
 
 export type { ConformanceContext, Row, ReadResult } from './context';
-export { read, write, ConformanceError } from './context';
+export { read, write, AdapterRefusal, ConformanceError } from './context';
 
 /**
  * The areas of §3.2, each one in the promise because something real consumes
@@ -77,10 +77,15 @@ export interface ConformanceCase {
  * - **`degraded`** — the case must still pass; it is expected to return
  *   *correct* rows and may differ in ordering. A degraded case that returns
  *   wrong rows is a failure like any other.
- * - **`unsupported`** — the case must **fail loudly**. An adapter that declares
- *   a capability unsupported and then quietly returns a wrong answer is the
- *   exact failure mode this phase was created by, so the suite inverts: a case
- *   declared unsupported that *passes* is itself reported as a failure.
+ * - **`unsupported`** — the case must **fail loudly**, and "loudly" means the
+ *   adapter itself refused: an {@link AdapterRefusal}, its `error` callback.
+ *   The suite inverts twice here, because there are two ways to answer when you
+ *   should have refused. A case declared unsupported that *passes* is reported
+ *   as a failure — you cannot declare away a capability you have. And a case
+ *   that fails on its **assertions** rather than on a refusal is also a
+ *   failure: the adapter answered, and the answer was wrong, which is the exact
+ *   thing this phase was created by and the one thing a declaration must never
+ *   cover. Both were measured at s4 under AC5 (`conformance/limited.ts`).
  * - **`conditional`** — settled elsewhere against a live instance; skipped here
  *   and reported as skipped, never as passed.
  */
@@ -198,18 +203,45 @@ export async function runConformance(
     if (declared?.state === 'unsupported') {
       // Inverted on purpose: an unsupported capability must fail loudly, never
       // return a wrong answer quietly.
-      results.push(
-        thrown
-          ? { id: c.id, area: c.area, pins: c.pins, status: 'failed-as-declared', message: declared.reason, durationMs }
-          : {
-              id: c.id,
-              area: c.area,
-              pins: c.pins,
-              status: 'failed',
-              message: `declared unsupported (${declared.reason}) but the case passed — an unsupported capability must fail loudly, not answer quietly`,
-              durationMs
-            }
-      );
+      //
+      // 🔴 **Only an {@link AdapterRefusal} is "loudly".** s2 accepted ANY
+      // throw here, which quietly made the declaration cover the one thing it
+      // promises to exclude: an adapter that answers with the wrong rows fails
+      // the case's assertions, and an assertion failure is a throw. AC5
+      // measured it — `limited.ts`'s `search-ignores-the-term` returns every
+      // row in the collection and two of the three search cases were recorded
+      // `failed-as-declared`. A wrong answer is now a failure whatever the
+      // declaration says, which is what §3.4's sentence actually asks for.
+      if (thrown instanceof AdapterRefusal) {
+        results.push({
+          id: c.id,
+          area: c.area,
+          pins: c.pins,
+          status: 'failed-as-declared',
+          message: declared.reason,
+          durationMs
+        });
+      } else if (thrown) {
+        results.push({
+          id: c.id,
+          area: c.area,
+          pins: c.pins,
+          status: 'failed',
+          message:
+            `declared unsupported (${declared.reason}), but the adapter did not refuse — it answered, and the ` +
+            `answer was wrong: ${message}. An unsupported capability must fail loudly, not answer quietly`,
+          durationMs
+        });
+      } else {
+        results.push({
+          id: c.id,
+          area: c.area,
+          pins: c.pins,
+          status: 'failed',
+          message: `declared unsupported (${declared.reason}) but the case passed — an unsupported capability must fail loudly, not answer quietly`,
+          durationMs
+        });
+      }
       continue;
     }
 

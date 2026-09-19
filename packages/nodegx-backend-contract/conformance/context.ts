@@ -64,6 +64,26 @@ export function write(keys: string[]): StorageAclOption {
  */
 export class ConformanceError extends Error {}
 
+/**
+ * The adapter itself refused the call — its `error` callback fired.
+ *
+ * 🔴 **Why this is a separate class, added at s4 by AC5.** Until it existed,
+ * an adapter *refusing* and a case's own assertion *failing* both threw
+ * `ConformanceError`, so nothing downstream could tell them apart. That made
+ * §3.4's central promise unenforceable: a capability declared `unsupported`
+ * was satisfied by ANY throw, so an adapter that answered — and answered
+ * wrongly — was recorded as `failed-as-declared` and travelled as an accepted
+ * divergence. Measured, not reasoned: `limited.ts`'s `search-ignores-the-term`
+ * returns every row in the collection, and two of the three search cases were
+ * laundered exactly that way before this class was introduced.
+ *
+ * The distinction is the phase's own thesis in miniature. *"Unsupported"* is a
+ * promise to fail loudly. An adapter that returns the wrong rows has not failed
+ * loudly; it has failed silently, which is the one thing a declaration must
+ * never be able to cover.
+ */
+export class AdapterRefusal extends ConformanceError {}
+
 type CallbackShape = {
   success: (...args: unknown[]) => void;
   error: (message: string) => void;
@@ -80,14 +100,14 @@ function invoke(adapter: IStorageAdapter, method: string, options: Record<string
     const call: Record<string, unknown> & CallbackShape = {
       ...options,
       success: (...args: unknown[]) => resolve(args),
-      error: (message: string) => reject(new ConformanceError(String(message)))
+      error: (message: string) => reject(new AdapterRefusal(String(message)))
     };
     // The data plane is declared as twelve distinct call shapes rather than one
     // indexed signature, which is right for callers and wrong for a generic
     // dispatcher. This is the single place the index is taken.
     const fn = (adapter as unknown as Record<string, unknown>)[method];
     if (typeof fn !== 'function') {
-      reject(new ConformanceError(`adapter has no method '${method}'`));
+      reject(new AdapterRefusal(`adapter has no method '${method}'`));
       return;
     }
     (fn as (o: unknown) => void).call(adapter, call);
@@ -219,7 +239,12 @@ export function makeContext(adapter: IStorageAdapter, runId: string): Conformanc
       try {
         await fn();
       } catch (err) {
-        return err instanceof Error ? err.message : String(err);
+        // Only the ADAPTER can refuse. An assertion that failed inside `fn`
+        // is the case finding something wrong, and reading it as a refusal
+        // would turn a real failure into the evidence the case was looking
+        // for — an expectation satisfied by its own collapse.
+        if (err instanceof AdapterRefusal) return err.message;
+        throw err;
       }
       throw new ConformanceError('expected the call to be refused, and it succeeded');
     }

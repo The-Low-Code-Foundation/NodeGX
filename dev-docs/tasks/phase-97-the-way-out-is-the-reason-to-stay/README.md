@@ -9,8 +9,9 @@ any more, and `execution/` is at zero raw statements now that `IOperationalStore
 has a running suite — 56 cases, green against SQLite, proven able to fail by six mutants — and
 **the §3.5 gate is built and in CI**: every member of the storage surface now has a conformance case
 or a written declaration with an owing task, and a new one that has neither fails both `tsc` and
-jest by name. 22 of 61 members are declared uncovered, held by a ratchet. AC5 and AC8 are what
-remain on BRG-003.**
+jest by name. 22 of 61 members are declared uncovered, held by a ratchet. AC5 was exercised and the
+mechanism **did not hold** — `unsupported` covered an adapter that answered wrongly; fixed. **AC8 is
+all that remains on BRG-003 and it belongs to BRG-004.**
 **Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
@@ -169,7 +170,7 @@ still `📋 Specced, not started`.
 |---|---|---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20 + 21 + 20** members that already exist (s1 recorded 20 + 22 + 16; **two of the three were wrong**, found when BRG-003's gate counted the artefact at s4) | ✅ s1 | ✅ s4 — `typecheck:contract` is now a CI job; the package had a `typecheck` script no workflow had ever called | n/a |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | ✅ s1-s3 — §3.1 + §3.2 + §3.3 | 🏗 AC1 AC4 AC5 AC6; AC7 left | n/a |
-| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | 🏗 s2-s4 — 56 cases, 5 areas, **+ the gate** | 🏗 AC1 AC3 AC4 **AC6 AC7**; AC5 AC8 left | n/a |
+| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | ✅ s2-s4 — 56 cases, 5 areas, **+ the gate** | ✅ AC1 AC3 AC4 **AC5 AC6 AC7**; **only AC8 left, and it is BRG-004's** | n/a |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | ⬜ | ⬜ | ⬜ |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) | `PostgresAdapter` implementing the BRG-001 interface until BRG-003 is green | ⬜ | ⬜ | ⬜ |
 | [BRG-006](BRG-006-THE-DRIVE.md) | The drive: a real app with workflows, cloud functions, triggers and ACLs moved end to end, graph untouched | ⬜ | ⬜ | ⬜ |
