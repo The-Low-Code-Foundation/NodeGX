@@ -225,20 +225,23 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     owes: 'BRG-004'
   },
   generatePostgresSQL: {
-    kind: 'uncovered',
+    kind: 'not-in-the-promise',
     why:
-      '🔴 THIS IS THE PHASE. It drops every declared index (BRG-D2) and every relation column (BRG-D3), it is live ' +
-      'behind an admin route, and its only test asserts `toContain("CREATE TABLE")`. AC8 is exactly this entry, and ' +
-      'R3 ruled it fixed in place rather than removed. The gate naming it here is the tax becoming visible.',
-    owes: 'BRG-004 (AC8 / BRG-D4)'
+      'A migration concern, not a storage one: a PostgreSQL adapter has no business emitting PostgreSQL DDL for ' +
+      'itself, so a conformance case here would be one no second adapter can pass. It was `uncovered` and owed to ' +
+      'BRG-004 because it was WRONG (BRG-D2, BRG-D3) and had one test asserting `toContain("CREATE TABLE")`. ' +
+      'BRG-004 repaired it and it is now held by 20 cases in ' +
+      'noodl-runtime/test/adapters/SchemaManager.export.test.js and 10 more in the `.postgres.` sibling, which ' +
+      'applies the emitted DDL to a real PostgreSQL and reads the indexes back out of `pg_indexes`.'
   },
   generateSupabaseSQL: {
-    kind: 'uncovered',
+    kind: 'not-in-the-promise',
     why:
-      '🔴 Worse than its sibling: four `TO authenticated … USING (true)` policies per table over a backend whose ' +
-      'default is `creatorOwns` with the ACL predicate compiled into the SQL. Reachable by an admin-token holder ' +
-      'until BRG-004 lands, which R3 recorded as a consequence rather than argued away.',
-    owes: 'BRG-004 (AC8 / BRG-D4)'
+      'Same boundary as its sibling. It was the worse of the two — four `TO authenticated … USING (true)` policies ' +
+      'per table over a backend whose default is `creatorOwns` — and BRG-004 replaced them with policies generated ' +
+      'from the live CLP and the row ACL, refusing by name rather than approximating (`code: CANNOT_CROSS`). The ' +
+      'adversarial half is measured, not declared: the `.postgres.` spec applies the policies and proves a ' +
+      'non-owner is denied read, update and delete on another user\'s row, with the owner as the control.'
   },
   hasFts5Support: {
     kind: 'not-in-the-promise',

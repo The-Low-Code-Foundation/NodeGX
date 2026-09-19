@@ -10,8 +10,10 @@ has a running suite — 56 cases, green against SQLite, proven able to fail by s
 **the §3.5 gate is built and in CI**: every member of the storage surface now has a conformance case
 or a written declaration with an owing task, and a new one that has neither fails both `tsc` and
 jest by name. 22 of 61 members are declared uncovered, held by a ratchet. AC5 was exercised and the
-mechanism **did not hold** — `unsupported` covered an adapter that answered wrongly; fixed. **AC8 is
-all that remains on BRG-003 and it belongs to BRG-004.**
+mechanism **did not hold** — `unsupported` covered an adapter that answered wrongly; fixed. **AC8 was all that remained on BRG-003 and it belonged to BRG-004 — s5 closed it**: the two
+SQL generators are repaired and held by 36 cases and four mutants, with the adversarial half measured
+on a real PostgreSQL 16.11. BRG-D1, D2, D3 and D4 are all closed. What BRG-004 still owes is **the
+`migrate` command itself**.
 **Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
@@ -171,7 +173,7 @@ still `📋 Specced, not started`.
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20 + 21 + 20** members that already exist (s1 recorded 20 + 22 + 16; **two of the three were wrong**, found when BRG-003's gate counted the artefact at s4) | ✅ s1 | ✅ s4 — `typecheck:contract` is now a CI job; the package had a `typecheck` script no workflow had ever called | n/a |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | ✅ s1-s3 — §3.1 + §3.2 + §3.3 | 🏗 AC1 AC4 AC5 AC6; AC7 left | n/a |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | ✅ s2-s4 — 56 cases, 5 areas, **+ the gate** | ✅ AC1 AC3 AC4 **AC5 AC6 AC7**; **only AC8 left, and it is BRG-004's** | n/a |
-| [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | ⬜ | ⬜ | ⬜ |
+| [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | 🏗 s5 — **the export half**: D1, D2, D3 closed, measured on PostgreSQL 16.11 | ✅ AC2 AC4; 🟡 AC3 AC8 | ⬜ AC1 AC5 AC6 AC7 AC9 — **the command itself** |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) | `PostgresAdapter` implementing the BRG-001 interface until BRG-003 is green | ⬜ | ⬜ | ⬜ |
 | [BRG-006](BRG-006-THE-DRIVE.md) | The drive: a real app with workflows, cloud functions, triggers and ACLs moved end to end, graph untouched | ⬜ | ⬜ | ⬜ |
 
@@ -245,10 +247,10 @@ and names it. Richard has read the published sentence about what the bridge does
 
 | id | reading | owner |
 |---|---|---|
-| **BRG-D1** 🔴 | `generateSupabaseSQL()` emits four `USING (true)` / `WITH CHECK (true)` policies per table on a backend enforcing `creatorOwns` row ACLs — a silent authorization downgrade from a live admin route. **R3 ruled: fixed in place by BRG-004**, so it stays reachable by an admin-token holder until then. No editor screen can produce it (§4.1) | BRG-004 |
-| **BRG-D2** 🔴 | `generatePostgresSQL()` emits only `createdAt`/`updatedAt` indexes, dropping every FED-002 declared index including `unique: true` — the dedupe guarantee does not cross | BRG-004 |
-| **BRG-D3** 🔴 | `POSTGRES_TYPE_MAP.Relation = null` causes relation columns to be skipped by `if (pgType)` and vanish from the export with no error | BRG-004 |
-| **BRG-D4** | The two generators' only coverage is one smoke assertion — `service-http.test.ts:503` checks the `format=postgres` body contains `CREATE TABLE`, which stays true with every relation dropped, every unique index missing and every row ACL replaced by `USING (true)`. A test that cannot fail on D1, D2 or D3 is the same absence with a green tick on it | BRG-003 |
+| **BRG-D1** ✅ | `generateSupabaseSQL()` emitted four `USING (true)` / `WITH CHECK (true)` policies per table on a backend enforcing `creatorOwns` row ACLs. **Closed s5** (BRG-004 §5.3): policies generated from the live CLP and the row ACL, with a non-owner's denied read/update/delete measured on a real PostgreSQL. 🔴 It needed a fact no generator can invent — a row's ACL is keyed by NodeGX `_User` objectIds and PostgREST authenticates a Supabase auth user — so `userIdClaim` is **required and refused when absent** | ~~BRG-004~~ |
+| **BRG-D2** ✅ | `generatePostgresSQL()` emitted only `createdAt`/`updatedAt` indexes, dropping every FED-002 declared index including `unique: true`. **Closed s5**: emitted under the same derived name, `UNIQUE` and `DESC` when declared, read back out of `pg_indexes` | ~~BRG-004~~ |
+| **BRG-D3** ✅ | `POSTGRES_TYPE_MAP.Relation = null` caused relation columns to be skipped by `if (pgType)`. **Closed s5**: the junction table is emitted under the name the adapter actually reads, and traverses in PostgreSQL. Two neighbours found while repairing it — `GeoPoint` mapped to `POINT` for a value stored as a JSON string, and declared `defaultValue` dropped entirely | ~~BRG-004~~ |
+| **BRG-D4** ✅ | The two generators' only coverage was one smoke assertion (`service-http.test.ts:503`). **Closed s5**: 36 cases across three files — 20 on what the SQL says, 10 on what PostgreSQL does with it, 6 on the route — and **four mutants**, one per original defect, each caught by name (BRG-004 §5.5). This also closes **BRG-003 AC8** | ~~BRG-003~~ |
 | **BRG-D5** · | `GeoPoint → POINT` may not answer `QueryBuilder`'s SQL distance queries without PostGIS. **Not verified** — measure before building on it | BRG-005 |
 | **BRG-D6** 🔴 | **There is no shutdown path for `executions.sqlite`.** `ExecutionHistory` has no close method and `BackendService.stop()` does not release the handle — which is free on SQLite (process exit does it) and a connection-pool leak on Postgres. Found at BRG-002 §7.5 while looking for a caller for `IOperationalStore.close()`, which was therefore **not declared**: the method and its caller land together at BRG-005 | BRG-005 |
 

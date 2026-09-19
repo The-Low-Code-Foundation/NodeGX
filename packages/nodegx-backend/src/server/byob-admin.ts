@@ -23,7 +23,7 @@ import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
-import type { StorageColumn, StorageIndexStatus } from '@noodl/backend-contract';
+import type { StorageColumn, StorageIndexStatus, StorageSupabaseExportOptions } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { summariseModelCalls } from '../execution/modelCost';
 import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
@@ -119,6 +119,20 @@ export interface SchemaMutationResponse {
   indexesKept?: string[];
   /** Every declared index on the collection afterwards, and whether it is built. */
   indexes?: StorageIndexStatus[];
+}
+
+/**
+ * What `GET /admin/schema-export` hands the Supabase generator (BRG-004).
+ *
+ * Both fields come from OUTSIDE this route — the live security config from the
+ * service, the claim name from the caller — because both are facts the
+ * generator would otherwise have to invent, and inventing them is what BRG-D1
+ * was.
+ */
+export interface SchemaExportOptions {
+  security?: StorageSupabaseExportOptions['security'];
+  /** The JWT claim carrying the NodeGX `_User` objectId. No default. */
+  userIdClaim?: string;
 }
 
 export class ByobAdminRoutes {
@@ -459,7 +473,7 @@ export class ByobAdminRoutes {
     };
   }
 
-  exportSchema(res: http.ServerResponse, format: string): void {
+  exportSchema(res: http.ServerResponse, format: string, options?: SchemaExportOptions): void {
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
 
@@ -468,25 +482,42 @@ export class ByobAdminRoutes {
     // adapter without them must answer rather than crash. Same 501 the index
     // routes above give, for the same reason.
     //
-    // 🔴 What they EMIT is wrong today and stays wrong until BRG-004: relation
-    // columns vanish (BRG-D3), declared indexes vanish (BRG-D2), and the
-    // Supabase policies grant every authenticated user every row (BRG-D1).
-    // Richard ruled 2026-09-19 (phase 97 R3) that they are repaired in place
-    // rather than removed.
+    // BRG-004 repaired what they emit (relations, declared indexes, and the row
+    // ACL translated into real policies). The part that shows up HERE is that
+    // they now REFUSE: anything the export cannot carry across comes back as a
+    // 409 naming the construct, rather than as SQL that looks fine.
     let content: string;
-    if (format === 'postgres') {
-      if (typeof sm.generatePostgresSQL !== 'function') {
-        throw new HttpError(501, 'This adapter cannot export PostgreSQL schema.');
+    try {
+      if (format === 'postgres') {
+        if (typeof sm.generatePostgresSQL !== 'function') {
+          throw new HttpError(501, 'This adapter cannot export PostgreSQL schema.');
+        }
+        content = sm.generatePostgresSQL();
+      } else if (format === 'supabase') {
+        if (typeof sm.generateSupabaseSQL !== 'function') {
+          throw new HttpError(501, 'This adapter cannot export Supabase schema.');
+        }
+        content = sm.generateSupabaseSQL({
+          security: options && options.security,
+          userIdClaim: options && options.userIdClaim
+        });
+      } else {
+        content = JSON.stringify(sm.exportSchemas(), null, 2);
       }
-      content = sm.generatePostgresSQL();
-    } else if (format === 'supabase') {
-      if (typeof sm.generateSupabaseSQL !== 'function') {
-        throw new HttpError(501, 'This adapter cannot export Supabase schema.');
+    } catch (e) {
+      if (e instanceof HttpError) throw e;
+      const err = e as { code?: string; message?: string; construct?: string; table?: string };
+      if (err && err.code === 'CANNOT_CROSS') {
+        // 409, the same answer a unique-index refusal gives: the request is
+        // well-formed and the state of the data or the config is what refuses.
+        // No Parse error code: 137 is `duplicate value` and this is not one.
+        // `construct` is the machine-readable half — a carry report groups by
+        // it, and a sentence cannot be grouped by.
+        throw new HttpError(409, String(err.message), undefined, { construct: err.construct, table: err.table });
       }
-      content = sm.generateSupabaseSQL();
-    } else {
-      content = JSON.stringify(sm.exportSchemas(), null, 2);
+      throw e;
     }
+
 
     sendJSON(res, 200, { format: format || 'json', content });
   }

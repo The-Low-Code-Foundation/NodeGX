@@ -1,6 +1,9 @@
 # BRG-004 — The migrator
 
-**Status: ⬜ Not started. Buildable in parallel with BRG-005; both needed for BRG-006.**
+**Status: 🏗 In progress (s5, 2026-09-19) — the EXPORT half is built, the migrator command is not.**
+BRG-D1, BRG-D2 and BRG-D3 are closed and measured against a real PostgreSQL 16.11; AC2 and AC4 are
+green, AC3 and AC8 half, and AC1/AC5/AC6/AC7/AC9 untouched. **See §5.** BRG-005 is no longer purely
+parallel: the data phases need its driver.
 
 ## 1. The person sentence
 
@@ -58,9 +61,10 @@ carries. This is a genuine advantage of keeping the NodeGX backend in front of P
 should be said out loud in the docs.
 
 The `--to supabase`-style path, where a third party's PostgREST becomes the enforcement point, is
-the one that needs real RLS. **Per R3, that path is removed until it can be generated correctly from
-the actual CLP and ACL configuration and tested adversarially.** A permissive policy emitted with a
-`-- customize based on ACL` comment is not a feature.
+the one that needs real RLS. **R3 as ruled: fixed in place, not removed** — this paragraph was
+written before the ruling and said "removed", which is what §5.3 did NOT do. It is generated from
+the actual CLP and ACL configuration and tested adversarially, and refuses by name where it cannot
+be. A permissive policy emitted with a `-- customize based on ACL` comment is not a feature.
 
 ### 3.3 Reversibility
 
@@ -95,3 +99,139 @@ this app move?" should be able to answer without a shell.
    never a silent approximation. At least one such case is exercised.
 9. **AC9** — 5 GB / 2-million-row migration completes; the wall-clock time is recorded here. Not
    asserted — recorded, so the docs can tell the truth about how long this takes.
+
+---
+
+## 5. As built, s5 — 2026-09-19: **the export half**
+
+**Status after this session: 🏗 in progress.** The three defects the phase was scoped on are closed
+and measured against a real PostgreSQL. **The `migrate` command itself does not exist yet** — AC1,
+AC5, AC6, AC7 and AC9 are untouched, and AC3 and AC8 are half.
+
+| AC | state | where it was measured |
+|---|---|---|
+| AC1 — carry report / `--dry-run` | ⬜ | the command does not exist |
+| **AC2 — BRG-D2, declared indexes incl. `unique`** | 🟢 | `pg_indexes` on PostgreSQL 16.11, §5.4 |
+| AC3 — BRG-D3, relations survive | 🟡 | junction table + traversal measured in PostgreSQL; **"through the facade on both sides" needs BRG-005** |
+| **AC4 — BRG-D1, the RLS path** | 🟢 | a non-owner denied SELECT/UPDATE/DELETE on a real server, with the owner as the control |
+| AC5 — verify catches damage | ⬜ | the command does not exist |
+| AC6 — resumable | ⬜ | " |
+| AC7 — source file unchanged | ⬜ | " |
+| **AC8 — a refusal names the construct** | 🟡 | five refusals on the export path, one of them over HTTP; the migrator's own are owed |
+| AC9 — 5 GB / 2 M rows | ⬜ | " |
+
+### 5.1 What landed
+
+| file | what |
+|---|---|
+| `noodl-runtime/src/api/adapters/local-sql/SchemaManager.ts` | both generators rewritten; `MigrationRefusal` (`code: 'CANNOT_CROSS'`); `_relationJunctions`, `_columnToPostgres`, `_aclPredicate`, `_ruleFor`, `_emitPolicy`, `_assertNoRoleKeyedAcls`; `GeoPoint` remapped |
+| `nodegx-backend-contract/src/storage.ts` | `StoragePostgresExportOptions`, `StorageSupabaseExportOptions`; both members re-declared; the "marker BRG-004 deletes" deleted |
+| `nodegx-backend-contract/conformance/coverage.ts` | both entries `uncovered` → `not-in-the-promise`, naming where they are now held. The AC7 ratchet drops 22 → 20 |
+| `nodegx-backend/src/server/{HttpServer,byob-admin}.ts` | the route hands over the **live** CLP config and the caller's `userIdClaim`; a refusal answers **409** with `construct` and `table` |
+| `noodl-runtime/test/adapters/SchemaManager.export.test.js` | **20 cases** — what the SQL says |
+| `noodl-runtime/test/adapters/SchemaManager.export.postgres.test.js` | **10 cases** — what PostgreSQL does with it |
+| `nodegx-backend/tests/brg-004-export-route.test.ts` | **6 cases** — the wiring neither of those can see |
+
+### 5.2 BRG-D2 and BRG-D3 — closed
+
+Declared indexes are emitted under **the same derived name** `indexName()` gives them, `UNIQUE` when
+declared, `DESC` when declared. Relation columns emit **the junction table the adapter actually
+reads** — `_Join_<field>_<Class>`, reproduced down to the same sanitisation, because that name is
+this adapter's private convention and a junction it cannot find by name is a relation that does not
+traverse. No foreign keys, for the same reason SQLite has none there: the adapter deletes a record
+without touching its junction rows, and an FK would turn a copy of that state into a failed insert.
+
+Three things found while repairing them, none of them in the scope list:
+
+1. 🔴 **`GeoPoint` mapped to `POINT`** with the comment *"or use PostGIS"*. The built-in stores a
+   GeoPoint as a **JSON string** and `SQL_DISTANCE_KM` reads it back as one — so `POINT` was a column
+   the app could not have read. Now `JSONB`, and measured: the adapter's own value round-trips.
+2. ⚠️ **Declared `defaultValue` was dropped entirely.** A column declared with a default arrived
+   without one. Now emitted, with the literal quoted.
+3. ⚠️ **The `updatedAt` trigger is no longer emitted on the NodeGX path.** The app stamps that
+   column itself; a `BEFORE UPDATE` trigger doing it again overwrites the value the caller just
+   wrote — a divergence between what is written and what is read back, which is this phase's whole
+   subject. It **is** emitted on the Supabase path, where a third party writes rows directly.
+
+### 5.3 BRG-D1 — closed, and the reason it could not just be "fixed"
+
+`USING (true)` is gone. In its place the policies are generated from the live CLP and the row ACL,
+and the predicate is `buildAclPredicate`'s, in PostgreSQL: a row with no ACL is public, a row with
+one qualifies when an entry keyed `'*'` or by this caller grants the access asked for.
+
+🔴 **But the honest fix needed a fact the generator cannot invent, and this is the finding of the
+session.** A row's ACL is keyed by **NodeGX `_User` objectIds**. PostgREST authenticates a **Supabase
+auth user**, whose `auth.uid()` is a different identifier in a different namespace. A policy
+comparing them denies everyone — or, if the two happen to collide, lets the wrong person through.
+There is no correct default, so `userIdClaim` is **required and refused when absent**: the export
+names the JWT claim that must carry the NodeGX user id, and generates
+`current_setting('request.jwt.claims', true)::jsonb ->> '<claim>'` rather than `auth.uid()`. That
+also means the adversarial test runs against **vanilla PostgreSQL**, measuring the emitted SQL and
+not a shim of Supabase.
+
+**Five refusals, each a thing the old export would have emitted something plausible for:**
+
+| construct | why it cannot cross |
+|---|---|
+| `the CLP configuration` | absent: which ops are allowed, and to whom, is in `security.json` and guessing it is how `USING (true)` happened |
+| `the identity mapping` | absent: see above |
+| `role-based collection permissions` | roles live in `_Role`; PostgREST has no membership to check |
+| `find and get differing` | PostgREST answers both with a SELECT, so one policy would be more permissive or more restrictive than the backend is |
+| `role-keyed row ACLs` | 🔴 read from the **data**, not the config: an administrator granting a team access writes `role:editors` into the row. Counted, with a sample |
+
+Also emitted now: the **`GRANT`** beside each policy. A policy narrows a privilege; it does not grant
+one. An operation ruled `nobody` therefore leaves neither — the same answer the backend gives, twice
+— and the anonymous case is refused one layer *below* the policy (`permission denied for table`),
+which is the stronger of the two answers.
+
+### 5.4 The measurement — PostgreSQL 16.11 (Homebrew), database `nodegx_brg004`
+
+The `.postgres.` spec talks to the server through `psql`, not a driver: this package has no
+PostgreSQL dependency and **BRG-005 is the task that decides which one it gets** — a test forcing
+that choice would be making it.
+
+`pg_indexes` after applying the generated DDL — **AC2, read off the other side**:
+
+```
+ Item            | idx_Item_guid               | CREATE UNIQUE INDEX "idx_Item_guid" ON public."Item" USING btree (guid)
+ Item            | idx_Item_published          | CREATE INDEX "idx_Item_published" ON public."Item" USING btree (published DESC)
+ Item            | idx_Item_createdAt          | CREATE INDEX "idx_Item_createdAt" ON public."Item" USING btree ("createdAt")
+ _Join_tags_Item | _Join_tags_Item_pkey        | CREATE UNIQUE INDEX … btree ("owningId", "relatedId")
+ _Join_tags_Item | idx__Join_tags_Item_owning  | CREATE INDEX … btree ("owningId")
+ _Join_tags_Item | idx__Join_tags_Item_related | CREATE INDEX … btree ("relatedId")
+```
+
+and the unique index then **refuses a duplicate**, which is what it was for.
+
+**AC4, adversarially:** three rows — owned by `u1`, owned by `u2`, un-ACL'd. As `u2`:
+`SELECT` returns `r1,r3` and not `r2`; `UPDATE … WHERE objectId='r2' RETURNING` returns nothing and
+the row is unchanged; `DELETE` likewise. The control is in the same run: **the owner CAN** update
+their own row, so the denial is the ACL and not a broken policy. With `find: public`, an anonymous
+caller sees the un-ACL'd row **and no other**.
+
+🔴 **It is skipped when no PostgreSQL is reachable, and that is a hole in CI**, recorded here rather
+than hidden: point it somewhere with `NODEGX_PG_TEST_URL=postgres://…`. BRG-006's drive is where
+that becomes a standing gate.
+
+### 5.5 A suite that cannot fail proves nothing — four mutants, each caught by name
+
+| mutant | what reddened |
+|---|---|
+| `_aclPredicate` returns `(true)` — **the original BRG-D1** | 7: the two SQL-shape cases and **all five** real-PostgreSQL ACL cases |
+| `UNIQUE` dropped from declared indexes — **the original BRG-D2** | 3, including `pg_indexes` and the duplicate refusal |
+| relation junctions not emitted — **the original BRG-D3** | 3, including the traversal |
+| `_assertNoRoleKeyedAcls` made a no-op | 1, the refusal with the count |
+| the route stops passing the live config | 4 of the 6 route cases |
+
+### 5.6 What the next session inherits
+
+The migrator command itself: `nodegx-backend migrate --to postgres://…`, its five phases, and the
+**carry report** (AC1) — which now has a vocabulary to be written in, because `MigrationRefusal`
+already carries `construct`, `table` and `detail` and the survey is the same five questions asked
+without emitting anything. AC5/AC6/AC7/AC9 need the data plane, and the data plane needs a driver —
+so **BRG-005's dependency choice is now on BRG-004's critical path**, which the task file did not
+say when it called them parallel.
+
+⚠️ One consequence to carry: `BackendManager.js:968`'s dead IPC channel passes `format` only, so a
+`format=supabase` call through it now answers **409** instead of permissive SQL. Nothing in the
+editor consumes it (README §4.1), and 409 is the correct answer to that request.

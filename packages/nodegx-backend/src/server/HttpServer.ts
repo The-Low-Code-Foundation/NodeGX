@@ -542,6 +542,7 @@ export class HttpServer {
 
   private buildRoutes(): RouteDef[] {
     const byob = this.byob;
+    const security = this.security;
     const parse = this.parse;
     const users = this.users;
     const files = this.files;
@@ -848,7 +849,15 @@ export class HttpServer {
         method: 'GET',
         pattern: 'admin/schema-export',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.exportSchema(ctx.res, ctx.query.format || 'json')
+        // BRG-004: the Supabase format generates its policies from the LIVE CLP
+        // config, so the route hands it over rather than letting the generator
+        // guess — guessing is how `USING (true)` got written. `userIdClaim` has
+        // no default for the same reason; without it the export refuses.
+        handler: (ctx) =>
+          byob.exportSchema(ctx.res, ctx.query.format || 'json', {
+            security: security.config,
+            userIdClaim: ctx.query.userIdClaim
+          })
       },
       {
         method: 'GET',

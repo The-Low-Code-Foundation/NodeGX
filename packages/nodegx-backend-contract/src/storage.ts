@@ -212,6 +212,34 @@ export interface StorageTableSchema {
   indexes?: StorageIndexDecl[];
 }
 
+/** Options for `IStorageSchema.generatePostgresSQL`. */
+export interface StoragePostgresExportOptions {
+  /**
+   * Emit a `BEFORE UPDATE` trigger stamping `updatedAt`. Off by default: on the
+   * NodeGX path the app stamps the column itself, and a trigger doing it again
+   * overwrites the value the caller just wrote.
+   */
+  updatedAtTrigger?: boolean;
+}
+
+/**
+ * Options for `IStorageSchema.generateSupabaseSQL`.
+ *
+ * `security` is the live CLP configuration (`security.json`'s shape, declared
+ * structurally because it lives in `nodegx-backend`, above this package) and
+ * `userIdClaim` is the JWT claim carrying the NodeGX `_User` objectId. Both are
+ * refused when absent: a row ACL is keyed by NodeGX user ids and PostgREST
+ * authenticates somebody else's, so a generator guessing either is how
+ * `USING (true)` happened.
+ */
+export interface StorageSupabaseExportOptions {
+  security?: {
+    defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
+    collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+  };
+  userIdClaim?: string;
+}
+
 /**
  * The schema surface — 16 names, every one called by `nodegx-backend` today.
  *
@@ -256,21 +284,28 @@ export interface IStorageSchema {
 
   // --- migration export ----------------------------------------------------
   //
-  // 🔴 These two are here because they are CALLED, not because they are right.
-  // `byob-admin.ts:466-467` reaches them from `GET /admin/schema-export`, and at
-  // HEAD they drop relation columns (BRG-D3), drop every declared index
-  // (BRG-D2), and emit four `USING (true)` policies per table over a backend
-  // enforcing `creatorOwns` row ACLs (BRG-D1). Richard ruled 2026-09-19 (R3)
-  // that they are **fixed in place by BRG-004** rather than removed — so they
-  // stay on the interface, and this comment is the marker BRG-004 deletes.
+  // Repaired in place by BRG-004 (R3), which is what this comment used to be
+  // the marker for. What they emitted at phase 97's HEAD: relation columns
+  // dropped (BRG-D3), every declared index dropped (BRG-D2), and four
+  // `USING (true)` policies per table over a backend enforcing `creatorOwns`
+  // row ACLs (BRG-D1). All three are closed, and the thing that keeps them
+  // closed is `noodl-runtime/test/adapters/SchemaManager.export.test.js` plus
+  // its `.postgres.` sibling, which applies the emitted DDL to a real
+  // PostgreSQL and measures the denial.
   //
-  // They are a *migration* concern, not a storage one: a second adapter has no
-  // business implementing them, which is why both are optional.
+  // They remain a *migration* concern, not a storage one: a second adapter has
+  // no business implementing them, which is why both are optional — and why
+  // they are `not-in-the-promise` in the coverage register rather than cases.
 
-  /** `byob-admin.ts:466`. Optional — SQLite-export only; see BRG-004. */
-  generatePostgresSQL?(): string;
-  /** `byob-admin.ts:467`. Optional — SQLite-export only; see BRG-004. */
-  generateSupabaseSQL?(): string;
+  /** `byob-admin.ts`. Optional — SQLite-export only. */
+  generatePostgresSQL?(options?: StoragePostgresExportOptions): string;
+  /**
+   * Optional — SQLite-export only. **Throws** `code: 'CANNOT_CROSS'` rather
+   * than approximating anything it cannot carry: no CLP config, no identity
+   * mapping, a role-based permission, a `find`/`get` split PostgREST cannot
+   * express, or rows whose ACL names a role.
+   */
+  generateSupabaseSQL?(options?: StorageSupabaseExportOptions): string;
 
   // --- declared indexes (FED-002) ------------------------------------------
 

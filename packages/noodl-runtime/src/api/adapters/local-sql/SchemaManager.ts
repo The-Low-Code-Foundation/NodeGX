@@ -105,6 +105,75 @@ function sanitizeIdent(name: string): string {
 }
 
 /**
+ * A PostgreSQL literal. Only ever wraps names and declared defaults, never a
+ * caller's data — but it doubles the quote anyway, because the next thing this
+ * function is used for is always one step closer to data.
+ */
+function quoteLiteral(value: string): string {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+/**
+ * Something the export will not carry across, named.
+ *
+ * BRG-004's person sentence is *"if anything at all could not be carried
+ * across, the command says so by name and refuses rather than half-doing it"*,
+ * and every construct this phase found had done the opposite: a relation column
+ * vanished on an `if (pgType)`, a unique index was never emitted, and an ACL
+ * became `USING (true)`. None of those threw anything.
+ *
+ * Carries `construct` and `table` as fields rather than only a sentence, for
+ * the same reason `IndexDuplicatesError` carries its numbers: the caller has to
+ * put this in front of a person, and a carry report that can only quote a
+ * sentence cannot group by what failed.
+ */
+class MigrationRefusal extends Error {
+  code: string;
+  construct: string;
+  table?: string;
+  detail?: Record<string, unknown>;
+
+  constructor(message: string, construct: string, table?: string, detail?: Record<string, unknown>) {
+    super(message);
+    this.name = 'MigrationRefusal';
+    this.code = 'CANNOT_CROSS';
+    this.construct = construct;
+    this.table = table;
+    this.detail = detail;
+  }
+}
+
+/** Options for the plain PostgreSQL export. */
+interface PostgresExportOptions {
+  /**
+   * Emit a `BEFORE UPDATE` trigger stamping `updatedAt`. Off by default and
+   * on for the Supabase path — see the comment at its emission site: on the
+   * NodeGX path the app stamps the column itself and a trigger would overwrite
+   * what the caller just wrote.
+   */
+  updatedAtTrigger?: boolean;
+}
+
+/**
+ * The shape of `security.json` this export reads, declared structurally rather
+ * than imported: the configuration lives in `nodegx-backend` and this package
+ * is below it. Only the two fields the policies are generated from are named,
+ * so a change to the rest of the config cannot break the export by type alone.
+ */
+interface SecurityRulesLike {
+  defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
+  collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+}
+
+/** Options for the Supabase export. Both fields are required in practice — see `generateSupabaseSQL`. */
+interface SupabaseExportOptions {
+  /** The live CLP configuration. Absent: refused. */
+  security?: SecurityRulesLike;
+  /** The JWT claim carrying the NodeGX `_User` objectId. Absent: refused. */
+  userIdClaim?: string;
+}
+
+/**
  * Read an `indexes` declaration, or refuse it. Loud rather than lenient: an
  * index declaration that is quietly dropped because it was mis-shaped is a
  * collection that quietly full-scans, and a `unique` that was quietly ignored
@@ -189,7 +258,10 @@ const POSTGRES_TYPE_MAP: Record<string, string | null> = {
   Array: 'JSONB',
   Pointer: 'TEXT', // or UUID with FK
   Relation: null,
-  GeoPoint: 'POINT', // or use PostGIS
+  // The built-in adapter stores a GeoPoint as a JSON string and `SQL_DISTANCE_KM`
+  // reads it back as one, so JSONB is what the column actually holds. `POINT`,
+  // with the comment "or use PostGIS", was a column the app could not read.
+  GeoPoint: 'JSONB',
   File: 'JSONB'
 };
 
@@ -203,6 +275,18 @@ class SchemaManager {
    * a sentence. `err.code === 'INDEX_DUPLICATES'` is the supported check.
    */
   static IndexDuplicatesError = IndexDuplicatesError;
+
+  /** Same reason, same door: `err.code === 'CANNOT_CROSS'` is the supported check. */
+  static MigrationRefusal = MigrationRefusal;
+
+  /**
+   * The two type maps, exposed so the portability invariant BETWEEN them can
+   * be asserted instead of believed: every type SQLite stores as a column must
+   * have a PostgreSQL type, or the export drops the column. That invariant is
+   * what `Relation: null` plus `if (pgType)` breached (BRG-D3), and nothing
+   * could read the maps to notice.
+   */
+  static TYPE_MAPS = { sqlite: TYPE_MAP, postgres: POSTGRES_TYPE_MAP };
 
   db: EngineDatabase;
   _schemaCache: Map<string, TableSchema>;
@@ -576,19 +660,126 @@ class SchemaManager {
     return rows.map((r) => JSON.parse(r.schema));
   }
 
-  /**
-   * Generate PostgreSQL-compatible SQL for migration
-   */
-  generatePostgresSQL(): string {
-    const schemas = this.exportSchemas();
-    const statements: string[] = [];
+  // ===========================================================================
+  // The Postgres export — BRG-004, phase 97
+  //
+  // What was here before dropped every declared index (BRG-D2), dropped every
+  // relation column with no warning (BRG-D3), and — on the Supabase path —
+  // emitted four `TO authenticated … USING (true)` policies per table over a
+  // backend that enforces row ACLs in the SQL it builds (BRG-D1). Richard ruled
+  // (R3) that it is repaired here rather than removed.
+  //
+  // The rule the repair is written to, and the phase's own sentence: **anything
+  // that cannot be carried across is named and refused, never approximated.**
+  // Every `MigrationRefusal` below is a thing this export could have emitted
+  // something plausible for.
+  // ===========================================================================
 
-    statements.push('-- Generated by Noodl LocalSQL Export');
-    statements.push('-- PostgreSQL Schema');
-    statements.push('');
+  /**
+   * One relation column as the junction table it is actually stored in.
+   *
+   * The name is reproduced EXACTLY as `_createJunctionTable` builds it, down to
+   * the same sanitisation, rather than given a nicer one: the junction table's
+   * name is this adapter's private convention (`getRelationOwners`' docstring
+   * says so), and a junction the adapter cannot find by name is a relation that
+   * does not traverse on the other side.
+   *
+   * A `Relation` column with no `targetClass` has no junction table in SQLite
+   * either — nothing was stored, so there is nothing to carry.
+   */
+  _relationJunctions(schema: TableSchema): Array<{ table: string; field: string; targetClass: string }> {
+    const out: Array<{ table: string; field: string; targetClass: string }> = [];
+    for (const col of schema.columns || []) {
+      if (col.type === 'Relation' && col.targetClass) {
+        out.push({
+          table: `_Join_${sanitizeIdent(col.name)}_${sanitizeIdent(schema.name)}`,
+          field: col.name,
+          targetClass: col.targetClass
+        });
+      }
+    }
+    return out;
+  }
+
+  /** One column definition, in Postgres, or a refusal naming the type. */
+  _columnToPostgres(schema: TableSchema, col: SchemaColumn): string | null {
+    if (col.type === 'Relation') return null; // carried by a junction table
+
+    const sqliteType = TYPE_MAP[col.type];
+    if (!sqliteType) {
+      // Not a column on this side either — `_columnToSQL` returns null for it,
+      // so SQLite holds nothing to carry. Parity, not a loss.
+      return null;
+    }
+
+    const pgType = POSTGRES_TYPE_MAP[col.type];
+    if (!pgType) {
+      // A type SQLite stores and this map has no answer for. That is BRG-D3's
+      // exact shape — a column that silently is not there on the other side —
+      // and it is the drift a future type will arrive as.
+      throw new MigrationRefusal(
+        `Column "${col.name}" on "${schema.name}" is a ${col.type}, and this export has no PostgreSQL ` +
+          `type for it. It is stored on SQLite, so exporting the table without it would lose data silently.`,
+        `column type ${col.type}`,
+        schema.name
+      );
+    }
+
+    let def = `${escapeColumn(col.name)} ${pgType}`;
+    if (col.required) def += ' NOT NULL';
+    if (col.defaultValue !== undefined) {
+      // Dropped entirely before this task: a column declared with a default
+      // arrived on the other side without one.
+      if (typeof col.defaultValue === 'string') {
+        def += ` DEFAULT ${quoteLiteral(col.defaultValue)}`;
+      } else if (typeof col.defaultValue === 'boolean') {
+        def += ` DEFAULT ${col.defaultValue ? 'TRUE' : 'FALSE'}`;
+      } else if (typeof col.defaultValue === 'number') {
+        def += ` DEFAULT ${col.defaultValue}`;
+      } else {
+        throw new MigrationRefusal(
+          `The default value declared for "${col.name}" on "${schema.name}" is a ` +
+            `${Array.isArray(col.defaultValue) ? 'array' : typeof col.defaultValue}, which this export cannot write ` +
+            'as a PostgreSQL default.',
+          'column default value',
+          schema.name
+        );
+      }
+    }
+    return def;
+  }
+
+  /**
+   * PostgreSQL DDL for every collection: columns, the two built-in indexes,
+   * **every declared index including `unique`** (BRG-D2) and **every relation's
+   * junction table** (BRG-D3).
+   *
+   * No row-security policy is emitted and none is needed on this path: the
+   * NodeGX app server compiles the same ACL predicate into the SQL it builds
+   * whichever database is behind it (`QueryBuilder.buildAclPredicate`), so the
+   * ACLs carry because the enforcement code carries. `generateSupabaseSQL` is
+   * the path where a third party's PostgREST becomes the enforcement point, and
+   * it is the one that needs real policies.
+   *
+   * @throws MigrationRefusal — `code: 'CANNOT_CROSS'` — for anything it will
+   *   not approximate.
+   */
+  generatePostgresSQL(options?: PostgresExportOptions): string {
+    const schemas = this.exportSchemas();
+    const touchTrigger = Boolean(options && options.updatedAtTrigger);
+    const out: string[] = [];
+
+    out.push('-- Generated by NodeGX: SQLite -> PostgreSQL schema export.');
+    out.push(`-- ${schemas.length} collection${schemas.length === 1 ? '' : 's'}.`);
+    out.push('--');
+    out.push('-- Row ACLs are deliberately NOT expressed as policies here. The NodeGX app');
+    out.push('-- server compiles the same ACL predicate into every query it builds, whichever');
+    out.push('-- database is behind it, so they carry because the enforcement code carries.');
+    out.push('');
 
     for (const schema of schemas) {
-      statements.push(`-- Table: ${schema.name}`);
+      const table = escapeTable(schema.name);
+      out.push(`-- Collection: ${schema.name}`);
 
       const columnDefs = [
         '"objectId" TEXT PRIMARY KEY',
@@ -596,89 +787,324 @@ class SchemaManager {
         '"updatedAt" TIMESTAMPTZ DEFAULT NOW()',
         '"ACL" JSONB'
       ];
-
       for (const col of schema.columns || []) {
-        const pgType = POSTGRES_TYPE_MAP[col.type];
-        if (pgType) {
-          let def = `"${col.name}" ${pgType}`;
-          if (col.required) def += ' NOT NULL';
-          columnDefs.push(def);
-        }
+        const def = this._columnToPostgres(schema, col);
+        if (def) columnDefs.push(def);
       }
 
-      statements.push(`CREATE TABLE IF NOT EXISTS "${schema.name}" (`);
-      statements.push(`  ${columnDefs.join(',\n  ')}`);
-      statements.push(');');
-      statements.push('');
+      out.push(`CREATE TABLE IF NOT EXISTS ${table} (`);
+      out.push(`  ${columnDefs.join(',\n  ')}`);
+      out.push(');');
+      out.push('');
 
-      // Indexes
-      statements.push(`CREATE INDEX IF NOT EXISTS "idx_${schema.name}_createdAt" ON "${schema.name}"("createdAt");`);
-      statements.push(`CREATE INDEX IF NOT EXISTS "idx_${schema.name}_updatedAt" ON "${schema.name}"("updatedAt");`);
-      statements.push('');
+      // The two indexes every table gets on creation, under the SAME names
+      // `builtInIndexNames` uses, so a reconcile on the other side agrees with
+      // this one about which indexes it did not create.
+      const builtIn = this.builtInIndexNames(schema.name);
+      out.push(`CREATE INDEX IF NOT EXISTS "${builtIn[0]}" ON ${table}("createdAt");`);
+      out.push(`CREATE INDEX IF NOT EXISTS "${builtIn[1]}" ON ${table}("updatedAt");`);
 
-      // Add updatedAt trigger
-      statements.push(`-- Trigger for auto-updating updatedAt`);
-      statements.push(`CREATE OR REPLACE FUNCTION update_updated_at_column()`);
-      statements.push(`RETURNS TRIGGER AS $$`);
-      statements.push(`BEGIN`);
-      statements.push(`  NEW."updatedAt" = NOW();`);
-      statements.push(`  RETURN NEW;`);
-      statements.push(`END;`);
-      statements.push(`$$ language 'plpgsql';`);
-      statements.push('');
-      statements.push(`DROP TRIGGER IF EXISTS "update_${schema.name}_updated_at" ON "${schema.name}";`);
-      statements.push(`CREATE TRIGGER "update_${schema.name}_updated_at" BEFORE UPDATE ON "${schema.name}"`);
-      statements.push(`  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`);
-      statements.push('');
+      // BRG-D2. FED-002 landed an index declaration in phase 96 and this export
+      // kept emitting the two above and nothing else — so a collection whose
+      // `id` is `unique: true` arrived as a table with no unique constraint and
+      // the dedupe guarantee silently stopped being one.
+      const declared = normalizeIndexDecls(schema.indexes);
+      for (const decl of declared) {
+        const name = this.indexName(schema.name, decl.fields);
+        const cols = decl.fields
+          .map((f) => `${escapeColumn(f)}${decl.order === 'desc' ? ' DESC' : ''}`)
+          .join(', ');
+        out.push(
+          `CREATE${decl.unique ? ' UNIQUE' : ''} INDEX IF NOT EXISTS "${name}" ON ${table} (${cols});`
+        );
+      }
+      out.push('');
+
+      // BRG-D3. `Relation: null` in the type map plus `if (pgType)` meant a
+      // relation column was skipped with no warning, no comment and no error —
+      // and the junction table holding its rows was never mentioned at all.
+      for (const j of this._relationJunctions(schema)) {
+        const jt = escapeTable(j.table);
+        out.push(`-- Relation: ${schema.name}.${j.field} -> ${j.targetClass}`);
+        out.push(`CREATE TABLE IF NOT EXISTS ${jt} (`);
+        out.push('  "owningId" TEXT NOT NULL,');
+        out.push('  "relatedId" TEXT NOT NULL,');
+        out.push('  PRIMARY KEY ("owningId", "relatedId")');
+        out.push(');');
+        // No foreign keys, for the same reason SQLite has none here: the
+        // adapter deletes a record without touching its junction rows, and an
+        // FK would turn a copy of that state into a failed insert.
+        out.push(`CREATE INDEX IF NOT EXISTS "idx_${j.table}_owning" ON ${jt}("owningId");`);
+        out.push(`CREATE INDEX IF NOT EXISTS "idx_${j.table}_related" ON ${jt}("relatedId");`);
+        out.push('');
+      }
+
+      if (touchTrigger) {
+        // Only ever emitted for a database a third party writes directly
+        // (`generateSupabaseSQL`). On the NodeGX path the app stamps
+        // `updatedAt` itself, and a trigger doing it again would overwrite the
+        // value the app just wrote — a divergence between what a caller writes
+        // and what it reads back, which is the whole failure mode of this phase.
+        out.push(`CREATE OR REPLACE FUNCTION nodegx_touch_updated_at()`);
+        out.push(`RETURNS TRIGGER AS $$`);
+        out.push(`BEGIN`);
+        out.push(`  NEW."updatedAt" = NOW();`);
+        out.push(`  RETURN NEW;`);
+        out.push(`END;`);
+        out.push(`$$ LANGUAGE plpgsql;`);
+        out.push('');
+        out.push(`DROP TRIGGER IF EXISTS "touch_${sanitizeIdent(schema.name)}_updatedAt" ON ${table};`);
+        out.push(
+          `CREATE TRIGGER "touch_${sanitizeIdent(schema.name)}_updatedAt" BEFORE UPDATE ON ${table}`
+        );
+        out.push(`  FOR EACH ROW EXECUTE FUNCTION nodegx_touch_updated_at();`);
+        out.push('');
+      }
     }
 
-    return statements.join('\n');
+    return out.join('\n');
   }
 
   /**
-   * Generate Supabase-compatible SQL (includes RLS policies)
+   * The same DDL plus row-level security, for the path where a third party's
+   * PostgREST — not the NodeGX app server — is the thing deciding who may read
+   * a row.
+   *
+   * 🔴 **This is BRG-D1.** What was here granted every authenticated caller
+   * every row of every table, with two of the four policies carrying the
+   * comment "(customize based on ACL)".
+   *
+   * Three things it now needs, and refuses without, because each is a fact it
+   * cannot invent:
+   *
+   * 1. `security` — the live CLP configuration. Which operations are allowed at
+   *    all, and to whom, is written in `security.json`; a generator guessing it
+   *    is how `USING (true)` happened.
+   * 2. `userIdClaim` — the JWT claim carrying the **NodeGX `_User` objectId**.
+   *    The keys of a row's ACL are NodeGX user ids, and `auth.uid()` on the
+   *    other side is a Supabase auth user's uuid. They are not the same
+   *    identifier, and a policy comparing them denies everyone or, worse, is
+   *    written to compare something that happens to match.
+   * 3. Rows whose ACL names a **role**. Roles live in `_Role` inside this
+   *    backend; PostgREST has no idea what they are. A policy that ignores
+   *    `role:` keys quietly narrows access for exactly the rows an
+   *    administrator granted a team — so the export is refused by name, with
+   *    the count, rather than emitted.
+   *
+   * @throws MigrationRefusal — `code: 'CANNOT_CROSS'`.
    */
-  generateSupabaseSQL(): string {
-    const baseSQL = this.generatePostgresSQL();
-    const schemas = this.exportSchemas();
-    const rlsStatements: string[] = [];
-
-    rlsStatements.push('');
-    rlsStatements.push('-- Row Level Security Policies');
-    rlsStatements.push('');
-
-    for (const schema of schemas) {
-      const tableName = schema.name;
-
-      rlsStatements.push(`-- RLS for ${tableName}`);
-      rlsStatements.push(`ALTER TABLE "${tableName}" ENABLE ROW LEVEL SECURITY;`);
-      rlsStatements.push('');
-
-      // Default policy: allow authenticated users
-      rlsStatements.push(`-- Allow authenticated users to read all records`);
-      rlsStatements.push(
-        `CREATE POLICY "Allow authenticated read" ON "${tableName}" FOR SELECT TO authenticated USING (true);`
+  generateSupabaseSQL(options?: SupabaseExportOptions): string {
+    const security = options && options.security;
+    if (!security || !security.defaults || !security.defaults.permissions) {
+      throw new MigrationRefusal(
+        'A Supabase export needs the live security configuration: which operations each collection ' +
+          'allows, and to whom, is in security.json and cannot be guessed. Generating policies without it ' +
+          'is how this export came to grant every authenticated user every row.',
+        'the CLP configuration'
       );
-      rlsStatements.push('');
-
-      rlsStatements.push(`-- Allow users to insert their own records`);
-      rlsStatements.push(
-        `CREATE POLICY "Allow insert" ON "${tableName}" FOR INSERT TO authenticated WITH CHECK (true);`
+    }
+    const claim = options && options.userIdClaim;
+    if (!claim) {
+      throw new MigrationRefusal(
+        "A row's ACL is keyed by NodeGX _User objectIds, and PostgREST authenticates a Supabase auth user. " +
+          'Name the JWT claim that carries the NodeGX user id (`userIdClaim`) so the policies can compare like ' +
+          'with like — there is no correct default, and a policy comparing the wrong two identifiers either ' +
+          'denies everyone or lets the wrong person through.',
+        'the identity mapping'
       );
-      rlsStatements.push('');
-
-      rlsStatements.push(`-- Allow users to update their own records (customize based on ACL)`);
-      rlsStatements.push(
-        `CREATE POLICY "Allow update" ON "${tableName}" FOR UPDATE TO authenticated USING (true) WITH CHECK (true);`
-      );
-      rlsStatements.push('');
-
-      rlsStatements.push(`-- Allow users to delete their own records (customize based on ACL)`);
-      rlsStatements.push(`CREATE POLICY "Allow delete" ON "${tableName}" FOR DELETE TO authenticated USING (true);`);
-      rlsStatements.push('');
     }
 
-    return baseSQL + rlsStatements.join('\n');
+    const schemas = this.exportSchemas();
+    const rls: string[] = [];
+
+    rls.push('');
+    rls.push('-- Row Level Security, generated from security.json and the row ACLs.');
+    rls.push(`-- The principal is the JWT claim "${claim}", which must carry the NodeGX _User objectId.`);
+    rls.push('-- `anon` and `authenticated` are the roles PostgREST switches to; they must exist.');
+    rls.push('');
+
+    const principal = `(current_setting('request.jwt.claims', true)::jsonb ->> ${quoteLiteral(claim)})`;
+
+    for (const schema of schemas) {
+      const table = escapeTable(schema.name);
+      const name = schema.name;
+      this._assertNoRoleKeyedAcls(name);
+
+      const find = this._ruleFor(security, name, 'find');
+      const get = this._ruleFor(security, name, 'get');
+      // Compared by CONTENT: both are normalised, sorted lists, and `!==` on
+      // two arrays is a reference check that is always true.
+      if (find.join('|') !== get.join('|')) {
+        // PostgREST answers a fetch-by-id with the same SELECT it answers a
+        // listing with, so one policy has to stand for both rules. A union
+        // hands a caller denied `find` the whole table one row at a time; an
+        // intersection denies a `get` the backend allows. Neither is this
+        // collection's rule, so neither is written.
+        throw new MigrationRefusal(
+          `"${name}" allows find to ${JSON.stringify(find)} and get to ${JSON.stringify(get)}. PostgREST cannot ` +
+            'tell one from the other — both are a SELECT — so a single policy would have to be more permissive ' +
+            'or more restrictive than what this backend enforces.',
+          'find and get differing',
+          name
+        );
+      }
+
+      rls.push(`-- Policies for ${name}`);
+      rls.push(`ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY;`);
+
+      this._emitPolicy(rls, table, name, 'SELECT', find, this._aclPredicate(principal, 'read'));
+      this._emitPolicy(
+        rls,
+        table,
+        name,
+        'INSERT',
+        this._ruleFor(security, name, 'create'),
+        this._aclPredicate(principal, 'write')
+      );
+      this._emitPolicy(
+        rls,
+        table,
+        name,
+        'UPDATE',
+        this._ruleFor(security, name, 'update'),
+        this._aclPredicate(principal, 'write')
+      );
+      this._emitPolicy(
+        rls,
+        table,
+        name,
+        'DELETE',
+        this._ruleFor(security, name, 'delete'),
+        this._aclPredicate(principal, 'write')
+      );
+      rls.push('');
+    }
+
+    return this.generatePostgresSQL({ updatedAtTrigger: true }) + rls.join('\n');
+  }
+
+  /** The effective CLP rule for one operation, collection entry over defaults. */
+  _ruleFor(security: SecurityRulesLike, collection: string, op: string): string[] {
+    const entry = security.collections && security.collections[collection];
+    const raw =
+      entry && entry.permissions && entry.permissions[op] !== undefined
+        ? entry.permissions[op]
+        : security.defaults.permissions[op];
+    const atoms = raw === undefined ? [] : Array.isArray(raw) ? raw.slice() : [raw];
+    return atoms.map((a) => String(a)).sort();
+  }
+
+  /**
+   * The ACL predicate, in PostgreSQL, saying exactly what
+   * `QueryBuilder.buildAclPredicate` says in SQLite: a row with no ACL is
+   * public, and a row with one qualifies when an entry whose key is '*' or this
+   * caller grants the access asked for.
+   *
+   * `->> 'read' IN ('1','true')` rather than `= 1`: the backend writes the flag
+   * as a JSON number, and a row written through some other door may carry a
+   * boolean. Reading both is the difference between a policy that works on the
+   * data that exists and one that works on the data it expected.
+   */
+  _aclPredicate(principal: string, access: 'read' | 'write'): string {
+    return (
+      `("ACL" IS NULL OR EXISTS (\n` +
+      `      SELECT 1 FROM jsonb_each("ACL") AS _acl\n` +
+      `      WHERE _acl.key IN ('*', ${principal})\n` +
+      `        AND (_acl.value ->> '${access}') IN ('1', 'true')))`
+    );
+  }
+
+  /**
+   * One policy, or the reason there is none.
+   *
+   * A rule of 'nobody' emits NO policy on purpose: RLS with no policy denies,
+   * which is the same answer the backend gives, and it is the one case where
+   * emitting nothing is the faithful translation rather than an omission — so
+   * it says so in a line of SQL that a person reading the file can see.
+   */
+  _emitPolicy(
+    out: string[],
+    table: string,
+    collection: string,
+    action: string,
+    rule: string[],
+    aclPredicate: string
+  ): void {
+    const roles = rule.filter((atom) => atom.startsWith('role:'));
+    if (roles.length > 0) {
+      throw new MigrationRefusal(
+        `"${collection}" restricts ${action} to ${roles.join(', ')}. Roles live in this backend's _Role table; ` +
+          'PostgREST has no membership to check, so the policy would either ignore the restriction or deny ' +
+          'everyone.',
+        'role-based collection permissions',
+        collection
+      );
+    }
+
+    const grantees: string[] = [];
+    if (rule.indexOf('public') !== -1) grantees.push('anon', 'authenticated');
+    else if (rule.indexOf('authenticated') !== -1) grantees.push('authenticated');
+
+    if (grantees.length === 0) {
+      out.push(`-- No ${action} policy: security.json allows ${action} to nobody, and RLS with no policy denies.`);
+      return;
+    }
+
+    const policy = `"nodegx_${sanitizeIdent(collection)}_${action.toLowerCase()}"`;
+    const to = grantees.join(', ');
+
+    // The GRANT as well as the policy. A policy narrows a privilege that has
+    // been granted; it does not grant one, so a table with policies and no
+    // grants denies everyone and reads as "the policies are wrong". Emitting
+    // both here also means an operation ruled `nobody` above leaves NEITHER,
+    // which is the same answer this backend gives, twice.
+    out.push(`GRANT ${action} ON ${table} TO ${to};`);
+    if (action === 'INSERT') {
+      out.push(`CREATE POLICY ${policy} ON ${table} FOR INSERT TO ${to}`);
+      out.push(`  WITH CHECK ${aclPredicate};`);
+    } else if (action === 'UPDATE') {
+      out.push(`CREATE POLICY ${policy} ON ${table} FOR UPDATE TO ${to}`);
+      out.push(`  USING ${aclPredicate}`);
+      out.push(`  WITH CHECK ${aclPredicate};`);
+    } else {
+      out.push(`CREATE POLICY ${policy} ON ${table} FOR ${action} TO ${to}`);
+      out.push(`  USING ${aclPredicate};`);
+    }
+  }
+
+  /**
+   * Refuse a table holding rows whose ACL names a role.
+   *
+   * This reads the DATA, not the configuration, because that is where the
+   * answer is: `security.json` says nothing about which keys a row's ACL
+   * carries, and an administrator granting a team access writes `role:editors`
+   * into the row itself.
+   */
+  _assertNoRoleKeyedAcls(tableName: string): void {
+    let row: { n?: number; sample?: string } | undefined;
+    try {
+      row = this.db
+        .prepare(
+          `SELECT COUNT(*) AS n, MIN(_acl.key) AS sample FROM ${escapeTable(tableName)}, json_each("ACL") AS _acl ` +
+            `WHERE "ACL" IS NOT NULL AND _acl.key LIKE 'role:%'`
+        )
+        .get() as { n?: number; sample?: string };
+    } catch (e) {
+      // No such table, or an engine with no json1 (the ephemeral mock). Nothing
+      // measured means nothing claimed: this check is an assertion about rows
+      // that exist, and where none can be read it has nothing to say.
+      return;
+    }
+    if (!row || !row.n) return;
+
+    throw new MigrationRefusal(
+      `${row.n} row${row.n === 1 ? '' : 's'} in "${tableName}" ${row.n === 1 ? 'has an ACL' : 'have ACLs'} naming a ` +
+        `role (${row.sample}). Roles are members of this backend's _Role table, which PostgREST cannot see, so ` +
+        'those grants would silently disappear from the exported policies.',
+      'role-keyed row ACLs',
+      tableName,
+      { rows: row.n, sample: row.sample }
+    );
   }
 
   /**

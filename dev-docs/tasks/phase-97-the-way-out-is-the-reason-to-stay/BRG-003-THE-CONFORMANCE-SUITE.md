@@ -2,7 +2,7 @@
 
 **Status: 🏗 s4 (2026-09-19). The suite is 56 cases across five areas, green against SQLite and
 proven able to fail by six mutants — and **the §3.5 gate is built and in CI**. AC1, AC3, AC4, AC5,
-AC6 and AC7 closed. **AC8 is the only criterion left, and it is BRG-004's.** The three §3.2 areas
+AC6 and AC7 closed. **AC8 was the only criterion left and it was BRG-004's — closed s5** (BRG-004 §5): the two generators are repaired and tested, and this file's AC7 ratchet falls from 22 to 20 because neither is `uncovered` any more. The three §3.2 areas
 with no cases are now *declared* rather than merely absent, and counted by a ratchet. Exercising the
 two mechanisms found four things nobody had noticed — §5.6 and §5.7.**
 
@@ -220,7 +220,7 @@ on this box at the time.
 | AC5 | the declaration mechanism works | ✅ s4 — exercised against three limited adapters, and **it did not work**: `unsupported` covered a wrong answer. Fixed and proved (§5.7) |
 | AC6 | the §3.5 CI gate | ✅ s4 — two mechanisms, both in CI, both **measured failing** on a real injected method (§5.6) |
 | AC7 | the gate run against HEAD; everything uncovered declared | ✅ s4 — **22 of 61** members declared uncovered, each with a reason and an owing task, held by a ratchet |
-| AC8 | BRG-D4 closed | ⬜ BRG-004's business |
+| AC8 | BRG-D4 closed | ✅ s5, in BRG-004 §5 — 36 cases and four mutants over the two generators; both register entries moved `uncovered` → `not-in-the-promise` (a migration concern no second adapter implements), which drops the AC7 ratchet 22 → 20 |
 
 ### 5.5 What is deliberately not covered yet, and why it is not a silent gap
 
