@@ -90,8 +90,37 @@ export class CanvasPainter {
       insertLocation: editor.interaction.insertLocation,
       multiselectAABB: showMultiselectBox ? editor.calculateNodesAABB(editor.selector.nodes) : undefined,
       multiselectMouseDown: editor.interaction.multiselectMouseDown,
-      multiselectMouseMove: editor.interaction.multiselectMouseMove
+      multiselectMouseMove: editor.interaction.multiselectMouseMove,
+      laneRoots: this.laneRoots(),
+      laneFilter: editor.laneFilter
     });
+  }
+
+  /**
+   * TVW-006 — one entry per root for the structure lane, built fresh each frame.
+   *
+   * 🔴 **`isVisualRoot` is the MODEL's answer and is never re-derived here.** It consults
+   * `allowAsChild` on a *resolved* type and falls back to the file's recorded `visualRoots` when
+   * the type is missing, which is what keeps a kit's node visual before its module registers. The
+   * same read done locally is the defect TVW-001 slice 2 was driven into: on project open the node
+   * library has not finished loading and every root answers "not visual", so the whole graph would
+   * lose its lane for a second and get it back ([[allowaschild-is-stale-until-the-node-library-loads]]).
+   *
+   * ⚠️ `measuredSize` is read, not `nodeSize`: the lane wraps the stack INCLUDING its nested
+   * children, and `nodeSize` is only the root's own card.
+   */
+  private laneRoots() {
+    const editor = this.editor;
+    if (!editor.model) return undefined;
+
+    return editor.roots.map((node) => ({
+      id: node.id,
+      x: node.x,
+      y: node.y,
+      width: node.measuredSize ? node.measuredSize.width : 0,
+      height: node.measuredSize ? node.measuredSize.height : 0,
+      isVisual: editor.model.isVisualRoot(node.model)
+    }));
   }
 
   /**

@@ -29,6 +29,7 @@ import { TitleBar } from './documents/EditorDocument/titlebar';
 import { CanvasIcons } from './nodegrapheditor/canvas/CanvasIcons';
 import { CanvasRenderer } from './nodegrapheditor/canvas/CanvasRenderer';
 import { CanvasTheme } from './nodegrapheditor/canvas/CanvasTheme';
+import type { LaneFilter } from './nodegrapheditor/canvas/structureLane';
 import { CanvasViewport } from './nodegrapheditor/canvas/CanvasViewport';
 import * as HitTester from './nodegrapheditor/canvas/HitTester';
 import { InteractionController } from './nodegrapheditor/canvas/InteractionController';
@@ -145,6 +146,22 @@ export class NodeGraphEditor extends View {
 
   /** Layout/paint pipeline: measure, AABB, per-frame FrameState assembly (PLAT-001 wave 3 extraction). */
   painter = new CanvasPainter(this);
+
+  /**
+   * TVW-006 — the structure lane's `All · Structure · Logic` filter.
+   *
+   * §2: **per canvas, not persisted.** A field on the editor rather than a stored setting, so it
+   * resets when the canvas does and never follows someone into a project they open tomorrow. It
+   * dims, never hides (R-F) — see `canvas/structureLane.ts`.
+   */
+  laneFilter: LaneFilter = 'all';
+
+  /** Set the lane filter and repaint. Returns the filter, so a caller can assert what landed. */
+  setLaneFilter(filter: LaneFilter): LaneFilter {
+    this.laneFilter = filter;
+    this.repaint();
+    return this.laneFilter;
+  }
 
   commentLayer: CommentLayer;
   _disposed: boolean;

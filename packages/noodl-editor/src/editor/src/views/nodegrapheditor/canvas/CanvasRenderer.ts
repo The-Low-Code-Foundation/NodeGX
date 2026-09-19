@@ -2,7 +2,20 @@ import _ from 'underscore';
 
 import type { NodeGraphEditorConnection } from '../NodeGraphEditorConnection';
 import { NodeGraphEditorNode } from '../NodeGraphEditorNode';
-import { CanvasTheme } from './CanvasTheme';
+import { CanvasFonts, CanvasTheme } from './CanvasTheme';
+import {
+  dashPattern,
+  eyebrowIsVisible,
+  hairlineWidth,
+  connectionAlpha,
+  isLogicOnly,
+  lanesForFrame,
+  rootAlpha,
+  StructureLane,
+  type LaneFilter,
+  type LaneRect,
+  type LaneRoot
+} from './structureLane';
 import { AABB, IVector2, PanAndScale } from './types';
 
 /**
@@ -24,6 +37,15 @@ export type FrameState = {
   roots: readonly NodeGraphEditorNode[];
   connections: readonly NodeGraphEditorConnection[];
 
+  /**
+   * TVW-006 — one entry per root, carrying the model's verdict on whether it draws. Assembled by
+   * `CanvasPainter` because `isVisualRoot` lives on the model and the renderer has no
+   * back-reference to the editor. Absent (older callers, tests) means no lanes and no filter.
+   */
+  laneRoots?: readonly LaneRoot[];
+  /** Per canvas, not persisted. `all` unless someone pressed something. */
+  laneFilter?: LaneFilter;
+
   /** Nodes being dragged are painted last, semi-transparent. */
   draggingNodes?: readonly NodeGraphEditorNode[];
 
@@ -42,6 +64,34 @@ export type FrameState = {
   multiselectMouseDown?: IVector2;
   multiselectMouseMove?: IVector2;
 };
+
+/**
+ * TVW-006 — the ids of the roots that have a lane.
+ *
+ * A lane covers a root's WHOLE subtree, so membership is a fact about the root and the set holds
+ * root ids only. {@link rootOf} is what turns a wire's endpoint — which is usually a child, deep
+ * in a stack — back into the root the set can answer for.
+ */
+function laneMembership(frame: FrameState): Set<string> {
+  const ids = new Set<string>();
+  for (const root of frame.laneRoots || []) {
+    if (root.isVisual) ids.add(root.id);
+  }
+  return ids;
+}
+
+/**
+ * The id of the root a node belongs to.
+ *
+ * ⚠️ A wire's endpoint is an editor node at any depth. Testing the ENDPOINT's own id against the
+ * lane set would say "not in a lane" for every wire that lands on a child — which is most of them,
+ * since a wire into a stack lands on something inside it, not on the Page node at its root.
+ */
+function rootOf(node: TSFixme): string {
+  let current = node;
+  while (current && current.parent) current = current.parent;
+  return current ? current.id : undefined;
+}
 
 export class CanvasRenderer {
   /**
@@ -76,13 +126,31 @@ export class CanvasRenderer {
 
     ctx.font = '10px Helvetica';
 
+    // TVW-006: the structure lane sits UNDER everything the graph draws — the hierarchy spine and
+    // the wires cross over it, because it is a region the nodes are in, not a thing between them.
+    if (frame.laneRoots && frame.laneRoots.length) {
+      this.paintStructureLanes(ctx, frame.laneRoots, paintRect, scale);
+    }
+
     // Paint hierarchy
     _.each(frame.roots, (root) => this.paintHierarchy(ctx, root));
 
+    // TVW-006 — the lane filter DIMS, never hides (R-F). Every node and wire below is still
+    // painted, so it is still hit-tested, draggable and connectable; only its alpha moves.
+    const dimming = !!frame.laneFilter && frame.laneFilter !== 'all';
+    const inLane = dimming ? laneMembership(frame) : undefined;
+
     // Paint connections
     _.each(frame.connections, function (con) {
+      if (inLane)
+        ctx.globalAlpha = connectionAlpha(
+          inLane.has(rootOf(con.fromNode)),
+          inLane.has(rootOf(con.toNode)),
+          frame.laneFilter
+        );
       con.paint(ctx, paintRect);
     });
+    if (inLane) ctx.globalAlpha = 1;
 
     // Paint all highlighted connections (so they always show up on top)
     _.each(frame.connections, function (con) {
@@ -92,9 +160,14 @@ export class CanvasRenderer {
     // Paint nodes
     _.each(frame.roots, function (node) {
       if (!frame.draggingNodes || frame.draggingNodes.indexOf(node) === -1) {
+        // 🔴 R-W: the alpha is decided per ROOT, off the MODEL's verdict. A logic node that
+        // happens to sit inside a lane's rectangle — 838 of them in the corpus — stays bright,
+        // because `Logic` means "show me the logic" and where someone parked it is not what it is.
+        if (inLane) ctx.globalAlpha = rootAlpha(inLane.has(node.id), frame.laneFilter);
         node.paint(ctx, paintRect);
       }
     });
+    if (inLane) ctx.globalAlpha = 1;
 
     if (frame.insertLocation) {
       // Indicate that we have an insert location when
@@ -142,6 +215,92 @@ export class CanvasRenderer {
       ctx.setLineDash([]);
     }
 
+    ctx.restore();
+  }
+
+  /**
+   * TVW-006 — the region around each visual stack, drawn *wherever the stack is* (R-J).
+   *
+   * One rounded dashed rectangle per visual root, a 4% wash of the visual category colour inside
+   * it, and a `STRUCTURE` eyebrow in the 22px the lane adds above the stack. A component with no
+   * visual root at all gets the logic-only eyebrow instead, once, at the top-left of the viewport.
+   *
+   * 🔴 **R-X: lanes that overlap are left overlapping.** 221 pairs in the corpus do. Merging them
+   * would draw one box claiming the space between two stacks — and any logic node parked in that
+   * gap — as structure.
+   */
+  private paintStructureLanes(
+    ctx: CanvasRenderingContext2D,
+    laneRoots: readonly LaneRoot[],
+    paintRect: { minX: number; maxX: number; minY: number; maxY: number },
+    scale: number
+  ) {
+    const colors = CanvasTheme.instance.colors;
+
+    if (isLogicOnly(laneRoots)) {
+      this.paintLaneEyebrow(ctx, StructureLane.logicOnlyLabel, paintRect.minX + 16, paintRect.minY + 16, scale);
+      return;
+    }
+
+    const lanes = lanesForFrame(laneRoots, paintRect);
+    if (!lanes.length) return;
+
+    const width = hairlineWidth(scale);
+
+    ctx.save();
+    for (const lane of lanes) {
+      // The wash first, then the stroke on top of it.
+      ctx.globalAlpha = StructureLane.washAlpha;
+      ctx.fillStyle = colors.categoryVisual;
+      this.laneOutline(ctx, lane);
+      ctx.fill();
+
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = colors.hierarchyLine;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dashPattern(scale));
+      this.laneOutline(ctx, lane);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+
+    for (const lane of lanes) {
+      this.paintLaneEyebrow(
+        ctx,
+        StructureLane.eyebrowLabel,
+        lane.x + StructureLane.padding,
+        lane.y + StructureLane.eyebrowHeight / 2,
+        scale
+      );
+    }
+  }
+
+  /** The lane's rounded path. Kept separate so the wash and the stroke can never trace different
+   *  rectangles — the failure that makes a 1px offset look like a rendering bug. */
+  private laneOutline(ctx: CanvasRenderingContext2D, lane: LaneRect) {
+    // The radius is in graph units and would balloon at low zoom relative to the hairline, so it
+    // is clamped to half the shorter side the way a CSS radius is.
+    const radius = Math.min(StructureLane.cornerRadius, lane.width / 2, lane.height / 2);
+    ctx.beginPath();
+    if (typeof (ctx as TSFixme).roundRect === 'function') {
+      (ctx as TSFixme).roundRect(lane.x, lane.y, lane.width, lane.height, radius);
+    } else {
+      ctx.rect(lane.x, lane.y, lane.width, lane.height);
+    }
+  }
+
+  /** §3: the eyebrow hides below 50% zoom, where its text is unreadable anyway. The lane keeps
+   *  drawing — the region is still the point. */
+  private paintLaneEyebrow(ctx: CanvasRenderingContext2D, label: string, x: number, y: number, scale: number) {
+    if (!eyebrowIsVisible(scale)) return;
+
+    ctx.save();
+    ctx.font = CanvasFonts.portLabel;
+    ctx.fillStyle = CanvasTheme.instance.colors.cardSubText;
+    ctx.globalAlpha = 0.75;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, y);
     ctx.restore();
   }
 

@@ -11,6 +11,7 @@ import { MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 import { Tooltip } from '@noodl-core-ui/components/popups/Tooltip';
 
 import { ViewerConnection } from '../../ViewerConnection';
+import type { LaneFilter } from '../nodegrapheditor/canvas/structureLane';
 import { buildCreateMenuItems, CLOUD_CREATE_PARENT_PATH, createMenuTitle } from '../panels/ComponentsPanelNew/createMenu';
 import { folderSegmentLabel } from '../panels/ComponentsPanelNew/folderDisplay';
 import { useComponentActions } from '../panels/ComponentsPanelNew/hooks/useComponentActions';
@@ -51,6 +52,57 @@ export interface NodeGraphComponentTrailProps {
    * ordinary component's trail takes the same code path it takes today.
    */
   statusSlot?: React.ReactNode;
+
+  /**
+   * TVW-006 — the structure lane's `All · Structure · Logic` filter.
+   *
+   * Absent on a canvas that has no lane to filter (and in every existing test), and the segmented
+   * control is not rendered then. It is state the CANVAS owns, not this bar: the bar reads it and
+   * reports a press, which is why it arrives as a value and a callback rather than as a hook.
+   */
+  laneFilter?: LaneFilter;
+  onLaneFilterChange?: (filter: LaneFilter) => void;
+}
+
+/** §2: the three segments, in the order the mock's callout 5 draws them. */
+const LANE_FILTERS: Array<{ value: LaneFilter; label: string; title: string }> = [
+  { value: 'all', label: 'All', title: 'Show the whole graph' },
+  { value: 'structure', label: 'Structure', title: 'Dim everything that is not the screen' },
+  { value: 'logic', label: 'Logic', title: 'Dim the screen' }
+];
+
+/**
+ * TVW-006 — the lane filter, at the right of the trail.
+ *
+ * ⚠️ The words are *dim*, never *hide* or *show only* (R-F). A label that said "Only structure"
+ * would promise something the canvas deliberately does not do: a dimmed node is still there, still
+ * clickable and still connectable, and someone who pressed a control labelled "only" and then
+ * clicked a node that should not have been there would think the filter was broken.
+ */
+function LaneFilterControl({
+  value,
+  onChange
+}: {
+  value: LaneFilter;
+  onChange: (filter: LaneFilter) => void;
+}) {
+  return (
+    <div className={css['LaneFilter']} role="group" aria-label="Structure lane filter" data-test="lane-filter">
+      {LANE_FILTERS.map((segment) => (
+        <button
+          key={segment.value}
+          type="button"
+          className={classNames(css['LaneFilterSegment'], value === segment.value && css['is-active'])}
+          aria-pressed={value === segment.value}
+          title={segment.title}
+          data-test={`lane-filter-${segment.value}`}
+          onClick={() => onChange(segment.value)}
+        >
+          {segment.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 /**
@@ -71,7 +123,9 @@ export function NodeGraphComponentTrail({
 
   runtimeType,
   readOnly,
-  statusSlot
+  statusSlot,
+  laneFilter,
+  onLaneFilterChange
 }: NodeGraphComponentTrailProps) {
   const trailRef = useRef<HTMLDivElement>(null);
 
@@ -197,6 +251,10 @@ export function NodeGraphComponentTrail({
       )}
 
       <div className={css['Spacer']} />
+
+      {laneFilter && onLaneFilterChange && (
+        <LaneFilterControl value={laneFilter} onChange={onLaneFilterChange} />
+      )}
 
       {statusSlot}
 

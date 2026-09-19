@@ -182,3 +182,46 @@
     background-color: var(--theme-color-success);
   }
 }
+
+/* TVW-006 — the structure lane's `All · Structure · Logic` filter, at the right of the trail.
+   Tokens only: P92's scale (11px), the shared radius, and the same primary the rest of the bar
+   uses for a pressed state. A second copy of a palette drifts silently. */
+.LaneFilter {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 1px;
+  padding: 1px;
+  margin-right: 8px;
+  border-radius: 5px;
+  background-color: var(--theme-color-bg-2);
+}
+
+.LaneFilterSegment {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--theme-color-fg-muted);
+  font-family: var(--font-family);
+  font-size: 11px;
+  line-height: 16px;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+
+  /* The pressed segment. `aria-pressed` carries the same fact for anything that is not looking at
+     the colour, so the state is never only a colour. */
+  &.is-active {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-default);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}

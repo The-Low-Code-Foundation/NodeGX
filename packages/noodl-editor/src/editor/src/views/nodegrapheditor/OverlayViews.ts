@@ -21,6 +21,7 @@ import { refFromComponentName } from '../../models/workflow/functionRefResolutio
 import { descentFor } from '../../models/workflow/workflowDescent';
 import { NodeGraphComponentTrail } from '../NodeGraphComponentTrail';
 import { CloudFunctionTrailStatus } from '../NodeGraphComponentTrail/CloudFunctionTrailStatus';
+import type { LaneFilter } from './canvas/structureLane';
 import {
   beginLogicOverlayDrag,
   endLogicOverlayDrag,
@@ -530,7 +531,15 @@ export class OverlayViews {
               backendId: descent?.backendId,
               backendName: descent?.backendName
             })
-          : undefined
+          : undefined,
+        // TVW-006 — the structure lane's filter. The canvas owns the state; the bar reads it and
+        // reports a press. `setLaneFilter` repaints, and this bar re-renders from the same
+        // `updateTitle` the rest of the canvas's navigation already drives.
+        laneFilter: editor.laneFilter,
+        onLaneFilterChange: (filter: LaneFilter) => {
+          editor.setLaneFilter(filter);
+          this.updateTitle();
+        }
       };
 
       editor.overlays.renderSlot('title', rootElem, React.createElement(NodeGraphComponentTrail, props));
