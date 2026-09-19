@@ -3,8 +3,10 @@
 **Scoped:** 2026-09-18, from Richard's question in session — *"what would be the easiest, most
 logical path to moving from SQLite to another DB type"* — and a measurement of the persistence seam
 taken the same afternoon at `cline-dev` HEAD `df60eb6f5`.
-**Status: 🏗 In progress, s1 (2026-09-19). 4 of 5 rulings taken (§4); R2 taken as recommended.
-BRG-001 building.** **Prefix: `BRG`.**
+**Status: 🏗 In progress, s2 (2026-09-19). All 5 rulings taken (§4); R2 taken as recommended.
+BRG-001 built. BRG-002 §3.1 and §3.3 built — nothing in the backend reaches past the storage
+interface any more; §3.2 (`IOperationalStore`) is the remainder. BRG-003 is next and unowned.**
+**Prefix: `BRG`.**
 
 > "Say somebody chooses NodeGX full stack, with the SQLite integrated backend. They develop a
 > reasonably complex app using workflows and cloud functions, and they deploy and one day start
@@ -161,7 +163,7 @@ still `📋 Specced, not started`.
 | task | one line | built | gated | driven |
 |---|---|---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) | The storage interface declared as a type in `nodegx-backend-contract` — **20** + 22 + 16 methods that already exist | ✅ s1 | 🏗 | n/a |
-| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | ⬜ | ⬜ | ⬜ |
+| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) | The 5 holes closed: 20 raw-SQL sites onto the interface, 7 sync methods made async, `getDatabase()` fenced | 🏗 s1-s2 — §3.1 + §3.3; §3.2 left | 🏗 AC5 AC6 | n/a |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) | One suite, any adapter, green against SQLite on day one — and a CI gate that fails an unportable feature | ⬜ | ⬜ | ⬜ |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) | `nodegx-backend migrate --to postgres://…`: schema, data, verify, cutover — and ACLs that survive | ⬜ | ⬜ | ⬜ |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) | `PostgresAdapter` implementing the BRG-001 interface until BRG-003 is green | ⬜ | ⬜ | ⬜ |
