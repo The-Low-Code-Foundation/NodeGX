@@ -9,6 +9,18 @@
  * which components may be mounted at all, what the width field does with the
  * junk a text input actually hands back, and what the size read-out claims. The
  * chrome, the stage and R3's live round trip are BEN-007's job, driven.
+ *
+ * 🔴 **There are THREE modes, and only two of them are graded in this file.**
+ * TVW-008 added `{ mode: 'board' }`, and its specs live in
+ * `tests-unit/tvw-008/previewScopeModes.test.ts` — jest rather than this jasmine
+ * bundle, so they run in seconds instead of needing a renderer. That is where
+ * the exhaustiveness guard (`assertNeverScope`) and the three mode predicates
+ * are pinned.
+ *
+ * ⚠️ **Said here because a reader of this file would otherwise conclude the
+ * surface has two modes**, which is exactly the mistake TVW-008 §6.5 is about:
+ * six call sites asked `!isBench` and silently meant *app or board*. If you are
+ * adding a fourth mode, that file is the one that will stop you.
  */
 
 import {

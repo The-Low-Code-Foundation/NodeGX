@@ -1,8 +1,9 @@
 # Phase 93 — next session
 
-**Written 2026-09-19, end of session 18.** s1–5 drove TVW-003; s6–11 closed TVW-001; s12–13 closed
-TVW-002; s14–17 built and closed TVW-004 (bar Richard's AC6 look) and TVW-005. **s18 sent Richard
-TVW-004's twenty AC6 shots, built AND DROVE TVW-006 slice 1, and censused TVW-007.**
+**Written 2026-09-19, end of session 19.** s1–5 drove TVW-003; s6–11 closed TVW-001; s12–13 closed
+TVW-002; s14–17 built and closed TVW-004 (bar Richard's AC6 look) and TVW-005; s18 built and drove
+TVW-006 and censused TVW-007. **s19 got two rulings out of Richard, reshaped TVW-008 around a
+census, and built its slice 1.**
 
 ## The board, re-derived from the task files
 
@@ -13,237 +14,187 @@ TVW-004's twenty AC6 shots, built AND DROVE TVW-006 slice 1, and censused TVW-00
 | TVW-003 | One selection, three surfaces | ✅ | **CLOSED — all 6 ACs** |
 | TVW-004 | Layers | ✅ | AC1–5, AC7 green. **AC6's 20 shots SENT at s18 — Richard's verdict is all that is left** |
 | TVW-005 | Layers can move things | ✅ | **CLOSED — all 6 ACs** |
-| TVW-006 | The structure lane | ✅ slice 1 | **AC1 (canvas half), AC2, AC3, AC4, AC6 green — 9/9 twice. `test:ci` at the floor. AC5's 18 shots SENT — Richard's verdict is ALL that is left** |
-| TVW-007 | An instance says what it is | — | **censused. 🔴 §2's eyebrow does not fit — R-Z at its §6** |
-| TVW-008 | The board (needs 002) | — | — |
+| TVW-006 | The structure lane | ✅ | AC1–4, AC6 green. **AC5's 18 shots SENT at s18 — Richard's verdict is all that is left** |
+| TVW-007 | An instance says what it is | — | **UNBLOCKED — R-Z ruled at s19. Not started** |
+| TVW-008 | The board | ✅ slice 1 | **Reshaped by R-7. AC8's `test:ci` half green. Slice 2 is the surface and needs the box** |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 50** — 45 at s17 plus TVW-006's AC1–AC4 and AC6.
+**ACs closed: 50.** s19 closed none — it spent itself on two rulings, a census that rewrote a task,
+and the half of TVW-008 that can be graded without the box. That was the right trade *once*; see
+"what to do first".
 
 ## 🔴 Start here
 
-1. ✅ **`test:ci` IS at the floor by name** — seed 13542, 2,978 specs, gitHead `ea94c205b` (carries
-   both TVW-006 commits, checked with `git merge-base --is-ancestor`), eight failures = 3 SUB-006 /
-   3 SUB-011 / 2 NDA-017, readout mtime checked against the clock. Run by `opennoodl-ec` and
-   **re-read off the artefact here** — ⚠️ their harness reported that run as exit 0 while the log
-   ended `TESTCI_EXIT=1`.
-2. **Two verdicts are with Richard**: TVW-004 AC6 (20 shots) and TVW-006 AC5 (18 shots, in
-   `verdicts/TVW-006/2026-09-19`). Both sets are gitignored; only the manifests are tracked.
-3. Then **TVW-007** — but read its §6 first: §2's eyebrow cannot fit on a node in any form, and
-   **R-Z is unanswered**, so the eyebrow cannot be built until Richard picks a format.
+1. **Two verdicts are still with Richard, and nobody else can do either**: TVW-004 AC6 (20 shots) and
+   TVW-006 AC5 (18 shots, in `verdicts/TVW-006/2026-09-19`). Both sets are gitignored; only the
+   manifests are tracked. **Do not re-send them** — they went out at s18. If he answers, both tasks
+   close on the spot.
+2. 🔴 **BUILD, do not farm defects.** s19 built; s18 built. Fine. But TVW-008 slice 2 is a surface
+   and needs a drive, so **check the box before you plan the session**:
+   `lsof -nP -iTCP:8080 -sTCP:LISTEN`, and if it is up, walk the pid to its owner
+   (`ps -o ppid=` up the chain to a `claude` pid, then `/tmp/cc-socks/<pid>.sock`) and ask that
+   session. Do not launch a second stack. ⚠️ A peer's all-clear is about that peer.
+3. **Pick one**: TVW-008 slice 2 (the bigger, and the one with a ruling banked) or TVW-007 (now
+   unblocked, and its §2 needs rewriting to R-Z before a line is written).
 
-## 🔴 Drive levers that each cost a run at s18 — read before driving the canvas
+## 🔴 What Richard ruled at s19, and what it changed
 
-- **A hidden Electron window never fires `requestAnimationFrame`.** `repaint()` therefore does
-  nothing and every arm that mutates-then-waits reads as a dead feature on a working build.
-  `Page.bringToFront` does **not** fix it. `Page.setWebLifecycleState {state:'active'}` +
-  `Emulation.setFocusEmulationEnabled {enabled:true}` does. `drive-tvw006-lane.js` now asserts rAF
-  fires as a precondition and exits 2 otherwise — copy that guard into any new canvas drive.
+### R-7 (TVW-008) — the board is a PICKED SET, placed by hand
+
+TVW-008 was *"press `All components`, see every visual component in its own frame"*. **It was
+censused before anything was built, and the census killed it** (129 projects, 5,922 components,
+`scripts/devtools/tvw008-board-census.js`):
+
+- **Zero of 99 projects fit the board at 100%.** Only **53.5%** fit at the 25% floor §2 specified.
+  Median project: **6 frames needing 31%** — so AC1's own *"six frames, ⌘-scroll to 50%, all six
+  fit"* was wrong twice over.
+- The four biggest boards reach **15,048 × 16,240px — 244 megapixels of live DOM** in one
+  `<webview>`. ⚠️ That constraint held *however* the zoom question was ruled, so virtualisation was
+  going to be mandatory.
+- **Three ACs named subjects that do not exist**: `bench.scenarios` on **0 of 5,922** components,
+  `bench.frame` on **3**, and AC1's six-component project on **none** (best match: 1 of 6).
+
+Shown that, Richard said *"I think you've highlighted a flaw in my vision, a very valid one"* and
+reshaped it: **you choose which components to show, and place them side by side on a canvas.** Then,
+offered three shapes, he chose **placed by hand** over auto-arranged and over dropping the task.
+
+🔴 **The argument that decided it was in his own sentence all along.** The stated value was *"do they
+really fit together?"* — a question about a **chosen set**. The app preview already answers it for
+components that share a screen; what nothing else can answer is *"show me these three button
+variants side by side"*, because in the running app those three are never on screen together. An
+every-component board serves that **worse**, by burying the three among 357.
+
+⚠️ **Hand placement was recommended against on cost and ruled for anyway, so its cost is now the
+task's cost.** The recommendation was a row at real sizes with reordering done in the picked list;
+the free canvas means drag, persist and undo — roughly double. **Do not quietly re-scope it back to
+a row. If it has to shrink, that is a new ruling.**
+
+### R-Z (TVW-007) — the instance eyebrow is the COUNT ONLY, path on hover
+
+s18 measured that §2's `INSTANCE · Sections/Hero · used 3×` fits **0 of 2,385** placed components,
+because the fixed chrome alone (~126px) is wider than the 114px a node leaves. Richard chose the
+**count alone** (`· 3×`) with the path on hover.
+
+🔴 **Two things follow, and both are in TVW-007 §7**: the hover is now the *only* place the
+component's identity lives, so it needs an AC of its own and must work on logic instances too; and
+`Edit ›` is already specified on hover at the node's top-right, so **two different things now appear
+on the same gesture** and whoever builds it resolves them together.
+
+## What s19 built — TVW-008 slice 1 (`fb82d4fa2`, `5208e3a42`)
+
+Everything gradeable without the box. `previewScope.ts` gained the third variant, the exhaustiveness
+guard and the mode predicates; `benchBoard.ts` is new (the board's pure rules and the `bench.board`
+record); `componentBench.ts` gained `boardBounds` / `boardHarness` / `buildBoardExport`.
+
+🔴 **§6.5 was right, and the compiler proved it by saying nothing.** Adding `{ mode: 'board' }` left
+`tsc --noEmit` at **exit 0** while six behaviours changed, because every site derived
+`const isBench = scope.mode === 'bench'` and then asked `!isBench` — which stops meaning *the app*
+the moment a third mode exists. The one a person would have seen first:
+`isBench ? benchTargetLabel(scope.target) : 'App'` labels the board **App**, on the single control
+whose entire job is to say which of three things you are looking at.
+
+⚠️ **`isBench` must STAY `scope.mode === 'bench'` and not be tidied into `showsBench(scope)`.**
+TypeScript narrows a union through a `const` aliasing a discriminant check; a helper returning
+`boolean` throws that away and four reads of `scope.target` stop compiling. It is commented in
+place, because it reads like a missed cleanup.
+
+🔴 **The frame wrapper is the one BEN-001 deliberately refused to build**, and a board cannot
+sidestep it the way the single bench did. Both its failure modes are answered against the real port
+definitions: `sizeMode` is **named**, and sizes are `{ value, unit: 'px' }` — `width`/`height` are
+`dimension` ports whose **`defaultUnit` is `'%'`**, so **a bare `768` is 768 _percent_**, a frame
+seven times its parent that reads on screen as *broken* and in the graph as *correct*.
+
+## 🔴 Three things that each cost something at s19 — read before writing a spec
+
+- **`tests/` is jasmine; `tests-unit/` is jest.** `toHaveLength`, `toHaveProperty` and `it.each` do
+  not exist in the jasmine bundle. Twelve of them were caught by
+  `tsc -p packages/noodl-editor/tsconfig.tests.json --noEmit` **before** a CI run —
+  **run that typecheck on any new `tests/` spec, always.**
+- 🔴 **Both `test:ci` runs were reported by the harness as exit 0 while the log ended
+  `TESTCI_EXIT=1`.** The `echo "TESTCI_EXIT=$?" | tee -a` is what caught it, both times. Gate on the
+  number in the log.
+- ⚠️ **An `&&` chain conflates a grep's exit code with your answer.** `grep -c "FAILED: TVW-008"`
+  printed `0` and **exited 1**, which broke the chain and made the final `|| echo "NO"` print — so a
+  question about *commit ancestry* was answered by a *grep that found nothing*. The ancestry check
+  had never run. Put each measurement on its own line.
+
+## ⚠️ Two failing specs at s19 were the SPEC being wrong, not the product
+
+The first `test:ci` was 10 = the floor + 2, and both of the two were mine to fix in the test:
+
+- `offsets a frame with margins` asserted a 120px margin on a board of **one** frame. Normalisation
+  makes the leftmost frame the origin **by definition**, so a lone frame sits at 0,0 however far it
+  was dragged. **The assertion contradicted the design it was written to check.** The single-frame
+  case is now its own spec saying so, because it is the property a reader is most likely to mistake
+  for a bug.
+- `instantiates each picked component by its legacy name` read `.type` off the **model**.
+  `ComponentModel.fromJSON` resolves a node's type through the global `NodeLibrary`, so a component
+  the fixture does not define comes back as `UnknownNodeType` — the *resolution*, not the authored
+  value. `.typename` is what the board wrote.
+
+## Gates at s19
+
+- ✅ **`test:ci` AT THE FLOOR BY NAME** — **3012 specs, seed 97272, gitHead `dd2c8367`** (carries
+  `fb82d4fa2`, checked with `git merge-base --is-ancestor`), readout mtime **20:54:05** against a
+  **20:56:28** clock. Eight failures, the same eight by name: **3 SUB-006, 3 SUB-011, 2 NDA-017**,
+  none of them mine.
+- `tests-unit/tvw-008` — **58 specs, 2 suites green**, `Tests: 58 total` (not zero — the modules
+  resolve).
+- `tsc -p packages/noodl-editor --noEmit` **0**; `tsconfig.tests.json --noEmit` **0**.
+- ⚠️ **No mutation testing was done on the 58.** The phase has done it for tvw-004/005/006 and it
+  has caught real holes every time. It is owed here.
+
+## ⚠️ AC8, stated precisely, because it is half-met
+
+AC8 is *"`test:ci` at the floor; `tests/canvas/preview-scope.test.ts` extended for the third mode
+and given the `never` exhaustiveness check"*. The `test:ci` half is green and the exhaustiveness
+check exists — but the mode specs live in **`tests-unit/tvw-008/previewScopeModes.test.ts`**, not in
+the file AC8 names, because jest runs them in four seconds where the jasmine bundle needs a renderer.
+`preview-scope.test.ts` now carries a pointer saying there are three modes and where the third is
+graded. **Whoever closes TVW-008 decides whether that satisfies AC8 as written; it is not counted as
+closed here.**
+
+## What slice 2 has to build, and where the traps are
+
+The picker (multi-select over `benchTargets`), the board surface, the drag, the editor-drawn
+captions, zoom/pan, click-through to the single bench, the empty state, and the wiring of
+`bench.board` through `ProjectModel.setMetaData`.
+
+- 🔴 **AC5 is the one that can regress quietly.** `setMetaData` calls `scheduleProjectSave()` itself
+  (`projectmodel.ts:1322`), so a drag that writes through dirties the project on **every pixel**.
+  The commit is on mouse-up, once — and only a control on `project.json`'s mtime can see it go wrong.
+- **AC4 needs an authored fixture** and the task says so: no component in 129 projects has a
+  `bench.scenarios`. ⚠️ A drive that writes one and reads it back grades the fixture, not the
+  product.
+- **23% of projects have no pickable components at all**, so the empty state is a common first sight,
+  not an edge case.
+- The board's extent uses an **estimated** height for content-sized frames
+  (`ESTIMATED_CONTENT_FRAME_HEIGHT`). The editor must re-measure for its captions — `benchSizeLabel`'s
+  standing rule: report the frame that was **measured**, not the one that was asked for.
+
+## 🔴 Drive levers from s18 that still apply
+
+- **A hidden Electron window never fires `requestAnimationFrame`**, so `repaint()` does nothing and
+  every mutate-then-wait arm reads as a dead feature on a working build. `Page.bringToFront` does
+  **not** fix it; `Page.setWebLifecycleState {state:'active'}` +
+  `Emulation.setFocusEmulationEnabled {enabled:true}` does. `drive-tvw006-lane.js` asserts rAF fires
+  as a precondition and exits 2 otherwise — **copy that guard into any new canvas drive.**
 - **There is no `window.NodeGraphEditor`.** The canvas is `NodeGraphContextTmp.nodeGraph` through
-  `__wreq`. Both new scripts had the wrong assumption and both had to be fixed mid-drive.
-- **A pixel scan row must be inside the lane AND the viewport.** `Home`'s stack is 1,650px tall and
-  opens 740px above the canvas; an off-canvas scan was reported as *"no ink found"*, which reads as
-  a missing feature and is really *"I did not look"*. Name that case separately.
-- **`centerToFit` computes a pan that belongs to the scale it chose.** Resetting the scale
-  afterwards without recomputing the pan photographs an empty canvas — 18 times, in one run.
-- **A 364-component project hangs a single `evaluate` that materialises every graph.** It sat at 0%
-  CPU for ten minutes while the editor answered everything else instantly. Shortlist from
-  `project.json` on disk, then verify the few candidates against the runtime.
-
-## What s18 measured, and what it changed
-
-🔴 **THE SCREENSHOT FOUND A DEFECT 45 GREEN SPECS COULD NOT — fourth time this phase.** Pressing
-`Logic` dimmed a page stack's **top card only**; every child stayed bright inside the dimmed lane.
-`NodeGraphEditorNodePainter` sets `ctx.globalAlpha = 1` at three points meaning *back to opaque*,
-and `node.paint` recurses into children, so the renderer's per-root alpha died at the first reset.
-The specs could not see it because the recording context **stubs `node.paint`** — nothing in them
-ever clobbered an alpha. ✅ The painter restores to a declared baseline now (`setBaseAlpha` /
-`normalAlpha` / `scaledAlpha`); the wire-label chip had the identical bug. A spy spec gates it, but
-the honest gate is the photograph. `809b63501`.
-
-🔴 **THE CENSUS THIS TASK LEANED ON WAS WRONG, AND THE DRIVE IS WHAT EXPOSED IT.** The offline
-guess at visual-ness — *any type seen as a child anywhere* — said 11 lanes where `isVisualRoot`
-says 5, and 6 where it says 1. Re-keyed on the recorded **`visualRoots`** field (96.9% coverage;
-the 180 without it excluded and counted): **multi-lane is 5.8%, not the 26% first reported**, and
-3+ lanes is **165, not 667**. **R-1 is retracted** — §2's wording was fairer than the first run
-claimed. ⚠️ The two rows the rulings rest on held or grew (918 logic roots inside a lane in 448
-components; 210 overlapping pairs in 81), so **R-W and R-X are unaffected**. The wrong numbers are
-kept beside the right ones in TVW-006 §6 so nobody re-derives them.
-
-⚠️ **AC5's subjects are runtime-verified now, because the first set was mislabelled** — the disk
-shortlist called a component `one-lane` that the runtime gives **zero**, so six photographs
-asserted in their filename the very thing they did not show.
-
-🔴 **A real canvas does not fit on screen, and that is a finding about the lane** (TVW-006 §6, R-6).
-No multi-lane component in either project fits above 40% zoom — the corpus's worst (29 lanes, 242
-nodes) fits at **4%** — and §3 hides the eyebrow below 50%. So on a large component you never see a
-whole lane or its label. AC5's shots are framed at **true size** for that reason.
-
-🔴 **TVW-006 — three of §2's rows were wrong, and the census found it before a pixel was drawn.**
-128 projects, 5,558 components (`scripts/devtools/tvw006-lane-census.js`). 667 components get
-THREE OR MORE lanes, not the two §2 mentions; 1,012 (18%) get none, so the logic-only eyebrow is a
-common sight; **838 logic roots in 386 components are drawn INSIDE where their lane would be**; and
-**221 pairs of lanes overlap each other** in 117 components. Richard ruled all three at TVW-006 §7
-(**R-W/R-X/R-Y**) and all three matched what was already built, so nothing was rewritten to suit a
-ruling.
-
-🔴 **TVW-007 — §2's instance eyebrow does not fit on a node, and truncation does not answer it.**
-A 150px node leaves **114px**. `INSTANCE · <path> · used N×` fits **0 of 2,385** placed components
-(p50 396px). The leaf-name form fits **0 too**, because the fixed chrome alone is ~126px *before*
-the component's name. Three options are filed as **R-Z** at TVW-007 §6; the format has to change.
-The same census corrects a number this phase has carried since s8 — *"5 of 6 components have all
-their instances in one parent"* was six components in ONE project; across the corpus **44% of placed
-components have two or more parents**, so `in 3 places ▾` is nearer the rule than the exception.
-
-✅ **The paint seam moved after scoping, in our favour.** TVW-006 §2 names `nodegrapheditor.ts`
-`paint()`; PLAT-001 has since extracted it to `canvas/CanvasRenderer.paint(ctx, frame)` fed a plain
-`FrameState`. AC4's "record the draw calls" seam therefore already exists, and the paint ORDER is
-graded offline against a recording context instead of against pixels.
-
-⚠️ **A spec that grades something which cannot break is worse than no spec.** "The filter must not
-leak into the drag ghost" is vacuous — `globalAlpha` is absolute, so the ghost's `0.5` overwrites
-it. The real leak is the insert indicator and multiselect box, drawn *after* the node pass with no
-alpha of their own. Check which way round a property can actually fail before asserting it.
-
-## 🔴 Read this before you debug anything in the running editor
-
-**An hour of s17 went into three defects that did not exist.** A `dev` stack's webpack watchers had
-been running for hours across a peer's directory add-and-delete, and both the editor and the viewer
-bundles went stale:
-
-- three drive arms went red saying a quick drop on the tab strip placed nothing;
-- a graph reorder did not move the preview — reproduced with the **raw model calls the canvas's own
-  drag makes**, with a spy proving the editor sent the right message — which was filed as a runtime
-  defect, in this file, in the task and in a memory;
-- and the editor bundle reported `TS2307` for modules that were on disk, which got a peer
-  accused of breaking the tree.
-
-**All of it was the bundle.** `tsc -p packages/noodl-editor --noEmit` was exit 0 throughout. After
-`dev:stop`, `rm -rf packages/noodl-editor/.webpack-cache` and a cold relaunch — **no code change** —
-the preview reorders in 800ms, the drive is 20/20 twice, and the drag drive is 11/11.
-
-✅ **The order that would have saved the hour: a renderer behaving impossibly is a question about the
-BUNDLE before it is a question about the code.** `tsc --noEmit` on the tsconfig `ts-loader` uses
-answers it in one command. ⚠️ And `.webpack-cache` is a red herring for a dev stack —
-`webpack.renderer.dev.js` is `cache: false` (line 18); what goes stale is the **in-memory resolver
-of a watcher that has been up for hours**, and the fix is the restart.
-
-## What s17 found
-
-🔴 **`stopPropagation` on the drop killed the cleanup everybody else's drag relies on.** The strip's
-`onMouseUp` stopped propagation, for tidiness — nothing else wants that mouse-up. React dispatches
-from the root container, so stopping there stops the **native** event before `body`, and `body` is
-where `PopupLayer` ends its own drag and where the panel clears the state that draws the strip. One
-drop left the strip **armed for the life of the panel**.
-
-⚠️ **Two things about how it was caught, because both will recur:**
-- It is **invisible inside a single run**. The drive's at-rest control is its first arm and had
-  already passed on the run that created the state. It took a **second consecutive run**
-  ([[a-post-drive-control-reads-the-state-the-drive-leaves]]).
-- The fix then had to be proved on **two consecutive runs with no rebuild between them**. A green
-  first arm after a reload proves the remount, not the fix
-  ([[a-control-pair-proves-what-you-varied-only]]). The first "it's fixed" reading here was exactly
-  that, and it was wrong — the renderer was still running the pre-edit bundle.
-
-🔴 **webpack-dev-server's overlay is an `about:blank` iframe the size of the window at
-z-index 2147483647.** While it is up, every row in the panel is drawn and none of them can be
-pressed. Two arms went UNGRADED on it before the drive learned to wait it out. The reachability
-guard is what caught it — it reported *drawn but not reachable*, which is what it is for.
-
-⚠️ **A row's `textContent` is not its name.** It carries the usage meta too, so the drive compared
-the product's correct sentence against `"GTM - Send Page Viewunplaced has no screen…"` and called a
-green build red. The name comes off the `title` attribute now. First drives find instrument faults
-([[a-new-instruments-first-drive-finds-instrument-faults]]) — this was the third of them.
-
-## 🔴 Richard's ruling, and what it changed
-
-Asked whether being able to place a component exactly where it goes in one gesture was worth §2's
-*"the tab does not switch during the drag"*, he said yes — and, asked separately, said **no** to
-dropping inside another component's interior (the band rule stands). So:
-
-- **Resting a component on the Layers tab for 500ms opens Layers under the live drag**, and the row
-  indicators and `planComponentDrop` that slice 1 already built take it from there. Dropping between
-  two rows puts it there; ⌘Z removes it in one step.
-- **The strip keeps both meanings** — let go and it lands at the end of the screen, hold and you aim.
-- **An abandoned spring puts the tab back** where the person was, because the switch was part of a
-  gesture that did nothing.
-- ⚠️ **The dwell is armed only when the drop would LAND**: a page held on the strip for 1.1s does
-  not open a tree that would refuse it. There is an arm for that.
-
-TVW-005 §11 has the three things the spring had to be built around, including the one that bit
-twice: a state update in a **capture-phase** listener re-renders the tab *between the capture and
-bubble phases of the same mouse-up*, so the handler React is about to call can be gone before it
-calls it. Everything in that listener is deferred to a macrotask now.
-
-## What the strip is, in one paragraph
-
-The two tabs are exclusive: a component row and the rows it could be dropped between are **never on
-screen together**, so without a target on the tab header there is no gesture at all. §2 rules out the
-other way to build it in its own sentence — *"the tab does not switch during the drag"* — so the
-strip is a **destination, not a spring-loaded doorway**. A drop places the component at the end of
-the screen's root and opens Layers with the new row selected; moving it from there is ⌥↑/⌥↓ or a
-second drag, both of which slice 1 already built. 🔴 The root it lands in is the first row the
-**canvas's** component owns, which is rarely the top of the tree — the app shell is drawn above every
-band, so "the top of Layers" is `/App`, on every page at once.
-
-## Gates at s17 (s18 ran no `test:ci` — the box was ec's)
-
-- `tests-unit/tvw-003` + `tvw-004` + `tvw-005` — **7 suites / 103 specs, green.** tvw-005 is 22 specs
-  (15 + 7 new), and the seven were mutation-tested: **4 mutants, each caught**. ⚠️ One proposed
-  mutant was *equivalent* (it moved a computation, not a decision) and had to be rewritten as the
-  real ordering swap before it meant anything.
-- `tsc -p packages/noodl-editor --noEmit` **0**.
-- `tsc -p packages/noodl-editor/tsconfig.tests.json --noEmit` — **three errors, all a peer's**:
-  `tests/ai/authoring-style.test.ts:116,117,119` read `variants` / `sizes` / `variantStyles` off
-  `VocabElement`, which **P94 STY-002 removed** (the type's own comment at `StyleVocabulary.ts:95`
-  says so). Both files were **uncommitted working-tree edits** at the time.
-- ✅ **`test:ci` at the floor BY NAME, twice** (2 NDA-017, 3 SUB-006, 3 SUB-011, none of them mine),
-  readout mtime checked against the clock both times: **2985 specs / seed 19733 at `1d342bc6`** (the
-  strip) and **2978 specs / seed 31629 at `61aa0502`** (a peer's commit carrying the spring).
-  ⚠️ The spec **count** moved by seven between them — a peer's property-editor refactor — and the
-  floor did not. The eight failures being the same eight *by name* is what makes that readable;
-  a count alone would have looked like a regression. TVW-005 AC6 is closed.
-- 🔴 **The first attempt exited 1 without running a single spec**, for the reason above: the editor's
-  `test:ci` webpack **typechecks `tests/ai/**`**, so it compiles a sibling's in-flight edit
-  ([[the-editor-test-ci-webpack-typechecks-a-sibling-packages-tests]]). Reported to `opennoodl-ec`
-  with file:line; fixed by them within the hour and re-measured here.
-- ⚠️ **The harness reported the `test:ci` run as exit 0 while the log ended `TESTCI_EXIT=1`.** The
-  `echo "TESTCI_EXIT=$?" | tee -a` is what caught it. Gate on the number in the log, never on the
-  run list ([[a-run-list-is-not-a-log]]).
-
-## The drives
-
-| script | what it is for |
-|---|---|
-| `drive-tvw005-drag.js` | slice 1's gesture + AC1's preview half. **11/11** |
-| `drive-tvw005-strip.js` | the tab-header strip and the spring. **20/20, twice back to back** |
-| `shots-tvw005-indicators.js` | AC5's ten photographs, both themes, page proved byte-identical after |
-
-All three take `--dir`; the fixture is a **copy**, `NodeGX test projects/TVW-005 s17 Strip`
-(s16's `TVW-004 s15 Drive`, copied). ⚠️ One probe left a stray `Divider` in it during s17 and it was
-removed from `project.json` by hand — if a run ever starts from four children, that is what happened.
-
-## The box
-
-🔴 **s18 never got it.** `opennoodl-ec` (P94/STY-003) launched a `dev` stack at 13:58 and still had
-it at the end of the session. Everything TVW-006 has left is a drive, so **check the box first**:
-`lsof -nP -iTCP:8080 -sTCP:LISTEN`, and if it is up, walk the pid to its owner
-(`ps -o ppid=` up the chain to a `claude` pid, then `/tmp/cc-socks/<pid>.sock`) and ask that session
-— do not launch a second stack.
-
-⚠️ **A peer's all-clear is about that peer.** `opennoodl-0b` answered "no dev stack, the box is free"
-while the stack was measurably up on :8080 — they were right about themselves and wrong about the
-box ([[a-peer-all-clear-is-about-that-peer]]). Measure it yourself; the process chain names the
-owner.
+  `__wreq`.
+- **A renderer behaving impossibly is a question about the BUNDLE before it is a question about the
+  code.** `tsc --noEmit` on the tsconfig `ts-loader` uses answers it in one command. An hour of s17
+  went into three defects that did not exist.
 
 ## Committing
 
-🔴 The working tree carries **three** other sessions' work — P78's TPL-009, P94's STY-002/004 (which
-includes `StyleVocabulary.ts` and `tests/ai/authoring-style.test.ts`) and P96's FED-002. Commit by
-explicit pathspec, `git add` untracked files first, and put `-F <file>` **before** the `--`.
-⚠️ `scripts/devtools/` holds a peer's untracked census script — never `git add` that directory.
-s17's commit is `1d342bc67`.
+🔴 The working tree carries other sessions' work (P78 TPL-009, P98, and docs). **Commit through a
+temporary index with a compare-and-swap** — `BASE=$(git rev-parse HEAD)`, `GIT_INDEX_FILE`,
+`read-tree $BASE`, stage only your paths, `write-tree`, `commit-tree -p $BASE`,
+`update-ref HEAD $NEW $BASE`. HEAD moved **twice** under s19 (a P94 peer and a P96 peer), and the CAS
+is what made that a non-event. ⚠️ Then refresh the real index immediately
+(`git show --name-only --format="" -z HEAD | xargs -0 git reset -q --`) and confirm
+`git diff --cached --stat` is empty — a stale index holds staged deletions that sweep a peer.
 
-🔴 **Verdict PNGs are gitignored** (`.gitignore:265`). The tracked artefact is `manifest.json`, and
-the shots have to be **sent** to Richard, not linked.
+⚠️ `scripts/devtools/` holds peers' untracked drive scripts. Never `git add` that directory; name
+your file.
