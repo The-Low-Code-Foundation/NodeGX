@@ -1,0 +1,278 @@
+/* TVW-008 slice 2 — the board.
+
+   The bench's surface conventions, kept deliberately: `bg-2` chrome over a
+   `bg-0` stage, flat rather than checkerboarded, nothing red (phase 23 — red is
+   danger only, and a board is not an error). What differs is that the stage is
+   an infinite canvas rather than a centred frame. */
+
+.Root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-width: 0;
+  background-color: var(--theme-color-bg-0);
+}
+
+/* The window onto the board. Clips; the document inside it is transformed. */
+.Surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* A canvas you pan by dragging. `grab` rather than `default` is what says so
+     before anyone tries it. */
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* The runtime document and the chrome drawn over it, sharing one transform so
+   a frame's border cannot drift from the frame it belongs to at any zoom. */
+.Document {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Not `overflow: hidden`: a frame dragged past the board's stored extent is
+     still a frame somebody put there, and `boardBounds` only re-normalises when
+     the origin moves. Clipping here would hide it until the next rebuild. */
+}
+
+.Webview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Over the guest view for the duration of a drag, so the moves stay in this
+   document. `ComponentBench`'s `.DragShield` and the note on `beginResize` are
+   the longer version of why this exists. */
+.DragShield {
+  position: absolute;
+  inset: -100000px;
+  z-index: 2;
+}
+
+/* 🔴 The frame chrome does not take the pointer. A click inside a frame has to
+   reach the `<webview>` under it — that is how design mode selects the element
+   you clicked — so everything here is transparent to the pointer except the
+   caption, which is the drag handle and the door. */
+.Frame {
+  pointer-events: none;
+  z-index: 3;
+}
+
+.FrameBorder {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--theme-color-border-subtle);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* The caption strip: the one surface on a frame that answers the pointer. Sits
+   above the frame rather than below it, so a content-height frame — which is
+   almost every frame (§6.4: 3 stored sizes in 5,922 components) — does not have
+   its caption move as the content settles. */
+.Caption {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 2px 4px;
+  margin-bottom: 3px;
+  pointer-events: auto;
+  cursor: grab;
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--theme-color-fg-default);
+}
+
+.CaptionName {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-primary);
+    text-decoration: underline;
+  }
+}
+
+/* The meta: what the panel's row meta already looks like, for the reason
+   `boardSurface.ts` imports its word rather than retyping it. */
+.CaptionMeta {
+  color: var(--theme-color-fg-subtle);
+  font-size: 10px;
+  font-family: var(--font-family-mono, monospace);
+}
+
+.CaptionRemove {
+  border: 0;
+  background: none;
+  padding: 0 2px;
+  color: var(--theme-color-fg-subtle);
+  cursor: pointer;
+  opacity: 0;
+
+  .Caption:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+}
+
+/* §2 / §6.1 — the ordinary first sight on 23% of projects, so it is written as
+   the surface explaining itself rather than as a failure. */
+.Empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  color: var(--theme-color-fg-subtle);
+  pointer-events: none;
+
+  > * {
+    max-width: 42ch;
+  }
+
+  strong {
+    color: var(--theme-color-fg-default);
+    font-size: 14px;
+  }
+}
+
+.EmptyAdd,
+.Add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--theme-color-border-subtle);
+  border-radius: 3px;
+  background-color: var(--theme-color-bg-2);
+  color: var(--theme-color-fg-default);
+  font-size: 11px;
+  cursor: pointer;
+  pointer-events: auto;
+
+  &:hover {
+    border-color: var(--theme-color-primary);
+    color: var(--theme-color-primary);
+  }
+}
+
+.Add {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+}
+
+.Missing {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  max-width: 48ch;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background-color: var(--theme-color-bg-2);
+  pointer-events: none;
+}
+
+/* The picker. An ordinary absolutely-positioned panel inside the surface — no
+   portal, no `PopupLayer` — for the reasons `PreviewChrome`'s header gives: a
+   portalled popup opened by a synthesised click never closes under a driver. */
+.Picker {
+  position: absolute;
+  top: 36px;
+  left: 8px;
+  z-index: 5;
+  width: 260px;
+  max-height: 60%;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--theme-color-border-subtle);
+  border-radius: 4px;
+  background-color: var(--theme-color-bg-2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.PickerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--theme-color-fg-subtle);
+}
+
+.PickerAddAll {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--theme-color-primary);
+  cursor: pointer;
+}
+
+.PickerEmpty {
+  padding: 8px;
+}
+
+.PickerRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--theme-color-fg-default);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+
+  &.is-placed {
+    color: var(--theme-color-primary);
+  }
+}
+
+.PickerRowLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.PickerRowHint {
+  color: var(--theme-color-fg-subtle);
+  font-size: 10px;
+}

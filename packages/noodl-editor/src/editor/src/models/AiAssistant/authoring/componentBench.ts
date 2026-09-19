@@ -543,6 +543,18 @@ export interface BoardFrameMount {
    */
   height: number | null;
   parameters: Record<string, unknown>;
+  /**
+   * The name of the scenario whose values this frame is showing, or `null` when
+   * the component has none.
+   *
+   * ⚠️ **Carried on the mount rather than re-read by the caption**, and that is
+   * the point of it: the editor draws `scenario: default` / `no inputs set`
+   * beside each frame, and a caption that answered that question from its own
+   * second read of `bench.scenarios` would be a second copy of the decision
+   * {@link boardFrameMounts} already made — free to drift the moment either
+   * side learns about a second scenario. `boardHarness` ignores the field.
+   */
+  scenario: string | null;
 }
 
 /** The id of the board's single root Group. Stable, so `rootNode` is predictable. */
@@ -694,6 +706,68 @@ export function boardHarness(frames: BoardFrameMount[]): ComponentModel {
   });
 }
 
+/** What {@link boardFrameMounts} resolved, and what it could not. */
+export interface BoardFrameMounts {
+  mounts: BoardFrameMount[];
+  /** Frames naming a component this project no longer has, in board order. */
+  missing: string[];
+  /** `Component.port` for every stored scenario key naming no declared input. */
+  unknownParams: string[];
+}
+
+/**
+ * Every stored frame resolved against the project: its size, its values, and the
+ * scenario those values came from.
+ *
+ * 🔴 **Extracted from {@link buildBoardExport} at slice 2 because the editor
+ * needs the same answer, and needed it for the same frames.** The board draws
+ * its own chrome — a border, a caption, a drag target — *over* the single
+ * `<webview>` the export renders into, so the editor has to know each frame's
+ * box and each frame's origin offset. Computing that beside the export rather
+ * than from it is how the captions end up half a frame away from the frames,
+ * which is the failure {@link boardBounds} already warns about in the one
+ * direction it could see. One function, one answer, two readers.
+ *
+ * ⚠️ **The returned coordinates are the stored ones, un-normalised.** The
+ * `minX`/`minY` shift belongs to {@link boardBounds}, and both readers apply it
+ * from there — the harness into `marginLeft`/`marginTop`, the editor into the
+ * position it draws chrome at.
+ */
+export function boardFrameMounts(project: ProjectModel, frames: BoardMount['frames']): BoardFrameMounts {
+  const mounts: BoardFrameMount[] = [];
+  const missing: string[] = [];
+  const unknownParams: string[] = [];
+
+  for (const frame of frames) {
+    const component = findComponent(project, frame.target);
+    if (!component) {
+      missing.push(frame.target);
+      continue;
+    }
+
+    const stored = readBenchFrameDefault(component.getMetaData(BENCH_FRAME_KEY));
+    const scenario = readBenchScenarios(component.getMetaData(BENCH_SCENARIOS_KEY))[0];
+    const iface = benchInterface(component);
+    const { parameters, unknown } = benchParameters(iface, scenario?.inputs);
+    for (const name of unknown) unknownParams.push(`${component.name}.${name}`);
+
+    mounts.push({
+      target: component.name,
+      x: frame.x,
+      y: frame.y,
+      // `stretch` has no meaning here — there is no stage for a frame to stretch
+      // to, which is the whole difference between a board and the single bench.
+      // The stored width is the component's authored size either way.
+      width: stored?.width ?? DEFAULT_BENCH_WIDTH,
+      height: stored?.height ?? null,
+      parameters,
+      scenario: scenario?.name ?? null
+    });
+  }
+
+  return { mounts, missing, unknownParams };
+}
+
 /** What {@link buildBoardExport} is asked to mount. Positions come from `bench.board`. */
 export interface BoardMount {
   frames: Array<{ target: string; x: number; y: number }>;
@@ -729,35 +803,7 @@ export function buildBoardExport({
     return { unrenderable: 'This project has no root component yet, so the runtime has nothing to boot.' };
   }
 
-  const mounts: BoardFrameMount[] = [];
-  const missing: string[] = [];
-  const unknownParams: string[] = [];
-
-  for (const frame of frames) {
-    const component = findComponent(project, frame.target);
-    if (!component) {
-      missing.push(frame.target);
-      continue;
-    }
-
-    const stored = readBenchFrameDefault(component.getMetaData(BENCH_FRAME_KEY));
-    const scenario = readBenchScenarios(component.getMetaData(BENCH_SCENARIOS_KEY))[0];
-    const iface = benchInterface(component);
-    const { parameters, unknown } = benchParameters(iface, scenario?.inputs);
-    for (const name of unknown) unknownParams.push(`${component.name}.${name}`);
-
-    mounts.push({
-      target: component.name,
-      x: frame.x,
-      y: frame.y,
-      // `stretch` has no meaning here — there is no stage for a frame to stretch
-      // to, which is the whole difference between a board and the single bench.
-      // The stored width is the component's authored size either way.
-      width: stored?.width ?? DEFAULT_BENCH_WIDTH,
-      height: stored?.height ?? null,
-      parameters
-    });
-  }
+  const { mounts, missing, unknownParams } = boardFrameMounts(project, frames);
 
   const harness = boardHarness(mounts);
 

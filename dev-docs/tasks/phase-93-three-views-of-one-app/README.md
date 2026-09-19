@@ -114,7 +114,7 @@ without shared selection is a second list, not a view.
 
 | id | task | depends on |
 |---|---|---|
-| [TVW-008](./TVW-008-THE-BOARD.md) | **Reshaped by R-7 (s19): a PICKED set, placed by hand** — a third Workbench target holding the components you chose, side by side at their authored sizes, arrangement remembered. *Not* every component; §6 is why (0 of 99 projects fit at 100%). Slice 1 built | TVW-002 |
+| [TVW-008](./TVW-008-THE-BOARD.md) | **Reshaped by R-7 (s19): a PICKED set, placed by hand** — a third Workbench target holding the components you chose, side by side at their authored sizes, arrangement remembered. *Not* every component; §6 is why (0 of 99 projects fit at 100%). Slices 1–2 built; every AC awaits a drive | TVW-002 |
 
 ### The words, and the verdict
 
@@ -193,10 +193,10 @@ Not when the suite is green. It was green on the day this was scoped.
 | TVW-005 | ✅ | CLOSED — 6 ACs |
 | TVW-006 | ✅ | AC1–4, AC6 green; **AC5's 18 shots SENT s18 — awaits Richard's look** |
 | TVW-007 | slices 1–3 | **AC2, AC3, AC4 green.** AC2b BUILT s22 (hover + door) but **graded on the rendered surface, so it needs the drive** — as do AC1 and AC5; the placement's 4 shots are WITH RICHARD |
-| TVW-008 | slice 1 | reshaped by R-7; slice 2 is the surface |
+| TVW-008 | slices 1–2 | reshaped by R-7. **Slice 2 (s23) built the whole surface** — chooser row, picker, frames, captions, drag, zoom/pan, empty state, persistence. **No AC closed: AC1, AC3–AC7 all need the drive**, AC8 needs `test:ci` |
 | TVW-009, TVW-010 | — | — |
 
-**52 ACs closed** (s22 closed none: it built AC2b, whose criterion is a photograph). 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
+**52 ACs closed** (s22 and s23 closed none: s22 built AC2b, whose criterion is a photograph, and s23 built TVW-008's surface, whose criteria are all drives — a peer's editor held CDP 9222 and its webpack held `:8080` across both sessions). 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
 TVW-004 AC6 (20 shots, s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placements (s20). The
 first two close their tasks on the spot. **Do not re-send them.** The board is re-derived from the task files each session; this table is a
 convenience, and the task files win where they disagree.

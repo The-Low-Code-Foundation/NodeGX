@@ -176,3 +176,18 @@ export {
   buildBenchExport
 } from './componentBench';
 export type { BenchExport, BenchInstanceUsage, BenchInterface, BenchMount, BenchPort } from './componentBench';
+// TVW-008 — the board half of the same module. Slice 1 built it and exported
+// none of it, because nothing outside the export spec could reach it yet; slice
+// 2's surface is its first caller, and it needs `boardFrameMounts` and
+// `boardBounds` by the same route the bench surface takes.
+export {
+  BOARD_ROOT_ID,
+  ESTIMATED_CONTENT_FRAME_HEIGHT,
+  boardBounds,
+  boardFrameMounts,
+  boardFrameNodeId,
+  boardHarness,
+  boardInstanceNodeId,
+  buildBoardExport
+} from './componentBench';
+export type { BoardFrameMount, BoardFrameMounts, BoardMount } from './componentBench';

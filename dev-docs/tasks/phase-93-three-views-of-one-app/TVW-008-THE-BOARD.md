@@ -330,3 +330,118 @@ captions, zoom/pan, click-through to the single bench, the empty state, and the 
 `bench.board` through `ProjectModel.setMetaData`. AC1, AC4, AC5, AC6 and AC7 all need a drive.
 🔴 **AC5 is the one that can regress quietly** — a drag that writes through dirties the project on
 every pixel, and only a control on `project.json`'s mtime can see it.
+
+## 9. Slice 2 — built 2026-09-19 (s23). The surface, and what only a drive can grade
+
+Built with the box unavailable all session (a peer's editor held CDP 9222 and its webpack held
+`:8080` from 22:38 onward; re-derived rather than inherited — `webpackconfigs/webpack.renderer.dev.js:24,38`
+hardcode the port with no env override, so "start my own on another port" remains unavailable).
+**No AC is closed by this session**: AC1, AC3, AC4, AC5, AC6 and AC7 all need a drive, and AC8's
+`test:ci` half is still owed.
+
+| built | where |
+|---|---|
+| the chooser's third row | `PreviewChrome.tsx` — above the `Workbench` heading, `OPEN_BOARD`, `data-test="preview-scope-board"` |
+| the caption, picker, viewport and rebuild rules | `boardSurface.ts` (new, pure) |
+| `bench.board` as the surface holds it | `useBenchBoard.ts` (new) |
+| the surface | `ComponentBoard.tsx` + `.module.scss` (new) |
+| the mounts both readers share | `componentBench.ts` — `boardFrameMounts` extracted out of `buildBoardExport` |
+| the live move | `benchInputs.ts` — `boardFrameMoveContents` |
+| the strip caption and the mount | `VisualCanvas.tsx` — `isBoard`, beside `isBench` in both places |
+| the board half of the authoring barrel | `authoring/index.ts` — slice 1 exported none of it |
+
+### 9.1 🔴 The caption strip is the handle *and* the door, and the frame's body takes no pointer
+
+§2 asks for three gestures on one frame: click it to bench it, drag it to arrange it, and click
+*inside* it to select the element under the pointer. The third is a click that has to reach the
+`<webview>`. So the chrome is `pointer-events: none` everywhere except the caption.
+
+✅ **This discharges the same worry AC2b raised on TVW-007 rather than deferring it**: the canvas
+still needs no sub-region click dispatch, because the controls are on a surface that is already its
+own hit target. It is s22's finding — *put the control where the gesture already is* — arriving on a
+second surface, and it arrived by the same route: the alternative put a control on top of content
+that another gesture already owned.
+
+### 9.2 🔴 A drag moves the frame live and rebuilds nothing
+
+A committed drop writes `bench.board` (AC5's subject) but does **not** rebuild the export. Positions
+travel to the running client as `parameterChanged` updates on each frame Group's
+`marginLeft`/`marginTop` — the mechanism an input edit already uses on the single bench, and for the
+identical reason: a changed export makes the runtime call `location.reload()`, so an export rebuilt
+per drop would flash the whole board, re-render every frame and throw away the scroll position
+inside every component, because somebody nudged one of them 8px.
+
+`boardExportSignature` is the single place that decides when a rebuild is genuinely owed:
+**membership, and the origin — never a position.** The origin is in it because `boardHarness`
+normalises through `boardBounds`, so `marginLeft` is `x - minX`; a drop that goes *past* the current
+top-left extreme changes `minX` for everything, and a live update alone would then compute its offset
+from an origin the document no longer has, leaving every frame that did not move silently off by the
+difference. On a board laid out left to right that is the drag that goes furthest left, and nothing
+else.
+
+🔴 **Two mechanisms in this slice are argued and NOT measured, and both need the first drive:**
+
+1. **That a `parameterChanged` on a Group's `marginLeft` moves a rendered frame at all.** The payload
+   reaches the same `nodeModel.setParameter` the graph import does
+   (`editormodeleventshandler.ts:211`), and the value is the `{ value, unit: 'px' }` shape the
+   exported JSON carries — `boardHarness` pays for that trap in full, because a bare number is
+   *percent*. But no spec can reach a running client, so "the frame moves" is a reading that fits,
+   not one that has been seen.
+2. **That `react-rnd` drags correctly inside the transformed document.** It is given `scale={zoom}`,
+   which is how `CommentForeground.tsx:115` uses it on a zoomed canvas, and the frames sit inside a
+   `translate(...) scale(...)` parent. A wrong scale does not fail — it makes the frame travel at the
+   wrong rate under the cursor, which is exactly the class of defect a green arm describes rather
+   than catches.
+
+### 9.3 ⚠️ A literal NUL byte type-checked, passed, and made the file binary to `grep`
+
+`boardExportSignature`'s separator was written as a unicode escape and reached disk as **byte 0x00**.
+It compiled, all 44 specs passed, and the only thing that noticed was a mutant whose pattern would
+not match. Left alone it would have made `ugrep` skip the whole module as binary — the trap already
+recorded as `ugrep-silently-skips-a-source-file-as-binary`, arriving from the authoring side rather
+than the searching side. It is now a named `NAME_SEPARATOR`, a newline, chosen because a legacy name
+cannot contain one and very nearly can contain a comma.
+
+✅ **Check new source for control bytes, not just for whether it compiles.** A NUL is invisible in
+every view that matters and survives every gate this repo runs.
+
+### 9.4 ⚠️ `typecheck:editor-tests` earned its place again
+
+`BoardFrameMount` gained a required `scenario` field (carried on the mount so the caption does not
+re-read `bench.scenarios` and become a second copy of a decision `boardFrameMounts` already made).
+`tsc -p packages/noodl-editor --noEmit` stayed at **0** — `tests/` is not in that program — and
+`tsconfig.tests.json` failed immediately on `board-export.test.ts`'s helper. Same lesson as slice 1's
+§8.3, on a different error class: run it as a matter of course on anything that touches a type a
+`tests/` spec constructs.
+
+### 9.5 Gates
+
+- `tests-unit/tvw-008` — **102 specs / 3 suites green** (44 new in `boardSurface.test.ts`).
+- **12 mutants, 12 killed.** A thirteenth arm was discarded rather than counted: it added an unused
+  constant and so changed no behaviour, and an arm that cannot fail grades nothing.
+- ⚠️ **One of my own assertions was vacuous and was rewritten.** *"The signature does not change when
+  a frame moves"* was written with the **same frames in both arms** — it compared a value with itself
+  and would have passed on a signature that hashed every position, which is the one thing it exists
+  to forbid. The arms now carry different coordinates.
+- ⚠️ **A second assertion was wrong and the code corrected it.** `clampBoardZoom(Infinity)` was
+  asserted to be the 400% ceiling; it is 1, because not-finite is not a request, and clamping junk to
+  the ceiling would reopen somebody's board at 400% with no gesture behind it.
+- `typecheck:editor` **0**, `typecheck:editor-tests` **0** (after 9.4).
+- `test:main` **521 suites / 8,336 specs, exit 0** — was 520 / 8,292 at s22, so the delta is exactly
+  the +1 suite / +44 specs this commit adds and nothing stopped loading.
+- 🔴 **`test:ci` NOT run**, and `tests/canvas/board-export.test.ts` is therefore **unrun** against the
+  `boardFrameMounts` extraction. The extraction moved the loop verbatim and the types agree, but that
+  is an argument, not a measurement — it is the first thing to run when the box is free.
+
+### 9.6 Still to build
+
+- **AC4's authored fixture.** §6.4 measured **0 of 5,922** components with a `bench.scenarios[0]`, so
+  the scenario branch is unreachable on real data and the caption's `scenario: <name>` arm has never
+  been drawn. Still owed, still the thing most likely to be discovered mid-drive.
+- **AC1's project.** No project on this machine has the six components its sentence names; it has to
+  be authored or the sentence rewritten against a project that exists.
+- **Selection through a frame** (§2's `selection` row) — a click inside a frame reaching TVW-003's
+  store with the instance path through that frame's harness node. The chrome is already transparent
+  to the pointer, so nothing blocks it, but nothing wires it either.
+- **`Add all`'s bound in the UI**: `canAddAll` is consulted, but the picker does not yet say *why* the
+  shortcut is absent on a project past twelve components.

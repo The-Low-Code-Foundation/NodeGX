@@ -55,6 +55,13 @@ const mount = (over: Partial<BoardFrameMount> = {}): BoardFrameMount => ({
   width: 768,
   height: null,
   parameters: {},
+  // TVW-008 slice 2 — `scenario` is required rather than optional, and the
+  // helper supplies it rather than the type relaxing to let it through: every
+  // mount comes from `boardFrameMounts`, which always knows whether the values
+  // it just resolved came from a saved scenario, and the caption always asks.
+  // A frame that could not answer would be one the editor draws `no inputs set`
+  // under on the strength of a missing key.
+  scenario: null,
   ...over
 });
 

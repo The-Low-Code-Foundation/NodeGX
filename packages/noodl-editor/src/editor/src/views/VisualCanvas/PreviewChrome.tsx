@@ -29,6 +29,7 @@ import { revealBenchTarget } from './benchRequest';
 import {
   APP_SCOPE,
   BENCH_FRAME_PRESETS,
+  BOARD_SCOPE,
   benchTargets,
   clampBenchHeight,
   clampBenchWidth,
@@ -40,7 +41,7 @@ import {
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
-import { WORKBENCH } from './benchWords';
+import { OPEN_BOARD, WORKBENCH } from './benchWords';
 import css from './PreviewChrome.module.scss';
 
 export interface PreviewScopeControlProps {
@@ -159,6 +160,30 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
               <Icon icon={IconName.Home} size={IconSize.Small} />
               <span className={css.ScopeItemLabel}>App preview</span>
               <span className={css.ScopeItemHint}>the whole project, as it ships</span>
+            </button>
+
+            {/*
+              TVW-008 — the third thing this control switches between, and it
+              sits above the Workbench heading rather than in the list below it:
+              the heading scopes that list to *components you can mount*, and
+              the board is not one of them. It is a place, like `App preview`.
+
+              ⚠️ `choose` navigates the canvas only for a bench pick, which is
+              what makes this row safe to add here — the board carries no target,
+              so there is no one component for a canvas to reveal, and jumping
+              somewhere arbitrary would be worse than staying put.
+            */}
+            <button
+              type="button"
+              role="option"
+              aria-selected={scope.mode === 'board'}
+              className={classNames(css.ScopeItem, scope.mode === 'board' && css['is-current'])}
+              onClick={() => choose(BOARD_SCOPE)}
+              data-test="preview-scope-board"
+            >
+              <Icon icon={SCOPE_CHIP_ICONS.board} size={IconSize.Small} />
+              <span className={css.ScopeItemLabel}>{OPEN_BOARD}</span>
+              <span className={css.ScopeItemHint}>components side by side, at their own sizes</span>
             </button>
 
             {/*

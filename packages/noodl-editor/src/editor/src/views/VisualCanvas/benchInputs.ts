@@ -26,7 +26,7 @@
  * @module noodl-editor/views/VisualCanvas/benchInputs
  */
 
-import { BENCH_COMPONENT_NAME, BENCH_NODE_ID, type BenchPort } from '@noodl-models/AiAssistant/authoring';
+import { BENCH_COMPONENT_NAME, BENCH_NODE_ID, boardFrameNodeId, type BenchPort } from '@noodl-models/AiAssistant/authoring';
 
 import { WORKBENCH } from './benchWords';
 
@@ -229,6 +229,36 @@ export function benchParameterContent(parameterName: string, parameterValue: unk
     parameterName,
     parameterValue
   };
+}
+
+/**
+ * TVW-008 — the `modelUpdate` payloads that move one board frame, live.
+ *
+ * 🔴 **This is what makes a drag cost nothing.** The alternative is rebuilding
+ * the export from the dropped position, and a changed export makes the runtime
+ * call `location.reload()` — the whole board re-rendered, every frame's internal
+ * state lost, because somebody nudged one of them 8px. A frame Group's position
+ * is two ordinary parameters, so it moves the way an input edit moves: one
+ * `parameterChanged` each, on the live client, with no rebuild.
+ *
+ * ⚠️ **`{ value, unit: 'px' }`, never a bare number** — the trap `boardHarness`
+ * pays for in full: `marginLeft` is a `dimension` port whose `defaultUnit` is
+ * `'%'`, so a bare `120` is **120 percent** of the parent. The runtime reaches
+ * the same `nodeModel.setParameter` the graph import does
+ * (`editormodeleventshandler.ts:211`), so the value must be the shape the
+ * exported JSON carries.
+ *
+ * ⚠️ **`x` and `y` are offsets from the board's origin, not stored coordinates.**
+ * `boardHarness` normalises every frame through `boardBounds`, and a caller that
+ * sent the raw `bench.board` coordinate would move the frame by the whole
+ * origin. `boardExportSignature` is what keeps the two in step.
+ */
+export function boardFrameMoveContents(frameIndex: number, x: number, y: number) {
+  const nodeId = boardFrameNodeId(frameIndex);
+  return [
+    { type: 'parameterChanged', componentName: BENCH_COMPONENT_NAME, nodeId, parameterName: 'marginLeft', parameterValue: { value: x, unit: 'px' } },
+    { type: 'parameterChanged', componentName: BENCH_COMPONENT_NAME, nodeId, parameterName: 'marginTop', parameterValue: { value: y, unit: 'px' } }
+  ];
 }
 
 /**

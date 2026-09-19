@@ -53,8 +53,10 @@ import {
 } from './benchRequest';
 import { registerLivePreview, unregisterLivePreview } from '../SandboxSurface';
 import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './benchFrameDefault';
-import { CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
+import { BOARD, CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
+import { boardCaptionRest } from './boardSurface';
 import { ComponentBench } from './ComponentBench';
+import { ComponentBoard } from './ComponentBoard';
 import { BenchFrameControl, PreviewScopeControl } from './PreviewChrome';
 import { stripToRender, type DetachedStripProps } from './detachedStrip';
 import { publishPlacementOutline } from './placementOutline';
@@ -66,6 +68,7 @@ import {
   benchTargetLabel,
   isDivergedFromCanvas,
   showsAppPreview,
+  showsBoard,
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
@@ -139,6 +142,21 @@ export function VisualCanvas({
    * a fourth mode is six compile errors instead of six silent changes.
    */
   const isApp = showsAppPreview(scope);
+
+  /**
+   * TVW-008 — the third mode. Read through the predicate rather than as
+   * `!isApp && !isBench`, which is the shape §6.5 measured six of.
+   */
+  const isBoard = showsBoard(scope);
+
+  /**
+   * How many components are on the board, for the strip caption.
+   *
+   * Reported up from `ComponentBoard` rather than read here, because
+   * `bench.board` has exactly one reader and a second one would be a second
+   * thing to keep in step with an undo.
+   */
+  const [boardFrameCount, setBoardFrameCount] = useState(0);
 
   /**
    * FIX-019 — which component the node graph is on, so the strip can say when
@@ -477,6 +495,26 @@ export function VisualCanvas({
             </div>
           </>
         )}
+
+        {/*
+          TVW-008 — the board's half of the same row, in the same voice: the
+          surface names itself and then says what is on it.
+
+          🔴 **It does not mention data, and that is AC7's ruling rather than an
+          omission.** `boardCaptionRest` carries the reasoning: Richard cut
+          "Sample values." from the bench caption on 2026-09-18 because *sample*
+          meant two things within 44px, and on the board the frame captions
+          already say where each frame's values came from, per frame.
+        */}
+        {isBoard && (
+          <div className={css.BenchCaption} data-test="board-caption">
+            <strong>{BOARD}</strong>
+            <span>
+              {CAPTION_JOIN}
+              {boardCaptionRest(boardFrameCount)}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className={classNames(css.Stages, showDesignChrome && css['is-design'])}>
@@ -521,6 +559,17 @@ export function VisualCanvas({
             onFrameChange={setFrame}
             onFrameMeasured={setBenchMeasured}
             designMode={Boolean(designMode)}
+          />
+        )}
+
+        {/* TVW-008 slice 2 — one `<webview>`, N frames, and the chrome the
+            editor draws over it. Mounted only in board mode, so the board's
+            client exists only while somebody is looking at it. */}
+        {isBoard && (
+          <ComponentBoard
+            designMode={Boolean(designMode)}
+            onScopeChange={setScope}
+            onFrameCountChange={setBoardFrameCount}
           />
         )}
 
