@@ -1034,11 +1034,36 @@
    the panel and the row's own box begins where the text does, so there is no room on the inside
    and plenty on the outside. Positioned rather than a wider shadow so the bar keeps its 2px
    weight, and inset 2px top and bottom so a column of them reads as separate marks rather than
-   one continuous rule. The parent is `overflow: visible`, checked, so nothing clips it. */
+   one continuous rule. The parent is `overflow: visible`, checked, so nothing clips it.
+
+   🔴 **THE GUTTER ALREADY HAD A MARK IN IT, AND THE FIRST VERSION OF THIS BAR WAS DRAWN THROUGH
+   THE MIDDLE OF IT.** Richard, 2026-09-19, ruling AC8: *"the little dot to the left of the label
+   that says when something is changed is overlapping with the blue or red vertical line next to
+   each label from a 'look' controlled value."* He found it by looking at the shot; every assertion
+   about the treatment was green, because a `data-look-treatment` attribute cannot say whether two
+   marks share a lane.
+
+   Measured off the source, not by eye: CHR-009 §2's `GutterDot` is `left: -11px; width: 6px`
+   (`PropertyPanelInput.module.scss`), so it spans **-11 → -5**; this bar was `left: -8px;
+   width: 2px`, spanning **-8 → -6**. The bar was *entirely inside* the dot, which is why an
+   overridden row — where a node owning the value is exactly what BOTH marks are reporting — drew
+   a grey disc punched into the middle of an amber rule.
+
+   🔴 **The dot does not move.** CHR-009 closed that gutter on Richard's look, and the two marks
+   are not redundant even though they coincide here: the dot resets to the port DEFAULT, `Revert`
+   puts the field back under the LOOK. So the bar takes the outer lane instead — `-15px` leaves
+   2px of clear ground before the dot's leading edge at `-11px` and still sits 1px inside the rows
+   host, which starts 16px in. A change-bar at the far edge is also the shape a person already
+   knows from a diff gutter.
+
+   ⚠️ NOT YET READ OFF A RENDERED ELEMENT. The numbers above are the stylesheets'; the two rules
+   live in different containing blocks (`.Root` in core-ui, `.property-panel-row` here) and the
+   screenshot is what says they coincide. Drive it before calling AC8 closed — twice now this
+   surface has been green in every assertion and wrong on screen. */
 .property-panel-row[data-look-treatment]::before {
   content: '';
   position: absolute;
-  left: -8px;
+  left: -15px;
   top: 2px;
   bottom: 2px;
   width: 2px;

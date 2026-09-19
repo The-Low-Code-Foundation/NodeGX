@@ -1,7 +1,7 @@
 # STY-003 — The property panel
 
-**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟡 **the decision was built in s4;
-the surface is drawn in s5 and has not yet been looked at.** `models/Looks/fieldState.ts` answers
+**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟡 **built, driven, and RULED —
+one defect Richard found stands between it and closed.** `models/Looks/fieldState.ts` answers
 the only question this panel asks — *where did this value come from?* — and `tests-unit/sty-003/` is
 now **30 tests green** across the decision and the drawing.
 
@@ -23,13 +23,17 @@ box went to load 41 under two other sessions' work before it could be. That re-d
 session's first job, and it is the same drive that should reshoot AC8 with a Look named like a real
 one.
 
-🔴 **AC8 IS THE ONLY THING LEFT THAT CLOSES THIS, and it is Richard's.** The shots are in
-[`shots/`](./shots/) — `sty003-light-look-with-override.png`, `sty003-dark-look-with-override.png`,
-the pair with no Look, and s6's menu/row-action pair. ⚠️ **The Look in the override shots is named
-`test`**, because that is what the drive project holds, so the sentence reads *"test says
-var(--text-4xl)"* rather than the design's *"Primary Button says 8px"* — state that when asking
-rather than let the shot argue the point for itself. **Ask him.** §4a names the one place the
-surface departs from his mockup, which is the thing to put in front of him rather than let pass.
+🔴 **AC8 WAS ASKED AND RICHARD RULED (2026-09-19): KEEP IT AS BUILT.** §4a is settled — the group
+heading naming the Look once is the answer, and the mockup's in-field `[ Primary Button  18px ]` is
+**not wanted**. 🔴 **But he found a defect in the shot in the same breath** — the changed-dot and the
+Look bar share a lane in the 16px gutter (§2e), measured at **-11 → -5** against **-8 → -6**, so the
+bar was drawn straight through the dot. Fixed to `left: -15px`, **not yet driven.**
+
+**So AC8 is not closed: it closes when he has seen the fix.** The next session's first job is one
+drive that does all three at once — the rename fix (§2d), the gutter fix (§2e), and a reshoot of the
+override pair in both themes. ⚠️ **Rename the Look before shooting.** The existing shots hold a Look
+called `test`, so the sentence reads *"test says var(--text-4xl)"* rather than the design's
+*"Primary Button says 8px"*; the `⋯` → Rename that s6 drove is how to fix it, and it takes seconds.
 **Design:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §2 (the four rules), §3
 (the panel), §4 (the Look menu) — **ruled by Richard, 2026-09-18**.
 
@@ -242,6 +246,45 @@ recomputes the hash, finds it unchanged and returns early.
 same event family and the hash guards it, not because a drive has seen it. Say so rather than let it
 read as measured.
 
+## 2e. 🔴 What RICHARD found in the shot — two gutter marks in one lane
+
+**Richard, 2026-09-19, ruling AC8:** *"Keep it as built, but notice that the little dot to the left
+of the label that says when something is changed is overlapping with the blue or red vertical line
+next to each label from a 'look' controlled value."*
+
+🔴 **The ruling and the defect arrived in the same sentence, and the defect is the more useful
+half.** He was asked one question — where should the Look's name appear — and answered it (the
+surface as built; §4a is ruled and the mockup's in-field naming is not wanted). Then he looked at
+the picture and saw something nobody had asked him about.
+
+**Measured off the two stylesheets, not by eye:**
+
+| mark | rule | spans |
+|---|---|---|
+| CHR-009 §2's `GutterDot` (reset / connected) | `PropertyPanelInput.module.scss`: `left: -11px; width: 6px` | **-11 → -5** |
+| this task's Look bar | `propertyeditor.css`: `left: -8px; width: 2px` | **-8 → -6** |
+
+The bar was **entirely inside** the dot. On an *overridden* row the two coincide at their worst,
+because a node owning the value is precisely what **both** marks are reporting — so the row drew a
+grey disc punched through the middle of an amber rule.
+
+**Why no gate saw it.** Every assertion this task owns reads `data-look-treatment` or a computed
+colour; two marks sharing a lane is a fact about **where two different stylesheets put their
+absolutely-positioned boxes**, and the second one is in `noodl-core-ui`, a package this task's tests
+never load. The same hole as §2c defect 2 — the bar painting over the label — which also only the
+screenshots showed. **That is twice on this surface, and it is the argument for driving it rather
+than adding a thirty-first assertion** ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+**Fix: the bar takes the outer lane, `left: -15px`.** The dot does not move — CHR-009 closed that
+gutter on Richard's look, and the two marks are **not** redundant despite coinciding here: the dot
+resets to the port **default**, `Revert` puts the field back under the **Look**. Two different
+destinations, so two marks, in two lanes. `-15px` leaves 2px of clear ground before the dot's
+leading edge and still sits 1px inside the rows host, which starts 16px in.
+
+⚠️ **NOT YET READ OFF A RENDERED ELEMENT.** The spans above are the stylesheets'; the two rules live
+in different containing blocks and it is the *screenshot* that says they coincide. **Drive it, and
+put the new shot in front of Richard — AC8 closes on that, not on this fix existing.**
+
 ## 3. Acceptance criteria
 
 The four rules of design §2 are the criteria. Any surface that breaks one is wrong.
@@ -255,7 +298,7 @@ The four rules of design §2 are the criteria. Any surface that breaks one is wr
 | **AC5** | **The three states read correctly on the element a person actually sees**, in **both themes** — linked, overridden, own. 🔴 Read from the rendered element, not from the class it was given ([[a-ring-must-be-read-on-the-element-a-person-sees]]), and check the chosen colours against the editor's existing semantic colours: design §3.3 explicitly does **not** rule them | ✅ **GREEN (s5's drive) — read off the rendered element in both themes, and it found two defects first** (§2c). Dark: linked `rgb(157,204,255)`, overridden `rgb(253,176,34)`. Light: `rgb(14,92,202)` / `rgb(147,55,13)` — the token layer swaps both to the darker pair for the lighter ground, so neither was hand-written per theme. A node with no Look reads **0 treatments, 0 group sources, 0 override lines**: design §3.2's "the absence of it is itself the signal", measured rather than assumed. Old note, now superseded: The colours **have** been checked against the editor's palette and the reasoning is in the stylesheet: **amber is kept for overridden because it IS `--theme-color-fg-notice`**, the editor's "caution, not error" — the right weight for a legitimate act the panel wants seen. **Purple has no token at all**, so linked takes `--theme-color-fg-accent`; minting one would start a second palette beside `colors.css` ([[a-second-copy-of-a-palette-drifts-silently]]). Both are theme-aware tokens, so light and dark come from the token layer. 🔴 **But a token's documented 4.5:1 is a fact about the token, not a reading of this row** — nothing has been read off a rendered element yet |
 | **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | 🟡 **built (s5)** — all three sections in that order, off `buildLookMenu`. 🔴 **The save row is not new behaviour; it is a new name and a new place.** `createNewVariant` always did exactly this — copy the node's parameters onto a named Look and put the node in it — but it was labelled *"Create new variant"* at the **top** of the popup, which asks a person to know what a variant is before they can want one. It is now the last row and reads *"Save this button's styles as a new Look…"*. ✅ **MEASURED (s6) — opened at rest and it reads as three** (§2d): `None — styles are its own`, `IN THIS PROJECT` with the wearer count and one `⋯`, `START FROM A NODEGX LOOK` with the **thirteen** a Text declares and the "adds it to your project" sentence, then the save row last. The order is design §4's |
 | **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | 🟡 **built (s5)** — `PickVariantItem` draws one always-visible `⋯` that opens Rename and Delete in the row. 🔴 **The new control deliberately does not use `.variants-item-icon`**, which is the class carrying the `visibility: hidden` the defect was made of, and the stylesheet carries a note saying nothing below it may re-introduce one. ✅ **MEASURED (s6) — §1's control pair re-run at rest, and it is the clean inverse** (§2d): the `⋯` reads `visibility: visible`, `opacity: 1` and `elementFromPoint` returns the button itself, while `.variants-item-icon` — the class the defect was made of — has **count 0** on this surface. One press expands `Rename` and `Delete`, both visible and hit-reachable, **no hover anywhere**; Rename was driven end to end and committed. 🔴 That rename is what exposed §2d's staleness defect |
-| **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | ⬜ |
+| **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | 🟡 **RULED, WITH ONE DEFECT TO FIX FIRST (2026-09-19).** He was shown the override shots in both themes and §4a's departure, put to him as three ways of naming the source. **He chose the surface as built** — the group heading names the Look once, the gutter bar marks each row that came from it, the override line carries the per-row sentence — so **§4a is RULED and the mockup's in-field naming is not wanted**. 🔴 **But he found a defect in the shot that 30 green tests and two prior drives had not:** *"the little dot to the left of the label that says when something is changed is overlapping with the blue or red vertical line next to each label from a 'look' controlled value."* The two gutter marks shared a lane — see §2e. ⬜ **Closes when he has seen the fix**, which is one drive away |
 
 ## 4a. 🔴 Where the surface departs from the mockup, and why
 
@@ -272,9 +315,19 @@ this task, on rows CHR-008 and CHR-009 closed on Richard's looks and which this 
 not to reopen. The design's own sentence — *"The section header names the source once so the
 per-field labels do not have to shout"* — is what the built version leans on.
 
-⚠️ **State it to him at AC8 rather than letting it pass as the mockup.** The rule it has to meet is
-*"a person must never see `18px` and have to wonder"*, and whether a heading four rows up answers
-that is a question about looking at it, not about the code.
+~~⚠️ **State it to him at AC8 rather than letting it pass as the mockup.**~~ **DONE — and RULED.**
+
+🟢 **Richard, 2026-09-19: the surface as built is the answer.** He was given three ways of naming
+the source — the heading once (as built), inside every field (the mockup), or on every row's label
+(a middle path, cheap because that label is ours) — and chose **as built**. So the departure is no
+longer a departure: **the heading naming the Look once, plus the gutter bar, plus the override
+line, is the ruled design**, and the mockup's `[ Primary Button  18px ]` is **not wanted**. Nothing
+further is owed here.
+
+⚠️ **The rule it had to meet was asked conservatively, and that is worth recording.** The shot he
+ruled on holds a Look named `test`, so its sentence read *"test says var(--text-4xl)"* — weaker
+than the design's *"Primary Button says 8px"*. He ruled it worthy anyway, which makes the ruling
+*more* robust, not less: he said yes to the less convincing version.
 
 ## 5. Out of scope
 
