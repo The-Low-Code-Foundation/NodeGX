@@ -840,6 +840,48 @@ class SchemaManager {
     }
   }
 
+  /**
+   * The INVERSE of `getRelatedIds`: which owners is this related id attached to.
+   *
+   * Added by phase 97 BRG-002 §3.3, ruled by Richard 2026-09-19. It exists
+   * because `security/state.ts` answered "which roles is this user in" with a
+   * hand-written JOIN on the raw SQLite handle — the last thing in the backend
+   * reaching past the storage interface, and the one standing between the
+   * product and "your app moves to Postgres" being true for PERMISSIONS.
+   *
+   * Two alternatives were measured and rejected:
+   *   - `$relatedTo` (QueryBuilder.ts:357) only filters by `owningId`, so it
+   *     answers the other direction and cannot express this one.
+   *   - Querying `_Join_<key>_<Class>` as an ordinary collection works today
+   *     (measured), but the junction table's NAME is this adapter's private
+   *     storage convention. A caller that hardcodes it would silently return no
+   *     roles on any adapter that stores relations differently — which reads as
+   *     a permissions outage, not an error.
+   *
+   * So the lookup belongs here, beside its mirror image, where a second adapter
+   * has to answer it in whatever shape its own storage takes.
+   *
+   * @param owningClass - the class that OWNS the relation (e.g. `_Role`)
+   * @param relationName - the relation's key (e.g. `users`)
+   * @param relatedId - the id on the far side (e.g. a user's objectId)
+   * @returns the owning objectIds, `[]` when the junction table does not exist
+   */
+  getRelationOwners(owningClass: string, relationName: string, relatedId: string): string[] {
+    const junctionTable = `_Join_${relationName}_${owningClass}`;
+
+    try {
+      const rows = this.db
+        .prepare(`SELECT "owningId" FROM ${escapeTable(junctionTable)} WHERE "relatedId" = ?`)
+        .all(relatedId) as Array<{ owningId: string }>;
+      return rows.map((r) => r.owningId);
+    } catch (e) {
+      if (e.message.includes('no such table')) {
+        return [];
+      }
+      throw e;
+    }
+  }
+
   // ===========================================================================
   // Declared indexes (FED-002)
   //

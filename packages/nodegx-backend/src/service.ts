@@ -243,10 +243,7 @@ export class BackendService {
       cliToken: this.options.authToken,
       readonlyToken: this.options.readonlyToken,
       deployedFunctions,
-      facade: this.facade,
-      // BRG-001: the raw handle, named. See SecurityStateDeps.adapter — the one
-      // reach past the storage interface left in the service, and BRG-002's job.
-      adapter: this.persistence.adapter
+      facade: this.facade
     });
 
     // DEF-009 AC4. Deliberately OUTSIDE the non-loopback block above: those
@@ -345,7 +342,7 @@ export class BackendService {
     //      while enforcement said no.
     this.systemRoles = new SystemRoles({
       facade: this.facade,
-      rolesForUser: (userId) => (this.security ? this.security.rolesForUser(userId) : []),
+      rolesForUser: (userId) => (this.security ? this.security.rolesForUser(userId) : Promise.resolve([])),
       onAudit: ({ action, outcome, target }) => {
         void this.audit?.record({
           action,

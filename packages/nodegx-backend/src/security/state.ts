@@ -21,7 +21,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type * as http from 'http';
 
-import type { IStorageAdapter, IStorageFacade } from '@noodl/backend-contract';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
 import {
@@ -53,6 +53,22 @@ export type { AclOption } from '../persistence/AdapterFacade';
 
 const SECURITY_FILE = 'security.json';
 const SECRETS_FILE = 'secrets.json';
+
+/**
+ * A key's `scopes` column is a JSON array stored as text. It is parsed in three
+ * places and a malformed value means "no scopes", never a thrown request —
+ * BRG-002 §3.3 pulled the three inline copies of this out into one function.
+ */
+function parseScopes(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String);
+  if (typeof raw !== 'string') return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
 
 function sha256(value: string): string {
   return crypto.createHash('sha256').update(value, 'utf8').digest('hex');
@@ -143,24 +159,6 @@ export interface SecurityDeps {
    */
   deployedFunctions: DeployedFunction[];
   facade: IStorageFacade;
-  /**
-   * 🔴 BRG-001 — the one dependency in the service that is not the facade.
-   *
-   * This module is the only consumer outside `persistence/` that reaches past
-   * `IStorageFacade` to the database itself: `_Role` and `_ApiKey` are read
-   * with prepared statements on the raw handle, because the adapter's query API
-   * cannot express the junction join and these run on every request.
-   *
-   * It is a **separate, named dependency** rather than a reach through
-   * `facade.adapter`, so that the reach is visible at every construction site
-   * instead of hidden one property deep — and so that the other seventeen
-   * facade consumers stay closed over the interface, which is what makes the
-   * BRG-003 conformance suite meaningful.
-   *
-   * BRG-002 §3.3 deletes this line and moves the eight statements onto
-   * ordinary facade calls.
-   */
-  adapter: IStorageAdapter;
 }
 
 export class SecurityState {
@@ -321,7 +319,7 @@ export class SecurityState {
     // 2. API key.
     const apiKey = h['x-nodegx-api-key'];
     if (typeof apiKey === 'string' && apiKey.length > 0) {
-      const row = this.lookupApiKey(apiKey);
+      const row = await this.lookupApiKey(apiKey);
       if (!row) throw new HttpError(401, 'Unauthorized.');
       this.touchApiKey(row.objectId);
       return { kind: 'apiKey', name: row.name, scopes: row.scopes };
@@ -344,7 +342,7 @@ export class SecurityState {
         throw new HttpError(400, 'Invalid session token', 209);
       }
       const userId = user.objectId as string;
-      return { kind: 'user', userId, roles: this.rolesForUser(userId) };
+      return { kind: 'user', userId, roles: await this.rolesForUser(userId) };
     }
 
     return { kind: 'anonymous' };
@@ -398,29 +396,38 @@ export class SecurityState {
   // Roles (flat; membership in the _Join_users__Role junction)
   // ==========================================================================
 
-  // The role/key stores use prepared statements on the raw engine handle: the
-  // adapter's query API can't express joins, and these run on every request.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private get db(): any {
-    // BRG-001: `getDatabase()` is optional on `IStorageAdapter` — a Postgres
-    // adapter has no SQLite handle to give — so the absence is answered with a
-    // sentence rather than `undefined is not a function`. See `deps.adapter`.
-    const db = this.deps.adapter.getDatabase?.();
-    if (!db) {
-      throw new Error('The security state needs a direct SQLite handle (BRG-002 removes this).');
-    }
-    return db;
-  }
+  // BRG-002 §3.3 — these were six prepared statements on the raw SQLite handle,
+  // and they were the LAST thing in the backend reaching past the storage
+  // interface. They are now ordinary facade calls, which is what makes
+  // "your app moves to Postgres" true for PERMISSIONS rather than true for
+  // everything except permissions.
+  //
+  // The one that could not simply become a facade call was `rolesForUser`: it
+  // joined `_Role` to `_Join_users__Role`, and the query layer's `$relatedTo`
+  // only filters by `owningId` — the other direction. Richard ruled 2026-09-19
+  // that the missing lookup be added to the storage layer beside its mirror
+  // image rather than worked around, so `getRelationOwners` exists and this is
+  // its only caller.
 
-  rolesForUser(userId: string): string[] {
+  /**
+   * Which roles this user is in.
+   *
+   * Two portable calls where there was one hand-written JOIN: the owning role
+   * ids from the relation, then the rows themselves for their names. The second
+   * is skipped entirely when the user is in no roles, which is the common case
+   * on the authorization path.
+   */
+  async rolesForUser(userId: string): Promise<string[]> {
     try {
-      const rows = this.db
-        .prepare(
-          'SELECT r."name" AS name FROM "_Role" r ' +
-            'JOIN "_Join_users__Role" j ON j."owningId" = r."objectId" WHERE j."relatedId" = ?'
-        )
-        .all(userId) as { name: string }[];
-      return rows.map((r) => r.name);
+      const sm = this.deps.facade.schemaManager;
+      const roleIds = sm.getRelationOwners('_Role', 'users', userId);
+      if (roleIds.length === 0) return [];
+      const { results } = await this.deps.facade.rawQuery('_Role', {
+        where: { objectId: { $in: roleIds } },
+        select: ['name'],
+        limit: roleIds.length
+      });
+      return results.map((r) => r.name).filter((n): n is string => typeof n === 'string');
     } catch {
       // Tables exist from service start; a failure here means no memberships.
       return [];
@@ -431,70 +438,89 @@ export class SecurityState {
   // API keys (_ApiKey: name, keyHash, scopes JSON, revoked, lastUsedAt)
   // ==========================================================================
 
-  private lookupApiKey(secret: string): { objectId: string; name: string; scopes: string[] } | null {
+  private async lookupApiKey(secret: string): Promise<{ objectId: string; name: string; scopes: string[] } | null> {
     try {
-      const row = this.db
-        .prepare('SELECT "objectId", "name", "scopes", "revoked" FROM "_ApiKey" WHERE "keyHash" = ?')
-        .get(sha256(secret)) as { objectId: string; name: string; scopes: string; revoked: number } | undefined;
+      const { results } = await this.deps.facade.rawQuery('_ApiKey', {
+        where: { keyHash: sha256(secret) },
+        limit: 1
+      });
+      const row = results[0];
       if (!row || row.revoked) return null;
-      let scopes: string[] = [];
-      try {
-        scopes = JSON.parse(row.scopes) || [];
-      } catch {
-        scopes = [];
-      }
-      return { objectId: row.objectId, name: row.name, scopes };
+      return {
+        objectId: row.objectId as string,
+        name: row.name as string,
+        scopes: parseScopes(row.scopes)
+      };
     } catch {
       return null;
     }
   }
 
+  /**
+   * `lastUsedAt` is advisory — nothing authorizes on it; the admin UI shows it
+   * in a "last used" column on a later request. So it is NOT awaited.
+   *
+   * Measured (BRG-002 AC5): through the facade this write is **179 ms of the
+   * 273 ms** that 2,000 authorizations cost — two thirds of the whole path, for
+   * a column no decision reads. The raw SQL this replaced was one `UPDATE`; the
+   * same write through the adapter is a fetch, a serialize and a change event.
+   *
+   * 🔴 **Not awaiting it saves nothing today, and that is worth knowing rather
+   * than assuming.** Measured both ways: throughput 0.137 ms/auth, latency
+   * 0.131 ms/auth, unchanged by this. The adapter is synchronous under the hood
+   * (`node:sqlite` wrapped in a promise), so the write runs on this call stack
+   * before the promise is even returned — there is no "later" to defer it to.
+   *
+   * It is written this way anyway, because it is the shape that pays off on the
+   * adapter this whole phase exists to enable: over a socket the advisory write
+   * is a round trip, and a request that waits for it pays for it. Kept as a
+   * correctness statement about `lastUsedAt` — nothing authorizes on it — not
+   * as an optimization anyone has measured a win from.
+   */
   private touchApiKey(objectId: string): void {
-    try {
-      this.db
-        .prepare('UPDATE "_ApiKey" SET "lastUsedAt" = ? WHERE "objectId" = ?')
-        .run(new Date().toISOString(), objectId);
-    } catch {
-      // lastUsedAt is advisory.
-    }
+    void this.deps.facade.rawSave('_ApiKey', objectId, { lastUsedAt: new Date().toISOString() }).catch(() => {
+      // Advisory: a failed timestamp must never fail the request it describes.
+    });
   }
 
   /** Create a key; returns the plaintext secret exactly once. */
-  createApiKey(name: string, scopes: string[]): { objectId: string; secret: string } {
+  async createApiKey(name: string, scopes: string[]): Promise<{ objectId: string; secret: string }> {
     const secret = 'ngxk_' + crypto.randomBytes(32).toString('base64url');
-    const objectId = crypto.randomUUID();
-    const now = new Date().toISOString();
-    this.db
-      .prepare(
-        'INSERT INTO "_ApiKey" ("objectId", "createdAt", "updatedAt", "name", "keyHash", "scopes", "revoked") ' +
-          'VALUES (?, ?, ?, ?, ?, ?, 0)'
-      )
-      .run(objectId, now, now, name, sha256(secret), JSON.stringify(scopes));
-    return { objectId, secret };
+    // 🔴 `scopes` is declared `Array` (service.ts:888), so the ADAPTER serializes
+    // it. The raw SQL this replaced wrote `JSON.stringify(scopes)` into the
+    // column itself; passing that same string through the facade would store a
+    // JSON string *inside* a JSON array and every scope check would silently
+    // fail open or closed. Pass the array; `parseScopes` still reads the rows
+    // the old code wrote.
+    const created = await this.deps.facade.rawCreate('_ApiKey', {
+      name,
+      keyHash: sha256(secret),
+      scopes,
+      revoked: false
+    });
+    return { objectId: created.objectId as string, secret };
   }
 
-  listApiKeys(): { objectId: string; name: string; scopes: string[]; revoked: boolean; createdAt: string; lastUsedAt: string | null }[] {
-    const rows = this.db
-      .prepare('SELECT "objectId", "name", "scopes", "revoked", "createdAt", "lastUsedAt" FROM "_ApiKey"')
-      .all() as { objectId: string; name: string; scopes: string; revoked: number; createdAt: string; lastUsedAt: string | null }[];
-    return rows.map((r) => ({
-      objectId: r.objectId,
-      name: r.name,
-      scopes: (() => {
-        try {
-          return JSON.parse(r.scopes) || [];
-        } catch {
-          return [];
-        }
-      })(),
+  async listApiKeys(): Promise<
+    { objectId: string; name: string; scopes: string[]; revoked: boolean; createdAt: string; lastUsedAt: string | null }[]
+  > {
+    const { results } = await this.deps.facade.rawQuery('_ApiKey', {});
+    return results.map((r) => ({
+      objectId: r.objectId as string,
+      name: r.name as string,
+      scopes: parseScopes(r.scopes),
       revoked: Boolean(r.revoked),
-      createdAt: r.createdAt,
-      lastUsedAt: r.lastUsedAt || null
+      createdAt: r.createdAt as string,
+      lastUsedAt: (r.lastUsedAt as string) || null
     }));
   }
 
-  revokeApiKey(objectId: string): boolean {
-    const result = this.db.prepare('UPDATE "_ApiKey" SET "revoked" = 1 WHERE "objectId" = ?').run(objectId);
-    return Boolean(result && result.changes > 0);
+  async revokeApiKey(objectId: string): Promise<boolean> {
+    try {
+      await this.deps.facade.rawSave('_ApiKey', objectId, { revoked: true });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

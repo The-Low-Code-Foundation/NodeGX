@@ -285,6 +285,17 @@ export interface IStorageSchema {
 
   /** `roles/RoleStore.ts`; `auth/identities.ts`. */
   getRelatedIds(table: string, objectId: string, key: string): unknown;
+  /**
+   * The inverse: which owners carry this related id. `security/state.ts`
+   * (`rolesForUser`, on the authorization path of every session request).
+   *
+   * Added by BRG-002 §3.3 and ruled 2026-09-19 — the ONE member of these three
+   * interfaces that was not already a call the backend made through an object
+   * method. It was a hand-written JOIN on the raw SQLite handle, and declaring
+   * it here is what let the last reach past the interface be deleted. It is
+   * therefore in the promise, and BRG-003 gates it like any other.
+   */
+  getRelationOwners(table: string, key: string, relatedId: string): string[];
   /** `roles/RoleStore.ts`. */
   addRelation(table: string, objectId: string, key: string, relatedId: string): void;
   /** `roles/RoleStore.ts`. */

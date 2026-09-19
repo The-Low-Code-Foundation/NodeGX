@@ -377,7 +377,7 @@ export class AdminSecurityRoutes {
    */
   async checkAccess(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const principal = this.parsePrincipal(body.principal);
+    const principal = await this.parsePrincipal(body.principal);
 
     if (typeof body.functionName === 'string') {
       // CWF-017: one resolver with the dispatcher's gate. This used to restate
@@ -422,7 +422,7 @@ export class AdminSecurityRoutes {
   }
 
   /** Build a Principal from a check-request descriptor (never from credentials). */
-  private parsePrincipal(raw: unknown): Principal {
+  private async parsePrincipal(raw: unknown): Promise<Principal> {
     if (!raw || typeof raw !== 'object') return { kind: 'anonymous' };
     const p = raw as Record<string, unknown>;
     switch (p.kind) {
@@ -438,7 +438,7 @@ export class AdminSecurityRoutes {
         const userId = String(p.userId || '');
         if (!userId) throw new HttpError(400, 'principal.userId is required for kind "user"');
         // Roles may be supplied explicitly (hypotheticals) or resolved live.
-        const roles = Array.isArray(p.roles) ? p.roles.map(String) : this.security.rolesForUser(userId);
+        const roles = Array.isArray(p.roles) ? p.roles.map(String) : await this.security.rolesForUser(userId);
         return { kind: 'user', userId, roles };
       }
       case 'anonymous':
@@ -517,9 +517,9 @@ export class AdminSecurityRoutes {
   // API keys
   // ==========================================================================
 
-  listKeys(ctx: RequestContext): void {
+  async listKeys(ctx: RequestContext): Promise<void> {
     // Names, scopes, status — never secrets (they are unrecoverable by design).
-    sendJSON(ctx.res, 200, { keys: this.security.listApiKeys() });
+    sendJSON(ctx.res, 200, { keys: await this.security.listApiKeys() });
   }
 
   async createKey(ctx: RequestContext): Promise<void> {
@@ -531,13 +531,13 @@ export class AdminSecurityRoutes {
     // Name and scopes are the audit-worthy part; the secret is returned to the
     // caller once and never recorded (the redaction rule would drop it anyway).
     ctx.audit({ key: name, scopes: body.scopes });
-    const { objectId, secret } = this.security.createApiKey(name, body.scopes as string[]);
+    const { objectId, secret } = await this.security.createApiKey(name, body.scopes as string[]);
     // The one and only time the secret is returned.
     sendJSON(ctx.res, 201, { objectId, name, scopes: body.scopes, secret });
   }
 
-  revokeKey(ctx: RequestContext): void {
-    const revoked = this.security.revokeApiKey(ctx.params.id);
+  async revokeKey(ctx: RequestContext): Promise<void> {
+    const revoked = await this.security.revokeApiKey(ctx.params.id);
     if (!revoked) throw new HttpError(404, `No such key: ${ctx.params.id}`);
     sendJSON(ctx.res, 200, { success: true, objectId: ctx.params.id, revoked: true });
   }

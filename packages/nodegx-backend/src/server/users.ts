@@ -201,7 +201,7 @@ export class UserRoutes {
    * them". The same absent-versus-false distinction `emailVerified` records in
    * `signup` below.
    */
-  private rolesFor(userId: unknown): string[] | undefined {
+  private async rolesFor(userId: unknown): Promise<string[] | undefined> {
     if (!this.security || typeof userId !== 'string' || !userId) return undefined;
     return this.security.rolesForUser(userId);
   }
@@ -240,7 +240,7 @@ export class UserRoutes {
     // ever acquired a literal `roles` column — an admin-side import, a restored
     // backup — `wire` would carry it, and a stored value outranking the live
     // junction is exactly the lie this field must never tell.
-    sendJSON(res, 200, { ...wire, roles: this.rolesFor(user.objectId), sessionToken });
+    sendJSON(res, 200, { ...wire, roles: await this.rolesFor(user.objectId), sessionToken });
   }
 
   async logout(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -318,7 +318,7 @@ export class UserRoutes {
       // graphs and after on others; asking the junction is right either way,
       // and hard-coding `[]` would be a guess that is wrong exactly when a
       // membership app's first screen depends on it.
-      roles: this.rolesFor(user.objectId),
+      roles: await this.rolesFor(user.objectId),
       sessionToken
     });
   }
@@ -335,7 +335,7 @@ export class UserRoutes {
     // round trip, and nothing for a `User` node to schedule.
     sendJSON(res, 200, {
       ...wire,
-      roles: this.rolesFor(user.objectId),
+      roles: await this.rolesFor(user.objectId),
       sessionToken: req.headers['x-parse-session-token']
     });
   }

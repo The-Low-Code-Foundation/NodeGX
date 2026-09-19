@@ -1,6 +1,7 @@
 # BRG-002 — The holes, closed
 
-**Status: 🏗 §3.1 done s1 (2026-09-19) — the structural blocker is closed. §3.2 and §3.3 open.**
+**Status: 🏗 §3.1 and §3.3 done s1 (2026-09-19). Nothing in the backend reaches past the storage
+interface any more. §3.2 (`IOperationalStore`) is what remains.**
 
 ## 1. The person sentence
 
@@ -153,3 +154,79 @@ BRG-005 measures it rather than assuming it.
 **Still open: §3.2 (`IOperationalStore`), §3.3 (`security/state.ts` onto the facade), AC1, AC4, AC5,
 AC6.** `security/state.ts` remains the one module reaching past the interface, through the named
 `adapter` dependency BRG-001 gave it.
+
+
+## 6. §3.3 as built, s1 — the last reach past the interface is gone
+
+### 6.1 §3.3's premise was false, and Richard ruled the fix
+
+§3.3 says *"`_Role` and `_ApiKey` are ordinary collections with ordinary rows. The eight raw
+statements become facade calls."* Five of the six statements were exactly that. **`rolesForUser` was
+not**: it joined `_Role` to `_Join_users__Role`, and two candidate replacements were measured and
+rejected before building —
+
+| candidate | measured |
+|---|---|
+| `$relatedTo` (`QueryBuilder.ts:357`) | ❌ **Wrong direction.** It emits `objectId IN (SELECT relatedId … WHERE owningId = ?)` — it answers "which users are in this role", and this needs the inverse |
+| Query `_Join_users__Role` as an ordinary collection | ⚠️ **Works today** (probed: returns `{owningId, relatedId}`), and is the wrong answer. The junction table's *name* is the SQLite adapter's private storage convention, so a security module hardcoding it would return **no roles** on any adapter that stores relations differently — a permissions outage that reads as "this user has no roles", not as an error |
+
+**Richard ruled: add the missing lookup.** `getRelationOwners(owningClass, relationName, relatedId)`
+now sits beside its mirror image `getRelatedIds` in `SchemaManager`
+(`local-sql/SchemaManager.ts`), and is declared on `IStorageSchema`. 🔴 **It is the one member of
+the three interfaces that was not already an object-method call** — it was a JOIN written in SQL —
+so it is the one place BRG-001's rule 1 was deliberately set aside, by ruling, and it is in the
+promise like everything else: BRG-003 gates it.
+
+`rolesForUser` is now two portable calls (the owning ids, then the rows for their names) and skips
+the second entirely when the user is in no roles.
+
+### 6.2 🔴 The bug this nearly shipped, which no type and no existing test would have caught
+
+`_ApiKey.scopes` is declared **`Array`** (`service.ts:888`). The raw SQL wrote
+`JSON.stringify(scopes)` into the column *by hand*. Moving the write onto `rawCreate` changes **who
+serializes it** — the adapter does — so passing that same pre-stringified value through the facade
+would have stored a JSON string *inside* a JSON array, and every scope list would have read back
+wrong on the authorization path.
+
+Nothing in the 1,673-test suite covered a create→list→authorize round trip for an API key.
+`tests/brg-002-api-key-roundtrip.test.ts` does now, and it asserts the scopes come back as
+`['records:read', 'records:write']` — the assertion the bug fails.
+
+✅ **`parseScopes` reads both shapes**, so keys written by the old code still resolve.
+
+### 6.3 AC5 — the latency, measured both ways, and the answer is honest rather than flattering
+
+2,000 authorizations through `resolvePrincipal` with an API key, same machine, before = commit
+`637217156` (raw prepared statements) restored over the module and re-run:
+
+| | per auth |
+|---|---|
+| **before** — two prepared statements on the raw handle | **0.021 ms** |
+| **after** — `rawQuery` + `rawSave` through the facade | **0.137 ms** |
+
+🔴 **6.5× slower on the authorization path**, and it is recorded rather than explained away. In
+absolute terms it is ~7,300 authorizations per second in one process, against a claim (§3 of the
+phase README) of *"one app process, thousands of active users"* — so it is not a wall, but it is a
+real cost and BRG-005 should re-measure it rather than inherit this number.
+
+**Where it goes:** `touchApiKey` — the advisory `lastUsedAt` write — is **179 ms of the 273 ms**.
+One `UPDATE` became a fetch, a serialize and a change event.
+
+🔴 **And the obvious fix does not work, which is the part worth keeping.** `touchApiKey` is now
+fire-and-forget, and it was measured **both ways**: throughput 0.137 ms/auth, latency 0.131 ms/auth,
+**unchanged**. The adapter is synchronous under the hood (`node:sqlite` wrapped in a promise), so
+the write runs on the calling stack before the promise is returned — there is no "later" to defer it
+to. It is kept because it is a true statement about `lastUsedAt` (nothing authorizes on it) and
+because it is the shape that *will* pay on an adapter reached over a socket — **not** because anyone
+measured a win. Assuming it had one would have been the easy mistake.
+
+### 6.4 Acceptance criteria
+
+| | criterion | |
+|---|---|---|
+| AC1 | `.prepare(` only under `persistence/` and the operational store | 🏗 — `security/state.ts` is at **0**, down from 6. `execution/IdempotencyStore.ts` still has 10 (§3.2) |
+| AC5 | `security/state.ts` no longer calls `getDatabase()`; the security specs stay green; latency measured before and after | ✅ — and `SecurityStateDeps.adapter`, the named reach BRG-001 added, is **deleted**. `security-enforcement`, `security-model` and `admin-cors-devopen` green (67 tests) |
+| AC6 | every remaining `nativeHandle` site listed | ✅ — **outside `persistence/`, none.** The only `getDatabase()` callers left in the backend are `AdapterFacade.upsertBatch` and its helper |
+
+**§3.2 (`IOperationalStore` for `IdempotencyStore` and `ExecutionStore`) is what remains**, plus AC4
+and AC7.

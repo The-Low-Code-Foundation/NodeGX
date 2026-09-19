@@ -36,7 +36,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { SecurityState, SecurityStartupError } from '../src/security/state';
-import type { IStorageAdapter, IStorageFacade } from '@noodl/backend-contract';
+import type { IStorageFacade } from '@noodl/backend-contract';
 
 jest.setTimeout(40000);
 
@@ -330,8 +330,6 @@ describe('FH-024 — the startup interlock still refuses dev-open on a wide bind
    * used on the paths under test.
    */
   const facade = {} as IStorageFacade;
-  // BRG-001: SecurityState now takes the raw handle as its own named dep.
-  const adapter = {} as IStorageAdapter;
 
   // SB-016: `deployedFunctions: []` throughout, and it means *this backend
   // serves no cloud endpoints* rather than *nobody looked*. These data dirs are
@@ -346,11 +344,11 @@ describe('FH-024 — the startup interlock still refuses dev-open on a wide bind
   });
 
   it('refuses to start with dev-open on a non-loopback bind', () => {
-    expect(() => new SecurityState({ dataDir, loopback: false, cliToken: null, deployedFunctions: [], facade, adapter })).toThrow(
+    expect(() => new SecurityState({ dataDir, loopback: false, cliToken: null, deployedFunctions: [], facade })).toThrow(
       SecurityStartupError
     );
     try {
-      new SecurityState({ dataDir, loopback: false, cliToken: null, deployedFunctions: [], facade, adapter });
+      new SecurityState({ dataDir, loopback: false, cliToken: null, deployedFunctions: [], facade });
       throw new Error('expected the interlock to refuse');
     } catch (e) {
       expect((e as SecurityStartupError).code).toBe('DEV_OPEN_ON_PUBLIC_BIND');
@@ -359,7 +357,7 @@ describe('FH-024 — the startup interlock still refuses dev-open on a wide bind
 
   it('starts on a non-loopback bind once dev-open is off, with dev-open inactive', () => {
     fs.writeFileSync(path.join(dataDir, 'security.json'), JSON.stringify(ENFORCING_CONFIG));
-    const state = new SecurityState({ dataDir, loopback: false, cliToken: null, deployedFunctions: [], facade, adapter });
+    const state = new SecurityState({ dataDir, loopback: false, cliToken: null, deployedFunctions: [], facade });
     expect(state.devOpenActive).toBe(false);
   });
 
@@ -367,7 +365,7 @@ describe('FH-024 — the startup interlock still refuses dev-open on a wide bind
     // The distinction that keeps this fix honest: `devOpenActive` means the same
     // thing it always did. What changed is that `checkAccess` consults it after
     // the admin gate instead of before it.
-    const state = new SecurityState({ dataDir, loopback: true, cliToken: null, deployedFunctions: [], facade, adapter });
+    const state = new SecurityState({ dataDir, loopback: true, cliToken: null, deployedFunctions: [], facade });
     expect(state.devOpenActive).toBe(true);
     expect(state.config.devOpen).toBe(true);
   });
