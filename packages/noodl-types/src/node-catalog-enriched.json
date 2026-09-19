@@ -38401,6 +38401,17 @@
           "description": "Fires when the request could not be completed — no URL, a network error, a timeout, an unparseable body, or a non-2xx status — after the reason has been put on Error"
         },
         {
+          "name": "notModified",
+          "displayName": "Not Modified",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Conditional is on and the server answered 304 — nothing has changed since the last fetch, Response still holds the previous body, and the invocation reports Unchanged"
+        },
+        {
           "name": "response",
           "displayName": "Response",
           "group": "Response",
@@ -38442,7 +38453,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request in flight, or a Cancel with no request to abandon. Canceled tells those two apart"
+          "description": "Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request in flight, a Cancel with no request to abandon, or a Conditional request the server answered 304. Canceled and Not Modified tell those apart"
         }
       ],
       "dynamicPorts": {

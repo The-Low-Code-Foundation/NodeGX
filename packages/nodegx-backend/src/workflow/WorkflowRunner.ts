@@ -42,6 +42,7 @@ import {
 // and the `NodeScope.runContext` a node reads cannot drift apart.
 import type {
   CloudKitLoadResult,
+  HttpValidatorStore,
   NodeRunContext,
   RuntimeLogEntry,
   RuntimeModelCall,
@@ -122,6 +123,22 @@ export interface WorkflowRunnerOptions {
    * (the key-based `redact()` inside `logger` runs either way).
    */
   scrubSecretValues?: LogValueScrubber;
+  /**
+   * FED-004 §3.2 — where an `HTTP Request` node with `Conditional` on remembers
+   * the `ETag` / `Last-Modified` a URL last answered with.
+   *
+   * Absent means "no conditional requests on this host", which is exactly what
+   * the browser sees, and the node degrades to an unconditional fetch without a
+   * second code path.
+   */
+  httpValidators?: HttpValidatorStore;
+  /**
+   * FED-004 §3.3 — the `User-Agent` outbound requests carry when the graph does
+   * not set its own. Late-bound and asked per run, like `getFunctionTimeoutMs`,
+   * because the public URL it names is edited through the admin surface and an
+   * operator should not have to restart to become identifiable.
+   */
+  getHttpUserAgent?: () => string | undefined;
 }
 
 /** What {@link WorkflowRunnerOptions.scrubSecretValues} has to be able to do. */
@@ -247,6 +264,8 @@ export class WorkflowRunner {
   private readonly enableDebugInspectors: boolean;
   private readonly getFunctionTimeoutMs?: (functionName: string) => number | undefined;
   private readonly scrubSecretValues?: LogValueScrubber;
+  private readonly httpValidators?: HttpValidatorStore;
+  private readonly getHttpUserAgent?: () => string | undefined;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cloudRunner: any = null;
@@ -261,6 +280,8 @@ export class WorkflowRunner {
     this.enableDebugInspectors = options.enableDebugInspectors || false;
     this.getFunctionTimeoutMs = options.getFunctionTimeoutMs;
     this.scrubSecretValues = options.scrubSecretValues;
+    this.httpValidators = options.httpValidators;
+    this.getHttpUserAgent = options.getHttpUserAgent;
   }
 
   /**
@@ -299,8 +320,17 @@ export class WorkflowRunner {
     // stamping `{ modelCalls: [one] }` twice would leave the row holding the second call only.
     const modelCalls: RuntimeModelCall[] = [];
 
+    // FED-004 §3.3. Read once per run rather than once per request the graph makes: the value
+    // is a deployment fact, and re-asking it inside a `for-each` over a thousand feeds would be
+    // a thousand identical answers.
+    const httpUserAgent = this.getHttpUserAgent ? this.getHttpUserAgent() : undefined;
+
     return {
       requestId,
+      // FED-004 §3.2 / §3.3 — both absent in the browser, which is what makes the `Conditional`
+      // port degrade rather than branch.
+      ...(this.httpValidators ? { httpValidators: this.httpValidators } : {}),
+      ...(httpUserAgent ? { httpUserAgent } : {}),
       log: (entry: RuntimeLogEntry) => {
         written++;
         if (written > MAX_LOG_LINES_PER_RUN) {

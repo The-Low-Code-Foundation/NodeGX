@@ -8,6 +8,8 @@ import NoodlRuntime from '@noodl/runtime';
 import Model from '@noodl/runtime/src/model';
 import NodeScope from '@noodl/runtime/src/nodescope';
 import type {
+  HttpValidators,
+  HttpValidatorStore,
   NodeRunContext,
   RuntimeLogEntry,
   RuntimeLogLevel,
@@ -22,6 +24,8 @@ import './noodl-js-api';
 // go. Re-exported from the package entry because the backend reaches this module through the
 // `@cloud-runtime` bundler alias and has no other way to name the type.
 export type {
+  HttpValidators,
+  HttpValidatorStore,
   NodeRunContext,
   RuntimeLogEntry,
   RuntimeLogLevel,

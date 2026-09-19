@@ -90,6 +90,43 @@ export interface RuntimeModelCall {
 }
 
 /**
+ * What a host remembers about the last answer a URL gave (FED-004 §3.2).
+ *
+ * Two strings and nothing else, because two strings are the whole of HTTP's
+ * conditional-request vocabulary: an `ETag` goes back out as `If-None-Match`,
+ * a `Last-Modified` as `If-Modified-Since`, and a server that recognises either
+ * answers 304 with no body. Anything richer — a cached BODY, an expiry, a
+ * freshness heuristic — would be a cache, and a cache is a thing that can be
+ * wrong. This cannot: every conditional request still goes to the server, and
+ * the server decides.
+ */
+export interface HttpValidators {
+  /** The `ETag` header the last 200 carried, verbatim, weak prefix included. */
+  etag?: string;
+  /** The `Last-Modified` header the last 200 carried, verbatim. */
+  lastModified?: string;
+}
+
+/**
+ * Where an `HTTP Request` node with `Conditional` on remembers what it last saw.
+ *
+ * ⚠️ **Per HOST, not per run**, unlike everything else on the context — and it is
+ * here anyway, for the same reason `log` is: a browser has no such store, and a
+ * node that reached for a module-level one would have to ask `if (cloud)`. The
+ * absence of this member IS the browser, and the node's own `Conditional` port
+ * degrades to a console warning there without a second code path.
+ */
+export interface HttpValidatorStore {
+  /** The validators last seen for this exact URL, or `null`. Never throws. */
+  read(url: string): Promise<HttpValidators | null>;
+  /**
+   * Remember what a 200 answered with. Fire-and-forget: a store that cannot
+   * write must never fail the request that was already served.
+   */
+  write(url: string, validators: HttpValidators): void;
+}
+
+/**
  * Services scoped to one run of one graph.
  *
  * Deliberately small. This is not a general-purpose bag: everything on it has to be something that
@@ -124,4 +161,20 @@ export interface NodeRunContext {
   recordModelCall?(call: RuntimeModelCall): void;
   /** The HTTP request id this run belongs to, when there is one. Diagnostics only. */
   requestId?: string;
+  /**
+   * FED-004 §3.2 — the conditional-request memory. Absent in the browser, and
+   * absent in any host that declines to keep one; a node must treat its absence
+   * as "no conditional requests here", never as an error.
+   */
+  httpValidators?: HttpValidatorStore;
+  /**
+   * FED-004 §3.3 — the `User-Agent` this host puts on outbound requests that do
+   * not set their own.
+   *
+   * ⚠️ **Absent in the browser deliberately, and not merely unset there.** A
+   * browser REFUSES to let script set `User-Agent` (it is a forbidden header
+   * name), so a value here would be silently dropped — and a setting that is
+   * silently dropped is worse than one that is visibly absent.
+   */
+  httpUserAgent?: string;
 }

@@ -56,6 +56,8 @@ import { TriggerSubsystem } from './triggers/TriggerSubsystem';
 import { BackupSubsystem } from './backup/BackupSubsystem';
 import { FileSubsystem } from './storage/FileSubsystem';
 import { ensureFilesTable } from './storage/MetadataStore';
+import { ensureHttpCacheTable, HttpCacheStore } from './persistence/HttpCacheStore';
+import { SERVICE_VERSION } from './ops/headers';
 import { EmailConfigState } from './email/EmailConfigState';
 import { Mailer, SendEmailResult } from './email/Mailer';
 import { EmailTokenStore } from './email/tokens';
@@ -620,7 +622,14 @@ export class BackendService {
       // thing that holds a SecretsStore, and it deliberately stays that way — the scrubber
       // exposes `scrub(text)` and nothing that hands a value back, so this is not a way around
       // SecretsStore's missing bulk read (CWF-009 design question 4).
-      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir))
+      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir)),
+      // FED-004 §3.2 — the `HTTP Request` node's `Conditional` port has somewhere
+      // to remember. One store per service, shared by every run: validators are
+      // a fact about a URL, not about a request.
+      httpValidators: new HttpCacheStore(this.facade),
+      // FED-004 §3.3 — a name on the door. Read live, like the timeout above,
+      // because the public URL it names is edited through the admin surface.
+      getHttpUserAgent: () => this.outboundUserAgent()
     });
     await this.runner.initialize();
     await this.runner.loadWorkflows();
@@ -836,6 +845,28 @@ export class BackendService {
   }
 
   /**
+   * FED-004 §3.3 — what this backend calls itself on an outbound request.
+   *
+   * `NodeGX/<version> (+<publicUrl>)`, RFC-shaped: a product token and a
+   * comment naming where to complain. Reddit REFUSES a request without a
+   * descriptive `User-Agent` and is the reason this exists; being identifiable
+   * to every other host is the reason it is not Reddit-specific.
+   *
+   * ⚠️ **The parenthetical is omitted rather than filled with a fallback.**
+   * `effectiveBaseUrl` will happily hand back `http://localhost:3000` when
+   * nothing is configured, and a localhost URL in a `User-Agent` identifies
+   * nobody — it is noise that looks like information. A backend that has not
+   * been told its public address says only its name.
+   */
+  private outboundUserAgent(): string {
+    const product = `NodeGX/${SERVICE_VERSION}`;
+    if (!this.emailConfig) return product;
+    const base = this.emailConfig.effectiveBaseUrl('');
+    if (base.usedFallback || !base.url) return product;
+    return `${product} (+${base.url})`;
+  }
+
+  /**
    * Parse's built-in classes, pre-created so the session endpoints can query
    * them before any row exists (a `where` on a column of a not-yet-created
    * table is a SQL error, not an empty result).
@@ -918,6 +949,11 @@ export class BackendService {
     // `isSystemCollection` keeps it off /api and /classes — the only front
     // door is the admin surface.
     ensureAuditTable(sm);
+    // FED-004 §3.2: the conditional-GET validator memory. Not a cache — it
+    // stores no bodies; see HttpCacheStore's module doc. System-collection
+    // rules keep it off every front door, which is the point: what a person
+    // opens is the node's `Conditional` port, not the bookkeeping behind it.
+    ensureHttpCacheTable(sm);
   }
 
   /**
