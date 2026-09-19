@@ -242,7 +242,25 @@ number is the reviewed baseline.
   other arm, 401 rather than 403 for the admin arm's reason: no credential was presented, so
   there was no rule to deny. The master key presenting the WRONG credential is 403 and is AC7.
 
-### 5.6 What §3.2 asked for and could not have
+### 5.6 Two design sentences deliberately NOT built, and why
+
+Neither is an AC; both are prose in §3 that a reader would otherwise assume shipped.
+
+- **§3.4's last sentence — "the dashboard's key view shows the last ten calls per key."** Not
+  built. The rows are all there (`action: mcp.tool.call`, actor = the key's name) and the Audit
+  section already filters on action, so the data is reachable today; what is missing is a panel
+  that joins it to the Keys view. Left out because AC6 defines what this task owed — *the rows
+  exist with §3.4's fields* — and a second surface is better sized against a real operator
+  complaint than against a sentence.
+- **§3.3's last clause — "the `List backend API keys` MCP tool gains a create form."** Not built,
+  and this one is a REFUSAL rather than a deferral: register R8 says `noodl-mcp`'s resident tool
+  surface has **6 tokens of headroom under 8,280**, and anything that grows a description tips
+  it. R6's lesson, which R8 records as unlearned, is that a session finding itself just under a
+  ratchet should read it as the surface needing a diet, not the ceiling needing a nudge. Creating
+  a bound key over HTTP (`POST /admin/keys` with `actsAsUserId`) works today and is what
+  `docs/runtime/BACKEND-MCP.md` documents.
+
+### 5.7 What §3.2 asked for and could not have
 
 🔴 **"description from the component's description" has no source on a deployed backend.**
 Measured at `noodl-editor/src/editor/src/utils/exporter/util.ts`: `exportComponent` builds
