@@ -54,8 +54,15 @@
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner, RunTriggerContext } from '../workflow/WorkflowRunner';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
-import type { TriggerDef, TriggerResult, TriggerRegistry } from './registry';
+import type { TriggerDef, TriggerResult, TriggerRegistry, TriggerSkip } from './registry';
 import { DEFAULT_RESPONSE_TIMEOUT_MS } from './registry';
+
+/**
+ * FED-004 — the disposition a skipped fire's execution record carries, in ONE
+ * place because three readers branch on it: this file writes it, the admin
+ * dashboard's trigger view shows it, and the drive asserts it.
+ */
+export const SKIPPED_OVERLAP = 'skipped-overlap';
 import { recordTriggerFire } from '../ops/metrics';
 
 /**
@@ -86,6 +93,37 @@ export interface FireInput {
   headers?: Record<string, unknown>;
   /** BAK-009: the HTTP request that delivered this fire (webhooks only). */
   requestId?: string;
+  /**
+   * FED-004 — called with this fire's execution id the moment the record is
+   * opened, before the target runs. Relayed verbatim onto the run's trigger
+   * context, which is the only thing this file does with it.
+   */
+  onStarted?: (executionId: string) => void;
+}
+
+/**
+ * FED-004 — a fire the overlap policy declined to dispatch.
+ *
+ * It is its own input, and its own verb below, because it is neither of the two
+ * things this dispatcher had. It is not a `fire` (nothing ran) and it is not a
+ * `recordRejection` (nothing was refused, and nothing failed): the schedule did
+ * exactly what it was configured to do. What it shares with both is that it is
+ * LOUD — a decision nobody can see is indistinguishable from a scheduler that
+ * has quietly stopped firing, which is the exact complaint this whole phase
+ * exists to answer.
+ */
+export interface SkipInput {
+  trigger: TriggerDef;
+  /** Human-readable origin, the same string a fire would have carried. */
+  source: string;
+  /** The policy that made the decision. */
+  policy: string;
+  /** The execution this fire yielded to, when the running run reported one. */
+  yieldedTo: string | null;
+  /** The reason, in the words an operator reads in the History Panel. */
+  reason: string;
+  /** What the fire WOULD have delivered — recorded so the skip is diffable against a run. */
+  triggerData: Record<string, unknown>;
 }
 
 export interface RejectionInput {
@@ -167,7 +205,7 @@ export class TriggerDispatcher {
     // workflow-level + per-step execution records). Same dispatcher path, second
     // target kind — no second dispatch path.
     if (trigger.target.kind === 'workflow') {
-      return this.fireWorkflow(trigger, triggerType, source, targetName, payload, firedAt, requestId);
+      return this.fireWorkflow(trigger, triggerType, source, targetName, payload, firedAt, requestId, input.onStarted);
     }
 
     const runner = this.deps.getRunner();
@@ -206,7 +244,7 @@ export class TriggerDispatcher {
       const response = await runner.run(
         targetName,
         { body: JSON.stringify(payload), headers: headers || {} },
-        { type: triggerType, source, triggerId: trigger.id, requestId }
+        { type: triggerType, source, triggerId: trigger.id, requestId, onStarted: input.onStarted }
       );
       statusCode = response.statusCode;
       body = response.body;
@@ -237,7 +275,8 @@ export class TriggerDispatcher {
     workflowId: string,
     payload: Record<string, unknown>,
     firedAt: string,
-    requestId?: string
+    requestId?: string,
+    onStarted?: (executionId: string) => void
   ): Promise<FireOutcome> {
     const workflows = this.deps.getWorkflows ? this.deps.getWorkflows() : null;
     if (!workflows) {
@@ -259,7 +298,7 @@ export class TriggerDispatcher {
     const sync = trigger.responseMode === 'sync';
     const runPromise = workflows.run(
       workflowId,
-      { type: triggerType, source, triggerId: trigger.id, requestId },
+      { type: triggerType, source, triggerId: trigger.id, requestId, onStarted },
       payload
     );
 
@@ -378,6 +417,62 @@ export class TriggerDispatcher {
       this.deps.registry.recordFire(input.triggerId, { firedAt: result.at, result });
     }
     return result;
+  }
+
+  /**
+   * FED-004 — record a fire the overlap policy declined, loudly and without
+   * calling it a failure.
+   *
+   * ⚠️ **Three things this deliberately does NOT do**, each of which the obvious
+   * implementation (`recordRejection` with a different string) would do:
+   *
+   *  1. It does not `registry.recordFire`. `fireCount` counts runs; a skip has
+   *     none. It calls `recordSkip`, which keeps its own count.
+   *  2. It does not `recordTriggerFire`. `nodegx_trigger_fires_total` is a fire
+   *     counter and a skip is not a fire — a skip that incremented it would
+   *     make a healthy skipping schedule indistinguishable from a firing one on
+   *     the only instrument an operator has for that question.
+   *  3. It does not complete the execution record as a FAILURE. A skip is a
+   *     successful outcome of the policy, and the disposition is in the
+   *     metadata where the History Panel reads `timedOut` and `rejected`.
+   */
+  recordSkip(input: SkipInput): TriggerResult {
+    const at = nowIso();
+    const logger = this.deps.executions.createLogger();
+    if (logger) {
+      try {
+        logger.startExecution({
+          workflowId: input.trigger.target.name,
+          workflowName: input.trigger.target.name,
+          triggerType: 'schedule',
+          triggerData: input.triggerData,
+          metadata: {
+            backendId: this.deps.backendId,
+            backendName: this.deps.backendName,
+            triggerSource: input.source,
+            triggerId: input.trigger.id,
+            // The word AC1 reads, and the word the dashboard branches on.
+            disposition: SKIPPED_OVERLAP,
+            overlapPolicy: input.policy,
+            // "each naming the run it yielded to" — the whole point of the
+            // record. `null` is written rather than omitted, so a skip that
+            // could not name one says so instead of looking like an older row.
+            yieldedTo: input.yieldedTo
+          }
+        });
+        // Succeeded: the policy did its job. The row's `disposition` is what
+        // says it did not run.
+        logger.completeExecution(true);
+      } catch {
+        // A logging failure must never propagate into the scheduler's timer.
+      }
+    }
+    this.deps.registry.recordSkip(input.trigger.id, {
+      at,
+      policy: input.policy as TriggerSkip['policy'],
+      yieldedTo: input.yieldedTo
+    });
+    return { ok: true, at, error: undefined };
   }
 
   /** Shared tail of fire()'s early-out branches. */

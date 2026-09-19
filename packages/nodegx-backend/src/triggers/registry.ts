@@ -29,6 +29,45 @@ import { validateCron } from './cron';
 
 export type TriggerType = 'schedule' | 'webhook' | 'db-change';
 export type MissedFirePolicy = 'skip' | 'run-once-on-start';
+/**
+ * What a fire does when the PREVIOUS fire of the same schedule is still running
+ * (FED-004 §3.1).
+ *
+ *  - `skip` (the default): the fire is not dispatched. It is recorded as
+ *    `skipped-overlap`, naming the run it yielded to.
+ *  - `queue-one`: at most ONE fire waits, and dispatches the moment the running
+ *    one finishes. A third fire while one is already waiting is skipped.
+ *  - `allow`: dispatch regardless — what every schedule did before this field.
+ */
+export type OverlapPolicy = 'skip' | 'queue-one' | 'allow';
+
+/**
+ * 🔴 **The default is `skip`, and that is a BEHAVIOUR CHANGE for a triggers.json
+ * written before this field existed** — the one place in this file where an
+ * omitted key does not mean "exactly what it did before" (compare
+ * `responseMode`, which is `async` for precisely that reason).
+ *
+ * It is deliberate and it is FED-004's whole person sentence: a fifteen-minute
+ * poll against a source that takes twenty minutes one morning is the case, and
+ * "start a second one" is not a policy anybody chose — it is what a scheduler
+ * with no opinion does. A schedule that genuinely wants concurrent runs now has
+ * a word for it (`allow`), which it did not have before; a schedule that wanted
+ * one at a time had no way to say so at all.
+ */
+export const DEFAULT_OVERLAP_POLICY: OverlapPolicy = 'skip';
+
+/**
+ * The policy in force for a trigger, default included.
+ *
+ * Read through this and never off `schedule.overlapPolicy` directly: the field
+ * is OMITTED on disk when it was not authored (house style — a diff shows a
+ * decision, not a default), so the raw key is `undefined` on exactly the
+ * triggers the default matters most for.
+ */
+export function effectiveOverlapPolicy(trigger: Pick<TriggerDef, 'schedule'>): OverlapPolicy {
+  const authored = trigger.schedule && trigger.schedule.overlapPolicy;
+  return authored || DEFAULT_OVERLAP_POLICY;
+}
 export type WebhookScheme = 'hmac-sha256' | 'token';
 export type ChangeAction = 'create' | 'update' | 'delete';
 
@@ -75,6 +114,12 @@ export interface ScheduleConfig {
    */
   missedFirePolicy: MissedFirePolicy;
   /**
+   * FED-004 §3.1 — what a fire does when the previous one has not finished.
+   * Omitted means {@link DEFAULT_OVERLAP_POLICY}; read it through
+   * {@link effectiveOverlapPolicy}, never off this key.
+   */
+  overlapPolicy?: OverlapPolicy;
+  /**
    * Constant data every fire of this schedule delivers, landing in WFA-003's
    * `body` — the same place a webhook's JSON lands (WFA-005, F8).
    *
@@ -109,12 +154,37 @@ export interface TriggerResult {
   error?: string;
 }
 
+/**
+ * FED-004 — one fire that did not happen because the previous one was still
+ * going. Kept on `status` beside `lastResult` and NOT folded into it: a skip is
+ * the policy working, not a failure, and colouring a healthy skip red is how an
+ * operator learns to ignore the column.
+ */
+export interface TriggerSkip {
+  at: string;
+  /** The policy that decided it — `skip`, or `queue-one` with one already waiting. */
+  policy: OverlapPolicy;
+  /**
+   * The execution id of the run this fire yielded to, or `null` when the
+   * running run had not reported one (history disabled, or it had not started
+   * far enough to mint an id).
+   */
+  yieldedTo: string | null;
+}
+
 export interface TriggerStatus {
   lastFiredAt: string | null;
   /** Schedule only — computed, not authored. */
   nextFireAt: string | null;
   lastResult: TriggerResult | null;
   fireCount: number;
+  /**
+   * FED-004, schedule only. Both keys are OPTIONAL and written only once a
+   * skip has actually happened, so a `triggers.json` for a backend that has
+   * never overlapped is byte-for-byte what it was.
+   */
+  lastSkip?: TriggerSkip | null;
+  skipCount?: number;
 }
 
 export interface TriggerDef {
@@ -226,7 +296,7 @@ const TRIGGER_KEYS = [
   'schedule', 'webhook', 'dbChange', 'createdAt', 'updatedAt', 'status'
 ] as const;
 const TARGET_KEYS = ['kind', 'name'] as const;
-const SCHEDULE_KEYS = ['cron', 'missedFirePolicy', 'payload'] as const;
+const SCHEDULE_KEYS = ['cron', 'missedFirePolicy', 'overlapPolicy', 'payload'] as const;
 const WEBHOOK_KEYS = ['slug', 'scheme', 'maxBodyBytes'] as const;
 const DB_CHANGE_KEYS = ['collection', 'actions'] as const;
 
@@ -317,6 +387,17 @@ export function validateTriggerDef(raw: unknown): string[] {
       }
       if (s.missedFirePolicy !== 'skip' && s.missedFirePolicy !== 'run-once-on-start') {
         errors.push('schedule.missedFirePolicy must be "skip" or "run-once-on-start"');
+      }
+      // FED-004. Absent is legal and means the default; a WORD that is not one
+      // of the three is refused rather than defaulted, because a schedule
+      // authored `overlapPolicy: "queue"` believes something is in force.
+      if (
+        s.overlapPolicy !== undefined &&
+        s.overlapPolicy !== 'skip' &&
+        s.overlapPolicy !== 'queue-one' &&
+        s.overlapPolicy !== 'allow'
+      ) {
+        errors.push('schedule.overlapPolicy must be "skip", "queue-one" or "allow"');
       }
       // The payload becomes the run's `body`, which a definition reads keys off,
       // so an array or a scalar there is a definition that cannot work.
@@ -566,6 +647,10 @@ export class TriggerRegistry {
       def.schedule = {
         cron: input.schedule ? input.schedule.cron : '',
         missedFirePolicy: input.schedule && input.schedule.missedFirePolicy ? input.schedule.missedFirePolicy : 'skip',
+        // FED-004. Stored only when authored — so `triggers.json` keeps showing
+        // decisions rather than defaults, and the ONE reader of the effective
+        // value is `effectiveOverlapPolicy`.
+        ...(input.schedule && input.schedule.overlapPolicy ? { overlapPolicy: input.schedule.overlapPolicy } : {}),
         // Omitted rather than stored as `{}`, so a schedule that carries nothing
         // reads on disk exactly as it did before this field existed.
         ...(input.schedule && input.schedule.payload !== undefined ? { payload: input.schedule.payload } : {})
@@ -671,6 +756,22 @@ export class TriggerRegistry {
     }
     if (patch.result !== undefined) t.status.lastResult = patch.result;
     if (patch.nextFireAt !== undefined) t.status.nextFireAt = patch.nextFireAt;
+    this.persist();
+  }
+
+  /**
+   * FED-004 — record a fire that the overlap policy declined to dispatch.
+   *
+   * Deliberately NOT `recordFire`: `fireCount` counts runs and `lastResult`
+   * describes one, and a skip is neither. A schedule whose source is slow every
+   * morning would otherwise report a fire count nothing ran behind and a last
+   * result that says `ok: false` about a decision that was correct.
+   */
+  recordSkip(id: string, skip: TriggerSkip): void {
+    const t = this.triggers.find((x) => x.id === id);
+    if (!t) return;
+    t.status.lastSkip = skip;
+    t.status.skipCount = (t.status.skipCount || 0) + 1;
     this.persist();
   }
 

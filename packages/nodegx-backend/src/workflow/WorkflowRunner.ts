@@ -190,6 +190,20 @@ export interface RunTriggerContext {
    * three can be lined up after the fact.
    */
   requestId?: string;
+  /**
+   * FED-004 — called once, with this run's execution id, as soon as the record
+   * is opened and BEFORE the graph runs.
+   *
+   * The scheduler is the caller that needs it. `run()` resolves when the run is
+   * over, which is exactly too late for the question the overlap policy asks:
+   * *which run is the one still going?* A fire that yields has to be able to
+   * name it, and the only moment that answer exists and is still useful is this
+   * one.
+   *
+   * Never called when there is no record to open (history disabled) — a
+   * listener must treat "not called" as a normal outcome, not an error.
+   */
+  onStarted?(executionId: string): void;
 }
 
 /** One loaded bundle, and the fingerprint of the deploy that put it here. */
@@ -665,6 +679,14 @@ export class WorkflowRunner {
           ...(trigger && trigger.requestId ? { requestId: trigger.requestId } : {})
         }
       });
+    }
+    // FED-004: announce the run before it runs, not after it finishes.
+    if (executionId && trigger && trigger.onStarted) {
+      try {
+        trigger.onStarted(executionId);
+      } catch {
+        // A listener's fault is never this run's problem.
+      }
     }
 
     try {

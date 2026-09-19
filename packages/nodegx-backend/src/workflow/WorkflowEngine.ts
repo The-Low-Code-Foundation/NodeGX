@@ -414,6 +414,16 @@ export class WorkflowEngine {
 
     if (executionId) this.active.set(executionId, controller);
 
+    // FED-004 — the same announcement `WorkflowRunner.run` makes, so a caller
+    // learns the in-flight run's id whichever target kind it fired at.
+    if (executionId && opts.trigger.onStarted) {
+      try {
+        opts.trigger.onStarted(executionId);
+      } catch {
+        // A listener's fault is never this run's problem.
+      }
+    }
+
     const order = topoOrder(def);
     const byId = new Map(def.steps.map((s) => [s.id, s]));
     const outcomes = new Map<string, StepOutcome>();
