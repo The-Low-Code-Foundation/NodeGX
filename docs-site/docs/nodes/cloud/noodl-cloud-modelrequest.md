@@ -87,6 +87,12 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 - Retrying a failure by re-pressing Do in a loop. A 429 is already retried twice inside the node, with backoff; a loop on top of that is a way to get rate-limited for longer.
 - Raising Max Tokens to fix a truncated answer that is truncated because the model was asked for too much. Narrow the request, or give it a schema.
 
+## Examples
+
+**Tag each new feed item with a model, and store it once**
+
+The per-item half of a feed reader, server-side: ask a model for the item's topics in a shape you can rely on, then write the row so that seeing the same item again updates it instead of duplicating it. Five things here are decisions rather than plumbing. First, the key is a NAME — Api Key Secret says MODEL_KEY, and the value lives in the backend's secrets, so the key is never a port value, never in the exported workflow, and never in an execution record. Second, Base Url comes out of a Secret node rather than being typed into the graph, so pointing this at a gateway or a test double is an operator's edit and not an author's. Third, Output Schema is wired from a Function node, not typed: it is an object, and the port only accepts a connection. With it set, Json carries the parsed answer in exactly the shape you asked for, and Text carries the raw JSON of it — which is why the little Function after the model reads Json and joins the list into one readable string rather than storing a blob. Fourth, Create Record's Upsert On names 'id', the feed item's own identity, which Parse Feed guarantees is never empty. The collection must declare that column and a UNIQUE index on it; with the index the second poll updates one row, without it the second poll fails. Fifth, and least decorative, every failure path is wired to a Failed output: a missing secret, a refusal, a script that threw, a write the index refused. This fragment is a Run Tasks task template, and a task that never reaches a completion output is one the loop waits for forever — so the function does not fail, it hangs until its timeout. Note also the Run On Value Change boxes: with a control signal wired, an input that is still ticked runs the node a SECOND time, early, with everything else unset. Every value input here is fed by the signal that should consume it, so every one of them is unticked.
+
 ## Related nodes
 
 [Secret](./noodl-cloud-secret.md), [Parse Feed](../data/net-noodl-parse-feed.md), [HTTP Request](../data/net-noodl-http.md), [Response](./noodl-cloud-response.md)

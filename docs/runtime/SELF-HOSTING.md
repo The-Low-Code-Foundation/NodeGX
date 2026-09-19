@@ -232,7 +232,7 @@ if you hit it, add the segment to the `location ~ ^/(…)` alternation in
 **Reserved paths.** Because app and API share an origin, these top-level names
 belong to the backend and cannot be used by your app's own files or routes:
 `_admin`, `admin`, `aggregate`, `api`, `apps`, `auth`, `classes`, `config`,
-`executions`, `files`, `functions`, `health`, `hooks`, `login`, `logout`,
+`executions`, `files`, `functions`, `health`, `hooks`, `login`, `logout`, `mcp`,
 `oauth`, `realtime`, `requestPasswordReset`, `users`, `verificationEmailRequest`.
 
 ## Other hosting

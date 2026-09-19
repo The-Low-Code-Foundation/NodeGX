@@ -48,5 +48,7 @@
     "net.noodl.HTTP",
     "noodl.cloud.response"
   ],
-  "examples": []
+  "examples": [
+    "cloud-tag-a-feed-item-with-a-model"
+  ]
 }

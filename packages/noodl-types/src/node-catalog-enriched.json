@@ -62491,7 +62491,9 @@
           "error": "Why there is no answer, in a sentence. Names the secret or the status, never a key.",
           "errorCode": "not_implemented, secret_missing, refusal, bad_json, http_error, rate_limited, timeout, network or unavailable."
         },
-        "examples": [],
+        "examples": [
+          "cloud-tag-a-feed-item-with-a-model"
+        ],
         "patterns": [
           "Parse Feed → For Each over `items` → Model Request with an Output Schema of { tag, summary } → store the result beside the item: the whole 'tag what just arrived' shape, with no Function node.",
           "Give Output Schema whenever another node reads the answer. Without it the graph is parsing prose, and prose changes shape between calls.",
@@ -68750,6 +68752,263 @@
               "fromProperty": "reference",
               "toId": "reference_text",
               "toProperty": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cloud-tag-a-feed-item-with-a-model",
+      "title": "Tag each new feed item with a model, and store it once",
+      "description": "The per-item half of a feed reader, server-side: ask a model for the item's topics in a shape you can rely on, then write the row so that seeing the same item again updates it instead of duplicating it. Five things here are decisions rather than plumbing. First, the key is a NAME — Api Key Secret says MODEL_KEY, and the value lives in the backend's secrets, so the key is never a port value, never in the exported workflow, and never in an execution record. Second, Base Url comes out of a Secret node rather than being typed into the graph, so pointing this at a gateway or a test double is an operator's edit and not an author's. Third, Output Schema is wired from a Function node, not typed: it is an object, and the port only accepts a connection. With it set, Json carries the parsed answer in exactly the shape you asked for, and Text carries the raw JSON of it — which is why the little Function after the model reads Json and joins the list into one readable string rather than storing a blob. Fourth, Create Record's Upsert On names 'id', the feed item's own identity, which Parse Feed guarantees is never empty. The collection must declare that column and a UNIQUE index on it; with the index the second poll updates one row, without it the second poll fails. Fifth, and least decorative, every failure path is wired to a Failed output: a missing secret, a refusal, a script that threw, a write the index refused. This fragment is a Run Tasks task template, and a task that never reaches a completion output is one the loop waits for forever — so the function does not fail, it hangs until its timeout. Note also the Run On Value Change boxes: with a control signal wired, an input that is still ticked runs the node a SECOND time, early, with everything else unset. Every value input here is fed by the signal that should consume it, so every one of them is unticked.",
+      "demonstrates": [
+        "noodl.cloud.modelrequest",
+        "noodl.cloud.secret",
+        "NewDbModelProperties",
+        "JavaScriptFunction",
+        "Component Inputs",
+        "Component Outputs"
+      ],
+      "components": [
+        {
+          "name": "/#__cloud__/helpers/Tag and store one item",
+          "nodes": [
+            {
+              "id": "ci",
+              "type": "Component Inputs",
+              "label": "Do, itemId, title, summary, link, published",
+              "ports": [
+                {
+                  "name": "Do",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "itemId",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "title",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "summary",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "link",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "published",
+                  "plug": "output",
+                  "type": "*"
+                }
+              ]
+            },
+            {
+              "id": "ask",
+              "type": "JavaScriptFunction",
+              "label": "The prompt, and the schema the answer must match",
+              "parameters": {
+                "functionScript": "Outputs.schema = { type: 'object', properties: { topics: { type: 'array', items: { type: 'string' } } }, required: ['topics'], additionalProperties: false };\nOutputs.prompt = 'Title: ' + (Inputs.title || '') + '\\n\\nSummary: ' + (Inputs.summary || '');",
+                "runOnChange-in-title": false,
+                "runOnChange-in-summary": false
+              }
+            },
+            {
+              "id": "baseUrl",
+              "type": "noodl.cloud.secret",
+              "label": "Where the provider lives",
+              "parameters": {
+                "name": "MODEL_BASE_URL"
+              }
+            },
+            {
+              "id": "model",
+              "type": "noodl.cloud.modelrequest",
+              "label": "Low effort: this is tagging, not reasoning",
+              "parameters": {
+                "provider": "anthropic",
+                "model": "claude-opus-5",
+                "apiKeySecret": "MODEL_KEY",
+                "effort": "low",
+                "maxTokens": 256,
+                "timeoutMs": 8000
+              }
+            },
+            {
+              "id": "topics",
+              "type": "JavaScriptFunction",
+              "label": "The answer, as one readable string",
+              "parameters": {
+                "functionScript": "const answer = Inputs.json || {};\nconst list = Array.isArray(answer.topics) ? answer.topics : [];\nOutputs.topics = list.join(', ');",
+                "runOnChange-in-json": false
+              }
+            },
+            {
+              "id": "store",
+              "type": "NewDbModelProperties",
+              "label": "Upsert on the feed's own id",
+              "parameters": {
+                "collectionName": "Item",
+                "upsertOn": "id"
+              }
+            },
+            {
+              "id": "co",
+              "type": "Component Outputs",
+              "label": "Success, Failed",
+              "ports": [
+                {
+                  "name": "Success",
+                  "plug": "input",
+                  "type": "*"
+                },
+                {
+                  "name": "Failed",
+                  "plug": "input",
+                  "type": "*"
+                }
+              ]
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "ci",
+              "fromProperty": "Do",
+              "toId": "ask",
+              "toProperty": "run"
+            },
+            {
+              "fromId": "ci",
+              "fromProperty": "title",
+              "toId": "ask",
+              "toProperty": "in-title"
+            },
+            {
+              "fromId": "ci",
+              "fromProperty": "summary",
+              "toId": "ask",
+              "toProperty": "in-summary"
+            },
+            {
+              "fromId": "ask",
+              "fromProperty": "out-schema",
+              "toId": "model",
+              "toProperty": "outputSchema"
+            },
+            {
+              "fromId": "ask",
+              "fromProperty": "out-prompt",
+              "toId": "model",
+              "toProperty": "input"
+            },
+            {
+              "fromId": "ask",
+              "fromProperty": "success",
+              "toId": "baseUrl",
+              "toProperty": "fetch"
+            },
+            {
+              "fromId": "baseUrl",
+              "fromProperty": "value",
+              "toId": "model",
+              "toProperty": "baseUrl"
+            },
+            {
+              "fromId": "baseUrl",
+              "fromProperty": "done",
+              "toId": "model",
+              "toProperty": "send"
+            },
+            {
+              "fromId": "model",
+              "fromProperty": "json",
+              "toId": "topics",
+              "toProperty": "in-json"
+            },
+            {
+              "fromId": "model",
+              "fromProperty": "done",
+              "toId": "topics",
+              "toProperty": "run"
+            },
+            {
+              "fromId": "topics",
+              "fromProperty": "out-topics",
+              "toId": "store",
+              "toProperty": "prop-topics"
+            },
+            {
+              "fromId": "ci",
+              "fromProperty": "itemId",
+              "toId": "store",
+              "toProperty": "prop-id"
+            },
+            {
+              "fromId": "ci",
+              "fromProperty": "title",
+              "toId": "store",
+              "toProperty": "prop-title"
+            },
+            {
+              "fromId": "ci",
+              "fromProperty": "link",
+              "toId": "store",
+              "toProperty": "prop-link"
+            },
+            {
+              "fromId": "ci",
+              "fromProperty": "published",
+              "toId": "store",
+              "toProperty": "prop-published"
+            },
+            {
+              "fromId": "topics",
+              "fromProperty": "success",
+              "toId": "store",
+              "toProperty": "store"
+            },
+            {
+              "fromId": "store",
+              "fromProperty": "done",
+              "toId": "co",
+              "toProperty": "Success"
+            },
+            {
+              "fromId": "ask",
+              "fromProperty": "failure",
+              "toId": "co",
+              "toProperty": "Failed"
+            },
+            {
+              "fromId": "baseUrl",
+              "fromProperty": "failure",
+              "toId": "co",
+              "toProperty": "Failed"
+            },
+            {
+              "fromId": "model",
+              "fromProperty": "failure",
+              "toId": "co",
+              "toProperty": "Failed"
+            },
+            {
+              "fromId": "topics",
+              "fromProperty": "failure",
+              "toId": "co",
+              "toProperty": "Failed"
+            },
+            {
+              "fromId": "store",
+              "fromProperty": "failure",
+              "toId": "co",
+              "toProperty": "Failed"
             }
           ]
         }

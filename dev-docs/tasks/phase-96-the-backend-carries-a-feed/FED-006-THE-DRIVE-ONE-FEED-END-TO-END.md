@@ -77,3 +77,100 @@ did not build this should be able to read the record and say which source produc
 4. **AC4** — The fixture project is added to the examples the MCP `get_example` tool can serve,
    named `feed-reader`, with a `docs/START-HERE.md` in the house style of `Todo list`.
 5. **AC5** — Richard has ruled the execution record legible (§3.4).
+
+---
+
+## 5. What was built (s6, 2026-09-19)
+
+**AC1 ✅ · AC2 ✅ · AC3 ✅ · AC4 ✅ (ruled) · AC5 ⬜ Richard, next session.**
+
+`packages/nodegx-backend/tests/feed-drive.test.ts` — **24 specs, green in ~40 s**, well inside
+AC1's five minutes. The project it drives is `tests/fixtures/feed-drive/project.ts`: the schema,
+the access rules, two cloud functions, two helper components and the schedule, with nothing about
+the graphs in the test file itself.
+
+### 5.1 Where this deviates from §3, and why
+
+Each of these is the artefact correcting the design, not a shortcut.
+
+| §3 said | what was built | why |
+|---|---|---|
+| twelve items (5 + 3 + 4) | **seven** (3 + 2 + 2), as a constant with a spec that counts the fixture documents | The FED-001 fixtures on disk hold 3, 2 and 2. §3.3's arithmetic was written before anyone counted the files. Editing a fixture now reddens the constant. |
+| the fake model returns a **`tool_use`** block | it returns a text block whose text is the JSON | `Model Request` does not implement structured output as a tool. It sends `output_config.format = {type: 'json_schema', schema}` and parses the text (FED-003 §3.2). A `tool_use` fixture would have been answering a question the node never asks. |
+| `MODEL_BASE_URL` in `secrets.json` | a **`Secret` node** reads it and wires it into `Base Url` | `Model Request` has `apiKeySecret` (a secret NAME) but `baseUrl` is an ordinary input. Reading it through `Secret` is what makes "point this at a gateway" an operator's edit. It also puts a second cloud node in the drive for free. |
+| `@minutely` polled, "wait for two fires" | a real `* * * * *` cron, fired twice through `run-once-on-start` catch-up + `POST /admin/triggers/:id/enabled` | FED-004's compression. Both fires are real dispatches through the real `TriggerDispatcher`; waiting for two minute boundaries would not fit AC1's budget. |
+| `Item.topics` unspecified | `String`, holding `"ai-coding, self-hosting"` | §3.4's close condition is Richard ruling the record **legible**. A JSON blob in a column is not. |
+| AC4: *"added to the examples `get_example` can serve, named `feed-reader`, with a `docs/START-HERE.md`"* | **one validated example fragment**, `docs/node-catalog/examples/cloud-tag-a-feed-item-with-a-model.json` | 🔴 Measured: no artefact has both properties. `get_example` serves graph FRAGMENTS (108 of them, none with a START-HERE.md); a project with `docs/START-HERE.md` is a `templates/` entry served by `create_project`. **Put to Richard 2026-09-19 and ruled: the fragment.** Named in the examples directory's own descriptive style rather than `feed-reader`. |
+
+### 5.2 Four findings, each of which cost a wrong reading first
+
+1. 🔴 **`Model.create` takes `data.id` as the record's IDENTITY and drops the key.**
+   `for (var key in modelData) { if (key === 'id') continue; ... }`. So a `Parse Feed` item's `id`
+   — the entire basis of "each item lands once" — is on `record.getId()` and **nowhere in
+   `record.data`**. A script reading `item.id` off one gets `undefined`, and the write then fails
+   with *"Upsert On names id, but this record has no value for it"*. `runtasks.ts` has the same
+   knowledge written out by hand, one line above the loop that copies every other field.
+
+2. 🔴 **`Run` is additive, and the default runs the node early with everything else unset.**
+   NDA-017's default is that a new value on ANY input re-runs the node; wiring a control signal
+   does not make the others passive. Measured: `mapItems` ran the moment `sourceRowId` arrived,
+   produced an empty list from an `items` input that had not been set yet, handed `Run Tasks`
+   nothing to do — and the poll **fetched the feed, reported success in 48 ms and wrote no rows**.
+   Every value input in this project that a signal already sequences is declared
+   `runOnChange-<port>: false`.
+
+3. 🔴 **`Query Records` has no `filter` port.** Its JSON filter is a script
+   (`storageJSONFilter`) in the neutral vocabulary — `where({ sourceId: { containedIn: $sourceIds } })`
+   — and each `$var` mints an input port named `storageFilterValue-<var>`. The fetch signal is
+   `storageFetch`, not `fetch`. Both `Query Records` and `Parse Feed` publish a **Collection of
+   records**, not plain objects, so `row.url` is `undefined` and the fields are on `row.data`.
+
+4. 🔴 **A `status: success` execution row says nothing about whether the graph succeeded** — see
+   the mutant table below.
+
+### 5.3 Three mutants, because a green drive has told you nothing
+
+| mutant | first result | after the gate was fixed |
+|---|---|---|
+| **remove `upsertOn: 'id'`** from Create Record | 🔴 **24/24 STILL GREEN** | 1 red |
+| `Conditional` off on the HTTP node | 2 red (the 304 spec, and the model-call count) | 2 red |
+| the API key not bound to Alice (`actsAsUserId` dropped) | 1 red (`myList` over `/mcp` is an error result) | 1 red |
+
+🔴 **The first mutant is the finding.** Both of `pollSources`' Response nodes answer HTTP 200 —
+one says `polled`, the other `failed` — so the execution row reads `success` whichever fired.
+Without `upsertOn` the second poll's writes were refused by the unique index one item at a time,
+`Run Tasks` reported the failures, the graph answered on `resErr`, the row still said `success`,
+and the item count was still seven **because the refusals wrote nothing**. A gate with a hole
+shaped exactly like the defect. It now reads the STEPS: which Response node ran, and whether any
+step errored — which is the same thing §3.4 asks Richard to rule legible, and that is not a
+coincidence.
+
+### 5.4 What two polls cost, and why it is not seven
+
+`MODEL_CALLS` is **11**, not `TOTAL_ITEMS`. The first poll tags all seven; the second tags every
+item of every feed that answered 200, because this graph re-tags before it upserts. The blog's
+`ETag` answers 304 and spares its three. That gap is the economic argument for `Conditional`,
+measured in model calls rather than asserted. **Tagging only what the database has not seen is the
+obvious next thing to build and was deliberately not built** — the drive's job is to show what the
+decisions cost, and a graph that optimised this away would show nothing.
+
+### 5.5 Two parts of §3.3 deliberately not built, so nobody assumes they shipped
+
+- **Step 6 — "make `pollSources` sleep past the minute; assert one `skipped-overlap` record."**
+  Not built. `fed-004-overlap-drive.test.ts` already drives exactly this on a provisioned backend,
+  and harder: three re-arms during one slow run, three skip records each naming the run they
+  yielded to, the trigger's own `skipCount`, and an `allow` control arm proving the word is what
+  did it. A second copy here would be a duplicate of the first, and a duplicate check is the
+  cheapest way to end up with two that disagree. **What FED-006 does carry is the decision being
+  SAYABLE**: the trigger authors `overlapPolicy: 'skip'` rather than inheriting it.
+- **Step 7's `Follow_create` and `Keep_create` among the offered tools.** The drive's key is
+  scoped `classes:read`, so it offers no create tool at all and the spec asserts that — a
+  narrower, more honest thing to measure than "these two creates are present". A key scoped
+  `classes:*` would offer them; nothing here says it would not.
+
+### 5.6 Still open
+
+- **AC5** — the two screenshots of §3.4 and Richard's ruling. Ruled 2026-09-19: **next session, on
+  a quiet box.** Recipe is in NEXT-SESSION-PROMPT.md §2.
+- **FED-003 §5.5's model-cost sum** is still unformatted on the wire, still deliberately, and
+  still for the same reason: AC5 has not happened yet.
