@@ -567,7 +567,19 @@ export class ByobAdminRoutes {
       startedAfter: query.startedAfter ? parseInt(query.startedAfter, 10) : undefined,
       startedBefore: query.startedBefore ? parseInt(query.startedBefore, 10) : undefined
     });
-    sendJSON(res, 200, result);
+    /**
+     * FED-003 §5.5 / FED-006 AC5 — the cost sentence on the LIST as well as on the row.
+     *
+     * §3.4's first screenshot is the execution list, and "which of these runs was expensive" is a
+     * question a list can answer at a glance or not at all. The arithmetic is the same derivation
+     * `getExecution` uses; a run that called no model gets no field, so the column is absent
+     * rather than a page of zeros.
+     */
+    const decorated = result.map((row) => {
+      const modelCost = summariseModelCalls((row as { metadata?: unknown }).metadata);
+      return modelCost ? { ...row, modelCost } : row;
+    });
+    sendJSON(res, 200, decorated);
   }
 
   getExecution(res: http.ServerResponse, id: string): void {

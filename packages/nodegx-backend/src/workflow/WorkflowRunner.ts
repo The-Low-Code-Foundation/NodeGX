@@ -421,7 +421,36 @@ export class WorkflowRunner {
                 'The action could not be performed'
             )
           : undefined;
-        execLogger.completeNode(handle, !failed, { outcome: end.status }, reason);
+
+        /**
+         * 🔴 **The subject of the failure, which is the half `message` cannot carry.**
+         *
+         * A step is named by `nodeId` — the GRAPH node's id — so every instance of a component
+         * writes steps under the same name. One `pollSources` run over three feeds records three
+         * steps called `http`, and before this a record reading `http · error · "HTTP 403:
+         * Forbidden"` could not say which feed was refused. The HTTP node already composes
+         * `{ url }` for the error bus; this carries it into the record. Ruled by Richard,
+         * 2026-09-19, as the condition for FED-006 AC5.
+         *
+         * ⚠️ **Scrubbed exactly as `inputData` is**, and for the same reason: a node hands over
+         * its own inputs and a URL is one of the likelier places a credential turns up. The
+         * record is never less safe than the log line.
+         *
+         * ⚠️ **Objects only.** `raiseRuntimeError`'s `detail` is `unknown` and most nodes pass a
+         * small object; a bare string or number would land in the record as a field whose
+         * meaning nobody could recover, so it is dropped rather than guessed at.
+         *
+         * It rides inside `outputData` rather than beside it so that
+         * `BoundedExecutionLogger.take` accounts for it against the run's record budget — a
+         * detail on a step inside a loop is a detail written hundreds of times.
+         */
+        const raw = end.detail;
+        const isPlainObject = typeof raw === 'object' && raw !== null && !Array.isArray(raw);
+        const detail = isPlainObject
+          ? ((scrub ? scrub.scrubValue(raw) : raw) as Record<string, unknown>)
+          : undefined;
+
+        execLogger.completeNode(handle, !failed, { outcome: end.status, ...(detail ? { detail } : {}) }, reason);
       },
 
       /**

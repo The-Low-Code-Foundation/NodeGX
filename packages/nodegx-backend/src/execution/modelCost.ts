@@ -38,9 +38,56 @@ export interface ModelCostSummary {
   durationMs: number;
   /** Each distinct model this run called, in first-seen order. */
   models: string[];
+  /**
+   * The same numbers as one sentence a person reads without arithmetic — FED-003 §5.5, ruled by
+   * Richard on 2026-09-19 after FED-006 put the record in front of him:
+   *
+   * `11 model calls · 1,320 in / 121 out tokens · 412 ms · claude-opus-5`
+   *
+   * 🔴 **There is no money in it, and that is the ruling, not an omission.** A currency figure
+   * needs a price per model, per token class; the backend does not have one and any table it
+   * carried would go stale silently while continuing to render confidently. A number nobody
+   * checks is worse than no number when people act on it. Tokens and counts are what this process
+   * actually observed, so tokens and counts are what it says.
+   *
+   * Composed here rather than in the dashboard for the same reason the sum is: three readers —
+   * the admin UI, the editor's History panel and MCP's backend tools — and a sentence written in
+   * one of them is a sentence the other two do not have.
+   */
+  line: string;
 }
 
 const num = (v: unknown): number => (typeof v === 'number' && isFinite(v) ? v : 0);
+
+/**
+ * Thousands separators, without `toLocaleString`.
+ *
+ * ⚠️ `toLocaleString()` reads the HOST's locale, so the same run renders `1,320` on one machine
+ * and `1.320` on another — and a record is a thing people paste to each other. This is the one
+ * grouping, everywhere.
+ */
+const grouped = (n: number): string => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+/** `412 ms` under a second, `1.3 s` over it — the resolution a person can act on, either way. */
+const duration = (ms: number): string => (ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
+
+/** The sentence. See {@link ModelCostSummary.line}. */
+export function formatModelCost(summary: Omit<ModelCostSummary, 'line'>): string {
+  const tokens =
+    summary.cacheReadTokens > 0
+      ? `${grouped(summary.inputTokens)} in (${grouped(summary.cacheReadTokens)} cached) / ` +
+        `${grouped(summary.outputTokens)} out tokens`
+      : `${grouped(summary.inputTokens)} in / ${grouped(summary.outputTokens)} out tokens`;
+
+  return [
+    `${grouped(summary.calls)} model call${summary.calls === 1 ? '' : 's'}`,
+    tokens,
+    duration(summary.durationMs),
+    // Absent rather than empty when the provider answered without naming a model: a trailing
+    // separator with nothing after it reads as a value that failed to load.
+    ...(summary.models.length ? [summary.models.join(', ')] : [])
+  ].join(' \u00b7 ');
+}
 
 /**
  * Sum a run's model calls, or `undefined` when it made none.
@@ -55,7 +102,7 @@ export function summariseModelCalls(metadata: unknown): ModelCostSummary | undef
   const calls = (metadata as { modelCalls?: unknown }).modelCalls;
   if (!Array.isArray(calls) || calls.length === 0) return undefined;
 
-  const summary: ModelCostSummary = {
+  const summary: Omit<ModelCostSummary, 'line'> = {
     calls: calls.length,
     inputTokens: 0,
     outputTokens: 0,
@@ -74,5 +121,5 @@ export function summariseModelCalls(metadata: unknown): ModelCostSummary | undef
     if (model && summary.models.indexOf(model) === -1) summary.models.push(model);
   }
 
-  return summary;
+  return { ...summary, line: formatModelCost(summary) };
 }

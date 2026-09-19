@@ -67,6 +67,24 @@ export interface RuntimeStepEnd {
   status: 'done' | 'unchanged' | 'failure';
   code?: string;
   message?: string;
+  /**
+   * 🔴 **What the failure was ABOUT, when the message cannot say it: the subject.**
+   *
+   * A step is identified by `nodeId`, which is the graph node's id — so every instance of a
+   * component shares it. One poll of three feeds writes three steps all called `http`, and a
+   * record reading `http · error · "HTTP 403: Forbidden"` three times over cannot tell you which
+   * feed was refused. The node knows: it already composes `{ url }` for the error bus. This is
+   * that same object, carried one step further so the execution record has it too.
+   *
+   * ⚠️ **Whatever consumes this is responsible for redacting it**, exactly as for
+   * {@link RuntimeStepStart.inputData} — a node hands over its own inputs and cannot know what
+   * the host considers a secret. The backend sink runs the same redaction the log line gets, so
+   * a record is never less safe than the log.
+   *
+   * ⚠️ **Not a second failure channel.** `code` and `message` remain the sentence a person reads;
+   * this is the noun that sentence is about, and a host is free to ignore it.
+   */
+  detail?: unknown;
 }
 
 /**

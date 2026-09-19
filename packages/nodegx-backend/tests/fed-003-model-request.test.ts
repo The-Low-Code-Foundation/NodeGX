@@ -650,8 +650,39 @@ describe('a cloud function calls a model (FED-003)', () => {
         outputTokens: 14, // 7 × 2
         cacheReadTokens: 24, // 12 × 2
         durationMs: expect.any(Number),
-        models: ['claude-opus-5'] // distinct, not repeated
+        models: ['claude-opus-5'], // distinct, not repeated
+        line: expect.any(String)
       });
+    });
+
+    /**
+     * §5.5, settled. This task left the cost unformatted on purpose — the phase's close condition
+     * is Richard ruling the record LEGIBLE, and guessing the presentation first means building it
+     * twice. Ruled 2026-09-19: a summary line, counts and tokens, **no money**.
+     *
+     * This run is where the CACHED clause is measured: the fixture reports
+     * `cache_read_input_tokens`, and a line that dropped it would hide the cheapest tokens in the
+     * bill. FED-006's drive pins the other branch, where there are none.
+     */
+    it('§5.5 the sentence a person reads — and it names the cached tokens', async () => {
+      const executions = await client.request<ExecutionRow[]>('GET', '/executions?workflowId=askTwice&limit=1', {
+        headers: asAdmin()
+      });
+      const detail = await client.request<{ modelCost?: { line?: string; durationMs?: number } }>(
+        'GET',
+        `/executions/${executions.json[0].id}`,
+        { headers: asAdmin() }
+      );
+
+      const ms = detail.json.modelCost!.durationMs!;
+      const time = ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+      expect(detail.json.modelCost!.line).toBe(
+        `2 model calls \u00b7 82 in (24 cached) / 14 out tokens \u00b7 ${time} \u00b7 claude-opus-5`
+      );
+
+      // 🔴 The ruling's own exclusion: a price table the backend carried would go stale silently
+      // while continuing to render confidently.
+      expect(detail.json.modelCost!.line).not.toMatch(/[$£€]/);
     });
 
     it('says nothing at all about cost on a run that never called a model', async () => {

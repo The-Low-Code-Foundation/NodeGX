@@ -12,10 +12,12 @@ the end condition, the register.
 | FED-003 A function calls a model | ✅ **CLOSED (s3).** Nine ACs green; 24 specs across two suites |
 | FED-004 A schedule does not trip over itself | ✅ **CLOSED (s4).** Seven ACs green; 26 specs across three suites |
 | FED-005 A backend speaks MCP | ✅ **CLOSED (s5).** Eight ACs green; 39 specs, one driven by the OFFICIAL MCP client |
-| FED-006 The drive | 🟢 **AC1–AC4 GREEN (s6). 24 specs, ~40 s.** Only **AC5** is left, and it is Richard's ruling, not a build |
+| FED-006 The drive | 🟢 **AC1–AC4 GREEN, and AC5's two CONDITIONS built (s6). 31 specs.** What is left is Richard looking at the dashboard and saying the word |
 
-**All four rulings are in** (README §4), plus a fifth taken at s6 on AC4's wording. **Nothing is
-gated on a ruling except AC5 itself.**
+**All four rulings are in** (README §4), plus THREE taken at s6: AC4's wording, and the two
+conditions Richard put on AC5 — *a failing step must name its subject* and *the model cost reads
+as a summary line*. Both are built and mutation-tested (FED-006 §5.6). **Nothing is gated on a
+ruling except AC5 itself, and AC5 is now only the looking.**
 
 ✅ **s5's owed whole-package run is DONE (s6): `nodegx-backend` WHOLE, 154 suites / 1827 tests in
 510 s at `--maxWorkers=2`** — and it found a real defect no subset could see. See register R13.
@@ -27,6 +29,9 @@ gated on a ruling except AC5 itself.**
 **take them next session, on a quiet box** — two peers were driving editors all through s6 and a
 stack would have collided.
 
+✅ **Both of his conditions are already paid** (FED-006 §5.6), so the screenshots are of a record
+that already names which feed failed and already carries the cost sentence. Do NOT rebuild either.
+
 🔴 **Check the box first.** `lsof -ti :9222 -sTCP:LISTEN` and `ps` for a peer's `dev`/`dev:debug`;
 a peer's `dev` run REAPS your stack. Then:
 
@@ -35,18 +40,21 @@ a peer's `dev` run REAPS your stack. Then:
    port from a small script using `tests/fixtures/feed-drive/project.ts` — the fixture HTTP server
    has to be up too, since the graphs point at it.
 2. Open `/_admin`, find the `pollSources` executions, capture the list and one record open.
-3. 🔴 **Do NOT format the model-cost sum first** (FED-003 §5.5). It is raw JSON on the wire on
-   purpose. The thing Richard is ruling on is whether the record can be READ as it is; guessing
-   the presentation before the ruling means building it twice.
+3. ✅ **The model-cost sum IS formatted now** — FED-003 §5.5 was settled at s6, by his ruling, as
+   a summary line with no money in it. It is on the list as well as the row.
 4. The sentence he is ruling on: *a person who did not build this should be able to read the
    record and say which source produced which items.*
 
-**What the record already carries, measured at s6:** `triggerSource` (`run-once-on-start catch-up`
-or `schedule * * * * *`), `triggerId`, `durationMs`, a `modelCalls[]` array with per-call model /
-token counts / duration, and a step per node with `nodeId`, `nodeType`, `status` and a real
-`errorMessage` on a failure. What it does NOT obviously carry is which SOURCE a given step belongs
-to — every per-item step says `store` / `model` / `ask` and the node ids repeat across the two
-helper components. **That is very likely the thing the ruling turns on**, so have an answer ready.
+**What the record carries, measured at s6:** `triggerSource` (`run-once-on-start catch-up` or
+`schedule * * * * *`), `triggerId`, `durationMs`, `modelCost` with its one-line summary, and a
+step per node with `nodeId`, `nodeType`, `status`, a real `errorMessage`, and — new at s6 — a
+`detail` naming the SUBJECT of a failure, so a failed fetch says which URL.
+
+🔴 **What it still does NOT carry, and you should say so rather than let him find it:** which
+instance or which ITEM a happy-path step belongs to. `nodeId` is the graph node's id, so seven
+items write seven steps called `store` and nothing distinguishes them. Richard was shown this and
+chose the narrow fix; **per-item execution history is scoped as its own work, not a FED-006
+tail** — it is the surface people compare to n8n, and it deserves a task.
 
 ## 3. The phase's end condition
 
@@ -79,15 +87,24 @@ Unchanged rows are kept short; read s5's copy in git history for the full text o
 | R15 | 🔴 **NEW (s6) — NDA-017's "run on value change" default silently halves a sequenced graph.** `Run` is additive: wiring a control signal does not make the other inputs passive, so a node whose value and signal arrive in sequence runs FIRST on the value with everything else unset. Measured: a poll that fetched its feed, reported **success in 48 ms** and wrote nothing. The fix is per-input (`runOnChange-<port>: false`) and every mapping node in the drive carries it. 🔴 **Nothing warns you** — the graph is correct, the run is green, and the only symptom is a suspiciously fast success | unowned — the shape is "a correct graph that does nothing" |
 | R16 | 🔴 **NEW (s6) — `catalog:examples` has TWO pre-existing reds**, both the same defect: `agent-sse-chat-stream` and `agent-store-shared-state` wire `net.noodl.controls.textinput`'s output `text`, which does not exist (it is `textChanged`/`onTextChanged`). 106/108 validate clean. **Not FED-006's** — measured before this session's example was added, and the example added is one of the 106 | unowned — whoever owns the agent examples |
 
+| R17 | 🔴 **NEW (s6) — a step is named by the GRAPH node's id, so nothing distinguishes one instance or one ITEM from another.** `RuntimeStepStart.nodeId` is `this.id`; seven items through one `Run Tasks` template write seven steps all called `store`. s6 closed the half that bites — a FAILING step now carries `detail`, so a refused fetch names its URL — on Richard's ruling. **The other half is open and is a product surface, not a phase-96 remainder:** per-item execution history is what people compare this to n8n on. `runtasks.ts` already holds `entry.index` and the item's record, so the data exists; what is missing is a field on the step and somewhere to show it | unowned — **scope it as its own task**, do not bolt it onto a feed task |
+| R18 | 🔴 **NEW (s6) — `MAX_STEPS_PER_RUN` is 1000 and a loop-shaped function eats it.** `WorkflowRunner.beginStep` stops recording past it and logs `function.steps.suppressed` ONCE. FED-006's poll of four feeds writes ~45 steps, so it is nowhere near — but a real feed reader with fifty sources and twenty items each is, and the failure mode is a record that silently stops half way. **Not measured against a realistic corpus by anything.** Related to R17: per-item identity makes the record bigger, so the two want sizing together | unowned |
+| R19 | 🔴 **NEW (s6) — `catalog:examples` and `test:main` both carry reds that belong to live peer edits, and mtime is the only thing that says so.** `tests-unit/tvw-007/instanceHover.test.ts` failed one `test:main` run (519/520) with mtime **23:00:32 — during the run** — and its whole `InstanceHoverCard/` tree is untracked P93 work; a re-run failed a DIFFERENT test in the same file, which is what a file being written mid-run looks like. ✅ **Attribute by mtime, never by `git status` and never by the failure text**, and re-run before believing any delta | not ours — P93 (TVW-007) |
+
 ## 5. What s6 measured
 
-- **`tests/feed-drive.test.ts`: 24/24, ~40 s.** AC1's budget is five minutes.
+- **`tests/feed-drive.test.ts`: 31/31**, and `fed-003-model-request` 17/17 — **48/48 together**,
+  78 s. AC1's budget is five minutes.
+- **`def004-execution-steps.test.ts` 9/9** — the step contract, which the `detail` change touches.
+- `typecheck:runtime`, `typecheck:cloud`, `typecheck:backend-tests` all **exit 0**.
 - 🔴 **`nodegx-backend` WHOLE: 154 suites / 1827 tests, 510 s** at `--maxWorkers=2` on a quiet box,
   **one red** — `deploy-assets`, register R13, fixed, and that suite is 21/21 after.
   ⚠️ Measured at 21:17–21:26. A peer began editing `packages/nodegx-backend/src/**` at 21:37 and
   was still editing at 21:50, so **this figure is about the tree as it was at 21:17**.
-- **`test:main` 514/514 suites, 8220/8220 tests, exit 0** — after the catalog merge, so it sees
-  the new example.
+- **`test:main` 514/514 / 8220/8220 exit 0** before the runtime change; **519/520 suites,
+  8290/8291 tests** after it, the single red being register R19's — a peer's file written during
+  the run. `noodl-runtime/src/node.ts` is shared with the browser runtime, which is why this was
+  re-run rather than assumed.
 - **`noodl-mcp` at R4's floor: 7 suites / 8 tests, the same seven names**, `Group` at 14,315.
 - `typecheck:backend-tests` exit 0 (re-measured: a first reading of 2 was transient, taken while a
   peer was mid-edit). `eslint` clean on both new files.
@@ -119,6 +136,24 @@ AC3's "exactly one run was added". `armAndWaitForOnePoll` now disarms the trigge
 fire it asked for has finished. The cron stays minutely on disk — the execution record still reads
 `schedule * * * * *`, which is the point — it is simply not armed except while the helper is
 waiting. Three consecutive clean runs after: 24/24, 33–40 s.
+
+### 🔴 An incident: `git checkout --` destroyed a PEER's uncommitted work
+
+Reverting a mutant on `src/server/byob-admin.ts`, s6 used `git checkout -- <file>`. That file held
+**another session's uncommitted edits** (P98's PRD-002 `?capped=` hunk). `checkout --` does not
+undo your change; it discards everything not committed, theirs included.
+
+✅ **Recovered in full, and the recovery route is the reusable part.** VS Code's local history had
+nothing — a peer agent writes through Bash, which leaves no editor buffer and therefore no local
+history. **Session transcripts record tool inputs verbatim**, so the lost hunk was read straight
+out of `~/.claude/projects/<project>/<session>.jsonl`, found by scanning every transcript touched
+in the last two days for a write to that path, and restored byte-for-byte. The sweep also proved
+it was the ONLY lost hunk: four write-touches to that file in two days, two theirs and two ours.
+
+**The rules this cost, both of which were already written down:** never `git checkout --` on this
+checkout (`cp` from a scratchpad copy instead — s6 had made such copies for `WorkflowRunner.ts`
+and `modelCost.ts`, and simply did not make one here), and a mutant on a file a peer is editing
+needs its own backup before the mutation, not after.
 
 ### Two traps that will cost the next person time
 

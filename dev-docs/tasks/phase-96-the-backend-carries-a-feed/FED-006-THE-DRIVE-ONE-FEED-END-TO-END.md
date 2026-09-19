@@ -82,7 +82,7 @@ did not build this should be able to read the record and say which source produc
 
 ## 5. What was built (s6, 2026-09-19)
 
-**AC1 ✅ · AC2 ✅ · AC3 ✅ · AC4 ✅ (ruled) · AC5 ⬜ Richard, next session.**
+**AC1 ✅ · AC2 ✅ · AC3 ✅ · AC4 ✅ (ruled) · AC5 🟢 both conditions BUILT; the ruling itself is the last step.**
 
 `packages/nodegx-backend/tests/feed-drive.test.ts` — **24 specs, green in ~40 s**, well inside
 AC1's five minutes. The project it drives is `tests/fixtures/feed-drive/project.ts`: the schema,
@@ -168,9 +168,58 @@ decisions cost, and a graph that optimised this away would show nothing.
   narrower, more honest thing to measure than "these two creates are present". A key scoped
   `classes:*` would offer them; nothing here says it would not.
 
-### 5.6 Still open
+### 5.6 AC5 — the two conditions Richard put on ruling, both built (s6)
 
-- **AC5** — the two screenshots of §3.4 and Richard's ruling. Ruled 2026-09-19: **next session, on
-  a quiet box.** Recipe is in NEXT-SESSION-PROMPT.md §2.
-- **FED-003 §5.5's model-cost sum** is still unformatted on the wire, still deliberately, and
-  still for the same reason: AC5 has not happened yet.
+He was shown what the record does and does not say, and ruled twice on 2026-09-19.
+
+**Ruling 1 — "a failing step must name its subject."** A step is identified by `nodeId`, which is
+the GRAPH node's id, so every instance of a component writes under the same name: one poll of four
+feeds records four steps called `http`, and `http · error · "The server answered 403 Forbidden"`
+could not say which feed. The node always knew — `httpnode.ts` composes `detail: { url, status }`
+for the error bus — so `RuntimeStepEnd` gained `detail` and `WorkflowRunner.endStep` carries it
+into the record.
+
+- 🔴 **Scrubbed exactly as `inputData` is**, because a URL is one of the likelier places a
+  credential turns up. The spec's broken feed carries the model key in its query string, so one
+  request measures both halves: the path is in the record, the key is not.
+- **Objects only.** `detail` is `unknown` at the node; a bare string would land as a field whose
+  meaning nobody could recover, so it is dropped rather than guessed at.
+- It rides inside `outputData` so `BoundedExecutionLogger.take` charges it to the run's record
+  budget — a detail on a step inside a loop is written hundreds of times.
+- **Reach:** five node modules already compose a `detail` and get this for free
+  (`httpnode` ×2, `signfileurl`, `modelcrudbase`, `actiondispatchernode`, `componentutils/base`),
+  plus every `raiseRuntimeError` call in the library.
+
+**Ruling 2 — "a summary line" for the model cost**, settling FED-003 §5.5. `summariseModelCalls`
+now returns `line`:
+
+```
+11 model calls · 1,320 in / 121 out tokens · 412 ms · claude-opus-5
+```
+
+- 🔴 **No money, and that is the ruling rather than an omission.** A price table the backend
+  carried would go stale silently while continuing to render confidently. The specs assert the
+  absence of a currency symbol.
+- Cached tokens get their own clause — `82 in (24 cached) / 14 out tokens` — pinned in FED-003,
+  whose fixture reports them; FED-006 pins the branch where there are none.
+- Grouping is done by hand, not `toLocaleString()`: that reads the HOST's locale, so the same run
+  would render `1,320` on one machine and `1.320` on another, and a record is a thing people paste
+  to each other.
+- **On the LIST as well as the row**, because §3.4's first screenshot is the list and "which of
+  these runs was expensive" is a question a list answers at a glance or not at all.
+
+**Three mutants, all caught, and the first two are independent claims rather than one:**
+
+| mutant | result |
+|---|---|
+| `detail` dropped at the sink | the "names which URL" spec reds |
+| `detail` carried UNSCRUBBED | only the redaction spec reds — the naming spec stays green |
+| the cached-tokens clause removed from the line | FED-003's spec reds; FED-006's stays green |
+| the list not decorated | two FED-006 specs red |
+
+### 5.7 Still open
+
+- **AC5's two screenshots** (§3.4) and the ruling itself. Both CONDITIONS Richard put on ruling are
+  now built and measured; what is left is him looking at the dashboard and saying the word. Ruled
+  2026-09-19: **next session, on a quiet box.** Recipe is in NEXT-SESSION-PROMPT.md §2.
+- ✅ **FED-003 §5.5 is settled** — see §5.6. It is no longer waiting on anything.

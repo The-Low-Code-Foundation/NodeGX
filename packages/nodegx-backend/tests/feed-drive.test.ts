@@ -75,6 +75,9 @@ const SOURCES = [
   }
 ] as const;
 
+/** A fourth source, added late, that never answers. See the AC5 describe near the bottom. */
+const BROKEN_PATH = '/broken.xml';
+
 const TOTAL_ITEMS = SOURCES.reduce((n, s) => n + s.items, 0);
 /**
  * How many model calls TWO polls cost.
@@ -105,6 +108,16 @@ interface ModelHit {
   body: Record<string, unknown>;
 }
 
+interface ModelCost {
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  durationMs: number;
+  models: string[];
+  line: string;
+}
+
 interface ExecutionRow {
   id: string;
   workflowId: string;
@@ -113,6 +126,7 @@ interface ExecutionRow {
   startedAt?: number;
   completedAt?: number;
   metadata?: Record<string, unknown>;
+  modelCost?: ModelCost;
 }
 
 interface ExecutionStep {
@@ -120,6 +134,7 @@ interface ExecutionStep {
   nodeType: string;
   status: string;
   errorMessage?: string;
+  outputData?: Record<string, unknown>;
 }
 
 interface ParseResults {
@@ -208,6 +223,15 @@ describe('FED-006 — one feed reader, end to end', () => {
             })
           );
         });
+        return;
+      }
+
+      // The subject of the AC5 ruling's spec: a feed that always refuses. Its query string
+      // carries the model key, so the record's redaction is measured on the same request.
+      if (route.startsWith(BROKEN_PATH)) {
+        upstreamHits.push({ route, userAgent: req.headers['user-agent'] as string | undefined, status: 403 });
+        res.writeHead(403);
+        res.end('nope');
         return;
       }
 
@@ -679,6 +703,143 @@ describe('FED-006 — one feed reader, end to end', () => {
       // session, and `actsAsUserId` is the only thing that put her id on the Request node.
       expect(JSON.parse(text).result.count).toBe(expected);
       expect(JSON.parse(text).result.sourceCount).toBe(2);
+    });
+  });
+
+  // ---------------------------------------------------------------------------------------------
+  // AC5 — what the run spent, as a sentence
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * 🔴 **FED-003 §5.5, settled.** That task put the model cost on the wire as raw JSON and
+   * deliberately did not format it, because §8's close condition is Richard ruling the record
+   * LEGIBLE and guessing the presentation first means building it twice. Ruled 2026-09-19: **a
+   * summary line** — counts and tokens, no money, because a price table the backend carried would
+   * go stale silently while continuing to render confidently.
+   *
+   * Asserted on the LIST as well as the row: §3.4's first screenshot is the execution list, and
+   * "which of these runs was expensive" is a question a list answers at a glance or not at all.
+   */
+  describe('AC5 — the model cost reads as one sentence, on the row and in the list', () => {
+    it('the first poll carries a line naming calls, tokens, time and the model', async () => {
+      // Every item of every feed, tagged once: the first poll is the one with a full bill.
+      const withCost = (await runs()).filter((r) => r.modelCost).sort((a, b) => (a.startedAt || 0) - (b.startedAt || 0));
+      expect(withCost.length).toBeGreaterThan(0);
+
+      const cost = withCost[0].modelCost!;
+      expect(cost.calls).toBe(TOTAL_ITEMS);
+      expect(cost.models).toEqual(['claude-opus-5']);
+
+      // The sentence, and every number in it is one this process observed.
+      expect(cost.line).toBe(
+        `${TOTAL_ITEMS} model calls \u00b7 ${cost.inputTokens.toLocaleString('en-US')} in / ` +
+          `${cost.outputTokens.toLocaleString('en-US')} out tokens \u00b7 ` +
+          `${cost.durationMs < 1000 ? `${Math.round(cost.durationMs)} ms` : `${(cost.durationMs / 1000).toFixed(1)} s`}` +
+          ` \u00b7 claude-opus-5`
+      );
+
+      // 🔴 The ruling's own exclusion. No currency symbol, anywhere.
+      expect(cost.line).not.toMatch(/[$£€]/);
+    });
+
+    it('the detail route says the same thing as the list — one derivation, not two', async () => {
+      const row = (await runs()).filter((r) => r.modelCost)[0];
+      const detail = await client.request<ExecutionRow>('GET', `/executions/${row.id}`, { headers: asAdmin() });
+      expect(detail.status).toBe(200);
+      expect(detail.json.modelCost).toEqual(row.modelCost);
+    });
+
+    it('a run that called no model carries no cost block at all, not a row of zeros', async () => {
+      // "Spent nothing" and "could not have spent anything" are different sentences, and the
+      // overwhelming majority of runs on any backend are the second.
+      const listed = await client.request<ExecutionRow[]>('GET', '/executions?workflowId=myList', {
+        headers: asAdmin()
+      });
+      expect(listed.status).toBe(200);
+      expect(listed.json.length).toBeGreaterThan(0);
+      for (const row of listed.json) expect(row.modelCost).toBeUndefined();
+    });
+  });
+
+  // ---------------------------------------------------------------------------------------------
+  // AC5 — the record says WHICH source failed
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * 🔴 **The condition Richard put on ruling the execution record legible** (2026-09-19).
+   *
+   * A step is named by `nodeId`, which is the GRAPH node's id — so all three `helpers/pollOne`
+   * instances write their fetch under the name `http`. Before this, a record reading
+   * `http · error · "The server answered 403 Forbidden"` three steps down a list of forty could
+   * not tell you which feed was refused, and the one question a person actually asks of a failed
+   * poll is "which feed is broken".
+   *
+   * The node always knew: `httpnode.ts` composes `detail: { url, status }` for the error bus.
+   * `RuntimeStepEnd.detail` now carries it as far as the record.
+   *
+   * ⚠️ **The URL carries the model key on purpose.** A URL is one of the likelier places a
+   * credential turns up, and a record that names the subject is worthless if naming it leaks the
+   * secret — so the same request measures both halves: the path is there, the key is not.
+   */
+  describe('AC5 — a failed poll names the feed that failed, without naming the secret', () => {
+    let brokenUrl = '';
+    let failedRun: ExecutionRow;
+    let steps: ExecutionStep[] = [];
+
+    beforeAll(async () => {
+      brokenUrl = `${fixtureUrl}${BROKEN_PATH}?token=${MODEL_KEY}`;
+      const created = await client.request<{ objectId: string }>('POST', '/classes/Source', {
+        body: { url: brokenUrl, kind: 'rss', title: 'A feed that is down' },
+        headers: asAdmin()
+      });
+      expect(created.status).toBe(201);
+
+      await armAndWaitForOnePoll();
+
+      failedRun = (await runs()).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0))[0];
+      const detail = await client.request<{ steps: ExecutionStep[] }>('GET', `/executions/${failedRun.id}`, {
+        headers: asAdmin()
+      });
+      expect(detail.status).toBe(200);
+      steps = detail.json.steps || [];
+    });
+
+    it('exactly one fetch failed, and the record says which URL it was', () => {
+      const fetches = steps.filter((step) => step.nodeType === 'net.noodl.HTTP');
+      const failed = fetches.filter((step) => step.status === 'error');
+
+      // Four sources now, and only one of them is broken: the discrimination is the point.
+      expect(fetches.length).toBe(SOURCES.length + 1);
+      expect(failed.length).toBe(1);
+
+      const named = (failed[0].outputData || {}).detail as { url?: string; status?: number } | undefined;
+      expect(named).toBeDefined();
+      expect(named!.url).toContain(BROKEN_PATH);
+      expect(named!.status).toBe(403);
+    });
+
+    it('🔴 and the key that was in that URL is not in the record', () => {
+      const failed = steps.filter((step) => step.nodeType === 'net.noodl.HTTP' && step.status === 'error')[0];
+      const named = (failed.outputData || {}).detail as { url?: string } | undefined;
+      // Two known-firing halves, because an absence beside nothing is worth nothing: the URL
+      // really did carry the key, and the record really did record a URL.
+      expect(brokenUrl).toContain(MODEL_KEY);
+      expect(typeof named?.url).toBe('string');
+      // And the record does not.
+      expect(named!.url).not.toContain(MODEL_KEY);
+      expect(JSON.stringify(steps)).not.toContain(MODEL_KEY);
+    });
+
+    it('the healthy feeds in the SAME run are still readable as healthy', () => {
+      // Without this the spec above would pass on a record that marked everything failed.
+      const ok = steps.filter((step) => step.nodeType === 'net.noodl.HTTP' && step.status !== 'error');
+      expect(ok.length).toBe(SOURCES.length);
+      // A successful fetch carries no detail — nothing went wrong, so there is no subject to name.
+      for (const step of ok) expect((step.outputData || {}).detail).toBeUndefined();
+    });
+
+    it('no new items were written by the broken source, and the other seven are untouched', async () => {
+      expect((await items()).length).toBe(TOTAL_ITEMS);
     });
   });
 

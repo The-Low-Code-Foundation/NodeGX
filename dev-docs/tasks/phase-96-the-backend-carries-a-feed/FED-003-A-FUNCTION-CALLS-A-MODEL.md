@@ -213,7 +213,17 @@ port added next year is covered without anybody remembering to; the drive's succ
 carries all eight value ports rather than the five a happy graph reads, and AC3 drives a failure as
 well as a success — which is what its own wording ("after AC1 **and AC2**") always said.
 
-### 5.5 AC9's second half — "the dashboard shows the sum"
+### 5.5 AC9's second half — "the dashboard shows the sum" ✅ SETTLED 2026-09-19
+
+> ⚠️ **This section is kept as written, but its open question is CLOSED.** It left the sum
+> unformatted on purpose, so that the presentation would not be guessed before Richard had seen a
+> real record. FED-006 put one in front of him and he ruled: **a summary line** —
+> `11 model calls · 1,320 in / 121 out tokens · 412 ms · claude-opus-5`, counts and tokens, and
+> **no money**, because a price table the backend carried would go stale silently while
+> continuing to render confidently. Built as `ModelCostSummary.line`
+> (`src/execution/modelCost.ts`), on the execution row AND on the list; the cached-tokens clause
+> is pinned by this task's own suite. See FED-006 §5.6.
+
 
 The record carrying `modelCalls` was the easy half and it was nearly the only half built. The
 dashboard's execution view is a JSON dump of `GET /executions/:id` (`admin/ui/index.html:1418`),
