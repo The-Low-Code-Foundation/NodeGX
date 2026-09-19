@@ -29,13 +29,14 @@ import { revealBenchTarget } from './benchRequest';
 import {
   APP_SCOPE,
   BENCH_FRAME_PRESETS,
-  benchTargetLabel,
   benchTargets,
   clampBenchHeight,
   clampBenchWidth,
   isMounted,
   matchingPreset,
   readMenuComponents,
+  scopeChipIconKind,
+  scopeChipLabel,
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
@@ -111,6 +112,14 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
     if (next.mode === 'bench') revealBenchTarget(next.target);
   }
 
+  // The kind-to-icon map, kept beside the render and nowhere else. See
+  // `scopeChipIconKind` for why the decision is not made here.
+  const SCOPE_CHIP_ICONS = {
+    app: IconName.Home,
+    component: IconName.Component,
+    board: IconName.Columns
+  } as const;
+
   const isBench = scope.mode === 'bench';
 
   return (
@@ -123,8 +132,8 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
         onClick={() => (isOpen ? setIsOpen(false) : open())}
         data-test="preview-scope-chip"
       >
-        <Icon icon={isBench ? IconName.Component : IconName.Home} size={IconSize.Small} />
-        <span className={css.ScopeLabel}>{isBench ? benchTargetLabel(scope.target) : 'App'}</span>
+        <Icon icon={SCOPE_CHIP_ICONS[scopeChipIconKind(scope)]} size={IconSize.Small} />
+        <span className={css.ScopeLabel}>{scopeChipLabel(scope)}</span>
         <Icon icon={IconName.CaretDown} size={IconSize.Small} />
       </button>
 

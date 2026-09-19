@@ -65,6 +65,7 @@ import {
   benchSizeLabel,
   benchTargetLabel,
   isDivergedFromCanvas,
+  showsAppPreview,
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
@@ -118,7 +119,26 @@ export function VisualCanvas({
   const [frame, setFrame] = useState<BenchFrame>(DEFAULT_BENCH_FRAME);
   /** The bench frame's measured box — see `ComponentBench`'s `onFrameMeasured`. */
   const [benchMeasured, setBenchMeasured] = useState<{ width: number; height: number } | undefined>(undefined);
+  /**
+   * ⚠️ **Kept as the discriminant comparison on purpose, not tidied into
+   * `showsBench(scope)`.** TypeScript narrows a union through a `const` that
+   * aliases a discriminant check, so `scope.target` type-checks inside
+   * `isBench && …`. A helper returning `boolean` throws that away, and the four
+   * reads of `scope.target` below stop compiling. The predicate exists for the
+   * callers that only want the answer; this one wants the narrowing too.
+   */
   const isBench = scope.mode === 'bench';
+  /**
+   * 🔴 **TVW-008 §6.5 — this is not `!isBench`, and the difference is six
+   * behaviours.** Every question below used to be asked as `!isBench`, which was
+   * right while there were two modes and silently wrong the moment there were
+   * three: the preview strip, the design chrome and the viewport read-out all
+   * describe *a route and a viewport*, which the board has neither of. Adding
+   * the third variant compiled clean and changed all of them, so the question is
+   * asked of the mode directly now — `showsAppPreview` switches exhaustively, and
+   * a fourth mode is six compile errors instead of six silent changes.
+   */
+  const isApp = showsAppPreview(scope);
 
   /**
    * FIX-019 — which component the node graph is on, so the strip can say when
@@ -155,11 +175,12 @@ export function VisualCanvas({
   /**
    * TVW-002 — the sentence between the two surfaces.
    *
-   * Disabled in bench mode deliberately: the bench already says what it is showing in its caption
-   * and says when the canvas has moved away with its own chip. A third claim on the same surface
-   * is a third answer to "what am I looking at", which is the confusion this phase is closing.
+   * Shown for the app and nothing else, deliberately: the bench already says what it is showing in
+   * its caption and says when the canvas has moved away with its own chip, and the board says what
+   * is on it. A third claim on the same surface is a third answer to "what am I looking at", which
+   * is the confusion this phase is closing. ⚠️ Was `!isBench` until TVW-008 — see `isApp`.
    */
-  const { strip: localStrip, outline, goToPage, dismiss } = usePreviewStrip(canvasComponent, !isBench);
+  const { strip: localStrip, outline, goToPage, dismiss } = usePreviewStrip(canvasComponent, isApp);
 
   /**
    * TVW-002 AC5 — the detached window renders the editor's answer; the docked one computes its own.
@@ -241,11 +262,11 @@ export function VisualCanvas({
    * inspector eats the event in the capture phase) and read it as broken. The
    * frame is the standing answer, the toast is the answer to a specific click.
    *
-   * Scoped to `!isBench` deliberately: the bench has its own accent strip for
-   * its own claim, and two accent claims on one surface is two answers to
-   * "what am I looking at".
+   * Scoped to the app preview deliberately: the bench has its own accent strip
+   * for its own claim, and two accent claims on one surface is two answers to
+   * "what am I looking at". The board is the same case as the bench.
    */
-  const showDesignChrome = Boolean(designMode) && !isBench;
+  const showDesignChrome = Boolean(designMode) && isApp;
   const [selectionToast, setSelectionToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -462,7 +483,7 @@ export function VisualCanvas({
         {/* PAR-003: size tag per mock — `1280 × 800 · 100%`, mono, top-right.
             Lives inside the stage so it floats over the preview rather than
             over the chrome strip above it. */}
-        {showViewportSize && !isBench && webviewBounds && (
+        {showViewportSize && isApp && webviewBounds && (
           <div className={css.ViewportInfo}>{`${deviceName ? deviceName + ' · ' : ''}${Math.floor(
             webviewBounds.width
           )} × ${Math.floor(webviewBounds.height)} · ${Math.floor(zoom * 100)}%`}</div>
@@ -475,7 +496,7 @@ export function VisualCanvas({
           measuring a real rectangle.
         */}
         <div
-          className={classNames(css.WebviewContainer, isBench && css['is-hidden'])}
+          className={classNames(css.WebviewContainer, !isApp && css['is-hidden'])}
           style={style}
           ref={containerRef}
           data-test="app-preview"

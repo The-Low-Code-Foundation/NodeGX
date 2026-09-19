@@ -41,3 +41,9 @@ export * from './bench-scenarios.test';
 // and the only thing besides a scenario save that this surface writes to
 // `project.json`. What reaches disk, and what survives coming back off it.
 export * from './bench-frame-default.test';
+
+// TVW-008: the comparison board — one harness, N picked frames, one client.
+// The frame wrapper is the one BEN-001 refused to build, so its two failure
+// modes (an unnamed `sizeMode`, a bare number where a `px` dimension goes) are
+// pinned here rather than left to a screenshot.
+export * from './board-export.test';

@@ -72,3 +72,22 @@ export function benchCaptionRest(targetLabel: string): string {
 export function benchCaption(targetLabel: string): string {
   return `${WORKBENCH}${CAPTION_JOIN}${benchCaptionRest(targetLabel)}`;
 }
+
+/**
+ * TVW-008 — the comparison board calls itself the Board.
+ *
+ * R-G's reasoning, applied to the third mode: *a surface a person cannot name is
+ * a surface they cannot ask for, search the docs for, or file a bug about.* The
+ * chip, the chooser row and the caption say this one word, and they say it from
+ * here for the reason the module header gives — a name enforced by separate
+ * copies is a name that decays the first time one copy is edited.
+ *
+ * ⚠️ **Not `All components`, which is what TVW-008 called it until R-7.** That
+ * name described a membership the surface no longer has: the board is what you
+ * put on it. A name that promises "all" on a surface showing three components is
+ * the kind of quiet lie this phase keeps finding in its own strings.
+ */
+export const BOARD = 'Board';
+
+/** The chooser row that switches to it, in the same voice as {@link OPEN_ON_WORKBENCH}. */
+export const OPEN_BOARD = `${WORKBENCH} ${BOARD.toLowerCase()}`;

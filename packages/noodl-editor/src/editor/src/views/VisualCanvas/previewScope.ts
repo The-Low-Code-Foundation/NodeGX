@@ -20,17 +20,31 @@
 
 import { CLOUD_SHEET } from '../panels/ComponentsPanelNew/types';
 
+import { BOARD } from './benchWords';
+
 /**
- * The two modes of the one surface.
+ * The three modes of the one surface.
+ *
+ * R1 is still the whole design — *one preview surface, N modes, never a second
+ * preview panel*. TVW-008 added the third and did not add a panel.
  *
  * `target` is a component's **legacy name** (`/Components/Card`) — the form
  * `buildBenchExport` resolves and the form a node uses to instantiate a project
  * component. Storing a display label here instead is how the bench would end up
  * unable to find what it is showing.
  */
-export type PreviewScope = { mode: 'app' } | { mode: 'bench'; target: string };
+export type PreviewScope = { mode: 'app' } | { mode: 'bench'; target: string } | { mode: 'board' };
 
 export const APP_SCOPE: PreviewScope = { mode: 'app' };
+
+/**
+ * TVW-008 — the comparison board. Carries no target, deliberately.
+ *
+ * Its membership is project state (`bench.board`), not scope state, so switching
+ * to the app and back cannot lose what someone put on it. A `target` here would
+ * be a second place for that to live and a second one to get out of date.
+ */
+export const BOARD_SCOPE: PreviewScope = { mode: 'board' };
 
 /** The frame widths offered as chips. Anything else is typed into the field. */
 export const BENCH_FRAME_PRESETS = [
@@ -284,4 +298,124 @@ export function isDivergedFromCanvas(scope: PreviewScope, canvasComponent: strin
   if (scope.mode !== 'bench') return false;
   if (!canvasComponent) return false;
   return canvasComponent !== scope.target;
+}
+
+
+/**
+ * TVW-008 §6.5 — the exhaustiveness guard, and it is the reason the three
+ * predicates below exist at all.
+ *
+ * 🔴 **Adding `{ mode: 'board' }` to {@link PreviewScope} is a type-safe change
+ * that silently altered six behaviours.** Nothing in this codebase switched on
+ * `scope.mode`; every site derived a boolean first —
+ * `const isBench = scope.mode === 'bench'` — and then asked `!isBench`. The
+ * moment a third mode exists, `!isBench` stops meaning *the app* and starts
+ * meaning *the app **or** the board*, and TypeScript has nothing to complain
+ * about: the boolean is still a boolean.
+ *
+ * The six sites were the preview strip, the design chrome, the viewport
+ * read-out, the webview's hidden class, the `data-preview-mode` attribute and
+ * the SCSS `&.is-bench` rules. Every one of them wanted *the app*, and every
+ * one of them would have got *not the bench*.
+ *
+ * So the fix is not a comment telling the next person to be careful. It is to
+ * take the question away from the call site: ask {@link showsAppPreview}, which
+ * switches exhaustively, and a fourth mode becomes six compile errors instead of
+ * six silent behaviour changes.
+ */
+export function assertNeverScope(scope: never): never {
+  throw new Error(`Unhandled preview scope: ${JSON.stringify(scope)}`);
+}
+
+/**
+ * Is the surface showing the running app?
+ *
+ * ⚠️ **This is what every `!isBench` in the canvas meant**, and the distinction
+ * only became visible once a third mode existed. The app's chrome — the preview
+ * strip, design mode, the viewport size read-out — describes a route and a
+ * viewport. The board has neither, so *not the bench* was never the question.
+ */
+export function showsAppPreview(scope: PreviewScope): boolean {
+  switch (scope.mode) {
+    case 'app':
+      return true;
+    case 'bench':
+    case 'board':
+      return false;
+    default:
+      return assertNeverScope(scope);
+  }
+}
+
+/** Is the surface showing exactly one component, with its inputs rail? */
+export function showsBench(scope: PreviewScope): boolean {
+  switch (scope.mode) {
+    case 'bench':
+      return true;
+    case 'app':
+    case 'board':
+      return false;
+    default:
+      return assertNeverScope(scope);
+  }
+}
+
+/** Is the surface showing the comparison board? */
+export function showsBoard(scope: PreviewScope): boolean {
+  switch (scope.mode) {
+    case 'board':
+      return true;
+    case 'app':
+    case 'bench':
+      return false;
+    default:
+      return assertNeverScope(scope);
+  }
+}
+
+
+/**
+ * What the scope chip says it is showing.
+ *
+ * 🔴 **This replaced a ternary, and the ternary was already wrong the moment the
+ * board existed**: `isBench ? benchTargetLabel(scope.target) : 'App'` labels the
+ * board *App*, on the surface whose entire job is to say which of three things
+ * you are looking at. It is exactly the §6.5 shape — a two-valued question asked
+ * of a three-valued thing — and it lived in the one control that exists to
+ * answer that question.
+ */
+export function scopeChipLabel(scope: PreviewScope): string {
+  switch (scope.mode) {
+    case 'app':
+      return 'App';
+    case 'bench':
+      return benchTargetLabel(scope.target);
+    case 'board':
+      return BOARD;
+    default:
+      return assertNeverScope(scope);
+  }
+}
+
+/**
+ * Which icon the chip shows, as a **kind** rather than an `IconName`.
+ *
+ * ⚠️ **The indirection is not ceremony.** `IconName` comes from
+ * `@noodl-core-ui/.../Icon`, whose `require.context` call ts-jest rejects
+ * outright — a module importing it fails the suite *to run*, which is how
+ * `readMenuComponents` ended up in this file in the first place (see its note).
+ * A decision that cannot be graded is a decision that will not be graded, so the
+ * exhaustive switch lives here and the surface does a lookup.
+ */
+export function scopeChipIconKind(scope: PreviewScope): 'app' | 'component' | 'board' {
+  switch (scope.mode) {
+    case 'app':
+      return 'app';
+    case 'bench':
+      return 'component';
+    case 'board':
+      return 'board';
+    default:
+      return assertNeverScope(scope);
+  }
 }

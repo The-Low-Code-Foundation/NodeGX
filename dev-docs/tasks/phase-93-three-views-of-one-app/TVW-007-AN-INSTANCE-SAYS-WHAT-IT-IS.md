@@ -87,3 +87,33 @@ of them.
 components with 2+ instances have them all in ONE parent"* — true, and about **six components in
 one project**. Across 128 projects the ratio inverts. Neither measurement is wrong; the first one's
 population was never the corpus ([[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]]).
+
+## 7. R-Z — RULED 2026-09-19 (s19): the count only, the path on hover
+
+Richard chose **option 3**. The eyebrow on the node is **the count alone** — `· 3×` — and the
+component's path appears **on hover**.
+
+**What this changes in §2.** The eyebrow row reads `· N×` in 10px mono, `N×` in the component hue,
+painted in the same pass as FIX-018's chip. `INSTANCE` is gone (the chip and the diamond already say
+it) and so is the path. The hover surface carries `Sections/Hero`. Everything else in §2 stands: the
+count is still TVW-001's, from the same source (AC2 is unchanged and is now the *only* thing the
+painted row has to agree with), and the row is still hidden below 75% zoom.
+
+**Why it was the right shape to ask for.** It is the one option that **cannot overflow** — the
+painted string is 2–4 characters wide on every one of the 8,833 instance nodes in the corpus,
+against 114px of room. Options 1 and 2 both trade a measured cost for information the hover already
+carries: option 1 still loses the folder (two components named `Hero` draw identically), and option
+2 spends 12px of height on all 8,833 nodes. ⚠️ **What it gives up is real and must be built for, not
+apologised for**: with no name on the node, the hover is not a nicety — it is the only place the
+identity lives, so it has to be reachable, fast, and present on logic instances too.
+
+🔴 **The hover is now load-bearing, so it needs an AC of its own.** §4 was written when the node
+carried the name and the hover was a bonus. Add: *hovering an instance node shows its full path
+within Xms, on both visual and logic instances, and at every zoom where the eyebrow is drawn* — and
+grade it on the rendered surface a person sees, not on the handler firing
+([[a-rendered-surface-can-be-behind-a-blocker]]).
+
+⚠️ **Where the hover goes is not decided.** `Edit ›` (§2's door) is already specified at the node's
+top-right **on hover**, so two different things now appear on the same gesture. Whoever builds this
+resolves them together — one hover surface carrying both, or the path beside the eyebrow and the
+door where it is — and measures it before choosing.
