@@ -2009,7 +2009,11 @@ export class HttpServer {
         engine: status.engine,
         persistent: status.persistent,
         ephemeral: status.ephemeral,
-        error: status.error
+        error: status.error,
+        // BRG-005 AC4: pool saturation beside the persistence status, so an
+        // under-configured pool is visible here before it is blamed on the
+        // database. `null` on SQLite, which has no pool.
+        pool: this.persistence.saturation ? this.persistence.saturation() : null
       },
       security: {
         devOpen: this.security.config.devOpen,

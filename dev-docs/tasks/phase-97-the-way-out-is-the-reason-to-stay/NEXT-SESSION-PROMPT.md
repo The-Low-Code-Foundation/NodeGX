@@ -1,99 +1,80 @@
 # Phase 97 — next session
 
-**Session 7 built the dialect seam inside `QueryBuilder`, which was the one thing every remaining
-BRG-005 criterion was waiting on. It is done, and nothing is now in front of the adapter class.**
+**Session 8 built the adapter. `PostgresAdapter` and `PgSchemaManager` pass BRG-003's conformance suite
+56/56 on a real PostgreSQL 16.11, all six mutants are caught by six distinct case sets, the real service
+boots on `NODEGX_STORAGE_URL=postgres://…`, `/health` carries the pool, and `stop()` drains it.
+BRG-005 has one criterion open — AC7's sweep — and BRG-D6 is closed.**
 
-**On the way it found two defects in a predicate the product had already shipped** — the row ACL,
-which existed **twice** and had drifted, so one copy carried a wrong translation into PostgreSQL RLS
-policies. Both are fixed in one place and graded where each ships.
+**On the way it found the seam's second synchronous half** — `IStorageSchema` — and served it from a
+per-process model with queued DDL rather than pretending. That is filed as **BRG-D7** (README §9) and
+declared as three divergences, not hidden.
 
-**Where it is:** `cline-dev`, commit `afead5e9d` (s6 was `3f2d393db`).
+**Where it is:** `cline-dev`, commit `4226a6c68` (s7 was `afead5e9d`).
 
 ## The board, re-derived from the task files
 
 | task | state | what is left |
 |---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) the interface | ✅ | — |
-| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`test:main` ✅ now; `noodl-mcp` — see §3) |
+| [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`noodl-mcp` — red for a peer's reason, measured at s7) |
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | — |
-| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | 🏗 export half + carry report | **AC5 AC6 AC9** — all need the data plane, so BRG-005 first |
-| [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | 🏗 driver, pool, geo, **seam**; AC5 AC6 AC8 ✅ | **AC1 AC3 AC9** — the adapter class |
+| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | 🏗 export half + carry report | **AC5 AC6 AC9** — the data plane exists now; nothing is in front of them |
+| [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ **AC1 AC2 AC3 AC4 AC5 AC6 AC8 AC9** | **AC7's sweep** (§1) and §7.4's owed list |
 | [BRG-006](BRG-006-THE-DRIVE.md) the drive | ⬜ | — |
 
-**Readings taken this session** (2026-09-19, at `afead5e9d`): adapter suite **287/287 exit 0** (was
-251), `typecheck:runtime` **exit 0**, `test:main` **8223/8223, 514 suites, exit 0**, the phase's own
-backend specs **67/67 exit 0**. `noodl-mcp` **8 suites / 10 tests red — measured NOT to be this
-change's**, see §3.
+**Readings taken this session** (2026-09-19): `brg-005-conformance-postgres` **13/13 — 56 cases passed,
+0 failed, 0 skipped**; mutants caught by 11 / 3 / 2 / 3 / 2 / 1 cases; `brg-005-service-postgres` 3/3;
+`brg-005-operational-store-postgres` + `brg002-operational-store` **36/36** on one shared runner;
+runtime adapter specs **292/292** (was 287; 5 new both-engine cases); phase backend specs **50/50**;
+`service-http` + `idempotency-store` 44/44; `typecheck:runtime` / `nodegx-backend` / `backend-tests` /
+`contract` **all exit 0**.
 
-## 1. First job — `PgSchemaManager`, then the adapter, then ONE test file
+## 1. First job — AC7's sweep, before anything new
 
-[BRG-005 §6.2](BRG-005-THE-POSTGRES-ADAPTER.md) has the order and the reasoning. In short:
+🔴 A peer held two jest runs, a `tsc` and three webpack builds for the whole of s8, so nothing wide was
+run ([[do-not-pile-cpu-work-on-a-shared-box]]). Before any build work:
 
-1. **`PgSchemaManager`** — `information_schema.columns` for the live-column read (`ColumnScope`),
-   keeping the `undefined`-means-no-substitution semantics `LocalSQLAdapter.ts:675-692` warns about.
-   DDL **reuses BRG-004's repaired `generatePostgresSQL`** rather than growing a second generator.
-2. **`PostgresAdapter`** over `PgConnectionPool`, implementing `IStorageDataPlane`'s twelve + eight.
-3. **`createAdapter()`** branches on `NODEGX_STORAGE_URL=postgres://`; `/health` carries
-   `saturation()`. 🔴 R5: the CLI refuses any other scheme **by name**.
-4. **One test file** — `packages/nodegx-backend/tests/brg-005-conformance-postgres.test.ts`. BRG-003's
-   SQLite spec says so in its own header: *"BRG-005 adds one file to run it against Postgres. Nothing
-   else changes."* **AC1, AC3 and AC9 all land there.**
-5. **`IOperationalStore` on Postgres**, its `close()`, and 🔴 **the shutdown path that calls it**
-   (BRG-D6) — §3.5 is emphatic that the shutdown path is the part that does not exist.
+1. `dev:stop --list`, then `ps` for `jest|webpack|tsc` — wait if a peer suite is up.
+2. `npm run test:main` (8223 at s7; exit 0 is the gate — read the DURATION).
+3. `noodl-mcp` (8 suites red at s7 for a peer's reason — re-measure with HEAD restored by `cp` if red).
+4. The full `nodegx-backend` suite, once the peer's `src` edits have landed (twelve+ files were live).
 
-**Also owed, and cheap while you are in the file:** AC2's **six** `capabilities.ts` declarations
-(§5.2's three, §5.5.1, §5.5.2, and AC6's ranking). An undeclared divergence is an AC1 failure.
+Then record the three numbers in BRG-005 §7 and close AC7 — or record which red is whose.
 
-## 2. What this session settled — including where the inherited handoff was wrong
+## 2. Second job — BRG-004's data plane (AC5 verify, AC6 resume, AC9 5 GB)
 
-✅ **The seam is a `dialect` argument, not a fork.** `'sqlite' | 'postgres'`, defaulting to SQLite,
-threaded to eleven functions. It has to be *inside* the builder because three expressions bind a
-different number of values than their SQLite originals (`$nearSphere` 3 not 2, `$regex` 1 not 2,
-search 3 not 1), and an expression whose marker count differs cannot be swapped in at the driver
-boundary after the SQL is built.
+The four phases that move data were all waiting on a driver and an adapter. Both exist. The migrator
+opens `PgConnectionPool` + `PgSchemaManager` on `--to`, applies `tableDDL` (already its own generator),
+and copies rows with `PostgresAdapter.upsertBatch` — one transaction per batch, the shape BRG-002 made.
+`_Schema` and `_SearchIndex` are TEXT-JSON on both engines by design so the meta rows copy verbatim.
 
-🔴 **The inherited handoff said the seam's job was "the ACL coercion, which BRG-004 has already been
-bitten by once". That was right about the place and wrong about the number — there were two defects,
-and the one BRG-004 had already "fixed" was still wrong:**
+## 3. 🔴 Two things in the working tree that are NOT at HEAD
 
-1. **`(value ->> 'read') IN ('1','true')` denies a flag stored as the JSON real `1.0`**, which
-   SQLite's `json_extract(…) = 1` grants. `->>` renders it `"1.0"`. The s5 fix was an *enumeration of
-   spellings*, and it could only contain the ones its author imagined. Comparing as **jsonb** agrees
-   on all eight, because `'1.0'::jsonb = '1'::jsonb`. **Silent denial — the user sees fewer of their
-   own rows and nothing errors.**
-2. **`jsonb_each` RAISES on a non-object ACL**, and an error inside a `WHERE` — or an RLS `USING` —
-   fails the **statement**. So one row whose ACL was written as an array turns every read of that
-   collection into a 500, where SQLite hides just that row. Guarded with `jsonb_typeof(…) = 'object'`.
+- **`packages/nodegx-backend/src/execution/ExecutionStore.ts`** — the `PgOperationalStore` wiring and
+  the `close()` call sit on the peer's uncommitted PRD-003 `close()` method, so the hunk has no HEAD
+  context and could not be committed alone. Commit it after theirs lands. The boot spec is green
+  against the working tree.
+- **`packages/nodegx-backend/src/server/HttpServer.ts`** — only the four-line `pool:` hunk in
+  `healthBody()` is this phase's; the rest of that file's diff is the peer's. It was committed through a
+  temporary index; check `git show HEAD --stat` shows the file with **+4** and nothing else.
 
-**Both existed because the predicate existed twice** (`SchemaManager._aclPredicate`,
-`QueryBuilder.buildAclPredicate`) and each copy agreed with itself. They now share
-`postgres/predicates.ts`.
+## 4. What s8 settled
 
-✅ **AC6 is closed** and was not a fourth translation site to do later. `'simple'` (FTS5 does not stem
-either), `plainto_tsquery` (not `websearch_`, which reinstates the operators `toFts5MatchQuery` exists
-to remove), and 🔴 **`_rank` NEGATED** — `bm25` is lower-is-better, `ts_rank_cd` is not, so unnegated
-every caller reads the ranking backwards with nothing failing anywhere.
+- **The order §6.2 gave was right, and the seam held.** Nothing in `QueryBuilder` needed a third
+  translation site beyond the two the first conformance run found (`$in: []` → `FALSE`, `LIKE` → `ILIKE`),
+  both armed on both engines in `QueryBuilder.dialect.test.js`.
+- **DDL has one source** (`postgres/ddl.ts`), the shared schema vocabulary is `schemaCommon.ts`, and the
+  BRG-004 export specs did not change by a byte.
+- **The model + queue is the honest shape for a synchronous schema interface on a socket** — and the
+  honest fix is to de-synchronise it (BRG-D7). Six callers. Not this session's: a peer was live in that
+  package throughout.
+- **`Object.create` wrappers split state on assignment.** `conformance/mutants.ts` wraps the schema
+  manager that way; `PgSchemaManager` keeps every mutable field in one `this.s` object for that reason.
+  A second adapter that forgets this passes the plain run and fails the `ignore-unique` mutant strangely.
 
-✅ **The method that found all of it:** run **both engines over ONE corpus** and assert the same
-`objectId` set — plus a third value saying which rows *should* come back, because two engines wrong in
-the same direction agree with each other. Do the same for the adapter class.
+## 5. Richard's calls — none outstanding
 
-## 3. 🔴 `noodl-mcp` is red, and it is not this phase's red — do not inherit it as a blocker
-
-8 suites / 10 tests fail (2181 of 2191 pass). **Measured, not assumed:** both runtime files were
-restored to their `HEAD` contents by `cp`, the whole suite re-run, and the failing-suite list and the
-counts came back **byte-identical**; then restored and verified by `diff`. The failing suites are
-unrelated surfaces (node id allocation, a response budget, theme preset chips, template settling, CMP
-exports, one live-backend spec).
-
-A peer holds **twelve modified files plus six new specs in `packages/nodegx-backend/src`**. So:
-
-- **BRG-005 AC7 cannot be *closed* by this task** — it is written as *"`noodl-mcp` is green"*, and
-  that is not this phase's to make true. Its SQLite half is demonstrated.
-- **The full `nodegx-backend` suite is deliberately unmeasured.** Running it now grades a peer's
-  working tree, not this change. Run it once their work lands.
-
-## 4. Richard's calls — none outstanding
-
-All six rulings (R1–R6) are taken and recorded in [README §4](README.md). Nothing in BRG-005 is
-waiting on a decision; the remaining work is build work.
+R1–R6 stand. Two things are worth a sentence from him when convenient, neither blocking:
+- BRG-D7's owner — BRG-006, or a task of its own.
+- Backups on PostgreSQL — `pg_dump` is the operator's job (recommended, say so in the docs) or the
+  service's `BackupManager` learns a database that is not a file (BRG-005 §7.4).
