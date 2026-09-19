@@ -395,6 +395,17 @@ still focused, caret at 17.
    "no reload fired" is known for **one save**, not for the window in which the divergence
    appeared.
 
+   🔴 **And that event has NO SUBSCRIBERS AT ALL.** Re-read at HEAD across `src/editor`,
+   `src/shared`, `tests/` and `tests-unit/`: **two emit sites and nothing else** —
+   `projectmodel.ts:1011` and its `EventDispatcher` mirror at `:1012`. Not the canvas, not the
+   panel, not a test. So when `applyProjectLevelSlice` swaps in fresh `VariantModel`s, **nobody is
+   told** — which is both why the divergence can appear silently and why the fix is larger than it
+   looks: whoever re-points the wearers is writing the **first consumer** of that event, not
+   extending one. It also says how to pin the window cheaply: with only two emit sites and no
+   subscribers, instrument the emits rather than waiting on a subscription. (Measured by
+   `opennoodl-3e` from the canvas files and re-read here off the tree
+   — [[a-relayed-conclusion-decays-faster-than-a-relayed-measurement]].)
+
 ## 3. Acceptance criteria
 
 The four rules of design §2 are the criteria. Any surface that breaks one is wrong.
