@@ -171,6 +171,24 @@ export const AUDIT_SYSTEM_USER_DELETE = 'user.system.delete';
  * families write — higher than `user.system.create`, which by construction
  * creates an account with no privilege at all.
  */
+/**
+ * FED-005 §3.4 — one row per MCP tool call, raised by `McpRoutes` rather than
+ * by the route table.
+ *
+ * The same exception as CWF-015's three below, and for the identical reason:
+ * `POST /mcp` is ONE route whose action is whatever tool the caller named, so
+ * the dispatcher cannot know whether a row was read, a row was added or a
+ * function was run — only the handler can. Declaring `POST mcp` in ACTIONS
+ * would have produced a trail in which every entry says "mcp", which answers
+ * none of the questions the trail exists for.
+ *
+ * ⚠️ It is also the first audited action on a route that is NOT admin-gated,
+ * which is why `requiresAuditAction` does not demand it: the coverage test
+ * asks admin routes for a declared action, and this one is declared because the
+ * task wants it, not because a gate insists.
+ */
+export const AUDIT_MCP_TOOL_CALL = 'mcp.tool.call';
+
 export const AUDIT_SYSTEM_ROLE_CREATE = 'role.system.create';
 export const AUDIT_SYSTEM_ROLE_USER_ADD = 'role.system.user.add';
 export const AUDIT_SYSTEM_ROLE_USER_REMOVE = 'role.system.user.remove';
@@ -203,6 +221,7 @@ export function declaredAuditActions(): string[] {
       AUDIT_SYSTEM_USER_CREATE,
       AUDIT_SYSTEM_USER_UPDATE,
       AUDIT_SYSTEM_USER_DELETE,
+      AUDIT_MCP_TOOL_CALL,
       AUDIT_SYSTEM_ROLE_CREATE,
       AUDIT_SYSTEM_ROLE_USER_ADD,
       AUDIT_SYSTEM_ROLE_USER_REMOVE

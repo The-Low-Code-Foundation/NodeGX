@@ -917,6 +917,25 @@ export class WorkflowRunner {
     return requestNodeAllowsNoAuth(this.findRequestNodeForFunction(functionName));
   }
 
+  /**
+   * FED-005 — the Request node's own `parameters` bag for a function, or
+   * undefined when this runner has not loaded it.
+   *
+   * Returned RAW rather than as a parsed contract, and that is the point:
+   * `requestParamSpecs` (CWF-014) is the single function that says what a
+   * Request node declares, and its docblock names an OpenAPI-style description
+   * generator as a caller it exists for. The MCP tool surface is that caller.
+   * Parsing here would make this the SECOND reader of the `ptype-`/`preq-`/
+   * `pdef-` convention, which is the drift `functionDeclarations`' own docblock
+   * is written about.
+   */
+  getRequestNodeParameters(functionName: string): Record<string, unknown> | undefined {
+    const node = this.findRequestNodeForFunction(functionName);
+    if (!node) return undefined;
+    const parameters = node.parameters;
+    return parameters && typeof parameters === 'object' ? (parameters as Record<string, unknown>) : undefined;
+  }
+
   getAvailableFunctions(): { name: string; workflow: string; writesRecords: boolean }[] {
     const functions: { name: string; workflow: string; writesRecords: boolean }[] = [];
     for (const [workflowName, exportData] of this.loadedWorkflows) {

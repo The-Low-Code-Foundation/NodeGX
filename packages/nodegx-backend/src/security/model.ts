@@ -32,19 +32,92 @@ export type Principal =
    * defeated by finding an un-annotated route.
    */
   | { kind: 'admin'; readonly?: boolean }
-  /** Named server-to-server credential; power comes only from its scopes. */
-  | { kind: 'apiKey'; name: string; scopes: string[] }
+  /**
+   * Named server-to-server credential; power comes only from its scopes —
+   * unless it also carries `actsAs`, which can only ever take power away.
+   */
+  | { kind: 'apiKey'; name: string; scopes: string[]; actsAs?: ActingUser }
   /** Session-token caller. `roles` are resolved names (no 'role:' prefix). */
   | { kind: 'user'; userId: string; roles: string[] }
   | { kind: 'anonymous' };
 
 /**
+ * FED-005 §3.3 — the user an API key acts as, resolved at authentication time.
+ *
+ * ## What this is for
+ *
+ * An API key is not a person, so `creatorOwns` rows are invisible to it: the
+ * key's scope bypasses the row check entirely and it sees EVERYTHING in the
+ * collections its scopes name. That is the right answer for a server-to-server
+ * credential doing bulk work, and the wrong one the moment the credential is
+ * pasted into somebody's MCP client — "let Claude read my todo list" must not
+ * mean "let Claude read everybody's todo list".
+ *
+ * So a key MAY be bound, by an admin, to exactly one `_User`. When it is, it is
+ * that user for every row-level and rule-level question, while remaining the
+ * KEY for every question about the credential itself — the rate-limit bucket,
+ * the audit actor, revocation. Richard's laptop key acts as Richard; the
+ * Distraction backend's key acts as the Distraction service user.
+ *
+ * ## 🔴 The invariant: `actsAs` only ever NARROWS
+ *
+ * A bound key is allowed what its scopes allow **and** what that user is
+ * allowed — never the union, never the user's side alone. Three consequences,
+ * each written where it is enforced:
+ *
+ *   - {@link checkClp} — scopes must cover the op AND the collection's rule
+ *     must admit that user. A key with `classes:*` bound to a user who may not
+ *     `create` on a collection cannot create there.
+ *   - {@link checkFunctionCall} — the `functions:` scope must cover the name
+ *     AND the function's `call` rule must admit that user. This is the ONLY
+ *     path on which a function rule is consulted for a key at all; an unbound
+ *     key is still decided by scope alone, exactly as before.
+ *   - `SecurityState.aclFor` — a bound key stops bypassing the row predicate
+ *     and gets that user's ACL keys instead.
+ *
+ * ⚠️ **Nothing changes for a key with no `actsAs`.** Every existing key has
+ * none, so every existing decision is byte-identical; the narrowing is opt-in
+ * per key and is applied by an admin, not by the caller.
+ *
+ * ## Why not "the key is system and the caller passes the user"
+ *
+ * That was option 2 in FED-005 §3.3 and it is rejected, not deferred-because-
+ * harder: it moves authorisation into the caller, which is precisely the
+ * service-role mistake this backend has avoided. A caller who can name the user
+ * can name any user.
+ */
+export interface ActingUser {
+  userId: string;
+  /** Resolved role names (no `role:` prefix), exactly as a session principal carries them. */
+  roles: string[];
+}
+
+/**
+ * The user a principal speaks for when a RULE is evaluated, or null.
+ *
+ * One function rather than an `actsAs` test at each of the three sites, because
+ * "which subject does this rule see?" is one question and three copies of it is
+ * how a bound key ends up narrowed on reads and not on calls.
+ */
+export function rulePrincipal(principal: Principal): Principal {
+  if (principal.kind === 'apiKey' && principal.actsAs) {
+    return { kind: 'user', userId: principal.actsAs.userId, roles: principal.actsAs.roles };
+  }
+  return principal;
+}
+
+/**
  * The principal-key set used in ACL matching — the exact strings that may
  * appear as keys of a record's ACL object. Everyone holds '*'.
+ *
+ * FED-005: a bound key matches as the user it acts as. An unbound key still
+ * answers `['*']`, which is unchanged and is anyway unreachable — `aclFor`
+ * hands an unbound key a bypass rather than a key set.
  */
 export function principalKeys(principal: Principal): string[] {
-  if (principal.kind === 'user') {
-    return ['*', principal.userId, ...principal.roles.map((r) => `role:${r}`)];
+  const subject = rulePrincipal(principal);
+  if (subject.kind === 'user') {
+    return ['*', subject.userId, ...subject.roles.map((r) => `role:${r}`)];
   }
   return ['*'];
 }
@@ -541,10 +614,49 @@ export function checkClp(config: SecurityConfig, principal: Principal, collectio
   if (principal.kind === 'admin') {
     return { allowed: true, rule, reason: 'admin credential bypasses collection permissions' };
   }
+  // 🔴 FED-005 (register R9) — the system-collection posture, hoisted so it
+  // covers EVERY non-admin principal in one place.
+  //
+  // It used to be carried only by `effectiveRule` returning 'nobody', which the
+  // user and anonymous branches below consult and the API-key branch does not:
+  // a key's decision was its scopes and nothing else. MEASURED 2026-09-19 on a
+  // locked backend — a key with `classes:read` read `_Session` and got live
+  // session tokens in plaintext, which is impersonation of every account on the
+  // backend; `_ApiKey` (key hashes), `_User` and `_Audit` came back the same
+  // way. Users and anonymous callers were correctly refused the whole time,
+  // which is why no test saw it.
+  //
+  // Placed HERE rather than inside the key branch so the posture is one
+  // statement about "who is not admin" rather than three copies that can drift
+  // — and so FED-005's `tools/list`, which is derived from this function, is
+  // safe by CONSTRUCTION instead of by remembering to filter `_`-prefixed names
+  // in the MCP layer. Nothing changes for users or anonymous callers: the rule
+  // they were already refused by is the same 'nobody'.
+  if (isSystemCollection(collection)) {
+    return {
+      allowed: false,
+      rule,
+      reason: `"${collection}" is a system collection and is reachable only with the admin credential`
+    };
+  }
   if (principal.kind === 'apiKey') {
-    return keyAllowsData(principal.scopes, op)
-      ? { allowed: true, rule, reason: `API key scope covers classes ${op}` }
-      : { allowed: false, rule, reason: `API key "${principal.name}" has no scope covering classes ${op}` };
+    if (!keyAllowsData(principal.scopes, op)) {
+      return { allowed: false, rule, reason: `API key "${principal.name}" has no scope covering classes ${op}` };
+    }
+    // FED-005 — a BOUND key is also held to the collection's own rule, as the
+    // user it acts as. See {@link ActingUser}: the two conditions are ANDed, so
+    // binding a key can only ever take access away. An unbound key takes the
+    // branch below untouched, which is what every key does today.
+    if (principal.actsAs) {
+      return ruleAllows(rule, rulePrincipal(principal))
+        ? { allowed: true, rule, reason: `API key scope covers classes ${op}, and rule ${JSON.stringify(rule)} grants it to the user "${principal.name}" acts as` }
+        : {
+            allowed: false,
+            rule,
+            reason: `API key "${principal.name}" acts as a user that rule ${JSON.stringify(rule)} denies ${op} to`
+          };
+    }
+    return { allowed: true, rule, reason: `API key scope covers classes ${op}` };
   }
   return ruleAllows(rule, principal)
     ? { allowed: true, rule, reason: `rule ${JSON.stringify(rule)} grants ${op} to ${principal.kind}` }
@@ -719,13 +831,34 @@ export function checkFunctionCall(
     return { allowed: true, rule: resolved.rule, reason: 'admin credential bypasses function rules', source: 'credential' };
   }
   if (principal.kind === 'apiKey') {
-    const allowed = keyAllowsFunction(principal.scopes, functionName);
+    if (!keyAllowsFunction(principal.scopes, functionName)) {
+      return {
+        allowed: false,
+        rule: resolved.rule,
+        reason: `API key "${principal.name}" has no scope covering "${functionName}"`,
+        source: 'credential'
+      };
+    }
+    // FED-005 — the mirror of the CLP narrowing above, and the ONLY path on
+    // which a function's `call` rule is consulted for a key. An unbound key is
+    // decided by scope alone, exactly as it always has been; a bound one must
+    // clear both, so `call: "role:staff"` means what it says even when the
+    // caller is a credential rather than a browser.
+    if (principal.actsAs) {
+      const allowed = ruleAllows(resolved.rule, rulePrincipal(principal));
+      return {
+        allowed,
+        rule: resolved.rule,
+        reason: allowed
+          ? `API key "${principal.name}" has a scope covering "${functionName}", and rule ${JSON.stringify(resolved.rule)} grants the call to the user it acts as`
+          : `API key "${principal.name}" acts as a user that rule ${JSON.stringify(resolved.rule)} denies calling "${functionName}"`,
+        source: 'credential'
+      };
+    }
     return {
-      allowed,
+      allowed: true,
       rule: resolved.rule,
-      reason: allowed
-        ? `API key "${principal.name}" has a scope covering "${functionName}"`
-        : `API key "${principal.name}" has no scope covering "${functionName}"`,
+      reason: `API key "${principal.name}" has a scope covering "${functionName}"`,
       source: 'credential'
     };
   }
@@ -919,6 +1052,16 @@ export interface AclEntry {
  *
  * This is the function BAK-001's realtime delivery must call per event per
  * subscriber; it is property-tested against the SQL form so they cannot drift.
+ *
+ * 🔴 **FED-005: the bound-key branch is here because this is the OTHER end of
+ * the chain, and it is the end that is easy to forget.** `aclFor` narrows what
+ * a bound key's QUERIES return; this narrows what its realtime SUBSCRIPTION is
+ * delivered. A bound key that fell through to the scope test here would read
+ * every user's rows as they were written, over SSE, while `/classes` correctly
+ * showed it only its own — the query gate and the event gate disagreeing, which
+ * is the exact drift this twin exists to prevent. So a bound key takes the
+ * ordinary ACL path below, as the user it acts as; an unbound key still follows
+ * its data scopes, unchanged.
  */
 export function canAccessRecord(
   principal: Principal,
@@ -927,7 +1070,10 @@ export function canAccessRecord(
 ): boolean {
   if (principal.kind === 'admin') return true;
   if (principal.kind === 'apiKey') {
-    return keyAllowsData(principal.scopes, access === 'read' ? 'find' : 'update');
+    // Scope first: a bound key still cannot reach a class its scopes do not name.
+    if (!keyAllowsData(principal.scopes, access === 'read' ? 'find' : 'update')) return false;
+    if (!principal.actsAs) return true;
+    // Bound: fall through to the ACL test with the acted-as user's keys.
   }
   const acl = record ? (record.ACL as Record<string, AclEntry> | null | undefined) : null;
   if (acl === null || acl === undefined) return true;

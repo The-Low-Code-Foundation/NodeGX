@@ -47,6 +47,7 @@ import {
   functionIdempotency,
   functionTimeoutMs,
   ruleAllows,
+  rulePrincipal,
   validateAclShape
 } from '../security/model';
 import type { TriggerSubsystem } from '../triggers/TriggerSubsystem';
@@ -72,7 +73,7 @@ import { ByobAdminRoutes } from './byob-admin';
 import { EmailRoutes } from './email-routes';
 import { FileRoutes } from './files';
 import type { FileSubsystem } from '../storage/FileSubsystem';
-import { ParseWireRoutes } from './parse-wire';
+import { ParseWireRoutes, toQueryOptions } from './parse-wire';
 import { UserRoutes } from './users';
 import { AdminDashboardRoutes, DashboardFeatures } from '../admin/AdminDashboardRoutes';
 import { AuthAttemptLimiter } from '../admin/auth';
@@ -84,7 +85,8 @@ import { RateLimiter, classifyRoute, type RateDecision } from '../ops/rate-limit
 import type { AuditLog } from '../ops/audit';
 import { AUDIT_LOGIN_FAILURE, AUDIT_LOGIN_SUCCESS, auditActionFor, declaredAuditActions } from '../ops/audit-actions';
 import { REQUEST_ID_HEADER, resolveRequestId } from '../ops/request-id';
-import { applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
+import { SERVICE_VERSION, applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
+import { McpRoutes } from './mcp/McpRoutes';
 import { metrics, recordRateLimited, recordRequest, registerProcessGauges } from '../ops/metrics';
 import { HttpError, parseURL, readJSONBody, readRawBody, sendError, sendJSON } from './http-util';
 
@@ -111,7 +113,18 @@ export type RouteAccess =
   | { kind: 'session' }
   /** Incoming webhook (WF-005) — SELF-ENFORCING on the per-hook secret; the
    *  handler verifies and rejects loudly into the execution record. */
-  | { kind: 'webhook' };
+  | { kind: 'webhook' }
+  /**
+   * FED-005 — the MCP endpoint. A SCOPED API KEY and nothing else: not a
+   * session, not anonymous, and deliberately **not** the master key (AC7).
+   *
+   * Its own class rather than reusing `data`, for two reasons a shared class
+   * would get wrong. The route is not per-collection, so there is no
+   * `collectionParam` for `data` to gate on — the gating is per TOOL, inside.
+   * And it must be refused BEFORE dev-open relaxes anything, which is a
+   * property only a declared class can carry (see `checkAccess`).
+   */
+  | { kind: 'mcp' };
 
 export interface RequestContext {
   req: http.IncomingMessage;
@@ -392,6 +405,8 @@ export class HttpServer {
   private readonly adminAuth: AdminAuthRoutes;
   /** BAK-005's dashboard, or null when `--no-admin` removed it entirely. */
   private readonly dashboard: AdminDashboardRoutes | null;
+  /** FED-005: the backend's own MCP endpoint. */
+  private readonly mcp: McpRoutes;
   /** BAK-005: failure budget in front of the one credential check. */
   private readonly authLimiter = new AuthAttemptLimiter();
   /**
@@ -491,6 +506,21 @@ export class HttpServer {
           features: () => this.dashboardFeatures(deps)
         })
       : null;
+    this.mcp = new McpRoutes({
+      facade: deps.facade,
+      security: deps.security,
+      audit: deps.audit,
+      getRunner: deps.getRunner,
+      // The query-argument reader the `/classes` routes use, passed in rather
+      // than re-derived: `where`/`order`/`limit`/`skip` mean one thing on this
+      // backend, and the MCP `_find` tool takes exactly those four words.
+      toQueryOptions,
+      // The name a client shows a person in its server list. The backend's own
+      // name, because somebody with three NodeGX backends connected needs to
+      // tell them apart, and "nodegx-backend" three times does not.
+      serverName: deps.options.backendName || deps.options.backendId || 'nodegx-backend',
+      serverVersion: SERVICE_VERSION
+    });
     this.routes = this.buildRoutes();
   }
 
@@ -555,6 +585,7 @@ export class HttpServer {
     const email = this.email;
     const adminEmail = this.adminEmail;
     const adminSearch = this.adminSearch;
+    const mcp = this.mcp;
 
     return [
       // ---- Public ----------------------------------------------------------
@@ -650,6 +681,13 @@ export class HttpServer {
         access: { kind: 'function', nameParam: 'name' },
         handler: (ctx) => this.runFunction(ctx)
       },
+
+      // ---- MCP (FED-005) ---------------------------------------------------
+      // Stateless Streamable HTTP. The GET is there to answer 405 rather than
+      // the router's 404: the official client special-cases 405 as "no SSE
+      // stream here" and treats anything else as a fault.
+      { method: 'POST', pattern: 'mcp', access: { kind: 'mcp' }, handler: (ctx) => mcp.handle(ctx) },
+      { method: 'GET', pattern: 'mcp', access: { kind: 'mcp' }, handler: (ctx) => mcp.noStream(ctx) },
 
       // ---- Files (BAK-006) --------------------------------------------------
       {
@@ -1773,6 +1811,38 @@ export class HttpServer {
       return;
     }
 
+    // Step 2a½: the MCP gate, which dev-open does NOT relax either — placed
+    // beside the admin one above and for FH-024's exact reason.
+    //
+    // Dev-open exists so an app can hit its own collections without a token
+    // from loopback, and a browser makes "only the developer can reach
+    // loopback" false: any web page can POST JSON-RPC to 127.0.0.1 on the
+    // developer's behalf. Relaxing this route would hand that page a tool list
+    // and a `_create` on every collection. `/mcp` is a credential-shaped door
+    // by construction — a key is the whole of how a client identifies itself —
+    // so there is nothing for dev-open to make more convenient here.
+    if (access.kind === 'mcp') {
+      if (principal.kind === 'admin') {
+        // AC7. Not 401 — the credential is real and was understood; it is the
+        // WRONG one, and saying so is the difference between a person fixing it
+        // in a minute and a person retyping the same token.
+        throw new HttpError(
+          403,
+          'The master key is refused on /mcp on purpose. An MCP client gets a scoped API key, never the admin ' +
+            'credential: make one with POST /admin/keys (scopes like ["classes:read"], optionally bound to a user ' +
+            'with actsAsUserId) and send it as X-NodeGX-Api-Key.',
+          119
+        );
+      }
+      if (principal.kind !== 'apiKey') {
+        throw new HttpError(
+          401,
+          'This endpoint needs a NodeGX API key, in X-NodeGX-Api-Key or as a Bearer token.'
+        );
+      }
+      return;
+    }
+
     // Step 2b: dev-open relaxes the remaining gates — only ever active on
     // loopback (the startup interlock guarantees a non-loopback bind cannot get
     // here), and never the admin one above.
@@ -1898,7 +1968,14 @@ export class HttpServer {
     if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
     if (data.ACL === undefined || data.ACL === null) delete data.ACL;
 
-    if (principal.kind === 'user' && this.security.creatorOwns(collection)) {
+    // FED-005: a key BOUND to a user stamps that user, exactly as a session
+    // would. Without this half, `aclFor` would hand the same key a row
+    // predicate it could not satisfy — it would create rows it could not then
+    // read back, which is a worse failure than the one the binding fixes
+    // because it looks like data loss. `rulePrincipal` is the same mapping the
+    // rule sites use, so "who is this?" has one answer.
+    const owner = rulePrincipal(principal);
+    if (owner.kind === 'user' && this.security.creatorOwns(collection)) {
       const sm = this.facade.schemaManager;
       if (sm) {
         // Ensure the table + a properly-typed owner column exist before insert
@@ -1907,9 +1984,9 @@ export class HttpServer {
         sm.createTable({ name: collection, columns: [] });
         sm.addColumn(collection, { name: 'owner', type: 'Pointer', targetClass: '_User' });
       }
-      data.owner = principal.userId;
+      data.owner = owner.userId;
       if (data.ACL === undefined) {
-        data.ACL = { [principal.userId]: { read: true, write: true } };
+        data.ACL = { [owner.userId]: { read: true, write: true } };
       }
     }
   }

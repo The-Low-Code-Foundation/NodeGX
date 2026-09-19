@@ -528,12 +528,33 @@ export class AdminSecurityRoutes {
     if (!name) throw new HttpError(400, 'Key name is required');
     const scopeError = validateScopes(body.scopes);
     if (scopeError) throw new HttpError(400, scopeError);
-    // Name and scopes are the audit-worthy part; the secret is returned to the
-    // caller once and never recorded (the redaction rule would drop it anyway).
-    ctx.audit({ key: name, scopes: body.scopes });
-    const { objectId, secret } = await this.security.createApiKey(name, body.scopes as string[]);
+    // FED-005 §3.3 — binding the key to a user, and the reason it is ADMIN-only
+    // and set at creation: a caller who could choose or change whom a key acts
+    // as would hold exactly the authority the binding exists to withhold.
+    //
+    // 🔴 The user is verified to EXIST here rather than at first use. A binding
+    // to a typo'd id would otherwise be accepted silently and only surface as a
+    // 401 on the MCP client's first call, with nothing pointing back at the
+    // typo — and `actingUserFor` fails shut on a missing user precisely so that
+    // this cannot fail open instead.
+    const actsAsUserId = body.actsAsUserId === undefined || body.actsAsUserId === null
+      ? null
+      : String(body.actsAsUserId).trim();
+    if (actsAsUserId !== null) {
+      if (!actsAsUserId) throw new HttpError(400, 'actsAsUserId must be a non-empty user id, or omitted');
+      try {
+        await this.facade.rawFetch('_User', actsAsUserId);
+      } catch {
+        throw new HttpError(400, `No such user: ${actsAsUserId}`);
+      }
+    }
+    // Name, scopes and the binding are the audit-worthy part; the secret is
+    // returned to the caller once and never recorded (the redaction rule would
+    // drop it anyway).
+    ctx.audit({ key: name, scopes: body.scopes, actsAsUserId });
+    const { objectId, secret } = await this.security.createApiKey(name, body.scopes as string[], actsAsUserId);
     // The one and only time the secret is returned.
-    sendJSON(ctx.res, 201, { objectId, name, scopes: body.scopes, secret });
+    sendJSON(ctx.res, 201, { objectId, name, scopes: body.scopes, actsAsUserId, secret });
   }
 
   async revokeKey(ctx: RequestContext): Promise<void> {

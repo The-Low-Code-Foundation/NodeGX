@@ -24,7 +24,7 @@ can do what. That's the whole workflow.
 | Principal | How it authenticates | Power |
 |-----------|---------------------|-------|
 | **Admin** | `Authorization: Bearer <adminToken>` or `X-Parse-Master-Key: <adminToken>` | Full access; bypasses all rules. The editor and ops tooling use this. |
-| **API key** | `X-NodeGX-API-Key: ngxk_…` | A named, revocable, scoped server-to-server credential. |
+| **API key** | `X-NodeGX-API-Key: ngxk_…` or `Authorization: Bearer ngxk_…` | A named, revocable, scoped server-to-server credential. May optionally **act as one user** — see below. |
 | **User** | `X-Parse-Session-Token: r:…` (from login/signup) | An end user; carries their role memberships. |
 | **Anonymous** | nothing | No identity. |
 
@@ -81,8 +81,20 @@ still set an explicit ACL when you need something other than private.
   Scopes: `functions:<name>` / `functions:*` (call those functions),
   `classes:read` / `classes:write` / `classes:*` (data access, all
   collections). No scope reaches `/admin` — keys can never administer or mint
-  keys. The secret is shown **once** at creation and is unrecoverable; store it
-  then.
+  keys, and no key of any scope reaches a system collection (`_User`,
+  `_Session`, `_ApiKey`, `_Audit`…); those are admin-only. The secret is shown
+  **once** at creation and is unrecoverable; store it then.
+- **A key can act as one user.** Pass `actsAsUserId` when you create it and the
+  key sees exactly what that person sees, creates rows they own, and is bound by
+  the roles they hold — while the rate limit, the audit trail and revocation
+  still name the key. It can only ever take access away: a bound key is allowed
+  what its scopes allow **and** what that user is allowed.
+
+  Unbound, a key with `classes:read` sees **every row** in the collections its
+  scopes name, including rows belonging to your users. That is right for bulk
+  server-to-server work and wrong for a credential you hand to somebody's AI
+  client — which is what
+  [Connecting a backend to Claude](./BACKEND-MCP.md) is about.
 
 ## Deploying: the checklist
 
@@ -90,7 +102,9 @@ still set an explicit ACL when you need something other than private.
    `"devOpen": false` in `security.json`).
 2. Set each collection's permissions. Leave creator-owns on for per-user data.
 3. Create roles and assign users as needed.
-4. Issue API keys for any external services; store the secrets.
+4. Issue API keys for any external services; store the secrets. Bind one to a
+   user (`actsAsUserId`) whenever it should see one person's rows rather than
+   everybody's.
 5. Deploy. The admin credential in `secrets.json` travels with the backend (keep
    it secret); end users authenticate with sessions, not the admin token.
 

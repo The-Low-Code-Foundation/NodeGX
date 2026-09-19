@@ -25,6 +25,7 @@ import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
 import {
+  ActingUser,
   ClpOp,
   Principal,
   SecurityConfig,
@@ -309,20 +310,55 @@ export class SecurityState {
       if (admin) return admin;
       throw new HttpError(401, 'Unauthorized.');
     }
+    //
+    // 🔴 FED-005 — a `Bearer` that is not an admin credential now FALLS THROUGH
+    // to the API-key lookup instead of throwing.
+    //
+    // It used to throw 401 immediately, which made `Authorization: Bearer <api
+    // key>` unusable — and that is the header an MCP client sends. (WFA-005/F7
+    // had already been bitten by the same throw from the other side: a webhook
+    // caller presenting its per-hook secret as a Bearer was rejected before
+    // routing, and the fix there was to exempt the route rather than to make
+    // the header mean more than one thing.) FED-005 §3.1 requires both
+    // spellings, and the alternative — a second credential-resolution path
+    // inside the MCP handler — would be a second answer to "is this key
+    // valid?", which is the one question that must have exactly one.
+    //
+    // Nothing is loosened. An admin token still resolves to admin and only to
+    // admin; a Bearer that is neither an admin token nor a live key still
+    // ends at the same 401 a few lines down, and still counts against the same
+    // failure budget. What changes is that one more real credential is
+    // recognised in a header that already carried credentials.
     const auth = h['authorization'];
-    if (typeof auth === 'string' && auth.startsWith('Bearer ')) {
-      const admin = this.matchAdminCredential(auth.slice('Bearer '.length));
+    const bearer =
+      typeof auth === 'string' && auth.startsWith('Bearer ') ? auth.slice('Bearer '.length) : null;
+    if (bearer) {
+      const admin = this.matchAdminCredential(bearer);
       if (admin) return admin;
-      throw new HttpError(401, 'Unauthorized.');
     }
 
-    // 2. API key.
-    const apiKey = h['x-nodegx-api-key'];
+    // 2. API key — in its own header, or as the Bearer token above.
+    const apiKeyHeader = h['x-nodegx-api-key'];
+    const apiKey = typeof apiKeyHeader === 'string' && apiKeyHeader.length > 0 ? apiKeyHeader : bearer;
     if (typeof apiKey === 'string' && apiKey.length > 0) {
       const row = await this.lookupApiKey(apiKey);
       if (!row) throw new HttpError(401, 'Unauthorized.');
       this.touchApiKey(row.objectId);
-      return { kind: 'apiKey', name: row.name, scopes: row.scopes };
+      // FED-005 §3.3 — a bound key resolves as the KEY carrying a user, never
+      // as the user. Everything that asks "which credential is this?" — the
+      // rate-limit bucket, the audit actor, the readonly tier, revocation —
+      // reads `kind` and is unaffected; only the rule and ACL sites consult
+      // `actsAs`, and only ever to take access away. See model.ts ActingUser.
+      //
+      // ⚠️ Roles are resolved HERE, once per request, rather than at each rule
+      // site: `rolesForUser` is a join, and the alternative is a query per
+      // collection in a `tools/list` that walks every collection on the
+      // backend. It is also what a session principal does, so a bound key and
+      // the user it acts as carry role lists built by the same call.
+      const actsAs = await this.actingUserFor(row.actsAsUserId, row.name);
+      return actsAs
+        ? { kind: 'apiKey', name: row.name, scopes: row.scopes, actsAs }
+        : { kind: 'apiKey', name: row.name, scopes: row.scopes };
     }
 
     // 3. Session token. The literal strings "undefined"/"null" occur when a
@@ -381,9 +417,17 @@ export class SecurityState {
       const covered =
         principal.scopes.includes('classes:*') ||
         principal.scopes.includes(access === 'read' ? 'classes:read' : 'classes:write');
-      // A key that got past the CLP check has a covering scope, so this is
-      // effectively always a bypass; the branch is defensive.
-      return covered ? undefined : { access, keys: [] };
+      if (!covered) return { access, keys: [] };
+      // 🔴 FED-005 §3.3 — a BOUND key stops bypassing. This one line is what
+      // makes "whose rows does a key see?" have an answer other than "all of
+      // them", and it applies to the whole data plane, not only to /mcp: the
+      // same key doing the same `find` over plain HTTP must return the same
+      // set, or there are two authorization models and the weaker one is the
+      // one an attacker uses. (FED-005 AC2 asserts exactly that pair.)
+      if (principal.actsAs) return { access, keys: principalKeys(principal) };
+      // An unbound key that got past the CLP check has a covering scope, so
+      // this is effectively always a bypass; the branch is defensive.
+      return undefined;
     }
     return { access, keys: principalKeys(principal) };
   }
@@ -438,7 +482,9 @@ export class SecurityState {
   // API keys (_ApiKey: name, keyHash, scopes JSON, revoked, lastUsedAt)
   // ==========================================================================
 
-  private async lookupApiKey(secret: string): Promise<{ objectId: string; name: string; scopes: string[] } | null> {
+  private async lookupApiKey(
+    secret: string
+  ): Promise<{ objectId: string; name: string; scopes: string[]; actsAsUserId: string | null } | null> {
     try {
       const { results } = await this.deps.facade.rawQuery('_ApiKey', {
         where: { keyHash: sha256(secret) },
@@ -449,11 +495,35 @@ export class SecurityState {
       return {
         objectId: row.objectId as string,
         name: row.name as string,
-        scopes: parseScopes(row.scopes)
+        scopes: parseScopes(row.scopes),
+        actsAsUserId: typeof row.actsAsUserId === 'string' && row.actsAsUserId.length > 0 ? row.actsAsUserId : null
       };
     } catch {
       return null;
     }
+  }
+
+  /**
+   * FED-005 — the `ActingUser` for a stored `actsAsUserId`, or null.
+   *
+   * 🔴 **A binding that names a user this backend does not have is a REFUSAL,
+   * not a downgrade.** The tempting shape is "fall back to an ordinary key" —
+   * and it is the dangerous one: deleting the user a key is bound to would then
+   * silently promote that key from "sees one person's rows" to "sees
+   * everybody's". Failing shut costs a bound key its access when its user is
+   * removed, which is the direction an operator can recover from.
+   */
+  private async actingUserFor(userId: string | null, keyName: string): Promise<ActingUser | null> {
+    if (!userId) return null;
+    try {
+      await this.deps.facade.rawFetch('_User', userId);
+    } catch {
+      throw new HttpError(
+        401,
+        `API key "${keyName}" acts as a user that no longer exists. Revoke the key, or re-create it bound to a user that does.`
+      );
+    }
+    return { userId, roles: await this.rolesForUser(userId) };
   }
 
   /**
@@ -483,8 +553,19 @@ export class SecurityState {
     });
   }
 
-  /** Create a key; returns the plaintext secret exactly once. */
-  async createApiKey(name: string, scopes: string[]): Promise<{ objectId: string; secret: string }> {
+  /**
+   * Create a key; returns the plaintext secret exactly once.
+   *
+   * FED-005: `actsAsUserId` binds the key to one `_User` (see model.ts
+   * {@link ActingUser}). It is written only when given, so a key created
+   * without one is byte-identical on disk to every key created before this
+   * task, and the column stays absent on rows nobody bound.
+   */
+  async createApiKey(
+    name: string,
+    scopes: string[],
+    actsAsUserId?: string | null
+  ): Promise<{ objectId: string; secret: string }> {
     const secret = 'ngxk_' + crypto.randomBytes(32).toString('base64url');
     // 🔴 `scopes` is declared `Array` (service.ts:888), so the ADAPTER serializes
     // it. The raw SQL this replaced wrote `JSON.stringify(scopes)` into the
@@ -496,13 +577,23 @@ export class SecurityState {
       name,
       keyHash: sha256(secret),
       scopes,
-      revoked: false
+      revoked: false,
+      ...(actsAsUserId ? { actsAsUserId } : {})
     });
     return { objectId: created.objectId as string, secret };
   }
 
   async listApiKeys(): Promise<
-    { objectId: string; name: string; scopes: string[]; revoked: boolean; createdAt: string; lastUsedAt: string | null }[]
+    {
+      objectId: string;
+      name: string;
+      scopes: string[];
+      revoked: boolean;
+      createdAt: string;
+      lastUsedAt: string | null;
+      /** FED-005 — the `_User` this key acts as, or null for an unbound key. */
+      actsAsUserId: string | null;
+    }[]
   > {
     const { results } = await this.deps.facade.rawQuery('_ApiKey', {});
     return results.map((r) => ({
@@ -511,7 +602,8 @@ export class SecurityState {
       scopes: parseScopes(r.scopes),
       revoked: Boolean(r.revoked),
       createdAt: r.createdAt as string,
-      lastUsedAt: (r.lastUsedAt as string) || null
+      lastUsedAt: (r.lastUsedAt as string) || null,
+      actsAsUserId: typeof r.actsAsUserId === 'string' && r.actsAsUserId.length > 0 ? r.actsAsUserId : null
     }));
   }
 

@@ -226,10 +226,19 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // secret being read here — nothing reads a secret back at all, by
     // construction (admin-secrets.ts). The write is an operator action taken
     // once per credential, which is the shape the admin budget is for.
+    // FED-005 moved `data` by 2: `POST /mcp` and `GET /mcp`. Reviewed and put
+    // in the `data` budget deliberately — every call the endpoint serves is a
+    // query, a write or a function run, so that is what it costs, and letting a
+    // new access kind fall through `classifyRoute`'s `default` would have given
+    // a credentialed data door the `public` allowance meant for `/health`. It
+    // is NOT `functions`: most calls are rows, and the per-function budget
+    // (CWF-017) is deliberately not spent on this door at all — see the gate
+    // table in McpRoutes' docblock, which says so rather than leaving it to be
+    // found.
     expect(counts).toEqual({
       admin: 79,
       auth: 15,
-      data: 17,
+      data: 19,
       files: 4,
       functions: 1,
       hooks: 1,
@@ -242,6 +251,10 @@ describe('BAK-009 rate limiting over real sockets', () => {
       const cls = classifyRoute(route.pattern, route.access.kind);
       if (route.access.kind === 'admin') expect(cls).toBe('admin');
       if (route.pattern.startsWith('realtime')) expect(cls).toBe('realtime');
+      // FED-005: and the MCP door never drifts back to `public` by someone
+      // removing its `case` from `classifyRoute` — which is a silent change,
+      // since the switch has a `default`.
+      if (route.access.kind === 'mcp') expect(cls).toBe('data');
     }
   });
 });

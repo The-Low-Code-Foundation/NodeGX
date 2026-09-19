@@ -95,3 +95,160 @@ prompts in this task; tools only.
 7. **AC7** — The master key is refused on `/mcp` with a message that says to make a scoped key.
 8. **AC8** — `docs/runtime/BACKEND-MCP.md` exists: the address, how to make a key, the todo-app
    example with `Task_find` and `Task_create`, and what a key can never do.
+
+---
+
+## 5. What was built, and the decisions taken while building it
+
+**Built 2026-09-19 (session 5), branch `cline-dev`.** All eight ACs green. 38 specs across three
+suites. It did **not** grow past the phase — R3's "liftable into phase 97" was not needed, and
+this section says so because the ruling asked to be told either way.
+
+**Shipped:**
+
+| | |
+|---|---|
+| `src/server/mcp/toolSurface.ts` | the tools one key sees, derived from `checkClp`/`checkFunctionCall`. Pure |
+| `src/server/mcp/McpRoutes.ts` | `POST /mcp` (stateless Streamable HTTP, JSON-RPC 2.0) and `GET /mcp` → 405 |
+| `security/model.ts` | `ActingUser`, `rulePrincipal`, the two narrowing sites, and **the R9 fix** |
+| `security/state.ts` | `actsAs` resolution, `aclFor` narrowing, `Bearer` carrying a key |
+| `service.ts` · `admin-security.ts` | the `_ApiKey.actsAsUserId` column and the admin door that sets it |
+| `docs/runtime/BACKEND-MCP.md` | AC8, plus the API-key half of `BACKEND-ACCESS-CONTROL.md` |
+| 3 suites | `fed-005-mcp-surface` (21) · `fed-005-mcp-acts-as` (11) · `fed-005-mcp-client` (7) |
+
+### 5.1 The decisions
+
+1. 🔴 **`actsAs` only ever NARROWS, and it applies to the WHOLE data plane.** A bound key is
+   allowed what its scopes allow **and** what its user is allowed — never the union, never the
+   user's side alone. It is enforced at four sites (`checkClp`, `checkFunctionCall`, `aclFor`,
+   `canAccessRecord`) and `rulePrincipal` is the one function all four ask "who is this?".
+   ⚠️ **Not an MCP-only rule.** AC2's third clause demanded it — *"a raw HTTP find with the same
+   key returns the same set"* — and it is right: two authorization models means an attacker uses
+   the weaker one. **Nothing changes for a key with no `actsAs`**, which is every key that
+   exists, so the narrowing is opt-in per key and applied by an admin, never by the caller.
+2. 🔴 **`canAccessRecord` needed the same branch, and it is the end of the chain that gets
+   forgotten.** `aclFor` narrows what a bound key's QUERIES return; `canAccessRecord` is the JS
+   twin BAK-001's realtime delivery calls per event per subscriber. Without it a bound key would
+   have read every user's rows as they were written, over SSE, while `/classes` correctly showed
+   it only its own — the query gate and the event gate disagreeing, which is the exact drift the
+   twin exists to prevent. Found by asking what else reads the principal, not by a red.
+3. **A missing acted-as user FAILS SHUT (401), rather than degrading to an unbound key.** The
+   tempting shape is the dangerous one: deleting the user a key is bound to would silently
+   promote that key from "sees one person's rows" to "sees everybody's". Losing access when your
+   user is removed is recoverable; the other direction is not.
+4. 🔴 **`Authorization: Bearer <api key>` now authenticates.** It used to throw 401 before the
+   key branch was ever reached, which made §3.1's second spelling impossible — and Bearer is the
+   header MCP clients send. (WFA-005/F7 was bitten by the same throw from the webhook side and
+   fixed it by exempting a route.) The alternative was a second credential path inside the MCP
+   handler, i.e. a second answer to "is this key valid?". Nothing is loosened: an admin token
+   still resolves only to admin, and an unrecognised Bearer still 401s against the same failure
+   budget.
+5. **Dev-open does NOT relax `/mcp`**, and the gate sits beside the admin one rather than inside
+   the fast path. FH-024's lesson verbatim: loopback is not "only the developer", because a
+   browser will reach 127.0.0.1 on any web page's behalf — and a relaxed `/mcp` would hand that
+   page a tool list and a `_create` on every collection. There is nothing for dev-open to make
+   more convenient here anyway: a key IS how a client identifies itself.
+6. **The rate class is `data`, declared rather than defaulted.** `classifyRoute` has a `default`,
+   so a new access kind silently lands in `public` — the budget meant for `/health` — and this
+   door does queries, writes and function runs. Pinned by an invariant in `ops-rate-limit`, not
+   only by the tally.
+7. **The audit row is raised by the HANDLER, not the dispatcher** — CWF-015's exception, for
+   CWF-015's reason word for word: `POST /mcp` is ONE route whose action is whatever tool was
+   named, so the dispatcher cannot know whether a row was read, a row was added, or a function
+   ran. `actor` is the key's NAME because that is the actor spelling every other row uses for a
+   key; a trail with two spellings for one principal is a trail nobody can filter.
+8. **An ephemeral `_Session` is minted for a bound key calling a FUNCTION, and released in a
+   `finally`.** The graph's own `Allow Unauthenticated` check runs inside the graph and nothing
+   outside can wave it, so without this a bound key's function tools would be offered and then
+   systematically refused — the one thing `toolSurface`'s docblock says must not happen. The
+   token never leaves the process, and a cloud function already runs as system with the master
+   key, so it is strictly more privileged than the session it is shown. `finally`, not
+   after-success: a failing call must not leave a live credential behind.
+9. **No `_delete` tool, for any collection, ever** (AC3) — not "unless the rule allows". The
+   suite proves the absence means something by using a collection whose HTTP `delete` rule is
+   `authenticated` and deleting through it in the same run.
+10. **The endpoint speaks JSON-RPC directly; the SDK is a test dependency only.** A deployed
+    backend carries no MCP library and none of its transitive dependencies. The official client
+    is used as the INSTRUMENT (AC5) precisely because a hand-rolled server and a hand-rolled
+    spec agree with each other by construction.
+
+### 5.2 The four doors, and which gates each passes
+
+FED-004 §5.1 decision 7 pinned that the overlap policy guards the scheduler's fires and nothing
+else. **FED-005 is that question's mirror, and the answer is a table in `McpRoutes`' docblock**
+rather than something to be discovered later. The two honest gaps, stated rather than hidden:
+
+- **No per-function rate limit (CWF-017).** That budget is for an endpoint a provider hammers;
+  an MCP client is a person's laptop and is already inside the `data` class budget.
+- **No idempotency (CWF-016).** An idempotency key identifies a DELIVERY being retried by a
+  provider. An MCP tool call is not one, and there is no key for the caller to send. Both are
+  cheap to add if a real case turns up; neither is worth a fake key today.
+
+### 5.3 What the gates are, and what they are not
+
+- 🔴 **Three mutants, because a security suite that is green on its first run has told you
+  nothing.** Each load-bearing change was reverted and the suite re-run: the R9 hoist (2 arms
+  red), `aclFor`'s narrowing (5 AC2 arms red, the unbound control **staying green** — which is
+  what makes them about the binding), `checkFunctionCall`'s narrowing (both AC4 arms red).
+- 🔴 **One of those mutants caught a spec of mine that GRADED NOTHING.** "Ask a live backend for
+  its tools, assert none start with `_`" stayed green with the hole deliberately reopened.
+  Measured: a backend with rows in `_User`, `_Session`, `_ApiKey` and `_Audit` answers
+  `GET /admin/schema` with `["Task"]` — `listTables()` does not report system tables at all, so
+  no system name ever reached `checkClp` by that path. Two independent reasons no
+  `_Session_find` exists is a good place to be, but only the gate is a security property, so the
+  assertion moved to `buildToolSurface` called directly with the system names in the list.
+- **Rule 5 does not apply: FED-005 adds no node type.** `/mcp` is a route. No `catalog:generate`,
+  no ledger row, no picker row — a ledger row follows a TYPE.
+- **Register R8 confirmed unmoved:** `noodl-mcp`'s tool surface reads **8,274 tokens / 20
+  resident tools — 6 under the 8,280 budget**, exactly s4's figure. FED-005 adds nothing to
+  `packages/noodl-mcp`; §3.3's optional "the List backend API keys tool gains a create form" was
+  **not built**, and R8 is the reason to leave it alone until that surface has been put on a diet.
+- 🔴 **R4's `noodl-mcp` floor holds at 7 suites / 8 tests — but the FIRST reading said 8 and 10,
+  and that is the part worth recording.** That run was started while `test:main` was still going
+  on a box at load 10 with a peer's Electron editor up; the quiet re-run reproduced neither extra
+  red. *A lone red on a loaded box is a flake, and the way to know is to re-run it rather than to
+  reason about it.* **And the seven names, which R4 recorded only as "the same seven names":**
+  `nodeIdAllocation` · `cn004` · `cmp004Parts` · `nodeDocBudget` · `cmp001InterfaceDoctrine` ·
+  `def038SettledTemplates` · `d54ThemePresetIdentity`. Written down so the next session can
+  compare a set rather than a number.
+
+### 5.4 The runs
+
+- **The three FED-005 suites: 39/39.** Surface 21 · acts-as 11 · official client 7.
+- **The affected `nodegx-backend` set: 15 suites / 165 tests, green** — every suite that reads a
+  `Principal`, walks the route table, or filters a realtime event: `security-model`,
+  `security-enforcement`, `security-functions`, `brg-002-api-key-roundtrip`, `ops-audit`,
+  `ops-rate-limit`, `impersonate-session`, `realtime-filter`, `realtime-http`,
+  `realtime-changebus`, `service-http`, `cloud-http-node`, plus the three new ones.
+- **`test:main` 508/508 suites, 8103/8103 tests.** (s4 read 504/8065; peers have added suites
+  since, and both numbers are green.)
+- `typecheck:backend-tests` and `typecheck:cloud` both exit 0.
+- ⚠️ **The `nodegx-backend` WHOLE run was NOT done, and the reason is not "it was slow".** A peer
+  held an Electron editor on CDP 9222 for the whole session and the box sat at load 7–11.
+  `tests/ac2-page-editor-drag-drive.test.ts` drives a real editor, and s4's own correction says
+  the historical "it hangs" report was almost certainly a peer holding that port. Running it
+  against a live peer editor would have measured the contention, not the package. **Owed by the
+  next session on a quiet box** — it is ten minutes at `--maxWorkers=2`.
+
+### 5.5 Two reviewed counts moved, and both are the artefact
+
+Neither literal was bumped to make a red go green; both gates count the live route table and the
+number is the reviewed baseline.
+
+- `ops-rate-limit`'s class tally: `data` **17 → 19**, the two `/mcp` routes, with the reason
+  written beside it and a new invariant so the class cannot drift back to `public` by silent
+  fall-through.
+- `security-enforcement`'s route walk gained an `mcp` arm expecting **401** — a denial like every
+  other arm, 401 rather than 403 for the admin arm's reason: no credential was presented, so
+  there was no rule to deny. The master key presenting the WRONG credential is 403 and is AC7.
+
+### 5.6 What §3.2 asked for and could not have
+
+🔴 **"description from the component's description" has no source on a deployed backend.**
+Measured at `noodl-editor/src/editor/src/utils/exporter/util.ts`: `exportComponent` builds
+`{name, nodes, connections, ports, roots, metadata}` and drops `ComponentModel.description`, so
+the sentence an author writes in the editor never reaches a bundle. Carrying it is an EDITOR
+change, which ruling R4 puts outside this phase — filed as register **R10**. The tool description
+is therefore built from what the bundle DOES carry (the name and the declared contract), because
+a model choosing between tools reads that string and "no description" is the one answer
+guaranteed to be useless.

@@ -56,7 +56,13 @@ function parseJSONParam(value: string | undefined, name: string): Record<string,
 }
 
 /** Map the wire query fields (from body or query-string) to adapter options. */
-function toQueryOptions(src: Record<string, unknown>): QueryOptions {
+/**
+ * FED-005 exports this: the MCP `_find` tool takes `where`/`order`/`limit`/
+ * `skip`, which is this function's input shape, and a second reading of what
+ * those four words mean is a second answer to "does `order` accept a comma
+ * list?".
+ */
+export function toQueryOptions(src: Record<string, unknown>): QueryOptions {
   const options: QueryOptions = {};
   if (src.where !== undefined) {
     options.where =

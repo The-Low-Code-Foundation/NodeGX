@@ -919,9 +919,21 @@ export class BackendService {
         { name: 'keyHash', type: 'String' },
         { name: 'scopes', type: 'Array' },
         { name: 'revoked', type: 'Boolean' },
-        { name: 'lastUsedAt', type: 'Date' }
+        { name: 'lastUsedAt', type: 'Date' },
+        // FED-005 §3.3 — the `_User` this key acts as, or absent. A plain
+        // String rather than a Pointer: `aclFor` and `rolesForUser` both want
+        // the bare id, and a Pointer column would have every reader unwrap a
+        // `{__type: 'Pointer'}` envelope for a field no query ever joins on.
+        { name: 'actsAsUserId', type: 'String' }
       ]
     });
+    // Same shape as `_Session.expiresAt` above, and for the same reason:
+    // `createTable` does nothing to a table that already exists, so every
+    // backend created before FED-005 needs the ALTER, and `addColumn` swallows
+    // a duplicate. Without it a bound key written by the admin route would read
+    // back unbound — which fails OPEN, into the exact "the key sees everybody's
+    // rows" behaviour the binding exists to stop.
+    sm.addColumn('_ApiKey', { name: 'actsAsUserId', type: 'String' });
     // BAK-002: password-reset / verify-email tokens — hashed at rest, single-use.
     // BAK-004 adds two columns for magic links: `email`, because a signup link
     // is issued before any user exists (so `userId` is empty and the address is

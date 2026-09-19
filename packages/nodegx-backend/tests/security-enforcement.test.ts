@@ -532,6 +532,15 @@ describe('BAK-003 enforcement (locked backend)', () => {
         case 'admin':
           expect(label).toContain('-> 401');
           break;
+        case 'mcp':
+          // FED-005. A denial, like every other arm of this walk — 401 rather
+          // than 403 for the admin arm's reason: no credential was presented at
+          // all, and there is no rule to have denied. (A credential that IS
+          // presented and is the wrong one — the master key — is 403, and is
+          // pinned by AC7 in fed-005-mcp-surface.) Both verbs are walked: the
+          // GET answers 405 only for a caller that got past this gate.
+          expect(label).toContain('-> 401');
+          break;
         default:
           // data / function / files / signup: locked config denies all of them.
           expect(`${label} ${json && json.code}`).toContain('-> 403');

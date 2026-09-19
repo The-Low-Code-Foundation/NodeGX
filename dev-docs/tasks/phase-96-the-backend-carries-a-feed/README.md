@@ -4,7 +4,7 @@
 NodeGX app at distraction.digitalbricks.io), and a capability survey of `packages/nodegx-backend`,
 `packages/noodl-viewer-cloud` and `packages/noodl-runtime` taken the same afternoon at `cline-dev`
 HEAD `f3f67874d`.
-**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 ✅ CLOSED. FED-004 ✅ CLOSED. FED-005 is next.** **Prefix: `FED`.**
+**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 ✅ CLOSED. FED-004 ✅ CLOSED. FED-005 ✅ CLOSED. FED-006 (the drive) is next and is the last task.** **Prefix: `FED`.**
 
 > "I'd really like the NodeGX backend to be able to handle this stuff. I want people to see NodeGX as
 > an alternative to tools like Supabase and n8n as well as a front end builder. The old Noodl made the
@@ -115,9 +115,9 @@ Asked in plain words, answered in one pass, 2026-09-18 (session 1).
 |---|---|---|---|---|
 | [FED-001](FED-001-A-FEED-IS-A-THING-YOU-CAN-PARSE.md) | `Parse XML` and `Parse Feed` nodes; RSS 2.0, Atom, RDF, YouTube, Reddit, podcasts → one item shape | ✅ | ✅ 6/6 | ✅ |
 | [FED-002](FED-002-A-COLLECTION-DECLARES-ITS-INDEXES.md) | `indexes` per collection in `schema.json`, unique included; upsert-on-unique on create | ✅ | ✅ 7/7 | ✅ |
-| [FED-003](FED-003-A-FUNCTION-CALLS-A-MODEL.md) | `Model Request` cloud node: key from `Secret`, structured JSON out, usage counted, no SDK | ⬜ | ⬜ | ⬜ |
+| [FED-003](FED-003-A-FUNCTION-CALLS-A-MODEL.md) | `Model Request` cloud node: key from `Secret`, structured JSON out, usage counted, no SDK | ✅ | ✅ 9/9 | ✅ |
 | [FED-004](FED-004-A-SCHEDULE-DOES-NOT-TRIP-OVER-ITSELF.md) | `overlapPolicy` on schedules; conditional GET (ETag / 304) on the HTTP node; a `User-Agent` | ✅ | ✅ 7/7 | ✅ |
-| [FED-005](FED-005-A-BACKEND-SPEAKS-MCP.md) | `/mcp` on the backend: functions and collections as tools, scoped by API key | ⬜ | ⬜ | ⬜ |
+| [FED-005](FED-005-A-BACKEND-SPEAKS-MCP.md) | `/mcp` on the backend: functions and collections as tools, scoped by API key | ✅ | ✅ 8/8 | ✅ |
 | [FED-006](FED-006-THE-DRIVE-ONE-FEED-END-TO-END.md) | the drive: fixture feeds → schedule → parse → dedupe → tag → per-user read, on a provisioned backend | ⬜ | ⬜ | ⬜ |
 
 **FED-001 is CLOSED (s1):** built, gated, driven over HTTP on a provisioned backend, 53 tests green
@@ -136,6 +136,23 @@ through a `_HttpCache` validator table that is deliberately **not a cache**, a `
 output, and `User-Agent: NodeGX/<version> (+<publicUrl>)` on every outbound request the graph did
 not name one for. 🔴 **And the run s3 owed: `nodegx-backend` WHOLE at 149/149 suites / 1758
 tests**, plus `test:main` at **504/504 suites, 8065/8065**.
+
+**FED-005 is CLOSED (s5):** built, gated and driven, **39 specs across three suites** — the
+surface and the door, the acting-as-a-user half, and one suite driven by the **official MCP
+TypeScript client** rather than by another `fetch`. `POST /mcp` speaks stateless Streamable HTTP
+and computes `tools/list` per request from the key's scopes; an `_ApiKey` may be BOUND to one
+`_User` (`actsAsUserId`) and then sees exactly what that person sees — **across the whole data
+plane, not only over MCP**, because two authorization models means an attacker uses the weaker
+one. No `_delete` tool exists for any collection, the master key is refused at the door, and
+every tool call writes an audit row.
+
+🔴 **It found and fixed a live privilege escalation on the way (register R9).** A scoped API key
+with `classes:read` could read `_Session` through `/classes` and get **live session tokens in
+plaintext** — impersonation of every account on the backend — plus `_ApiKey`, `_User` and
+`_Audit`. `checkClp` consulted a key's scopes and never the system-collection posture that
+`effectiveRule` carries for everyone else. Users and anonymous callers were correctly refused the
+whole time, which is why no test saw it. Fixed at the root, above the key branch, so it covers
+every non-admin principal in one statement.
 
 🔴 **One deliberate behaviour change, recorded here because it is the only one in the phase:** a
 `triggers.json` written before FED-004 now gets `overlapPolicy: skip` rather than the `allow` it
