@@ -151,6 +151,7 @@ session's readings, two of which had drifted.
 | **R3** | the live `format=postgres\|supabase` route: remove, stamp, or fix in place | ✅ **Fixed in place.** The route, the IPC channel and the hook function all stay; **BRG-004 repairs what they emit** — relations, declared indexes, and the row-ACL translation. Consequence, recorded rather than argued: the four `USING (true)` policies remain reachable by an admin-token holder until BRG-004 lands. The generators therefore **stay on the schema interface** in BRG-001 rather than moving out of it. |
 | **R4** | whether the editor's local backend is in conformance scope | ✅ **No.** The editor's local backend is SQLite forever. The interface is declared at the `nodegx-backend` seam, and this phase touches no editor file. |
 | **R5** | Postgres only, or a family of targets | ✅ **Postgres only**, and the docs say so. MySQL, libsql, Turso and D1 stay out of scope (§6) and are not described as coming. |
+| **R6** | which Postgres client library, and whether it ships with every build | ✅ **`pg`, bundled into every build** — ruled 2026-09-19, s6, from the measurements in §4.2. The SQLite path gains 175 KB on a 3,498,546-byte `dist/cli.js`; `noodl-runtime` gains 14 packages / 828 KB in the install tree. `postgres.js` was rejected on behaviour, not on size. The third option — a runtime-resolved optional dependency, as `better-sqlite3` is — was rejected because the deploy artefact is one bundled file with no `node_modules` beside it, so 'the operator installs it' has nowhere to install to. |
 
 ### 4.1 What re-measuring moved, 2026-09-19 (HEAD `c7fe1a1da`)
 
@@ -166,6 +167,45 @@ Unchanged and re-confirmed at HEAD: the 8 adapter names; `POSTGRES_TYPE_MAP.Rela
 (`SchemaManager.ts:191`); indexes hardcoded to `createdAt`/`updatedAt` only (`SchemaManager.ts:614-616`);
 four `TO authenticated ... USING (true)` policies per table (`SchemaManager.ts:658-679`); phase 48
 still `📋 Specced, not started`.
+
+### 4.2 What was measured before R6 was asked, 2026-09-19 (s6)
+
+A scoping session's parenthetical about a third party is not a measurement
+(the R1–R5 rulings were taken that way; §4.1 is the same discipline applied to this file's own numbers). Nothing in §3 of BRG-005 named a driver, so every
+number below was taken in this session, against the **PostgreSQL 16.11 (Homebrew) on
+aarch64-apple-darwin23.6.0** already on this machine — the same server BRG-004's adversarial half
+ran on — in a scratch database `nodegx_brg005`.
+
+| | `pg` 8.23.0 | `postgres` (postgres.js) 3.4.9 |
+|---|---|---|
+| licence | MIT | Unlicense |
+| install tree | **14 packages, 828 KB** | **1 package, 384 KB** |
+| esbuild `--platform=node --target=node22 --format=cjs` | **175.5 KB, no warnings, no extra `external`** | 72.0 KB, clean |
+| last published | 2026-08-08 | 2026-04-05 |
+| call shape | `query(text, values)` — **exactly `BuiltQuery { sql, params }`** (`QueryBuilder.ts:25-28`) | tagged template; `sql.unsafe(text, values)` is the escape hatch, not the idiom |
+
+🔴 **The deciding measurement is not the size — it is the JSON round trip, and it lands on the
+ACL.** The same SQL and the same params array, through the only call shape `QueryBuilder`'s output
+fits, against the same server:
+
+| probe | `pg` | `postgres.js` via `sql.unsafe` |
+|---|---|---|
+| `select $1::jsonb as j` with `'{"k":"ok"}'` | `{ k: 'ok' }` — parsed | `'{"k":"ok"}'` — **an unparsed string** |
+| `select $1::jsonb -> 'k' as j`, same param | `'ok'` | **`null`** |
+
+Re-run against the **unbundled** installed package to rule out the bundler: identical. The row-ACL
+predicate is a JSON extract (`QueryBuilder.ts:241`) and BRG-D2 has already shown once that a
+translated predicate carries the source engine's coercions
+(BRG-004 §5: the ACL flag is `true` on disk and `json_extract` returns `1`, so a faithful transcription of the SQLite predicate denied everyone) — a driver that answers `null`
+where the other answers `'ok'`, on that operator, is the wrong tool for this particular port.
+
+⚠️ **One thing was measured and is NOT a divergence**, recorded so it is not quoted as one later:
+`select pg_typeof($1)` throws *"could not determine data type of parameter $1"* on **both** drivers.
+That is the server refusing an untyped parameter, not a client difference. The first pass of this
+measurement nearly reported it as a third strike against `postgres.js`.
+
+**What R6 does not decide:** the pool size. That is AC8, and §3.5 of BRG-005 already owes the
+arithmetic.
 
 ## 5. The tasks
 
