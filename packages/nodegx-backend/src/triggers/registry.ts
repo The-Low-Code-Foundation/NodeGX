@@ -293,7 +293,14 @@ const CHANGE_ACTIONS: ChangeAction[] = ['create', 'update', 'delete'];
  */
 const TRIGGER_KEYS = [
   'id', 'type', 'name', 'enabled', 'target', 'responseMode', 'responseTimeoutMs',
-  'schedule', 'webhook', 'dbChange', 'createdAt', 'updatedAt', 'status'
+  'schedule', 'webhook', 'dbChange', 'createdAt', 'updatedAt', 'status',
+  // FED-004 — a READ-ONLY view field the admin routes decorate responses with
+  // (`effectiveOverlapPolicy` in admin-triggers.ts), never stored and never read
+  // by `upsert`. It is here for exactly the reason the three above it are: a
+  // `GET` → edit → `PUT` round trip from a panel or an agent carries back
+  // everything the `GET` handed over, and refusing a field this registry itself
+  // put in the response would make the obvious edit gesture a 400.
+  'effectiveOverlapPolicy'
 ] as const;
 const TARGET_KEYS = ['kind', 'name'] as const;
 const SCHEDULE_KEYS = ['cron', 'missedFirePolicy', 'overlapPolicy', 'payload'] as const;

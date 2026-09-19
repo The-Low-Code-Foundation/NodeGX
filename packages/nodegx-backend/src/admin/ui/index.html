@@ -1289,13 +1289,14 @@
           .then(function (data) {
             clear(body);
             body.appendChild(
-              table(['Name', 'Type', 'Target', 'Enabled', 'Last fired', 'Last result', ''], data.triggers || [], function (t) {
+              table(['Name', 'Type', 'Target', 'Enabled', 'Overlap', 'Last fired', 'Last result', ''], data.triggers || [], function (t) {
                 var last = t.status || t;
                 return el('tr', {},
                   el('td', { text: t.name || t.id }),
                   el('td', { text: t.type }),
                   el('td', { text: (t.target && (t.target.kind + ':' + t.target.name)) || '' }),
                   el('td', {}, t.enabled ? chip('on', 'ok') : chip('off')),
+                  el('td', {}, overlapCell(t)),
                   el('td', { text: when(last.lastFiredAt) }),
                   el('td', {}, lastResultChip(last.lastResult)),
                   actionCell(
@@ -1321,6 +1322,37 @@
         if (!result) return chip('—');
         if (result === 'ok' || result.ok === true) return chip('ok', 'ok');
         return chip(typeof result === 'string' ? result : (result.error || 'failed'), 'bad');
+      }
+
+      /**
+       * FED-004 AC7 — the policy in force, and the last fire it refused.
+       *
+       * The policy comes from `effectiveOverlapPolicy`, which the route computes:
+       * `schedule.overlapPolicy` is absent on disk when nobody authored one, and a
+       * second copy of "absent means skip" living in this file is a second copy
+       * that can drift from the scheduler's.
+       *
+       * A skip is NOT coloured red. It is the policy working, and an operator who
+       * learns this column goes red when things are fine is an operator who stops
+       * reading it. `warn` is the honest colour: nothing is broken, and something
+       * did not run.
+       */
+      function overlapCell(t) {
+        if (t.type !== 'schedule') return el('span.sub', { text: '—' });
+        var policy = t.effectiveOverlapPolicy || 'skip';
+        var status = t.status || {};
+        var cell = el('div', {}, chip(policy, policy === 'allow' ? null : 'ok'));
+        if (status.lastSkip) {
+          var count = status.skipCount || 1;
+          var yielded = status.lastSkip.yieldedTo ? ' → ' + status.lastSkip.yieldedTo : '';
+          cell.appendChild(
+            el('div.sub', {
+              text: 'skipped ' + count + '× · last ' + when(status.lastSkip.at) + yielded,
+              title: 'The most recent fire that did not run, and the execution it yielded to.'
+            })
+          );
+        }
+        return cell;
       }
     });
 

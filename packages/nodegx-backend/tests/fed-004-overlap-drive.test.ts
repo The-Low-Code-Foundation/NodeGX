@@ -275,6 +275,80 @@ describe('FED-004 the overlap policy, driven on a provisioned backend', () => {
     }
   });
 
+  /**
+   * AC7 — what a person and an agent can SEE.
+   *
+   * The dashboard reads `effectiveOverlapPolicy` off the route rather than computing it, and
+   * that is the whole reason this field exists: `schedule.overlapPolicy` is absent on disk when
+   * nobody authored one, so every consumer would otherwise carry its own copy of "absent means
+   * skip" — and a second copy of a rule is a copy that drifts.
+   *
+   * `get_backend_trigger` over MCP relays this route's JSON verbatim, so the same decoration is
+   * what satisfies the MCP half; `mcp-fed-004-surface.test.ts`'s sibling assertion pins the
+   * write direction (an agent can SET the policy, not only read it).
+   */
+  it('AC7 the trigger routes report the policy in force, authored or defaulted', async () => {
+    const authored = await provision('queue-one');
+    try {
+      const one = await authored.trigger();
+      expect((one as unknown as { effectiveOverlapPolicy?: string }).effectiveOverlapPolicy).toBe('queue-one');
+      expect(one.schedule!.overlapPolicy).toBe('queue-one');
+
+      const list = await authored.client.request<{ triggers: { effectiveOverlapPolicy?: string }[] }>(
+        'GET',
+        '/admin/triggers',
+        { headers: authored.asAdmin() }
+      );
+      expect(list.status).toBe(200);
+      expect(list.json.triggers[0].effectiveOverlapPolicy).toBe('queue-one');
+    } finally {
+      await authored.teardown();
+    }
+
+    const defaulted = await provision(undefined);
+    try {
+      const t = await defaulted.trigger();
+      // The field nobody wrote, reported anyway — and the stored config still does not carry it.
+      expect((t as unknown as { effectiveOverlapPolicy?: string }).effectiveOverlapPolicy).toBe('skip');
+      expect(t.schedule!.overlapPolicy).toBeUndefined();
+
+      // AC7's "last skip". One re-arm during the boot run is one refused fire.
+      await defaulted.refire();
+      await settle(RUN_MS + 1200);
+      const after = await defaulted.trigger();
+      expect(after.status.skipCount).toBe(1);
+      expect(after.status.lastSkip!.policy).toBe('skip');
+      expect(after.status.lastSkip!.at).toEqual(expect.any(String));
+      expect(after.status.lastSkip!.yieldedTo).toEqual(expect.any(String));
+    } finally {
+      await defaulted.teardown();
+    }
+  });
+
+  /**
+   * The round trip an edit form and an agent both perform: `GET` a trigger, change one field,
+   * `PUT` it back. The registry refuses unknown keys on the WRITE path (WFA-005 F8), so a field
+   * the route itself decorates the response with has to be accepted and ignored — exactly as
+   * `createdAt`, `updatedAt` and `status` are. Without that, adding the view field would have
+   * made every GET→PUT a 400.
+   */
+  it('AC7 a trigger read from the route can be written straight back', async () => {
+    const be = await provision('skip');
+    try {
+      const fetched = await be.trigger();
+      expect((fetched as unknown as { effectiveOverlapPolicy?: string }).effectiveOverlapPolicy).toBe('skip');
+
+      const res = await be.client.request<{ trigger: TriggerDef }>('PUT', `/admin/triggers/${TRIGGER_ID}`, {
+        body: { ...fetched, schedule: { ...fetched.schedule, overlapPolicy: 'allow' } },
+        headers: be.asAdmin()
+      });
+      expect(res.status).toBe(200);
+      expect((await be.trigger()).schedule!.overlapPolicy).toBe('allow');
+    } finally {
+      await be.teardown();
+    }
+  });
+
   it('refuses a policy word it does not implement rather than defaulting it', async () => {
     const be = await provision('skip');
     try {

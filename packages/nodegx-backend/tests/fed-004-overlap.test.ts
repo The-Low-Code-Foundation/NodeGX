@@ -233,3 +233,115 @@ describe('FED-004 overlapPolicy — four minutes of a minutely schedule against 
     expect(registry.get(trigger.id)!.status.nextFireAt).toBe(new Date(START + 3 * MINUTE).toISOString());
   });
 });
+
+/**
+ * AC7's dashboard half.
+ *
+ * ⚠️ **Not a `toContain` on the markup.** The page is one large inline script no compiler ever
+ * reads, and asserting that a string appears in it passes just as happily when the function is
+ * dead code nothing calls. So the cell builder is EXTRACTED and RUN, against DOM stubs, and what
+ * is asserted is what it produces.
+ *
+ * The one thing that would still get past this is the function never being reached from the row
+ * builder — so that call site is asserted too, which is the smallest honest version of "the
+ * column is on the page".
+ */
+describe('FED-004 AC7 — the Overlap column in the admin dashboard', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'admin', 'ui', 'index.html'), 'utf-8');
+
+  /** Lift one top-level `function name(...) {...}` out of the inline script by brace matching. */
+  function extract(name: string): string {
+    const start = html.indexOf(`function ${name}(`);
+    expect(start).toBeGreaterThan(-1);
+    let depth = 0;
+    for (let i = html.indexOf('{', start); i < html.length; i++) {
+      if (html[i] === '{') depth++;
+      else if (html[i] === '}' && --depth === 0) return html.slice(start, i + 1);
+    }
+    throw new Error(`unbalanced braces in ${name}`);
+  }
+
+  /** The three page helpers the cell reaches for, reduced to what an assertion can read. */
+  interface Stub {
+    tag: string;
+    text: string;
+    title?: string;
+    tone?: string;
+    children: Stub[];
+    /** The one DOM verb the cell uses. Given to each stub rather than to `Object.prototype`. */
+    appendChild(child: Stub): void;
+  }
+  function stub(tag: string, text: string, extra: Partial<Stub> = {}): Stub {
+    const node: Stub = {
+      tag,
+      text,
+      children: [],
+      appendChild(child: Stub) {
+        node.children.push(child);
+      },
+      ...extra
+    };
+    return node;
+  }
+  function run(trigger: unknown): Stub {
+    const el = (tag: string, attrs: Record<string, string> | null, ...children: (Stub | null)[]): Stub => {
+      const node = stub(tag, (attrs && attrs.text) || '', { title: attrs ? attrs.title : undefined });
+      for (const child of children) if (child) node.children.push(child);
+      return node;
+    };
+    const chip = (text: string, tone?: string): Stub => stub('chip', text, { tone });
+    const when = (iso: string | null) => (iso ? `at ${iso}` : '—');
+    // eslint-disable-next-line no-new-func
+    const factory = new Function('el', 'chip', 'when', `${extract('overlapCell')}; return overlapCell;`);
+    return factory(el, chip, when)(trigger) as Stub;
+  }
+
+  /** Everything the cell rendered, flattened, so an assertion can read it as one string. */
+  function textOf(node: Stub): string {
+    return [node.text, ...node.children.map(textOf)].filter(Boolean).join(' | ');
+  }
+
+  it('is actually reached: the row builder calls it, and the header names it', () => {
+    expect(html).toContain("el('td', {}, overlapCell(t))");
+    expect(html).toContain("'Enabled', 'Overlap', 'Last fired'");
+  });
+
+  it('shows the policy in force, taken from the ROUTE and not recomputed here', () => {
+    const cell = run({ type: 'schedule', effectiveOverlapPolicy: 'queue-one', status: {} });
+    expect(textOf(cell)).toContain('queue-one');
+
+    // 🔴 The whole reason `effectiveOverlapPolicy` exists. A dashboard that read
+    // `schedule.overlapPolicy` would show nothing for the commonest trigger there is — the one
+    // nobody configured — and a dashboard that filled that gap with its own `|| 'skip'` would be
+    // a second copy of the default, free to drift from the scheduler's.
+    const source = extract('overlapCell');
+    expect(source).toContain('effectiveOverlapPolicy');
+    expect(source).not.toContain('schedule.overlapPolicy');
+  });
+
+  it('shows the last skip, how many there have been, and which run it yielded to', () => {
+    const cell = run({
+      type: 'schedule',
+      effectiveOverlapPolicy: 'skip',
+      status: { skipCount: 4, lastSkip: { at: '2026-03-01T09:00:00.000Z', policy: 'skip', yieldedTo: 'exec_77' } }
+    });
+    const rendered = textOf(cell);
+    expect(rendered).toContain('skipped 4×');
+    expect(rendered).toContain('exec_77');
+    expect(rendered).toContain('2026-03-01T09:00:00.000Z');
+  });
+
+  it('colours a skip as WORKING, never as a failure', () => {
+    const cell = run({ type: 'schedule', effectiveOverlapPolicy: 'skip', status: {} });
+    const chips = cell.children.filter((c) => c.tag === 'chip');
+    expect(chips.length).toBe(1);
+    // `bad` is the palette's red. An operator who learns this column goes red when everything is
+    // fine is an operator who stops reading it (phase-23's palette law says red is for danger).
+    expect(chips[0].tone).not.toBe('bad');
+    expect(chips[0].tone).toBe('ok');
+  });
+
+  it('says nothing about a webhook, which has no such policy', () => {
+    expect(textOf(run({ type: 'webhook', status: {} }))).toBe('—');
+  });
+});

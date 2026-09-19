@@ -816,7 +816,13 @@ export function registerBackendWriteTools(server: McpServer): void {
     schedule: z
       .object({
         cron: z.string().describe('5-field cron or @preset (@hourly/@daily/…). Local timezone.'),
-        missedFirePolicy: z.enum(['skip', 'run-once-on-start']).describe('What to do about fires missed while down')
+        missedFirePolicy: z.enum(['skip', 'run-once-on-start']).describe('What to do about fires missed while down'),
+        // FED-004. Omit for the default, `skip`. Writable here because a policy an
+        // agent can read and not set is a policy it cannot fix (phase rule 1).
+        overlapPolicy: z
+          .enum(['skip', 'queue-one', 'allow'])
+          .optional()
+          .describe('What a fire does when the previous one is still running (default skip)')
       })
       .optional()
       .describe('Required for type "schedule"'),
