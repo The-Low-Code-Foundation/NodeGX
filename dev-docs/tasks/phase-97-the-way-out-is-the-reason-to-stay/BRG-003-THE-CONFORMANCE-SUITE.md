@@ -63,6 +63,44 @@ correct rows and may differ in order; a case marked `unsupported` must **fail lo
 a wrong answer quietly. An undeclared divergence is a suite failure. **Silence is the failure mode
 this whole phase was created by** (README §2).
 
+### 3.4.1 The cross-process notify channel — filed here, and NOT in BRG-001
+
+Raised 2026-09-19 by a peer session from
+[`dev-docs/future-projects/HORIZONTAL-SCALING-STUDY.md`](../../future-projects/HORIZONTAL-SCALING-STUDY.md)
+§3: a `LISTEN/NOTIFY` channel is *"near-unfixable on SQLite and near-trivial on Postgres"*, and the
+study asks that it be declared `conditional` in `capabilities.ts` — **"cheap now, awkward to retrofit
+after the interface is published"**.
+
+**The subject is real and the placement was measured wrong.** Three readings, taken at
+HEAD `978d49da8` before deciding:
+
+1. 🟢 **BRG-001's interface does not foreclose it, which is what the study actually asked for.**
+   `IStorageAdapter.on/off` are optional and carry `StorageChange`, and nothing in the declaration
+   says where the event came from. A Postgres adapter sourcing those events from `LISTEN/NOTIFY`
+   published inside the committing transaction implements the interface **as written**, with no
+   change — and that is exactly the post-commit, release-on-commit semantics `ChangeBus` already
+   promises. Nothing to do.
+2. 🔴 **A `CapabilityKey` is a node/port gate, and a notify channel gates neither.** Every one of the
+   27 keys exists so the editor can grey something an author can see: `NODE_CAPABILITIES` binds
+   `realtime.subscribe` to the `SubscribeToChanges` node and to `DbCollection2`'s `realtime` port
+   (`nodeCapabilities.ts:86, 98`). How many app processes you run is not a node, not a port, and not
+   a property of a backend *type* — it is the same descriptor under a different deployment. The key
+   would be the first one nothing consumes.
+3. 🔴 **And it is not cheap.** `CAPABILITY_KEYS` is enumerated by `gating.test.ts` across
+   `BACKEND_TYPES` × every key, so a new key must be declared in all **eight** descriptors
+   (`src/descriptors/`) with both readings of a `conditional` cell holding. **"Awkward to retrofit
+   after publication" does not apply either**: this package is `file:`-linked inside the monorepo
+   with three consumers and no external ones, so the retrofit costs the same the day it is needed as
+   it does today.
+
+**So: the declaration belongs to this task's §3.4 mechanism, not to BRG-001's interface, and it
+lands when the thing it describes exists.** It is recorded here so it is not rediscovered — and §10
+already says DAT-007 and §3.4 must be implemented once, not twice; this is a third claimant on the
+same mechanism.
+
+⚠️ **The one live consequence for BRG-006:** the published sentence (R2) must not be read as
+promising cross-process change delivery. It already says *"one app process"*, which covers it.
+
 ### 3.5 The gate — the part that earns its keep before any Postgres exists
 
 A CI check that fails when a new capability appears on the facade or the schema surface without a
