@@ -542,7 +542,11 @@ function translateOperator(
 
     case '$in': {
       if (!Array.isArray(value) || value.length === 0) {
-        return '0'; // Always false
+        // Always false. 🔴 A bare `0` is a boolean to SQLite and an INTEGER to
+        // PostgreSQL, where `WHERE 0` is a type error ("argument of WHERE must
+        // be type boolean") — so `$in: []` would fail the statement instead of
+        // matching nothing. Found by BRG-005's conformance run.
+        return dialect === 'postgres' ? 'FALSE' : '0';
       }
       const inValues = value.map((v) => convertQueryValue(v));
       const placeholders = inValues.map(() => '?').join(', ');
@@ -552,7 +556,7 @@ function translateOperator(
 
     case '$nin': {
       if (!Array.isArray(value) || value.length === 0) {
-        return '1'; // Always true (not in empty set)
+        return dialect === 'postgres' ? 'TRUE' : '1'; // Always true (not in empty set)
       }
       const ninValues = value.map((v) => convertQueryValue(v));
       const ninPlaceholders = ninValues.map(() => '?').join(', ');
@@ -599,7 +603,9 @@ function translateOperator(
       if (textValue && textValue.$search) {
         const term = typeof textValue.$search === 'string' ? textValue.$search : textValue.$search.$term || '';
         params.push(`%${term}%`);
-        return `${col} LIKE ?`;
+        // SQLite's LIKE is case-insensitive for ASCII; PostgreSQL's is not, and
+        // `ILIKE` is the operator that says what SQLite's LIKE means.
+        return `${col} ${dialect === 'postgres' ? 'ILIKE' : 'LIKE'} ?`;
       }
       return null;
     }
@@ -608,7 +614,7 @@ function translateOperator(
     case '$contains':
       // Contains search - convert to LIKE with wildcards
       params.push(`%${convertedValue}%`);
-      return `${col} LIKE ?`;
+      return `${col} ${dialect === 'postgres' ? 'ILIKE' : 'LIKE'} ?`;
 
     // ── Geo ────────────────────────────────────────────────────────────────
     //

@@ -66,7 +66,7 @@
  * @module adapters/postgres/pool
  */
 
-import { Pool, type PoolClient, type PoolConfig } from 'pg';
+import { Pool, types as pgTypes, type PoolClient, type PoolConfig } from 'pg';
 
 import { toPgQuery } from './placeholders';
 
@@ -119,6 +119,44 @@ export interface PgPoolSaturation {
   saturation: number;
 }
 
+/** PostgreSQL type OIDs whose default `pg` parsers do not give back what the adapter stores. */
+const OID_INT8 = 20;
+const OID_NUMERIC = 1700;
+const OID_TIMESTAMP = 1114;
+const OID_TIMESTAMPTZ = 1184;
+
+/**
+ * How values come back — chosen so a row read from PostgreSQL is the row the
+ * built-in adapter would have returned.
+ *
+ * `pg`'s defaults hand back `NUMERIC`, `BIGINT` and `COUNT(*)` as **strings**
+ * (exact, and unusable as a score), and `TIMESTAMPTZ` as a JS `Date` where the
+ * built-in adapter stores and returns an ISO-8601 string. `POSTGRES_TYPE_MAP`
+ * (BRG-004) makes `Number` a `NUMERIC` and `Date` a `TIMESTAMPTZ`, so without
+ * these three parsers every number on the canvas is a string and every date is
+ * an object — a "visibly broken app", which BRG-003 §3.2 is what catches.
+ *
+ * `Number(…)` on a NUMERIC loses precision past 2^53, exactly as SQLite's
+ * `REAL` does today: parity, not a new loss.
+ */
+const NODEGX_TYPES = {
+  getTypeParser(oid: number, format?: 'text' | 'binary'): (value: string) => unknown {
+    if (format !== 'binary') {
+      if (oid === OID_NUMERIC || oid === OID_INT8) {
+        return (value: string) => (value === null ? null : Number(value));
+      }
+      if (oid === OID_TIMESTAMPTZ || oid === OID_TIMESTAMP) {
+        const asDate = pgTypes.getTypeParser(oid, 'text') as (value: string) => Date;
+        return (value: string) => {
+          const d = asDate(value);
+          return d instanceof Date && !Number.isNaN(d.getTime()) ? d.toISOString() : value;
+        };
+      }
+    }
+    return pgTypes.getTypeParser(oid, format as 'text') as (value: string) => unknown;
+  }
+};
+
 /**
  * A pool, plus the two things the adapter needs from it: run a `QueryBuilder`
  * query, and run several in one transaction.
@@ -140,6 +178,7 @@ export class PgConnectionPool {
 
     const config: PoolConfig = {
       connectionString: options.url,
+      types: NODEGX_TYPES,
       max: this.max,
       connectionTimeoutMillis: options.connectionTimeoutMillis ?? 10_000,
       idleTimeoutMillis: options.idleTimeoutMillis ?? 30_000

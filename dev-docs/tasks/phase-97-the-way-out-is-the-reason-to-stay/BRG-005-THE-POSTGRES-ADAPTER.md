@@ -1,9 +1,11 @@
 # BRG-005 — The Postgres adapter
 
-**Status: 🏗 In progress, s7 (2026-09-19). R6 ruled — `pg`, bundled. AC5, AC6 and AC8 closed; the
-connection layer AND the dialect seam are built and measured against a real PostgreSQL 16.11. The
-adapter class is next, and nothing is now in front of it (§6.1 is done — see §5.5).** Needs
-BRG-001 ✅ and BRG-003 ✅. Gated on R5 ✅.
+**Status: 🏗 s8 (2026-09-19) — THE ADAPTER IS BUILT AND CONFORMANT. `PostgresAdapter` + `PgSchemaManager`
+pass BRG-003's suite 56/56 on PostgreSQL 16.11 with the six mutants each caught by a distinct case set
+(AC1, AC3, AC9 ✅). `NODEGX_STORAGE_URL=postgres://…` starts the real service, `/health` carries the
+pool, `stop()` drains it (AC4 ✅). Sixteen divergences declared with evidence (AC2 ✅). AC5 AC6 AC8 were
+closed at s6/s7. Left: AC7's sweep (`test:main`, `noodl-mcp`, the full backend suite — a peer held
+three suites live), and §7.4's owed list.** Needs BRG-001 ✅ and BRG-003 ✅. Gated on R5 ✅.
 
 ## 1. The person sentence
 
@@ -391,3 +393,152 @@ already shipped.
   reaches `sqliteHandle()` because `adapter.transaction()` takes a synchronous callback — and its
   own docstring says *"BRG-005 owes either a batch write on `IStorageAdapter` or its own facade"*.
   `PgConnectionPool.transaction()` is the awaitable shape that makes the second option cheap.
+
+---
+
+## 7. What s8 built (2026-09-19) — the adapter, and what a synchronous interface costs on a socket
+
+**Every remaining criterion that needed the adapter class is closed.** The order §6.2 gave was the
+order it was built in: `PgSchemaManager`, `PostgresAdapter`, `createAdapter()` on the URL, one test
+file, then `IOperationalStore` on Postgres with its `close()` and the shutdown path.
+
+| AC | state | evidence |
+|---|---|---|
+| **AC1** `runConformance()` green on Postgres | ✅ **56/56, 0 skipped, 0 failed-as-declared** | `tests/brg-005-conformance-postgres.test.ts` — builds through `createAdapter({ storageUrl })`, never names the class |
+| **AC2** divergences declared | ✅ **16 entries**, 8 `degraded`/`unsupported` + 8 measured translations, each with the spec that measured it | `postgres/divergences.ts`; the spec assigns the register to `ConformanceDeclaration` (compile-time shape check) and asserts every declared case id exists and every `degraded` case still PASSED |
+| **AC3** mutants fail on Postgres | ✅ **6/6 caught, 6 distinct signatures, none wholesale** | same file; the record is in §7.2 |
+| **AC4** URL starts the service, `/health`, drain | ✅ | `tests/brg-005-service-postgres.test.ts` — real `BackendService.start()`, `_User`/`_Role`/`_Schema` on PostgreSQL, no `local.db` written, `/health.persistence.pool`, `stop()` |
+| AC5 AC6 AC8 | ✅ s6/s7 | unchanged |
+| **AC7** SQLite untouched | 🟡 **adapter specs 292/292, phase backend specs 50/50 + 36 + 3 + 13, `service-http` 24/24, `typecheck:runtime`/`backend`/`backend-tests`/`contract` all exit 0.** 🔴 `test:main`, `noodl-mcp` and the full backend suite NOT run: a peer had two jest runs, a `tsc` and three webpack builds live for the whole session ([[do-not-pile-cpu-work-on-a-shared-box]]) | owed by s9 |
+| **AC9** suite + six mutants, both numbers | ✅ **56 passed; mutants caught by 11 / 3 / 2 / 3 / 2 / 1 cases** | §7.2 |
+
+Runtime: `npx jest --config packages/nodegx-backend/jest.config.js --rootDir packages/nodegx-backend brg-005`
+— conformance ≈110 s (seven connected adapters, ~90 tables each, on a fresh database it creates and drops).
+
+### 7.1 🔴 The finding: `IStorageSchema` is synchronous, and that is the seam's second half
+
+BRG-002 de-synchronised the **facade** — seven methods, *"a synchronous call cannot be served over a
+socket at any cost"* — and left `IStorageSchema` synchronous, correctly, because every caller of it was
+synchronous too. The adapter class is where that comes due: `createTable`, `addColumn`,
+`reconcileIndexes`, `getRelatedIds`, `getRelationOwners`, `rebuildSearchIndex` all return
+synchronously, and PostgreSQL cannot.
+
+**Built the only way it can be, and declared:** `PgSchemaManager` answers readers from a **model** of
+the schema this process holds (primed at `connect()` from `information_schema`, `pg_indexes`, every
+`_Join_` table and the `_Schema`/`_SearchIndex` rows), applies every mutation to the model at once and
+**queues** the statement; the adapter's data plane calls `barrier()` before every query, so a row
+written after `createTable` lands in a table that exists. A queued statement that fails undoes its
+model change and surfaces on the **next** data-plane call — the earliest a synchronous interface can
+report an asynchronous failure, and never swallowed. `/health.persistence.pool.pendingSchemaStatements`
+shows the queue depth; the boot spec measured it at **7 right after `start()`** (the system tables)
+and **0 within 373 ms**.
+
+Three consequences are declared in `divergences.ts` rather than hidden:
+`schema/served-from-a-per-process-model` (a second writer — the migrator run while the service is up,
+a `psql` session — is not seen until restart; R2's bound makes this the truth),
+`schema/reconcile-cannot-precount-duplicates` (the database refuses a unique index over duplicates
+atomically, code `INDEX_DUPLICATES`, at the queue instead of before it), and
+`relations/served-from-a-per-process-model` (`getRelationOwners` on the authorization path reads the
+in-memory copy of the junction tables, written through by `addRelation`/`removeRelation`).
+
+🔴 **Filed as BRG-D7: de-synchronise `IStorageSchema` the way BRG-002 de-synchronised the facade,
+and delete the queue.** Six callers in `nodegx-backend` (`byob-admin` routes, `RoleStore`,
+`identities`, `security/state.rolesForUser`, `SearchIndexer`, `backup`) — a package a peer was live in
+all session, so it is filed, not done. Until then the model is [[a-client-property-read-as-a-fact-about-the-source]]
+with its scope stated.
+
+**One state object, on purpose.** `conformance/mutants.ts` wraps a schema manager with
+`Object.create(manager, …)`, so a method can run with `this` being the wrapper — reads reach the real
+manager through the prototype, an assignment to `this.x` would land on the wrapper. All mutable state
+is `this.s`, mutated in place, never reassigned. Without that, the `ignore-unique` mutant's
+`reconcileIndexes` would queue DDL on a copy the adapter's barrier never waits for.
+
+### 7.2 What the first conformance run found — two more translations, both armed on both engines
+
+The suite went **green on the first run** except for what it was built to find:
+
+1. 🔴 **`$in: []` emitted a bare `0`** (`$nin: []` a bare `1`). SQLite reads `WHERE 0` as false;
+   PostgreSQL refuses it — *"argument of WHERE must be type boolean"* — so a filter that should match
+   nothing **failed the statement**. The postgres dialect emits `FALSE`/`TRUE`. Armed: the pre-fix
+   `WHERE 0` is asserted to raise.
+2. 🔴 **`LIKE` is case-insensitive on SQLite and not on PostgreSQL.** `$contains: 'lon'` finds
+   `London` on one engine and nothing on the other — fewer rows, no error, the BCN-001 class. `$text`
+   and `$contains` emit `ILIKE` on the postgres dialect. Armed: plain `LIKE` on the corpus is asserted
+   to miss.
+
+Plus the driver's own shape: `pg` returns `NUMERIC`, `BIGINT` and `COUNT(*)` as **strings** and
+`TIMESTAMPTZ` as a `Date`; the built-in adapter returns numbers and ISO strings. The pool installs three
+type parsers, so `records/create-returns-the-stored-row`'s `eq(row.score, 1)` holds with `===`. And
+PostgreSQL's `duplicate key value violates unique constraint` is rewritten as SQLite's
+`UNIQUE constraint failed: T.col` (`postgres/errors.ts`) so `uniqueConstraintProblem` and the HTTP 409
+path read it unchanged — `schema/unique-index-refuses-a-duplicate` passes through the same decoder.
+
+**AC9's record — which cases caught each mutant on PostgreSQL:**
+
+| mutant | caught by |
+|---|---|
+| `drop-acl-on-reads` | 11 — every `acl/` read case incl. `search-returns-only-visible-rows` and `fetch-of-an-invisible-row` |
+| `drop-acl-on-writes` | 3 — `a-non-owner-cannot-save` / `-delete` / `-increment` |
+| `count-returns-page-length` | 2 — `records/count-matches-the-visible-set`, `acl/count-counts-only-visible-rows` |
+| `ignore-unique` | 3 — `schema/unique-index-refuses-a-duplicate`, `compound-index-is-unique-over-the-tuple`, `index-declaration-survives-a-reread` |
+| `relation-inverse-ignores-target` | 2 — `relations/inverse-lookup-finds-the-owners`, `inverse-lookup-of-an-unrelated-target-is-empty` |
+| `aggregate-ignores-acl` | 1 — `acl/aggregate-computes-only-over-visible-rows` |
+
+Same signatures as SQLite's run. The suite discriminates on both engines.
+
+### 7.3 What else landed, and where
+
+- **DDL has one source.** BRG-004's `generatePostgresSQL` loop body moved to `postgres/ddl.ts`
+  (`tableDDL`, `junctionDDL`, `declaredIndexDDL`) and the SQLite manager calls it; a table the migrator
+  creates and a table the adapter creates on first write are the same lines. The shared vocabulary
+  (`TYPE_MAP`, `POSTGRES_TYPE_MAP`, `normalizeIndexDecls`, `indexName`, `junctionTableName`,
+  `MigrationRefusal`, `inferType`) is `local-sql/schemaCommon.ts`. `SchemaManager.export*.test.js`
+  are byte-for-byte unchanged and green — the proof the text did not move.
+- **`createAdapter({ storageUrl })`** — defaults to `NODEGX_STORAGE_URL`, resolved by one function
+  (`resolveStorageUrl`) that `ExecutionHistory` uses too. **R5 enforced by name** at construction
+  (`postgres/storageUrl.ts`): `mysql://`, `libsql://`, `turso://`, `d1://`, `mongodb://`, `sqlite://`
+  each get the sentence that says PostgreSQL only and *not coming*; the spec drives three of them.
+  `PersistenceHandle` gained `target` (redacted URL) and `saturation()`; `/health.persistence.pool`
+  is the AC4 reading. `dbPath` is `''` on PostgreSQL — the metrics gauge already guards it; the two
+  SQLite-only consumers (`backup/snapshot.ts`, `schema-migrate`) are §7.4's.
+- **`upsertBatch` on the adapter** — one real transaction over the pool; `AdapterFacade.upsertBatch`
+  prefers it when present and keeps the SQLite-handle path otherwise. Read off the adapter, not added
+  to `IStorageAdapter`: BRG-003's ratchet (*"the uncovered list does not grow"*) is the price of a new
+  member and it is BRG-006's to pay with a case. `transaction()` on Postgres **throws** — a loud
+  refusal, never a silent non-transaction.
+- **`PgOperationalStore`** (`nodegx-backend/src/persistence/`) over its own pool of
+  `DEFAULT_OPERATIONAL_POOL_MAX` = 2, graded by BRG-002's cases — which moved unchanged into
+  `tests/helpers/operational-store-cases.ts` so both engines run the SAME 18 cases (36/36). `close()`
+  is on `IOperationalStore` (optional) and **`ExecutionHistory.close()` calls it** — the shutdown path
+  `operational.ts` said did not exist exists since PRD-003 gave the history a `close()`.
+- **AC2's register** is `POSTGRES_DIVERGENCES`; `POSTGRES_CONFORMANCE_DECLARATION` is derived from it
+  so the two cannot disagree. Sixteen entries, listed in the file with the spec behind each.
+
+### 7.4 Owed, with the reason
+
+- 🔴 **AC7's sweep** — `test:main`, `noodl-mcp`, the full `nodegx-backend` suite. Not run: a peer had
+  two jest runs, a `tsc` and three webpack builds live for the whole session. First job of s9, before
+  any new work.
+- 🔴 **`ExecutionStore.ts`'s hunk is in the working tree and NOT committed.** It wires
+  `PgOperationalStore` into `ExecutionHistory.open()` and releases it in `close()` — and `close()` is
+  the peer's uncommitted PRD-003 method, so the hunk's context does not exist at HEAD
+  ([[commit-your-delta-through-a-temporary-index]] rule 6). Commit it once theirs lands. The boot spec
+  runs against the working tree and is green.
+- **BRG-D7** (§7.1) — de-synchronise `IStorageSchema`; removes three declared divergences.
+- **Backups and `schema-migrate` on PostgreSQL** — `BackupManager` snapshots a SQLite file
+  (`engine: 'node:sqlite'` hardcoded, `backup/BackupManager.ts:382`); on a storage URL a scheduled
+  backup would fail at backup time with "source database does not exist" rather than at start. Not
+  in AC4's sentence; BRG-006 decides whether a PostgreSQL deployment's backup is `pg_dump`'s job
+  (recommended — say so in the docs) or the service's.
+- **A GIN index for search** (`search/no-materialised-index`) — the `tsvector` is per row; a generated
+  column + GIN is the operator-facing fix and `PgSchemaManager.rebuildSearchIndex` is where it goes.
+- **Operator docs** — `NODEGX_STORAGE_URL`, the pool arithmetic, PgBouncer, `pg_dump` — belong in
+  `docs/runtime/SELF-HOSTING.md` / `BACKEND-OPERATIONS.md`, both peer-held this session. BRG-006's
+  AC (the published claim) is where they land.
+- **`stop()` does not await the operational pool's drain** — `ExecutionHistory.close()` is
+  synchronous (the peer's shape); the drain runs after `stop()` returns and keeps the loop alive until
+  the sockets close. Exit is clean; it is not *awaited*. A `Promise`-returning close is BRG-D7-adjacent.
+- One stray `PostgresAdapter.query error: Database not connected` was logged during one boot-spec run
+  after `stop()` — something queried after `disconnect()`. Not reproduced on the second run; the
+  SQLite adapter logs the same sentence in the same situation, so it is a `stop()` ordering question
+  for whoever owns it, not an adapter one.

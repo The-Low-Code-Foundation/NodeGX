@@ -31,6 +31,46 @@ const { LocalSQLAdapter, LocalBackendPersistenceError } = localSql;
 
 export { LocalBackendPersistenceError };
 
+/**
+ * BRG-005: the PostgreSQL adapter, required lazily and only when a storage URL
+ * is present, so a SQLite-only start never loads `pg`. Same declared edge as
+ * `local-sql` above — the package's public subpath, no relative reach.
+ */
+function loadPostgres(): {
+  PostgresAdapter: new (url: string, options: Record<string, unknown>) => IStorageAdapter & {
+    saturation(): PoolSaturation | null;
+    target: { redacted: string };
+  };
+  parseStorageUrl(raw: string): { redacted: string };
+} {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require('@noodl/runtime/src/api/adapters/postgres');
+}
+
+/** What `/health` shows for a pooled engine (BRG-005 AC4). Null on SQLite, which has no pool. */
+export interface PoolSaturation {
+  label: string;
+  total: number;
+  idle: number;
+  waiting: number;
+  max: number;
+  saturation: number;
+  pendingSchemaStatements: number;
+}
+
+/**
+ * The storage URL this process should open, if any. Read here — at the one
+ * place a database is opened — rather than in `resolveOptions`, so every
+ * caller of `createAdapter` (serve, doctor, backup, the CLI audit log) agrees
+ * about which database it is talking to. An explicit `storageUrl` option wins;
+ * `NODEGX_STORAGE_URL` is the deploy-time spelling. Absent means SQLite.
+ */
+export function resolveStorageUrl(explicit?: string | null): string | null {
+  if (explicit !== undefined && explicit !== null) return explicit.trim() === '' ? null : explicit;
+  const fromEnv = process.env.NODEGX_STORAGE_URL;
+  return fromEnv && fromEnv.trim() !== '' ? fromEnv : null;
+}
+
 export interface PersistenceHandle {
   /**
    * The connected adapter.
@@ -44,8 +84,18 @@ export interface PersistenceHandle {
    * one's honour system.
    */
   adapter: IStorageAdapter;
-  /** Absolute path to the SQLite file backing this data-dir. */
+  /**
+   * Absolute path to the SQLite file backing this data-dir — or `''` on
+   * PostgreSQL, where there is no file. Every reader already guards the empty
+   * string (`nodegx_db_file_bytes` returns null for it), and the two SQLite
+   * consumers that need a real file (`backup/snapshot.ts`, `schema-migrate`)
+   * are the ones BRG-006 has to teach about a database that is not a file.
+   */
   dbPath: string;
+  /** BRG-005 AC4: the redacted storage target, for the boot line and `/health`. */
+  target: string;
+  /** BRG-005 AC4: pool saturation, for `/health`. Absent on SQLite. */
+  saturation?: () => PoolSaturation | null;
   /** { mode, persistent, ephemeral, engine, error } from the adapter. */
   status: {
     mode: string;
@@ -58,6 +108,12 @@ export interface PersistenceHandle {
 
 export interface CreateAdapterOptions {
   dataDir: string;
+  /**
+   * BRG-005: `postgres://…` opens the PostgreSQL adapter instead of SQLite.
+   * Defaults to `NODEGX_STORAGE_URL`. 🔴 R5: any other scheme is refused BY
+   * NAME (`StorageUrlError`), at construction, before anything is opened.
+   */
+  storageUrl?: string | null;
   /** Opt in to ephemeral (non-persisting) mode when no engine loads. */
   allowEphemeral?: boolean;
   /** Collection schemas, if known up front (same shape as dbCollections metadata). */
@@ -74,6 +130,23 @@ export interface CreateAdapterOptions {
  *   allowEphemeral is false — the service must not pretend to persist.
  */
 export async function createAdapter(options: CreateAdapterOptions): Promise<PersistenceHandle> {
+  const storageUrl = resolveStorageUrl(options.storageUrl);
+  if (storageUrl) {
+    // BRG-005. The data dir still exists — files, secrets, security.json and
+    // the execution history live there whichever database holds the rows.
+    fs.mkdirSync(path.join(options.dataDir, 'data'), { recursive: true });
+    const { PostgresAdapter } = loadPostgres();
+    const pg = new PostgresAdapter(storageUrl, { collections: options.collections || {} });
+    await pg.connect(); // throws PostgresConnectionError — the service refuses to start
+    return {
+      adapter: pg,
+      dbPath: '',
+      target: pg.target.redacted,
+      saturation: () => pg.saturation(),
+      status: pg.getPersistenceStatus()
+    };
+  }
+
   fs.mkdirSync(path.join(options.dataDir, 'data'), { recursive: true });
   const dbPath = path.join(options.dataDir, 'data', 'local.db');
 
@@ -87,6 +160,7 @@ export async function createAdapter(options: CreateAdapterOptions): Promise<Pers
   return {
     adapter,
     dbPath,
+    target: dbPath,
     status: adapter.getPersistenceStatus()
   };
 }

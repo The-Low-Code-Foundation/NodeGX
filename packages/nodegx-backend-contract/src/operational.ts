@@ -194,10 +194,20 @@ export interface IOperationalStore {
 
   /** How many records this namespace holds. Diagnostics and tests. */
   count(namespace: string): Promise<number>;
+
+  /**
+   * Release what the store holds. **Optional**, and the reason is in the note
+   * below: the SQLite implementation has nothing to release (its handle is
+   * `ExecutionHistory`'s), while a PostgreSQL implementation holds a pool that
+   * leaks if nobody calls this. BRG-005 added it together with the caller —
+   * `ExecutionHistory.close()`, which exists since PRD-003 gave the history a
+   * shutdown path of its own.
+   */
+  close?(): Promise<void>;
 }
 
 /*
- * 🔴 There is deliberately no `close()`, and the reason is worth keeping.
+ * 🔴 `close()` was deliberately absent until BRG-005, and the reason is worth keeping.
  *
  * It was written, and then removed, because **nothing would have called it**:
  * `ExecutionHistory` has no shutdown path at all — `BackendService.stop()` does

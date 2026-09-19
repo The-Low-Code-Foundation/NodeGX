@@ -260,6 +260,44 @@ suite('BRG-005 §6.1 — the dialect seam, both engines over one corpus', () => 
     });
   });
 
+  // ── 1b. the two the first conformance run on PostgreSQL found (BRG-005 s8) ──
+
+  describe('what the conformance suite found on the first PostgreSQL run', () => {
+    test('$in over an empty set matches nothing on both engines', async () => {
+      // `filters/in-and-nin` pins this. The SQLite builder emitted a bare `0`,
+      // which SQLite reads as false and PostgreSQL refuses as a type error —
+      // the statement failed rather than matching nothing.
+      const r = await both(select({ where: { name: { $in: [] } } }), 'in-empty');
+      expect(r.postgres).toEqual(r.sqlite);
+      expect(r.sqlite).toEqual([]);
+    });
+
+    test('$nin over an empty set matches everything on both engines', async () => {
+      const r = await both(select({ where: { name: { $nin: [] } } }), 'nin-empty');
+      expect(r.postgres).toEqual(r.sqlite);
+      expect(r.sqlite.length).toBe(ROWS.length);
+    });
+
+    test('ARMED — a bare 0 in WHERE is a type error on PostgreSQL, not false', async () => {
+      await expect(pool.query(`SELECT "objectId" FROM "${TABLE}" WHERE 0`)).rejects.toThrow(
+        /argument of WHERE must be type boolean/
+      );
+    });
+
+    test('$contains is case-insensitive on both engines (LIKE vs ILIKE)', async () => {
+      // SQLite's LIKE folds ASCII case; PostgreSQL's LIKE does not. The corpus
+      // has 'London', 'Paris', 'Sydney' — a lower-case term must find them.
+      const r = await both(select({ where: { name: { $contains: 'lon' } } }), 'contains-case');
+      expect(r.postgres).toEqual(r.sqlite);
+      expect(r.sqlite).toEqual(['p-london']);
+    });
+
+    test('ARMED — plain LIKE on PostgreSQL misses the row SQLite finds', async () => {
+      const rows = await pool.query(`SELECT "objectId" FROM "${TABLE}" WHERE "name" LIKE '%lon%'`);
+      expect(rows.map((x) => x.objectId)).toEqual([]);
+    });
+  });
+
   // ── 2. geo ───────────────────────────────────────────────────────────────
 
   describe('geo', () => {

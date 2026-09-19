@@ -10,6 +10,7 @@
 
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
+import { inferType } from './schemaCommon';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -1340,33 +1341,8 @@ class LocalSQLAdapter {
    * @private
    */
   _inferType(value: unknown): string {
-    if (value === null || value === undefined) {
-      return 'String';
-    }
-    if (typeof value === 'string') {
-      return 'String';
-    }
-    if (typeof value === 'number') {
-      return 'Number';
-    }
-    if (typeof value === 'boolean') {
-      return 'Boolean';
-    }
-    if (value instanceof Date) {
-      return 'Date';
-    }
-    if (Array.isArray(value)) {
-      return 'Array';
-    }
-    if (typeof value === 'object') {
-      const tagged = value as { __type?: string };
-      if (tagged.__type === 'Date') return 'Date';
-      if (tagged.__type === 'Pointer') return 'Pointer';
-      if (tagged.__type === 'File') return 'File';
-      if (tagged.__type === 'GeoPoint') return 'GeoPoint';
-      return 'Object';
-    }
-    return 'String';
+    // One rule for both adapters (BRG-005): `schemaCommon.inferType`.
+    return inferType(value);
   }
 }
 

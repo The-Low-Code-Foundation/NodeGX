@@ -69,6 +69,12 @@ interface SchemaColumn {
 /** Fields never sent over the wire for `_User` records. */
 const USER_PROTECTED_FIELDS = ['_hashed_password', '_email_verify_token', '_perishable_token'];
 
+/** The awaitable batch write a network adapter offers (BRG-005 `PostgresAdapter.upsertBatch`). */
+type BatchWriter = (
+  collection: string,
+  rows: { objectId?: string; data: Record<string, unknown> }[]
+) => Promise<{ created: number; updated: number }>;
+
 export class AdapterFacade implements IStorageFacade {
   /**
    * BRG-001: was `any`. The adapter is still plain CommonJS from
@@ -498,6 +504,18 @@ export class AdapterFacade implements IStorageFacade {
     rows: { objectId?: string; data: Record<string, unknown> }[]
   ): Promise<{ created: number; updated: number }> {
     if (rows.length === 0) return { created: 0, updated: 0 };
+
+    // BRG-005: an adapter that offers its own awaitable batch — one real
+    // transaction on its own connection — is preferred over the SQLite-handle
+    // path below, which is the "either a batch write on IStorageAdapter or its
+    // own facade" this docstring owed. It is read off the adapter rather than
+    // declared on the interface for now: BRG-003's coverage ratchet (AC7, "the
+    // uncovered list does not grow") is the gate that a new interface member
+    // has to pay, and that is BRG-006's to settle with a case, not a comment.
+    const batch = (this.adapter as { upsertBatch?: BatchWriter }).upsertBatch;
+    if (typeof batch === 'function') {
+      return batch.call(this.adapter, collection, rows);
+    }
 
     const ids = rows.map((r) => r.objectId).filter((id): id is string => typeof id === 'string' && id.length > 0);
     const existing = await this.existingIds(collection, ids);

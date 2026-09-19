@@ -11,63 +11,24 @@
 import { aclPredicateSql } from '../postgres/predicates';
 import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
-
-/** One column of a collection schema, as the editor's data model persists it. */
-interface SchemaColumn {
-  name: string;
-  type: string;
-  /** Relations only: the class on the other side of the junction table. */
-  targetClass?: string;
-  required?: boolean;
-  defaultValue?: unknown;
-}
-
-/** A collection's schema as tracked in the `_Schema` table. */
-interface TableSchema {
-  name: string;
-  columns?: SchemaColumn[];
-  /** FED-002: the indexes this collection declares, beyond the built-in pair. */
-  indexes?: IndexDecl[];
-  [extra: string]: unknown;
-}
-
-/**
- * One declared index on a collection, as `schema.json` carries it (FED-002).
- *
- * `fields` is one to four property names of that collection; `unique` defaults
- * to false; `order` applies to every field of the index and defaults to `asc`.
- * There is no `name` — it is derived, so that the same fields are the same
- * index however two people spelled the declaration.
- */
-interface IndexDecl {
-  fields: string[];
-  unique?: boolean;
-  order?: 'asc' | 'desc';
-}
-
-/** An index SQLite actually has, as the pragmas report it. */
-interface BuiltIndex {
-  name: string;
-  fields: string[];
-  unique: boolean;
-  order: 'asc' | 'desc';
-}
-
-/** A declared index and whether it is built — plus drift, which is neither. */
-interface IndexStatus extends BuiltIndex {
-  built: boolean;
-  /** False for an index that exists but nothing declares (hand-made, or drift). */
-  declared: boolean;
-}
-
-/** What a reconcile did, and what the audit record of a schema push names. */
-interface IndexReconcileReport {
-  created: string[];
-  dropped: string[];
-  kept: string[];
-  /** The declaration as it was stored, normalized. */
-  indexes: IndexDecl[];
-}
+import {
+  builtInIndexNames as sharedBuiltInIndexNames,
+  indexName as sharedIndexName,
+  MigrationRefusal,
+  normalizeIndexDecls,
+  POSTGRES_TYPE_MAP,
+  quoteLiteral,
+  sameIndexSignature,
+  sanitizeIdent,
+  TYPE_MAP,
+  type BuiltIndex,
+  type IndexDecl,
+  type IndexReconcileReport,
+  type IndexStatus,
+  type SchemaColumn,
+  type TableSchema
+} from './schemaCommon';
+import { columnToPostgres, relationJunctions, tableDDL } from '../postgres/ddl';
 
 /**
  * A unique index refused by the rows already in the table (FED-002 AC4).
@@ -100,50 +61,6 @@ class IndexDuplicatesError extends Error {
   }
 }
 
-/** The identifier rule `escapeTable`/`escapeColumn` already apply, for names. */
-function sanitizeIdent(name: string): string {
-  return String(name).replace(/[^a-zA-Z0-9_]/g, '');
-}
-
-/**
- * A PostgreSQL literal. Only ever wraps names and declared defaults, never a
- * caller's data — but it doubles the quote anyway, because the next thing this
- * function is used for is always one step closer to data.
- */
-function quoteLiteral(value: string): string {
-  return `'${String(value).replace(/'/g, "''")}'`;
-}
-
-/**
- * Something the export will not carry across, named.
- *
- * BRG-004's person sentence is *"if anything at all could not be carried
- * across, the command says so by name and refuses rather than half-doing it"*,
- * and every construct this phase found had done the opposite: a relation column
- * vanished on an `if (pgType)`, a unique index was never emitted, and an ACL
- * became `USING (true)`. None of those threw anything.
- *
- * Carries `construct` and `table` as fields rather than only a sentence, for
- * the same reason `IndexDuplicatesError` carries its numbers: the caller has to
- * put this in front of a person, and a carry report that can only quote a
- * sentence cannot group by what failed.
- */
-class MigrationRefusal extends Error {
-  code: string;
-  construct: string;
-  table?: string;
-  detail?: Record<string, unknown>;
-
-  constructor(message: string, construct: string, table?: string, detail?: Record<string, unknown>) {
-    super(message);
-    this.name = 'MigrationRefusal';
-    this.code = 'CANNOT_CROSS';
-    this.construct = construct;
-    this.table = table;
-    this.detail = detail;
-  }
-}
-
 /** Options for the plain PostgreSQL export. */
 interface PostgresExportOptions {
   /**
@@ -173,98 +90,6 @@ interface SupabaseExportOptions {
   /** The JWT claim carrying the NodeGX `_User` objectId. Absent: refused. */
   userIdClaim?: string;
 }
-
-/**
- * Read an `indexes` declaration, or refuse it. Loud rather than lenient: an
- * index declaration that is quietly dropped because it was mis-shaped is a
- * collection that quietly full-scans, and a `unique` that was quietly ignored
- * is a dedupe guarantee that quietly is not one.
- */
-function normalizeIndexDecls(raw: unknown): IndexDecl[] {
-  if (raw === undefined || raw === null) return [];
-  if (!Array.isArray(raw)) throw new Error('"indexes" must be an array of index declarations');
-
-  return raw.map((entry, i) => {
-    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-      throw new Error(`indexes[${i}] must be an object like { "fields": ["id"], "unique": true }`);
-    }
-    const e = entry as Record<string, unknown>;
-    for (const key of Object.keys(e)) {
-      if (key !== 'fields' && key !== 'unique' && key !== 'order') {
-        throw new Error(`indexes[${i}]: unknown key "${key}" (expected fields, unique, order)`);
-      }
-    }
-    if (!Array.isArray(e.fields) || e.fields.length === 0 || e.fields.length > 4) {
-      throw new Error(`indexes[${i}].fields must be an array of one to four property names`);
-    }
-    const fields = e.fields.map((f) => {
-      if (typeof f !== 'string' || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(f)) {
-        throw new Error(`indexes[${i}].fields: ${JSON.stringify(f)} is not a valid property name`);
-      }
-      return f;
-    });
-    if (new Set(fields).size !== fields.length) {
-      throw new Error(`indexes[${i}].fields names the same property twice`);
-    }
-    if (e.unique !== undefined && typeof e.unique !== 'boolean') {
-      throw new Error(`indexes[${i}].unique must be true or false`);
-    }
-    if (e.order !== undefined && e.order !== 'asc' && e.order !== 'desc') {
-      throw new Error(`indexes[${i}].order must be "asc" or "desc"`);
-    }
-
-    const decl: IndexDecl = { fields };
-    if (e.unique === true) decl.unique = true;
-    if (e.order === 'desc') decl.order = 'desc';
-    return decl;
-  });
-}
-
-/** Whether a built index is the index a declaration asks for. */
-function sameIndexSignature(built: BuiltIndex, decl: IndexDecl): boolean {
-  return (
-    built.unique === (decl.unique === true) &&
-    built.order === (decl.order === 'desc' ? 'desc' : 'asc') &&
-    built.fields.length === decl.fields.length &&
-    built.fields.every((f, i) => f === decl.fields[i])
-  );
-}
-
-
-/**
- * Map Noodl/Parse types to SQLite types
- */
-const TYPE_MAP: Record<string, string | null> = {
-  String: 'TEXT',
-  Number: 'REAL',
-  Boolean: 'INTEGER', // SQLite uses 0/1
-  Date: 'TEXT', // ISO8601 string
-  Object: 'TEXT', // JSON string
-  Array: 'TEXT', // JSON string
-  Pointer: 'TEXT', // objectId reference
-  Relation: null, // Handled via junction tables
-  GeoPoint: 'TEXT', // JSON string
-  File: 'TEXT' // JSON string with url/name
-};
-
-/**
- * Map Noodl types to PostgreSQL types (for export)
- */
-const POSTGRES_TYPE_MAP: Record<string, string | null> = {
-  String: 'TEXT',
-  Number: 'NUMERIC',
-  Boolean: 'BOOLEAN',
-  Date: 'TIMESTAMPTZ',
-  Object: 'JSONB',
-  Array: 'JSONB',
-  Pointer: 'TEXT', // or UUID with FK
-  Relation: null,
-  // The built-in adapter stores a GeoPoint as a JSON string and `SQL_DISTANCE_KM`
-  // reads it back as one, so JSONB is what the column actually holds. `POINT`,
-  // with the comment "or use PostGIS", was a column the app could not read.
-  GeoPoint: 'JSONB',
-  File: 'JSONB'
-};
 
 /**
  * SchemaManager class
@@ -689,65 +514,12 @@ class SchemaManager {
    * either — nothing was stored, so there is nothing to carry.
    */
   _relationJunctions(schema: TableSchema): Array<{ table: string; field: string; targetClass: string }> {
-    const out: Array<{ table: string; field: string; targetClass: string }> = [];
-    for (const col of schema.columns || []) {
-      if (col.type === 'Relation' && col.targetClass) {
-        out.push({
-          table: `_Join_${sanitizeIdent(col.name)}_${sanitizeIdent(schema.name)}`,
-          field: col.name,
-          targetClass: col.targetClass
-        });
-      }
-    }
-    return out;
+    return relationJunctions(schema);
   }
 
   /** One column definition, in Postgres, or a refusal naming the type. */
   _columnToPostgres(schema: TableSchema, col: SchemaColumn): string | null {
-    if (col.type === 'Relation') return null; // carried by a junction table
-
-    const sqliteType = TYPE_MAP[col.type];
-    if (!sqliteType) {
-      // Not a column on this side either — `_columnToSQL` returns null for it,
-      // so SQLite holds nothing to carry. Parity, not a loss.
-      return null;
-    }
-
-    const pgType = POSTGRES_TYPE_MAP[col.type];
-    if (!pgType) {
-      // A type SQLite stores and this map has no answer for. That is BRG-D3's
-      // exact shape — a column that silently is not there on the other side —
-      // and it is the drift a future type will arrive as.
-      throw new MigrationRefusal(
-        `Column "${col.name}" on "${schema.name}" is a ${col.type}, and this export has no PostgreSQL ` +
-          `type for it. It is stored on SQLite, so exporting the table without it would lose data silently.`,
-        `column type ${col.type}`,
-        schema.name
-      );
-    }
-
-    let def = `${escapeColumn(col.name)} ${pgType}`;
-    if (col.required) def += ' NOT NULL';
-    if (col.defaultValue !== undefined) {
-      // Dropped entirely before this task: a column declared with a default
-      // arrived on the other side without one.
-      if (typeof col.defaultValue === 'string') {
-        def += ` DEFAULT ${quoteLiteral(col.defaultValue)}`;
-      } else if (typeof col.defaultValue === 'boolean') {
-        def += ` DEFAULT ${col.defaultValue ? 'TRUE' : 'FALSE'}`;
-      } else if (typeof col.defaultValue === 'number') {
-        def += ` DEFAULT ${col.defaultValue}`;
-      } else {
-        throw new MigrationRefusal(
-          `The default value declared for "${col.name}" on "${schema.name}" is a ` +
-            `${Array.isArray(col.defaultValue) ? 'array' : typeof col.defaultValue}, which this export cannot write ` +
-            'as a PostgreSQL default.',
-          'column default value',
-          schema.name
-        );
-      }
-    }
-    return def;
+    return columnToPostgres(schema, col);
   }
 
   /**
@@ -779,88 +551,9 @@ class SchemaManager {
     out.push('');
 
     for (const schema of schemas) {
-      const table = escapeTable(schema.name);
-      out.push(`-- Collection: ${schema.name}`);
-
-      const columnDefs = [
-        '"objectId" TEXT PRIMARY KEY',
-        '"createdAt" TIMESTAMPTZ DEFAULT NOW()',
-        '"updatedAt" TIMESTAMPTZ DEFAULT NOW()',
-        '"ACL" JSONB'
-      ];
-      for (const col of schema.columns || []) {
-        const def = this._columnToPostgres(schema, col);
-        if (def) columnDefs.push(def);
-      }
-
-      out.push(`CREATE TABLE IF NOT EXISTS ${table} (`);
-      out.push(`  ${columnDefs.join(',\n  ')}`);
-      out.push(');');
-      out.push('');
-
-      // The two indexes every table gets on creation, under the SAME names
-      // `builtInIndexNames` uses, so a reconcile on the other side agrees with
-      // this one about which indexes it did not create.
-      const builtIn = this.builtInIndexNames(schema.name);
-      out.push(`CREATE INDEX IF NOT EXISTS "${builtIn[0]}" ON ${table}("createdAt");`);
-      out.push(`CREATE INDEX IF NOT EXISTS "${builtIn[1]}" ON ${table}("updatedAt");`);
-
-      // BRG-D2. FED-002 landed an index declaration in phase 96 and this export
-      // kept emitting the two above and nothing else — so a collection whose
-      // `id` is `unique: true` arrived as a table with no unique constraint and
-      // the dedupe guarantee silently stopped being one.
-      const declared = normalizeIndexDecls(schema.indexes);
-      for (const decl of declared) {
-        const name = this.indexName(schema.name, decl.fields);
-        const cols = decl.fields
-          .map((f) => `${escapeColumn(f)}${decl.order === 'desc' ? ' DESC' : ''}`)
-          .join(', ');
-        out.push(
-          `CREATE${decl.unique ? ' UNIQUE' : ''} INDEX IF NOT EXISTS "${name}" ON ${table} (${cols});`
-        );
-      }
-      out.push('');
-
-      // BRG-D3. `Relation: null` in the type map plus `if (pgType)` meant a
-      // relation column was skipped with no warning, no comment and no error —
-      // and the junction table holding its rows was never mentioned at all.
-      for (const j of this._relationJunctions(schema)) {
-        const jt = escapeTable(j.table);
-        out.push(`-- Relation: ${schema.name}.${j.field} -> ${j.targetClass}`);
-        out.push(`CREATE TABLE IF NOT EXISTS ${jt} (`);
-        out.push('  "owningId" TEXT NOT NULL,');
-        out.push('  "relatedId" TEXT NOT NULL,');
-        out.push('  PRIMARY KEY ("owningId", "relatedId")');
-        out.push(');');
-        // No foreign keys, for the same reason SQLite has none here: the
-        // adapter deletes a record without touching its junction rows, and an
-        // FK would turn a copy of that state into a failed insert.
-        out.push(`CREATE INDEX IF NOT EXISTS "idx_${j.table}_owning" ON ${jt}("owningId");`);
-        out.push(`CREATE INDEX IF NOT EXISTS "idx_${j.table}_related" ON ${jt}("relatedId");`);
-        out.push('');
-      }
-
-      if (touchTrigger) {
-        // Only ever emitted for a database a third party writes directly
-        // (`generateSupabaseSQL`). On the NodeGX path the app stamps
-        // `updatedAt` itself, and a trigger doing it again would overwrite the
-        // value the app just wrote — a divergence between what a caller writes
-        // and what it reads back, which is the whole failure mode of this phase.
-        out.push(`CREATE OR REPLACE FUNCTION nodegx_touch_updated_at()`);
-        out.push(`RETURNS TRIGGER AS $$`);
-        out.push(`BEGIN`);
-        out.push(`  NEW."updatedAt" = NOW();`);
-        out.push(`  RETURN NEW;`);
-        out.push(`END;`);
-        out.push(`$$ LANGUAGE plpgsql;`);
-        out.push('');
-        out.push(`DROP TRIGGER IF EXISTS "touch_${sanitizeIdent(schema.name)}_updatedAt" ON ${table};`);
-        out.push(
-          `CREATE TRIGGER "touch_${sanitizeIdent(schema.name)}_updatedAt" BEFORE UPDATE ON ${table}`
-        );
-        out.push(`  FOR EACH ROW EXECUTE FUNCTION nodegx_touch_updated_at();`);
-        out.push('');
-      }
+      // BRG-005 moved the loop body to `postgres/ddl.ts` so the live adapter
+      // creates the same table this export describes. Same lines, one source.
+      out.push(...tableDDL(schema, { touchTrigger }));
     }
 
     return out.join('\n');
@@ -1340,8 +1033,7 @@ class SchemaManager {
 
   /** The two indexes every table gets on creation. They cannot be declared away. */
   builtInIndexNames(tableName: string): string[] {
-    const t = sanitizeIdent(tableName);
-    return [`idx_${t}_createdAt`, `idx_${t}_updatedAt`];
+    return sharedBuiltInIndexNames(tableName);
   }
 
   /**
@@ -1350,7 +1042,7 @@ class SchemaManager {
    * spelled, and a declaration removed from `schema.json` has a name to drop.
    */
   indexName(tableName: string, fields: string[]): string {
-    return `idx_${sanitizeIdent(tableName)}_${fields.map(sanitizeIdent).join('_')}`;
+    return sharedIndexName(tableName, fields);
   }
 
   /** The indexes a collection's `_Schema` row declares (normalized, never null). */
