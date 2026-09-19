@@ -49,6 +49,23 @@ jobs:
       # in it) — the specs are how the server's wire contract is stated, so a type
       # written in one has to mean something, the same argument as the two lines above.
       - run: npm run typecheck:mcp
+      # BRG-003 AC6. `@noodl/backend-contract` is not in the root program either,
+      # and it had the SAME hole `typecheck:mcp` above was added to close: the
+      # package carried a `typecheck` script that no workflow had ever called.
+      # That matters more here than it looks. The package's jest runs under
+      # ts-jest with `isolatedModules: true`, which transpiles WITHOUT
+      # typechecking — measured in BRG-003 §5.3, where a helper typed
+      # `Record<string, unknown>` widened seven mutated call sites and every test
+      # stayed green. So `tsc` is not a second opinion about this package, it is
+      # the only one.
+      #
+      # 🔴 It is also half of the conformance gate. `conformance/coverage.ts`
+      # keys its register with mapped types over `keyof IStorageFacade`,
+      # `keyof IStorageSchema` and `keyof IStorageAdapter`, so a capability added
+      # to the storage seam with no conformance case and no declaration stops
+      # this line compiling and names the method. The other half runs in
+      # `test:packages` (tests/brg-003-conformance-gate.test.ts).
+      - run: npm run typecheck:contract
       # ✅ D17 (phase 69). The editor's own program, not the root one.
       #
       # ⚠️ It overlaps `npm run typecheck` above heavily and deliberately: the root

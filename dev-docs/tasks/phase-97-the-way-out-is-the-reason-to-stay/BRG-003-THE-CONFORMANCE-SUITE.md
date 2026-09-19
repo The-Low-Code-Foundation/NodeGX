@@ -1,9 +1,10 @@
 # BRG-003 — The conformance suite
 
-**Status: 🏗 s2 (2026-09-19). The suite exists and runs: 53 cases across five areas, green
-against SQLite, and proven able to fail by six mutants. AC1, AC3 and AC4 closed. Left: the CI
-gate (AC6/AC7), the declaration mechanism exercised (AC5), and three §3.2 areas with no cases
-yet — see §5.5.**
+**Status: 🏗 s4 (2026-09-19). The suite is 56 cases across five areas, green against SQLite and
+proven able to fail by six mutants — and **the §3.5 gate is built and in CI**. AC1, AC3, AC4, AC6
+and AC7 closed. Left: AC5 (the declaration mechanism unexercised), AC8 (BRG-004's), and the three
+§3.2 areas with no cases — all now *declared* rather than merely absent, and counted by a ratchet.
+The gate's first run found three things nobody had noticed; they are in §5.6.**
 
 ## 1. The person sentence
 
@@ -146,7 +147,8 @@ adapter. FED-002's index declaration would have tripped it (BRG-D2).
 | `nodegx-backend/tests/brg-003-conformance-sqlite.test.ts` | AC1 — the suite against SQLite |
 | `nodegx-backend/tests/brg-003-conformance-mutants.test.ts` | AC3 — the proof it can fail |
 
-**AC2 — the case count, by area: `records 13, filters 10, acl 15, relations 6, schema 9` = 53.**
+**AC2 — the case count, by area: `records 15, filters 10, acl 16, relations 6, schema 9` = 56.**
+(53 at s2; s4 added three search cases — see §5.6.)
 The count is printed by the run from `CONFORMANCE_CASES.length` rather than kept by hand here: a
 hand-maintained count drifts the first time a case lands.
 
@@ -158,7 +160,7 @@ would mean the suite has one real assertion and fifty-two decorations.
 
 | mutation | cases that caught it |
 |---|---|
-| `drop-acl-on-reads` | **9** — every read shape: query, count, distinct, aggregate, the empty-key-set case and the write-grant-does-not-confer-read case |
+| `drop-acl-on-reads` | **11** — every read shape: query, count, distinct, aggregate, **fetch**, **search**, the empty-key-set case and the write-grant-does-not-confer-read case. 🔴 **9 at s2.** The mutant left `fetch` and `search` filtered, so `acl/fetch-of-an-invisible-row-does-not-return-it` was a case no mutation could make fail — see §5.6 |
 | `drop-acl-on-writes` | **3** — `a-non-owner-cannot-{save,delete,increment}` |
 | `count-returns-page-length` | **2** — `records/count-matches-the-visible-set`, `acl/count-counts-only-visible-rows` |
 | `ignore-unique` | **3** — `unique-index-refuses-a-duplicate`, `compound-index-is-unique-over-the-tuple`, `index-declaration-survives-a-reread` |
@@ -216,8 +218,8 @@ on this box at the time.
 | AC3 | a mutant fails, one distinct failure per mutation, each recorded by name | ✅ six mutations, six distinct signatures, both controls green |
 | AC4 | the ACL cases are adversarial | ✅ 15 cases; every read and write shape a non-owner can reach |
 | AC5 | the declaration mechanism works | ⬜ the vocabulary is implemented and `unsupported` inverts correctly, but nothing declares yet, so it is **unexercised** |
-| AC6 | the §3.5 CI gate | ⬜ not built. The structural half is done — `ConformanceContext` exposes no `getDatabase`, asserted |
-| AC7 | the gate run against HEAD; everything uncovered declared | ⬜ blocked on AC6 |
+| AC6 | the §3.5 CI gate | ✅ s4 — two mechanisms, both in CI, both **measured failing** on a real injected method (§5.6) |
+| AC7 | the gate run against HEAD; everything uncovered declared | ✅ s4 — **22 of 61** members declared uncovered, each with a reason and an owing task, held by a ratchet |
 | AC8 | BRG-D4 closed | ⬜ BRG-004's business |
 
 ### 5.5 What is deliberately not covered yet, and why it is not a silent gap
@@ -234,3 +236,87 @@ areas have **no cases**, and they are named here rather than left to be discover
 The `wire*` envelopes and `include=` expansion are also uncovered: they live on `IStorageFacade`,
 not on the adapter, so they need a second harness taking a facade. That is the largest remaining
 piece of AC2.
+
+⚠️ **As of s4 none of these is a prose list any more.** Every one is an entry in
+`conformance/coverage.ts` with a reason and an owing task, the count is held by a ratchet, and the
+gate fails if this file and that register disagree. The difference matters: a paragraph naming three
+absences is read once, and a register is read by CI on every push.
+
+## 5.6 As built, s4 — the gate (AC6, AC7)
+
+### The shape: two mechanisms, one artefact
+
+| | mechanism | fails how | runs as |
+|---|---|---|---|
+| compile time | `coverage.ts`'s three registers are mapped types over `keyof IStorageFacade`, `keyof IStorageSchema`, `keyof IStorageAdapter`, with `-?` so optional members count | `tsc` exits 2 naming the property | `npm run typecheck:contract`, **new**, added to `pr.yml`'s Typecheck job |
+| run time | `surface.ts` parses `storage.ts` for the member lists; `recorder.ts` wraps the adapter and the suite is run **once per case**; `checkCoverage()` compares | jest fails, printing `[facade] rawExportEverything — …is on the storage surface with no conformance case and no declaration` | `tests/brg-003-conformance-gate.test.ts`, inside `test:packages` |
+
+🔴 **Both halves were measured failing, not asserted to.** `rawExportEverything(collection: string)`
+was added to `IStorageFacade`, both commands run, and both named it — `tsc` at exit 2 with
+`TS2741: Property 'rawExportEverything' is missing`, and the gate test with the finding above. Then
+reverted. §5.2's own standard, applied to the gate: *a detector that cannot fail proves nothing.*
+
+### Why it is a recorded run and not an annotation
+
+The register says which cases cover which member. Left there that is a **claim**, true the day it
+is written and silently false after the next refactor. So the gate does not take it: it runs each of
+the 56 cases against a recording proxy and rejects any entry naming a case that did not reach the
+member. Two controls hold it honest, both in the gate test:
+
+- feed it an **empty** recording and `adapter.query`, `schema.createTable` and `facade.rawQuery` all
+  red — so the green result is evidence, not the register read back to itself;
+- the facade's twelve `through` entries are checked against `AdapterFacade.prototype[name].toString()`,
+  because `call()` dispatches **by string** (README §2) and the string is therefore in the compiled
+  method. A claim about another package's source is read, not trusted.
+
+⚠️ **The recorder's one blind spot, written down rather than left to be found.** It wraps the
+reference the *suite* holds, so a call the adapter makes to its **own** schema manager is invisible —
+`LocalSQLAdapter.ts:1255` calls `this.schemaManager.addRelation(...)` inside `addRelation()`. Those
+two members are therefore registered `through`, not `uncovered`: "no case reached it" means "no case
+reached it **directly**", and reporting that as an absence would have been a false one.
+
+### What the gate's first run found
+
+🔴 **1. `search` had no case at all — and `ConformanceContext` has had a `search()` method since s2.**
+A door in the harness that nothing walked through. §3.2 lists search among the read shapes a row ACL
+must hold for; AC4 was ticked ✅ at s2 on the strength of that list. **The tick was wrong.** Three
+cases added (`records/search-finds-a-row-by-its-text`,
+`records/search-composes-with-a-structured-where`, `acl/search-returns-only-visible-rows`), 53 → 56.
+Search is the worst read shape to miss: the index is built over the *text* of private rows, so an
+unfiltered search leaks what the rows say, not merely that they exist.
+
+🔴 **2. The `drop-acl-on-reads` mutant left `fetch` and `search` filtered.** Found immediately
+beside the above, and the same shape one level up: `acl/fetch-of-an-invisible-row-does-not-return-it`
+has existed since s2 and **no mutation could make it fail**, so it pinned nothing that had been shown
+to move. The mutant now strips the predicate on both; it goes from 9 cases to **11**, and the
+distinct-signature control still holds.
+
+⚠️ **3. Two of the three counts in `storage.ts`'s own header were wrong** — the facade is 21
+members, not 22, and the schema surface is 20 names, not 16. Corrected, with the note that they are
+no longer load-bearing now that the register is keyed by `keyof` and the gate parses the file.
+
+### AC7 — the drift, counted
+
+**22 of 61** storage-surface members are declared uncovered. The list is printed by the run and
+owned in the register, not kept here — a hand-maintained list drifts exactly like the counts above:
+
+| owing task | count | members |
+|---|---|---|
+| `BRG-003 AC2` | 11 | `adapter.on`, `adapter.off`, `adapter.transaction`, `facade.wire{Query,Fetch,Search,Record}`, `facade.{getColumns,existingIds,ensureImportShape,upsertBatch}` — the change tap, transactions, and the facade harness of §5.5 |
+| `BRG-004` | 6 | `schema.{renameColumn,changeColumnType,deleteTable,exportSchemas,generatePostgresSQL,generateSupabaseSQL}` |
+| `BRG-005` | 3 | `adapter.{connect,disconnect,getPersistenceStatus}` — lifecycle the runner owns, not the suite (§3.1) |
+| `BRG-003 AC5` | 2 | `schema.{hasSearchIndex,dropSearchIndex}` — the search-index lifecycle, which wants the §3.4 declaration because FTS5 and `tsvector` genuinely rank differently |
+
+Two members are declared **out of the promise** rather than owed: `adapter.getDatabase` (the raw
+handle BRG-002 fenced — a case depending on it is a case no second adapter can pass) and
+`schema.hasFts5Support` (a SQLite feature *by name*; the portable question is whether search works).
+
+🔴 **`generatePostgresSQL` and `generateSupabaseSQL` are on that list, and that is the phase.** The
+two generators that drop every declared index, drop every relation column and emit four
+`USING (true)` policies over a `creatorOwns` backend are now **named by CI on every push**, owed to
+BRG-004, instead of being a thing two sessions happened to notice. §3.5 said FED-002's index
+declaration would have tripped this gate; these two entries are what that looks like once it exists.
+
+The 22 is a **ceiling**, asserted `toBeLessThanOrEqual`, never an equality — a session that closes a
+gap must not also have to come here and edit a literal to make a gate green, because that reflex is
+the one that ships the drift.

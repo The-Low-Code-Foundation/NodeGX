@@ -17,9 +17,18 @@
  *
  * | | what it is | who implements it |
  * |---|---|---|
- * | {@link IStorageAdapter} | the **8 names** the backend calls on the adapter object itself | `LocalSQLAdapter` today; `PostgresAdapter` at BRG-005 |
- * | {@link IStorageFacade} | the **22 methods** everything else in the backend goes through | `AdapterFacade` |
- * | {@link IStorageSchema} | the **16 names** of the schema surface | `SchemaManager` |
+ * | {@link IStorageAdapter} | the **20 names** on the adapter object — its own 8, plus the 12 of {@link IStorageDataPlane} it extends | `LocalSQLAdapter` today; `PostgresAdapter` at BRG-005 |
+ * | {@link IStorageFacade} | the **21 members** everything else in the backend goes through | `AdapterFacade` |
+ * | {@link IStorageSchema} | the **20 names** of the schema surface | `SchemaManager` |
+ *
+ * ⚠️ **Those three numbers were 8 / 22 / 16 until BRG-003's gate counted them**
+ * (2026-09-19, s4). Two of them were simply wrong, and the header had been read
+ * several times without anyone noticing — which is the phase's own subject
+ * arriving in its own file. They are no longer load-bearing: the coverage
+ * register in `conformance/coverage.ts` is keyed by `keyof` these interfaces and
+ * the gate reads the surface back out of this file, so what is counted is the
+ * artefact. A number in this table that drifts again costs a reader a moment;
+ * it can no longer cost a capability its case.
  *
  * Read `dev-docs/tasks/phase-97-the-way-out-is-the-reason-to-stay/` before
  * adding anything here. Rule 1 of that phase: declare what exists; do not

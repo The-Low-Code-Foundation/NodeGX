@@ -212,5 +212,48 @@ export const recordCases: readonly ConformanceCase[] = Object.freeze([
       const fromA = await ctx.query(a, {});
       deepEq(pluck(fromA.results, 'title'), ['in a'], 'collections are not isolated');
     }
+  },
+
+  {
+    id: 'records/search-finds-a-row-by-its-text',
+    area: 'records',
+    pins: 'BAK-008 full-text search returns the matching rows and only those',
+    async run(ctx) {
+      // 🔴 Added by the AC6 gate's first run, which is the point of it. `search`
+      // is on `IStorageDataPlane`, §3.2 lists it among the read shapes an ACL
+      // must hold for, and `ConformanceContext` has carried a `search()` method
+      // since s2 — that NO case called. A capability with a door in the harness
+      // and nothing walking through it is precisely the silent gap rule 2 names.
+      const c = ctx.collection('Srch');
+      const fox = await ctx.create(c, { title: 'Quick brown fox', body: 'It jumps over the lazy dog.' });
+      const other = await ctx.create(c, { title: 'Totally unrelated', body: 'Nothing to see here.' });
+      ctx.schema.rebuildSearchIndex(c, ['title', 'body']);
+
+      const hit = await ctx.search(c, { search: 'quick brown' });
+      deepEq(pluck(hit.results, 'objectId'), [String(fox.objectId)], 'search did not return exactly the matching row');
+
+      const miss = await ctx.search(c, { search: 'marmots' });
+      eq(miss.results.length, 0, 'search invented a match for a term in no row');
+      ok(String(other.objectId).length > 0, 'the control row was not created');
+    }
+  },
+
+  {
+    id: 'records/search-composes-with-a-structured-where',
+    area: 'records',
+    pins: 'a search term and a where clause intersect rather than either one winning',
+    async run(ctx) {
+      const c = ctx.collection('Srch');
+      await ctx.create(c, { title: 'findable alpha', score: 1 });
+      const beta = await ctx.create(c, { title: 'findable beta', score: 9 });
+      ctx.schema.rebuildSearchIndex(c, ['title']);
+
+      const both = await ctx.search(c, { search: 'findable', where: { score: { $gt: 4 } } });
+      deepEq(
+        pluck(both.results, 'objectId'),
+        [String(beta.objectId)],
+        'search and where did not intersect — one of the two was dropped'
+      );
+    }
   }
 ]);

@@ -278,5 +278,35 @@ export const aclCases: readonly ConformanceCase[] = Object.freeze([
       const after = await ctx.fetch(c, ids.alicePriv);
       eq(after.title, 'alice edited', 'an owner was refused a write to their own row');
     }
+  },
+
+  {
+    id: 'acl/search-returns-only-visible-rows',
+    area: 'acl',
+    pins: 'full-text search is filtered by the row ACL, like every other read shape',
+    async run(ctx) {
+      // 🔴 The door AC4 said was covered and was not. §3.2 names search among
+      // the shapes a non-owner must be denied through — *"query, fetch,
+      // aggregate, distinct, search, relation traversal and realtime"* — and
+      // the AC6 gate's first recorded run showed no case reaching `search` at
+      // all. Search is the worst one to miss: an index built over the text of
+      // private rows answers on their CONTENT, so an unfiltered search leaks
+      // what the rows say, not merely that they exist.
+      const { c, ids } = await seed(ctx);
+      ctx.schema.rebuildSearchIndex(c, ['title']);
+
+      const unfiltered = await ctx.search(c, { search: 'private' });
+      eq(unfiltered.results.length, 2, 'the baseline is wrong — both private rows should match the term');
+
+      const asBob = await ctx.search(c, { search: 'private', acl: read(BOB) });
+      deepEq(
+        pluck(asBob.results, 'objectId'),
+        [ids.bobPriv],
+        'search returned a row the caller cannot read — an unfiltered search index leaks row CONTENT'
+      );
+
+      const asAnon = await ctx.search(c, { search: 'private', acl: read(ANON) });
+      eq(asAnon.results.length, 0, 'an anonymous caller found a private row through search');
+    }
   }
 ]);

@@ -124,8 +124,31 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
       }
       adapter.query(options);
     },
-    search: (options) => adapter.search(options),
-    fetch: (options) => adapter.fetch(options),
+    search(options) {
+      if (kind === 'drop-acl-on-reads') {
+        // 🔴 Added when the AC6 gate found that NO case called `search` at all
+        // (s4). Search is the read shape where forgetting the predicate costs
+        // most: an index built over the text of private rows answers on their
+        // CONTENT, so the leak is what the rows say and not merely that they
+        // exist. A mutant that left search filtered was modelling an adapter
+        // more careful than any real one.
+        adapter.search(stripAcl(options));
+        return;
+      }
+      adapter.search(options);
+    },
+
+    fetch(options) {
+      if (kind === 'drop-acl-on-reads') {
+        // The same hole, found beside it: `acl/fetch-of-an-invisible-row-does-
+        // not-return-it` existed from s2 and no mutation could make it fail,
+        // so the case was pinning nothing that had been shown to move.
+        adapter.fetch(stripAcl(options));
+        return;
+      }
+      adapter.fetch(options);
+    },
+
     create: (options) => adapter.create(options),
 
     save(options) {
