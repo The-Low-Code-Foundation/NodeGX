@@ -2,7 +2,13 @@
 
 **Scoped:** 2026-09-18, from Richard's ruling at the close of P92 CHR-010, and a code audit taken
 the same hour at `cline-dev` HEAD `884881cff`.
-**Status: 🟡 BUILT AND DRIVEN — waiting on Richard.** After s5 the model, the export and the panel
+**Status: 🟡 BUILT AND DRIVEN — waiting on Richard, now on TWO surfaces.** 🔴 **s8 built and drove
+STY-005, the task the phase is named after**: the Styles panel is in the rail under Components, with
+colours, text styles, Looks and the tokens in one place, 25/25 driven arms in both themes. **Richard
+now owes two looks, and neither closes on a test** — STY-003 AC8 (`shots/sty003-gutter-{dark,light}.png`,
+the gutter fix) and STY-005 AC8 (`shots/sty005-panel-{dark,light}.png`, the panel itself).
+
+**Previous status:** 🟡 BUILT AND DRIVEN — waiting on Richard. After s5 the model, the export and the panel
 are all built, `test:main` is **502/502 suites / 8,020 tests clean**, and the panel has been driven:
 the three states are read off the rendered element in **both themes** (STY-003 AC5 ✅), which found
 and fixed two defects no test could see. 🔴 **What is left is STY-003 AC8 — Richard's look**, and
@@ -137,7 +143,7 @@ visible; **build from §8, not from this.**
 | [STY-002](./STY-002-THE-LOOK-MODEL.md) | **The Look model** — one concept end to end; `Preset`/`Size` removed | 🟡 **AC2/3/4 model + AC6 green (s4); AC5 and AC1's mechanism closed (s5)** — the `Preset`/`Size` rows and the size axis are deleted, and nothing writes `_variant`/`_size` any more. ⬜ **AC7 is the next session's first job**, and AC1's rename waits on the name |
 | [STY-003](./STY-003-THE-PROPERTY-PANEL.md) | **The property panel** — the four rules and three states. The "clear AF" task | 🟡 **built in s5, not yet looked at.** AC1–AC3, AC6 and AC7 are in the tree: every row says where its value came from, an override says what the Look wanted and offers a revert, the menu is design §4's three sections, and the `⋯` is visible. 🔴 **AC5 (read off the rendered element, both themes) and AC8 (Richard's WORTHY) are untouched and are the only things that close it** |
 | [STY-004](./STY-004-EXPORT-CARRIES-LOOKS.md) | **Export carries Looks** — scope first; blocking for anything that ships | 🟢 **Part A done (s4)** — a Look, a text style and a colour style all reach the emitted CSS and the report names each. Part B (one shared class per Look) is 1 session and not blocking |
-| STY-005 | **The Styles panel in the rail** — colours, text, Looks (R1, R3–R6 as ruled) | ⬜ |
+| [STY-005](./STY-005-THE-STYLES-PANEL.md) | **The Styles panel in the rail** — colours, text, Looks (R1, R3–R6 as ruled) | 🟡 **AC1–AC7 green and DRIVEN (s8)** — the panel is in the rail between Components and Search, not `experimental`; four sections; every row badged with its layer and counted; one visible `⋯`; the old `design-tokens` panel retired without losing its token editor. **Only AC8 — Richard's look — is left: `shots/sty005-panel-{dark,light}.png`** |
 | STY-006 | **Where it's used** | ⬜ |
 | STY-007 | **The after picture** — both themes, Richard's WORTHY | ⬜ |
 

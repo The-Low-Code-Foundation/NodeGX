@@ -10,7 +10,7 @@ import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { InlineNameInput, StylesSection } from '../../shared';
 import css from '../../StylesPanel.module.scss';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
-import { describeUsage } from '../ColoursSection/ColoursSection';
+import { describeUsage, summariseTextStyle } from '../../format';
 
 export interface TextStylesSectionProps {
   stylesModel: StylesModel | null;
@@ -133,21 +133,3 @@ export const DEFAULT_NEW_TEXT_STYLE = {
   fontWeight: 'var(--font-normal)',
   lineHeight: 'var(--leading-normal)'
 };
-
-/**
- * What a text style row prints under its name.
- *
- * It says the size and the weight because those are what tell two text styles apart at a glance,
- * and it prints the value **as stored** — `var(--text-base)` stays `var(--text-base)`. Resolving it
- * to `16px` here would be this panel teaching, on every row, the exact habit the phase exists to
- * replace.
- */
-export function summariseTextStyle(style: TSFixme): string {
-  if (!style || typeof style !== 'object') return '';
-
-  const parts = [style.fontSize, style.fontWeight, style.fontFamily].filter(
-    (p) => typeof p === 'string' && p.length > 0
-  );
-
-  return parts.join(' · ');
-}

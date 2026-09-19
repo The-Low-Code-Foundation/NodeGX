@@ -6,11 +6,14 @@ import { StylesModel } from '@noodl-models/StylesModel';
 import { escapeHtml } from '@noodl-utils/escapeHtml';
 
 import { IconName } from '@noodl-core-ui/components/common/Icon';
+import { CollapsableSection } from '@noodl-core-ui/components/sidebar/CollapsableSection';
+import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
 
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { InlineNameInput, StylesSection } from '../../shared';
 import css from '../../StylesPanel.module.scss';
+import { describeUsage } from '../../format';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
 
 /**
@@ -151,7 +154,24 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
         </button>
       )}
 
-      {colourTokens.map((token) => (
+      {/*
+        🔴 CLOSED, and the count is on the heading.
+
+        Measured on a real project: this list is **88 rows**. Drawn open beside nine colour styles
+        it buried them, and pushed Text styles and Looks so far below the fold that someone opening
+        the panel to find their Looks scrolled past ninety colour swatches to get there. The tokens
+        still belong in this section — R2 is that both layers are in ONE list and this is the one
+        type where they actually collide — but the layer a person came to MANAGE is the one that
+        should be on screen when the panel opens. The heading says how many are behind it, so the
+        set is never a surprise.
+      */}
+      <CollapsableSection
+        title={`Design tokens (${colourTokens.length})`}
+        variant={SectionVariant.Panel}
+        isClosed
+        UNSAFE_style={{ marginTop: '4px' }}
+      >
+        {colourTokens.map((token) => (
         <StyleRow
           key={token.name}
           name={token.name}
@@ -178,7 +198,8 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
             }
           ]}
         />
-      ))}
+        ))}
+      </CollapsableSection>
     </StylesSection>
   );
 }
@@ -192,10 +213,3 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
  * 8 of its 11 rows. A new style is a colour you can see and then change.
  */
 export const DEFAULT_NEW_COLOUR = '#808080';
-
-export function describeUsage(nodeCount: number, variantCount: number): string {
-  const parts: string[] = [];
-  if (nodeCount) parts.push(`${nodeCount} ${nodeCount === 1 ? 'node' : 'nodes'}`);
-  if (variantCount) parts.push(`${variantCount} ${variantCount === 1 ? 'Look' : 'Looks'}`);
-  return parts.join(' and ');
-}

@@ -1,6 +1,10 @@
 # STY-005 — The Styles panel in the rail
 
-**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** ⬜ **not started** (this file scopes it).
+**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟡 **AC1–AC7 GREEN, DRIVEN. Only AC8
+— Richard's look — is left.** `test:main` 510/510 suites / 8,161 tests exit 0, `tsc --noEmit` exit 0,
+`tests-unit/sty-005` 38/38, and the drive `scripts/devtools/drive-sty005-panel.js` reports **25/25
+graded arms** against a real project in both themes.
+🔴 **The shots AC8 closes on: `shots/sty005-panel-{dark,light}.png`. Put them in front of Richard.**
 **Depends on:** STY-002 (the Look model exists and is the only concept) — 🟢 done.
 
 > This is the task the phase is named after. Richard's sentence: *"I wish actually there was a styles
@@ -104,3 +108,62 @@ THREE meanings, styles FIRST, so a style named `--primary` *shadows* the token.)
 [[STY-002]] (the model this reads), [[STY-003]] (the panel that picks; this one manages — R1's
 "beside"), [[STY-006]] (where it's used — the navigation this deliberately leaves out),
 [[build-the-tasks-do-not-farm-the-defects]].
+
+
+---
+
+## 7. What the drive measured — s8, `scripts/devtools/drive-sty005-panel.js`
+
+Driven against a **copy** of `cn027-drive` (`STY-005 Panel Drive`), chosen by reading every styles
+sidecar on this machine: it is the only project with all three populated at once — **9 colour
+styles, 2 text styles, 1 Look** — so a run against it can tell *"the section is empty"* from *"the
+section is broken"*. **25/25 graded arms, both themes.**
+
+| | read off the rendered elements |
+|---|---|
+| ✅ | **AC1.** The rail draws `components@0 styles@1 search@2` — R5, in the rail's **own** order, not `router.setup.ts`'s. The button is `visibility: visible`, `opacity: 1`, 34×38, and `elementFromPoint` returns it. Clicking it opens the panel |
+| ✅ | **AC2.** Top-level headings are exactly `Colours | Text styles | Looks | Other tokens`, and the token groups (`Spacing`, `Typography`, `Borders`, `Effects`, `Animation`) are **nested under one of them**, never peers |
+| ✅ | **AC3.** 100 rows; **11 Style, 88 Token, 1 Look**, every row's badge equal to its layer. **12 of 100 carry a usage figure** — the 9 colour styles, the 2 text styles and the Look, which is exactly the set that has one. `Grey - 700 = 9×`, `Label Small = 7×`, `S27Variant = unused` |
+| ✅ | **AC4.** Every on-screen row's `⋯` is hit-tested where it is drawn and returns itself; all at `opacity: 1`. **CONTROL: zero `.variants-item-icon`** — the class the hover-only defect is made of |
+| ✅ | **AC5.** Both create doors are on screen without expanding anything |
+| ✅ | **AC6.** `tests-unit/fix-015` ran and passed in the same `test:main` |
+| ✅ | **AC7.** All of the above re-read after a theme flip, in **dark and light**, with the shots taken from the panel's own rect |
+
+### 🔴 Two things the SHOT found that every assertion had passed
+
+Both were green in `tests-unit/sty-005` and wrong on screen — the third and fourth time this phase.
+
+1. **The Colours section was 88 token rows long and buried the nine styles.** Text styles and Looks
+   were pushed so far below the fold that someone opening the panel to find their Looks scrolled
+   past ninety colour swatches. The tokens still belong in that section (R2 — this is the one type
+   where the two layers actually collide) but the layer a person came to **manage** is the one that
+   should be on screen. They are now behind a **closed** `Design tokens (88)` sub-heading that says
+   how many are there.
+2. **The token groups were drawn as PEERS of the three ruled sections.** The rendered headings were
+   `Colours | Text styles | Looks | Spacing | Borders | Effects | Animation` — seven things, four of
+   which a person had no way to know were a different layer. That is the confusion R2's badges exist
+   to prevent, reappearing one level up. They now sit under **`Other tokens`**. ⚠️ Fixing it found a
+   third thing: `excludeGroups` had been `['Colors', 'Typography']`, and since the Text styles
+   section draws no token rows, **the typography tokens were reachable from nowhere at all.**
+
+### 🔴 Two INSTRUMENT faults that read exactly like product defects
+
+Both would have been filed as findings against the panel. Neither was true of it.
+
+1. **`elementFromPoint` returned `IFRAME` for every point on screen**, the rail button included —
+   which had been hittable ten minutes earlier. The blocker was
+   `webpack-dev-server-client-overlay`, a full-window iframe at `z-index: 2147483647` that the dev
+   server injects when **any** file in the package fails to compile. The failing file was
+   `VisualCanvas/PreviewChrome.tsx` — **a peer's open edit, mid-flight** (mtime 90 seconds old,
+   green again minutes later). [[a-commit-is-not-what-the-compiler-read]], and
+   [[a-rendered-surface-can-be-behind-a-blocker]] inverted: a real blocker that is not the app's.
+   The drive now strips the overlay and **reports that it did**, so a run can never launder one into
+   the other.
+2. 🔴 **A RECT IS NOT VISIBILITY.** After the sub-section was collapsed, eight token rows reported
+   full-size `getBoundingClientRect`s at coordinates inside the viewport — a collapsed
+   `CollapsableSection` is 36px tall with `overflow: hidden`, and the browser lays its children out
+   before clipping them. The drive called them visible, hit-tested them, got the section's own
+   **title** back, and reported **8 unreachable menus in a panel where nothing was unreachable.**
+   The hit test IS the visibility test: a row is on screen iff what is painted at its centre is the
+   row. And because that predicate now **excludes** rows, the drive opens the collapsed sub-section
+   and re-measures — an exclusion that nothing checks is a place for a defect to live.

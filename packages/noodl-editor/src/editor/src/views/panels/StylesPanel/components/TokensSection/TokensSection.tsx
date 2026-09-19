@@ -22,6 +22,17 @@ import { TokenCategorySection } from '../TokenCategorySection';
 
 export interface TokensSectionProps {
   /**
+   * The heading this whole set sits under.
+   *
+   * 🔴 Without it the group sections — Spacing, Borders, Effects, Animation — were drawn as PEERS
+   * of Colours, Text styles and Looks, with nothing anywhere saying they were tokens. Read off the
+   * rendered panel, the headings were `Colours | Text styles | Looks | Spacing | Borders | Effects
+   * | Animation`: seven things, four of which a person had no way to know were a different layer
+   * from the other three. That is the exact confusion R2 made the badges for, reappearing one
+   * level up.
+   */
+  title?: string;
+  /**
    * Groups the Styles panel already draws elsewhere, beside the styles they collide with. Left
    * out here so that no token is editable in two places on one screen — see `StylesPanel.tsx`.
    * Omitted entirely, this renders every group, which is what it did as a tab of its own.
@@ -29,7 +40,7 @@ export interface TokensSectionProps {
   excludeGroups?: TokenCategoryGroup[];
 }
 
-export function TokensSection({ excludeGroups }: TokensSectionProps = {}) {
+export function TokensSection({ excludeGroups, title }: TokensSectionProps = {}) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
   const shownGroups = React.useMemo(
     () => TOKEN_CATEGORY_GROUPS.filter((g) => !(excludeGroups ?? []).includes(g)),
@@ -55,7 +66,7 @@ export function TokensSection({ excludeGroups }: TokensSectionProps = {}) {
 
   const customCount = designTokens.filter((t) => t.isCustom).length;
 
-  return (
+  const body = (
     <div>
       {customCount > 0 && (
         <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--theme-color-fg-default-shy)' }}>
@@ -92,7 +103,8 @@ export function TokensSection({ excludeGroups }: TokensSectionProps = {}) {
             key={group}
             title={group}
             variant={SectionVariant.Panel}
-            UNSAFE_style={{ marginTop: group === shownGroups[0] ? '16px' : '8px' }}
+            isClosed={Boolean(title)}
+            UNSAFE_style={{ marginTop: group === shownGroups[0] && !title ? '16px' : '8px' }}
           >
             <TokenCategorySection
               tokens={tokens}
@@ -103,6 +115,14 @@ export function TokensSection({ excludeGroups }: TokensSectionProps = {}) {
         );
       })}
     </div>
+  );
+
+  if (!title) return body;
+
+  return (
+    <CollapsableSection title={title} variant={SectionVariant.Panel} isClosed UNSAFE_style={{ marginTop: '8px' }}>
+      {body}
+    </CollapsableSection>
   );
 }
 

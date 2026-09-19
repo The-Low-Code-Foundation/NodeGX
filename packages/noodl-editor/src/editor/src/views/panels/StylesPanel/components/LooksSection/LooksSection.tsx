@@ -6,6 +6,7 @@ import { IconName } from '@noodl-core-ui/components/common/Icon';
 
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { InlineNameInput, StylesSection, useLooksRevision } from '../../shared';
+import { displayTypeName } from '../../format';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
 
 /**
@@ -109,11 +110,4 @@ export function LooksSection() {
       )}
     </StylesSection>
   );
-}
-
-/** `net.noodl.controls.button` says nothing to a person; `Button` does. */
-export function displayTypeName(typename: string): string {
-  if (typeof typename !== 'string') return '';
-  const last = typename.split('.').pop() ?? typename;
-  return last.charAt(0).toUpperCase() + last.slice(1);
 }

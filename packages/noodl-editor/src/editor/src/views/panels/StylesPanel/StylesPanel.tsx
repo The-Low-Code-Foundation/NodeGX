@@ -46,12 +46,17 @@ export function StylesPanel() {
       <LooksSection />
 
       {/*
-        The colour and typography tokens are drawn by the two sections above, beside the styles they
-        collide with — so this section holds what has no style-layer twin. Repeating them here would
-        make the same token editable in two places on one screen, which is the shape of the
-        two-systems confusion this panel exists to end, not a convenience.
+        The colour tokens are drawn by the Colours section above, beside the styles they collide
+        with — so this section holds what has no style-layer twin. Repeating them here would make
+        the same token editable in two places on one screen, which is the shape of the two-systems
+        confusion this panel exists to end, not a convenience.
+
+        🔴 `title` is not decoration. Without it these groups rendered as PEERS of Colours, Text
+        styles and Looks, and a person had nothing to tell them that Spacing and Borders are a
+        different layer from the three above — the confusion R2's badges exist to prevent, one
+        level up from where the badges are.
       */}
-      <TokensSection excludeGroups={['Colors', 'Typography']} />
+      <TokensSection title="Other tokens" excludeGroups={['Colors']} />
     </BasePanel>
   );
 }
