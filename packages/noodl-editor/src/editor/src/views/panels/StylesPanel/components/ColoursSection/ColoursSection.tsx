@@ -11,7 +11,7 @@ import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
 
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
-import { InlineNameInput, StylesSection } from '../../shared';
+import { InlineNameInput, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
 import { describeUsage } from '../../format';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
@@ -34,6 +34,8 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
   const [isCreating, setIsCreating] = useState(false);
   const [renaming, setRenaming] = useState<string | null>(null);
+  const [openUsage, toggleUsage] = useOpenUsageRow();
+  const goToWearer = useGoToWearer();
 
   const styles = useMemo(() => {
     if (!stylesModel) return [];
@@ -42,11 +44,21 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stylesModel, revision]);
 
-  const usage = useMemo(() => {
+  /**
+   * P94 STY-006 — what names each colour style, by identity.
+   *
+   * 🔴 **The count below is a `.length` over THIS, not a second call to `styleUsageCounts`.** Two
+   * calls would be two walks a re-render apart, and a row that says `9×` above eight lines is a
+   * panel nobody can trust about the number *or* the list. One walk, read twice.
+   */
+  const wearers = useMemo(() => {
     if (!stylesModel) return {};
-    return stylesModel.styleUsageCounts('colors');
+    return stylesModel.styleWearers('colors');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stylesModel, revision]);
+
+  const countFor = (name: string) =>
+    (wearers[name]?.nodes.length ?? 0) + (wearers[name]?.variants.length ?? 0);
 
   const colourTokens = useMemo(
     () => designTokens.filter((t) => t.category === 'color-semantic' || t.category === 'color-palette'),
@@ -90,7 +102,10 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
 
   function onDelete(name: string) {
     if (!stylesModel) return;
-    const { nodeCount, variantCount } = usage[name] ?? { nodeCount: 0, variantCount: 0 };
+    // Read off the SAME walk the row's number and its list came from, so the delete-confirm's
+    // sentence cannot name a different population from the one the person just looked at.
+    const nodeCount = wearers[name]?.nodes.length ?? 0;
+    const variantCount = wearers[name]?.variants.length ?? 0;
 
     const remove = () => stylesModel.deleteStyle('colors', name, { undo: true, label: 'delete colour style' });
 
@@ -137,7 +152,11 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
             value={style}
             swatch={ProjectModel.instance?.resolveColor(style) ?? style}
             layer="Style"
-            usageCount={(usage[name]?.nodeCount ?? 0) + (usage[name]?.variantCount ?? 0)}
+            usageCount={countFor(name)}
+            wearers={wearers[name]}
+            isUsageOpen={openUsage === name}
+            onToggleUsage={() => toggleUsage(name)}
+            onGoToWearer={goToWearer}
             menuItems={[
               { label: 'Rename', icon: IconName.Pencil, onClick: () => setRenaming(name) },
               { label: 'Delete', icon: IconName.Trash, isDangerous: true, onClick: () => onDelete(name) }

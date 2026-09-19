@@ -182,7 +182,22 @@ export class SelectionActions {
     // Always select the node in the selector if not already selected
     if (!node.selected) {
       this.settle(() => {
-        this.clearSelection();
+        /**
+         * 🔴 **`keepSidePanel` has to reach THIS deselect too, and it did not.**
+         *
+         * `clearSelection()` → `deselectNow()` → `SidebarModel.instance.hidePanels()`, which
+         * switches the sidebar to `previousActiveId` or falls back to `components`. So a caller
+         * asking to keep its panel lost it **here**, a few lines above the `switchToNode` its flag
+         * was guarding — the panel was taken down by the deselect and then simply not put back.
+         *
+         * Measured 2026-09-19 (P94 STY-006) by wrapping the sidebar's own methods in the running
+         * editor and reading who called them:
+         *   `hidePanels(undefined) from: SelectionActions.deselectNow < eval < SelectionActions.settle`
+         * — this call site, not the two others that also clear a selection on the way here. Two
+         * earlier fixes guarded those two and the reading did not move at all, which is what an
+         * unmeasured guess looks like from the outside. [[a-predicted-sentence-belongs-to-one-code-path]].
+         */
+        this.clearSelection(options?.keepSidePanel ? { disableHidePanels: true } : undefined);
         editor.commentLayer?.clearSelection();
         node.selected = true;
         editor.selector.select([node]);

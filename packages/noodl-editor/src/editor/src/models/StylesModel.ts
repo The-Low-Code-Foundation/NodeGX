@@ -3,10 +3,10 @@ import { UndoQueue } from '@noodl-models/undo-queue-model';
 import Model from '../../../shared/model';
 import { EventDispatcher } from '../../../shared/utils/EventDispatcher';
 import { ProjectModel } from './projectmodel';
-import { STYLE_PORT_TYPES, StyleUsage, styleUsageIn } from './StylesModel.usage';
+import { STYLE_PORT_TYPES, StyleUsage, StyleWearers, styleUsageIn, styleWearersIn } from './StylesModel.usage';
 
-export { STYLE_PORT_TYPES, styleUsageIn } from './StylesModel.usage';
-export type { StyleUsage } from './StylesModel.usage';
+export { STYLE_PORT_TYPES, styleUsageIn, styleWearersIn, lookWearersIn } from './StylesModel.usage';
+export type { StyleUsage, StyleWearers, Wearer, VariantRef } from './StylesModel.usage';
 
 export class StylesModel extends Model {
   styles: any;
@@ -169,6 +169,19 @@ export class StylesModel extends Model {
     const portType = STYLE_PORT_TYPES[type];
     if (portType === undefined) return {};
     return styleUsageIn(ProjectModel.instance, portType);
+  }
+
+  /**
+   * P94 STY-006 AC1 — **which** things name each style of `type`, not how many.
+   *
+   * The same walk `styleUsageCounts` is a `.length` over, handed back whole: the panel draws the
+   * count from one and the list from the other and they are one answer, so a row cannot say `9×`
+   * above eight lines. See {@link styleWearersIn}.
+   */
+  styleWearers(type: string): Record<string, StyleWearers> {
+    const portType = STYLE_PORT_TYPES[type];
+    if (portType === undefined) return {};
+    return styleWearersIn(ProjectModel.instance, portType);
   }
 }
 

@@ -679,7 +679,21 @@ export class NodeGraphEditor extends View {
     if (args?.node) {
       const node = this.findNodeWithId(args.node.id);
       if (node) {
-        this.clearSelection();
+        /**
+         * 🔴 **`keepSidePanel` has to cover BOTH halves of this, and it only covered one.**
+         *
+         * `clearSelection()` → `deselect()` → `SidebarModel.instance.hidePanels()`, which switches
+         * the sidebar to `previousActiveId` or falls back to `components`. So a caller asking to
+         * keep its panel lost it here, one line *before* the `selectNode` its flag was guarding —
+         * the panel was swapped out by the deselect and then simply not swapped again.
+         *
+         * Measured 2026-09-19 (P94 STY-006): pressing a wearer entry in the Styles panel navigated
+         * to the node correctly and left the sidebar showing **Components**, so the list of nine
+         * wearers a person was working through vanished on the first one. With `keepSidePanel` set
+         * and only `selectNode` guarded, the reading was identical to the flag not existing.
+         * [[two-gates-covering-the-ends-of-a-chain-read-as-coverage]].
+         */
+        this.clearSelection(args.keepSidePanel ? { disableHidePanels: true } : undefined);
         this.selectNode(node, { keepSidePanel: args.keepSidePanel });
 
         this.relayout(); // Need to relayout twice the first time a new model is set...

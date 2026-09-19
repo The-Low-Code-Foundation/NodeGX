@@ -32,6 +32,7 @@ import { hashComponent } from '../services/ProjectStructure/ComponentSaver';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import { decideComponentReload } from '../services/ProjectFileWatcher/decide';
 import { resolveProjectTokenValue } from './StyleTokensModel/ProjectTokenCss';
+import { lookWearersIn } from './StylesModel.usage';
 
 /** Which on-disk format a loaded project uses. Set at load; drives the save path. */
 export type ProjectFormatKind = 'legacy' | 'v2';
@@ -1501,26 +1502,33 @@ export class ProjectModel extends Model {
    * would walk the whole project anyway, so the two would have been the same cost and two places
    * to get the identity rule wrong.
    *
-   * 🔴 **The callback must not return a truthy value.** `forEachNode` treats one as "stop
-   * walking" ([[foreachnode-stops-on-a-truthy-return]]), so a body written as
-   * `n.variant && counts[...]++` would abort at the first wearer and report 1 for every Look that
-   * has any. That is also why {@link isVariantUsed} beside it sets a flag instead of returning —
-   * the shape is deliberate, not a style.
+   * 🔴 **A `.length` over {@link lookWearersIn}, and no longer its own walk** (P94 STY-006 AC2).
+   * The Looks section prints this number and, on a press, draws the wearers it came from directly
+   * underneath it — two traversals of the same graph would let a row say `3×` above two lines with
+   * nothing able to say which was right. [[a-second-copy-of-a-palette-drifts-silently]].
+   *
+   * 🔴 **That walk's callback must not return a truthy value.** `forEachNode` treats one as "stop
+   * walking" ([[foreachnode-stops-on-a-truthy-return]]), and the body now *pushes*, so
+   * `return list.push(...)` — push returns the new length — aborts at the first wearer and reports
+   * one for every Look that has any. Armed and measured at s9: 5 named arms red, reverted green.
+   * That is also why {@link isVariantUsed} beside it sets a flag instead of returning — the shape
+   * is deliberate, not a style.
    *
    * ⚠️ **Scoped by `typename`, because a name alone is not an identity.** Two node types may each
    * hold a Look called `Primary`, and bucketing by name across both would report one number for
    * two different things.
+   *
+   * ⚠️ `StylesModel.usage` imports NOTHING, which is what makes it safe to import from here and
+   * what makes it gradeable at all — see its own header.
+   * [[an-import-added-for-a-feature-can-switch-a-sibling-gate-off]].
    */
   variantWearerCounts(typename): Record<string, number> {
     const counts: Record<string, number> = {};
-    this.forEachComponent((c) => {
-      c.forEachNode((n) => {
-        const variant = n.variant;
-        if (variant !== undefined && variant.name !== undefined && variant.typename === typename) {
-          counts[variant.name] = (counts[variant.name] ?? 0) + 1;
-        }
-      });
-    });
+
+    for (const [name, wearers] of Object.entries(lookWearersIn(this, typename))) {
+      counts[name] = wearers.length;
+    }
+
     return counts;
   }
 

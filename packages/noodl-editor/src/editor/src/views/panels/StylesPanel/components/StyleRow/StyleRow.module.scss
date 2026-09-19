@@ -79,6 +79,15 @@
   color: var(--theme-color-fg-default-shy);
 }
 
+/**
+ * P94 STY-006 — the row and its wearer list are one block, so the list is inside the
+ * row's hover target and reads as belonging to it rather than to the row below.
+ */
+.Wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 /** R-D's other half: what uses it. A zero is drawn, not hidden — see StyleRow.tsx. */
 .Usage {
   flex: 0 0 auto;
@@ -108,4 +117,118 @@
   padding: 6px 12px 10px;
   font-size: 11px;
   color: var(--theme-color-fg-default-shy);
+}
+
+/**
+ * P94 STY-006 AC3 — the count, when there is something behind it.
+ *
+ * 🔴 **It has to LOOK pressable.** STY-005 drew the count as dim grey text and nothing about it
+ * said it could be pressed; adding an `onClick` to text that looks like text ships a feature
+ * nobody finds. It carries the underline and the pointer a link carries, and brightens the way the
+ * rest of this panel's controls do.
+ */
+.UsageButton {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 1px 3px;
+  margin: 0;
+  font: inherit;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  border-radius: 3px;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+    background-color: var(--theme-color-bg-4);
+  }
+}
+
+/** Open reads as pressed-in, so a person can tell which row's list they are looking at. */
+.is-open {
+  color: var(--theme-color-fg-default);
+  background-color: var(--theme-color-bg-4);
+  text-decoration: none;
+}
+
+.Wearers {
+  display: flex;
+  flex-direction: column;
+  /* Indented under the row it belongs to, and railed, so a long list cannot read as the section. */
+  margin: 2px 12px 6px 24px;
+  padding-left: 8px;
+  border-left: 1px solid var(--theme-color-bg-4);
+}
+
+.WearersTitle {
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  padding: 2px 0 4px;
+}
+
+/**
+ * One node you can go to.
+ *
+ * ⚠️ `appearance: none` on a `<button>` is not enough to make it look like a row in this editor —
+ * the padding, the font and the text alignment are all browser defaults that survive it.
+ * [[a-css-property-whose-default-equals-the-test-value]] is about asserting on one; this is about
+ * the four others nobody asserts on.
+ */
+/**
+ * 🔴 **No arrow, no chevron, no accent on the label — RULED by Richard 2026-09-19.** Asked
+ * explicitly off the shot, with an always-visible arrow and a link-coloured label both on the
+ * table; he chose the quiet row. The hover highlight is the whole affordance. This is a decision,
+ * not an omission, so do not "fix" it.
+ */
+.Wearer {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  appearance: none;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 3px 4px;
+  border-radius: 3px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-4);
+  }
+}
+
+/** A Look. Same list, deliberately NOT a button — there is nowhere to go. */
+.WearerLook {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 4px;
+}
+
+.WearerName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerWhere {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

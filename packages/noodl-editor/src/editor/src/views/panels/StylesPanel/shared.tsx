@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { StylesModel } from '@noodl-models/StylesModel';
+
+import { NodeGraphContextTmp } from '../../../contexts/NodeGraphContext/NodeGraphContext';
+import { ToastLayer } from '../../ToastLayer/ToastLayer';
 
 import { CollapsableSection } from '@noodl-core-ui/components/sidebar/CollapsableSection';
 import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
@@ -135,4 +138,71 @@ export function InlineNameInput({ placeholder, initialValue, onCommit, onCancel 
       />
     </div>
   );
+}
+
+
+/**
+ * P94 STY-006 AC5 — go to the node that wears this style.
+ *
+ * 🔴 **`switchToComponent(component, { node })` is the door, and it is the SAME door** the canvas
+ * uses for a breadcrumb, a navigation-history step and "edit this component" on a node's context
+ * menu. It clears the selection, selects the node and pans the viewport so the node is centred —
+ * all of which is what "takes you there" means and none of which this panel should reimplement.
+ *
+ * 🔴 **The component is resolved at the moment of the press, by name.** A wearer list can be a
+ * minute old, and a `ComponentModel` captured when it was drawn is a reference to something that
+ * may have been deleted since. `getComponentWithName` returning nothing is a message; a stale model
+ * is a crash inside the canvas.
+ *
+ * ⚠️ `args.node` is read for `.id` only (`findNodeWithId(args.node.id)`), so the id is the whole
+ * identity and there is no `NodeGraphNode` to find first. The cast says that, rather than this
+ * panel walking the graph to produce a model the canvas is about to look up again anyway.
+ */
+export function useGoToWearer(): (wearer: { componentName: string; nodeId: string }) => void {
+  return useCallback((wearer) => {
+    const component = ProjectModel.instance?.getComponentWithName(wearer.componentName);
+
+    if (!component) {
+      ToastLayer.showError(`That node's component (${wearer.componentName}) is not in this project any more`);
+      return;
+    }
+
+    if (!NodeGraphContextTmp.switchToComponent) {
+      // The canvas has not mounted — opening a project is the only way to be here, so this is a
+      // race and not a state. Saying so beats a press that silently does nothing.
+      ToastLayer.showError('The canvas is not ready yet');
+      return;
+    }
+
+    NodeGraphContextTmp.switchToComponent(component, {
+      node: { id: wearer.nodeId } as TSFixme,
+      pushHistory: true,
+      /**
+       * 🔴 **Without this the press destroys the list it was pressed in.** `SelectionActions.
+       * selectNode` ends with `if (!options?.keepSidePanel) SidebarModel.instance.switchToNode(...)`
+       * — so selecting the node swaps the Styles panel out for the property panel, and a person
+       * working through nine wearers loses the list on the first one and has to reopen the panel
+       * and the row for each of the other eight.
+       *
+       * Found by the drive, not by a gate: every assertion about what the list *draws* was green,
+       * and `tests-unit/sty-006` cannot see a sidebar at all. The flag exists for precisely this
+       * case — its own comment says *"unless the selection came from a panel, which would then be
+       * replacing itself"* — and this selection came from a panel.
+       */
+      keepSidePanel: true
+    });
+  }, []);
+}
+
+/**
+ * Which row's wearer list is open, for one section.
+ *
+ * 🔴 **One at a time.** The rail is narrow and a list is up to N lines tall; two open lists put the
+ * second row's wearers a screen below the number that opened them, which is the *"buried under
+ * ninety swatches"* shape the shot caught at s8. Pressing an open row closes it.
+ */
+export function useOpenUsageRow(): [string | null, (key: string) => void] {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const toggle = useCallback((key: string) => setOpenKey((current) => (current === key ? null : key)), []);
+  return [openKey, toggle];
 }

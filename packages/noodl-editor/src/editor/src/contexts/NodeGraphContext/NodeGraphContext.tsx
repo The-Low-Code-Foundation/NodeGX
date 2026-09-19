@@ -18,6 +18,16 @@ interface NodeGraphControlSwitchOptions {
   selectSheet?: boolean;
   breadcrumbs?: boolean;
   node?: TSFixme;
+  /**
+   * Keep the sidebar panel the selection came from (TVW-004; see `SelectionActions.selectNode`).
+   *
+   * ⚠️ **This type was NARROWER than the method it forwards to**, and silently so: every option is
+   * passed straight through to `NodeGraphEditor.switchToComponent`, which has accepted
+   * `keepSidePanel` all along, but a caller reaching the canvas through this context could not
+   * name it without a `tsc` error. P94 STY-006 hit exactly that — a panel navigating to a node
+   * needs it, or selecting the node replaces the panel that asked.
+   */
+  keepSidePanel?: boolean;
 }
 
 export interface NodeGraphControlContext {

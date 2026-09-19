@@ -7,7 +7,7 @@ import { IconName } from '@noodl-core-ui/components/common/Icon';
 
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
-import { InlineNameInput, StylesSection } from '../../shared';
+import { InlineNameInput, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
 import { describeUsage, summariseTextStyle } from '../../format';
@@ -20,6 +20,8 @@ export interface TextStylesSectionProps {
 export function TextStylesSection({ stylesModel, revision }: TextStylesSectionProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [renaming, setRenaming] = useState<string | null>(null);
+  const [openUsage, toggleUsage] = useOpenUsageRow();
+  const goToWearer = useGoToWearer();
 
   const styles = useMemo(() => {
     if (!stylesModel) return [];
@@ -27,11 +29,15 @@ export function TextStylesSection({ stylesModel, revision }: TextStylesSectionPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stylesModel, revision]);
 
-  const usage = useMemo(() => {
+  /** P94 STY-006 — the identities. The row's count is a `.length` over this; see `ColoursSection`. */
+  const wearers = useMemo(() => {
     if (!stylesModel) return {};
-    return stylesModel.styleUsageCounts('text');
+    return stylesModel.styleWearers('text');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stylesModel, revision]);
+
+  const countFor = (name: string) =>
+    (wearers[name]?.nodes.length ?? 0) + (wearers[name]?.variants.length ?? 0);
 
   function onCreate(name: string) {
     setIsCreating(false);
@@ -66,7 +72,9 @@ export function TextStylesSection({ stylesModel, revision }: TextStylesSectionPr
 
   function onDelete(name: string) {
     if (!stylesModel) return;
-    const { nodeCount, variantCount } = usage[name] ?? { nodeCount: 0, variantCount: 0 };
+    // The same walk the row's number and its list came from — see `ColoursSection.onDelete`.
+    const nodeCount = wearers[name]?.nodes.length ?? 0;
+    const variantCount = wearers[name]?.variants.length ?? 0;
 
     const remove = () => stylesModel.deleteStyle('text', name, { undo: true, label: 'delete text style' });
 
@@ -107,7 +115,11 @@ export function TextStylesSection({ stylesModel, revision }: TextStylesSectionPr
             name={name}
             value={summariseTextStyle(style)}
             layer="Style"
-            usageCount={(usage[name]?.nodeCount ?? 0) + (usage[name]?.variantCount ?? 0)}
+            usageCount={countFor(name)}
+            wearers={wearers[name]}
+            isUsageOpen={openUsage === name}
+            onToggleUsage={() => toggleUsage(name)}
+            onGoToWearer={goToWearer}
             menuItems={[
               { label: 'Rename', icon: IconName.Pencil, onClick: () => setRenaming(name) },
               { label: 'Delete', icon: IconName.Trash, isDangerous: true, onClick: () => onDelete(name) }
