@@ -26,27 +26,21 @@ one.
 🔴 **AC8 WAS ASKED AND RICHARD RULED (2026-09-19): KEEP IT AS BUILT.** §4a is settled — the group
 heading naming the Look once is the answer, and the mockup's in-field `[ Primary Button  18px ]` is
 **not wanted**. 🔴 **But he found a defect in the shot in the same breath** — the changed-dot and the
-Look bar share a lane in the 16px gutter (§2e), measured at **-11 → -5** against **-8 → -6**, so the
-bar was drawn straight through the dot. Fixed to `left: -15px`, **not yet driven.**
+Look bar share a lane in the 16px gutter (§2e).
 
-**So AC8 is not closed: it closes when he has seen the fix.** The next session's first job is one
-drive that does all three at once — the rename fix (§2d), the gutter fix (§2e), and a reshoot of the
-override pair in both themes. ⚠️ **Rename the Look before shooting.** The existing shots hold a Look
-called `test`, so the sentence reads *"test says var(--text-4xl)"* rather than the design's
-*"Primary Button says 8px"*; the `⋯` → Rename that s6 drove is how to fix it, and it takes seconds.
-**Design:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §2 (the four rules), §3
-(the panel), §4 (the Look menu) — **ruled by Richard, 2026-09-18**.
+✅ **s7 DROVE BOTH FIXES. The gutter is green and shot** (§2f): the two marks read **2px apart** off
+the rendered elements in **both themes**, on the overridden row he described, and the shots are
+`shots/sty003-gutter-dark.png` / `shots/sty003-gutter-light.png`, cropped to the styled group at 2×
+with the Look called `Section Heading` rather than `test`. 🔴 **The rename fix was only half a fix
+and s6 recorded it as done:** the subscription fires and `renderGroups` was still returning early,
+because both of the hash's names for the Look are stale copies. `variantAsDrawn` — the name the
+panel actually prints — is now in the hash, and the rename then reaches the group headings and the
+override line with nothing else touched.
 
-> **"It needs to be clear AF."** — Richard's ruling, and the reason this task exists as its own row.
-
-🔴 **Build with [STY-002](./STY-002-THE-LOOK-MODEL.md).** That one is the model; this is the only
-place a person ever meets it.
-
-**The close condition is Richard's look.** A surface closes when he has seen a screenshot and ruled
-it WORTHY — as in P92, and for the sixth-plus time
-([[correct-and-usable-were-never-the-same-criterion]]). Nothing here closes on a passing test.
-
----
+**AC8 now closes on one thing only: Richard looking at those two shots.** Two further defects the
+drive found are recorded at the end of §2f and neither blocks him — a node can hold a Look object
+that is not the project's, and `nodegx.styles.json` stopped being written for the rest of the
+session while the component that wears the Look kept being written.
 
 ## 1. What the surface is today, measured at HEAD (s3)
 
@@ -285,6 +279,89 @@ leading edge and still sits 1px inside the rows host, which starts 16px in.
 in different containing blocks and it is the *screenshot* that says they coincide. **Drive it, and
 put the new shot in front of Richard — AC8 closes on that, not on this fix existing.**
 
+## 2f. 🔴 What s7's drive measured — the gutter is fixed, and the rename fix was only half of one
+
+Driven on `members area Richard test` through `scripts/devtools/drive-sty003-gutter.js`, which is
+the whole of this in one pass and is checked in. **16/17 graded arms.**
+
+### ✅ The gutter — Richard's defect, read off the rendered elements at last
+
+| row | Look bar (viewport x) | gutter dot | gap |
+|---|---|---|---|
+| `Text` — **linked**, connected | 55 → 57 | 59 → 65 | **2px** |
+| `Font Size` — **overridden**, changed | 55 → 57 | 59 → 65 | **2px** |
+
+Both themes, re-read after each flip: dark `rgb(157,204,255)` / `rgb(253,176,34)`, light
+`rgb(14,92,202)` / `rgb(147,55,13)`. 🔴 **The arm that matters is not "they do not overlap" but
+"a row draws BOTH marks"**, and it is graded separately — **2 of 6 rows do**. Without it the
+headline arm would be true of a panel drawing no dots at all, which is exactly what this project
+draws by default: the node on disk wears the Look and owns **nothing**, so the drive takes over
+`fontSize` to make Richard's worst case exist before photographing it.
+
+Shots: `shots/sty003-gutter-dark.png`, `shots/sty003-gutter-light.png` — cropped to the styled
+group at 2×, scrolled to the **overridden** row, because that is the one he described.
+
+### 🔴 The rename: s6 fixed the ASK, and the GUARD was still dropping it
+
+s6 added the project subscription and recorded the defect as closed. It was not. Measured by
+patching `Ports.prototype.renderGroups` in the running editor: on a rename it **is entered**
+(`rgCalls: 1`) and then **returns early**, because both of the hash's names for the Look are
+stale:
+
+```
+"variant":"Heading One"            ← this.model.variantName
+"variantAsDrawn":"Section Heading" ← nodeOf(this.model).variant.name   (added by this session)
+                                      project.variants[0].name was "Probe Two"
+```
+
+`NodeGraphNode.variantName` is a **plain stored string**, written when the node was given the Look
+and never touched again; `renameVariant` mutates the Look object in place. So the hash could not
+move and the panel went on naming a Look nothing was called any more. **Three times this phase the
+missing half has been assumed to be the ask** — here the ask arrived and the guard threw it away
+([[verify-the-consequence-not-just-the-mechanism]]).
+
+Fix: `renderGroups`'s hash also carries `variantAsDrawn` — the name the panel actually prints.
+Both fields are kept: `node.variant = 'SomeName'` (the string setter) moves `variantName` while
+`_variant` still holds the old object, so each catches a transition the other cannot see.
+
+**Graded green afterwards, and the arm was rebuilt twice before it graded anything:**
+
+- v1 renamed to the name the panel already displayed and passed **without the panel updating** —
+  string containment against a target string that was already on screen.
+- v2 primed the rename off the panel's own reading, which is the thing under test, so it aimed at
+  a name the model no longer had.
+- v3, the one that counts: rename to `Look Alpha`, force **one unrelated rebuild** (a keystroke in
+  the filter box, in the hash and touching no Look) so the panel is **known** to be printing it,
+  then rename to `Look Bravo` and touch nothing. Neither name is a substring of the other. The
+  headings and the override line both followed; a second rename to `Section Heading` followed too.
+
+Negative arm, same run, **graded on the consequence rather than a marker**: the caret. An earlier
+version stamped the rows and checked the stamps survived — that grades nothing, because React
+reconciles and an attribute set from outside survives a rebuild intact. What §8 protects is a
+person typing: a real keypress into the owned `Font Size` field left the input in the document and
+still focused, caret at 17.
+
+### 🔴 Two defects this drive found and did NOT fix — neither blocks AC8
+
+1. **A node can hold a `VariantModel` that is not the project's.** Measured: `variantName:
+   "Probe Two"`, `node.variant.name: "Section Heading"`, `project.variants[0].name:
+   "Orphan Check"` — three names for one Look, all disagreeing. While that is true every word the
+   panel says about the Look is a true statement about a **ghost**, and a rename of the project's
+   Look is invisible to it by construction. `node.setVariant(project.variants[0])` repairs it, and
+   the rename then reaches every row immediately — which is how the fix above was confirmed. 🔴 A
+   **save does not cause it** (measured: no `projectLevelReloadedFromDisk`, identity held across
+   one), so the cause is still open. The drive now grades the binding as its own clause so the
+   rename arm can never be graded against a ghost.
+2. **`nodegx.styles.json` stopped being written for the rest of the session.** After one write at
+   18:09 the sidecar never moved again, through five further renames, while
+   `components/__page__/Home/nodes.json` **was** rewritten with the new name. That leaves a node
+   on disk naming a Look the sidecar does not contain — and on the next open it resolves to
+   nothing and the next save writes the node **without a `variant` key at all**, which is what
+   happened at 18:04 and is unrecoverable without undo. Not the FLD-009 refusal path: no refusal
+   warning reached the console, only `Project saved`. `saveProjectLevel`'s
+   `hash === projectLevelHashes.get(key) → continue` is where to start. The driven project was
+   repaired by hand afterwards.
+
 ## 3. Acceptance criteria
 
 The four rules of design §2 are the criteria. Any surface that breaks one is wrong.
@@ -298,7 +375,7 @@ The four rules of design §2 are the criteria. Any surface that breaks one is wr
 | **AC5** | **The three states read correctly on the element a person actually sees**, in **both themes** — linked, overridden, own. 🔴 Read from the rendered element, not from the class it was given ([[a-ring-must-be-read-on-the-element-a-person-sees]]), and check the chosen colours against the editor's existing semantic colours: design §3.3 explicitly does **not** rule them | ✅ **GREEN (s5's drive) — read off the rendered element in both themes, and it found two defects first** (§2c). Dark: linked `rgb(157,204,255)`, overridden `rgb(253,176,34)`. Light: `rgb(14,92,202)` / `rgb(147,55,13)` — the token layer swaps both to the darker pair for the lighter ground, so neither was hand-written per theme. A node with no Look reads **0 treatments, 0 group sources, 0 override lines**: design §3.2's "the absence of it is itself the signal", measured rather than assumed. Old note, now superseded: The colours **have** been checked against the editor's palette and the reasoning is in the stylesheet: **amber is kept for overridden because it IS `--theme-color-fg-notice`**, the editor's "caution, not error" — the right weight for a legitimate act the panel wants seen. **Purple has no token at all**, so linked takes `--theme-color-fg-accent`; minting one would start a second palette beside `colors.css` ([[a-second-copy-of-a-palette-drifts-silently]]). Both are theme-aware tokens, so light and dark come from the token layer. 🔴 **But a token's documented 4.5:1 is a fact about the token, not a reading of this row** — nothing has been read off a rendered element yet |
 | **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | 🟡 **built (s5)** — all three sections in that order, off `buildLookMenu`. 🔴 **The save row is not new behaviour; it is a new name and a new place.** `createNewVariant` always did exactly this — copy the node's parameters onto a named Look and put the node in it — but it was labelled *"Create new variant"* at the **top** of the popup, which asks a person to know what a variant is before they can want one. It is now the last row and reads *"Save this button's styles as a new Look…"*. ✅ **MEASURED (s6) — opened at rest and it reads as three** (§2d): `None — styles are its own`, `IN THIS PROJECT` with the wearer count and one `⋯`, `START FROM A NODEGX LOOK` with the **thirteen** a Text declares and the "adds it to your project" sentence, then the save row last. The order is design §4's |
 | **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | 🟡 **built (s5)** — `PickVariantItem` draws one always-visible `⋯` that opens Rename and Delete in the row. 🔴 **The new control deliberately does not use `.variants-item-icon`**, which is the class carrying the `visibility: hidden` the defect was made of, and the stylesheet carries a note saying nothing below it may re-introduce one. ✅ **MEASURED (s6) — §1's control pair re-run at rest, and it is the clean inverse** (§2d): the `⋯` reads `visibility: visible`, `opacity: 1` and `elementFromPoint` returns the button itself, while `.variants-item-icon` — the class the defect was made of — has **count 0** on this surface. One press expands `Rename` and `Delete`, both visible and hit-reachable, **no hover anywhere**; Rename was driven end to end and committed. 🔴 That rename is what exposed §2d's staleness defect |
-| **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | 🟡 **RULED, WITH ONE DEFECT TO FIX FIRST (2026-09-19).** He was shown the override shots in both themes and §4a's departure, put to him as three ways of naming the source. **He chose the surface as built** — the group heading names the Look once, the gutter bar marks each row that came from it, the override line carries the per-row sentence — so **§4a is RULED and the mockup's in-field naming is not wanted**. 🔴 **But he found a defect in the shot that 30 green tests and two prior drives had not:** *"the little dot to the left of the label that says when something is changed is overlapping with the blue or red vertical line next to each label from a 'look' controlled value."* The two gutter marks shared a lane — see §2e. ⬜ **Closes when he has seen the fix**, which is one drive away |
+| **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | 🟡 **RULED, WITH ONE DEFECT TO FIX FIRST (2026-09-19).** He was shown the override shots in both themes and §4a's departure, put to him as three ways of naming the source. **He chose the surface as built** — the group heading names the Look once, the gutter bar marks each row that came from it, the override line carries the per-row sentence — so **§4a is RULED and the mockup's in-field naming is not wanted**. 🔴 **But he found a defect in the shot that 30 green tests and two prior drives had not:** *"the little dot to the left of the label that says when something is changed is overlapping with the blue or red vertical line next to each label from a 'look' controlled value."* The two gutter marks shared a lane — see §2e. ✅ **THE FIX IS DRIVEN AND SHOT (s7, §2f)** — the two marks are 2px apart, read off the rendered elements in **both themes**, on the overridden row he described. ⬜ **Still closes on his look**, not on this: `shots/sty003-gutter-dark.png` and `shots/sty003-gutter-light.png` are what to put in front of him |
 
 ## 4a. 🔴 Where the surface departs from the mockup, and why
 

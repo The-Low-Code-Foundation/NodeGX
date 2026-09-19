@@ -969,6 +969,27 @@ export class Ports extends View {
     const inputData = {
       ports: this._getPorts(),
       variant: this.model.variantName,
+      /**
+       * 🔴 P94 STY-003 — THE NAME AS DRAWN, because `variantName` is a STALE COPY OF IT.
+       *
+       * `NodeGraphNode.variantName` is a plain stored string, written when the node was given the
+       * Look and never touched again; `renameVariant` mutates the Look object in place. So after a
+       * rename the node holds two names for one thing and they disagree — measured live on
+       * `members area Richard test`: `variantName: "test"` beside `variant.name:
+       * "Section Heading"`, with the project holding only the new one.
+       *
+       * That is why s6's subscription fix did not close the defect. The project event **fires** —
+       * instrumented in the same drive, `variantRenamed` arrived once — and `renderGroups` then
+       * returned early because the hash is built from the name that cannot move. The panel went on
+       * saying `— from test` about a Look nothing was called any more. **Three times this phase the
+       * missing half has been assumed to be the ask; here the ask arrived and the GUARD dropped
+       * it** ([[verify-the-consequence-not-just-the-mechanism]]).
+       *
+       * Both are kept. They are not redundant: `node.variant = 'SomeName'` (the string setter)
+       * moves `variantName` while `_variant` still holds the old object, so each field catches a
+       * transition the other cannot see, and a hash is the cheapest place to be generous.
+       */
+      variantAsDrawn: nodeOf(this.model)?.variant?.name,
       // 🔴 P94 STY-003 — WHICH parameters the node owns, because that is what the provenance
       // treatments are computed from and nothing else here moves when it changes.
       //
