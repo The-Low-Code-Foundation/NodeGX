@@ -25,6 +25,15 @@ export interface ComponentTrailItem {
   component?: TSFixme; // Noodl Component object or undefined if folder
   isCurrent: boolean;
   stateText: 'Read only' | null;
+
+  /**
+   * TVW-007 §2 — this crumb is the component you came THROUGH, not a folder you are stored in.
+   *
+   * Set only by `OverlayViews.updateTitle` on the parent crumb of a containment trail
+   * (`[◆ Home] › Hero`). It is what earns the diamond and the component-hue wash, and it is the
+   * only crumb kind in this bar that renders as a real `<button>` — see `Item`.
+   */
+  isInstanceCrumb?: boolean;
 }
 
 export interface NodeGraphComponentTrailProps {
@@ -345,26 +354,73 @@ function Item({ item, onSwitchToComponent }: ItemProps) {
     isRootComponent = rootComponent.name === item.fullName;
   }
 
-  return (
-    <div
-      ref={itemRef}
-      className={classNames(
-        css['Item'],
-        item.component ? css['is-component'] : css['is-folder'],
-        item.isCurrent && css['is-current']
+  const className = classNames(
+    css['Item'],
+    item.component ? css['is-component'] : css['is-folder'],
+    item.isCurrent && css['is-current'],
+    item.isInstanceCrumb && css['is-instance']
+  );
+
+  const body = (
+    <>
+      {/* TVW-007: the diamond, on the crumb you came through. Inline rather than an `Icon`
+          because the glyph IS the claim this crumb makes — that `Home` is a place containing
+          this component, not a folder above it — and an icon set is a thing a later task can
+          re-point. It paints with `currentColor`, so the hue comes from the class. */}
+      {item.isInstanceCrumb && (
+        <svg
+          className={css['Diamond']}
+          width="8"
+          height="8"
+          viewBox="0 0 8 8"
+          aria-hidden="true"
+          focusable="false"
+          data-test="trail-instance-diamond"
+        >
+          <path d="M4 0.5 L7.5 4 L4 7.5 L0.5 4 Z" fill="currentColor" />
+        </svg>
       )}
-      aria-current={item.isCurrent ? 'page' : undefined}
-      onClick={() => {
-        if (!item.component || item.isCurrent) return;
-        onSwitchToComponent(item.component, { pushHistory: true });
-      }}
-    >
       {/* Mock: only the current tab carries the component glyph. */}
       {icon && !isSheet && item.isCurrent && (
         <Icon icon={isRootComponent ? IconName.Home : icon} size={IconSize.Tiny} UNSAFE_className={css['Icon']} />
       )}
       <span className={css['Label']}>{name}</span>
       {item.component && Boolean(item.stateText) && <span className={css['StateText']}>({item.stateText})</span>}
+    </>
+  );
+
+  function onCrumbClick() {
+    if (!item.component || item.isCurrent) return;
+    onSwitchToComponent(item.component, { pushHistory: true });
+  }
+
+  /**
+   * TVW-007 AC4 — the instance crumb is a real `<button>`; every other crumb is unchanged.
+   *
+   * ⚠️ Scoped to the new crumb on purpose. Every clickable crumb in this bar SHOULD be a button —
+   * a `<div onClick>` is unreachable by keyboard and unannounced to a screen reader — but that is
+   * a change to the look of a bar three other phases are editing this week, and it has to be
+   * photographed before it ships. This crumb is new, so there is nothing to regress, and it means
+   * the two crumb kinds differ in the rendered DOM rather than only in a class name.
+   */
+  if (item.isInstanceCrumb) {
+    return (
+      <button
+        type="button"
+        ref={itemRef as unknown as React.RefObject<HTMLButtonElement>}
+        className={className}
+        data-test={`trail-instance-crumb-${item.fullName}`}
+        title={`Back to ${name}`}
+        onClick={onCrumbClick}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return (
+    <div ref={itemRef} className={className} aria-current={item.isCurrent ? 'page' : undefined} onClick={onCrumbClick}>
+      {body}
     </div>
   );
 }

@@ -596,6 +596,15 @@ export class NodeGraphEditor extends View {
       keepSidePanel?: boolean;
       pushHistory?: boolean;
       replaceHistory?: boolean;
+      /**
+       * TVW-007 — this navigation went THROUGH AN INSTANCE on the canvas being left.
+       *
+       * A boolean rather than the parent's name on purpose: the parent is always the component
+       * the canvas is on at the moment of the call, and every caller that had to look it up
+       * itself would be one more place that could look up the wrong one. It is read here, from
+       * `this.activeComponent`, before that field is reassigned.
+       */
+      viaInstance?: boolean;
     }
   ) {
     if (!component) {
@@ -620,6 +629,10 @@ export class NodeGraphEditor extends View {
     this.runtimeType = getComponentModelRuntimeType(component);
 
     if (this.activeComponent !== component) {
+      // TVW-007: the canvas being LEFT — captured before `activeComponent` is reassigned below,
+      // because that is the component an instance route came through.
+      const cameFrom = this.activeComponent;
+
       this.activeComponent?.off(this);
 
       // Clear highlights when switching to a different component
@@ -641,11 +654,14 @@ export class NodeGraphEditor extends View {
        */
       const canPushHistory = this.runtimeType !== RuntimeType.Workflow;
 
+      // TVW-007: null unless this was an instance door AND there was a canvas to come from.
+      const via = args?.viaInstance && cameFrom ? cameFrom.fullName : null;
+
       if (args?.replaceHistory) {
         this.navigationHistory.reset();
-        if (canPushHistory) this.navigationHistory.push(component);
+        if (canPushHistory) this.navigationHistory.push(component, via);
       } else if (args?.pushHistory && canPushHistory) {
-        this.navigationHistory.push(component);
+        this.navigationHistory.push(component, via);
       }
 
       TitleBar.instance.getWarningsAmount(component);

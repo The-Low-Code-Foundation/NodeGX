@@ -221,7 +221,9 @@ export class SelectionActions {
       }
 
       if (node.model.type instanceof ComponentModel) {
-        editor.switchToComponent(node.model.type, { pushHistory: true });
+        // TVW-007: the instance door. `viaInstance` is what makes the trail read `[◆ Home] › Hero`
+        // instead of the folder path — see `instanceTrail.ts`.
+        editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true });
       } else {
         const componentPorts = node.model
           .getPorts()
@@ -232,6 +234,15 @@ export class SelectionActions {
         const type = component.length && NodeLibrary.instance.getNodeTypeWithName(component[0]);
 
         if (type) {
+          /**
+           * ⚠️ TVW-007 deliberately does NOT pass `viaInstance` here.
+           *
+           * This branch is a node with a `component`-typed INPUT PARAMETER (a node configured to
+           * point at a component), not an instance of one. The trail's parent crumb is drawn as
+           * the instance chip — diamond and component-hue wash — and that chip would be a claim
+           * about containment that this relationship does not make: the component is not placed
+           * on this canvas, it is named by a parameter on it. These descend to the folder path.
+           */
           // @ts-expect-error TODO: this is wrong!
           editor.switchToComponent(type, { pushHistory: true });
         } else {
