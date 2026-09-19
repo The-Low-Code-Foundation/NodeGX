@@ -7,13 +7,29 @@ now **30 tests green** across the decision and the drawing.
 
 **s5 drew it AND drove it.** AC1, AC2, AC3 are built (§2b) and **AC5 is green** — the three states
 read off the **rendered element in both themes**, which found two defects first and both are fixed
-(§2c): the override treatment was **stale**, and the bar **painted over the label**. AC6 and AC7 are
-built but **not opened in a running editor**.
+(§2c): the override treatment was **stale**, and the bar **painted over the label**.
 
-🔴 **AC8 IS THE ONLY THING LEFT, and it is Richard's.** The shots are in
+**s6 opened AC6 and AC7 and both are green** (§2d): the menu reads as design §4's three sections in
+order, and the `⋯` is `visible` / `opacity: 1` / hit-reachable **at rest**, against a control of
+**zero** `.variants-item-icon` left on the surface. Shots `sty003-look-menu.png` and
+`sty003-row-actions.png`.
+
+🔴 **And driving the rename found a THIRD staleness defect** (§2d): renaming a Look updated the
+`Look` row and left **every group heading and every override line naming the old name**, through a
+reselect. The model was right throughout — one keystroke in the filter box printed the new name —
+so the fix is a subscription, not a guard: `Ports.bindModel` now hears the project's
+`variantRenamed`. ⚠️ **The fix compiles clean in the editor bundle but has NOT been driven**; the
+box went to load 41 under two other sessions' work before it could be. That re-drive is the next
+session's first job, and it is the same drive that should reshoot AC8 with a Look named like a real
+one.
+
+🔴 **AC8 IS THE ONLY THING LEFT THAT CLOSES THIS, and it is Richard's.** The shots are in
 [`shots/`](./shots/) — `sty003-light-look-with-override.png`, `sty003-dark-look-with-override.png`,
-and the pair with no Look. **Ask him.** §4a names the one place the surface departs from his
-mockup, which is the thing to put in front of him rather than let pass.
+the pair with no Look, and s6's menu/row-action pair. ⚠️ **The Look in the override shots is named
+`test`**, because that is what the drive project holds, so the sentence reads *"test says
+var(--text-4xl)"* rather than the design's *"Primary Button says 8px"* — state that when asking
+rather than let the shot argue the point for itself. **Ask him.** §4a names the one place the
+surface departs from his mockup, which is the thing to put in front of him rather than let pass.
 **Design:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §2 (the four rules), §3
 (the panel), §4 (the Look menu) — **ruled by Richard, 2026-09-18**.
 
@@ -156,10 +172,75 @@ tests and would be invisible to 30 more of the same kind, because it is a fact a
 re-renders*, not about what `readField` returns ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
 A guard for it has to drive the editor.
 
-⚠️ **AC6 and AC7 are BUILT, NOT MEASURED.** Neither has been opened in a running editor. The parts
-most likely to be wrong are the ones a unit test cannot reach: whether the three sections read as
-three, whether `⋯` is discoverable, and whether the copy lands as a Look the person then sees in
-the project section.
+~~⚠️ **AC6 and AC7 are BUILT, NOT MEASURED.**~~ **Both were opened and measured in s6 — see §2d.**
+
+## 2d. 🔴 What s6's drive measured — AC6 and AC7 green, and a THIRD staleness defect
+
+Driven on `members area Richard test`, the same project s5 used, with the `Text` node that wears the
+project's one Look.
+
+**AC6 — the menu reads as design §4's three sections, in order.** Opened at rest off the `Look` row:
+`None — styles are its own`, then **`IN THIS PROJECT`** (`test`, wearer count `1`, one `⋯`), then
+**`START FROM A NODEGX LOOK`** with the thirteen the library declares for a Text — Body, Heading
+1–6, Muted, Label, Small, Code, Lead, Blockquote — closed by *"Picking one adds it to your project
+so you can edit it. It won't change under you later."*, and last the save row, *"Save this text's
+styles as a new Look… ＋"*. **Thirteen, not fourteen** — the count s4 asserted off the configs is
+what the running editor draws.
+
+**AC7 — §1's control pair re-run at rest on the new element, and it is the clean inverse.** With the
+pointer parked away from the row, the `⋯` (`.variants-row-menu-button`) reads `visibility: visible`,
+`opacity: 1`, a 26×26 box, and `elementFromPoint` at its centre returns the button itself — so it is
+*reachable* at rest, not merely painted ([[a-rendered-surface-can-be-behind-a-blocker]]). The
+control: `document.querySelectorAll('.variants-item-icon').length` is **0** — the class that carried
+the `visibility: hidden` the defect was made of is not on this surface at all, so there is no second
+element to regress to. One press expands `Rename` and `Delete` in the row, both `visible`,
+`opacity: 1` and both hit-reachable; **no hover anywhere in the sequence.** Rename was then driven
+end to end and committed.
+
+⚠️ **One press, not two.** [[cdp-click-hits-the-measuring-ghost-inside-a-modal]] is about a `Modal`;
+this popout is not one, and a second click *closes* the menu. The first reading here said the `⋯`
+was inert, and it was the second click that made it look that way.
+
+### 🔴 The defect: a Look RENAME leaves every row naming the old name
+
+Renaming the Look `test` → `Section Heading` through that `⋯`:
+
+| what | after the rename |
+|---|---|
+| the `Look` row | ✅ `Section Heading` |
+| the menu's project section | ✅ `Section Heading`, wearer count `1` |
+| **every group heading** | 🔴 `— from test` |
+| **every override line** | 🔴 `test says var(--text-4xl)` ×3 |
+
+**It survived a reselect** — the panel stays mounted across selection (CHR-008 §3.4's
+`followsSelection`), so reselecting the same node rebuilds nothing.
+
+🔴 **The model was right throughout, and one keystroke proves it.** `_filterQuery` is in
+`renderGroups`'s hash, so typing `font` into the filter box forces a rebuild *without touching the
+Look* — and the panel immediately printed `— from Section Heading` and
+`Section Heading says var(--text-4xl)`. So this is not a wrong answer; it is an answer nobody asked
+for ([[a-post-drive-control-reads-the-state-the-drive-leaves]] — the control was chosen to vary
+something unrelated to the subject).
+
+**Cause — the same shape as §2c defect 1, in a second trigger.** `ProjectModel.renameVariant`
+mutates the Look in place and raises **`variantRenamed` on the PROJECT**. Every subscription in
+`Ports.bindModel` is a **node** event (`variantChanged`, `variantUpdated`, …), so nothing called
+`renderGroups`. `variantseditor.tsx` *does* subscribe to the project event, which is exactly why the
+`Look` row updated and the rows did not — the two halves of rule 2 were reading from two different
+subscriptions.
+
+🔴 **And `variant` was ALREADY in the hash.** Widening the guard was never the missing half; asking
+was — the third time this phase has learned it ([[verify-the-consequence-not-just-the-mechanism]]).
+
+**Fix:** `Ports.bindModel` now subscribes to `ProjectModel.instance.on(['variantRenamed',
+'variantDeleted'])` → `renderGroups()`, with the matching `ProjectModel.instance?.off(this)` in
+`dispose` (the same null-guard `variantseditor`'s unmount carries, because a panel can be torn down
+after the project singleton is cleared). The hash keeps it cheap: renaming some *other* Look
+recomputes the hash, finds it unchanged and returns early.
+
+⚠️ **`variantDeleted` is in the subscription but was NOT measured** — it is there because it is the
+same event family and the hash guards it, not because a drive has seen it. Say so rather than let it
+read as measured.
 
 ## 3. Acceptance criteria
 
@@ -172,8 +253,8 @@ The four rules of design §2 are the criteria. Any surface that breaks one is wr
 | **AC3** | 🔴 **Overrides are loud and reversible.** Overriding one field on a node wearing a Look changes that field's appearance, **states what the Look wanted**, and offers revert | 🟡 **built (s5)** — the row draws `Primary Button says 8px` and a `Revert` that clears the node's own value so the Look's resolves again (`getParameter` is own → variant → port default, so removing the key is what puts the field back). One undo step. ⚠️ A Look value that cannot be quoted as a short string — a colour object — falls back to `Overrides Primary Button` rather than printing `[object Object]`; the treatment and the revert do not depend on it. ⬜ The revert has not been pressed in a running editor |
 | **AC4** | 🔴 **Shipped and homemade behave identically.** Nothing in this surface behaves differently because of where a Look came from | ⬜ |
 | **AC5** | **The three states read correctly on the element a person actually sees**, in **both themes** — linked, overridden, own. 🔴 Read from the rendered element, not from the class it was given ([[a-ring-must-be-read-on-the-element-a-person-sees]]), and check the chosen colours against the editor's existing semantic colours: design §3.3 explicitly does **not** rule them | ✅ **GREEN (s5's drive) — read off the rendered element in both themes, and it found two defects first** (§2c). Dark: linked `rgb(157,204,255)`, overridden `rgb(253,176,34)`. Light: `rgb(14,92,202)` / `rgb(147,55,13)` — the token layer swaps both to the darker pair for the lighter ground, so neither was hand-written per theme. A node with no Look reads **0 treatments, 0 group sources, 0 override lines**: design §3.2's "the absence of it is itself the signal", measured rather than assumed. Old note, now superseded: The colours **have** been checked against the editor's palette and the reasoning is in the stylesheet: **amber is kept for overridden because it IS `--theme-color-fg-notice`**, the editor's "caution, not error" — the right weight for a legitimate act the panel wants seen. **Purple has no token at all**, so linked takes `--theme-color-fg-accent`; minting one would start a second palette beside `colors.css` ([[a-second-copy-of-a-palette-drifts-silently]]). Both are theme-aware tokens, so light and dark come from the token layer. 🔴 **But a token's documented 4.5:1 is a fact about the token, not a reading of this row** — nothing has been read off a rendered element yet |
-| **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | 🟡 **built (s5)** — all three sections in that order, off `buildLookMenu`. 🔴 **The save row is not new behaviour; it is a new name and a new place.** `createNewVariant` always did exactly this — copy the node's parameters onto a named Look and put the node in it — but it was labelled *"Create new variant"* at the **top** of the popup, which asks a person to know what a variant is before they can want one. It is now the last row and reads *"Save this button's styles as a new Look…"*. ⬜ Not opened in a running editor |
-| **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | 🟡 **built (s5)** — `PickVariantItem` draws one always-visible `⋯` that opens Rename and Delete in the row. 🔴 **The new control deliberately does not use `.variants-item-icon`**, which is the class carrying the `visibility: hidden` the defect was made of, and the stylesheet carries a note saying nothing below it may re-introduce one. ⬜ **The measurement is NOT done:** §1's control pair has to be re-run at rest on the new element, and that is a drive |
+| **AC6** | **The Look menu** is design §4's order: this project's Looks with wearer counts, then the NodeGX library with its "adds it to your project" sentence, then **"Save this node's styles as a new Look…"**. That last row is the behaviour change that matters | 🟡 **built (s5)** — all three sections in that order, off `buildLookMenu`. 🔴 **The save row is not new behaviour; it is a new name and a new place.** `createNewVariant` always did exactly this — copy the node's parameters onto a named Look and put the node in it — but it was labelled *"Create new variant"* at the **top** of the popup, which asks a person to know what a variant is before they can want one. It is now the last row and reads *"Save this button's styles as a new Look…"*. ✅ **MEASURED (s6) — opened at rest and it reads as three** (§2d): `None — styles are its own`, `IN THIS PROJECT` with the wearer count and one `⋯`, `START FROM A NODEGX LOOK` with the **thirteen** a Text declares and the "adds it to your project" sentence, then the save row last. The order is design §4's |
+| **AC7** | **The hover-only affordance is gone** — R6's one visible `⋯` per row. The control pair that measured the defect (§1) re-run at rest, and the actions reachable without hovering | 🟡 **built (s5)** — `PickVariantItem` draws one always-visible `⋯` that opens Rename and Delete in the row. 🔴 **The new control deliberately does not use `.variants-item-icon`**, which is the class carrying the `visibility: hidden` the defect was made of, and the stylesheet carries a note saying nothing below it may re-introduce one. ✅ **MEASURED (s6) — §1's control pair re-run at rest, and it is the clean inverse** (§2d): the `⋯` reads `visibility: visible`, `opacity: 1` and `elementFromPoint` returns the button itself, while `.variants-item-icon` — the class the defect was made of — has **count 0** on this surface. One press expands `Rename` and `Delete`, both visible and hit-reachable, **no hover anywhere**; Rename was driven end to end and committed. 🔴 That rename is what exposed §2d's staleness defect |
 | **AC8** | 🔴 **Richard has seen it and ruled it WORTHY** — both themes, a node wearing a Look with an override, and a node with none. Nothing else closes this task | ⬜ |
 
 ## 4a. 🔴 Where the surface departs from the mockup, and why

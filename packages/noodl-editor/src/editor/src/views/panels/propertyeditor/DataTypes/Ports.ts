@@ -28,6 +28,7 @@ import { CodeEditorType } from '../CodeEditor';
 import { PropertyFilterInput } from '../components/PropertyFilterInput';
 import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups';
 import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
+import { ProjectModel } from '@noodl-models/projectmodel';
 import { ControlHost, PropertyRow, type PropertyRowCapability, type PropertyRowLook } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
@@ -217,6 +218,31 @@ export class Ports extends View {
       this
     );
 
+    // 🔴 P94 STY-003 — A RENAME IS A SECOND TRIGGER THE HASH ALREADY CATCHES AND NOTHING ASKED FOR.
+    //
+    // `renameVariant` mutates the Look in place and raises `variantRenamed` on the PROJECT. Every
+    // subscription above is a *node* event, so nothing called `renderGroups` and every row went on
+    // naming the name the Look used to have.
+    //
+    // Measured in a running editor: renaming `test` to `Section Heading` updated the Look row —
+    // `variantseditor` listens to this same project event — while the group heading still read
+    // `— from test` and the override line still read `test says var(--text-4xl)`, a Look name that
+    // no longer existed anywhere. That is exactly what rules 2 and 3 are for. It survived a
+    // reselect, because the panel stays mounted across selection (CHR-008 §3.4's
+    // `followsSelection`), and any unrelated rebuild — one keystroke in the filter box — printed
+    // the new name correctly, which is what proves the model was right throughout.
+    //
+    // 🔴 The same shape as the ownership defect below, and the same lesson: `variant` is ALREADY in
+    // `renderGroups`'s hash, so a guard was never the missing half — asking is. The hash is what
+    // keeps this cheap when some *other* Look is renamed.
+    ProjectModel.instance?.on(
+      ['variantRenamed', 'variantDeleted'],
+      () => {
+        this.renderGroups();
+      },
+      this
+    );
+
     // 🔴 CHR-009 slice 3: THE GRAPH, NOT `model.owner`. `model` is a `ModelProxy` everywhere the
     // property panel builds this view, and the proxy has no `owner` — so both `model.owner && …`
     // subscriptions below had never bound anything, since the initial commit. Measured on the dev
@@ -271,6 +297,9 @@ export class Ports extends View {
     const graph = this.model && graphOf(this.model);
     graph && graph.off(this);
     EventDispatcher.instance.off(this);
+    // May be torn down after the project singleton has been cleared, as `variantseditor` also
+    // guards for.
+    ProjectModel.instance?.off(this);
 
     this.views.forEach((v) => v.dispose && v.dispose());
     this.disposeTabGroups();
