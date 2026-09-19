@@ -108,7 +108,7 @@ without shared selection is a second list, not a view.
 | id | task | depends on |
 |---|---|---|
 | [TVW-006](./TVW-006-THE-STRUCTURE-LANE.md) | The lane drawn around the stack wherever it is, the eyebrow, and the `All · Structure · Logic` filter that dims (R-F, R-J) | — |
-| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. Unblocked, not started | TVW-003 |
+| [TVW-007](./TVW-007-AN-INSTANCE-SAYS-WHAT-IT-IS.md) | The instance eyebrow and `Edit ›` on the node; the trail becomes containment when entered through an instance. **R-Z ruled (s19): the eyebrow is the COUNT ONLY, path on hover** — §2 fitted 0 of 2,385. **Slice 1 built (s20): the rules, the shared count source, the painter. 🔴 R-Z settled the text, not the ROW — four placements photographed and WITH RICHARD; `hover-only` ships meanwhile** | TVW-003 |
 
 ### Track D — the Workbench
 

@@ -8,9 +8,11 @@ import { ProjectModel } from '../../models/projectmodel';
 import { NodeGraphEditor } from '../nodegrapheditor';
 import PopupLayer from '../popuplayer';
 import { CanvasFonts } from './canvas/CanvasTheme';
+import { currentEyebrowPlacement } from './canvas/eyebrowPlacement';
+import { eyebrowExtraHeight, titleAllowanceFor } from './canvas/instanceEyebrow';
 import { nodeShouldAttach } from './nodeAttachment';
 import { NodeGraphEditorConnection } from './NodeGraphEditorConnection';
-import { measureTextHeight, paintNode } from './NodeGraphEditorNodePainter';
+import { eyebrowReserveWidth, measureTextHeight, paintNode } from './NodeGraphEditorNodePainter';
 
 export class NodeGraphEditorNode {
   public static readonly size = { width: 150, height: 36 };
@@ -336,7 +338,11 @@ export class NodeGraphEditorNode {
   }
 
   titlebarLabelHeight() {
-    const cacheKey = this.labelText() + (this.icon ? 'icon' : '');
+    // TVW-007: the placement is part of the key. `reserve-width` narrows the allowance below, so a
+    // height cached under one placement is wrong under another — and the drive that switches
+    // between them would photograph the first placement's wrap four times.
+    const placement = currentEyebrowPlacement();
+    const cacheKey = this.labelText() + (this.icon ? 'icon' : '') + placement;
     if (cacheKey !== this._cachedLabelHeightTextKey) {
       const connectionDragAreaWidth = 10;
       const horizontalSpacing = 10;
@@ -350,7 +356,14 @@ export class NodeGraphEditorNode {
         connectionDragAreaWidth -
         iconOffset;
 
-      this._cachedLabelHeight = measureTextHeight(this.labelText(), CanvasFonts.nodeLabel, 14, maxWidth);
+      // 🔴 The same narrowing the painter applies, from the same function. Measuring the name
+      // against the full width and then painting it into a narrower one clips the last line
+      // inside the titlebar — photographed on the first TVW-007 verdict run.
+      const allowance = this.isComponent()
+        ? titleAllowanceFor(placement, maxWidth, eyebrowReserveWidth())
+        : maxWidth;
+
+      this._cachedLabelHeight = measureTextHeight(this.labelText(), CanvasFonts.nodeLabel, 14, allowance);
       this._cachedLabelHeightTextKey = cacheKey;
     }
 
@@ -373,7 +386,12 @@ export class NodeGraphEditorNode {
 
   titlebarHeight() {
     const labelExtraHeight = this.labelText() !== this.typeDisplayName() ? this.titlebarSublabelHeight() : 0;
-    return this.titlebarLabelHeight() + labelExtraHeight + 22;
+    // TVW-007: only the `own-row` placement adds anything here, and when it does it adds the same
+    // row to every instance node regardless of zoom or of whether there is a count to draw —
+    // 🔴 this number sets every connection-anchor position on the card (UIX-005), so it must not
+    // depend on anything the user can change without touching this node.
+    const eyebrowHeight = eyebrowExtraHeight(currentEyebrowPlacement(), this.isComponent());
+    return this.titlebarLabelHeight() + labelExtraHeight + eyebrowHeight + 22;
   }
 
   /**

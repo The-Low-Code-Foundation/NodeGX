@@ -12,7 +12,9 @@ with Home drawn as the instance they came through — and clicking Home takes th
 
 | element | detail |
 |---|---|
-| **the eyebrow** | beneath an instance node's name, 10px mono: `INSTANCE · Sections/Hero · used 3×`, `INSTANCE` in the component hue. Painted by `NodeGraphEditorNodePainter.ts` in the same pass that paints FIX-018's chip (`:205-231`). The count is TVW-001's, from the same source. Hidden below 75% zoom |
+| **the eyebrow** | ✅ **REWRITTEN TO R-Z, s20.** The count alone — `· 3×` — in 10px mono, the number in the component hue, painted by `NodeGraphEditorNodePainter.ts` in the same pass as FIX-018's chip. `INSTANCE` and the path are gone. The count is TVW-001's, from the same walk (`instanceCounts.ts` → `buildUsageIndex`). Hidden below 75% zoom — read off `getPanAndScale().scale`, **never** `ctx.getTransform().a`, which is `ratio × scale` and so opens the gate at a different zoom on a retina screen |
+| **where the count sits** | 🔴 **NOT SETTLED BY R-Z — with Richard as four photographs (s20, `verdicts/TVW-007/2026-09-19`).** R-Z settled the text; the *row* is a separate cost, because `titlebarHeight()` fixes every connection-anchor position on the card (UIX-005). See §8 |
+| **the path** | on hover, and 🔴 **load-bearing** — with no name on the card it is the only place the component's identity lives. Not built at s20 |
 | **the door** | `Edit ›` at the node's top-right on hover, `primary` on `primary-bg`. It is `NodeContextMenu.ts:243-262`'s *Open component* given a visible control; double-click keeps working. Also on logic instances (a `Format price` node) |
 | **the trail** | today: `OverlayViews.updateTitle()` splits `fullName` on `/` (`OverlayViews.ts:483-503`). After: when the current component was entered *through an instance* (`switchToComponent` called from `SelectionActions.ts:167-169`, the `Edit ›` door, a Layers `›`, or TVW-001's *Used in*), the trail's first crumb is the **parent component**, drawn as the instance chip (diamond + component-hue wash), live, followed by `›` and the current component. Entered from the panel or search, the trail reads as today (folder path, folder crumbs inert). `NavigationHistory` (`NavigationHistory.ts:47-56`) records the entry route alongside the name so ⌘[ / ⌘] rebuild the right trail |
 | **more than one parent** | the parent crumb is the one you came through. `in 3 places ▾` on hover lists the others (TVW-001's popover) |
@@ -27,12 +29,21 @@ Out: the panel's containment crumb (TVW-004). Any change to what the trail's `+`
 
 ## 4. Acceptance criteria
 
-1. **(person)** Home's canvas. The `Hero` node shows `INSTANCE · Sections/Hero · used 1×`. Hover it:
+1. **(person)** Home's canvas. The `Hero` node shows `· 1×` (R-Z), and hovering it shows `Sections/Hero`. Hover it:
    `Edit ›`. Press it: the canvas is Hero; the trail reads `[◆ Home] › Hero`. Press `Home` in the
    trail: back on Home with the Hero node selected. Now open Hero from the Components panel: the trail
    reads `Sections › Hero`. ⌘[ twice, ⌘] twice: each trail is the one that was shown at that step.
-2. The eyebrow's `used N×` equals TVW-001's row meta for the same component (one source; assert
-   both read from it).
+2. The eyebrow's count equals TVW-001's for the same component — **one call, not one rule applied
+   twice**: both read `usage.instances.length` from `buildUsageIndex`. ⚠️ Stated as the *instances*, not
+   as "the row meta", because `rowMetaFor` gives a routed page its **route** instead of a count, so
+   a page that was also placed would show `/about` on its row and `· 2×` on its card. Measured
+   across 128 projects at s20: **0 instance nodes point at a routed page, 0 at the home component**
+   — the population where they can disagree is empty.
+2b. **(the hover, R-Z)** Hovering an instance node shows its full path, on visual **and** logic
+   instances, at every zoom where the count is drawn — graded on the rendered surface a person
+   sees, not on the handler firing. ⚠️ `Edit ›` is already specified on the same gesture at the
+   node's top-right, which is also the existing 20×20px connection-drag zone (`NodeGraphEditorNode.ts:261`)
+   — the canvas has **no** click dispatch for sub-regions today, so whoever builds it builds that too.
 3. A spec on `NavigationHistory`: entries carry `{name, via: parentName | null}`; `goBack` from an
    instance-entered component rebuilds the containment trail; `discardInvalidEntries` drops entries
    whose `via` component is deleted.
@@ -117,3 +128,61 @@ grade it on the rendered surface a person sees, not on the handler firing
 top-right **on hover**, so two different things now appear on the same gesture. Whoever builds this
 resolves them together — one hover surface carrying both, or the path beside the eyebrow and the
 door where it is — and measures it before choosing.
+
+## 8. s20 — built, and the one thing the ruling did not price
+
+**Built (slice 1):** `instanceEyebrow.ts` (the pure rules: text, zoom gate, the four placements,
+the allowance), `instanceCounts.ts` (TVW-001's walk, cached behind a dirty flag for a per-frame
+caller), `eyebrowPlacement.ts` (the switch, 🔴 **delete it when Richard rules**), and the painter +
+`titlebarHeight()`/`titlebarLabelHeight()` wiring. 18 jest specs in `tests-unit/tvw-007`, **six
+mutants killed, none survived**.
+
+### 🔴 The question that went to Richard, and why R-Z could not answer it
+
+R-Z chose the count because it "cannot overflow" — 2–4 characters against **114px**. Two things
+were wrong with that number, and neither changes the text, only its cost:
+
+- **The real allowance is 93px (81px with an icon)**, not 114: `headerTextInset` is 37, not the
+  7 the s18 census assumed. The ruling holds *a fortiori* — the count still fits.
+- 🔴 **There is no free row to put it in.** `titlebarHeight()` = label + sub-label + 22, and
+  UIX-005 records that this formula fixes **every connection-anchor position**. So a count on its
+  own row moves the ports on every instance node in every project — the cost option 2 was rejected
+  for, one row's worth instead of two.
+
+Measured over 128 projects before anything was built (`scratchpad/eyebrow-*.js`): **9,634 instance
+nodes**; **1,702 (17.7%) renamed** so they already pay for a sub-label row; of the 7,932 unrenamed,
+the count fits after the name's last line on only **3,547 (44.7%)**.
+
+Asked to choose, Richard said he would need to see them — so all four were built and photographed
+on one canvas (`drive-tvw007-eyebrow.js`, 12/12 arms, `verdicts/TVW-007/2026-09-19`). What the
+**model** said, per placement, on 33 instance cards:
+
+| placement | titlebar | verdict from the drive |
+|---|---|---|
+| `hover-only` (today) | 36–64px | nothing on the card |
+| `own-row` | 48–76px | **every port on 33 cards moves** |
+| `reserve-width` | 36–78px | **also moves** — and its tallest card exceeds `own-row`'s |
+| `inline-if-fits` | 36–64px | nothing moves; **the count is absent on 55%** |
+
+### 🔴 The defect the photograph caught and every arm missed
+
+The first run's `reserve-width` shots showed **names clipped inside the titlebar** — `Main Navbar`
+lost its second line. The painter narrowed the name's allowance; `titlebarLabelHeight()` did not,
+so the card was *measured* for a one-line wrap and *painted* with a two-line one. Every arm was
+green, and the arm that was supposed to catch it reported **"card geometry unchanged"** — because
+it read a height that had never seen the narrowing. Both now call the same `titleAllowanceFor` with
+the same `eyebrowReserveWidth()`, and the placement is part of the label-height cache key. Once
+fixed, the same drive reported `reserve-width` at **36–78px**: the arm had been describing the bug.
+
+⚠️ **`reserve-width` reserves a fixed three-digit band, never the live count.** Reserving the real
+width would re-wrap a card — and move its ports — when a *tenth* instance was placed in another
+component, with nothing on screen saying why. The corpus holds counts needing three digits (198
+components at 10–99, **two over 100**, max 140).
+
+### What the next session does
+
+1. **Richard's verdict on the four shots.** Then: the winner becomes a constant, `eyebrowPlacement.ts`
+   is deleted with the three losers, and AC1/AC5 can be driven.
+2. `hover-only` is what ships until then — it is the only placement that moves nothing.
+3. Then the hover (AC2b) and the trail (AC3/AC4), which R-Z did not touch and which are independent
+   of the placement.

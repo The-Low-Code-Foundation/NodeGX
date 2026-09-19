@@ -1,0 +1,128 @@
+{
+  "project": "/Users/richardosborne/vscode_projects/Noodl projects/TVW-007 s20 Eyebrow",
+  "component": "/Pages/Logged in/Account",
+  "readings": {
+    "hover-only": {
+      "component": "/Pages/Logged in/Account",
+      "scale": 1,
+      "instanceCards": 33,
+      "titlebarMin": 36,
+      "titlebarMax": 64,
+      "sample": [
+        "Main Navbar (titlebar 36, card 36)",
+        "Page Main (titlebar 36, card 36)",
+        "Input Container (titlebar 50, card 50)",
+        "User Avatar (titlebar 36, card 72)",
+        "Secondary Button (titlebar 50, card 86)",
+        "Name (titlebar 50, card 50)"
+      ]
+    },
+    "own-row": {
+      "component": "/Pages/Logged in/Account",
+      "scale": 1,
+      "instanceCards": 33,
+      "titlebarMin": 48,
+      "titlebarMax": 76,
+      "sample": [
+        "Main Navbar (titlebar 48, card 48)",
+        "Page Main (titlebar 48, card 48)",
+        "Input Container (titlebar 62, card 62)",
+        "User Avatar (titlebar 48, card 84)",
+        "Secondary Button (titlebar 62, card 98)",
+        "Name (titlebar 62, card 62)"
+      ]
+    },
+    "reserve-width": {
+      "component": "/Pages/Logged in/Account",
+      "scale": 1,
+      "instanceCards": 33,
+      "titlebarMin": 36,
+      "titlebarMax": 78,
+      "sample": [
+        "Main Navbar (titlebar 50, card 50)",
+        "Page Main (titlebar 50, card 50)",
+        "Input Container (titlebar 64, card 64)",
+        "User Avatar (titlebar 50, card 86)",
+        "Secondary Button (titlebar 50, card 86)",
+        "Name (titlebar 50, card 50)"
+      ]
+    },
+    "inline-if-fits": {
+      "component": "/Pages/Logged in/Account",
+      "scale": 1,
+      "instanceCards": 33,
+      "titlebarMin": 36,
+      "titlebarMax": 64,
+      "sample": [
+        "Main Navbar (titlebar 36, card 36)",
+        "Page Main (titlebar 36, card 36)",
+        "Input Container (titlebar 50, card 50)",
+        "User Avatar (titlebar 36, card 72)",
+        "Secondary Button (titlebar 50, card 86)",
+        "Name (titlebar 50, card 50)"
+      ]
+    }
+  },
+  "arms": [
+    {
+      "name": "instrument: the window is awake and rAF fires",
+      "ok": true,
+      "detail": "frames=3, hidden=false"
+    },
+    {
+      "name": "the editor router was found",
+      "ok": true,
+      "detail": "ok"
+    },
+    {
+      "name": "the driven project is the copy this drive names",
+      "ok": true,
+      "detail": "/Users/richardosborne/vscode_projects/Noodl projects/TVW-007 s20 Eyebrow"
+    },
+    {
+      "name": "the canvas is on the component with the instances",
+      "ok": true,
+      "detail": "/Pages/Logged in/Account"
+    },
+    {
+      "name": "the canvas has room to be photographed",
+      "ok": true,
+      "detail": "1220×1075 CSS px"
+    },
+    {
+      "name": "shot: hover-only",
+      "ok": true,
+      "detail": "tvw007-hover-only.png, 210KB, 33 instance cards, titlebar 36–64px"
+    },
+    {
+      "name": "shot: own-row",
+      "ok": true,
+      "detail": "tvw007-own-row.png, 208KB, 33 instance cards, titlebar 48–76px"
+    },
+    {
+      "name": "shot: reserve-width",
+      "ok": true,
+      "detail": "tvw007-reserve-width.png, 209KB, 33 instance cards, titlebar 36–78px"
+    },
+    {
+      "name": "shot: inline-if-fits",
+      "ok": true,
+      "detail": "tvw007-inline-if-fits.png, 212KB, 33 instance cards, titlebar 36–64px"
+    },
+    {
+      "name": "own-row: card geometry vs today",
+      "ok": true,
+      "detail": "MOVES — titlebar 36–64 → 48–76px, so every port on 33 cards moves"
+    },
+    {
+      "name": "reserve-width: card geometry vs today",
+      "ok": true,
+      "detail": "MOVES — titlebar 36–64 → 36–78px, so every port on 33 cards moves"
+    },
+    {
+      "name": "inline-if-fits: card geometry vs today",
+      "ok": true,
+      "detail": "unchanged — titlebar still 36–64px, no port moves"
+    }
+  ]
+}

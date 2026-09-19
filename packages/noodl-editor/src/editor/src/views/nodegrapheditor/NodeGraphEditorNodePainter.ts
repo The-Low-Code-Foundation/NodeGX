@@ -2,6 +2,9 @@ import _ from 'underscore';
 
 import { NodeLibrary } from '../../models/nodelibrary';
 import { CanvasFonts, CanvasTheme } from './canvas/CanvasTheme';
+import { currentEyebrowPlacement } from './canvas/eyebrowPlacement';
+import { instanceCountOf } from './canvas/instanceCounts';
+import { eyebrowPlan, eyebrowText, InstanceEyebrow, titleAllowanceFor } from './canvas/instanceEyebrow';
 import { fillRoundRect, roundRect, strokeRoundRect, truncateText } from './canvasHelpers';
 import { NodeGraphEditorNode } from './NodeGraphEditorNode';
 import { arrowheadPolygon, diamondPolygon, glyphForPlugIcon, glyphScaleFor, WIRE_ENDPOINT } from './wireEndpoints';
@@ -48,6 +51,30 @@ function _getColorForAnnotation(annotation) {
   if (annotation === 'Deleted') return theme.annotationDeleted;
   else if (annotation === 'Changed') return theme.annotationChanged;
   else if (annotation === 'Created') return theme.annotationCreated;
+}
+
+/**
+ * TVW-007 — the width `reserve-width` takes out of the name's allowance.
+ *
+ * 🔴 **Both the painter and `titlebarLabelHeight()` must narrow the allowance by the SAME number**,
+ * or the card is measured for a name that wraps to one line and painted with one that wraps to two
+ * — and the second line is clipped by the titlebar. That is not hypothetical: it is what the first
+ * set of verdict shots photographed, on a run whose arms all reported "card geometry unchanged",
+ * because the height math never saw the narrowing the painter had applied
+ * ([[verify-the-consequence-not-just-the-mechanism]]).
+ *
+ * Memoised because it depends on nothing but the font: a fixed three-digit reference string
+ * (`InstanceEyebrow.reserveReference`), never the count.
+ */
+let cachedReserveWidth: number | null = null;
+export function eyebrowReserveWidth(): number {
+  if (cachedReserveWidth === null) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = CanvasFonts.portLabel;
+    cachedReserveWidth = ctx.measureText(InstanceEyebrow.reserveReference).width;
+  }
+  return cachedReserveWidth;
 }
 
 export function measureTextHeight(text, font, lineHeight, maxWidth) {
@@ -352,21 +379,84 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
     // disagree.
     ctx.fillStyle = theme.cardText;
 
+    // TVW-007 — the instance count, and how much room the name may keep.
+    //
+    // Measured here and not in `instanceEyebrow.ts` because the only honest width is the one this
+    // context returns for the font actually in use: the card is 150px and the name's allowance is
+    // 93px (81 with an icon), so a 3px estimate error is the difference between a count that fits
+    // and one that overlaps the drag area.
+    const placement = currentEyebrowPlacement();
+    const eyebrowCount = isComponentInstance ? instanceCountOf(node.model.typename) : 0;
+    const eyebrowLabel = eyebrowText(eyebrowCount);
+
+    ctx.font = CanvasFonts.portLabel;
+    const eyebrowWidth = eyebrowLabel ? ctx.measureText(eyebrowLabel).width : 0;
+
+    const baseTitleAllowance =
+      node.nodeSize.width -
+      NodeGraphEditorNode.headerTextInset -
+      horizontalSpacing -
+      connectionDragAreaWidth -
+      iconOffset;
+    // 🔴 The same call `titlebarLabelHeight()` makes, with the same arguments. If these two ever
+    // differ, the card is measured for one wrap and painted with another.
+    const titleAllowance = isComponentInstance
+      ? titleAllowanceFor(placement, baseTitleAllowance, eyebrowReserveWidth())
+      : baseTitleAllowance;
+
     ctx.font = CanvasFonts.nodeLabel;
     ctx.textBaseline = 'top';
+
+    // The last painted line is what an inline count follows, so it is captured as the name is
+    // drawn rather than re-wrapped afterwards — two wraps of the same string with two different
+    // allowances is exactly how paint and layout drift apart.
+    let lastLineWidth = 0;
+    let lastLineY = y + NodeGraphEditorNode.verticalSpacing + 5;
     textWordWrap(
       ctx,
       labelText,
       x + NodeGraphEditorNode.headerTextInset,
       y + NodeGraphEditorNode.verticalSpacing + 5,
       14,
-      node.nodeSize.width -
-        NodeGraphEditorNode.headerTextInset -
-        horizontalSpacing -
-        connectionDragAreaWidth -
-        iconOffset,
-      (text, x, y) => ctx.fillText(text, x, y)
+      titleAllowance,
+      (text, tx, ty) => {
+        ctx.fillText(text, tx, ty);
+        lastLineWidth = ctx.measureText(text).width;
+        lastLineY = ty;
+      }
     );
+
+    const plan = eyebrowPlan({
+      placement,
+      isComponentInstance,
+      count: eyebrowCount,
+      scale: node.owner.getPanAndScale?.().scale ?? 1,
+      lastLineWidth,
+      countWidth: eyebrowWidth,
+      baseAllowance: baseTitleAllowance
+    });
+
+    if (plan.kind !== 'none') {
+      ctx.save();
+      // The count is the component's hue, the same one FIX-018's chip is painted in, because it is
+      // a fact about the component and not about this node.
+      ctx.fillStyle = cat.accent;
+      ctx.font = CanvasFonts.portLabel;
+      ctx.textBaseline = 'top';
+      const eyebrowX =
+        plan.kind === 'inline'
+          ? x + NodeGraphEditorNode.headerTextInset + plan.x
+          : x + NodeGraphEditorNode.headerTextInset;
+      // A renamed instance already pays for a sub-label row (the component's name), and it is
+      // painted below this block — so `own-row` sits under *that*, not on top of it. 17.7% of the
+      // corpus's instance nodes are renamed, which is too many for this to be an edge case.
+      const rowTop = hasUserLabel
+        ? y + node.titlebarLabelHeight() + 14 + 14
+        : lastLineY + InstanceEyebrow.rowHeight + 2;
+      const eyebrowY = plan.kind === 'inline' ? lastLineY + 1 : rowTop;
+      ctx.fillText(plan.text, eyebrowX, eyebrowY);
+      ctx.restore();
+    }
 
     //If this node has a label set by the user, render the type name as a sub label
     if (hasUserLabel) {
