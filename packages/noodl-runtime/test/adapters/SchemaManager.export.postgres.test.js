@@ -207,14 +207,59 @@ suite(`the export applied to PostgreSQL (${PG_URL})`, () => {
            ('r1', 'g1', '{"u1":{"read":true,"write":true}}'::jsonb),
            ('r2', 'g2', '{"u2":{"read":true,"write":true}}'::jsonb),
            ('r3', 'g3', NULL),
-           ('r4', 'g4', '{"u1":{"read":1,"write":1}}'::jsonb);`
+           ('r4', 'g4', '{"u1":{"read":1,"write":1}}'::jsonb),
+           ('r5', 'g5', '{"u1":{"read":1.0,"write":1.0}}'::jsonb),
+           ('r6', 'g6', '[1,2]'::jsonb);`
       );
+      // 🔴 r5 and r6 were added by BRG-005 §6.1, which measured the two ways
+      // this policy's first translation diverged from the predicate it copies.
+      // Neither shape can arrive through the product's own wire (it refuses a
+      // non-boolean flag), which is exactly why they were not covered — and
+      // exactly the population this generator's docstring says it exists for:
+      // "a policy that works on the data that exists rather than the data it
+      // expected". A migrated database, a fixture, another language's writer.
     });
 
     it('a user reads their own rows and the public one, and not the other user’s', () => {
       const seen = asUser('u1', `SELECT string_agg("objectId", ',' ORDER BY "objectId") FROM "Item";`).trim();
-      // r1 (boolean flags), r3 (no ACL), r4 (numeric flags) — and NOT r2.
-      expect(seen).toBe('r1,r3,r4');
+      // r1 (boolean flags), r3 (no ACL), r4 (numeric flags), r5 (a JSON real) —
+      // and NOT r2 (another user) or r6 (an ACL that is not an object).
+      expect(seen).toBe('r1,r3,r4,r5');
+    });
+
+    it('🔴 a flag stored as a JSON real grants, as the SQLite predicate does', () => {
+      // The first translation compared the flag as TEXT: `(value ->> 'read') IN
+      // ('1','true')`. `->>` renders 1.0 as "1.0", so this row was DENIED to its
+      // own owner, where SQLite's numeric `json_extract(…) = 1` grants it. The
+      // fix compares as jsonb, because '1.0'::jsonb = '1'::jsonb.
+      expect(asUser('u1', `SELECT "objectId" FROM "Item" WHERE "objectId" = 'r5';`).trim()).toBe('r5');
+      // And the control that proves the row is reachable at all and the denial
+      // above is the ACL rather than the row being missing.
+      expect(psql(`SELECT "objectId" FROM "Item" WHERE "objectId" = 'r5';`).trim()).toBe('r5');
+      // The pre-fix expression, run over the same row: it denies.
+      expect(
+        psql(
+          `SELECT count(*) FROM "Item" WHERE "objectId" = 'r5' ` +
+            `AND ("ACL" -> 'u1' ->> 'read') IN ('1','true');`
+        ).trim()
+      ).toBe('0');
+    });
+
+    it('🔴 one ACL that is not an object hides its row, and does not fail the table', () => {
+      // `jsonb_each` RAISES on a non-object, and an error inside a policy's
+      // USING clause fails the statement — so without the `jsonb_typeof` guard
+      // r6 would make every read of this table an error for every user, where
+      // SQLite's `json_each` walks it, matches no principal and hides the row.
+      // The case above already reads four rows past r6; this one names why.
+      expect(() => asUser('u1', `SELECT count(*) FROM "Item";`)).not.toThrow();
+      expect(asUser('u1', `SELECT count(*) FROM "Item" WHERE "objectId" = 'r6';`).trim()).toBe('0');
+      // Armed: the unguarded predicate over the same row is the error itself.
+      expect(() =>
+        psql(
+          `SELECT count(*) FROM "Item" WHERE EXISTS (` +
+            `SELECT 1 FROM jsonb_each("ACL") AS _a WHERE _a.key IN ('u1'));`
+        )
+      ).toThrow(/cannot call jsonb_each on a non-object/);
     });
 
     it('a non-owner cannot UPDATE another user’s row', () => {

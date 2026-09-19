@@ -1,8 +1,9 @@
 # BRG-005 — The Postgres adapter
 
-**Status: 🏗 In progress, s6 (2026-09-19). R6 ruled — `pg`, bundled. AC5 and AC8 closed; the
-connection layer is built and measured against a real PostgreSQL 16.11. The adapter class is next
-and the dialect seam is what unblocks it (§6.1). Needs BRG-001 ✅ and BRG-003 ✅. Gated on R5 ✅.**
+**Status: 🏗 In progress, s7 (2026-09-19). R6 ruled — `pg`, bundled. AC5, AC6 and AC8 closed; the
+connection layer AND the dialect seam are built and measured against a real PostgreSQL 16.11. The
+adapter class is next, and nothing is now in front of it (§6.1 is done — see §5.5).** Needs
+BRG-001 ✅ and BRG-003 ✅. Gated on R5 ✅.
 
 ## 1. The person sentence
 
@@ -121,12 +122,12 @@ is next and why it is next.
 | AC | state |
 |---|---|
 | AC1 `runConformance()` green on Postgres | ⬜ needs the adapter class |
-| AC2 divergences declared in `capabilities.ts` | 🟡 **three measured and written down below**; the `capabilities.ts` entries are owed |
+| AC2 divergences declared in `capabilities.ts` | 🟡 **six measured and written down below**; the `capabilities.ts` entries are owed |
 | AC3 mutants fail against Postgres | ⬜ needs AC1 |
 | AC4 `NODEGX_STORAGE_URL`, `/health`, SIGTERM drain | 🟡 pool + `saturation()` + `end()` built and specced; the **wiring** is owed |
 | **AC5 BRG-D5 resolved by measurement** | ✅ **closed — see §5.2** |
-| AC6 FTS5 → `tsvector` declared `degraded` | ⬜ |
-| AC7 SQLite path untouched | 🟡 `typecheck:runtime`, `typecheck:contract` and 251 adapter tests green; **`test:main` + `noodl-mcp` still owed** (§6.2) |
+| **AC6 FTS5 → `tsvector` declared `degraded`** | ✅ **closed — see §5.5.3.** Rows asserted, ranking declared different, and the refusal when no field list is given |
+| AC7 SQLite path untouched | 🟡 **`test:main` 8223/8223 ✅** (514 suites, exit 0), `typecheck:runtime` ✅, 287 adapter tests ✅, phase backend specs 67/67 ✅. 🔴 **`noodl-mcp` is RED and it is not this phase's red** — measured, §5.5.5 |
 | **AC8 pool default + formula + PgBouncer caveat** | ✅ **built and specced — see §5.3** |
 | AC9 suite + six mutants, both numbers recorded | ⬜ needs AC1 |
 
@@ -224,9 +225,119 @@ An expression whose marker count differs from SQLite's cannot be swapped in afte
 **So the dialect seam belongs inside `QueryBuilder`, where the parameters are pushed.** That is §6.1,
 and it is the next thing to build.
 
+### 5.5 s7 — the dialect seam, and the two ways the ACL translation was already wrong
+
+`QueryBuilder` now takes a `dialect` argument (`'sqlite' | 'postgres'`) that **defaults to
+`'sqlite'`**, threaded to the eleven functions that emit engine-specific SQL. Not a fork: a second
+copy of a 1,230-line query builder is this phase's own thesis failing from the inside.
+
+**`test/adapters/QueryBuilder.dialect.test.js` — 34 cases, green, every one of them run on BOTH
+engines over ONE corpus** (a real `node:sqlite` database and a real PostgreSQL table seeded with the
+same 20 rows), asserting the two return the **same `objectId` set**. Every case also asserts a third
+value — which rows *should* come back — because two engines that are wrong in the same direction
+agree with each other and pass. Package total **251 → 287 adapter tests**, `typecheck:runtime` exit 0.
+
+#### 5.5.1 🔴 The ACL flag compared as TEXT denied a row SQLite grants
+
+BRG-004 shipped `(_acl.value ->> '<access>') IN ('1', 'true')` — extract the flag as text, compare
+the spelling. Graded against the SQLite predicate it translates (`json_extract(…, '$.read') = 1`)
+over **all eight spellings the flag appears in**, it is right seven times and wrong once:
+
+| stored flag | SQLite `= 1` | `->>` text form | `->` jsonb form |
+|---|---|---|---|
+| `true`, `1` | grants | grants | grants |
+| **`1.0`** | **grants** | 🔴 **denies** | grants |
+| `false`, `0`, `"yes"`, `null`, absent | denies | denies | denies |
+
+`->>` renders the JSON real `1.0` as the text `"1.0"`, which is neither `'1'` nor `'true'`. Comparing
+as `jsonb` agrees on all eight, because PostgreSQL normalises JSON numerics and `'1.0'::jsonb =
+'1'::jsonb`. **A silent denial is the worst shape this predicate can fail in** — the app shows a user
+fewer of their own rows and nothing reports an error.
+
+`JSON.stringify` cannot emit `1.0`, so the flag arrives that way only through another door: a
+migrated database, a fixture, another language's writer. That is exactly the population BRG-004's own
+docstring says the policy exists for — *"a policy that works on the data that exists rather than the
+data it expected."*
+
+#### 5.5.2 🔴 `jsonb_each` RAISES on a non-object ACL — one bad row breaks the whole collection
+
+Measured: `jsonb_each('[1,2]'::jsonb)` is `ERROR: cannot call jsonb_each on a non-object`, and an
+error inside a `WHERE` clause — or inside an RLS policy's `USING` clause — fails the **statement**.
+SQLite's `json_each` walks an array or a scalar quite happily, hands back keys that are integers or
+NULL, and no principal string matches them, so the row is simply **not visible**.
+
+So one row whose ACL was written as an array turns every read of that collection into a 500 on
+Postgres, where the built-in backend merely hides that row. `jsonb_typeof(…) = 'object'` reproduces
+SQLite's answer exactly. This is `geo.ts`'s malformed-GeoPoint finding in a second place: **PostgreSQL
+raises where SQLite coerces, and a raise inside `WHERE` is not a narrower result, it is no result.**
+
+**Both fixes land in one place.** The ACL predicate existed **twice** — `SchemaManager._aclPredicate`
+(RLS policy text) and `QueryBuilder.buildAclPredicate` (a bound WHERE clause) — and the two copies
+had already drifted, which is why only one of them carried the text-comparison defect into the other
+half of the product. Both now call `postgres/predicates.ts`. Each copy agreed with itself; that is
+the whole reason neither found it.
+
+Graded where each ships: the query path in `QueryBuilder.dialect.test.js`, and the **RLS path** in
+`SchemaManager.export.postgres.test.js`, which gained two cases (a `1.0` row its owner can now read,
+and a non-object ACL that hides its row without failing the table) — run against a live server under
+real policies, each with its arming control. That spec is 10 → 12 cases.
+
+#### 5.5.3 AC6 — FTS5 as `tsvector`, and the ranking that had to be negated
+
+The searchable document is `to_tsvector('simple', <indexed columns, coalesced and cast>)`, matched
+with `plainto_tsquery`, ranked with `ts_rank_cd`, excerpted with `ts_headline`.
+
+- **`'simple'`, not `'english'`.** FTS5's `unicode61` tokenizer does not stem and drops no stopwords;
+  `'simple'` does the same. `'english'` reads like an improvement and is a **different row set**.
+- **`plainto_tsquery`, not `websearch_to_tsquery`.** `toFts5MatchQuery` exists to stop `-`, `:`, `*`
+  and `"` in a user's phrase meaning operators; `websearch_to_tsquery` reintroduces exactly that.
+  🔴 The Postgres path therefore binds the **raw term**, never `toFts5MatchQuery`'s output.
+- 🔴 **`_rank` is negated.** `bm25()` is lower-is-better, `LocalSQLAdapter.search` publishes
+  `_score = -_rank` on that basis, and the default ordering is `"_rank" ASC`. `ts_rank_cd` is
+  higher-is-better, so an unnegated port hands every caller the ranking **backwards** — worst match
+  first — with nothing failing anywhere. Asserted.
+- **It REFUSES without a field list.** There is no shadow table to read the indexed fields from, so a
+  default would search columns nobody chose: wrong rows, no error.
+- ⚠️ **Declared `degraded`:** the rows are asserted, the ordering is not. Two ranking functions with
+  different normalisation cannot be made to agree by choosing better arguments. The `tsvector` is
+  computed per row, so this is a **sequential scan** — a generated column with a GIN index is
+  `PgSchemaManager`'s to add, and the expression is written so adding one does not change the rows.
+
+#### 5.5.4 The marker counts, which is why the seam is where it is
+
+Three expressions bind a different number of values than their SQLite originals, so no driver-boundary
+translator could have produced them from built SQL:
+
+| operator | SQLite markers | Postgres markers |
+|---|---|---|
+| `$nearSphere` | 2 (`lat, lon`) | **3** — `lat, lat, lon`, the haversine needs the centre latitude twice |
+| `$regex` | 2 (pattern, options) | **1** — the flags select the operator (`~*`) and an embedded `(?n)` |
+| search | 1 (`MATCH ?`) | **3** — the tsquery appears in the rank, the headline and the predicate |
+
+`$within`'s four markers are unchanged and in the same order, so that one *could* have moved at the
+boundary; it is in the seam anyway, because a translation split across two layers is the harder thing
+to read. Every case asserts the balance through `toPgQuery`, which throws on a mismatch.
+
+#### 5.5.5 🔴 AC7: `test:main` is green, and `noodl-mcp` is red for someone else's reason
+
+`test:main` **8223/8223, 514 suites, exit 0** — the half s6 owed, now run.
+
+`noodl-mcp` is **8 suites / 10 tests failing (2181 passed of 2191)**, and it fails **identically
+without this session's changes**: the two runtime files were restored to their `HEAD` contents by
+`cp`, the whole suite re-run, and the failing-suite list and the counts came back **byte-identical**
+(then restored and verified by `diff`). The failing suites — node id allocation, a response budget,
+theme preset chips, template settling, CMP exports, and a live-backend spec — are unrelated surfaces,
+and a peer currently holds **twelve modified files plus six new specs in `packages/nodegx-backend/src`**
+in this checkout, which is what a "live backend" spec runs against.
+
+**So AC7's SQLite half is demonstrated and AC7 cannot be *closed* by this task**: it is written as
+*"`noodl-mcp` is green"*, and that is not this phase's to make true. The full `nodegx-backend` suite
+is deliberately **not** claimed either — with a peer's uncommitted edits in that package, running it
+grades their working tree rather than this change. The phase's own backend specs are **67/67, exit 0**.
+
 ## 6. What is next, and why in this order
 
-### 6.1 The dialect seam in `QueryBuilder` — the one thing everything else waits on
+### 6.1 ✅ DONE (s7) — the dialect seam in `QueryBuilder`, which everything else was waiting on
 
 Not a fork. `QueryBuilder` is 1,230 lines and a second copy of it is this phase's own thesis
 arriving from inside the fix. The engine-specific surface in it is small and already located:
@@ -245,7 +356,13 @@ every existing caller and all 251 adapter tests are untouched. It has to be **in
 because the Postgres expressions do not all take the same number of parameters as the SQLite ones
 (§5.4).
 
-### 6.2 Then, in order
+✅ **Built in s7 and graded on both engines — §5.5.** The table above survived contact with one
+correction: the FTS5 row was not a fourth site to translate later but AC6 itself, and it is closed.
+What the table did not predict is that the ACL row had **two** defects in it rather than a coercion
+to watch for, and that the second one (`jsonb_each` raising) reached the RLS policies BRG-004 had
+already shipped.
+
+### 6.2 Then, in order — and #1 is now the front of the queue
 
 1. **`PgSchemaManager`** — `information_schema.columns` for the live-column read (`ColumnScope`),
    keeping the `undefined`-means-no-substitution semantics `LocalSQLAdapter.ts:675-692` warns about.
@@ -260,16 +377,16 @@ because the Postgres expressions do not all take the same number of parameters a
 5. **`IOperationalStore` on Postgres**, its `close()`, and **the shutdown path that calls it** —
    BRG-D6. §3.5 is emphatic that the shutdown path is the part that does not exist.
 
-### 6.3 Owed from s6, with the reason
+### 6.3 Owed, with the reason
 
-- 🔴 **AC7's full sweep was NOT run.** `typecheck:runtime`, `typecheck:contract` and the 251-test
-  adapter suite are green, but `test:main` and `noodl-mcp` were not started: a peer session had a
-  jest run and three webpack builds live in this checkout at the time. One heavy job at a time. They
-  are owed before this task closes, and nothing in s6 touched a SQLite code path — the only edits to
-  an existing file are `noodl-runtime/package.json` (and the root `package-lock.json` it moved).
-- **AC2's `capabilities.ts` entries** for the three divergences in §5.2 and §5.3 are written down
-  here but not yet declared in code. An undeclared divergence is an AC1 failure, so they land with
-  the adapter.
+- ✅ **AC7's sweep from s6 is RUN.** `test:main` 8223/8223 exit 0. `noodl-mcp` is red and **measured
+  to be red without this change too** — §5.5.5 has the control and what it means for closing AC7.
+- 🔴 **The full `nodegx-backend` suite is still unmeasured, and deliberately so**: a peer holds
+  twelve modified files and six new specs in that package. Run it when their work has landed;
+  running it now grades their tree. See [[a-commit-is-not-what-the-compiler-read]].
+- **AC2's `capabilities.ts` entries** — now **six** divergences (§5.2's three, §5.5.1, §5.5.2 and
+  AC6's ranking), written down here but not yet declared in code. An undeclared divergence is an AC1
+  failure, so they land with the adapter.
 - **`upsertBatch`.** `AdapterFacade.ts:474-528` is the one facade method still SQLite-specific — it
   reaches `sqliteHandle()` because `adapter.transaction()` takes a synchronous callback — and its
   own docstring says *"BRG-005 owes either a batch write on `IStorageAdapter` or its own facade"*.

@@ -8,6 +8,7 @@
  * @module adapters/local-sql/SchemaManager
  */
 
+import { aclPredicateSql } from '../postgres/predicates';
 import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
 
@@ -1000,18 +1001,25 @@ class SchemaManager {
    * public, and a row with one qualifies when an entry whose key is '*' or this
    * caller grants the access asked for.
    *
-   * `->> 'read' IN ('1','true')` rather than `= 1`: the backend writes the flag
-   * as a JSON number, and a row written through some other door may carry a
-   * boolean. Reading both is the difference between a policy that works on the
-   * data that exists and one that works on the data it expected.
+   * 🔴 **This used to be its own copy of that translation, and the copy was
+   * wrong in two ways that BRG-005 measured** (see `postgres/predicates.ts`, now
+   * the single source for it):
+   *
+   * - `(_acl.value ->> '<access>') IN ('1', 'true')` compared the flag as
+   *   **text**, so a flag stored as the JSON real `1.0` rendered as `"1.0"` and
+   *   was **denied** — where the SQLite predicate's numeric `= 1` grants it. A
+   *   policy that silently shows a user fewer of their own rows.
+   * - `jsonb_each` **raises** on an ACL that is not a JSON object, and an error
+   *   inside a policy's `USING` clause fails the statement — so one malformed
+   *   ACL row would break every read of the table, where SQLite merely hides
+   *   that row.
+   *
+   * Both were found by grading the two engines against each other over the same
+   * eight flag spellings and five ACL shapes, which is the only reason they were
+   * found at all: each copy agreed with itself.
    */
   _aclPredicate(principal: string, access: 'read' | 'write'): string {
-    return (
-      `("ACL" IS NULL OR EXISTS (\n` +
-      `      SELECT 1 FROM jsonb_each("ACL") AS _acl\n` +
-      `      WHERE _acl.key IN ('*', ${principal})\n` +
-      `        AND (_acl.value ->> '${access}') IN ('1', 'true')))`
-    );
+    return aclPredicateSql('"ACL"', `'*', ${principal}`, access, '_acl', '\n      ');
   }
 
   /**

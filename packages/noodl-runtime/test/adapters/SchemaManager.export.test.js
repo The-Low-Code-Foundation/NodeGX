@@ -220,11 +220,21 @@ describe('SchemaManager — the Supabase export (BRG-D1)', () => {
     const sql = ctx.sm.generateSupabaseSQL(SUPABASE_OPTIONS);
     // `buildAclPredicate`: a row with no ACL is public, and a row with one
     // qualifies when an entry keyed '*' or by this caller grants the access.
-    expect(sql).toContain('"ACL" IS NULL OR EXISTS (');
+    expect(sql).toContain('"ACL" IS NULL OR (');
     expect(sql).toContain("SELECT 1 FROM jsonb_each(\"ACL\") AS _acl");
     expect(sql).toContain("WHERE _acl.key IN ('*', (current_setting('request.jwt.claims', true)::jsonb ->> 'nodegx_user_id'))");
-    expect(sql).toContain("AND (_acl.value ->> 'read') IN ('1', 'true')");
-    expect(sql).toContain("AND (_acl.value ->> 'write') IN ('1', 'true')");
+    // BRG-005 corrected this translation: the flag is compared as `jsonb`, not
+    // as text, because `->>` renders the JSON real `1.0` as "1.0" and denied a
+    // row the SQLite predicate grants. `'1.0'::jsonb = '1'::jsonb` is true, so
+    // the jsonb form agrees with SQLite on all eight spellings the flag appears
+    // in. The behaviour is graded in QueryBuilder.dialect.test.js against a live
+    // server and against `json_extract` on the same values; these two lines only
+    // pin the text the generator emits.
+    expect(sql).toContain("AND (_acl.value -> 'read') IN ('true'::jsonb, '1'::jsonb)");
+    expect(sql).toContain("AND (_acl.value -> 'write') IN ('true'::jsonb, '1'::jsonb)");
+    // And the guard, without which one malformed ACL row fails every read of the
+    // table under RLS: `jsonb_each` raises on a non-object.
+    expect(sql).toContain("jsonb_typeof(\"ACL\") = 'object'");
   });
 
   it('refuses without the CLP configuration', () => {
