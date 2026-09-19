@@ -19,6 +19,21 @@ nobody can see.
 
 ---
 
+
+## ✅ AC7's other half is measured (s7, 2026-09-19)
+
+`tests/models/*` runs **only** under `test:ci` (Electron), so s5's edits there had never executed.
+They have now, at `ea94c205b`, seed **13542**: **2978 specs, 8 failures** — the documented floor
+**by name** (3 SUB-006, 3 SUB-011, 2 NDA-017), none of them ours. The two files s5 changed both
+ran: `ElementConfigRegistry` **17 specs**, `ElementConfig token vocabulary` **3**,
+`generateProjectTokenCss` **4**.
+
+⚠️ **`TESTCI_EXIT=1` is what the floor produces** — eight failures is a non-zero exit, so the exit
+code alone cannot tell the floor from a regression. Read the **names**. And the harness reported
+the background run as exit 0 while the log said 1: the command ended in an `echo`, so the status
+was the echo's ([[a-backgrounded-command-exit-code-can-lie]]). The readout was fresh — JSON mtime
+18:22 against a clock of 18:22, `elapsedSeconds: 66`.
+
 ## 1. What is already true, measured at HEAD (s3)
 
 **read** = read at HEAD this session · **counted** = counted this session.
