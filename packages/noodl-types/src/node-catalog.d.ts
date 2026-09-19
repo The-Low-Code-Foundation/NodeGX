@@ -178,6 +178,7 @@ export type NodeTypeName =
   | 'noodl.cloud.jwtsign'
   | 'noodl.cloud.jwtverify'
   | 'noodl.cloud.listusersinrole'
+  | 'noodl.cloud.modelrequest'
   | 'noodl.cloud.removeuserfromrole'
   | 'noodl.cloud.request'
   | 'noodl.cloud.response'

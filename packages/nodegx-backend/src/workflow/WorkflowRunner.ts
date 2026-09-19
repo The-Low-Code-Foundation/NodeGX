@@ -44,6 +44,7 @@ import type {
   CloudKitLoadResult,
   NodeRunContext,
   RuntimeLogEntry,
+  RuntimeModelCall,
   RuntimeStepEnd,
   RuntimeStepStart
 } from '@cloud-runtime';
@@ -150,6 +151,15 @@ export const MAX_LOG_LINES_PER_RUN = 200;
  * shape of the run — and, like it, the suppression is announced exactly once.
  */
 export const MAX_STEPS_PER_RUN = 1000;
+
+/**
+ * FED-003 — how many model calls one run may record the cost of.
+ *
+ * Lower than the step cap on purpose: a graph making a thousand model calls in one run has a
+ * problem the cost column cannot fix, and each of these is a read-modify-write on the execution
+ * row. Like the other two caps, it announces itself once and then goes quiet.
+ */
+export const MAX_MODEL_CALLS_PER_RUN = 200;
 
 export interface RunnerResponse {
   statusCode: number;
@@ -265,11 +275,15 @@ export class WorkflowRunner {
   private createRunContext(
     functionName: string,
     execLogger: ReturnType<ExecutionHistory['createLogger']>,
-    trigger?: RunTriggerContext
+    trigger?: RunTriggerContext,
+    executionId?: string
   ): NodeRunContext {
     const requestId = trigger && trigger.requestId;
     let written = 0;
     let stepsWritten = 0;
+    // FED-003 §3.4. Accumulated rather than appended blind, because `stampMetadata` MERGES keys:
+    // stamping `{ modelCalls: [one] }` twice would leave the row holding the second call only.
+    const modelCalls: RuntimeModelCall[] = [];
 
     return {
       requestId,
@@ -364,6 +378,40 @@ export class WorkflowRunner {
             )
           : undefined;
         execLogger.completeNode(handle, !failed, { outcome: end.status }, reason);
+      },
+
+      /**
+       * FED-003 §3.4 — what the run spent on model calls, on the execution record where the
+       * dashboard already reads.
+       *
+       * ⚠️ **Stamped on every call rather than once at the end, and the reason is CWF-018.** The
+       * run this column matters most for is the one that never finishes: a function that hangs
+       * after three expensive calls has spent that money, and a summary written in a completion
+       * path that is never reached would show zero. `completeExecution` does not touch metadata,
+       * so a stamp made now survives the run ending either way.
+       *
+       * ⚠️ Nothing here is scrubbed, because nothing here is free text: the node hands over four
+       * counts and a model id, and `RuntimeModelCall` exists to make that the only thing it can
+       * hand over.
+       */
+      recordModelCall: (call: RuntimeModelCall) => {
+        if (!executionId) return;
+
+        if (modelCalls.length >= MAX_MODEL_CALLS_PER_RUN) {
+          if (modelCalls.length === MAX_MODEL_CALLS_PER_RUN) {
+            modelCalls.push(call);
+            logger.warn('function.modelCalls.suppressed', {
+              function: functionName,
+              requestId,
+              limit: MAX_MODEL_CALLS_PER_RUN,
+              hint: 'a Model Request inside a loop — the rest of this run’s calls are not costed'
+            });
+          }
+          return;
+        }
+
+        modelCalls.push(call);
+        this.executions.stampMetadata(executionId, { modelCalls });
       }
     };
   }
@@ -624,7 +672,7 @@ export class WorkflowRunner {
       const response = await this.cloudRunner.run(functionName, request, {
         timeoutMs,
         // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
-        runContext: this.createRunContext(functionName, execLogger, trigger)
+        runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
       });
       const duration = Date.now() - startTime;
       safeLog(`Function ${functionName} completed in ${duration}ms`);

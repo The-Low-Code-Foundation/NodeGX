@@ -57387,6 +57387,322 @@
       "parameterEncoding": null
     },
     {
+      "typeName": "noodl.cloud.modelrequest",
+      "displayName": "Model Request",
+      "category": "Cloud",
+      "isVisual": false,
+      "isDeprecated": false,
+      "inNodePicker": true,
+      "availableIn": [
+        "cloud"
+      ],
+      "providedBy": "noodl-viewer-cloud",
+      "docs": "https://docs.noodl.net/nodes/cloud-functions/model-request",
+      "inputs": [
+        {
+          "name": "apiKeySecret",
+          "displayName": "API Key Secret",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "MODEL_KEY",
+          "description": "The NAME of a secret in the project's functions namespace — never the key itself. It is read server-side at the moment of the call, exactly as the Secret node reads one, used in one header and dropped. There is deliberately no port that could hold the value"
+        },
+        {
+          "name": "baseUrl",
+          "displayName": "Base URL",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "https://api.anthropic.com",
+          "description": "Where the request goes. Change it for a proxy, a gateway, or a test double"
+        },
+        {
+          "name": "effort",
+          "displayName": "Effort",
+          "group": "Limits",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Extra high",
+                "value": "xhigh"
+              },
+              {
+                "label": "Max",
+                "value": "max"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "high",
+          "description": "How hard the model works before answering — the first lever to reach for on both cost and quality. Low for tagging and classifying, high for anything that has to be right"
+        },
+        {
+          "name": "input",
+          "displayName": "Input",
+          "group": "Request",
+          "plug": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "isSignal": false,
+          "description": "The one thing being asked, as a single user turn. Ignored when Messages is wired — a graph holding a conversation sends the whole conversation"
+        },
+        {
+          "name": "instructions",
+          "displayName": "Instructions",
+          "group": "Request",
+          "plug": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "isSignal": false,
+          "description": "The system prompt — who the model is being asked to be, and the rules of the task"
+        },
+        {
+          "name": "maxTokens",
+          "displayName": "Max Tokens",
+          "group": "Limits",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 16000,
+          "description": "The ceiling on the answer. Hitting it is not an error: Done fires with Stop Reason set to max_tokens and a truncated Text, so the graph can decide what that means"
+        },
+        {
+          "name": "messages",
+          "displayName": "Messages",
+          "group": "Request",
+          "plug": "input",
+          "type": {
+            "name": "array",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": false,
+          "description": "A whole conversation as [{ role, content }], for a graph that is holding one. When this is wired and non-empty it replaces Input entirely"
+        },
+        {
+          "name": "model",
+          "displayName": "Model",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "claude-opus-5",
+          "description": "The model id, sent verbatim. Free text on purpose: a model released after this backend was built needs no release of NodeGX to be usable"
+        },
+        {
+          "name": "outputSchema",
+          "displayName": "Output Schema",
+          "group": "Request",
+          "plug": "input",
+          "type": {
+            "name": "object",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": false,
+          "description": "A JSON schema the answer must match. When set, the answer is constrained to it and arrives parsed on Json as well as raw on Text. Objects in the schema need additionalProperties false, and the provider refuses the request outright if they do not have it"
+        },
+        {
+          "name": "provider",
+          "displayName": "Provider",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Anthropic",
+                "value": "anthropic"
+              },
+              {
+                "label": "OpenAI-compatible (not yet implemented)",
+                "value": "openai-compatible"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "anthropic",
+          "description": "Which API shape the request is built in. Only Anthropic is implemented; OpenAI-compatible is listed so a graph drawn today keeps its wiring when it arrives, and until then it fails on Failure with Error Code not_implemented rather than pretending"
+        },
+        {
+          "name": "send",
+          "displayName": "Do",
+          "group": "Actions",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Sends the request"
+        },
+        {
+          "name": "timeoutMs",
+          "displayName": "Timeout (ms)",
+          "group": "Limits",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 120000,
+          "description": "The whole call's budget, retries included. Keep it under the function's own timeout, or the function answers 504 before this node gets to report anything"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "attempts",
+          "displayName": "Attempts",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "How many HTTP requests this call actually took. More than one means the provider rate-limited or faulted and the node retried; it is the number to watch before raising a quota"
+        },
+        {
+          "name": "completed",
+          "displayName": "Completed",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
+          "name": "done",
+          "displayName": "Done",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires once the model has answered and Text, Json, Usage and Stop Reason hold that answer"
+        },
+        {
+          "name": "error",
+          "displayName": "Error",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Why there is no answer, in a sentence. Names the secret or the status, never a key"
+        },
+        {
+          "name": "errorCode",
+          "displayName": "Error Code",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "A stable code for the failure, for a graph that branches rather than reads: not_implemented, secret_missing, refusal, bad_json, http_error, rate_limited, timeout, network, unavailable"
+        },
+        {
+          "name": "failure",
+          "displayName": "Failure",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when no answer was obtained — a missing secret, a refusal, a provider error that outlived its retries, or an answer that did not match the schema. Read Error Code to tell them apart rather than matching on Error, which is written for a person"
+        },
+        {
+          "name": "json",
+          "displayName": "Json",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "object"
+          },
+          "isSignal": false,
+          "description": "The answer parsed, when Output Schema asked for one. Untouched when no schema was set — a graph that wants an object has to say what shape it is"
+        },
+        {
+          "name": "status",
+          "displayName": "Status",
+          "group": "Error",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "The HTTP status of the last attempt, or 0 when the request never reached the provider — a missing secret, an unimplemented provider, a timeout"
+        },
+        {
+          "name": "stopReason",
+          "displayName": "Stop Reason",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Why the model stopped: end_turn when it finished, max_tokens when it ran out of room, tool_use when it wants a tool. A refusal never arrives here — it fires Failure"
+        },
+        {
+          "name": "text",
+          "displayName": "Text",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "The model's answer. When Output Schema is set this is the raw JSON of it"
+        },
+        {
+          "name": "usage",
+          "displayName": "Usage",
+          "group": "Values",
+          "plug": "output",
+          "type": {
+            "name": "object"
+          },
+          "isSignal": false,
+          "description": "What the call cost, as { inputTokens, outputTokens, cacheReadTokens }. The same numbers land on the run's execution record, where they are summed per run"
+        }
+      ],
+      "dynamicPorts": null,
+      "parameterEncoding": null
+    },
+    {
       "typeName": "noodl.cloud.removeuserfromrole",
       "displayName": "Remove User From Role",
       "category": "Cloud",

@@ -2,7 +2,7 @@
 title: Node reference
 ---
 
-Every node in the catalog — 179 in total — generated from the same
+Every node in the catalog — 180 in total — generated from the same
 enriched catalog the editor reads for its own in-editor help. Grouped by picker category.
 
 :::info Generated
@@ -27,6 +27,7 @@ This page is generated from `node-catalog-enriched.json`. Do not edit it by hand
 - [JWT Sign](./cloud/noodl-cloud-jwtsign.md)
 - [JWT Verify](./cloud/noodl-cloud-jwtverify.md)
 - [List Users In Role](./cloud/noodl-cloud-listusersinrole.md)
+- [Model Request](./cloud/noodl-cloud-modelrequest.md)
 - [Remove User From Role](./cloud/noodl-cloud-removeuserfromrole.md)
 - [Request](./cloud/noodl-cloud-request.md)
 - [Response](./cloud/noodl-cloud-response.md)

@@ -11,6 +11,7 @@ import type {
   NodeRunContext,
   RuntimeLogEntry,
   RuntimeLogLevel,
+  RuntimeModelCall,
   RuntimeStepEnd,
   RuntimeStepStart
 } from '@noodl/runtime/src/runcontext';
@@ -20,7 +21,14 @@ import './noodl-js-api';
 // CWF-013 — the shape a host has to fill in to give a cloud function's `Log` node somewhere to
 // go. Re-exported from the package entry because the backend reaches this module through the
 // `@cloud-runtime` bundler alias and has no other way to name the type.
-export type { NodeRunContext, RuntimeLogEntry, RuntimeLogLevel, RuntimeStepEnd, RuntimeStepStart };
+export type {
+  NodeRunContext,
+  RuntimeLogEntry,
+  RuntimeLogLevel,
+  RuntimeModelCall,
+  RuntimeStepEnd,
+  RuntimeStepStart
+};
 
 // CN-013 — the cloud kit loader's vocabulary, re-exported for the same reason as the three above:
 // `nodegx-backend` reaches this module through the `@cloud-runtime` bundler alias and has no other

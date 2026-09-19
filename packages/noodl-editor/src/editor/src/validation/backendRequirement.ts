@@ -172,6 +172,16 @@ export const DELIBERATELY_BACKEND_FREE: Readonly<Record<string, string>> = Objec
   'noodl.cloud.secret':
     'Reads the hosting function process’s own secret store (the `functions` namespace), not a backend. ' +
     'An unprovisioned secret is a provisioning failure, not a missing backend.',
+  // P96/FED-003's Model Request, classified with Secret and NOT with group 1 — the
+  // distinction the comment above Secret draws is exactly the one that decides this.
+  // It reads the hosting process's secret store by the same route, and the request it
+  // then makes goes to a MODEL PROVIDER, not to a configured NodeGX backend. So both
+  // of its failures — an unprovisioned key, an expired one — are provisioning
+  // failures, and "you have no backend" would name the wrong thing twice over.
+  'noodl.cloud.modelrequest':
+    'Reads the hosting function process’s own secret store (the `functions` namespace) and calls a model ' +
+    'provider over HTTPS. Neither half is a request to a configured backend; a missing key is a ' +
+    'provisioning failure.',
 
   // ── Cloud category, group 2: it reaches nothing at all ────────────────────
   // CWF-010's crypto kit. Pure computation over `node:crypto`. A strictly

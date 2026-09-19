@@ -859,6 +859,11 @@
       "note": "runs only in the backend interpreter; frontend export never sees it"
     },
     {
+      "typeName": "noodl.cloud.modelrequest",
+      "status": "backend-only",
+      "note": "runs only in the backend interpreter; frontend export never sees it. FED-003: cloud-only by construction \u2014 it reads a model key through the backend's secret resolver, so a translated browser version of it would be a credential in a page. Unlike `Parse Feed` and `Parse XML`, this row is NOT a candidate for Richard's 2026-09-18 \"convert all nodes to code export\" ruling: those two are pure functions of their input and this one is not."
+    },
+    {
       "typeName": "noodl.cloud.removeuserfromrole",
       "status": "backend-only",
       "note": "runs only in the backend interpreter; frontend export never sees it"

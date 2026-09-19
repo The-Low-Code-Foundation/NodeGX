@@ -70,6 +70,26 @@ export interface RuntimeStepEnd {
 }
 
 /**
+ * One model call made by a `Model Request` node during this run (FED-003 §3.4).
+ *
+ * ⚠️ **Every field here is a COUNT or an IDENTIFIER, and that is the whole design.** The phase's
+ * rule 3 says a model key never reaches a log line or an execution record; the prompt is the
+ * author's own data and the response is the model's, and neither is something this channel is
+ * entitled to persist. What a person needs after the fact is what the run COST — which is four
+ * numbers and a model id — and that is exactly what this carries.
+ */
+export interface RuntimeModelCall {
+  /** The model id the request was sent with, e.g. `claude-opus-5`. */
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  /** Tokens served from the prompt cache, which are billed at a fraction of the rest. */
+  cacheReadTokens: number;
+  /** Wall-clock for the call, retries included — what the graph actually waited. */
+  durationMs: number;
+}
+
+/**
  * Services scoped to one run of one graph.
  *
  * Deliberately small. This is not a general-purpose bag: everything on it has to be something that
@@ -91,6 +111,17 @@ export interface NodeRunContext {
   beginStep?(step: RuntimeStepStart): unknown;
   /** Close the invocation opened by {@link beginStep}. Never called without a handle from it. */
   endStep?(handle: unknown, end: RuntimeStepEnd): void;
+  /**
+   * FED-003 — where a model call's cost lands. Absent in the browser, and absent in any host
+   * that has no execution record to stamp; a node must treat it as optional exactly as it treats
+   * {@link log}.
+   *
+   * ⚠️ **Per run, for the same reason {@link beginStep} is.** A backend serving two feed
+   * functions at once would otherwise bill one graph's tokens to the other's execution record,
+   * and a cost number attributed to the wrong run is worse than no cost number — it is a number
+   * somebody will act on.
+   */
+  recordModelCall?(call: RuntimeModelCall): void;
   /** The HTTP request id this run belongs to, when there is one. Diagnostics only. */
   requestId?: string;
 }

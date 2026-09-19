@@ -25,6 +25,7 @@ import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
 import type { StorageColumn, StorageIndexStatus } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
+import { summariseModelCalls } from '../execution/modelCost';
 import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
 
 function parseJSON(value: string | undefined, name: string): Record<string, unknown> | undefined {
@@ -541,6 +542,9 @@ export class ByobAdminRoutes {
   getExecution(res: http.ServerResponse, id: string): void {
     const result = this.executions.get(id);
     if (!result) throw new HttpError(404, 'Execution not found');
-    sendJSON(res, 200, result);
+    // FED-003 §3.4 — what the run spent on models, summed here rather than by each of the three
+    // readers of this route. Derived, never stored: see `execution/modelCost.ts`.
+    const modelCost = summariseModelCalls(result.metadata);
+    sendJSON(res, 200, modelCost ? { ...result, modelCost } : result);
   }
 }

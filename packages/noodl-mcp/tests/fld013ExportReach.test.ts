@@ -18,7 +18,7 @@
  * a port was added, and this repo has already paid for that once.
  */
 
-import { exportCoverage } from '@nodegx/export';
+import { exportCoverage, ledgerEntryOf } from '@nodegx/export';
 
 import { exportInfoOf, listNodeTypes, getNodeTypeDetail } from '../src/catalog';
 import { callRawText, connect, copyFixture } from './helpers';
@@ -142,10 +142,14 @@ describe('FLD-013 AC3 — the listing, and what it costs', () => {
     const rows = listNodeTypes();
     const carried = rows.filter((r) => r.export !== undefined);
 
-    // 29 non-translated picker rows, plus nine translated types that still refuse on a wire.
-    // 27 → 29 at P96/FED-002 (2026-09-18): `Parse Feed` and `Parse XML` entered the picker with
-    // FED-001 and were classified the same day — `scheduled`, the ledger's first two commitments
-    // rather than decisions. Both carry a badge, so both are rows with something to say.
+    // The non-translated picker rows, plus nine translated types that still refuse on a wire.
+    //
+    // 🔴 **This count is DERIVED from the ledger now, and was a literal — 27, then 29, then red
+    // again at P96/FED-003.** Every new non-translated picker type moves it by one, so the
+    // literal was a number three sessions in a row had to edit to say the same thing: *every
+    // non-translated row carries the field*. Bumping it was never the fix; it is the ledger's own
+    // census, so it is read from the ledger. What still grades the rule is below — the nine
+    // names, which are the `or`'s second half and cannot be derived, and the silence floor.
     const translatedButRefusing = carried.filter((r) => r.export!.status === 'translated').map((r) => r.typeName);
     expect(translatedButRefusing).toEqual([
       'Circle',
@@ -166,8 +170,18 @@ describe('FLD-013 AC3 — the listing, and what it costs', () => {
     // that is silent about the exact type that caused the issue.
     expect(translatedButRefusing).toContain(CIRCLE);
 
+    // The ledger's census, taken from the ledger rather than from the field under test.
+    const nonTranslated = rows.filter((r) => {
+      const entry = ledgerEntryOf(r.typeName);
+      return entry !== undefined && entry.status !== 'translated';
+    });
+    // It is a real population, not an empty filter that would make the line below vacuous.
+    expect(nonTranslated.length).toBeGreaterThan(20);
+    // Every non-translated row carries the field, every refusing-translated row carries it, and
+    // NOTHING else does — the third clause is the one that would catch a field leaking onto rows
+    // with nothing to say.
+    expect(carried.length).toBe(nonTranslated.length + translatedButRefusing.length);
     // Two-sided: silence is the common case, and it has to stay the common case.
-    expect(carried.length).toBe(29 + translatedButRefusing.length);
     expect(rows.length - carried.length).toBeGreaterThan(100);
   });
 
@@ -207,14 +221,25 @@ describe('FLD-013 AC3 — the listing, and what it costs', () => {
    *   exists to remove: absent and empty must not be the same answer.
    * - the remainder is the `"export": {…}` wrapper and `"status"` on thirty-six rows.
    *
-   * The ceiling below is a ratchet, not a target: it is set 3,614 bytes above the measured figure,
-   * so the next field added to a listing row fails here rather than silently costing every agent
-   * that opens a project a few thousand more tokens. If a change legitimately grows it, move the
+   * The ceiling below is a ratchet, not a target: it is set above the measured figure, so the
+   * next field added to a listing row fails here rather than silently costing every agent that
+   * opens a project a few thousand more tokens. If a change legitimately grows it, move the
    * number and say why in the commit.
+   *
+   * 🔴 **Moved 62,000 → 66,000 at P96/FED-003 (2026-09-19), and the reason the headroom had to
+   * grow is worth more than the number.** One new cloud node type (`Model Request`) cost **+464
+   * wire bytes**, measured as a one-variable control: the same listing against this branch's
+   * catalog and ledger read **62,137**, and against HEAD's read **61,673**. But HEAD was already
+   * at 61,673 against a ceiling of 62,000 — **327 bytes of headroom left out of the 3,614 this
+   * ratchet was built with.** Three thousand bytes had been spent since FLD-013 by changes that
+   * each fitted under the ceiling and so never had to say so, which is the one thing a ratchet
+   * cannot catch. The new ceiling restores comparable headroom (3,863 bytes above 62,137); a
+   * session that finds itself within a few hundred bytes of it again should read that as the
+   * listing needing a diet, not the ceiling needing a nudge.
    */
-  it('keeps the default listing under 62,000 wire bytes', async () => {
+  it('keeps the default listing under 66,000 wire bytes', async () => {
     const wire = await callRawText(session, 'list_node_types', {});
-    expect(wire.length).toBeLessThan(62_000);
+    expect(wire.length).toBeLessThan(66_000);
     // Two-sided: a listing that collapsed to nothing would also be under the ceiling.
     expect(wire.length).toBeGreaterThan(40_000);
   });

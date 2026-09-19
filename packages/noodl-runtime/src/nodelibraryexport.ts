@@ -920,6 +920,19 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
           items: ['noodl.cloud.secret']
         },
         {
+          // FED-003: cloud-only for Secret's reason one notch on — this node READS a
+          // credential, so a browser copy would hand a model key to everyone who opens the
+          // page.
+          //
+          // ⚠️ **Being registered in `noodl-viewer-cloud/src/nodes/index.ts` is NOT being
+          // offered.** That registration is what makes the type run; THIS list is what makes
+          // it findable, and the catalog's `inNodePicker` is derived from here. Model Request
+          // was registered, tested green end to end, and absent from this list — which made it
+          // the only node in this whole category a person could not have added to a graph.
+          name: 'AI',
+          items: ['noodl.cloud.modelrequest']
+        },
+        {
           // CWF-010: the crypto nodes that hold a key. Cloud-only, deliberately — see the
           // module comments on hmac.ts and jwtsign.ts.
           name: 'Security',

@@ -4,7 +4,7 @@
 NodeGX app at distraction.digitalbricks.io), and a capability survey of `packages/nodegx-backend`,
 `packages/noodl-viewer-cloud` and `packages/noodl-runtime` taken the same afternoon at `cline-dev`
 HEAD `f3f67874d`.
-**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 is next.** **Prefix: `FED`.**
+**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 ✅ CLOSED. FED-004 is next.** **Prefix: `FED`.**
 
 > "I'd really like the NodeGX backend to be able to handle this stuff. I want people to see NodeGX as
 > an alternative to tools like Supabase and n8n as well as a front end builder. The old Noodl made the
@@ -181,6 +181,21 @@ indexed `published desc` answer in **0.04 ms against a control's 8.92 ms**, with
    parsers are the ledger's first `scheduled` rows. **What this means for FED-003:** `Model Request`
    is cloud-only, so its row is `backend-only` and the check will insist on exactly that — no
    ruling needed, but the row is not optional.
+   🔴 **And there is a SEVENTH step none of the six catch, found at FED-003 (s3): registering a
+   node is not OFFERING it.** `Model Request` was registered in
+   `noodl-viewer-cloud/src/nodes/index.ts`, both its suites were green, all nine of its ACs were
+   satisfied — and the generated catalog said **`inNodePicker: false`**, the only `false` among
+   eighteen cloud nodes. The picker's index is a hand-curated list in
+   `noodl-runtime/src/nodelibraryexport.ts`; a type absent from it runs perfectly and **cannot be
+   added to a graph by a human being**, which is rule 1 broken by a node that passes every test.
+   Nothing in the repo catches this. So: **after `catalog:generate`, read the new type's
+   `inNodePicker` out of `packages/noodl-types/src/node-catalog.json`** — add the row, or know why
+   not.
+
+   🔴 **An eighth, also found at FED-003: a cloud node owes `AIB-007`'s classification table**
+   (`noodl-editor/src/editor/src/validation/backendRequirement.ts`). That one DOES have a gate —
+   it is in `test:main` and it caught the miss — but it is worth knowing before rather than after,
+   because the decision it forces is a real one, not a formality.
 6. **[PHASE-EXECUTION.md](../../guidelines/PHASE-EXECUTION.md) applies.** A defect found while
    driving is filed, with an owner, and the next session builds the next task unless the defect
    carries `BLOCKS <AC>`.
