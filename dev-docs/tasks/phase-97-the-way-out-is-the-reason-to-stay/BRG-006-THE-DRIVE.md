@@ -3,7 +3,7 @@
 **Status: 🟢 Built and green, s10 (2026-09-20). AC1–AC7 closed; AC8 published and awaiting
 Richard's ruling.** `tests/brg-006-the-drive.test.ts` — **22/22, exit 0, 206 s**, the whole app
 driven across and back. It found one product defect the bridge did not cause: **BRG-D10**, two
-Parse-wire prefixes answering `1` and `true` for the same Boolean in the same row on one engine.
+REST surfaces answering `1` and `true` for the same Boolean in the same row on one engine.
 
 ## 1. The person sentence
 
@@ -144,7 +144,7 @@ Both are covered by the 83-test sibling run above.
 
 ## 7. What the drive found
 
-### 7.1 🔴 BRG-D10 — two Parse-wire prefixes disagree about a Boolean, on ONE engine
+### 7.1 🔴 BRG-D10 — two REST surfaces disagree about a Boolean, on ONE engine
 
 The same row, the same column, the same running backend, no PostgreSQL anywhere near it:
 
@@ -222,3 +222,38 @@ and s9 and are now false on a page a user reads before deciding whether to start
 
 The edit is **surgical**: one section replaced, one bullet in "Honest limits" corrected, everything
 else byte-identical. It is called out here so the file's owner sees it rather than finds it.
+
+---
+
+## 9. R7, and where the repair goes (ruled 2026-09-20, s10)
+
+🔴 **Richard ruled: `/api` is brought into line — `true`/`false` everywhere.** The reasoning is in
+README §4 R7. What matters for whoever builds it is that **s10 located the mechanism**, so the next
+session does not re-derive it:
+
+| surface | route | facade half it reads through | Boolean on SQLite |
+|---|---|---|---|
+| Parse-wire | `GET /classes/:c` | `wireQuery` / `wireFetch` / `wireSearch` | `true` |
+| BYOB | `GET /api/:table` | `rawQuery` / `rawFetch` | **`1`** |
+
+`byob-admin.ts` calls `raw*` for every read (`:163`, `:169`); `parse-wire.ts` calls `wire*`
+(`:207`, `:214`, `:420`, `:427`). That split is deliberate — `raw*` is storage-shaped — so **the
+repair is not "make `rawQuery` convert"**: `raw*` has internal callers (`security/state`,
+`RoleStore`, sessions, `McpRoutes.sessionForGraph`) that must keep seeing storage values, and
+changing it underneath them is a much larger blast radius than the defect.
+
+Two candidate shapes, and the second is the one BRG-D8's own filing points at:
+
+1. Convert at the BYOB read handlers, sharing one `applyDeclaredTypes(record, schema)` with `wire*`
+   so there is not a second copy ([[a-second-copy-of-a-palette-drifts-silently]]).
+2. 🔴 **Fix it where BRG-D8 says it actually is**: both adapters already try to apply the declared
+   type in `_rowToRecord` via `schema.properties[key].type`, and `SchemaManager.getTableSchema()`
+   returns a `TableSchema` with **no `properties` member**, so the declared type is never seen. Make
+   it visible and the SQLite adapter returns `true` at source — which fixes `/api` without touching
+   either route family.
+
+⚠️ **The gate this needs is one boolean case PER WIRE PREFIX, not one case.** A single round-trip
+case added to BRG-003 would have been added on whichever prefix the author reached for, and would
+have passed while the other stayed wrong — which is exactly the hole BRG-D8 got through
+([[a-gate-can-have-a-hole-shaped-like-the-defect]]). The drive's own three-way assertion stays as
+the end-to-end arm and **will go red when the repair lands**, naming itself as the thing to update.

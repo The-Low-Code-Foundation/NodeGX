@@ -6,7 +6,10 @@ FED-006's feed reader, imported unmodified — is provisioned on SQLite, recorde
 then served again from the untouched SQLite file. AC1–AC7 are closed. AC8 is published and waiting
 on Richard.**
 
-**It also found BRG-D10, and BRG-D10 is not about the bridge at all**: two Parse-wire prefixes
+**Both rulings were then taken (R7, README §4): `/api` is brought into line — `true`/`false`
+everywhere — and Richard took `SCALING.md` away to read for AC8.**
+
+**The drive found BRG-D10, and BRG-D10 is not about the bridge at all**: two REST surfaces
 answer differently for the same Boolean, in the same row, on the same engine. `GET /api/:c` reads
 `1` where `GET /classes/:c` reads `true` — on SQLite, with no PostgreSQL involved.
 
@@ -21,7 +24,7 @@ answer differently for the same Boolean, in the same row, on the same engine. `G
 | [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | ⚠️ still no boolean round-trip case — and BRG-D10 says one case would not be enough; it needs one **per wire prefix** |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ AC1–AC9 | — |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ all but AC7 | **AC7** — `noodl-mcp` green is not this phase's to make true (§7.5) |
-| [BRG-006](BRG-006-THE-DRIVE.md) the drive | 🟢 **AC1–AC7** | **AC8** — published, needs Richard to read and rule it honest |
+| [BRG-006](BRG-006-THE-DRIVE.md) the drive | 🟢 **AC1–AC7** | **AC8** — published; Richard is reading it |
 
 **Readings taken this session** (2026-09-20): the drive **22/22 exit 0, 206 s**; carry report clean
 (committed at `brg-006-drive-record/`); `migrate` **58 rows / 15 batches / 0.1 s, 43 records
@@ -29,29 +32,27 @@ compared through both adapters, nothing differs**, source sha256 identical; sibl
 `feed-drive` + `fed-004` + every `realtime` spec **9 suites / 83 tests exit 0**;
 `typecheck:backend-tests` exit 0.
 
-## 1. First job — the two rulings, then close the phase
+## 1. First job — build R7's repair
 
-Both are Richard's and both are now ONE decision, which is new information from this session.
+🔴 **Both rulings were taken at the end of s10. Nothing is waiting on Richard except his read of
+`SCALING.md`, which he took away to read.**
 
-1. 🔴 **BRG-D8 + BRG-D10 together.** The drive read one Boolean column three ways on two engines:
+**R7 (README §4): `/api` is brought into line — `true`/`false` everywhere.** `/api` on SQLite is
+the only reader that says `1`; `/classes`, a graph's own `Query Records`, and every reader on
+PostgreSQL already say `true`. ⚠️ It reaches `_User.emailVerified`, `_Files.private` and
+`_ApiKey.revoked`.
 
-   | read through | SQLite | PostgreSQL |
-   |---|---|---|
-   | `GET /api/:c` | **`1`** | `true` |
-   | `GET /classes/:c` | **`true`** | `true` |
-   | a graph's `Query Records` | `true` | `true` |
+**s10 located the mechanism so you do not re-derive it — BRG-006 §9 has the table.** In short:
+`byob-admin.ts` reads through `raw*`, `parse-wire.ts` through `wire*`, and that split is
+deliberate, so **do not make `rawQuery` convert** — `security/state`, `RoleStore`, sessions and
+`McpRoutes.sessionForGraph` all need storage values. The shape BRG-D8's own filing points at is
+`SchemaManager.getTableSchema()` returning a `TableSchema` with no `properties`, so `_rowToRecord`
+never sees the declared type on either adapter.
 
-   BRG-D8 was filed as "two engines disagree" and is one cell of this. **The argument its ruling
-   was waiting on is false as stated**: "every existing app reads `0`/`1`" is true only of apps on
-   `/api` against SQLite. Everything else already reads `true`. ⚠️ It reaches internal tables too —
-   `migrate`'s verify report names `_User.emailVerified`, `_Files.private`, `_ApiKey.revoked`.
-   The question to put in plain words: **should `/api` on SQLite be brought into line with
-   everything else (`true`), knowing that is the one reader that changes?**
-
-2. **AC8** — `docs/runtime/SCALING.md` §"SQLite and Postgres" is rewritten and needs Richard to
-   read it and rule it honest. It states what the bridge buys (the storage ceiling — one app
-   process, a real database behind it) and what it does not (the app tier is still single-process),
-   in R2's words, on the page a person reads before deciding whether to start.
+🔴 **The gate is one boolean case PER WIRE PREFIX, not one case** — a single case would have been
+written on whichever prefix came to hand and passed while the other stayed wrong, which is the hole
+BRG-D8 got through. BRG-006's own three-way assertion **will go red when the repair lands** and
+names itself as the thing to update; that is deliberate.
 
 ## 2. 🔴 What is in the working tree and NOT at HEAD
 
@@ -86,12 +87,10 @@ Both are Richard's and both are now ONE decision, which is new information from 
 - **Execution history does not cross, by design** — `executions.sqlite` is a second file `migrate`
   never surveys. Still there, still readable, still SQLite after the cutover. Now in `SCALING.md`.
 
-## 4. After the rulings
+## 4. After R7 lands
 
-The phase closes. What is left beyond the rulings is small and named:
+The phase closes. What is left is small and named:
 
-- **BRG-003 needs boolean round-trip cases — one per wire prefix**, which is the shape BRG-D10
-  makes necessary and a single case would have missed ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
 - **BRG-D7** (`IStorageSchema` is synchronous) is still open and still owed to BRG-002's method on
   six callers, or a task of its own.
 - **Backups on PostgreSQL** — `BackupManager` snapshots a SQLite file. `SCALING.md` now tells an

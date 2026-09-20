@@ -551,7 +551,7 @@ describeIf('BRG-006 — the drive: a real app crosses', () => {
     };
   }
 
-  /** Every `Mark` row over one of the two Parse-wire prefixes, sorted by `itemId`. */
+  /** Every `Mark` row over one of the two REST surfaces, sorted by `itemId`. */
   async function markRowsRaw(prefix: '/classes' | '/api' = '/classes'): Promise<Record<string, unknown>[]> {
     const res = await client.request<{ results: Record<string, unknown>[] }>('GET', `${prefix}/Mark`, {
       headers: asAdmin()
@@ -1016,7 +1016,7 @@ describeIf('BRG-006 — the drive: a real app crosses', () => {
      * | a cloud function's `Query Records` | `true` | `true` |
      *
      * 🔴 **`/api` and `/classes` disagree with each other on ONE engine, today, with no
-     * PostgreSQL anywhere near it.** Two Parse-wire prefixes over the same store, the same row and
+     * PostgreSQL anywhere near it.** Two REST surfaces over the same store, the same row and
      * the same column, answering `1` and `true`. That is BRG-D10, filed on its own: it is a
      * product defect the bridge did not cause and would never have found, and it is strictly
      * larger than BRG-D8, which turns out to be one cell of it.
