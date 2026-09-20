@@ -123,16 +123,26 @@ Unchanged rows are kept short; read s5's copy in git history for the full text o
   (gated on exit status, not on empty output). `eslint` clean on every changed file.
 - Bundle: **+6.8 KB gzipped** on the served document (23.9 → 30.7 KB).
 
-### ⚠️ Not measured at s8, and the next session should decide whether it matters
+### ✅ The whole-package run is PAID (s8, after the peer's suite cleared)
 
-- **The whole `nodegx-backend` package** (154 suites / 1827 tests, ~510 s at `--maxWorkers=2`).
-  s8 changed a shared substrate — `ExecutionLogger` is the single write point for **every**
-  execution record on every backend — and swept the 19 suites that assert on run status plus
-  every suite touching the dashboard. 🔴 **R13's lesson says a change with this reach owes the
-  whole-package run**, and a peer was driving the editor for much of s8. **Run it before the
-  phase closes.**
-- **`test:main`**, for the same reason: `ExecutionLogger` lives in `noodl-viewer-cloud`, which
-  the editor also consumes.
+**`nodegx-backend` WHOLE: 164 suites / 1980 tests, 642 s at `--maxWorkers=2`, ONE red — and the
+red is a peer's.**
+
+`ops-rate-limit.test.ts` counts the live route table against a reviewed tally and reads
+**admin: 80 against an expected 79**. The extra route is **`POST /admin/executions/compact`** —
+**PRD-003**, phase 98's disk work, uncommitted, written 2026-09-19 22:59. FED-007 added no routes
+at all. 🔴 **That task owes the tally**, and the gate is doing exactly what it exists for.
+
+This is R13's lesson paid rather than assumed: `ExecutionLogger` is the single write point for
+every execution record on every backend, so a change there owes the run no subset can stand in
+for. It found nothing of ours.
+
+⚠️ **The wrapper said exit 0 and the LOG said `JEST EXIT: 1`.** Same trap as s6's. Read the log.
+
+⚠️ **`test:main` is still NOT run** — `ExecutionLogger` lives in `noodl-viewer-cloud`, which the
+editor also consumes, and the editor's own `main/src/execution-history/` reads the same statuses.
+The 19-suite backend sweep and the whole-package run both cover the backend side; the editor side
+is unmeasured. **Run `test:main` before the phase closes.**
 
 ## 7. Traps s8 paid for, so the next session does not
 
