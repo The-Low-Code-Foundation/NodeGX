@@ -191,6 +191,19 @@ the response is one object of fixed size whatever the table holds. **The residua
 unbounded array in a bounded response. Filed as **PRD-D7** rather than clamped here —
 the honest fix is a limit on the aggregate path, not a reach into an accessor map.
 
+> 🔴 **Superseded by PRD-006 (s5), on both counts.**
+>
+> 1. **The residual was misread.** `QueryBuilder.buildAggregate:1319` emits `COUNT(DISTINCT col)`
+>    for that accessor — a scalar, not a set. There is no unbounded array on this path with the
+>    shipped adapter. `distinct` names a list of values in `parse-wire.ts` and a count in
+>    `QueryBuilder`, and the meaning was carried one file too far. PRD-006 §7.1.
+> 2. **The real defect was in the clamp this paragraph reports as done.** `rawDistinct` sliced and
+>    said nothing — no header, no body flag — which is the silent truncation §3.2 exists to
+>    abolish. The spec below asserted the COUNT and not the CONTRACT, so it passed. PRD-006 §7.2.
+>
+> Both are closed. The aggregate path is now bounded and annotated, and the exemption this section
+> wrote down no longer applies.
+
 ### 7.7 The three mutants
 
 | mutant | caught by |

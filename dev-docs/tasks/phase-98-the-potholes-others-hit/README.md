@@ -3,8 +3,9 @@
 **Scoped:** 2026-09-19, from Richard's field report of a 60,000-participant conference his team
 served on n8n + Directus + Azure AKS, a measurement of the backend at HEAD `aa5d00e2a`, and a survey
 of how n8n and Directus actually behave in production.
-**Status: ✅ Complete, s4 (2026-09-20). All five tasks built and gated; the outage chain is closed and the
-vertical ceiling is measured and published. Prefix: `PRD`.**
+**Status: ✅ Complete, s5 (2026-09-20). Six tasks built and gated; the outage chain is closed, the
+vertical ceiling is measured and published, and the last silent truncation is gone. Prefix:
+`PRD`.**
 
 > *"let's try not to repeat the mistakes of those who came before us"* — Richard, 2026-09-19
 
@@ -92,6 +93,7 @@ unwritten; painful afterwards.
 | [PRD-003](PRD-003-PRUNING-THAT-GIVES-THE-DISK-BACK.md) | Prune by count as well as age, say which limit fired, and actually reclaim the space | ✅ s1 | ✅ s1 — 7 specs, file shrinks <25% | 🟡 over HTTP in the spec |
 | [PRD-004](PRD-004-THE-NUMBER-WE-DO-NOT-HAVE.md) | The vertical ceiling, measured on a mixed workload with a heavy scheduled job in the mix | ✅ s4 — harness `scripts/soak/` | ✅ s4 — quiet-box guard + preflight; the run IS the gate | ✅ s4 — **~3,500 req/s**, knee at concurrency 4, on 282k rows |
 | [PRD-005](PRD-005-SECRETS-ARE-PROVISIONED.md) | Secrets provisioned from the environment, never invented; a deploy that cannot find one refuses | ✅ s1 | ✅ s1 — 11 specs | 🟡 over HTTP in the spec; not driven from the Compose deploy |
+| [PRD-006](PRD-006-THE-AGGREGATE-PATH-SAYS-WHAT-IT-DID.md) | The two routes that answer with a **list** instead of a page are bounded too — and say so | ✅ s5 | ✅ s5 — 13 specs, 3 mutants | 🟡 over HTTP in the spec |
 
 **PRD-001 → 003 are the outage chain, in order.** Any one of them alone shortens it; all three
 close it. They are small, self-contained, need no interface and no Postgres, and they protect the
@@ -149,7 +151,9 @@ written against is real, but it is not what binds first on this shape.
 | id | reading | owner |
 |---|---|---|
 | **PRD-D1** ✅ s3 | ~~No default or maximum page size on any query route~~ — closed. `queries.defaultLimit`/`maxLimit` clamp in `AdapterFacade`, capped responses carry `X-NodeGX-Result-Capped`, and thirteen whole-table readers moved to the explicit `rawQueryAll` bypass. PRD-001 §7 | PRD-001 |
-| **PRD-D7** BACKLOG | `$addToSet` in a grouped aggregate maps to `distinct` INSIDE the single result object — an unbounded array in an otherwise bounded response. `rawDistinct` itself is capped; this one is not, because the fix is a limit on the aggregate path rather than a reach into an accessor map. PRD-001 §7.6 | none yet |
+| **PRD-D7** ✅ s5 | **Closed, and the reading that filed it was wrong.** There is no unbounded array: `QueryBuilder.buildAggregate:1319` emits `COUNT(DISTINCT col)` for that accessor — the word `distinct` names a list of values in `parse-wire.ts` and a count in `QueryBuilder`, and PRD-001 §7.6 carried the first meaning one file too far. The clamp shipped anyway as a **guard** for a set-returning adapter (Postgres `array_agg`), inert on SQLite. PRD-006 §7.1 | PRD-006 |
+| **PRD-D9** ✅ s5 | 🔴 **The defect found beside D7, and the one that was real.** `rawDistinct` sliced at `maxLimit` and told nobody — no header, no body flag — for a route whose whole point is returning a list. `BACKEND-OPERATIONS.md` was already promising operators that *every* capped response says so. PRD-001's AC7 spec asserted the count and not the contract, so it passed. PRD-006 §7.2 | PRD-006 |
+| **PRD-D8** BACKLOG | Downstream of D7: a Parse client emitting `$addToSet` is asking for a **set** and gets an integer, and the Aggregate Records node documents Distinct as returning a string. Whether the repair is the wire or the vocabulary is a product decision, not a clamp. PRD-006 §7.5 | none — Richard's call |
 | **PRD-D2** ✅ s1 | ~~Run records are bounded by count but not by size~~ **Corrected:** the substrate already capped one value at 50KB (`store.ts:28`); what was absent was the per-run sum, config, announcement and queryability — PRD-002 §7.1 | PRD-002 |
 | **PRD-D3** ✅ s1 | Pruning never reclaims disk — closed for new files (incremental + bounded reclaim) and for old ones by `POST /admin/executions/compact`; PRD-003 §7 | PRD-003 |
 | **PRD-D4** ✅ s1 | Retention is age-only — `executions.maxCount` (10,000) beside it, attributed; per-workflow opt-out still PRD-003 §6 | PRD-003 |

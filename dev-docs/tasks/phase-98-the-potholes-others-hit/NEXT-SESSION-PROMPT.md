@@ -1,8 +1,10 @@
 # Phase 98 — closed
 
-**Written by s4, 2026-09-20. There is no next task in this phase.** Re-derive from the task files
+**Written by s5, 2026-09-20. There is no next task in this phase.** Re-derive from the task files
 before believing this (PHASE-EXECUTION §3.1) — s1's version of this file claimed work was committed
-when nothing was, so the habit is worth keeping even on a closing page.
+when nothing was, and s4's version said "nothing here" while a live silent-truncation defect sat in
+the §4 backlog under a mis-filed heading. **s5 found it by opening the file, not the task file.**
+The habit is worth keeping even on a closing page.
 
 ## 1. The board
 
@@ -13,9 +15,11 @@ when nothing was, so the habit is worth keeping even on a closing page.
 | PRD-003 pruning gives the disk back | ✅ 7 specs | s2 |
 | PRD-004 the number we do not have | ✅ **measured and published** | `6ac81b207` |
 | PRD-005 secrets are provisioned | ✅ 11 specs | s2 |
+| PRD-006 the aggregate path says what it did | ✅ **13 specs, 3 mutants** | s5 |
 
-The outage chain (001→003) closed at s3. The ceiling was measured at s4. **§7 of the PRD-004 task
-file is the record**, and the raw results are in `soak/` beside it.
+The outage chain (001→003) closed at s3. The ceiling was measured at s4. The last silent truncation
+went at s5. **§7 of the PRD-004 task file is the record** for the number, and the raw results are in
+`soak/` beside it; **§7 of PRD-006** is the record for s5, and it corrects PRD-001 §7.6.
 
 ## 2. The number, and the part that was not expected
 
@@ -54,13 +58,22 @@ Method, options and the two arms (`--rate-limit on|off`) are in
 
 ## 4. What this phase deliberately did NOT close
 
-Backlogged, and neither is a task today:
+Three left, and **all three are now waiting on Richard rather than on work**:
 
-1. **PRD-003 §6 — `local.db` reclamation.** Still owed a ruling from Richard: here, in backup, or
-   in phase 97's migrator?
-2. **PRD-D7 — `$addToSet` in a grouped aggregate** returns an unbounded array inside an otherwise
-   bounded response. The honest repair is a limit on the aggregate path.
-3. **PRD-D6** — the workflow-engine path records step input/output unscrubbed.
+1. **PRD-003 §6 — `local.db` reclamation.** Here, in backup, or in phase 97's migrator?
+2. **PRD-D6** — the workflow-engine path records step input/output unscrubbed. A product decision
+   about what a workflow step may hold.
+3. **PRD-D8 (new, s5)** — a Parse client emitting `$addToSet` is asking for a set and gets an
+   integer (`COUNT(DISTINCT …)`), while the Aggregate Records node's published docs say Distinct
+   returns a string. Repair the wire, or rename the operation and say what it does?
+
+**PRD-D7 is closed and its filing was wrong** — there was no unbounded array to clamp. See PRD-006
+§7.1 for how one word meaning two things in two files produced a defect report that outlived two sessions.
+
+🔴 **The lesson s5 would hand forward.** The thing worth fixing was not on the backlog at all: the
+distinct route had been truncating silently since s3, inside the task that wrote "a capped result
+says so", because its spec asserted the row COUNT and not the CONTRACT. If a page is capped, assert
+the signal beside the number — every other spec in PRD-001's file does.
 
 Two of PRD-001's numbers (`defaultLimit: 1000`, `maxLimit: 10000`) shipped as the task's own
 suggestion. They are `ops.json` config and live-patchable, so changing them is an edit and not a

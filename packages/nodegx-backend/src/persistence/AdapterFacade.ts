@@ -29,6 +29,8 @@ import type {
   IStorageFacade,
   IStorageSchema,
   StorageAclOption,
+  StorageAggregateResult,
+  StorageDistinctResult,
   StorageImportColumn,
   StorageQueryOptions,
   StorageQueryResult,
@@ -292,13 +294,44 @@ export class AdapterFacade implements IStorageFacade {
     return this.call('increment', { collection, objectId, properties, acl });
   }
 
-  rawAggregate(
+  /**
+   * PRD-006 AC1 — the grouped aggregate is bounded, closing PRD-D7.
+   *
+   * 🔴 **Bounded by the VALUE's shape, never by the accessor's name.**
+   * `$avg`/`$sum`/`$max`/`$min` return scalars and are untouched by
+   * construction; `$addToSet` (which the wire layer rewrites to `distinct`)
+   * returns a list and is bounded. So is an accessor nobody has written yet —
+   * the day it lands, rather than the day someone remembers to add its name to
+   * a list. That is PRD-001 §7.6's objection answered: the cap never reaches
+   * into the accessor map, because it does not need to know what made the
+   * array.
+   *
+   * At `maxLimit` for the same reason `rawDistinct` is: an aggregate is an
+   * aggregate by intent, and the route has no `limit` parameter to raise.
+   *
+   * ⚠️ See `rawDistinct` for what this does NOT bound.
+   */
+  async rawAggregate(
     collection: string,
     group: Record<string, Record<string, string>>,
     where?: Record<string, unknown>,
     acl?: AclOption
-  ): Promise<Record<string, unknown>> {
-    return this.call('aggregate', { collection, group, where, acl });
+  ): Promise<StorageAggregateResult> {
+    const result = await this.call<Record<string, unknown>>('aggregate', {
+      collection,
+      group,
+      where,
+      acl
+    });
+    const { maxLimit } = this.getPageCap();
+    let cappedAt: number | undefined;
+    for (const [alias, value] of Object.entries(result || {})) {
+      if (Array.isArray(value) && value.length > maxLimit) {
+        result[alias] = value.slice(0, maxLimit);
+        cappedAt = maxLimit;
+      }
+    }
+    return cappedAt === undefined ? { result } : { result, cappedAt };
   }
 
   /**
@@ -311,24 +344,34 @@ export class AdapterFacade implements IStorageFacade {
    * expecting a page — and there is no `limit` parameter on the route for a
    * caller to raise.
    *
-   * ⚠️ **The grouped aggregate beside it is NOT capped, and this is its written
-   * exemption.** `rawAggregate` runs our single-group aggregate: `$avg`/`$sum`/
-   * `$max`/`$min` each return one scalar, so the response is one object of a
-   * fixed size whatever the table holds. The one residual is `$addToSet`, which
-   * QueryBuilder maps to `distinct` INSIDE that object — an unbounded array in
-   * a bounded response. It is recorded as PRD-D7 rather than clamped here,
-   * because the cap would have to reach into an accessor map and the honest fix
-   * is for the aggregate path to take a limit of its own.
+   * ✅ **The grouped aggregate beside it is capped too, since PRD-006.** Its
+   * exemption used to be written here; `rawAggregate` now bounds any
+   * array-valued entry in its result object, which is where `$addToSet` — the
+   * residual this docblock recorded as PRD-D7 — used to escape.
+   *
+   * 🔴 PRD-006 AC3 — it also SAYS it capped. Slicing and staying quiet is the
+   * failure `ops/model.ts` names: a list that looks complete and is not is
+   * worse than an error, because it is believed. That was this path's own
+   * defect between s3 and s5, inside the task that wrote the rule.
+   *
+   * 🔴 What this does NOT bound: the ADAPTER still builds the whole distinct
+   * set before the slice happens here. This bounds the RESPONSE. Bounding the
+   * engine's work means pushing a limit through `IStorageDataPlane` into every
+   * adapter — a contract change, and PRD-006 §3.5 says so out loud rather than
+   * leaving a reader to find it.
    */
   async rawDistinct(
     collection: string,
     property: string,
     where?: Record<string, unknown>,
     acl?: AclOption
-  ): Promise<unknown[]> {
+  ): Promise<StorageDistinctResult> {
     const values = await this.call<unknown[]>('distinct', { collection, property, where, acl });
     const { maxLimit } = this.getPageCap();
-    return Array.isArray(values) && values.length > maxLimit ? values.slice(0, maxLimit) : values;
+    if (!Array.isArray(values)) return { values };
+    return values.length > maxLimit
+      ? { values: values.slice(0, maxLimit), cappedAt: maxLimit }
+      : { values };
   }
 
   addRelation(collection: string, objectId: string, key: string, targetObjectId: string): Promise<void> {

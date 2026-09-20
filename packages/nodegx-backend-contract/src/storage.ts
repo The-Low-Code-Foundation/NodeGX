@@ -86,6 +86,29 @@ export interface StorageSearchOptions extends StorageQueryOptions {
 }
 
 /**
+ * PRD-006 — what the two LIST-shaped reads return: the payload, plus the one
+ * field that says the product's ceiling shortened it.
+ *
+ * 🔴 **One field, not the two `StorageQueryResult` carries.** A page needs
+ * `capped` as well because `splitCapped` has to strip both out of a body that
+ * is otherwise sent verbatim; these two are assembled into their body by hand,
+ * so a second boolean would only be a field that can disagree with the number
+ * beside it. `cappedAt` is present exactly when the ceiling fired.
+ *
+ * As with `capped`, this is a FACADE annotation and never an adapter's output.
+ */
+export interface StorageDistinctResult {
+  values: unknown[];
+  cappedAt?: number;
+}
+
+/** PRD-006 — the single-group aggregate's object, and the same annotation. */
+export interface StorageAggregateResult {
+  result: Record<string, unknown>;
+  cappedAt?: number;
+}
+
+/**
  * What a read returns: the rows, and the total when `count` was asked for.
  *
  * Transcribed from `nodegx-backend/src/persistence/AdapterFacade.ts:75-78`.
@@ -690,14 +713,14 @@ export interface IStorageFacade {
     group: Record<string, Record<string, string>>,
     where?: Record<string, unknown>,
     acl?: StorageAclOption
-  ): Promise<Record<string, unknown>>;
+  ): Promise<StorageAggregateResult>;
   /** `AdapterFacade.ts:176`. */
   rawDistinct(
     collection: string,
     property: string,
     where?: Record<string, unknown>,
     acl?: StorageAclOption
-  ): Promise<unknown[]>;
+  ): Promise<StorageDistinctResult>;
 
   // --- relations -----------------------------------------------------------
 

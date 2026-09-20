@@ -148,13 +148,27 @@ export function splitCapped(result: StorageQueryResult): {
   headers: Record<string, string>;
 } {
   const { capped, cappedAt, ...body } = result;
-  if (!capped) return { body, headers: {} };
+  return { body, headers: capped ? cappedHeaders(cappedAt) : {} };
+}
+
+/**
+ * PRD-006 — the ONE spelling of the cap signal, for the routes that cannot use
+ * `splitCapped`.
+ *
+ * The aggregate routes answer with a scalar list and with a single object, not
+ * with `results: Record<string, unknown>[]`, so they cannot pass through the
+ * splitter — but they carry the same signal, and a second quoted copy of that
+ * header name in this file is exactly the drift `splitCapped`'s docblock above
+ * warns about. `splitCapped` calls this too, so the name is written once.
+ *
+ * `undefined` means the ceiling did not fire, and produces no headers at all:
+ * a caller whose result FIT is not marked (PRD-001 AC4, PRD-006 AC5).
+ */
+export function cappedHeaders(cappedAt: number | undefined): Record<string, string> {
+  if (cappedAt === undefined) return {};
   return {
-    body,
-    headers: {
-      'X-NodeGX-Result-Capped': 'true',
-      'X-NodeGX-Result-Limit': String(cappedAt)
-    }
+    'X-NodeGX-Result-Capped': 'true',
+    'X-NodeGX-Result-Limit': String(cappedAt)
   };
 }
 

@@ -28,6 +28,7 @@ import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
 import {
+  cappedHeaders,
   createErrorToHttp,
   HttpError,
   readJSONBody,
@@ -524,6 +525,12 @@ export class ParseWireRoutes {
    * `$avg`/`$sum`/`$max`/`$min`/`$addToSet` accessors. Both are governed by
    * the `find` permission and the read ACL — they reveal exactly what find
    * reveals.
+   *
+   * PRD-006 — both shapes answer with a LIST rather than a page, so both are
+   * bounded at `queries.maxLimit` in the facade and both say so with
+   * `X-NodeGX-Result-Capped`. The body is unchanged either way: the wire format
+   * is shared with clients we do not ship (`cloudstore.js`), so the signal
+   * rides in headers, exactly as it does on `GET /classes/:collection`.
    */
   async aggregate(ctx: RequestContext): Promise<void> {
     const collection = ctx.params.collection;
@@ -532,8 +539,13 @@ export class ParseWireRoutes {
     const acl = ctx.acl('read');
 
     if (query.distinct) {
-      const results = await this.facade.rawDistinct(collection, query.distinct, where, acl);
-      sendJSON(ctx.res, 200, { results });
+      const { values, cappedAt } = await this.facade.rawDistinct(
+        collection,
+        query.distinct,
+        where,
+        acl
+      );
+      sendJSON(ctx.res, 200, { results: values }, cappedHeaders(cappedAt));
       return;
     }
 
@@ -554,8 +566,8 @@ export class ParseWireRoutes {
       }
     }
 
-    const result = await this.facade.rawAggregate(collection, group, where, acl);
-    sendJSON(ctx.res, 200, { results: [result] });
+    const { result, cappedAt } = await this.facade.rawAggregate(collection, group, where, acl);
+    sendJSON(ctx.res, 200, { results: [result] }, cappedHeaders(cappedAt));
   }
 
   /**

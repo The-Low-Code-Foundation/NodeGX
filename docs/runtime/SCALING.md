@@ -193,6 +193,9 @@ single-process backend. No bug in the backend was required.
   bounds the damage; it does not make the filter right.
 - **Paginate with `limit` and `skip`** rather than fetching and slicing.
 - **`limit=0&count=1` still works**: the cap bounds the page, not the count.
+- **`?distinct=` is bounded at the ceiling**, not at the default, and says so in
+  the same two headers. It is the other route that answers with a list instead
+  of a page.
 - **Watch `nodegx_db_file_bytes`** against the response sizes you expect.
 
 Internal readers that genuinely need every row — backup, export, the file

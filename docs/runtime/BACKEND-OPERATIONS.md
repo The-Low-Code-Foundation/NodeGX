@@ -330,6 +330,17 @@ carries neither header, and neither does a caller paging with its own smaller
 full". `count` still describes the whole matching set, so the usual
 `limit=0&count=1` count-only query is unaffected: ask for the count, then page.
 
+**The two list-shaped reads are bounded too, at the ceiling.**
+`GET /aggregate/:collection?distinct=<prop>` answers with a list of values
+rather than a page, and nothing in the wire format bounds it — `SELECT DISTINCT
+city` over four hundred thousand rows returns as many values as there are
+cities. It is clamped at `queries.maxLimit` rather than `defaultLimit`, because
+a distinct is an aggregate by intent and the route has no `limit` parameter for
+a caller to raise, and it carries the same two headers when it was shortened.
+The grouped aggregate beside it returns one object of scalars and is normally
+far below any cap; an entry that comes back as a *list* is bounded on the same
+rule.
+
 **Backups and exports are not capped.** They read whole tables by design,
 through a separate, explicitly named path (`facade.rawQueryAll`), as do the
 file orphan sweep, the role and API-key registries, and every "revoke every

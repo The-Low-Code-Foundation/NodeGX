@@ -145,8 +145,11 @@ describe('PRD-001 the limit that reaches the adapter', () => {
   });
 
   it('distinct is capped at the ceiling (AC7)', async () => {
+    // PRD-006 gave this a shape: it used to return a bare array and truncate
+    // without saying so. The SIGNAL is asserted in prd-006's spec; the BOUND is
+    // this task's AC7 and stays here.
     const { facade } = facadeWith(50);
-    expect((await facade.rawDistinct('T', 'city')).length).toBe(10);
+    expect((await facade.rawDistinct('T', 'city')).values.length).toBe(10);
   });
 
   it('rawQueryAll passes no limit at all, and passes a large one through verbatim (§3.3)', async () => {
