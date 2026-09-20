@@ -25,6 +25,7 @@ import { imagePickerActions, imagePickerEmptyState } from '../components/pickerE
 import { folderForProjectPath } from '../components/fontItems';
 import { getEditType } from '../utils';
 import { ContentPickerHandle, PickerTypeView } from './PickerTypeView';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /** The extensions the walk is asked for, and the filter the import dialog offers. */
 export const IMAGE_EXTENSIONS = ['png', 'jpeg', 'jpg', 'svg', 'gif', 'webp'];
@@ -189,7 +190,7 @@ export class ImageType extends PickerTypeView {
       attachTo: this.el,
       position: 'right',
       onClose: () => {
-        root?.unmount();
+        unmountReactRoot(root);
         root = null;
       }
     });

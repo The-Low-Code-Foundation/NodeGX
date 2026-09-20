@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import { platform } from '@noodl/platform';
 
 import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
@@ -10,6 +10,7 @@ import { VisualCanvas } from './VisualCanvas';
 import { PREVIEW_STRIP_ACTION, type StripAction } from './detachedStrip';
 import { previewRoutePath } from './previewRoutePath';
 import type { StripModel } from './previewStripWords';
+import { createReactRoot, unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 /** What the preview outlines: a TVW-003 selection path, a bare node id, or nothing. */
 type NodeSelection = readonly string[] | string | null;
@@ -209,7 +210,7 @@ export class CanvasView extends View {
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el as HTMLElement);
+      this.root = createReactRoot(this.el as HTMLElement);
     }
     this.root.render(React.createElement(VisualCanvas, this.props as any));
   }
@@ -261,7 +262,7 @@ export class CanvasView extends View {
     }
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     PreviewTokenInjector.instance.clearWebview(this.webview);

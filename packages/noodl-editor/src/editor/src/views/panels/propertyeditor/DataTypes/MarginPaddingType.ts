@@ -11,6 +11,7 @@ import { MarginPaddingConnection, MarginPaddingInput } from '../components/Margi
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
 import { sameParameterValue } from './scrubCommit';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class MarginPaddingType extends TypeView {
   defaults: Record<string, MarginPaddingParam>;
@@ -242,7 +243,7 @@ export class MarginPaddingType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -11,6 +11,7 @@ import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } fr
 import { readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class Dimension extends TypeView {
   numberWithUnits: TSFixme;
@@ -241,7 +242,7 @@ export class Dimension extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

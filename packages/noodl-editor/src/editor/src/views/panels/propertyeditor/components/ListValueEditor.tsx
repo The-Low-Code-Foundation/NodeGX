@@ -12,6 +12,7 @@ import {
 import type { EditorMode } from '@noodl-core-ui/components/json-editor/utils/types';
 
 import css from './ListValueEditor.module.scss';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * ERG-003 — the one editor every list-shaped port opens.
@@ -176,7 +177,7 @@ export function openListValueEditor(args: {
     disableDynamicPositioning: true,
     onClose: () => {
       // Deferred: onClose runs inside the React event that closed the popout.
-      setTimeout(() => root.unmount(), 0);
+      unmountReactRoot(root);
     }
   });
 }

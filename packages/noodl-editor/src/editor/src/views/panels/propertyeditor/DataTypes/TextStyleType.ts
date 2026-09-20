@@ -8,6 +8,7 @@ import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher'
 import TextStylePicker from '../../../TextStylePicker/TextStylePicker';
 import { getEditType } from '../utils';
 import { PickerTypeView } from './PickerTypeView';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class TextStyleType extends PickerTypeView {
   private pickerRoot: Root | null = null;
@@ -148,7 +149,7 @@ export class TextStyleType extends PickerTypeView {
       position: 'right',
       onClose: () => {
         if (this.pickerRoot) {
-          this.pickerRoot.unmount();
+          unmountReactRoot(this.pickerRoot);
           this.pickerRoot = null;
         }
       }

@@ -1,9 +1,10 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import View from '../../../../../../shared/ListenableView';
 import { PropertyTabs } from '../components/PropertyTabs';
 import { scopeRowOf } from '../model/scopeRows';
+import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 function setElementVisible(el: HTMLElement, visible: boolean) {
   if (el) el.style.display = visible ? '' : 'none';
@@ -52,7 +53,7 @@ export class TabGroup extends View {
     this.el = div;
 
     if (!this.tabsRoot) {
-      this.tabsRoot = createRoot(this.tabsHost);
+      this.tabsRoot = createReactRoot(this.tabsHost);
     }
     this.renderTabs();
 
@@ -106,7 +107,7 @@ export class TabGroup extends View {
   dispose() {
     this.parent.model && this.parent.model.off(this);
     if (this.tabsRoot) {
-      this.tabsRoot.unmount();
+      unmountReactRoot(this.tabsRoot);
       this.tabsRoot = null;
     }
   }

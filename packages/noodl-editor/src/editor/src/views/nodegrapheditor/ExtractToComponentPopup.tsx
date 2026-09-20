@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { ProjectModel } from '@noodl-models/projectmodel';
@@ -18,6 +18,7 @@ import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon'
 import { PrimaryButton, PrimaryButtonSize, PrimaryButtonVariant } from '@noodl-core-ui/components/inputs/PrimaryButton';
 
 import css from './ExtractToComponentPopup.module.scss';
+import { createReactRoot, unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 /**
  * Ask where an extraction should go, before making it.
@@ -304,7 +305,7 @@ export class ExtractToComponentPopup {
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el);
+      this.root = createReactRoot(this.el);
     }
 
     // Synchronous: `showPopup` measures this element to centre the popup, and
@@ -342,6 +343,6 @@ export class ExtractToComponentPopup {
     const root = this.root;
     this.root = null;
     // Deferred: onClose runs inside the React event that triggered the close.
-    root && setTimeout(() => root.unmount(), 0);
+    unmountReactRoot(root);
   }
 }

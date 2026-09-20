@@ -3,6 +3,7 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 import { ColorPickerFields } from '../../components/ColorPickerFields';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 type IroColor = TSFixme;
 
@@ -54,7 +55,7 @@ export class ColorPicker {
       const root = this.fieldsRoot;
       this.fieldsRoot = undefined;
       // The popout is torn down inside a React commit; defer the unmount
-      setTimeout(() => root.unmount(), 0);
+      unmountReactRoot(root);
     }
   }
 

@@ -22,6 +22,7 @@ import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { PickVariantPopup } from './PickVariantPopup';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../../../../../styles/propertyeditor/variantseditor.css');
@@ -255,7 +256,7 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
       position: 'right',
       onClose: () => {
         if (this.popupRoot) {
-          this.popupRoot.unmount();
+          unmountReactRoot(this.popupRoot);
           this.popupRoot = null;
         }
         this.popout = undefined;

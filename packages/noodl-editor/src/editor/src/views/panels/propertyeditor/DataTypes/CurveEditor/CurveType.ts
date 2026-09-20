@@ -6,6 +6,7 @@ import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/Prope
 
 import { TypeView } from '../../TypeView';
 import { getEditType } from '../../utils';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 export class CurveType extends TypeView {
   propertyName: TSFixme;
@@ -106,7 +107,7 @@ export class CurveType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -6,6 +6,7 @@ import { DialogRenderDirection } from '@noodl-core-ui/components/layout/BaseDial
 import { MenuDialog, MenuDialogItem, MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 
 import PopupLayer from './popuplayer';
+import { unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 interface ShowContextMenuInPopupArgs {
   title?: string;
@@ -55,7 +56,7 @@ export function showContextMenuInPopup({
         }),
     position: position || (attachTo ? 'bottom' : 'top'),
     onClose: () => {
-      root.unmount();
+      unmountReactRoot(root);
     }
   });
 

@@ -1,7 +1,7 @@
 import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphContext';
 import _ from 'underscore';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { UndoQueue, UndoActionGroup } from '@noodl-models/undo-queue-model';
@@ -14,6 +14,7 @@ import { VariantsEditor } from './components/VariantStates';
 import { VisualStates } from './components/VisualStates';
 import { Ports } from './DataTypes/Ports';
 import { ModelProxy } from './models/modelProxy';
+import { createReactRoot } from '../../../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../../../styles/propertyeditor/propertyeditor.css');
@@ -85,7 +86,7 @@ export class PropertyEditor extends View {
         }
       };
       if (!this.variantsRoot) {
-        this.variantsRoot = createRoot(this.variantsEl);
+        this.variantsRoot = createReactRoot(this.variantsEl);
       }
       this.variantsRoot.render(React.createElement(VariantsEditor, props));
     }
@@ -98,7 +99,7 @@ export class PropertyEditor extends View {
         portsView: this.portsView
       };
       if (!this.visualStatesRoot) {
-        this.visualStatesRoot = createRoot(this.visualStatesEl);
+        this.visualStatesRoot = createReactRoot(this.visualStatesEl);
       }
       this.visualStatesRoot.render(React.createElement(VisualStates, props));
     }
@@ -128,7 +129,7 @@ export class PropertyEditor extends View {
     if (!this.styleSuggestionEl) return;
 
     if (!this.styleSuggestionRoot) {
-      this.styleSuggestionRoot = createRoot(this.styleSuggestionEl);
+      this.styleSuggestionRoot = createReactRoot(this.styleSuggestionEl);
     }
     this.styleSuggestionRoot.render(React.createElement(StyleSuggestionHost));
   }

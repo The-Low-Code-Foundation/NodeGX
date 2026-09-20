@@ -12,6 +12,7 @@ import PopupLayer from '../popuplayer';
 import { ToastLayer } from '../ToastLayer/ToastLayer';
 import TextStylePopup from './TextStylePopup';
 import utils from './utils';
+import { unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 require('../../styles/propertyeditor/variantseditor.css');
 require('./TextStylePicker.css');
@@ -52,7 +53,7 @@ function TextStylePicker(props) {
       attachTo: popupAnchor,
       position: 'right',
       onClose: () => {
-        root.unmount();
+        unmountReactRoot(root);
       }
     });
 

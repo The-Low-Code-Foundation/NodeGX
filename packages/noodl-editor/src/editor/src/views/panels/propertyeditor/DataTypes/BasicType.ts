@@ -14,6 +14,7 @@ import { expressionProps } from './expressionProps';
 import { readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 function firstType(type) {
   return NodeLibrary.nameForPortType(type);
@@ -246,7 +247,7 @@ export class BasicType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

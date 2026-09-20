@@ -37,6 +37,7 @@ import { MergeConflicts } from './components/MergeConflicts';
 import { RepositorySection } from './components/RepositorySection';
 import { useVersionControlContext, VersionControlProvider } from './context';
 import { useGitHubRepository } from './hooks/useGitHubRepository';
+import { unmountReactRoot } from '../../../../../shared/utils/unmountReactRoot';
 
 enum ViewState {
   Default,
@@ -149,7 +150,7 @@ function BaseVersionControlPanel() {
         position: 'right',
         disableDynamicPositioning: true,
         onClose: () => {
-          root.unmount();
+          unmountReactRoot(root);
           fetch.fetchRemote();
         }
       });

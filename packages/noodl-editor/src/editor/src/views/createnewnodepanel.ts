@@ -11,6 +11,7 @@ import { NodeLibrary } from '../models/nodelibrary';
 import { IVector2 } from './nodegrapheditor';
 import { getNodePickerSize, NodePickerSize } from './NodePicker/NodePicker.constants';
 import { NodePicker } from './NodePicker/NodePicker';
+import { unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 export interface CreateNewNodePanelOptions {
   model: NodeGraphModel;
@@ -60,7 +61,7 @@ export class CreateNewNodePanel extends View {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     ipcRenderer.send('viewer-show');

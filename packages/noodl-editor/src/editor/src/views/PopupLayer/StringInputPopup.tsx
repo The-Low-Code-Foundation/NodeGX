@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
+import { createReactRoot, unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 /** The placeholder the comment editor has always shown. */
 const COMMENT_PLACEHOLDER = '// Add your comment here...';
@@ -196,7 +197,7 @@ export class StringInputPopup {
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el);
+      this.root = createReactRoot(this.el);
     }
 
     // Synchronous: the caller hands `el` straight to PopupLayer.showPopup, which
@@ -255,6 +256,6 @@ export class StringInputPopup {
     const root = this.root;
     this.root = null;
     // Deferred: onClose runs inside the React event that triggered the close.
-    root && setTimeout(() => root.unmount(), 0);
+    unmountReactRoot(root);
   }
 }

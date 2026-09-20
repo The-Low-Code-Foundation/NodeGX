@@ -1,6 +1,7 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import View from './ListenableView';
+import { createReactRoot, unmountReactRoot } from './utils/unmountReactRoot';
 
 export interface ReactViewDefaultProps {
   owner?: TSFixme;
@@ -31,7 +32,7 @@ export abstract class ReactView<TProps extends ReactViewDefaultProps> extends Vi
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el);
+      this.root = createReactRoot(this.el);
     }
     this.root.render(React.createElement(this.renderReact.bind(this), this.props));
 
@@ -40,7 +41,7 @@ export abstract class ReactView<TProps extends ReactViewDefaultProps> extends Vi
 
   public dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
   }

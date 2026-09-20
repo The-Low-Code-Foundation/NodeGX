@@ -8,6 +8,7 @@ import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * REL-014 — what a typed edit to a number-with-units field *means*.
@@ -317,7 +318,7 @@ export class NumberWithUnits extends TypeView {
     transformOriginFocus.release(this.name);
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

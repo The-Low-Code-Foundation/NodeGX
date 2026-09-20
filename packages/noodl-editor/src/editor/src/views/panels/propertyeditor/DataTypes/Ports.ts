@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
 import {
@@ -81,6 +81,7 @@ import {
   WorkflowValidateType,
   WorkflowValueType
 } from './WorkflowTypes';
+import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 type Port = {
   popout?: TSFixme;
@@ -331,7 +332,7 @@ export class Ports extends View {
     this._onScroll = undefined;
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
 
@@ -1154,7 +1155,7 @@ export class Ports extends View {
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el);
+      this.root = createReactRoot(this.el);
     }
 
     this.renderGroups();

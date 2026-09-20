@@ -7,6 +7,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
 import { Pages } from './Pages';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class PagesType extends TypeView {
   el: TSFixme;
@@ -61,7 +62,7 @@ export class PagesType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     TypeView.prototype.dispose.call(this);

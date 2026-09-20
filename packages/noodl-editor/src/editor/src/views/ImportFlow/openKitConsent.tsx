@@ -32,6 +32,7 @@ import { scanExecutableModules, type ScannedExecutableModule } from '../../../..
 import PopupLayer from '../popuplayer';
 import { KIT_CONSENT_COPY } from './kitConsentCopy';
 import { ImportFlowCancelled } from './openImportFlow';
+import { unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 /** One row in the dialog: a module, and whether it can be offered at all. */
 interface ConsentRow {
@@ -258,7 +259,7 @@ export async function requireDownloadConsent(options: {
       settled = true;
       PopupLayer.instance.hideModal(modal);
       // React forbids unmounting from inside a handler still on the stack.
-      setTimeout(() => root.unmount(), 0);
+      unmountReactRoot(root);
       resolve(value);
     };
 

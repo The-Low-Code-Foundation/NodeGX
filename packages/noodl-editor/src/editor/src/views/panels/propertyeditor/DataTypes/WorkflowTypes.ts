@@ -34,6 +34,7 @@ import { WorkflowParamsEditor } from '../components/WorkflowCondition/WorkflowPa
 import { WorkflowValueInput } from '../components/WorkflowCondition/WorkflowValueInput';
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * Shared plumbing: read the port, mount a React root, write the parameter back
@@ -124,7 +125,7 @@ abstract class WorkflowTypeView extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -10,6 +10,7 @@ import { PropertyPanelInputWithExpressionModal } from '../components/PropertyPan
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { expressionProps } from './expressionProps';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * A multiline string property — POL-011.
@@ -115,7 +116,7 @@ export class TextAreaType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

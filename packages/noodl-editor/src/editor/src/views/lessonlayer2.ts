@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { App } from '@noodl-models/app';
 import { EditorSettings } from '@noodl-utils/editorsettings';
@@ -22,6 +22,7 @@ import { publishRunningLesson } from '../models/lessonprotection';
 import { stashLessonReset } from '@noodl-utils/launcher/launcherHandoff';
 import { leaveForLauncher } from '@noodl-utils/launcher/leaveForLauncher';
 import { ToastLayer } from './ToastLayer/ToastLayer';
+import { createReactRoot, unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 /**
  * UNI-007 slice 4 — what the "check my work" control is showing.
@@ -216,7 +217,7 @@ export class LessonLayer {
     };
 
     if (!this.root) {
-      this.root = createRoot(this.div);
+      this.root = createReactRoot(this.div);
     }
     this.root.render(React.createElement(LessonLayerView, props));
   }
@@ -277,7 +278,7 @@ export class LessonLayer {
 
   _render() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
 
@@ -792,7 +793,7 @@ export class LessonLayer {
     EventDispatcher.instance.off(this);
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
   }

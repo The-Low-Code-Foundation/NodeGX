@@ -8,6 +8,7 @@ import { PropListInput, PropListItem } from '../components/PropListInput';
 import { openListValueEditor } from '../components/ListValueEditor';
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../../../../styles/propertyeditor/proplist.css');
@@ -187,7 +188,7 @@ export class PropListType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -9,6 +9,7 @@ const { ContentPicker } = require('../views/panels/propertyeditor/components/Con
 const { loadFontItems } = require('../views/panels/propertyeditor/components/fontItems');
 const PopupLayer = require('../views/popuplayer').default;
 const { Icon, IconName, IconSize } = require('@noodl-core-ui/components/common/Icon');
+const { unmountReactRoot } = require('../../../shared/utils/unmountReactRoot');
 
 require('./propertyeditors.css');
 
@@ -205,7 +206,7 @@ function FontProperty(props) {
 
     return () => {
       PopupLayer.instance.hidePopout(popout);
-      root.unmount();
+      unmountReactRoot(root);
       fontPickerRef.current = null;
     };
   }, [showFontPicker, onChange]);

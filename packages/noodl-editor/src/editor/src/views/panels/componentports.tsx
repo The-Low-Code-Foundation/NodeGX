@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { filter as _filter } from 'underscore';
 import React, { useEffect, useState } from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { UndoQueue, UndoActionGroup } from '@noodl-models/undo-queue-model';
 
@@ -12,6 +12,7 @@ import { Frame } from '../common/Frame';
 import PopupLayer, { StringInputPopup } from '../popuplayer';
 import { ToastLayer } from '../ToastLayer/ToastLayer';
 import { ComponentPortItem, ComponentPortsView } from './componentports/ComponentPortsView';
+import { createReactRoot, unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 export class ComponentPorts extends View {
   el: HTMLElement;
@@ -51,7 +52,7 @@ export class ComponentPorts extends View {
     this.el.className = 'sidebar-panel';
 
     if (!this.root) {
-      this.root = createRoot(this.el);
+      this.root = createReactRoot(this.el);
     }
 
     this.bindModel();
@@ -70,7 +71,7 @@ export class ComponentPorts extends View {
       const root = this.root;
       this.root = null;
       // dispose runs from a React effect cleanup; unmount cannot be synchronous
-      setTimeout(() => root.unmount(), 0);
+      unmountReactRoot(root);
     }
   }
 

@@ -11,6 +11,7 @@ import { TypeView } from '../../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../../utils';
 import ColorPicker from './colorpicker';
 import ColorStylePicker from './colorstylepicker';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 //Note: this entire property can be re-created by events such as undo
 //so the color picker can be left open, but now need a new callback to set
@@ -61,7 +62,7 @@ export class ColorType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     TypeView.prototype.dispose.call(this);
@@ -188,7 +189,7 @@ export class ColorType extends TypeView {
       position: 'right',
       onClose: () => {
         if (this.stylePickerRoot) {
-          this.stylePickerRoot.unmount();
+          unmountReactRoot(this.stylePickerRoot);
           this.stylePickerRoot = null;
         }
       }

@@ -12,6 +12,7 @@ import PopupLayer from '../../../popuplayer';
 import * as NewPopupLayer from '../../../PopupLayer/index';
 import { ToastLayer } from '../../../ToastLayer/ToastLayer';
 import { RouterPagesValue, withRouteAdded, withRouteRemoved, withStartPage } from './pagesValue';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../../../../styles/propertyeditor/pages.css');
@@ -234,7 +235,7 @@ export class Pages extends React.Component {
       attachTo: this.popupAnchor,
       position: 'right',
       onClose: function () {
-        root.unmount();
+        unmountReactRoot(root);
       }
     });
   }

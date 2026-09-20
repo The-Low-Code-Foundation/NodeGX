@@ -8,6 +8,7 @@ import { openListValueEditor } from '../../components/ListValueEditor';
 import { StringListInput } from '../../components/StringListInput';
 import { TypeView } from '../../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../../utils';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * ERG-003 — the `stringlist` row.
@@ -148,7 +149,7 @@ export class StringListType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

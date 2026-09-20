@@ -4,6 +4,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { AlignConnection, AlignToolsInput } from '../../components/AlignToolsInput';
 import { TypeView } from '../../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../../utils';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 export class AlignToolsType extends TypeView {
   defaults: TSFixme;
@@ -126,7 +127,7 @@ export class AlignToolsType extends TypeView {
   dispose() {
     this.parent.model.off(this);
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

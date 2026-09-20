@@ -11,6 +11,7 @@ import { ContentPicker, ContentPickerAction, ContentPickerEmptyState, ContentPic
 import { PickerTextInput } from '../components/PickerTextInput';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * Base for the property rows that pair a text input with a picker popout
@@ -147,7 +148,7 @@ export abstract class PickerTypeView extends TypeView {
       attachTo: this.el,
       position: 'right',
       onClose: () => {
-        root.unmount();
+        unmountReactRoot(root);
         if (this.contentPicker === state) this.contentPicker = null;
       }
     });
@@ -209,7 +210,7 @@ export abstract class PickerTypeView extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

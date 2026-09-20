@@ -17,6 +17,7 @@ import { blockerIsNeeded, popoutBlocksOutsideClicks, pressIsInsideKeptRegion } f
 import { ConfirmModal, ErrorModal } from './PopupLayer/ConfirmModal';
 import { StringInputPopup } from './PopupLayer/StringInputPopup';
 import { ToastLayer } from './ToastLayer/ToastLayer';
+import { unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../styles/popuplayer.css');
@@ -1217,7 +1218,7 @@ export class PopupLayer {
     this.showModal({
       content: { el: container },
       // Deferred: onClose runs inside the React event that triggered the close.
-      onClose: () => setTimeout(() => root.unmount(), 0)
+      onClose: () => unmountReactRoot(root)
     });
   }
 

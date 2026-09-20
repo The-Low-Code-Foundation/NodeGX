@@ -30,6 +30,7 @@ import { ViewerConnection } from '../../ViewerConnection';
 import PopupLayer from '../popuplayer';
 import { ImportFlow, ImportFlowProps } from './ImportFlow';
 import { createTargetProject, emptyTargetProject, TargetSnapshot } from './model/targetProject';
+import { unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 /** Raised when the user closes the flow without applying. */
 export class ImportFlowCancelled extends Error {
@@ -57,7 +58,7 @@ function showFlow(props: FlowProps, hooks: { onOpen?: () => void; onClose?: () =
       hooks.onClose?.();
       // Unmount on the next tick: React forbids unmounting from inside a render
       // or an event handler that is still on the stack.
-      setTimeout(() => root.unmount(), 0);
+      unmountReactRoot(root);
     };
 
     const done = (result: ImportResult) => {
@@ -84,7 +85,7 @@ function showFlow(props: FlowProps, hooks: { onOpen?: () => void; onClose?: () =
         if (settled) return;
         settled = true;
         hooks.onClose?.();
-        setTimeout(() => root.unmount(), 0);
+        unmountReactRoot(root);
         reject(new ImportFlowCancelled());
       }
     });

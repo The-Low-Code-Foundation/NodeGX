@@ -6,6 +6,7 @@ import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/Prope
 
 import View from '../../../../../../shared/ListenableView';
 import { Ports } from './Ports';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * A group of ports that live behind an "Edit" button and are rendered into a
@@ -85,7 +86,7 @@ export class PopoutGroup extends View {
   dispose() {
     this.view && this.view.dispose();
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
   }

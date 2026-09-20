@@ -1,5 +1,6 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
+import { createReactRoot, unmountReactRoot } from '../../../../../shared/utils/unmountReactRoot';
 
 /**
  * One documented mechanism for mounting React overlays over the canvas
@@ -43,12 +44,12 @@ export class OverlayHost {
 
     let entry = this.slots.get(slot);
     if (entry && entry.element !== element) {
-      entry.root.unmount();
+      unmountReactRoot(entry.root);
       entry = undefined;
     }
 
     if (!entry) {
-      entry = { element, root: createRoot(element) };
+      entry = { element, root: createReactRoot(element) };
       this.slots.set(slot, entry);
     }
 
@@ -63,14 +64,14 @@ export class OverlayHost {
   unmountSlot(slot: string) {
     const entry = this.slots.get(slot);
     if (entry) {
-      entry.root.unmount();
+      unmountReactRoot(entry.root);
       this.slots.delete(slot);
     }
   }
 
   /** Mount an ephemeral overlay into a per-showing container element. */
   mount(element: HTMLElement, node: React.ReactNode): OverlayHandle {
-    const root = createRoot(element);
+    const root = createReactRoot(element);
     root.render(node);
     this.ephemeral.add(root);
 
@@ -78,7 +79,7 @@ export class OverlayHost {
       update: (next: React.ReactNode) => root.render(next),
       unmount: () => {
         if (this.ephemeral.delete(root)) {
-          root.unmount();
+          unmountReactRoot(root);
         }
       }
     };
@@ -87,12 +88,12 @@ export class OverlayHost {
   /** Unmount everything — called from the editor's dispose. */
   unmountAll() {
     for (const entry of this.slots.values()) {
-      entry.root.unmount();
+      unmountReactRoot(entry.root);
     }
     this.slots.clear();
 
     for (const root of this.ephemeral) {
-      root.unmount();
+      unmountReactRoot(root);
     }
     this.ephemeral.clear();
   }

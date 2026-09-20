@@ -6,6 +6,14 @@ import { OverlayHost } from '../../src/editor/src/views/nodegrapheditor/canvas/O
  * React 19 commits root.render() through its own scheduler; under a loaded
  * test run a single macrotask tick is not always enough. Poll until the
  * condition holds (or a deadline passes, letting the expectation fail loudly).
+ *
+ * 🔴 HLT-001: teardown is now asynchronous too. `OverlayHost` unmounts through
+ * `unmountReactRoot`, which defers to a macrotask so a teardown running inside a
+ * React render does not trip React's "synchronously unmount" error — 1,538 of
+ * them on one driven session with the deferral removed. So the assertions that a
+ * container is EMPTY are polled, exactly like the assertions that it FILLED.
+ * ⚠️ The bookkeeping assertions (`hasSlot`) stay immediate on purpose: forgetting
+ * the slot is synchronous, and polling it would hide a host that never forgot.
  */
 function waitFor(condition: () => boolean, then: () => void, deadline = 2000) {
   const started = Date.now();
@@ -79,9 +87,14 @@ describe('OverlayHost', () => {
       () => container.textContent === 'one',
       () => {
         host.unmountSlot('test');
-        expect(container.textContent).toBe('');
         expect(host.hasSlot('test')).toBe(false);
-        done();
+        waitFor(
+          () => container.textContent === '',
+          () => {
+            expect(container.textContent).toBe('');
+            done();
+          }
+        );
       }
     );
   });
@@ -101,10 +114,15 @@ describe('OverlayHost', () => {
           () => {
             expect(el.textContent).toBe('b');
             handle.unmount();
-            expect(el.textContent).toBe('');
             handle.unmount(); // double unmount is a safe no-op
-            el.remove();
-            done();
+            waitFor(
+              () => el.textContent === '',
+              () => {
+                expect(el.textContent).toBe('');
+                el.remove();
+                done();
+              }
+            );
           }
         );
       }
@@ -122,11 +140,16 @@ describe('OverlayHost', () => {
       () => container.textContent === 'slot' && el.textContent === 'eph',
       () => {
         host.unmountAll();
-        expect(container.textContent).toBe('');
-        expect(el.textContent).toBe('');
         expect(host.hasSlot('test')).toBe(false);
-        el.remove();
-        done();
+        waitFor(
+          () => container.textContent === '' && el.textContent === '',
+          () => {
+            expect(container.textContent).toBe('');
+            expect(el.textContent).toBe('');
+            el.remove();
+            done();
+          }
+        );
       }
     );
   });

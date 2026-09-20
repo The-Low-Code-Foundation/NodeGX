@@ -7,6 +7,7 @@ import { PropertyPanelInput, PropertyPanelInputType } from '@noodl-core-ui/compo
 import { inheritedSideValue } from '../model/inheritedSide';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class EnumType extends TypeView {
   el: TSFixme;
@@ -108,7 +109,7 @@ export class EnumType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -10,6 +10,7 @@ import { PanelRow } from '@noodl-core-ui/components/sidebar/PanelRow';
 
 import PopupLayer, { Popout } from '../../../popuplayer';
 import css from './sections.module.scss';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 interface VariablesSectionProps {
   variables: ConfigVariable[];
@@ -32,7 +33,7 @@ function JSONEditorButton({ value, varType, onSave }: JSONEditorButtonProps) {
   useEffect(() => {
     return () => {
       if (rootRef.current) {
-        rootRef.current.unmount();
+        unmountReactRoot(rootRef.current);
         rootRef.current = null;
       }
       if (popoutRef.current) {
@@ -48,7 +49,7 @@ function JSONEditorButton({ value, varType, onSave }: JSONEditorButtonProps) {
 
     // Close any existing editor
     if (rootRef.current) {
-      rootRef.current.unmount();
+      unmountReactRoot(rootRef.current);
       rootRef.current = null;
     }
 
@@ -79,7 +80,7 @@ function JSONEditorButton({ value, varType, onSave }: JSONEditorButtonProps) {
         // Invalid JSON - don't save
       }
 
-      root.unmount();
+      unmountReactRoot(root);
       rootRef.current = null;
     };
 

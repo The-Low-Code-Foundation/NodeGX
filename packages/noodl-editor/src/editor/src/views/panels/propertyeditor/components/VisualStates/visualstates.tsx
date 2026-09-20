@@ -4,6 +4,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
 
 import { TransitionEditor } from './TransitionEditor';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../../../../../styles/propertyeditor/visualstates.css');
@@ -98,7 +99,7 @@ export class VisualStates extends React.Component<VisualStatesProps, State> {
       position: 'right',
       onClose: () => {
         if (this.popupRoot) {
-          this.popupRoot.unmount();
+          unmountReactRoot(this.popupRoot);
           this.popupRoot = null;
         }
       }

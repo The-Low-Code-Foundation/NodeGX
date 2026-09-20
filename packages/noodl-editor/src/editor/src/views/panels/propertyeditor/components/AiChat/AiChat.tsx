@@ -30,6 +30,7 @@ import { Text, TextType } from '@noodl-core-ui/components/typography/Text';
 import { JavaScriptEditor } from '@noodl-core-ui/components/code-editor';
 
 import PopupLayer, { Popout } from '../../../../popuplayer';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 export interface AiChatProps {
   model: NodeGraphNode;
@@ -299,7 +300,7 @@ function AiMessageFunctionNodeAffix({ context, onUpdated }: AiMessageFunctionNod
       if (!editorRef.current) return;
       // Defer unmount so it doesn't run during React's own commit teardown.
       const { root } = editorRef.current;
-      setTimeout(() => root.unmount(), 0);
+      unmountReactRoot(root);
       editorRef.current = null;
     };
   }, []);
@@ -356,7 +357,7 @@ function AiMessageFunctionNodeAffix({ context, onUpdated }: AiMessageFunctionNod
       onClose: function () {
         save();
         // Defer so the unmount doesn't collide with the popout close pass.
-        setTimeout(() => root.unmount(), 0);
+        unmountReactRoot(root);
         editorRef.current = null;
       }
     });

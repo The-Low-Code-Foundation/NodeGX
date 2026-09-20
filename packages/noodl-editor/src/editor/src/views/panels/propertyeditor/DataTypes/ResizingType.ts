@@ -10,6 +10,7 @@ import {
 } from '../components/ResizingInput';
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class ResizingType extends TypeView {
   el: TSFixme;
@@ -120,7 +121,7 @@ export class ResizingType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();
