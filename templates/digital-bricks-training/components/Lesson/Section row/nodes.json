@@ -1,0 +1,76 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ffaf31e8-05d5-4437-90d1-49bd0965efd1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sr_in",
+      "type": "Component Inputs",
+      "label": "One row",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "section",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "sr_section",
+      "type": "dbt-lesson.Section",
+      "label": "The section, by its kind",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "label": "Section"
+      },
+      "metadata": {
+        "comment": "A kit node (noodl_modules/dbt-lesson). It is the component's ROOT on purpose: the lesson page's .lesson-layout is a CSS grid whose direct children are the knots, and a wrapper Group here would break that."
+      }
+    },
+    {
+      "id": "sr_out",
+      "type": "Component Outputs",
+      "label": "What the learner did",
+      "x": 300,
+      "y": 400,
+      "ports": [
+        {
+          "name": "acted",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "field",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "sr_section"
+  ]
+}

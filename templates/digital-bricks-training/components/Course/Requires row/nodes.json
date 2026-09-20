@@ -1,0 +1,50 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "be84f35f-8a24-4b7a-abfd-4412897df51f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rq_in",
+      "type": "Component Inputs",
+      "label": "One thing it asks for",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "rq_text",
+      "type": "Text",
+      "label": "What it asks for",
+      "x": 320,
+      "y": 40,
+      "parameters": {
+        "as": "p",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "metadata": {
+        "comment": "A <p> and not an <li>: the catalogue's Text offers div|h1-h6|p|span and Group offers no list element, so the product's <ul>/<li> cannot be reproduced. The lifted .up-next-requires-list rule is flex-column with a gap and needs no list semantics to render identically — what is lost is the semantics, recorded rather than papered over."
+      }
+    }
+  ],
+  "visualRoots": [
+    "rq_text"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "102a95ed-d432-4f9d-a5cb-51f5d4fd83b7",
+  "name": "Fixture programme",
+  "path": "/Data/Fixture programme",
+  "type": "visual",
+  "created": "2026-09-20T12:46:59.161Z",
+  "modified": "2026-09-20T12:46:59.161Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The learner's programme until the backend lands: one Static Data node holding the project, the agreed end and every timeline entry, split into outputs. Replace the Static Data node with a query and nothing downstream changes."
+}

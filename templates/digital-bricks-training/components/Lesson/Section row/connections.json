@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ffaf31e8-05d5-4437-90d1-49bd0965efd1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sr_in",
+      "fromProperty": "section",
+      "toId": "sr_section",
+      "toProperty": "section"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "facts",
+      "toId": "sr_section",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onAction",
+      "toId": "sr_out",
+      "toProperty": "acted"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onSave",
+      "toId": "sr_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onSaveField",
+      "toId": "sr_out",
+      "toProperty": "field"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onSaveValue",
+      "toId": "sr_out",
+      "toProperty": "value"
+    }
+  ]
+}

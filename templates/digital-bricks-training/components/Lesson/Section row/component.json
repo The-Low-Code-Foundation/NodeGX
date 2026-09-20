@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ffaf31e8-05d5-4437-90d1-49bd0965efd1",
+  "name": "Section row",
+  "path": "/Lesson/Section row",
+  "type": "visual",
+  "created": "2026-09-19T21:09:24.188Z",
+  "modified": "2026-09-19T21:09:24.188Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The For Each template for a lesson's sections: one row is { id, section }, and the kit's Section node renders the section by its kind and draws the knot. Its root IS the kit node, so each row lands as a direct child of the lesson grid (the Sprint-8 fragment contract)."
+}

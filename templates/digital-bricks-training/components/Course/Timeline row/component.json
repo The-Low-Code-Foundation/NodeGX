@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "56f7d5c0-a48e-4e71-8012-c1d462ce95b2",
+  "name": "Timeline row",
+  "path": "/Course/Timeline row",
+  "type": "visual",
+  "created": "2026-09-20T12:48:40.209Z",
+  "modified": "2026-09-20T12:51:46.062Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One entry on the learner's programme: the band heading when this row opens a group, then either the folded one-line summary (everything behind the learner) or the open card. No numeral, no percentage, no state badge."
+}

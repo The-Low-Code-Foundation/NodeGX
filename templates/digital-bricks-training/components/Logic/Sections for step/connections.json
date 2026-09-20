@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6b829d47-6cb3-48b2-8540-a967fd70fd04",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "sections",
+      "toId": "sfs_fn",
+      "toProperty": "in-sections"
+    },
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "steps",
+      "toId": "sfs_fn",
+      "toProperty": "in-steps"
+    },
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "activeStepId",
+      "toId": "sfs_fn",
+      "toProperty": "in-activeStepId"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-rows",
+      "toId": "sfs_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-count",
+      "toId": "sfs_out",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-chips",
+      "toId": "sfs_out",
+      "toProperty": "chips"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-stepTitle",
+      "toId": "sfs_out",
+      "toProperty": "stepTitle"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-stepGoal",
+      "toId": "sfs_out",
+      "toProperty": "stepGoal"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-unlocks",
+      "toId": "sfs_out",
+      "toProperty": "unlocks"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-hasNext",
+      "toId": "sfs_out",
+      "toProperty": "hasNext"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-nextTitle",
+      "toId": "sfs_out",
+      "toProperty": "nextTitle"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-nextStepId",
+      "toId": "sfs_out",
+      "toProperty": "nextStepId"
+    },
+    {
+      "fromId": "sfs_fn",
+      "fromProperty": "out-activeIndex",
+      "toId": "sfs_out",
+      "toProperty": "activeIndex"
+    }
+  ]
+}

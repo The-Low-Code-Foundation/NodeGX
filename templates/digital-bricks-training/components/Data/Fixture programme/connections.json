@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "102a95ed-d432-4f9d-a5cb-51f5d4fd83b7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fp_data",
+      "fromProperty": "items",
+      "toId": "fp_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-projectName",
+      "toId": "fp_out",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-problemStatement",
+      "toId": "fp_out",
+      "toProperty": "problemStatement"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-endsOn",
+      "toId": "fp_out",
+      "toProperty": "endsOn"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-entries",
+      "toId": "fp_out",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-dimensions",
+      "toId": "fp_out",
+      "toProperty": "dimensions"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-loaded",
+      "toId": "fp_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

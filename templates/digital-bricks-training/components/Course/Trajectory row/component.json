@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c1e4a5e3-2fea-4ab4-baa4-793c1f382c36",
+  "name": "Trajectory row",
+  "path": "/Course/Trajectory row",
+  "type": "visual",
+  "created": "2026-09-20T13:57:36.074Z",
+  "modified": "2026-09-20T13:57:36.074Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One agreed objective, drawn against its own goal on the shared 1-10 track — or the learner's own confidence, which has a track and no goal and must never grow one. A small multiple: the name is beside it in ink, so identity is never carried by colour."
+}

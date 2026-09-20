@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "56f7d5c0-a48e-4e71-8012-c1d462ce95b2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tr_in",
+      "fromProperty": "heading",
+      "toId": "tr_heading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "hasHeading",
+      "toId": "tr_heading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "entry",
+      "toId": "tr_row",
+      "toProperty": "entry"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "kindLabel",
+      "toId": "tr_row",
+      "toProperty": "kindLabel"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "title",
+      "toId": "tr_row",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "when",
+      "toId": "tr_row",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "collapsed",
+      "toId": "tr_row",
+      "toProperty": "collapsed"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "notes",
+      "toId": "tr_row",
+      "toProperty": "notes"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onAnchorKind",
+      "toId": "tr_log",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onAnchorId",
+      "toId": "tr_log",
+      "toProperty": "message"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onAskRequested",
+      "toId": "tr_log",
+      "toProperty": "log"
+    }
+  ]
+}

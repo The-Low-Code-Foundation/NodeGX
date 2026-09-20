@@ -1,0 +1,274 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6fe0dc8c-a747-4386-92fe-14c2885dd75e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ls_page",
+      "type": "Page",
+      "label": "Lesson",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ls_band"
+      ],
+      "parameters": {
+        "title": "Lesson",
+        "urlPath": "lesson"
+      }
+    },
+    {
+      "id": "ls_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "ls_page",
+      "children": [
+        "ls_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ls_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "ls_band",
+      "children": [
+        "ls_eyebrow",
+        "ls_title",
+        "ls_hook",
+        "ls_layout"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 920,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "ls_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "ls_shell",
+      "parameters": {
+        "text": "Concept · woven onto your project",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "ls_title",
+      "type": "Text",
+      "label": "The lesson title",
+      "x": 220,
+      "y": 480,
+      "parent": "ls_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ls_hook",
+      "type": "Text",
+      "label": "The hook — the lede, a consequence on their project",
+      "x": 220,
+      "y": 560,
+      "parent": "ls_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "maxWidth": {
+          "value": 680,
+          "unit": "px"
+        },
+        "marginBottom": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ls_layout",
+      "type": "Group",
+      "label": "The thread — .lesson-layout",
+      "x": 220,
+      "y": 660,
+      "parent": "ls_shell",
+      "children": [
+        "ls_stepper",
+        "ls_rows",
+        "ls_close"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "lesson-layout",
+        "styleCss": "display: grid;"
+      },
+      "metadata": {
+        "comment": "The lifted .lesson-layout is a 2-column CSS grid (32px thread gutter + content); its ::before draws the thread. The runtime writes display:flex inline on a Group, so styleCss restates grid to win. Every child must be a DIRECT child of this box — the Sprint-8 fragment contract — which is why the section rows come from a For Each placed here rather than inside a wrapper."
+      }
+    },
+    {
+      "id": "ls_stepper",
+      "type": "Group",
+      "label": "The stepper — .lesson-stepper",
+      "x": 280,
+      "y": 760,
+      "parent": "ls_layout",
+      "children": [
+        "ls_chips"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "lesson-stepper"
+      },
+      "metadata": {
+        "comment": "A wrapped row of content-sized chips (the layout-wrap-a-row-of-content-width-items recipe): each chip keeps its own width and flows to the next line, which is what a stepper wants at 390px. The validator's Columns suggestion is for grids of equal cells, which this is not."
+      }
+    },
+    {
+      "id": "ls_chips",
+      "type": "For Each",
+      "label": "One chip per step",
+      "x": 340,
+      "y": 860,
+      "parent": "ls_stepper",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Step chip"
+      }
+    },
+    {
+      "id": "ls_rows",
+      "type": "For Each",
+      "label": "The active step's sections, as knots",
+      "x": 280,
+      "y": 960,
+      "parent": "ls_layout",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Section row"
+      }
+    },
+    {
+      "id": "ls_close",
+      "type": "/Lesson/Step close",
+      "label": "Where this step leaves you",
+      "x": 280,
+      "y": 1060,
+      "parent": "ls_layout"
+    },
+    {
+      "id": "ls_fixture",
+      "type": "/Data/Fixture lesson",
+      "label": "The lesson (fixture until the backend lands)",
+      "x": 800,
+      "y": 160
+    },
+    {
+      "id": "ls_active",
+      "type": "Variable2",
+      "label": "Which step is open",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "name": "dbtActiveStepId"
+      },
+      "metadata": {
+        "comment": "Empty means the first step. Set by a chip or by the step close; nothing else writes it."
+      }
+    },
+    {
+      "id": "ls_index",
+      "type": "/Logic/Sections for step",
+      "label": "This step, resolved",
+      "x": 800,
+      "y": 560
+    },
+    {
+      "id": "ls_pick",
+      "type": "Set Variable",
+      "label": "A chip was pressed",
+      "x": 800,
+      "y": 860,
+      "parameters": {
+        "name": "dbtActiveStepId",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "The repeater surfaces the chip's `select` as itemOutputSignal-select and the row's id as itemActionItemId; the id IS the step id."
+      }
+    },
+    {
+      "id": "ls_forward",
+      "type": "Set Variable",
+      "label": "One way forward",
+      "x": 800,
+      "y": 1060,
+      "parameters": {
+        "name": "dbtActiveStepId",
+        "setWith": "string"
+      }
+    },
+    {
+      "id": "ls_scroll",
+      "type": "JavaScriptFunction",
+      "label": "Changing step starts at the top",
+      "x": 1100,
+      "y": 400,
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });\n"
+      },
+      "metadata": {
+        "comment": "The one thing a node cannot do. Runs only on the signal."
+      }
+    }
+  ],
+  "visualRoots": [
+    "ls_page"
+  ]
+}

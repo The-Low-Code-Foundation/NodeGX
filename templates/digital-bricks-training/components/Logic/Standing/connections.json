@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7559ef04-b662-4e85-9a4a-6155c1ef7a5a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "st_in",
+      "fromProperty": "entries",
+      "toId": "st_fn",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "st_in",
+      "fromProperty": "dimensions",
+      "toId": "st_fn",
+      "toProperty": "in-dimensions"
+    },
+    {
+      "fromId": "st_in",
+      "fromProperty": "endsOn",
+      "toId": "st_fn",
+      "toProperty": "in-endsOn"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasStanding",
+      "toId": "st_out",
+      "toProperty": "hasStanding"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-countsSentence",
+      "toId": "st_out",
+      "toProperty": "countsSentence"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasEndsOn",
+      "toId": "st_out",
+      "toProperty": "hasEndsOn"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-endsOnSentence",
+      "toId": "st_out",
+      "toProperty": "endsOnSentence"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasOrder",
+      "toId": "st_out",
+      "toProperty": "hasOrder"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-orderSentence",
+      "toId": "st_out",
+      "toProperty": "orderSentence"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasRequires",
+      "toId": "st_out",
+      "toProperty": "hasRequires"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-requiresLabel",
+      "toId": "st_out",
+      "toProperty": "requiresLabel"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-requires",
+      "toId": "st_out",
+      "toProperty": "requires"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasPace",
+      "toId": "st_out",
+      "toProperty": "hasPace"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-paceHeadline",
+      "toId": "st_out",
+      "toProperty": "paceHeadline"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-paceView",
+      "toId": "st_out",
+      "toProperty": "paceView"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-parPoints",
+      "toId": "st_out",
+      "toProperty": "parPoints"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-legendActual",
+      "toId": "st_out",
+      "toProperty": "legendActual"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-legendPar",
+      "toId": "st_out",
+      "toProperty": "legendPar"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasTrajectory",
+      "toId": "st_out",
+      "toProperty": "hasTrajectory"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-trajectoryRows",
+      "toId": "st_out",
+      "toProperty": "trajectoryRows"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasEarlier",
+      "toId": "st_out",
+      "toProperty": "hasEarlier"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-earlierCaption",
+      "toId": "st_out",
+      "toProperty": "earlierCaption"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-loaded",
+      "toId": "st_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

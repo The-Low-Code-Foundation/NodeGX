@@ -1,0 +1,92 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "56f7d5c0-a48e-4e71-8012-c1d462ce95b2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tr_in",
+      "type": "Component Inputs",
+      "label": "One row",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        { "name": "id", "plug": "output", "type": "string" },
+        { "name": "entry", "plug": "output", "type": "object" },
+        { "name": "kindLabel", "plug": "output", "type": "string" },
+        { "name": "title", "plug": "output", "type": "string" },
+        { "name": "when", "plug": "output", "type": "string" },
+        { "name": "collapsed", "plug": "output", "type": "boolean" },
+        { "name": "notes", "plug": "output", "type": "array" },
+        { "name": "heading", "plug": "output", "type": "string" },
+        { "name": "hasHeading", "plug": "output", "type": "boolean" }
+      ],
+      "metadata": {
+        "comment": "Every port here is a field of the row object `Logic/Ordered timeline` emits, bound by NAME by the page's For Each. `open` and `body` are gone: the kit node owns whether a row is open, because the fold's guarantee is that a closed row's children are not mounted — and the card's prose now goes through the kit's one sanitised markdown path rather than arriving as flat text."
+      }
+    },
+    {
+      "id": "tr_root",
+      "type": "Group",
+      "label": "The row",
+      "x": 360,
+      "y": 40,
+      "children": ["tr_heading", "tr_row"],
+      "parameters": {
+        "width": { "value": 100, "unit": "%" },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "tr_heading",
+      "type": "Text",
+      "label": "Band heading",
+      "x": 420,
+      "y": 200,
+      "parent": "tr_root",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-6)",
+        "marginBottom": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "Rendered by the FIRST row of each ahead group, which is how one repeater over one ordered list draws two headed groups without the page re-deciding an order the model owns. `mounted`, never `visible`: `visible: false` is visibility:hidden in this runtime and would leave an empty eyebrow's worth of space on the other nineteen rows (measured on L157 — a 316px hole under each folded row, and a 7327px page that became 3806px). It stays OUTSIDE the kit node because a band heading is not part of a row's card."
+      }
+    },
+    {
+      "id": "tr_row",
+      "type": "dbt-lesson.TimelineRow",
+      "label": "The entry",
+      "x": 420,
+      "y": 360,
+      "parent": "tr_root",
+      "parameters": {
+        "width": { "value": 100, "unit": "%" },
+        "sizeMode": "contentHeight"
+      },
+      "metadata": {
+        "comment": "The kit draws the row; the graph decided what it is and where it goes. The fold, the six glyphs, the two-voice wash and the one markdown path are rendering facts the catalogue cannot express — 180 node types, no SVG, no <details> (measured 2026-09-20). A kind with no glyph or card rule throws by name rather than drawing nothing (L126)."
+      }
+    },
+    {
+      "id": "tr_log",
+      "type": "net.noodl.Log",
+      "label": "Where a question would go",
+      "x": 840,
+      "y": 360,
+      "parameters": {
+        "level": "info",
+        "message": "Ask your coach about this"
+      },
+      "metadata": {
+        "comment": "NOTHING WRITES THIS SPRINT (sprint 45 decision 6). The control emits and the graph decides where it goes — a Log until a backend exists, a Cloud Function after. Wiring it to a fake success would be worse than wiring it here."
+      }
+    }
+  ],
+  "visualRoots": ["tr_root"]
+}

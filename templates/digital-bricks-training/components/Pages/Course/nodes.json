@@ -1,0 +1,572 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "03e5eb89-ced5-4ac3-9ec8-9914d7939acc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cs_page",
+      "type": "Page",
+      "label": "Course",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "cs_band"
+      ],
+      "parameters": {
+        "title": "Your course",
+        "urlPath": "course"
+      }
+    },
+    {
+      "id": "cs_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "cs_page",
+      "children": [
+        "cs_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "cs_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "cs_band",
+      "children": [
+        "cs_eyebrow",
+        "cs_title",
+        "cs_scope",
+        "cs_whereat",
+        "cs_card",
+        "cs_pace_wrap",
+        "cs_traj",
+        "cs_programme"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "cs_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "cs_shell",
+      "parameters": {
+        "text": "Your course",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "cs_title",
+      "type": "Text",
+      "label": "Their project — the spine of the curriculum",
+      "x": 220,
+      "y": 480,
+      "parent": "cs_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "The learner's own project names this page, not a course title: there is no catalogue, and the project IS the curriculum."
+      }
+    },
+    {
+      "id": "cs_scope",
+      "type": "Text",
+      "label": "What they are trying to solve",
+      "x": 220,
+      "y": 560,
+      "parent": "cs_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 600,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "cs_card",
+      "type": "Group",
+      "label": "The lesson in play — an ivory card with the edge and the pop",
+      "x": 220,
+      "y": 660,
+      "parent": "cs_shell",
+      "children": [
+        "cs_card_eyebrow",
+        "cs_lesson_title",
+        "cs_landing",
+        "cs_steps_label",
+        "cs_steps",
+        "cs_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "cs_card_eyebrow",
+      "type": "Text",
+      "label": "Card eyebrow",
+      "x": 280,
+      "y": 720,
+      "parent": "cs_card",
+      "parameters": {
+        "text": "The lesson you are in",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "cs_lesson_title",
+      "type": "Text",
+      "label": "The lesson's title",
+      "x": 280,
+      "y": 800,
+      "parent": "cs_card",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "cs_landing",
+      "type": "Text",
+      "label": "Where it lands you",
+      "x": 280,
+      "y": 880,
+      "parent": "cs_card",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "cs_steps_label",
+      "type": "Text",
+      "label": "Steps label",
+      "x": 280,
+      "y": 960,
+      "parent": "cs_card",
+      "parameters": {
+        "text": "In this lesson",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-3)"
+      }
+    },
+    {
+      "id": "cs_steps",
+      "type": "For Each",
+      "label": "One row per step",
+      "x": 280,
+      "y": 1040,
+      "parent": "cs_card",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Step row"
+      }
+    },
+    {
+      "id": "cs_actions",
+      "type": "Group",
+      "label": "Actions",
+      "x": 280,
+      "y": 1140,
+      "parent": "cs_card",
+      "children": [
+        "cs_open"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)",
+        "marginTop": "var(--space-3)"
+      }
+    },
+    {
+      "id": "cs_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open the lesson",
+      "x": 340,
+      "y": 1240,
+      "parent": "cs_actions",
+      "parameters": {
+        "label": "Open the lesson",
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "cs_programme",
+      "type": "Group",
+      "label": "The programme",
+      "x": 220,
+      "y": 1340,
+      "parent": "cs_shell",
+      "children": [
+        "cs_prog_label",
+        "cs_thread"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "marginTop": "var(--space-6)"
+      }
+    },
+    {
+      "id": "cs_prog_label",
+      "type": "Text",
+      "label": "Programme eyebrow",
+      "x": 280,
+      "y": 1420,
+      "parent": "cs_programme",
+      "parameters": {
+        "text": "Your programme",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      }
+    },
+    {
+      "id": "cs_thread",
+      "type": "Group",
+      "label": "The thread the knots hang on",
+      "x": 280,
+      "y": 1480,
+      "parent": "cs_programme",
+      "children": [
+        "cs_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "path"
+      },
+      "metadata": {
+        "comment": "`.path` carries the vertical thread as a ::before pseudo-element, which the catalogue cannot draw and a Group cannot be (measured 2026-09-20: 180 node types, no SVG). It wraps ONLY the rows — sharing a group with the eyebrow would start the line above the first knot."
+      }
+    },
+    {
+      "id": "cs_rows",
+      "type": "For Each",
+      "label": "One row per entry, in the order the model puts them",
+      "x": 280,
+      "y": 1500,
+      "parent": "cs_thread",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Timeline row"
+      },
+      "metadata": {
+        "comment": "ONE repeater over ONE ordered list, not four lists under four headings: the band headings are carried by the first row of each ahead group, so the page never re-decides an order the model already owns."
+      }
+    },
+    {
+      "id": "cs_programme_data",
+      "type": "/Data/Fixture programme",
+      "label": "The programme (fixture until the backend lands)",
+      "x": 900,
+      "y": 160
+    },
+    {
+      "id": "cs_ordered",
+      "type": "/Logic/Ordered timeline",
+      "label": "Order, group, fold, preview",
+      "x": 900,
+      "y": 420
+    },
+    {
+      "id": "cs_fixture",
+      "type": "/Data/Fixture lesson",
+      "label": "The lesson (fixture until the backend lands)",
+      "x": 900,
+      "y": 700
+    },
+    {
+      "id": "cs_go",
+      "type": "RouterNavigate",
+      "label": "Into the lesson",
+      "x": 900,
+      "y": 980,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Lesson"
+      }
+    },
+    {
+      "id": "cs_whereat",
+      "type": "/Course/Where you're at",
+      "label": "Where you are, in a sentence",
+      "x": 220,
+      "y": 620,
+      "parent": "cs_shell",
+      "metadata": {
+        "comment": "Two counts and one line naming the order. It renders with no coach, no programme and no horizon — counts of your own finished work need no deadline to be true, which is exactly the opposite of the pace panel below."
+      }
+    },
+    {
+      "id": "cs_pace_wrap",
+      "type": "Group",
+      "label": "Your pace",
+      "x": 220,
+      "y": 1320,
+      "parent": "cs_shell",
+      "children": [
+        "cs_pace_eyebrow",
+        "cs_pace"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "MOUNTED, never visible: `visible: false` is visibility:hidden in this runtime and keeps the space (measured on L157). And absence is the point here rather than a saving — a learner with no agreed end and nothing booked gets NO pace panel, because a pace line against a schedule nobody agreed to is a deadline the product invented and then measured somebody against."
+      }
+    },
+    {
+      "id": "cs_pace_eyebrow",
+      "type": "Text",
+      "label": "Pace eyebrow",
+      "x": 280,
+      "y": 1400,
+      "parent": "cs_pace_wrap",
+      "parameters": {
+        "as": "p",
+        "text": "Your pace",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      }
+    },
+    {
+      "id": "cs_pace",
+      "type": "dbt-lesson.PaceTracker",
+      "label": "Two lines and a horizon",
+      "x": 280,
+      "y": 1480,
+      "parent": "cs_pace_wrap",
+      "metadata": {
+        "comment": "A kit node because the catalogue has no SVG node (measured 2026-09-20: 180 types). It DRAWS the view Logic/Standing computed and works none of it out — par included, which pace.ts exports so a renderer cannot become a second owner of the par rule."
+      },
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      }
+    },
+    {
+      "id": "cs_traj",
+      "type": "Group",
+      "label": "How it is going",
+      "x": 220,
+      "y": 1620,
+      "parent": "cs_shell",
+      "children": [
+        "cs_traj_eyebrow",
+        "cs_traj_rows",
+        "cs_traj_caption"
+      ],
+      "parameters": {
+        "as": "section",
+        "cssClassName": "trajectory",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "SMALL MULTIPLES, one narrow row per agreed objective, each with its NAME BESIDE IT IN INK — so identity is never carried by colour and four rows need no legend. Overlaid they cannot be told apart honestly: every dimension has its own target, so four lines plus four targets is eight marks in one box."
+      }
+    },
+    {
+      "id": "cs_traj_eyebrow",
+      "type": "Text",
+      "label": "Trajectory eyebrow",
+      "x": 280,
+      "y": 1700,
+      "parent": "cs_traj",
+      "parameters": {
+        "as": "p",
+        "text": "How it is going",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      }
+    },
+    {
+      "id": "cs_traj_rows",
+      "type": "Group",
+      "label": "The rows",
+      "x": 280,
+      "y": 1780,
+      "parent": "cs_traj",
+      "children": [
+        "cs_traj_each"
+      ],
+      "parameters": {
+        "cssClassName": "trajectory-rows",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "cs_traj_each",
+      "type": "For Each",
+      "label": "One row per objective, then the learner's own confidence",
+      "x": 280,
+      "y": 1860,
+      "parent": "cs_traj_rows",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Trajectory row"
+      },
+      "metadata": {
+        "comment": "ONE repeater over one list. The confidence row is the LAST member of it rather than a second repeater: it is one line on the same track, and a second list would be a second place the scale could drift. It is never repeated faintly inside each objective — that would dress a learner's own feeling up as a self-assessment against targets nobody asked them about."
+      }
+    },
+    {
+      "id": "cs_traj_caption",
+      "type": "Text",
+      "label": "What the faint marks are",
+      "x": 280,
+      "y": 1940,
+      "parent": "cs_traj",
+      "parameters": {
+        "as": "p",
+        "cssClassName": "trajectory-earlier-caption",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "metadata": {
+        "comment": "It names a KIND of mark and does not summarise a trajectory — no number, no count, no percentage. Absent when no row has an earlier mark, because a line about them would then be a line about nothing."
+      }
+    },
+    {
+      "id": "cs_standing",
+      "type": "/Logic/Standing",
+      "label": "Count, pace, trajectory",
+      "x": 900,
+      "y": 1260
+    }
+  ],
+  "visualRoots": [
+    "cs_page"
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cace4a82-009b-4933-8b4e-0aaaeb8d8997",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pl_page",
+      "type": "Page",
+      "label": "Palette",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "pl_band"
+      ],
+      "parameters": {
+        "title": "The lesson kit",
+        "urlPath": "palette"
+      }
+    },
+    {
+      "id": "pl_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "pl_page",
+      "children": [
+        "pl_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "pl_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "pl_band",
+      "children": [
+        "pl_eyebrow",
+        "pl_title",
+        "pl_line",
+        "pl_layout"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 920,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "pl_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "pl_shell",
+      "parameters": {
+        "text": "The lesson kit",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "pl_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 220,
+      "y": 480,
+      "parent": "pl_shell",
+      "parameters": {
+        "as": "h1",
+        "text": "Every section kind, once",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pl_line",
+      "type": "Text",
+      "label": "One line",
+      "x": 220,
+      "y": 560,
+      "parent": "pl_shell",
+      "parameters": {
+        "as": "p",
+        "text": "The nineteen kinds a lesson is made of, as the kit draws them. Four are placeholders that carry their data — the kit’s README says which and why.",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "marginBottom": "var(--space-6)"
+      }
+    },
+    {
+      "id": "pl_layout",
+      "type": "Group",
+      "label": "The thread — .lesson-layout",
+      "x": 220,
+      "y": 660,
+      "parent": "pl_shell",
+      "children": [
+        "pl_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "lesson-layout",
+        "styleCss": "display: grid;"
+      }
+    },
+    {
+      "id": "pl_rows",
+      "type": "For Each",
+      "label": "Every section, as a knot",
+      "x": 280,
+      "y": 760,
+      "parent": "pl_layout",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Section row"
+      }
+    },
+    {
+      "id": "pl_fixture",
+      "type": "/Data/Fixture lesson",
+      "label": "The lesson (fixture)",
+      "x": 800,
+      "y": 160
+    },
+    {
+      "id": "pl_all",
+      "type": "JavaScriptFunction",
+      "label": "Every section, flat, plus the one kind the fixture lacks",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst sections = plain(Inputs.sections) || [];\nif (!sections.length) return;\nconst extra = {\n  id: 'pal-artifact',\n  kind: 'artifact_challenge',\n  title: 'Bring back one cleaned row',\n  brief: 'Take one real row from intake.csv, run it through your sanitiser, and paste what came out beside what went in.',\n  rubric: ['The row you chose is one a colleague actually sent', 'Every rule you wrote is visible in the difference', 'You can say which rule you are least sure about'],\n  acceptedFormats: ['text', 'markdown']\n};\nOutputs.rows = sections.concat([extra]).map((s) => ({ id: s.id, section: s }));\n"
+      },
+      "metadata": {
+        "comment": "The fixture carries 18 of the 19 kinds; an artifact_challenge is added here so the page shows all of them."
+      },
+      "ports": [
+        {
+          "name": "in-sections",
+          "displayName": "sections",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "pl_page"
+  ]
+}

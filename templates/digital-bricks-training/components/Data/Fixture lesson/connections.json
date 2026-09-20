@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b952d124-580d-4e56-bde5-3a0f352c73fc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fx_data",
+      "fromProperty": "items",
+      "toId": "fx_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-title",
+      "toId": "fx_out",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-hook",
+      "toId": "fx_out",
+      "toProperty": "hook"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-landing",
+      "toId": "fx_out",
+      "toProperty": "landing"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-conceptId",
+      "toId": "fx_out",
+      "toProperty": "conceptId"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-steps",
+      "toId": "fx_out",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-sections",
+      "toId": "fx_out",
+      "toProperty": "sections"
+    },
+    {
+      "fromId": "fx_split",
+      "fromProperty": "out-loaded",
+      "toId": "fx_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b952d124-580d-4e56-bde5-3a0f352c73fc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fx_data",
+      "type": "Static Data",
+      "label": "EDIT — this is the lesson",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[\n  {\n    \"conceptId\": \"what-is-a-backend\",\n    \"title\": \"What a backend means for your Client-intake CSV sanitiser\",\n    \"hook\": \"Right now your sanitiser cleans intake.csv on your own machine, and it works. The moment you send it to a colleague, every rule you wrote stays behind on your laptop — the file opens, nothing validates, and it will look like it ran fine.\",\n    \"landing\": \"You can now say where a backend would sit in your sanitiser's flow, and why it isn't there yet.\",\n    \"conceptVersion\": 4,\n    \"projectContextVersion\": 1,\n    \"generationVersion\": 4,\n    \"generatedByTier\": \"senior_teacher\",\n    \"steps\": [\n      {\n        \"id\": \"step-1\",\n        \"title\": \"Whether your sanitiser needs a backend at all\",\n        \"goal\": \"You can say, in one sentence, why intake.csv doesn't need a server yet.\",\n        \"sectionIds\": [\n          \"s-01\",\n          \"s-02\",\n          \"s-03\",\n          \"s-04\",\n          \"s-05\"\n        ],\n        \"unlocks\": \"You can tell whether intake.csv needs a server, without guessing.\"\n      },\n      {\n        \"id\": \"step-2\",\n        \"title\": \"The two walls that force one\",\n        \"goal\": \"You can name the moment your project would cross into needing a backend.\",\n        \"sectionIds\": [\n          \"s-06\",\n          \"s-06b\",\n          \"s-07\",\n          \"s-08\",\n          \"s-09\",\n          \"s-10\"\n        ],\n        \"unlocks\": \"You can name the moment your sanitiser would cross the line.\"\n      },\n      {\n        \"id\": \"step-3\",\n        \"title\": \"Seeing it on your own project\",\n        \"goal\": \"You can point at where a backend would sit in your sanitiser's flow.\",\n        \"sectionIds\": [\n          \"s-11\",\n          \"s-11b\",\n          \"s-12\",\n          \"s-13\",\n          \"s-14\",\n          \"s-15\"\n        ],\n        \"unlocks\": \"You can point at where a backend would sit in your own flow.\"\n      },\n      {\n        \"id\": \"step-4\",\n        \"title\": \"Writing it down for your dossier\",\n        \"goal\": \"You have your own answer recorded, ready to hand to an assistant.\",\n        \"sectionIds\": [\n          \"s-16\",\n          \"s-17\",\n          \"s-18\",\n          \"s-19\",\n          \"s-20\",\n          \"s-21\"\n        ],\n        \"unlocks\": \"You can describe your sanitiser's shape to an AI assistant.\"\n      }\n    ],\n    \"sections\": [\n      {\n        \"id\": \"s-01\",\n        \"kind\": \"answer_capsule\",\n        \"text\": \"Your CSV sanitiser doesn't need a backend yet — it takes intake.csv, cleans it, and hands it back, all inside the browser. A backend becomes necessary the moment someone else needs to see the cleaned data too, or it has to persist after you close the tab.\"\n      },\n      {\n        \"id\": \"s-02\",\n        \"kind\": \"reading\",\n        \"markdown\": \"## Why your CSV sanitiser is currently browser-only\\n\\nRight now, `intake.csv` lives on your machine. You drop it in, the sanitiser validates each row, and you get a clean file back. That entire loop happens inside your browser tab — nothing touches a server.\\n\\nThat's the correct architecture for what you've described. Adding a backend before you need it would mean hosting a server, keeping it running, and paying for it — all for no benefit yet.\\n\\nThe question isn't \\\"should I have a backend?\\\" It's \\\"**when** will I hit the wall that forces me to add one?\\\"\"\n      },\n      {\n        \"id\": \"s-03\",\n        \"kind\": \"callout\",\n        \"tone\": \"jargon\",\n        \"markdown\": \"**Backend** — a program running on a computer you don't sit in front of (a data centre machine). For your CSV sanitiser, that would be a program that receives your intake.csv, processes it, and stores the result somewhere both you and a colleague could reach.\"\n      },\n      {\n        \"id\": \"s-04\",\n        \"kind\": \"callout\",\n        \"tone\": \"tip\",\n        \"markdown\": \"The two walls that force a backend: **sharing** (someone else must see the same data) and **permanence** (the work must survive closing the browser). Your sanitiser currently hits neither wall.\"\n      },\n      {\n        \"id\": \"s-05\",\n        \"kind\": \"code_block\",\n        \"language\": \"typescript\",\n        \"code\": \"// Browser-only: intake.csv is read locally, cleaned in memory, downloaded.\\n// No server involved.\\nasync function sanitiseFile(file: File): Promise<Blob> {\\n  const text = await file.text();\\n  const rows = parseCSV(text);\\n  const cleaned = rows.map(validateRow);\\n  return new Blob([toCSV(cleaned)], { type: \\\"text/csv\\\" });\\n}\",\n        \"explanation\": \"This is the shape of your current sanitiser — it reads the file, processes it, and produces a download. The whole thing runs in the browser. There is no `fetch` call, no server URL, no storage. That's fine, and correct, for what you're building now.\"\n      },\n      {\n        \"id\": \"s-06\",\n        \"kind\": \"quiz\",\n        \"question\": \"Your manager asks you to let the whole intake team see the sanitised output without each person running their own copy. Which wall are you hitting?\",\n        \"variant\": {\n          \"type\": \"mcq\",\n          \"options\": [\n            {\n              \"text\": \"The permanence wall — the data needs to outlive a browser session.\",\n              \"correct\": false,\n              \"feedback\": \"Close, but permanence is about the data surviving time (e.g. it must still be there tomorrow). Sharing is the more immediate need here — multiple people accessing the same result.\"\n            },\n            {\n              \"text\": \"The sharing wall — more than one person needs to see the same data.\",\n              \"correct\": true,\n              \"feedback\": \"Exactly. Once a second person needs to see the same cleaned output, it can't live only in your browser. That's the sharing wall, and it's when a backend earns its place.\"\n            },\n            {\n              \"text\": \"Neither wall — email the CSV to your colleagues.\",\n              \"correct\": false,\n              \"feedback\": \"Emailing is a workaround, not a wall. But if the requirement is that the team sees it in real time as intake arrives, emailing breaks down quickly. The sharing wall is real.\"\n            }\n          ]\n        }\n      },\n      {\n        \"id\": \"s-06b\",\n        \"kind\": \"quiz\",\n        \"question\": \"In one sentence: why doesn't your sanitiser need a backend yet?\",\n        \"variant\": {\n          \"type\": \"say_it_back\",\n          \"rubric\": \"Names either sharing (only one person needs the data) or permanence (the data doesn't need to survive closing the browser) as the reason.\"\n        }\n      },\n      {\n        \"id\": \"s-07\",\n        \"kind\": \"activity\",\n        \"title\": \"Map your sanitiser's walls\",\n        \"steps\": [\n          \"Open intake.csv in a spreadsheet. Who else currently sees this data?\",\n          \"Ask: does this cleaned output need to exist tomorrow, or only during the current session?\",\n          \"Write one sentence answering: 'I will need a backend when ______.'\"\n        ],\n        \"capturesProjectFact\": {\n          \"field\": \"backendTrigger\",\n          \"prompt\": \"Finish the sentence: 'I will need a backend for this project when ______.' (Be specific about what event or requirement would trigger it.)\"\n        }\n      },\n      {\n        \"id\": \"s-08\",\n        \"kind\": \"mermaid\",\n        \"source\": \"graph LR\\n  A[intake.csv] -->|drop in| B[Browser: sanitiser]\\n  B -->|cleaned output| C[Download]\\n  \\n  style B fill:#1e3a5f,color:#fff\\n  style A fill:#f8fafc\\n  style C fill:#ecfdf5\",\n        \"caption\": \"Your current architecture: entirely browser-side. No server in the loop.\"\n      },\n      {\n        \"id\": \"s-09\",\n        \"kind\": \"svg_diagram\",\n        \"svg\": \"<svg viewBox=\\\"0 0 400 120\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"400\\\" height=\\\"120\\\">\\n  <rect x=\\\"10\\\" y=\\\"30\\\" width=\\\"100\\\" height=\\\"60\\\" rx=\\\"8\\\" fill=\\\"#f0f9ff\\\" stroke=\\\"#bae6fd\\\" stroke-width=\\\"2\\\"/>\\n  <text x=\\\"60\\\" y=\\\"65\\\" text-anchor=\\\"middle\\\" font-size=\\\"13\\\" fill=\\\"#0369a1\\\">Browser</text>\\n  <rect x=\\\"290\\\" y=\\\"30\\\" width=\\\"100\\\" height=\\\"60\\\" rx=\\\"8\\\" fill=\\\"#fef3c7\\\" stroke=\\\"#fde68a\\\" stroke-width=\\\"2\\\"/>\\n  <text x=\\\"340\\\" y=\\\"65\\\" text-anchor=\\\"middle\\\" font-size=\\\"13\\\" fill=\\\"#92400e\\\">Backend</text>\\n  <line x1=\\\"160\\\" y1=\\\"60\\\" x2=\\\"285\\\" y2=\\\"60\\\" stroke=\\\"#94a3b8\\\" stroke-width=\\\"1.5\\\" stroke-dasharray=\\\"6,4\\\"/>\\n  <text x=\\\"220\\\" y=\\\"50\\\" text-anchor=\\\"middle\\\" font-size=\\\"11\\\" fill=\\\"#94a3b8\\\">sharing or</text>\\n  <text x=\\\"220\\\" y=\\\"70\\\" text-anchor=\\\"middle\\\" font-size=\\\"11\\\" fill=\\\"#94a3b8\\\">permanence wall</text>\\n</svg>\",\n        \"caption\": \"The wall you cross when sharing or permanence forces a backend.\"\n      },\n      {\n        \"id\": \"s-10\",\n        \"kind\": \"chart\",\n        \"chartType\": \"bar\",\n        \"data\": [\n          {\n            \"phase\": \"Browser only\",\n            \"complexity\": 1,\n            \"cost\": 0\n          },\n          {\n            \"phase\": \"Add backend\",\n            \"complexity\": 4,\n            \"cost\": 5\n          },\n          {\n            \"phase\": \"Add DB\",\n            \"complexity\": 6,\n            \"cost\": 8\n          }\n        ],\n        \"xKey\": \"phase\",\n        \"yKeys\": [\n          \"complexity\",\n          \"cost\"\n        ],\n        \"caption\": \"Rough complexity and running cost at each phase. Stay browser-only until a wall forces you over.\"\n      },\n      {\n        \"id\": \"s-11\",\n        \"kind\": \"interactive_widget\",\n        \"widgetKey\": \"csv-sanitiser\",\n        \"params\": {\n          \"columns\": [\n            {\n              \"name\": \"name\",\n              \"rules\": [\n                \"trim\",\n                \"required\"\n              ]\n            },\n            {\n              \"name\": \"email\",\n              \"rules\": [\n                \"trim\",\n                \"lowercase\",\n                \"required\",\n                \"email\"\n              ]\n            },\n            {\n              \"name\": \"date\",\n              \"rules\": [\n                \"trim\",\n                \"required\",\n                \"date\"\n              ]\n            }\n          ],\n          \"sampleRow\": \"  John Smith , JOHN@EXAMPLE.COM , 2024-01-15\"\n        },\n        \"caption\": \"Paste one row from your intake.csv and watch each column get validated.\"\n      },\n      {\n        \"id\": \"s-11b\",\n        \"kind\": \"interactive_widget\",\n        \"widgetKey\": \"prompt-upgrade\",\n        \"params\": {\n          \"scenario\": \"You want an AI assistant to help you write the validation rules section of your CSV sanitiser's documentation.\",\n          \"baselinePrompt\": \"Write documentation for my CSV sanitiser's validation rules.\",\n          \"baselineOutput\": \"## Validation Rules\\n\\nThe sanitiser validates each column according to configured rules such as trimming whitespace, checking required fields, and validating email format. Rows that fail validation are flagged for review.\",\n          \"baselineNote\": \"Passes — it's accurate and readable, but generic enough to describe almost any validator. Nothing here is specific to your intake.csv or its actual columns.\",\n          \"question\": \"Which upgrade moves this from passing to top-band?\",\n          \"candidates\": [\n            {\n              \"prompt\": \"Write documentation for my CSV sanitiser's validation rules. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date).\",\n              \"output\": \"## Validation Rules\\n\\n- **name**: trimmed, required\\n- **email**: trimmed, lowercased, required, validated as an email address\\n- **date**: trimmed, required, validated as a date\\n\\nRows failing any rule are flagged for review.\",\n              \"band\": \"passing\",\n              \"why\": \"Grounds the output in your real columns instead of a generic description — accurate, but still just a restatement of the rules with no guidance for the reader.\"\n            },\n            {\n              \"prompt\": \"Write documentation for my CSV sanitiser's validation rules. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date). Include one example of a row that fails each rule and why.\",\n              \"output\": \"## Validation Rules\\n\\n- **name**: trimmed, required. Fails on: empty string.\\n- **email**: trimmed, lowercased, required, validated as an email. Fails on: \\\"not-an-email\\\".\\n- **date**: trimmed, required, validated as a date. Fails on: \\\"15/13/2024\\\" (invalid month).\\n\\nRows failing any rule are flagged for review with the specific failure reason.\",\n              \"band\": \"stronger\",\n              \"why\": \"Adds concrete failure examples, which is what makes documentation usable by someone debugging a rejected row — a real step up in usefulness, not just accuracy.\"\n            },\n            {\n              \"prompt\": \"Write documentation for my CSV sanitiser's validation rules, for a teammate who will maintain this code after me. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date). For each rule: state what it checks, give one example of a row that fails it and why, and note anything a maintainer should know before changing that rule (e.g. what would break downstream). Ask me if you're missing context on any column before writing.\",\n              \"output\": \"## Validation Rules — Maintainer Notes\\n\\n- **name**: trimmed, required. Fails on: empty string. *Before changing:* downstream reporting assumes name is never blank.\\n- **email**: trimmed, lowercased, required, validated as an email. Fails on: \\\"not-an-email\\\". *Before changing:* lowercasing is load-bearing — the dedup step matches on exact string.\\n- **date**: trimmed, required, validated as a date. Fails on: \\\"15/13/2024\\\". *Before changing:* confirm the expected date format with whoever owns intake.csv upstream.\\n\\nOne thing I'm not certain of: is there a maximum row count this needs to handle? Let me know and I'll add a note on performance if relevant.\",\n              \"band\": \"top_band\",\n              \"why\": \"Names the audience (a future maintainer) and asks for missing context rather than guessing — exactly what the jury rewards: the prompt directs the assistant to surface what it doesn't know instead of inventing it.\"\n            }\n          ]\n        },\n        \"caption\": \"Try upgrading the baseline prompt yourself before checking the gradient.\"\n      },\n      {\n        \"id\": \"s-12\",\n        \"kind\": \"annotated_screenshot\",\n        \"storageKey\": \"concepts/what-is-a-backend/browser-devtools.png\",\n        \"overlaySvg\": \"<svg viewBox=\\\"0 0 800 500\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n  <rect x=\\\"20\\\" y=\\\"20\\\" width=\\\"200\\\" height=\\\"40\\\" rx=\\\"4\\\" fill=\\\"none\\\" stroke=\\\"#ef4444\\\" stroke-width=\\\"3\\\"/>\\n  <text x=\\\"230\\\" y=\\\"45\\\" font-size=\\\"14\\\" fill=\\\"#ef4444\\\" font-weight=\\\"bold\\\">No network calls here</text>\\n</svg>\",\n        \"caption\": \"Browser DevTools Network tab for a browser-only sanitiser — no requests to any server.\"\n      },\n      {\n        \"id\": \"s-13\",\n        \"kind\": \"curated_video\",\n        \"url\": \"https://www.youtube.com/watch?v=WXsD0ZgxjRw\",\n        \"startSeconds\": 45,\n        \"endSeconds\": 180,\n        \"whyItMatters\": \"This clip explains the client/server split in plain terms — the same mental model applies to your sanitiser sitting on the browser side of that line.\"\n      },\n      {\n        \"id\": \"s-14\",\n        \"kind\": \"human_recording\",\n        \"storageKey\": \"recordings/richard/backend-decision-point.mp3\",\n        \"contextualIntro\": \"Richard explains the exact moment he adds a backend to a project like yours — what changes in the requirements, and what he asks himself first.\"\n      },\n      {\n        \"id\": \"s-15\",\n        \"kind\": \"audio\",\n        \"source\": {\n          \"type\": \"tts\",\n          \"text\": \"Your CSV sanitiser doesn't need a backend yet. Stay browser-only until the sharing wall or the permanence wall forces your hand. When you hit one of those walls, the smallest backend that solves that specific problem is the right backend.\",\n          \"lang\": \"en\"\n        }\n      },\n      {\n        \"id\": \"s-16\",\n        \"kind\": \"voice_interaction\",\n        \"prompt\": \"In your own words: describe the moment when your CSV sanitiser would need a backend. What would change in your project that forces you to add one?\",\n        \"lang\": \"en\",\n        \"rubric\": \"Learner correctly identifies either sharing (multiple people accessing the same data) or permanence (data must survive closing the browser) as the trigger. Partial credit if they identify the general concept without naming the specific wall.\"\n      },\n      {\n        \"id\": \"s-17\",\n        \"kind\": \"capture\",\n        \"prompt\": \"In your own words, what is the trainee's stated goal for this needs analysis?\",\n        \"field\": \"needs_analysis.statedGoal\",\n        \"hint\": \"One sentence is enough — you'll refine it later.\"\n      },\n      {\n        \"id\": \"s-18\",\n        \"kind\": \"capture\",\n        \"prompt\": \"What is the trainee's current comfort level with AI tools, in their own words?\",\n        \"field\": \"needs_analysis.currentSkillLevel\",\n        \"hint\": \"e.g. \\\"never used one\\\", \\\"uses it for email\\\"…\"\n      },\n      {\n        \"id\": \"s-19\",\n        \"kind\": \"capture\",\n        \"prompt\": \"What would success look like for this trainee, by the end of the course?\",\n        \"field\": \"needs_analysis.successCriteria\"\n      },\n      {\n        \"id\": \"s-20\",\n        \"kind\": \"prep_pack\",\n        \"title\": \"Your Needs Analysis prep pack\",\n        \"instructions\": \"Use ONLY the facts below to draft the first section of a Needs Analysis for this trainee. Do not invent anything missing — ask the trainer instead.\",\n        \"factFields\": [\n          \"needs_analysis.statedGoal\",\n          \"needs_analysis.currentSkillLevel\",\n          \"needs_analysis.successCriteria\"\n        ]\n      },\n      {\n        \"id\": \"s-21\",\n        \"kind\": \"handover_pack\",\n        \"title\": \"What your sanitiser's repo should already know\",\n        \"intro\": \"Your sanitiser has lived in a chat window so far. Before you open it with a coding agent on your own machine, it needs three documents that say what it is and how it gets worked on — otherwise the agent starts every session guessing.\",\n        \"files\": [\n          {\n            \"path\": \"CLAUDE.md\",\n            \"purpose\": \"How this project works, written to the agent that will edit it.\"\n          },\n          {\n            \"path\": \"PROJECT.md\",\n            \"purpose\": \"What the sanitiser is for and what it deliberately does not do yet.\"\n          },\n          {\n            \"path\": \"docs/TASK-001-validate-one-column.md\",\n            \"purpose\": \"The first slice: validate the email column and nothing else.\"\n          }\n        ]\n      }\n    ]\n  }\n]"
+      },
+      "metadata": {
+        "comment": "The seam. A JSON array with ONE lesson object: { title, hook, landing, conceptId, steps[{id,title,goal,unlocks,sectionIds[]}], sections[{id,kind,...}] }. Every section id a step claims must exist, exactly once. When the backend lands, a query replaces this node and the outputs stay the same."
+      }
+    },
+    {
+      "id": "fx_split",
+      "type": "JavaScriptFunction",
+      "label": "Split the lesson into its parts",
+      "x": 40,
+      "y": 260,
+      "parameters": {
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst rows = plain(Inputs.items) || [];\nconst lesson = rows[0];\nif (!lesson) return;\nOutputs.title = lesson.title || '';\nOutputs.hook = lesson.hook || '';\nOutputs.landing = lesson.landing || '';\nOutputs.conceptId = lesson.conceptId || '';\nOutputs.steps = lesson.steps || [];\nOutputs.sections = lesson.sections || [];\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hook",
+          "displayName": "hook",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-landing",
+          "displayName": "landing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptId",
+          "displayName": "conceptId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-steps",
+          "displayName": "steps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sections",
+          "displayName": "sections",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "One calculation, one code node (doctrine 8). Static Data may hand rows as runtime Models rather than plain objects, so `plain()` unwraps whichever arrives."
+      }
+    },
+    {
+      "id": "fx_out",
+      "type": "Component Outputs",
+      "label": "The lesson's parts",
+      "x": 40,
+      "y": 560,
+      "ports": [
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hook",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "landing",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "conceptId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "steps",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "sections",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

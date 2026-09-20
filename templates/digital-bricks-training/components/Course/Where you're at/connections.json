@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2f940117-c534-4528-ab24-8e77fc3b25c9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wy_in",
+      "fromProperty": "hasStanding",
+      "toId": "wy_counts",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "countsSentence",
+      "toId": "wy_counts",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "hasEndsOn",
+      "toId": "wy_when",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "endsOnSentence",
+      "toId": "wy_when",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "hasOrder",
+      "toId": "wy_order",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "orderSentence",
+      "toId": "wy_order",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "hasRequires",
+      "toId": "wy_requires",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "requiresLabel",
+      "toId": "wy_req_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wy_in",
+      "fromProperty": "requires",
+      "toId": "wy_req_each",
+      "toProperty": "items"
+    }
+  ]
+}

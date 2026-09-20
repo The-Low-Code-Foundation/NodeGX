@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6fe0dc8c-a747-4386-92fe-14c2885dd75e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "title",
+      "toId": "ls_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "hook",
+      "toId": "ls_hook",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "sections",
+      "toId": "ls_index",
+      "toProperty": "sections"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "steps",
+      "toId": "ls_index",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "ls_active",
+      "fromProperty": "value",
+      "toId": "ls_index",
+      "toProperty": "activeStepId"
+    },
+    {
+      "fromId": "ls_index",
+      "fromProperty": "chips",
+      "toId": "ls_chips",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ls_index",
+      "fromProperty": "rows",
+      "toId": "ls_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ls_index",
+      "fromProperty": "stepGoal",
+      "toId": "ls_close",
+      "toProperty": "goal"
+    },
+    {
+      "fromId": "ls_index",
+      "fromProperty": "nextTitle",
+      "toId": "ls_close",
+      "toProperty": "nextTitle"
+    },
+    {
+      "fromId": "ls_index",
+      "fromProperty": "hasNext",
+      "toId": "ls_close",
+      "toProperty": "hasNext"
+    },
+    {
+      "fromId": "ls_chips",
+      "fromProperty": "itemOutputSignal-select",
+      "toId": "ls_pick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ls_chips",
+      "fromProperty": "itemActionItemId",
+      "toId": "ls_pick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ls_close",
+      "fromProperty": "next",
+      "toId": "ls_forward",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ls_index",
+      "fromProperty": "nextStepId",
+      "toId": "ls_forward",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ls_active",
+      "fromProperty": "changed",
+      "toId": "ls_scroll",
+      "toProperty": "run"
+    }
+  ]
+}

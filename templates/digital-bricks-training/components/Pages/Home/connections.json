@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "02367b69-5625-4431-83e6-1d395135d674",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hm_cta",
+      "fromProperty": "onClick",
+      "toId": "hm_go",
+      "toProperty": "navigate"
+    }
+  ]
+}

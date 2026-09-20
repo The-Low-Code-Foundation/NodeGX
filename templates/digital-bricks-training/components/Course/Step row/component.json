@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bfad5e47-95c2-4413-b525-090531a52ec4",
+  "name": "Step row",
+  "path": "/Course/Step row",
+  "type": "visual",
+  "created": "2026-09-19T21:09:48.077Z",
+  "modified": "2026-09-19T21:09:48.077Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One step of the lesson as the course page lists it: the title in the display face and the goal under it, on a hairline. No numeral, no state, no percentage."
+}

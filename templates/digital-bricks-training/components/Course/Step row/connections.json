@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bfad5e47-95c2-4413-b525-090531a52ec4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cr_in",
+      "fromProperty": "title",
+      "toId": "cr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cr_in",
+      "fromProperty": "goal",
+      "toId": "cr_goal",
+      "toProperty": "text"
+    }
+  ]
+}

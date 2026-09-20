@@ -1,0 +1,286 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Digital Bricks Training",
+  "id": "a9004a0f-0384-4ebe-97d6-1238edf80460",
+  "version": "4",
+  "nodegxVersion": "0.1.0",
+  "runtimeVersion": "react19",
+  "created": "2026-09-19T20:51:44.992Z",
+  "modified": "2026-09-19T20:51:44.992Z",
+  "settings": {
+    "htmlTitle": "Digital Bricks Training",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "ecbe1abf-f593-4c0d-96ea-1e206566b658",
+  "metadata": {
+    "designTokens": {
+      "version": 1,
+      "customTokens": [
+        {
+          "name": "--background",
+          "value": "#F6ECD9",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "The ground \u2014 cream (globals.css --paper)"
+        },
+        {
+          "name": "--foreground",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Primary text AND every edge \u2014 ink (--ink), 13.45:1 on cream"
+        },
+        {
+          "name": "--surface",
+          "value": "#FFFDF7",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Fields, cards, panels \u2014 ivory (--paper-raised)"
+        },
+        {
+          "name": "--surface-raised",
+          "value": "#FFFDF7",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Same ivory; NodeGX has two roles where the product has one"
+        },
+        {
+          "name": "--muted",
+          "value": "#EFE3CC",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Subtle backgrounds, disabled states (Rocket School; the product has no muted surface token)"
+        },
+        {
+          "name": "--muted-foreground",
+          "value": "#6B5B4D",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Secondary text (--ink-soft), 5.55:1 on cream"
+        },
+        {
+          "name": "--primary",
+          "value": "#F5522E",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Coral \u2014 the accent as a FILL (--thread). Never text: 2.92:1 on cream"
+        },
+        {
+          "name": "--primary-hover",
+          "value": "#E0441F",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Coral on hover"
+        },
+        {
+          "name": "--primary-foreground",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Ink on coral, 4.6:1 (sprint 43 \u00a72.2)"
+        },
+        {
+          "name": "--secondary",
+          "value": "#0A7670",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Teal \u2014 available / start / done (--go). Text-safe: 4.67:1. NOT Rocket School's #12a39b (2.66:1)"
+        },
+        {
+          "name": "--secondary-hover",
+          "value": "#085F5A",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Teal on hover"
+        },
+        {
+          "name": "--secondary-foreground",
+          "value": "#FFFDF7",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Ivory on teal, 4.67:1"
+        },
+        {
+          "name": "--accent",
+          "value": "#FFE9A6",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Sunflower, as a WASH only (--warm-tint). Nothing is ever written in it (1.18:1)"
+        },
+        {
+          "name": "--accent-foreground",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Ink on sunflower"
+        },
+        {
+          "name": "--destructive",
+          "value": "#B3261E",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Exists so a built-in node has one. This product never paints red on a learner surface"
+        },
+        {
+          "name": "--destructive-hover",
+          "value": "#9A1F18",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Destructive on hover"
+        },
+        {
+          "name": "--destructive-foreground",
+          "value": "#FFFFFF",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text on destructive"
+        },
+        {
+          "name": "--border",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "The outline is ink (sprint 43 \u00a71.2)"
+        },
+        {
+          "name": "--border-strong",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Ink"
+        },
+        {
+          "name": "--border-control",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Ink"
+        },
+        {
+          "name": "--border-subtle",
+          "value": "#E4D6BD",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Hairlines stay hairlines (--line): eyebrows, list rows, the thread"
+        },
+        {
+          "name": "--ring",
+          "value": "#2A211B",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Focus ring \u2014 ink"
+        },
+        {
+          "name": "--ring-offset",
+          "value": "#FFFDF7",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Focus ring offset \u2014 ivory"
+        },
+        {
+          "name": "--font-sans",
+          "value": "\"Nunito\", ui-rounded, system-ui, sans-serif",
+          "category": "typography-family",
+          "isCustom": true,
+          "description": "Nunito \u2014 the body and UI face (--font-ui, --font-prose). Bundled by preset-font-nunito, never fetched"
+        },
+        {
+          "name": "--font-display",
+          "value": "\"Grandstander\", \"Nunito\", ui-rounded, system-ui, sans-serif",
+          "category": "typography-family",
+          "isCustom": true,
+          "description": "Grandstander 800 \u2014 headlines and buttons. Bundled by rocket-school-fonts"
+        },
+        {
+          "name": "--font-mono",
+          "value": "ui-monospace, \"SF Mono\", Menlo, Consolas, \"Liberation Mono\", monospace",
+          "category": "typography-family",
+          "isCustom": true,
+          "description": "Code"
+        },
+        {
+          "name": "--radius-sm",
+          "value": "8px",
+          "category": "border-radius",
+          "isCustom": true,
+          "description": "Chips"
+        },
+        {
+          "name": "--radius-md",
+          "value": "10px",
+          "category": "border-radius",
+          "isCustom": true,
+          "description": "Fields, inner cards (--radius-sm in globals.css)"
+        },
+        {
+          "name": "--radius-lg",
+          "value": "16px",
+          "category": "border-radius",
+          "isCustom": true,
+          "description": "Cards and buttons (--radius)"
+        },
+        {
+          "name": "--radius-xl",
+          "value": "20px",
+          "category": "border-radius",
+          "isCustom": true,
+          "description": ""
+        },
+        {
+          "name": "--radius-2xl",
+          "value": "24px",
+          "category": "border-radius",
+          "isCustom": true,
+          "description": ""
+        },
+        {
+          "name": "--radius-3xl",
+          "value": "28px",
+          "category": "border-radius",
+          "isCustom": true,
+          "description": ""
+        },
+        {
+          "name": "--shadow-sm",
+          "value": "2px 2px 0 #2A211B",
+          "category": "shadow",
+          "isCustom": true,
+          "description": "A small pop \u2014 the pressed state of a button"
+        },
+        {
+          "name": "--shadow-md",
+          "value": "4px 4px 0 #2A211B",
+          "category": "shadow",
+          "isCustom": true,
+          "description": "THE POP (--shadow-lifted): a hard ink offset, no blur. The quiet card wears none"
+        },
+        {
+          "name": "--shadow-lg",
+          "value": "6px 6px 0 #2A211B",
+          "category": "shadow",
+          "isCustom": true,
+          "description": "A bigger pop"
+        },
+        {
+          "name": "--shadow-xl",
+          "value": "8px 8px 0 #2A211B",
+          "category": "shadow",
+          "isCustom": true,
+          "description": "The biggest pop"
+        },
+        {
+          "name": "--border-1",
+          "value": "3px",
+          "category": "border-width",
+          "isCustom": true,
+          "description": "The edge (--edge); pills, tracks and fields use 2px"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "387f666a-c9e9-4154-8d31-63d376489e0c",
+  "name": "Step chip",
+  "path": "/Lesson/Step chip",
+  "type": "visual",
+  "created": "2026-09-19T21:09:29.622Z",
+  "modified": "2026-09-19T21:14:17.041Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One chip of the stepper (L48): a live button carrying the step's title. Its class arrives from the row data (active or not), so the lifted .lesson-step-chip rules decide the look. No numeral on screen; nothing is ever disabled."
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bfad5e47-95c2-4413-b525-090531a52ec4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cr_in",
+      "type": "Component Inputs",
+      "label": "One step",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "goal",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "cr_row",
+      "type": "Group",
+      "label": "The row",
+      "x": 300,
+      "y": 40,
+      "children": [
+        "cr_title",
+        "cr_goal"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomColor": "var(--border-subtle)"
+      }
+    },
+    {
+      "id": "cr_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 360,
+      "y": 160,
+      "parent": "cr_row",
+      "parameters": {
+        "as": "h3",
+        "fontFamily": "var(--font-display)",
+        "fontWeight": 800,
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "cr_goal",
+      "type": "Text",
+      "label": "Goal",
+      "x": 360,
+      "y": 260,
+      "parent": "cr_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    }
+  ],
+  "visualRoots": [
+    "cr_row"
+  ]
+}

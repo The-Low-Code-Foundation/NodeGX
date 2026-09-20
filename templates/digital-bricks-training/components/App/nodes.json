@@ -1,0 +1,69 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8c06431d-ae40-4f70-972e-fa7c6b5d7b86",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "app_root",
+      "type": "Group",
+      "label": "App",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "app_router"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)"
+      },
+      "metadata": {
+        "comment": "The ground is a token so the Styles panel owns it. Full-size so a page's own bands decide their height (settings.bodyScroll is true)."
+      }
+    },
+    {
+      "id": "app_router",
+      "type": "Router",
+      "label": "Main router",
+      "x": 100,
+      "y": 160,
+      "parent": "app_root",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "routes": [
+            "/Pages/Home",
+            "/Pages/Lesson",
+            "/Pages/Course",
+            "/Pages/Palette"
+          ],
+          "startPage": "/Pages/Home"
+        }
+      }
+    },
+    {
+      "id": "app_css",
+      "type": "CSS Definition",
+      "label": "The few things a port cannot say",
+      "x": 400,
+      "y": 40,
+      "parameters": {
+        "style": "/* Digital Bricks Training — the page ground and the pointer. The lesson CSS is the kit's stylesheet. */\nhtml, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }\n.pressable { cursor: pointer; }\n@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }\n"
+      },
+      "metadata": {
+        "comment": "Everything else this template styles lives in noodl_modules/dbt-lesson/styles.css (the product's token aliases and the lesson CSS lifted from globals.css) — TASK-L154 §2. This node holds only what needs the document itself."
+      }
+    }
+  ],
+  "visualRoots": [
+    "app_root"
+  ]
+}

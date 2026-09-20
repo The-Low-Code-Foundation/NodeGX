@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b952d124-580d-4e56-bde5-3a0f352c73fc",
+  "name": "Fixture lesson",
+  "path": "/Data/Fixture lesson",
+  "type": "logic",
+  "created": "2026-09-19T21:08:55.384Z",
+  "modified": "2026-09-19T21:08:55.384Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The lesson this template renders until the backend lands: one Static Data node holding the whole lesson (title, hook, landing, steps indexing a flat sections array), split into outputs. Replace the Static Data node with a query and nothing downstream changes."
+}

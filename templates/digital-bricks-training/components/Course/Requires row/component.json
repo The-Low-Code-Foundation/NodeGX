@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "be84f35f-8a24-4b7a-abfd-4412897df51f",
+  "name": "Requires row",
+  "path": "/Course/Requires row",
+  "type": "visual",
+  "created": "2026-09-20T13:56:03.674Z",
+  "modified": "2026-09-20T13:56:03.674Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing the next dated thing asks for — a coach's prep suggestion, or a criterion the brief names. Plain words in the same ink: no count of how many are done, no tick, no cross, no colour."
+}

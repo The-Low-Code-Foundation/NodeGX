@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cace4a82-009b-4933-8b4e-0aaaeb8d8997",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pl_fixture",
+      "fromProperty": "sections",
+      "toId": "pl_all",
+      "toProperty": "in-sections"
+    },
+    {
+      "fromId": "pl_all",
+      "fromProperty": "out-rows",
+      "toId": "pl_rows",
+      "toProperty": "items"
+    }
+  ]
+}

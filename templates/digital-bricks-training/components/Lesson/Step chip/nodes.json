@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "387f666a-c9e9-4154-8d31-63d376489e0c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sc_in",
+      "type": "Component Inputs",
+      "label": "One step",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "className",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "index",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "fg",
+          "plug": "output",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "id": "sc_btn",
+      "type": "net.noodl.controls.button",
+      "label": "The chip",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "lesson-step-chip dbt-chip"
+      },
+      "metadata": {
+        "comment": "Every chip is a live button whether or not the step is done (L48: nothing gates). The title is the label; position is order and the active styling, never a numeral. The Button control writes its background and colour inline, so both arrive as tokens on the row rather than from the class."
+      }
+    },
+    {
+      "id": "sc_out",
+      "type": "Component Outputs",
+      "label": "Chosen",
+      "x": 300,
+      "y": 300,
+      "ports": [
+        {
+          "name": "select",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "sc_btn"
+  ]
+}

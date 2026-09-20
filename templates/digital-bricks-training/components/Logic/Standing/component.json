@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7559ef04-b662-4e85-9a4a-6155c1ef7a5a",
+  "name": "Standing",
+  "path": "/Logic/Standing",
+  "type": "visual",
+  "created": "2026-09-20T13:54:08.435Z",
+  "modified": "2026-09-20T13:54:08.435Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Where the learner is: two counts, the pace against the end they agreed, and one gauge per agreed objective. Every rule here is PORTED from the product's own pure modules and names the file it came from — a second spelling would let the three panels disagree about one list of entries."
+}

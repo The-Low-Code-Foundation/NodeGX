@@ -1,0 +1,180 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "02367b69-5625-4431-83e6-1d395135d674",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hm_page",
+      "type": "Page",
+      "label": "Home",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "hm_band"
+      ],
+      "parameters": {
+        "title": "Digital Bricks Training",
+        "urlPath": "home"
+      }
+    },
+    {
+      "id": "hm_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "hm_page",
+      "children": [
+        "hm_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-24)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "hm_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "hm_band",
+      "children": [
+        "hm_eyebrow",
+        "hm_title",
+        "hm_line",
+        "hm_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "hm_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "hm_shell",
+      "parameters": {
+        "text": "Digital Bricks Training",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      },
+      "metadata": {
+        "comment": "The accent AS TEXT is --thread-deep (4.65:1), never the coral fill (2.92:1) — sprint 43 §2.2. The alias is defined in the kit stylesheet."
+      }
+    },
+    {
+      "id": "hm_title",
+      "type": "Text",
+      "label": "The headline",
+      "x": 220,
+      "y": 500,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "h1",
+        "text": "Learn to build the thing you actually need.",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-5xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "Grandstander 800 — the one display face, bundled by rocket-school-fonts."
+      }
+    },
+    {
+      "id": "hm_line",
+      "type": "Text",
+      "label": "One line",
+      "x": 220,
+      "y": 600,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "p",
+        "text": "Your own project is the course. Every lesson is written for it, in an order that makes sense for what you are making — with a coach who reads the same page you do.",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "hm_actions",
+      "type": "Group",
+      "label": "Actions",
+      "x": 220,
+      "y": 700,
+      "parent": "hm_shell",
+      "children": [
+        "hm_cta"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)",
+        "paddingTop": "var(--space-2)"
+      }
+    },
+    {
+      "id": "hm_cta",
+      "type": "net.noodl.controls.button",
+      "label": "Open your course",
+      "x": 280,
+      "y": 800,
+      "parent": "hm_actions",
+      "parameters": {
+        "label": "Open your course",
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      },
+      "metadata": {
+        "comment": "The sticker book's button is the lifted .btn.btn-thread rules in the kit stylesheet: Grandstander 800, an ink edge, the 4px pop, ink on coral. Wired to Pages/Course by TASK-L156."
+      }
+    },
+    {
+      "id": "hm_go",
+      "type": "RouterNavigate",
+      "label": "Into the course",
+      "x": 700,
+      "y": 800,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Course"
+      }
+    }
+  ],
+  "visualRoots": [
+    "hm_page"
+  ]
+}

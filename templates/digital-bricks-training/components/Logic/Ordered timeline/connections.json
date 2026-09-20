@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d4aeeaec-af6e-4114-af0a-cdfd86c4adda",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ot_in",
+      "fromProperty": "entries",
+      "toId": "ot_fn",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-ordered",
+      "toId": "ot_out",
+      "toProperty": "ordered"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-loaded",
+      "toId": "ot_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

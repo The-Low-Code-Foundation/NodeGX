@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b4231f34-19df-410f-a65e-f8615ec9b24f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "scl_in",
+      "fromProperty": "goal",
+      "toId": "scl_goal",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "scl_in",
+      "fromProperty": "nextTitle",
+      "toId": "scl_label",
+      "toProperty": "nextTitle"
+    },
+    {
+      "fromId": "scl_label",
+      "fromProperty": "asString",
+      "toId": "scl_next",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "scl_in",
+      "fromProperty": "hasNext",
+      "toId": "scl_next",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "scl_next",
+      "fromProperty": "onClick",
+      "toId": "scl_out",
+      "toProperty": "next"
+    }
+  ]
+}

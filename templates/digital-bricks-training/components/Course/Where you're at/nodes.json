@@ -1,0 +1,241 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2f940117-c534-4528-ab24-8e77fc3b25c9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wy_in",
+      "type": "Component Inputs",
+      "label": "What the block says",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "hasStanding",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "countsSentence",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasEndsOn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "endsOnSentence",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasOrder",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "orderSentence",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasRequires",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "requiresLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requires",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "metadata": {
+        "comment": "Every sentence arrives composed. Logic/Standing owns the counting AND the wording, so nothing here can put a number on screen that the model did not produce — which is what keeps `total` off this surface."
+      }
+    },
+    {
+      "id": "wy_root",
+      "type": "Group",
+      "label": "The block",
+      "x": 360,
+      "y": 40,
+      "children": [
+        "wy_eyebrow",
+        "wy_counts",
+        "wy_when",
+        "wy_order",
+        "wy_requires"
+      ],
+      "parameters": {
+        "as": "section",
+        "cssClassName": "standing",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "`.standing` is a --warm-tint card, and that is the product's own: --warm is encouragement and human recording, which is exactly what this block is. It is NOT borrowed to dramatise a gap — the pace panel below carries no --warm at all, which is the reservation this template inherits."
+      }
+    },
+    {
+      "id": "wy_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 700,
+      "y": 40,
+      "parent": "wy_root",
+      "parameters": {
+        "as": "p",
+        "text": "Where you're at",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      }
+    },
+    {
+      "id": "wy_counts",
+      "type": "Text",
+      "label": "Two counts, in a sentence",
+      "x": 700,
+      "y": 160,
+      "parent": "wy_root",
+      "parameters": {
+        "as": "p",
+        "cssClassName": "standing-counts",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "metadata": {
+        "comment": "NOT A STAT ROW, not two big numerals, not a bar. A stat tile here would be a scoreboard, which is the ban wearing a layout instead of a word. The product bolds the two numbers with <b>; a NodeGX Text node has no rich text, so they are plain — recorded, and it loses nothing but findability."
+      }
+    },
+    {
+      "id": "wy_when",
+      "type": "Text",
+      "label": "The end they agreed",
+      "x": 700,
+      "y": 300,
+      "parent": "wy_root",
+      "parameters": {
+        "as": "p",
+        "cssClassName": "standing-when",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "metadata": {
+        "comment": "A DATE and nothing else: no countdown, no \"N days left\", and no sentence naming the learner as the cause of a gap. Absent entirely when the programme has no agreed end."
+      }
+    },
+    {
+      "id": "wy_order",
+      "type": "Text",
+      "label": "What now, in one sentence",
+      "x": 700,
+      "y": 440,
+      "parent": "wy_root",
+      "parameters": {
+        "as": "p",
+        "cssClassName": "up-next-order",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "metadata": {
+        "comment": "ONE Text for what the product draws as two <p>s of the same class — the order sentence and the all-done line, only ever one of which renders. So it is mounted on THE SENTENCE existing, not on the pair of things behind it: gating it on `dated || lesson` would mount nothing on exactly the learner who has finished everything."
+      }
+    },
+    {
+      "id": "wy_requires",
+      "type": "Group",
+      "label": "What it asks for",
+      "x": 700,
+      "y": 580,
+      "parent": "wy_root",
+      "children": [
+        "wy_req_label",
+        "wy_req_list"
+      ],
+      "parameters": {
+        "cssClassName": "up-next-requires",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "wy_req_label",
+      "type": "Text",
+      "label": "Label",
+      "x": 1040,
+      "y": 580,
+      "parent": "wy_requires",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "wy_req_list",
+      "type": "Group",
+      "label": "The list",
+      "x": 1040,
+      "y": 700,
+      "parent": "wy_requires",
+      "children": [
+        "wy_req_each"
+      ],
+      "parameters": {
+        "cssClassName": "up-next-requires-list",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "wy_req_each",
+      "type": "For Each",
+      "label": "One row per thing it asks for",
+      "x": 1040,
+      "y": 820,
+      "parent": "wy_req_list",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Requires row"
+      }
+    }
+  ],
+  "visualRoots": [
+    "wy_root"
+  ]
+}

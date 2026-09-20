@@ -1,0 +1,9 @@
+{
+  "name": "Rocket School fonts",
+  "browser": {
+    "stylesheets": [
+      "noodl_modules/rocket-school-fonts/styles.css"
+    ]
+  },
+  "_note": "RKT-002, the Sticker book look: Grandstander for titles and buttons, bundled rather than fetched, like the starter project's Inter, so a children's app renders offline and asks nothing of fonts.googleapis.com. Latin and Latin-extended subsets, because French needs \u0153 (c\u0153urs). SIL Open Font License 1.1; the licence travels beside it. Nunito, the body face, used to be bundled here too; since P88 GAM-016 the Playful preset brings it (noodl_modules/preset-font-nunito)."
+}

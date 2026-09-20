@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b4231f34-19df-410f-a65e-f8615ec9b24f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "scl_in",
+      "type": "Component Inputs",
+      "label": "This step",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "goal",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasNext",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "scl_box",
+      "type": "Group",
+      "label": "The close",
+      "x": 300,
+      "y": 40,
+      "children": [
+        "scl_eyebrow",
+        "scl_goal",
+        "scl_next"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "lesson-step-close"
+      },
+      "metadata": {
+        "comment": "The lifted .lesson-step-close rules give it the edge, the pop and its grid column; the Group only sets what CSS cannot know."
+      }
+    },
+    {
+      "id": "scl_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 360,
+      "y": 160,
+      "parent": "scl_box",
+      "parameters": {
+        "text": "Where this step leaves you",
+        "cssClassName": "lesson-step-close-eyebrow"
+      }
+    },
+    {
+      "id": "scl_goal",
+      "type": "Text",
+      "label": "The goal",
+      "x": 360,
+      "y": 260,
+      "parent": "scl_box",
+      "parameters": {
+        "cssClassName": "lesson-step-close-goal"
+      }
+    },
+    {
+      "id": "scl_next",
+      "type": "net.noodl.controls.button",
+      "label": "One way forward",
+      "x": 360,
+      "y": 360,
+      "parent": "scl_box",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "btn btn-thread lesson-step-next pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      },
+      "metadata": {
+        "comment": "Mounted only when there is a next step; on the final step nothing renders here rather than a disabled control. Background and colour are set as tokens because the Button control paints both inline and a class cannot override it."
+      }
+    },
+    {
+      "id": "scl_label",
+      "type": "Expression",
+      "label": "Next: title →",
+      "x": 700,
+      "y": 360,
+      "parameters": {
+        "expression": "'Next: ' + nextTitle + ' →'"
+      }
+    },
+    {
+      "id": "scl_out",
+      "type": "Component Outputs",
+      "label": "Forward",
+      "x": 700,
+      "y": 520,
+      "ports": [
+        {
+          "name": "next",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "scl_box"
+  ]
+}

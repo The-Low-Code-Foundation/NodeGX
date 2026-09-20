@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "03e5eb89-ced5-4ac3-9ec8-9914d7939acc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "projectName",
+      "toId": "cs_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "problemStatement",
+      "toId": "cs_scope",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "entries",
+      "toId": "cs_ordered",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "cs_ordered",
+      "fromProperty": "ordered",
+      "toId": "cs_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_fixture",
+      "fromProperty": "title",
+      "toId": "cs_lesson_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_fixture",
+      "fromProperty": "landing",
+      "toId": "cs_landing",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_fixture",
+      "fromProperty": "steps",
+      "toId": "cs_steps",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_open",
+      "fromProperty": "onClick",
+      "toId": "cs_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "entries",
+      "toId": "cs_standing",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "dimensions",
+      "toId": "cs_standing",
+      "toProperty": "dimensions"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "endsOn",
+      "toId": "cs_standing",
+      "toProperty": "endsOn"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasStanding",
+      "toId": "cs_whereat",
+      "toProperty": "hasStanding"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "countsSentence",
+      "toId": "cs_whereat",
+      "toProperty": "countsSentence"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasEndsOn",
+      "toId": "cs_whereat",
+      "toProperty": "hasEndsOn"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "endsOnSentence",
+      "toId": "cs_whereat",
+      "toProperty": "endsOnSentence"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasOrder",
+      "toId": "cs_whereat",
+      "toProperty": "hasOrder"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "orderSentence",
+      "toId": "cs_whereat",
+      "toProperty": "orderSentence"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasRequires",
+      "toId": "cs_whereat",
+      "toProperty": "hasRequires"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "requiresLabel",
+      "toId": "cs_whereat",
+      "toProperty": "requiresLabel"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "requires",
+      "toId": "cs_whereat",
+      "toProperty": "requires"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasPace",
+      "toId": "cs_pace_wrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "paceView",
+      "toId": "cs_pace",
+      "toProperty": "view"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "parPoints",
+      "toId": "cs_pace",
+      "toProperty": "par"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "paceHeadline",
+      "toId": "cs_pace",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "legendActual",
+      "toId": "cs_pace",
+      "toProperty": "legendActual"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "legendPar",
+      "toId": "cs_pace",
+      "toProperty": "legendPar"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasTrajectory",
+      "toId": "cs_traj",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "trajectoryRows",
+      "toId": "cs_traj_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasEarlier",
+      "toId": "cs_traj_caption",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "earlierCaption",
+      "toId": "cs_traj_caption",
+      "toProperty": "text"
+    }
+  ]
+}

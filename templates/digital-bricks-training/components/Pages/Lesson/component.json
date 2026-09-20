@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6fe0dc8c-a747-4386-92fe-14c2885dd75e",
+  "name": "Lesson",
+  "path": "/Pages/Lesson",
+  "type": "page",
+  "created": "2026-09-19T21:11:05.517Z",
+  "modified": "2026-09-19T21:12:03.561Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The lesson as a workshop: title and hook, the L48 stepper (every step reachable, no numerals), the active step's sections as knots on the thread rendered by the kit's Section node, and the step-close with one way forward. Reads the fixture; nothing fetches."
+}

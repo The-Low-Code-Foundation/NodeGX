@@ -1,0 +1,74 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d4aeeaec-af6e-4114-af0a-cdfd86c4adda",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ot_in",
+      "type": "Component Inputs",
+      "label": "The programme's entries",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "entries",
+          "plug": "output",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "ot_fn",
+      "type": "JavaScriptFunction",
+      "label": "Order, group, fold, preview",
+      "x": 40,
+      "y": 220,
+      "parameters": {
+        "functionScript": "/*\n * PORTED, NEVER RE-DERIVED. Sources, in the product's repo:\n *   orderEntries, aheadGroupOf, KIND_ORDER  -> src/lib/server/timeline/model.ts\n *   previewOf, previewTitle, startsCollapsed -> src/lib/components/course/timeline-preview.ts\n * Proven equal to those functions over this fixture before it was pasted here:\n * same order, same fold, same grouping (TASK-L157 AC3).\n */\nconst KIND_ORDER = ['evaluation', 'session', 'assignment', 'lesson', 'submission', 'message', 'note', 'signal'];\nconst STATE_RANK = { done: 0, now: 1, ahead: 2 };\nconst KIND_RANK = new Map(KIND_ORDER.map((k, i) => [k, i]));\n\n/* The words. One map, so a string table can replace them in one edit (i18n is\n   still the port evaluation's open gap). */\nconst COPY = {\n  kind: { lesson: 'Lesson', session: 'Coaching session', note: 'Note from your coach', assignment: 'Brief', submission: 'What you sent in', evaluation: 'Review' },\n  evaluationKind: { initial: 'Where you started', mid: 'Mid-programme review', final: 'End-of-programme review', impact: 'Six weeks on' },\n  foldedAssignment: 'Your answer, attempt ',\n  foldedArtifact: 'What you sent in, attempt ',\n  aheadScheduled: 'Coming up',\n  aheadPickup: 'Yours to pick up'\n};\n\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\nconst entries = plain(Inputs.entries) || [];\n\n/* 1 band, 2 dated before undated, 3 at, 4 position, 5 kind, 6 id. Total,\n   deterministic and stable — the one property the model owns. */\nconst ordered = [...entries].sort((a, b) => {\n  const band = STATE_RANK[a.state] - STATE_RANK[b.state];\n  if (band !== 0) return band;\n  const aDated = a.at === null ? 1 : 0;\n  const bDated = b.at === null ? 1 : 0;\n  if (aDated !== bDated) return aDated - bDated;\n  if (a.at !== null && b.at !== null && a.at !== b.at) return a.at < b.at ? -1 : 1;\n  if (a.position !== b.position) return a.position - b.position;\n  const kind = (KIND_RANK.get(a.kind) || 0) - (KIND_RANK.get(b.kind) || 0);\n  if (kind !== 0) return kind;\n  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;\n});\n\nconst aheadGroupOf = (e) => (e.state !== 'ahead' ? null : e.kind === 'lesson' ? 'pickup' : 'scheduled');\n\n/* Markdown is carried as TEXT on a folded line, never rendered: a collapsed row\n   is one line of chrome and the open card below has the only render path. */\nconst firstLine = (body, max) => {\n  const limit = max || 90;\n  const line = String(body || '').split('\\n').map((l) => l.trim()).find((l) => l.length > 0) || '';\n  const flat = line.replace(/[#*_`>\\[\\]]/g, '').replace(/\\s+/g, ' ').trim();\n  return flat.length > limit ? flat.slice(0, limit - 1).trimEnd() + '…' : flat;\n};\n\nconst previewOf = (e) => {\n  switch (e.kind) {\n    case 'lesson': return { style: 'text', title: e.title, at: e.at, body: e.rationale };\n    /* A cancelled meeting keeps its place on the timeline, so the moment it\n       says is startsAt rather than at. */\n    case 'session': return { style: 'text', title: e.session.title, at: e.session.startsAt, body: e.session.summary || '' };\n    /* The first line of what the coach actually wrote. Eighteen rows reading\n       \"Note from your coach\" is the wall with fewer pixels. */\n    case 'note': return { style: 'text', title: firstLine(e.note.body), at: e.at, body: e.note.body };\n    /* A review has no title of its own: WHICH of the four points it was is what\n       tells one apart from another on a programme that has four. */\n    case 'evaluation': return { style: 'evaluation', evaluationKind: e.evaluationKind, at: e.at, body: e.summary || '' };\n    case 'assignment': return { style: 'text', title: e.title, at: e.at, body: e.brief };\n    /* A submission has no title either. WHICH attempt is what stops a learner\n       who revised three times reading three identical rows. */\n    case 'submission': return { style: 'submission', attempt: e.attempt, source: e.source, at: e.at, body: '' };\n    /* The one kind this surface has never drawn: a message belongs to the\n       conversation rather than to the programme. */\n    case 'message': return null;\n    default: throw new Error('Ordered timeline: no preview rule for kind \"' + String(e.kind) + '\"');\n  }\n};\n\nconst previewTitle = (p) => {\n  if (p.style === 'text') return p.title;\n  if (p.style === 'evaluation') return COPY.evaluationKind[p.evaluationKind] || p.evaluationKind;\n  return (p.source === 'assignment' ? COPY.foldedAssignment : COPY.foldedArtifact) + p.attempt;\n};\n\n/* Derived from the programme, never stored: persisting a per-card open/closed\n   would let the page revert to the wall it replaced, one expansion at a time.\n   A LESSON reads status rather than state, because a LOCKED lesson is ahead too\n   and folding it would hide the only thing explaining why it cannot be opened. */\nconst startsCollapsed = (e) => (e.kind === 'lesson' ? e.status === 'complete' : e.state === 'done');\n\n/* One owner for every date on this page, pinned to UTC. A bare toLocale* or\n   toDateString() reads the ambient environment and shows a server's calendar\n   day to a learner in another timezone. */\nconst FORMAT = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });\nconst fmtDate = (iso) => (iso ? FORMAT.format(new Date(iso)) : '');\n\n/* ── A SHARED NOTE READS ON THE CARD IT IS ABOUT (sprint 39 §0.3) ────────────\n   A note anchored to an entry is drawn UNDER that entry's card, and its own\n   standalone row is suppressed ONLY when that entry is on this page. Pointed at\n   something that is NOT here it keeps its own card: suppressing unconditionally\n   would silently delete something the coach wrote to them, which sprint 39\n   drove both ways rather than reasoned about. The fixture carries all three\n   cases on purpose — anchored-and-here, anchored-and-elsewhere, and free.\n\n   `onPage` is built from the entries that RENDER rather than from every entry:\n   a note anchored to a `message` would otherwise be suppressed into a row that\n   never draws, and vanish.\n\n   The COUNT on the folded line is this array's LENGTH, never a number sent\n   beside it, so the folded line cannot promise a note the open card does not\n   hold. Nothing in this template supplies `comments`: the conversation's write\n   path is out of scope this sprint, so the row sends no count rather than a\n   hardcoded zero. */\nconst renderable = ordered.filter((e) => previewOf(e) !== null);\nconst onPage = new Set(renderable.map((e) => e.id));\nconst notesByAnchor = new Map();\nconst carried = new Set();\nfor (const e of renderable) {\n  if (e.kind !== 'note') continue;\n  const anchor = e.note && e.note.anchor && e.note.anchor.id;\n  if (!anchor || !onPage.has(anchor)) continue;\n  if (!notesByAnchor.has(anchor)) notesByAnchor.set(anchor, []);\n  notesByAnchor.get(anchor).push(e.note);\n  carried.add(e.id);\n}\n\nconst rows = [];\nlet lastGroup = null;\nfor (const entry of renderable) {\n  if (carried.has(entry.id)) continue;\n  const preview = previewOf(entry);\n  const group = aheadGroupOf(entry);\n  /* The heading is emitted by the FIRST row of each ahead group, which is how\n     one repeater over one ordered list draws two headed groups without the page\n     re-deciding the order. */\n  const heading = group !== null && group !== lastGroup ? (group === 'scheduled' ? COPY.aheadScheduled : COPY.aheadPickup) : '';\n  lastGroup = group;\n  rows.push({\n    id: entry.id,\n    kind: entry.kind,\n    state: entry.state,\n    kindLabel: COPY.kind[entry.kind] || entry.kind,\n    title: previewTitle(preview),\n    body: preview.body || '',\n    when: fmtDate(preview.at),\n    collapsed: startsCollapsed(entry),\n    open: !startsCollapsed(entry),\n    heading: heading,\n    hasHeading: heading !== '',\n    notes: notesByAnchor.get(entry.id) || [],\n    entry: entry\n  });\n}\n\nOutputs.ordered = rows;\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-entries",
+          "plug": "input",
+          "type": "*",
+          "displayName": "entries",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-ordered",
+          "plug": "output",
+          "type": "*",
+          "displayName": "ordered",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONE code node for one calculation (doctrine 8). The ordering, the grouping, the fold and the preview are one rule about one list; splitting them across an Expression and two Functions would be three places a learner's programme could disagree with their coach's."
+      }
+    },
+    {
+      "id": "ot_out",
+      "type": "Component Outputs",
+      "label": "Rows in reading order",
+      "x": 40,
+      "y": 640,
+      "ports": [
+        {
+          "name": "ordered",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}
