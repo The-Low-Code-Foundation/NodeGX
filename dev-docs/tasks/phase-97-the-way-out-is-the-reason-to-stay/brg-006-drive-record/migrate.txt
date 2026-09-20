@@ -1,0 +1,126 @@
+Carry report — /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/brg006-drive-6bsfky/data/local.db
+             -> postgres:///nodegx_brg006_73416_mu9v3w2a
+  taken 2026-09-20T13:40:00.709Z, permissions read from security.json
+
+  [carries ] collection: Follow
+             {"rows":3}
+  [carries ] index: Follow(userId)
+  [carries ] row ACL: Follow
+             {"user":3,"everyone":0,"role":0}
+             Enforced by the app server in the SQL it builds, so it carries because
+             the enforcement code carries — not because anything is written into
+             PostgreSQL.
+  [carries ] collection: Item
+             {"rows":7}
+  [carries ] unique index: Item(id)
+  [carries ] index: Item(published)
+  [carries ] index: Item(sourceId)
+  [carries ] collection: Keep
+             {"rows":1}
+  [carries ] index: Keep(userId)
+  [carries ] row ACL: Keep
+             {"user":1,"everyone":0,"role":0}
+             (as above)
+  [carries ] collection: Mark
+             {"rows":2}
+  [carries ] index: Mark(itemId)
+  [carries ] collection: Ping
+             {"rows":2}
+  [carries ] collection: Source
+             {"rows":3}
+  [carries ] internal table: _ApiKey
+             {"rows":1}
+             API keys (hashed). Invisible to `exportSchemas()` and `listTables()`,
+             which both filter `_%`.
+  [carries ] internal table: _Audit
+             {"rows":16}
+             the audit log. Invisible to `exportSchemas()` and `listTables()`, which
+             both filter `_%`.
+  [carries ] internal table: _EmailToken
+             {"rows":0}
+             password-reset and verification tokens. Invisible to `exportSchemas()`
+             and `listTables()`, which both filter `_%`.
+  [carries ] internal table: _Files
+             {"rows":1}
+             file RECORDS — the bytes live on disk beside the database, not in it.
+             Invisible to `exportSchemas()` and `listTables()`, which both filter
+             `_%`.
+  [carries ] internal table: _HttpCache
+             {"rows":1}
+             an HTTP response cache — it rebuilds itself, so the data phase may skip
+             it. Invisible to `exportSchemas()` and `listTables()`, which both filter
+             `_%`.
+  [carries ] relation junction table: _Join_users__Role
+             {"rows":1}
+             Carried as a table in its own right: the relation is its rows.
+  [carries ] internal table: _Role
+             {"rows":1}
+             roles. Invisible to `exportSchemas()` and `listTables()`, which both
+             filter `_%`.
+  [carries ] internal table: _Schema
+             {"rows":15}
+             the schema the adapter itself tracks. Invisible to `exportSchemas()` and
+             `listTables()`, which both filter `_%`.
+  [carries ] internal table: _Session
+             {"rows":2}
+             live sessions — carrying it keeps everyone logged in across the move.
+             Invisible to `exportSchemas()` and `listTables()`, which both filter
+             `_%`.
+  [carries ] internal table: _User
+             {"rows":2}
+             user accounts. Invisible to `exportSchemas()` and `listTables()`, which
+             both filter `_%`.
+  [carries ] internal table: _UserIdentity
+             {"rows":0}
+             OAuth identities. Invisible to `exportSchemas()` and `listTables()`,
+             which both filter `_%`.
+  [carries ] collection permissions: security.json (6 collections with their own rules)
+             The same file governs the same app server after the move; nothing about
+             it is database-specific.
+
+  26 carry, 0 degraded, 0 refused — 17 tables, 58 rows.
+  Nothing refuses to cross.
+  snapshot: online-backup, 335872 bytes
+  Follow: 3/3     Item: 7/7     Keep: 1/1     Mark: 2/2     Ping: 2/2     Source: 3/3     _ApiKey: 1/1     _Audit: 16/16     _Files: 1/1     _HttpCache: 1/1     _Join_users__Role: 1/1     _Role: 1/1     _Schema: 15/15     _Session: 2/2     _User: 2/2   
+Verify — postgres:///nodegx_brg006_73416_mu9v3w2a
+
+  table                source  postgres  compared
+  Follow                    3         3         3
+  Item                      7         7         7
+  Keep                      1         1         1
+  Mark                      2         2         2
+  Ping                      2         2         2
+  Source                    3         3         3
+  _ApiKey                   1         1         1
+  _Audit                   16        16        16
+  _EmailToken               0         0         0
+  _Files                    1         1         1
+  _HttpCache                1         1         1
+  _Join_users__Role         1         1         1
+  _Role                     1         1         1
+  _Schema                  15        15         0
+  _Session                  2         2         2
+  _User                     2         2         2
+  _UserIdentity             0         0         0
+
+✅ Nothing differs. 43 records compared through both adapters.
+
+Notes (6) — same value, different spelling:
+  - Mark.pinned on 52004610-3984-4089-a929-b4cfa1b18948: same value, 1 on SQLite and true on PostgreSQL
+  - Mark.pinned on b28fa789-b58d-45c0-b9b2-b891e5ec686d: same value, 1 on SQLite and true on PostgreSQL
+  - _ApiKey.revoked on 9e241b41-919c-456c-abfa-2768dcd91156: same value, 0 on SQLite and false on PostgreSQL
+  - _Files.private on 8210bcbc-5aac-44af-a077-12ec428b7a59: same value, 0 on SQLite and false on PostgreSQL
+  - _User.emailVerified on 23dd767e-9892-4965-bb82-4f2b29a39e45: same value, 0 on SQLite and false on PostgreSQL
+  - _User.emailVerified on 983b5580-c058-45ea-aae0-0bd2f307f238: same value, 0 on SQLite and false on PostgreSQL
+
+Copied 58 rows in 15 batches, 0.1s.
+Source unchanged: sha256 5eb4e3dcdca92dcd before and after (AC7).
+
+Cutover:
+  NODEGX_STORAGE_URL=postgres:///nodegx_brg006_73416_mu9v3w2a nodegx-backend serve --data-dir <dir>
+  /health reports engine "postgres" and the pool once it is up.
+
+Going back:
+  Unset NODEGX_STORAGE_URL and start again. The SQLite database at
+  /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/brg006-drive-6bsfky/data/local.db was opened read-only and is byte-identical to before the migration,
+  so it is still the app it was. Nothing about this move is one-way.

@@ -220,7 +220,7 @@ const PASSIVE = (inputs: string[]): Record<string, boolean> =>
  * no value for it" — which is where this was found. `runtasks.ts` has the same knowledge written
  * out by hand, one line above the loop that copies the rest of the fields.
  */
-const ROW_HELPERS = [
+export const ROW_HELPERS = [
   'function rowsOf(value) {',
   '  const list = value ? Array.prototype.slice.call(value) : [];',
   '  return list.map(function (row) {',
