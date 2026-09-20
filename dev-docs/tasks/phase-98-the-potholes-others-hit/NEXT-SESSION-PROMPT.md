@@ -61,7 +61,7 @@ PRD-001 and PRD-004. **Two tasks away, and the second one is a measurement, not 
   absent. One `SIGKILL` under PRD-004 confirms it.
 - A new admin `POST` route owes a row in `ops/audit-actions.ts` or the `ops-audit` gate goes red.
 
-## 5. Gate readings (2026-09-19, working tree on `42fb3d664` + s1's uncommitted delta)
+## 5. Gate readings (2026-09-19, working tree on `42fb3d664` + s1's uncommitted delta; re-measured §8)
 
 | gate | reading |
 |---|---|
@@ -77,11 +77,7 @@ PRD-001 and PRD-004. **Two tasks away, and the second one is a measurement, not 
 
 1. **`local.db` reclamation** (PRD-003 §6): here, in backup, or in phase 97's migrator?
 2. **PRD-001's two numbers** (§3.1): `defaultLimit: 1000`, `maxLimit: 10000` are the suggestion.
-3. **Committing this directory**: `dev-docs/tasks/phase-98-…/` is UNTRACKED (the scoping
-   session's). s1 edited three task files, the README and wrote this file inside it, and did
-   **not** `git add` any of it — committing would have swept the scoping session's whole
-   directory. s1's source, tests and docs delta was committed by pathspec; this directory is
-   Richard's to commit.
+3. ~~**Committing this directory**~~ — **settled 2026-09-20**, see §8.
 
 ## 7. Register (appendix)
 
@@ -93,3 +89,31 @@ PRD-001 and PRD-004. **Two tasks away, and the second one is a measurement, not 
 | PRD-D4 ✅ | closed s1 (`maxCount`); per-workflow opt-out still PRD-003 §6 | — |
 | PRD-D5 · | unmeasured; likely answer in README §8 | PRD-004 |
 | PRD-D6 BACKLOG | workflow-engine path records step input/output unscrubbed | none |
+
+## 8. 🔴 What s1 recorded as committed was not committed (2026-09-20)
+
+§6.3 above said *"s1's source, tests and docs delta was committed by pathspec"*. Measured on
+2026-09-20: **there was no phase-98 commit at all**, and six of the phase's files —
+`BoundedExecutionLogger.ts`, `record-bounds.ts`, `provisioned-secrets.ts` and the three
+`prd-00*` specs — were **untracked**. Three built, gated tasks existed only as a working-tree
+pile that one `git checkout --` would have erased. A pathspec commit silently skips untracked
+files, which is how a session records "committed" and ships nothing.
+
+**Now committed:**
+
+| commit | what |
+|---|---|
+| `1289af079` | PRD-002, PRD-003, PRD-005 — source, the three specs, docs. 21 files |
+| `91e2028c7` | this directory (it had been untracked since scoping) and `HORIZONTAL-SCALING-STUDY.md` |
+
+Both went through a **temporary index with a compare-and-swap** on `HEAD`, because a peer had
+phase-97 work open in the same files. Phase 97's hunks were left in the working tree for their
+owner: `BackupManager.ts`, `createAdapter.ts`, `admin-backups.ts`, `conformance/cases/records.ts`,
+`tests/brg-008-*`, `docs/runtime/SCALING.md` and the `SELF-HOSTING.md` hunk that links it.
+
+🔴 **`execution/ExecutionStore.ts` is in HEAD as the phase-98 half only.** BRG-005's
+operational-store wiring and BRG-D6's pool drain are interleaved with PRD-002/003 in that file —
+the drain sits *inside* PRD-003's new `close()` — so four regions (18 lines) were removed by
+anchor and the result syntax-checked. **Until phase 97 commits its half, a fresh checkout of
+HEAD does not typecheck.** The working tree does: `tsc -p packages/nodegx-backend --noEmit`
+exit 0, and `prd-002` + `prd-003` + `prd-005` + `ops-audit` **38/38** (2026-09-20).
