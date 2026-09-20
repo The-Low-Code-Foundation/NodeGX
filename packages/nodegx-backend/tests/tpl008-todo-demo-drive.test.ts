@@ -34,7 +34,9 @@ import * as path from 'path';
 import { placeStarterAssets } from './helpers/judge';
 import { clickButton, fill } from './helpers/members-drive';
 import { withRenderedPage } from './helpers/site-drive';
-import { buttonDisabled, clickButtonBeside, clickButtonByField, clickWords, pathname, text, until, wait } from './helpers/todo-drive';
+import {
+  buttonDisabled, clickButtonBeside, clickButtonBesideField, clickButtonByField, clickWords, pathname, text, until, wait
+} from './helpers/todo-drive';
 
 jest.setTimeout(600_000);
 
@@ -176,7 +178,9 @@ describe('TPL-008 AC10 — the browser-only demo, driven', () => {
         await until('list tab', () => text(page), (s) => s.includes(CHAIR));
         await clickWords(page, NOTES);
         await until('notes open', () => text(page), (s) => s.includes('Lead with the templates'));
-        await clickButtonBeside(page, SHIPPED, 1, 0);
+        // s8: a ticked next action's line holds two buttons (tick, description), and its
+        // title is a field, so the row is found by what that field holds.
+        await clickButtonBesideField(page, SHIPPED, 2, 0);
         await until('untick dialog', () => text(page), (s) => s.includes('It goes back in at the bottom of the next actions.'));
         await fill(page, 'what happened', UNTICK_NOTE);
         await clickButton(page, 'Untick');

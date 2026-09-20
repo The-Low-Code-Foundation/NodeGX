@@ -28,6 +28,12 @@
       "toProperty": "in-selectedId"
     },
     {
+      "fromId": "slIn",
+      "fromProperty": "openActionId",
+      "toId": "slBuild",
+      "toProperty": "in-openActionId"
+    },
+    {
       "fromId": "slBuild",
       "fromProperty": "out-found",
       "toId": "slOut",

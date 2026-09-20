@@ -5,6 +5,9 @@ one list, and its order is **what you are going to do next** — which only you 
 
 - A new task goes in at the bottom. Move it up if it matters more.
 - Open a task to give it a deadline, next actions (in the same kind of order) and notes.
+- A title — the task’s or a next action’s — is a box: type over it and press Enter, or click away.
+- **Description** on a next action opens a box for what it involves. Leaving the box writes it and
+  closes it, and **Save** does the same; only one is open at a time.
 - **Nothing is ever deleted.** You close a task by writing what happened — even
   "not needed, dropping it" — and every move, note, rename, tick and close is kept in its history.
 
@@ -28,7 +31,7 @@ The access rules ship as `nodegx.security.json`:
 
 ## How it is built
 
-- **`Commands/`** — one component for each thing a person can do: Add task, Move task, Close task, Reopen task, Rename task, Set deadline, Add action, Tick action, Untick action, Move action, Describe action, Add note.
+- **`Commands/`** — one component for each thing a person can do: Add task, Move task, Close task, Reopen task, Rename task, Set deadline, Add action, Tick action, Untick action, Move action, Rename action, Describe action, Add note.
   Each one checks its input, writes the record, then writes a line of history. Read one and you have
   read the pattern.
 - **`Logic/Write history`** is the only thing that writes to `Event`. Moving the same task several

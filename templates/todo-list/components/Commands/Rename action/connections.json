@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bfa6e892-b192-5930-8599-a538ce9b32e5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "RenameactiIn",
+      "fromProperty": "rows",
+      "toId": "RenameactiGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "RenameactiIn",
+      "fromProperty": "actionId",
+      "toId": "RenameactiGuard",
+      "toProperty": "in-actionId"
+    },
+    {
+      "fromId": "RenameactiIn",
+      "fromProperty": "newTitle",
+      "toId": "RenameactiGuard",
+      "toProperty": "in-newTitle"
+    },
+    {
+      "fromId": "RenameactiIn",
+      "fromProperty": "do",
+      "toId": "RenameactiGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "RenameactiGuard",
+      "fromProperty": "out-title",
+      "toId": "RenameactiWrite",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "RenameactiIn",
+      "fromProperty": "actionId",
+      "toId": "RenameactiWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "RenameactiGuard",
+      "fromProperty": "out-go",
+      "toId": "RenameactiWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "RenameactiIn",
+      "fromProperty": "taskId",
+      "toId": "RenameactiHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "RenameactiGuard",
+      "fromProperty": "out-summary",
+      "toId": "RenameactiHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "RenameactiWrite",
+      "fromProperty": "done",
+      "toId": "RenameactiHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "RenameactiHistory",
+      "fromProperty": "done",
+      "toId": "RenameactiOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "RenameactiWrite",
+      "fromProperty": "failure",
+      "toId": "RenameactiProblem",
+      "toProperty": "do"
+    }
+  ]
+}

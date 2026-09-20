@@ -235,6 +235,92 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.evaluate(`localStorage.removeItem(${JSON.stringify(THEME_KEY)})`);
   await system('light');
 
+  // ── s8: a next action's title is a field, and Save writes AND closes the description ──
+  // Richard, 2026-09-20: *"I can't edit a 'next action' title, and when I type a description
+  // I can't save or exit the description input field."* Both are graded here, on the built
+  // site, because both were invisible to every clause above.
+  const ACT = 'Lead with the templates';
+  const ACT_RENAMED = 'Lead with the templates first';
+  const DESC = 'Three new ones went out this month.';
+  const boxes = async () => Number(await page.evaluate(`document.querySelectorAll('textarea[placeholder="Add a description"]').length`));
+  /** The nth button on the line of the action whose TITLE FIELD holds `value` — an input has no text. */
+  const buttonBesideField = (value, count, index) =>
+    page.evaluate(`(() => {
+      const fields = [...document.querySelectorAll('input, textarea')].filter((i) => i.value === ${JSON.stringify(value)});
+      for (const f of fields) {
+        for (let el = f.parentElement; el; el = el.parentElement) {
+          const bs = el.querySelectorAll('button');
+          if (bs.length === 0) continue;
+          if (bs.length !== ${count}) break;
+          const b = bs[${index}];
+          b.scrollIntoView({ block: 'center', behavior: 'instant' });
+          const r = b.getBoundingClientRect();
+          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        }
+      }
+      return null;
+    })()`);
+  const storedAction = async () =>
+    ((await store())?.Action || []).find((a) => a.title === ACT || a.title === ACT_RENAMED);
+
+  // Open the task again: a reload closed the detail pane.
+  const listTitle = await page.evaluate(`(() => {
+    const leaf = [...document.querySelectorAll('body *')].find((e) => e.children.length === 0 && (e.textContent || '').trim() === ${JSON.stringify('Write the release notes')});
+    if (!leaf) return null;
+    leaf.scrollIntoView({ block: 'center', behavior: 'instant' });
+    const r = leaf.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  })()`);
+  if (listTitle) await press(listTitle);
+  await until(async () => (await buttonBesideField(ACT, 4, 1)) !== null, (v) => v === true, 8000);
+
+  const descBtn = await buttonBesideField(ACT, 4, 1);
+  if (descBtn) await press(descBtn);
+  const boxOpened = await until(boxes, (n) => n === 1, 6000);
+  // The box opens holding what is already there, so clear it before typing.
+  await page.evaluate(`(() => {
+    const f = [...document.querySelectorAll('textarea')].find((i) => (i.getAttribute('placeholder') || '') === 'Add a description');
+    if (f) { f.focus(); f.value = ''; }
+  })()`);
+  const typedDesc = await type('Add a description', DESC);
+  await clickButton('Save', null);
+  const describedRow = await until(storedAction, (a) => a && a.description === DESC);
+  const boxAfterSave = await until(boxes, (n) => n === 0, 6000);
+  check(
+    's8: Description opens a box, and Save writes it and shuts it',
+    boxOpened === 1 && typedDesc === true && describedRow?.description === DESC && boxAfterSave === 0,
+    JSON.stringify({ boxOpened, typedDesc, wrote: describedRow?.description, boxAfterSave })
+  );
+
+  // The title is a field: type over it and press Enter, as the task's title works.
+  const caret = await page.evaluate(`(() => {
+    const f = [...document.querySelectorAll('input, textarea')].find((i) => i.value === ${JSON.stringify(ACT)});
+    if (!f) return null;
+    f.scrollIntoView({ block: 'center', behavior: 'instant' });
+    const r = f.getBoundingClientRect();
+    return { x: r.left + 20, y: r.top + r.height / 2 };
+  })()`);
+  let renamedRow = null;
+  if (caret) {
+    await press(caret);
+    await page.evaluate(`(() => {
+      const f = [...document.querySelectorAll('input, textarea')].find((i) => i.value === ${JSON.stringify(ACT)});
+      if (f) { f.focus(); f.value = ''; }
+    })()`);
+    await page.client.send('Input.insertText', { text: ACT_RENAMED });
+    await wait(400);
+    for (const type of ['keyDown', 'keyUp']) {
+      await page.client.send('Input.dispatchKeyEvent', { type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13 });
+    }
+    renamedRow = await until(storedAction, (a) => a && a.title === ACT_RENAMED);
+  }
+  check(
+    's8: a next action’s title is a field — typing over it and pressing Enter renames it',
+    !!caret && renamedRow?.title === ACT_RENAMED,
+    JSON.stringify({ foundField: !!caret, title: renamedRow?.title })
+  );
+  await shot('2c-next-action');
+
   // ── Nothing else was asked ───────────────────────────────────────────────
   const errors = [...page.consoleErrors];
   const netErrors = [...page.networkErrors];

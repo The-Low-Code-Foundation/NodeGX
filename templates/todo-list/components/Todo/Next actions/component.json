@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "A task’s next actions in order — open ones numbered, ticked ones after — and the box that adds one at the bottom."
+  "description": "A task’s next actions in order — open ones numbered, ticked ones after — and the box that adds one at the bottom. Which one has its description open is the page’s to hold, so only ever one does."
 }

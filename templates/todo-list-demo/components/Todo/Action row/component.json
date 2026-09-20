@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "One next action: its number, a tick box, its title and move buttons. Click the title to open its description. A ticked action shows what happened instead of a number."
+  "description": "One next action: its number, a tick box, its title (edit it in place, Enter saves) and the buttons that move it. Description opens a box for what it involves; leaving the box, or Save, writes it and closes it. A ticked action shows what happened instead of a number."
 }

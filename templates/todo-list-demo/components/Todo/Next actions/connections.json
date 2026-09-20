@@ -71,6 +71,24 @@
     },
     {
       "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-rename",
+      "toId": "naOut",
+      "toProperty": "rename"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-openDescription",
+      "toId": "naOut",
+      "toProperty": "openDescription"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-closeDescription",
+      "toId": "naOut",
+      "toProperty": "closeDescription"
+    },
+    {
+      "fromId": "naEach",
       "fromProperty": "itemOutputSignal-describe",
       "toId": "naOut",
       "toProperty": "describe"
@@ -86,6 +104,12 @@
       "fromProperty": "itemOutput-title",
       "toId": "naOut",
       "toProperty": "actionTitle"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutput-titleText",
+      "toId": "naOut",
+      "toProperty": "actionTitleText"
     },
     {
       "fromId": "naEach",

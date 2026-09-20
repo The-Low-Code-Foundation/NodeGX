@@ -70,6 +70,12 @@
       "toProperty": "selectedId"
     },
     {
+      "fromId": "tdOpenAction",
+      "fromProperty": "value",
+      "toId": "tdSel",
+      "toProperty": "openActionId"
+    },
+    {
       "fromId": "tdTab",
       "fromProperty": "currentState",
       "toId": "tdHeader",
@@ -314,6 +320,54 @@
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromList",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromDone",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromLog",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDeselect",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "tdOpenDesc",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "openDescription",
+      "toId": "tdOpenDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "closeDescription",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "describe",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
     },
     {
       "fromId": "tdList",
@@ -726,6 +780,36 @@
     {
       "fromId": "tdSel",
       "fromProperty": "actionRows",
+      "toId": "cmdRenameAct",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdRenameAct",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "cmdRenameAct",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionTitleText",
+      "toId": "cmdRenameAct",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "rename",
+      "toId": "cmdRenameAct",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "actionRows",
       "toId": "cmdDescribe",
       "toProperty": "rows"
     },
@@ -851,6 +935,12 @@
     },
     {
       "fromId": "cmdActDown",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRenameAct",
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "refresh"

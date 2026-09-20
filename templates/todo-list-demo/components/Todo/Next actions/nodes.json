@@ -48,6 +48,21 @@
           "type": "signal"
         },
         {
+          "name": "rename",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "closeDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
           "name": "describe",
           "plug": "input",
           "type": "signal"
@@ -64,6 +79,11 @@
         },
         {
           "name": "actionTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "actionTitleText",
           "plug": "input",
           "type": "string"
         },

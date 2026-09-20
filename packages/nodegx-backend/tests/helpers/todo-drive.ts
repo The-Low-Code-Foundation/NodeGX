@@ -194,3 +194,57 @@ export async function pickDate(page: RenderedPage, iso: string): Promise<{ input
   }
   throw new Error(`pickDate: ${iso} never appeared in the calendar`);
 }
+
+/**
+ * s8 — **a next action's title is a field now, so its row cannot be found by its words.**
+ * `clickButtonBeside` walks up from a leaf whose `textContent` is the title, and an
+ * `<input>` has none. This walks up from the field *holding* `value` instead, to the
+ * smallest element around it with exactly `count` buttons: an open next action's line
+ * holds four (tick, description, up, down) and a ticked one two (tick, description).
+ */
+export async function clickButtonBesideField(page: RenderedPage, value: string, count: number, index: number): Promise<void> {
+  const found = String(
+    await page.evaluate(`(function () {
+      var want = ${JSON.stringify(value)};
+      var fields = Array.prototype.filter.call(document.querySelectorAll('input, textarea'), function (i) {
+        return i.value === want;
+      });
+      for (var i = 0; i < fields.length; i++) {
+        for (var el = fields[i].parentElement; el; el = el.parentElement) {
+          var bs = el.querySelectorAll('button');
+          if (bs.length === 0) continue;
+          if (bs.length !== ${count}) break;
+          var b = bs[${index}];
+          b.scrollIntoView({ block: 'center', behavior: 'instant' });
+          var r = b.getBoundingClientRect();
+          return JSON.stringify({ x: r.left + r.width / 2, y: r.top + r.height / 2, disabled: !!b.disabled });
+        }
+      }
+      return 'absent:' + fields.length + ':' + JSON.stringify(Array.prototype.map.call(document.querySelectorAll('input, textarea'), function (i) { return i.value; }));
+    })()`)
+  );
+  if (found.startsWith('absent')) throw new Error(`no ${count}-button element around the field holding "${value}" (${found})`);
+  const at = JSON.parse(found) as { x: number; y: number; disabled: boolean };
+  if (at.disabled) throw new Error(`button ${index} beside the field holding "${value}" is disabled`);
+  await clickAt(page, at.x, at.y);
+}
+
+/** Type `next` into the field that currently holds `value`, replacing it — a rename in place. */
+export async function retypeField(page: RenderedPage, value: string, next: string): Promise<void> {
+  const client = (page as unknown as { client: { send(m: string, p: unknown): Promise<unknown> } }).client;
+  const ok = String(
+    await page.evaluate(`(function () {
+      var el = Array.prototype.filter.call(document.querySelectorAll('input, textarea'), function (i) {
+        return i.value === ${JSON.stringify(value)};
+      })[0];
+      if (!el) return 'absent';
+      el.scrollIntoView({ block: 'center', behavior: 'instant' });
+      el.focus();
+      el.value = '';
+      return 'ok';
+    })()`)
+  );
+  if (ok !== 'ok') throw new Error(`retypeField: no field holds "${value}"`);
+  await client.send('Input.insertText', { text: next });
+  await wait(400);
+}

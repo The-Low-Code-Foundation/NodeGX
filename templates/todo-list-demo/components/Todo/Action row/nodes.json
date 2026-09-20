@@ -34,7 +34,12 @@
           "type": "string"
         },
         {
-          "name": "hasDescription",
+          "name": "showPreview",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "descriptionOpen",
           "plug": "output",
           "type": "boolean"
         },
@@ -118,6 +123,21 @@
           "type": "signal"
         },
         {
+          "name": "rename",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "closeDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
           "name": "describe",
           "plug": "input",
           "type": "signal"
@@ -133,13 +153,18 @@
           "type": "string"
         },
         {
+          "name": "titleText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "descriptionText",
           "plug": "input",
           "type": "string"
         }
       ],
       "x": 470,
-      "y": 760
+      "y": 880
     },
     {
       "id": "arRoot",
@@ -187,6 +212,7 @@
         "arNum",
         "arCheck",
         "arTitle",
+        "arDescOpen",
         "arMove"
       ],
       "x": 100,
@@ -254,21 +280,62 @@
     },
     {
       "id": "arTitle",
-      "type": "Text",
+      "type": "net.noodl.controls.textinput",
       "label": "Title",
       "parent": "arTop",
       "parameters": {
-        "text": "",
-        "fontSize": "var(--text-base)",
-        "color": "var(--foreground)",
+        "type": "text",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
           "unit": "%"
-        }
+        },
+        "placeholder": "Next action",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
       },
       "x": 160,
       "y": 520
+    },
+    {
+      "id": "arDescOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Open the description",
+      "parent": "arTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "sizeMode": "contentSize",
+        "label": "Description",
+        "styleCss": "font-size: 0;",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-align-left",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": 0,
+        "iconColor": "var(--muted-foreground)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 640
     },
     {
       "id": "arMove",
@@ -285,7 +352,7 @@
         "arDown"
       ],
       "x": 160,
-      "y": 640
+      "y": 760
     },
     {
       "id": "arUp",
@@ -316,7 +383,7 @@
         "paddingRight": "var(--space-2)"
       },
       "x": 220,
-      "y": 760
+      "y": 880
     },
     {
       "id": "arDown",
@@ -347,7 +414,7 @@
         "paddingRight": "var(--space-2)"
       },
       "x": 220,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "arPreview",
@@ -362,13 +429,14 @@
           "unit": "%"
         },
         "rowGap": "var(--space-0)",
-        "paddingLeft": 62
+        "paddingLeft": 62,
+        "mounted": false
       },
       "children": [
         "arPreviewText"
       ],
       "x": 100,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "arPreviewText",
@@ -386,7 +454,7 @@
         }
       },
       "x": 160,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "arEditor",
@@ -406,10 +474,11 @@
         "mounted": false
       },
       "children": [
-        "arDescField"
+        "arDescField",
+        "arSave"
       ],
       "x": 100,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "arDescField",
@@ -437,7 +506,31 @@
         "placeholder": "Add a description"
       },
       "x": 160,
-      "y": 1360
+      "y": 1480
+    },
+    {
+      "id": "arSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save the description",
+      "parent": "arEditor",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 160,
+      "y": 1600
     },
     {
       "id": "arNote",
@@ -460,19 +553,7 @@
         "marginBottom": "var(--space-1)"
       },
       "x": 100,
-      "y": 1480
-    },
-    {
-      "id": "arFold",
-      "type": "States",
-      "label": "Is the description open?",
-      "parameters": {
-        "states": "closed,open",
-        "currentState": "closed",
-        "useTransitions": false
-      },
-      "x": 470,
-      "y": 1240
+      "y": 1720
     },
     {
       "id": "arWhich",

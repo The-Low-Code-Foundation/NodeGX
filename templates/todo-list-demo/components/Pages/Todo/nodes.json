@@ -375,7 +375,7 @@
       "type": "Screen Resolution",
       "label": "How wide the screen is",
       "x": 650,
-      "y": 3760
+      "y": 4120
     },
     {
       "id": "tdLayout",
@@ -444,7 +444,7 @@
         "name": "todoSelected"
       },
       "x": 650,
-      "y": 3160
+      "y": 3520
     },
     {
       "id": "tdSelectFromList",
@@ -491,6 +491,38 @@
       "y": 2080
     },
     {
+      "id": "tdOpenAction",
+      "type": "Variable2",
+      "label": "Which description is open",
+      "parameters": {
+        "name": "todoOpenAction"
+      },
+      "x": 650,
+      "y": 4240
+    },
+    {
+      "id": "tdOpenDesc",
+      "type": "Set Variable",
+      "label": "Open a description",
+      "parameters": {
+        "name": "todoOpenAction",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "tdCloseDesc",
+      "type": "Set Variable",
+      "label": "Close the description",
+      "parameters": {
+        "name": "todoOpenAction",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
       "id": "cmdAdd",
       "type": "/Commands/Add task",
       "label": "Add",
@@ -532,14 +564,14 @@
       "type": "/Commands/Close task",
       "label": "Close",
       "x": 650,
-      "y": 3280
+      "y": 3640
     },
     {
       "id": "cmdReopen",
       "type": "/Commands/Reopen task",
       "label": "Reopen",
       "x": 650,
-      "y": 3400
+      "y": 3760
     },
     {
       "id": "cmdRename",
@@ -560,21 +592,21 @@
       "type": "/Commands/Add action",
       "label": "AddAction",
       "x": 650,
-      "y": 2560
+      "y": 2800
     },
     {
       "id": "cmdTick",
       "type": "/Commands/Tick action",
       "label": "Tick",
       "x": 650,
-      "y": 3520
+      "y": 3880
     },
     {
       "id": "cmdUntick",
       "type": "/Commands/Untick action",
       "label": "Untick",
       "x": 650,
-      "y": 3640
+      "y": 4000
     },
     {
       "id": "cmdActUp",
@@ -584,7 +616,7 @@
         "direction": "up"
       },
       "x": 650,
-      "y": 2680
+      "y": 2920
     },
     {
       "id": "cmdActDown",
@@ -594,21 +626,28 @@
         "direction": "down"
       },
       "x": 650,
-      "y": 2800
+      "y": 3040
+    },
+    {
+      "id": "cmdRenameAct",
+      "type": "/Commands/Rename action",
+      "label": "RenameAct",
+      "x": 650,
+      "y": 3160
     },
     {
       "id": "cmdDescribe",
       "type": "/Commands/Describe action",
       "label": "Describe",
       "x": 650,
-      "y": 2920
+      "y": 3280
     },
     {
       "id": "cmdNote",
       "type": "/Commands/Add note",
       "label": "Note",
       "x": 650,
-      "y": 3040
+      "y": 3400
     }
   ],
   "visualRoots": [

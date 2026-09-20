@@ -51,6 +51,7 @@ failure this file's first house rule exists to prevent.
 | D15 | ⚠️ open | **DEF-006** | product | every agent styling on-system |
 | D16 | ✅ fixed s6 | — | template | (was: every gated screen) |
 | D17 | ✅ answered s5 | — | — | — |
+| D76 | 🔴 open — measured 09-20 | **NONE** | product (`For Each`) | any repeated row that answers one event with two signals — a field that must save AND close, a button that must record AND navigate |
 | **D18** | 🔴 open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
 | **D19** | ⚠️ open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
 | **D20** | 🔴 open (08-29) | **DEF-006** — **filed** as §0(c) (was `NONE`, s17) | product | every agent styling on-system |
@@ -2998,3 +2999,34 @@ Single-page demos (story engine, pixel dungeon) never navigate, so never showed 
 reload stays under the base and the plain file server answers it); the template itself is unchanged. Driven locally under the path
 (16/16) and on the public URL (TPL-007 §15). **Cheapest door:** prefix `BaseUrl` in `_getCompleteUrlToPage` for path mode, and have
 `nodegx-deploy.cjs --base-url` either warn about a multi-page path-mode project or write the host fallback it needs. Owner `NONE`.
+
+## D76 — 🔴 A repeated row can only send ONE signal per update through a `For Each`; a second one silently replaces the first
+
+**Measured 2026-09-20 (TPL-008 s8), on Richard's report that a next action's description "can't
+save or exit".**
+
+`Todo/Action row` ends a description edit on the field's `Blurred`, and that one event has two
+jobs: write the text (`describe`) and shut the box (`closeDescription`). Both were wired straight
+out of the row's `Component Outputs`, which is the obvious graph and reads correctly.
+
+**What happens.** `foreach.tsx`'s `itemOutputSignalTriggered` records the signal's name in
+`_internal.itemActionSignal`, then schedules ONE `scheduleAfterUpdate` behind
+`hasScheduledTriggerItemOutputSignal`. A second signal from the same row in the same update does
+not schedule its own callback — it overwrites `itemActionSignal` and returns. When the one
+callback runs it sends `itemOutputSignal-<the LAST name>`. **The first signal is never sent, and
+nothing says so.**
+
+**What was done.** The drive (`tpl008-todo-drive.test.ts` §4) typed a description and pressed
+Save. `closeDescription` arrived and shut the box; `describe` was dropped, and the record's
+`description` stayed empty through a 20-second wait — a page that looks like it worked and a write
+that never happened. Re-wired so the row emits `describe` alone and `Pages/Todo` drives both the
+command and the close from it: 14/14, and the description is written and the box closes.
+
+**Where it bites a person.** Any repeated row that answers one event with two signals — a form row
+that must save and collapse, a list row that must record a choice and navigate. The failure is
+silent and order-dependent (whichever signal is wired second wins), so it looks like a flake: in
+TPL-008 the same press dropped the save on one run and not another.
+
+**The cheapest door** is not a fix to the semantics but a diagnostic: `itemOutputSignalTriggered`
+already knows it is discarding a name, so a second signal in one update could raise
+`repeater/item-signal-replaced` naming both. Queueing them instead would be the real fix. Owner `NONE`.

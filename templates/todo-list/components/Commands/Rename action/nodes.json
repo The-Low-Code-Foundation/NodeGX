@@ -1,0 +1,148 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bfa6e892-b192-5930-8599-a538ce9b32e5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "RenameactiIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "newTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "RenameactiOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "RenameactiGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function findRow(rows, id) {\n  for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];\n  return null;\n}\nvar row = findRow(Inputs.rows || [], String(Inputs.actionId || ''));\nif (!row) return;\nvar old = String(row.title || '');\nvar t = String(Inputs.newTitle || '').trim();\nif (t === '' || t === old) return;\nOutputs.title = t;\nOutputs.summary = 'Next action renamed from “' + old + '”';\nOutputs.go();",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-actionId": false,
+        "runOnChange-in-newTitle": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actionId",
+          "displayName": "actionId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-newTitle",
+          "displayName": "newTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "RenameactiWrite",
+      "type": "SetDbModelProperties",
+      "label": "Rename the next action",
+      "parameters": {
+        "collectionName": "Action",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "RenameactiHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "action-renamed"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "RenameactiProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

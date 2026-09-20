@@ -35,7 +35,10 @@ import { request } from './helpers/http';
 import { placeStarterAssets } from './helpers/judge';
 import { clickButton, currentSession, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
-import { blur, buttonDisabled, clickButtonBeside, clickButtonByField, clickWords, pathname, pickDate, text, themeSwitches, until } from './helpers/todo-drive';
+import {
+  blur, buttonDisabled, clickButtonBeside, clickButtonBesideField, clickButtonByField, clickWords, pathname, pickDate,
+  retypeField, text, themeSwitches, until
+} from './helpers/todo-drive';
 
 jest.setTimeout(600_000);
 
@@ -53,6 +56,7 @@ const NOTES = 'Write the release notes';
 const NOTES_RENAMED = 'Write the 0.2.3 release notes';
 const CLOSING_NOTE = 'Booked for Saturday at Mill Lane.';
 const ACTION = 'List what shipped';
+const ACTION_RENAMED = 'List what actually shipped';
 const TICK_NOTE = 'Pulled it from the merged PRs.';
 const DESCRIPTION = 'Lead with the templates, not the fixes.';
 const NOTE = 'The draft is in the shared folder.';
@@ -99,6 +103,9 @@ describe('TPL-008 — the todo list, driven', () => {
     if (!task) return [];
     return (await rows('Event', token)).filter((e) => e.taskId === task.objectId);
   };
+  /** s8: how many description boxes are open. One at a time, and none once one is saved. */
+  const boxes = async (page: RenderedPage): Promise<number> =>
+    Number(await page.evaluate(`document.querySelectorAll('textarea[placeholder="Add a description"]').length`));
   /** D72: what a screen reader calls each button on screen, read from Chrome's own accessibility tree. */
   const buttonNames = async (page: RenderedPage): Promise<string[]> => {
     const client = (page as unknown as { client: { send(m: string, p?: unknown): Promise<unknown> } }).client;
@@ -265,7 +272,9 @@ describe('TPL-008 — the todo list, driven', () => {
         await until('action drawn', () => text(page), (s) => s.includes(ACTION));
         R.actionNamesBefore = await buttonNames(page);
         step('§4 tick action');
-        await clickButtonBeside(page, ACTION, 3, 0);
+        // s8: an open next action's line holds four buttons (tick, description, up, down),
+        // and its title is a field, so the row is found by what the field holds.
+        await clickButtonBesideField(page, ACTION, 4, 0);
         await until('tick dialog', () => text(page), (s) => s.includes('A line is enough.'));
         await fill(page, 'what happened', TICK_NOTE);
         await clickButton(page, 'Tick off');
@@ -273,9 +282,10 @@ describe('TPL-008 — the todo list, driven', () => {
         R.ticked = { done: ticked[0].done, note: ticked[0].note };
         await wait(1500);
         R.actionNamesAfter = await buttonNames(page);
-        // s3: untick was wired and never clicked. A ticked line holds one button, its tick box.
+        // s3: untick was wired and never clicked. A ticked line holds two buttons — its tick
+        // box and (s8) Description — because a done action has nowhere to move to.
         step('§4 untick action');
-        await clickButtonBeside(page, ACTION, 1, 0);
+        await clickButtonBesideField(page, ACTION, 2, 0);
         await until('untick dialog', () => text(page), (s) => s.includes('It goes back in at the bottom of the next actions.'));
         await fill(page, 'what happened', UNTICK_NOTE);
         await clickButton(page, 'Untick');
@@ -283,15 +293,28 @@ describe('TPL-008 — the todo list, driven', () => {
         R.unticked = { done: unticked[0].done, note: unticked[0].note, position: unticked[0].position };
         await wait(1500);
         R.untickLines = (await eventsFor(tk, NOTES)).filter((e) => e.kind === 'action-undone').map((e) => `${e.summary} | ${e.body}`);
+        // 🔴 s8 — Richard: *"when I type a description I can't save or exit the description
+        // input field."* The box is opened by its own button now, and pressing Save has to do
+        // BOTH: write the text and close the box. Both are read below.
         step('§4 describe action');
-        await clickWords(page, ACTION);
-        await until('description open', () =>
-          page.evaluate("document.querySelectorAll('textarea[placeholder=\"Add a description\"]').length"), (n) => Number(n) === 1);
+        await clickButtonBesideField(page, ACTION, 4, 1);
+        await until('description open', () => boxes(page), (n) => n === 1);
         await fill(page, 'add a description', DESCRIPTION);
-        await blur(page);
+        await clickButton(page, 'Save');
         const described = await until('description written', () => rows('Action', tk), (a) => a[0]?.description === DESCRIPTION);
         R.description = described[0].description;
+        R.boxAfterSave = await until('the box closed', () => boxes(page), (n) => n === 0).catch(() => boxes(page));
         await wait(1500);
+
+        // 🔴 s8 — *"I can't edit a 'next action' title."* Now it is a field: type over it and
+        // leave, exactly as the task's title works.
+        step('§4 rename action');
+        await retypeField(page, ACTION, ACTION_RENAMED);
+        await blur(page);
+        const renamedAction = await until('action rename written', () => rows('Action', tk), (a) => a[0]?.title === ACTION_RENAMED);
+        R.actionRenamed = renamedAction[0].title;
+        await wait(1500);
+        R.actionRenameLines = (await eventsFor(tk, NOTES)).filter((e) => e.kind === 'action-renamed').map((e) => String(e.summary));
 
         // ── §5 A note, a rename, a deadline ───────────────────────────────────
         step('§5 note');
@@ -432,6 +455,10 @@ describe('TPL-008 — the todo list, driven', () => {
   it('§4 AC6 — a next action is added, ticked with a note and described', () => {
     expect(R.ticked).toEqual({ done: true, note: TICK_NOTE });
     expect(R.description).toBe(DESCRIPTION);
+    // s8, the half the old build failed: Save wrote it AND shut the box.
+    expect(R.boxAfterSave).toBe(0);
+    expect(R.actionRenamed).toBe(ACTION_RENAMED);
+    expect(R.actionRenameLines).toEqual([`Next action renamed from \u201c${ACTION}\u201d`]);
   });
 
   it('§4 unticking asks why, clears what happened and puts the next action at the bottom of the open ones', () => {
@@ -469,7 +496,7 @@ describe('TPL-008 — the todo list, driven', () => {
     expect(R.deadline).toBe(R.deadlineWanted);
     expect(R.deadlineDue).toBe('Due in 5 days');
     expect(R.historyKinds).toEqual(
-      ['action-added', 'action-described', 'action-done', 'action-undone', 'created', 'deadline', 'moved', 'note', 'renamed'].sort()
+      ['action-added', 'action-described', 'action-done', 'action-renamed', 'action-undone', 'created', 'deadline', 'moved', 'note', 'renamed'].sort()
     );
     expect(String(R.detailText)).toContain(NOTE);
   });

@@ -103,6 +103,7 @@ export const C = {
   tickAction: '/Commands/Tick action',
   untickAction: '/Commands/Untick action',
   moveAction: '/Commands/Move action',
+  renameAction: '/Commands/Rename action',
   describeAction: '/Commands/Describe action',
   addNote: '/Commands/Add note',
   pageTodo: '/Pages/Todo',
@@ -116,7 +117,9 @@ export const VAR = {
   lastHistory: 'todoLastHistory',
   dialogTask: 'todoDialogTask',
   dialogAction: 'todoDialogAction',
-  dialogSubject: 'todoDialogSubject'
+  dialogSubject: 'todoDialogSubject',
+  /** s8 — which next action has its description open. One at a time, and never a per-row toggle (see `ACTION_ROW`). */
+  openAction: 'todoOpenAction'
 } as const;
 
 /** The one sentence a failed write shows. */
@@ -838,7 +841,8 @@ const ACTION_ROW_FIELDS: Array<[string, string]> = [
   ['title', 'string'],
   ['titleColor', 'string'],
   ['description', 'string'],
-  ['hasDescription', 'boolean'],
+  ['showPreview', 'boolean'],
+  ['descriptionOpen', 'boolean'],
   ['noteLine', 'string'],
   ['hasNote', 'boolean'],
   ['done', 'boolean'],
@@ -855,19 +859,62 @@ const ACTION_ROW_OUTS: Array<[string, string]> = [
   ['untick', 'signal'],
   ['up', 'signal'],
   ['down', 'signal'],
+  ['rename', 'signal'],
+  ['openDescription', 'signal'],
+  ['closeDescription', 'signal'],
   ['describe', 'signal'],
   ['id', 'string'],
   ['title', 'string'],
+  ['titleText', 'string'],
   ['descriptionText', 'string']
 ];
+
+/** A row's title, editable in place — the task title's treatment at body size. */
+const ROW_TITLE_FIELD = {
+  type: 'text',
+  sizeMode: 'contentHeight',
+  width: pct(100),
+  placeholder: 'Next action',
+  fontSize: 'var(--text-base)',
+  color: 'var(--foreground)',
+  backgroundColor: 'transparent',
+  borderStyle: 'solid',
+  borderWidth: 'var(--border-1)',
+  borderColor: 'var(--border-subtle)',
+  borderRadius: 'var(--radius-md)',
+  paddingLeft: 'var(--space-2)',
+  paddingRight: 'var(--space-2)',
+  paddingTop: 'var(--space-1)',
+  paddingBottom: 'var(--space-1)'
+};
 
 /** Lines up a row's second line with its title: number (20) + gap (8) + tick (26) + gap (8). */
 const ACTION_INDENT = 62;
 
+/**
+ * 🔴 **s8 — the title is a field, and the box closes when you leave it.** Richard:
+ * *"I can't edit a 'next action' title, and when I type a description I can't save or
+ * exit the description input field."* Both were one node doing two jobs: the title was a
+ * `Text` whose click toggled a per-row `States` fold, so it could not be typed in, and
+ * that fold was the only way out of the editor.
+ *
+ * **Measured before it was changed** (`s8` §0, the demo in headless Chrome): with nothing
+ * typed the fold closed on a second click, but with a save in flight it closed on one run
+ * and stayed open on another — the blur writes the description, the write refreshes the
+ * list, and the rebuild lands between the press and the release often enough to eat the
+ * click. **A toggle is not safe on a press that also saves.** So:
+ *
+ * - the title is a `Text Input` that renames on Enter/blur, exactly as the task's does;
+ * - **which next action is open is one value on the page** (`todoOpenAction`), SET by the
+ *   Description button and CLEARED by the field's own blur. Nothing here toggles, so there
+ *   is no press for a rebuild to eat, and only one description is ever open;
+ * - leaving the field both saves and closes, so `Save` never has to be the thing that
+ *   works — it is the affordance that says so, and it closes an editor nobody typed in.
+ */
 const ACTION_ROW: Tpl008Component = {
   path: 'Todo/Action row',
   description:
-    'One next action: its number, a tick box, its title and move buttons. Click the title to open its description. A ticked action shows what happened instead of a number.',
+    'One next action: its number, a tick box, its title (edit it in place, Enter saves) and the buttons that move it. Description opens a box for what it involves; leaving the box, or Save, writes it and closes it. A ticked action shows what happened instead of a number.',
   ...iface(ACTION_ROW_FIELDS, ACTION_ROW_OUTS),
   nodes: [
     inputs('arIn', 'The next action', ACTION_ROW_FIELDS),
@@ -876,25 +923,27 @@ const ACTION_ROW: Tpl008Component = {
     group('arTop', 'The line', 'arRoot', ROW('var(--space-2)')),
     text('arNum', 'Its place', 'arTop', '', { ...T_META, sizeMode: 'contentHeight', width: px(20), textAlignX: 'right', fontVariantNumeric: 'tabular-nums' }),
     place('arCheck', BUTTON, 'Tick box', 'arTop', { ...BTN_CHECK, label: 'Mark done' }),
-    text('arTitle', 'Title', 'arTop', '', wide(T_BODY)),
+    place('arTitle', TEXT_INPUT, 'Title', 'arTop', ROW_TITLE_FIELD),
+    place('arDescOpen', BUTTON, 'Open the description', 'arTop', BTN_ICON('icon-align-left', 'Description')),
     group('arMove', 'Move buttons', 'arTop', { flexDirection: 'row', alignItems: 'center', sizeMode: 'contentSize' }),
     place('arUp', BUTTON, 'Move up', 'arMove', BTN_ICON('icon-chevron-up', 'Move up')),
     place('arDown', BUTTON, 'Move down', 'arMove', BTN_ICON('icon-chevron-down', 'Move down')),
-    group('arPreview', 'Description, folded', 'arRoot', { ...COLUMN('var(--space-0)'), paddingLeft: ACTION_INDENT }),
+    group('arPreview', 'Description, folded', 'arRoot', { ...COLUMN('var(--space-0)'), paddingLeft: ACTION_INDENT, mounted: false }),
     text('arPreviewText', 'Description', 'arPreview', '', wide(T_META)),
     group('arEditor', 'Description, open', 'arRoot', { ...COLUMN('var(--space-1)'), paddingLeft: ACTION_INDENT, paddingBottom: 'var(--space-2)', mounted: false }),
     place('arDescField', TEXT_INPUT, 'Description', 'arEditor', { ...FIELD, type: 'textArea', placeholder: 'Add a description' }),
+    place('arSave', BUTTON, 'Save the description', 'arEditor', { ...BTN_OUTLINE, label: 'Save', sizeMode: 'contentSize' }),
     text('arNote', 'What happened', 'arRoot', '', { ...wide(T_META), marginLeft: px(ACTION_INDENT), marginBottom: 'var(--space-1)' }),
-    logic('arFold', STATES, 'Is the description open?', { states: 'closed,open', currentState: 'closed', useTransitions: false }),
     logic('arWhich', CONDITION, 'Tick or untick?', signalOnly('condition'))
   ],
   connections: [
     wire('arIn', 'num', 'arNum', 'text'),
-    wire('arIn', 'title', 'arTitle', 'text'),
+    wire('arIn', 'title', 'arTitle', 'startValue'),
     wire('arIn', 'titleColor', 'arTitle', 'color'),
     wire('arIn', 'description', 'arPreviewText', 'text'),
-    wire('arIn', 'hasDescription', 'arPreviewText', 'mounted'),
+    wire('arIn', 'showPreview', 'arPreview', 'mounted'),
     wire('arIn', 'description', 'arDescField', 'startValue'),
+    wire('arIn', 'descriptionOpen', 'arEditor', 'mounted'),
     wire('arIn', 'noteLine', 'arNote', 'text'),
     wire('arIn', 'hasNote', 'arNote', 'mounted'),
     wire('arIn', 'canMove', 'arMove', 'mounted'),
@@ -912,22 +961,35 @@ const ACTION_ROW: Tpl008Component = {
     wire('arWhich', 'onfalse', 'arOut', 'tick'),
     wire('arUp', 'onClick', 'arOut', 'up'),
     wire('arDown', 'onClick', 'arOut', 'down'),
-    wire('arTitle', 'onClick', 'arFold', 'toggle'),
-    wire('arFold', 'at-open', 'arEditor', 'mounted'),
-    wire('arFold', 'at-closed', 'arPreview', 'mounted'),
+    // 🔴 Enter BLURS, and only blur renames. Wiring Enter to rename as well would
+    // rename twice — once on Enter, again on the blur Enter causes (the task title's rule).
+    wire('arTitle', 'onTextChanged', 'arOut', 'titleText'),
+    wire('arTitle', 'onEnter', 'arTitle', 'blur'),
+    wire('arTitle', 'onBlur', 'arOut', 'rename'),
+    wire('arDescOpen', 'onClick', 'arOut', 'openDescription'),
     wire('arDescField', 'onTextChanged', 'arOut', 'descriptionText'),
-    wire('arDescField', 'onBlur', 'arOut', 'describe')
+    // 🔴 **ONE signal out of a row per update.** `For Each` forwards item signals through a
+    // single `scheduleAfterUpdate` (`foreach.tsx`, `itemOutputSignalTriggered`): a second
+    // signal in the same update overwrites which one is sent, and the first is LOST. Blur
+    // wired to both `describe` and `closeDescription` silently dropped the save — measured,
+    // the drive read an empty description after Save. So leaving the box says ONE thing,
+    // and the page below does both jobs with it.
+    wire('arDescField', 'onBlur', 'arOut', 'describe'),
+    // …and Save closes a box nobody typed in, where there is no blur to say it.
+    wire('arSave', 'onClick', 'arOut', 'closeDescription')
   ]
 };
 
 const NEXT_ACTIONS: Tpl008Component = {
   path: 'Todo/Next actions',
-  description: 'A task’s next actions in order — open ones numbered, ticked ones after — and the box that adds one at the bottom.',
+  description:
+    'A task’s next actions in order — open ones numbered, ticked ones after — and the box that adds one at the bottom. Which one has its description open is the page’s to hold, so only ever one does.',
   ...iface(
     [['rows', 'array'], ['clearNew', 'signal']],
     [
-      ['tick', 'signal'], ['untick', 'signal'], ['up', 'signal'], ['down', 'signal'], ['describe', 'signal'], ['add', 'signal'],
-      ['actionId', 'string'], ['actionTitle', 'string'], ['descriptionText', 'string'], ['newTitle', 'string']
+      ['tick', 'signal'], ['untick', 'signal'], ['up', 'signal'], ['down', 'signal'], ['rename', 'signal'],
+      ['openDescription', 'signal'], ['closeDescription', 'signal'], ['describe', 'signal'], ['add', 'signal'],
+      ['actionId', 'string'], ['actionTitle', 'string'], ['actionTitleText', 'string'], ['descriptionText', 'string'], ['newTitle', 'string']
     ]
   ),
   repeats: { source: 'array', rowFields: ACTION_ROW_FIELDS.map(([n]) => n) },
@@ -935,8 +997,9 @@ const NEXT_ACTIONS: Tpl008Component = {
   nodes: [
     inputs('naIn', 'The next actions', [['rows', 'array'], ['clearNew', 'signal']]),
     outputs('naOut', 'What you did', [
-      ['tick', 'signal'], ['untick', 'signal'], ['up', 'signal'], ['down', 'signal'], ['describe', 'signal'], ['add', 'signal'],
-      ['actionId', 'string'], ['actionTitle', 'string'], ['descriptionText', 'string'], ['newTitle', 'string']
+      ['tick', 'signal'], ['untick', 'signal'], ['up', 'signal'], ['down', 'signal'], ['rename', 'signal'],
+      ['openDescription', 'signal'], ['closeDescription', 'signal'], ['describe', 'signal'], ['add', 'signal'],
+      ['actionId', 'string'], ['actionTitle', 'string'], ['actionTitleText', 'string'], ['descriptionText', 'string'], ['newTitle', 'string']
     ]),
     group('naRoot', 'Next actions', undefined, COLUMN('var(--space-2)')),
     text('naHeading', 'Heading', 'naRoot', 'Next actions', { ...wide(T_HEADING), as: 'h2' }),
@@ -959,9 +1022,13 @@ const NEXT_ACTIONS: Tpl008Component = {
     wire('naEach', 'itemOutputSignal-untick', 'naOut', 'untick'),
     wire('naEach', 'itemOutputSignal-up', 'naOut', 'up'),
     wire('naEach', 'itemOutputSignal-down', 'naOut', 'down'),
+    wire('naEach', 'itemOutputSignal-rename', 'naOut', 'rename'),
+    wire('naEach', 'itemOutputSignal-openDescription', 'naOut', 'openDescription'),
+    wire('naEach', 'itemOutputSignal-closeDescription', 'naOut', 'closeDescription'),
     wire('naEach', 'itemOutputSignal-describe', 'naOut', 'describe'),
     wire('naEach', 'itemOutput-id', 'naOut', 'actionId'),
     wire('naEach', 'itemOutput-title', 'naOut', 'actionTitle'),
+    wire('naEach', 'itemOutput-titleText', 'naOut', 'actionTitleText'),
     wire('naEach', 'itemOutput-descriptionText', 'naOut', 'descriptionText')
   ]
 };
@@ -1216,6 +1283,9 @@ Outputs.canMakeNext = isOpen && rank > 1;
 Outputs.closingNote = String(task.closingNote || '');
 
 // Next actions: open ones in order and numbered, ticked ones after them.
+// s8: the page says which one has its description open — a row's own state would
+// be a toggle, and a toggle loses the press that also saves (see Todo/Action row).
+var openId = String(Inputs.openActionId || '');
 var mine = [], maxPos = 0;
 for (var k = 0; k < actions.length; k++) {
   var a = actions[k];
@@ -1236,7 +1306,8 @@ function row(x, index, count) {
     title: String(x.title || ''),
     titleColor: isDone ? 'var(--muted-foreground)' : 'var(--foreground)',
     description: desc,
-    hasDescription: desc !== '',
+    showPreview: desc !== '' && x.id !== openId,
+    descriptionOpen: x.id === openId,
     noteLine: note === '' ? '' : 'Done: ' + note,
     hasNote: isDone && note !== '',
     done: isDone,
@@ -1301,9 +1372,14 @@ const SELECTED_TASK: Tpl008Component = {
   path: 'Logic/Selected task',
   description:
     'Everything the detail pane shows about the selected task: title, where it is, its deadline, its next actions in order and its history, newest first.',
-  ...iface([['tasks', 'array'], ['actions', 'array'], ['events', 'array'], ['selectedId', 'string']], SELECTED_OUTS),
+  ...iface(
+    [['tasks', 'array'], ['actions', 'array'], ['events', 'array'], ['selectedId', 'string'], ['openActionId', 'string']],
+    SELECTED_OUTS
+  ),
   nodes: [
-    inputs('slIn', 'The records', [['tasks', 'array'], ['actions', 'array'], ['events', 'array'], ['selectedId', 'string']]),
+    inputs('slIn', 'The records', [
+      ['tasks', 'array'], ['actions', 'array'], ['events', 'array'], ['selectedId', 'string'], ['openActionId', 'string']
+    ]),
     outputs('slOut', 'The selected task', SELECTED_OUTS),
     derive('slBuild', 'Read the selected task', SELECTED_SCRIPT)
   ],
@@ -1312,6 +1388,7 @@ const SELECTED_TASK: Tpl008Component = {
     wire('slIn', 'actions', 'slBuild', 'in-actions'),
     wire('slIn', 'events', 'slBuild', 'in-events'),
     wire('slIn', 'selectedId', 'slBuild', 'in-selectedId'),
+    wire('slIn', 'openActionId', 'slBuild', 'in-openActionId'),
     ...SELECTED_OUTS.map(([n]) => wire('slBuild', `out-${n}`, 'slOut', n))
   ]
 };
@@ -1879,6 +1956,33 @@ Outputs.go();`,
   history: { kind: 'action-undone', taskId: ['UntickactiIn', 'taskId'], summary: ['UntickactiGuard', 'out-summary'], body: ['UntickactiGuard', 'out-note'] }
 });
 
+const RENAME_ACTION = command({
+  path: 'Commands/Rename action',
+  description: 'Renames a next action, if the new title is different and not empty.',
+  ins: [['rows', 'array'], ['taskId', 'string'], ['actionId', 'string'], ['newTitle', 'string']],
+  guard:
+    FIND_ROW +
+    `var row = findRow(Inputs.rows || [], String(Inputs.actionId || ''));
+if (!row) return;
+var old = String(row.title || '');
+var t = String(Inputs.newTitle || '').trim();
+if (t === '' || t === old) return;
+Outputs.title = t;
+Outputs.summary = 'Next action renamed from \u201c' + old + '\u201d';
+Outputs.go();`,
+  guardIns: ['rows', 'actionId', 'newTitle'],
+  body: (p) => {
+    const w = writeNode(p, 'Write', UPDATE, 'Action', 'Rename the next action', [['title', 'title']], [`${p}In`, 'actionId']);
+    return {
+      nodes: w.nodes,
+      connections: [...w.connections, wire(`${p}Guard`, 'out-go', `${p}Write`, 'store')],
+      historyDo: [[`${p}Write`, 'done']],
+      failures: [[`${p}Write`, 'failure']]
+    };
+  },
+  history: { kind: 'action-renamed', taskId: ['RenameactiIn', 'taskId'], summary: ['RenameactiGuard', 'out-summary'] }
+});
+
 const DESCRIBE_ACTION = command({
   path: 'Commands/Describe action',
   description: 'Saves a next action’s description when it changed.',
@@ -2053,6 +2157,7 @@ const PAGE_COMMANDS: Array<[string, string, Record<string, unknown>?]> = [
   ['cmdUntick', C.untickAction],
   ['cmdActUp', C.moveAction, { direction: 'up' }],
   ['cmdActDown', C.moveAction, { direction: 'down' }],
+  ['cmdRenameAct', C.renameAction],
   ['cmdDescribe', C.describeAction],
   ['cmdNote', C.addNote]
 ];
@@ -2288,6 +2393,12 @@ const PAGE_TODO: Tpl008Component = {
     logic('tdSelectFromLog', SET_VARIABLE, 'Select from the log', { name: VAR.selected, setWith: 'string' }),
     logic('tdDeselect', SET_VARIABLE, 'Back to the list', { name: VAR.selected, setWith: 'emptyString' }),
 
+    // s8 — which next action has its description open. One value, SET and CLEARED;
+    // never a per-row toggle, which loses the press that also saves (Todo/Action row).
+    logic('tdOpenAction', VARIABLE, 'Which description is open', { name: VAR.openAction }),
+    logic('tdOpenDesc', SET_VARIABLE, 'Open a description', { name: VAR.openAction, setWith: 'string' }),
+    logic('tdCloseDesc', SET_VARIABLE, 'Close the description', { name: VAR.openAction, setWith: 'emptyString' }),
+
     // The commands
     ...PAGE_COMMANDS.map(([id, type, params]) => logic(id, type, id.replace(/^cmd/, ''), params))
   ],
@@ -2311,6 +2422,7 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdData', 'recent', 'tdLogRows', 'events'),
     wire('tdSelected', 'value', 'tdRows', 'selectedId'),
     wire('tdSelected', 'value', 'tdSel', 'selectedId'),
+    wire('tdOpenAction', 'value', 'tdSel', 'openActionId'),
 
     // Views
     wire('tdTab', 'currentState', 'tdHeader', 'tab'),
@@ -2350,6 +2462,14 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdLog', 'open', 'tdSelectFromLog', 'do'),
     wire('tdSummary', 'back', 'tdDeselect', 'do'),
     ...['tdSelectFromList', 'tdSelectFromDone', 'tdSelectFromLog'].map((s) => wire(s, 'done', 'tdData', 'loadHistory')),
+    // A description left open belongs to the task you left, so changing task closes it.
+    ...['tdSelectFromList', 'tdSelectFromDone', 'tdSelectFromLog', 'tdDeselect'].map((s) => wire(s, 'done', 'tdCloseDesc', 'do')),
+    wire('tdNext', 'actionId', 'tdOpenDesc', 'value'),
+    wire('tdNext', 'openDescription', 'tdOpenDesc', 'do'),
+    wire('tdNext', 'closeDescription', 'tdCloseDesc', 'do'),
+    // Leaving the description box both writes it and shuts it. The row can only say one
+    // thing per update (see Todo/Action row), so the page is where the second job lives.
+    wire('tdNext', 'describe', 'tdCloseDesc', 'do'),
 
     // Asking what happened — each producer on its own inputs
     wire('tdList', 'taskId', 'tdDialog', 'listTaskId'),
@@ -2432,6 +2552,12 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdNext', 'actionId', 'cmdActDown', 'actionId'),
     wire('tdNext', 'down', 'cmdActDown', 'do'),
 
+    wire('tdSel', 'actionRows', 'cmdRenameAct', 'rows'),
+    wire('tdSelected', 'value', 'cmdRenameAct', 'taskId'),
+    wire('tdNext', 'actionId', 'cmdRenameAct', 'actionId'),
+    wire('tdNext', 'actionTitleText', 'cmdRenameAct', 'newTitle'),
+    wire('tdNext', 'rename', 'cmdRenameAct', 'do'),
+
     wire('tdSel', 'actionRows', 'cmdDescribe', 'rows'),
     wire('tdSelected', 'value', 'cmdDescribe', 'taskId'),
     wire('tdNext', 'actionId', 'cmdDescribe', 'actionId'),
@@ -2482,6 +2608,7 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   TICK_ACTION,
   UNTICK_ACTION,
   MOVE_ACTION,
+  RENAME_ACTION,
   DESCRIBE_ACTION,
   ADD_NOTE,
   TASK_ROWS,

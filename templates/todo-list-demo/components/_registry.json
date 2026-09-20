@@ -99,6 +99,14 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Commands/Rename action": {
+      "path": "Commands/Rename action",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 12,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Commands/Describe action": {
       "path": "Commands/Describe action",
       "type": "visual",
@@ -127,7 +135,7 @@
       "path": "Logic/Selected task",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 19,
+      "connectionCount": 20,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -246,8 +254,8 @@
     "Todo/Action row": {
       "path": "Todo/Action row",
       "type": "visual",
-      "nodeCount": 17,
-      "connectionCount": 28,
+      "nodeCount": 18,
+      "connectionCount": 31,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -255,7 +263,7 @@
       "path": "Todo/Next actions",
       "type": "visual",
       "nodeCount": 10,
-      "connectionCount": 15,
+      "connectionCount": 19,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -294,15 +302,15 @@
     "Pages/Todo": {
       "path": "Pages/Todo",
       "type": "page",
-      "nodeCount": 48,
-      "connectionCount": 146,
+      "nodeCount": 52,
+      "connectionCount": 161,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 37,
-    "totalNodes": 325,
-    "totalConnections": 627
+    "totalComponents": 38,
+    "totalNodes": 336,
+    "totalConnections": 662
   }
 }

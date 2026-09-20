@@ -166,7 +166,9 @@ describe('§3 the history is not optional', () => {
 
   it('every command places Logic/Write history, and every record it writes is followed by it', () => {
     const commands = componentsOf().filter((c) => c.name.startsWith('/Commands/'));
-    expect(commands).toHaveLength(12);
+    // Counted off the SOURCES, never typed: a command added without its history writer
+    // must redden the rule below, not this line.
+    expect(commands).toHaveLength(TPL008_COMPONENTS.filter((c) => c.path.startsWith('Commands/')).length);
     for (const c of commands) {
       const history = nodesOf(c).filter((n) => n.type === C.writeHistory);
       expect(`${c.name} history nodes:${history.length}`).toBe(`${c.name} history nodes:1`);
@@ -237,10 +239,12 @@ describe('§4 the look Richard approved', () => {
       }
     }
     // The control: the rule reached every icon button there is — two moves and a tick box per
-    // row kind, the theme switch's moon and sun, and (s6) the reminders bell's two.
+    // row kind, (s8) the next action's Description button, the theme switch's moon and sun,
+    // and (s6) the reminders bell's two.
     expect(seen.sort()).toEqual(
       [
         '/Todo/Action row arCheck',
+        '/Todo/Action row arDescOpen',
         '/Todo/Action row arDown',
         '/Todo/Action row arUp',
         '/Todo/Task row trClose',

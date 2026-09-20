@@ -13,7 +13,9 @@
 
 **Status: 🟢 BUILT, GATED, DRIVEN — with light and dark (s4) — and the demo is PUBLISHED: <https://nodegx.io/templates/todo-list/>.**
 `npm run template:todo` → `templates/todo-list/` **and** `templates/todo-list-demo/`. AC1–AC7, AC9, AC10 and **AC11** green
-(template gate 24/24, drive 14/14; demo gate 18/18, drive 10/10; theme drive 9/9; the public URL driven 16/16).
+(gates 43/43, template drive 14/14, demo drive 10/10, theme drive 9/9; the public URL driven 19/19).
+**s8 (2026-09-20) answered Richard's two reports on a next action — an editable title and a description that saves and
+closes — and republished BOTH sites.**
 **AC8 is Richard's week of use. R11: the backend stays on his computer; sign-in from other devices and hosting are a later phase.**
 
 ---
@@ -140,7 +142,7 @@ and gate §4 recomputes every contrast pair against both sets (dark: lowest text
 Gates: `packages/noodl-mcp/tests/tpl008Template.test.ts` **24/24** · `tpl008Demo.test.ts` **18/18** ·
 `packages/nodegx-backend/tests/tpl008-todo-drive.test.ts` **14/14** · `tpl008-todo-demo-drive.test.ts` **10/10** ·
 `tpl008-theme-drive.test.ts` **9/9**, all drives **0 console errors** · `tsc -p packages/noodl-mcp --noEmit` exit 0 ·
-`scripts/devtools/drive-tpl008-demo.js` **16/16** on the built folder and on the live URL. Pictures: `TPL008_SHOTS=<dir>`.
+`scripts/devtools/drive-tpl008-demo.js` **19/19** on the built folder and on the live URL. Pictures: `TPL008_SHOTS=<dir>`.
 
 ## 5. Not in this build
 
@@ -483,3 +485,62 @@ button drew beside it. Every drive had been headless Chrome. Reproduced in Playw
   a keyboard change stored when the field is left (🔴 Tab moves between Firefox's date segments — leaving needs a click), no errors.
 - Redeployed both (same recipe, engines unchanged: todo `43041dd…`, demo `ab1982c…`); neighbours 200 before/after; `live-pwa.js` clean.
 - ⚠️ Safari desktop not driven (no WebKit here): it takes the enhanced path and relies on `::-webkit-calendar-picker-indicator`.
+
+### s8 — 2026-09-20: a next action's title is a field, and its description saves and closes — D76
+
+**Ask** (Richard, with a screenshot of his own list): *"In the todo template, I can't edit a 'next action' title, and when
+I type a description I can't save or exit the description input field. Can you please fix and push to the demo nodegx page
+and my digital bricks page?"*
+
+**Measured before anything was changed** — the demo in headless Chrome, reading `localStorage`:
+- **The title.** The detail pane's fields were `Task title`, the date, `Add a next action` and `Add a note`. **There was no
+  field for a next action's title at all**: `arTitle` was a `Text`, and there was no `Commands/Rename action`. The report is
+  exactly right — the feature did not exist.
+- **The description.** Enter typed a newline (it is a `textArea`) and Escape did nothing, so **the only commit was the
+  field's blur**, and the only way to fold the box was clicking the same title that had to be typed in. Worse, it was a
+  *race*: with nothing to save the second click closed the box, and with a save in flight it closed on one run and left the
+  box open on another — the write refreshes the list and the rebuild lands between the press and the release often enough to
+  eat the click. **A toggle is not safe on a press that also saves.**
+
+**Built.**
+- `Todo/Action row`: the title is a `Text Input` that renames on Enter/blur, exactly as the task's does, and a new
+  `Commands/Rename action` writes it with an `action-renamed` line. A **Description** icon button opens the box and **Save**
+  closes it.
+- **Which next action is open is one value on the page** (`todoOpenAction`), SET by the Description button and CLEARED by the
+  field's blur — not a per-row `States` toggle. Nothing toggles, so there is no press for a rebuild to eat, and only one
+  description is ever open. `Logic/Selected task` takes `openActionId` and each row is told `descriptionOpen` / `showPreview`.
+- **Leaving the box writes it AND shuts it**, so the exit never depends on a click landing; Save is there for a box nobody
+  typed in, and to say so.
+
+🔴 **D76, found by the first attempt at that last point.** Blur was wired to two of the row's outputs (`describe` and
+`closeDescription`) and **the save silently vanished**: `For Each` forwards item signals through a single
+`scheduleAfterUpdate`, and a second signal in the same update overwrites which name is sent. The box shut, the record stayed
+empty, and nothing said so — the drive read it after a 20-second wait. The row now emits ONE signal and `Pages/Todo` drives
+both jobs from it. Filed in `DEFECTS-THE-TEMPLATES-FOUND.md`, owner `NONE`.
+
+**Graded.**
+- Regenerated: **0 refusals, 0 warnings**, 39 components / demo 38. `tsc -p packages/noodl-mcp --noEmit` exit 0.
+- Gates `tpl008Template.test.ts` + `tpl008Demo.test.ts` **43/43**. The command count is now read off the SOURCES rather than
+  typed, so a command added without its history writer reddens the rule and not the literal.
+- `tpl008-todo-drive` **14/14** with two new readings in §4: pressing **Save** writes the description *and* shuts the box
+  (`boxAfterSave === 0`), and typing over a next action's title and pressing Enter renames it, with its history line.
+  `tpl008-todo-demo-drive` **10/10**, `tpl008-theme-drive` **9/9** — all 0 console errors.
+- `drive-tpl008-demo.js` gained the same two clauses: **19/19** on the built folder. **Control: the OLD live build fails
+  exactly those two and passes the other 17** (`foundField: false` — there was no title field, and no button to open the box).
+
+**Published — both, as asked.**
+- **<https://nodegx.io/templates/todo-list/>** — the demo. The shared viewer engine was AGAIN a DEVELOPMENT build (a peer's
+  webpack, 09-19 23:08), so built with `--allow-development-engine` and the live production engine copied in (md5
+  `ab1982c…`, unchanged); Inter's `LICENSE.txt` carried over, as today's starter modules still lack it. Before the push the
+  live site and the local `site/` were **byte-identical, all 123 files**, so `deploy.sh --delete` removed nothing else;
+  homepage md5 unchanged either side; neighbours 200 before and after. **19/19 against the live URL.**
+- **<https://todo.digitalbricks.io>** — Richard's own list, with its backend. Same engine problem, same answer (production
+  engine md5 `43041dd…`). `nodegx.security.json` removed from the build and `apply-pwa.js` run; rsynced `--delete` excluding
+  `nodegx.security.json` and `pwa/vapid-public-key.txt`, which both survived. The old site is `/srv/todo/site.before-s8`.
+  `/var/lib/todo` was never touched. Diff vs live was exactly the three bundles, the index hash and `index.html`.
+  `live-pwa.js` clean: `/sign-in`, manifest no errors, SW active, no installability errors, `data-reminders=off`, 0 console
+  errors. Four neighbours 200 before and after.
+
+⚠️ **Not done:** todo.digitalbricks.io was **not driven signed in** — that needs an account on Richard's list, as in s7; the
+behaviour itself is graded by the template drive against a real enforcing backend. · Richard's local working copy
+(`NodeGX test projects/Todo list`) still has the old Action row. · `test:ci` / `test:main` not run. · sign-up is still `public`.

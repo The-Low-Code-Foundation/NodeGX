@@ -13,7 +13,7 @@
       "fromId": "arIn",
       "fromProperty": "title",
       "toId": "arTitle",
-      "toProperty": "text"
+      "toProperty": "startValue"
     },
     {
       "fromId": "arIn",
@@ -29,8 +29,8 @@
     },
     {
       "fromId": "arIn",
-      "fromProperty": "hasDescription",
-      "toId": "arPreviewText",
+      "fromProperty": "showPreview",
+      "toId": "arPreview",
       "toProperty": "mounted"
     },
     {
@@ -38,6 +38,12 @@
       "fromProperty": "description",
       "toId": "arDescField",
       "toProperty": "startValue"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "descriptionOpen",
+      "toId": "arEditor",
+      "toProperty": "mounted"
     },
     {
       "fromId": "arIn",
@@ -143,21 +149,27 @@
     },
     {
       "fromId": "arTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "arOut",
+      "toProperty": "titleText"
+    },
+    {
+      "fromId": "arTitle",
+      "fromProperty": "onEnter",
+      "toId": "arTitle",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "arTitle",
+      "fromProperty": "onBlur",
+      "toId": "arOut",
+      "toProperty": "rename"
+    },
+    {
+      "fromId": "arDescOpen",
       "fromProperty": "onClick",
-      "toId": "arFold",
-      "toProperty": "toggle"
-    },
-    {
-      "fromId": "arFold",
-      "fromProperty": "at-open",
-      "toId": "arEditor",
-      "toProperty": "mounted"
-    },
-    {
-      "fromId": "arFold",
-      "fromProperty": "at-closed",
-      "toId": "arPreview",
-      "toProperty": "mounted"
+      "toId": "arOut",
+      "toProperty": "openDescription"
     },
     {
       "fromId": "arDescField",
@@ -170,6 +182,12 @@
       "fromProperty": "onBlur",
       "toId": "arOut",
       "toProperty": "describe"
+    },
+    {
+      "fromId": "arSave",
+      "fromProperty": "onClick",
+      "toId": "arOut",
+      "toProperty": "closeDescription"
     }
   ]
 }
