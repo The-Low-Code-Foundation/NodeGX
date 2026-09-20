@@ -199,7 +199,15 @@ export class HttpCacheStore implements HttpValidatorStore {
       if (count <= HTTP_CACHE_MAX_ROWS) return 0;
 
       const overBy = count - HTTP_CACHE_MAX_ROWS;
-      const { results } = await this.facade.rawQuery(HTTP_CACHE_COLLECTION, {
+      // 🔴 PRD-001 §3.3: `rawQueryAll`, and this one is not obvious. The batch
+      // below is EVICTION's own decision about how much work one pass does; if
+      // the request page cap could shorten it, an operator setting
+      // `queries.maxLimit` low enough would make eviction slower than the
+      // writes that trigger it — 500 rows added per check against a clamped
+      // number removed — and the cache this exists to bound would grow without
+      // limit. A maintenance loop's batch size must not be reachable from a
+      // control written for requests.
+      const { results } = await this.facade.rawQueryAll(HTTP_CACHE_COLLECTION, {
         sort: ['seenAt'],
         limit: Math.max(overBy, EVICTION_BATCH)
       });

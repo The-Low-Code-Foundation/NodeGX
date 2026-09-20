@@ -7,6 +7,8 @@
 
 import type * as http from 'http';
 
+import type { StorageQueryResult } from '@noodl/backend-contract';
+
 import { requestIdOf } from '../ops/request-id';
 
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
@@ -121,6 +123,39 @@ export function sendJSON(
     ...headers
   });
   res.end(body);
+}
+
+/**
+ * PRD-001 — split a query result into the body the client gets and the headers
+ * that say the page cap fired.
+ *
+ * 🔴 The cap announces itself in a HEADER, never in the body. The Parse wire
+ * format is shared with four unchanged clients (`cloudstore.js`,
+ * `userservice.ts`, the two runtime readers), and a new key in `{results,
+ * count}` is a key one of them may already be iterating. A header is a surface
+ * every route can set and no existing client can trip over.
+ *
+ * The BYOB `/api/*` routes are ours and could carry it in the body, and
+ * deliberately do not: two surfaces answering the same question two ways is how
+ * they come to disagree about the answer.
+ *
+ * Returning the body separately rather than deleting in place is what keeps
+ * `capped` from leaking: a route that forgets to call this sends a result that
+ * still has the fields on it, and the test that reads the body catches it.
+ */
+export function splitCapped(result: StorageQueryResult): {
+  body: { results: Record<string, unknown>[]; count?: number };
+  headers: Record<string, string>;
+} {
+  const { capped, cappedAt, ...body } = result;
+  if (!capped) return { body, headers: {} };
+  return {
+    body,
+    headers: {
+      'X-NodeGX-Result-Capped': 'true',
+      'X-NodeGX-Result-Limit': String(cappedAt)
+    }
+  };
 }
 
 /**

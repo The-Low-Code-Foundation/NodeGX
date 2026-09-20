@@ -196,7 +196,11 @@ export class AuditLog {
     if (!retentionDays || retentionDays <= 0) return 0;
     const cutoff = new Date(now - retentionDays * 86_400_000).toISOString();
     try {
-      const { results } = await this.facade.rawQuery(AUDIT_COLLECTION, {
+      // PRD-001 §3.3: `rawQueryAll` for the same reason as HttpCacheStore's
+      // eviction — 5,000 is this prune's own batch size, and a prune that the
+      // request cap could shorten would fall behind a busy backend's writes.
+      // The audit LIST route above stays capped: that one is request-shaped.
+      const { results } = await this.facade.rawQueryAll(AUDIT_COLLECTION, {
         where: { at: { $lt: cutoff } },
         limit: 5000
       });

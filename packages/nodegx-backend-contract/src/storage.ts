@@ -93,6 +93,23 @@ export interface StorageSearchOptions extends StorageQueryOptions {
 export interface StorageQueryResult {
   results: Record<string, unknown>[];
   count?: number;
+  /**
+   * PRD-001 — the page cap fired: `results` is a PAGE and there are, or may be,
+   * more rows behind it.
+   *
+   * 🔴 **A facade annotation, never an adapter's output.** `AdapterFacade`
+   * resolves the effective limit before the call and stamps this after it; an
+   * adapter returns rows and a count and knows nothing about the product's cap.
+   * An adapter that sets it is not more conformant, it is wrong — which is why
+   * BRG-003 asserts `limit` is honoured and says nothing about this field.
+   *
+   * Set ONLY when the cap itself shortened the request (no `limit` given, or one
+   * above `queries.maxLimit`). A caller that asked for 50 and got 50 is paging,
+   * not capped, and is not marked.
+   */
+  capped?: boolean;
+  /** PRD-001 — the limit actually applied, present exactly when `capped` is true. */
+  cappedAt?: number;
 }
 
 /**
@@ -619,8 +636,25 @@ export interface IStorageAdapter extends IStorageDataPlane {
 export interface IStorageFacade {
   // --- storage-shaped reads and writes -------------------------------------
 
-  /** `AdapterFacade.ts:112`. */
+  /** `AdapterFacade.ts:112`. Subject to the PRD-001 page cap — see `rawQueryAll`. */
   rawQuery(collection: string, options?: StorageQueryOptions): Promise<StorageQueryResult>;
+  /**
+   * PRD-001 §3.3 — a read that must return the WHOLE table, with the page cap
+   * explicitly off.
+   *
+   * The cap defends request-shaped queries. Backup, export, the orphan sweep,
+   * the role and API-key registries and "revoke every session for this user" are
+   * not request-shaped: each of them is wrong, silently and sometimes
+   * catastrophically, if it stops at a page. A backup that stopped at
+   * `defaultLimit` restores cleanly and has lost data.
+   *
+   * 🔴 It is a **separate method** rather than an option flag on purpose. Two
+   * routes build query options out of client-supplied fields, so any flag that
+   * turns the cap off is one `{...req.query}` away from being client-settable.
+   * A method cannot be reached from a request body, and `rawQueryAll` greps to
+   * the complete list of readers that opt out.
+   */
+  rawQueryAll(collection: string, options?: StorageQueryOptions): Promise<StorageQueryResult>;
   /** BAK-008 full-text search; results carry `_score` and `_snippet`. `AdapterFacade.ts:126`. */
   rawSearch(collection: string, options: StorageSearchOptions): Promise<StorageQueryResult>;
   /** `AdapterFacade.ts:133`. */

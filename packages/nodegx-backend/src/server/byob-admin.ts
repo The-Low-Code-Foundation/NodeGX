@@ -26,7 +26,14 @@ import type { ClpOp } from '../security/model';
 import type { StorageColumn, StorageIndexStatus, StorageSupabaseExportOptions } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { summariseModelCalls } from '../execution/modelCost';
-import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
+import {
+  createErrorToHttp,
+  HttpError,
+  readJSONBody,
+  sendJSON,
+  splitCapped,
+  uniqueViolationToHttp
+} from './http-util';
 
 function parseJSON(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -160,8 +167,17 @@ export class ByobAdminRoutes {
       count: query.count === '1' || query.count === 'true',
       acl: ctx.acl('read')
     };
-    const { results, count } = await this.facade.rawQuery(ctx.params.table, options);
-    sendJSON(ctx.res, 200, { results, count: count !== undefined ? count : results.length });
+    const result = await this.facade.rawQuery(ctx.params.table, options);
+    const { results, count } = result;
+    // PRD-001: the same header the Parse routes set. The BYOB body is ours and
+    // could have carried it; it does not, so there is one answer to "was this
+    // capped?" rather than two that can drift (see `splitCapped`).
+    sendJSON(
+      ctx.res,
+      200,
+      { results, count: count !== undefined ? count : results.length },
+      splitCapped(result).headers
+    );
   }
 
   async fetch(ctx: RequestContext): Promise<void> {

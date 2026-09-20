@@ -235,8 +235,16 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // (CWF-017) is deliberately not spent on this door at all — see the gate
     // table in McpRoutes' docblock, which says so rather than leaving it to be
     // found.
+    // PRD-003 moved `admin` by 1: `POST /admin/executions/compact`, the
+    // operator-triggered full rewrite of `executions.sqlite`. It arrived in
+    // `1289af079` without this tally, which is what made the full backend suite
+    // red by exactly one on 2026-09-20 — counted here, not guessed: it is the
+    // only admin pattern `getRouteTable()` gained since the FED-005 reading.
+    // Reviewed and left in the `admin` budget: it is a once-per-file operator
+    // action that holds a write lock for seconds per GB, so the thing that
+    // should stop it being called in a loop is the lock, not a token bucket.
     expect(counts).toEqual({
-      admin: 79,
+      admin: 80,
       auth: 15,
       data: 19,
       files: 4,

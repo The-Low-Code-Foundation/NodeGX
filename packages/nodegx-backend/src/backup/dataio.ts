@@ -34,6 +34,17 @@ export interface ExportResult {
 
 const SYSTEM_KEYS = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
 
+/**
+ * Every row of a collection, in pages.
+ *
+ * 🔴 PRD-001 §3.3 — `rawQueryAll`, never `rawQuery`. An export or a backup that
+ * silently stopped at the request page cap would restore cleanly and have lost
+ * data, which is the worst failure available in this codebase: an operator
+ * would learn about it from the rows that are not there. The page size below is
+ * this function's own decision about memory, and the cap an operator sets on
+ * REQUESTS must not be able to reach it — `queries.maxLimit: 100` is a
+ * reasonable thing for someone to type and must not quietly truncate backups.
+ */
 async function readAll(facade: IStorageFacade, collection: string): Promise<Record<string, unknown>[]> {
   // Page through so a large collection does not rely on one huge query.
   const page = 1000;
@@ -41,7 +52,7 @@ async function readAll(facade: IStorageFacade, collection: string): Promise<Reco
   let skip = 0;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const { results } = await facade.rawQuery(collection, { limit: page, skip, sort: 'createdAt' });
+    const { results } = await facade.rawQueryAll(collection, { limit: page, skip, sort: 'createdAt' });
     out.push(...results);
     if (results.length < page) break;
     skip += page;

@@ -27,7 +27,14 @@
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
-import { createErrorToHttp, HttpError, readJSONBody, sendJSON, uniqueViolationToHttp } from './http-util';
+import {
+  createErrorToHttp,
+  HttpError,
+  readJSONBody,
+  sendJSON,
+  splitCapped,
+  uniqueViolationToHttp
+} from './http-util';
 
 /**
  * FED-002 — the upsert header: `X-NodeGX-Upsert: <field>` on a create.
@@ -213,7 +220,10 @@ export class ParseWireRoutes {
       } else {
         result = await this.facade.wireQuery(collection, options);
       }
-      sendJSON(ctx.res, 200, result);
+      // PRD-001: a capped page says so in a header, and the annotation never
+      // reaches the Parse body.
+      const capped = splitCapped(result);
+      sendJSON(ctx.res, 200, capped.body, capped.headers);
       return;
     }
 
@@ -418,7 +428,8 @@ export class ParseWireRoutes {
     const options = toQueryOptions(ctx.query);
     options.acl = ctx.acl('read');
     const result = await this.facade.wireQuery(ctx.params.collection, options);
-    sendJSON(ctx.res, 200, result);
+    const { body, headers } = splitCapped(result);
+    sendJSON(ctx.res, 200, body, headers);
   }
 
   /** GET /classes/:collection/:id */

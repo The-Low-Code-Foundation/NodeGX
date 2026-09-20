@@ -372,7 +372,8 @@ export class UserRoutes {
     // survive the victim rotating their password. Adversarial-suite item.
     if (passwordChanged) {
       const currentToken = req.headers['x-parse-session-token'] as string;
-      const { results: sessions } = await this.facade.rawQuery('_Session', { where: { userId: objectId } });
+      // PRD-001 §3.3: every other session, not a page — see IdentityStore.revokeAllSessions.
+      const { results: sessions } = await this.facade.rawQueryAll('_Session', { where: { userId: objectId } });
       for (const session of sessions) {
         if (session.sessionToken !== currentToken) {
           await this.facade.rawDelete('_Session', session.objectId as string);

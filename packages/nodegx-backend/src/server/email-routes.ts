@@ -159,7 +159,8 @@ export class EmailRoutes {
   }
 
   private async deleteAllSessions(userId: string): Promise<void> {
-    const { results } = await this.facade.rawQuery('_Session', { where: { userId } });
+    // PRD-001 §3.3: all, as the name says.
+    const { results } = await this.facade.rawQueryAll('_Session', { where: { userId } });
     for (const session of results) {
       await this.facade.rawDelete('_Session', session.objectId as string);
     }

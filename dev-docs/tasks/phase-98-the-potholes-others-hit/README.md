@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-19, from Richard's field report of a 60,000-participant conference his team
 served on n8n + Directus + Azure AKS, a measurement of the backend at HEAD `aa5d00e2a`, and a survey
 of how n8n and Directus actually behave in production.
-**Status: 🏗 In progress, s1 (2026-09-19). PRD-002, PRD-003, PRD-005 built and gated; PRD-001 and PRD-004 open. Prefix: `PRD`.**
+**Status: 🏗 In progress, s3 (2026-09-20). PRD-001, 002, 003 and 005 built and gated — the outage chain is closed. Only PRD-004, the measurement, is open. Prefix: `PRD`.**
 
 > *"let's try not to repeat the mistakes of those who came before us"* — Richard, 2026-09-19
 
@@ -86,7 +86,7 @@ unwritten; painful afterwards.
 
 | task | one line | built | gated | driven |
 |---|---|---|---|---|
-| [PRD-001](PRD-001-NO-QUERY-RETURNS-EVERYTHING.md) | A default and maximum page size on every query route — and a capped result says so | ⬜ | ⬜ | ⬜ |
+| [PRD-001](PRD-001-NO-QUERY-RETURNS-EVERYTHING.md) | A default and maximum page size on every query route — and a capped result says so | ✅ s3 | ✅ s3 — 19 specs, 3 mutants | 🟡 over HTTP in the spec |
 | [PRD-002](PRD-002-A-RUN-CANNOT-EAT-THE-DISK.md) | Run records bounded by **bytes**, not just count, with the overflow reported in the record | ✅ s1 | ✅ s1 — 8 specs, 2 mutants | 🟡 over HTTP in the spec; the 1,000-run drive is PRD-004's |
 | [PRD-003](PRD-003-PRUNING-THAT-GIVES-THE-DISK-BACK.md) | Prune by count as well as age, say which limit fired, and actually reclaim the space | ✅ s1 | ✅ s1 — 7 specs, file shrinks <25% | 🟡 over HTTP in the spec |
 | [PRD-004](PRD-004-THE-NUMBER-WE-DO-NOT-HAVE.md) | The vertical ceiling, measured on a mixed workload with a heavy scheduled job in the mix | ⬜ | ⬜ | ⬜ |
@@ -128,7 +128,8 @@ A backend is started with production-shaped data. A deliberately broken workflow
 bug, reproduced: a query whose filter is empty because its input was missing — is run **a thousand
 times**. At the end:
 
-- no response returned an unbounded result set, and every capped one **said so**;
+- no response returned an unbounded result set, and every capped one **said so**; ✅ *mechanically
+  true after s3 — PRD-001; what the thousand-run drive still owes is that it holds under load*;
 - `executions.sqlite` is bounded, and the bound is one an operator chose;
 - lowering retention **gives the disk back**;
 - the record is good enough to find the offending workflow **without reading the source**; and
@@ -139,7 +140,8 @@ times**. At the end:
 
 | id | reading | owner |
 |---|---|---|
-| **PRD-D1** 🔴 | No default or maximum page size on any query route — an unfiltered query returns the entire collection and materialises it in memory (`QueryBuilder.ts:699`, `parse-wire.ts:65`). This is the half of Richard's incident that turned a logic bug into an outage | PRD-001 |
+| **PRD-D1** ✅ s3 | ~~No default or maximum page size on any query route~~ — closed. `queries.defaultLimit`/`maxLimit` clamp in `AdapterFacade`, capped responses carry `X-NodeGX-Result-Capped`, and thirteen whole-table readers moved to the explicit `rawQueryAll` bypass. PRD-001 §7 | PRD-001 |
+| **PRD-D7** BACKLOG | `$addToSet` in a grouped aggregate maps to `distinct` INSIDE the single result object — an unbounded array in an otherwise bounded response. `rawDistinct` itself is capped; this one is not, because the fix is a limit on the aggregate path rather than a reach into an accessor map. PRD-001 §7.6 | none yet |
 | **PRD-D2** ✅ s1 | ~~Run records are bounded by count but not by size~~ **Corrected:** the substrate already capped one value at 50KB (`store.ts:28`); what was absent was the per-run sum, config, announcement and queryability — PRD-002 §7.1 | PRD-002 |
 | **PRD-D3** ✅ s1 | Pruning never reclaims disk — closed for new files (incremental + bounded reclaim) and for old ones by `POST /admin/executions/compact`; PRD-003 §7 | PRD-003 |
 | **PRD-D4** ✅ s1 | Retention is age-only — `executions.maxCount` (10,000) beside it, attributed; per-workflow opt-out still PRD-003 §6 | PRD-003 |

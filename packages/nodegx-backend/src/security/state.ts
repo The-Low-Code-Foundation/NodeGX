@@ -653,7 +653,9 @@ export class SecurityState {
       actsAsUserId: string | null;
     }[]
   > {
-    const { results } = await this.deps.facade.rawQuery('_ApiKey', {});
+    // PRD-001 §3.3: the key registry, not a request page. An admin who could
+    // not SEE a key past the cap could not revoke it either.
+    const { results } = await this.deps.facade.rawQueryAll('_ApiKey', {});
     return results.map((r) => ({
       objectId: r.objectId as string,
       name: r.name as string,

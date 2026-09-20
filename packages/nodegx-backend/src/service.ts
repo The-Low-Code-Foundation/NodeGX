@@ -26,7 +26,7 @@ import { BackendServiceOptions, resolveOptions, requiresAuth } from './config';
 import { createAdapter, PersistenceHandle } from './persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 
-import { AdapterFacade } from './persistence/AdapterFacade';
+import { AdapterFacade, DEFAULT_PAGE_CAP } from './persistence/AdapterFacade';
 import { ExecutionHistory, ExecutionHistoryStatus } from './execution/ExecutionStore';
 import { IdempotencyStore } from './execution/IdempotencyStore';
 import { HttpServer, ListenInfo } from './server/HttpServer';
@@ -208,7 +208,12 @@ export class BackendService {
       dataDir: this.options.dataDir,
       allowEphemeral: this.options.allowEphemeral
     });
-    this.facade = new AdapterFacade(this.persistence.adapter);
+    // PRD-001: the page cap, read fresh on every query so `PUT /admin/ops`
+    // applies to the next request rather than the next restart. `this.ops` is
+    // already loaded (its logging config configured the logger above).
+    this.facade = new AdapterFacade(this.persistence.adapter, () =>
+      this.ops ? this.ops.config.queries : DEFAULT_PAGE_CAP
+    );
     this.ensureSystemTables();
 
     // 1.4 SB-015: the project's own policy, if it ships one and this backend has

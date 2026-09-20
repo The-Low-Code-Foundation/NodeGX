@@ -159,6 +159,40 @@ export interface ExecutionsConfig {
   maxRunBytes: number;
 }
 
+/**
+ * PRD-001 — the page cap on request-shaped reads.
+ *
+ * The outage this exists for needs no bug in the backend at all: a cloud
+ * function builds a filter from an optional value, omits the key when the value
+ * is missing, and an empty `where` with no `limit` is `SELECT * FROM table`.
+ * Four hundred thousand rows later the process is gone.
+ *
+ * Two numbers rather than one, because they answer two different questions:
+ * `defaultLimit` bounds the ACCIDENT (a caller who forgot to ask), `maxLimit`
+ * bounds the DELIBERATE case (a caller who asked for everything). One number
+ * would have to be both the sensible page a forgetful caller gets and the
+ * ceiling a paging client may raise itself to, and those are not the same
+ * number.
+ *
+ * 🔴 A capped result **says so** — `X-NodeGX-Result-Capped` — because silent
+ * truncation turns an outage into a correctness bug, and a list that looks
+ * complete and is not is worse than an error: it is believed.
+ *
+ * Readers that must see a whole table (backup, export, the orphan sweep, "every
+ * session for this user") do not go through this at all; they call
+ * `facade.rawQueryAll`, which is the greppable list of everything exempt.
+ */
+export interface QueriesConfig {
+  /**
+   * Rows returned when the caller supplied no `limit` at all. Also the cap on a
+   * caller who supplies a NEGATIVE one — `LIMIT -1` is "no limit" in SQLite, so
+   * a negative number is an unbounded read spelled differently.
+   */
+  defaultLimit: number;
+  /** The ceiling on a caller who does supply a `limit`. Clamped, never refused. */
+  maxLimit: number;
+}
+
 export interface MetricsConfig {
   /** Serve `GET /metrics`. */
   enabled: boolean;
@@ -176,6 +210,7 @@ export interface OpsConfig {
   cors: CorsConfig;
   audit: AuditConfig;
   executions: ExecutionsConfig;
+  queries: QueriesConfig;
   metrics: MetricsConfig;
 }
 
@@ -221,6 +256,11 @@ export function defaultOpsConfig(): OpsConfig {
       maxValueBytes: 50 * 1024,
       maxRunBytes: 8 * 1024 * 1024
     },
+    // PRD-001. 1,000 is a page no ordinary app notices and no single response
+    // can take the process down with; 10,000 is a deliberate export-shaped read
+    // that still fits in a response. Neither is a guess about the ceiling — the
+    // ceiling is PRD-004's measurement, and these move when it lands.
+    queries: { defaultLimit: 1000, maxLimit: 10_000 },
     metrics: { enabled: true, allowLoopback: true }
   };
 }
@@ -252,7 +292,7 @@ function checkStringArray(errors: string[], where: string, value: unknown): void
 export function validateOpsConfig(raw: unknown): string[] {
   const errors: string[] = [];
   if (
-    !checkKeys(errors, 'ops config', raw, ['version', 'logging', 'rateLimit', 'cors', 'audit', 'executions', 'metrics'])
+    !checkKeys(errors, 'ops config', raw, ['version', 'logging', 'rateLimit', 'cors', 'audit', 'executions', 'queries', 'metrics'])
   ) {
     return errors;
   }
@@ -393,6 +433,28 @@ export function validateOpsConfig(raw: unknown): string[] {
     }
   }
 
+  if (cfg.queries !== undefined && checkKeys(errors, 'queries', cfg.queries, ['defaultLimit', 'maxLimit'])) {
+    const queries = cfg.queries as Record<string, unknown>;
+    // PRD-001. No zero escape hatch on either: `defaultLimit: 0` would mean a
+    // plain query returns nothing, and `maxLimit: 0` would mean every query
+    // does. "No cap" is not a supported setting — that is the whole task — so
+    // an operator who wants a very high ceiling writes a very high number and
+    // can see it in the file.
+    for (const field of ['defaultLimit', 'maxLimit']) {
+      const value = queries[field];
+      if (value !== undefined && (typeof value !== 'number' || !Number.isInteger(value) || value < 1)) {
+        errors.push(`queries.${field} must be an integer >= 1`);
+      }
+    }
+    if (
+      typeof queries.defaultLimit === 'number' &&
+      typeof queries.maxLimit === 'number' &&
+      queries.maxLimit < queries.defaultLimit
+    ) {
+      errors.push('queries.maxLimit must be >= queries.defaultLimit (a caller may not ask for less than the default)');
+    }
+  }
+
   if (cfg.metrics !== undefined && checkKeys(errors, 'metrics', cfg.metrics, ['enabled', 'allowLoopback'])) {
     const metrics = cfg.metrics as Record<string, unknown>;
     for (const field of ['enabled', 'allowLoopback']) {
@@ -430,6 +492,7 @@ export function mergeOpsOver(base: OpsConfig, partial: unknown): OpsConfig {
     cors: { ...base.cors, ...(raw.cors || {}) },
     audit: { ...base.audit, ...(raw.audit || {}) },
     executions: { ...base.executions, ...(raw.executions || {}) },
+    queries: { ...base.queries, ...(raw.queries || {}) },
     metrics: { ...base.metrics, ...(raw.metrics || {}) }
   };
 }

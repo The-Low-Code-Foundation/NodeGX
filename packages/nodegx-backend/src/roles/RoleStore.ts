@@ -75,9 +75,9 @@ export class RoleStore {
     return results.length === 0 ? null : asRole(results[0]);
   }
 
-  /** Every role, in storage order. */
+  /** Every role, in storage order. PRD-001 §3.3: a registry authorization is computed from. */
   async list(): Promise<RoleRecord[]> {
-    const { results } = await this.facade.rawQuery('_Role', {});
+    const { results } = await this.facade.rawQueryAll('_Role', {});
     return results.map(asRole);
   }
 

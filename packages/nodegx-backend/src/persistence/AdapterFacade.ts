@@ -69,6 +69,28 @@ interface SchemaColumn {
 /** Fields never sent over the wire for `_User` records. */
 const USER_PROTECTED_FIELDS = ['_hashed_password', '_email_verify_token', '_perishable_token'];
 
+/**
+ * PRD-001 — the page cap, as the facade reads it.
+ *
+ * Structurally identical to `ops/model.ts`'s `QueriesConfig` and deliberately
+ * NOT imported from it: `persistence/` is below `ops/` and a facade that
+ * imported the operational config model would make the storage seam depend on
+ * the service's configuration file format. The service passes a getter; a CLI
+ * or a test passes nothing and gets the shipped defaults.
+ */
+export interface PageCap {
+  defaultLimit: number;
+  maxLimit: number;
+}
+
+/**
+ * The shipped defaults, duplicated from `defaultOpsConfig().queries` for the
+ * reason above. `ops/model.ts` owns the operator-facing numbers; these are the
+ * floor under a facade nobody configured, and `prd-001-page-cap.test.ts`
+ * asserts the two agree so the duplication cannot drift.
+ */
+export const DEFAULT_PAGE_CAP: PageCap = { defaultLimit: 1000, maxLimit: 10_000 };
+
 /** The awaitable batch write a network adapter offers (BRG-005 `PostgresAdapter.upsertBatch`). */
 type BatchWriter = (
   collection: string,
@@ -84,8 +106,70 @@ export class AdapterFacade implements IStorageFacade {
    */
   readonly adapter: IStorageAdapter;
 
-  constructor(adapter: IStorageAdapter) {
+  /**
+   * PRD-001 — read fresh on every query, never captured, so `PUT /admin/ops`
+   * takes effect on the next request rather than the next restart.
+   */
+  private readonly getPageCap: () => PageCap;
+
+  constructor(adapter: IStorageAdapter, getPageCap?: () => PageCap) {
     this.adapter = adapter;
+    this.getPageCap = getPageCap || (() => DEFAULT_PAGE_CAP);
+  }
+
+  // ==========================================================================
+  // PRD-001 — the page cap
+  //
+  // 🔴 HERE, above the adapter, and not in `QueryBuilder`. The facade is the
+  // only door left (BRG-002 removed the last raw-handle reach from
+  // `security/state.ts`), so a clamp here is honoured by every adapter
+  // INCLUDING ones nobody has written yet. A clamp in QueryBuilder would be
+  // SQLite-only, and the Postgres adapter would have to reimplement it — which
+  // is how two implementations of one rule get to disagree.
+  // ==========================================================================
+
+  /**
+   * What limit this query actually runs with, and whether the CAP is what
+   * decided it.
+   *
+   * `capApplied` is the whole of the signalling rule. A caller that asked for
+   * 50 and got 50 rows is paging and is not marked capped (AC4); a caller that
+   * asked for nothing, or for more than the ceiling, had its request shortened
+   * by us and is owed a say-so.
+   *
+   * 🔴 `limit: 0` survives as 0. Parse clients send `limit=0&count=1` to ask
+   * for a count and no rows — turning that into `defaultLimit` would answer a
+   * count-only request with a thousand records.
+   *
+   * 🔴 A NEGATIVE limit is caught here rather than left to the engine. SQLite
+   * reads `LIMIT -1` as "no limit", so `?limit=-1` is this task's own outage
+   * spelled as a parameter.
+   */
+  private resolveLimit(limit: number | undefined): { limit: number; capApplied: boolean } {
+    const { defaultLimit, maxLimit } = this.getPageCap();
+    const asked = typeof limit === 'number' && Number.isFinite(limit) ? Math.floor(limit) : undefined;
+    if (asked === undefined || asked < 0) return { limit: defaultLimit, capApplied: true };
+    if (asked > maxLimit) return { limit: maxLimit, capApplied: true };
+    return { limit: asked, capApplied: false };
+  }
+
+  /**
+   * Stamp `capped`/`cappedAt` when the cap shortened the request AND the page
+   * came back full.
+   *
+   * A full page is reported as capped even when it happens to be the last one.
+   * The alternative is a second count query on every plain read to tell "1,000
+   * rows exactly" from "1,000 of 400,000", and a false "there may be more" is
+   * the safe direction of that trade: it makes a client page once more and find
+   * nothing, where the other direction is the silent truncation this task
+   * exists to abolish.
+   */
+  private markCapped(result: WireQueryResult, effective: number, capApplied: boolean): WireQueryResult {
+    if (capApplied && result.results.length >= effective) {
+      result.capped = true;
+      result.cappedAt = effective;
+    }
+    return result;
   }
 
   // ==========================================================================
@@ -118,7 +202,36 @@ export class AdapterFacade implements IStorageFacade {
     });
   }
 
-  rawQuery(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
+  async rawQuery(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
+    const { limit, capApplied } = this.resolveLimit(options.limit);
+    const result = await this.call<WireQueryResult>(
+      'query',
+      { collection, ...options, limit },
+      (results, count) => ({
+        results: results as Record<string, unknown>[],
+        count: count as number | undefined
+      })
+    );
+    return this.markCapped(result, limit, capApplied);
+  }
+
+  /**
+   * PRD-001 §3.3 — the whole table, cap explicitly off. See `IStorageFacade`
+   * for why this is a method and not a flag.
+   *
+   * Every caller of this is a reader that is WRONG if it stops at a page:
+   * backup and export (`backup/dataio.ts` — a restore that looks fine and has
+   * lost data is the worst outcome in this codebase), the file orphan sweep,
+   * the role and API-key registries that authorization is computed from, and
+   * every "revoke every session for this user", where a missed row is a stolen
+   * token that survived a password change.
+   *
+   * It does not pass `limit` through at all unless the caller set one, so it is
+   * also the honest place for a reader that wants its own paging: `dataio`
+   * pages at 1,000 through here, and its page size is its own decision rather
+   * than a number that silently becomes whatever `queries.maxLimit` is today.
+   */
+  rawQueryAll(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
     return this.call<WireQueryResult>('query', { collection, ...options }, (results, count) => ({
       results: results as Record<string, unknown>[],
       count: count as number | undefined
@@ -132,11 +245,17 @@ export class AdapterFacade implements IStorageFacade {
    * the same buildAclPredicate() query() uses); a "no search index" failure
    * surfaces as a rejected promise with LocalSQLAdapter's clear message.
    */
-  rawSearch(collection: string, options: SearchOptions): Promise<WireQueryResult> {
-    return this.call<WireQueryResult>('search', { collection, ...options }, (results, count) => ({
-      results: results as Record<string, unknown>[],
-      count: count as number | undefined
-    }));
+  async rawSearch(collection: string, options: SearchOptions): Promise<WireQueryResult> {
+    const { limit, capApplied } = this.resolveLimit(options.limit);
+    const result = await this.call<WireQueryResult>(
+      'search',
+      { collection, ...options, limit },
+      (results, count) => ({
+        results: results as Record<string, unknown>[],
+        count: count as number | undefined
+      })
+    );
+    return this.markCapped(result, limit, capApplied);
   }
 
   rawFetch(collection: string, objectId: string, acl?: AclOption): Promise<Record<string, unknown>> {
@@ -182,8 +301,34 @@ export class AdapterFacade implements IStorageFacade {
     return this.call('aggregate', { collection, group, where, acl });
   }
 
-  rawDistinct(collection: string, property: string, where?: Record<string, unknown>, acl?: AclOption): Promise<unknown[]> {
-    return this.call('distinct', { collection, property, where, acl });
+  /**
+   * PRD-001 AC7 — the distinct path is capped too, at `maxLimit`.
+   *
+   * `SELECT DISTINCT city FROM orders` over four hundred thousand rows returns
+   * as many values as there are cities, and nothing in the wire format bounds
+   * that. It is clamped at the CEILING rather than the default because a
+   * distinct is an aggregate by intent — nobody asks for distinct values
+   * expecting a page — and there is no `limit` parameter on the route for a
+   * caller to raise.
+   *
+   * ⚠️ **The grouped aggregate beside it is NOT capped, and this is its written
+   * exemption.** `rawAggregate` runs our single-group aggregate: `$avg`/`$sum`/
+   * `$max`/`$min` each return one scalar, so the response is one object of a
+   * fixed size whatever the table holds. The one residual is `$addToSet`, which
+   * QueryBuilder maps to `distinct` INSIDE that object — an unbounded array in
+   * a bounded response. It is recorded as PRD-D7 rather than clamped here,
+   * because the cap would have to reach into an accessor map and the honest fix
+   * is for the aggregate path to take a limit of its own.
+   */
+  async rawDistinct(
+    collection: string,
+    property: string,
+    where?: Record<string, unknown>,
+    acl?: AclOption
+  ): Promise<unknown[]> {
+    const values = await this.call<unknown[]>('distinct', { collection, property, where, acl });
+    const { maxLimit } = this.getPageCap();
+    return Array.isArray(values) && values.length > maxLimit ? values.slice(0, maxLimit) : values;
   }
 
   addRelation(collection: string, objectId: string, key: string, targetObjectId: string): Promise<void> {
@@ -298,13 +443,21 @@ export class AdapterFacade implements IStorageFacade {
 
   async wireQuery(collection: string, options: QueryOptions): Promise<WireQueryResult> {
     const include = this.normalizeInclude(options.include);
-    const { results, count } = await this.rawQuery(collection, options);
+    const { results, count, capped, cappedAt } = await this.rawQuery(collection, options);
     const wire: Record<string, unknown>[] = [];
     for (const record of results) {
       wire.push(await this.toWire(collection, record, include, options.acl));
     }
     const out: WireQueryResult = { results: wire };
     if (count !== undefined) out.count = count;
+    // PRD-001: the annotation rawQuery stamped survives serialization. The
+    // ROUTE is what turns it into a header and drops it from the body — the
+    // Parse wire format is shared with unchanged clients and a new body field
+    // is the one place this may not go.
+    if (capped) {
+      out.capped = true;
+      out.cappedAt = cappedAt;
+    }
     return out;
   }
 
@@ -327,7 +480,7 @@ export class AdapterFacade implements IStorageFacade {
    */
   async wireSearch(collection: string, options: SearchOptions): Promise<WireQueryResult> {
     const include = this.normalizeInclude(options.include);
-    const { results, count } = await this.rawSearch(collection, options);
+    const { results, count, capped, cappedAt } = await this.rawSearch(collection, options);
     const wire: Record<string, unknown>[] = [];
     for (const record of results) {
       const { _score, _snippet, ...rest } = record;
@@ -338,6 +491,10 @@ export class AdapterFacade implements IStorageFacade {
     }
     const out: WireQueryResult = { results: wire };
     if (count !== undefined) out.count = count;
+    if (capped) {
+      out.capped = true;
+      out.cappedAt = cappedAt;
+    }
     return out;
   }
 
@@ -459,7 +616,11 @@ export class AdapterFacade implements IStorageFacade {
     for (let i = 0; i < ids.length; i += CHUNK) {
       const slice = ids.slice(i, i + CHUNK);
       try {
-        const { results } = await this.rawQuery(collection, {
+        // rawQueryAll: this is an import-path read whose page size is the chunk
+        // it just asked about, not a product page. 500 is under any cap worth
+        // configuring, but "under it today" is not a reason to route a
+        // system read through a control built for requests.
+        const { results } = await this.rawQueryAll(collection, {
           where: { objectId: { $in: slice } },
           select: ['objectId'],
           limit: slice.length

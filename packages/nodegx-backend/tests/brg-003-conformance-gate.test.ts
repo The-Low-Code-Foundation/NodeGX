@@ -150,7 +150,7 @@ describe('BRG-003 AC6/AC7 — the conformance gate', () => {
   });
 
   it('the facade delegations in the register are the ones the facade performs', () => {
-    // Twelve entries say "rawX is a one-line this.call('x', …)". That is a
+    // Thirteen entries say "rawX is a one-line this.call('x', …)". That is a
     // claim about another package's source, so it is read rather than trusted —
     // `AdapterFacade.call()` dispatches BY STRING (README §2), which means the
     // string is right there in the compiled method.
@@ -168,7 +168,14 @@ describe('BRG-003 AC6/AC7 — the conformance gate', () => {
 
     // The register may not quietly stop claiming delegations: if a `through`
     // entry is downgraded to `uncovered` the count falls and this line says so.
-    expect(checked.length).toBe(12);
+    //
+    // PRD-001 moved it from 12 to 13: `rawQueryAll` is a thirteenth dispatch to
+    // the SAME adapter member as `rawQuery` (`'query'`), with the page cap
+    // explicitly off. Two facade methods over one adapter member is what the
+    // `through` claim is for, and both are checked by the loop above — the
+    // capped one still has to contain `'query'`, which is what catches a
+    // rewrite that buries the dispatch behind a helper.
+    expect(checked.length).toBe(13);
   });
 
   it('AC7 — the uncovered list is recorded, owned, and does not grow', () => {

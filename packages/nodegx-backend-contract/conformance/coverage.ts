@@ -273,6 +273,16 @@ export const FACADE_COVERAGE: { readonly [K in keyof IStorageFacade]-?: Coverage
   // and the gate test in nodegx-backend reads that dispatch string back off the
   // compiled method rather than trusting these entries.
   rawQuery: { kind: 'through', member: 'adapter:query', why: "AdapterFacade.rawQuery = this.call('query', …)" },
+  rawQueryAll: {
+    kind: 'through',
+    member: 'adapter:query',
+    why:
+      "AdapterFacade.rawQueryAll = this.call('query', …) — the same adapter member as rawQuery, with the PRD-001 " +
+      'page cap explicitly off. The DIFFERENCE between the two is a product rule and not a portability one: a ' +
+      'conformance case for it would assert that an adapter has a limit, when what the suite asks is whether two ' +
+      'adapters behave the same, and they do — both honour the `limit` the facade hands them (records/' +
+      'limit-skip-and-count-compose). PRD-001 §3.5 is the long form of that reasoning.'
+  },
   rawSearch: { kind: 'through', member: 'adapter:search', why: "AdapterFacade.rawSearch = this.call('search', …)" },
   rawFetch: { kind: 'through', member: 'adapter:fetch', why: "AdapterFacade.rawFetch = this.call('fetch', …)" },
   rawCreate: { kind: 'through', member: 'adapter:create', why: "AdapterFacade.rawCreate = this.call('create', …)" },

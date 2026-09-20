@@ -1,6 +1,6 @@
 # PRD-001 — No query returns everything
 
-**Status: ⬜ Not started.**
+**Status: ✅ Built and gated, s3 (2026-09-20).** 19 specs, three mutants caught. §7 below is what was measured and what the task file got wrong.
 
 ## 1. The person sentence
 
@@ -110,3 +110,99 @@ job is to prove `limit` is honoured once the rule sets it.**
 - Cursor pagination. `limit`/`skip` already exist; this task bounds them and does not redesign them.
 - Rate limiting — a different question, already answered by `ops/rate-limit.ts`.
 - The editor's Data Browser paging UI.
+
+---
+
+## 7. What was built, and where §2–§6 were wrong (s3, 2026-09-20)
+
+### 7.1 The shape
+
+| piece | where |
+|---|---|
+| the clamp | `AdapterFacade.resolveLimit()` / `markCapped()` — §3.4's ruling, honoured |
+| the bypass | **`IStorageFacade.rawQueryAll`**, a separate METHOD (see 7.2) |
+| the two numbers | `ops.json` → `queries.defaultLimit` (1000) / `queries.maxLimit` (10000) |
+| the signal | `X-NodeGX-Result-Capped: true` + `X-NodeGX-Result-Limit: <n>`, set by `splitCapped()` in `server/http-util.ts` |
+| the routes | `parse-wire` POST-tunnel find, `parse-wire` GET `/classes/:collection`, `byob-admin` `/api/:table` |
+| the spec | `tests/prd-001-no-query-returns-everything.test.ts` — 19, all green |
+| the docs | `docs/runtime/BACKEND-OPERATIONS.md` § *No query returns everything* |
+
+### 7.2 🔴 §3.3's bypass had to be a method, not a flag — and the reason is not style
+
+The obvious implementation is `rawQuery(c, {…, unbounded: true})`. It is
+**wrong, and reachable by an attacker.** `toQueryOptions()` and `byob-admin.query()`
+both build query options out of client-supplied fields; any flag that turns the cap
+off is one careless `{...req.query}` away from being settable over the wire. A method
+cannot be reached from a request body at all, and `rawQueryAll` greps to the exact
+list of readers that opt out. The same argument is written into the interface docstring
+so the next person to "simplify" it finds the reason there.
+
+### 7.3 Two bounds §2 did not name, both of which would have defeated it
+
+- 🔴 **`limit: -1`.** SQLite reads `LIMIT -1` as *no limit*, so a negative limit is
+  this outage spelled as a query parameter. `resolveLimit` catches it and applies
+  `defaultLimit`; a clamp that only tested `limit > maxLimit` would have shipped with
+  a one-character bypass in it.
+- 🔴 **`limit: 0` must survive as 0.** `limit=0&count=1` is how every Parse client asks
+  "how many?". Folding a missing limit and a zero limit together would answer a
+  count-only request with a thousand records — a performance bug introduced by a
+  performance fix. Both are specs.
+
+### 7.4 The cap signal is narrower than "the page is full"
+
+`capped` is stamped only when the CAP decided the limit — no limit given, or one above
+the ceiling — **and** the page came back full. A client paging with its own `limit: 50`
+is never marked, or the header would be true on every well-behaved request and mean
+nothing. The one honest imprecision is recorded in the code: an exactly-full last page
+reads as capped, because telling "1,000 rows exactly" from "1,000 of 400,000" needs a
+second count query on every plain read, and a false *"there may be more"* is the safe
+side of that trade.
+
+### 7.5 The thirteen internal readers that had to be moved (§3.3, enumerated)
+
+`backup/dataio.ts` `readAll` (export + backup), `storage/MetadataStore.listAll` (the
+orphan sweep — where a page cap does not truncate a listing but **deletes files**),
+`roles/RoleStore.list`, `security/state.ts` `listApiKeys`, `auth/identities.ts`
+`listForUser` and `revokeAllSessions`, `server/users.ts` (password-change revocation),
+`users/SystemUsers.ts` ×2 (admin reset, user delete), `server/email-routes.ts`
+`deleteAllSessions`, and `AdapterFacade.existingIds`. Four of those are session
+revocation: a row missed by a cap there is a stolen token that survived the
+revocation meant to kill it.
+
+Plus two that §3.3 does not describe and that are the subtlest of the set: **`HttpCacheStore`'s
+eviction and `AuditLog.prune`**. Both pass an explicit batch size — 5,000 — which looks like a
+caller choosing a page and is not. It is a MAINTENANCE loop's own decision about how much work
+one pass does, and a request cap that could shorten it would make the loop slower than the writes
+that trigger it: eviction checks every 500 writes, so a clamped batch means the HTTP cache this
+exists to bound grows without limit, and the audit table falls behind a busy backend. Neither
+would have shown up as a failing test; both would have shown up as a disk filling.
+
+Every other caller already passed an explicit small limit and is unaffected. §3.3 was
+right that "happening to pass a large limit" is not a bypass: `MetadataStore` passed
+`limit: 1000000` and would have been clamped to `maxLimit`.
+
+### 7.6 AC7 — distinct is capped, the grouped aggregate's exemption is written down
+
+`rawDistinct` is clamped at `maxLimit` (at the ceiling, not the default: a distinct is
+an aggregate by intent and its route has no `limit` parameter to raise). `rawAggregate`
+runs a single-group aggregate — `$avg`/`$sum`/`$max`/`$min` each return one scalar, so
+the response is one object of fixed size whatever the table holds. **The residual is
+`$addToSet`**, which `QueryBuilder` maps to `distinct` *inside* that object: an
+unbounded array in a bounded response. Filed as **PRD-D7** rather than clamped here —
+the honest fix is a limit on the aggregate path, not a reach into an accessor map.
+
+### 7.7 The three mutants
+
+| mutant | caught by |
+|---|---|
+| `dataio.readAll` reads through `rawQuery` | AC5's round trip (1 failed) |
+| a missing limit is left unbounded | 6 specs across both halves |
+| `splitCapped` leaves `capped` in the body | AC3 (1 failed) |
+
+### 7.8 What it cost elsewhere
+
+A new `IStorageFacade` member pays BRG-003's coverage ratchet: `FACADE_COVERAGE` gains
+a `through` entry (so `uncovered` does not grow) and `brg-001-storage-interface.test.ts`'s
+hand-kept `FACADE_MEMBERS` list gains a name. §3.5's reasoning — that a page cap is a
+product rule and not a portability one — is written into that coverage entry, where the
+next person deciding whether to add a conformance case will read it.

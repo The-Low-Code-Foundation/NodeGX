@@ -361,7 +361,9 @@ export class SystemUsers {
     // administrator is exactly the case where a stolen session must not live.
     let sessionsRevoked = 0;
     if (password !== undefined) {
-      const { results: sessions } = await this.facade.rawQuery('_Session', { where: { userId } });
+      // PRD-001 §3.3: every session, not a page — a token that outlived the
+    // account it belonged to is the failure this revocation exists to prevent.
+    const { results: sessions } = await this.facade.rawQueryAll('_Session', { where: { userId } });
       for (const session of sessions) {
         await this.facade.rawDelete('_Session', session.objectId as string);
         sessionsRevoked++;
@@ -411,7 +413,9 @@ export class SystemUsers {
     // that `SecurityState.resolvePrincipal` resolves to a `_User` row it can no
     // longer fetch — a 209 at best, and rows the sweep would never reach.
     let sessionsRevoked = 0;
-    const { results: sessions } = await this.facade.rawQuery('_Session', { where: { userId } });
+    // PRD-001 §3.3: every session, not a page — a token that outlived the
+    // account it belonged to is the failure this revocation exists to prevent.
+    const { results: sessions } = await this.facade.rawQueryAll('_Session', { where: { userId } });
     for (const session of sessions) {
       await this.facade.rawDelete('_Session', session.objectId as string);
       sessionsRevoked++;

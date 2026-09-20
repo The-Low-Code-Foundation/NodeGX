@@ -43,6 +43,7 @@ there is always something to edit:
     "retentionDays": 30, "idempotencyTtlHours": 24,
     "maxCount": 10000, "maxValueBytes": 51200, "maxRunBytes": 8388608
   },
+  "queries": { "defaultLimit": 1000, "maxLimit": 10000 },
   "metrics": { "enabled": true, "allowLoopback": true }
 }
 ```
@@ -291,6 +292,53 @@ curl -s -X POST "$BACKEND/admin/executions/compact" -H "authorization: Bearer $A
 rewrites the file once under a write lock (seconds per GB), converts it, and
 answers with `beforeBytes`, `afterBytes` and `durationMs`. After that, every
 prune reclaims on its own. Nothing runs that rewrite automatically.
+
+---
+
+## No query returns everything
+
+A query that forgot its filter used to return the whole table. Nothing in the
+backend was broken for that to happen: a cloud function builds a filter from an
+optional value, omits the key when the value is missing, and an empty filter
+with no limit is `SELECT * FROM table`. Four hundred thousand rows come back
+through one process, and the process is what you lose.
+
+Two numbers bound it, and they answer two different questions:
+
+| `ops.json` | default | what it bounds |
+|---|---|---|
+| `queries.defaultLimit` | `1000` | the rows a caller gets when it supplied **no** `limit` — the accident |
+| `queries.maxLimit` | `10000` | the ceiling on a caller that **did** supply one — the deliberate case |
+
+A request above the ceiling is **clamped, never refused**: an export-shaped
+client asking for everything gets ten thousand rows and a 200, not an error it
+has no path for.
+
+**A capped result says so.** Silent truncation is worse than an error, because
+a list that looks complete is believed. Every capped response carries two
+headers, on the Parse routes and the BYOB `/api/*` routes alike:
+
+```
+X-NodeGX-Result-Capped: true
+X-NodeGX-Result-Limit: 1000
+```
+
+They are headers rather than body fields because the Parse wire format is
+shared with clients this change did not touch. A result *smaller* than the cap
+carries neither header, and neither does a caller paging with its own smaller
+`limit` — the signal means "we shortened your request", not "your page is
+full". `count` still describes the whole matching set, so the usual
+`limit=0&count=1` count-only query is unaffected: ask for the count, then page.
+
+**Backups and exports are not capped.** They read whole tables by design,
+through a separate, explicitly named path (`facade.rawQueryAll`), as do the
+file orphan sweep, the role and API-key registries, and every "revoke every
+session for this user". Lowering `queries.maxLimit` cannot truncate a backup —
+which matters, because a backup that stopped at a page would restore cleanly
+and have lost data.
+
+Both numbers are live-patchable (`PUT /admin/ops`) and take effect on the next
+request.
 
 ---
 

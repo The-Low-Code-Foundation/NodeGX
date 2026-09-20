@@ -47,6 +47,7 @@ function makeFacadeMock(): IStorageFacade {
   };
   return {
     rawQuery: notCalled('rawQuery'),
+    rawQueryAll: notCalled('rawQueryAll'),
     rawSearch: notCalled('rawSearch'),
     rawFetch: notCalled('rawFetch'),
     rawCreate: notCalled('rawCreate'),
@@ -80,6 +81,9 @@ function makeFacadeMock(): IStorageFacade {
  */
 const FACADE_MEMBERS = [
   'rawQuery',
+  // PRD-001 §3.3 — the page cap's explicit bypass, for readers that are wrong
+  // if they stop at a page (backup, export, the orphan sweep, session revocation).
+  'rawQueryAll',
   'rawSearch',
   'rawFetch',
   'rawCreate',

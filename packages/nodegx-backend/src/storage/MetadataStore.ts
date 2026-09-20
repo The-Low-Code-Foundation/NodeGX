@@ -122,9 +122,16 @@ export class MetadataStore {
     await this.facade.rawDelete(FILES_COLLECTION, objectId);
   }
 
-  /** Every row — the orphan sweep's "what metadata thinks exists" half. Unbounded (v1; see BAK-006-NOTES). */
+  /**
+   * Every row — the orphan sweep's "what metadata thinks exists" half.
+   * Unbounded (v1; see BAK-006-NOTES).
+   *
+   * PRD-001 §3.3: `rawQueryAll`. A sweep that saw only the first page would
+   * read every unlisted file as an orphan and DELETE it — the one caller where
+   * a page cap does not truncate a listing but destroys data.
+   */
   async listAll(): Promise<FileRecord[]> {
-    const { results } = await this.facade.rawQuery(FILES_COLLECTION, { limit: 1000000 });
+    const { results } = await this.facade.rawQueryAll(FILES_COLLECTION, {});
     return results as unknown as FileRecord[];
   }
 }

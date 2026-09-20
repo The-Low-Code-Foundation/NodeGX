@@ -162,7 +162,8 @@ export class IdentityStore {
   }
 
   async listForUser(userId: string): Promise<IdentityRow[]> {
-    const { results } = await this.facade.rawQuery(IDENTITY_COLLECTION, { where: { userId } });
+    // PRD-001 §3.3: every identity this user has linked, not a page of them.
+    const { results } = await this.facade.rawQueryAll(IDENTITY_COLLECTION, { where: { userId } });
     return results as unknown as IdentityRow[];
   }
 
@@ -221,7 +222,9 @@ export class IdentityStore {
 
   /** Delete every `_Session` for a user. Shared by rule 5 and by unlink-driven revocation. */
   private async revokeAllSessions(userId: string): Promise<number> {
-    const { results } = await this.facade.rawQuery('_Session', { where: { userId } });
+    // PRD-001 §3.3: ALL of them. A session left behind by a page cap is a
+    // stolen token that survived the revocation meant to kill it.
+    const { results } = await this.facade.rawQueryAll('_Session', { where: { userId } });
     for (const session of results) {
       await this.facade.rawDelete('_Session', session.objectId as string);
     }
