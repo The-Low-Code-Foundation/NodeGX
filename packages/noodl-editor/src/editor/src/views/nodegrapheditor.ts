@@ -616,6 +616,16 @@ export class NodeGraphEditor extends View {
        * `this.activeComponent`, before that field is reassigned.
        */
       viaInstance?: boolean;
+      /**
+       * TVW-007 AC1 — the id of the instance node on the canvas being LEFT.
+       *
+       * ⚠️ Unlike `viaInstance`, this cannot be derived here. The parent is always
+       * `this.activeComponent`, but *which* of its instance nodes was opened is known only to the
+       * door that opened it — and a canvas may hold many instances of the same component, so the
+       * component name cannot stand in for the node. Recorded on the history entry, and read back
+       * by the trail's instance crumb.
+       */
+      viaNodeId?: string;
     }
   ) {
     // TVW-007: whatever the hover card was anchored to is not on the canvas after this call —
@@ -672,12 +682,14 @@ export class NodeGraphEditor extends View {
 
       // TVW-007: null unless this was an instance door AND there was a canvas to come from.
       const via = args?.viaInstance && cameFrom ? cameFrom.fullName : null;
+      // TVW-007 AC1: the node rides with the route, and is dropped whenever the route is null.
+      const viaNodeId = via ? args?.viaNodeId ?? null : null;
 
       if (args?.replaceHistory) {
         this.navigationHistory.reset();
-        if (canPushHistory) this.navigationHistory.push(component, via);
+        if (canPushHistory) this.navigationHistory.push(component, via, viaNodeId);
       } else if (args?.pushHistory && canPushHistory) {
-        this.navigationHistory.push(component, via);
+        this.navigationHistory.push(component, via, viaNodeId);
       }
 
       TitleBar.instance.getWarningsAmount(component);

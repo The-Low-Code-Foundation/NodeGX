@@ -223,7 +223,7 @@ export class SelectionActions {
       if (node.model.type instanceof ComponentModel) {
         // TVW-007: the instance door. `viaInstance` is what makes the trail read `[◆ Home] › Hero`
         // instead of the folder path — see `instanceTrail.ts`.
-        editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true });
+        editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true, viaNodeId: node.id });
       } else {
         const componentPorts = node.model
           .getPorts()

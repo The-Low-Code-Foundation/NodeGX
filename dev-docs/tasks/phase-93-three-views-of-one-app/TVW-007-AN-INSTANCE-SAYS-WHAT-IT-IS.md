@@ -450,3 +450,135 @@ The drive now carries `the component's NAME is legible, not ellipsised`, which r
 `tests-unit/tvw-007` **88 specs / 6 suites, exit 0** (was 80/6 — the delta is this pass's 8).
 `typecheck:editor` **0**; `typecheck:editor-tests` **0**. 🔴 `test:ci` still **NOT run** — owed since
 s21, and now owed this commit's card change as well.
+
+## 12 — s25: the gate ran, AC6 closed, and AC1's third arm cannot pass as built
+
+### 12.1 AC6 ✅ — `test:ci` at the floor, and the pins are in the OTHER runner
+
+`test:ci` had been owed since s21. It ran at **seed 52534: 3012 specs, 8 failures, and the eight are
+the floor by name** — 3 SUB-006, 3 SUB-011, 2 NDA-017 ([[test-ci-baseline-is-six-at-seed-39386]]).
+`test-results.json` mtime **16:00:59**, matching the run's own END line, against a baseline of
+2026-09-19 22:27:35 — a fresh readout, not yesterday's re-read
+([[test-results-json-is-the-readout-not-the-log]]).
+
+🔴 **AC6's second clause is graded by a different runner, and reading only `test:ci` would have
+closed it on an absence.** `leg-005` / LGC-008's trail-visibility pins live in `tests-unit/`, which
+is **jest** — `test:ci` is the jasmine bundle and never loads them, so their silence in that log
+means *not present*, not *green* ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+`test:main`: **521 suites / 8343 specs, exit 0**, and the four suites the AC names are in the pass
+list by name — `leg-005/nodeCommentRow`, `lgc-008/canvas-remeasure`, `lgc-008/blockly-resize`,
+`lgc-008/tab-workspaces`. **Both clauses measured ⇒ AC6 ✅.**
+
+⚠️ **`board-export.test.ts` ran, and s23's `boardFrameMounts` extraction is green** — the handoff
+named it the thing most likely broken. Its describes are all `TVW-008 …`, which is why a grep for
+`board-export` in the log reads zero; the 34 `TVW-008` spec-starts are the known-firing signal that
+says it loaded.
+
+### 12.2 🔴 The instrument fault that cost the first run — a heap number borrowed from another context
+
+The first `test:ci` died at **60s, exit 134 (SIGABRT)** with `Reached heap limit` in webpack, and
+`test-results.json` was **unmoved**. The cause was mine: `NODE_OPTIONS=--max-old-space-size=2048`,
+carried over from [[the-smallest-runner-fails-first-and-names-nothing]] — a number that belongs to
+the *test runner*, not to a cold webpack build, and **less than half** this machine's default heap of
+4144MB. The repo sets no `NODE_OPTIONS` anywhere, so s21–s23 had always run on that default. Removing
+the override was the whole fix ([[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]]).
+
+🔴 **And the harness reported that run as "exit code 0".** A backgrounded command reports its *last*
+statement's status, and the last statement was the `echo` — the real 134 survived only because it was
+captured into `EC` and written to the log ([[a-backgrounded-command-exit-code-can-lie]]). **Read the
+duration and the artefact mtime, never the harness's exit line.**
+
+### 12.3 🔴 AC1's "with the Hero node selected" is not implemented, and no drive can make it pass
+
+AC1 ends *"Press `Home` in the trail: back on Home **with the Hero node selected**."* Building the
+arm meant first asking what it would read, and the answer is that **nothing in the system remembers
+which instance node was entered through**:
+
+- `NavigationHistoryEntry` is `{ name, via }` and `via` is a **component `fullName`**, not a node id
+  (`NavigationHistory.ts:16-21`).
+- `buildComponentTrail`'s item carries `{ name, fullName, component }` — no node (`instanceTrail.ts:79`).
+- The crumb calls `onSwitchToComponent(item.component, { pushHistory: true })` — no node
+  (`NodeGraphComponentTrail.tsx:392-394`).
+- `goToCurrent()` calls `switchToComponent(component)` — no node (`NavigationHistory.ts`).
+
+`switchToComponent` **already accepts `args.node`** to select on arrival (`nodegrapheditor.ts:605`);
+every one of these four callers simply passes nothing. So this is a missing wire, not a redesign.
+
+⚠️ **This is why the arm was written before the drive.** A drive would have reported
+`selected: none` and read as a flaky instrument — the s24 failure mode exactly
+([[verify-the-consequence-not-just-the-mechanism]]). **The gap blocks an AC, so it is first-job
+work** ([[build-the-tasks-do-not-farm-the-defects]]).
+
+🔴 **The node id belongs on the history ENTRY, not beside `activeComponent`** — the same argument the
+`via` field already records in its own comment: ⌘[ and ⌘] must rebuild *the step*, and a single
+"which node did I come through" field is wrong the moment you go back one step.
+
+### 12.4 What s25 confirmed about AC1's other two arms, by measurement
+
+- **⌘[ / ⌘] DO exist** — `EditorDocument.tsx:755-763`, `KeyMod.CtrlCmd | KeyCode.US_OPEN/CLOSE_SQUARE_BRACKET`,
+  handlers `navigationHistory.goBack/goForward`. ⚠️ A first grep over `views/nodegrapheditor` and the
+  Electron menu found **nothing** and nearly recorded the gesture as unbuilt; the binding lives in
+  `views/documents/EditorDocument` ([[elimination-over-an-unchecked-candidate-list]]).
+- 🔴 **The drive must press real keys, not call `goBack()`.** The shortcut and the trail's back
+  button are the *same handler*, so calling it grades the button a second time
+  ([[a-check-in-a-second-pipeline-is-a-duplicate-first]]). The keyboard route's own risk is the focus
+  predicate in `keyboardhandler.ts`, which only a real keystroke crosses.
+- **The match is on `event.key`**, not `keyCode` or `code` — `KeyCodeUtils.fromString(event.key)`
+  (`keyboardhandler.ts:281,348`), and `'['` is the registered label (`KeyCodeMapper.ts:130`). So the
+  dispatch must set `key: '['` with `modifiers: 4` (Meta); `windowsVirtualKeyCode` alone would fire
+  nothing.
+- **The fixture has the subjects.** `TVW-007 s20 Eyebrow`, 165 components / **515 instance nodes**;
+  `/Pages/Logged in/Account` holds 33 instances of 16 distinct components, e.g.
+  `/#Noodl Component System/Atoms/Buttons/Primary Button` — whose panel-opened trail must read the
+  containment form **`Buttons › Primary Button`**.
+
+### 12.5 s25 built the missing wire — the entry remembers the NODE
+
+Six files, and the shape follows the one `via` already set.
+
+| file | change |
+|---|---|
+| `NavigationHistory.ts` | `NavigationHistoryEntry` gains **`viaNodeId: string \| null`**; `push(component, via, viaNodeId)`; `discardInvalidEntries` clears it **with** `via` |
+| `instanceTrail.ts` | `InstanceParentCrumb` and `ComponentTrailCrumb` carry it; `instanceParentCrumb` returns `entry.viaNodeId` |
+| `NodeGraphComponentTrail.tsx` | `ComponentTrailItem` carries it; `onCrumbClick` passes `{ node: { id: viaNodeId } }` |
+| `nodegrapheditor.ts` | `switchToComponent` args gain `viaNodeId?: string`, forwarded to `push` |
+| `InstanceHoverController.ts`, `NodeContextMenu.ts`, `SelectionActions.ts` | the three instance doors pass `viaNodeId: node.id` |
+
+**Three decisions worth the ink:**
+
+- 🔴 **`viaNodeId` is a separate fact from `via`, and the spec proves it has to be.** A parent can
+  hold many instances of the same child — `/Pages/Logged in/Account` holds **33 instances of 16
+  components** — so an implementation that derived the node from the component name would send you
+  back to the wrong one, and would pass any spec that ever placed only one. The arm *"TWO instances
+  of the same component on one canvas are two different destinations"* is the one that fails it.
+- ⚠️ **`viaInstance` stays a boolean; `viaNodeId` had to be the id.** The parent is always
+  `this.activeComponent` and so is derived in one place, but *which node* is known only to the door
+  — the one thing the editor cannot look up for itself.
+- **A node without a route is dropped, at both layers.** `push` stores `via ? viaNodeId : null` and
+  `switchToComponent` computes `via ? args.viaNodeId : null`. A node id with no `via` addresses a
+  canvas the trail will never navigate to ([[a-write-nobody-reads-is-a-write-nobody-grades]]).
+
+🔴 **Deliberately NOT done: ⌘[ does not select the node, only the crumb does.** AC1 asks for
+selection on *"Press `Home` in the trail"* and asks ⌘[/⌘] only for *"each trail is the one that was
+shown at that step"*. `goToCurrent()` switches to `history[index]`, and the node on an entry
+describes the route **into** that entry, not out of it — so making ⌘[ select would mean reading the
+entry being *left*, a different rule that nothing in §4 asks for. Left as a question rather than
+answered silently: **the two gestures land in the same place and differ in selection.** If that
+reads wrong to Richard it is a one-line change in `goToCurrent`, and it should be his call.
+
+**Gates.** `tests-unit/tvw-007` **95 specs / 6 suites, exit 0** (was 88 — the 7 new arms are AC1's).
+`test:main` **521 suites / 8350 specs, exit 0** (was 8343). `typecheck:editor` **0**;
+`typecheck:editor-tests` **0**.
+
+⚠️ **Two suites failed to RUN before they failed to pass** — `instanceCrumb.test.tsx` and
+`componentTrail.test.ts`, on a missing `viaNodeId` in a type and in five entry literals. Making the
+field **required** on `NavigationHistoryEntry` is what surfaced them; an optional field would have
+compiled clean and left five specs asserting a shape the product no longer produces
+([[this-jest-can-grade-a-react-component]] — a type error here is a suite that grades *nothing*).
+
+### 12.6 What is left on AC1
+
+The wire exists and is graded offline; **AC1 still needs the drive**, and it is now three arms:
+the trail `Home` press (asserting the *selection*, not just the canvas), the Components-panel open
+(trail must read `Buttons › Primary Button`), and ⌘[ ×2 / ⌘] ×2 pressed as **real keys**
+(`key: '['`, `modifiers: 4`). `drive-tvw007-hover.js` is the instrument to build them on.

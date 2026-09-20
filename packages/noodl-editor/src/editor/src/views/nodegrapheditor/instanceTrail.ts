@@ -28,6 +28,14 @@ export interface InstanceParentCrumb {
   fullName: string;
   /** The resolved `ComponentModel`; a crumb without one is inert, so this is never null here. */
   component: unknown;
+  /**
+   * TVW-007 AC1 — the instance node to select on arrival, or `null`.
+   *
+   * Carried through to `switchToComponent({ node })`, which looks it up with `findNodeWithId` on
+   * the canvas it has just switched to. `null` is the pre-AC1 behaviour — land on the parent with
+   * nothing selected — and is what an entry recorded before this field existed still produces.
+   */
+  viaNodeId: string | null;
 }
 
 /** `/Pages/Home` → `Home`. A name with no `/` is its own leaf. */
@@ -76,7 +84,7 @@ export function instanceParentCrumb(
   const component = resolve(entry.via);
   if (!component) return null;
 
-  return { name: leafName(entry.via), fullName: entry.via, component };
+  return { name: leafName(entry.via), fullName: entry.via, component, viaNodeId: entry.viaNodeId ?? null };
 }
 
 /**
@@ -97,6 +105,8 @@ export interface ComponentTrailCrumb {
    */
   stateText?: string | null;
   isInstanceCrumb?: boolean;
+  /** TVW-007 AC1 — set only on the instance crumb; the node to select on the parent's canvas. */
+  viaNodeId?: string | null;
 }
 
 /**
@@ -140,7 +150,9 @@ export function buildComponentTrail({
         isCurrent: false,
         isFolderComponent: false,
         // What draws the diamond and the component-hue wash — see `NodeGraphComponentTrail`.
-        isInstanceCrumb: true
+        isInstanceCrumb: true,
+        // TVW-007 AC1 — the node this crumb selects on arrival.
+        viaNodeId: parent.viaNodeId
       },
       {
         name: nameParts[nameParts.length - 1],

@@ -18,6 +18,21 @@ export interface NavigationHistoryEntry {
   name: string;
   /** The parent component entered through, or `null` for every other route. */
   via: string | null;
+  /**
+   * TVW-007 AC1 — the **instance node** on `via`'s canvas that was entered through.
+   *
+   * `via` alone gets you back to the right canvas; it cannot get you back to the right *place* on
+   * it. AC1 ends *"back on Home with the Hero node selected"*, and a parent component may hold
+   * many instances of the same child — so the node is a separate fact from the component, and
+   * `leafName(via)` can never recover it.
+   *
+   * 🔴 It lives on the ENTRY for the same reason `via` does: a route is a property of the step.
+   * A single "which node did I come through" field beside `activeComponent` would be wrong the
+   * moment you went back one step.
+   *
+   * `null` whenever `via` is null, and cleared with it when the parent is deleted.
+   */
+  viaNodeId: string | null;
 }
 
 export class NavigationHistory {
@@ -63,6 +78,10 @@ export class NavigationHistory {
     for (const entry of this.history) {
       if (entry.via && !ProjectModel.instance.getComponentWithName(entry.via)) {
         entry.via = null;
+        // TVW-007 AC1: the node id addresses a node on the canvas that has just gone. Left set, it
+        // would be handed to `findNodeWithId` on whatever canvas the fallback trail leads to — a
+        // lookup that either misses or, worse, hits an unrelated node with a recycled id.
+        entry.viaNodeId = null;
       }
     }
 
@@ -90,11 +109,12 @@ export class NavigationHistory {
    * @param via TVW-007 — the parent component's `fullName` when this component was entered
    *   through an instance on that parent's canvas. `null`/omitted for every other route.
    */
-  push(component, via: string | null = null) {
+  push(component, via: string | null = null, viaNodeId: string | null = null) {
     if (this.history[this.index]?.name === component.name) return;
 
     this.history.length = this.index + 1; //clear the history after the index
-    this.history.push({ name: component.name, via });
+    // TVW-007 AC1: the node is meaningless without the route, so it is stored only alongside one.
+    this.history.push({ name: component.name, via, viaNodeId: via ? viaNodeId : null });
     this.index = this.history.length - 1;
 
     this.canNavigateBack = this.index > 0;

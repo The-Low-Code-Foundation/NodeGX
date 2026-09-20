@@ -150,7 +150,7 @@ export class InstanceHoverController {
           // The same call as the double-click (`SelectionActions`) and the context menu's *Open
           // component* — `viaInstance` included, or this door would be the one that produced a
           // folder-path trail where the other two produce the containment one.
-          editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true });
+          editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true, viaNodeId: node.id });
         },
         onPointerEnter: () => this.dispatch({ kind: 'card-enter' }),
         onPointerLeave: () => this.dispatch({ kind: 'card-leave' })

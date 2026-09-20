@@ -445,3 +445,36 @@ re-read `bench.scenarios` and become a second copy of a decision `boardFrameMoun
   to the pointer, so nothing blocks it, but nothing wires it either.
 - **`Add all`'s bound in the UI**: `canAddAll` is consulted, but the picker does not yet say *why* the
   shortcut is absent on a project past twelve components.
+
+## s25 — AC8 ✅
+
+**Both clauses measured.**
+
+1. **`test:ci` at the floor.** Seed **52534**, **3012 specs, 8 failures**, and the eight are the
+   floor by name — 3 SUB-006, 3 SUB-011, 2 NDA-017. `test-results.json` mtime **16:00:59**, matching
+   the run's own END, against a baseline of 2026-09-19 22:27:35
+   ([[test-results-json-is-the-readout-not-the-log]]).
+2. **The third mode is graded, and the `never` guard exists.** `assertNeverScope` is in
+   `previewScope.ts`, and **five** switches (`showsAppPreview`, `showsBench`, `showsBoard`,
+   `scopeChipLabel`, `scopeChipIconKind`) each end with it.
+
+⚠️ **The specs are in `tests-unit/tvw-008/previewScopeModes.test.ts`, not in the
+`tests/canvas/preview-scope.test.ts` §4 AC8 names** — s23's deviation, and it is the right one:
+`preview-scope.test.ts` is the **jasmine** bundle, which needs a renderer, while the predicates are
+pure. `preview-scope.test.ts` carries a pointer at the top so a reader of that file cannot conclude
+the surface has two modes. Recorded here rather than left to be re-derived.
+
+🔴 **The strongest arm in that file is the one that reads the SOURCE**: it counts
+`switch (scope.mode)` blocks and `return assertNeverScope(scope)` guards and asserts the two numbers
+are equal and ≥5. That is what makes a *sixth* switch added later a failing spec rather than a
+silent sixth hole — the gate covers the rule, not just today's five call sites
+([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+**Also confirmed, and the handoff had flagged it as the likeliest breakage:** `board-export.test.ts`
+**ran for the first time since s23's `boardFrameMounts` extraction, and is green** — all of AC2's and
+AC3's describes are in the log by name. A grep for `board-export` reads zero because its describes
+are all titled `TVW-008 …`; the 34 `TVW-008` spec-starts are the known-firing signal
+([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+
+**Still open: AC1, AC3–AC7** — all need the drive, whose script does not exist. AC4 additionally
+needs the authored fixture §9.6 describes (0 of 5,922 components in the corpus have a scenario).

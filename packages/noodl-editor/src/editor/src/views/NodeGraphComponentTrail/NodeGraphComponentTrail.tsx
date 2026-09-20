@@ -34,6 +34,13 @@ export interface ComponentTrailItem {
    * only crumb kind in this bar that renders as a real `<button>` — see `Item`.
    */
   isInstanceCrumb?: boolean;
+
+  /**
+   * TVW-007 AC1 — the instance node on that parent's canvas, so pressing this crumb goes back to
+   * the *place* you left and not merely the canvas. Set alongside `isInstanceCrumb`; `undefined`
+   * on every folder crumb, which is the pre-AC1 behaviour.
+   */
+  viaNodeId?: string | null;
 }
 
 export interface NodeGraphComponentTrailProps {
@@ -391,7 +398,20 @@ function Item({ item, onSwitchToComponent }: ItemProps) {
 
   function onCrumbClick() {
     if (!item.component || item.isCurrent) return;
-    onSwitchToComponent(item.component, { pushHistory: true });
+    /**
+     * TVW-007 AC1 — *"Press `Home` in the trail: back on Home with the Hero node selected."*
+     *
+     * ⚠️ `switchToComponent` reads only `node.id` (`nodegrapheditor.ts:711`), which it hands to
+     * `findNodeWithId` on the canvas it has just switched to — so `{ id }` is the whole of what it
+     * needs, and the trail does not have to resolve a `NodeGraphNode` it has no access to.
+     *
+     * Only the instance crumb carries a `viaNodeId`; every folder crumb leaves this undefined and
+     * behaves exactly as before.
+     */
+    onSwitchToComponent(item.component, {
+      pushHistory: true,
+      node: item.viaNodeId ? { id: item.viaNodeId } : undefined
+    });
   }
 
   /**

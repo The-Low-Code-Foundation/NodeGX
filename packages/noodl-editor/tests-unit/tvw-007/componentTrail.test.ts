@@ -30,7 +30,7 @@ function build(over: Partial<Parameters<typeof buildComponentTrail>[0]> = {}) {
 }
 
 describe('TVW-007 — entered through an instance: the route', () => {
-  const trail = () => build({ entry: { name: HERO, via: HOME } });
+  const trail = () => build({ entry: { name: HERO, via: HOME, viaNodeId: null } });
 
   it('draws exactly two crumbs — the parent and the current component', () => {
     expect(trail().map((c) => c.name)).toEqual(['Home', 'Hero']);
@@ -55,7 +55,7 @@ describe('TVW-007 — entered through an instance: the route', () => {
   });
 
   it('carries the read-only marker onto the current crumb', () => {
-    const trail = build({ entry: { name: HERO, via: HOME }, stateText: 'Read only' });
+    const trail = build({ entry: { name: HERO, via: HOME, viaNodeId: null }, stateText: 'Read only' });
 
     expect(trail[1].stateText).toBe('Read only');
   });
@@ -64,7 +64,7 @@ describe('TVW-007 — entered through an instance: the route', () => {
     const trail = buildComponentTrail({
       fullName: '/Hero',
       nameParts: ['Hero'],
-      entry: { name: '/Hero', via: HOME },
+      entry: { name: '/Hero', via: HOME, viaNodeId: null },
       hasDescent: false,
       resolve: (name) => (name === HOME || name === '/Hero' ? { name } : undefined)
     });
@@ -118,13 +118,13 @@ describe('TVW-007 — the containment trail stands down where another crumb owns
   it('🔴 a workflow descent keeps the folder path, even with a route recorded', () => {
     // WFA-006 prepends the workflow crumb itself. Two prepended crumbs would be two answers to
     // "where did I come from", and the person can only have come from one of them.
-    const trail = build({ entry: { name: HERO, via: HOME }, hasDescent: true });
+    const trail = build({ entry: { name: HERO, via: HOME, viaNodeId: null }, hasDescent: true });
 
     expect(trail.map((c) => c.fullName)).toEqual(['/Sections', '/Sections/Hero']);
   });
 
   it('a route pointing at a deleted parent falls back to the folder path', () => {
-    const trail = build({ entry: { name: HERO, via: '/Pages/Deleted' } });
+    const trail = build({ entry: { name: HERO, via: '/Pages/Deleted', viaNodeId: null } });
 
     expect(trail.map((c) => c.fullName)).toEqual(['/Sections', '/Sections/Hero']);
   });

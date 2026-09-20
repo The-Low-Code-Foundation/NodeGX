@@ -256,7 +256,7 @@ export class NodeContextMenu {
         icon: IconName.Component,
         // TVW-007: `viaInstance` too — the guard above is `isComponent()`, so this door is only
         // ever offered on a real instance, and the two doors must not produce different trails.
-        onClick: () => editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true }),
+        onClick: () => editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true, viaNodeId: node.id }),
         tooltip: `Go into ${node.model.type.displayName || node.model.type.name}`,
         tooltipShowAfterMs: 300
       });

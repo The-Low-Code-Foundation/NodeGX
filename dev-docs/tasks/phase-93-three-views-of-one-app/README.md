@@ -192,11 +192,11 @@ Not when the suite is green. It was green on the day this was scoped.
 | TVW-004 | ✅ | AC1–5, AC7 green; **AC6's 20 shots SENT s18 — awaits Richard's look** |
 | TVW-005 | ✅ | CLOSED — 6 ACs |
 | TVW-006 | ✅ | AC1–4, AC6 green; **AC5's 18 shots SENT s18 — awaits Richard's look** |
-| TVW-007 | slices 1–3 | **AC2, AC3, AC4 green.** AC2b BUILT s22 (hover + door) but **graded on the rendered surface, so it needs the drive** — as do AC1 and AC5; the placement's 4 shots are WITH RICHARD |
-| TVW-008 | slices 1–2 | reshaped by R-7. **Slice 2 (s23) built the whole surface** — chooser row, picker, frames, captions, drag, zoom/pan, empty state, persistence. **No AC closed: AC1, AC3–AC7 all need the drive**, AC8 needs `test:ci` |
+| TVW-007 | slices 1–3 | **AC2, AC2b, AC3, AC4, AC6 green** (s24 drove AC2/AC2b; s25 closed AC6 — `test:ci` at the floor **and** the leg-005/LGC-008 pins, which live in jest and `test:ci` never loads). **AC1: the missing wire is BUILT and graded offline (s25) — the history entry now remembers the NODE, not just the component — and it still needs the drive, three arms.** AC5 = Richard; the placement's 4 shots are WITH RICHARD |
+| TVW-008 | slices 1–2 | reshaped by R-7. **Slice 2 (s23) built the whole surface** — chooser row, picker, frames, captions, drag, zoom/pan, empty state, persistence. **AC8 ✅ (s25): `test:ci` at the floor + the `never` guard on all five mode switches, pinned by a spec that reads the SOURCE.** `board-export.test.ts` ran for the first time since s23 and is green. **AC1, AC3–AC7 all need the drive** |
 | TVW-009, TVW-010 | — | — |
 
-**52 ACs closed** (s22 and s23 closed none: s22 built AC2b, whose criterion is a photograph, and s23 built TVW-008's surface, whose criteria are all drives — a peer's editor held CDP 9222 and its webpack held `:8080` across both sessions). 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
+**56 ACs closed** — 52 at s21, +2 at s24 (TVW-007 AC2, AC2b), +2 at s25 (TVW-007 **AC6**, TVW-008 **AC8**). s22 and s23 closed none: s22 built AC2b, whose criterion is a photograph, and s23 built TVW-008's surface, whose criteria are all drives — a peer's editor held CDP 9222 and its webpack held `:8080` across both sessions. 🔴 **THREE verdicts are with Richard and nobody else can do any of them** —
 TVW-004 AC6 (20 shots, s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placements (s20). The
 first two close their tasks on the spot. **Do not re-send them.** The board is re-derived from the task files each session; this table is a
 convenience, and the task files win where they disagree.

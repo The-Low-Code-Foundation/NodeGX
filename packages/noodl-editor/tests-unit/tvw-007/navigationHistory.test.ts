@@ -42,7 +42,7 @@ describe('TVW-007 AC3 — entries carry {name, via}', () => {
     const { history } = newHistory();
     history.push(component(HOME));
 
-    expect(history.history).toEqual([{ name: HOME, via: null }]);
+    expect(history.history).toEqual([{ name: HOME, via: null, viaNodeId: null }]);
   });
 
   it('records the parent for a route that IS an instance door', () => {
@@ -51,8 +51,8 @@ describe('TVW-007 AC3 — entries carry {name, via}', () => {
     history.push(component(HERO), HOME);
 
     expect(history.history).toEqual([
-      { name: HOME, via: null },
-      { name: HERO, via: HOME }
+      { name: HOME, via: null, viaNodeId: null },
+      { name: HERO, via: HOME, viaNodeId: null }
     ]);
   });
 
@@ -85,7 +85,8 @@ describe('TVW-007 AC3 — goBack from an instance-entered component rebuilds the
     expect(instanceParentCrumb(HERO, history.currentEntry(), resolve)).toEqual({
       name: 'Home',
       fullName: HOME,
-      component: { name: HOME }
+      component: { name: HOME },
+      viaNodeId: null
     });
 
     expect(history.goBack()).toBe(true);
@@ -163,7 +164,7 @@ describe('TVW-007 — instanceParentCrumb refuses to draw a route it cannot stan
     // on the previous component. Reading its `via` would draw a real, live crumb for a parent
     // that has nothing to do with what is on screen.
     PROJECT.components = new Set([HOME, HERO, ABOUT]);
-    const stale = { name: HERO, via: HOME };
+    const stale = { name: HERO, via: HOME, viaNodeId: null };
 
     expect(instanceParentCrumb(ABOUT, stale, resolve)).toBeNull();
   });
@@ -171,17 +172,108 @@ describe('TVW-007 — instanceParentCrumb refuses to draw a route it cannot stan
   it('draws nothing when the parent no longer resolves', () => {
     PROJECT.components = new Set([HERO]);
 
-    expect(instanceParentCrumb(HERO, { name: HERO, via: HOME }, resolve)).toBeNull();
+    expect(instanceParentCrumb(HERO, { name: HERO, via: HOME, viaNodeId: null }, resolve)).toBeNull();
   });
 
   it('draws nothing for a component that claims itself as its parent', () => {
     PROJECT.components = new Set([HERO]);
 
-    expect(instanceParentCrumb(HERO, { name: HERO, via: HERO }, resolve)).toBeNull();
+    expect(instanceParentCrumb(HERO, { name: HERO, via: HERO, viaNodeId: null }, resolve)).toBeNull();
   });
 
   it('leafName takes the last segment, and a bare name is its own leaf', () => {
     expect(leafName('/Pages/Home')).toBe('Home');
     expect(leafName('Home')).toBe('Home');
+  });
+});
+
+/**
+ * TVW-007 AC1 — *"Press `Home` in the trail: back on Home with the Hero node selected."*
+ *
+ * 🔴 **Before s25 nothing in the system remembered which instance node was entered through.**
+ * `via` names the parent COMPONENT, and a parent may hold many instances of the same child — so
+ * `leafName(via)` could never recover the node, and the crumb landed on the right canvas with
+ * nothing selected. These arms pin the fact that carries the difference.
+ */
+describe('TVW-007 AC1 — the entry remembers the NODE, not just the component', () => {
+  const HERO_NODE = 'node-hero-7';
+
+  it('records the node the instance door was opened from', () => {
+    const { history } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    expect(history.history[1]).toEqual({ name: HERO, via: HOME, viaNodeId: HERO_NODE });
+  });
+
+  it('🔴 hands the node to the crumb, which is the only thing that can select it', () => {
+    const { history } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    // The crumb is what `NodeGraphComponentTrail` turns into
+    // `switchToComponent(component, { node: { id: viaNodeId } })`.
+    expect(instanceParentCrumb(HERO, history.currentEntry(), resolve)).toEqual({
+      name: 'Home',
+      fullName: HOME,
+      component: { name: HOME },
+      viaNodeId: HERO_NODE
+    });
+  });
+
+  it('🔴 TWO instances of the same component on one canvas are two different destinations', () => {
+    // The reason the node is a separate fact from `via`. Both steps below have an identical
+    // `via`, so an implementation that derived the node from the component name would send the
+    // person back to the same node twice — and would pass any spec that only ever placed one.
+    const { history } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, 'node-hero-A');
+    history.goBack();
+    history.push(component(HERO), HOME, 'node-hero-B');
+
+    expect(history.history.map((e) => e.viaNodeId)).toEqual([null, 'node-hero-B']);
+    expect(instanceParentCrumb(HERO, history.currentEntry(), resolve)?.viaNodeId).toBe('node-hero-B');
+  });
+
+  it('carries no node for a route that is not an instance door', () => {
+    const { history } = newHistory();
+    history.push(component(HERO)); // from the panel
+
+    expect(history.history[0].viaNodeId).toBeNull();
+  });
+
+  it('🔴 refuses a node id offered without a route, rather than storing an unreachable one', () => {
+    // `switchToComponent` already drops it, but the class is what the spec can reach, and a node
+    // id with no `via` addresses a canvas the trail will never navigate to.
+    const { history } = newHistory();
+    history.push(component(HERO), null, 'node-orphan');
+
+    expect(history.history[0].viaNodeId).toBeNull();
+  });
+
+  it('🔴 clears the node when the parent is deleted, alongside the route', () => {
+    // A stale id would be handed to `findNodeWithId` on whatever canvas the fallback leads to.
+    const { history } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    PROJECT.components.delete(HOME);
+    history.discardInvalidEntries();
+
+    expect(history.history[0].via).toBeNull();
+    expect(history.history[0].viaNodeId).toBeNull();
+  });
+
+  it('rebuilds the node across goBack and goForward, because it belongs to the STEP', () => {
+    const { history } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+    history.push(component(ABOUT));
+
+    history.goBack();
+    expect(instanceParentCrumb(HERO, history.currentEntry(), resolve)?.viaNodeId).toBe(HERO_NODE);
+
+    history.goForward();
+    expect(instanceParentCrumb(ABOUT, history.currentEntry(), resolve)).toBeNull();
   });
 });
