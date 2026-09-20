@@ -225,7 +225,16 @@ else byte-identical. It is called out here so the file's owner sees it rather th
 
 ---
 
-## 9. R7, and where the repair goes (ruled 2026-09-20, s10)
+## 9. R7, and where the repair goes — ✅ **BUILT s11, see [BRG-007](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md)**
+
+🟢 **Done.** The repair is option 2 below, the shape BRG-D8's own filing pointed at: both adapters'
+`_rowToRecord` now read BOTH schema shapes through `schemaCommon.declaredProperties`, so the SQLite
+adapter returns `true` at source and `/api` comes into line without either route family being
+touched. **BRG-D8 and BRG-D10 are closed.** The gate is one case per wire prefix, 7/7, and this
+file's own three-way case went red exactly as s10 said it would — it now asserts agreement, and
+`normalise()` has lost its `booleanReads` fold.
+
+🔴 **Everything below is kept as the located mechanism, because locating it was most of the work.**
 
 🔴 **Richard ruled: `/api` is brought into line — `true`/`false` everywhere.** The reasoning is in
 README §4 R7. What matters for whoever builds it is that **s10 located the mechanism**, so the next

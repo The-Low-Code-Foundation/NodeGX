@@ -10,7 +10,7 @@
 
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
-import { inferType } from './schemaCommon';
+import { declaredProperties, inferType } from './schemaCommon';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -31,9 +31,15 @@ interface ChangeEvent {
 /**
  * The schema shape `_rowToRecord` deserialises against — the editor's
  * dbCollections form. SchemaManager's tracked `TableSchema` (`{ name, columns }`)
- * also flows through `_getSchema`, and for it `properties` is simply absent, so
- * rows from SchemaManager-tracked-only collections deserialise without column
- * types. That asymmetry is the pre-existing behaviour, typed rather than hidden.
+ * also flows through `_getSchema`, and for it `properties` is simply absent.
+ *
+ * 🔴 **That asymmetry WAS the defect** (BRG-D8/BRG-D10, ruled R7). Rows from
+ * SchemaManager-tracked-only collections — which is every collection on a
+ * service-opened backend — deserialised with no column type at all, so a
+ * declared `Boolean` left here as whichever value the driver happened to
+ * return. `_rowToRecord` now reads both shapes through
+ * `schemaCommon.declaredProperties`, and this interface describes only the
+ * editor's half of that.
  */
 interface AdapterSchema {
   properties?: Record<string, { type?: string; required?: boolean; targetClass?: string }>;
@@ -750,11 +756,14 @@ class LocalSQLAdapter {
   _rowToRecord(row: AdapterRecord | null | undefined, collection: string): AdapterRecord {
     if (!row) return null;
 
-    const schema = this._getSchema(collection);
+    // R7 / BRG-D8: BOTH schema shapes, not just the editor's. A service-opened
+    // backend has only the manager's `TableSchema`, and reading `.properties`
+    // off that is how a declared `Boolean` left here as SQLite's raw `1`.
+    const properties = declaredProperties(this._getSchema(collection));
     const record: AdapterRecord = {};
 
     for (const [key, value] of Object.entries(row)) {
-      const colType = schema?.properties?.[key]?.type;
+      const colType = properties?.[key]?.type;
       record[key] = QueryBuilder.deserializeValue(value, colType);
     }
 

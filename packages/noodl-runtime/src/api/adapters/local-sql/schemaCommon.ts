@@ -277,3 +277,71 @@ export function inferType(value: unknown): string {
   }
   return 'String';
 }
+
+/**
+ * One column's declared type, in the shape `_rowToRecord` reads.
+ *
+ * This is the editor's `dbCollections` form (`schema.properties[name].type`),
+ * which is one of the TWO shapes a collection schema arrives in. The other is
+ * `TableSchema` above (`{ name, columns: [{ name, type }] }`), which is what
+ * `SchemaManager.getTableSchema()` and `PgSchemaManager.getTableSchema()`
+ * return.
+ */
+export interface DeclaredProperty {
+  type?: string;
+  targetClass?: string;
+  required?: boolean;
+}
+
+/** Derived maps, keyed by the schema object they were derived from. */
+const DERIVED = new WeakMap<object, Record<string, DeclaredProperty>>();
+
+/**
+ * The declared column types of a collection, from EITHER schema shape.
+ *
+ * 🔴 **This function is BRG-D8/BRG-D10's repair, and the defect was that only
+ * one of the two shapes was ever read.** Both adapters' `_rowToRecord` asked
+ * for `schema.properties[key].type` — the editor's shape — while a
+ * service-opened backend passes no `collections` config at all, so the schema
+ * it gets back is the manager's `TableSchema`, which has no `properties`
+ * member. The lookup was therefore `undefined` for every column of every
+ * collection on every service-opened backend, `deserializeValue` was called
+ * with no type, and each driver's own return value won: SQLite's INTEGER `1`
+ * where PostgreSQL's BOOLEAN gave `true`. R7 (README §4) rules that they agree
+ * on `true`/`false`, which means the declared type has to be visible on the way
+ * out — here, once, for both adapters, rather than transcribed into each
+ * ([[a-second-copy-of-a-palette-drifts-silently]]).
+ *
+ * The result is memoised against the schema object itself rather than by
+ * collection name, because `_rowToRecord` runs once per ROW and building a map
+ * per row is a per-row allocation on a path that a 2,000,000-row migration
+ * walks. A `WeakMap` and not a mutation of the schema: `getTableSchema()`'s
+ * object is served straight out over `GET /admin/schema` and `GET /api/_schema`,
+ * so attaching a derived member to it would change what those routes answer.
+ * Cache invalidation is free — `SchemaManager` replaces the cached object when
+ * a column is added, and a new object derives afresh.
+ *
+ * @param schema - Either schema shape, or null/undefined for an untracked collection.
+ * @returns name → declared property, or undefined when the schema declares nothing.
+ */
+export function declaredProperties(schema: unknown): Record<string, DeclaredProperty> | undefined {
+  if (!schema || typeof schema !== 'object') return undefined;
+  const s = schema as { properties?: Record<string, DeclaredProperty>; columns?: SchemaColumn[] };
+
+  // The editor's shape already IS the map. Returned as-is, so a collection
+  // configured with `collections` keeps reading exactly as it always has.
+  if (s.properties && typeof s.properties === 'object') return s.properties;
+
+  if (!Array.isArray(s.columns)) return undefined;
+
+  const memoised = DERIVED.get(s);
+  if (memoised) return memoised;
+
+  const derived: Record<string, DeclaredProperty> = {};
+  for (const col of s.columns) {
+    if (!col || typeof col.name !== 'string') continue;
+    derived[col.name] = { type: col.type, targetClass: col.targetClass, required: col.required };
+  }
+  DERIVED.set(s, derived);
+  return derived;
+}

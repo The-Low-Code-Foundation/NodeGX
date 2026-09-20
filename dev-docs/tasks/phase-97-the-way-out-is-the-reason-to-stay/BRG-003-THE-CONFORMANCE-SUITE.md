@@ -380,3 +380,25 @@ other read case is order-tolerant already — an s2 decision that paid off here 
 to.
 
 `conditional` was checked too: reported `skipped`, never `passed`, never counted as green.
+
+## The hole this suite had, and where it was closed (s11)
+
+🔴 **56 green cases said nothing about a boolean round-trip, because there was no boolean
+round-trip case.** That is how BRG-D8 crossed this suite — a gate with a hole shaped exactly like
+the defect ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+The obvious repair — add one case here — **would have been the same hole again**, and BRG-D10 is
+why. Two REST prefixes over the same store disagreed about the same column; a single case would
+have been written against whichever one its author reached for and passed either way. A conformance
+case also runs at the **adapter** level, below both prefixes, so it could not have seen the
+disagreement at all.
+
+So the gate lives where the prefixes do:
+[`brg-007-a-boolean-reads-the-same-through-every-prefix.test.ts`](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md)
+— **one case per wire prefix**, both arms, SQLite only so it runs where there is no database.
+
+**What is still owed to this suite:** a declared-type round-trip case *at the conformance level*,
+for the property BRG-007 fixed at source — an adapter hands back the DECLARED type, not the
+driver's. That is the portable claim, and a third adapter would need it. Not built at s11: BRG-007's
+gate measures the product surface the ruling was about, and adding a case here is a change to the
+56-case ratchet and its declaration, which is a separate edit with its own AC7 accounting.

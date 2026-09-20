@@ -543,13 +543,17 @@ suite('BRG-004 — the data plane (AC5, AC6, AC7)', () => {
   // BRG-D8 — the finding this file's cross-engine comparison produced
   // =========================================================================
 
-  it('🔴 BRG-D8 — the same app reads a Boolean as 0 on SQLite and false on PostgreSQL, over HTTP', async () => {
+  it('BRG-D8 — REPAIRED: the same app reads a Boolean the same way on both engines, over HTTP', async () => {
     // Measured through the product, not the facade: two BackendServices over
-    // the SAME data directory, one on each engine, answering the same GET. A
-    // browser app testing `note.pinned === true` works after the migration and
-    // did not before it — or `=== 1`, the other way round. Neither adapter
-    // applies the declared type on the way out (see the divergence register,
-    // `types/boolean-reads-as-0-1-on-sqlite`), so each driver wins.
+    // the SAME data directory, one on each engine, answering the same GET.
+    //
+    // 🔴 This case is the one that FOUND BRG-D8, and it used to assert the
+    // difference: `1` here and `true` there. Under R7 both adapters apply the
+    // declared type on the way out (`schemaCommon.declaredProperties`), so the
+    // assertion is now that a browser app testing `note.pinned === true` works
+    // on either engine. The cross-engine arm is kept here rather than moved
+    // into BRG-007's gate because only this file has both engines in one run —
+    // BRG-007 is SQLite-only so that it runs where there is no database.
     const sqliteDir = fs.mkdtempSync(path.join(os.tmpdir(), 'brg004-d8-sqlite-'));
     fs.cpSync(dataDir, sqliteDir, { recursive: true });
 
@@ -581,9 +585,13 @@ suite('BRG-004 — the data plane (AC5, AC6, AC7)', () => {
     expect(pgRow).toBeDefined();
     expect(liteRow).toBeDefined();
 
-    // The same record, the same field, the same app: two different JSON values.
-    expect(liteRow?.pinned).toBe(1);
+    // The same record, the same field, the same app: ONE JSON value.
+    expect(liteRow?.pinned).toBe(true);
     expect(pgRow?.pinned).toBe(true);
+    // And `note-001`, whose flag is false, is the other arm — a repair that
+    // coerced everything to `true` passes the line above and fails this one.
+    expect((onSqlite.find((r) => r.title === 'note-001') as NoteRow | undefined)?.pinned).toBe(false);
+    expect((onPostgres.find((r) => r.title === 'note-001') as NoteRow | undefined)?.pinned).toBe(false);
     // And the control that says this is about Boolean and not about everything:
     // a String and a Number field read identically through both.
     expect(pgRow?.title).toBe(liteRow?.title);

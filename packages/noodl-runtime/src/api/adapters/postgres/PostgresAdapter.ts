@@ -33,7 +33,7 @@
  * @module adapters/postgres/PostgresAdapter
  */
 
-import { inferType } from '../local-sql/schemaCommon';
+import { declaredProperties, inferType } from '../local-sql/schemaCommon';
 import { translatePgError } from './errors';
 import { PgSchemaManager } from './PgSchemaManager';
 import { DEFAULT_DATA_POOL_MAX, PgConnectionPool, type PgPoolSaturation } from './pool';
@@ -424,10 +424,16 @@ export class PostgresAdapter {
 
   private _rowToRecord(row: AdapterRecord | null | undefined, collection: string): AdapterRecord {
     if (!row) return null;
-    const schema = this._getSchema(collection);
+    // R7 / BRG-D8 — the same repair as the SQLite adapter, from the same helper.
+    // It changes nothing a caller can see HERE (`pg` already returns a real
+    // boolean for a BOOLEAN column, which is why this engine was the one that
+    // read correctly), and that is exactly why it belongs: the day the two
+    // adapters apply the declared type differently is the day they disagree
+    // again, and the only defence is that there is one place to read.
+    const properties = declaredProperties(this._getSchema(collection));
     const record: AdapterRecord = {};
     for (const [key, value] of Object.entries(row)) {
-      const colType = schema?.properties?.[key]?.type;
+      const colType = properties?.[key]?.type;
       record[key] = QueryBuilder.deserializeValue(value, colType);
     }
     return record;

@@ -35,14 +35,16 @@
  *   4. restart on `NODEGX_STORAGE_URL`; **probe again** (AC4, AC6)
  *   5. stop; restart on the untouched SQLite file; **probe a third time** (AC7)
  *
- * ## 🔴 Two declared divergences, lifted out of the snapshot by name
+ * ## 🔴 One declared divergence lifted out of the snapshot by name — and one that was repaired
  *
- * 1. **BRG-D8** — a `Boolean` reads `0` on SQLite and `false` on PostgreSQL. Filed, declared in
- *    the adapter's divergence register, and deliberately unrepaired: which way they should agree
- *    is a product decision. `Mark.pinned` carries it here, and the case that states it is the only
- *    place it appears. `normalise()` folds it for the snapshot, and **the folding is itself armed**
- *    — when BRG-D8 is repaired, the case asserting the difference goes red and names the
- *    normaliser to delete. A fold nobody can see expiring is a fold that hides the next defect.
+ * 1. **BRG-D8/BRG-D10 — REPAIRED, and this file is where it was found.** A `Boolean` read `0`
+ *    through `GET /api/:c` on SQLite where `GET /classes/:c` and a graph's own `Query Records`
+ *    read `true` — two REST surfaces disagreeing on one engine, which is strictly larger than the
+ *    engine difference BRG-D8 was filed as. Richard ruled R7 (README §4): `true`/`false`
+ *    everywhere. `Mark.pinned` carries it here; the case that states it is the only place it
+ *    appears, and it now asserts agreement rather than the difference. 🔴 **`normalise()`'s
+ *    `booleanReads` fold is GONE** — s10 armed the fold to expire with the repair, and this is it
+ *    expiring. A fold nobody can see expiring is a fold that hides the next defect.
  * 2. **Workflow execution history does not cross, by design.** It lives in
  *    `<dataDir>/executions.sqlite`, a second file `migrate` never reads (it surveys `local.db`).
  *    After the move it is still there, still readable, still SQLite. That is a property an
@@ -1003,48 +1005,58 @@ describeIf('BRG-006 — the drive: a real app crosses', () => {
 
   describe('the declared divergences — measured, not smoothed', () => {
     /**
-     * 🔴 BRG-D8, end to end — and **bounded**, which is what this drive added to it.
+     * 🔴 BRG-D8 and BRG-D10, end to end — **found here, and now repaired.**
      *
      * BRG-004 s9 measured the divergence over `GET /api/:collection` alone and filed it as a
      * difference between two ENGINES. This drive read the same column in the same row three ways,
-     * on both engines, and the table is not what the filing says:
+     * on both engines, and the table it produced was not what the filing said:
      *
-     * | read through | SQLite | PostgreSQL |
-     * |---|---|---|
-     * | `GET /api/Mark` | **`1`** | `true` |
-     * | `GET /classes/Mark` | **`true`** | `true` |
-     * | a cloud function's `Query Records` | `true` | `true` |
+     * | read through | SQLite, as found | PostgreSQL, as found | both, now |
+     * |---|---|---|---|
+     * | `GET /api/Mark` | **`1`** | `true` | `true` |
+     * | `GET /classes/Mark` | `true` | `true` | `true` |
+     * | a cloud function's `Query Records` | `true` | `true` | `true` |
      *
-     * 🔴 **`/api` and `/classes` disagree with each other on ONE engine, today, with no
-     * PostgreSQL anywhere near it.** Two REST surfaces over the same store, the same row and
-     * the same column, answering `1` and `true`. That is BRG-D10, filed on its own: it is a
-     * product defect the bridge did not cause and would never have found, and it is strictly
-     * larger than BRG-D8, which turns out to be one cell of it.
+     * 🔴 **`/api` and `/classes` disagreed with each other on ONE engine, with no PostgreSQL
+     * anywhere near it.** Two REST surfaces over the same store, the same row and the same column,
+     * answering `1` and `true`. That was BRG-D10: a product defect the bridge did not cause and
+     * would never have found, strictly larger than BRG-D8, which turned out to be one cell of it.
      *
-     * It also changes the ruling BRG-D8 is waiting on. The argument for keeping SQLite's `0`/`1`
-     * is "every existing app reads that" — and it is false as stated: an app on `/classes`, and
-     * every NodeGX graph reading its own data, already gets `true`. Only `/api` on SQLite reads
-     * `1`, and moving to PostgreSQL makes it agree with everything else.
+     * It also settled the ruling BRG-D8 was waiting on. The argument for keeping SQLite's `0`/`1`
+     * was "every existing app reads that" — false as stated: an app on `/classes`, and every
+     * NodeGX graph reading its own data, already got `true`. Richard ruled R7 accordingly
+     * (README §4): `/api` comes into line, `true`/`false` everywhere.
      *
-     * When BRG-D8 is repaired this case goes red, and the repair is not finished until
-     * `normalise()` has lost its `booleanReads` fold. A fold nobody can see expiring is a fold
-     * that hides the next defect.
+     * The repair is one helper — `schemaCommon.declaredProperties` — read by both adapters'
+     * `_rowToRecord`, and its gate is `brg-007-a-boolean-reads-the-same-through-every-prefix`,
+     * which is one case PER WIRE PREFIX because a single case would have been written on
+     * whichever prefix came to hand and passed while the other stayed wrong.
+     *
+     * This case is the end-to-end arm and s10 wrote it knowing it would go red when the repair
+     * landed. It did, and `normalise()` has lost its `booleanReads` fold — a fold nobody can see
+     * expiring is a fold that hides the next defect.
      */
-    it('BRG-D8: the divergence is in the REST reader, not in storage — a graph already agrees', () => {
-      // BRG-D8 as filed, reproduced in a running app: `/api` differs across the move.
-      expect(control.booleanReads.viaApi).toBe(1);
+    it('BRG-D8/BRG-D10 are REPAIRED: every prefix, both engines, one answer', () => {
+      // 🔴 This case is the one s10 said would go red when the repair landed, and it did. What it
+      // asserted then is kept above as the table; what it asserts now is the ruling: `true`
+      // everywhere. The `.not.toBe()` line that used to PIN the disagreement is deliberately gone
+      // rather than negated — an assertion that two readers differ, left standing with its sense
+      // flipped, reads as a rule about the repair instead of a rule about the product.
+      expect(control.booleanReads.viaApi).toBe(true);
       expect(afterPg.booleanReads.viaApi).toBe(true);
 
-      // 🔴 BRG-D10: on SQLite, the OTHER prefix over the same row already says `true`. One engine,
-      // one record, one column, two routes, two answers.
+      // The prefix that was already right, still right — the half of BRG-D10 the repair had to
+      // leave alone, and the reason `wireQuery` has its own case in BRG-007.
       expect(control.booleanReads.viaClasses).toBe(true);
-      expect(control.booleanReads.viaApi).not.toBe(control.booleanReads.viaClasses);
-
-      // And on PostgreSQL every reader agrees — which is what makes `/api` on SQLite the outlier
-      // rather than PostgreSQL the odd one out.
       expect(afterPg.booleanReads.viaClasses).toBe(true);
+
+      // And the graph's own reader, which agreed with `/classes` on both engines throughout.
       expect(control.booleanReads.viaFunction).toBe(true);
       expect(afterPg.booleanReads.viaFunction).toBe(true);
+
+      // The two prefixes now agree with each other ON ONE ENGINE, which is the sentence BRG-D10
+      // was filed on, read here end to end rather than at the facade.
+      expect(control.booleanReads.viaApi).toBe(control.booleanReads.viaClasses);
 
       // The control that says this is about `Boolean` and not about the write: the `String`
       // written by the same node in the same write reads identically everywhere.
@@ -1127,10 +1139,13 @@ describeIf('BRG-006 — the drive: a real app crosses', () => {
  * different moment on each engine, and AC4 asserts it directly instead.
  */
 function normalise(s: Snapshot): Record<string, unknown> {
-  const { marks, itemCountAfterAnotherPoll, marksAtStart, marksAtEnd, booleanReads, ...rest } = s;
+  const { marks, itemCountAfterAnotherPoll, marksAtStart, marksAtEnd, ...rest } = s;
   void itemCountAfterAnotherPoll;
   void marksAtStart;
   void marksAtEnd;
-  void booleanReads;
-  return { ...rest, marks: { added: marks.added, firstNote: marks.firstNote } };
+  // 🔴 `booleanReads` is NO LONGER FOLDED OUT. R7's repair landed, the two engines
+  // agree, and the fold that used to hide the one declared difference now compares
+  // like everything else — which is what it means for the repair to be finished.
+  // `marks.firstPinned` is likewise compared again, through the full `marks` object.
+  return { ...rest, marks: { added: marks.added, firstNote: marks.firstNote, firstPinned: marks.firstPinned } };
 }
