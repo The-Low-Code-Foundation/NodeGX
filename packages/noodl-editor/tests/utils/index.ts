@@ -4,6 +4,7 @@ export * from './deploy-ignore.test';
 export * from './deploy-starter-imagery.test';
 export * from './exp017-duplicate-assets.test';
 export * from './hlt-001-deferred-unmount.spec';
+export * from './hlt-002-thumbnail-capture.spec';
 export * from './iconsets.test';
 export * from './keyboardhandler.spec';
 export * from './ParameterValueResolver.test';

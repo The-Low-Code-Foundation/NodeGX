@@ -21,6 +21,27 @@ Uncaught (in promise) Error: Error invoking remote method 'GUEST_VIEW_MANAGER_CA
 `await` has nothing catching it. `UseCaptureThumbnails` runs it on a timer, so it repeats for as
 long as the editor is open.
 
+> 🔴 **CORRECTED 2026-09-20 by measurement, before the fix was written.** *"a `<webview>` that is
+> not attached"* is **wrong**, and it is the reason this sat for four phases: `captureThumbnail`
+> has carried an attachment guard (`webviewDomReady && webview.isConnected`) since the **initial
+> commit**, so anyone who read the code saw a guard and moved on. At every one of seven failures on
+> a driven session the webview was `isConnected: true`, `domReady: true`, in a window with
+> `visibilityState: "visible"`, with a real `988×285` rectangle — and `checkVisibility(): false`.
+>
+> **It is not detached. It is hidden.** BEN-004 R3 hides the app stage with `visibility: hidden`
+> rather than unmounting it, on purpose, so the preview keeps its route and its scroll position
+> while the bench or the board is on top. "Hidden but attached" went from impossible to routine
+> when the preview gained its second and third modes — which is why the count went 6 → 15 → 116
+> without this file changing. **The editor changed around it.**
+> ([[measure-the-artefact-before-believing-the-task-file]])
+>
+> 🔴 **And there is a second regime this task did not know about.** With the editor window occluded
+> (`visibilityState === 'hidden'`) `capturePage()` does not reject — it **never settles at all**:
+> measured still pending after 15 seconds, against a timer that fires every 20. Every tick spent
+> behind another window left another capture pending forever. That regime emits nothing, so every
+> instrument that counted rejections was blind to it — part of why four sessions looked at this and
+> read it as harmless. Line `357` is now `438`.
+
 ## 3. 🔴 Its history, which is this phase's whole thesis
 
 | when | where | what was written | that phase |
@@ -49,6 +70,17 @@ there is no thumbnail. If the capture is found to be pointless, that is a **find
 not a deletion inside this task.
 
 ## 5. Acceptance criteria
+
+> ✅ **BUILT 2026-09-20. All five met — [verdict](../phase-99-the-ones-nobody-owned/verdicts/HLT-002/2026-09-20/VERDICT.md).**
+> A 21-minute driven session: **56 capture attempts, 41 real captures, 0 failures, 0 rejections**,
+> against a control that read 7 rejections and, on the deterministic arm, 4 `capturePage` calls
+> while hidden versus **0**. `scripts/devtools/drive-hlt002-thumbnail.js` grades both directions.
+>
+> 🔴 **The fix also cured a leak it would otherwise have made worse**: `UseCaptureThumbnails`
+> registered an `ipcRenderer.once` reply listener per 20-second tick that was only ever consumed
+> when a capture *succeeded*. Skips were rare before this task and are ordinary after it, so the
+> guard alone would have turned a slow leak into a fast one
+> ([[a-drive-that-counts-only-the-cured-error-cannot-see-a-trade]]).
 
 1. **(the number)** A driven session of at least 20 minutes, with project open/close and canvas
    navigation, logs **0** `UnknownVizError` rejections. Log committed to `verdicts/HLT-002/<date>/`.

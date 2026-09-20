@@ -10,6 +10,12 @@ import { VisualCanvas } from './VisualCanvas';
 import { PREVIEW_STRIP_ACTION, type StripAction } from './detachedStrip';
 import { previewRoutePath } from './previewRoutePath';
 import type { StripModel } from './previewStripWords';
+import {
+  CAPTURE_SKIP_EXPLANATION,
+  captureThumbnailSafely,
+  type CaptureFailure,
+  type CaptureSkipReason
+} from './thumbnailCapture';
 import { createReactRoot, unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 /** What the preview outlines: a TVW-003 selection path, a bare node id, or nothing. */
@@ -435,13 +441,55 @@ export class CanvasView extends View {
     });
   }
 
+  /**
+   * HLT-002 — a picture of the preview, or `null` and a reason.
+   *
+   * The guard that used to be here asked whether the `<webview>` was attached, and every one of
+   * the 116 unhandled rejections Richard's 2026-09-20 session logged happened with it attached,
+   * DOM-ready, in a visible window, with a real rectangle. See `thumbnailCapture.ts` for what the
+   * condition actually is and for the second regime — an occluded window, where `capturePage()`
+   * never settles at all — that made the count as large as it is.
+   *
+   * ⚠️ **The containment belongs here rather than at the call sites**, because there are two
+   * callers and only one of them is obvious: `UseCaptureThumbnails` in the editor window, and
+   * `viewer-frame/src/views/viewer.js:127` in the *detached preview* window, which awaits this the
+   * same unguarded way. Fixing the method covers both; fixing the hook would have left the
+   * detached window exactly as it was.
+   */
   async captureThumbnail() {
-    if (!this.webviewDomReady || !this.webview?.isConnected) {
-      return null;
+    return captureThumbnailSafely(
+      {
+        domReady: this.webviewDomReady,
+        webview: this.webview,
+        pageVisibility: document.visibilityState
+      },
+      async () => this.resizeToThumbnail(await this.webview.capturePage()),
+      (reason, detail) => this.reportThumbnailSkip(reason, detail)
+    );
+  }
+
+  /**
+   * AC4 — a skip says so, **once per reason**, not once per tick.
+   *
+   * The timer fires every 20 seconds for as long as a project is open, so a line per skip would
+   * put thousands of them in the log of anyone who works on the board for an afternoon — and this
+   * task exists because a log nobody can read is a log nobody reads. A line when the reason
+   * *changes* says the same thing and stays legible.
+   */
+  private lastThumbnailSkip: string | null = null;
+
+  private reportThumbnailSkip(reason: CaptureSkipReason | CaptureFailure, detail?: string) {
+    const key = `${reason}:${detail ?? ''}`;
+    if (this.lastThumbnailSkip === key) {
+      return;
     }
+    this.lastThumbnailSkip = key;
 
-    const nativeImage = await this.webview.capturePage();
+    const why = reason in CAPTURE_SKIP_EXPLANATION ? CAPTURE_SKIP_EXPLANATION[reason] : detail;
+    console.debug(`[thumbnail] not capturing the project thumbnail: ${why}`);
+  }
 
+  private resizeToThumbnail(nativeImage: Electron.NativeImage) {
     const size = nativeImage.getSize();
     const canvasWidth = size.width;
     const canvasHeight = size.height;
