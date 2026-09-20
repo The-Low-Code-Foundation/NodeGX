@@ -1,20 +1,16 @@
 # Phase 97 — next session
 
-**Session 9 built the data plane. `nodegx-backend migrate --to postgres://…` now takes a consistent
-snapshot, creates the schema, copies every table in checkpointed batches, and then VERIFIES its own
-work by reading both sides back through their adapters — and refuses to say "cut over" if anything
-differs. BRG-004 is closed: AC1–AC9. `brg-004-data-plane.test.ts` is 19/19, the three BRG-004 specs 39/39.**
+**Session 10 built the drive. BRG-006 is green: 22/22, exit 0, 206 s. A whole NodeGX app —
+FED-006's feed reader, imported unmodified — is provisioned on SQLite, recorded, moved by the real
+`migrate` command, served from PostgreSQL, compared against its own control field for field, and
+then served again from the untouched SQLite file. AC1–AC7 are closed. AC8 is published and waiting
+on Richard.**
 
-**It also found two defects, each invisible to everything that ran before it.** One is a product
-defect 56/56 conformance could not see — a `Boolean` reads `0` on
-SQLite and `false` on PostgreSQL, over HTTP, in the same app. Filed as **BRG-D8** (README §9),
-declared in the adapter's divergence register, and NOT silently repaired: which way the two should
-agree is Richard's call. The other is **BRG-D9**: `migrate` could not run at all on a database over
-2 GiB, because AC7's hash used `readFileSync` — found by AC9's 8 GB run and by nothing smaller, and
-fixed.
+**It also found BRG-D10, and BRG-D10 is not about the bridge at all**: two Parse-wire prefixes
+answer differently for the same Boolean, in the same row, on the same engine. `GET /api/:c` reads
+`1` where `GET /classes/:c` reads `true` — on SQLite, with no PostgreSQL involved.
 
-**Where it is:** `cline-dev`, commits `7ba47bde9` (the data plane) and `f89a6a81a` (a pool a refusal
-leaked) — s8 was `4226a6c68`.
+**Where it is:** `cline-dev`, commit `7c93fe888`. s9 was `7ba47bde9` + `f89a6a81a`.
 
 ## The board, re-derived from the task files
 
@@ -22,68 +18,82 @@ leaked) — s8 was `4226a6c68`.
 |---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) the interface | ✅ | — |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`noodl-mcp` — red for peers' reasons, re-measured at s9) |
-| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | ⚠️ **it has no boolean round-trip case** — BRG-D8 got past it |
-| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ **AC1–AC9 closed** | — |
+| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | ⚠️ still no boolean round-trip case — and BRG-D10 says one case would not be enough; it needs one **per wire prefix** |
+| [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ AC1–AC9 | — |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ all but AC7 | **AC7** — `noodl-mcp` green is not this phase's to make true (§7.5) |
-| [BRG-006](BRG-006-THE-DRIVE.md) the drive | ⬜ **next** | the whole task |
+| [BRG-006](BRG-006-THE-DRIVE.md) the drive | 🟢 **AC1–AC7** | **AC8** — published, needs Richard to read and rule it honest |
 
-**Readings taken this session** (2026-09-20): `brg-004` specs **39/39 exit 0**; `test:main`
-**520 suites / 8292 tests exit 0**; full `nodegx-backend` **161 suites / 1920 tests, 1 failed — the
-peer's new `POST admin/executions/compact` route moving BAK-009's reviewed tally 79→80**; `noodl-mcp`
-**129 suites / 2193 tests, 8 suites red — the same eight as s7**, one of them failing on an untracked
-peer template; `nodegx-backend` typecheck exit 0. AC9: **2,000,000 rows / 8.07 GB in 107.6 s**, verify clean.
+**Readings taken this session** (2026-09-20): the drive **22/22 exit 0, 206 s**; carry report clean
+(committed at `brg-006-drive-record/`); `migrate` **58 rows / 15 batches / 0.1 s, 43 records
+compared through both adapters, nothing differs**, source sha256 identical; siblings
+`feed-drive` + `fed-004` + every `realtime` spec **9 suites / 83 tests exit 0**;
+`typecheck:backend-tests` exit 0.
 
-## 1. First job — BRG-006, the drive
+## 1. First job — the two rulings, then close the phase
 
-Everything it depends on now exists. §3 of that file is the scope; the three things s9 leaves it:
+Both are Richard's and both are now ONE decision, which is new information from this session.
 
-1. **The PostgreSQL specs are skipped when no server is reachable** (`brg-004-data-plane`,
-   `brg-005-*`, `SchemaManager.export.postgres`, `QueryBuilder.dialect`, `postgres.geo`). That is a
-   hole in CI written down in four places and closed in none. BRG-006's AC is where it becomes a gate.
-2. **Operator docs** — `NODEGX_STORAGE_URL`, the pool arithmetic, PgBouncer, `pg_dump`, and now
-   `migrate`'s five phases and what `--resume` promises. `docs/runtime/SELF-HOSTING.md` and
-   `BACKEND-OPERATIONS.md` were peer-held at s8 and s9; check before editing.
-3. **Backups on PostgreSQL** — `BackupManager` snapshots a SQLite file (`engine: 'node:sqlite'`
-   hardcoded). On a storage URL a scheduled backup fails at backup time, not at start. Ruling needed:
-   `pg_dump` is the operator's job (recommended — say so in the docs) or the service learns it.
+1. 🔴 **BRG-D8 + BRG-D10 together.** The drive read one Boolean column three ways on two engines:
 
-## 2. 🔴 Two things in the working tree that are NOT at HEAD
+   | read through | SQLite | PostgreSQL |
+   |---|---|---|
+   | `GET /api/:c` | **`1`** | `true` |
+   | `GET /classes/:c` | **`true`** | `true` |
+   | a graph's `Query Records` | `true` | `true` |
 
-Unchanged from s8, and s9 added a third:
+   BRG-D8 was filed as "two engines disagree" and is one cell of this. **The argument its ruling
+   was waiting on is false as stated**: "every existing app reads `0`/`1`" is true only of apps on
+   `/api` against SQLite. Everything else already reads `true`. ⚠️ It reaches internal tables too —
+   `migrate`'s verify report names `_User.emailVerified`, `_Files.private`, `_ApiKey.revoked`.
+   The question to put in plain words: **should `/api` on SQLite be brought into line with
+   everything else (`true`), knowing that is the one reader that changes?**
 
+2. **AC8** — `docs/runtime/SCALING.md` §"SQLite and Postgres" is rewritten and needs Richard to
+   read it and rule it honest. It states what the bridge buys (the storage ceiling — one app
+   process, a real database behind it) and what it does not (the app tier is still single-process),
+   in R2's words, on the page a person reads before deciding whether to start.
+
+## 2. 🔴 What is in the working tree and NOT at HEAD
+
+- **`docs/runtime/SCALING.md`** — 🔴 **a phase 98 peer's UNTRACKED file, which s10 edited and did
+  NOT commit.** Its Postgres section said *"Today: there is no supported SQLite → Postgres
+  migration"* and warned the schema-export route drops relations, indexes and RLS — all shipped in
+  s5/s9 and all false, on a page a user reads before starting. The edit is surgical: one section
+  replaced, one bullet in "Honest limits" corrected, everything else byte-identical. **It belongs to
+  whoever owns that file.** See BRG-006 §8.1.
 - **`packages/nodegx-backend/src/execution/ExecutionStore.ts`** — the `PgOperationalStore` wiring
-  sits on the peer's uncommitted PRD-003 `close()`. Commit it once theirs lands.
-- **`packages/nodegx-backend/src/server/HttpServer.ts`** — only the four-line `pool:` hunk in
-  `healthBody()` is this phase's; it was committed through a temporary index at s8.
-- **`packages/nodegx-backend/src/cli.ts`** — s9's `migrate` hunks were committed through a temporary
-  index (the file also holds the peer's PRD-005 `--require-secrets` work). If a `git diff` on it
-  looks strange, that is why: what is at HEAD is HEAD + this phase's hunks only.
+  still sits on the peer's uncommitted PRD-003 `close()`. Commit once theirs lands. (Unchanged
+  since s8.)
+- **`packages/nodegx-backend/src/server/HttpServer.ts`** and **`src/cli.ts`** — this phase's hunks
+  went in through a temporary index at s8/s9. A strange-looking `git diff` on either is that.
 
-## 3. What s9 settled, including where s8's handoff was wrong
+## 3. What s10 settled
 
-- 🔴 **s8 said the migrator would copy rows with `PostgresAdapter.upsertBatch`. It must not.**
-  `upsertBatch`'s update path re-stamps `updatedAt` and drops `createdAt` — correct for an app write,
-  a falsification for a migration, and invisible except on the resume. The writer is
-  `INSERT … ON CONFLICT DO UPDATE` over the source's own values, and a case states that property on
-  its own so the swap back fails with a sentence. (BRG-004 §7.2)
-- **An FTS5 index is not data.** `sqlite_master` lists the virtual table and its shadow tables; a
-  migrator reading the table list copies an index as a collection. They are excluded and the field
-  list is carried instead, to be rebuilt.
-- **A zoneless SQLite timestamp is UTC, and PostgreSQL will not assume that.** `_Schema`'s stamps are
-  written with `CURRENT_TIMESTAMP`; handed to a `TIMESTAMPTZ` as-is they shift by the server's UTC
-  offset. Verify compares instants, never spellings — and the obvious "compare the first 19
-  characters" repair would have passed exactly the damage AC5.4 mutates in.
-- **The verifier compares RECORDS through both adapters, not SQL.** That is what found BRG-D8, and it
-  is why every declared divergence is exercised by verification rather than described by it.
+- **The CI hole is closed where it is measured.** Five spec files skip themselves with no
+  PostgreSQL, so a database-less CI run was green and said nothing. `NODEGX_REQUIRE_PG=1` now
+  throws at module load with the URL in the message. Set it in the phase's gate; a laptop keeps
+  the skip.
+- **A bound API key over `POST /functions/:name` is not "signed in" to a graph.** The cloud
+  `Request` node reads `x-parse-session-token` alone (`nodes/cloud/request.ts:220`); only `/mcp`
+  mints an ephemeral session for a bound key. Known — FED-005 §3.3, phase 96 R11 — identical on
+  both engines, and terrain the drive routes around rather than a finding.
+- **`run.output.result`, two unwrappings.** CWF-002 named the run's answer `output`, and that
+  output is the function's body, which a `Response` node wraps in `result`. Either key alone gives
+  `undefined`; `undefined ?? -1` is a number, so the run stays green while the count goes quietly
+  wrong.
+- **The stored name of an uploaded file is not the posted name** (`server/files.ts:165`). A fetch
+  under the posted name is a 404 — which reads as "the file did not cross", on every engine equally.
+- **Execution history does not cross, by design** — `executions.sqlite` is a second file `migrate`
+  never surveys. Still there, still readable, still SQLite after the cutover. Now in `SCALING.md`.
 
-## 4. Richard's calls — two, neither blocking
+## 4. After the rulings
 
-R1–R6 stand. Outstanding:
+The phase closes. What is left beyond the rulings is small and named:
 
-- 🔴 **BRG-D8: which way should the two engines agree about a Boolean?** PostgreSQL's `true` is the
-  better answer and SQLite's `0`/`1` is what every existing app has been reading. The repair is one
-  of: teach `_rowToRecord` the declared type (changes SQLite's answers), or make the Postgres adapter
-  hand back `0`/`1` (keeps the old answer, and is the wrong-looking one). Either way BRG-003 needs a
-  boolean round-trip case, which is the cheap part.
-- **Backups on PostgreSQL** — `pg_dump` as the operator's job, or `BackupManager` learns a database
-  that is not a file.
+- **BRG-003 needs boolean round-trip cases — one per wire prefix**, which is the shape BRG-D10
+  makes necessary and a single case would have missed ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+- **BRG-D7** (`IStorageSchema` is synchronous) is still open and still owed to BRG-002's method on
+  six callers, or a task of its own.
+- **Backups on PostgreSQL** — `BackupManager` snapshots a SQLite file. `SCALING.md` now tells an
+  operator the execution history is a file to copy; whether `pg_dump` is the operator's job or the
+  service learns it is still unruled.
