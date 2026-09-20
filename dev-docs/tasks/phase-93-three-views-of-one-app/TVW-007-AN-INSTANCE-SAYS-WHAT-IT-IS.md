@@ -582,3 +582,51 @@ The wire exists and is graded offline; **AC1 still needs the drive**, and it is 
 the trail `Home` press (asserting the *selection*, not just the canvas), the Components-panel open
 (trail must read `Buttons › Primary Button`), and ⌘[ ×2 / ⌘] ×2 pressed as **real keys**
 (`key: '['`, `modifiers: 4`). `drive-tvw007-hover.js` is the instrument to build them on.
+
+### 12.7 🔴 AC1 ✅ — the drive ran: **24/24**, and the shot confirms the consequence
+
+`scripts/devtools/drive-tvw007-ac1.js`, against `TVW-007 s20 Eyebrow`. All three remaining clauses
+of AC1's sentence are now measured on the rendered surface:
+
+| clause | result |
+|---|---|
+| Press `Home` in the trail: back on the parent **with the node selected** | ✅ `selected=[08383aa4…] labels=[Input Container]` |
+| Open from the Components panel: the **containment** trail | ✅ `Noodl Component System › Atoms › Sections and Dividers › Input Container`, `diamond=false` |
+| ⌘[ ×2, ⌘] ×2, each showing the trail shown at that step | ✅ all four steps, as **real keystrokes** |
+
+🔴 **The screenshot says more than the log could.** `ac1-returned-with-node-selected.png` shows the
+canvas back on `Account`, the `Input Container` node carrying a selection ring **and the Properties
+panel switched to `Input Container · VISUAL`**. The selection is not a flag the drive read back out
+of the model — the editor's property surface followed it, which is the thing a person is actually
+returning *for* ([[verify-the-consequence-not-just-the-mechanism]]).
+
+**The control pair is visible too**, and it is one component reached two ways: the instance route
+draws `◆ Account › Input Container` (`ac1-trail-instance-form.png`), the panel route draws the full
+folder path (`ac1-trail-containment-form.png`). **Route is the only variable**
+([[a-control-pair-proves-what-you-varied-only]]).
+
+### 12.8 🔴 Four instrument faults, and all four were the same mistake
+
+The first run reported **15/18** and every red was the drive, not the product. All four are one
+error — **reading "present" where the arm needed "usable"** — and this is the fourth phase running
+to pay for it ([[correct-and-usable-were-never-the-same-criterion]]).
+
+1. 🔴 **`ed.selector.selection` DOES NOT EXIST.** The reader mapped `undefined` to `[]` and reported
+   *"nothing is selected"* — failing AC1's headline arm against a wire that worked. The field is
+   **`selector._selected`**. Found by arming the reader with a known-firing control: `selectNode(x)`,
+   then read it back ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+   **An absence from an unverified reader is not a measurement.**
+2. **Aiming is not hitting.** The drive aimed at `Main Navbar` and opened **`Page Main`'s** card: a
+   visual child is drawn inside its parent, so the child's centre hit-tests to the parent. Fixed by
+   choosing the subject **by measurement** — hover each candidate, keep the first whose card names
+   it. ⚠️ `instanceHover.state.node` is not exposed, so the card's own path is the identity.
+3. **The Components panel opens on the LAYERS tab**, so `component-tree-item` matched 0 rows.
+4. 🔴 **And once tabbed, the tree was `0 × 0`.** 18 rows in the DOM, `display:flex`,
+   `visibility:visible`, **every rect zero** — so a click computed from a row landed at `(0,0)`.
+   `SidebarModel.instance.switch('components')` is what gives the panel a size. The panel's own
+   filter input has the same defect and is **still invisible** (`offsetWidth`/`offsetHeight` 0),
+   which is why the drive expands folders by clicking instead ([[a-rect-is-not-visibility]]).
+
+⚠️ **The lesson that generalises**: three separate arms read *"the component is not in the panel"*
+when what was true was *"the panel has no size"*. **A row that exists is not a row a pointer can
+reach — assert on a rect, not on a `querySelector`.** The drive now grades `boxedRows > 0`.
