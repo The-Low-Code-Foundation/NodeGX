@@ -14,6 +14,30 @@
       "fromProperty": "out-rows",
       "toId": "pl_rows",
       "toProperty": "items"
+    },
+    {
+      "fromId": "t_pl_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "pl_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pl_title",
+      "fromProperty": "Translation",
+      "toId": "pl_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pl_line",
+      "fromProperty": "Translation",
+      "toId": "pl_line",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pl_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_pl_page",
+      "toProperty": "in-title"
     }
   ]
 }

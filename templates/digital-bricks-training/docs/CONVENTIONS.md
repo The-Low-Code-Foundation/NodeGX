@@ -50,4 +50,32 @@ carrying "(example) Do not add a Router; this app is a single page".
 - The lesson is 3-5 steps indexing a flat sections array; a section id that does not resolve throws by name rather than rendering wrong.
 - No fetch in any kit node: a node emits an output port and the graph decides where it goes.
 
+## Strings (TASK-L160, L161)
+
+- **Every learner-facing string comes from `Data/Strings`.** A literal typed into a
+  `text`, `label`, `placeholder` or `content` parameter is a bug. `python3
+  tools/check-strings.py` reports them and exits 1; it is the guard for this rule and
+  it carries its two exclusions by reason rather than by a looser pattern.
+- **Two halves, two owners, one bundle.** The kit's 80 strings are GENERATED from
+  `library/modules/dbt-lesson/src/kit.js` into the `str_data` node; this template's 19
+  are AUTHORED in `str_graph` beside it. Kit strings do not go in the authored node and
+  page copy does not go in `kit.js`. A key written in both halves is reported to the
+  console by the merge, which `render_report` surfaces as a console error.
+- **The graph reads the table through i18next `Translation` nodes**, one per string.
+  Several in one component is correct: the node is the graph saying out loud that this
+  text comes from the table.
+- **One `Language Bundle` per namespace, mounted in `App`.** Its `Bundle` port parses a
+  JSON string and loads it under exactly one namespace, and a `Translation` node takes
+  no wire — it reads the module-scoped i18next instance, so the bundle must load in a
+  component that is always mounted.
+- **A page title is the one exception, and it is not a wire.** `Page.title` is read off
+  the node's parameters at export time into the router index, so a connection to it is
+  silently ignored (measured: the tab then shows the component name). The parameter
+  stays as the build-time fallback and a small JavaScript node overrides it at runtime
+  through `Noodl.SEO.setTitle`.
+- **`dbt-lesson.*` `label` parameters are editor labels**, shown on the node in the
+  graph only. They stay literals.
+- **`nodegx.project.json`'s `settings.htmlTitle`** is project metadata with no node to
+  wire; it is the tab for the instant before a page's own title lands.
+
 _Source: `docs/decisions/000-initial-scope.md`._

@@ -13,8 +13,8 @@
         "pl_band"
       ],
       "parameters": {
-        "title": "The lesson kit",
-        "urlPath": "palette"
+        "urlPath": "palette",
+        "title": "The lesson kit"
       }
     },
     {
@@ -76,7 +76,6 @@
       "y": 400,
       "parent": "pl_shell",
       "parameters": {
-        "text": "The lesson kit",
         "fontSize": "var(--text-xs)",
         "fontWeight": "var(--font-bold)",
         "letterSpacing": "var(--tracking-widest)",
@@ -93,7 +92,6 @@
       "parent": "pl_shell",
       "parameters": {
         "as": "h1",
-        "text": "Every section kind, once",
         "fontFamily": "var(--font-display)",
         "fontSize": "var(--text-3xl)",
         "fontWeight": 800,
@@ -110,7 +108,6 @@
       "parent": "pl_shell",
       "parameters": {
         "as": "p",
-        "text": "The nineteen kinds a lesson is made of, as the kit draws them. Four are placeholders that carry their data — the kit’s README says which and why.",
         "fontSize": "var(--text-base)",
         "lineHeight": "var(--leading-relaxed)",
         "color": "var(--muted-foreground)",
@@ -188,6 +185,81 @@
           "group": "Outputs"
         }
       ]
+    },
+    {
+      "id": "t_pl_eyebrow",
+      "type": "Translation",
+      "label": "palette:eyebrow",
+      "x": 1000,
+      "y": 930,
+      "parameters": {
+        "Key": "eyebrow",
+        "Namespace": "palette"
+      },
+      "metadata": {
+        "comment": "Was the literal \"The lesson kit\" on pl_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_pl_title",
+      "type": "Translation",
+      "label": "palette:headline",
+      "x": 1000,
+      "y": 1020,
+      "parameters": {
+        "Key": "headline",
+        "Namespace": "palette"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Every section kind, once\" on pl_title.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_pl_line",
+      "type": "Translation",
+      "label": "palette:lede",
+      "x": 1000,
+      "y": 1110,
+      "parameters": {
+        "Key": "lede",
+        "Namespace": "palette"
+      },
+      "metadata": {
+        "comment": "Was the literal \"The nineteen kinds a lesson is made of, as the kit draws them. Four are placeholders that carry their data — the kit’s README says which and why.\" on pl_line.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_pl_page_title",
+      "type": "Translation",
+      "label": "palette:pageTitle (the tab)",
+      "x": 1400,
+      "y": 1190,
+      "parameters": {
+        "Key": "pageTitle",
+        "Namespace": "palette"
+      }
+    },
+    {
+      "id": "seo_pl_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1400,
+      "y": 1310,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB, and it is the one learner-facing string a\n// Translation node cannot reach: `Page.title` is read off the node's PARAMETERS at\n// export time into the router index (utils/exporter/router.ts), and the Router hands\n// that to Noodl.SEO.setTitle on mount. A connection to the port is silently ignored —\n// measured, TASK-L161 §1: with the parameter removed and a Translation wired, the tab\n// read \"Home\", the component name.\n//\n// So the parameter stays as the BUILD-TIME FALLBACK (the router index needs it, and it\n// is what the tab shows for the instant before this runs), and the translated value\n// overrides it here. Same shape as the kit's built-in English: a fallback is not a\n// second owner.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
+      }
     }
   ],
   "visualRoots": [

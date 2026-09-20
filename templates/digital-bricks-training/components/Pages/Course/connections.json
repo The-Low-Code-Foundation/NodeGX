@@ -182,6 +182,54 @@
       "fromProperty": "earlierCaption",
       "toId": "cs_traj_caption",
       "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_card_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_card_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_steps_label",
+      "fromProperty": "Translation",
+      "toId": "cs_steps_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_open",
+      "fromProperty": "Translation",
+      "toId": "cs_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_cs_prog_label",
+      "fromProperty": "Translation",
+      "toId": "cs_prog_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_pace_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_pace_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_traj_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_traj_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_cs_page",
+      "toProperty": "in-title"
     }
   ]
 }

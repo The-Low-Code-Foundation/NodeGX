@@ -56,6 +56,12 @@
       "fromProperty": "requires",
       "toId": "wy_req_each",
       "toProperty": "items"
+    },
+    {
+      "fromId": "t_wy_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "wy_eyebrow",
+      "toProperty": "text"
     }
   ]
 }

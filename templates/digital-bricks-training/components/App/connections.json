@@ -2,5 +2,36 @@
   "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
   "componentId": "8c06431d-ae40-4f70-972e-fa7c6b5d7b86",
   "version": 1,
-  "connections": []
+  "connections": [
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonCommon",
+      "toId": "app_ns_common",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonHome",
+      "toId": "app_ns_home",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonCourse",
+      "toId": "app_ns_course",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonLesson",
+      "toId": "app_ns_lesson",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonPalette",
+      "toId": "app_ns_palette",
+      "toProperty": "Bundle"
+    }
+  ]
 }

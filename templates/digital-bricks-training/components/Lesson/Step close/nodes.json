@@ -59,7 +59,6 @@
       "y": 160,
       "parent": "scl_box",
       "parameters": {
-        "text": "Where this step leaves you",
         "cssClassName": "lesson-step-close-eyebrow"
       }
     },
@@ -115,6 +114,20 @@
           "type": "signal"
         }
       ]
+    },
+    {
+      "id": "t_scl_eyebrow",
+      "type": "Translation",
+      "label": "lesson:stepper.closeEyebrow",
+      "x": 1000,
+      "y": 600,
+      "parameters": {
+        "Key": "stepper.closeEyebrow",
+        "Namespace": "lesson"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Where this step leaves you\" on scl_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
     }
   ],
   "visualRoots": [

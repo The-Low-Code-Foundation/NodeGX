@@ -13,8 +13,8 @@
         "hm_band"
       ],
       "parameters": {
-        "title": "Digital Bricks Training",
-        "urlPath": "home"
+        "urlPath": "home",
+        "title": "Digital Bricks Training"
       }
     },
     {
@@ -77,7 +77,6 @@
       "y": 400,
       "parent": "hm_shell",
       "parameters": {
-        "text": "Digital Bricks Training",
         "fontSize": "var(--text-xs)",
         "fontWeight": "var(--font-bold)",
         "letterSpacing": "var(--tracking-widest)",
@@ -97,7 +96,6 @@
       "parent": "hm_shell",
       "parameters": {
         "as": "h1",
-        "text": "Learn to build the thing you actually need.",
         "fontFamily": "var(--font-display)",
         "fontSize": "var(--text-5xl)",
         "fontWeight": 800,
@@ -117,7 +115,6 @@
       "parent": "hm_shell",
       "parameters": {
         "as": "p",
-        "text": "Your own project is the course. Every lesson is written for it, in an order that makes sense for what you are making — with a coach who reads the same page you do.",
         "fontSize": "var(--text-lg)",
         "lineHeight": "var(--leading-relaxed)",
         "color": "var(--muted-foreground)",
@@ -152,7 +149,6 @@
       "y": 800,
       "parent": "hm_actions",
       "parameters": {
-        "label": "Open your course",
         "sizeMode": "contentSize",
         "cssClassName": "btn btn-thread pressable",
         "backgroundColor": "var(--primary)",
@@ -171,6 +167,95 @@
       "parameters": {
         "router": "Main",
         "target": "/Pages/Course"
+      }
+    },
+    {
+      "id": "t_hm_eyebrow",
+      "type": "Translation",
+      "label": "common:productName",
+      "x": 1000,
+      "y": 880,
+      "parameters": {
+        "Key": "productName",
+        "Namespace": "common"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Digital Bricks Training\" on hm_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_title",
+      "type": "Translation",
+      "label": "home:headline",
+      "x": 1000,
+      "y": 970,
+      "parameters": {
+        "Key": "headline",
+        "Namespace": "home"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Learn to build the thing you actually need.\" on hm_title.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_line",
+      "type": "Translation",
+      "label": "home:lede",
+      "x": 1000,
+      "y": 1060,
+      "parameters": {
+        "Key": "lede",
+        "Namespace": "home"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Your own project is the course. Every lesson is written for it, in an order that makes sense for what you are making — with a coach who reads the same page you do.\" on hm_line.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_cta",
+      "type": "Translation",
+      "label": "home:openCourse",
+      "x": 1000,
+      "y": 1150,
+      "parameters": {
+        "Key": "openCourse",
+        "Namespace": "home"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Open your course\" on hm_cta.label. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_page_title",
+      "type": "Translation",
+      "label": "common:productName (the tab)",
+      "x": 1400,
+      "y": 900,
+      "parameters": {
+        "Key": "productName",
+        "Namespace": "common"
+      }
+    },
+    {
+      "id": "seo_hm_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1400,
+      "y": 1020,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB, and it is the one learner-facing string a\n// Translation node cannot reach: `Page.title` is read off the node's PARAMETERS at\n// export time into the router index (utils/exporter/router.ts), and the Router hands\n// that to Noodl.SEO.setTitle on mount. A connection to the port is silently ignored —\n// measured, TASK-L161 §1: with the parameter removed and a Translation wired, the tab\n// read \"Home\", the component name.\n//\n// So the parameter stays as the BUILD-TIME FALLBACK (the router index needs it, and it\n// is what the tab shows for the instant before this runs), and the translated value\n// overrides it here. Same shape as the kit's built-in English: a fallback is not a\n// second owner.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
       }
     }
   ],

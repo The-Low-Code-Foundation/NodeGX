@@ -13,8 +13,8 @@
         "ls_band"
       ],
       "parameters": {
-        "title": "Lesson",
-        "urlPath": "lesson"
+        "urlPath": "lesson",
+        "title": "Lesson"
       }
     },
     {
@@ -76,7 +76,6 @@
       "y": 400,
       "parent": "ls_shell",
       "parameters": {
-        "text": "Concept · woven onto your project",
         "fontSize": "var(--text-xs)",
         "fontWeight": "var(--font-bold)",
         "letterSpacing": "var(--tracking-widest)",
@@ -275,6 +274,53 @@
       "y": 40,
       "metadata": {
         "comment": "One instance per page. Its `copy` output is the whole bundle; Logic/Sections for step puts it on every row, and the For Each maps it onto Section row's Copy input by name. Delete this node and the lesson still renders — in the English the kit ships (TASK-L160)."
+      }
+    },
+    {
+      "id": "t_ls_eyebrow",
+      "type": "Translation",
+      "label": "lesson:eyebrow",
+      "x": 1000,
+      "y": 1230,
+      "parameters": {
+        "Key": "eyebrow",
+        "Namespace": "lesson"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Concept · woven onto your project\" on ls_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_ls_page_title",
+      "type": "Translation",
+      "label": "lesson:pageTitle (the tab)",
+      "x": 1400,
+      "y": 1310,
+      "parameters": {
+        "Key": "pageTitle",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "seo_ls_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1400,
+      "y": 1430,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB, and it is the one learner-facing string a\n// Translation node cannot reach: `Page.title` is read off the node's PARAMETERS at\n// export time into the router index (utils/exporter/router.ts), and the Router hands\n// that to Noodl.SEO.setTitle on mount. A connection to the port is silently ignored —\n// measured, TASK-L161 §1: with the parameter removed and a Translation wired, the tab\n// read \"Home\", the component name.\n//\n// So the parameter stays as the BUILD-TIME FALLBACK (the router index needs it, and it\n// is what the tab shows for the instant before this runs), and the translated value\n// overrides it here. Same shape as the kit's built-in English: a fallback is not a\n// second owner.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
       }
     }
   ],

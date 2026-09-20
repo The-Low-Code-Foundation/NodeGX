@@ -61,6 +61,74 @@
       "metadata": {
         "comment": "Everything else this template styles lives in noodl_modules/dbt-lesson/styles.css (the product's token aliases and the lesson CSS lifted from globals.css) — TASK-L154 §2. This node holds only what needs the document itself."
       }
+    },
+    {
+      "id": "app_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen",
+      "x": 760,
+      "y": 40,
+      "metadata": {
+        "comment": "Mounted HERE, in the root, because a Translation node takes no wire — it reads the module-scoped i18next instance. A bundle loaded inside a page would leave every other page unresolved until someone had visited that one. TASK-L161 §0."
+      }
+    },
+    {
+      "id": "app_ns_common",
+      "type": "Language Bundle",
+      "label": "common → i18next",
+      "x": 1060,
+      "y": 40,
+      "parameters": {
+        "Namespace": "common",
+        "Language": "en"
+      },
+      "metadata": {
+        "comment": "ONE Language Bundle PER NAMESPACE, because its Bundle port parses a JSON string and loads it under exactly one namespace (measured, TASK-L161 §0). Language is pinned to \"en\": this template ships one locale and the switch is L162's."
+      }
+    },
+    {
+      "id": "app_ns_home",
+      "type": "Language Bundle",
+      "label": "home → i18next",
+      "x": 1060,
+      "y": 160,
+      "parameters": {
+        "Namespace": "home",
+        "Language": "en"
+      }
+    },
+    {
+      "id": "app_ns_course",
+      "type": "Language Bundle",
+      "label": "course → i18next",
+      "x": 1060,
+      "y": 280,
+      "parameters": {
+        "Namespace": "course",
+        "Language": "en"
+      }
+    },
+    {
+      "id": "app_ns_lesson",
+      "type": "Language Bundle",
+      "label": "lesson → i18next",
+      "x": 1060,
+      "y": 400,
+      "parameters": {
+        "Namespace": "lesson",
+        "Language": "en"
+      }
+    },
+    {
+      "id": "app_ns_palette",
+      "type": "Language Bundle",
+      "label": "palette → i18next",
+      "x": 1060,
+      "y": 520,
+      "parameters": {
+        "Namespace": "palette",
+        "Language": "en"
+      }
     }
   ],
   "visualRoots": [

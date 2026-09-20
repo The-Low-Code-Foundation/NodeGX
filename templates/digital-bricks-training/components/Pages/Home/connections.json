@@ -8,6 +8,36 @@
       "fromProperty": "onClick",
       "toId": "hm_go",
       "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_hm_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "hm_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_hm_title",
+      "fromProperty": "Translation",
+      "toId": "hm_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_hm_line",
+      "fromProperty": "Translation",
+      "toId": "hm_line",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_hm_cta",
+      "fromProperty": "Translation",
+      "toId": "hm_cta",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_hm_page",
+      "toProperty": "in-title"
     }
   ]
 }

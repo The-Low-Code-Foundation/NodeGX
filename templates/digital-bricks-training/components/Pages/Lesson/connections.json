@@ -98,6 +98,18 @@
       "fromProperty": "copy",
       "toId": "ls_index",
       "toProperty": "copy"
+    },
+    {
+      "fromId": "t_ls_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "ls_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_ls_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_ls_page",
+      "toProperty": "in-title"
     }
   ]
 }

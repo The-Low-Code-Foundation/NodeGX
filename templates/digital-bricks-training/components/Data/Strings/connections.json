@@ -44,6 +44,42 @@
       "fromProperty": "out-loaded",
       "toId": "str_out",
       "toProperty": "loaded"
+    },
+    {
+      "fromId": "str_graph",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-graph"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonCommon",
+      "toId": "str_out",
+      "toProperty": "jsonCommon"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonHome",
+      "toId": "str_out",
+      "toProperty": "jsonHome"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonCourse",
+      "toId": "str_out",
+      "toProperty": "jsonCourse"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonLesson",
+      "toId": "str_out",
+      "toProperty": "jsonLesson"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonPalette",
+      "toId": "str_out",
+      "toProperty": "jsonPalette"
     }
   ]
 }

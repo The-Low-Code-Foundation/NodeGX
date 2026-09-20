@@ -32,6 +32,12 @@
       "fromProperty": "onClick",
       "toId": "scl_out",
       "toProperty": "next"
+    },
+    {
+      "fromId": "t_scl_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "scl_eyebrow",
+      "toProperty": "text"
     }
   ]
 }

@@ -96,7 +96,6 @@
       "parent": "wy_root",
       "parameters": {
         "as": "p",
-        "text": "Where you're at",
         "fontSize": "var(--text-xs)",
         "fontWeight": "var(--font-bold)",
         "letterSpacing": "var(--tracking-widest)",
@@ -232,6 +231,20 @@
       "parameters": {
         "templateType": "explicit",
         "template": "/Course/Requires row"
+      }
+    },
+    {
+      "id": "t_wy_eyebrow",
+      "type": "Translation",
+      "label": "course:standing.eyebrow",
+      "x": 1000,
+      "y": 900,
+      "parameters": {
+        "Key": "standing.eyebrow",
+        "Namespace": "course"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Where you're at\" on wy_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
       }
     }
   ],
