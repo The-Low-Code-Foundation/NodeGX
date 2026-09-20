@@ -80,6 +80,36 @@
       "fromProperty": "out-jsonPalette",
       "toId": "str_out",
       "toProperty": "jsonPalette"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "language",
+      "toId": "str_lang",
+      "toProperty": "in-want"
+    },
+    {
+      "fromId": "str_locales",
+      "fromProperty": "items",
+      "toId": "str_lang",
+      "toProperty": "in-locales"
+    },
+    {
+      "fromId": "str_locales",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-locales"
+    },
+    {
+      "fromId": "str_lang",
+      "fromProperty": "out-resolved",
+      "toId": "str_out",
+      "toProperty": "contentLanguage"
+    },
+    {
+      "fromId": "str_lang",
+      "fromProperty": "out-resolved",
+      "toId": "str_split",
+      "toProperty": "in-language"
     }
   ]
 }

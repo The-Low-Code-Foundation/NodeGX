@@ -36,9 +36,9 @@
       "type": "JavaScriptFunction",
       "label": "Merge the two halves, hand them out",
       "x": 40,
-      "y": 260,
+      "y": 420,
       "parameters": {
-        "functionScript": "/*\n * ONE BUNDLE, TWO HALVES, TWO CONSUMERS (TASK-L161 §0b).\n *\n *   the kit's 80   — GENERATED from library/modules/dbt-lesson/src/kit.js\n *   the graph's 19 — AUTHORED in the node beside this one\n *\n * They are merged here and nowhere else. The merge REFUSES to pick a winner:\n * a key present in both halves is the drift this sprint exists to prevent, so\n * it is reported to the console, which render_report surfaces as a console\n * error and a template therefore cannot ship with one.\n *\n * `copy` goes to the kit as an OBJECT. The `json*` outputs go to App's\n * `Language Bundle` nodes as STRINGS, because `Language Bundle.Bundle` parses\n * JSON text and loads it under exactly ONE namespace (measured, L161 §0).\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\nfunction first(rows) {\n  const r = plain(rows) || [];\n  return r[0] || {};\n}\n\n/** Every leaf path, so a collision is reported by name rather than by count. */\nfunction leaves(o, prefix, into) {\n  for (const k of Object.keys(o || {})) {\n    if (k.charAt(0) === '_') continue;\n    const v = o[k];\n    const path = prefix ? prefix + '.' + k : k;\n    if (v && typeof v === 'object') leaves(v, path, into);\n    else into.push(path);\n  }\n  return into;\n}\n\nfunction deepMerge(a, b) {\n  const out = {};\n  for (const k of Object.keys(a || {})) out[k] = a[k];\n  for (const k of Object.keys(b || {})) {\n    const v = b[k];\n    if (v && typeof v === 'object' && out[k] && typeof out[k] === 'object') out[k] = deepMerge(out[k], v);\n    else out[k] = v;\n  }\n  return out;\n}\n\nconst kit = first(Inputs.items);\nconst graph = first(Inputs.graph);\n\nconst clash = leaves(kit, '', []).filter((p) => leaves(graph, '', []).indexOf(p) !== -1);\nif (clash.length) {\n  console.error(\n    '[Data/Strings] ' + clash.length + ' key(s) are written in BOTH halves of the string table, ' +\n    'so one of them is unreachable and they are free to drift: ' + clash.join(', ') +\n    '. Delete whichever copy is not the owner (TASK-L161 §0b).'\n  );\n}\n\nconst bundle = deepMerge(kit, graph);\nconst ns = (n) => bundle[n] || {};\n\nOutputs.copy = bundle;\nOutputs.common = ns('common');\nOutputs.lesson = ns('lesson');\nOutputs.timeline = ns('timeline');\nOutputs.productName = (bundle.common && bundle.common.productName) || '';\n\nOutputs.jsonCommon = JSON.stringify(ns('common'));\nOutputs.jsonHome = JSON.stringify(ns('home'));\nOutputs.jsonCourse = JSON.stringify(ns('course'));\nOutputs.jsonLesson = JSON.stringify(ns('lesson'));\nOutputs.jsonPalette = JSON.stringify(ns('palette'));\n\nOutputs.loaded();\n"
+        "functionScript": "/*\n * ONE BUNDLE, TWO HALVES, TWO CONSUMERS (TASK-L161 §0b).\n *\n *   the kit's 80   — GENERATED from library/modules/dbt-lesson/src/kit.js\n *   the graph's 19 — AUTHORED in the node beside this one\n *\n * They are merged here and nowhere else. The merge REFUSES to pick a winner:\n * a key present in both halves is the drift this sprint exists to prevent, so\n * it is reported to the console, which render_report surfaces as a console\n * error and a template therefore cannot ship with one.\n *\n * `copy` goes to the kit as an OBJECT. The `json*` outputs go to App's\n * `Language Bundle` nodes as STRINGS, because `Language Bundle.Bundle` parses\n * JSON text and loads it under exactly ONE namespace (measured, L161 §0).\n *\n * THREE HALVES NOW, AND THE THIRD IS THE LOCALE (TASK-L162 §2). English is the\n * BASE and a locale is an OVERLAY on top of it, so a key a translator has not\n * reached renders English — for the kit and for the graph's `Translation`\n * nodes alike, by ONE rule in ONE place rather than two mechanisms that happen\n * to agree. (i18next's own `fallbackLng` would give the graph half of that and\n * nothing at all to the kit, which cannot reach i18next: it exposes no global.)\n *\n * The overlay is deliberately NOT part of the collision check below. A key in\n * both English halves is drift; a key in English and in a locale is the point.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\nfunction first(rows) {\n  const r = plain(rows) || [];\n  return r[0] || {};\n}\n\n/** Every leaf path, so a collision is reported by name rather than by count. */\nfunction leaves(o, prefix, into) {\n  for (const k of Object.keys(o || {})) {\n    if (k.charAt(0) === '_') continue;\n    const v = o[k];\n    const path = prefix ? prefix + '.' + k : k;\n    if (v && typeof v === 'object') leaves(v, path, into);\n    else into.push(path);\n  }\n  return into;\n}\n\nfunction deepMerge(a, b) {\n  const out = {};\n  for (const k of Object.keys(a || {})) out[k] = a[k];\n  for (const k of Object.keys(b || {})) {\n    const v = b[k];\n    if (v && typeof v === 'object' && out[k] && typeof out[k] === 'object') out[k] = deepMerge(out[k], v);\n    else out[k] = v;\n  }\n  return out;\n}\n\nconst kit = first(Inputs.items);\nconst graph = first(Inputs.graph);\n\nconst clash = leaves(kit, '', []).filter((p) => leaves(graph, '', []).indexOf(p) !== -1);\nif (clash.length) {\n  console.error(\n    '[Data/Strings] ' + clash.length + ' key(s) are written in BOTH halves of the string table, ' +\n    'so one of them is unreachable and they are free to drift: ' + clash.join(', ') +\n    '. Delete whichever copy is not the owner (TASK-L161 §0b).'\n  );\n}\n\nconst english = deepMerge(kit, graph);\n\n/* `language` is resolved UPSTREAM, so it is only ever a locale we have content\n * for, or 'en' (TASK-L162 §1). 'en' has no overlay by construction: it is the base. */\nconst language = String(Inputs.language || 'en');\nconst locales = first(Inputs.locales);\nconst overlay = language === 'en' ? {} : locales[language] || {};\n\nconst bundle = deepMerge(english, overlay);\nconst ns = (n) => bundle[n] || {};\n\nOutputs.copy = bundle;\nOutputs.common = ns('common');\nOutputs.lesson = ns('lesson');\nOutputs.timeline = ns('timeline');\nOutputs.productName = (bundle.common && bundle.common.productName) || '';\n\nOutputs.jsonCommon = JSON.stringify(ns('common'));\nOutputs.jsonHome = JSON.stringify(ns('home'));\nOutputs.jsonCourse = JSON.stringify(ns('course'));\nOutputs.jsonLesson = JSON.stringify(ns('lesson'));\nOutputs.jsonPalette = JSON.stringify(ns('palette'));\n\nOutputs.loaded();\n\n"
       },
       "ports": [
         {
@@ -140,7 +140,7 @@
       "type": "Component Outputs",
       "label": "The strings",
       "x": 40,
-      "y": 560,
+      "y": 720,
       "ports": [
         {
           "name": "copy",
@@ -196,8 +196,57 @@
           "name": "jsonPalette",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "contentLanguage",
+          "plug": "input",
+          "type": "string"
         }
       ]
+    },
+    {
+      "id": "str_in",
+      "type": "Component Inputs",
+      "label": "Which language the viewer reads",
+      "x": 760,
+      "y": 40,
+      "ports": [
+        {
+          "name": "language",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "Driven from the ONE owner — the `i18next` node in App. Nothing else in this template decides which language a page is in (TASK-L162 §1)."
+      }
+    },
+    {
+      "id": "str_locales",
+      "type": "Static Data",
+      "label": "EDIT — a second locale goes here",
+      "x": 400,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[\n  {\n    \"_\": \"WHERE A SECOND LOCALE GOES (TASK-L162). One key per language code, each holding the same namespaces as the two nodes above: {\\\"fr\\\": {\\\"home\\\": {\\\"headline\\\": \\\"...\\\"}}}. English is the BASE and is never a key here — a key you do not translate renders English, on its own, for the kit and for the graph alike. Adding a code here is the whole of adding a locale: nothing else in the graph names a language.\",\n    \"_shipped\": \"This template ships ONE locale, English. This node is empty of locales on purpose — it is a seam, not an omission. The switch that reads it has been driven against a throwaway second locale and works; no translation has been written or reviewed.\"\n  }\n]"
+      },
+      "metadata": {
+        "comment": "THE LOCALE OVERLAY, and it ships EMPTY. English lives in the two nodes beside it; a locale is an overlay ON TOP of English, so an untranslated key renders English by construction rather than by a fallback rule somebody has to remember. TASK-L162 §2."
+      }
+    },
+    {
+      "id": "str_lang",
+      "type": "JavaScriptFunction",
+      "label": "Resolve it against what we actually have",
+      "x": 760,
+      "y": 180,
+      "parameters": {
+        "functionScript": "/*\n * WHICH LANGUAGE ARE WE ACTUALLY SERVING? (TASK-L162 §1)\n *\n * `want` is what the one owner — the `i18next` node in App — says the viewer\n * reads. This resolves it against the locales this template actually HAS\n * CONTENT FOR, and answers \"en\" for everything else.\n *\n * That matters for a reason only driving finds. The i18next module's own\n * language detector runs before anything here (querystring `lng`, cookie,\n * localStorage, sessionStorage, navigator, htmlTag — baked into the vendored\n * bundle, with no port to configure it), so `CurrentLanguage` can be \"fr\" on a\n * French laptop one tick after load. Passing that straight through would\n * register the ENGLISH strings as the French bundle and hand every reader a\n * language we have only the NAME of.\n *\n * It is also the ordering guarantee. This node is strictly UPSTREAM of the\n * merge, so `Language Bundle.Language` is always set before the `Bundle` JSON\n * that the merge produces arrives — and `Language Bundle` reads its Language\n * at the moment Bundle changes, never on its own.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\nconst rows = plain(Inputs.locales) || [];\nconst overlay = rows[0] || {};\n\n/* English is the BASE layer, never an overlay key — so it is never listed here. */\nconst available = Object.keys(overlay).filter((k) => k.charAt(0) !== '_');\n\nconst want = String(Inputs.want || '').trim();\nlet resolved = 'en';\nif (want) {\n  if (available.indexOf(want) !== -1) resolved = want;\n  else {\n    const base = want.split('-')[0];\n    if (available.indexOf(base) !== -1) resolved = base;\n  }\n}\n\nOutputs.resolved = resolved;\nOutputs.available = ['en'].concat(available).join(', ');\n"
+      },
+      "metadata": {
+        "comment": "Two jobs, and the second is easy to miss. It refuses a language we have only the NAME of (the module's own detector can hand us \"fr\" on a French laptop one tick after load), and being strictly UPSTREAM of the merge it guarantees `Language Bundle.Language` is set before the `Bundle` JSON arrives — that node reads its Language only at the moment Bundle changes. TASK-L162 §1."
+      }
     }
   ]
 }

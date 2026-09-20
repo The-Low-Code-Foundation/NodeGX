@@ -32,6 +32,14 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 - **Nothing gates, nothing scores, nothing is red.** A wrong quiz answer is warm; `Correct` is a
   port for the graph, never a count on screen. `--warm` is encouragement and a human voice; `--go`
   is done. Every colour is a class the stylesheet owns.
+- **Every node takes ONE `copy` input, and English is built in.** A node is handed the whole
+  resolved string object rather than eighty string parameters, and it falls back **per call** to
+  the English in `kit.js` — so a kit node whose graph forgot to wire `copy` renders English, never
+  a blank and never a raw key. `kit.js` is the one place that English is WRITTEN;
+  `strings.en.json` is GENERATED from it by `build.mjs` and is what a graph seeds its string table
+  from. The kit never calls `t()` itself and never knows what language it is in: it renders the
+  object it is given, and the graph decides which language that object is.
+
 - **React is the runtime's global.** The bundle maps `react` and `react/jsx-runtime` onto it and
   carries no React of its own.
 
@@ -39,7 +47,7 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 
 | node | ports in | ports out |
 |---|---|---|
-| `Section` | `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
+| `Section` | `copy` (object), `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
 | `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
 | `PaceTracker` | `view` (object), `par` (array), `headline`, `legendActual`, `legendPar` | — |
 | `RatingGauge` | `gauge` (object) | — |

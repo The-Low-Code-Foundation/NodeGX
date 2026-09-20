@@ -110,6 +110,12 @@
       "fromProperty": "Translation",
       "toId": "seo_ls_page",
       "toProperty": "in-title"
+    },
+    {
+      "fromId": "ls_lang_var",
+      "fromProperty": "value",
+      "toId": "ls_strings",
+      "toProperty": "language"
     }
   ]
 }

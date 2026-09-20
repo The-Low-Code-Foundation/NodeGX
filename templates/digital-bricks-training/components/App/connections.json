@@ -5,6 +5,36 @@
   "connections": [
     {
       "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_common",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_home",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_course",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_lesson",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_palette",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
       "fromProperty": "jsonCommon",
       "toId": "app_ns_common",
       "toProperty": "Bundle"
@@ -32,6 +62,30 @@
       "fromProperty": "jsonPalette",
       "toId": "app_ns_palette",
       "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "loaded",
+      "toId": "app_lang_once",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "app_lang_once",
+      "fromProperty": "switchedToOn",
+      "toId": "app_i18n",
+      "toProperty": "ChangeLanguage"
+    },
+    {
+      "fromId": "app_i18n",
+      "fromProperty": "CurrentLanguage",
+      "toId": "app_lang_var",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "app_lang_var",
+      "fromProperty": "value",
+      "toId": "app_strings",
+      "toProperty": "language"
     }
   ]
 }

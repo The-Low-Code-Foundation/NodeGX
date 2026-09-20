@@ -322,6 +322,19 @@
       "metadata": {
         "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
       }
+    },
+    {
+      "id": "ls_lang_var",
+      "type": "Variable",
+      "label": "language — from the one owner in App",
+      "x": 1120,
+      "y": 40,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
+      }
     }
   ],
   "visualRoots": [

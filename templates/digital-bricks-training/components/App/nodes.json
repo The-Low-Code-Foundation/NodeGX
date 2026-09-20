@@ -79,11 +79,10 @@
       "x": 1060,
       "y": 40,
       "parameters": {
-        "Namespace": "common",
-        "Language": "en"
+        "Namespace": "common"
       },
       "metadata": {
-        "comment": "ONE Language Bundle PER NAMESPACE, because its Bundle port parses a JSON string and loads it under exactly one namespace (measured, TASK-L161 §0). Language is pinned to \"en\": this template ships one locale and the switch is L162's."
+        "comment": "ONE Language Bundle PER NAMESPACE, because its Bundle port parses a JSON string and loads it under exactly one namespace (measured, TASK-L161 §0). Its Language is no longer written here: it arrives from the one owner below, so this node registers the strings under the language they ARE rather than under a code somebody typed twice (TASK-L162 §1). The order is load-bearing — loadBundle() reads Language only at the moment Bundle changes, and the language wire is one node shorter than the JSON wire for exactly that reason."
       }
     },
     {
@@ -93,8 +92,7 @@
       "x": 1060,
       "y": 160,
       "parameters": {
-        "Namespace": "home",
-        "Language": "en"
+        "Namespace": "home"
       }
     },
     {
@@ -104,8 +102,7 @@
       "x": 1060,
       "y": 280,
       "parameters": {
-        "Namespace": "course",
-        "Language": "en"
+        "Namespace": "course"
       }
     },
     {
@@ -115,8 +112,7 @@
       "x": 1060,
       "y": 400,
       "parameters": {
-        "Namespace": "lesson",
-        "Language": "en"
+        "Namespace": "lesson"
       }
     },
     {
@@ -126,8 +122,43 @@
       "x": 1060,
       "y": 520,
       "parameters": {
-        "Namespace": "palette",
+        "Namespace": "palette"
+      }
+    },
+    {
+      "id": "app_i18n",
+      "type": "i18next",
+      "label": "WHICH LANGUAGE — the one owner",
+      "x": 1460,
+      "y": 40,
+      "parameters": {
         "Language": "en"
+      },
+      "metadata": {
+        "comment": "THE ONE VALUE. Change this and the whole template changes language: the kit's copy object and the graph's Translation nodes both read it, so they cannot disagree about what language a page is in (TASK-L162 §2). There is deliberately no language picker — with one locale that is a control whose condition nothing can change.\n\nTwo measured facts about this node. Setting Language does NOTHING on its own: only the ChangeLanguage signal calls i18next, so it is pulsed once below. And the module's detector (querystring lng, cookie, localStorage, sessionStorage, navigator, htmlTag) is baked into the vendored bundle with no port to configure — the pulse is what makes the template's language deterministic instead of the visitor's browser's."
+      }
+    },
+    {
+      "id": "app_lang_once",
+      "type": "Switch",
+      "label": "Pulse the language once, not forever",
+      "x": 1460,
+      "y": 220,
+      "metadata": {
+        "comment": "There is a CYCLE here and this breaks it structurally rather than with a delay: the strings emit `loaded`, which sets the language, whose CurrentLanguage feeds back into the strings, which emit `loaded` again. `switchedToOn` fires on the TRANSITION only, so the second pulse is absorbed. TASK-L162 §1."
+      }
+    },
+    {
+      "id": "app_lang_var",
+      "type": "Variable",
+      "label": "language — broadcast to every string table",
+      "x": 1460,
+      "y": 400,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
       }
     }
   ],

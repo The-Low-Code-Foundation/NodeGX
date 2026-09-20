@@ -115,6 +115,49 @@ colour inline, so a class alone cannot restyle one — set the two ports (the ch
 the row data); and a `Group` writes `display: flex` inline, so the lesson grid restates
 `display: grid` in `styleCss`.
 
+## Every string has one owner
+
+Every learner-facing string on the three pages is one entry in **`Data/Strings`**, and the language
+is one value: the `Language` parameter on the **`i18next` node in `App`**. Change that one value and
+the page changes language. Nothing else in the graph decides it —
+`tools/check-language-owner.py` fails the build if anything tries.
+
+`Data/Strings` holds **three** nodes and they are not interchangeable:
+
+| node | what it holds | who writes it |
+|---|---|---|
+| *"EDIT — this is every word on screen"* | the lesson kit's 80 strings | **generated** by `library/modules/dbt-lesson/build.mjs` from `src/kit.js` — do not hand-edit |
+| *"EDIT — this template's own page copy"* | these pages' 19 headings and labels | **you**, here and nowhere else |
+| *"EDIT — a second locale goes here"* | one key per language code | **you**, when you add a locale |
+
+English is the **base**; a locale is an **overlay on top of it**. So a key you have not translated
+renders English rather than a raw key or a blank — for the kit and for the graph's `Translation`
+nodes alike, by one rule in one place. Adding a locale is adding one key to the overlay node:
+nothing else in the graph names a language.
+
+**There is one locale — English.** The switch has been driven against a second, throwaway locale
+and works: a kit string and a `Translation` string both changed in one page load, the tab title
+followed, interpolation (`{product}`, `{label}`) still filled, and every key the throwaway locale
+left out came back English. Switching back restored all four pages byte-identically. **No human
+translation has been written or reviewed by anyone**, so this template is i18n-**ready**; it is not
+a template in two languages.
+
+### What the table does NOT own yet, and it is deliberate
+
+Two sets of strings on **`Pages/Course`** are still English in place, by decision rather than by
+oversight:
+
+- the **timeline's own labels** — `Lesson`, `Coaching session`, `Brief`, `Review`, `Coming up`,
+  `Yours to pick up` and the four review names — which live in a `COPY` map inside
+  `Logic/Ordered timeline`'s function;
+- the kit strings drawn by **`TimelineRow`**, **`RatingGauge`** and **`PaceTracker`**, which are
+  the three kit nodes this template does not hand a copy object to, so they render the kit's
+  built-in English.
+
+They do not change language. If you add a locale, `/course` stays English until those are wired —
+`Pages/Lesson` shows the shape to copy: a `/Data/Strings` instance, a `Variable` named `language`,
+and the copy folded into each repeated row.
+
 ## What is a placeholder, and why
 
 Four renders carry their data in a dashed box instead of drawing it: **Mermaid** diagrams (the
@@ -126,9 +169,8 @@ image. The kit README says which and why.
 ## What is not here yet
 
 The backend and every write, sign-in, the coach's surfaces, the assistant, the confusion control
-and the signals, onboarding — and **i18n**: every learner-facing string is either a node parameter
-or one entry in the kit's `COPY` map, so a string table can replace them in one place when NodeGX
-has one.
+and the signals, onboarding — and a **second locale**: see "Every string has one owner" above for
+exactly which strings the table owns today and which are still English in place.
 
 ## Licences
 
