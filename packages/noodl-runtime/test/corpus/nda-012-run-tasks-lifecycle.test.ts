@@ -378,3 +378,141 @@ describe('RT-5 — G1, null on Items clears rather than abstaining', () => {
     expect(graph.errors).toEqual([]);
   });
 });
+
+/**
+ * 🔴 **RT-6 — P96 register R25: what a failed run writes into the EXECUTION RECORD.**
+ *
+ * Every row above reads the error bus (`graph.errors`) or the wires (`signalsFor`), and on both
+ * of those this node was already exemplary: `reportTaskFailure` raises one precise
+ * `run-tasks/task-failed` per failing task, naming the item and why. That is the reason the
+ * terminal failures report their outcome with `raise: false` — a second, vaguer event about the
+ * same root cause is noise.
+ *
+ * **There is a third channel, and it was reading the flag as "say nothing".** `reportOutcome`
+ * closes the DEF-004 execution step with the same `code`/`message` it would have raised, so a
+ * failure reported with `raise: false` and nothing else closed its step bare — and the cloud
+ * runner's fallback for a step carrying neither is *"The action could not be performed"*.
+ * Measured on FED-006's own record, that sentence was the FIRST failure a person read, above the
+ * four steps that did say what went wrong.
+ *
+ * ⚠️ **Only the cloud runner attaches a `runContext`**, so none of this is observable in the
+ * browser and no row here had ever attached one. That is why four call sites could drop the text
+ * of every failure they reported and stay green everywhere.
+ */
+
+interface RecordedStep {
+  nodeId: string;
+  nodeType: string;
+  end?: { status: string; code?: string; message?: string; detail?: unknown };
+}
+
+/** The per-run step channel a cloud function's runner attaches, recorded. */
+function recordSteps(graph: CorpusGraph, id: string): RecordedStep[] {
+  const steps: RecordedStep[] = [];
+  const scope = (graph.node(id) as unknown as { nodeScope: Record<string, unknown> }).nodeScope;
+  scope.runContext = {
+    beginStep(step: { nodeId: string; nodeType: string }) {
+      steps.push({ nodeId: step.nodeId, nodeType: step.nodeType });
+      return String(steps.length - 1);
+    },
+    endStep(handle: unknown, end: RecordedStep['end']) {
+      steps[Number(handle)].end = end;
+    }
+  };
+  return steps;
+}
+
+/** A failed step carrying neither a code nor a message — the defect, stated as a predicate. */
+function bareFailures(steps: RecordedStep[]): RecordedStep[] {
+  return steps.filter((step) => step.end && step.end.status === 'failure' && !step.end.code && !step.end.message);
+}
+
+describe('RT-6 — a failed run names itself in the execution record', () => {
+  it('says how many of how many, which no per-task raise can', async () => {
+    const graph = await buildGraph({ items: [{ id: 'a' }, { id: 'b' }], failing: true });
+    await graph.settle(3);
+    const steps = recordSteps(graph, 'runner');
+
+    graph.node<StarterInstance>('starter').start();
+    await graph.settle(12);
+
+    // The control for everything below: the run really did fail, on the wire and on the bus.
+    expect(graph.signalsFor('runner')).toEqual(['failure', 'completed']);
+    expect(graph.errors.map((e) => e.code)).toEqual(['run-tasks/task-failed', 'run-tasks/task-failed']);
+
+    // 🔴 R25 itself. Before this, the run's own step closed bare and the record read
+    // "The action could not be performed".
+    expect(bareFailures(steps)).toEqual([]);
+
+    const run = steps.filter((step) => step.end && step.end.code === 'run-tasks/tasks-failed');
+    expect(run).toHaveLength(1);
+    expect(run[0].end?.message).toBe('2 of 2 tasks failed');
+    expect(run[0].end?.detail).toEqual({ template: '/Task', failedTasks: 2, numTasks: 2 });
+
+    // …and it did NOT become a second event on the bus, which is what `raise: false` is for.
+    expect(graph.errors.map((e) => e.code)).not.toContain('run-tasks/tasks-failed');
+  });
+
+  it('control: a run that succeeds closes its step Done, and writes no failure at all', async () => {
+    const graph = await buildGraph({ items: [{ id: 'a' }] });
+    await graph.settle(3);
+    const steps = recordSteps(graph, 'runner');
+
+    graph.node<StarterInstance>('starter').start();
+    await graph.settle(10);
+
+    expect(steps.filter((step) => step.end && step.end.status === 'failure')).toEqual([]);
+    expect(steps.some((step) => step.nodeType === 'RunTasks' && step.end?.status === 'done')).toBe(true);
+  });
+
+  it('Stop On Failure says it stopped, rather than reporting the whole batch', async () => {
+    const graph = await buildGraph({
+      items: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+      parameters: { maxRunningTasks: 1, stopOnFailure: true },
+      failing: true
+    });
+    await graph.settle(3);
+    const steps = recordSteps(graph, 'runner');
+
+    graph.node<StarterInstance>('starter').start();
+    await graph.settle(14);
+
+    expect(bareFailures(steps)).toEqual([]);
+    const run = steps.filter((step) => step.end && step.end.code === 'run-tasks/stopped-on-failure');
+    expect(run).toHaveLength(1);
+    // The count is the run's, not the list's: two tasks never started, and a record saying
+    // "3 of 3 failed" would be a lie about work that never happened.
+    expect(run[0].end?.message).toBe('Stopped after 1 of 3 tasks failed, because Stop On Failure is set');
+  });
+
+  it('a task that cannot be STARTED names itself too — the fourth call site', async () => {
+    // `endRunAsFailed`, reached only from `startTask`'s catch. A template name that resolves to
+    // no component throws inside `createTaskComponent`, which is a run that provably cannot
+    // finish — and it is the one terminal failure no other row here reaches.
+    const graph = await buildGraph({ items: [{ id: 'a' }], parameters: { taskTemplate: '/Missing' } });
+    await graph.settle(3);
+    const steps = recordSteps(graph, 'runner');
+
+    graph.node<StarterInstance>('starter').start();
+    await graph.settle(12);
+
+    expect(graph.errors.map((e) => e.code)).toContain('run-tasks/task-start-failed');
+    expect(bareFailures(steps)).toEqual([]);
+    expect(steps.some((step) => step.end?.code === 'run-tasks/task-start-failed')).toBe(true);
+  });
+
+  it('and a Do that cannot start a run writes its own reason, not the fallback', async () => {
+    const graph = await buildGraph({ items: [{ id: 'a' }] });
+    await graph.settle(3);
+    const steps = recordSteps(graph, 'runner');
+
+    // `null` is the reachable spelling of "there is nothing to run" — RT-5's finding.
+    graph.node<StarterInstance>('starter').setItems(null);
+    await graph.settle(4);
+    graph.node<StarterInstance>('starter').start();
+    await graph.settle(10);
+
+    expect(bareFailures(steps)).toEqual([]);
+    expect(steps.some((step) => step.end?.code === 'run-tasks/no-items')).toBe(true);
+  });
+});

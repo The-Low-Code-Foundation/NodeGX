@@ -134,6 +134,8 @@ interface RunTasksNodeInstance extends NodeInstance {
   _failToStart(tokens: OutcomeToken[], code: string, message: string, detail?: unknown): void;
   /** ERG-001 — settles every invocation the ending run owns. The one exit from `running`. */
   _endRun(outcome: NodeOutcome, options?: OutcomeFailureOptions): void;
+  /** P96 R25 — what the run-level `failure` says, for a reason already raised per task. */
+  _runFailureReport(stopped: boolean): OutcomeFailureOptions;
   run(): Promise<void>;
   abort(): void;
   itemOutputSignalTriggered(name: string, model: ModelLike, itemNode: TaskNode): void;
@@ -511,11 +513,15 @@ const RunTasksDefinition: NodeDefinitionOptions = {
       // list is empty for any reason would end with no diagnostic at all. NDA-012 §B2's whole
       // repair on this node was "a deployed app is told", and that must not become conditional
       // on how the invocation was wired. `raise: false` below suppresses the duplicate.
+      //
+      // 🔴 **The code and the message travel anyway — see {@link _runFailureReport}.** `raise:
+      // false` is about the error BUS; the execution step `reportOutcome` closes reads the same
+      // two fields, and omitting them was register R25.
       this.raiseRuntimeError(code, message, detail);
 
       internal.queuedTasks = [];
       internal.state = 'idle';
-      this._endRun('failure', { raise: false });
+      this._endRun('failure', { raise: false, code, message, detail });
     },
     /**
      * ERG-001 — settle every invocation the ending run owns, and only here.
@@ -547,6 +553,36 @@ const RunTasksDefinition: NodeDefinitionOptions = {
       reportOutcomes(this, abortTokens, 'done');
     },
     /**
+     * 🔴 **P96 R25 — `raise: false` silences the error BUS, not the RECORD.**
+     *
+     * Every terminal failure here already has its reason on the error channel: `reportTaskFailure`
+     * raises one precise `run-tasks/task-failed` per failing task, naming the item and why. So the
+     * outcome is reported with `raise: false` to drop the duplicate event — and that also dropped
+     * the *step's* text, because `reportOutcome` closes the DEF-004 execution step with the same
+     * `code`/`message` it would have raised, and the cloud runner's fallback for a step carrying
+     * neither is the sentence *"The action could not be performed"*.
+     *
+     * Measured on FED-006's own record: that sentence was the FIRST failure a person read in the
+     * record's failures band, above the four steps that did say what went wrong — a failure naming
+     * neither subject nor reason, which is exactly what FED-006's ruling 1 was about, one layer up.
+     *
+     * So the run says the thing no per-task raise can: **how many of how many**. It stays off the
+     * bus, and the record stops leading with a sentence about nothing.
+     */
+    _runFailureReport(this: RunTasksNodeInstance, stopped: boolean): OutcomeFailureOptions {
+      const internal = this._internal;
+      const failed = internal.failedTasks || 0;
+      const total = internal.numTasks || 0;
+      return {
+        raise: false,
+        code: stopped ? 'run-tasks/stopped-on-failure' : 'run-tasks/tasks-failed',
+        message: stopped
+          ? 'Stopped after ' + failed + ' of ' + total + ' tasks failed, because Stop On Failure is set'
+          : failed + ' of ' + total + ' tasks failed',
+        detail: { template: internal.template, failedTasks: failed, numTasks: total }
+      };
+    },
+    /**
      * NDA-012 §B2 — a `Do` that cannot start a run says so **at runtime**, not only in the editor.
      *
      * `run`'s three preconditions were reported with `editorConnection.sendWarning` and nothing
@@ -561,7 +597,9 @@ const RunTasksDefinition: NodeDefinitionOptions = {
       // Raised outside the token loop for the reason `endRunAsFailed` states: the diagnostic is
       // owed to a deployed app whatever the token count, and `raise: false` drops the duplicate.
       this.raiseRuntimeError(code, message, detail);
-      reportOutcomes(this, tokens, 'failure', { raise: false });
+      // R25 — `raise: false` drops the duplicate EVENT, never the step's text. See
+      // {@link _runFailureReport}.
+      reportOutcomes(this, tokens, 'failure', { raise: false, code, message, detail });
     },
     async run(this: RunTasksNodeInstance) {
       const internal = this._internal;
@@ -764,8 +802,11 @@ const RunTasksDefinition: NodeDefinitionOptions = {
           // `run-tasks/task-failed` per failing task, naming the item and the reason. A second,
           // vaguer "some tasks failed" event about the same root cause is the "two wordings of
           // one failure" the Failure Contract calls noise.
+          //
+          // 🔴 The code and message still travel, because the RECORD's step reads them and the
+          // bus does not — {@link _runFailureReport}, register R25.
           if (internal.failedTasks === 0) this._endRun('done');
-          else this._endRun('failure', { raise: false });
+          else this._endRun('failure', this._runFailureReport(false));
         } else {
           if (internal.stopOnFailure) {
             // Only continue if there are no failed tasks, otherwise aborted
@@ -795,7 +836,7 @@ const RunTasksDefinition: NodeDefinitionOptions = {
               internal.queuedTasks = [];
               internal.state = 'idle';
               this.sendSignalOnOutput('aborted');
-              this._endRun('failure', { raise: false });
+              this._endRun('failure', this._runFailureReport(true));
             }
           } else {
             internal.runningTasks++;

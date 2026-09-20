@@ -336,6 +336,14 @@ export interface OutcomeFailureOptions {
    * `modelcrudbase._failNoModel` in `foreach` mode, where `foreachitem.ts` has already raised the
    * precise binding diagnosis (`repeater-item/no-item-in-scope`); a second, vaguer event about
    * the same root cause is the "two wordings of one failure" the Failure Contract calls noise.
+   *
+   * 🔴 **It does not excuse you from `code` and `message`.** They are read TWICE — once by the
+   * error bus, which this flag turns off, and once by the DEF-004 execution step, which it does
+   * not. A failure reported with `raise: false` and nothing else closes its step bare, and the
+   * cloud runner writes *"The action could not be performed"* into the record: a failure naming
+   * neither subject nor reason. That was `Run Tasks` for four call sites (P96 register R25), and
+   * it is invisible to every test that reads only the error channel. Pass both; pass a summary
+   * where the precise reason is genuinely per-item.
    */
   raise?: boolean;
 }

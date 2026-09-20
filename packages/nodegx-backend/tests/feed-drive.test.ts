@@ -952,9 +952,17 @@ describe('FED-006 — one feed reader, end to end', () => {
      *
      * At least one of those is a duplicate and is folded by the summariser; the rest are a
      * genuine cascade and are shown, because hiding a step that really did fail is how a record
-     * stops being a record. 🔴 **One of them — a `Run Tasks` step whose whole message is "The
-     * action could not be performed" — is a failure with no subject and no reason, which is the
-     * exact complaint FED-006's ruling 1 was about.** Phase register R25.
+     * stops being a record.
+     *
+     * ✅ **Register R25's second half is CLOSED (s9), and this row is where it was visible.** One
+     * of those failures — a `Run Tasks` step whose whole message was *"The action could not be
+     * performed"* — named neither a subject nor a reason, and it was the FIRST failure a person
+     * read. The cause was not in the message: `Run Tasks` reports its terminal failures with
+     * `raise: false`, because `reportTaskFailure` has already raised a precise per-task event —
+     * and `reportOutcome` closes the execution step with the same `code`/`message` it would have
+     * raised, so four call sites that passed neither closed their step bare. The run now says the
+     * thing no per-task raise can: **how many of how many**. See
+     * `noodl-runtime/test/corpus/nda-012-run-tasks-lifecycle.test.ts` RT-6.
      *
      * ⚠️ **The COUNT is not asserted, and that is a measurement rather than a shrug.** A first
      * version pinned five raw and four folded; it went red once and green on the two runs after
@@ -983,10 +991,21 @@ describe('FED-006 — one feed reader, end to end', () => {
       const keys = summary.failures.map((f) => `${f.step}|${f.message}|${JSON.stringify(f.detail)}`);
       expect(new Set(keys).size).toBe(keys.length);
 
-      // 🔴 Register R25: one of the failures a person reads names neither a subject nor a reason.
-      const bare = summary.failures.filter((f) => f.message === 'The action could not be performed');
-      expect(bare.length).toBeGreaterThan(0);
-      expect(bare[0].detail).toBeNull();
+      // ✅ R25, inverted: NO failure a person reads is the runner's fallback sentence. That
+      // string is what `WorkflowRunner.endStep` writes for a failed step carrying neither a code
+      // nor a message, so its absence is the property, and asserting it here rather than only in
+      // the runtime is the point — this is a real record, written by a real run.
+      expect(summary.failures.map((f) => f.message)).not.toContain('The action could not be performed');
+
+      // …and every one of them says something. A record whose band is a list of blanks is the
+      // defect FED-006's ruling 1 was about, one layer up.
+      for (const failure of summary.failures) {
+        expect(String(failure.message || '').length).toBeGreaterThan(0);
+      }
+
+      // The run-level failure the fallback used to stand in for, in the words it now uses.
+      const counted = summary.failures.filter((f) => /\d+ of \d+ tasks failed/.test(String(f.message)));
+      expect(counted.length).toBeGreaterThan(0);
     });
 
     /**

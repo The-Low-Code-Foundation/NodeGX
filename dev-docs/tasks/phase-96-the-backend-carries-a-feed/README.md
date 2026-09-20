@@ -251,6 +251,10 @@ a key from `secrets.json`, readable by a session user and by an API key, and rea
 `/mcp` by an MCP client. **No process other than `nodegx-backend` is running.** Richard has seen
 the execution record in the dashboard and ruled it legible.
 
-**Where it stands after s8:** every clause above is green except the last. The drive is 35/35;
-FED-007 built the three rulings Richard took on 2026-09-20 and its AC1–AC6 are gated. The last
-clause is a conversation — `shots/fed007-*.png`, and the question in FED-007 §8.
+✅ **Where it stands after s9: EVERY clause is green, the last one included.** Richard saw
+`shots/fed007-*.png` on 2026-09-20 and ruled the record legible, with one condition — fix the
+`Run Tasks` step whose whole message was *"The action could not be performed"* (register R25).
+That is built, gated and re-shot (FED-007 §10), and §8's ruling was taken the same day: a correct
+graph that probes for an absent optional value **does** read `error`, and the record says which
+step and why. `test:main` — the phase's one outstanding gate — is paid: 524 suites / 8397 tests,
+exit 0.

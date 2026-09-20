@@ -3,7 +3,7 @@
 Shaped per [PHASE-EXECUTION.md §3](../../guidelines/PHASE-EXECUTION.md): the board, the next task,
 the end condition, the register.
 
-## 1. The board (re-derived from the task FILES, 2026-09-20 after s8)
+## 1. The board (re-derived from the task FILES, 2026-09-20 after s9)
 
 | task | state |
 |---|---|
@@ -12,15 +12,30 @@ the end condition, the register.
 | FED-003 A function calls a model | ✅ **CLOSED (s3).** Nine ACs green; 24 specs across two suites |
 | FED-004 A schedule does not trip over itself | ✅ **CLOSED (s4).** Seven ACs green; 26 specs across three suites |
 | FED-005 A backend speaks MCP | ✅ **CLOSED (s5).** Eight ACs green; 39 specs, one driven by the OFFICIAL MCP client |
-| FED-006 The drive | 🟡 **AC1–AC4 GREEN; AC5 built at s8 and BACK WITH RICHARD.** The drive is 35/35 and now proves ruling 2 itself |
-| FED-007 The record reads like a record | 🟡 **AC1–AC6 GREEN (s8). AC7 is the ruling, and it is with Richard.** Plus §8: one ruling the build found and needs |
+| FED-006 The drive | ✅ **CLOSED (s9).** 35/35, and its own record is what graded FED-007 |
+| FED-007 The record reads like a record | ✅ **CLOSED (s9).** AC1–AC7 green; §8's ruling taken; R25 fixed, gated and re-shot |
 
-🔴 **The phase is one conversation from done.** Everything buildable in FED-007 is built and
-gated. What is left is Richard looking at four screenshots, and answering §8's question.
+✅ **THE PHASE IS DONE.** Richard ruled on both halves on 2026-09-20: the record is legible
+(AC7), on condition that the nameless `Run Tasks` failure was fixed first — it was (FED-007 §10) —
+and §8 is ruled *leave it red*: a correct graph that probes for an absent optional value reads
+`error`, and the record says which step and why. `test:main`, the one outstanding gate, is paid.
 
-## 2. 🔴 FIRST JOB: two things are with Richard, and both are in FED-007
+## 2. What a next session picks up — NOT this phase
 
-**Do not start anything else until these are put to him** — they are the phase's close condition.
+✅ **Nothing in P96 is waiting on anyone.** The rows below are the phase's leavings, and each one
+belongs to a different phase or is unowned; §5 is the full register.
+
+| carry | where it goes |
+|---|---|
+| 🔴 **R24** — the site template's contact form has never sent its confirmation email (`Send Email`: *"To" is required*, since SB-004). Pinned by a spec that reds when fixed | the site-builder phase (P76/P77) |
+| 🔴 **R17** — a step is named by the GRAPH node's id, so nothing tells one instance or one ITEM from another on the SUCCESS path | unowned — **scope it as its own task** |
+| 🔴 **R18** — `MAX_STEPS_PER_RUN` is 1000 and a loop-shaped function eats it; the record view now makes that both more visible and more annoying | unowned |
+| **R21** — the `/_admin` view-vs-route sweep, with s8's three helpers as the instrument | unowned — a dashboard sweep |
+| **R11 / R14 / R15 / R16 / R12** | unchanged, see §5 |
+
+---
+
+**The record of what was with Richard, kept because the rulings live here.**
 
 ### (a) AC7 — the shots
 
@@ -34,8 +49,10 @@ against a real backend serving the records FED-006's own drive produced:
 | `fed007-step-expanded.png` | the failed fetch opened — its error, and `url` / `status` in the tree |
 | `fed007-explorer.png` | a model call's input as the explorer draws it: strings green, numbers violet, booleans cyan |
 
-The question is §1's sentence: *a run went wrong, you open it, and the thing that went wrong is
-the thing you see.*
+The question was §1's sentence: *a run went wrong, you open it, and the thing that went wrong is
+the thing you see.* ✅ **Answered: yes, once the nameless `Run Tasks` failure was fixed.** It was
+(FED-007 §10), and the four shots above are the RE-SHOT ones — `fed007-record-open.png`'s band now
+opens with `run-tasks/tasks-failed: 1 of 4 tasks failed`.
 
 ### (b) 🔴 The ruling FED-007 §8 needs, in plain words
 
@@ -52,9 +69,10 @@ So: **should a correct graph that treats an absent optional value as ordinary co
 `error`?** FED-007 §8 has the three options and shows why the obvious narrowing ("only unrouted
 failures count") does **not** work — measured, not assumed.
 
-⚠️ **Do not change the built behaviour without his answer.**
+✅ **ANSWERED 2026-09-20: leave it red.** Option (a) — the built behaviour stands, no migration,
+no new port. FED-007 §8 carries the ruling and the evidence under it.
 
-## 3. What s8 built
+## 3. What s8 and s9 built
 
 **FED-007 §5.1a and §5.2a have the full account.** In short:
 
@@ -74,7 +92,8 @@ failures count") does **not** work — measured, not assumed.
 
 ## 4. The phase's end condition
 
-README §8, unchanged. **Every clause is green except the last.** 🔴 **Distance: one conversation.**
+README §8. ✅ **EVERY CLAUSE IS GREEN, the last one included** — Richard has seen the execution
+record in the dashboard and ruled it legible (with the R25 condition, now paid). **Distance: zero.**
 
 ## 5. The register
 
@@ -104,11 +123,29 @@ Unchanged rows are kept short; read s5's copy in git history for the full text o
 | R20 | 🔴 **The served dashboard's Executions view had NEVER shown a row** (bare-array route, envelope reader), since 2026-07-26. Fixed and gated at s7 | ✅ closed (s7) |
 | R21 | **The other list views on that page were NOT audited.** The reach of "a view reads a key its route does not answer" is every view on `/_admin`; only the executions one has a spec. ✅ *s8 adds the cheap instrument:* three helpers in `admin-dashboard.test.ts` lift a declaration out of the shipped page and compare it to its source of truth — the sweep is now a table of (page declaration, real source) pairs | unowned — a dashboard sweep |
 | R22 | 🔴 **The Executions view's status vocabulary disagreed with the store's, three ways.** ✅ **CLOSED (s8) as FED-007 AC2**, and gated against the union in `types.ts` from the shipped document | ✅ closed (s8) |
-| R23 | 🔴 **NEW (s8) — the status ruling paints a CORRECT graph red, and the shipped contact form is the example.** `/#__cloud__/site/ContactRecipient` probes for an optional secret; an unprovisioned `Secret` reports a failed step; the graph handles it and is right to. Under ruling 2 every contact submission now reads `error`. 🔴 **The obvious narrowing does not work** — "routed" is a `WorkflowEngine` concept (`inputData.previous.error`) and does not exist for graph runs, and this probe does not wire `failure` at all. **FED-007 §8 is the question, and it is Richard's** | 🔴 **WITH RICHARD** |
+| R23 | ✅ **RULED AND CLOSED (s9) — leave it red.** Richard, 2026-09-20: a correct graph that treats an absent optional value as control flow reads `error`, and the record names the step and the reason. No new port on `Secret`, no migration, no third status value. The finding, kept: **the status ruling paints a CORRECT graph red, and the shipped contact form is the example.** `/#__cloud__/site/ContactRecipient` probes for an optional secret; an unprovisioned `Secret` reports a failed step; the graph handles it and is right to. Under ruling 2 every contact submission now reads `error`. 🔴 **The obvious narrowing does not work** — "routed" is a `WorkflowEngine` concept (`inputData.previous.error`) and does not exist for graph runs, and this probe does not wire `failure` at all. **FED-007 §8 records the ruling and the evidence under it** | ✅ closed (s9) |
 | R24 | 🔴 **NEW (s8) — the site template's contact form has NEVER sent its confirmation email.** `noodl.cloud.sendemail#mail` fails with *"To" is required* on every submission, since SB-004: the recipient probe fails, `pick` produces no address, and nothing downstream notices. The visitor is still told *"sent"* and the message really is stored — only the confirmation is missing. **Pinned by a spec in `sbr010-messages-drive.test.ts`, which will red when it is fixed — that is the intended way to find out.** Invisible for months because the run read `success` | unowned — **the site-builder phase (P76/P77)** |
-| R25 | 🔴 **NEW (s8) — one down feed makes FIVE failed steps, the cascade's size is NOT STABLE, and one of them names nothing.** The fetch, the `Parse Feed` handed the refusal body, and `Run Tasks` reporting *"Task 4 of 4 failed"* **twice byte-for-byte** (folded by the band). A spec pinning the count went red once and green twice on identical code, so the spec now gates the stable properties and PRINTS the shape each run. 🔴 **And the first failure a person reads is a `Run Tasks` step whose entire message is *"The action could not be performed"*, with no detail** — a failure naming neither subject nor reason, which is precisely what FED-006's ruling 1 was about, one layer up | unowned — `runtasks.ts` |
+| R25 | ✅ **THE NAMELESS HALF IS CLOSED (s9); the instability is understood and gated as such.** One down feed makes FIVE failed steps, and the cascade's size is NOT STABLE. The fetch, the `Parse Feed` handed the refusal body, and `Run Tasks` reporting *"Task 4 of 4 failed"* **twice byte-for-byte** (folded by the band). A spec pinning the count went red once and green twice on identical code, so the spec now gates the stable properties and PRINTS the shape each run. ✅ **The first failure a person read — a `Run Tasks` step whose entire message was *"The action could not be performed"* — now reads `run-tasks/tasks-failed: 1 of 4 tasks failed`.** The cause was not the message: `raise: false` silences the error BUS and not the DEF-004 step, which `reportOutcome` closes with the same `code`/`message`, so four `runtasks.ts` call sites closed their step bare. FED-007 §10; gated by RT-6, the first corpus row to attach a `runContext` | ✅ closed (s9) |
 
-## 6. What s8 measured
+## 6. What s8 and s9 measured
+
+### s9 — R25, and the gate s8 owed
+
+- **`nda-012-run-tasks-lifecycle.test.ts` 15/15** (5 new, RT-6). Mutants: the two `checkDone`
+  sites + `_failToStart` reverted → **3 red**, control green; `endRunAsFailed` alone → **1 red**.
+- **`noodl-runtime` WHOLE: 172 suites / 2957 tests, 0 red**, 11 s.
+- **`feed-drive.test.ts` 35/35** with the R25 pin INVERTED — and the shots re-taken from the
+  rebuilt backend, so `shots/fed007-record-open.png` is the fixed band.
+- `def004-execution-steps`, `sbr015-execution-steps-drive`, `admin-dashboard`,
+  `sbr010-messages-drive`, `cloud-run-tasks-loop`, `sb-003-helper-not-endpoint`,
+  `sb004-publication-invariant` (backend) and `execution-logger` (cloud): **all green**.
+- ✅ **`test:main` IS PAID — 524 suites / 8397 tests, exit 0.** s8 owed it because
+  `ExecutionLogger` lives in a package the editor also consumes; s9 owed it twice over, having
+  changed `noodl-runtime`.
+- `typecheck` (runtime, backend, backend-tests, cloud): all exit 0. `eslint`: no new problems —
+  the two errors on the touched files are byte-identical at `HEAD`.
+
+### s8
 
 - **`execution-logger.test.ts` 35/35** (8 new). Mutant — drop `&& !failedStep` — **1 red**, its
   green control still green.

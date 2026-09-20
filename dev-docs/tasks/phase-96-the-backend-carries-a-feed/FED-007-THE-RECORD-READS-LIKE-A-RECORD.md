@@ -337,8 +337,13 @@ a wrong credential.
    page composed.
 6. ✅ **AC6 (s8)** — the three standing gates are green, and the bundle delta is **+6.8 KB
    gzipped** against a stated ceiling of 48 KB on the served document.
-7. 📋 **AC7 — WITH RICHARD.** Four shots in `shots/fed007-*.png`, taken against a real backend
-   serving the drive's own records. Put to him at the end of s8, together with §8's ruling.
+7. ✅ **AC7 (s9) — RULED, with one condition, and the condition is paid.** Richard saw the four
+   shots on 2026-09-20 and answered *"yes, but fix the nameless failure first"* — the `Run Tasks`
+   step whose whole message was *"The action could not be performed"*, sitting at the TOP of the
+   failures band (register R25). §10 is that fix, and `shots/fed007-*.png` are **re-shot against a
+   rebuilt backend**: the first line of the band now reads
+   `run-tasks/tasks-failed: 1 of 4 tasks failed`, with `template`, `failedTasks` and `numTasks`
+   under it.
 
 ## 7. How this gets graded, because the last gate had a hole
 
@@ -352,7 +357,28 @@ a spec that restates what the explorer should do will agree with itself forever.
 written to be machine-checkable against the real record wherever that is possible; AC7 is the
 ruling, not the evidence.
 
-## 8. 🔴 A ruling this task now needs, and the measurement it came from
+## 8. ✅ RULED (2026-09-20) — a correct graph that probes may read `error`
+
+🔴 **Richard's answer, in his own terms: leave it red.** Option (a) below — *keep it as ruled: a
+probe that fails reads `error`, and the record says truthfully which step and why.* Nothing in the
+built behaviour changes, no migration is owed, and `Secret` gets no new port.
+
+**What that decides, so nobody re-opens it from the symptom:**
+
+- Every submission of the shipped contact form reads `error` in the executions list **by design**,
+  because it probes for an optional secret and an unprovisioned `Secret` reports a failed step
+  (register R23). The record names the step and the reason, which is the whole point.
+- 🔴 **Register R24 is unaffected and still a real defect** — the same form's `Send Email` has
+  been failing with *"To" is required* since SB-004, so the visitor's confirmation email has never
+  been sent. That is the site-builder phase's row, pinned by a spec in
+  `sbr010-messages-drive.test.ts` that reds when it is fixed.
+- A future session that wants the red quieted owes option (b) or (c) below **and a ruling of its
+  own**; "it looks noisy" is not one.
+
+---
+
+**The question as it was put, and the measurement it came from. Kept, because the ruling is only
+as good as the evidence under it.**
 
 **Put to Richard at s8, from §5.1a's SBR-010 red.**
 
@@ -416,3 +442,56 @@ legible, three of the four sentences are underivable and the fourth would be wro
 
 ⚠️ The vocabulary-agreement spec AC3 asks for is still right, and is now narrower: it compares
 the ENGINE-run sentences between the two surfaces.
+
+
+## 10. ✅ s9 — the nameless failure, and where it actually lived
+
+**AC7's condition.** The first failure a person read in the record's failures band was
+`each · RunTasks — "The action could not be performed"`: no subject, no reason, above the four
+steps that did say what went wrong. Register R25.
+
+🔴 **It was not a bad message. It was a THIRD channel nobody had looked at.**
+
+`Run Tasks` reports every terminal failure with `raise: false`, and that is correct: it has
+already raised one precise `run-tasks/task-failed` per failing task, naming the item and why, and
+a second vaguer event about the same root cause is the "two wordings of one failure" the Failure
+Contract calls noise. But `raise: false` was read as *say nothing*, and `code`/`message` are read
+**twice**:
+
+| reader | what `raise: false` does to it |
+|---|---|
+| the error bus (`raiseRuntimeError`) | suppressed — this is what the flag is for |
+| the DEF-004 execution step (`reportOutcome` → `runContext.endStep`) | **nothing.** It closes the step with the same `code`/`message`, and the cloud runner's fallback for a step carrying neither is `WorkflowRunner.ts`'s *"The action could not be performed"* |
+
+So four call sites in `runtasks.ts` closed their step bare. **Every other `raise: false` site in the
+runtime passes `code` and `message`** — `expression`, `logic-builder`, `statesnapshotnode`,
+`filtercollectionnode`, `filterdbmodelsnode`, `mapcollectionnode` — which is what makes this a
+four-site defect rather than a contract one. The export's own `runTasksLib` has no step channel and
+is out of reach.
+
+**What was built:**
+
+- `_runFailureReport(stopped)` — the run says the thing no per-task raise can: **how many of how
+  many**. `run-tasks/tasks-failed: 1 of 4 tasks failed`, or
+  `run-tasks/stopped-on-failure: Stopped after 1 of 3 tasks failed, because Stop On Failure is set`,
+  with `{ template, failedTasks, numTasks }` as the step's detail. Still `raise: false`, so the bus
+  is unchanged.
+- The two sites that already HAD a code and a message — `endRunAsFailed` and `_failToStart` —
+  simply pass them on.
+- `OutcomeFailureOptions.raise` now says so in the contract, because the next node to use the flag
+  will otherwise repeat this exactly.
+
+**Gated:** `nda-012-run-tasks-lifecycle.test.ts` **RT-6**, five arms, and it is the first row in
+that corpus to attach a `runContext` — which is *why* four call sites could drop the text of every
+failure they reported and stay green: only the cloud runner attaches one, so none of this is
+observable in the browser. Mutants: reverting the two `checkDone` sites and `_failToStart` → **3
+red**, control green; reverting `endRunAsFailed` alone → **1 red**, the arm written for it.
+
+**Measured:** `noodl-runtime` whole — 172 suites / 2957 tests, 0 red. `feed-drive.test.ts` 35/35
+with the R25 pin **inverted** (no failure in the band is the fallback sentence; one of them matches
+`N of M tasks failed`). `def004-execution-steps`, `sbr015-execution-steps-drive`, `admin-dashboard`,
+`sbr010-messages-drive`, `cloud-run-tasks-loop`, `sb-003-helper-not-endpoint`,
+`sb004-publication-invariant`, `execution-logger` — all green. `test:main` — **524 suites / 8397
+tests, exit 0**, which is s8's owed gate paid on the session that added a runtime change to it.
+`typecheck` on runtime, backend, backend-tests and cloud: all exit 0. `eslint`: no new problems
+(the two errors on the touched files are pre-existing and identical at `HEAD`).
