@@ -53,6 +53,12 @@ import {
 } from './benchRequest';
 import { registerLivePreview, unregisterLivePreview } from '../SandboxSurface';
 import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './benchFrameDefault';
+import {
+  BENCH_SCENARIOS_KEY,
+  benchOpeningFrame,
+  benchOpeningScenario,
+  readBenchScenarios
+} from './benchScenarios';
 import { BOARD, CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
 import { boardCaptionRest } from './boardSurface';
 import { ComponentBench } from './ComponentBench';
@@ -249,12 +255,26 @@ export function VisualCanvas({
     const stored = readBenchFrameDefault(component?.getMetaData(BENCH_FRAME_KEY));
     setHasDefaultSize(Boolean(stored));
 
-    // ⚠️ Only *applied* when there is one. Falling back to `DEFAULT_BENCH_FRAME`
-    // here would reset the frame every time you pointed the bench at a
-    // component that has no stored default — silently throwing away a width the
-    // user set moments ago, which is the frame control's own version of the
-    // reported bug.
-    if (stored) setFrame(stored);
+    /**
+     * TVW-008 AC4 — the scenario the bench opens on has a width, and it wins.
+     *
+     * ⚠️ **Only ever *applied* when there is one.** Falling back to `DEFAULT_BENCH_FRAME` here
+     * would reset the frame every time you pointed the bench at a component that has neither a
+     * scenario frame nor a stored default — silently throwing away a width the user set moments
+     * ago, which is the frame control's own version of the reported bug. That rule is now
+     * {@link benchOpeningFrame}'s `current` argument, which is why this is a functional update:
+     * the effect is keyed on the target, so a `frame` read from the closure would be the width
+     * from whenever the target last changed rather than the one on screen.
+     *
+     * 🔴 The *values* are seeded by `ComponentBench` and the *width* here, and they must not swap:
+     * child effects run before parent effects, so a width set in the child would be overwritten by
+     * this one without either file saying so.
+     */
+    // No interface is passed, and none is needed: `iface` only filters the *values*, and the only
+    // field read here is the scenario's own recorded frame. Which scenario it is — the first — is
+    // the one rule, and it is asked of the one function the bench asks.
+    const opening = benchOpeningScenario(readBenchScenarios(component?.getMetaData(BENCH_SCENARIOS_KEY)));
+    if (stored || opening) setFrame((current) => benchOpeningFrame(opening, stored, current));
   }, [benchTarget]);
 
   /**

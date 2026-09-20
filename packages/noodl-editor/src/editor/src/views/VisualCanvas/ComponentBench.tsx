@@ -68,12 +68,14 @@ import {
   benchScenarioFrom,
   benchScenarioIsModified,
   benchScenarioStore,
+  benchOpeningScenario,
   moveBenchScenario,
   readBenchScenarios,
   removeBenchScenario,
   renameBenchScenario,
   uniqueBenchScenarioName,
   upsertBenchScenario,
+  type BenchOpening,
   type BenchScenario
 } from './benchScenarios';
 import css from './ComponentBench.module.scss';
@@ -168,12 +170,40 @@ export function ComponentBench({
   const inputsRef = useRef(inputs);
   inputsRef.current = inputs;
 
-  // A different component has a different interface, so the previous one's
-  // values are not merely stale, they name ports that do not exist. Declared
-  // before the build effect so the clear lands first on a target change.
+  /**
+   * What the bench opens holding: the component's first scenario, or nothing.
+   *
+   * A different component has a different interface, so the previous one's values are not merely
+   * stale, they name ports that do not exist — so this starts by throwing them away.
+   *
+   * 🔴 **Declared before the build effect, and since TVW-008 AC4 that ordering is load-bearing
+   * rather than tidy.** Effects in one commit run in declaration order, so what this writes into
+   * `inputsRef` is what the export below is *built from* — which is the entire fix. See
+   * {@link benchOpeningScenario} for why the values cannot arrive any other way: sent as a
+   * targeted `modelUpdate` at mount they are dropped, because the sandbox client has not connected
+   * yet, and the bench ends up claiming a scenario it is not rendering.
+   *
+   * ⚠️ **Keyed on `target` and nothing else**, which is the `autoSelectedFor` bookkeeping in its
+   * cheapest form: `None` sets `activeScenario` back to `undefined`, so *"never chose"* and
+   * *"chose None"* are the same value, and a Refresh, a dataset change or the export rebuild
+   * {@link applyValueSet} does when it has to remount would each re-open a scenario the user had
+   * deliberately left.
+   */
+  const openingRef = useRef<BenchOpening | undefined>(undefined);
   useEffect(() => {
-    inputsRef.current = {};
-    setInputs({});
+    const project = ProjectModel.instance;
+    const component = project ? benchComponent(project, target) : undefined;
+    const opening =
+      project && component
+        ? benchOpeningScenario(
+            readBenchScenarios(component.getMetaData(BENCH_SCENARIOS_KEY)),
+            benchInterfaceFor(project, target)
+          )
+        : undefined;
+
+    openingRef.current = opening;
+    inputsRef.current = opening?.inputs ?? {};
+    setInputs(inputsRef.current);
   }, [target]);
 
   useEffect(() => {
@@ -440,17 +470,23 @@ export function ComponentBench({
   }, [target]);
 
   /**
-   * ⚠️ **Clearing the selection is keyed on the target and nothing else.**
+   * ⚠️ **The selection follows the target and nothing else.**
    *
    * Folding it into the re-read below — which is keyed on `revision` too — would
    * mean a Refresh, a dataset change, or the export rebuild that
    * {@link applyValueSet} does when it has to remount, each silently dropped the
    * scenario the user was looking at. The last of those is the sharp one:
    * *applying* a scenario would deselect it.
+   *
+   * 🔴 **It reads `openingRef`, it does not compute anything.** The opening effect above is
+   * keyed on the same `target` and is declared first, so by the time this runs the ref holds the
+   * answer *that the export was built from* — one decision, read twice. Resolving the scenario a
+   * second time here is how the chip and the runtime end up disagreeing, which is the defect
+   * AC4 caught in the first place ([[a-check-in-a-second-pipeline-is-a-duplicate-first]]).
    */
   useEffect(() => {
-    setActiveScenario(undefined);
-    setScenarioNotice(undefined);
+    setActiveScenario(openingRef.current?.name);
+    setScenarioNotice(benchScenarioApplyNotice(openingRef.current?.missing ?? []));
   }, [target]);
 
   useEffect(() => {
@@ -507,34 +543,29 @@ export function ComponentBench({
   );
 
   /**
-   * TVW-008 AC4 — **RULED by Richard 2026-09-20: the bench should open on the first scenario, as
-   * the board does. BUILT, MEASURED, AND REVERTED IN THE SAME SESSION — the reason is the value.**
+   * TVW-008 AC4 — **the bench opens on the first scenario, as the board does.** Ruled by Richard
+   * 2026-09-20: *"if you saved a scenario, that's what you meant the component to look like."*
    *
-   * The ruling is right and the implementation was not. Auto-selecting `scenarios[0]` on mount
-   * worked *as far as this component can see*: the chip read `Checkout` and the inputs rail read
-   * `label = Continue to checkout`. **The runtime went on drawing `Button`**, because
-   * {@link applyValueSet} delivers through `sendModelUpdateToClient` — a **targeted delta** — and
-   * at mount the sandbox client has not connected, so the update is dropped. The manual path works
-   * only because by the time a person picks a scenario the client is up. It is the same trap
-   * `useSandboxViewer`'s `remountKey` note already records: *"a bench input set through a targeted
-   * `modelUpdate` never entered the export."*
+   * There is no code here on purpose. The first attempt at this lived exactly here — an effect
+   * that called {@link selectScenario} on mount — and it was **built, measured and reverted in one
+   * session**: the chip read `Checkout`, the rail read `label = Continue to checkout`, and the
+   * runtime went on drawing `Button`, because a click's values travel as a targeted
+   * `modelUpdate` and at mount the sandbox client has not connected. It *claimed* a scenario it
+   * was not rendering, which is the defect TVW-001 and TVW-002 exist to remove
+   * ([[verify-the-consequence-not-just-the-mechanism]]).
    *
-   * 🔴 **Reverted rather than left in, because the half-state is WORSE than the old behaviour by
-   * this phase's own standard.** Before, the bench said `None` and drew the node's own values —
-   * honest. With the auto-select in, it *claimed* a scenario it was not rendering, which is the
-   * exact defect TVW-001 and TVW-002 exist to remove: a surface saying one thing and showing
-   * another ([[verify-the-consequence-not-just-the-mechanism]]).
+   * ✅ So the opening scenario goes into the **export** instead — the one place the board was
+   * already putting it — by the effect at the top of this component seeding `inputsRef` before
+   * the export is built. Three things follow, and each is load-bearing:
    *
-   * ✅ **The fix, for whoever builds it: put the initial scenario in the EXPORT, not in a delta.**
-   * That is precisely what the board already does — `boardFrameMounts` writes
-   * `bench.scenarios[0]` into each harness node's `parameters`, which is why the board renders the
-   * scenario from its very first paint and the bench does not. `buildBenchExport` needs the same
-   * treatment for the opening scenario, and only for it: every later switch is a delta and must
-   * stay one, or changing scenario would rebuild the export and reload the window.
-   *
-   * ⚠️ Whatever is built, `autoSelectedFor`-style bookkeeping is still needed: `None` sets
-   * `activeScenario` back to `undefined`, so "never chose" and "chose None" are the same value,
-   * and without a ref keyed on the target a deliberate `None` snaps back on the next render.
+   * - **the values are in the harness node's `parameters`**, through the same `benchParameters`
+   *   call `boardFrameMounts` goes through, so the two surfaces agree by construction rather than
+   *   by two implementations happening to match;
+   * - **every later switch is still a delta** — a scenario click that rebuilt the export would
+   *   reload the window and throw away whatever the person was mid-way through inspecting;
+   * - **the width comes with it**, resolved by `VisualCanvas` (see {@link benchOpeningFrame}),
+   *   because otherwise the bar opens reading `Checkout ●` over a bench nobody has touched and
+   *   offers a Save that would overwrite the scenario's width with the stage's.
    */
 
   /** Overwrite the selected scenario with what is on the bench now. */

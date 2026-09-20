@@ -655,10 +655,10 @@ its absence rather than reading an empty result as "the bench drew nothing"
 | AC1 | ✅ driven — empty state, three picks, no overlap, drag, App round trip, frame benched |
 | AC2 | ✅ offline (`board-export.test.ts`) + the `Add all` bound seen on the surface |
 | AC3 | ✅ driven — authored sizes, placement counts, no caption overlap |
-| AC4 | 🟡 **first clause ✅ driven** — the scenario reaches the screen on the board. **Second clause OPEN**: the bench renders the same values only once the scenario is picked, and RULED-BUT-UNBUILT for the opening default (§10.5 names the fix) |
+| AC4 | 🟡 at s26. **Closed at s27 — see §11**, which built the fix §10.5 names |
 | AC5 | ✅ driven — 200 moves write nothing, the release commits once |
 | AC6 | ✅ driven — the app preview's route is unchanged throughout |
-| AC7 | 🟡 **FOUR shots taken** (`verdicts/tvw-008/`). **The theme pair is still owed** — see §10.9 |
+| AC7 | 🟡 four shots at s26; **six at s27**, both themes real. Richard's WORTHY is all that is left |
 | AC8 | ✅ s25 |
 
 **Still open:** AC7's verdict, and two §9.6 items that no AC names — selection through a frame, and
@@ -695,3 +695,118 @@ of the two readings **and** of the two files' hashes, and the fallback writes `d
 ⚠️ **So AC7 is FOUR shots, not six**, and the theme pair is owed by the next drive. The four that
 stand are the empty board, the three-frame board before and after a rearrange, and one frame
 benched.
+
+## 11. s27 — AC4 closed: the opening scenario goes in the EXPORT
+
+**2026-09-20.** s26 ruled AC4's second clause, built it, measured it and reverted it, leaving §10.5
+as a diagnosis with a named fix. This session built the named fix, and the drive that had failed
+that one arm came back **38/38**.
+
+### 11.1 What was built
+
+`benchOpeningScenario(scenarios, iface?)` and `benchOpeningFrame(opening, stored, current)` in
+`benchScenarios.ts` — both pure, both beside the rules they belong with, for the reason that
+module's header already gives.
+
+| surface | seeds | why there |
+|---|---|---|
+| `ComponentBench` | `inputsRef.current` + `activeScenario` + the notice | the effect is **declared before the export-building effect**, and effects in one commit run in declaration order — so what it writes is what the export is *built from* |
+| `VisualCanvas` | the frame | it owns `frame` and already had a target-keyed effect reading the component. §11.3 is why the two must not swap |
+
+🔴 **The values never travel as a delta.** That is the whole of the fix and the whole of what s26's
+attempt got wrong: `applyValueSet` → `sendModelUpdateToClient` is a *targeted* update, and at mount
+the sandbox client has not connected, so it is dropped. Seeding `inputsRef` first puts the values
+through `benchParameters` into the harness node's `parameters` — **the same call `boardFrameMounts`
+goes through**, which is why the two surfaces now agree by construction rather than by two
+implementations happening to match. Every *later* switch is still a delta and must stay one: a
+scenario click that rebuilt the export would reload the window and throw away the state the person
+was inspecting.
+
+⚠️ The `autoSelectedFor` bookkeeping §10.5 asked for is the effect's **dependency array**. Keyed on
+`target` alone, a Refresh, a dataset change or `applyValueSet`'s remount rebuild cannot re-open a
+scenario someone deliberately left with `None` — which matters because `None` and *never chose* are
+the same `activeScenario` value.
+
+### 11.2 🔴 Without the WIDTH, the bench opens already claiming to be MODIFIED
+
+Seeding the values alone ships a second half-state, and it is the same *kind* of dishonesty §10.5
+refused. `benchScenarioIsModified` compares the scenario's **recorded width** against the stage's,
+and every scenario saved since FIX-011 records one (`benchScenarioFrom` is always handed the
+frame). The fixture is exactly this case — Primary Button has **no** `bench.frame` and its scenario
+records `480 × 200` — so the bar would have opened reading `Checkout ●` over a bench nobody had
+touched, offering a Save that would overwrite the scenario's 480 with the stage's 768. **The dot
+would have been telling the truth about a state the product had put itself in.**
+
+So the opening resolves the width too, through `benchScenarioFrame` — the function a click already
+calls. Order: the scenario's recorded frame, then the component's stored `bench.frame`, then *the
+width already on screen*. That last fallback is FIX-011's rule kept verbatim: returning a default
+would throw away a width the user set moments ago every time they pointed the bench somewhere new.
+
+⚠️ **This does not change the BOARD.** `boardFrameMounts` reads `bench.frame` and ignores a
+scenario's frame, so Primary's board frame is still the 768 default and AC3 is untouched. The two
+surfaces agree about **values**, which is what AC4 asks; they differ about width because a board
+frame is the component's authored size and a bench stage is a width you chose.
+
+### 11.3 ⚠️ Two writers of one opening, resolved by React rather than by a rule
+
+The first sketch put the frame in `ComponentBench` beside the values. It would have been silently
+overwritten: **child effects run before parent effects**, so `VisualCanvas`'s stored-`bench.frame`
+effect lands second and wins. Nothing would have thrown, no gate would have gone red, and the
+scenario's width would simply never have applied on a component that also had a stored default.
+The rule is now written down in both files — values in the child, width in the parent.
+
+### 11.4 What the drive measured
+
+`drive-tvw008-board.js`, unchanged from s26 apart from running against a stack whose bundle was
+gated first. **38/38 arms green**, against a re-run fixture.
+
+```
+AC4 🔴 — the SINGLE BENCH renders the same scenario values as the board did
+        — looking for "Continue to checkout" in: Continue to checkout
+```
+
+🔴 **Read the right-hand side.** The bench's webview drew `Continue to checkout` and **nothing
+else** — at s26 the same read returned `Button`, the node's own parameter. And
+`ac7-04-one-frame-benched.png` shows what no text arm could: the chip reads `Checkout`, the frame
+read-out reads `480 × 200`, and **there is no `●` beside the chip** — §11.2's defect, absent, in a
+photograph.
+
+AC7's theme pair was retaken with §10.9's repaired arm: `light="light"`, `dark="dark"`, and the two
+files differ in md5. **AC7 is six shots now, not four.**
+
+### 11.5 ⚠️ `nohup` cost a stack teardown and a relaunch
+
+The drive **refused to run**: *"could not attribute the editor on 9222 — owner=unknown"*. The guard
+was right and the launch was wrong. `nohup npm run dev:debug &` leaves the stack with **PPID 1**, so
+`walkToCli` cannot reach the launching session and an unattributable owner is correctly treated as
+*possibly a peer's*, not as absent. Launch the stack **attached** (a backgrounded tool call, not
+`nohup`) and the ancestry reaches the CLI pid. Cost: one teardown and a second seven-minute boot.
+
+### 11.6 Gates at s27
+
+- `tests-unit/tvw-008` **119 specs / 5 suites** (was 106 / 4 — `benchOpening.test.ts` adds 13).
+- **3 mutants, 3 killed**: the *last* scenario instead of the first (2 arms die), the scenario's
+  width ignored (3 die), the interface filter dropped (1 dies). Control green after each restore.
+- `tests/canvas/board-export.test.ts` **+3 jasmine arms** — the board's and the bench's opening
+  parameters compared as bytes, *with* the control that they disagree without the fix. 🔴 Named
+  before compared: two empty objects are equal, and an arm that only compared them would go green
+  on a build where neither surface resolved anything.
+- `typecheck:editor` **0**, `typecheck:editor-tests` **0**.
+- **`test:main` 523 suites / 8375 specs, exit 0** — was 522 / 8362, so the delta is exactly the
+  +1 suite and +13 specs this session adds and nothing stopped loading.
+
+### 11.7 Where TVW-008 stands after s27
+
+| AC | state |
+|---|---|
+| AC1 | ✅ driven |
+| AC2 | ✅ offline + the `Add all` bound seen on the surface |
+| AC3 | ✅ driven |
+| AC4 | ✅ **CLOSED** — both clauses driven. The board draws its scenario, the bench opens on the same values, and a component without one reads `no inputs set` |
+| AC5 | ✅ driven |
+| AC6 | ✅ driven |
+| AC7 | 🟡 **SIX shots taken, both themes real.** Richard's WORTHY is all that is left |
+| AC8 | ✅ s25 |
+
+**Still open on TVW-008:** AC7's verdict, and the two §9.6 items no AC names — selection through a
+frame, and the `Add all` bound *explained* in the picker rather than merely enforced.

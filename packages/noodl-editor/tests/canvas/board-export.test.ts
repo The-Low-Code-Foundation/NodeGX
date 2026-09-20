@@ -23,10 +23,16 @@ import {
   boardHarness,
   boardInstanceNodeId,
   buildBoardExport,
+  benchInterface,
+  buildBenchExport,
   type BoardFrameMount
 } from '../../src/editor/src/models/AiAssistant/authoring/componentBench';
 import { BENCH_FRAME_KEY } from '../../src/editor/src/views/VisualCanvas/benchFrameDefault';
-import { BENCH_SCENARIOS_KEY } from '../../src/editor/src/views/VisualCanvas/benchScenarios';
+import {
+  BENCH_SCENARIOS_KEY,
+  benchOpeningScenario,
+  readBenchScenarios
+} from '../../src/editor/src/views/VisualCanvas/benchScenarios';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
 import { ProjectModel } from '../../src/editor/src/models/projectmodel';
 
@@ -434,5 +440,83 @@ describe('TVW-008 — the data story is the single bench, said once', () => {
     const project = loadProject();
     const result = buildBoardExport({ project, frames: [{ target: SHARE_ITEM, x: 0, y: 0 }] });
     expect(result.summary).toContain('1 component on');
+  });
+});
+
+/**
+ * TVW-008 AC4, second clause — **the board and the single bench say the same thing about one
+ * component.**
+ *
+ * > "if you saved a scenario, that's what you meant the component to look like." — Richard,
+ * > 2026-09-20
+ *
+ * The drive found the two surfaces disagreeing: the board drew `Continue to checkout` and the
+ * bench drew `Button`, the node's own parameter. Nothing was wrong with either *rendering* —
+ * picking the scenario in the bench's bar made it draw the board's bytes exactly — what differed
+ * was the **default** each surface opened on.
+ *
+ * 🔴 **This is the assertion the first fix would have passed while shipping the defect.** That
+ * attempt auto-selected `scenarios[0]` through the click path, which delivers through
+ * `sendModelUpdateToClient` — a targeted delta, dropped at mount because the sandbox client has
+ * not connected. The chip and the rail were right and the runtime drew the old value. So what is
+ * graded here is the **export**: the bytes the runtime is handed before any delta exists.
+ */
+describe('TVW-008 AC4 — the board and the single bench open on the same values', () => {
+  beforeEach(loadNodeLibrary);
+
+  const SCENARIO = { name: 'Checkout', inputs: { Label: 'Continue to checkout' }, frame: { width: 480 } };
+
+  function projectWithScenario(): ProjectModel {
+    const project = loadProject();
+    project.getComponentWithName(SHARE_ITEM)!.setMetaData(BENCH_SCENARIOS_KEY, { scenarios: [SCENARIO] });
+    return project;
+  }
+
+  /** Exactly what `ComponentBench` seeds `inputsRef` with before it builds the export. */
+  function openingInputs(project: ProjectModel): Record<string, unknown> {
+    const component = project.getComponentWithName(SHARE_ITEM)!;
+    const opening = benchOpeningScenario(
+      readBenchScenarios(component.getMetaData(BENCH_SCENARIOS_KEY)),
+      benchInterface(component)
+    );
+    return opening?.inputs ?? {};
+  }
+
+  const boardParameters = (project: ProjectModel) =>
+    harnessOf(
+      buildBoardExport({ project, frames: [{ target: SHARE_ITEM, x: 0, y: 0 }] }).json!
+    ).nodes![0].children[0].children[0].parameters;
+
+  const benchParameters = (project: ProjectModel, inputs: Record<string, unknown>) =>
+    harnessOf(buildBenchExport({ project, target: SHARE_ITEM, inputs }).json!).nodes![0].parameters;
+
+  it('hands the runtime the same parameters on both surfaces', () => {
+    const project = projectWithScenario();
+    const board = boardParameters(project);
+    const bench = benchParameters(project, openingInputs(project));
+
+    // 🔴 Named before compared. Two empty objects are equal, and an arm that only compared them
+    // would go green on a build where neither surface resolved anything at all
+    // ([[a-rule-reading-zero-in-both-arms-grades-nothing]]).
+    expect(board.Label).toBe('Continue to checkout');
+    expect(bench.Label).toBe('Continue to checkout');
+    expect(bench).toEqual(board);
+  });
+
+  it('and they disagree without it — the control that gives the arm above its teeth', () => {
+    // The old behaviour, verbatim: the bench opened holding nothing. This is the defect the drive
+    // photographed, kept as an arm so "they agree" cannot pass by both surfaces being empty.
+    const project = projectWithScenario();
+
+    expect(benchParameters(project, {}).Label).toBeUndefined();
+    expect(benchParameters(project, {})).not.toEqual(boardParameters(project));
+  });
+
+  it('opens on nothing when the component has no scenario, on both surfaces', () => {
+    // §6.4's overwhelming case, and it must not acquire values from anywhere.
+    const project = loadProject();
+
+    expect(openingInputs(project)).toEqual({});
+    expect(benchParameters(project, openingInputs(project))).toEqual(boardParameters(project));
   });
 });
