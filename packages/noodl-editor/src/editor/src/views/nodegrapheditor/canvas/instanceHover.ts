@@ -196,6 +196,31 @@ export function hoverPathText(fullName: string): string {
   return fullName.startsWith('/') ? fullName.slice(1) : fullName;
 }
 
+/**
+ * `Atoms/Buttons/Primary Button` → `{ folder: 'Atoms/Buttons/', name: 'Primary Button' }`.
+ *
+ * 🔴 **Which half gives way when the card runs out of room.** s24 measured the rendered card on
+ * the s20 fixture: **8 of 16 distinct paths were clipped**, the widest needing 412px in a 313px
+ * box — and `text-overflow: ellipsis` truncates from the END, so what it dropped was the
+ * component's own NAME, keeping the long shared `#Noodl Component System/Atoms/...` prefix that
+ * tells two instances apart least. R-Z took the name off the node card, which makes this surface
+ * the only place an instance says what it is; ellipsising the name is the one truncation this
+ * card cannot afford.
+ *
+ * So the split is rendered as two elements and only the folder is allowed to shrink. The folder
+ * still stays whenever it fits — {@link hoverPathText}'s reason is unchanged, and an ellipsis in
+ * the prefix still says "there is more folder here" — but the leaf always survives.
+ *
+ * ⚠️ The trailing separator belongs to the folder, so the two halves concatenate back to exactly
+ * the input: the card's `textContent` is still the full path, which is what every spec and the
+ * drive read.
+ */
+export function splitHoverPath(path: string): { folder: string; name: string } {
+  const cut = path.lastIndexOf('/');
+  if (cut === -1) return { folder: '', name: path };
+  return { folder: path.slice(0, cut + 1), name: path.slice(cut + 1) };
+}
+
 export interface InstanceHoverContent {
   path: string;
   /** `· 3×`, or null when there is no count worth printing. */

@@ -47,6 +47,9 @@ const SHOTS = opt(
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** `InstanceHover.graceMs` — the window the card outlives a `move-out` by. Read from the product. */
+const InstanceHoverGraceMs = 220;
+
 const arms = [];
 const record = (name, ok, detail) => {
   arms.push({ name, ok, detail });
@@ -125,6 +128,17 @@ const NODE_RECTS = `JSON.stringify((() => {
       label: typeof n.labelText === 'function' ? String(n.labelText()) : '?',
       typename: n.model && n.model.typename,
       isInstance: typeof n.isComponent === 'function' ? !!n.isComponent() : false,
+      // 🔴 The visual/logic split for an INSTANCE. \`isVisual()\` reads \`type.visual\`, which is
+      // undefined on every component instance (measured s24), so it cannot answer this — and the
+      // height heuristic it was standing in for picked a 36px VISUAL navbar as the "logic" one.
+      // \`allowAsChild\` is the field that splits them: a logic component cannot be a visual child.
+      // ⚠️ It is stale until the node library has loaded ([[allowaschild-is-stale-until-the-node-library-loads]]),
+      // which is why this is read mid-drive and never at open.
+      allowAsChild: !!(n.model && n.model.type && n.model.type.allowAsChild),
+      graphX: n.global.x,
+      graphY: n.global.y,
+      rawWidth: n.nodeSize.width,
+      rawHeight: n.nodeSize.height,
       left: Math.round(left),
       top: Math.round(top),
       width: Math.round(n.nodeSize.width * ps.scale),
@@ -133,8 +147,51 @@ const NODE_RECTS = `JSON.stringify((() => {
     for (const c of n.children || []) visit(c);
   };
   for (const r of ed.roots || []) visit(r);
-  return { scale: ps.scale, nodes: out };
+  return { scale: ps.scale, box: { left: box.left, top: box.top, width: box.width, height: box.height }, nodes: out };
 })())`;
+
+/**
+ * 🔴 Is this node on the surface a pointer can actually reach it on?
+ *
+ * The first run of this drive (s24) hovered three nodes that were not on the canvas at all and
+ * read `present:false` from all of them, because the old guard was `top > 60 && left > 40` — a
+ * test against the WINDOW, written when the node graph filled it. In the three-views layout the
+ * canvas starts ~425px down, so a node panned off the top of the graph still passes that guard
+ * and its centre lands in the PREVIEW WEBVIEW. The dispatched move then goes to the preview and
+ * the card never opens, which looks exactly like a dead feature
+ * ([[a-rendered-surface-can-be-behind-a-blocker]] — same lesson, one layer out: a coordinate is
+ * not a surface).
+ *
+ * Only 12 of the 55 nodes on the s20 fixture were inside the canvas at the drive's opening pan.
+ */
+/**
+ * Centre the canvas on a node.
+ *
+ * Only 12 of the s20 fixture's 55 nodes were on screen at the opening pan, and the ones that
+ * matter for a given arm are not reliably among them. Inverting NODE_RECTS' own arithmetic is
+ * what makes an arm grade the node it NAMES rather than the node that happened to be visible.
+ */
+const FOCUS_ON = (node) => `(() => {
+  const ed = ${ED};
+  const canvas = document.getElementById('nodegraphcanvas');
+  const box = canvas.getBoundingClientRect();
+  const ps = ed.getPanAndScale();
+  const x = (box.width / 2 - ${node.rawWidth} * ps.scale / 2) / ps.scale - ${node.graphX};
+  const y = (box.height / 2 - ${node.rawHeight} * ps.scale / 2) / ps.scale - ${node.graphY};
+  ed.setPanAndScale({ x, y, scale: ps.scale });
+  ed.repaint();
+  return 'ok';
+})()`;
+
+const insideCanvas = (n, box) => {
+  if (!box) return false;
+  const cx = n.left + n.width / 2;
+  const cy = n.top + n.height / 2;
+  // A margin, so the whole node — not just its centre pixel — is on the canvas, and so the
+  // hover card has somewhere to be drawn.
+  const m = 8;
+  return cx > box.left + m && cx < box.left + box.width - m && cy > box.top + m && cy < box.top + box.height - m;
+};
 
 /**
  * The card as a PERSON meets it: what is actually at the pixel.
@@ -165,9 +222,19 @@ const READ_CARD = `JSON.stringify((() => {
     return (top.getAttribute && top.getAttribute('data-test')) || top.tagName;
   };
   const style = getComputedStyle(card);
+  // 🔴 textContent returns the whole string even when CSS has clipped it to an ellipsis, so the
+  // path arm above passes on text a person cannot read. s24 measured 8 of 16 paths clipped, and
+  // end-truncation dropped the component's NAME. These two report what is actually legible.
+  // (No backticks in this comment: it lives INSIDE a template literal.)
+  const nameEl = card.querySelector('[data-test="instance-hover-name"]');
+  const folderEl = card.querySelector('[data-test="instance-hover-folder"]');
+  const clipped = (el) => (el ? el.scrollWidth > el.clientWidth + 1 : null);
   return {
     present: true,
     path: pathEl ? pathEl.textContent.trim() : null,
+    name: nameEl ? nameEl.textContent.trim() : null,
+    nameClipped: clipped(nameEl),
+    folderClipped: clipped(folderEl),
     count: countEl ? countEl.textContent.trim() : null,
     editLabel: editEl ? editEl.textContent.trim() : null,
     editTag: editEl ? editEl.tagName : null,
@@ -334,13 +401,56 @@ async function main() {
     record('instrument: the canvas geometry could be read', false, geometry.error);
     process.exit(2);
   }
-  const instances = geometry.nodes.filter((n) => n.isInstance && n.top > 60 && n.left > 40);
-  const plain = geometry.nodes.filter((n) => !n.isInstance && n.top > 60 && n.left > 40);
-  record('the canvas holds instance nodes and a non-instance control', instances.length > 0 && plain.length > 0, `${instances.length} instances, ${plain.length} others`);
+  let instances = geometry.nodes.filter((n) => n.isInstance && insideCanvas(n, geometry.box));
+  let plain = geometry.nodes.filter((n) => !n.isInstance && insideCanvas(n, geometry.box));
+
+  /**
+   * 🔴 Re-measure. A node's screen box belongs to ONE canvas at ONE pan and ONE zoom.
+   *
+   * s24: three arms failed on coordinates measured before the `Edit ›` door navigated away.
+   * Switching back to the component does NOT restore the pan it was measured at, and the zoom arm
+   * below changes the scale under everything after it — so a centre computed once and reused is a
+   * point on a canvas that no longer exists. Every arm that moves the pointer re-reads first.
+   */
+  let canvasBox = geometry.box;
+  const remeasure = async () => {
+    const g = await readJson(editor, NODE_RECTS);
+    if (g.error) return false;
+    canvasBox = g.box;
+    instances = g.nodes.filter((n) => n.isInstance && insideCanvas(n, g.box));
+    plain = g.nodes.filter((n) => !n.isInstance && insideCanvas(n, g.box));
+    return instances.length > 0 && plain.length > 0;
+  };
+
+  /**
+   * 🔴 Park the pointer on empty canvas and wait out the grace window.
+   *
+   * s24: the control arm read `present: true` on a plain Group and looked like a product defect.
+   * The controller's own state said `overNode: false, overCard: true` — the Group sits UNDER the
+   * card that is still open for the previous subject, so the journey ended ON THE CARD, which is
+   * exactly what the card is supposed to do when you move onto it to press `Edit ›`. The arm
+   * never reached the Group at all.
+   *
+   * A negative arm has to START from nothing, or it is measuring the previous positive one.
+   */
+  const restToEmptyCanvas = async () => {
+    await moveTo(editor, Math.round(canvasBox.left + 16), Math.round(canvasBox.top + canvasBox.height - 16), 4);
+    await wait(InstanceHoverGraceMs + 300);
+    const resting = await readJson(editor, READ_CARD);
+    return resting.present === false;
+  };
+  const centreOf = (n) => ({ x: n.left + Math.round(n.width / 2), y: n.top + Math.round(n.height / 2) });
+  record(
+    'the canvas holds instance nodes and a non-instance control',
+    instances.length > 0 && plain.length > 0,
+    `${instances.length} instances, ${plain.length} others ON CANVAS (of ${geometry.nodes.length} in the graph)`
+  );
   if (!instances.length) process.exit(2);
 
-  const subject = instances[0];
-  const nodeCentre = { x: subject.left + Math.round(subject.width / 2), y: subject.top + Math.round(subject.height / 2) };
+  // The pair AC2b asks for is visual AND logic, so name the visual one too rather than taking
+  // whatever sorted first.
+  const subject = instances.find((n) => n.allowAsChild) || instances[0];
+  let nodeCentre = centreOf(subject);
 
   // --- AC2b: the surface --------------------------------------------------------------------
   await moveTo(editor, nodeCentre.x, nodeCentre.y, 4, { x: nodeCentre.x, y: nodeCentre.y + 120 });
@@ -351,6 +461,13 @@ async function main() {
   // 🔴 Rendered is not reachable.
   record('the path is at the pixel it is drawn at', card.pathReachable === 'reachable', String(card.pathReachable));
   record('the door is a real button, reachable', card.editTag === 'BUTTON' && card.editReachable === 'reachable', `${card.editTag} / ${card.editReachable}`);
+  // AC2b says FULL path. Before s24 the card ellipsised the leaf, so the identity the whole
+  // surface exists to show was the first thing to go.
+  record(
+    'the component’s NAME is legible, not ellipsised',
+    card.nameClipped === false,
+    `name="${card.name}" nameClipped=${card.nameClipped} folderClipped=${card.folderClipped}`
+  );
   await shoot(editor, `ac2b-hover-${subject.typename ? String(subject.typename).replace(/[^\w]+/g, '-') : 'instance'}`);
 
   // AC2: the count on the card is TVW-001's count for the same component.
@@ -414,35 +531,75 @@ async function main() {
       })()`
     );
     await wait(2000);
+    if (!(await remeasure())) {
+      record('instrument: the canvas could be re-measured after coming back', false, 'no on-canvas instance/plain pair');
+      process.exit(2);
+    }
   }
 
   // --- the control, in the same run ---------------------------------------------------------
   // 🔴 A negative arm needs its control beside it: without this, "no card on a plain node" and
   // "the hover is broken" read identically.
   const control = plain[0];
-  await moveTo(editor, control.left + Math.round(control.width / 2), control.top + Math.round(control.height / 2), 6, {
-    x: control.left,
-    y: control.top + 200
-  });
+  const rested = await restToEmptyCanvas();
+  record('instrument: the card is dismissed before the negative arm', rested, `card gone before hovering ${control.label}`);
+  const controlCentre = centreOf(control);
+  await moveTo(editor, controlCentre.x, controlCentre.y, 6, { x: controlCentre.x, y: controlCentre.y + 120 });
   await wait(400);
   const controlCard = await readJson(editor, READ_CARD);
-  record('a node that is not an instance gets no card', controlCard.present === false, `present=${controlCard.present} on ${control.label}`);
+  // Read the controller too: `present: false` because the pointer missed the node is not the same
+  // measurement as `present: false` because the node is not an instance.
+  const controlWhere = await readJson(
+    editor,
+    `JSON.stringify((() => { const st = ${ED}.instanceHover.state; return { overNode: st.overNode, overCard: st.overCard, subject: st.subject ? st.subject.fullName : null }; })())`
+  );
+  record(
+    'a node that is not an instance gets no card',
+    controlCard.present === false,
+    `present=${controlCard.present} on ${control.label} (overNode=${controlWhere.overNode} overCard=${controlWhere.overCard})`
+  );
 
   // --- AC2b: a LOGIC instance, and the zoom the painted count is hidden at -------------------
-  const logic = instances.find((n) => n.height < 90) || instances[instances.length - 1];
-  await moveTo(editor, logic.left + Math.round(logic.width / 2), logic.top + 12, 6, { x: logic.left, y: logic.top + 200 });
-  await wait(400);
-  const logicCard = await readJson(editor, READ_CARD);
-  record('the second instance kind also carries the card', logicCard.present === true, `${logic.label}: ${logicCard.path}`);
+  // AC2b names visual AND logic instances. Take the kind from the graph, not from the pixels, and
+  // bring it into view — the whole graph is searched, not just what the opening pan showed.
+  const wholeGraph = await readJson(editor, NODE_RECTS);
+  const logic = (wholeGraph.nodes || []).find((n) => n.isInstance && !n.allowAsChild);
+  if (!logic) {
+    record('the second instance kind also carries the card', null, 'no LOGIC instance in this graph to grade');
+  } else {
+    await restToEmptyCanvas();
+    await evaluate(editor, FOCUS_ON(logic));
+    await wait(600);
+    await remeasure();
+    const placed = instances.find((n) => n.id === logic.id);
+    if (!placed) {
+      record('the second instance kind also carries the card', false, `${logic.label} could not be brought onto the canvas`);
+    } else {
+      const lc = centreOf(placed);
+      await moveTo(editor, lc.x, lc.y, 6, { x: lc.x, y: lc.y + 120 });
+      await wait(400);
+      const logicCard = await readJson(editor, READ_CARD);
+      record(
+        'the second instance kind — a LOGIC instance — also carries the card',
+        logicCard.present === true,
+        `${logic.label} (allowAsChild=false): ${logicCard.path}`
+      );
+    }
+  }
 
   // Below the painted count's 75% gate the hover is the ONLY place the identity lives, so this is
   // the arm R-Z's ruling makes load-bearing.
   await evaluate(editor, `(() => { const ed = ${ED}; const ps = ed.getPanAndScale(); ed.setPanAndScale({ x: ps.x, y: ps.y, scale: 0.5 }); ed.repaint(); return 'ok'; })()`);
   await wait(800);
   const zoomed = await readJson(editor, NODE_RECTS);
-  const zoomedSubject = (zoomed.nodes || []).find((n) => n.id === subject.id);
+  // Zooming out moves everything: the subject may leave the canvas, and any node that is still
+  // ON it answers this arm's question just as well. Falling back to one keeps the arm graded
+  // instead of failing on the instrument's choice of subject.
+  const zoomedSubject =
+    (zoomed.nodes || []).find((n) => n.id === subject.id && insideCanvas(n, zoomed.box)) ||
+    (zoomed.nodes || []).find((n) => n.isInstance && insideCanvas(n, zoomed.box));
   if (!zoomedSubject) {
-    record('the subject is still on screen at 50%', false, 'not found');
+    record('the subject is still on screen at 50%', false, 'no instance node is on the canvas at 50%');
   } else {
     await moveTo(
       editor,
@@ -462,6 +619,16 @@ async function main() {
   }
 
   // --- AC5: both themes ---------------------------------------------------------------------
+  // The zoom arm above left the canvas at 50%, so every box measured at 100% is now wrong. Put
+  // the zoom back and re-measure before aiming at anything.
+  await evaluate(editor, `(() => { const ed = ${ED}; const ps = ed.getPanAndScale(); ed.setPanAndScale({ x: ps.x, y: ps.y, scale: 1 }); ed.repaint(); return 'ok'; })()`);
+  await wait(800);
+  if (await remeasure()) {
+    nodeCentre = centreOf(instances[0]);
+  } else {
+    record('instrument: an instance is on the canvas for the theme arms', false, 'none on canvas at 100%');
+  }
+
   for (const theme of ['light', 'dark']) {
     // The same door P94's drives use — `ThemeManager.setMode`, not a settings key.
     await evaluate(editor, `(() => { ${WREQ('./src/editor/src/models/ThemeManager.ts')}.ThemeManager.setMode(${JSON.stringify(theme)}); return 'ok'; })()`);
@@ -487,6 +654,17 @@ async function main() {
     for (const a of failed) console.log(`  FAIL ${a.name} — ${a.detail}`);
     process.exit(1);
   }
+  /**
+   * 🔴 Exit explicitly on the GREEN path too.
+   *
+   * s24: the first all-green run of this drive appeared to HANG for ten minutes and was killed
+   * twice before anyone read the log — it had already printed `21/21 arms passed`. The open CDP
+   * websocket keeps the event loop alive, and every red run had left through `process.exit(1)`,
+   * so this line was the one path the instrument had never taken. A gate that reports success by
+   * never returning is indistinguishable from a wedged editor
+   * ([[a-run-list-is-not-a-log]] — read the duration, and give the happy path an exit).
+   */
+  process.exit(0);
 }
 
 if (require.main === module) {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { HoverCardAnchor } from '../../nodegrapheditor/canvas/instanceHover';
+import { splitHoverPath, type HoverCardAnchor } from '../../nodegrapheditor/canvas/instanceHover';
 import css from './InstanceHoverCard.module.scss';
 
 /**
@@ -40,6 +40,7 @@ export interface InstanceHoverCardProps {
  * keeps itself open while the pointer is on it, which is what makes the door pressable at all.
  */
 export function InstanceHoverCard({ path, count, anchor, onEdit, onPointerEnter, onPointerLeave }: InstanceHoverCardProps) {
+  const { folder, name } = splitHoverPath(path);
   const translate = `translate(${anchor.alignX === 'right' ? '-100%' : '0'}, ${
     anchor.alignY === 'above' ? '-100%' : '0'
   })`;
@@ -54,8 +55,20 @@ export function InstanceHoverCard({ path, count, anchor, onEdit, onPointerEnter,
       onMouseEnter={onPointerEnter}
       onMouseLeave={onPointerLeave}
     >
+      {/*
+        Two elements, one string: only the folder may shrink, so the component's own name is never
+        the half that ellipsises (see `splitHoverPath` — 8 of 16 paths were clipped before this).
+        They concatenate back to the full path, so `textContent` is unchanged for every reader.
+      */}
       <span className={css.Path} data-test="instance-hover-path" title={path}>
-        {path}
+        {folder && (
+          <span className={css.PathFolder} data-test="instance-hover-folder">
+            {folder}
+          </span>
+        )}
+        <span className={css.PathName} data-test="instance-hover-name">
+          {name}
+        </span>
       </span>
       {count && (
         <span className={css.Count} data-test="instance-hover-count">

@@ -21,7 +21,8 @@ import {
   nextHoverState,
   nodeScreenRect,
   type InstanceHoverState,
-  type InstanceHoverSubject
+  type InstanceHoverSubject,
+  splitHoverPath
 } from '../../src/editor/src/views/nodegrapheditor/canvas/instanceHover';
 
 const hero: InstanceHoverSubject = { nodeId: 'node-1', fullName: '/Sections/Hero', count: 3 };
@@ -265,5 +266,38 @@ describe('TVW-007 AC2b — where the card goes', () => {
 
     expect(anchor.alignX).toBe('left');
     expect(anchor.x).toBe(InstanceHover.edgeInset);
+  });
+});
+
+describe('TVW-007 AC2b — which half of the path gives way', () => {
+  it('splits the leaf off the folder, separator staying with the folder', () => {
+    expect(splitHoverPath('Atoms/Buttons/Primary Button')).toEqual({
+      folder: 'Atoms/Buttons/',
+      name: 'Primary Button'
+    });
+  });
+
+  it('leaves a component with no folder entirely as a name', () => {
+    expect(splitHoverPath('Home')).toEqual({ folder: '', name: 'Home' });
+  });
+
+  it('🔴 the two halves rebuild the input EXACTLY, so textContent is still the full path', () => {
+    // The drive and every spec read the card's text as one string. If the split lost or added a
+    // character, the surface would still look right and every reader of it would be wrong.
+    for (const path of [
+      '#Noodl Component System/Atoms/Sections and Dividers/Input Container',
+      '#Integrations/Noodl Registry/Profile/[Profile] Create or Update',
+      'Sections/Hero',
+      'Home'
+    ]) {
+      const { folder, name } = splitHoverPath(path);
+      expect(folder + name).toBe(path);
+      // and the name is never empty, or the card would draw a bare folder
+      expect(name.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('keeps the deepest segment when folders nest', () => {
+    expect(splitHoverPath('a/b/c/d').name).toBe('d');
   });
 });

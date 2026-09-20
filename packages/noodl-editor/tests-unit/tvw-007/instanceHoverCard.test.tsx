@@ -89,4 +89,35 @@ describe('TVW-007 AC2b — the rendered hover card', () => {
     expect(markup).toContain('translate(-100%, -100%)');
     expect(markup).toContain('data-align-x="right"');
   });
+
+  /**
+   * 🔴 The clipping AC2b's "full path" could not survive, measured on the real card at s24:
+   * 8 of 16 distinct paths on the s20 fixture were cut off, and `text-overflow: ellipsis` cuts
+   * from the END — so the half it dropped was the component's own NAME. These pin the structure
+   * that makes the leaf unshrinkable; the widths themselves belong to the drive.
+   */
+  it('draws the folder and the name as SEPARATE elements, so only the folder can shrink', () => {
+    const markup = render({ path: 'Atoms/Sections and Dividers/Input Container' });
+
+    expect(markup).toContain('data-test="instance-hover-folder"');
+    expect(markup).toContain('data-test="instance-hover-name"');
+    // The name must not be inside the element that carries the ellipsis.
+    const folderPart = markup.slice(markup.indexOf('instance-hover-folder'));
+    const folderText = folderPart.slice(0, folderPart.indexOf('</span>'));
+    expect(folderText).not.toContain('Input Container');
+  });
+
+  it('still reads as ONE full path in text, which is what every other reader takes', () => {
+    const markup = render({ path: 'Atoms/Sections and Dividers/Input Container' });
+    const text = markup.replace(/<[^>]*>/g, '');
+
+    expect(text).toContain('Atoms/Sections and Dividers/Input Container');
+  });
+
+  it('draws a component with no folder as a name and nothing else', () => {
+    const markup = render({ path: 'Home' });
+
+    expect(markup).not.toContain('data-test="instance-hover-folder"');
+    expect(markup).toContain('>Home</span>');
+  });
 });

@@ -349,3 +349,104 @@ ruling makes load-bearing. Then both themes, shot.
 ⚠️ **One thing no spec here covers**: that the door passes `viaInstance`. It is an options object
 in the controller, which needs a renderer to reach, so the trail's diamond after pressing `Edit ›`
 is the only place it is graded — the drive's job, exactly as the crumb's appearance was at s21.
+
+## 11 — s24: the drive ran, and the picture found what the log could not (AC2b ✅)
+
+**`node scripts/devtools/drive-tvw007-hover.js` — 22/22 arms, exit 0, 20 seconds.** First run ever;
+the box came free when a peer tore down mid-session and handed over 9222.
+
+### 11.1 Four instrument faults, found before any product fault — as s22 predicted
+
+The script had never executed, and every one of these looked exactly like a dead feature:
+
+1. 🔴 **The subject was chosen off the WINDOW, not the canvas.** The guard was `top > 60 && left > 40`,
+   written when the node graph filled the window. In the three-views layout the canvas starts
+   ~425px down, so a node panned off the top of the graph still passes it and its centre lands in
+   the **preview webview** — the dispatched move goes to the preview and no card ever opens. **Only
+   12 of the fixture's 55 nodes were on the canvas at the opening pan.** First run: `present:false`
+   on every card arm, 6/16. Fixed with `insideCanvas`, which tests the node against the canvas box
+   `NODE_RECTS` now returns. *A coordinate is not a surface* — the same lesson as
+   [[a-rendered-surface-can-be-behind-a-blocker]], one layer out.
+2. 🔴 **Coordinates were reused across a navigation and a zoom.** After `Edit ›` navigated away, the
+   arms below it aimed at boxes measured on the previous canvas; the author had anticipated this and
+   switched back, but **switching back does not restore the pan**. The 50% arm then changed the
+   scale under everything after it. Fixed with a `remeasure()` every arm calls.
+3. 🔴 **The control arm was measuring the positive one.** "A plain node gets no card" read
+   `present:true` on a `Group` and looked like a product defect. The controller's own state said
+   `overNode:false, overCard:true` — the Group sits **under** the card still open for the previous
+   subject, so the journey ended on the card, which is exactly what the card is built to do. The arm
+   never reached the Group. It now parks on empty canvas, waits out `graceMs`, **asserts the card is
+   gone**, and only then hovers — and reports `overNode`/`overCard` beside the verdict, because
+   "no card because it is not an instance" and "no card because the pointer missed" are two
+   different measurements.
+4. 🔴 **The logic instance was a guess, and the guess was wrong.** `instances.find(n => n.height < 90)`
+   picked `Main Navbar` — a 36px **visual** node — so AC2b's *"visual **and** logic"* was being graded
+   on two visual instances. `isVisual()` cannot answer it: it reads `type.visual`, which is
+   `undefined` on every component instance (measured). `allowAsChild` is the field that splits them.
+   The arm now searches the whole graph for `allowAsChild === false`, **brings it into view**
+   (`FOCUS_ON` inverts `NODE_RECTS`' arithmetic) and grades it — `[Profile] Create or Update`.
+
+⚠️ **And the fifth, which cost the most wall-clock: the green path had no `process.exit(0)`.** The
+first all-green run *appeared to hang*, was killed twice, and had already printed `21/21 arms
+passed` — the open CDP socket keeps the event loop alive, and every red run had left through
+`process.exit(1)`, so that line was the one path the instrument had never taken. **A gate that
+reports success by never returning is indistinguishable from a wedged editor.** Read the duration.
+
+### 11.2 🔴 The product defect the log could not see, and the picture could
+
+Every path arm was **green** while half the cards were unreadable. `textContent` returns the whole
+string even when CSS has clipped it, so `card.path.includes('/')` passes on text nobody can read.
+**The screenshot is what caught it** — the same way TVW-001 §"the picture caught it" caught a
+`canvas.measureText` error, and for the same reason.
+
+Measured over every instance on the fixture, hovering each in turn: **8 of 16 distinct paths were
+clipped**, the widest needing **412px in a 313px box**. And `text-overflow: ellipsis` truncates from
+the **end**, so what it dropped was the component's own **name**, keeping the long shared
+`#Noodl Component System/Atoms/…` prefix that tells two instances apart *least*:
+
+```
+before   #Noodl Component System/Atoms/Sections and Divid…      ← "Input Container" is GONE
+after    #Noodl Component System/Atoms/Se… Input Container       ← the folder gives way instead
+```
+
+🔴 **R-Z is what makes this a defect rather than a cosmetic loss.** The ruling took the name off the
+node card precisely so the hover would be the one place an instance says what it is — and the hover
+was ellipsising exactly that. This is TVW-001 §2's shrink-order finding **inverted**: there
+end-truncation *kept* the redundant half, here it *dropped* the load-bearing one. Same mechanism,
+opposite consequence, because which end carries the meaning had changed.
+
+**The fix** is a pure `splitHoverPath` (`instanceHover.ts`) plus two elements in the card: the folder
+is `flex-shrink: 1` with `min-width: 0`, the name is `flex-shrink: 0`. The halves concatenate back to
+the input exactly, so `textContent` — which the drive and every spec read — is unchanged. The folder
+still stays whenever it fits, and an ellipsis inside it still says *"there is more folder here"*.
+
+**Re-measured after the fix, same population, same run: names clipped `8 → 0`; folders clipped 8,
+which is the acceptable half.** The 8 paths still do not fit — 412px cannot become 313px — so this
+is a change of *which half gives way*, not a claim that everything fits.
+⚠️ The drive's own subject (`User Avatar`, 302/302) **fitted before the fix**, so its green arm
+proves nothing on its own; the before/after above is the census over all 16, and
+`ac2b-name-legible-after-fix.png` is the picture.
+The drive now carries `the component's NAME is legible, not ellipsised`, which reads
+`scrollWidth`/`clientWidth` on the name element rather than its text.
+
+### 11.3 What this closes, and what it does not
+
+- ✅ **AC2b — CLOSED.** The card is reachable by `elementFromPoint` on a **visual** and a **logic**
+  instance, at 100% and at 50% (where the painted count is gated off), in both themes; `Edit ›` is a
+  real reachable `BUTTON`; a non-instance gets no card, measured from a dismissed start; and the
+  path is now **legible**, not merely present.
+- ✅ **AC2** — the count on the card equals `buildUsageIndex`'s for the same component, read in one
+  run: `· 18×` vs `18`.
+- ⚠️ **AC1 — NOT closed, and the s23 handoff over-promised it.** The drive covers the hover, the
+  `Edit ›` press and the diamond crumb. Its sentence also asks for **pressing `Home` in the trail**
+  (returning with the node selected), **opening the component from the Components panel** (the
+  containment trail), and **⌘[ ⌘] twice each**. No arm exists for any of those three.
+- ⚠️ **AC5 — shots taken, verdict owed.** `ac5-hover-light.png`, `ac5-hover-dark.png`,
+  `ac2b-hover-at-50-percent.png`, `ac1-trail-after-the-door.png`,
+  `ac2b-name-legible-after-fix.png`. AC5 ends *"Richard rules WORTHY"*, so a drive cannot close it.
+
+### 11.4 Gates
+
+`tests-unit/tvw-007` **88 specs / 6 suites, exit 0** (was 80/6 — the delta is this pass's 8).
+`typecheck:editor` **0**; `typecheck:editor-tests` **0**. 🔴 `test:ci` still **NOT run** — owed since
+s21, and now owed this commit's card change as well.

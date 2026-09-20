@@ -28,10 +28,30 @@
   color: var(--theme-color-fg-default);
 }
 
+/* The path is a flex row of two parts so that the leaf name is never the half that gives way.
+   `min-width: 0` on both the row and the shrinkable child is what actually lets the folder
+   shrink inside a flex parent — without it a nowrap child sets its own floor and the CARD grows
+   past its max-width instead, which is the same bug one layer out. */
 .Path {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--theme-color-fg-highlight);
+}
+
+.PathFolder {
+  flex-shrink: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--theme-color-fg-highlight);
+  white-space: nowrap;
+}
+
+/* 🔴 The name never shrinks. This is the whole fix. */
+.PathName {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* The same token the painter fills the `· 3×` with (`cat.accent` resolves
