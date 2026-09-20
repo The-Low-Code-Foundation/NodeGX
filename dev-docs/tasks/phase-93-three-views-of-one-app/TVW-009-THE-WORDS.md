@@ -116,14 +116,35 @@ So the gate walks the **TypeScript AST**. The hex ratchet's header says CSS has 
 readily available; TypeScript ships one, and it is the whole difference between 1192 and 20.
 **Comments are not AST nodes**, so this gate cannot redden on prose explaining why a word moved.
 
-### 6.2 🔴 `bench` means two things, and sweeping both would have renamed a different product
+### 6.2 🔴 `bench` names THREE surfaces, and this task retires exactly one
 
-The community surface has a **Bench** — `CommunityBenchView`, `communityTabs.ts`'s
-`{ id: 'bench', label: 'Bench' }`, `/api/v1/bench/threads`, FB-002 — where questions asked from the
-editor land. It has nothing to do with running a component on its own. Caught **before** the sweep,
-by reading the surrounding declaration rather than the matched word.
-`COMMUNITY_BENCH_PATHS` is that distinction written down: narrow, by path, printed with its reason.
-The spec proves it is about the *path* by counting the **identical string** outside those files.
+| surface | where | retired here? |
+|---|---|---|
+| the **Workbench** | `views/VisualCanvas/` (`benchWords.ts`) | ✅ already swept by TVW-001 |
+| the Blockly **logic run bench** | `views/BlocklyEditor/` | ❌ **no — a ruling forbids it** |
+| the community's **Bench** | `components/community/`, `communityTabs.ts`, FB-002 | ❌ a different product |
+
+The community's Bench — `CommunityBenchView`, `{ id: 'bench', label: 'Bench' }`,
+`/api/v1/bench/threads` — is where questions asked from the editor land. Caught **before** the
+sweep, by reading the surrounding declaration rather than the matched word.
+
+🔴 **The Blockly bench was caught AFTER the sweep, and it was a real mistake.** This session
+rewrote `InterfaceRailsOverlay`'s note to *"The Workbench runs these blocks here in the editor"* —
+which **merges two names Richard ruled apart on 2026-09-17** (*swap the jargon, do not rename it*)
+and breaks **VFN-011 acceptance criterion 3**: "Workbench" claims the surface mounts the real app on
+sample values, the opposite of what it does. That ruling is why `SANDBOX_NOTE` became
+`TEST_VALUES_NOTE` there and never gained the new word. **Reverted**, and the gate now carries a
+`blockly-run-bench` rule saying why. Whether the logic bench gets a name of its own is **still an
+open question for Richard** — and a sweep is not the place to answer it.
+
+⚠️ **This is the trap a word-shaped acceptance criterion sets**: §2.1 hands you one list of
+occurrences and implies one answer. The memory
+`two-surfaces-are-called-the-bench` had recorded the ruling; nothing in the task file did.
+
+Both exemptions are narrow, by path, printed with their reason, and **only ever excuse the word
+`bench` itself** — a `sandbox` or `page component` written in either folder is counted like anywhere
+else, so neither becomes a hole shaped like the task. The spec proves each is about the *path* by
+counting the **identical string** outside it.
 
 ⚠️ Identifiers keep the old spelling throughout — `componentBench.ts`, `bench-harness`,
 `benchOpeningScenario`. §2.1 retires *words people read*, and TVW-008 is live in the same files.
@@ -134,7 +155,7 @@ The spec proves it is about the *path* by counting the **identical string** outs
 ("A page is not a page until…"); it is now *"A page is not reachable until a Page Router lists it."*
 Sites: four AI prompt files, `pageMap`, `RouterNavigateAdapter` (`Choose page component` →
 `Choose page`), `authoringVocabulary`, `diagnosticExamples`, `navigation`, `oversizedPage`,
-`InterfaceRailsOverlay` (the Blockly bench note), `ComponentTemplates`.
+`ComponentTemplates`. ⚠️ `InterfaceRailsOverlay` was swept and **reverted** — see §6.2.
 
 ### 6.4 AC3 — 🔴 the label was an identity, and the warning was already in the file
 
@@ -193,14 +214,14 @@ mechanism is absent still passes — it was grading the right answer for the wro
 
 ### 6.7 Gates
 
-- `npm run vocabulary` — **all six words 0**, exit 0; 132 exemptions printed under 9 named rules.
-- New `tests-unit/tvw-009/vocabularyRatchet.test.ts` — **19 specs**, most on synthetic sources.
+- `npm run vocabulary` — **all six words 0**, exit 0; 134 exemptions printed under 10 named rules.
+- New `tests-unit/tvw-009/vocabularyRatchet.test.ts` — **22 specs**, most on synthetic sources.
 - `packages/noodl-mcp/tests/tvw009Vocabulary.test.ts` — **10 specs**.
 - `tests/components/createMenu.spec.ts` — **+4 jasmine arms** (AC3), and one pre-existing arm fixed
   where it looked a template up by its old label.
 - `typecheck:editor` 0 · `typecheck:editor-tests` 0 · `typecheck:mcp` 0.
-- **`test:main` 524 suites / 8394 specs, exit 0** — was 523 / 8375, so the delta is exactly the
-  +1 suite and +19 specs this session adds and nothing stopped loading.
+- **`test:main` 524 suites / 8397 specs, exit 0** — was 523 / 8375, so the delta is exactly the
+  +1 suite and +22 specs this session adds and nothing stopped loading.
 - **noodl-mcp: 7 suites / 9 tests failing — the pre-existing floor**, measured on HEAD with this
   session's MCP edits reverted and restored. `toolDisclosure` was an 8th and it **was** mine; §6.5
   is how it went green.

@@ -39,14 +39,25 @@
  * read the exemptions and find nothing user-visible among them. A rule that cannot be
  * stated in a line has no business excusing a string, so each one is a line below.
  *
- * ## 🔴 `bench` means two different things and only one of them is retired
+ * ## 🔴 `bench` names THREE surfaces and this task retires exactly one of them
  *
- * The community surface has a **Bench** — `CommunityBenchView`, `/api/v1/bench/threads`,
- * FB-002 — which is a place people post captures to, and has nothing to do with running a
- * component on its own. TVW-009 retires "bench" as a name for *the Workbench*. Renaming
- * the community's Bench would rename a different product. `COMMUNITY_BENCH_PATHS` is that
- * distinction, written down: narrow, by path, and printed with its reason so the next
- * reader can disagree with it in one place instead of discovering it in five.
+ * | surface | where | retired here? |
+ * |---|---|---|
+ * | the **Workbench** | `views/VisualCanvas/` (`benchWords.ts`) | ✅ already swept by TVW-001 |
+ * | the Blockly **logic run bench** | `views/BlocklyEditor/` | ❌ **NO** — see below |
+ * | the community's **Bench** | `components/community/`, `/api/v1/bench/threads`, FB-002 | ❌ a different product |
+ *
+ * 🔴 **The Blockly bench must NOT be called the Workbench.** Richard ruled 2026-09-17:
+ * *swap the jargon, do not merge the names.* VFN-011's acceptance criterion 3 is that the
+ * cost of running inside the editor is **stated**, and "Workbench" would claim it mounts
+ * the real app on sample values — the opposite of what it does. That ruling is why
+ * `SANDBOX_NOTE` became `TEST_VALUES_NOTE` there rather than gaining the new word.
+ * Whether the logic bench gets a name of its own is **still an open question for Richard**,
+ * and a sweep is not the place to answer it.
+ *
+ * ⚠️ This is the trap a word-shaped acceptance criterion sets: it hands you one list and
+ * implies one answer. Both exceptions are narrow, by path, and printed with their reason,
+ * so the next reader can disagree in one place instead of discovering it in five.
  *
  *   node scripts/vocabulary-ratchet.js             # the gate, plus the grouped exemptions
  *   node scripts/vocabulary-ratchet.js --verbose   # every exemption, with file and line
@@ -106,6 +117,13 @@ const NON_VISIBLE_PROPS = new Set([
  * Narrow on purpose: a `bench` that means the Workbench must not be able to hide by
  * being written in one of these files.
  */
+/**
+ * Where "bench" is the Blockly logic run bench — a surface Richard has ruled must NOT take
+ * the name Workbench, and whose own name is an open question. Not a permanent exemption:
+ * it expires the day that question is answered.
+ */
+const BLOCKLY_BENCH_PATHS = ['packages/noodl-editor/src/editor/src/views/BlocklyEditor/'];
+
 const COMMUNITY_BENCH_PATHS = [
   'packages/noodl-core-ui/src/components/community/',
   'packages/noodl-core-ui/src/preview/launcher/Launcher/views/Community.tsx',
@@ -163,6 +181,33 @@ function owningProp(node) {
 }
 
 /**
+ * The two surfaces that wear "bench" and are not the Workbench, or `null`.
+ *
+ * Only ever excuses the word `bench` itself, and only on its own: a string carrying
+ * `sandbox` or `page component` is counted in these files like anywhere else, so neither
+ * path can become a place the rest of the vocabulary hides.
+ */
+function otherBenchRule(file, words) {
+  if (words.length !== 1 || words[0] !== 'bench') return null;
+
+  if (BLOCKLY_BENCH_PATHS.some((p) => file.startsWith(p))) {
+    return {
+      rule: 'blockly-run-bench',
+      why: 'The Blockly logic run bench is a different surface; Richard ruled 2026-09-17 to swap its jargon and NOT give it the name Workbench (VFN-011 AC3). Its own name is an open question.'
+    };
+  }
+
+  if (COMMUNITY_BENCH_PATHS.some((p) => file.startsWith(p))) {
+    return {
+      rule: 'community-bench',
+      why: "The community's Bench is a different product surface; TVW-009 retires 'bench' only as a name for the Workbench."
+    };
+  }
+
+  return null;
+}
+
+/**
  * Why this string is not counted, or `null` when it is.
  *
  * Order is load-bearing: the structural rules run before the visible-prop check so that a
@@ -198,16 +243,16 @@ function exemptionFor({ node, text, file, isJsxText, words }) {
     if (prop && (NON_VISIBLE_PROPS.has(prop) || /^data-/.test(prop))) {
       return { rule: `non-visible-prop:${prop}`, why: 'This prop carries machinery, not a sentence.' };
     }
-    if (words.length === 1 && words[0] === 'bench' && COMMUNITY_BENCH_PATHS.some((p) => file.startsWith(p))) {
-      return { rule: 'community-bench', why: "The community's Bench is a different surface; TVW-009 retires 'bench' only as a name for the Workbench." };
-    }
+    const otherBench = otherBenchRule(file, words);
+    if (otherBench) return otherBench;
     if (!prop || !VISIBLE_PROPS.has(prop)) {
       if (!/\s/.test(text.trim())) {
         return { rule: 'identifier-or-url', why: 'No whitespace, and in no prop a person reads: an id, a selector or a URL.' };
       }
     }
-  } else if (words.length === 1 && words[0] === 'bench' && COMMUNITY_BENCH_PATHS.some((p) => file.startsWith(p))) {
-    return { rule: 'community-bench', why: "The community's Bench is a different surface; TVW-009 retires 'bench' only as a name for the Workbench." };
+  } else {
+    const otherBench = otherBenchRule(file, words);
+    if (otherBench) return otherBench;
   }
 
   return null;
@@ -346,7 +391,7 @@ function main() {
  * A gate whose only assertion is "it printed 0 today" passes just as well when the
  * rules that produced the 0 have quietly stopped matching anything at all.
  */
-module.exports = { scan, scanSource, RETIRED, TARGETS, COMMUNITY_BENCH_PATHS, VISIBLE_PROPS, NON_VISIBLE_PROPS };
+module.exports = { scan, scanSource, RETIRED, TARGETS, BLOCKLY_BENCH_PATHS, COMMUNITY_BENCH_PATHS, VISIBLE_PROPS, NON_VISIBLE_PROPS };
 
 if (require.main === module) {
   try {

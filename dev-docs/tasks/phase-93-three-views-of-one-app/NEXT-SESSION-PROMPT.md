@@ -1,11 +1,12 @@
 # Phase 93 — next session
 
-**Written 2026-09-20, end of session 27.** s1–5 drove TVW-003; s6–11 closed TVW-001; s12–13 closed
+**Written 2026-09-20, end of session 28.** s1–5 drove TVW-003; s6–11 closed TVW-001; s12–13 closed
 TVW-002; s14–17 built TVW-004/005; s18 built and drove TVW-006; s19 got two rulings and reshaped
 TVW-008; s20–22 built TVW-007's eyebrow, trail and hover; s23 built TVW-008's surface; s24 drove
-TVW-007's hover; s25 closed TVW-007 AC1/AC6 and TVW-008 AC8; s26 drove TVW-008 for the first time.
-**s27 BUILT THE FIX s26 NAMED AND REVERTED — the bench now opens on the first scenario through the
-EXPORT — drove it 38/38, closed TVW-008 AC4, and took AC7's missing theme pair.**
+TVW-007's hover; s25 closed TVW-007 AC1/AC6 and TVW-008 AC8; s26 drove TVW-008 for the first time;
+s27 built the bench's opening-scenario fix and closed TVW-008 AC4.
+**s28 BUILT TVW-009 SLICE 1 — the vocabulary gate, the twenty-string sweep, the create menu and the
+MCP briefing. AC2, AC3 and AC4 closed.**
 
 ## The board, re-derived from the task files
 
@@ -19,135 +20,113 @@ EXPORT — drove it 38/38, closed TVW-008 AC4, and took AC7's missing theme pair
 | TVW-006 | The structure lane | ✅ | AC1–4, AC6 green. **AC5's 18 shots SENT s18 — Richard's verdict is all that is left** |
 | TVW-007 | An instance says what it is | ✅ | **AC1–AC4, AC6 green. ONLY AC5 (Richard's WORTHY) is left** |
 | TVW-008 | The board | ✅ slices 1–2 | **AC1–AC6, AC8 ✅. ONLY AC7 (Richard's WORTHY) is left — six shots, both themes real** |
-| TVW-009 | The words (needs 001, 002, 004) | — | — |
+| TVW-009 | The words | ✅ **slice 1** | **AC2, AC3, AC4 ✅. Left: AC1 (a drive), AC5 (P73's step), AC6** |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
-**ACs closed: 62** (61 at s26; s27 added TVW-008 **AC4**).
+**ACs closed: 65** (62 at s27; s28 added TVW-009 **AC2**, **AC3**, **AC4**).
 
 ## 🔴 Start here
 
-1. 🔴 **THERE IS NO BUILD WORK LEFT ON ANY STARTED TASK. The next session MUST build TVW-009.**
-   Every one of TVW-001…TVW-008 is either closed or waiting on a verdict only Richard can give.
-   TVW-009 is unblocked (001, 002 and 004 are all built), it is the cheapest unstarted task on the
-   board, and two sessions of polishing finished tasks instead would be the
-   [[build-the-tasks-do-not-farm-the-defects]] failure exactly.
-2. **FOUR verdicts are with Richard and nobody else can do any of them.** TVW-004 AC6 (20 shots,
-   s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placement shots (s20), and TVW-008 AC7 — now
-   **SIX** shots in `verdicts/tvw-008/` (empty board, three frames before and after a rearrange,
-   one frame benched, and the light/dark pair retaken at s27 with an arm that has a predicate in
-   it: `light="light"`, `dark="dark"`, distinct md5s). The first two close their tasks on the
-   spot; the last two are each the *only* thing left on their task. **Do not re-send them.** No
-   ruling file had landed at s27.
+1. **Build TVW-009 slice 2.** §7 of the task file lists it. The cheapest first job is **AC5**
+   (P73's tutorial step — read P73's board first; P73 owns the tutorial's shape) and **§2.4's docs
+   page**, for which *you must find where the editor docs live* — §2.4 says "or wherever the editor
+   docs live, find first", and s28 did not resolve it. **AC1 needs a drive** on a fresh install with
+   the blank template, and it is the only part a drive can grade.
+2. **FOUR verdicts are with Richard and nobody else can do any of them**, unchanged since s27:
+   TVW-004 AC6 (20 shots, s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placement shots (s20),
+   TVW-008 AC7 (six shots in `verdicts/tvw-008/`). The first two close their tasks on the spot; the
+   last two are each the *only* thing left on their task. **Do not re-send them.** No ruling file
+   had landed at s28.
 3. **If Richard has ruled on TVW-007's placement**: the winner becomes a constant,
    `eyebrowPlacement.ts` is **deleted** with the three losing branches in `instanceEyebrow.ts`.
    🔴 A switch that outlives its verdict is a second copy of a decision.
-4. Two §9.6 items no AC names are still owed on TVW-008, and they are the only unbuilt product
-   work on a started task: **selection through a frame**, and the `Add all` bound **explained** in
-   the picker rather than merely enforced. Neither blocks an AC, so neither is a first job.
+4. Two §9.6 items no AC names are still owed on TVW-008: **selection through a frame**, and the
+   `Add all` bound **explained** in the picker rather than merely enforced. Neither blocks an AC.
 
-## What s27 built — TVW-008 §11 has the whole of it
+## 🔴 What s28 got WRONG, and how it was caught
 
-**`benchOpeningScenario` seeds `inputsRef` in the effect declared *before* the export-building
-effect**, so the opening scenario's values go through `benchParameters` into the harness node's
-`parameters` — the same call `boardFrameMounts` makes. That is the entire fix, and it is why the
-two surfaces now agree *by construction* rather than by two implementations happening to match.
+**The sweep renamed a surface an explicit ruling had protected.** `InterfaceRailsOverlay.ts` is the
+**Blockly logic run bench**, not the Workbench — and s28 rewrote its note to *"The Workbench runs
+these blocks here in the editor"*. That **merges two names Richard ruled apart on 2026-09-17**
+(*swap the jargon, do not rename it*) and breaks **VFN-011 acceptance criterion 3**: "Workbench"
+claims the surface mounts the real app on sample values, which is the opposite of what it does.
 
-🔴 **Every later scenario switch is still a delta and must stay one.** Rebuilding the export
-reloads the window and throws away the state the person is inspecting.
+It was caught **only** because the memory `two-surfaces-are-called-the-bench` was opened while
+writing an unrelated index pointer. **Nothing in TVW-009's task file carried the ruling**, and §2.1
+is a *word-shaped* criterion: it hands you one list of occurrences and implies one answer.
 
-🔴 **The width had to come with it** (`benchOpeningFrame`, resolved in `VisualCanvas`, which owns
-`frame`). `benchScenarioIsModified` compares the scenario's *recorded* width against the stage's,
-and every scenario saved since FIX-011 records one — so values-only would have opened the bar
-reading `Checkout ●` over a bench nobody had touched, offering a Save that would overwrite the
-scenario's 480 with the stage's 768. **A second half-state, of exactly the kind s26 refused.**
+✅ **Reverted, and now enforced rather than remembered.** `scripts/vocabulary-ratchet.js` carries
+`blockly-run-bench` and `community-bench` as named, path-scoped rules that print their reason.
+🔴 **Before sweeping a product word, grep the MEMORY directory for it, not only the source.**
 
-⚠️ **Values in the child, width in the parent, and they must not swap.** Child effects run before
-parent effects, so a width set in `ComponentBench` would be silently overwritten by
-`VisualCanvas`'s stored-`bench.frame` writer. Nothing throws and no gate goes red.
+## What slice 1 is — TVW-009 §6 has the whole of it
 
-⚠️ The `autoSelectedFor` bookkeeping s26 asked for is the effect's **dependency array**: keyed on
-`target` alone, a Refresh or an `applyValueSet` remount cannot re-open a scenario someone
-deliberately left with `None` — which matters because `None` and *never chose* are the same value.
+- **`scripts/vocabulary-ratchet.js`** — a **gate at 0**, not a falling baseline, because the debt
+  was twenty strings and the same change swept them. `npm run vocabulary`, wired into `pr.yml`.
+- 🔴 **"User-visible" is a question about CONTEXT, not text.** `grep -rac sandbox` over the two
+  roots returns **1192** (Electron's `sandbox:` option, `@noodl/runtime/src/sandbox/types` imports,
+  `data-test` hooks); the **TypeScript AST** plus a context classifier returns **20**. A regex gate
+  would have been red on day one against strings nobody can fix, and would have been switched off.
+  **Comments are not AST nodes**, so it cannot redden on prose explaining a rename.
+- 🔴 **`bench` names three surfaces** — the Workbench, the Blockly run bench, the community's Bench
+  (`/api/v1/bench/threads`, FB-002). **Exactly one was renamable.**
+- 🔴 **AC3 found a live defect.** `createMenu` picked the cloud template by comparing
+  `template.label` to a constant — the exact failure `ComponentTemplates.cloudFunction`'s own
+  comment predicted for "the day someone rewords a menu entry". Renaming the labels would have
+  minted a **second `New cloud function` row** and nothing else would have failed. `templateId` now
+  carries that identity, the row's test id and the `Component Created` telemetry dimension.
+- 🔴 **AC4's lane sentence cost 23 resident MCP tokens and the surface had 6 free.** **Funded, not
+  bumped** — `toolDisclosure.test.ts`'s header says `SURFACE_TOKEN_BUDGET` must not be renegotiated
+  a third time. The briefing's identifier clause duplicated `get_project_info`'s note (**P77 D48**,
+  owner NONE since 2026-09-02, now **SPENT — do not look for that saving again**). **8,274 → 8,255,
+  25 free.** A spec asserts the **survivor**, because deleting a fact on the claim that another
+  surface carries it, without checking that surface, is how a fact leaves the product.
 
-## 🔴 What s27 learned the hard way
+## 🔴 What s28 learned the hard way
 
-### `nohup` makes your own stack unattributable, and the drive is right to refuse
+### A mutant that SURVIVES can mean your comment names a mechanism that is not there
 
-The drive exited 2 with *"could not attribute the editor on 9222 — owner=unknown"*.
-`nohup npm run dev:debug &` leaves the stack with **PPID 1**, so `walkToCli` cannot reach the
-launching session, and an unattributable owner is correctly treated as *possibly a peer's* rather
-than as absent. **Launch the stack attached** — a backgrounded tool call, not `nohup` — and the
-ancestry reaches the CLI pid. Cost: a teardown and a second seven-minute boot.
+The `bench` pattern was written `/(?<!work)\bbench\b/i` with a comment calling the lookbehind
+load-bearing. Removing it killed **nothing** — because `\b` already cannot match inside "Workbench"
+(there is no boundary between `k` and `b`). The arm was passing for the right answer and the wrong
+reason. **Deleted, and re-mutating the `\b` itself kills 3 arms.** 3 mutants killed, 1 survived, and
+the survivor was the finding.
 
-### 🔴 The temporary-index commit leaves the REAL index holding a staged REVERT of your own commit
+### The temporary-index commit trap is real, and the reset is not optional
 
-This is the sharp one, and the recipe in the previous handoff does not prevent it.
-`GIT_INDEX_FILE` + `commit-tree` + `update-ref` moves **HEAD** and never touches the real index —
-which still holds the *pre-commit* content of your files. `git diff --cached` then shows your whole
-commit **backwards**, and `git update-index --refresh` does **not** fix it: refresh updates stat
-info, not content. A peer running `git commit` from that index would revert your work under their
-name.
+Confirmed again, with numbers: immediately after `update-ref`, `git diff --cached --stat` showed
+**27 files, 982 deletions** — the whole commit **backwards**. A peer running `git commit` would have
+reverted this session's work under their name. ✅ `git reset -q HEAD -- <only your paths>` cleared
+it; the tree then held **46** entries, the peers' work, untouched (73 before the commit).
 
-✅ **`git reset -q HEAD -- <only your paths>`** afterwards. It rewrites those index entries from
-HEAD, leaves the working tree alone, and touches no other path. Then confirm
-`git diff --cached --stat | wc -l` is **0** — and keep a control that the tree is not simply empty
-(`git status --porcelain | wc -l` was 46, the peers' work, untouched).
+## The gates, as of s28
 
-## The gates, as of s27
-
-- `tests-unit/tvw-008` **119 specs / 5 suites** (was 106 / 4 — `benchOpening.test.ts` adds 13).
-- `tests-unit/tvw-007` **103 specs / 6 suites**, unchanged.
-- **3 mutants, 3 killed**: the *last* scenario instead of the first, the scenario's width ignored,
-  the interface filter dropped. Control green after each restore.
-- `tests/canvas/board-export.test.ts` **+3 jasmine arms** — the board's and the bench's opening
-  parameters compared as bytes, **with the control that they disagree without the fix**, because
-  two empty objects are equal and an arm that only compared them would grade nothing.
-- `typecheck:editor` **0**, `typecheck:editor-tests` **0**.
-- **`test:main` 523 suites / 8375 specs, exit 0** — was 522 / 8362, so the delta is exactly the
-  +1 suite and +13 specs this session adds and nothing stopped loading.
-- ✅ **`test:ci` RUN AND AT THE FLOOR** — 3015 specs, 8 failures, **exactly the eight by name**
-  (3 SUB-006, 3 SUB-011, 2 NDA-017), seed **15214** — a fifth distinct seed confirming the same
-  set. Fresh readout at `packages/noodl-editor/tests/test-results.json`. s26 skipped this run; the
-  debt is paid.
-
-## The fixture
-
-`scripts/devtools/tvw008-board-fixture.js` writes
-`NodeGX test projects/TVW-008 s26 Board` deterministically and **checks its own claims before
-exiting**. 🔴 **Re-run it before every drive** — a drive leaves `bench.board` behind, and AC1's
-first arm is the *empty* board. Its Primary Button carries a scenario whose value differs from the
-node's own parameter and whose `frame` is `480 × 200` while the component has **no** stored
-`bench.frame` — which is precisely the case §11.2's width rule exists for.
-
-## The drive hazard
-
-`npm run dev:debug` exiting **144** is the single-instance lock *or* a clean teardown, not a
-failure. **Two dev stacks cannot coexist** (`webpack.renderer.dev.js:24,38` hardcode 8080).
-**Attribute before you touch**: `lsof -nP -iTCP:9222 -sTCP:LISTEN -t`, walk `ppid` to a Claude Code
-pid, compare with your own. ⚠️ **`dev:stop --list` first.** ⏱️ The stack took ~75s to reach 9222 at
-s27, not the seven minutes s26 recorded. s27 tore down twice (24 and 27 processes) leaving all 10
-peer `noodl-mcp` Electrons alive both times.
-
-🔴 **Gate on the SERVED bundle, never the one on disk** —
-`packages/noodl-editor/src/editor/index.bundle.js` on disk is from Sep 10:
-
-```
-curl -s http://localhost:8080/src/editor/index.bundle.js | grep -c '<a string from your change>'
-```
-
-s27 gated on `benchOpeningScenario` (3 hits) **and** on the *absence* of a string the change
-deleted — a present-and-absent pair, so the check could not pass on a stale bundle that happened
-to contain the word.
+- `npm run vocabulary` — **all six words 0**, exit 0; 134 exemptions under 10 named rules.
+- `tests-unit/tvw-009/vocabularyRatchet.test.ts` **22 specs**; `noodl-mcp/tests/tvw009Vocabulary.test.ts`
+  **10 specs**; `tests/components/createMenu.spec.ts` **+4 jasmine arms**.
+- `typecheck:editor` **0**, `typecheck:editor-tests` **0**, `typecheck:mcp` **0**.
+- **`test:main` 524 suites / 8397 specs, exit 0** — was 523 / 8375, so the delta is exactly the
+  +1 suite and +22 specs this session adds and nothing stopped loading.
+- ✅ **`test:ci` RUN AND AT THE FLOOR** — **3019 specs, 8 failures, exactly the eight by name**
+  (3 SUB-006, 3 SUB-011, 2 NDA-017), seed **61157** — a **sixth** distinct seed confirming the same
+  set. 3015 → 3019 is exactly AC3's four jasmine arms. ⚠️ Run *before* the Blockly revert; that
+  revert restores HEAD's own string and touches no jasmine spec, and `test:main` was re-run green
+  after it.
+- **noodl-mcp: 7 suites / 9 tests failing — the pre-existing floor**, measured on both arms (this
+  session's MCP edits reverted, then restored). `toolDisclosure` was an 8th and it **was** ours.
+- ⚠️ **`typecheck:core-ui` is red with 45 unresolved-module errors** (`@noodl-viewer-cloud/execution-history`,
+  `@noodl-versioning`, `@noodl-store/*`, `@nodegx/export/ledger`) — **none naming a file s28
+  touched**. It has no `pretypecheck` hook, so it wants `build:types` output this checkout does not
+  have. Pre-existing. Do not inherit it as a blocker without re-measuring.
 
 ## Committing
 
-🔴 The working tree carries other sessions' work (46 entries at s27). **Commit through a temporary
-index with a compare-and-swap** — `BASE=$(git rev-parse HEAD)`, `GIT_INDEX_FILE`,
-`read-tree $BASE`, `update-index --add` **naming your paths** (untracked included; a pathspec
-commit skips them), `write-tree`, `commit-tree -p $BASE`, `update-ref HEAD $NEW $BASE` — **and
-then `git reset -q HEAD -- <your paths>`**, which the section above is about. **Re-read `HEAD`
-immediately before each commit.**
+🔴 The working tree carries other sessions' work (**46** entries at s28). **Commit through a
+temporary index with a compare-and-swap** — `BASE=$(git rev-parse HEAD)`, `GIT_INDEX_FILE`,
+`read-tree $BASE`, `update-index --add` **naming your paths** (untracked included; a pathspec commit
+skips them), `write-tree`, `commit-tree -p $BASE`, `update-ref HEAD $NEW $BASE` — **and then
+`git reset -q HEAD -- <your paths>`**. Confirm `git diff --cached --stat | wc -l` is **0** and keep
+a control that the tree is not simply empty. **Re-read `HEAD` immediately before each commit.**
 ⚠️ `scripts/devtools/` holds peers' untracked drive scripts — never `git add` that directory.
-⚠️ `dev-docs/tasks/**/verdicts/**/*.png` is gitignored; shots are for Richard and the local record.
-✅ But the **JSON readout beside them is tracked** for every other verdict set in this phase —
-s26's `arms.json` was left untracked and s27 committed it. Commit yours with the shots' session.
+⚠️ `packages/noodl-editor/tests/index.bundle.js` is an untracked build artefact containing full
+source; it poisons any repo-wide grep. Exclude it, and never stage it.

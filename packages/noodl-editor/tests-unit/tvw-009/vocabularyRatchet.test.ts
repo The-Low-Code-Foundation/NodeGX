@@ -115,6 +115,32 @@ describe("TVW-009 — 🔴 'bench' means two things and the gate knows which fil
   });
 });
 
+describe('TVW-009 — 🔴 the Blockly logic run bench keeps its name, because a ruling says so', () => {
+  const BLOCKLY = 'packages/noodl-editor/src/editor/src/views/BlocklyEditor/InterfaceRailsOverlay.ts';
+  const NOTE = "const a = { title: 'The bench runs these blocks here in the editor' };";
+
+  it('does not ask that surface to say Workbench', () => {
+    // Richard ruled 2026-09-17: swap the jargon, do not merge the names. VFN-011's AC3 is
+    // that the cost of running inside the editor is STATED — "Workbench" would claim it
+    // mounts the real app on sample values, which is the opposite of what it does.
+    // This session swept it by mistake and the ruling caught it; the arm is here so the
+    // next sweep cannot.
+    expect(rules(BLOCKLY, NOTE)).toEqual(['blockly-run-bench']);
+    expect(counted(BLOCKLY, NOTE)).toEqual([]);
+  });
+
+  it('counts the same sentence anywhere else', () => {
+    expect(counted(EDITOR, NOTE)).toEqual(['The bench runs these blocks here in the editor']);
+  });
+
+  it('excuses only the word bench there — the rest of the vocabulary cannot hide in that folder', () => {
+    // 🔴 Without this the exemption would be a hole shaped like the whole task: any retired
+    // word written under BlocklyEditor/ would go uncounted.
+    expect(counted(BLOCKLY, "const a = { title: 'Open the sandbox' };")).toEqual(['Open the sandbox']);
+    expect(counted(BLOCKLY, "const a = { title: 'a page component' };")).toEqual(['a page component']);
+  });
+});
+
 describe('TVW-009 — the replacement word does not trip the gate that retired it', () => {
   it('reads Workbench as Workbench and not as bench', () => {
     // The leading `\b` is the whole mechanism: there is no word boundary between the `k`

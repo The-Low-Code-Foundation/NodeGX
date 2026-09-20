@@ -191,9 +191,16 @@ class InterfaceRails {
       const marker = document.createElement('div');
       marker.className = css.RailSandboxNote;
       marker.textContent = TEST_VALUES_NOTE;
+      // 🔴 TVW-009 does NOT rename this surface. This is the Blockly **logic run bench**, not the
+      // Workbench (`views/VisualCanvas/benchWords.ts`) — two different surfaces wear the word.
+      // Richard ruled 2026-09-17: swap the jargon, do not merge the names. VFN-011's acceptance
+      // criterion 3 is that the cost of running inside the editor is STATED, and calling this the
+      // Workbench would claim it mounts the real app on sample values, which is the opposite of
+      // what it does. `SANDBOX_NOTE` already became `TEST_VALUES_NOTE` under that ruling.
+      // Whether the logic bench gets a name of its own is still an open question for Richard.
       marker.title =
-        'The Workbench runs these blocks here in the editor, against values you type. Variables, Objects and ' +
-        'Arrays are empty stand-ins, not your app’s data, and nothing a Workbench run does reaches your app.';
+        'The bench runs these blocks here in the editor, against values you type. Variables, Objects and ' +
+        'Arrays are empty stand-ins, not your app’s data, and nothing a bench run does reaches your app.';
       host.appendChild(marker);
     }
 
