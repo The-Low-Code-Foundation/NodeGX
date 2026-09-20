@@ -92,6 +92,12 @@
       "fromProperty": "changed",
       "toId": "ls_scroll",
       "toProperty": "run"
+    },
+    {
+      "fromId": "ls_strings",
+      "fromProperty": "copy",
+      "toId": "ls_index",
+      "toProperty": "copy"
     }
   ]
 }

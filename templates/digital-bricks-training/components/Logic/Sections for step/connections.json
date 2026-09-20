@@ -80,6 +80,12 @@
       "fromProperty": "out-activeIndex",
       "toId": "sfs_out",
       "toProperty": "activeIndex"
+    },
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "copy",
+      "toId": "sfs_fn",
+      "toProperty": "in-copy"
     }
   ]
 }

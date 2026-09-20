@@ -38,6 +38,12 @@
       "fromProperty": "onSaveValue",
       "toId": "sr_out",
       "toProperty": "value"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "copy",
+      "toId": "sr_section",
+      "toProperty": "copy"
     }
   ]
 }

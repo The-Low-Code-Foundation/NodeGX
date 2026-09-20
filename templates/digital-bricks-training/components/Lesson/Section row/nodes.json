@@ -24,6 +24,11 @@
           "name": "facts",
           "plug": "output",
           "type": "*"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "*"
         }
       ]
     },

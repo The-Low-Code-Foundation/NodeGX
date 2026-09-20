@@ -24,6 +24,11 @@
           "name": "activeStepId",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
         }
       ]
     },
@@ -34,7 +39,7 @@
       "x": 40,
       "y": 260,
       "parameters": {
-        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst sections = plain(Inputs.sections) || [];\nconst steps = plain(Inputs.steps) || [];\nif (!steps.length || !sections.length) return;\nlet index = steps.findIndex((s) => s.id === Inputs.activeStepId);\nif (index < 0) index = 0;\nconst step = steps[index];\nconst byId = new Map(sections.map((s) => [s.id, s]));\nconst rows = (step.sectionIds || []).map((id) => {\n  const section = byId.get(id);\n  if (!section) throw new Error('step \"' + step.id + '\" claims section \"' + id + '\", which this lesson does not have');\n  return { id: id, section: section };\n});\nOutputs.rows = rows;\nOutputs.count = rows.length;\n// A built-in Button paints its background and colour INLINE, so a class alone\n// cannot switch the active chip: the two colours ride the row data as tokens.\nOutputs.chips = steps.map((s, i) => ({\n  id: s.id,\n  title: s.title,\n  index: i,\n  active: i === index,\n  className: i === index ? 'lesson-step-chip dbt-chip active' : 'lesson-step-chip dbt-chip',\n  bg: i === index ? 'var(--primary)' : 'var(--surface-raised)',\n  fg: i === index ? 'var(--primary-foreground)' : 'var(--muted-foreground)'\n}));\nOutputs.stepTitle = step.title || '';\nOutputs.stepGoal = step.goal || '';\nOutputs.unlocks = step.unlocks || '';\nconst hasNext = index < steps.length - 1;\nOutputs.hasNext = hasNext;\nOutputs.nextTitle = hasNext ? steps[index + 1].title : '';\nOutputs.nextStepId = hasNext ? steps[index + 1].id : '';\nOutputs.activeIndex = index;\n"
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst sections = plain(Inputs.sections) || [];\nconst steps = plain(Inputs.steps) || [];\nif (!steps.length || !sections.length) return;\nlet index = steps.findIndex((s) => s.id === Inputs.activeStepId);\nif (index < 0) index = 0;\nconst step = steps[index];\nconst byId = new Map(sections.map((s) => [s.id, s]));\n// THE STRINGS RIDE THE ROW (TASK-L160). A For Each maps an item's properties\n// onto the template component's inputs BY NAME, so `copy` on the row is what\n// fills Section row's Copy input and reaches the kit node. It is one object by\n// reference on every row, never 80 string parameters. Undefined is a supported\n// value: the kit then renders the English it ships (L160 AC1).\nconst copy = plain(Inputs.copy) || undefined;\nconst rows = (step.sectionIds || []).map((id) => {\n  const section = byId.get(id);\n  if (!section) throw new Error('step \"' + step.id + '\" claims section \"' + id + '\", which this lesson does not have');\n  return { id: id, section: section, copy: copy };\n});\nOutputs.rows = rows;\nOutputs.count = rows.length;\n// A built-in Button paints its background and colour INLINE, so a class alone\n// cannot switch the active chip: the two colours ride the row data as tokens.\nOutputs.chips = steps.map((s, i) => ({\n  id: s.id,\n  title: s.title,\n  index: i,\n  active: i === index,\n  className: i === index ? 'lesson-step-chip dbt-chip active' : 'lesson-step-chip dbt-chip',\n  bg: i === index ? 'var(--primary)' : 'var(--surface-raised)',\n  fg: i === index ? 'var(--primary-foreground)' : 'var(--muted-foreground)'\n}));\nOutputs.stepTitle = step.title || '';\nOutputs.stepGoal = step.goal || '';\nOutputs.unlocks = step.unlocks || '';\nconst hasNext = index < steps.length - 1;\nOutputs.hasNext = hasNext;\nOutputs.nextTitle = hasNext ? steps[index + 1].title : '';\nOutputs.nextStepId = hasNext ? steps[index + 1].id : '';\nOutputs.activeIndex = index;\n"
       },
       "metadata": {
         "comment": "Every id a step claims must resolve — a missing one THROWS by name rather than rendering the step with a hole (L46's referential-integrity rule). An empty activeStepId means the first step. Nothing here gates: every chip is live."
@@ -42,93 +47,100 @@
       "ports": [
         {
           "name": "in-sections",
-          "displayName": "sections",
           "plug": "input",
           "type": "*",
+          "displayName": "sections",
           "group": "Inputs"
         },
         {
           "name": "in-steps",
-          "displayName": "steps",
           "plug": "input",
           "type": "*",
+          "displayName": "steps",
           "group": "Inputs"
         },
         {
           "name": "in-activeStepId",
-          "displayName": "activeStepId",
           "plug": "input",
           "type": "*",
+          "displayName": "activeStepId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-copy",
+          "plug": "input",
+          "type": "*",
+          "displayName": "copy",
           "group": "Inputs"
         },
         {
           "name": "out-rows",
-          "displayName": "rows",
           "plug": "output",
           "type": "*",
+          "displayName": "rows",
           "group": "Outputs"
         },
         {
           "name": "out-count",
-          "displayName": "count",
           "plug": "output",
           "type": "*",
+          "displayName": "count",
           "group": "Outputs"
         },
         {
           "name": "out-chips",
-          "displayName": "chips",
           "plug": "output",
           "type": "*",
+          "displayName": "chips",
           "group": "Outputs"
         },
         {
           "name": "out-stepTitle",
-          "displayName": "stepTitle",
           "plug": "output",
           "type": "*",
+          "displayName": "stepTitle",
           "group": "Outputs"
         },
         {
           "name": "out-stepGoal",
-          "displayName": "stepGoal",
           "plug": "output",
           "type": "*",
+          "displayName": "stepGoal",
           "group": "Outputs"
         },
         {
           "name": "out-unlocks",
-          "displayName": "unlocks",
           "plug": "output",
           "type": "*",
+          "displayName": "unlocks",
           "group": "Outputs"
         },
         {
           "name": "out-hasNext",
-          "displayName": "hasNext",
           "plug": "output",
           "type": "*",
+          "displayName": "hasNext",
           "group": "Outputs"
         },
         {
           "name": "out-nextTitle",
-          "displayName": "nextTitle",
           "plug": "output",
           "type": "*",
+          "displayName": "nextTitle",
           "group": "Outputs"
         },
         {
           "name": "out-nextStepId",
-          "displayName": "nextStepId",
           "plug": "output",
           "type": "*",
+          "displayName": "nextStepId",
           "group": "Outputs"
         },
         {
           "name": "out-activeIndex",
-          "displayName": "activeIndex",
           "plug": "output",
           "type": "*",
+          "displayName": "activeIndex",
           "group": "Outputs"
         }
       ]

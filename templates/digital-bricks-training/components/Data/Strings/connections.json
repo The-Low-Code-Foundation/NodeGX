@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "913280da-9456-4aa4-96a0-06e51617796f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "str_data",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-copy",
+      "toId": "str_out",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-common",
+      "toId": "str_out",
+      "toProperty": "common"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-lesson",
+      "toId": "str_out",
+      "toProperty": "lesson"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-timeline",
+      "toId": "str_out",
+      "toProperty": "timeline"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-productName",
+      "toId": "str_out",
+      "toProperty": "productName"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-loaded",
+      "toId": "str_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

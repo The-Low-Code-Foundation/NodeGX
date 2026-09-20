@@ -1,0 +1,122 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "913280da-9456-4aa4-96a0-06e51617796f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "str_data",
+      "type": "Static Data",
+      "label": "EDIT — this is every word on screen",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[\n  {\n    \"_generated\": \"by library/modules/dbt-lesson/build.mjs from src/kit.js \\u2014 do not hand-edit (TASK-L160 \\u00a72)\",\n    \"common\": {\n      \"productName\": \"Digital Bricks Training\"\n    },\n    \"lesson\": {\n      \"shortAnswer\": \"The short answer\",\n      \"moreDetail\": \"More detail\",\n      \"tryAgain\": \"Try again\",\n      \"tones\": {\n        \"jargon\": \"what this means for you\",\n        \"tip\": \"tip\",\n        \"warning\": \"watch out\",\n        \"reassurance\": \"good to know\"\n      },\n      \"quizTrue\": \"True\",\n      \"quizFalse\": \"False\",\n      \"quizPlaceholder\": \"Type your answer here\\u2026\",\n      \"quizSubmit\": \"Submit answer\",\n      \"sayItBackPlaceholder\": \"Say it back in one sentence\\u2026\",\n      \"sayItBackSubmit\": \"Submit\",\n      \"quizSent\": \"Sent. The reading of your answer arrives here once a backend is connected.\",\n      \"activityPlaceholder\": \"Your answer\\u2026\",\n      \"activitySave\": \"Save to my project\",\n      \"activitySaved\": \"\\u2713 Saved to your project \\u2014 future lessons will know this.\",\n      \"capturePlaceholder\": \"Your answer\\u2026\",\n      \"captureSave\": \"Save to my project\",\n      \"captureSaved\": \"\\u2713 Saved to your project\",\n      \"captureEdit\": \"Edit\",\n      \"prepCopy\": \"Copy\",\n      \"prepCopied\": \"Copied!\",\n      \"prepDownload\": \"Download .md\",\n      \"prepMissing\": \"Not captured yet \\u2014 it\\u2019s above in this lesson.\",\n      \"prepMissingDoc\": \"NOT YET PROVIDED \\u2014 ask the trainer\",\n      \"artifactRubric\": \"What a good one shows\",\n      \"artifactPaste\": \"Paste what you built\",\n      \"artifactPlaceholder\": \"Paste it here.\",\n      \"artifactSubmit\": \"Bring it back\",\n      \"artifactSent\": \"Sent. The reading against each criterion arrives here once a backend is connected.\",\n      \"artifactRevise\": \"Revise and send it again\",\n      \"handoverFiles\": \"What {product} will write for you\",\n      \"handoverWrite\": \"Write these for me\",\n      \"handoverNeeds\": \"Writing these reads your whole project, which needs the backend \\u2014 this button asks for it.\",\n      \"videoPlays\": \"Plays from {label}. \",\n      \"videoOpen\": \"Open it there instead \\u2197\",\n      \"videoWatch\": \"Watch the video\",\n      \"videoInvalid\": \"This video link isn\\u2019t working. Your coach can fix it.\",\n      \"recordedForYou\": \"Recorded for you\",\n      \"listen\": \"\\ud83d\\udd0a Listen to this section\",\n      \"transcript\": \"Read transcript\",\n      \"voiceRecord\": \"\\ud83c\\udfa4 Record answer\",\n      \"voiceOr\": \"or type it below\",\n      \"voiceRecording\": \"Recording\\u2026\",\n      \"voiceStop\": \"Stop\",\n      \"voicePlaceholder\": \"Type your answer here if you prefer\\u2026\",\n      \"voiceSubmit\": \"Submit answer\",\n      \"deferredMermaid\": \"Diagram source. Drawing it needs the Mermaid library, which this kit does not bundle yet (README).\",\n      \"deferredChart\": \"Chart data. Drawing it needs a chart library, which this kit does not bundle yet (README).\",\n      \"deferredWidget\": \"Interactive widget\",\n      \"deferredWidgetNote\": \"One of five interactive components not yet in this kit (README). Its settings are below.\",\n      \"deferredImage\": \"The image lives at this storage key. The backend that serves it is not connected yet, so nothing loads here.\"\n    },\n    \"timeline\": {\n      \"fold\": \"Fold this back up\",\n      \"ask\": \"Ask your coach about this\",\n      \"comments_one\": \"{n} comment\",\n      \"comments_other\": \"{n} comments\",\n      \"notes_one\": \"{n} note\",\n      \"notes_other\": \"{n} notes\",\n      \"noteKind\": \"Note about this step\",\n      \"noteFrom\": \"From {who}\",\n      \"status\": {\n        \"complete\": \"Completed\",\n        \"in_progress\": \"In progress\",\n        \"available\": \"Ready to start\",\n        \"locked\": \"Locked\"\n      },\n      \"sessionCancelled\": \"Cancelled\",\n      \"sessionPrep\": \"Before this session\",\n      \"sessionMinutes\": \"{n} minutes\",\n      \"assignmentDue\": \"For\",\n      \"assignmentNoDate\": \"No date on this one \\u2014 when you get to it\",\n      \"assignmentSent\": \"you\\u2019ve sent something in\",\n      \"assignmentWithdrawn\": \"your coach has taken this one back\",\n      \"assignmentCriteria\": \"What it asks for\",\n      \"evaluationDue\": \"Due\",\n      \"evaluationNoDate\": \"Your coach will set a date for this one\",\n      \"evaluationNotYet\": \"Your coach hasn\\u2019t written this one up yet\",\n      \"evaluationCriteria\": \"What we looked at\",\n      \"evaluationNextStep\": \"What would move it\",\n      \"submissionEvaluated\": \"read and commented on\",\n      \"submissionNotYet\": \"not assessed yet\"\n    }\n  }\n]"
+      },
+      "metadata": {
+        "comment": "GENERATED SEED, then yours to edit. The English here was produced by library/modules/dbt-lesson/build.mjs from src/kit.js's COMMON/COPY/TL_COPY — the one place English is written (TASK-L160 §2, corrected). Editing a value here overrides what the kit ships for that key; deleting the node entirely makes every node fall back to its built-in English, which is why L160 AC1 renders byte-identically with nothing wired."
+      }
+    },
+    {
+      "id": "str_split",
+      "type": "JavaScriptFunction",
+      "label": "Hand the bundle out",
+      "x": 40,
+      "y": 260,
+      "parameters": {
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst rows = plain(Inputs.items) || [];\nconst bundle = rows[0] || {};\nOutputs.copy = bundle;\nOutputs.common = bundle.common || {};\nOutputs.lesson = bundle.lesson || {};\nOutputs.timeline = bundle.timeline || {};\nOutputs.productName = (bundle.common && bundle.common.productName) || '';\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*",
+          "displayName": "items",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-copy",
+          "plug": "output",
+          "type": "*",
+          "displayName": "copy",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-common",
+          "plug": "output",
+          "type": "*",
+          "displayName": "common",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lesson",
+          "plug": "output",
+          "type": "*",
+          "displayName": "lesson",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-timeline",
+          "plug": "output",
+          "type": "*",
+          "displayName": "timeline",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-productName",
+          "plug": "output",
+          "type": "*",
+          "displayName": "productName",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "One calculation, one code node. `copy` is the WHOLE bundle and is what every kit node's Copy input takes — one wire, never 80 string parameters. The per-namespace outputs exist for Language Bundle, which registers one namespace at a time. Static Data may hand rows as runtime Models rather than plain objects, so plain() unwraps whichever arrives (the Data/Fixture lesson precedent)."
+      }
+    },
+    {
+      "id": "str_out",
+      "type": "Component Outputs",
+      "label": "The strings",
+      "x": 40,
+      "y": 560,
+      "ports": [
+        {
+          "name": "copy",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "common",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "lesson",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "timeline",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "productName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

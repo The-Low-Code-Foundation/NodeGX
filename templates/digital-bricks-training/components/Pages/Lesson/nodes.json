@@ -266,6 +266,16 @@
       "metadata": {
         "comment": "The one thing a node cannot do. Runs only on the signal."
       }
+    },
+    {
+      "id": "ls_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen",
+      "x": 760,
+      "y": 40,
+      "metadata": {
+        "comment": "One instance per page. Its `copy` output is the whole bundle; Logic/Sections for step puts it on every row, and the For Each maps it onto Section row's Copy input by name. Delete this node and the lesson still renders — in the English the kit ships (TASK-L160)."
+      }
     }
   ],
   "visualRoots": [

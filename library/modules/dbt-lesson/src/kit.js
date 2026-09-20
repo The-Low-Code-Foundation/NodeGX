@@ -53,6 +53,16 @@
 
   var KIT = 'dbt-lesson';
 
+  /**
+   * The `common` namespace. §2b: `kit.js` carried the literal
+   * 'Digital Bricks Training' as a fallback — the same L45/L94 class as
+   * `Pages/Home`'s two literals, but in the kit, where L161 would never have
+   * reached it.
+   */
+  var COMMON = {
+    productName: 'Digital Bricks Training'
+  };
+
   var COPY = {
     shortAnswer: 'The short answer',
     moreDetail: 'More detail',
@@ -194,6 +204,12 @@
   // ── Renderers: one per kind. Each is a React component taking the section's fields as props. ──
 
   function Reading(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var detail = str(p.detail).trim();
     return h(
       'div',
@@ -211,6 +227,12 @@
   }
 
   function Callout(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var tone = COPY.tones[p.tone] ? p.tone : 'tip';
     return h(
       'aside',
@@ -221,6 +243,12 @@
   }
 
   function AnswerCapsule(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     return h(
       'div',
       { className: 'dbt-capsule' },
@@ -245,6 +273,12 @@
    * emit the learner's words; the reading is the graph's to fetch.
    */
   function Quiz(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var variant = data(p.variant, {}) || {};
     var type = variant.type;
     var state = R.useState({ selected: null, text: '', sent: false });
@@ -371,6 +405,12 @@
   }
 
   function Activity(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var steps = data(p.steps, []) || [];
     var capture = data(p.capturesProjectFact, null);
     var doneState = R.useState({});
@@ -448,6 +488,12 @@
   }
 
   function Capture(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var facts = data(p.facts, {}) || {};
     var initial = str(p.initialValue) || str(facts[str(p.field)]);
     var st = R.useState({ text: initial, saved: initial, editing: !initial });
@@ -515,6 +561,12 @@
   }
 
   function PrepPack(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var facts = data(p.facts, {}) || {};
     var fields = data(p.factFields, []) || [];
     var copied = R.useState(false);
@@ -588,6 +640,12 @@
   }
 
   function ArtifactChallenge(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var rubric = data(p.rubric, []) || [];
     var st = R.useState({ text: '', sent: false });
     var s = st[0];
@@ -665,13 +723,19 @@
   }
 
   function HandoverPack(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var files = data(p.files, []) || [];
     return h(
       'div',
       { className: 'handover-pack' },
       h('h3', { className: 'handover-pack-title' }, str(p.title)),
       md(p.intro, 'handover-pack-intro'),
-      h('p', { className: 'handover-pack-files-label' }, fill(COPY.handoverFiles, { product: str(p.productName) || 'Digital Bricks Training' })),
+      h('p', { className: 'handover-pack-files-label' }, fill(COPY.handoverFiles, { product: str(p.productName) || commonCopy(p).productName })),
       h(
         'ul',
         { className: 'handover-pack-files' },
@@ -772,6 +836,12 @@
   }
 
   function CuratedVideo(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var r = resolveEmbed(p.url, p.startSeconds, p.endSeconds);
     var start = Number(p.startSeconds);
     var end = Number(p.endSeconds);
@@ -823,6 +893,12 @@
   }
 
   function AnnotatedScreenshot(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var clean = R.useMemo(
       function () {
         return sanitiseSvg(p.overlaySvg);
@@ -858,10 +934,22 @@
   }
 
   function Mermaid(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     return Deferred('Diagram', COPY.deferredMermaid, h('pre', null, str(p.source)), p.caption);
   }
 
   function Chart(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var rows = data(p.data, []) || [];
     var yKeys = data(p.yKeys, []) || [];
     var cols = [str(p.xKey)].concat(yKeys.map(str));
@@ -901,11 +989,23 @@
   }
 
   function Widget(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var params = data(p.params, {}) || {};
     return Deferred(COPY.deferredWidget + ': ' + str(p.widgetKey), COPY.deferredWidgetNote, h('pre', null, JSON.stringify(params, null, 2)), p.caption);
   }
 
   function HumanRecording(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var src = str(p.src) || assetUrl(p, p.storageKey);
     return h(
       'div',
@@ -917,6 +1017,12 @@
   }
 
   function Audio(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var source = data(p.source, {}) || {};
     var src = str(p.src) || (source.type === 'file' ? assetUrl(p, source.storageKey) : '');
     return h(
@@ -943,6 +1049,12 @@
   }
 
   function VoiceInteraction(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var COPY = lessonCopy(p);
+
     var st = R.useState({ recording: false, text: '', sent: false });
     var s = st[0];
     var set = st[1];
@@ -1085,6 +1197,18 @@
     return { type: type, displayName: name, group: E, description: description };
   };
 
+  /**
+   * THE RESOLVED BUNDLE (L160). One object input, never 80 string parameters —
+   * 80 parameters is the density failure the port evaluation §3.6 warns about
+   * wearing an i18n costume. Left unwired, the node renders the English this
+   * kit ships, which is what makes the no-wire case byte-identical (AC1).
+   */
+  var COPY_PORT = obj('Copy', {
+    description:
+      'The resolved string bundle, { common, lesson, timeline }. Wire Data/Strings. ' +
+      'Unwired, or missing a key, the node renders its built-in English — never a raw key and never blank.'
+  });
+
   var ASSET_BASE = text('Asset URL base', {
     default: '/api/assets/',
     description: 'Prepended to a storage key when no Src is given. A port, so the backend that serves files decides it.'
@@ -1134,7 +1258,7 @@
           return h('div', { ref: el, className: 'dbt-section dbt-section-' + id, style: props.style }, h(Renderer, props));
         };
       },
-      inputProps: inputProps,
+      inputProps: Object.assign({}, inputProps, { copy: COPY_PORT }),
       outputProps: outputProps || {}
     };
     return def;
@@ -1205,7 +1329,7 @@
     'Lesson: Handover pack',
     'The files the learner carries across to their own machine — names and purposes. Writing them needs the backend; the button emits Write requested.',
     HandoverPack,
-    { title: text('Title'), intro: text('Intro', { description: 'Markdown.' }), files: obj('Files', { description: 'An array of { path, purpose }.' }), productName: text('Product name', { default: 'Digital Bricks Training' }) },
+    { title: text('Title'), intro: text('Intro', { description: 'Markdown.' }), files: obj('Files', { description: 'An array of { path, purpose }.' }), productName: text('Product name', { default: COMMON.productName }) },
     pick(['onWrite', 'onAction'])
   );
   var CuratedVideo_ = kindNode(
@@ -1291,7 +1415,7 @@
         var cls = ['lesson-section', 'dbt-section-' + section.kind, section.kind === 'human_recording' && 'knot-warm', props.done && 'knot-tied', props.current && !props.done && 'knot-current']
           .filter(Boolean)
           .join(' ');
-        var forwarded = { facts: props.facts, assetBase: props.assetBase };
+        var forwarded = { facts: props.facts, assetBase: props.assetBase, copy: props.copy };
         Object.keys(ACTION_OUTS).forEach(function (k) {
           forwarded[k] = props[k];
         });
@@ -1304,7 +1428,8 @@
       done: port('boolean', 'Done', { default: false, description: 'Draws the tied (teal) knot. Decoration only — nothing gates.' }),
       current: port('boolean', 'Current', { default: false, description: 'Draws the current-knot ring.' }),
       label: text('Label', { description: 'Shown on the node in the graph only.' }),
-      assetBase: ASSET_BASE
+      assetBase: ASSET_BASE,
+      copy: COPY_PORT
     },
     outputProps: ACTION_OUTS
   };
@@ -1353,6 +1478,59 @@
     submissionEvaluated: 'read and commented on',
     submissionNotYet: 'not assessed yet'
   };
+
+  /**
+   * ── THE COPY OBJECT (TASK-L160, sprint 46) ──────────────────────────────────
+   *
+   * This kit CANNOT call i18next. The library's i18next module is module-scoped
+   * inside its own bundle and exposes no global (measured, sprint 46 index), and
+   * a kit manifest's `dependencies` field has no loader semantics in this tree
+   * (sprint 45). So the graph resolves the bundle and hands every node a `copy`
+   * object; we merge it over the English this kit ships.
+   *
+   * THE FALLBACK IS A REAL RENDERING PATH, NOT A DEFENSIVE BRANCH (L106's
+   * COACH_FALLBACK_NAME). The merge happens per call, so there is no load-order
+   * dependency on the i18next module at all: a graph that wires nothing renders
+   * exactly what this kit rendered before L160, and L160 AC1 pins that by md5.
+   *
+   * AND A MISSING KEY RENDERS ENGLISH, NEVER THE KEY. `/course` in the product
+   * renders `timeline.evaluation.kind.checkpoint` verbatim today from a missing
+   * catalogue entry (L148, recorded in sprint 43's status block). That is the
+   * defect this shape makes unreachable — including for an override that is
+   * present but EMPTY, which is what a half-finished translation looks like.
+   */
+  var COPY_CACHE = typeof WeakMap === 'function' ? new WeakMap() : null;
+
+  function mergeCopy(base, over) {
+    if (!over || typeof over !== 'object') return base;
+    var out = {};
+    var k;
+    for (k in base) out[k] = base[k];
+    for (k in over) {
+      var v = over[k];
+      if (v && typeof v === 'object' && base[k] && typeof base[k] === 'object') out[k] = mergeCopy(base[k], v);
+      else if (typeof v === 'string' && v !== '') out[k] = v;
+    }
+    return out;
+  }
+
+  /** The resolved copy for one namespace, memoised on the bundle's identity. */
+  function copyNs(p, ns, base) {
+    var bundle = p && p.copy;
+    if (!bundle || typeof bundle !== 'object') return base;
+    var per = COPY_CACHE && COPY_CACHE.get(bundle);
+    if (per && per[ns]) return per[ns];
+    var merged = mergeCopy(base, bundle[ns]);
+    if (COPY_CACHE) {
+      if (!per) { per = {}; COPY_CACHE.set(bundle, per); }
+      per[ns] = merged;
+    }
+    return merged;
+  }
+
+  function lessonCopy(p) { return copyNs(p, 'lesson', COPY); }
+  function timelineCopy(p) { return copyNs(p, 'timeline', TL_COPY); }
+  function commonCopy(p) { return copyNs(p, 'common', COMMON); }
 
   function plural(one, other, n) {
     return fill(n === 1 ? one : other, { n: n });
@@ -1499,13 +1677,13 @@
    * row never mounts at all — the one kind this surface has never drawn.
    */
   var CARD = {
-    lesson: function (e) {
+    lesson: function (e, TL_COPY) {
       return [
         e.rationale ? md(e.rationale, 'path-step-why') : null,
         h('p', { className: 'path-card-note' }, TL_COPY.status[str(e.status)] || '')
       ];
     },
-    session: function (e) {
+    session: function (e, TL_COPY) {
       var s = e.session || {};
       var prep = (s.prep || []).map(function (x) {
         return x && x.title;
@@ -1518,11 +1696,11 @@
         list('path-card-list', prep)
       ];
     },
-    note: function (e) {
+    note: function (e, TL_COPY) {
       var n = e.note || {};
       return [n.authorName ? meta(fill(TL_COPY.noteFrom, { who: n.authorName })) : null, md(n.body, 'path-card-body')];
     },
-    evaluation: function (e) {
+    evaluation: function (e, TL_COPY) {
       return [
         e.completedAt ? null : meta(e.dueOn ? TL_COPY.evaluationNotYet : TL_COPY.evaluationNoDate),
         e.summary ? md(e.summary, 'path-card-body') : null,
@@ -1532,7 +1710,7 @@
         e.nextStep ? md(e.nextStep, 'path-card-body') : null
       ];
     },
-    assignment: function (e) {
+    assignment: function (e, TL_COPY) {
       return [
         e.withdrawn ? meta(TL_COPY.assignmentWithdrawn) : e.answered ? meta(TL_COPY.assignmentSent) : null,
         md(e.brief, 'path-card-body'),
@@ -1540,7 +1718,7 @@
         list('path-card-list', e.criteria)
       ];
     },
-    submission: function (e) {
+    submission: function (e, TL_COPY) {
       return [meta(e.evaluated ? TL_COPY.submissionEvaluated : TL_COPY.submissionNotYet)];
     },
     message: null,
@@ -1549,6 +1727,12 @@
 
   /** A coach's note, drawn the same way whether it is its own row or carried under the card it points at. */
   function NoteBody(props) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var TL_COPY = timelineCopy(props);
+
     var n = props.note || {};
     return h(
       'div',
@@ -1560,6 +1744,12 @@
   }
 
   function TimelineRowView(p) {
+  /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
+   * read in this function — and in every closure it creates, such as an
+   * onClick — captures THIS render's copy rather than a mutable module
+   * global. The body below is unchanged: L160 moves strings, never words. */
+    var TL_COPY = timelineCopy(p);
+
     var entry = data(p.entry, null);
     var notes = data(p.notes, []) || [];
     var comments = Number(p.comments) || 0;
@@ -1648,7 +1838,7 @@
             { className: 'path-card path-card-block' },
             h('p', { className: 'path-step-label' }, str(p.kindLabel)),
             h('h3', { className: 'path-step-title' }, str(p.title))
-          ].concat(CARD[kind](entry))
+          ].concat(CARD[kind](entry, TL_COPY))
         )
       : /*
          * ONE LINE THE READER CAN OPEN. Not hidden, not filtered, nothing
@@ -1759,6 +1949,7 @@
       collapsed: port('boolean', 'Starts folded', { default: false, description: 'Derived from the programme by the graph, never stored. What the reader does after is this node’s own state.' }),
       notes: obj('Notes', { description: 'The coach’s notes anchored to this entry. Its LENGTH is the count on the folded line — never a separate number.' }),
       comments: num('Comments', { default: 0, description: 'How many comments this entry’s thread holds. Words and a number on the folded line, never a badge.' }),
+      copy: COPY_PORT,
       assetBase: ASSET_BASE
     },
     outputProps: {

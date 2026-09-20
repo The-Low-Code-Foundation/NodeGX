@@ -5,7 +5,7 @@
   "path": "/Logic/Sections for step",
   "type": "logic",
   "created": "2026-09-19T21:09:14.137Z",
-  "modified": "2026-09-19T21:14:14.082Z",
+  "modified": "2026-09-20T18:13:08.361Z",
   "modifiedBy": "noodl-mcp",
   "description": "The lesson's step index (L46): resolves the active step's sectionIds against the flat sections array, in order, and throws by name on an id the lesson does not have. Also derives the stepper's chips and the step-close's next step."
 }
