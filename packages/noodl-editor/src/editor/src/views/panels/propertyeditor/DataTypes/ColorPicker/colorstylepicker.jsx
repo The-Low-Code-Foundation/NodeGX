@@ -14,6 +14,32 @@ import ColorPicker from './colorpicker';
 
 require('../../../../../styles/propertyeditor/variantseditor.css');
 
+/**
+ * What a swatch should actually paint.
+ *
+ * 🔴 **A swatch handed a raw `var(--token)` paints NOTHING.** Those tokens are the *project's*
+ * design tokens; the editor's own chrome never declares them, so `background-color: var(--primary)`
+ * is an invalid declaration in this DOM, the element paints transparent, and the checkerboard
+ * behind it shows through. Measured 2026-09-19 (P94 STY-007) in the running editor: **17 of the 20
+ * rows** under `Colors in project` computed to `rgba(0, 0, 0, 0)` while
+ * `ProjectModel.resolveColor` had the true colour for every one of them — `var(--primary)` is
+ * `#2f5bc8`, `var(--destructive)` is `#b3261e`. Richard, seeing the shot: *"Why do all the colour
+ * squares next to the list of 'Colors in project' look transparent??"* — because they were.
+ *
+ * ⚠️ **`transparent` must survive.** It is a real, pickable value and its checkerboard is correct;
+ * only an UNRESOLVABLE token should ever read as nothing. `resolveColor` returns its input
+ * unchanged when it cannot resolve it, so the fallback is exactly the old behaviour and no row can
+ * be made worse by this.
+ */
+function swatchColor(value) {
+  if (!value) return value;
+  try {
+    return ProjectModel.instance.resolveColor(value);
+  } catch {
+    return value;
+  }
+}
+
 function getProjectColors(colorStyles) {
   const colorsNames = new Set();
 
@@ -275,7 +301,7 @@ function ColorStyleItem(props) {
           onBlur={() => setIsEditing(false)}
         />
         <div className="color-thumbnail">
-          <div className="color-thumbnail-content" style={{ backgroundColor: props.style.style }} />
+          <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(props.style.style) }} />
         </div>
       </div>
     );
@@ -296,7 +322,7 @@ function ColorStyleItem(props) {
         <Icon icon={IconName.Trash} size={IconSize.Small} />
       </div>
       <div className="color-thumbnail" onClick={onColorClicked}>
-        <div className="color-thumbnail-content" style={{ backgroundColor: props.style.style }} />
+        <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(props.style.style) }} />
       </div>
     </div>
   );
@@ -321,7 +347,7 @@ function ColorItem(props) {
     >
       <div className="variant-item-name">{props.color}</div>
       <div className="color-thumbnail">
-        <div className="color-thumbnail-content" style={{ backgroundColor: props.color }} />
+        <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(props.color) }} />
       </div>
     </div>
   );

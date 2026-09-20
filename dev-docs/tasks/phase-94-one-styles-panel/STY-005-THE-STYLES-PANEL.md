@@ -1,7 +1,7 @@
 # STY-005 — The Styles panel in the rail
 
-**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟡 **AC1–AC7 GREEN, DRIVEN. Only AC8
-— Richard's look — is left.** `test:main` 510/510 suites / 8,161 tests exit 0, `tsc --noEmit` exit 0,
+**Phase:** 94 — one styles panel. **Prefix:** `STY`. **State:** 🟢 **CLOSED s10 — AC1–AC7 GREEN and DRIVEN, AC8 RULED WORTHY. (Was: only AC8
+— Richard's look — was left.)** `test:main` 510/510 suites / 8,161 tests exit 0, `tsc --noEmit` exit 0,
 `tests-unit/sty-005` 38/38, and the drive `scripts/devtools/drive-sty005-panel.js` reports **25/25
 graded arms** against a real project in both themes.
 🔴 **The shots AC8 closes on: `shots/sty005-panel-{dark,light}.png`. Put them in front of Richard.**
@@ -79,7 +79,7 @@ THREE meanings, styles FIRST, so a style named `--primary` *shadows* the token.)
 | **AC5** | **Create works in each of the first three sections**, and a created colour style holds **the value that was typed** | specs on the handlers, plus §3's argument recorded: there is no port to read here |
 | **AC6** | **The old Design Tokens panel is retired** (R3): its registration and its shell are gone, `ColorsTab` is deleted, and **`DesignTokensTab` + `TokenCategorySection` survive the move with `tests-unit/fix-015` still green** | `fix-015` runs and passes after the move; a grep proves no `DesignTokenPanel` import remains |
 | **AC7** | The panel is **read off the rendered element in both themes** — the rows, the badges, the counts and the `⋯`, not a DOM that merely contains them | a drive, as STY-003 AC5 was driven. 🔴 [[verify-the-consequence-not-just-the-mechanism]] |
-| **AC8** | 🔴 **Richard has looked at it and ruled it WORTHY** | his word |
+| **AC8** | 🔴 **Richard has looked at it and ruled it WORTHY** | 🟢 **RULED WORTHY, s10 (2026-09-19)** — shown `shots/sty005-panel-{dark,light}.png`, both themes: the nine colour rows with their swatch, hex, STYLE badge and usage count, the collapsed `Design tokens (88)`, Text styles, Looks, and each section's `+ New …`. **AC8 CLOSED, and with it STY-005** |
 
 **AC1–AC6 are one session's build. AC7 is a drive. AC8 is Richard.** Nothing here is done until AC8.
 

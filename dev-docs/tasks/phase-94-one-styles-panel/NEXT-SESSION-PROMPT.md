@@ -1,109 +1,99 @@
-# Phase 94 — next session
+# Phase 94 — 🟢 CLOSED
 
-**Written at the end of s9, 2026-09-19.** Commit this session: `99381daea` (STY-006, AC1–AC7 + the
-three-guard fix the drive forced).
-
-🔴 **READ FIRST:** [`STY-DESIGN-THE-LOOK-MODEL.md`](./STY-DESIGN-THE-LOOK-MODEL.md) §8 — it
-supersedes README §5. **Nothing in this phase closes on a passing test.**
+**Written at the end of s10, 2026-09-19/20.** There is no next session for this phase.
 
 ---
 
-## 1. Built vs. driven, per task
+## 1. What closed, and on whose word
 
-| task | built (code + gates) | **driven** (the app doing it) | Richard |
-|---|---|---|---|
-| STY-001 study + verdict | 🟢 | n/a | 🟢 ruled 2026-09-18 |
-| STY-002 the Look model | 🟢 AC2–AC7 + AC1's mechanism | 🟢 | ⬜ AC1's *name* ("Look") still unruled |
-| STY-003 the property panel | 🟢 AC1–AC3, AC6, AC7 | 🟢 AC5 (s5), gutter + rename (s7) | 🔴 **AC8 — `shots/sty003-gutter-{dark,light}.png`** |
-| STY-004 export carries Looks | 🟢 Part A (AC1–AC7) | 🟢 | — Part B (one shared class per Look) = 1 session, **not blocking** |
-| STY-005 the Styles panel | 🟢 AC1–AC6 (s8) | 🟢 AC7 — 25/25 arms, both themes | 🔴 **AC8 — `shots/sty005-panel-{dark,light}.png`** |
-| **STY-006 where it's used** | 🟢 **AC1–AC4, AC6 (s9)** | 🟢 **AC5 + AC7 — 28/28 arms, exit 0, both themes** | 🔴 **AC8 — `shots/sty006-used-by-{dark,light}.png`** |
-| STY-007 the after picture | ⬜ | ⬜ | — 🔴 **must not open before the three pairs above are ruled** |
+🔴 **Nothing in this phase closed on a passing test. All seven tasks are closed on Richard's look.**
 
-🔴 **BUILT-BUT-UNDRIVEN COUNT: 0.** Every built task in this phase has been driven.
-🔴 **STY-007 is the only unbuilt task, and it is BLOCKED on Richard by definition** — it is the
-*after* picture of surfaces he has not yet approved. **The phase's entire remaining debt is three
-screenshot pairs in front of one person.**
+| task | state |
+|---|---|
+| STY-001 study + verdict | 🟢 ruled 2026-09-18 |
+| STY-002 the Look model | 🟢 AC2–AC7 + AC1's mechanism. **AC1's NAME ruled at s10: it stays a LOOK** |
+| STY-003 the property panel | 🟢 **AC8 RULED WORTHY s10** — `shots/sty003-gutter-{dark,light}.png` |
+| STY-004 export carries Looks | 🟢 Part A. ⬜ **Part B (one shared class per Look) is 1 session and was never blocking** |
+| STY-005 the Styles panel | 🟢 **AC8 RULED WORTHY s10** — `shots/sty005-panel-{dark,light}.png` |
+| STY-006 where it's used | 🟢 **AC8 RULED WORTHY s10** — `shots/sty006-used-by-{dark,light}.png` |
+| STY-007 the after picture | 🟢 **AC5 RULED WORTHY s10 — and that closes the phase** |
 
----
-
-## 2. Gate readings — s9, 2026-09-19, at `99381daea`
-
-| gate | reading | note |
-|---|---|---|
-| `npm run test:main` | **514 suites / 8,223 tests, all pass, exit 0, zero FAIL** | ⚠️ **do NOT read 514 as this task's number** — STY-006 is 3 suites / 44 tests; the rest arrived from peers mid-session |
-| `tsc -p tsconfig.json --noEmit` (noodl-editor) | **exit 0, zero output** | 🔴 `--noEmit` matters: `tsc -p <package>` EMITS IN PLACE |
-| `tests-unit/sty-006` | **3 suites / 44 tests** | wearers, format, styleRowWearers |
-| `tests-unit/sty-005` | **38/38, unchanged** across the walk rewrite | the reading that says the count-derivation is the same answer |
-| `tests-unit/chr-007` | **passes** | the suite an added import has silently switched off before |
-| mutant arm | `return list.push(...)` in both walks ⇒ **5 named failures**; reverted ⇒ 18/18 | the gate can go red |
-| `drive-sty006-wheres-it-used.js` | **28/28 graded arms, exit 0**, dark + light, 1 ungraded and named | |
-| `npm run test:ci` | ⏳ **NOT RUN at s8 or s9.** Last trusted reading is s7: seed 13542, 2,978 specs, **8 failures BY NAME** (3 SUB-006, 3 SUB-011, 2 NDA-017) = the floor | `TESTCI_EXIT=1` **IS** the floor — read the NAMES, never the code |
+**STY-002 AC1, ruled:** the concept stays called a **Look**. The rename cost was measured before
+asking (~107 source files, 83 markdown docs) and he chose to keep it. **Do not re-open this.**
 
 ---
 
-## 3. What s9 settled
+## 2. Gate readings — s10, 2026-09-19/20
 
-### STY-006, and the one decision that shapes it
-Pressing a row's count opens the list of what names that style, **inline under the row**; pressing
-an entry switches the canvas to that component and selects that node.
-🔴 **The count is a `.length` over the wearer walk** — `styleUsageIn` *and*
-`ProjectModel.variantWearerCounts` both derive from `styleWearersIn`/`lookWearersIn`, so a row
-cannot say `9×` above eight lines. Inline rather than a `ContextMenu` because `BaseDialog` reads
-`document` in a `useState` initialiser and **there is no jsdom here**; the open row is the
-**section's** state, which is what lets a spec render a row open.
-
-### 🔴 The defect the drive found, and the three guards it took
-Pressing an entry **destroyed the list it was pressed in** — the sidebar came back reading
-`components`. `keepSidePanel` is **P93 TVW-004's** flag and was threaded through `selectNode` only;
-`clearSelection` → `deselect` → `hidePanels` was unguarded at **two further sites**, and the one
-that actually fired was **`selectNode`'s own `clearSelection()` inside `settle`**.
-🔴 **The first two fixes measured byte-identical to no fix at all.** What settled it was **wrapping
-`SidebarModel`'s own methods in the running editor and reading the stack** — not a third guess.
-See `STY-006-WHERE-ITS-USED.md` §6.
-
-### 🔴 Two things a next session must know before it drives anything
-1. **Webpack HMR replaces the MODULE; an already-constructed instance keeps the OLD prototype.**
-   Reload the renderer before trusting a fix, and read the fix's own string off the **loaded class**.
-   A `tail | grep "compiled successfully"` matches **history**, not the compile you are waiting for.
-2. **A peer session drove this editor for ~30 minutes and it cost three runs.** Their `dev:debug`
-   died with **exit 144 = the single-instance lock**, so their `cdp.js` attached to *my* Electron.
-   The drive now **refuses an editor it cannot prove it owns** and **fails closed**. Exit 144 is a
-   statement about *ownership*, not a launch failure to retry.
+| gate | reading |
+|---|---|
+| `npm run test:ci` | **3012 specs, 8 failures, seed 00079, HEAD `3c4cedd34`** — the floor **by name** (3× SUB-006, 3× SUB-011, 2× NDA-017). Fresh readout, elapsed 71s. ⚠️ Taken *before* this session's two fixes; `test:main` and `tsc` were taken after |
+| `tsc -p tsconfig.json --noEmit` (noodl-editor) | **exit 0, zero output** — taken with a redirect, not a pipe ([[a-pipe-eats-the-exit-code-you-are-gating-on]]) |
+| `npm run test:main` | **519 of 520 suites, 8290 of 8291 tests.** ⚠️ The single failure is **`tests-unit/tvw-007/instanceHoverCard.test.tsx`** — a **peer's untracked P93 work, written 22:49–23:15 while the run was in flight**. Not this session's, not on the committed tree |
+| `tests-unit/sty-007` (new) | **6/6**, and **armed**: restoring the pre-fix behaviour turns **3 red by name** |
+| `tests-unit/sty-003` | **30/30**, unchanged by the `fieldState` addition |
+| `drive-sty007-after-picture.js` (new) | **23/23 graded arms, exit 0**, both themes, 1 ungraded and named |
 
 ---
 
-## 4. What to do next
+## 3. What s10 settled — and the two defects it found
 
-### 🔴 Owed by RICHARD — an agent cannot close these, and they ARE the phase now
-1. **STY-003 AC8** — `shots/sty003-gutter-{dark,light}.png`. Does the gutter read right?
-2. **STY-005 AC8** — `shots/sty005-panel-{dark,light}.png`. Is the Styles panel WORTHY?
-3. **STY-006 AC8** — `shots/sty006-used-by-{dark,light}.png`. ⚠️ The Look called **`Drive Look`
-   was made by the drive**, not shipped with the fixture.
-4. **STY-002 AC1** — is the concept called **"Look"**? Still explicitly unruled (`STY-DESIGN` §9).
-   Renaming is cheap in code and expensive in docs, so **ask before STY-007**.
+### 🔴 Both were inside the phase's own promise, and neither was farmed
 
-✅ **Already ruled at s9, do not re-ask:** the wearer entries need **no visible pressable cue**
-(hover is enough — an arrow and an accent label were both offered and declined), and **`Drive Look`
-stays** in the fixture.
+1. **The Look menu never opened on a list.** On any project with no Look of its own — which is
+   *every* project until someone makes one — the menu jumped straight to "name your new Look" and
+   the **twelve shipped Looks were unreachable from the property panel**. A pre-library condition
+   that nobody revisited when STY-003 added the library.
+   **Fixed** (`shouldOpenInCreateMode` in `models/Looks/fieldState.ts`, called from
+   `PickVariantPopup`'s constructor) **because it blocked STY-007's own AC1** — the "old variants
+   list → new Look menu" pair could not be photographed, because the menu never appeared.
+   [[a-shortcut-that-skips-an-empty-list-outlives-the-list-filling-up]]
 
-### What an agent can do alone, in order
-1. **`test:ci`** — not run at s8 or s9. Run it before anything ships and read the eight **by name**.
-2. **Relay to P93** (see §5 below) — one message, not a task.
-3. **The two s7 defects, still filed-not-fixed** (STY-003 §2f); neither blocks an AC, so neither is
-   a first job: (a) a node can hold a `VariantModel` that is **not the project's**; (b)
-   `nodegx.styles.json` stopped being written for a session.
-4. **STY-004 Part B** (one shared class per Look) — one session, not blocking.
+2. 🔴 **Every `var(--…)` swatch in the colour picker painted NOTHING — and RICHARD found it**, in
+   the after-picture, in seconds: *"Why do all the colour squares next to the list of 'Colors in
+   project' look transparent??"* They were: **17 of 20 rows** computed `rgba(0,0,0,0)`, because the
+   swatch was handed the raw token and **the editor's chrome never declares a project's design
+   tokens**. Three drives, three ruled screenshots and two sessions reading that exact surface had
+   all missed it. [[an-editor-surface-cannot-paint-a-projects-design-token]]
 
-🔴 **Do NOT open STY-007 before the three pairs are ruled**, and do not treat the two filed defects
-as the next build — [[build-the-tasks-do-not-farm-the-defects]].
+### 🔴 Two things a next session should carry out of here
+
+1. **The close condition earns its keep.** Defect 2 is invisible to every static and unit gate: the
+   markup is right, the value is right, the component renders. Only `getComputedStyle` on the real
+   element — or a person looking at a picture — can see it.
+2. **A new instrument's first run finds instrument faults, not product faults.** STY-007's first
+   drive produced four "defects" that were all mine: a row at y=−872, a zero-area heading (the
+   Styles panel had replaced Properties **in the same slot**), five popouts alive because
+   `document.body.click()` does not close one, and `button[class*="Value"]` matching nothing.
+   **Hit-test before every shot.**
+
+---
+
+## 4. What is left in this phase — nothing blocking
+
+Not one of these is a reason to open a P94 session. They are listed so they are not rediscovered at
+full price ([[an-unowned-row-gets-rediscovered-at-full-price]]).
+
+1. **STY-004 Part B** — one shared class per Look in the export, rather than per-node. One session,
+   never blocking, and now the only unbuilt piece of scope in the phase.
+2. **The two s7 defects, still filed-not-fixed** (STY-003 §2f): (a) a node can hold a `VariantModel`
+   that is **not the project's**; (b) `nodegx.styles.json` stopped being written for a session.
+   Neither blocks anything ruled.
+3. **States** (hover / pressed / disabled) — `STY-DESIGN` §9 calls this *"the obvious next thing
+   after this lands"*, and it is where the win is for the tutorial-video plan. **It is its own
+   phase**, and it was deliberately kept out of this one. `VariantModel` already has
+   `stateParameters` / `stateTransitions` and nothing uses them; 6 of 7 templates hand-write those
+   states as CSS text.
+4. **MCP Look authoring** — its own phase, README §4.1.
 
 ---
 
 ## 5. Owed to other phases
 
 - **P93 (TVW-004):** `keepSidePanel` now holds on the **cross-component** path, which their drive
-  never exercised — their fix guarded one of three `clearSelection` sites. Worth a line to them.
+  never exercised — their fix guarded one of three `clearSelection` sites. **Still owed, not sent.**
 - **P93 (TVW-001):** `ComponentsPanelNew/showUsedInPopover.ts` → `navigateToInstance` uses the same
-  door **unguarded**. Its symptom is invisible because `hidePanels()` falls back to `components`,
-  which is the panel that popover was opened from. **Filed, not fixed, not farmed.**
+  door **unguarded**. Its symptom is invisible because `hidePanels()` falls back to `components`.
+  **Filed, not fixed.**
+- **P93 s23 was told** (s10, by peer message) that the editor was torn down, plus the two drive
+  traps above.

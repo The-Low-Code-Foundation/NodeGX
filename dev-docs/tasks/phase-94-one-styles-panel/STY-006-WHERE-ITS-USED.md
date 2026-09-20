@@ -61,7 +61,7 @@ failure this paragraph exists to prevent.
 | **AC5** | **A node entry takes you there** — the canvas switches to that component, that node is selected and centred. A **Look** entry is listed and is not pressable. | drive |
 | **AC6** | **The Looks section does it too** — the task is named after a Look and the Looks section must not be the one that only counts. | `tests-unit/sty-006` + drive |
 | **AC7** | **Driven in the real app, both themes**: open a style's list, read the real wearers off the rendered elements, press one, and read the canvas's active component and selection **after**. 🔴 The press is graded on the **consequence** (which component is active, which node is selected), never on the entry having been clicked. | `scripts/devtools/drive-sty006-wheres-it-used.js` |
-| **AC8** | **Richard's look.** `shots/sty006-used-by-{dark,light}.png`. | Richard |
+| **AC8** | **Richard's look.** `shots/sty006-used-by-{dark,light}.png`. | 🟢 **RULED WORTHY, s10 (2026-09-19)** — shown both themes: the inline `Used by 9 nodes` list under the row, node name left, component right, and the navigation. **CLOSED** |
 
 ## 4. Out of scope
 
@@ -310,7 +310,7 @@ The arms that carry the task, with what they measured:
 is worn by no Look, so that population is empty and a green there would be a lie. The claim is
 carried by `styleRowWearers.test.tsx` instead, which renders the case directly.
 
-🔴 **AC8 is Richard's**: `shots/sty006-used-by-{dark,light}.png`.
+🟢 **AC8 RULED WORTHY by Richard, s10 (2026-09-19)**: `shots/sty006-used-by-{dark,light}.png`. **STY-006 is closed.**
 
 
 ## 9. Richard's rulings, 2026-09-19 (s9)

@@ -233,3 +233,24 @@ export function buildLookMenu(input: LookMenuInput): LookMenu {
     none: input.currentLookName === undefined
   };
 }
+
+/**
+ * Should the Look menu open straight into "name your new Look", skipping the list?
+ *
+ * 🔴 **Only when the list would be empty.** The property panel's own caller has always asked for
+ * the shortcut when the PROJECT holds no Look for this node type, and that was right while a
+ * project's own Looks were the only thing the menu could offer. The shipped library changed the
+ * answer without changing the question: a project with none of its own still has twelve to pick
+ * from, and *every* project has none of its own until someone makes one — so the shortcut fired on
+ * exactly the projects the library exists for, and `START FROM A NODEGX LOOK` could not be reached
+ * from the property panel at all.
+ *
+ * `callerWantsCreate` is that caller's ask; this function is the veto. It deliberately reads the
+ * SAME `LookMenu` the popup renders, so the decision cannot disagree with the list it is about.
+ *
+ * Found by STY-007's drive, 2026-09-19, on a copy of `Todo list`.
+ */
+export function shouldOpenInCreateMode(menu: LookMenu, callerWantsCreate: boolean): boolean {
+  if (!callerWantsCreate) return false;
+  return menu.inThisProject.length === 0 && menu.fromLibrary.length === 0;
+}

@@ -22,7 +22,7 @@
  */
 import React from 'react';
 
-import { buildLookMenu, type LookMenu, type LookMenuEntry } from '@noodl-models/Looks/fieldState';
+import { buildLookMenu, shouldOpenInCreateMode, type LookMenu, type LookMenuEntry } from '@noodl-models/Looks/fieldState';
 import { shippedLooksFor, type ShippedLook } from '@noodl-models/Looks/looks';
 import { ElementConfigRegistry } from '@noodl-models/ElementConfigs';
 import { ProjectModel } from '@noodl-models/projectmodel';
@@ -56,9 +56,27 @@ export class PickVariantPopup extends React.Component<PickVariantPopupProps, Sta
 
     this.model = props.model;
 
+    // 🔴 **The caller's shortcut predates the shipped library, and the library made it wrong.**
+    // `variantseditor.onPickVariant` passes `showCreateNewVariant: true` whenever the PROJECT holds
+    // no Look for this node type — which was right when a project's own Looks were the only thing
+    // this menu could offer: there was nothing to pick, so it asked for a name instead.
+    //
+    // A project with no Looks of its own now still has **twelve shipped ones** to pick from, and
+    // every project has no Looks of its own until someone makes one. So the shortcut fired on
+    // exactly the projects the library exists for, and `START FROM A NODEGX LOOK` was unreachable
+    // from the property panel until a person had already hand-made a Look — the one thing the
+    // library is meant to save them from. Found by STY-007's drive on a copy of `Todo list`, the
+    // project STY-001 took the before-pictures on. Same shape as
+    // [[a-whitelist-gate-is-blind-to-a-later-node-class]]: a condition that stayed still while the
+    // set it was deciding about grew.
+    //
+    // Take the shortcut only when the menu would genuinely have nothing to offer. `menu()` reads
+    // `this.model` and the project singleton, both of which are ready here, and it is the SAME
+    // computation `render` draws from — so this cannot drift from what the list would have shown.
+    // The rule itself lives in `fieldState` beside the menu it is about, where a spec can reach it.
     this.state = {
       variants: ProjectModel.instance.findVariantsForNodeType(this.model.type),
-      showCreateNewVariant: props.showCreateNewVariant
+      showCreateNewVariant: shouldOpenInCreateMode(this.menu(), !!props.showCreateNewVariant)
     };
   }
 
