@@ -48,6 +48,66 @@ bugs.
 
 ---
 
+## What one process actually does
+
+Every figure here was **measured**, and the conditions are part of the claim — a
+requests/second number without its workload is the kind of claim that gets
+people hurt. Re-take it with
+`packages/nodegx-backend/scripts/soak/run.js`; the method, and what it
+deliberately does not cover, are in that directory's README.
+
+**Conditions.** One backend process, 8-core Apple Silicon laptop, 16 GB RAM,
+Node 22, SQLite with WAL. A **282,000-row** database — `Talk` 1,200,
+`Exhibitor` 800, `Attendee` 40,000, `MyDay` 200,000, `Profile` 40,000 — with the
+indexes its queries use declared before the rows were written. Workload **85%
+reads / 15% writes** over the Parse wire, shaped on a real conference app:
+programme and exhibitor lists, one attendee's saved sessions, and a profile row
+rewritten in place. Page cap at its shipped defaults. Rate limiting off (see
+below). Security in the localhost `devOpen` posture, so per-row ACL enforcement
+is **not** in these numbers.
+
+| | measured |
+|---|---|
+| **Mixed-workload throughput** | **~3,500 requests/second** — flat from concurrency 4 to 128 |
+| **The knee** | concurrency **4**, at p95 **1.9 ms** |
+| Above the knee | throughput stops rising; latency rises in proportion — p95 4.1 ms at 8, 16 ms at 32, 51 ms at 128 |
+| **Writes only** | **~5,200 writes/second** |
+| **CPU at saturation** | **1.16 of 8 cores** |
+| Errors | zero, at every level |
+| Simultaneous SSE streams | **500** sustained; beyond the cap, `503` |
+| Memory | RSS returned to baseline after the load stopped |
+
+**The first signal to move was request duration, and *why* is the useful part.**
+It was not the writer and it was not the disk. Writes alone sustained ~5,200/s —
+*faster* than the mixed workload, because the reads return more data than the
+writes do. The process saturated at **1.16 of 8 cores**: one Node process is one
+main thread, and that thread was full while seven cores sat idle.
+
+So on this workload the **process** ceiling binds first, not the **storage** one.
+That is why [step 5](#5-give-it-a-bigger-box) says single-core speed rather than
+core count: on this evidence a box with *more* cores does not raise this number,
+and a box with *faster* ones does.
+
+**With rate limiting on, the binding number is the budget, not the backend.**
+The same run under the shipped `rateLimit` defaults served exactly **20
+requests/second** and refused everything else with `429`, identically at every
+concurrency. That is `policies.data` (1200/min) working correctly: every caller
+in that run was anonymous from one address, so they all shared one bucket. A
+real app's signed-in users each get their own — but an app whose traffic all
+appears to come from one address does not, and `rateLimit.trustedProxies` is the
+usual reason. This is signal 4, reproduced deliberately.
+
+**A heavy scheduled job costs about a quarter of your throughput.** Running one
+in the same process took throughput from ~3,490 to ~2,670 req/s (**−24%**) and
+raised p95 from 8.3 ms to 9.9 ms. There is no separate worker role today.
+
+🔴 **What this number is not.** It is one workload on one box. It says nothing
+about your queries, your row counts, or your indexes, and the read:write ratio
+is the first thing you should change to match your own app. Measure yours —
+that is what the harness is for.
+
+---
+
 ## Which ceiling are you hitting
 
 Work through this in order — each step rules out the next. All of these come
@@ -103,27 +163,41 @@ column that already holds duplicates is **refused** (`INDEX_DUPLICATES`) rather
 than silently skipped. Index the fields you filter and sort by, and check
 `nodegx_db_file_bytes` to know whether size is even plausible as the cause.
 
-### 2a. ⚠️ Always set a limit — queries have no maximum page size
+### 2a. Set a limit anyway — the page cap is a floor under accidents, not a design
 
-**A query with no `limit` returns the entire collection.** There is no default
-page size and no enforced maximum: the `LIMIT` clause is emitted only when the
-caller supplies one. On a small collection that is convenient. On a large one it
-materialises every row in the backend's memory and ships it to the client.
+**A query with no `limit` returns one page, not the collection.** The backend
+caps it at `queries.defaultLimit` (1,000 rows), and clamps any explicitly larger
+request to `queries.maxLimit` (10,000) rather than refusing it. Both are
+[ops.json settings](./BACKEND-OPERATIONS.md#no-query-returns-everything). When a response was
+shortened, it says so in a header:
 
-This is the difference between a logic bug and an outage, and it is worth
-designing against before you are large:
+```
+X-NodeGX-Result-Capped: true
+X-NodeGX-Result-Limit: 1000
+```
+
+That cap exists because the alternative is an outage. A cloud function that
+builds a filter from an optional value and omits the key when the value is
+missing produces an *empty* filter; an empty filter with no limit was
+`SELECT * FROM table`, and four hundred thousand rows came back through a
+single-process backend. No bug in the backend was required.
+
+**It is a floor under accidents, and you should still design above it:**
 
 - **Set an explicit `limit` on every query**, including the ones you "know" are
-  small. Collections grow.
-- **Be careful building a filter from optional values.** If the field you filter
-  on is missing and your code omits the key rather than passing it, the filter
-  object becomes empty — and an empty filter matters far more when there is also
-  no limit. An unfiltered, unlimited query returns everything.
+  small. Collections grow, and a silently capped page is a correctness bug in
+  your application even when it is a healthy one in the backend.
+- **Check `X-NodeGX-Result-Capped`** if it matters whether you got everything.
+  The Parse response body is unchanged and does not carry it.
+- **Be careful building a filter from optional values** — see above. The cap
+  bounds the damage; it does not make the filter right.
 - **Paginate with `limit` and `skip`** rather than fetching and slicing.
+- **`limit=0&count=1` still works**: the cap bounds the page, not the count.
 - **Watch `nodegx_db_file_bytes`** against the response sizes you expect.
 
-A cap is worth adding to the backend and is not there today; until it is, the
-limit is yours to set.
+Internal readers that genuinely need every row — backup, export, the file
+orphan sweep, the registries — go through a separate method and are not capped,
+so a backup is still a whole backup.
 
 ### 3. Move file storage off the local disk
 
@@ -352,10 +426,12 @@ date that cannot move. What actually works:
 
 1. **Characterise the load before you design for it.** Concurrent *users* is not
    a useful number. What you need is peak requests/second, the read:write ratio,
-   and how many simultaneous realtime streams. A conference app with 60,000
-   attendees is usually tens of thousands of reads of nearly-identical content
-   and a very small number of writes — which is a caching problem wearing a
-   database problem's clothes.
+   and how many simultaneous realtime streams. Do not assume an event app is
+   read-only in disguise: the one this page's numbers are shaped on read shared
+   content *and* wrote continuously — saved agendas, and a profile row rewritten
+   **after every AI assistant question**. An assistant-driven write rate scales
+   with engagement, not with how much content you publish, so it does not flatten
+   out once the programme is final.
 2. **Make the read path not touch the backend.** Static app on a CDN; cache the
    handful of hot API reads at the edge with a short TTL. This is where the
    orders of magnitude are.
@@ -392,18 +468,27 @@ date that cannot move. What actually works:
   directory. The database is yours (or your provider's) to back up — see
   [Backups on Postgres](#backups-on-postgres).
 - **Metrics are per-process**, so any fleet view is yours to assemble.
-- **No maximum page size.** A query without an explicit `limit` returns the whole
-  collection, and no configuration caps it. See step 2a.
-- **Run records are capped by count, not by size.** A run records at most 200 log
-  lines and 1000 steps, but a single large step output or log value is stored
-  whole — so an unexpectedly large payload can grow `executions.sqlite` fast, and
-  `executions.retentionDays` (default 30) will not save you from it in the moment.
+- **A page cap, not a query planner.** `queries.defaultLimit` (1,000) bounds a
+  query that asked for no limit and `maxLimit` (10,000) clamps one that asked
+  for too much — so no single response takes the process down. It does nothing
+  about a query that is slow for other reasons, and a capped page your code
+  treats as a complete one is still your bug. See step 2a.
+- **Run records are capped by size as well as by count**, since 0.2.4:
+  `executions.maxValueBytes` (50KB) replaces one oversized step output or log
+  value with a marker, `executions.maxRunBytes` (8MB) bounds a whole run, and
+  `executions.maxCount` (10,000) bounds how many are kept alongside
+  `retentionDays` (30). A truncated record is marked `?capped=true` rather than
+  quietly shortened. What is still yours to watch: pruning bounds the row count,
+  and reclaiming the file's disk back is a separate `POST /admin/executions/compact`.
 - **A scheduled workflow runs in the process that serves your users.** A heavy
   periodic job competes with request traffic; there is no separate worker role
-  today. If you have one, measure request latency while it runs.
-- **No published load-test numbers.** There is deliberately no "handles N
-  requests/second" figure on this page, because one has not been measured on a
-  production-shaped workload. Measure your own — step 5 above.
+  today. Measured: **−24% throughput** while one ran. If yours is heavier than
+  the one measured, so is your delta.
+- **One measured workload, not a guarantee.** [The number above](#what-one-process-actually-does)
+  was taken on a production-shaped database on one laptop-class box, with ACL
+  enforcement off and one read:write ratio. It is a real measurement and it is
+  not a promise about your app. Re-take it on your hardware with your shape —
+  `packages/nodegx-backend/scripts/soak/run.js`.
 
 ---
 

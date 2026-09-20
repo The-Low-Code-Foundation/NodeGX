@@ -3,7 +3,8 @@
 **Scoped:** 2026-09-19, from Richard's field report of a 60,000-participant conference his team
 served on n8n + Directus + Azure AKS, a measurement of the backend at HEAD `aa5d00e2a`, and a survey
 of how n8n and Directus actually behave in production.
-**Status: 🏗 In progress, s3 (2026-09-20). PRD-001, 002, 003 and 005 built and gated — the outage chain is closed. Only PRD-004, the measurement, is open. Prefix: `PRD`.**
+**Status: ✅ Complete, s4 (2026-09-20). All five tasks built and gated; the outage chain is closed and the
+vertical ceiling is measured and published. Prefix: `PRD`.**
 
 > *"let's try not to repeat the mistakes of those who came before us"* — Richard, 2026-09-19
 
@@ -89,7 +90,7 @@ unwritten; painful afterwards.
 | [PRD-001](PRD-001-NO-QUERY-RETURNS-EVERYTHING.md) | A default and maximum page size on every query route — and a capped result says so | ✅ s3 | ✅ s3 — 19 specs, 3 mutants | 🟡 over HTTP in the spec |
 | [PRD-002](PRD-002-A-RUN-CANNOT-EAT-THE-DISK.md) | Run records bounded by **bytes**, not just count, with the overflow reported in the record | ✅ s1 | ✅ s1 — 8 specs, 2 mutants | 🟡 over HTTP in the spec; the 1,000-run drive is PRD-004's |
 | [PRD-003](PRD-003-PRUNING-THAT-GIVES-THE-DISK-BACK.md) | Prune by count as well as age, say which limit fired, and actually reclaim the space | ✅ s1 | ✅ s1 — 7 specs, file shrinks <25% | 🟡 over HTTP in the spec |
-| [PRD-004](PRD-004-THE-NUMBER-WE-DO-NOT-HAVE.md) | The vertical ceiling, measured on a mixed workload with a heavy scheduled job in the mix | ⬜ | ⬜ | ⬜ |
+| [PRD-004](PRD-004-THE-NUMBER-WE-DO-NOT-HAVE.md) | The vertical ceiling, measured on a mixed workload with a heavy scheduled job in the mix | ✅ s4 — harness `scripts/soak/` | ✅ s4 — quiet-box guard + preflight; the run IS the gate | ✅ s4 — **~3,500 req/s**, knee at concurrency 4, on 282k rows |
 | [PRD-005](PRD-005-SECRETS-ARE-PROVISIONED.md) | Secrets provisioned from the environment, never invented; a deploy that cannot find one refuses | ✅ s1 | ✅ s1 — 11 specs | 🟡 over HTTP in the spec; not driven from the Compose deploy |
 
 **PRD-001 → 003 are the outage chain, in order.** Any one of them alone shortens it; all three
@@ -134,7 +135,14 @@ times**. At the end:
 - lowering retention **gives the disk back**;
 - the record is good enough to find the offending workflow **without reading the source**; and
 - the vertical ceiling is a number in `docs/runtime/SCALING.md`, measured, with the method written
-  down so it can be re-run.
+  down so it can be re-run. ✅ *s4 — **~3,500 req/s** on a mixed 85:15 workload over 282,000 rows,
+  knee at concurrency 4, saturating at **1.16 of 8 cores**. Method and harness:
+  `packages/nodegx-backend/scripts/soak/`; the record is PRD-004 §7.*
+
+🔴 **What the measurement changed about the phase's own framing.** The ceiling is the
+**process**, not the writer: writes alone ran *faster* (~5,200/s) than the mixed workload, and the
+backend saturated one Node main thread with seven cores idle. The storage ceiling PRD-001→003 was
+written against is real, but it is not what binds first on this shape.
 
 ## 8. Defects filed at scoping
 
@@ -145,5 +153,5 @@ times**. At the end:
 | **PRD-D2** ✅ s1 | ~~Run records are bounded by count but not by size~~ **Corrected:** the substrate already capped one value at 50KB (`store.ts:28`); what was absent was the per-run sum, config, announcement and queryability — PRD-002 §7.1 | PRD-002 |
 | **PRD-D3** ✅ s1 | Pruning never reclaims disk — closed for new files (incremental + bounded reclaim) and for old ones by `POST /admin/executions/compact`; PRD-003 §7 | PRD-003 |
 | **PRD-D4** ✅ s1 | Retention is age-only — `executions.maxCount` (10,000) beside it, attributed; per-workflow opt-out still PRD-003 §6 | PRD-003 |
-| **PRD-D5** · | **Unverified:** the execution record of a run killed mid-flight may be absent rather than stuck. Measure before designing around it. s1 note: the record is written at `startExecution` with status `running` (`ExecutionLogger.ts:189`), and `WorkflowEngine.start()` marks `running` rows `interrupted` on the next start (`WorkflowEngine.ts:325`, WF-001) — so a SIGKILL should leave a **stuck-then-recovered** row, not an absent one. Still unmeasured | PRD-004 |
+| **PRD-D5** ✅ s4 | **Measured, and not a defect.** A `SIGKILL` with a run in flight leaves a record that survives and is **terminal** after restart: `status: "error"`, `completedAt` set, `errorMessage: "Interrupted by service restart (in-flight run did not resume — WF-001 v1 durability)."`, and `metadata.interrupted: true`. s1's code reading was right about the recovery; the `interrupted` disposition rides in metadata, not in the status vocabulary. Reproduced twice | PRD-004 §7.4 |
 | **PRD-D6** BACKLOG | The workflow-engine path (`WorkflowEngine.ts:534-546`) records step `input`/`output` with **no** value scrubber; only the cloud-function path scrubs. Bounded since s1, scrubbed still not. Unverified whether a workflow step can carry a secret value | none — a product decision about what a workflow step may hold |
