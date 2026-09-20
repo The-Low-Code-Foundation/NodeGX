@@ -23,7 +23,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { BackendService } from './service';
-import { createAdapter } from './persistence/createAdapter';
+import { createAdapter, describeConfiguredStorage } from './persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 
 import { AdapterFacade } from './persistence/AdapterFacade';
@@ -140,7 +140,6 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--sample':
         extras.sample = next();
         break;
-
       case '--json':
         extras.json = true;
         break;
@@ -210,9 +209,17 @@ function cliBackupManager(options: Partial<BackendServiceOptions>): { manager: B
   const config = new BackupConfigStore(dataDir);
   const dbPath = path.join(dataDir, 'data', 'local.db');
   const allowEphemeral = !!options.allowEphemeral;
+  // BRG-008. 🔴 This path does NOT go through `createAdapter` — it builds the
+  // SQLite path itself. On a data dir that has been migrated to PostgreSQL the
+  // pre-migration `local.db` is still sitting there (that is what makes going
+  // back work), so without this the CLI would archive it and report success:
+  // a healthy-looking backup of stale rows, which is worse than a failure.
+  const storage = describeConfiguredStorage();
   const manager = new BackupManager({
     dataDir,
     dbPath,
+    engine: storage.engine,
+    storageTarget: storage.target,
     executions,
     config,
     backendId: resolved.backendId,

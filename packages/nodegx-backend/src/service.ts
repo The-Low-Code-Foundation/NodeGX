@@ -460,6 +460,12 @@ export class BackendService {
     this.backups = new BackupSubsystem({
       dataDir: this.options.dataDir,
       dbPath: this.persistence.dbPath,
+      // BRG-008: which engine actually holds the rows. On PostgreSQL `dbPath`
+      // is '' and a pre-migration `local.db` may still be sitting in `data/`,
+      // so without this the subsystem would archive stale rows and call it a
+      // success. The manager refuses by name instead.
+      engine: this.persistence.status.engine,
+      storageTarget: this.persistence.target,
       executions: this.executions,
       backendId: this.options.backendId,
       backendName: this.options.backendName,

@@ -25,6 +25,7 @@ import type { RequestContext } from './HttpServer';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { BackupSubsystem } from '../backup/BackupSubsystem';
 import type { BackupListItem } from '../backup/BackupManager';
+import { BackupNotFileBackedError } from '../backup/BackupManager';
 import type { BackupConfig } from '../backup/config';
 import { exportCollection, importCollection, DataFormat } from '../backup/dataio';
 import {
@@ -69,6 +70,20 @@ export interface SchemaDiffResponse {
   rendered: string;
 }
 
+/**
+ * BRG-008: turn the backup subsystem's "this engine is not a file" refusal into
+ * a 409. Anything else is rethrown untouched — this translates ONE named error
+ * and is not a general error swallow.
+ */
+async function asRefusal<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (e) {
+    if (e instanceof BackupNotFileBackedError) throw new HttpError(409, e.message);
+    throw e;
+  }
+}
+
 export class AdminBackupRoutes {
   constructor(private readonly deps: AdminBackupDeps) {}
 
@@ -106,10 +121,15 @@ export class AdminBackupRoutes {
   }
 
   async runBackup(ctx: RequestContext): Promise<void> {
-    const result = await this.deps.backups.manager.createBackup({
-      triggerType: 'manual',
-      source: 'admin backup'
-    });
+    // BRG-008: a backend whose rows are not in a file refuses. That is a
+    // precondition of this route, not a fault in it — 409, not 500, so an
+    // operator's client can tell "you cannot do this here" from "it broke".
+    const result = await asRefusal(() =>
+      this.deps.backups.manager.createBackup({
+        triggerType: 'manual',
+        source: 'admin backup'
+      })
+    );
     sendJSON(ctx.res, 200, {
       ok: true,
       archive: result.archivePath,
@@ -123,11 +143,13 @@ export class AdminBackupRoutes {
     const body = await readJSONBody(ctx.req);
     const archive = typeof body.archive === 'string' ? body.archive : '';
     if (!archive) throw new HttpError(400, 'archive (path) is required');
-    const result = await this.deps.backups.manager.restore(archive, {
-      triggerType: 'manual',
-      source: 'admin restore',
-      safetySnapshot: body.safetySnapshot !== false
-    });
+    const result = await asRefusal(() =>
+      this.deps.backups.manager.restore(archive, {
+        triggerType: 'manual',
+        source: 'admin restore',
+        safetySnapshot: body.safetySnapshot !== false
+      })
+    );
     sendJSON(ctx.res, 200, { ok: true, ...result });
   }
 

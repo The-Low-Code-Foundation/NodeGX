@@ -64,6 +64,54 @@ export const recordCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'records/a-declared-type-survives-the-round-trip',
+    area: 'records',
+    pins: 'a row reads back in its DECLARED type, not in whatever the driver stores it as',
+    async run(ctx) {
+      // 🔴 BRG-008, owed by BRG-003 since s11. This is the portable half of
+      // R7: BRG-007 gates the PRODUCT surface (one case per wire prefix,
+      // because two REST prefixes over one store disagreed), and a conformance
+      // case cannot see that — it runs BELOW both prefixes. What it CAN pin,
+      // and what a third adapter would need, is the claim underneath: the
+      // adapter applies the declared type on the way out.
+      //
+      // The defect this would have caught: both adapters looked the type up as
+      // `schema.properties[key].type`, and a service-opened backend only ever
+      // has a `TableSchema {name, columns}` — so the lookup was `undefined` for
+      // every column of every collection and each driver's own return value
+      // won. SQLite stores a Boolean as INTEGER 0/1; `pg` returns a real
+      // boolean. Neither driver was wrong; the lookup was.
+      const c = ctx.collection('Typ');
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'done', type: 'Boolean' },
+        { name: 'score', type: 'Number' }
+      ]);
+
+      const made = await ctx.create(c, { title: 'declared', done: true, score: 3 });
+      eq(typeof made.done, 'boolean', `create returned the declared Boolean as ${typeof made.done}`);
+      eq(made.done, true, 'create did not echo the Boolean as true');
+
+      const got = await ctx.fetch(c, String(made.objectId));
+      eq(typeof got.done, 'boolean', `fetch returned the declared Boolean as ${typeof got.done}`);
+      eq(got.done, true, 'fetch lost the Boolean value');
+
+      // The false arm, separately: `0` and `false` are both falsy, so a case
+      // asserting only `true` passes on an adapter that returns 0 for false.
+      const off = await ctx.create(c, { title: 'off', done: false, score: 0 });
+      const gotOff = await ctx.fetch(c, String(off.objectId));
+      eq(typeof gotOff.done, 'boolean', `the false arm read back as ${typeof gotOff.done}`);
+      eq(gotOff.done, false, 'the false arm did not read back as false');
+
+      // The control: a Number must NOT have been coerced on the way through.
+      // Without it this case passes on an adapter that stringifies everything
+      // and happens to hand back a boolean-shaped value.
+      eq(typeof gotOff.score, 'number', `the Number control read back as ${typeof gotOff.score}`);
+      eq(gotOff.score, 0, 'the Number control lost its value');
+    }
+  },
+
+  {
     id: 'records/save-updates-in-place',
     area: 'records',
     pins: 'save() mutates the existing row rather than inserting a second one',

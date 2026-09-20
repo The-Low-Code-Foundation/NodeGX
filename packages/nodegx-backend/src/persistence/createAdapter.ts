@@ -42,9 +42,34 @@ function loadPostgres(): {
     target: { redacted: string };
   };
   parseStorageUrl(raw: string): { redacted: string };
+  POSTGRES_ENGINE_NAME: string;
 } {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   return require('@noodl/runtime/src/api/adapters/postgres');
+}
+
+/**
+ * BRG-008: what engine this data dir WOULD use, and where, WITHOUT connecting.
+ *
+ * `createAdapter` answers the same question by connecting, which is the right
+ * answer for anything that then uses the adapter. The backup CLI needs it
+ * before it touches anything and must be able to refuse while the database is
+ * unreachable — a backup asked of an engine this process cannot copy is wrong
+ * whether or not that engine is up.
+ *
+ * `engine: null` means "the built-in SQLite backend", which is exactly the
+ * "caller did not say" the backup guard treats as proceed: the CLI cannot know
+ * whether `node:sqlite` or `better-sqlite3` will load without loading one, and
+ * for this question it does not matter — both are files.
+ */
+export function describeConfiguredStorage(explicit?: string | null): { engine: string | null; target: string | null } {
+  const storageUrl = resolveStorageUrl(explicit);
+  if (!storageUrl) return { engine: null, target: null };
+  const pg = loadPostgres();
+  // Throws StorageUrlError by name on an unsupported scheme (R5) — the same
+  // refusal `createAdapter` would give, at the same seam, without a socket.
+  const parsed = pg.parseStorageUrl(storageUrl);
+  return { engine: pg.POSTGRES_ENGINE_NAME, target: parsed.redacted };
 }
 
 /** What `/health` shows for a pooled engine (BRG-005 AC4). Null on SQLite, which has no pool. */

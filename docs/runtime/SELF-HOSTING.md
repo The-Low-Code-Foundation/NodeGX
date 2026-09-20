@@ -246,7 +246,11 @@ node cli.js serve --data-dir /var/lib/nodegx --port 8577 --host 0.0.0.0
 ```
 
 So you can deploy the app to any static host and run that command under systemd,
-or use a different container platform, or your existing Kubernetes. Package the
+or use a different container platform, or your existing Kubernetes — **as a
+single replica**. The backend assumes one process per data directory, so a
+`replicas: 2` Deployment will come up cleanly and then double-fire every
+schedule, split its realtime stream and multiply its own rate limits.
+[Scaling](./SCALING.md) has the full list and what to do instead. Package the
 artifact with `node scripts/package-deploy.js --app <folder>` and you have the
 same deterministic tree the images are built from; the pieces in
 `deploy/nginx.conf` and `deploy/entrypoint.sh` are the reference for what any

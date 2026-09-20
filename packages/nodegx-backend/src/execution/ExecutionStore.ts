@@ -38,6 +38,8 @@ import type { IOperationalStore } from '@noodl/backend-contract';
 
 import { logger } from '../ops/logger';
 import { SqliteOperationalStore, SqlDatabase } from '../persistence/SqliteOperationalStore';
+import { PgOperationalStore } from '../persistence/PgOperationalStore';
+import { resolveStorageUrl } from '../persistence/createAdapter';
 import { BoundedExecutionLogger } from './BoundedExecutionLogger';
 import type { RecordBounds } from './record-bounds';
 
@@ -74,6 +76,8 @@ export interface ExecutionHistoryStatus {
 export const DEFAULT_RECORD_BOUNDS: RecordBounds = { maxValueBytes: 50 * 1024, maxRunBytes: 8 * 1024 * 1024 };
 
 export interface ExecutionHistoryOpenOptions {
+  /** BRG-005: a PostgreSQL storage URL puts the operational store there. Defaults to `NODEGX_STORAGE_URL`. */
+  storageUrl?: string | null;
   /**
    * Live retention window, read on every prune so `PUT /admin/ops` takes effect
    * without a restart — same late-binding as `AuditLog`'s `getConfig`.
@@ -236,7 +240,14 @@ export class ExecutionHistory {
       this.store = store;
       this.autoVacuum = this.readAutoVacuum();
       this.pageBytes = this.readPragmaNumber('page_size');
-      this.operational = new SqliteOperationalStore(db as unknown as SqlDatabase);
+      // BRG-005 / BRG-D6: with a PostgreSQL storage URL the claim table lives
+      // in the database rather than beside the execution history, on its own
+      // pool (`DEFAULT_OPERATIONAL_POOL_MAX`). Resolved by the same function
+      // `createAdapter` uses, so the two cannot disagree about the database.
+      const storageUrl = resolveStorageUrl(options.storageUrl);
+      this.operational = storageUrl
+        ? new PgOperationalStore(storageUrl)
+        : new SqliteOperationalStore(db as unknown as SqlDatabase);
       this.status = { enabled: true, dbPath, error: null };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
@@ -295,6 +306,17 @@ export class ExecutionHistory {
       this.reclaimTimer = null;
     }
     this.reclaimRunning = false;
+    // BRG-D6: the operational store's pool, if it has one, is released here —
+    // this is the shutdown path `operational.ts` said did not exist. The drain
+    // is not awaited by this synchronous close; `stop()` returns while the
+    // sockets finish closing, which keeps the event loop alive until they do.
+    const operational = this.operational;
+    this.operational = null;
+    if (operational && typeof operational.close === 'function') {
+      operational.close().catch((e: unknown) => {
+        console.error('[nodegx-backend] operational store did not close cleanly:', e instanceof Error ? e.message : e);
+      });
+    }
   }
 
   /**

@@ -1,14 +1,13 @@
 # Phase 97 — next session
 
-**Session 11 built R7's repair. `GET /api/:table` now answers `true`/`false` for a declared
-`Boolean`, the same as `GET /classes/:c`, a graph's own `Query Records` and every reader on
-PostgreSQL. BRG-D8 and BRG-D10 are both closed.** The gate is
-[BRG-007](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md) — **7/7, one case per wire prefix, both arms.**
+**Session 12 took Richard's two rulings and built what they asked for. R8 is ruled and built
+([BRG-008](BRG-008-BACKUPS-ON-POSTGRES.md), 7/7), BRG-D7 is carried out of the phase with a home,
+BRG-003's owed conformance case is in (56 → 57), and the page AC8 is waiting on has been corrected.**
 
-**All six built tasks are green and every ruling is taken. What is left is not build work:** AC8 is
-with Richard, and two named items (§4) are unruled rather than unbuilt.
+🔴 **The only thing left in this phase is Richard reading `docs/runtime/SCALING.md` and ruling it
+honest.** There is no build work. Do not go looking for some.
 
-**Where it is:** `cline-dev`, commit `40140ca71`. s10 was `7c93fe888` + `bb3c3a1b5`.
+**Where it is:** `cline-dev`. s11 was `40140ca71`.
 
 ## The board, re-derived from the task files
 
@@ -16,82 +15,74 @@ with Richard, and two named items (§4) are unruled rather than unbuilt.
 |---|---|---|
 | [BRG-001](BRG-001-THE-SEAM-WRITTEN-DOWN.md) the interface | ✅ | — |
 | [BRG-002](BRG-002-THE-FOUR-HOLES-CLOSED.md) the holes | ✅ | AC7 (`noodl-mcp` — red for peers' reasons, re-measured at s9) |
-| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ all eight | its boolean hole is closed by BRG-007 at the prefix level; a declared-type case **at the conformance level** is still owed, and is a ratchet edit — see the end of that file |
+| [BRG-003](BRG-003-THE-CONFORMANCE-SUITE.md) the suite + gate | ✅ **all eight, and the owed case is in** | — |
 | [BRG-004](BRG-004-THE-MIGRATOR.md) the migrator | ✅ AC1–AC9 | — |
 | [BRG-005](BRG-005-THE-POSTGRES-ADAPTER.md) the adapter | ✅ all but AC7 | **AC7** — `noodl-mcp` green is not this phase's to make true (§7.5) |
-| [BRG-006](BRG-006-THE-DRIVE.md) the drive | ✅ **AC1–AC7** | **AC8** — published; Richard is reading it |
-| [BRG-007](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md) the Boolean | ✅ **AC1–AC5** | — |
+| [BRG-006](BRG-006-THE-DRIVE.md) the drive | ✅ AC1–AC7 | **AC8** — published, corrected at s12, with Richard |
+| [BRG-007](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md) the Boolean | ✅ AC1–AC5 | — |
+| [BRG-008](BRG-008-BACKUPS-ON-POSTGRES.md) backups | ✅ **AC1–AC5** | — |
 
-## Readings taken this session (2026-09-20)
+## 1. What s12 found, and it is the reason to re-read a page before acting on it
+
+🔴 **The page Richard took away to rule had gone false while he held it.** Its section *"One thing
+that changes shape: booleans over `/api`"* described exactly the divergence **BRG-007 removed the
+next day**. s10 wrote it truthfully; s11's own repair falsified it; nobody re-read it.
+
+It is replaced with the divergences that are still real, read out of `POSTGRES_DIVERGENCES` rather
+than remembered: search **ranking** order, the per-query `tsvector` sequential scan, and the
+`$within` polygon north/east boundary.
+
+**The general shape:** a document handed to someone for a decision is a measurement, and it decays
+like one. See [[a-page-handed-over-for-a-ruling-decays-like-any-other-measurement]].
+
+## 2. What R8 actually bought — it is not the refusal
+
+Richard ruled backups are the operator's job and the service should refuse rather than appear to
+work. Building it found the reason that matters:
+
+🔴 **`nodegx-backend backup` on a migrated data dir was archiving the pre-migration `local.db` —
+still sitting in `data/`, because that is what makes "going back works" true — and reporting
+success with a byte count.** The CLI never went through `createAdapter`; it built the SQLite path
+itself, so it could not know the backend had moved. The scheduled backup did the same, nightly.
+
+A backup that fails is an inconvenience. One that succeeds against stale rows is what you find out
+about on the worst day.
+
+**And the first draft of the guard was in the wrong place** — before the execution logger, so a
+refused scheduled backup left `/admin/backups` showing the last *pre-migration* success for ever.
+Writing the SCALING.md sentence *"the scheduled backup does not quietly keep running"* is what
+caught it: the sentence was false, so the code moved, not the sentence.
+See [[a-claim-written-into-a-doc-can-grade-the-code-it-describes]].
+
+## 3. Readings taken this session (2026-09-20)
 
 | what | reading |
 |---|---|
-| `brg-007` gate | **7/7** |
-| the same gate, repair reverted in place | **5 failed / 2 passed** — and the 2 passing are exactly the two controls |
-| `noodl-runtime` `test/adapters` | **292/292, 14 suites** — unchanged from s8 |
-| all `brg` specs, `NODEGX_REQUIRE_PG=1` | **16 suites / 150 tests, all passed, 212 s**, nothing skipped |
-| `typecheck:runtime` / `:contract` / `:backend-tests` | **0 / 0 / 0** |
-| full `nodegx-backend` sweep | **164 suites / 1980 tests — 1941 passed, 29 failed, 10 skipped**; two red suites, **neither this session's** (below) |
+| `brg-008` gate | **7/7** |
+| the same gate, guard disabled in place | **4 failed / 3 passed — the 3 passing are exactly the 3 controls**; the CLI arms fail with *"expected a refusal, and the call succeeded"* and the service arm with *Expected 409, Received 500* |
+| all backup specs (9 pre-existing suites + brg-008) | **10 suites / 34 tests, exit 0** |
+| conformance, SQLite + PostgreSQL | **7 suites / 57 tests**; case count **57** — records 16, filters 10, acl 16, relations 6, schema 9 |
+| the new conformance case, pre-R7 lookup restored | **red on that case and no other** |
+| `typecheck:backend-tests` / `nodegx-backend-contract` | **0 / 0** |
 
-🔴 **Both reds are attributed by measurement, not by assumption:**
+## 4. 🔴 What is in the working tree and NOT at HEAD
 
-- **`ops-rate-limit`** (1 test) — a peer's new `POST admin/executions/compact` moves the route tally
-  79 → 80. Absent at HEAD; **the same red s9 measured**. A read-path change cannot add a route.
-- **`ac2-page-editor-drag-drive`** (28 tests) — every one of them is the *same* `beforeAll` hook
-  hitting its 1,800,000 ms timeout, before any assertion ran. **Run alone it is 28/28, exit 0,
-  292 s.** It is the contention hang BRG-004 §"Running it" already records for a bare package-wide
-  `npx jest`, and the sweep is now three suites larger than s9's because of the peer's `prd-*` files.
-
-## 1. First job — there is no build work left in this phase
-
-🔴 **Do not go looking for some.** Every scoped task is green, all seven rulings are taken, and the
-close condition (README §8) is met but for Richard's read. If you have arrived here with time, the
-honest options are §4 below or another phase — **not** farming defects out of this one.
-
-**Ask Richard for the two rulings in §4 in plain words**, and otherwise treat this phase as closed.
-
-## 2. 🔴 What is in the working tree and NOT at HEAD
-
-Unchanged from s10 except that this session's own work is now committed:
-
-- **`docs/runtime/SCALING.md`** — 🔴 **a phase 98 peer's UNTRACKED file, which s10 edited and did
-  NOT commit.** Its Postgres section claimed shipped features did not exist. One section replaced,
-  one "Honest limits" bullet corrected, byte-identical otherwise. **It belongs to whoever owns that
-  file.** See BRG-006 §8.1.
+- **`docs/runtime/SCALING.md`** — still a phase 98 peer's **untracked** file, now edited by s10
+  *and* s12. Sections replaced whole, everything else byte-identical. **It belongs to whoever owns
+  that file.** BRG-006 §8.1.
 - **`packages/nodegx-backend/src/execution/ExecutionStore.ts`** — the `PgOperationalStore` wiring
   still sits on the peer's uncommitted PRD-003 `close()`. Commit once theirs lands. (Unchanged
   since s8.)
-- **`packages/nodegx-backend/src/server/HttpServer.ts`** and **`src/cli.ts`** — this phase's hunks
-  went in through a temporary index at s8/s9. A strange-looking `git diff` on either is that.
+- **`HttpServer.ts`** and **`cli.ts`** — this phase's hunks went in through a temporary index at
+  s8/s9. A strange-looking `git diff` on either is that.
 
-## 3. What s11 settled
+## 5. What is left
 
-- **The defect was one lookup reading one of two schema shapes.** Both adapters asked for
-  `schema.properties[key].type`; `getTableSchema()` returns `{ name, columns }`, and
-  `BackendService` passes no `collections` config, so on a service-opened backend the declared type
-  was invisible for **every column of every collection** and each driver's own return value won.
-  `/classes` was right for an unrelated reason: `AdapterFacade.toWire()` reads `schema.columns`
-  itself. One helper — `schemaCommon.declaredProperties` — now serves both adapters.
-- 🔴 **`rawQuery` was deliberately NOT made to convert**, as BRG-006 §9 warned. `raw*` stays
-  storage-shaped — a Pointer is still a bare id, a Date still an ISO string. What changed is that
-  the **declared** type is applied where it was being dropped, which is a different claim.
-- 🔴 **A gate written after a repair proves nothing until you take the repair away.** Both adapter
-  files were `cp`'d aside, the old lookup put back, the gate re-run (**5 red**), then restored and
-  `diff -u`-verified byte-identical. The two cases that stayed green under the revert are the
-  `Number` control and the `wire*` half — that signature is the reading, not the red count.
-- **`normalise()`'s `booleanReads` fold is gone.** s10 armed that fold to expire with the repair and
-  wrote down that it must. It expired, and the drive now compares the column like everything else.
-- **BRG-003's hole could not have been closed inside BRG-003.** A conformance case runs at the
-  adapter level, below both prefixes, so it could never have seen two REST surfaces disagree.
-
-## 4. What is left, and it is Richard's to rule
-
-- **AC8** — Richard has `SCALING.md`. Nothing is blocked on it but the phase's own close.
-- **BRG-D7** (`IStorageSchema` is synchronous; `PgSchemaManager` serves readers from a primed model
-  and queues DDL) is still open, and still owed to BRG-002's method on six callers, or a task of its
-  own.
-- **Backups on PostgreSQL** — `BackupManager` snapshots a SQLite file. `SCALING.md` now tells an
-  operator the execution history is a file to copy; whether `pg_dump` is the operator's job or the
-  service learns it **is still unruled**.
-- **A declared-type case at the conformance level** (BRG-003's own note) — the portable claim a
-  third adapter would need, as distinct from the product surface BRG-007 gates.
+- **AC8 — Richard's read.** Nothing else in the phase is open.
+- **Carried out, with homes, not left hanging:**
+  - **BRG-D7** → [SYNCHRONOUS-SCHEMA-INTERFACE.md](../../future-projects/SYNCHRONOUS-SCHEMA-INTERFACE.md).
+    Gated behind horizontal scaling, which is the phase that cannot ship without it.
+  - **`schema-migrate` on a Postgres data dir** → [BRG-008](BRG-008-BACKUPS-ON-POSTGRES.md) §6.
+    🔴 **Located, not suspected**: `schema-migrate.ts:165` reads `<dataDir>/data/local.db`
+    unconditionally, so `nodegx-backend schema diff` on a migrated dir compares against the
+    pre-migration schema. Same defect as BRG-008, one command family over. One session.

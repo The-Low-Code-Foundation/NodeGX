@@ -397,8 +397,25 @@ So the gate lives where the prefixes do:
 [`brg-007-a-boolean-reads-the-same-through-every-prefix.test.ts`](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md)
 — **one case per wire prefix**, both arms, SQLite only so it runs where there is no database.
 
-**What is still owed to this suite:** a declared-type round-trip case *at the conformance level*,
-for the property BRG-007 fixed at source — an adapter hands back the DECLARED type, not the
-driver's. That is the portable claim, and a third adapter would need it. Not built at s11: BRG-007's
-gate measures the product surface the ruling was about, and adding a case here is a change to the
-56-case ratchet and its declaration, which is a separate edit with its own AC7 accounting.
+**What was still owed to this suite — ✅ closed s12.** A declared-type round-trip case *at the
+conformance level*, for the property BRG-007 fixed at source: an adapter hands back the DECLARED
+type, not the driver's. That is the portable claim, and a third adapter needs it.
+
+`records/a-declared-type-survives-the-round-trip` — **the suite is 57 cases**
+(records 16, filters 10, acl 16, relations 6, schema 9), green on SQLite **and** on PostgreSQL
+16.11. The count is still derived from the artefact and asserted against `report.total`, never kept
+by hand, so the ratchet moved by itself.
+
+Three things the case does that a one-line boolean assertion would not:
+
+- **both arms.** `0` and `false` are both falsy, so a case asserting only the `true` arm passes on
+  an adapter that hands back `0` for false. The false arm is asserted separately, on `typeof`.
+- **a `Number` control in the same case.** Without it the case also passes on an adapter that
+  coerces everything and happens to land on a boolean-shaped value.
+- **`typeof`, not equality.** `eq(row.done, true)` is satisfied by `1` under `==`-shaped thinking;
+  the type is the claim, so the type is what is read.
+
+🔴 **Verified by removing the repair it pins**, not by watching it pass: the pre-R7 lookup
+(`schema.properties[key].type`) was put back in `LocalSQLAdapter._rowToRecord` and the SQLite run
+went red on **this case and no other** — which is the same reading as BRG-003's hole, stated from
+the other side. Restored by `cp` and `diff -u -a`-verified byte-identical.

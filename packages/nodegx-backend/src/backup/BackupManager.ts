@@ -55,6 +55,28 @@ import {
 } from './archive';
 import type { TarEntry } from './tar';
 
+/**
+ * BRG-008: the engines whose database this class can actually copy — the ones
+ * that ARE a file. `createAdapter` reports the name; `snapshot.ts` is what
+ * constrains the list.
+ */
+export const FILE_BACKED_ENGINES: readonly string[] = Object.freeze(['node:sqlite', 'better-sqlite3']);
+
+/**
+ * BRG-008: thrown when a backup or restore is asked of a backend whose records
+ * are not in a file this process can snapshot. Its own class so the HTTP layer
+ * can answer 409 rather than 500 — a refusal is not a crash.
+ */
+export class BackupNotFileBackedError extends Error {
+  readonly code = 'BACKUP_NOT_FILE_BACKED';
+  readonly engine: string;
+  constructor(message: string, engine: string) {
+    super(message);
+    this.name = 'BackupNotFileBackedError';
+    this.engine = engine;
+  }
+}
+
 /** Config files (dataDir-root) captured under `config/` in the archive. */
 const CONFIG_FILES = ['security.json', 'triggers.json', 'email.json', 'config-params.json', 'backups.json'];
 const SECRETS_FILE = 'secrets.json';
@@ -63,6 +85,26 @@ export interface BackupManagerDeps {
   dataDir: string;
   /** Absolute path to the live SQLite db (persistence.dbPath). */
   dbPath: string;
+  /**
+   * BRG-008: the engine actually holding the records, as
+   * `PersistenceHandle.status.engine` reports it (`node:sqlite`,
+   * `better-sqlite3`, `postgres`, …).
+   *
+   * This whole class copies a SQLite FILE. When the records live anywhere else
+   * that mechanism does not merely fail — on a migrated data dir it SUCCEEDS
+   * against the pre-migration `local.db` still sitting in `data/`, and writes
+   * an archive that looks healthy and holds stale rows. So the guard is a
+   * whitelist and the default direction is refusal: an engine this class does
+   * not know how to copy is refused BY NAME rather than approximated.
+   *
+   * Optional, and `undefined` means "the caller did not say" — every
+   * pre-BRG-008 caller is SQLite and is unaffected. The service and the CLI
+   * both pass it; `brg-008-backups-on-postgres` asserts they do, through a
+   * real backend rather than a hand-built manager.
+   */
+  engine?: string | null;
+  /** BRG-008: redacted storage target, so a refusal can name where the rows actually are. */
+  storageTarget?: string | null;
   executions: ExecutionHistory;
   config: BackupConfigStore;
   backendId: string;
@@ -237,6 +279,39 @@ export class BackupManager {
   // Create
   // --------------------------------------------------------------------------
 
+  /**
+   * BRG-008. Refuse, by name, when the records are not in a file this process
+   * can copy.
+   *
+   * 🔴 Called INSIDE the recorded path, not before it — and the first draft of
+   * this had it the other way round. The reasoning for "before" was that a
+   * refusal is a precondition rather than a failed backup, so it should not put
+   * a red run in the history every night. That reasoning produces the exact
+   * outcome RUN-004 and this module's own docblock exist to forbid: a scheduled
+   * backup that stops protecting you while `/admin/backups` still shows the
+   * last PRE-MIGRATION success. `BackupScheduleDispatcher.fire` even says so —
+   * it swallows the throw because "createBackup already recorded the failure
+   * LOUDLY", which is only true if the throw happens in here.
+   *
+   * A nightly red run is not noise. It is the operator finding out.
+   */
+  private assertFileBackedStorage(operation: 'backup' | 'restore'): void {
+    const engine = this.deps.engine;
+    // `undefined`/`null` = the caller did not say. Every such caller predates
+    // BRG-008 and is SQLite; narrowing that to a refusal would break them.
+    if (engine === undefined || engine === null) return;
+    if (FILE_BACKED_ENGINES.includes(engine)) return;
+    const where = this.deps.storageTarget ? ` (${this.deps.storageTarget})` : '';
+    throw new BackupNotFileBackedError(
+      `Refusing to ${operation}: this backend's records live in ${engine}${where}, not in a local ` +
+        `SQLite file, and nodegx-backend's ${operation} only knows how to copy the latter. Use your ` +
+        `database's own tooling (pg_dump / your provider's snapshots) for the records. Your data ` +
+        `directory still holds files, cloud functions, config and the execution history, and they ` +
+        `are not backed up by this command either — see docs/runtime/SCALING.md, "Backups on Postgres".`,
+      engine
+    );
+  }
+
   async createBackup(options: CreateBackupOptions = {}): Promise<CreateBackupResult> {
     const triggerType = options.triggerType || 'manual';
     const source = options.source || 'backup';
@@ -321,6 +396,7 @@ export class BackupManager {
   }
 
   private async doCreate(at: Date, options: CreateBackupOptions): Promise<CreateBackupResult> {
+    this.assertFileBackedStorage('backup');
     const destDir = options.destinationDir || this.deps.config.getDestinationDir();
     fs.mkdirSync(destDir, { recursive: true });
 
@@ -453,6 +529,7 @@ export class BackupManager {
     }
 
     try {
+      this.assertFileBackedStorage('restore');
       const result = await this.doRestore(archivePath, target, options);
       if (logger) logger.completeExecution(true);
       // Opened AFTER doRestore returns — target's db file has already been
