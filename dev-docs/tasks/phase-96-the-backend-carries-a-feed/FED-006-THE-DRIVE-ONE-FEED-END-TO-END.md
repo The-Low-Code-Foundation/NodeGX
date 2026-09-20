@@ -217,9 +217,103 @@ now returns `line`:
 | the cached-tokens clause removed from the line | FED-003's spec reds; FED-006's stays green |
 | the list not decorated | two FED-006 specs red |
 
-### 5.7 Still open
+---
 
-- **AC5's two screenshots** (§3.4) and the ruling itself. Both CONDITIONS Richard put on ruling are
-  now built and measured; what is left is him looking at the dashboard and saying the word. Ruled
-  2026-09-19: **next session, on a quiet box.** Recipe is in NEXT-SESSION-PROMPT.md §2.
-- ✅ **FED-003 §5.5 is settled** — see §5.6. It is no longer waiting on anything.
+## 6. The looking (s7, 2026-09-19)
+
+The shots §3.4 asks for are in `shots/`, taken against a backend provisioned from this task's own
+fixture project — three real schedule fires, seven items, four sources, one of them down.
+
+| shot | what it is |
+|---|---|
+| `fed006-ac5-execution-list.png` | `/_admin` → Executions, three `pollSources` runs |
+| `fed006-ac5-record-open.png` | one record open, as it opens |
+| `fed006-ac5-record-failed-step.png` | the same record scrolled to the step that failed |
+
+### 6.1 🔴 The looking found a defect first, and it blocked AC5 outright
+
+**The Executions view of the served dashboard had never shown a single execution.** It rendered
+"Nothing here yet." on a backend with three runs in it, at HTTP 200, with no error anywhere.
+
+`GET /executions` answers a **bare array**. Every other list route this page reads is enveloped —
+`/classes/*` gives `{results}`, `/admin/triggers` gives `{triggers}` — and the executions view
+read `data.executions || data.results || []`, which on an array is `[]`. Present since BAK-005's
+first commit (`083a20746`, 2026-07-26). Fixed in `src/admin/ui/index.html`: the reader now takes
+an array as an array.
+
+🔴 **`admin-dashboard.test.ts` had a hole exactly the defect's shape.** It grades the document
+(markers, CSP, valid JS, `textContent` over `innerHTML`, the palette) and the HTTP tiers — so
+**every view on that page could read a key its route does not answer and the suite stayed green**.
+A spec now seeds one real execution and asserts the view finds it, and the extraction is **read
+out of the shipped document rather than restated in the test** — a copy would agree with the route
+forever while the page showed nothing. Mutant: revert the one-line fix and it reds with
+`Received array: []`, which is the empty table. 26/26 with the fix.
+
+### 6.2 What the record says, measured
+
+Both conditions Richard ruled at s6 are visibly working on real data:
+
+- **Ruling 1 — a failing step names its subject.** The refused feed's step carries
+  `detail: { url: "http://127.0.0.1:65454/broken.xml?token=[REDACTED]", status: 403 }` beside
+  `errorMessage: "http/error-status: The server answered 403 Forbidden"`. The path is there; the
+  key in the query string is not. That is the third shot.
+- **Ruling 2 — the cost reads as a sentence.**
+  `modelCost.line` = `4 model calls · 480 in / 44 out tokens · 25 ms · claude-opus-5`.
+- **Unplanned, and it matters for R17:** the failing `Run Tasks` steps already carry
+  `detail: { template, itemIndex, itemId, item: { sourceRowId, url } }`. **Per-item identity
+  exists today on the failing path** — R17's "the data exists" is stronger than s6 recorded.
+
+### 6.3 🔴 Three things the shots put to Richard, which the building did not
+
+Named here rather than left for him to find.
+
+1. **The record opens as 614 lines of raw JSON in a read-only textarea.** `"steps"` does not
+   begin until line 63; the first screenful is `triggerData` boilerplate. The answer to §3.4's
+   sentence — *which source produced which items* — is in there, and you scroll for it.
+2. 🔴 **All three rows read `success`, in green, including the poll where a feed was down.** This
+   is s6 §5.3's finding surfacing in exactly the place §3.4 asks him to rule: both of
+   `pollSources`' Response nodes answer HTTP 200, so the row's status is about the graph
+   answering, not about the poll working. **The failure is visible only inside the steps.**
+3. **The cost line is in the payload of both routes and in no column of either view.** §5.6 says
+   it is "on the LIST as well as the row" — that is true of the API and not of the page.
+
+### 6.4 🔴 Richard ruled on the shots, 2026-09-20 — **AC5 does NOT close**
+
+He was shown §6.3's three questions in plain words, with the shots. All three answered.
+
+**Ruling 1 — the record is NOT legible, and he named the standard.** Verbatim:
+
+> *"Yeah I want to insist here on having readable JSON. The beauty of n8n is exactly its offer of
+> breaking down the JSON visually and letting the user isolate the part that errored really
+> easily, nice colourful styled JSON explorer that's easy for a non coder to navigate, highlights
+> the important bits"*
+
+🔴 **This is a REFUSAL of "good enough for now", and it names a competitor's surface as the bar** —
+the same surface the phase's own sentence points at (README: *an alternative to Supabase and
+n8n*). It is not a polish request. **AC5 stays open and needs a task of its own.**
+
+**Ruling 2 — a run with a failed step must not read `success`.** Chosen over "keep `success`, add
+a separate signal" and over "leave it alone". The status becomes about what happened rather than
+about whether a reply was sent. 🔴 **Reach: this is every backend, not feeds** — the list's status
+filter, and anything else reading `status`, are in it.
+
+**Ruling 3 — the cost line rides the explorer, with a column as the fallback.** Verbatim:
+
+> *"If you make the JSON explorer better, that can be a highlighted visually part, but then you'd
+> have to also give access to the JSON from the successful runs too (which would be nice if
+> possible, otherwise make a column)"*
+
+✅ **His condition is ALREADY met and he did not know it:** the `Detail` button is on every row,
+successful or not, and the record it opens is the same for both — measured at s7 on three runs,
+all `success`. So the branch he prefers is available and the column is genuinely the fallback.
+
+### 6.5 Still open
+
+- **AC5** — 🟡 **BUILT at s8, and back with Richard.** FED-007 built all three rulings: the run
+  status is about the work (ruling 2), the record opens as a band + failures + steps + a tree
+  (ruling 1), and the cost line rides the band (ruling 3). Four fresh shots are in
+  `shots/fed007-*.png` and AC5 closes when he rules on them. See FED-007 §5.1a and §5.2a.
+- 🔴 **And the drive itself now proves ruling 2:** `feed-drive.test.ts` is 35/35, and the poll
+  with the 403'd source reads `error` while the two healthy polls in the same file still read
+  `success`.
+- ✅ **FED-003 §5.5 is settled** — see §5.6.

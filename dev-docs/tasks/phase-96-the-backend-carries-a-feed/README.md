@@ -4,7 +4,10 @@
 NodeGX app at distraction.digitalbricks.io), and a capability survey of `packages/nodegx-backend`,
 `packages/noodl-viewer-cloud` and `packages/noodl-runtime` taken the same afternoon at `cline-dev`
 HEAD `f3f67874d`.
-**Status: 🚧 R1–R4 RULED (§4). FED-001 ✅ CLOSED. FED-002 ✅ CLOSED. FED-003 ✅ CLOSED. FED-004 ✅ CLOSED. FED-005 ✅ CLOSED. FED-006 (the drive) is next and is the last task.** **Prefix: `FED`.**
+**Status: 🚧 FED-001…FED-005 ✅ CLOSED. FED-006 (the drive) is green on AC1–AC4 and 35/35. FED-007
+(the record reads like a record — scoped from Richard's refusal of FED-006 AC5) is built and gated
+on AC1–AC6 as of s8. 🔴 What is left in this phase is RICHARD: the FED-007 shots, and the one
+ruling the build found (FED-007 §8).** **Prefix: `FED`.**
 
 > "I'd really like the NodeGX backend to be able to handle this stuff. I want people to see NodeGX as
 > an alternative to tools like Supabase and n8n as well as a front end builder. The old Noodl made the
@@ -118,7 +121,8 @@ Asked in plain words, answered in one pass, 2026-09-18 (session 1).
 | [FED-003](FED-003-A-FUNCTION-CALLS-A-MODEL.md) | `Model Request` cloud node: key from `Secret`, structured JSON out, usage counted, no SDK | ✅ | ✅ 9/9 | ✅ |
 | [FED-004](FED-004-A-SCHEDULE-DOES-NOT-TRIP-OVER-ITSELF.md) | `overlapPolicy` on schedules; conditional GET (ETag / 304) on the HTTP node; a `User-Agent` | ✅ | ✅ 7/7 | ✅ |
 | [FED-005](FED-005-A-BACKEND-SPEAKS-MCP.md) | `/mcp` on the backend: functions and collections as tools, scoped by API key | ✅ | ✅ 8/8 | ✅ |
-| [FED-006](FED-006-THE-DRIVE-ONE-FEED-END-TO-END.md) | the drive: fixture feeds → schedule → parse → dedupe → tag → per-user read, on a provisioned backend | ⬜ | ⬜ | ⬜ |
+| [FED-006](FED-006-THE-DRIVE-ONE-FEED-END-TO-END.md) | the drive: fixture feeds → schedule → parse → dedupe → tag → per-user read, on a provisioned backend | ✅ | ✅ 35/35 | 🟡 AC5 with Richard |
+| [FED-007](FED-007-THE-RECORD-READS-LIKE-A-RECORD.md) | the execution record as a record: the run's status is about the WORK, and `/_admin` opens it as a band, its failures, its steps and a tree — not 614 lines of JSON | ✅ | ✅ AC1–AC6 | 🟡 AC7 with Richard |
 
 **FED-001 is CLOSED (s1):** built, gated, driven over HTTP on a provisioned backend, 53 tests green
 across the two suites, and the bundle budget measured at **+14.8 KB gzipped against 50 KB**.
@@ -246,3 +250,7 @@ schedule, items landing once each in `Item` under a unique index, each tagged by
 a key from `secrets.json`, readable by a session user and by an API key, and readable through
 `/mcp` by an MCP client. **No process other than `nodegx-backend` is running.** Richard has seen
 the execution record in the dashboard and ruled it legible.
+
+**Where it stands after s8:** every clause above is green except the last. The drive is 35/35;
+FED-007 built the three rulings Richard took on 2026-09-20 and its AC1–AC6 are gated. The last
+clause is a conversation — `shots/fed007-*.png`, and the question in FED-007 §8.

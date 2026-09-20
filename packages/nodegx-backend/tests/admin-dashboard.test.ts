@@ -20,6 +20,7 @@ import * as path from 'path';
 import type { DashboardFeatures } from '../src/admin/AdminDashboardRoutes';
 import type { SchemaResponse } from '../src/server/byob-admin';
 import { BackendService } from '../src/service';
+import { ExecutionHistory } from '../src/execution/ExecutionStore';
 
 import type { ErrorBody, ParseQueryResult, ParseRecord } from './helpers/http';
 
@@ -50,6 +51,93 @@ const LOCKED_CONFIG = {
 };
 
 const UI_DIR = path.join(__dirname, '..', 'src', 'admin', 'ui');
+
+/**
+ * The executions view's own row-extraction expression, lifted out of the served document and
+ * compiled. Reading it rather than restating it is what makes the spec below a gate on the PAGE
+ * instead of a gate on a copy of the page.
+ */
+function executionsExtraction(): (data: unknown) => unknown {
+  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
+  const at = html.indexOf("api('GET', '/executions?'");
+  if (at < 0) throw new Error('the executions view no longer calls /executions — re-point this spec');
+  const decl = html.indexOf('var rows =', at);
+  const end = html.indexOf(';', decl);
+  if (decl < 0 || end < 0) throw new Error('the executions view no longer assigns `var rows` — re-point this spec');
+  const expr = html.slice(decl + 'var rows ='.length, end).trim();
+  return new Function('data', `return ${expr};`) as (data: unknown) => unknown;
+}
+
+/**
+ * 🔴 FED-007 AC2 — the two surfaces this suite has to hold together.
+ *
+ * The dashboard's status vocabulary drifted three ways from the store's (`failed` and
+ * `cancelled`, which the store has never written; no `error`, which is the only failure value)
+ * and NOTHING caught it, because this document is a string to esbuild's text loader and no
+ * compiler reads it. The editor's own filter never drifted — it is declared
+ * `ExecutionStatus | ''` and the compiler checks it.
+ *
+ * So both of these read the LIVE text rather than restating it: the union out of the type file
+ * the store is typed by, and the array out of the page that ships.
+ */
+function executionStatusUnion(): string[] {
+  return typeUnion('ExecutionStatus');
+}
+
+/** The page's own status list, compiled out of the shipped document. `''` is "any status". */
+function dashboardStatusOptions(): string[] {
+  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
+  const decl = /var EXECUTION_STATUSES\s*=\s*(\[[^\]]*\])/.exec(html);
+  if (!decl) throw new Error('the page no longer declares EXECUTION_STATUSES — re-point this spec');
+  return new Function(`return ${decl[1]};`)() as string[];
+}
+
+/** The page's own status → affordance mapping, compiled out of the shipped document. */
+function dashboardStatusKind(which: 'executionStatusKind' | 'stepStatusKind' = 'executionStatusKind'): (
+  status: string
+) => string {
+  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
+  const at = html.indexOf(`function ${which}(value) {`);
+  if (at < 0) throw new Error(`the page no longer declares ${which} — re-point this spec`);
+  const end = html.indexOf('\n    }', at);
+  const body = html.slice(html.indexOf('{', at) + 1, end);
+  return new Function('value', body) as (status: string) => string;
+}
+
+/** A union of string literals declared in the execution-history types, read live. */
+function typeUnion(name: string): string[] {
+  const types = path.join(__dirname, '..', '..', 'noodl-viewer-cloud', 'src', 'execution-history', 'types.ts');
+  const source = fs.readFileSync(types, 'utf-8');
+  const decl = new RegExp(`export type ${name}\\s*=([^;]+);`).exec(source);
+  if (!decl) throw new Error(`${name} is no longer declared where this spec looks — re-point it`);
+  const values = decl[1].match(/'([^']+)'/g);
+  if (!values) throw new Error(`${name} is no longer a union of string literals — re-point this spec`);
+  return values.map((v) => v.replace(/'/g, ''));
+}
+
+/** The page's own STEP status list, compiled out of the shipped document. FED-007 AC3. */
+function dashboardStepStatuses(): string[] {
+  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
+  const decl = /var STEP_STATUSES\s*=\s*(\[[^\]]*\])/.exec(html);
+  if (!decl) throw new Error('the page no longer declares STEP_STATUSES — re-point this spec');
+  return new Function(`return ${decl[1]};`)() as string[];
+}
+
+/** The record reduction the opened-execution view is built from. FED-007 AC3–AC5. */
+function dashboardRecordSummary(): (record: unknown) => {
+  status: string;
+  workflow: string;
+  costLine: string;
+  stepCount: number;
+  failures: Array<{ index: number; step: string; type: string; message: string; detail: unknown }>;
+} {
+  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
+  const at = html.indexOf('function recordSummary(record) {');
+  if (at < 0) throw new Error('the page no longer declares recordSummary — re-point this spec');
+  const end = html.indexOf('\n    }', at);
+  const body = html.slice(html.indexOf('{', at) + 1, end);
+  return new Function('record', body) as never;
+}
 
 // ============================================================================
 // 1. Policy, with no server in the way
@@ -168,6 +256,39 @@ describe('BAK-005 dashboard document', () => {
     // innerHTML, a hostile value in a row would execute.
     expect(html).not.toMatch(/\.innerHTML\s*=/);
     expect(html).not.toMatch(/insertAdjacentHTML/);
+  });
+
+  /**
+   * 🔴 **FED-007 AC6 — every byte of this page ships, to every admin, on every load.**
+   *
+   * The document and its stylesheet are inlined by esbuild's text loader, so there is no lazy
+   * anything: a comment written here is a comment downloaded there. FED-001's precedent for an
+   * addition this size is a measured delta against a stated ceiling, so here is both.
+   *
+   * | | gzipped |
+   * |---|---|
+   * | before FED-007 | 23.9 KB |
+   * | after (the explorer, the bands, the step table, the vocabularies) | 30.7 KB |
+   * | **delta** | **+6.8 KB** |
+   *
+   * ⚠️ **The ceiling is deliberately loose and absolute, not a ratchet.** A ratchet set at the
+   * current figure makes the next person's honest 400 bytes into a red gate and teaches them to
+   * bump the number — this phase's register carries a row (R8) about a budget with six tokens of
+   * headroom that nobody knew about. This is a smoke alarm: it fires when the page has doubled,
+   * which is the failure worth catching.
+   */
+  it('the served page is still small enough to be one document (FED-007 AC6)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const zlib = require('zlib') as typeof import('zlib');
+    const shipped = Buffer.concat([
+      fs.readFileSync(path.join(UI_DIR, 'index.html')),
+      fs.readFileSync(path.join(UI_DIR, 'styles.css'))
+    ]);
+    const gzipped = zlib.gzipSync(shipped, { level: 9 }).length;
+
+    // The reading is real — a mis-pointed path would give a tiny number and pass.
+    expect(shipped.length).toBeGreaterThan(50_000);
+    expect(gzipped).toBeLessThan(48_000);
   });
 
   it('keeps red for danger only (the phase-23 palette law)', () => {
@@ -362,6 +483,181 @@ describe('BAK-005 dashboard over HTTP (locked backend)', () => {
 
     const after = await req('GET', '/admin/schema', undefined, asAdmin());
     expect(after.json.tables!.map((t) => t.name)).not.toContain('Doomed');
+  });
+
+  /**
+   * 🔴 **The Executions view showed "Nothing here yet." on a backend with executions in it**,
+   * from BAK-005's first commit until FED-006's AC5 screenshots went looking for it.
+   *
+   * `GET /executions` answers a BARE ARRAY. Every other list route this page reads is enveloped
+   * — `/classes/*` gives `{results}`, `/admin/triggers` gives `{triggers}` — and the executions
+   * view read `data.executions || data.results || []`, which on an array is `[]`. Status 200,
+   * a well-formed page, an empty table, and no error anywhere.
+   *
+   * ⚠️ **Nothing above could see it.** Level 2 grades the document (markers, CSP, valid JS,
+   * `textContent` over `innerHTML`, the palette) and level 3 grades the HTTP tiers — so every
+   * view on this page could read a key its route does not answer and this suite would stay
+   * green. That is the hole, and this is the spec shaped to fill it.
+   *
+   * 🔴 **The extraction is read OUT OF THE SHIPPED DOCUMENT, never copied into this file.** A
+   * copy would grade itself: it would agree with the route forever while the page showed
+   * nothing. If the view is restructured this spec fails loudly asking to be re-pointed, which
+   * is the correct outcome — it cannot silently start grading a page that no longer exists.
+   */
+  it('the Executions view finds the rows GET /executions actually answers', async () => {
+    // A real row, written by the real store into the dataDir this service is serving.
+    const history = new ExecutionHistory();
+    const status = history.open(dataDir, { getRetentionDays: () => 0 });
+    expect(status.enabled).toBe(true);
+    const store = history.createLogger()!.getStore();
+    const startedAt = Date.now();
+    const seeded = store.createExecution({
+      workflowId: 'pollSources',
+      workflowName: 'pollSources',
+      triggerType: 'schedule',
+      status: 'success',
+      startedAt,
+      completedAt: startedAt + 5,
+      durationMs: 5
+    });
+    history.close?.();
+
+    const listed = await req('GET', '/executions?limit=100', undefined, asAdmin());
+    expect(listed.status).toBe(200);
+    const data = JSON.parse(listed.text);
+
+    // 🔴 Seeding has to have WORKED, or the two arms below both read zero and grade nothing.
+    const real = (Array.isArray(data) ? data : []) as { id: string }[];
+    expect(real.map((r) => r.id)).toContain(seeded);
+
+    const rows = executionsExtraction()(data) as { id: string }[];
+    expect(Array.isArray(rows)).toBe(true);
+    expect(rows.map((r) => r.id)).toContain(seeded);
+  });
+
+  /**
+   * 🔴 FED-007 AC2. Three defects in five list entries, all invisible until R20's fix made the
+   * table show rows at all: `failed` and `cancelled` filtered to nothing whatever the backend
+   * held, and `error` — the store's only failure value — could not be picked.
+   *
+   * The filter is passed straight through to the store (`byob-admin.listExecutions`), so there
+   * was never a translation layer that could have absorbed the mismatch.
+   */
+  it('the status filter offers exactly the values a record can hold, and no others', () => {
+    const offered = dashboardStatusOptions();
+    const union = executionStatusUnion();
+
+    // The union has to have been READ, or an empty list would agree with an empty list.
+    expect(union).toContain('error');
+    expect(offered).toContain('');
+    expect(offered.filter((s) => s !== '').sort()).toEqual([...union].sort());
+  });
+
+  /**
+   * 🔴 FED-007 AC2, the other half: the chip tested `x.status === 'failed'` for its danger
+   * affordance, and the store writes `error`. Every failure this backend has ever recorded
+   * rendered AMBER — a warning, on a run that broke.
+   */
+  it('a failed run wears the danger affordance, and a healthy one does not', () => {
+    const kind = dashboardStatusKind();
+
+    expect(kind('error')).toBe('bad');
+    expect(kind('success')).toBe('ok');
+    expect(kind('running')).toBe('warn');
+  });
+
+  /**
+   * FED-007 AC2 — and the reason both specs above exist rather than one: a page that agrees with
+   * the union but colours by a value outside it is still broken, and vice versa. This is the
+   * seam they share.
+   */
+  it('colours every status it offers, and nothing it offers falls through to the warning', () => {
+    const kind = dashboardStatusKind();
+    const offered = dashboardStatusOptions().filter((s) => s !== '');
+
+    const coloured = offered.map((s) => [s, kind(s)]);
+    expect(coloured).toEqual(expect.arrayContaining([['success', 'ok'], ['error', 'bad']]));
+    // A status nobody thought about lands on `warn`, which is the fallback — that is correct for
+    // `running` and would be silence for anything new.
+    expect(offered.filter((s) => kind(s) === 'warn')).toEqual(['running']);
+  });
+
+  /**
+   * 🔴 FED-007 AC3 — the STEP vocabulary, held to the same standard as the run vocabulary and
+   * for the same reason: the record view now draws a chip per step, and `StepStatus` has a
+   * fourth value the run status does not.
+   */
+  it('the step vocabulary is the store’s, and `skipped` is not painted as a fault', () => {
+    const offered = dashboardStepStatuses();
+    const union = typeUnion('StepStatus');
+
+    expect(union).toContain('skipped');
+    expect([...offered].sort()).toEqual([...union].sort());
+
+    const kind = dashboardStatusKind('stepStatusKind');
+    expect(kind('error')).toBe('bad');
+    expect(kind('success')).toBe('ok');
+    expect(kind('running')).toBe('warn');
+    // A branch the run did not take is not a warning. It gets the plain chip.
+    expect(kind('skipped')).toBe('');
+  });
+
+  /**
+   * 🔴 **FED-007 AC3 — the reduction the opened record is built from, over a real one.**
+   *
+   * The record here is SEEDED through the real store and read back through the real route, so
+   * what the reduction is fed is the shape `/_admin` is actually handed — which is the half
+   * register R20 proved nobody was checking.
+   *
+   * ⚠️ AC4's *"against the real record, not a fixture"* is graded in `feed-drive.test.ts`, on a
+   * record produced by a real poll of a real feed. This arm is the cheap, always-run half: that
+   * the reduction finds a failed step at all, and does not find one where there is none.
+   */
+  it('the opened record surfaces its failed step, with the subject that step named', async () => {
+    const history = new ExecutionHistory();
+    expect(history.open(dataDir, { getRetentionDays: () => 0 }).enabled).toBe(true);
+    const logger = history.createLogger()!;
+    const startedAt = Date.now();
+    const executionId = logger.startExecution({
+      workflowId: 'pollSources',
+      workflowName: 'pollSources',
+      triggerType: 'schedule',
+      triggerData: { cron: '* * * * *' }
+    });
+    const healthy = logger.startNode({ nodeId: 'http', nodeType: 'net.noodl.HTTP', nodeName: 'Fetch the blog' });
+    logger.completeNode(healthy, true, { outcome: 'success' });
+    const broken = logger.startNode({ nodeId: 'http', nodeType: 'net.noodl.HTTP', nodeName: 'Fetch the channel' });
+    logger.completeNode(
+      broken,
+      false,
+      { outcome: 'failure', detail: { url: 'http://127.0.0.1:65454/broken.xml', status: 403 } },
+      new Error('http/error-status: The server answered 403 Forbidden')
+    );
+    logger.completeExecution(true);
+    history.close?.();
+
+    const opened = await req('GET', `/executions/${executionId}`, undefined, asAdmin());
+    expect(opened.status).toBe(200);
+    const record = JSON.parse(opened.text) as { steps?: unknown[]; startedAt?: number };
+
+    // Seeding worked, or both arms below read zero and grade nothing.
+    expect(record.steps).toHaveLength(2);
+    expect(record.startedAt).toBeGreaterThanOrEqual(startedAt);
+
+    const summary = dashboardRecordSummary()(record);
+    expect(summary.stepCount).toBe(2);
+    expect(summary.failures).toHaveLength(1);
+    expect(summary.failures[0].step).toBe('Fetch the channel');
+    expect(summary.failures[0].message).toContain('403');
+    expect((summary.failures[0].detail as { url?: string }).url).toContain('/broken.xml');
+
+    // 🔴 FED-007 AC1 again, and here it is the ROUTE that says so rather than a unit: the run was
+    // completed as a success and the record answers `error`.
+    expect(summary.status).toBe('error');
+
+    // The negative arm, in the same breath: a run with no failed step surfaces no failure, so
+    // the band above is a reading rather than a constant.
+    expect(dashboardRecordSummary()({ steps: [{ nodeId: 'http', status: 'success' }] }).failures).toEqual([]);
   });
 
   it('registers both dashboard routes in the one route table the walk test checks', () => {

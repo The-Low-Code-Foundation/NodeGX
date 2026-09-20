@@ -249,6 +249,214 @@
       return el('span.chip' + (kind ? '.' + kind : ''), { text: text });
     }
 
+    /**
+     * 🔴 FED-007 AC2 — the status values an execution record can hold, and the ONLY list this
+     * page may offer. `'' ` is "any status" and is not one of them.
+     *
+     * This is `ExecutionStatus` — `'running' | 'success' | 'error'` — from
+     * `noodl-viewer-cloud/src/execution-history/types.ts`. It is written out here because this
+     * document is a STRING to the build (esbuild's text loader) and no compiler will ever read
+     * it; `admin-dashboard.test.ts` reads this array out of the shipped page and requires it to
+     * equal that union, which is the only thing keeping the two in step.
+     */
+    var EXECUTION_STATUSES = ['', 'running', 'success', 'error'];
+
+    /**
+     * The affordance a run's status wears. `error` is the danger one — it was AMBER, because
+     * the chip tested for `'failed'`, a value the store has never written.
+     *
+     * ⚠️ Red is for danger only (the phase-23 palette law, gated over the stylesheet), which is
+     * why nothing else here reaches for `bad`.
+     */
+    function executionStatusKind(value) {
+      if (value === 'success') return 'ok';
+      if (value === 'error') return 'bad';
+      return 'warn';
+    }
+
+    /**
+     * The same again for a STEP, whose vocabulary is one longer: `StepStatus` is
+     * `'running' | 'success' | 'error' | 'skipped'`. The extra one is the reason this is a
+     * second function rather than a shared one — `skipped` is a branch the run did not take, and
+     * painting it amber would make every conditional graph look like it went wrong.
+     *
+     * Checked against `types.ts` by the same spec that checks the run vocabulary, for the
+     * reason given there: nothing else will ever read this document.
+     */
+    var STEP_STATUSES = ['running', 'success', 'error', 'skipped'];
+
+    function stepStatusKind(value) {
+      if (value === 'success') return 'ok';
+      if (value === 'error') return 'bad';
+      if (value === 'skipped') return '';
+      return 'warn';
+    }
+
+    /**
+     * 🔴 **FED-007 — what a person needs off an execution record before they read any of it.**
+     *
+     * Richard's *"highlights the important bits"*, computed. The record this reduces already
+     * carries every field below; what it did not have was anywhere they were said out loud
+     * rather than being line 63 of six hundred.
+     *
+     * ⚠️ **PURE, and self-contained ON PURPOSE.** It touches no other function on this page and
+     * no DOM, so `feed-drive.test.ts` can lift it out of the shipped document with `new
+     * Function` and run it over a REAL record from a real backend — which is AC4's *"asserted
+     * against the real record, not a fixture"*. A spec that restated this reduction would agree
+     * with itself forever, which is exactly how the executions view came to have never shown a
+     * row (register R20).
+     *
+     * `failures` is the reason the whole thing exists: a failed step's own `detail` — the URL a
+     * fetch was refused, the item a template choked on — is the answer to the only question
+     * anybody asks of a broken run, and until FED-006 it was not in the record at all.
+     */
+    function recordSummary(record) {
+      var rec = record || {};
+      var steps = rec.steps || [];
+      var failures = [];
+      var seen = {};
+      for (var i = 0; i < steps.length; i++) {
+        var step = steps[i] || {};
+        if (step.status !== 'error') continue;
+        var out = step.outputData || {};
+        var raw = out.detail;
+        var detail = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : null;
+        var failure = {
+          index: i,
+          step: step.nodeName || step.nodeId || 'step ' + (i + 1),
+          type: step.nodeType || '',
+          message: step.errorMessage || '',
+          detail: detail
+        };
+        /**
+         * 🔴 **Deduplicated, and the real record is why.** FED-006's poll of a feed that 403s
+         * records FIVE failed steps for ONE broken source: the fetch, the `Parse Feed` handed
+         * the refusal body, and the enclosing `Run Tasks` reporting "Task 4 of 4 failed" —
+         * twice, byte for byte. A band that lists the same failure twice is the 614-line
+         * textarea starting again.
+         *
+         * ⚠️ The key includes the DETAIL, so two items of a loop that fail separately are two
+         * failures. Only a genuinely identical report is folded.
+         */
+        var key = failure.step + ' ' + failure.message + ' ' + JSON.stringify(failure.detail);
+        if (seen[key]) continue;
+        seen[key] = true;
+        failures.push(failure);
+      }
+      var cost = rec.modelCost && typeof rec.modelCost === 'object' ? rec.modelCost : null;
+      var metadata = rec.metadata || {};
+      return {
+        id: rec.id || '',
+        status: rec.status || '',
+        workflow: rec.workflowName || rec.workflowId || '',
+        trigger: rec.triggerType || '',
+        triggerSource: metadata.triggerSource || '',
+        startedAt: rec.startedAt,
+        durationMs: rec.durationMs,
+        // The run's own message. On a run that answered and stepped in something this is the
+        // sentence `ExecutionLogger` borrowed from the failed step (FED-007 AC1).
+        errorMessage: rec.errorMessage || '',
+        costLine: cost && cost.line ? String(cost.line) : '',
+        capped: !!metadata.recordCapped,
+        stepCount: steps.length,
+        failures: failures
+      };
+    }
+
+    /**
+     * 🔴 **The explorer.** A value as a collapsible tree of ELEMENTS — never markup.
+     *
+     * ⚠️ `innerHTML` is gated out of this whole document by a regex, and the reason is in the
+     * spec: this screen prints record contents, and a record holds whatever a graph put in it.
+     * Every leaf below goes in through `textContent`, so a value shaped like a `<script>` tag is
+     * a string that says `<script>`.
+     *
+     * Containers deeper than `openTo` start collapsed, which is the difference between an
+     * explorer and a second textarea: `triggerData` is the first screenful of a webhook record
+     * and is almost never what you came for.
+     */
+    function jsonTree(value, key, depth, openTo) {
+      var wrap = el('div.jx-node');
+      var line = el('div.jx-line');
+      wrap.appendChild(line);
+
+      var isArray = Array.isArray(value);
+      var isObject = value !== null && typeof value === 'object' && !isArray;
+
+      if (!isArray && !isObject) {
+        line.appendChild(el('span.jx-twist', { text: ' ' }));
+        if (key !== null) line.appendChild(el('span.jx-key', { text: key + ':' }));
+        line.appendChild(el('span.jx-val.' + leafClass(value), { text: leafText(value) }));
+        return wrap;
+      }
+
+      var entries = isArray
+        ? value.map(function (v, i) { return { k: String(i), v: v }; })
+        : Object.keys(value).map(function (k) { return { k: k, v: value[k] }; });
+
+      var open = depth < openTo;
+      var twist = el('span.jx-twist', { text: open ? '▾' : '▸' });
+      var children = el('div.jx-children');
+      if (!open) children.classList.add('hidden');
+
+      line.appendChild(twist);
+      if (key !== null) line.appendChild(el('span.jx-key', { text: key + ':' }));
+      line.appendChild(
+        el('span.jx-meta', {
+          text: isArray
+            ? '[' + entries.length + (entries.length === 1 ? ' item]' : ' items]')
+            : '{' + entries.length + (entries.length === 1 ? ' field}' : ' fields}')
+        })
+      );
+
+      function toggle() {
+        var hidden = children.classList.contains('hidden');
+        children.classList.toggle('hidden');
+        twist.textContent = hidden ? '▾' : '▸';
+      }
+      twist.addEventListener('click', toggle);
+      line.addEventListener('click', function (e) { if (e.target !== twist) toggle(); });
+
+      entries.forEach(function (entry) {
+        children.appendChild(jsonTree(entry.v, entry.k, depth + 1, openTo));
+      });
+      wrap.appendChild(children);
+      return wrap;
+    }
+
+    /** The colour a leaf wears. None of them is red — that is reserved for a step that failed. */
+    function leafClass(value) {
+      if (value === null || value === undefined) return 'jx-null';
+      if (typeof value === 'number') return 'jx-num';
+      if (typeof value === 'boolean') return 'jx-bool';
+      return 'jx-str';
+    }
+
+    function leafText(value) {
+      if (value === null) return 'null';
+      if (value === undefined) return 'undefined';
+      if (typeof value === 'string') return '"' + value + '"';
+      return String(value);
+    }
+
+    /** A labelled section that opens on a click. Used for the raw JSON, which must stay one action away. */
+    function disclosure(label, build) {
+      var body = el('div.disclose-body.hidden');
+      var mark = el('span.jx-twist', { text: '▸' });
+      var head = el('div.disclose-head', {}, mark, el('span', { text: label }));
+      var built = false;
+      head.addEventListener('click', function () {
+        if (!built) {
+          built = true;
+          body.appendChild(build());
+        }
+        var hidden = body.classList.contains('hidden');
+        body.classList.toggle('hidden');
+        mark.textContent = hidden ? '▾' : '▸';
+      });
+      return el('div.disclose', {}, head, body);
+    }
+
     function emptyState(message) {
       return el('div.empty', { text: message });
     }
@@ -1415,8 +1623,20 @@
       var node = page('Executions', 'Every function, trigger, workflow and backup run this backend has recorded.');
       root.appendChild(node);
       var status = el('select');
-      ['', 'success', 'failed', 'running', 'cancelled'].forEach(function (s) {
-        status.appendChild(el('option', { value: s, text: s || 'any status' }));
+      // 🔴 FED-007 AC2. This list WAS `['', 'success', 'failed', 'running', 'cancelled']`, and
+      // three of those five were wrong: the store has never written `failed` or `cancelled` (both
+      // filtered to nothing, always) and `error` — the ONLY failure value — was missing, so the
+      // one filter worth having was the one you could not pick. The filter is passed straight
+      // through to the store, so nothing in between translated it.
+      //
+      // ⚠️ The values are `ExecutionStatus` from `noodl-viewer-cloud/src/execution-history/types.ts`,
+      // and the reason this drifted is that NOTHING TYPE-CHECKS THIS DOCUMENT — it is a string to
+      // esbuild's text loader. The editor's own filter (`ExecutionFilters.tsx`) is declared
+      // `ExecutionStatus | ''` and the compiler has kept it right. `admin-dashboard.test.ts` now
+      // lifts this array out of the shipped page and compares it to the union in that file, which
+      // is the closest thing this surface has to a compiler.
+      EXECUTION_STATUSES.forEach(function (s) {
+        status.appendChild(el('option', { value: s, text: s ? s.charAt(0).toUpperCase() + s.slice(1) : 'any status' }));
       });
       status.addEventListener('change', load);
       var body = el('div');
@@ -1430,14 +1650,17 @@
         api('GET', '/executions?' + query)
           .then(function (data) {
             clear(body);
-            var rows = data.executions || data.results || [];
+            // 🔴 `GET /executions` answers a BARE ARRAY. Every other list route on this page is
+            // enveloped (`{results}`, `{triggers}`), and reading only for an envelope here is why
+            // this view showed "Nothing here yet." on a backend with executions in it.
+            var rows = Array.isArray(data) ? data : data.executions || data.results || [];
             body.appendChild(
               table(['Started', 'Workflow / function', 'Trigger', 'Status', 'Duration', ''], rows, function (x) {
                 return el('tr', {},
                   el('td', { text: when(x.startedAt) }),
                   el('td', { text: cellText(x.workflowId || x.functionName) }),
                   el('td', { text: cellText(x.triggerType) }),
-                  el('td', {}, chip(cellText(x.status), x.status === 'success' ? 'ok' : x.status === 'failed' ? 'bad' : 'warn')),
+                  el('td', {}, chip(cellText(x.status), executionStatusKind(x.status))),
                   el('td', { text: x.durationMs !== undefined && x.durationMs !== null ? x.durationMs + ' ms' : '—' }),
                   actionCell(el('button.btn.tiny', { type: 'button', text: 'Detail', onclick: function () { detail(x.id); } }))
                 );
@@ -1447,15 +1670,168 @@
           .catch(fail);
       }
 
+      /**
+       * 🔴 **FED-007 — the record, as a record.**
+       *
+       * This opened as `JSON.stringify(data, null, 2)` in a readonly textarea until Richard
+       * looked at one and refused it: 614 lines, `"steps"` beginning at line 63, the failed
+       * fetch somewhere past it. What he asked for, in his order — *breaking down the JSON
+       * visually · isolate the part that errored really easily · nice colourful styled · easy
+       * for a non coder to navigate · highlights the important bits* — is the four parts below:
+       *
+       *  1. **The band** — status, what ran, what started it, how long, and the model cost as
+       *     the sentence FED-003 already composes.
+       *  2. **The failures**, first, in red, naming the step AND its subject (the URL that was
+       *     refused, the item that choked). No scrolling, no expanding. AC4.
+       *  3. **The steps as rows**, each opening onto its own error / input / output — instead of
+       *     one dump for the whole run.
+       *  4. **The raw JSON**, still one click away, because it is what people paste to each
+       *     other and the only thing that is certainly complete.
+       */
       function detail(id) {
         api('GET', '/executions/' + encodeURIComponent(id))
           .then(function (data) {
             var ref = {};
-            var pre = el('textarea', { value: JSON.stringify(data, null, 2), readonly: true });
-            pre.style.minHeight = '380px';
-            ref.ref = modal('Execution ' + id, [pre], [el('button.btn', { type: 'button', text: 'Close', onclick: function () { ref.ref.close(); } })]);
+            var summary = recordSummary(data);
+            var parts = [band(summary), failureBand(summary), stepTable(data.steps || [])];
+            parts.push(
+              disclosure('Raw JSON', function () {
+                var pre = el('textarea', { value: JSON.stringify(data, null, 2), readonly: true });
+                pre.style.minHeight = '320px';
+                return pre;
+              })
+            );
+            ref.ref = modal(
+              'Execution ' + id,
+              parts,
+              [el('button.btn', { type: 'button', text: 'Close', onclick: function () { ref.ref.close(); } })]
+            );
+            // A record is a table of 34 rows, not a confirmation dialog. The default 620px wraps
+            // an error message mid-word, which is the illegibility this task is about.
+            ref.ref.box.classList.add('wide');
           })
           .catch(fail);
+      }
+
+      /** Fact, fact, fact — and the cost line on its own row. */
+      function band(summary) {
+        var fact = function (label, value) {
+          return value === '' || value === null || value === undefined
+            ? null
+            : el('span.rec-fact', {}, document.createTextNode(label + ' '), el('b', { text: String(value) }));
+        };
+        return el(
+          'div.rec-band',
+          {},
+          chip(summary.status || 'unknown', executionStatusKind(summary.status)),
+          fact('ran', summary.workflow),
+          fact('triggered by', summary.triggerSource || summary.trigger),
+          fact('started', summary.startedAt ? when(summary.startedAt) : ''),
+          fact('took', summary.durationMs === undefined || summary.durationMs === null ? '' : summary.durationMs + ' ms'),
+          fact('steps', summary.stepCount),
+          summary.capped ? chip('record capped', 'warn') : null,
+          summary.costLine ? el('div.rec-cost', { text: summary.costLine }) : null
+        );
+      }
+
+      /**
+       * 🔴 AC4 — *"the failed fetch and the URL it names are reachable without scrolling and
+       * without expanding anything"*. Everything here is already in the record; the only new
+       * thing is that it is at the top instead of forty steps down.
+       */
+      function failureBand(summary) {
+        if (!summary.failures.length) return null;
+        var box = el('div.rec-danger');
+        box.appendChild(
+          el('div.rec-danger-head', {
+            text:
+              summary.failures.length === 1
+                ? '1 step failed'
+                : summary.failures.length + ' steps failed'
+          })
+        );
+        /**
+         * ⚠️ Capped, because a loop that fails per item can fail hundreds of times and a band
+         * you scroll is the thing this replaced. The steps table below holds every one.
+         */
+        var SHOWN = 5;
+        summary.failures.slice(0, SHOWN).forEach(function (f) {
+          box.appendChild(el('div.rec-danger-step', { text: f.step + (f.type ? '  ·  ' + f.type : '') }));
+          if (f.message) box.appendChild(el('div.rec-danger-why', { text: f.message }));
+          if (f.detail) {
+            Object.keys(f.detail).forEach(function (k) {
+              var v = f.detail[k];
+              if (v === null || typeof v === 'object') return;
+              box.appendChild(el('div.rec-danger-why', { text: k + ': ' + String(v) }));
+            });
+          }
+        });
+        if (summary.failures.length > SHOWN) {
+          box.appendChild(
+            el('div.rec-danger-why', {
+              text: 'and ' + (summary.failures.length - SHOWN) + ' more — every step is in the table below.'
+            })
+          );
+        }
+        return box;
+      }
+
+      /** Each step a row; each row opens onto its own error, input and output. */
+      function stepTable(steps) {
+        if (!steps.length) return el('div.empty', { text: 'This run recorded no steps.' });
+        var head = el('tr');
+        ['', 'Step', 'Type', 'Duration', 'Status'].forEach(function (c) { head.appendChild(el('th', { text: c })); });
+        var tbody = el('tbody');
+        steps.forEach(function (step, i) {
+          var pane = el('tr.step-pane.hidden', {}, el('td', { colspan: '5' }, stepPane(step)));
+          var row = el(
+            'tr.step-row',
+            {
+              onclick: function () {
+                pane.classList.toggle('hidden');
+                row.classList.toggle('open');
+              }
+            },
+            el('td', { text: String(i + 1) }),
+            el('td', { text: cellText(step.nodeName || step.nodeId) }),
+            el('td', { text: cellText(step.nodeType) }),
+            el('td', { text: step.durationMs === undefined || step.durationMs === null ? '—' : step.durationMs + ' ms' }),
+            el('td', {}, chip(cellText(step.status), stepStatusKind(step.status)))
+          );
+          tbody.appendChild(row);
+          tbody.appendChild(pane);
+        });
+        return el('div.scroller', {}, el('table', {}, el('thead', {}, head), tbody));
+      }
+
+      /**
+       * A step's own three things. `skipped` is a branch the run did not take, so it is said in
+       * words rather than shown as a status nobody can act on.
+       */
+      function stepPane(step) {
+        var pane = el('div');
+        var part = function (title, value) {
+          // 🔴 TWO levels open, not one. A step's output is almost always `{ outcome, detail }`
+          // and `detail` is the half anybody opened the step for — the URL that was refused, the
+          // item that choked. One level shows `detail: {2 fields}` and makes them click again.
+          return el('div.pane-part', {}, el('h4', { text: title }), el('div.jx', {}, jsonTree(value, null, 0, 2)));
+        };
+        if (step.errorMessage) {
+          pane.appendChild(
+            el('div.pane-part', {}, el('h4', { text: 'Error' }), el('div.rec-danger-why', { text: step.errorMessage }))
+          );
+        }
+        if (step.status === 'skipped') {
+          pane.appendChild(
+            el('div.pane-part', {}, el('h4', { text: 'Skipped' }), el('div.jx-meta', {
+              text: 'This step was not reached — the run took another path.'
+            }))
+          );
+        }
+        if (step.inputData !== undefined && step.inputData !== null) pane.appendChild(part('Input', step.inputData));
+        if (step.outputData !== undefined && step.outputData !== null) pane.appendChild(part('Output', step.outputData));
+        if (!pane.firstChild) pane.appendChild(el('div.jx-meta', { text: 'This step recorded no data.' }));
+        return pane;
       }
     });
 

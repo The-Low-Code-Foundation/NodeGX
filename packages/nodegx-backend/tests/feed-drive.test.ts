@@ -53,6 +53,40 @@ import { httpClient } from './helpers/http';
 
 jest.setTimeout(300_000);
 
+/**
+ * 🔴 **FED-007 AC4/AC5 — the served dashboard's own reduction of a record, lifted out of the
+ * shipped document and run HERE, against the real one.**
+ *
+ * `recordSummary` is what `/_admin` puts at the top of an opened execution: the status, what ran,
+ * the model cost as a sentence, and the failures with the subject each one names. It is written
+ * as a pure, self-contained function precisely so this file can compile it and feed it a record
+ * produced by a real poll of a real feed — AC4's *"asserted against the real record, not a
+ * fixture"*.
+ *
+ * ⚠️ Read, never restated. A copy of this reduction in this file would agree with itself forever
+ * while the page showed something else, which is register R20's whole lesson.
+ */
+interface RecordSummary {
+  status: string;
+  workflow: string;
+  trigger: string;
+  triggerSource: string;
+  errorMessage: string;
+  costLine: string;
+  stepCount: number;
+  failures: Array<{ index: number; step: string; type: string; message: string; detail: Record<string, unknown> | null }>;
+}
+
+function dashboardRecordSummary(): (record: unknown) => RecordSummary {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'admin', 'ui', 'index.html'), 'utf-8');
+  const at = html.indexOf('function recordSummary(record) {');
+  if (at < 0) throw new Error('the dashboard no longer declares recordSummary — re-point this spec');
+  const end = html.indexOf('\n    }', at);
+  if (end < 0) throw new Error('recordSummary is no longer indented as this spec expects — re-point it');
+  const body = html.slice(html.indexOf('{', at) + 1, end);
+  return new Function('record', body) as (record: unknown) => RecordSummary;
+}
+
 /** Where the FED-001 feed fixtures live. Read across rather than copied: one copy cannot drift. */
 const FEEDS = path.join(__dirname, '..', '..', 'noodl-runtime', 'test', 'fixtures', 'feeds');
 
@@ -373,6 +407,25 @@ describe('FED-006 — one feed reader, end to end', () => {
     logger.configure({ level: 'silent' });
     if (service) await service.stop();
     if (fixtures) await new Promise<void>((resolve) => fixtures.close(() => resolve()));
+
+    /**
+     * 🔴 **`FED007_KEEP_DATA=1` leaves the data dir behind, and it is the re-shoot recipe.**
+     *
+     * FED-007 AC7 needs screenshots of a REAL record — three schedule fires, a feed that is
+     * down, a model cost — and s7 built that backend by hand, threw the script away, and wrote
+     * half a page of the next handoff explaining how to do it again. This is the same thing in
+     * one flag: run the drive, keep the directory, then point the real CLI at it
+     * (`node bin/nodegx-backend.js serve --data-dir <dir> --port <port>`) and the dashboard
+     * serves the records this file just produced, admin token and all, from `secrets.json`.
+     *
+     * ⚠️ Off by default, because a drive that leaves a directory behind every run is a drive
+     * that fills a disk.
+     */
+    if (dataDir && process.env.FED007_KEEP_DATA) {
+      // eslint-disable-next-line no-console
+      console.log(`\n        FED007_KEEP_DATA: the drive's backend is at ${dataDir}\n`);
+      return;
+    }
     if (dataDir) fs.rmSync(dataDir, { recursive: true, force: true });
   });
 
@@ -785,6 +838,8 @@ describe('FED-006 — one feed reader, end to end', () => {
     let brokenUrl = '';
     let failedRun: ExecutionRow;
     let steps: ExecutionStep[] = [];
+    /** The whole record, as `/_admin` receives it — what FED-007's summariser is fed. */
+    let failedRecord: unknown = null;
 
     beforeAll(async () => {
       brokenUrl = `${fixtureUrl}${BROKEN_PATH}?token=${MODEL_KEY}`;
@@ -802,6 +857,7 @@ describe('FED-006 — one feed reader, end to end', () => {
       });
       expect(detail.status).toBe(200);
       steps = detail.json.steps || [];
+      failedRecord = detail.json;
     });
 
     it('exactly one fetch failed, and the record says which URL it was', () => {
@@ -840,6 +896,120 @@ describe('FED-006 — one feed reader, end to end', () => {
 
     it('no new items were written by the broken source, and the other seven are untouched', async () => {
       expect((await items()).length).toBe(TOTAL_ITEMS);
+    });
+
+    /**
+     * 🔴 **FED-007 AC1, on the real record.** Richard ruled it on this very run, 2026-09-20,
+     * looking at a screenshot of three green rows one of which was this poll: *a run with a
+     * failed step must not read `success`.*
+     *
+     * Before the ruling was built, `status` was the HTTP reply — `WorkflowRunner`'s
+     * `response.statusCode >= 200 && < 300` — and this graph answers 200 on BOTH its Response
+     * nodes, because CWF-018 requires the failure path to reach one. So the row said `success`
+     * over a poll where a feed was down, and the only place the failure appeared was forty steps
+     * into the JSON.
+     *
+     * ⚠️ Its control is the spec at step 3 above: the two HEALTHY polls, in this same file,
+     * still read `success`. Without that arm this would pass against a backend that marked every
+     * run an error.
+     */
+    /**
+     * 🔴 **FED-007 AC4, on the real record.** *"The failed fetch and the URL it names are
+     * reachable without scrolling and without expanding anything."*
+     *
+     * The page's band is built from exactly this reduction and from nothing else, so what is
+     * asserted here is what a person sees at the top of the modal before touching anything: the
+     * name of the step, the reason, and the URL it was refused at.
+     *
+     * ⚠️ Every arm below runs the SHIPPED function. If the page stops computing this, or starts
+     * computing it differently, this reddens — which is the property a restated copy could never
+     * have.
+     */
+    it('🔴 FED-007 AC4: the page surfaces the failed fetch and its URL, unexpanded', () => {
+      const summary = dashboardRecordSummary()(failedRecord);
+
+      // The reduction really did read THIS run, or every arm below is about an empty object.
+      expect(summary.stepCount).toBe(steps.length);
+      expect(summary.stepCount).toBeGreaterThan(4);
+
+      const fetchFailure = summary.failures.filter((f) => f.type === 'net.noodl.HTTP');
+      expect(fetchFailure).toHaveLength(1);
+      expect(fetchFailure[0].message).toContain('403');
+      // 🔴 AC4's actual sentence: the URL, in the band, with nothing expanded.
+      expect(String(fetchFailure[0].detail?.url)).toContain(BROKEN_PATH);
+      expect(fetchFailure[0].detail?.status).toBe(403);
+      // …and still not the key that was in it. The band is no less redacted than the record.
+      expect(JSON.stringify(summary)).not.toContain(MODEL_KEY);
+    });
+
+    /**
+     * 🔴 **What AC4's first draft got wrong, kept because it is the finding.**
+     *
+     * That draft expected ONE failure in the band, on the strength of the spec above it: exactly
+     * one fetch failed. The real record carries **five** failed steps for one down feed — the
+     * fetch, the `Parse Feed` handed the refusal body, and the enclosing `Run Tasks` reporting
+     * *"Task 4 of 4 failed"* **twice, byte for byte**.
+     *
+     * At least one of those is a duplicate and is folded by the summariser; the rest are a
+     * genuine cascade and are shown, because hiding a step that really did fail is how a record
+     * stops being a record. 🔴 **One of them — a `Run Tasks` step whose whole message is "The
+     * action could not be performed" — is a failure with no subject and no reason, which is the
+     * exact complaint FED-006's ruling 1 was about.** Phase register R25.
+     *
+     * ⚠️ **The COUNT is not asserted, and that is a measurement rather than a shrug.** A first
+     * version pinned five raw and four folded; it went red once and green on the two runs after
+     * it with the same code, so the cascade's size is not stable run to run — which is register
+     * R25's other half. What IS stable is asserted below, and the shape is printed on every run
+     * so the variation is visible rather than inferred.
+     */
+    it('🔴 one down feed makes a CASCADE of failed steps, and the band folds the duplicates', () => {
+      const summary = dashboardRecordSummary()(failedRecord);
+      const raw = steps.filter((step) => step.status === 'error');
+      // eslint-disable-next-line no-console
+      console.log(
+        '        FED-007 cascade:',
+        JSON.stringify({
+          raw: raw.map((s) => `${s.nodeType}#${s.nodeId}: ${s.errorMessage}`),
+          folded: summary.failures.length
+        })
+      );
+
+      // One broken feed, and more than one step says so — that is what a cascade is.
+      expect(raw.length).toBeGreaterThan(1);
+      // The fold never invents a failure and never drops a distinct one.
+      expect(summary.failures.length).toBeGreaterThan(0);
+      expect(summary.failures.length).toBeLessThanOrEqual(raw.length);
+      // …and no two survivors are identical, which is the whole of what folding means here.
+      const keys = summary.failures.map((f) => `${f.step}|${f.message}|${JSON.stringify(f.detail)}`);
+      expect(new Set(keys).size).toBe(keys.length);
+
+      // 🔴 Register R25: one of the failures a person reads names neither a subject nor a reason.
+      const bare = summary.failures.filter((f) => f.message === 'The action could not be performed');
+      expect(bare.length).toBeGreaterThan(0);
+      expect(bare[0].detail).toBeNull();
+    });
+
+    /**
+     * 🔴 **FED-007 AC5** — *"the cost line is visible on an opened record without reading raw
+     * JSON"*. Richard's ruling 3, which asked for it on the explorer with a list column as the
+     * fallback. It rides the band.
+     */
+    it('🔴 FED-007 AC5: the cost line is on the opened record, as a sentence', () => {
+      const summary = dashboardRecordSummary()(failedRecord);
+      expect(summary.costLine).toContain('model call');
+      expect(summary.costLine).toContain('tokens');
+      // The control: it is the record's own line, not something this reduction composed.
+      expect(summary.costLine).toBe((failedRun as { modelCost?: ModelCost }).modelCost?.line);
+    });
+
+    it('🔴 the run that contained the failure does not read success (FED-007 AC1)', () => {
+      // The failure really is in this run, or the status below is about nothing.
+      expect(steps.filter((step) => step.status === 'error').length).toBeGreaterThan(0);
+
+      expect(failedRun.status).toBe('error');
+      // And it says so in a sentence, naming the node, rather than leaving the row bare — the
+      // run DID answer, and a message that omitted that would read as a run that fell over.
+      expect(failedRun.errorMessage).toContain('The run answered, but a step failed:');
     });
   });
 
@@ -903,10 +1073,24 @@ describe('FED-006 — one feed reader, end to end', () => {
       expect((await runs()).length).toBe(runsBefore + 1);
     });
 
-    it('it was the catch-up, and it succeeded', async () => {
+    /**
+     * 🔴 **This spec read `status === 'success'` until FED-007 AC1, and the ruling took it.**
+     *
+     * The run is the catch-up poll, and the broken source the AC5 block added is still in the
+     * Source table — nothing removes it — so this poll fetches four feeds and one of them 403s,
+     * exactly like the run above. Under the ruling that row is `error`, and it should be: it is
+     * the same poll, with the same feed down.
+     *
+     * So what AC3 is actually about is asserted directly instead of through a green chip — it
+     * was the CATCH-UP that ran (the metadata), it ran ONCE (the spec above), and it DID THE
+     * WORK (the spec below: the same items, upserted, no new rows). The status is now a
+     * statement about the broken feed, and it is asserted as one.
+     */
+    it('it was the catch-up, and its record is honest about the feed that is still down', async () => {
       const latest = (await runs()).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0))[0];
-      expect(latest.status).toBe('success');
       expect(String((latest.metadata || {}).triggerSource)).toContain('catch-up');
+      expect(latest.status).toBe('error');
+      expect(latest.errorMessage).toContain('The run answered, but a step failed:');
     });
 
     it('and it wrote no new rows — the same items, upserted', async () => {

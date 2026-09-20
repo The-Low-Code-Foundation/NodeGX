@@ -3,7 +3,7 @@
 Shaped per [PHASE-EXECUTION.md §3](../../guidelines/PHASE-EXECUTION.md): the board, the next task,
 the end condition, the register.
 
-## 1. The board (re-derived from the task FILES, 2026-09-19 after s6)
+## 1. The board (re-derived from the task FILES, 2026-09-20 after s8)
 
 | task | state |
 |---|---|
@@ -12,157 +12,140 @@ the end condition, the register.
 | FED-003 A function calls a model | ✅ **CLOSED (s3).** Nine ACs green; 24 specs across two suites |
 | FED-004 A schedule does not trip over itself | ✅ **CLOSED (s4).** Seven ACs green; 26 specs across three suites |
 | FED-005 A backend speaks MCP | ✅ **CLOSED (s5).** Eight ACs green; 39 specs, one driven by the OFFICIAL MCP client |
-| FED-006 The drive | 🟢 **AC1–AC4 GREEN, and AC5's two CONDITIONS built (s6). 31 specs.** What is left is Richard looking at the dashboard and saying the word |
+| FED-006 The drive | 🟡 **AC1–AC4 GREEN; AC5 built at s8 and BACK WITH RICHARD.** The drive is 35/35 and now proves ruling 2 itself |
+| FED-007 The record reads like a record | 🟡 **AC1–AC6 GREEN (s8). AC7 is the ruling, and it is with Richard.** Plus §8: one ruling the build found and needs |
 
-**All four rulings are in** (README §4), plus THREE taken at s6: AC4's wording, and the two
-conditions Richard put on AC5 — *a failing step must name its subject* and *the model cost reads
-as a summary line*. Both are built and mutation-tested (FED-006 §5.6). **Nothing is gated on a
-ruling except AC5 itself, and AC5 is now only the looking.**
+🔴 **The phase is one conversation from done.** Everything buildable in FED-007 is built and
+gated. What is left is Richard looking at four screenshots, and answering §8's question.
 
-✅ **s5's owed whole-package run is DONE (s6): `nodegx-backend` WHOLE, 154 suites / 1827 tests in
-510 s at `--maxWorkers=2`** — and it found a real defect no subset could see. See register R13.
+## 2. 🔴 FIRST JOB: two things are with Richard, and both are in FED-007
 
-## 2. The next task: FED-006 AC5, and that is the whole phase
+**Do not start anything else until these are put to him** — they are the phase's close condition.
 
-**AC5 — Richard rules the execution record legible.** §3.4 wants two screenshots in `shots/`: the
-`/_admin` execution list after a poll, and one `pollSources` record open. Ruled 2026-09-19:
-**take them next session, on a quiet box** — two peers were driving editors all through s6 and a
-stack would have collided.
+### (a) AC7 — the shots
 
-✅ **Both of his conditions are already paid** (FED-006 §5.6), so the screenshots are of a record
-that already names which feed failed and already carries the cost sentence. Do NOT rebuild either.
+`dev-docs/tasks/phase-96-the-backend-carries-a-feed/shots/fed007-*.png`, four of them, taken
+against a real backend serving the records FED-006's own drive produced:
 
-🔴 **Check the box first.** `lsof -ti :9222 -sTCP:LISTEN` and `ps` for a peer's `dev`/`dev:debug`;
-a peer's `dev` run REAPS your stack. Then:
+| shot | what it shows |
+|---|---|
+| `fed007-executions-list.png` | the list, with the broken polls in **red** and the healthy ones green — AC1 and AC2 in one picture |
+| `fed007-record-open.png` | a record as it opens: the band, the cost line, **4 steps failed** naming the URL and its 403, then the steps |
+| `fed007-step-expanded.png` | the failed fetch opened — its error, and `url` / `status` in the tree |
+| `fed007-explorer.png` | a model call's input as the explorer draws it: strings green, numbers violet, booleans cyan |
 
-1. Provision a backend from the drive's own project. The cheapest honest way is to run
-   `tests/feed-drive.test.ts` with the teardown skipped, or to boot a `BackendService` on a fixed
-   port from a small script using `tests/fixtures/feed-drive/project.ts` — the fixture HTTP server
-   has to be up too, since the graphs point at it.
-2. Open `/_admin`, find the `pollSources` executions, capture the list and one record open.
-3. ✅ **The model-cost sum IS formatted now** — FED-003 §5.5 was settled at s6, by his ruling, as
-   a summary line with no money in it. It is on the list as well as the row.
-4. The sentence he is ruling on: *a person who did not build this should be able to read the
-   record and say which source produced which items.*
+The question is §1's sentence: *a run went wrong, you open it, and the thing that went wrong is
+the thing you see.*
 
-**What the record carries, measured at s6:** `triggerSource` (`run-once-on-start catch-up` or
-`schedule * * * * *`), `triggerId`, `durationMs`, `modelCost` with its one-line summary, and a
-step per node with `nodeId`, `nodeType`, `status`, a real `errorMessage`, and — new at s6 — a
-`detail` naming the SUBJECT of a failure, so a failed fetch says which URL.
+### (b) 🔴 The ruling FED-007 §8 needs, in plain words
 
-🔴 **What it still does NOT carry, and you should say so rather than let him find it:** which
-instance or which ITEM a happy-path step belongs to. `nodeId` is the graph node's id, so seven
-items write seven steps called `store` and nothing distinguishes them. Richard was shown this and
-chose the narrow fix; **per-item execution history is scoped as its own work, not a FED-006
-tail** — it is the surface people compare to n8n, and it deserves a task.
+Ruling 2 — *"a run with a failed step must not read `success`"* — is built exactly as taken, and
+on its first day it found the shipped contact form failing **two** steps on every submission:
 
-## 3. The phase's end condition
+- **One is a real defect** (register R24): `Send Email` refuses with *"To" is required*, so **the
+  visitor's confirmation email has never been sent**, since SB-004.
+- **One is by design** (register R23): the template PROBES for an optional secret
+  (`CONTACT_RECIPIENT_EMAIL`), and a `Secret` that is not provisioned reports a failed step. The
+  graph is correct and the run did what it should.
 
-README §8, unchanged. **Everything in it is now green except the last clause.** The drive is
-green on a fresh backend, in one process; two fixture feeds (RSS 2.0 and Atom, plus a third) are
-polled by a schedule; items land once each under a unique index; each is tagged by a model call
-with a key from `secrets.json`; the rows are read back by a session user, by an API key, and
-through `/mcp` by the official MCP client. **Distance: Richard's ruling, and that is all.**
+So: **should a correct graph that treats an absent optional value as ordinary control flow read
+`error`?** FED-007 §8 has the three options and shows why the obvious narrowing ("only unrouted
+failures count") does **not** work — measured, not assumed.
 
-## 4. The register
+⚠️ **Do not change the built behaviour without his answer.**
+
+## 3. What s8 built
+
+**FED-007 §5.1a and §5.2a have the full account.** In short:
+
+- **AC1** — `ExecutionLogger.completeExecution` now reads the caller's `success` as *what the
+  caller observed*: a run whose record contains a failed step is `error` and borrows the step's
+  message (`The run answered, but a step failed: <node> — <reason>`). Built at the logger, not in
+  `WorkflowRunner`, because **eight** call sites complete an execution and all eight write
+  through that object. The `partial`-vs-`error` question §5.1 left open was settled by counting:
+  a third value costs changes in **ten** places across three packages, reusing `error` costs none.
+- **AC2** — the dashboard's status vocabulary was wrong three ways (`failed` and `cancelled`,
+  which the store never writes; no `error`, the only failure value; failures painted AMBER). Now
+  `EXECUTION_STATUSES` / `STEP_STATUSES` / `executionStatusKind` / `stepStatusKind` are named
+  things, and a spec lifts them out of the shipped page and compares them to the unions in
+  `types.ts` — the closest thing that document has to a compiler.
+- **AC3–AC6** — the record opens as a band + a failures band + steps-as-rows + a collapsible
+  tree, with the raw JSON one click away. +6.8 KB gzipped against a stated 48 KB ceiling.
+
+## 4. The phase's end condition
+
+README §8, unchanged. **Every clause is green except the last.** 🔴 **Distance: one conversation.**
+
+## 5. The register
 
 Unchanged rows are kept short; read s5's copy in git history for the full text of R1–R12.
 
 | | finding | owner |
 |---|---|---|
-| R1 | **A feed graph that wires only the happy path HANGS for the full function timeout** (CWF-018). ✅ *s6 paid it forward again:* every graph in `tests/fixtures/feed-drive/project.ts` wires `Failure` beside the path it expects — five of them in the task template alone, because a `Run Tasks` item that never reaches a completion output is one the loop waits for forever | CWF-018 |
+| R1 | **A feed graph that wires only the happy path HANGS for the full function timeout** (CWF-018). ✅ Paid forward by every graph in `tests/fixtures/feed-drive/project.ts` | CWF-018 |
 | R2 | The scoping session's `fast-xml-parser` figure was wrong. Corrected in FED-001 §3.1. **No action.** | — |
-| R3 | 🔴 **`id` is reserved at the adapter layer** — never auto-created as a column, never changeable (`PUT` answers 200 and writes nothing). ✅ **Re-measured at s6 exactly as this row asked.** A DECLARED `id` column with a unique index works, and `upsertOn: 'id'` through the `Create Record` node writes once and updates thereafter — 7 items after two polls, 11 model calls, one row each. **FED-006 did not trip on it. Row can close** unless someone wants the adapter-layer note written down somewhere a person would find it | ✅ paid by FED-006 |
-| R4 | A new node type owes `packages/noodl-mcp`. ✅ *s6 confirms the floor a third time:* **7 suites / 8 tests**, and the SET is the same seven — `nodeIdAllocation` · `cn004` · `cmp004Parts` · `nodeDocBudget` · `cmp001InterfaceDoctrine` · `def038SettledTemplates` · `d54ThemePresetIdentity`. `nodeDocBudget` still reds on **`Group` at exactly 14,315**, unmoved by s6's new catalog example | P18 (the wider ruling) · the seven: unattributed |
+| R3 | 🔴 **`id` is reserved at the adapter layer.** Re-measured at s6; FED-006 did not trip on it. **Row can close** unless someone wants the adapter-layer note written down where a person would find it | ✅ paid by FED-006 |
+| R4 | A new node type owes `packages/noodl-mcp`. The floor is **7 suites / 8 tests**, the same seven names; `nodeDocBudget` still reds on `Group` at 14,315 | P18 · the seven: unattributed |
 | R5 | ✅ **CLOSED 2026-09-18.** Kept for its attribution lesson: presence in `git status` is not authorship; mtime is | ✅ closed |
 | R6 | The `list_node_types` ratchet had 327 bytes of headroom and nobody knew. **No action beyond awareness.** | — |
-| R7 | ✅ **CLOSED BY FED-006 (s6).** `noodl.cloud.modelrequest` now cites one validated example — `docs/node-catalog/examples/cloud-tag-a-feed-item-with-a-model.json`, the `Secret → Model Request (Output Schema) → Create Record (Upsert On)` task template the drive actually runs. `catalog:examples` validates it clean; `catalog:merge:check` exits 0; `docs:nodes` regenerated | ✅ closed (s6) |
-| R8 | 🔴 The `noodl-mcp` **tool-surface** budget reads **8,274 against 8,280 — six tokens.** s6 added nothing to that surface (an example is not a tool description), and the ratchet is unmoved. A session that finds itself a few tokens under a ratchet should read that as the surface needing a diet | the ratchet: unowned |
-| R9 | ✅ **CLOSED (s5)** — the scoped-API-key privilege escalation on system collections, found and fixed in FED-005 | ✅ closed (s5) |
-| R10 | **A cloud component's `description` is dropped at export**, so a deployed backend has none. An EDITOR change (the exporter), which ruling R4 puts outside this phase | unowned — an editor phase |
-| R11 | **A graph refusing an unauthenticated caller answers HTTP 500, not 401.** True over `POST /functions/:name` too | unowned — the cloud-function door |
-| R12 | Two FED-005 design sentences deliberately not built (FED-005 §5.6): the joined key-usage panel, and the create form (refused behind R8) | the panel: unowned · the form: blocked behind R8 |
-| R13 | 🔴 **NEW (s6) — a deployed backend could not serve `/mcp` at all, and only the WHOLE package run could see it.** `tests/deploy-assets.test.ts` starts the real service, reads its real route table, and requires `deploy/nginx.conf` to forward every top-level family. `/mcp` is a family FED-005 added and nginx did not forward, so the endpoint FED-005 exists to offer would have 404'd in production while working in every test. **Fixed at s6** in both places the test names — the alternation in `deploy/nginx.conf` and the reserved-path list in `docs/runtime/SELF-HOSTING.md` — and that suite is 21/21. 🔴 **The lesson is the board's own warning from s5, paid off:** this is invisible to `test:main`, invisible to a per-suite run, and invisible to the 15-suite subset s5 ran. A task that adds a ROUTE FAMILY owes the whole-package run | ✅ closed (s6) |
-| R14 | 🔴 **NEW (s6) — `Model.create` takes `data.id` as the record's IDENTITY and then skips the key**, so a `Parse Feed` item's `id` is on `record.getId()` and **nowhere in `record.data`**. Any script mapping records to plain objects and reading `item.id` gets `undefined`. Cost an hour and surfaced as *"Upsert On names id, but this record has no value for it"* — a good error, several layers from the cause. `runtasks.ts` carries the same knowledge as two hand-written lines. **Not a defect** — it is how Model has always worked — but it is undocumented and it is the exact shape of "each item lands once" | unowned — worth a line in the `Parse Feed` / `Run Tasks` enrichment |
-| R15 | 🔴 **NEW (s6) — NDA-017's "run on value change" default silently halves a sequenced graph.** `Run` is additive: wiring a control signal does not make the other inputs passive, so a node whose value and signal arrive in sequence runs FIRST on the value with everything else unset. Measured: a poll that fetched its feed, reported **success in 48 ms** and wrote nothing. The fix is per-input (`runOnChange-<port>: false`) and every mapping node in the drive carries it. 🔴 **Nothing warns you** — the graph is correct, the run is green, and the only symptom is a suspiciously fast success | unowned — the shape is "a correct graph that does nothing" |
-| R16 | 🔴 **NEW (s6) — `catalog:examples` has TWO pre-existing reds**, both the same defect: `agent-sse-chat-stream` and `agent-store-shared-state` wire `net.noodl.controls.textinput`'s output `text`, which does not exist (it is `textChanged`/`onTextChanged`). 106/108 validate clean. **Not FED-006's** — measured before this session's example was added, and the example added is one of the 106 | unowned — whoever owns the agent examples |
+| R7 | ✅ **CLOSED BY FED-006 (s6).** `noodl.cloud.modelrequest` cites one validated example | ✅ closed (s6) |
+| R8 | 🔴 The `noodl-mcp` **tool-surface** budget reads **8,274 against 8,280 — six tokens.** A session that finds itself a few tokens under a ratchet should read that as the surface needing a diet. ✅ *s8 took the lesson:* FED-007's own size gate is a loose absolute ceiling, not a ratchet at the current figure | the ratchet: unowned |
+| R9 | ✅ **CLOSED (s5)** — the scoped-API-key privilege escalation on system collections | ✅ closed (s5) |
+| R10 | **A cloud component's `description` is dropped at export.** An EDITOR change | unowned — an editor phase |
+| R11 | **A graph refusing an unauthenticated caller answers HTTP 500, not 401.** | unowned — the cloud-function door |
+| R12 | Two FED-005 design sentences deliberately not built: the joined key-usage panel, and the create form (refused behind R8) | the panel: unowned · the form: blocked behind R8 |
+| R13 | ✅ **CLOSED (s6)** — a deployed backend could not serve `/mcp` at all, and only the WHOLE package run could see it. **A task that adds a ROUTE FAMILY owes the whole-package run** | ✅ closed (s6) |
+| R14 | 🔴 **`Model.create` takes `data.id` as the record's IDENTITY and then skips the key.** Undocumented, and exactly the shape of "each item lands once" | unowned — worth a line in the `Parse Feed` / `Run Tasks` enrichment |
+| R15 | 🔴 **NDA-017's "run on value change" default silently halves a sequenced graph.** The only symptom is a suspiciously fast success | unowned |
+| R16 | 🔴 **`catalog:examples` has TWO pre-existing reds** — `agent-sse-chat-stream` and `agent-store-shared-state` wire a port that does not exist. Not FED-006's | unowned — whoever owns the agent examples |
+| R17 | 🔴 **A step is named by the GRAPH node's id**, so nothing distinguishes one instance or one ITEM from another. Per-item identity already exists on the FAILING path (FED-006 §3.4) — ✅ **and s8 shows it working on the screen:** the failures band prints `itemIndex` and `itemId` for a `Run Tasks` failure. The SUCCESS path still has nothing | unowned — **scope it as its own task** |
+| R18 | 🔴 **`MAX_STEPS_PER_RUN` is 1000 and a loop-shaped function eats it.** FED-006's poll writes ~45 steps; a real reader with fifty sources is not far off. ⚠️ **s8 makes this worse and better at once:** the record view now shows every step as a row, so a record that silently stops at 1000 is more visible AND more annoying | unowned |
+| R19 | 🔴 **`catalog:examples` and `test:main` both carry reds that belong to live peer edits, and mtime is the only thing that says so.** ✅ *Paid again at s8:* s7's `typecheck` reds were a peer's `src/migrate/plan.ts` mid-write, and at s8 the same command exits 0 with nothing changed by us | not ours — P93/P97 |
+| R20 | 🔴 **The served dashboard's Executions view had NEVER shown a row** (bare-array route, envelope reader), since 2026-07-26. Fixed and gated at s7 | ✅ closed (s7) |
+| R21 | **The other list views on that page were NOT audited.** The reach of "a view reads a key its route does not answer" is every view on `/_admin`; only the executions one has a spec. ✅ *s8 adds the cheap instrument:* three helpers in `admin-dashboard.test.ts` lift a declaration out of the shipped page and compare it to its source of truth — the sweep is now a table of (page declaration, real source) pairs | unowned — a dashboard sweep |
+| R22 | 🔴 **The Executions view's status vocabulary disagreed with the store's, three ways.** ✅ **CLOSED (s8) as FED-007 AC2**, and gated against the union in `types.ts` from the shipped document | ✅ closed (s8) |
+| R23 | 🔴 **NEW (s8) — the status ruling paints a CORRECT graph red, and the shipped contact form is the example.** `/#__cloud__/site/ContactRecipient` probes for an optional secret; an unprovisioned `Secret` reports a failed step; the graph handles it and is right to. Under ruling 2 every contact submission now reads `error`. 🔴 **The obvious narrowing does not work** — "routed" is a `WorkflowEngine` concept (`inputData.previous.error`) and does not exist for graph runs, and this probe does not wire `failure` at all. **FED-007 §8 is the question, and it is Richard's** | 🔴 **WITH RICHARD** |
+| R24 | 🔴 **NEW (s8) — the site template's contact form has NEVER sent its confirmation email.** `noodl.cloud.sendemail#mail` fails with *"To" is required* on every submission, since SB-004: the recipient probe fails, `pick` produces no address, and nothing downstream notices. The visitor is still told *"sent"* and the message really is stored — only the confirmation is missing. **Pinned by a spec in `sbr010-messages-drive.test.ts`, which will red when it is fixed — that is the intended way to find out.** Invisible for months because the run read `success` | unowned — **the site-builder phase (P76/P77)** |
+| R25 | 🔴 **NEW (s8) — one down feed makes FIVE failed steps, the cascade's size is NOT STABLE, and one of them names nothing.** The fetch, the `Parse Feed` handed the refusal body, and `Run Tasks` reporting *"Task 4 of 4 failed"* **twice byte-for-byte** (folded by the band). A spec pinning the count went red once and green twice on identical code, so the spec now gates the stable properties and PRINTS the shape each run. 🔴 **And the first failure a person reads is a `Run Tasks` step whose entire message is *"The action could not be performed"*, with no detail** — a failure naming neither subject nor reason, which is precisely what FED-006's ruling 1 was about, one layer up | unowned — `runtasks.ts` |
 
-| R17 | 🔴 **NEW (s6) — a step is named by the GRAPH node's id, so nothing distinguishes one instance or one ITEM from another.** `RuntimeStepStart.nodeId` is `this.id`; seven items through one `Run Tasks` template write seven steps all called `store`. s6 closed the half that bites — a FAILING step now carries `detail`, so a refused fetch names its URL — on Richard's ruling. **The other half is open and is a product surface, not a phase-96 remainder:** per-item execution history is what people compare this to n8n on. `runtasks.ts` already holds `entry.index` and the item's record, so the data exists; what is missing is a field on the step and somewhere to show it | unowned — **scope it as its own task**, do not bolt it onto a feed task |
-| R18 | 🔴 **NEW (s6) — `MAX_STEPS_PER_RUN` is 1000 and a loop-shaped function eats it.** `WorkflowRunner.beginStep` stops recording past it and logs `function.steps.suppressed` ONCE. FED-006's poll of four feeds writes ~45 steps, so it is nowhere near — but a real feed reader with fifty sources and twenty items each is, and the failure mode is a record that silently stops half way. **Not measured against a realistic corpus by anything.** Related to R17: per-item identity makes the record bigger, so the two want sizing together | unowned |
-| R19 | 🔴 **NEW (s6) — `catalog:examples` and `test:main` both carry reds that belong to live peer edits, and mtime is the only thing that says so.** `tests-unit/tvw-007/instanceHover.test.ts` failed one `test:main` run (519/520) with mtime **23:00:32 — during the run** — and its whole `InstanceHoverCard/` tree is untracked P93 work; a re-run failed a DIFFERENT test in the same file, which is what a file being written mid-run looks like. ✅ **Attribute by mtime, never by `git status` and never by the failure text**, and re-run before believing any delta | not ours — P93 (TVW-007) |
+## 6. What s8 measured
 
-## 5. What s6 measured
+- **`execution-logger.test.ts` 35/35** (8 new). Mutant — drop `&& !failedStep` — **1 red**, its
+  green control still green.
+- **`admin-dashboard.test.ts` 32/32** (6 new). Mutant — restore the old vocabulary and the
+  `=== 'failed'` chip — **3 red**.
+- **`feed-drive.test.ts` 35/35** (4 new), ~100 s. The AC1/AC4/AC5 arms all read the REAL record.
+- **`sbr010-messages-drive.test.ts` 23/23**, **`def004-execution-steps.test.ts` 9/9**.
+- **The 19 backend suites that assert on a run's status: 353 tests, and the only two reds were
+  the ruling doing its job** — a spec whose title was the old behaviour, and R24.
+- **`noodl-viewer-cloud` whole: 15 suites / 242 tests, exit 0.**
+- `typecheck:cloud`, `typecheck:backend-tests`, `nodegx-backend typecheck`: **all exit 0**
+  (gated on exit status, not on empty output). `eslint` clean on every changed file.
+- Bundle: **+6.8 KB gzipped** on the served document (23.9 → 30.7 KB).
 
-- **`tests/feed-drive.test.ts`: 31/31**, and `fed-003-model-request` 17/17 — **48/48 together**,
-  78 s. AC1's budget is five minutes.
-- **`def004-execution-steps.test.ts` 9/9** — the step contract, which the `detail` change touches.
-- `typecheck:runtime`, `typecheck:cloud`, `typecheck:backend-tests` all **exit 0**.
-- 🔴 **`nodegx-backend` WHOLE: 154 suites / 1827 tests, 510 s** at `--maxWorkers=2` on a quiet box,
-  **one red** — `deploy-assets`, register R13, fixed, and that suite is 21/21 after.
-  ⚠️ Measured at 21:17–21:26. A peer began editing `packages/nodegx-backend/src/**` at 21:37 and
-  was still editing at 21:50, so **this figure is about the tree as it was at 21:17**.
-- **`test:main` 514/514 / 8220/8220 exit 0** before the runtime change; **519/520 suites,
-  8290/8291 tests** after it, the single red being register R19's — a peer's file written during
-  the run. `noodl-runtime/src/node.ts` is shared with the browser runtime, which is why this was
-  re-run rather than assumed.
-- **`noodl-mcp` at R4's floor: 7 suites / 8 tests, the same seven names**, `Group` at 14,315.
-- `typecheck:backend-tests` exit 0 (re-measured: a first reading of 2 was transient, taken while a
-  peer was mid-edit). `eslint` clean on both new files.
-- `catalog:examples` **106/108** — the two reds are R16's and are not ours.
-  `catalog:merge:check` exit 0. `docs:nodes` exit 0.
+### ⚠️ Not measured at s8, and the next session should decide whether it matters
 
-### 🔴 Three mutants, and the first one is the finding
+- **The whole `nodegx-backend` package** (154 suites / 1827 tests, ~510 s at `--maxWorkers=2`).
+  s8 changed a shared substrate — `ExecutionLogger` is the single write point for **every**
+  execution record on every backend — and swept the 19 suites that assert on run status plus
+  every suite touching the dashboard. 🔴 **R13's lesson says a change with this reach owes the
+  whole-package run**, and a peer was driving the editor for much of s8. **Run it before the
+  phase closes.**
+- **`test:main`**, for the same reason: `ExecutionLogger` lives in `noodl-viewer-cloud`, which
+  the editor also consumes.
 
-| mutant | result |
-|---|---|
-| **remove `upsertOn: 'id'`** from Create Record | 🔴 **24/24 STILL GREEN** → gate rewritten → 1 red |
-| `Conditional` off on the HTTP node | 2 red (the 304, and the model-call count) |
-| the API key not bound to Alice | 1 red (`myList` over `/mcp` is an error result) |
+## 7. Traps s8 paid for, so the next session does not
 
-🔴 **Both of `pollSources`' Response nodes answer HTTP 200**, so the execution row reads `success`
-whichever fired. Without `upsertOn` the second poll's writes were refused one item at a time, the
-graph answered on `resErr`, the row still said `success`, and the item count was still seven
-**because the refusals wrote nothing**. A gate with a hole shaped exactly like the defect. It now
-reads the STEPS — which Response node ran, and whether any step errored — which is the same thing
-§3.4 asks Richard to rule legible.
-
-### One flake, found and closed
-
-The drive went red ONCE, on a spec two immediate re-runs did not reproduce — the worst kind of
-result to leave lying. The cause is real and is now fixed rather than re-run away: the trigger's
-cron is a genuine `* * * * *`, and the suite was leaving the scheduler ARMED between assertions,
-so a minute boundary could land a THIRD poll mid-suite and move both the model-call count and
-AC3's "exactly one run was added". `armAndWaitForOnePoll` now disarms the trigger the moment the
-fire it asked for has finished. The cron stays minutely on disk — the execution record still reads
-`schedule * * * * *`, which is the point — it is simply not armed except while the helper is
-waiting. Three consecutive clean runs after: 24/24, 33–40 s.
-
-### 🔴 An incident: `git checkout --` destroyed a PEER's uncommitted work
-
-Reverting a mutant on `src/server/byob-admin.ts`, s6 used `git checkout -- <file>`. That file held
-**another session's uncommitted edits** (P98's PRD-002 `?capped=` hunk). `checkout --` does not
-undo your change; it discards everything not committed, theirs included.
-
-✅ **Recovered in full, and the recovery route is the reusable part.** VS Code's local history had
-nothing — a peer agent writes through Bash, which leaves no editor buffer and therefore no local
-history. **Session transcripts record tool inputs verbatim**, so the lost hunk was read straight
-out of `~/.claude/projects/<project>/<session>.jsonl`, found by scanning every transcript touched
-in the last two days for a write to that path, and restored byte-for-byte. The sweep also proved
-it was the ONLY lost hunk: four write-touches to that file in two days, two theirs and two ours.
-
-**The rules this cost, both of which were already written down:** never `git checkout --` on this
-checkout (`cp` from a scratchpad copy instead — s6 had made such copies for `WorkflowRunner.ts`
-and `modelCost.ts`, and simply did not make one here), and a mutant on a file a peer is editing
-needs its own backup before the mutation, not after.
-
-### Two traps that will cost the next person time
-
-⚠️ **`timeout` does not exist on macOS.** `timeout 300 npx jest …` exits instantly with `command
-not found` and a `| grep` swallows it, which reads exactly like a hang. Use `time npx jest …`.
-
-⚠️ **`grep` skips this package's big TypeScript files as binary.** `grep -n … src/server/HttpServer.ts`
-returns NOTHING; `grep -an` returns the matches.
-
-⚠️ **A backgrounded or piped command's exit code is the LAST command's.** s6's whole-package run
-was reported as exit 0 by a wrapper whose last statement was `tail`; the real result — one red —
-was in the log. Read the log, not the wrapper.
+- ⚠️ **`npm run build` is NOT optional when shooting the dashboard.** `bin/nodegx-backend.js`
+  runs `dist/`, and the page is inlined by esbuild's text loader — an unbuilt change shows the
+  OLD page while every test passes on the new one.
+- ⚠️ **A hash is not a navigation.** `Page.navigate` to `…/_admin#/executions` from `…/_admin`
+  changes `location.hash` and does NOT reload, so the boot that reads the seeded admin token
+  never runs and the page sits on its login screen — which looks exactly like a wrong credential.
+- ⚠️ **Use debug port 9333, not 9222.** 9222 is the editor's and a peer is usually on it.
+- ✅ **The shot recipe is a script now** (`scripts/devtools/shoot-admin-dashboard.js`), and
+  `FED007_KEEP_DATA=1 npx jest tests/feed-drive.test.ts` leaves the drive's backend on disk and
+  prints where. Three commands, in that file's header.
+- ⚠️ `timeout` does not exist on macOS — use `time npx jest …`. `grep` skips this package's big
+  TypeScript files as binary — use `grep -a`. A backgrounded or piped command's exit code is the
+  LAST command's — read the log, not the wrapper.

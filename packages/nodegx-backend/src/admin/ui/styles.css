@@ -37,6 +37,15 @@
   --danger: #f97066;
   --danger-bg: rgba(249, 112, 102, 0.12);
 
+  /*
+   * FED-007's syntax colours. Deliberately NOT the status palette: a string is
+   * not a success and a number is not a warning, and red is danger only — so a
+   * failed step is the only red on the record screen.
+   */
+  --code-str: #9ae6b4;
+  --code-num: #d6bcfa;
+  --code-bool: #76e4f7;
+
   --radius: 6px;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -527,4 +536,206 @@ td.actions {
 
 .hidden {
   display: none !important;
+}
+
+/* ------------------------------------------------- the execution record -- */
+/*
+ * FED-007. An execution record used to open as 614 lines of JSON in a readonly
+ * textarea, and Richard refused it: *"breaking down the JSON visually and
+ * letting the user isolate the part that errored really easily, nice colourful
+ * styled JSON explorer that's easy for a non coder to navigate, highlights the
+ * important bits"*.
+ *
+ * 🔴 Three constraints shaped every rule below and none of them is negotiable:
+ * there is NOWHERE to load a JSON-viewer library from (`default-src 'none'`,
+ * one self-contained document), the tree is built from elements and
+ * `textContent` and never from markup (gated: no `innerHTML` in this document),
+ * and RED IS DANGER ONLY (gated over this file) — so the syntax colours below
+ * are deliberately a green, a violet and a cyan, and the only red on the screen
+ * is a step that failed.
+ */
+
+.rec-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius);
+}
+
+.rec-fact {
+  color: var(--fg-shy);
+  font-size: 11.5px;
+}
+
+.rec-fact b {
+  color: var(--fg-hi);
+  font-weight: 600;
+}
+
+/* The cost line (FED-003), on its own row so it reads as the sentence it is. */
+.rec-cost {
+  flex-basis: 100%;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--primary-hi);
+}
+
+/*
+ * The failures band. `danger` is in the selector because this IS the danger
+ * affordance — the one place on this screen red is allowed, and the thing
+ * Richard asked to be able to find without hunting.
+ */
+.rec-danger {
+  border-left: 3px solid var(--danger);
+  background: var(--danger-bg);
+  border-radius: 3px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+}
+
+.rec-danger .rec-danger-head {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 11.5px;
+  margin-bottom: 6px;
+}
+
+.rec-danger .rec-danger-step {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-hi);
+  margin-top: 5px;
+  word-break: break-all;
+}
+
+.rec-danger .rec-danger-why {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg);
+  word-break: break-all;
+}
+
+/* ------------------------------------------------------------- steps -- */
+
+.step-row {
+  cursor: pointer;
+}
+
+.step-row.open td {
+  background: var(--bg-2);
+}
+
+.step-pane td {
+  white-space: normal;
+  font-family: var(--sans);
+  background: var(--bg-0);
+  max-width: none;
+  padding: 10px 12px;
+}
+
+.step-pane h4 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg-shy);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.step-pane .pane-part + .pane-part {
+  margin-top: 10px;
+}
+
+/* ------------------------------------------ the JSON explorer itself -- */
+
+.jx {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+.jx-children {
+  padding-left: 11px;
+  margin-left: 4px;
+  border-left: 1px solid var(--bg-3);
+}
+
+.jx-line {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.jx-twist {
+  cursor: pointer;
+  width: 10px;
+  flex: none;
+  color: var(--fg-muted);
+  user-select: none;
+}
+
+.jx-twist:hover {
+  color: var(--fg-hi);
+}
+
+.jx-key {
+  color: var(--fg-hi);
+}
+
+.jx-meta {
+  color: var(--fg-muted);
+}
+
+.jx-val {
+  word-break: break-all;
+}
+
+.jx-str {
+  color: var(--code-str);
+}
+
+.jx-num {
+  color: var(--code-num);
+}
+
+.jx-bool {
+  color: var(--code-bool);
+}
+
+.jx-null {
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------- disclosure -- */
+
+.disclose {
+  margin-top: 14px;
+}
+
+.disclose-head {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--fg-shy);
+  font-size: 11.5px;
+}
+
+.disclose-head:hover {
+  color: var(--fg-hi);
+}
+
+.disclose-body {
+  margin-top: 8px;
+}
+
+/* A record needs the width a table needs. FED-007. */
+.modal.wide {
+  width: min(900px, 100%);
 }

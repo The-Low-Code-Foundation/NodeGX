@@ -284,6 +284,13 @@ describe('SBR-010 — a visitor writes, and the owner reads it', () => {
   let contactRuns: Array<{ status: string; stores: number }> = [];
   /** The step list of one of those runs, which is where D42 was actually visible. */
   let contactSteps: string[] = ['ARM NEVER RAN'];
+  /**
+   * 🔴 The failed steps of that same run — `<nodeType>#<nodeId>: <message>`.
+   *
+   * Added by FED-007 AC1, which is what made them visible: until the ruling, a run whose steps
+   * failed still read `success`, so nothing in this drive had a reason to look at them.
+   */
+  let contactFailures: string[] = ['ARM NEVER RAN'];
   /** Steps whose node id has `base` once the door's collision suffix is taken off. */
   const stepsNamed = (base: string): string[] => contactSteps.filter((st) => stepBase(st) === base);
 
@@ -470,6 +477,18 @@ describe('SBR-010 — a visitor writes, and the owner reads it', () => {
     ).map((st) => `${st.nodeType}#${st.nodeId}`);
     // eslint-disable-next-line no-console
     console.log('        steps of one run:', JSON.stringify(contactSteps));
+    contactFailures = (
+      (history.get(first.id)?.steps || []) as unknown as Array<{
+        nodeId: string;
+        nodeType: string;
+        status: string;
+        errorMessage?: string;
+      }>
+    )
+      .filter((st) => st.status === 'error')
+      .map((st) => `${st.nodeType}#${st.nodeId.replace(/-\d+$/, '')}: ${st.errorMessage}`);
+    // eslint-disable-next-line no-console
+    console.log('        FAILED steps of one run:', JSON.stringify(contactFailures));
 
     // ── ARM 3: the owner reads what the visitor wrote ────────────────────────
     await withRenderedPage({ projectDir, backendPort }, async (p) => {
@@ -634,10 +653,14 @@ describe('SBR-010 — a visitor writes, and the owner reads it', () => {
    * twice reddens, and so does a repair that stops storing at all.
    */
   it('D42: the one public endpoint stores each enquiry exactly ONCE', () => {
+    // 🔴 **These read `success` until FED-007 AC1, and what the change revealed is below.**
+    // Richard ruled 2026-09-20 that a run containing a failed step must not read `success`, and
+    // every one of these three runs contains TWO — see the spec that follows, which is the whole
+    // point of the ruling arriving on a drive that had been green for months.
     expect(contactRuns).toEqual([
-      { status: 'success', stores: 1 },
-      { status: 'success', stores: 1 },
-      { status: 'success', stores: 1 }
+      { status: 'error', stores: 1 },
+      { status: 'error', stores: 1 },
+      { status: 'error', stores: 1 }
     ]);
     // …and the chain it hangs off ran once too, which is the cause rather than
     // the symptom: two `save` steps were two `fallback → pick` runs.
@@ -648,6 +671,36 @@ describe('SBR-010 — a visitor writes, and the owner reads it', () => {
     // …and it is a reading of THIS chain and not of an empty list — the filter
     // above returns `[]` just as happily for a step list that never arrived.
     expect(contactSteps.length).toBeGreaterThan(4);
+  });
+
+  /**
+   * 🔴 **What FED-007 AC1 found here on its first day, and neither half is this task's to fix.**
+   *
+   * Two steps fail in every submission, and the visitor, the owner and this drive were all told
+   * everything was fine:
+   *
+   *  1. `noodl.cloud.secret#fallback` — `CONTACT_RECIPIENT_EMAIL` is not provisioned, and the
+   *     template is built to cope: the `Secret` is a PROBE whose failure edge feeds `pick`. So
+   *     this failure is by design, and it is the ruling's cost — **a graph that probes for an
+   *     optional secret now records every run as `error`.** Put to Richard, phase register R23.
+   *  2. 🔴 `noodl.cloud.sendemail#mail` — *"To" is required*. **The confirmation email to the
+   *     visitor has never been sent**, on the shipped template, since SB-004. `pick` produced no
+   *     recipient because the probe failed and nothing downstream noticed. The visitor is still
+   *     told *"sent"* (the spec above says so) and the message really is stored — so the only
+   *     thing missing is the confirmation, and until the ruling there was nowhere it showed.
+   *
+   * This spec pins both so the next change to either is a conversation rather than a surprise.
+   * **When (2) is fixed this will red** — that is the intended way to find out.
+   */
+  it('🔴 FED-007 AC1: every one of those runs failed two steps nobody could see', () => {
+    expect(contactFailures.map((f) => f.slice(0, f.indexOf(':')))).toEqual([
+      'noodl.cloud.secret#fallback',
+      'noodl.cloud.sendemail#mail'
+    ]);
+    // The messages, because "a step failed" without its reason is the complaint the whole of
+    // FED-006's ruling 1 was about.
+    expect(contactFailures[0]).toContain('CONTACT_RECIPIENT_EMAIL');
+    expect(contactFailures[1]).toContain('"To" is required');
   });
 
   // ── §2. AC2 — the ACL is the feature ──────────────────────────────────────
