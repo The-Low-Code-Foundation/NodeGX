@@ -17,6 +17,17 @@ class ComponentTemplate {
   parentTypes: string[];
   runtimeTypes: string[];
   template: any;
+  /**
+   * TVW-009 §2.1 — a stable key that is NOT the label.
+   *
+   * `cloudFunction`'s comment below predicted this exactly: picking a template out
+   * of a list by `label` "would break the day someone rewords a menu entry", and
+   * TVW-009 is that day — every label on this class changed. A test id and a
+   * telemetry dimension are both identities, and an identity spelled as a sentence
+   * a person reads is one rename away from being a different identity. So the words
+   * move and this does not.
+   */
+  templateId: string;
   label: string;
   icon: IconName;
   /**
@@ -30,7 +41,8 @@ class ComponentTemplate {
   promptLabel = 'New component name';
   promptPlaceholder = 'e.g. ProductCard';
 
-  constructor(label, icon) {
+  constructor(templateId, label, icon) {
+    this.templateId = templateId;
     this.label = label;
     this.icon = icon;
   }
@@ -82,7 +94,7 @@ class ComponentTemplate {
 
 class VisualComponentTemplate extends ComponentTemplate {
   constructor() {
-    super('Visual Component', IconName.Component);
+    super('visual', 'New component', IconName.Component);
 
     this.parentTypes = ['folder', 'component'];
     this.runtimeTypes = ['browser'];
@@ -107,7 +119,7 @@ class VisualComponentTemplate extends ComponentTemplate {
 
 class LogicComponentTemplate extends ComponentTemplate {
   constructor() {
-    super('Logic Component', IconName.Component);
+    super('logic', 'New logic component', IconName.Component);
 
     this.parentTypes = ['folder', 'component'];
     this.runtimeTypes = ['cloud', 'browser'];
@@ -159,7 +171,7 @@ class LogicComponentTemplate extends ComponentTemplate {
 
 class CloudFunctionComponentTemplate extends ComponentTemplate {
   constructor() {
-    super('Cloud Function Component', IconName.CloudFunction);
+    super('cloud-function', 'New cloud function', IconName.CloudFunction);
 
     this.parentTypes = ['folder'];
     this.runtimeTypes = ['cloud'];
@@ -250,7 +262,7 @@ class CloudFunctionComponentTemplate extends ComponentTemplate {
 
 class PageComponentTemplate extends ComponentTemplate {
   constructor() {
-    super('Page Component', IconName.File);
+    super('page', 'New page', IconName.File);
 
     this.parentTypes = ['folder'];
     this.runtimeTypes = ['browser'];

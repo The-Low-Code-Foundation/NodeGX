@@ -26,13 +26,20 @@ import {
   buildCreateMenuItems,
   CLOUD_CREATE_PARENT_PATH,
   cloudFunctionUnavailableReason,
-  CLOUD_TEMPLATE_LABEL,
   createMenuTitle,
   destinationLabel
 } from '../../src/editor/src/views/panels/ComponentsPanelNew/createMenu';
 import { CLOUD_SHEET } from '../../src/editor/src/views/panels/ComponentsPanelNew/types';
 
 const NOOP = { onAddComponent: () => undefined, onAddFolder: () => undefined };
+
+/**
+ * TVW-009 §2.1 renamed every template label, and `createMenu` no longer exports one.
+ * Read from the template itself rather than restating the words here: a spec that keeps
+ * its own copy of a label is a second place the vocabulary has to be changed, and the
+ * one that goes stale quietly.
+ */
+const CLOUD_LABEL = ComponentTemplates.instance.cloudFunction.label;
 
 function rows(items: (MenuDialogItem | 'divider')[]): MenuDialogItem[] {
   return items.filter((i): i is MenuDialogItem => i !== 'divider');
@@ -98,15 +105,15 @@ describe('SPR-005 — the create menu itself', () => {
     });
     const items = buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'browser' }, NOOP);
     const enabled = rows(items).filter(
-      (i) => !i.isDisabled && i.label !== 'Create Folder' && i.label !== `Create ${CLOUD_TEMPLATE_LABEL}`
+      (i) => !i.isDisabled && i.label !== 'New folder' && i.label !== CLOUD_LABEL
     );
 
-    expect(enabled.map((i) => i.label)).toEqual(templates.map((t) => `Create ${t.label}`));
+    expect(enabled.map((i) => i.label)).toEqual(templates.map((t) => t.label));
   });
 
   it('offers the cloud function template, enabled, at the root of the cloud section', () => {
     const items = buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'cloud' }, NOOP);
-    const item = labelled(items, `Create ${CLOUD_TEMPLATE_LABEL}`);
+    const item = labelled(items, CLOUD_LABEL);
 
     expect(item).toBeDefined();
     expect(item.isDisabled).toBeFalsy();
@@ -129,20 +136,20 @@ describe('SPR-005 — the create menu itself', () => {
       { forParentType: 'folder', runtimeType: 'browser', parentPath: '/Sections' },
       { onAddComponent: (template, parentPath) => created.push({ label: template.label, parentPath }) }
     );
-    const item = labelled(items, `Create ${CLOUD_TEMPLATE_LABEL}`);
+    const item = labelled(items, CLOUD_LABEL);
 
     expect(item).toBeDefined();
     expect(item.isDisabled).toBeFalsy();
     expect(item.endSlot).toBe(SECTION_LABEL.cloud);
 
     item.onClick(null as TSFixme);
-    expect(created).toEqual([{ label: CLOUD_TEMPLATE_LABEL, parentPath: CLOUD_CREATE_PARENT_PATH }]);
+    expect(created).toEqual([{ label: CLOUD_LABEL, parentPath: CLOUD_CREATE_PARENT_PATH }]);
     expect(CLOUD_CREATE_PARENT_PATH).not.toBe('/Sections');
   });
 
   it('keeps it disabled inside a component, where no destination would help', () => {
     const items = buildCreateMenuItems({ forParentType: 'component', runtimeType: 'browser' }, NOOP);
-    const item = labelled(items, `Create ${CLOUD_TEMPLATE_LABEL}`);
+    const item = labelled(items, CLOUD_LABEL);
 
     expect(item).toBeDefined();
     // `isDisabled` is the key `MenuDialog` reads. `disabled` is inert there, and a row that looks
@@ -154,7 +161,7 @@ describe('SPR-005 — the create menu itself', () => {
 
   it('never offers it twice', () => {
     const cloud = buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'cloud' }, NOOP);
-    const matches = rows(cloud).filter((i) => i.label === `Create ${CLOUD_TEMPLATE_LABEL}`);
+    const matches = rows(cloud).filter((i) => i.label === CLOUD_LABEL);
     expect(matches.length).toBe(1);
   });
 
@@ -163,7 +170,7 @@ describe('SPR-005 — the create menu itself', () => {
     const items = buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'browser' }, {
       onAddComponent: () => undefined
     });
-    expect(labelled(items, 'Create Folder')).toBeUndefined();
+    expect(labelled(items, 'New folder')).toBeUndefined();
   });
 
   it('creates an ordinary template into the parent path it was given', () => {
@@ -173,8 +180,8 @@ describe('SPR-005 — the create menu itself', () => {
       { onAddComponent: (template, parentPath) => created.push({ label: template.label, parentPath }) }
     );
 
-    labelled(items, `Create ${CLOUD_TEMPLATE_LABEL}`).onClick(null as TSFixme);
-    expect(created).toEqual([{ label: CLOUD_TEMPLATE_LABEL, parentPath: '/Orders' }]);
+    labelled(items, CLOUD_LABEL).onClick(null as TSFixme);
+    expect(created).toEqual([{ label: CLOUD_LABEL, parentPath: '/Orders' }]);
   });
 });
 
@@ -184,9 +191,9 @@ describe('SPR-005 — the two doors onto a new cloud function agree', () => {
     // `ComponentTemplates.instance.cloudFunction`. If the panel's menu ever offered a different
     // template, the two doors would produce two different shapes of "new cloud function".
     const items = buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'cloud' }, NOOP);
-    const item = labelled(items, `Create ${CLOUD_TEMPLATE_LABEL}`);
+    const item = labelled(items, CLOUD_LABEL);
 
-    expect(item.label).toBe(`Create ${ComponentTemplates.instance.cloudFunction.label}`);
+    expect(item.label).toBe(ComponentTemplates.instance.cloudFunction.label);
     expect(item.icon).toBe(ComponentTemplates.instance.cloudFunction.icon);
   });
 
@@ -215,7 +222,11 @@ describe('SPR-005 — the two doors onto a new cloud function agree', () => {
   it('holds nothing else to it — a visual component may be called anything', () => {
     const visual = ComponentTemplates.instance
       .getTemplates({ forParentType: 'folder', forRuntimeType: 'browser' })
-      .find((t) => t.label === 'Visual Component');
+      // By `templateId`. This line said `t.label === 'Visual Component'` until TVW-009
+      // renamed it, at which point `find` returned undefined and the assertion below
+      // threw on a property of nothing — the failure `cloudFunction`'s comment predicted,
+      // landing in a spec rather than in the menu.
+      .find((t) => t.templateId === 'visual');
 
     expect(visual.validateLocalName('My Card!')).toBeNull();
   });
@@ -226,5 +237,60 @@ describe('SPR-005 — the two doors onto a new cloud function agree', () => {
     const cloud = ComponentTemplates.instance.cloudFunction;
     expect(cloud.promptLabel).toBe('New cloud function name');
     expect(cloud.promptPlaceholder).toBe('e.g. chargeCard');
+  });
+});
+
+/**
+ * TVW-009 AC3 — every `New …` row says one of the five words.
+ *
+ * §2.1's table is a promise about what a person reads, and the only place the promise is
+ * kept is the list `buildCreateMenuItems` returns. Pinned as the exact strings rather than
+ * "contains New", because "Create Visual Component" contains it too.
+ */
+describe('TVW-009 AC3 — the create menu speaks the vocabulary', () => {
+  it('offers New page, New component and New logic component in a browser folder', () => {
+    const items = rows(buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'browser' }, NOOP));
+    const labels = items.filter((i) => !i.isDisabled).map((i) => i.label);
+
+    expect(labels).toContain('New page');
+    expect(labels).toContain('New component');
+    expect(labels).toContain('New logic component');
+    expect(labels).toContain('New folder');
+  });
+
+  it('leaves no row saying Create, and none saying the retired words', () => {
+    // The whole menu, from both parent types and both runtimes, so a row that only appears
+    // in the cloud section cannot keep an old label by never being looked at.
+    const every = [
+      ...rows(buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'browser' }, NOOP)),
+      ...rows(buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'cloud' }, NOOP)),
+      ...rows(buildCreateMenuItems({ forParentType: 'component', runtimeType: 'browser' }, NOOP))
+    ].map((i) => i.label);
+
+    expect(every.length).toBeGreaterThan(3);
+    for (const label of every) {
+      expect(label.startsWith('New ')).toBe(true);
+      expect(/\b(sandbox|bench|page component|component node)\b/i.test(label)).toBe(false);
+    }
+  });
+
+  it('derives the test id from templateId, so a rename cannot silently unhook a selector', () => {
+    const items = rows(buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'browser' }, NOOP));
+    const page = items.find((i) => i.label === 'New page');
+
+    expect(page.testId).toBe('create-page');
+  });
+
+  it('mints the cloud row exactly once now that the check is by identity', () => {
+    // 🔴 The regression this guards: `alreadyOffered` compared `template.label` against a
+    // constant string. TVW-009 changed every label, so that comparison would have gone
+    // false in the cloud section, where `getTemplates` already returns the cloud template —
+    // and the menu would have shown two New cloud function rows. Nothing else would have
+    // failed; the count is the only witness.
+    const cloud = rows(buildCreateMenuItems({ forParentType: 'folder', runtimeType: 'cloud' }, NOOP));
+    const label = ComponentTemplates.instance.cloudFunction.label;
+
+    expect(label).toBe('New cloud function');
+    expect(cloud.filter((i) => i.label === label).length).toBe(1);
   });
 });

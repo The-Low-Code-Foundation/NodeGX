@@ -166,7 +166,7 @@ Everything below describes named, repeatable objects — a band, a section head,
 This is the decomposition doctrine applied to layout, and it is the rule most often lost the moment
 a page starts looking good: the page ends up correct, handsome, and 66 nodes long.
 
-- A finished page component should read as a short list of instances — header, hero, feature strip,
+- A finished page should read as a short list of instances — header, hero, feature strip,
   listing, footer — and is usually **under ~15 nodes**. If a page graph is past ~25, it wanted to
   be several components.
 - **Three structurally identical siblings is a validation warning**

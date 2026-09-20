@@ -53,8 +53,6 @@ import { folderPathLabel, PROJECT_ROOT_LABEL } from './folderDisplay';
 /** Which runtime the surrounding section authors for — `ComponentTree`'s prop. */
 export type CreateRuntimeType = 'browser' | 'cloud';
 
-/** The label `CloudFunctionComponentTemplate` carries, for the stand-in row. */
-export const CLOUD_TEMPLATE_LABEL = 'Cloud Function Component';
 
 /** Where the stand-in row creates from a browser context: the top level of the cloud folder. */
 export const CLOUD_CREATE_PARENT_PATH = CLOUD_PATH_PREFIX.slice(0, -1);
@@ -78,7 +76,7 @@ export interface CreateContext {
 
 export interface CreateHandlers {
   onAddComponent: (template: TSFixme, parentPath?: string) => void;
-  /** Omit to leave "Create Folder" off the menu — the canvas trail has no folders. */
+  /** Omit to leave "New folder" off the menu — the canvas trail has no folders. */
   onAddFolder?: (parentPath?: string) => void;
 }
 
@@ -142,9 +140,14 @@ export function buildCreateMenuItems(
 
   const items: (MenuDialogItem | 'divider')[] = templates.map((template) => ({
     icon: template.icon,
-    label: `Create ${template.label}`,
+    // TVW-009 §2.1: the template's label IS the row, with no verb bolted on. The menu's
+    // title already says `New in <destination>`, so "Create Visual Component" under it read
+    // as two different promises about one gesture.
+    label: template.label,
     onClick: () => onAddComponent(template, context.parentPath),
-    testId: `create-${template.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+    // From `templateId`, never the label: a test id that is derived from a sentence changes
+    // when the sentence does, and every rename becomes a silently skipped selector.
+    testId: `create-${template.templateId}`
   }));
 
   /**
@@ -155,14 +158,18 @@ export function buildCreateMenuItems(
    * instead. The row is the same template object the workflow-step gesture uses, so the two doors
    * cannot drift into two shapes of "new cloud function".
    */
-  const alreadyOffered = templates.some((template) => template.label === CLOUD_TEMPLATE_LABEL);
+  const cloudTemplate = ComponentTemplates.instance.cloudFunction;
+  // 🔴 By identity, not by label. `ComponentTemplates.cloudFunction`'s own comment warned that
+  // finding this template by `label` "would break the day someone rewords a menu entry" — and
+  // TVW-009 is that day. Compared as strings, this line would have gone quietly false, the row
+  // would have been minted a second time, and the menu would have offered two cloud functions.
+  const alreadyOffered = templates.some((template) => template === cloudTemplate);
   if (!alreadyOffered) {
     const blocked = cloudFunctionUnavailableReason(context);
-    const cloudTemplate = ComponentTemplates.instance.cloudFunction;
 
     items.push({
       icon: cloudTemplate.icon,
-      label: `Create ${cloudTemplate.label}`,
+      label: cloudTemplate.label,
       // `isDisabled`, not `disabled`: MenuDialog reads the former and ignores the latter, which is
       // how "Make Home" on the home component has been rendering enabled all along. A truly
       // disabled row never fires `onClick` at all, so the handler goes with it.
@@ -183,7 +190,7 @@ export function buildCreateMenuItems(
     items.push('divider');
     items.push({
       icon: IconName.FolderClosed,
-      label: 'Create Folder',
+      label: 'New folder',
       onClick: () => onAddFolder(context.parentPath),
       testId: 'create-folder'
     });

@@ -322,8 +322,8 @@ export const AUTHORED_PAYLOAD_FIELDS: readonly VocabField[] = [
       'queries — up to 5 per collection, realistic values, no real data. Only for components that read a backend.',
     exposedTo: ['editor'],
     divergence:
-      "AIX-008: `sample_data` is never written anywhere. It exists so the editor's sandbox preview shows a book " +
-      'list full of books instead of "Title 1", and is discarded with the preview. MCP has no preview sandbox, so ' +
+      "AIX-008: `sample_data` is never written anywhere. It exists so the editor's Workbench preview shows a book " +
+      'list full of books instead of "Title 1", and is discarded with the preview. MCP has no preview Workbench, so ' +
       'the field would be an instruction to produce output nothing consumes.'
   },
   {

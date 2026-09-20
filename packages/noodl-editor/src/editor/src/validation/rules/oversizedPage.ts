@@ -58,7 +58,7 @@ export const OVERSIZED_PAGE_NODES = 40;
 
 export const oversizedPage: Rule = {
   code: DiagnosticCode.OversizedPage,
-  description: 'A page component whose own graph is large enough to have wanted sections of its own.',
+  description: 'A page whose own graph is large enough to have wanted sections of its own.',
   defaultEnabled: true,
 
   run(ctx: RuleContext): Diagnostic[] {

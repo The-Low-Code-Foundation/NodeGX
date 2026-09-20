@@ -192,8 +192,8 @@ class InterfaceRails {
       marker.className = css.RailSandboxNote;
       marker.textContent = TEST_VALUES_NOTE;
       marker.title =
-        'The bench runs these blocks here in the editor, against values you type. Variables, Objects and ' +
-        'Arrays are empty stand-ins, not your app’s data, and nothing a bench run does reaches your app.';
+        'The Workbench runs these blocks here in the editor, against values you type. Variables, Objects and ' +
+        'Arrays are empty stand-ins, not your app’s data, and nothing a Workbench run does reaches your app.';
       host.appendChild(marker);
     }
 

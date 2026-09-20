@@ -399,7 +399,10 @@ export function useComponentActions() {
           }
 
           tracker.track('Component Created', {
-            template: template ? template.label : undefined
+            // TVW-009 §2.1: `templateId`, not `label`. This dimension used to carry the menu's
+            // words, so renaming a menu entry silently split one series in the analytics into
+            // two that no query joins back up.
+            template: template ? template.templateId : undefined
           });
 
           ProjectModel.instance?.addComponent(component, { undo: undoGroup });
