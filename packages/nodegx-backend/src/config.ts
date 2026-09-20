@@ -76,6 +76,14 @@ export interface BackendServiceOptions {
    * else that wants project state should go over HTTP like every other caller.
    */
   projectDir: string | null;
+  /**
+   * PRD-005 — the production stance: every secret this backend would otherwise mint (the admin
+   * credential, the signed-URL HMAC secret) must be PROVISIONED — by flag, by a `NODEGX_*`
+   * variable, by its `_FILE` form, or already present in `secrets.json` — and a start that
+   * cannot find one refuses and names it. Off by default: minting is right for a laptop.
+   * `NODEGX_REQUIRE_SECRETS=1` turns it on for a container that cannot edit its command.
+   */
+  requireSecrets: boolean;
 }
 
 /** Non-loopback bind => a token is mandatory. */
@@ -99,7 +107,8 @@ const DEFAULTS: BackendServiceOptions = {
   backendName: 'NodeGX Backend',
   adminDashboard: true,
   readonlyToken: null,
-  projectDir: null
+  projectDir: null,
+  requireSecrets: false
 };
 
 /**

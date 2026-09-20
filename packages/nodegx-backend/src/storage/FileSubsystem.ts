@@ -20,6 +20,13 @@ import * as path from 'path';
 
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { SecretsStore } from '../config/SecretsStore';
+import {
+  describeMissingSecret,
+  FILES_SIGNING_SECRET_ENV,
+  readProvisionedSecret,
+  SecretProvenance,
+  SecretsStartupError
+} from '../config/provisioned-secrets';
 import { CronScheduler, SchedulerRegistry, SchedulerDispatcher } from '../triggers/scheduler';
 import type { FireInput, FireOutcome, RejectionInput, TriggerResultShape } from '../triggers/dispatcher';
 import type { TriggerDef } from '../triggers/registry';
@@ -149,12 +156,15 @@ export interface FileSubsystemDeps {
   executions: ExecutionHistory;
   backendId: string;
   backendName: string;
+  /** PRD-005: refuse to start rather than mint the signed-URL secret. See `verifyProvisionedSecrets`. */
+  requireSecrets?: boolean;
 }
 
 export class FileSubsystem {
   readonly config: FileConfigStore;
   readonly metadata: MetadataStore;
   private readonly deps: FileSubsystemDeps;
+  private signingProvenance: SecretProvenance | null = null;
   private driver: StorageDriver;
   private readonly registry: SweepScheduleRegistry;
   private readonly scheduler: CronScheduler;
@@ -196,13 +206,57 @@ export class FileSubsystem {
     return this.driver;
   }
 
-  /** The HMAC secret for signed file URLs (./signing.ts), auto-minted on first use. */
+  /**
+   * The HMAC secret for signed file URLs (./signing.ts).
+   *
+   * PRD-005: `NODEGX_FILES_SIGNING_SECRET` (or its `_FILE` form) wins and is never written to
+   * secrets.json; then the file; then — unless the deploy said not to — a mint. The mint used
+   * to happen on the first signed URL; `verifyProvisionedSecrets` now settles it at startup,
+   * so a deploy that must not invent one refuses before the port opens rather than on a
+   * request a week later.
+   */
   getSigningSecret(): string {
+    const fromEnv = readProvisionedSecret(FILES_SIGNING_SECRET_ENV);
+    if (fromEnv) {
+      this.signingProvenance = { source: fromEnv.source, persisted: false };
+      return fromEnv.value;
+    }
     const existing = this.deps.secrets.get(FILES_SECRETS_NAMESPACE, 'signingSecret');
-    if (existing) return existing;
+    if (existing) {
+      if (!this.signingProvenance) this.signingProvenance = { source: 'file', persisted: true };
+      return existing;
+    }
+    if (this.deps.requireSecrets) {
+      throw new SecretsStartupError(
+        'SECRET_NOT_PROVISIONED',
+        describeMissingSecret({
+          name: 'files.signingSecret',
+          purpose: 'the HMAC key behind every signed file URL — a different key invalidates every link already handed out',
+          envName: FILES_SIGNING_SECRET_ENV,
+          cliFlag: null,
+          secretsPath: path.join(this.deps.dataDir, 'secrets.json'),
+          fileKey: '"files" → "signingSecret"'
+        })
+      );
+    }
     const minted = crypto.randomBytes(32).toString('base64url');
     this.deps.secrets.set(FILES_SECRETS_NAMESPACE, 'signingSecret', minted);
+    this.signingProvenance = { source: 'generated', persisted: true };
     return minted;
+  }
+
+  /**
+   * PRD-005: resolve the signing secret NOW. Under the production stance a missing one is a
+   * startup refusal; under the default stance it is minted here instead of on first use. Called
+   * by the service before the HTTP surface opens.
+   */
+  verifyProvisionedSecrets(): void {
+    this.getSigningSecret();
+  }
+
+  /** Where the signing secret came from. `absent` only before `verifyProvisionedSecrets` has run. */
+  signingSecretProvenance(): SecretProvenance {
+    return this.signingProvenance || { source: 'absent', persisted: false };
   }
 
   /** Whether image transforms are available right now (sharp loaded), and why not if not. */

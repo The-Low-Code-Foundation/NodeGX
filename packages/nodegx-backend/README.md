@@ -30,12 +30,15 @@ NODEGX_BACKEND_READY {"port":8577,"url":"http://127.0.0.1:8577","persistence":"p
 ```
 nodegx-backend serve  --data-dir <dir> --port <p> [--host <h>] [--token <t>]
                       [--backend-id <id>] [--backend-name <name>] [--ephemeral]
+                      [--require-secrets]
 nodegx-backend doctor --data-dir <dir> [--ephemeral]
 ```
 
 - `--host` defaults to `127.0.0.1`. A non-loopback bind **requires** a bearer
-  token (one is generated if you don't pass `--token`); everything except
-  `/health` then wants `Authorization: Bearer <token>`.
+  token (one is generated if you don't pass `--token` — unless
+  `--require-secrets`, the deploy stance, under which a missing secret is a
+  refusal that names it); everything except `/health` then wants
+  `Authorization: Bearer <token>`.
 - `--ephemeral` opts in to non-persisting in-memory mode **only** if no SQLite
   engine can load. Off by default: the service refuses to start rather than
   silently losing data (RUN-004 loud-failure policy).
@@ -68,7 +71,10 @@ localhost and *refuses to start* if asked to bind non-loopback with dev-open on
 
 - Policy lives in `<dataDir>/security.json` (diffable, deploys with the
   backend); the admin credential in `<dataDir>/secrets.json` (0600). `--token`
-  provisions the admin credential.
+  provisions the admin credential, as do `NODEGX_ADMIN_TOKEN` and
+  `NODEGX_ADMIN_TOKEN_FILE` (never written to the file). With
+  `--require-secrets` / `NODEGX_REQUIRE_SECRETS=1` nothing is minted and a
+  missing secret refuses start; `GET /admin/status` says where each came from.
 - The model of record: [`BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
   Operator guide: [`docs/runtime/BACKEND-ACCESS-CONTROL.md`](../../docs/runtime/BACKEND-ACCESS-CONTROL.md).
 - `src/security/model.ts` exports the pure model (`canReadRecord`,

@@ -110,17 +110,38 @@ export interface SQLiteDatabase {
  *
  * Uses better-sqlite3 for synchronous SQLite access.
  */
+/**
+ * Construction options.
+ *
+ * `maxDataSize` — the per-value cap (JSON length) on `trigger_data`, `metadata`, `input_data`
+ * and `output_data`. Default {@link MAX_DATA_SIZE}. A function is read on every write, so an
+ * embedder whose cap is live-configurable (nodegx-backend's `ops.json`, PRD-002) can pass its
+ * getter and the store follows it without being reconstructed.
+ */
+export interface ExecutionStoreOptions {
+  maxDataSize?: number | (() => number);
+}
+
 export class ExecutionStore {
   private db: SQLiteDatabase;
   private initialized = false;
+  private readonly maxDataSize: number | (() => number);
 
   /**
    * Create an ExecutionStore
    *
    * @param db - SQLite Database instance (better-sqlite3 compatible)
+   * @param options - see {@link ExecutionStoreOptions}
    */
-  constructor(db: SQLiteDatabase) {
+  constructor(db: SQLiteDatabase, options: ExecutionStoreOptions = {}) {
     this.db = db;
+    this.maxDataSize = options.maxDataSize ?? MAX_DATA_SIZE;
+  }
+
+  /** The per-value cap in force for this write. */
+  private dataLimit(): number {
+    const limit = typeof this.maxDataSize === 'function' ? this.maxDataSize() : this.maxDataSize;
+    return Number.isFinite(limit) && limit > 0 ? limit : MAX_DATA_SIZE;
   }
 
   /**
@@ -217,14 +238,14 @@ export class ExecutionStore {
       options.workflowId,
       options.workflowName,
       options.triggerType,
-      truncateData(options.triggerData),
+      truncateData(options.triggerData, this.dataLimit()),
       options.status,
       options.startedAt,
       options.completedAt ?? null,
       options.durationMs ?? null,
       options.errorMessage ?? null,
       options.errorStack ?? null,
-      truncateData(options.metadata)
+      truncateData(options.metadata, this.dataLimit())
     );
 
     return id;
@@ -261,7 +282,7 @@ export class ExecutionStore {
     }
     if (updates.metadata !== undefined) {
       fields.push('metadata = ?');
-      values.push(truncateData(updates.metadata));
+      values.push(truncateData(updates.metadata, this.dataLimit()));
     }
 
     if (fields.length === 0) {
@@ -335,6 +356,14 @@ export class ExecutionStore {
       conditions.push('started_at <= ?');
       params.push(query.startedBefore);
     }
+    // PRD-002: runs whose record hit a size bound stamp `metadata.recordCapped`. Filtering on
+    // it here is what lets an operator name the offending workflow from the API without
+    // reading every record — the whole point of a cap that announces itself.
+    if (query.capped === true) {
+      conditions.push("json_extract(metadata, '$.recordCapped') IS NOT NULL");
+    } else if (query.capped === false) {
+      conditions.push("(metadata IS NULL OR json_extract(metadata, '$.recordCapped') IS NULL)");
+    }
 
     let sql = 'SELECT * FROM workflow_executions';
     if (conditions.length > 0) {
@@ -403,8 +432,8 @@ export class ExecutionStore {
       options.completedAt ?? null,
       options.durationMs ?? null,
       options.status,
-      truncateData(options.inputData),
-      truncateData(options.outputData),
+      truncateData(options.inputData, this.dataLimit()),
+      truncateData(options.outputData, this.dataLimit()),
       options.errorMessage ?? null
     );
 
@@ -434,7 +463,7 @@ export class ExecutionStore {
     }
     if (updates.outputData !== undefined) {
       fields.push('output_data = ?');
-      values.push(truncateData(updates.outputData));
+      values.push(truncateData(updates.outputData, this.dataLimit()));
     }
     if (updates.errorMessage !== undefined) {
       fields.push('error_message = ?');

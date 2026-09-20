@@ -39,6 +39,10 @@ there is always something to edit:
   },
   "cors":    { "origins": ["*"], "credentials": false },
   "audit":   { "enabled": true, "retentionDays": 90 },
+  "executions": {
+    "retentionDays": 30, "idempotencyTtlHours": 24,
+    "maxCount": 10000, "maxValueBytes": 51200, "maxRunBytes": 8388608
+  },
   "metrics": { "enabled": true, "allowLoopback": true }
 }
 ```
@@ -186,7 +190,8 @@ scrape_configs:
 | `nodegx_trigger_fires_total{type,outcome}` | Cron/webhook/db-change automation health |
 | `nodegx_emails_sent_total{outcome}` | Mail actually leaving |
 | `nodegx_backup_age_seconds` | Seconds since the last successful backup |
-| `nodegx_db_file_bytes` | Database growth |
+| `nodegx_db_file_bytes` | Database growth (`local.db`) |
+| `nodegx_executions_db_file_bytes` | Execution history growth — what `executions.retentionDays` / `maxCount` bound, and what compaction gives back |
 | `nodegx_uptime_seconds`, `process_*`, `nodejs_heap_used_bytes` | Restarts and memory |
 
 **`nodegx_backup_age_seconds` is absent, not zero, until a backup succeeds.**
@@ -237,6 +242,97 @@ log line carrying the same request id.
 Retention is `audit.retentionDays` (90 by default; `0` keeps everything), and
 pruning runs at startup and hourly. Entries are included in
 [backups](./BACKEND-SERVICES.md) like any other collection.
+
+---
+
+## Execution history: bounded, pruned, and the disk given back
+
+Every function and workflow run is recorded in `<dataDir>/executions.sqlite`.
+Three things keep that file from becoming the outage — each one taken from an
+incident somebody else had — and all three ship **on**:
+
+**A run's record is bounded by bytes, not just by count.** One value (a step's
+input, a trigger body, a `Log` node's argument) is kept whole up to
+`executions.maxValueBytes` (50KB); a larger one is replaced by a marker that
+names its original size and keeps a 1,000-character preview. The whole run's
+record is bounded by `executions.maxRunBytes` (8MB); once reached, further
+values are omitted with a marker and the run **still completes** — this bounds
+the record, never the execution. A run that hit either bound is stamped
+`metadata.recordCapped` and is findable without reading the source:
+
+```bash
+curl -s "$BACKEND/executions?capped=true" -H "authorization: Bearer $ADMIN_TOKEN" \
+  | jq '.[] | {workflowId, startedAt, capped: .metadata.recordCapped}'
+```
+
+Both bounds are applied **after** secret scrubbing, so a credential can never be
+cut in half and escape the match.
+
+**Pruning is by age and by count, and says which one fired.** `retentionDays`
+(30) removes old runs; `maxCount` (10,000) removes the oldest beyond that many,
+whatever their age — a misfiring workflow can write a month's volume in an hour
+and every row is younger than the window. `0` disables either. Each prune logs
+`executions.pruned` with `byAge`, `byCount` and `boundBy`, and the same report
+is on `GET /admin/status` under `executions.lastPrune`, because two retention
+limits interacting invisibly is its own support thread.
+
+**Pruning gives the disk back.** A backend created from this version onward
+makes `executions.sqlite` with SQLite's incremental vacuum, and each prune that
+removed rows is followed by a bounded, yielding reclaim — many short write
+locks, never one long one. `nodegx_executions_db_file_bytes` visibly moves. A
+file created **before** this version cannot be converted without one full
+rewrite, so that is left to you: `GET /admin/status` reports
+`executions.compaction.manual: true` with the reason, and
+
+```bash
+curl -s -X POST "$BACKEND/admin/executions/compact" -H "authorization: Bearer $ADMIN_TOKEN"
+```
+
+rewrites the file once under a write lock (seconds per GB), converts it, and
+answers with `beforeBytes`, `afterBytes` and `durationMs`. After that, every
+prune reclaims on its own. Nothing runs that rewrite automatically.
+
+---
+
+## Secrets: provisioned, never invented
+
+By default a backend **mints** the secrets it needs and nobody supplied — the
+admin credential (`adminToken`) and the HMAC key behind signed file URLs
+(`files.signingSecret`) — and writes them to `<dataDir>/secrets.json`. That is
+right for a laptop and wrong for a deploy: the next empty volume mints a
+*different* one, comes up healthy, and locks you out of everything under the
+old one. It is the most-reported production failure in the n8n ecosystem, and
+the shape is identical here.
+
+For a deploy, take the other stance:
+
+```bash
+nodegx-backend serve --data-dir /var/lib/nodegx --host 0.0.0.0 --require-secrets
+# or, for a container that cannot edit its command line:
+NODEGX_REQUIRE_SECRETS=1
+```
+
+Under `--require-secrets`, every secret the backend would otherwise mint must be
+**provisioned** — and a start that cannot find one **refuses**, naming the
+secret, every place it looked, and the command that fixes it. Nothing is minted
+on the way to refusing. Supply them from your secret manager:
+
+| Secret | Environment variable | Also |
+|---|---|---|
+| `adminToken` | `NODEGX_ADMIN_TOKEN` or `NODEGX_ADMIN_TOKEN_FILE` | `--token`; an existing `secrets.json` |
+| `adminReadonlyToken` (optional) | `NODEGX_READONLY_TOKEN` or `NODEGX_READONLY_TOKEN_FILE` | `--readonly-token`; an existing `secrets.json` |
+| `files.signingSecret` | `NODEGX_FILES_SIGNING_SECRET` or `NODEGX_FILES_SIGNING_SECRET_FILE` | an existing `secrets.json` |
+
+`<VAR>_FILE` wins over `<VAR>` (Docker and Compose secrets), a trailing newline
+is stripped, and an unreadable `_FILE` is a refusal, not a mint. A value read
+from the environment is **never written to `secrets.json`** — that is the point
+of supplying it from the environment. `--token` keeps its existing behaviour
+and does persist. An existing `secrets.json` satisfies the stance as it is.
+
+`GET /admin/status` reports, per secret, where it came from — `cli`, `env`,
+`env-file`, `file`, `generated` or `absent` — and whether it is persisted.
+Never the value. That is how you audit a fleet, and it is the number to look at
+before "it works on this box" turns into the paragraph above.
 
 ---
 
@@ -404,6 +500,7 @@ signal).
 
 ## See also
 
+- [Scaling](./SCALING.md) — the storage and process ceilings, and which one you are hitting
 - [Self-hosting](./SELF-HOSTING.md) — the packaged Compose deploy
 - [Access control](./BACKEND-ACCESS-CONTROL.md) — permissions, roles, API keys
 - [Admin dashboard](./BACKEND-ADMIN-DASHBOARD.md) — including the Audit view

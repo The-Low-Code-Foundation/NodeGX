@@ -565,7 +565,9 @@ export class ByobAdminRoutes {
       limit: query.limit ? parseInt(query.limit, 10) : undefined,
       offset: query.offset ? parseInt(query.offset, 10) : undefined,
       startedAfter: query.startedAfter ? parseInt(query.startedAfter, 10) : undefined,
-      startedBefore: query.startedBefore ? parseInt(query.startedBefore, 10) : undefined
+      startedBefore: query.startedBefore ? parseInt(query.startedBefore, 10) : undefined,
+      // PRD-002: `?capped=true` names the runs whose record hit a size bound.
+      capped: query.capped === 'true' ? true : query.capped === 'false' ? false : undefined
     });
     /**
      * FED-003 §5.5 / FED-006 AC5 — the cost sentence on the LIST as well as on the row.

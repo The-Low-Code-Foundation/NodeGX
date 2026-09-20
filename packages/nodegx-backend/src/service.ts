@@ -244,6 +244,8 @@ export class BackendService {
       loopback: !requiresAuth(this.options),
       cliToken: this.options.authToken,
       readonlyToken: this.options.readonlyToken,
+      // PRD-005: never mint under the production stance.
+      requireSecrets: this.options.requireSecrets,
       deployedFunctions,
       facade: this.facade
     });
@@ -365,7 +367,13 @@ export class BackendService {
     //    ExecutionHistory.maybePrune for why this service does not grow a fourth
     //    timer to do it.
     const executionHistory = this.executions.open(this.options.dataDir, {
-      getRetentionDays: () => this.ops!.config.executions.retentionDays
+      getRetentionDays: () => this.ops!.config.executions.retentionDays,
+      // PRD-003: the count limit beside the age limit; PRD-002: the record bounds. All live.
+      getMaxCount: () => this.ops!.config.executions.maxCount,
+      getRecordBounds: () => ({
+        maxValueBytes: this.ops!.config.executions.maxValueBytes,
+        maxRunBytes: this.ops!.config.executions.maxRunBytes
+      })
     });
     if (!executionHistory.enabled) {
       // eslint-disable-next-line no-console
@@ -468,8 +476,13 @@ export class BackendService {
       secrets: new SecretsStore(this.options.dataDir),
       executions: this.executions,
       backendId: this.options.backendId,
-      backendName: this.options.backendName
+      backendName: this.options.backendName,
+      requireSecrets: this.options.requireSecrets
     });
+    // PRD-005: the signed-URL secret is settled NOW — before the port opens — rather than on
+    // the first signed URL, so a deploy told not to invent secrets refuses at start and not on
+    // a request a week later. Under the default stance this mints it, as first use would have.
+    this.files.verifyProvisionedSecrets();
 
     // 2.7 Email (BAK-002): config + secrets load beside security.json/secrets.json
     //     (same dataDir, same shared-secrets convention — see config/SecretsStore).
@@ -623,6 +636,11 @@ export class BackendService {
       // exposes `scrub(text)` and nothing that hands a value back, so this is not a way around
       // SecretsStore's missing bulk read (CWF-009 design question 4).
       scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir)),
+      // PRD-002: a `Log` node's message and data are bounded AFTER that scrub, live.
+      getRecordBounds: () => ({
+        maxValueBytes: this.ops!.config.executions.maxValueBytes,
+        maxRunBytes: this.ops!.config.executions.maxRunBytes
+      }),
       // FED-004 §3.2 — the `HTTP Request` node's `Conditional` port has somewhere
       // to remember. One store per service, shared by every run: validators are
       // a fact about a URL, not about a request.
@@ -702,6 +720,9 @@ export class BackendService {
       this.files.stop();
       this.files = null;
     }
+    // PRD-003: a reclaim step scheduled for the next tick must not run against a process that
+    // is leaving. The handle itself was never closed here (see ExecutionHistory.close).
+    this.executions.close();
     if (this.http) {
       await this.http.close();
       this.http = null;

@@ -130,6 +130,12 @@ export interface ExecutionQuery {
   /** Filter executions started before this timestamp (ms) */
   startedBefore?: number;
 
+  /**
+   * Only runs whose record hit a size bound (`metadata.recordCapped` present) — or, `false`,
+   * only runs that did not. Omit for both. (nodegx-backend PRD-002.)
+   */
+  capped?: boolean;
+
   /** Maximum number of results to return */
   limit?: number;
 

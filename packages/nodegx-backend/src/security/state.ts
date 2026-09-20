@@ -25,6 +25,14 @@ import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
 import {
+  ADMIN_TOKEN_ENV,
+  describeMissingSecret,
+  readProvisionedSecret,
+  READONLY_TOKEN_ENV,
+  SecretProvenance,
+  SecretsStartupError
+} from '../config/provisioned-secrets';
+import {
   ActingUser,
   ClpOp,
   Principal,
@@ -160,6 +168,12 @@ export interface SecurityDeps {
    */
   deployedFunctions: DeployedFunction[];
   facade: IStorageFacade;
+  /**
+   * PRD-005: refuse to start rather than mint a missing admin credential. The credential may
+   * still arrive by `--token`, by `NODEGX_ADMIN_TOKEN` / `NODEGX_ADMIN_TOKEN_FILE`, or from an
+   * existing `secrets.json`; only the mint is refused.
+   */
+  requireSecrets?: boolean;
 }
 
 export class SecurityState {
@@ -171,6 +185,8 @@ export class SecurityState {
   readonly migratedThisStart: boolean;
   /** True when the admin credential was auto-minted on THIS start (first-run surface). */
   readonly adminTokenMintedThisStart: boolean;
+  /** PRD-005: where each admin credential came from. Sources only — never a value. */
+  readonly secretProvenance: { adminToken: SecretProvenance; adminReadonlyToken: SecretProvenance };
   private readonly deps: SecurityDeps;
 
   constructor(deps: SecurityDeps) {
@@ -221,37 +237,79 @@ export class SecurityState {
         );
       }
     }
+    // Precedence: --token, then the environment, then the file, then — unless the deploy said
+    // not to — a mint. PRD-005 added the middle two and the refusal.
     let mintedThisStart = false;
+    let adminToken: string;
+    let adminTokenProvenance: SecretProvenance;
+    const adminFromEnv = readProvisionedSecret(ADMIN_TOKEN_ENV);
     if (deps.cliToken) {
       // WF-004 migration: the --token flag provisions the admin credential.
       secrets.adminToken = deps.cliToken;
       atomicWriteJSON(secretsPath, secrets, 0o600);
-    } else if (!secrets.adminToken) {
+      adminToken = deps.cliToken;
+      adminTokenProvenance = { source: 'cli', persisted: true };
+    } else if (adminFromEnv) {
+      // PRD-005: from the environment, and deliberately NOT written to secrets.json — the point
+      // of an environment-supplied secret is that it never lands in the volume. A stale value
+      // already in the file is left alone; the environment wins while it is set.
+      adminToken = adminFromEnv.value;
+      adminTokenProvenance = { source: adminFromEnv.source, persisted: false };
+    } else if (secrets.adminToken) {
+      adminToken = secrets.adminToken;
+      adminTokenProvenance = { source: 'file', persisted: true };
+    } else if (deps.requireSecrets) {
+      throw new SecretsStartupError(
+        'SECRET_NOT_PROVISIONED',
+        describeMissingSecret({
+          name: 'adminToken',
+          purpose: 'the admin credential — every /admin route, the dashboard, and CLI backup/restore',
+          envName: ADMIN_TOKEN_ENV,
+          cliFlag: '--token <value>',
+          secretsPath,
+          fileKey: '"adminToken"'
+        })
+      );
+    } else {
       secrets.adminToken = crypto.randomBytes(32).toString('base64url');
       mintedThisStart = true;
       atomicWriteJSON(secretsPath, secrets, 0o600);
+      adminToken = secrets.adminToken;
+      adminTokenProvenance = { source: 'generated', persisted: true };
     }
-    this.adminToken = secrets.adminToken;
+    this.adminToken = adminToken;
     this.adminTokenMintedThisStart = mintedThisStart;
 
-    // BAK-005's read-only tier. Provisioned only on request; refused if it
-    // collides with the full credential (a read-only token that silently grants
-    // write is exactly the accept-and-ignore security config this model bans).
-    if (deps.readonlyToken) {
-      if (deps.readonlyToken === secrets.adminToken) {
+    // BAK-005's read-only tier. Provisioned only on request — flag, or (PRD-005) the
+    // environment; never minted; refused if it collides with the full credential (a read-only
+    // token that silently grants write is exactly the accept-and-ignore security config this
+    // model bans).
+    let readonlyProvenance: SecretProvenance = { source: 'absent', persisted: false };
+    const readonlyFromEnv = deps.readonlyToken ? null : readProvisionedSecret(READONLY_TOKEN_ENV);
+    const readonlyCandidate = deps.readonlyToken || (readonlyFromEnv ? readonlyFromEnv.value : null);
+    if (readonlyCandidate) {
+      if (readonlyCandidate === adminToken) {
         throw new SecurityStartupError(
           'READONLY_TOKEN_COLLIDES',
           'Refusing to start: the read-only admin credential is identical to the full admin credential, ' +
             'so "read-only" would silently grant full write access. Use a different --readonly-token.'
         );
       }
-      secrets.adminReadonlyToken = deps.readonlyToken;
-      atomicWriteJSON(secretsPath, secrets, 0o600);
+      if (deps.readonlyToken) {
+        secrets.adminReadonlyToken = deps.readonlyToken;
+        atomicWriteJSON(secretsPath, secrets, 0o600);
+        readonlyProvenance = { source: 'cli', persisted: true };
+      } else if (readonlyFromEnv) {
+        readonlyProvenance = { source: readonlyFromEnv.source, persisted: false };
+      }
     }
-    this.adminReadonlyToken =
+    const storedReadonly =
       typeof secrets.adminReadonlyToken === 'string' && secrets.adminReadonlyToken.length > 0
         ? secrets.adminReadonlyToken
         : null;
+    this.adminReadonlyToken = readonlyCandidate || storedReadonly;
+    if (!readonlyCandidate && storedReadonly) readonlyProvenance = { source: 'file', persisted: true };
+    this.secretProvenance = { adminToken: adminTokenProvenance, adminReadonlyToken: readonlyProvenance };
 
     // --- The deploy interlock ----------------------------------------------
     if (!deps.loopback && this.config.devOpen) {

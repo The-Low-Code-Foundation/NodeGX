@@ -391,6 +391,10 @@ export class HttpServer {
   private readonly parse: ParseWireRoutes;
   private readonly users: UserRoutes;
   private readonly files: FileRoutes;
+  /** PRD-005: the subsystem itself, for the secrets provenance on `/admin/status`. */
+  private readonly fileSubsystem: FileSubsystem;
+  /** PRD-003: the history itself, for `/admin/status`, the gauge and compaction. */
+  private readonly executions: ExecutionHistory;
   private readonly adminSecurity: AdminSecurityRoutes;
   /** CWF-009 slice 4: the `functions` secrets door, names out and values in. */
   private readonly adminSecrets: AdminSecretsRoutes;
@@ -468,6 +472,8 @@ export class HttpServer {
       getLocalUrl: () => this.localUrl()
     });
     this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
+    this.fileSubsystem = deps.files;
+    this.executions = deps.executions;
     this.adminFiles = new AdminFileRoutes(deps.files);
     this.adminSecurity = new AdminSecurityRoutes(
       deps.security,
@@ -869,7 +875,7 @@ export class HttpServer {
       },
 
       // ---- Admin -----------------------------------------------------------
-      { method: 'GET', pattern: 'admin/status', access: { kind: 'admin' }, handler: (ctx) => this.health(ctx.res) },
+      { method: 'GET', pattern: 'admin/status', access: { kind: 'admin' }, handler: (ctx) => this.adminStatus(ctx.res) },
       { method: 'GET', pattern: 'admin/schema', access: { kind: 'admin' }, handler: (ctx) => byob.getSchema(ctx.res) },
       {
         method: 'POST',
@@ -932,6 +938,13 @@ export class HttpServer {
         pattern: 'executions/:id',
         access: { kind: 'admin' },
         handler: (ctx) => byob.getExecution(ctx.res, ctx.params.id)
+      },
+      // PRD-003 AC6: the full rewrite of executions.sqlite, on request only, cost in the reply.
+      {
+        method: 'POST',
+        pattern: 'admin/executions/compact',
+        access: { kind: 'admin' },
+        handler: (ctx) => this.compactExecutions(ctx)
       },
 
       // ---- Admin: the BAK-003 security surface -----------------------------
@@ -1461,6 +1474,14 @@ export class HttpServer {
         return null;
       }
     });
+    // PRD-003: the OTHER file. `nodegx_db_file_bytes` is local.db; this is what pruning bounds
+    // and what compaction gives back — the number that has to visibly move for the fix to be
+    // real to the operator it is for.
+    metrics.gauge(
+      'nodegx_executions_db_file_bytes',
+      'Size of executions.sqlite on disk: what executions.retentionDays / maxCount bound, and what compaction reclaims.',
+      () => this.executions.fileBytes()
+    );
     metrics.gauge(
       'nodegx_backup_age_seconds',
       'Seconds since the last successful backup. ABSENT when none has ever succeeded — an absent series is a ' +
@@ -1996,9 +2017,49 @@ export class HttpServer {
   // ==========================================================================
 
   private health(res: http.ServerResponse): void {
+    sendJSON(res, 200, this.healthBody());
+  }
+
+  /**
+   * `GET /admin/status` — `/health` plus what only an operator should see: the execution
+   * history's size, prune and compaction state (PRD-003), and where each secret came from
+   * (PRD-005). Sources and sizes, never a value and never a record.
+   */
+  private adminStatus(res: http.ServerResponse): void {
+    const provenance = this.security.secretProvenance;
+    sendJSON(res, 200, {
+      ...this.healthBody(),
+      executions: this.executions.describe(),
+      secrets: {
+        stance: this.options.requireSecrets ? 'provisioned' : 'generate',
+        adminToken: provenance.adminToken,
+        adminReadonlyToken: provenance.adminReadonlyToken,
+        filesSigningSecret: this.fileSubsystem.signingSecretProvenance()
+      }
+    });
+  }
+
+  /** `POST /admin/executions/compact` — PRD-003 AC6. Refuses when history is disabled. */
+  private compactExecutions(ctx: RequestContext): void {
+    let report;
+    try {
+      report = this.executions.compact();
+    } catch (e) {
+      throw new HttpError(503, e instanceof Error ? e.message : String(e));
+    }
+    ctx.audit({
+      beforeBytes: report.beforeBytes,
+      afterBytes: report.afterBytes,
+      durationMs: report.durationMs,
+      converted: report.converted
+    });
+    sendJSON(ctx.res, 200, { ...report, executions: this.executions.describe() });
+  }
+
+  private healthBody(): Record<string, unknown> {
     const runner = this.getRunner();
     const status = this.persistence.status;
-    sendJSON(res, 200, {
+    return {
       ok: true,
       service: 'nodegx-backend',
       backendId: this.options.backendId,
@@ -2021,7 +2082,7 @@ export class HttpServer {
         migratedThisStart: this.security.migratedThisStart
       },
       workflows: runner ? runner.getStatus() : { initialized: false, workflowCount: 0, functions: [] }
-    });
+    };
   }
 
   /**

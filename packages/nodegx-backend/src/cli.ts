@@ -34,6 +34,7 @@ import { BackupAuditActor, BackupManager } from './backup/BackupManager';
 import { ARCHIVE_EXT } from './backup/archive';
 import { AuditLog, ensureAuditTable } from './ops/audit';
 import { OpsState } from './ops/OpsState';
+import { requireSecretsFromEnv } from './config/provisioned-secrets';
 import { exportCollection, importCollection, DataFormat } from './backup/dataio';
 import { formatCarryReport, redactTarget, surveyForMigration } from './migrate/survey';
 import { cutoverAdvice, migrateToPostgres } from './migrate/move';
@@ -93,6 +94,10 @@ function parseArgs(argv: string[]): ParsedArgs {
         break;
       case '--readonly-token':
         options.readonlyToken = next();
+        break;
+      // PRD-005: refuse to start rather than mint a missing secret.
+      case '--require-secrets':
+        options.requireSecrets = true;
         break;
       // SB-015: the project this backend was provisioned for. Read for exactly
       // one thing — installing `nodegx.security.json` as this backend's policy
@@ -159,6 +164,10 @@ function parseArgs(argv: string[]): ParsedArgs {
         }
     }
   }
+
+  // PRD-005: a container that cannot edit its command line turns the stance on with the
+  // environment instead. The flag and the variable are the same switch.
+  if (requireSecretsFromEnv()) options.requireSecrets = true;
 
   return { command, positionals, options, extras };
 }
@@ -300,6 +309,14 @@ Options:
                          everything the admin surface exposes and change
                          nothing. Never minted automatically — a backend has
                          this tier only if you ask for it.
+  --require-secrets      The production stance: every secret this backend would
+                         otherwise mint — the admin credential, the signed-URL
+                         secret — must be provisioned (--token, or
+                         NODEGX_ADMIN_TOKEN / NODEGX_FILES_SIGNING_SECRET, or
+                         their _FILE forms, or already in secrets.json). A start
+                         that cannot find one refuses and names it. Same as
+                         NODEGX_REQUIRE_SECRETS=1. Off by default: minting is
+                         right for a laptop and wrong for an empty volume.
 `;
 
 async function runServe(options: Partial<BackendServiceOptions>, parentPid?: number): Promise<void> {
@@ -354,6 +371,16 @@ async function runServe(options: Partial<BackendServiceOptions>, parentPid?: num
     }
   } else {
     process.stdout.write('[nodegx-backend] admin dashboard: DISABLED (--no-admin); /_admin is not routed\n');
+  }
+  // PRD-005: a minted credential on a bind other people can reach is the n8n failure waiting
+  // to happen — the next empty volume mints a different one. Say so once, at the moment the
+  // operator is reading the startup lines.
+  if (started.security.adminTokenMintedThisStart && service.requiresAuth()) {
+    process.stdout.write(
+      '[nodegx-backend]   ⚠ non-loopback bind with a MINTED admin credential. For a deploy, provision it\n' +
+        '[nodegx-backend]   (NODEGX_ADMIN_TOKEN, NODEGX_ADMIN_TOKEN_FILE or --token) and start with\n' +
+        '[nodegx-backend]   --require-secrets, so an empty volume refuses rather than minting a different one.\n'
+    );
   }
 
   // Machine-readable readiness line — the editor supervisor handshakes on this.

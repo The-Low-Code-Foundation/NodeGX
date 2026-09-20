@@ -28,6 +28,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 import type { ExecutionHistory } from '../execution/ExecutionStore';
+import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
@@ -139,6 +140,12 @@ export interface WorkflowRunnerOptions {
    * operator should not have to restart to become identifiable.
    */
   getHttpUserAgent?: () => string | undefined;
+  /**
+   * PRD-002 — the record bounds, read live. Applied here to a `Log` node's message and data
+   * AFTER the scrub above and before they reach the ops log; the execution record's own copy
+   * is bounded by the `BoundedExecutionLogger` every record is born through.
+   */
+  getRecordBounds?: () => RecordBounds;
 }
 
 /** What {@link WorkflowRunnerOptions.scrubSecretValues} has to be able to do. */
@@ -264,6 +271,7 @@ export class WorkflowRunner {
   private readonly enableDebugInspectors: boolean;
   private readonly getFunctionTimeoutMs?: (functionName: string) => number | undefined;
   private readonly scrubSecretValues?: LogValueScrubber;
+  private readonly getRecordBounds?: () => RecordBounds;
   private readonly httpValidators?: HttpValidatorStore;
   private readonly getHttpUserAgent?: () => string | undefined;
 
@@ -280,6 +288,7 @@ export class WorkflowRunner {
     this.enableDebugInspectors = options.enableDebugInspectors || false;
     this.getFunctionTimeoutMs = options.getFunctionTimeoutMs;
     this.scrubSecretValues = options.scrubSecretValues;
+    this.getRecordBounds = options.getRecordBounds;
     this.httpValidators = options.httpValidators;
     this.getHttpUserAgent = options.getHttpUserAgent;
   }
@@ -348,8 +357,17 @@ export class WorkflowRunner {
 
         const level = entry && entry.level ? entry.level : 'info';
         const scrub = this.scrubSecretValues;
-        const message = scrub ? scrub.scrub(String(entry.message || '')) : String((entry && entry.message) || '');
-        const data = entry && entry.data !== undefined ? (scrub ? scrub.scrubValue(entry.data) : entry.data) : undefined;
+        // PRD-002: bound AFTER scrubbing — see record-bounds.ts. A cut made first could split a
+        // secret and defeat the match; a cut made after it sees only `[REDACTED]`.
+        const bounds = this.getRecordBounds ? this.getRecordBounds() : null;
+        const scrubbedMessage = scrub
+          ? scrub.scrub(String(entry.message || ''))
+          : String((entry && entry.message) || '');
+        const message = bounds ? boundText(scrubbedMessage, bounds.maxValueBytes) : scrubbedMessage;
+        const scrubbedData =
+          entry && entry.data !== undefined ? (scrub ? scrub.scrubValue(entry.data) : entry.data) : undefined;
+        const data =
+          bounds && scrubbedData !== undefined ? boundValue(scrubbedData, bounds.maxValueBytes).value : scrubbedData;
 
         // `function.log` is one event name for every author line, so an operator can filter the
         // graph's own output apart from the service's with `jq 'select(.event=="function.log")'`.

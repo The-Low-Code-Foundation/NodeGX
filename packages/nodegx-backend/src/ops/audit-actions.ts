@@ -84,6 +84,9 @@ const ACTIONS: Record<string, string> = {
   'DELETE admin/search/collections/:name': 'search.collection.delete',
   'POST admin/search/collections/:name/rebuild': 'search.rebuild',
   'PUT admin/ops': 'ops.config.update',
+  // PRD-003. A full rewrite of executions.sqlite under a write lock is the kind of thing an
+  // operator wants to be able to place in time when a latency graph has a notch in it.
+  'POST admin/executions/compact': 'executions.compact',
 
   // Sign-in providers (BAK-004). Changing a provider's client id, or adding an
   // issuer, changes WHO can obtain a session on this backend — which is the

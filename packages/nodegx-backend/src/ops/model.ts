@@ -133,6 +133,30 @@ export interface ExecutionsConfig {
    * upstream retries for a week can say so.
    */
   idempotencyTtlHours: number;
+  /**
+   * PRD-003: keep at most this many `workflow_executions` rows, oldest pruned first, whatever
+   * their age. 0 = no count limit. Age cannot bound a FAST blowup — a misfiring workflow can
+   * write a month's volume in an hour and every row is younger than `retentionDays` — so this
+   * is the second control n8n needed and shipped as *"two weeks or 10,000, whichever first"*.
+   * A prune reports which of the two limits bound it (`executions.pruned`, `/admin/status`),
+   * because two silent limits interacting is its own outage.
+   */
+  maxCount: number;
+  /**
+   * PRD-002: the largest single value (a step's input, a trigger body, a log argument) an
+   * execution record keeps whole, as JSON length. Larger values are replaced by a marker that
+   * names the original size and keeps a 1,000-character preview. The default is the cap the
+   * shared substrate already applied (50KB), so nothing about an ordinary run's record changes.
+   */
+  maxValueBytes: number;
+  /**
+   * PRD-002: the total an execution record may hold across every value in the run. Once
+   * reached, further values are omitted (with a marker), `metadata.recordCapped` is stamped so
+   * `GET /executions?capped=true` can name the workflow, and the run itself continues — this
+   * bounds the RECORD, never the execution. A per-value cap alone lets a thousand 50KB values
+   * through; this is the other half.
+   */
+  maxRunBytes: number;
 }
 
 export interface MetricsConfig {
@@ -190,10 +214,19 @@ export function defaultOpsConfig(): OpsConfig {
     },
     cors: { origins: ['*'], credentials: false },
     audit: { enabled: true, retentionDays: 90 },
-    executions: { retentionDays: 30, idempotencyTtlHours: 24 },
+    executions: {
+      retentionDays: 30,
+      idempotencyTtlHours: 24,
+      maxCount: 10_000,
+      maxValueBytes: 50 * 1024,
+      maxRunBytes: 8 * 1024 * 1024
+    },
     metrics: { enabled: true, allowLoopback: true }
   };
 }
+
+/** The floor under both record byte caps — see the validation note beside `executions`. */
+export const MIN_RECORD_VALUE_BYTES = 4096;
 
 const LOG_LEVELS: LogLevel[] = ['debug', 'info', 'warn', 'error', 'silent'];
 const LOG_FORMATS: LogFormat[] = ['json', 'pretty', 'auto'];
@@ -299,9 +332,49 @@ export function validateOpsConfig(raw: unknown): string[] {
 
   if (
     cfg.executions !== undefined &&
-    checkKeys(errors, 'executions', cfg.executions, ['retentionDays', 'idempotencyTtlHours'])
+    checkKeys(errors, 'executions', cfg.executions, [
+      'retentionDays',
+      'idempotencyTtlHours',
+      'maxCount',
+      'maxValueBytes',
+      'maxRunBytes'
+    ])
   ) {
     const executions = cfg.executions as Record<string, unknown>;
+    // PRD-002/003. `maxCount: 0` is "no count limit", the same vocabulary as `retentionDays: 0`.
+    // The two byte caps have a FLOOR rather than a zero escape hatch: a record bound of 0 would
+    // be a record of nothing, and the marker a cut value leaves behind is itself ~1.2KB, so a
+    // cap below that could never be honoured. 4KB is the smallest value that still keeps a
+    // preview; an operator who wants "no cap" sets a number they are prepared to see on disk.
+    if (
+      executions.maxCount !== undefined &&
+      (typeof executions.maxCount !== 'number' || !Number.isInteger(executions.maxCount) || executions.maxCount < 0)
+    ) {
+      errors.push('executions.maxCount must be an integer >= 0 (0 = no count limit)');
+    }
+    if (
+      executions.maxValueBytes !== undefined &&
+      (typeof executions.maxValueBytes !== 'number' ||
+        !Number.isInteger(executions.maxValueBytes) ||
+        executions.maxValueBytes < MIN_RECORD_VALUE_BYTES)
+    ) {
+      errors.push(`executions.maxValueBytes must be an integer >= ${MIN_RECORD_VALUE_BYTES}`);
+    }
+    if (
+      executions.maxRunBytes !== undefined &&
+      (typeof executions.maxRunBytes !== 'number' ||
+        !Number.isInteger(executions.maxRunBytes) ||
+        executions.maxRunBytes < MIN_RECORD_VALUE_BYTES)
+    ) {
+      errors.push(`executions.maxRunBytes must be an integer >= ${MIN_RECORD_VALUE_BYTES}`);
+    }
+    if (
+      typeof executions.maxRunBytes === 'number' &&
+      typeof executions.maxValueBytes === 'number' &&
+      executions.maxRunBytes < executions.maxValueBytes
+    ) {
+      errors.push('executions.maxRunBytes must be >= executions.maxValueBytes (a run holds at least one value)');
+    }
     if (
       executions.retentionDays !== undefined &&
       (typeof executions.retentionDays !== 'number' ||
