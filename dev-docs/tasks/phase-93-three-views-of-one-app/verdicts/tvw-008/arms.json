@@ -1,0 +1,214 @@
+{
+  "when": "2026-09-20T16:12:08.789Z",
+  "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/TVW-008 s26 Board",
+  "arms": [
+    {
+      "name": "the editor on 9222 belongs to this session",
+      "ok": true,
+      "detail": "electron 32173, owner 10024"
+    },
+    {
+      "name": "instrument: the editor bundle is evaluated and reachable (__wreq)",
+      "ok": true,
+      "detail": "ok"
+    },
+    {
+      "name": "instrument: the window is awake and rAF fires",
+      "ok": true,
+      "detail": "frames=3"
+    },
+    {
+      "name": "the driven project is the fixture this drive names",
+      "ok": true,
+      "detail": "/Users/richardosborne/vscode_projects/NodeGX test projects/TVW-008 s26 Board"
+    },
+    {
+      "name": "the fixture carries the three buttons AC1 compares",
+      "ok": true,
+      "detail": "5 components"
+    },
+    {
+      "name": "instrument: the app preview is running and readable",
+      "ok": true,
+      "detail": "mode=app src=http://localhost:8574/"
+    },
+    {
+      "name": "the chooser offers a third segment, and it opens the board",
+      "ok": true,
+      "detail": "ok"
+    },
+    {
+      "name": "AC1 — the board opens on the empty state, not an error",
+      "ok": true,
+      "detail": "empty=Put components side by sidePick two or three components to see them at their rea"
+    },
+    {
+      "name": "the picker is open and has rows a person could press",
+      "ok": true,
+      "detail": "260×150 rows=5 boxed=5 addAll=true"
+    },
+    {
+      "name": "AC2 (surface half) — `Add all` is offered: the fixture has 5 components, under the 12 bound",
+      "ok": true,
+      "detail": "addAll=true"
+    },
+    {
+      "name": "AC1 — three picks draw three frames",
+      "ok": true,
+      "detail": "frames=/Buttons/Primary Button, /Buttons/Secondary Button, /Buttons/Ghost Button"
+    },
+    {
+      "name": "AC1 — they land side by side, none overlapping",
+      "ok": true,
+      "detail": "no pair intersects"
+    },
+    {
+      "name": "the caption of each frame hit-tests to THAT frame (§9.1, the handle and the door)",
+      "ok": true,
+      "detail": "all three"
+    },
+    {
+      "name": "AC3 — /Buttons/Primary Button: the caption states a size",
+      "ok": true,
+      "detail": "caption=\"Primary Button×2768 × autoscenario: Checkout\""
+    },
+    {
+      "name": "AC4 — /Buttons/Primary Button: the caption says where its values came from",
+      "ok": true,
+      "detail": "expected scenario: Checkout"
+    },
+    {
+      "name": "AC3 — /Buttons/Primary Button: the caption states how many times it is placed",
+      "ok": true,
+      "detail": "expected ×2 in \"Primary Button×2768 × autoscenario: Checkout\""
+    },
+    {
+      "name": "AC3 — /Buttons/Secondary Button: the caption states a size",
+      "ok": true,
+      "detail": "caption=\"Secondary Button×1320 × 180no inputs set\""
+    },
+    {
+      "name": "AC4 — /Buttons/Secondary Button: the caption says where its values came from",
+      "ok": true,
+      "detail": "expected no inputs set"
+    },
+    {
+      "name": "AC3 — /Buttons/Secondary Button: the caption states how many times it is placed",
+      "ok": true,
+      "detail": "expected ×1 in \"Secondary Button×1320 × 180no inputs set\""
+    },
+    {
+      "name": "AC3 — /Buttons/Ghost Button: the caption states a size",
+      "ok": true,
+      "detail": "caption=\"Ghost Button×1768 × autono inputs set\""
+    },
+    {
+      "name": "AC4 — /Buttons/Ghost Button: the caption says where its values came from",
+      "ok": true,
+      "detail": "expected no inputs set"
+    },
+    {
+      "name": "AC3 — /Buttons/Ghost Button: the caption states how many times it is placed",
+      "ok": true,
+      "detail": "expected ×1 in \"Ghost Button×1768 × autono inputs set\""
+    },
+    {
+      "name": "AC3 — captions do not overlap at the opening zoom",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "name": "AC4 🔴 — the scenario REACHED THE SCREEN: Primary draws its scenario value, not its own default",
+      "ok": true,
+      "detail": "looking for \"Continue to checkout\" in: Continue to checkout | Button"
+    },
+    {
+      "name": "AC4 — a component with no scenario draws its own value",
+      "ok": true,
+      "detail": "looking for \"Button\" in: Continue to checkout | Button"
+    },
+    {
+      "name": "AC5 — a middle frame to drag",
+      "ok": true,
+      "detail": "/Buttons/Secondary Button"
+    },
+    {
+      "name": "AC5 🔴 — 200 intermediate moves write NOTHING to `bench.board` (the call that schedules the save)",
+      "ok": true,
+      "detail": "stored 816,0 → 816,0 while the frame was visibly elsewhere"
+    },
+    {
+      "name": "AC5 🔴 — and the RELEASE commits, once (the control without which the half above grades nothing)",
+      "ok": true,
+      "detail": "stored 816,0 → 696,180"
+    },
+    {
+      "name": "§9.2 🔴 — the frame MOVED under the cursor while the button was down (argued at s23, measured here)",
+      "ok": true,
+      "detail": "1244,160 → 983,522"
+    },
+    {
+      "name": "AC1 — the drop is written to `bench.board` as project state",
+      "ok": true,
+      "detail": "{\"frames\":[{\"target\":\"/Buttons/Primary Button\",\"x\":0,\"y\":0},{\"target\":\"/Buttons/Secondary Button\",\"x\":696,\"y\":180},{\"target\":\"/Buttons/Ghost Button\",\"x\":1184,\"y\":0}]}"
+    },
+    {
+      "name": "the board is gone while the scope is App",
+      "ok": true,
+      "detail": "board=false"
+    },
+    {
+      "name": "AC1 🔴 — switch to App and back: the frame is where it was dropped (the stored arrangement)",
+      "ok": true,
+      "detail": "stored 696,180 → 696,180"
+    },
+    {
+      "name": "AC1 — and it is still in the same place RELATIVE to the other frames on screen",
+      "ok": true,
+      "detail": "offset 696,180 → 696,180"
+    },
+    {
+      "name": "AC6 🔴 — the app preview is on the same ROUTE it started on, after every step above",
+      "ok": true,
+      "detail": "src http://localhost:8574/ → http://localhost:8574/"
+    },
+    {
+      "name": "AC6 — and the scope came back to App, so the arm above is about a preview that is actually showing",
+      "ok": true,
+      "detail": "mode app → app"
+    },
+    {
+      "name": "AC1 — pressing a frame benches THAT component",
+      "ok": true,
+      "detail": "chip=\"Primary Button\""
+    },
+    {
+      "name": "AC4 🔴 — the SINGLE BENCH renders the same scenario values as the board did",
+      "ok": true,
+      "detail": "looking for \"Continue to checkout\" in: Continue to checkout"
+    },
+    {
+      "name": "AC7 🔴 — the two theme shots are of two DIFFERENT themes, not the same one twice",
+      "ok": true,
+      "detail": "light=\"light\" (attribute), dark=\"dark\" (attribute), pixels differ"
+    }
+  ],
+  "ac5": {
+    "skipped": false,
+    "m0": 1789920684264.385,
+    "mMid": 1789920684264.385,
+    "mAfter": 1789920697112.037,
+    "movedLive": {
+      "left": 983,
+      "top": 522
+    },
+    "from": {
+      "x": 1390,
+      "y": 148
+    },
+    "to": {
+      "x": 1130,
+      "y": 508
+    }
+  }
+}
