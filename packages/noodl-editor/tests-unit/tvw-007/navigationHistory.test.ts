@@ -28,10 +28,23 @@ const ABOUT = '/Pages/About';
 function newHistory() {
   PROJECT.components = new Set([HOME, HERO, ABOUT]);
   const switched: string[] = [];
+  /**
+   * TVW-007 AC1 — the ARGS, not just the name.
+   *
+   * The ruled behaviour of ⌘[ is entirely in the second argument: the same call reaches the same
+   * component either way, and differs only in whether it carries `{ node: { id } }`. A mock that
+   * recorded only `component.name` would pass identically before and after the ruling.
+   */
+  const calls: { name: string; args: TSFixme }[] = [];
   const history = new NavigationHistory({
-    owner: { switchToComponent: (component: TSFixme) => switched.push(component.name) }
+    owner: {
+      switchToComponent: (component: TSFixme, args?: TSFixme) => {
+        switched.push(component.name);
+        calls.push({ name: component.name, args });
+      }
+    }
   });
-  return { history, switched };
+  return { history, switched, calls };
 }
 
 const component = (name: string) => ({ name, fullName: name });
@@ -275,5 +288,126 @@ describe('TVW-007 AC1 — the entry remembers the NODE, not just the component',
 
     history.goForward();
     expect(instanceParentCrumb(ABOUT, history.currentEntry(), resolve)).toBeNull();
+  });
+});
+
+/**
+ * TVW-007 AC1 — ⌘[ selects the node it came through. RULED by Richard 2026-09-20.
+ *
+ * Every arm here grades the SECOND argument of `switchToComponent`, because that is the whole of
+ * the change: before the ruling `goBack` reached the identical component with no args at all.
+ */
+describe('TVW-007 AC1 — ⌘[ lands where the crumb lands, selection included', () => {
+  const HERO_NODE = 'node-hero-7';
+
+  it('🔴 selects the instance node on the canvas it returns TO', () => {
+    const { history, calls } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    calls.length = 0;
+    expect(history.goBack()).toBe(true);
+
+    // The id is carried on the HERO entry — the one being left — and names a node on HOME.
+    expect(calls).toEqual([{ name: HOME, args: { node: { id: HERO_NODE } } }]);
+  });
+
+  it('passes the SAME argument shape the trail crumb passes, and no pushHistory', () => {
+    // `NodeGraphComponentTrail.tsx:411` sends `{ pushHistory: true, node: { id } }`. A history move
+    // must not push: the index is already where it belongs, and a push would truncate the forward
+    // half of the history the very gesture exists to walk.
+    const { history, calls } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    calls.length = 0;
+    history.goBack();
+
+    expect(calls[0].args.node).toEqual({ id: HERO_NODE });
+    expect(calls[0].args.pushHistory).toBeUndefined();
+    expect(history.canNavigateForward).toBe(true);
+  });
+
+  it('🔴 TWO instances of the same component are two different destinations', () => {
+    // The arm that fails any implementation deriving the node from the component name.
+    const { history, calls } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, 'node-hero-A');
+    history.goBack();
+    history.push(component(HERO), HOME, 'node-hero-B');
+
+    calls.length = 0;
+    history.goBack();
+
+    expect(calls[0].args.node).toEqual({ id: 'node-hero-B' });
+  });
+
+  it('selects nothing when the step was not an instance door', () => {
+    const { history, calls } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO)); // from the panel — no route
+
+    calls.length = 0;
+    history.goBack();
+
+    expect(calls).toEqual([{ name: HOME, args: undefined }]);
+  });
+
+  it('🔴 selects nothing once the route has been cleared by a deleted parent', () => {
+    // `discardInvalidEntries` nulls both fields together; this is the arm that proves the SELECTION
+    // follows, rather than the id surviving in a second reader.
+    const { history, calls } = newHistory();
+    history.push(component(ABOUT));
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    PROJECT.components.delete(HOME);
+    history.discardInvalidEntries();
+
+    calls.length = 0;
+    history.goBack();
+
+    expect(calls[0].args).toBeUndefined();
+  });
+
+  it('🔴 refuses a node id whose route does not name the canvas being opened', () => {
+    // The guard `leaving.via === arriving.name`. Entries are spliced out from under the index by
+    // `discardInvalidEntries`, so "the previous entry" and "the component the route names" are two
+    // separate facts, and an id belonging to a canvas one step further back must not be used.
+    const { history, calls } = newHistory();
+    history.push(component(ABOUT));
+    history.push(component(HERO));
+    // Hero's route names HOME, but the entry it sits on top of is ABOUT — the shape a splice leaves
+    // behind. `node-hero-7` is a node on Home's canvas, and Home is not what this press opens.
+    history.history[1] = { name: HERO, via: HOME, viaNodeId: HERO_NODE };
+    history.index = 1;
+
+    calls.length = 0;
+    history.goBack();
+
+    expect(calls).toEqual([{ name: ABOUT, args: undefined }]);
+  });
+
+  it('⌘] selects nothing, because the route names no node on the canvas it opens', () => {
+    const { history, calls } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+    history.goBack();
+
+    calls.length = 0;
+    expect(history.goForward()).toBe(true);
+
+    expect(calls).toEqual([{ name: HERO, args: undefined }]);
+  });
+
+  it('leaves goToCurrent unchanged for every caller that passes nothing', () => {
+    const { history, calls } = newHistory();
+    history.push(component(HOME));
+    history.push(component(HERO), HOME, HERO_NODE);
+
+    calls.length = 0;
+    history.goToCurrent();
+
+    expect(calls).toEqual([{ name: HERO, args: undefined }]);
   });
 });

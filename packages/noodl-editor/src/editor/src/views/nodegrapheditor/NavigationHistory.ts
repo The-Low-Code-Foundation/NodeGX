@@ -130,14 +130,48 @@ export class NavigationHistory {
       return false;
     }
 
+    /**
+     * TVW-007 AC1 — **RULED by Richard 2026-09-20: ⌘[ selects the node, exactly as the crumb does.**
+     *
+     * s25 built the crumb's selection and deliberately left ⌘[ without one, because §4 asks for
+     * selection only on the trail press — so the two gestures landed in the same place and differed
+     * in what was highlighted. Richard's call: *"make ⌘[ select it too"*, and the reason is the one
+     * the question was asked on — the highlight says where you came from however you got back.
+     *
+     * 🔴 **The node is read off the entry being LEFT, not the one being entered.** `viaNodeId`
+     * describes the route *into* an entry, so it names a node on the PREVIOUS entry's canvas — which
+     * is precisely the canvas ⌘[ is about to land on. Reading the arriving entry instead (the
+     * obvious one, since that is what `goToCurrent` resolves) would hand `findNodeWithId` an id
+     * belonging to a component one step further back.
+     */
+    const leaving = this.history[this.index];
     this.index--;
-    this.goToCurrent();
+    const arriving = this.history[this.index];
+
+    /**
+     * ⚠️ The route has to still name the destination. `via` and the index are two separate facts,
+     * and `discardInvalidEntries` splices entries out from under both — so an entry whose `via`
+     * names some component other than the one we are arriving at addresses a node on a canvas this
+     * press is not opening, and `findNodeWithId` would either miss or hit a recycled id.
+     */
+    const selectNodeId = leaving?.via && leaving.via === arriving?.name ? leaving.viaNodeId : null;
+
+    this.goToCurrent(selectNodeId);
     return true;
   }
 
   /**
    *
    * @returns Returns true when successfully went forward; Otherwise, false.
+   */
+  /**
+   * ⚠️ TVW-007 AC1 — ⌘] selects nothing, and that is not an omission of the ruling above.
+   *
+   * There is no node for it to select. Forward moves INTO an entry, whose `viaNodeId` names a node
+   * on the canvas being left, not the one being opened — and the entry before it describes a route
+   * into *itself*. The asymmetry is in the data, not in the gesture: going back you step out of a
+   * component and the instance you came through is on the canvas you land on; going forward you
+   * step into one and there is nothing on that canvas that the route names.
    */
   public goForward(): boolean {
     if (this.index === this.history.length - 1) {
@@ -175,7 +209,7 @@ export class NavigationHistory {
    *
    * @returns Returns true when successfully went to current component; Otherwise, false.
    */
-  public goToCurrent(): boolean {
+  public goToCurrent(selectNodeId: string | null = null): boolean {
     const entry = this.history[this.index];
     if (!entry) return false;
 
@@ -185,7 +219,18 @@ export class NavigationHistory {
     this.canNavigateBack = this.index > 0;
     this.canNavigateForward = this.index < this.history.length - 1;
 
-    this.owner.switchToComponent(component);
+    /**
+     * TVW-007 AC1 — `{ node: { id } }` is the SAME argument the trail's instance crumb passes
+     * (`NodeGraphComponentTrail.tsx:411`), so the ruled behaviour is one code path, not a second
+     * copy of it: `switchToComponent` clears the selection, selects the node and centres the
+     * canvas on it. Deliberately WITHOUT `pushHistory` — the crumb is a navigation and this is a
+     * move through history that has already set `index` itself.
+     *
+     * ⚠️ `undefined` rather than `{ node: undefined }` when there is nothing to select, because
+     * every other caller of `goToCurrent` (`discardInvalidEntries`, `goForward`) has always passed
+     * no args at all and must keep behaving identically.
+     */
+    this.owner.switchToComponent(component, selectNodeId ? { node: { id: selectNodeId } } : undefined);
     return true;
   }
 }

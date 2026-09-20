@@ -29,6 +29,7 @@ import { guid } from '@noodl-utils/utils';
 
 import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { ViewerConnection } from '../../ViewerConnection';
+import { applyInspectScript } from './applyInspectScript';
 import { sandboxEditorBridge } from './editorBridge';
 import { registerLivePreview, unregisterLivePreview } from './livePreviewCapture';
 import { viewerOrigin } from './viewerOrigin';
@@ -132,9 +133,32 @@ export function useSandboxViewer({
   useEffect(() => {
     const element = webview.current;
     if (!element || !bridge.inspectScript) return;
-    element.executeJavaScript(bridge.inspectScript).catch(() => {
-      // Not attached or not loaded yet — dom-ready will apply it.
-    });
+    /**
+     * 🔴 **TVW-008 s26 — the guard was on the WRONG SIDE of the call, and it took the whole
+     * preview down with it.**
+     *
+     * The `.catch()` below says *"not attached or not loaded yet — dom-ready will apply it"*, and
+     * the intent was right. But `WebviewTag.executeJavaScript` calls `getWebContentsId()` FIRST,
+     * and that **throws synchronously** (`The WebView must be attached to the DOM and the
+     * dom-ready event emitted before this method can be called`) — so it never returns a promise
+     * and there is nothing for a `.catch()` to attach to. The rejection handler was written for a
+     * failure mode this call does not have.
+     *
+     * The throw escaped a passive effect, and with no error boundary over the preview React
+     * unmounted the subtree: measured 2026-09-20 opening the board on a fresh project, where the
+     * **entire** preview vanished — `[data-test="app-preview"]`, the scope chip and the board all
+     * absent from the DOM, and the log carrying *"An error occurred in the &lt;ComponentBoard&gt;
+     * component"*. Six of TVW-008's ACs were ungradable behind it.
+     *
+     * ⚠️ **It reads as board-specific and is not.** Nothing here knows which surface mounted it;
+     * the board is simply the first host that mounts a sandbox whose `<webview>` is not yet
+     * attached when this effect first runs. The bench reaches the same line by a slower path.
+     *
+     * ✅ So the guard now covers BOTH failure shapes — a synchronous throw and a rejected promise —
+     * because "not ready yet" can arrive as either, and the recovery is identical: dom-ready
+     * applies the script ([[verify-the-consequence-not-just-the-mechanism]]).
+     */
+    applyInspectScript(element, bridge.inspectScript);
   }, [bridge.inspectScript]);
 
   useEffect(() => {
@@ -163,7 +187,9 @@ export function useSandboxViewer({
     if (element) {
       const handler = () => {
         PreviewTokenInjector.instance.notifyDomReady(element);
-        if (inspectScript.current) element.executeJavaScript(inspectScript.current).catch(() => undefined);
+        // Same call, same two failure shapes — a webview can be torn down between `dom-ready`
+        // firing and this line running. One helper so the two sites cannot drift apart.
+        if (inspectScript.current) applyInspectScript(element, inspectScript.current);
       };
       onDomReady.current = handler;
       element.addEventListener('dom-ready', handler);

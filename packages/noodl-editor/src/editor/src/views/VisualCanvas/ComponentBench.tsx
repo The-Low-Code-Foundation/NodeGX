@@ -506,6 +506,37 @@ export function ComponentBench({
     [applyValueSet, frame, iface, onFrameChange, scenarios]
   );
 
+  /**
+   * TVW-008 AC4 — **RULED by Richard 2026-09-20: the bench should open on the first scenario, as
+   * the board does. BUILT, MEASURED, AND REVERTED IN THE SAME SESSION — the reason is the value.**
+   *
+   * The ruling is right and the implementation was not. Auto-selecting `scenarios[0]` on mount
+   * worked *as far as this component can see*: the chip read `Checkout` and the inputs rail read
+   * `label = Continue to checkout`. **The runtime went on drawing `Button`**, because
+   * {@link applyValueSet} delivers through `sendModelUpdateToClient` — a **targeted delta** — and
+   * at mount the sandbox client has not connected, so the update is dropped. The manual path works
+   * only because by the time a person picks a scenario the client is up. It is the same trap
+   * `useSandboxViewer`'s `remountKey` note already records: *"a bench input set through a targeted
+   * `modelUpdate` never entered the export."*
+   *
+   * 🔴 **Reverted rather than left in, because the half-state is WORSE than the old behaviour by
+   * this phase's own standard.** Before, the bench said `None` and drew the node's own values —
+   * honest. With the auto-select in, it *claimed* a scenario it was not rendering, which is the
+   * exact defect TVW-001 and TVW-002 exist to remove: a surface saying one thing and showing
+   * another ([[verify-the-consequence-not-just-the-mechanism]]).
+   *
+   * ✅ **The fix, for whoever builds it: put the initial scenario in the EXPORT, not in a delta.**
+   * That is precisely what the board already does — `boardFrameMounts` writes
+   * `bench.scenarios[0]` into each harness node's `parameters`, which is why the board renders the
+   * scenario from its very first paint and the bench does not. `buildBenchExport` needs the same
+   * treatment for the opening scenario, and only for it: every later switch is a delta and must
+   * stay one, or changing scenario would rebuild the export and reload the window.
+   *
+   * ⚠️ Whatever is built, `autoSelectedFor`-style bookkeeping is still needed: `None` sets
+   * `activeScenario` back to `undefined`, so "never chose" and "chose None" are the same value,
+   * and without a ref keyed on the target a deliberate `None` snaps back on the next render.
+   */
+
   /** Overwrite the selected scenario with what is on the bench now. */
   const saveScenario = useCallback(() => {
     if (!activeScenario) return;

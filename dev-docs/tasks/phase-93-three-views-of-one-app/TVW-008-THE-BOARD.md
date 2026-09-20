@@ -478,3 +478,199 @@ are all titled `TVW-008 …`; the 34 `TVW-008` spec-starts are the known-firing 
 
 **Still open: AC1, AC3–AC7** — all need the drive, whose script does not exist. AC4 additionally
 needs the authored fixture §9.6 describes (0 of 5,922 components in the corpus have a scenario).
+
+## 10. s26 — the first drive, the crash it found, and five ACs
+
+**The board had never been run.** Slices 1 and 2 were built at s19 and s23 with the box unavailable
+both times, so every mechanism below was an argument until this session. The drive
+(`scripts/devtools/drive-tvw008-board.js`) and its fixture
+(`scripts/devtools/tvw008-board-fixture.js`) are both new.
+
+### 10.1 🔴 The first press of the board segment DELETED THE WHOLE PREVIEW
+
+Opening the board on a fresh project left `[data-test="app-preview"]`, the scope chip and the board
+itself **all absent from the DOM**, with the dev-stack log carrying *"An error occurred in the
+`<ComponentBoard>` component"*. Six ACs were ungradable behind it, and no offline gate could see it:
+102 specs, 12 killed mutants and two clean typechecks all passed over a surface that could not open.
+
+**The cause was three lines in `useSandboxViewer.ts`, and it is a shape worth remembering:**
+
+```ts
+element.executeJavaScript(bridge.inspectScript).catch(() => {
+  // Not attached or not loaded yet — dom-ready will apply it.
+});
+```
+
+🔴 **The guard was on the wrong side of the call.** `WebviewTag.executeJavaScript` calls
+`getWebContentsId()` **first**, and that **throws synchronously** (*"The WebView must be attached to
+the DOM and the dom-ready event emitted before this method can be called"*) — so it never returns a
+promise and there is nothing for a `.catch()` to attach to. The author had anticipated the exact
+failure and written a handler for the one shape it does not have. The throw escaped a passive
+effect, React found no error boundary over the preview, and the subtree was unmounted.
+
+⚠️ **It reads as board-specific and is not.** Nothing in that hook knows which surface mounted it;
+the board is simply the first host that mounts a sandbox whose `<webview>` is not yet attached when
+the effect first runs.
+
+✅ **Fixed, and moved so it can be graded.** The logic is now `applyInspectScript.ts` — a pure module
+with no imports — because the defect was *unreachable from a spec where it lived*:
+`useSandboxViewer.ts` imports `ViewerConnection` → `projectmodel` → `bugtracker`, which reads
+Electron's user-data path at module scope, so ts-jest cannot load the file at all. That is the same
+reason `boardSurface.ts` and `previewScope.ts` are separate modules, arriving as a *cause* rather
+than a style. `tests-unit/tvw-008/sandboxInspectScript.test.ts` gives it 4 arms; **3 mutants, 3
+killed**, and **M1 is the shipped defect verbatim** (`.catch()` with no `try`).
+
+### 10.2 The fixture AC1 and AC4 both needed
+
+§6.4 measured **0 of 5,922** components with a `bench.scenarios[0]`, so AC4's scenario branch had
+never been drawn, and no project had AC1's *"three versions of a button"*.
+`tvw008-board-fixture.js` writes one deterministically and **checks its own claims before
+exiting** — an authored fixture that does not hold the property it was authored for is worse than
+none.
+
+🔴 **The trap it is shaped around**: a scenario value equal to what the node already draws grades
+nothing. So `Primary Button`'s `label` port is **connected** to the visual root's `text`, and the
+scenario says `Continue to checkout` where the node's own parameter says `Button` — two different
+screenshots, not one ([[a-css-property-whose-default-equals-the-test-value]]). The three buttons
+divide AC3's and AC4's cases: Primary has a scenario and no stored frame, Secondary has a stored
+`320 × 180` and no scenario, Ghost has neither.
+
+### 10.3 What the drive measured
+
+- **AC4 🔴 — a scenario reached the screen for the first time in this phase.** The runtime drew
+  `Continue to checkout`, read inside the `<webview>`, not inferred from the caption. The caption's
+  `scenario: Checkout` is the editor's claim *about* the export; this is the consequence
+  ([[verify-the-consequence-not-just-the-mechanism]]).
+- **AC5 ✅ — a drag writes nothing until mouse-up**, on the surface §2 said the rule is load-bearing.
+  `bench.board` held `816,0` across 200 intermediate moves with the button down and the frame
+  visibly elsewhere, then committed `696,180` once on release.
+- **§9.2's two argued mechanisms are now measured.** A `parameterChanged` on a Group's `marginLeft`
+  **does** move a rendered frame (`1244,160 → 983,522` mid-drag), and `react-rnd` tracks the cursor
+  correctly inside the scaled document.
+- **AC3** — captions carry the authored size, the placement count and the value source, and do not
+  overlap; Secondary reads `320 × 180`, Primary and Ghost `768 × auto`.
+- **AC1** — empty state, three picks, three non-overlapping frames, drag, and the arrangement
+  survives an App round trip.
+- **AC6** — the app preview's route is unchanged (`http://localhost:8574/`) throughout.
+
+### 10.4 🔴 Four instrument faults, and three were the same mistake
+
+Recorded because the next drive will otherwise pay for them again. **Every one produced a FAIL
+against working product, or worse, a PASS against nothing.**
+
+1. 🔴 **`null === null` graded AC6 GREEN in a run whose subject had crashed.** With the preview
+   gone, `previewBefore.src` and `previewAfter.src` were both `null` and the negative arm passed —
+   the *only* green in that run. An arm whose two sides are both absent grades nothing
+   ([[a-rule-reading-zero-in-both-arms-grades-nothing]]). The drive now **refuses** rather than
+   producing a scorecard about an absent surface.
+2. 🔴 **`[data-preview-mode]` is the SCOPE's mode, not the app's.** AC6 failed with `app→board`,
+   which is the drive doing exactly what AC1 told it to. The fact that carries TVW-002's negative
+   arm is the app window's **URL** ([[a-client-property-read-as-a-fact-about-the-source]]).
+3. 🔴 **`project.json`'s mtime ATTRIBUTES NOTHING.** AC5 failed run 2 on an mtime that moved
+   mid-drag — and the drag had written nothing. This editor saves that file for its own reasons
+   (`projectmodel.ts:1760` logged *"Project saved"* twice during the open). The producer FIX-011's
+   rule is about is `setMetaData('bench.board', …)`, so the subject is the **stored coordinate**
+   ([[a-url-filtered-capture-attributes-nothing-to-a-producer]]). Re-armed that way, AC5 is green
+   and the mtime is kept as an observation, not an arm.
+4. 🔴 **A screen rect cannot tell "the frame moved" from "the camera moved".** AC1's round trip
+   failed on `984,520 → 1124,340` while `bench.board` held the identical `696,180` on both sides:
+   the board's **viewport** resets to `DEFAULT_BOARD_VIEWPORT` on remount, shifting every frame
+   together. Zoom and pan are session state and that reset is correct; the arm was wrong
+   ([[a-control-pair-proves-what-you-varied-only]]). Now graded on the stored coordinate **and** the
+   offset from the other frames.
+
+⚠️ **Two hangs, both the same root: no CDP call in this repo's harness has a timeout.**
+`connect()` resolves on socket open and never rejects, and `evaluate` on a target destroyed by a
+reload never settles — a benched component reloads the `<webview>`, so a viewer client reused
+across that boundary hangs forever. The first run sat **ten minutes** with no output. Every viewer
+read now attaches fresh and is raced against a deadline. ⚠️ And `BOOT` must be **retried**:
+`webpackChunknoodl_editor` does not exist until the bundle has evaluated, so a drive starting soon
+after a renderer reload dies forty lines later with *"window.__wreq is not a function"*.
+
+### 10.5 🔴 AC4's second clause found a real disagreement — RULED 2026-09-20
+
+The drive's last failing arm was the honest one, and it survived the instrument review:
+
+| surface | same component, same project | drew |
+|---|---|---|
+| the **board** | opens on `bench.scenarios[0]` | `Continue to checkout` |
+| the **single bench** | opens on `None` | `Button` — the node's own parameter |
+
+✅ **The rendering never disagreed.** Picking `Checkout` in the bench's scenario bar made it draw
+`Continue to checkout`, byte for byte what the board drew. What differed was the **default**, and
+AC4 asks the two surfaces to say the same thing about one component.
+
+**Richard ruled: the bench opens on the first scenario too** — *"if you saved a scenario, that's
+what you meant the component to look like."*
+
+🔴 **Built, measured, and REVERTED in the same session — and the measurement is the useful part.**
+Auto-selecting `scenarios[0]` on mount worked as far as the editor could see: the chip read
+`Checkout` and the inputs rail read `label = Continue to checkout`. **The runtime went on drawing
+`Button`.** `applyValueSet` delivers through `sendModelUpdateToClient` — a **targeted delta** — and
+at mount the sandbox client has not connected, so the update is dropped. Manual selection works
+only because by then the client is up. It is the trap `useSandboxViewer`'s `remountKey` note
+already records: *"a bench input set through a targeted `modelUpdate` never entered the export."*
+
+⚠️ **Reverted rather than shipped, because the half-state is WORSE than the old behaviour by this
+phase's own standard.** Before, the bench said `None` and drew the node's own values — honest. With
+the auto-select in, it *claimed* a scenario it was not rendering, which is the exact defect TVW-001
+and TVW-002 exist to remove ([[verify-the-consequence-not-just-the-mechanism]]).
+
+✅ **The fix is known and named: put the opening scenario in the EXPORT, not in a delta.** That is
+what the board already does — `boardFrameMounts` writes `bench.scenarios[0]` into each harness
+node's `parameters`, which is exactly why the board renders the scenario from its first paint and
+the bench does not. `buildBenchExport` needs the same treatment **for the opening scenario only**:
+every later switch must stay a delta, or changing scenario would rebuild the export and reload the
+window. ⚠️ `autoSelectedFor`-style bookkeeping is still needed alongside it — `None` sets
+`activeScenario` back to `undefined`, so *"never chose"* and *"chose None"* are the same value.
+
+🔴 **Three drives were spent before this was diagnosed, and two of them were wasted on the
+BUNDLE, not the code.** `packages/noodl-editor/src/editor/index.bundle.js` on disk is from
+**Sep 10** — the dev server serves webpack's in-memory bundle over `http://localhost:8080`, so a
+grep of the on-disk file "proves" a change is absent when it is live
+([[measure-the-artefact-before-believing-the-task-file]]). The reliable gate is
+`curl -s http://localhost:8080/src/editor/index.bundle.js | grep -q '<a string from your change>'`,
+and the reliable in-renderer check is `window.__wreq('<module path>')`.
+
+### 10.6 ⚠️ The editor has TWO `<webview>`s and `appTarget('viewer')` picks whichever matches first
+
+Listed live while the board was up:
+
+```
+webview  Button Gallery   http://localhost:8574/                        ← the APP preview
+webview  Noodl Viewer     http://localhost:8574/?noodl-sandbox=<id>&…   ← the bench AND the board
+page     NodeGX           file:///…/noodl-editor/src/editor/index.html
+```
+
+🔴 **The drive read the right one twice by luck.** A follow-up probe asking the identical question
+got the app's own page back — `Continue | Save draft | Button` — and would have failed AC4 against
+a window that was never its subject. The drive now selects the sandbox **by its URL** and reports
+its absence rather than reading an empty result as "the bench drew nothing"
+([[cdp-attaches-to-whoever-holds-9222]], one level in: the port was right and the *window* was not).
+
+### 10.7 Where TVW-008 stands
+
+| AC | state |
+|---|---|
+| AC1 | ✅ driven — empty state, three picks, no overlap, drag, App round trip, frame benched |
+| AC2 | ✅ offline (`board-export.test.ts`) + the `Add all` bound seen on the surface |
+| AC3 | ✅ driven — authored sizes, placement counts, no caption overlap |
+| AC4 | 🟡 **first clause ✅ driven** — the scenario reaches the screen on the board. **Second clause OPEN**: the bench renders the same values only once the scenario is picked, and RULED-BUT-UNBUILT for the opening default (§10.5 names the fix) |
+| AC5 | ✅ driven — 200 moves write nothing, the release commits once |
+| AC6 | ✅ driven — the app preview's route is unchanged throughout |
+| AC7 | 📸 **six shots taken, WITH RICHARD** — `verdicts/tvw-008/` |
+| AC8 | ✅ s25 |
+
+**Still open:** AC7's verdict, and two §9.6 items that no AC names — selection through a frame, and
+the `Add all` bound explained in the picker rather than merely enforced.
+
+### 10.8 Gates at s26
+
+- `tests-unit/tvw-008` **106 specs / 4 suites** (was 102 — `sandboxInspectScript.test.ts` adds 4).
+- `tests-unit/tvw-007` **103 specs / 6 suites** (was 95 — the ⌘[ ruling adds 8).
+- **6 mutants across the two new arm sets, 6 killed** — including the shipped `.catch()` defect.
+- `typecheck:editor` **0**, `typecheck:editor-tests` **0**.
+- **`test:main` 522 suites / 8362 specs, exit 0** — was 521 / 8350, so the delta is exactly the
+  +1 suite and +12 specs this session adds and nothing stopped loading.
+- 🔴 **`test:ci` NOT re-run.** It was at the floor at s25 and nothing here touches a jasmine path,
+  but that is an argument, not a measurement.
