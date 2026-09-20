@@ -18,7 +18,7 @@ preview — fixed it, closed four ACs, and got two rulings from Richard.**
 | TVW-005 | Layers can move things | ✅ | **CLOSED — all 6 ACs** |
 | TVW-006 | The structure lane | ✅ | AC1–4, AC6 green. **AC5's 18 shots SENT s18 — Richard's verdict is all that is left** |
 | TVW-007 | An instance says what it is | ✅ | **AC1–AC4, AC6 green. ONLY AC5 (Richard's WORTHY) is left.** ⌘[ ruling built at s26 |
-| TVW-008 | The board | ✅ slices 1–2 | **AC1, AC3, AC5, AC6, AC8 ✅. AC4 half. AC7 = 6 shots WITH RICHARD** |
+| TVW-008 | The board | ✅ slices 1–2 | **AC1, AC3, AC5, AC6, AC8 ✅. AC4 half. AC7 = 4 shots WITH RICHARD, theme pair owed** |
 | TVW-009 | The words (needs 001, 002, 004) | — | — |
 | TVW-010 | The disorientation test (needs all) | — | — |
 
@@ -28,8 +28,9 @@ preview — fixed it, closed four ACs, and got two rulings from Richard.**
 
 1. **FOUR verdicts are with Richard and nobody else can do any of them.** TVW-004 AC6 (20 shots,
    s18), TVW-006 AC5 (18 shots, s18), TVW-007's four placement shots (s20), and **new at s26:
-   TVW-008 AC7 — six shots in `verdicts/tvw-008/`** (empty board, three frames before and after a
-   rearrange, one frame benched, light, dark). The first two close their tasks on the spot.
+   TVW-008 AC7 — FOUR shots in `verdicts/tvw-008/`** (empty board, three frames before and after a
+   rearrange, one frame benched). 🔴 **The light/dark pair is OWED** — s26's theme arm had no
+   predicate in it and produced two byte-identical files; both were deleted and the arm fixed. The first two close their tasks on the spot.
    **Do not re-send them.** No ruling file had landed at s26.
 2. 🔴 **TVW-008 AC4's second clause is RULED AND UNBUILT, and the fix is already named.** Richard
    ruled the bench should open on its first scenario, as the board does. s26 built it, measured it,

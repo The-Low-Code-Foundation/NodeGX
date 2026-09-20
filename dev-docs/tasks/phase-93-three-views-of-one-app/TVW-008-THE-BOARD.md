@@ -658,7 +658,7 @@ its absence rather than reading an empty result as "the bench drew nothing"
 | AC4 | 🟡 **first clause ✅ driven** — the scenario reaches the screen on the board. **Second clause OPEN**: the bench renders the same values only once the scenario is picked, and RULED-BUT-UNBUILT for the opening default (§10.5 names the fix) |
 | AC5 | ✅ driven — 200 moves write nothing, the release commits once |
 | AC6 | ✅ driven — the app preview's route is unchanged throughout |
-| AC7 | 📸 **six shots taken, WITH RICHARD** — `verdicts/tvw-008/` |
+| AC7 | 🟡 **FOUR shots taken** (`verdicts/tvw-008/`). **The theme pair is still owed** — see §10.9 |
 | AC8 | ✅ s25 |
 
 **Still open:** AC7's verdict, and two §9.6 items that no AC names — selection through a frame, and
@@ -674,3 +674,24 @@ the `Add all` bound explained in the picker rather than merely enforced.
   +1 suite and +12 specs this session adds and nothing stopped loading.
 - 🔴 **`test:ci` NOT re-run.** It was at the floor at s25 and nothing here touches a jasmine path,
   but that is an argument, not a measurement.
+
+### 10.9 🔴 The AC7 theme arm recorded `true` with no predicate in it, and the shots proved it
+
+`ac7-05-board-light.png` and `ac7-06-board-dark.png` came out with the **same md5**. The theme had
+never changed: the `Theme.setTheme` call was swallowed by a `.catch()` and the arm said *"both
+themes photographed"* regardless, because it was written as `record(..., true, ...)`.
+
+**An arm with no predicate in it grades nothing** — the identical fault as AC6's `null === null`
+two sections above, on a different surface, in the same run
+([[a-rule-reading-zero-in-both-arms-grades-nothing]]). It is worth naming twice because the two do
+not look alike while you are writing them: one is a comparison whose sides are both absent, the
+other is a literal. They fail the same way.
+
+✅ **Fixed in the drive**: the theme is now **read back** after being set, the arm is the comparison
+of the two readings **and** of the two files' hashes, and the fallback writes `data-theme` on
+`documentElement` directly when the module's API is not reachable. The two misleading files were
+**deleted** — a shot that is not of what it claims is worse than no shot.
+
+⚠️ **So AC7 is FOUR shots, not six**, and the theme pair is owed by the next drive. The four that
+stand are the empty board, the three-frame board before and after a rearrange, and one frame
+benched.

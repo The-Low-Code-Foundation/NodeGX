@@ -654,25 +654,55 @@ async function main() {
   await shoot(editor, 'ac7-04-one-frame-benched');
 
   // --- AC7: both themes --------------------------------------------------------------------------
+  /**
+   * 🔴 **This arm recorded `true` UNCONDITIONALLY and the two shots came out byte-identical.**
+   *
+   * `ac7-05-board-light.png` and `ac7-06-board-dark.png` had the same md5: the theme never
+   * changed, the `setTheme` call was swallowed by a `.catch()`, and the arm said *"both themes
+   * photographed"* anyway. An arm with no predicate in it grades nothing — it is the same fault as
+   * AC6's `null === null`, one surface along ([[a-rule-reading-zero-in-both-arms-grades-nothing]]).
+   *
+   * So the theme is now READ BACK after being set, the arm is the comparison of the two readings,
+   * and the shots are only claimed if they differ. ⚠️ A theme flip does not apply in the same
+   * eval, so the read is a separate round trip after a frame has passed
+   * ([[a-theme-flip-does-not-apply-in-the-same-eval]]).
+   */
   await openBoard();
   await wait(2000);
-  // 🔴 A theme flip does not apply in the same eval — set it, then let a frame pass before shooting.
-  const themeBefore = await evaluate(editor, `(() => document.documentElement.getAttribute('data-theme') || document.body.className)()`);
-  await evaluate(editor, `(() => {
-    const t = ${WREQ('./src/editor/src/utils/theme.ts')};
-    if (t && t.Theme && typeof t.Theme.setTheme === 'function') { t.Theme.setTheme('light'); return 'ok'; }
-    return 'NO THEME API';
-  })()`).catch(() => 'NO THEME API');
-  await wait(2500);
-  await shoot(editor, 'ac7-05-board-light');
-  await evaluate(editor, `(() => {
-    const t = ${WREQ('./src/editor/src/utils/theme.ts')};
-    if (t && t.Theme && typeof t.Theme.setTheme === 'function') { t.Theme.setTheme('dark'); return 'ok'; }
-    return 'NO THEME API';
-  })()`).catch(() => 'NO THEME API');
-  await wait(2500);
-  await shoot(editor, 'ac7-06-board-dark');
-  record('AC7 — both themes photographed', true, `theme was ${String(themeBefore).slice(0, 30)}`);
+
+  const readTheme = () =>
+    evaluate(
+      editor,
+      `(() => document.documentElement.getAttribute('data-theme') || document.body.getAttribute('data-theme') || document.body.className || 'unknown')()`
+    );
+  const setTheme = async (name) => {
+    const applied = await evaluate(
+      editor,
+      `(() => {
+        try {
+          const mod = ${WREQ('./src/editor/src/utils/theme.ts')};
+          const api = mod && (mod.Theme || mod.default);
+          if (api && typeof api.setTheme === 'function') { api.setTheme(${JSON.stringify(name)}); return 'ok'; }
+        } catch (error) { /* fall through to the DOM */ }
+        // The attribute is what every stylesheet in this editor actually keys on.
+        document.documentElement.setAttribute('data-theme', ${JSON.stringify(name)});
+        return 'attribute';
+      })()`
+    );
+    await wait(2500);
+    return { applied: String(applied), theme: String(await readTheme()) };
+  };
+
+  const light = await setTheme('light');
+  const lightShot = await shoot(editor, 'ac7-05-board-light');
+  const dark = await setTheme('dark');
+  const darkShot = await shoot(editor, 'ac7-06-board-dark');
+
+  const md5 = (file) => require('crypto').createHash('md5').update(fs.readFileSync(file)).digest('hex');
+  const differ = md5(lightShot) !== md5(darkShot);
+  record('AC7 🔴 — the two theme shots are of two DIFFERENT themes, not the same one twice',
+    light.theme !== dark.theme && differ,
+    `light="${light.theme}" (${light.applied}), dark="${dark.theme}" (${dark.applied}), pixels ${differ ? 'differ' : 'IDENTICAL'}`);
 
   // --- summary -----------------------------------------------------------------------------------
   const failed = arms.filter((a) => a.ok === false);
