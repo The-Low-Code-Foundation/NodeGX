@@ -1,0 +1,240 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fdd4574e-169e-5140-81e5-d77ed2e78754",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mcIn",
+      "type": "Component Inputs",
+      "label": "The move",
+      "ports": [
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "worth",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasWorth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "soft",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "placed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "late",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hint",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "mcOut",
+      "type": "Component Outputs",
+      "label": "Pressed",
+      "ports": [
+        {
+          "name": "press",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "placed",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "mcRoot",
+      "type": "Group",
+      "label": "Move chip",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "mcDot",
+        "mcWho",
+        "mcWhat",
+        "mcWorth",
+        "mcTick",
+        "mcPress"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mcDot",
+      "type": "Group",
+      "label": "Which envelope",
+      "parent": "mcRoot",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 8,
+          "unit": "px"
+        },
+        "height": {
+          "value": 8,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mcWho",
+      "type": "Text",
+      "label": "Whose move",
+      "parent": "mcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mcWhat",
+      "type": "Text",
+      "label": "The move",
+      "parent": "mcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mcWorth",
+      "type": "Text",
+      "label": "What it is worth",
+      "parent": "mcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mcTick",
+      "type": "Text",
+      "label": "Already in the week",
+      "parent": "mcRoot",
+      "parameters": {
+        "text": "✓",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "mcPress",
+      "type": "net.noodl.controls.button",
+      "label": "Put it in the week",
+      "parent": "mcRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "+",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "mcRoot"
+  ]
+}

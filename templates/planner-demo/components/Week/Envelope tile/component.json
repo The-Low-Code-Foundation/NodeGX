@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e4277d1c-6887-5095-8146-bed3aba3cf76",
+  "name": "Envelope tile",
+  "path": "/Week/Envelope tile",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One envelope: what it is called, how many hours are left in it, a bar of how much is spent, and the one line that says what to do with the rest."
+}

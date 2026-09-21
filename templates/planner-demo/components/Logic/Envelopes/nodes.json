@@ -1,0 +1,241 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "613c2e35-d521-5e04-895b-7bfb3541b040",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "enIn",
+      "type": "Component Inputs",
+      "label": "The month so far",
+      "ports": [
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "monthPlans",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "settings",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "weekStart",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "enOut",
+      "type": "Component Outputs",
+      "label": "The tiles",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "target",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "billableUsed",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "billableLeft",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "perDay",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "buildingLeft",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "daysLeft",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "focusHours",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "hasPlan",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "planLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "targetLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "invoicedText",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "enWork",
+      "type": "JavaScriptFunction",
+      "label": "Work out every envelope",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar ENV_KEYS = [\"billable\",\"building\",\"admin\",\"hobby\",\"dormant\"];\nvar ENV_NAMES = {\"billable\":\"Billable\",\"building\":\"Building\",\"admin\":\"Admin and asks\",\"hobby\":\"Hobby\",\"dormant\":\"Dormant, worth a nudge\"};\nfunction envMark(k) { return 'var(--env-' + k + ')'; }\nfunction envInk(k) { return 'var(--env-' + k + '-ink)'; }\nfunction envSoft(k) { return 'var(--env-' + k + '-soft)'; }\n\nvar projects = Inputs.projects || [];\nvar blocks = Inputs.blocks || [];\nvar plans = Inputs.monthPlans || [];\nvar settings = (Inputs.settings || [])[0] || {};\nvar monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());\nvar month = monday.getFullYear() + '-' + pad(monday.getMonth() + 1);\nvar plan = null;\nfor (var i = 0; i < plans.length; i++) if (plans[i] && plans[i].month === month) plan = plans[i];\n\nvar rate = num(settings.rate, 0);\nvar need = num(settings.householdNeed, 0);\nvar partner = num(settings.partnerIncome, 0);\nvar focus = num(settings.focusHours, 6);\n// R2 — the month's target is hours, never a project price.\nvar target = rate > 0 ? Math.ceil(Math.max(0, need - partner) / rate) : 0;\n\nvar byId = {};\nfor (var p = 0; p < projects.length; p++) if (projects[p]) byId[projects[p].id] = projects[p];\n\n// Spent this month, per envelope. Only a LOGGED block has been spent.\nvar used = { billable: 0, building: 0, admin: 0, hobby: 0 };\nfor (var b = 0; b < blocks.length; b++) {\n  var blk = blocks[b];\n  if (!blk || !blk.done) continue;\n  var d = parseDay(blk.date);\n  if (!d || d.getFullYear() + '-' + pad(d.getMonth() + 1) !== month) continue;\n  var env = envelopeOf(byId[blk.projectId]);\n  used[env] = used[env] + hoursOf(blk);\n}\n\n// R3 — working days left in the month, counted from today, Mon–Sat, Saturday included (Q4).\nvar today = startOfToday();\nvar monthStart = new Date(monday.getFullYear(), monday.getMonth(), 1);\nvar monthEnd = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);\n// Today counts as a day you can still work. Looking at a week that is not this\n// month's, the whole month is still ahead of you.\nvar cursor = today.getTime() >= monthStart.getTime() && today.getTime() <= monthEnd.getTime() ? new Date(today.getTime()) : monthStart;\nvar daysLeft = 0;\nwhile (cursor.getTime() <= monthEnd.getTime()) {\n  if (cursor.getDay() !== 0) daysLeft++;\n  cursor = addDays(cursor, 1);\n}\n\nvar billableLeft = Math.max(0, target - used.billable);\nvar perDay = daysLeft > 0 ? q(billableLeft / daysLeft) : 0;\n// R3 — what the ceiling leaves over once the billable day is paid for IS the building budget.\nvar buildingLeft = q(Math.max(0, focus - perDay) * daysLeft);\n\nvar budgets = {\n  billable: plan ? num(plan.billable, target) : target,\n  building: plan ? num(plan.building, buildingLeft) : buildingLeft,\n  admin: plan ? num(plan.admin, 12) : 12,\n  hobby: plan ? num(plan.hobby, 0) : 0\n};\n\nfunction say(k) {\n  var left = budgets[k] - used[k];\n  if (k === 'billable') {\n    if (billableLeft <= 0) return 'Month covered. Everything else is yours.';\n    return hText(perDay) + ' h a day for the ' + daysLeft + ' ' + (daysLeft === 1 ? 'day' : 'days') + ' left';\n  }\n  if (k === 'building') {\n    if (buildingLeft <= 0) return 'Nothing spare this month once the billable hours are in.';\n    return hText(buildingLeft) + ' h left to spend on rungs';\n  }\n  if (k === 'admin') return hText(Math.max(0, left)) + ' h left. Invoices and asks count here';\n  // R4, word for word.\n  return 'Not budgeted, not counted, not a problem';\n}\n\nvar rows = [];\nvar four = ['billable', 'building', 'admin', 'hobby'];\nfor (var f = 0; f < four.length; f++) {\n  var k = four[f];\n  var u = used[k];\n  var budget = budgets[k];\n  var left = k === 'building' ? buildingLeft : Math.max(0, budget - u);\n  var over = budget > 0 && u > budget;\n  var pctFull = budget > 0 ? Math.min(100, (u / budget) * 100) : (u > 0 ? 100 : 0);\n  rows.push({\n    name: ENV_NAMES[k],\n    leftText: hText(left) + ' h left',\n    usedText: hText(u),\n    budgetText: hText(budget),\n    say: say(k),\n    fillWidth: { value: Math.round(pctFull), unit: '%' },\n    restWidth: { value: 100 - Math.round(pctFull), unit: '%' },\n    // R4 and R13 — going over Billable is red; going over Hobby is simply the bar full.\n    fillColor: over && k !== 'hobby' ? 'var(--destructive)' : envMark(k),\n    mark: envMark(k)\n  });\n}\n\nOutputs.rows = rows;\nOutputs.target = target;\nOutputs.billableUsed = used.billable;\nOutputs.billableLeft = billableLeft;\nOutputs.perDay = perDay;\nOutputs.buildingLeft = buildingLeft;\nOutputs.daysLeft = daysLeft;\nOutputs.focusHours = focus;\nOutputs.hasPlan = !!plan;\nOutputs.planLine = plan\n  ? 'This month is planned: ' + hText(budgets.billable) + ' h billable, ' + hText(budgets.building) + ' h building.'\n  : 'This month has no plan yet. Press Plan this month and the envelopes start from your settings.';\nOutputs.targetLine = rate > 0\n  ? 'That is ' + target + ' billable hours this month — (' + money(need) + ' − ' + money(partner) + ') ÷ ' + money(rate) + ' an hour.'\n  : 'Put your rate in and the month gets a target.';\n\n// What has been invoiced this month so far: logged hours on earning projects, at their rate.\nvar invoiced = 0;\nfor (var q2 = 0; q2 < blocks.length; q2++) {\n  var bb = blocks[q2];\n  if (!bb || !bb.done) continue;\n  var dd = parseDay(bb.date);\n  if (!dd || dd.getFullYear() + '-' + pad(dd.getMonth() + 1) !== month) continue;\n  var pr = byId[bb.projectId];\n  if (!pr || pr.kind !== 'earning') continue;\n  invoiced += hoursOf(bb) * num(pr.rate, rate);\n}\nOutputs.invoicedText = money(invoiced) + ' invoiced so far';"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-monthPlans",
+          "displayName": "monthPlans",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-settings",
+          "displayName": "settings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-weekStart",
+          "displayName": "weekStart",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-target",
+          "displayName": "target",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billableUsed",
+          "displayName": "billableUsed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billableLeft",
+          "displayName": "billableLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-perDay",
+          "displayName": "perDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buildingLeft",
+          "displayName": "buildingLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-daysLeft",
+          "displayName": "daysLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-focusHours",
+          "displayName": "focusHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPlan",
+          "displayName": "hasPlan",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-planLine",
+          "displayName": "planLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-targetLine",
+          "displayName": "targetLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-invoicedText",
+          "displayName": "invoicedText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c606387c-4fce-539e-8470-3afddf07a300",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pcIn",
+      "fromProperty": "shown",
+      "toId": "pcScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "groups",
+      "toId": "pcEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pcEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "pcOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "pcEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "pcOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "name",
+      "toId": "pcDetail",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "sub",
+      "toId": "pcDetail",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "move",
+      "toId": "pcDetail",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasMove",
+      "toId": "pcDetail",
+      "toProperty": "hasMove"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "worth",
+      "toId": "pcDetail",
+      "toProperty": "worth"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasWorth",
+      "toId": "pcDetail",
+      "toProperty": "hasWorth"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "when",
+      "toId": "pcDetail",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "whenColor",
+      "toId": "pcDetail",
+      "toProperty": "whenColor"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "mark",
+      "toId": "pcDetail",
+      "toProperty": "mark"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "soft",
+      "toId": "pcDetail",
+      "toProperty": "soft"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "planLabel",
+      "toId": "pcDetail",
+      "toProperty": "planLabel"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "canPlan",
+      "toId": "pcDetail",
+      "toProperty": "canPlan"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "weekText",
+      "toId": "pcDetail",
+      "toProperty": "weekText"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "sparkTitle",
+      "toId": "pcDetail",
+      "toProperty": "sparkTitle"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "say",
+      "toId": "pcDetail",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "facts",
+      "toId": "pcDetail",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "bars",
+      "toId": "pcDetail",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "boxes",
+      "toId": "pcDetail",
+      "toProperty": "boxes"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "firstLabel",
+      "toId": "pcDetail",
+      "toProperty": "firstLabel"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "lastLabel",
+      "toId": "pcDetail",
+      "toProperty": "lastLabel"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "plan",
+      "toId": "pcOut",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "close",
+      "toId": "pcOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "pcScrim",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "close"
+    }
+  ]
+}

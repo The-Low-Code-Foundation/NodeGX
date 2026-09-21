@@ -1,0 +1,389 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d47bd9fa-ebc6-5d08-82b7-996446d1263b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pnIn",
+      "type": "Component Inputs",
+      "label": "When to load",
+      "ports": [
+        {
+          "name": "refresh",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "previousWeek",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "nextWeek",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "thisWeek",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pnOut",
+      "type": "Component Outputs",
+      "label": "The records",
+      "ports": [
+        {
+          "name": "projects",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "monthPlans",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "cashEvents",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "settings",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "weekStart",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "weekLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "month",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "pnWeek",
+      "type": "Variable2",
+      "label": "The Monday on screen",
+      "parameters": {
+        "name": "plannerWeekStart"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "pnStart",
+      "type": "Set Variable",
+      "label": "Start on this week",
+      "parameters": {
+        "name": "plannerWeekStart",
+        "setWith": "string"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "pnThisWeek",
+      "type": "JavaScriptFunction",
+      "label": "Which Monday is today in",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nOutputs.monday = dayKey(mondayOf(startOfToday()));"
+      },
+      "x": 40,
+      "y": 520,
+      "ports": [
+        {
+          "name": "out-monday",
+          "displayName": "monday",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pnCount",
+      "type": "Counter",
+      "label": "How many weeks from this one",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "pnStep",
+      "type": "JavaScriptFunction",
+      "label": "The Monday that many weeks away",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nOutputs.monday = dayKey(addDays(mondayOf(startOfToday()), num(Inputs.offset, 0) * 7));\n// 🔴 The pulse is held back on the first run, which happens when the node mounts and\n// nobody has pressed anything: it would set the week — and so start a fetch — for a\n// visitor who has not signed in yet. A node's own scope survives its runs.\nif (this.moved) Outputs.moved();\nthis.moved = true;"
+      },
+      "x": 40,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-offset",
+          "displayName": "offset",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-moved",
+          "displayName": "moved",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monday",
+          "displayName": "monday",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pnWindow",
+      "type": "JavaScriptFunction",
+      "label": "The window to ask the backend for",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());\nvar saturday = addDays(monday, 5);\nvar monthStart = new Date(monday.getFullYear(), monday.getMonth(), 1);\nvar monthEnd = new Date(saturday.getFullYear(), saturday.getMonth() + 1, 0);\n// Whichever is wider: the week, or the month(s) the week touches.\nvar from = monday.getTime() < monthStart.getTime() ? monday : monthStart;\nvar to = saturday.getTime() > monthEnd.getTime() ? saturday : monthEnd;\nOutputs.from = dayKey(from);\nOutputs.to = dayKey(to);\nOutputs.month = monday.getFullYear() + '-' + pad(monday.getMonth() + 1);\nOutputs.weekStart = dayKey(monday);\nvar sameMonth = monday.getMonth() === saturday.getMonth();\nOutputs.weekLabel = monday.getDate() + (sameMonth ? '' : ' ' + MON[monday.getMonth()]) + ' – ' + saturday.getDate() + ' ' + MON[saturday.getMonth()];\n// 🔴 Ready means \"somebody asked for this week\", not \"this script ran\". The fallback above\n// keeps the labels sensible before anyone has, and this keeps the FETCH from following it:\n// a Function runs once when it mounts, and at that moment nobody is signed in yet.\nOutputs.ready = !!parseDay(Inputs.weekStart);\n// Last line on purpose: the values above are delivered before the pulse that acts on them,\n// so the query parameters a fetch uses are never a week behind the week on screen.\nOutputs.fetch();"
+      },
+      "x": 40,
+      "y": 880,
+      "ports": [
+        {
+          "name": "in-weekStart",
+          "displayName": "weekStart",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-fetch",
+          "displayName": "fetch",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-from",
+          "displayName": "from",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-to",
+          "displayName": "to",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-month",
+          "displayName": "month",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-weekStart",
+          "displayName": "weekStart",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-weekLabel",
+          "displayName": "weekLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ready",
+          "displayName": "ready",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pnReady",
+      "type": "Condition",
+      "label": "Is the window worked out?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1000
+    },
+    {
+      "id": "pnProjects",
+      "type": "DbCollection2",
+      "label": "Your projects",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Project",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 500,
+        "visualSort": [
+          {
+            "property": "position",
+            "order": "ascending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 1120
+    },
+    {
+      "id": "pnBlocks",
+      "type": "DbCollection2",
+      "label": "The blocks in the weeks on screen",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Block",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "runOnChange-qp-from": false,
+        "runOnChange-qp-to": false,
+        "storageLimit": 1000,
+        "visualFilter": {
+          "combinator": "and",
+          "rules": [
+            {
+              "property": "date",
+              "operator": "greater than or equal to",
+              "input": "from"
+            },
+            {
+              "property": "date",
+              "operator": "less than or equal to",
+              "input": "to"
+            }
+          ]
+        },
+        "visualSort": [
+          {
+            "property": "position",
+            "order": "ascending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 1240
+    },
+    {
+      "id": "pnMonth",
+      "type": "DbCollection2",
+      "label": "This month’s plan",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "MonthPlan",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "runOnChange-qp-month": false,
+        "storageLimit": 24,
+        "visualFilter": {
+          "combinator": "and",
+          "rules": [
+            {
+              "property": "month",
+              "operator": "equal to",
+              "input": "month"
+            }
+          ]
+        }
+      },
+      "x": 40,
+      "y": 1360
+    },
+    {
+      "id": "pnCash",
+      "type": "DbCollection2",
+      "label": "The money coming and going",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "CashEvent",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 500,
+        "visualSort": [
+          {
+            "property": "date",
+            "order": "ascending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 1480
+    },
+    {
+      "id": "pnSettings",
+      "type": "DbCollection2",
+      "label": "Your settings",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Settings",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 1
+      },
+      "x": 40,
+      "y": 1600
+    },
+    {
+      "id": "pnLoadProblem",
+      "type": "Set Variable",
+      "label": "Say the week did not load",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "Your week could not be loaded. Check that the backend is running, then sign in again."
+      },
+      "x": 40,
+      "y": 1720
+    }
+  ]
+}

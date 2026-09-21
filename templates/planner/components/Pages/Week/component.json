@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "347a8d67-3277-5ef4-846d-d5eb53b3d56d",
+  "name": "Week",
+  "path": "/Pages/Week",
+  "type": "page",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The week: the envelopes, the moves, six days of blocks and the cash strip, with the projects card and the evening drawer over the top of it."
+}

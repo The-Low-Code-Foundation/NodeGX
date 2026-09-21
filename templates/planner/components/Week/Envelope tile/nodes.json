@@ -1,0 +1,236 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7346550d-bc9e-5b3d-8ceb-ff40ec074008",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "etIn",
+      "type": "Component Inputs",
+      "label": "The envelope",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "leftText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "usedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "budgetText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fillWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "restWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "fillColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "etRoot",
+      "type": "Group",
+      "label": "Envelope tile",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "borderTopWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderTopStyle": "solid",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "etHead",
+        "etTrack",
+        "etSay"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "etHead",
+      "type": "Group",
+      "label": "Name and what is left",
+      "parent": "etRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between",
+        "cssClassName": "planner-env-head"
+      },
+      "children": [
+        "etName",
+        "etLeft"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "etName",
+      "type": "Text",
+      "label": "Envelope name",
+      "parent": "etHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "etLeft",
+      "type": "Text",
+      "label": "Hours left",
+      "parent": "etHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "etTrack",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "etRoot",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 6,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-sm)",
+        "flexDirection": "row",
+        "alignItems": "stretch"
+      },
+      "children": [
+        "etFill",
+        "etRest"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "etFill",
+      "type": "Group",
+      "label": "How much is spent",
+      "parent": "etTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "etRest",
+      "type": "Group",
+      "label": "What is left in it",
+      "parent": "etTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "transparent"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "etSay",
+      "type": "Text",
+      "label": "What to do with the rest",
+      "parent": "etRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "etRoot"
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "51610a68-a4e5-5fb0-802e-d9fbd39f0d56",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pdIn",
+      "fromProperty": "name",
+      "toId": "pdName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "sub",
+      "toId": "pdSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "hasMove",
+      "toId": "pdMove",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "mark",
+      "toId": "pdMove",
+      "toProperty": "borderLeftColor"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "soft",
+      "toId": "pdMove",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "move",
+      "toId": "pdMoveText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "worth",
+      "toId": "pdWorth",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "hasWorth",
+      "toId": "pdWorth",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "when",
+      "toId": "pdWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "whenColor",
+      "toId": "pdWhen",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "planLabel",
+      "toId": "pdPlan",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "canPlan",
+      "toId": "pdPlan",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "weekText",
+      "toId": "pdWeekLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "sparkTitle",
+      "toId": "pdSparkTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "say",
+      "toId": "pdSay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "facts",
+      "toId": "pdFactEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "bars",
+      "toId": "pdSpark",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "firstLabel",
+      "toId": "pdSpark",
+      "toProperty": "firstLabel"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "lastLabel",
+      "toId": "pdSpark",
+      "toProperty": "lastLabel"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "boxes",
+      "toId": "pdBoxes",
+      "toProperty": "boxes"
+    },
+    {
+      "fromId": "pdPlan",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "pdClose",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "close"
+    }
+  ]
+}

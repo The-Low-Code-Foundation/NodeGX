@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7346550d-bc9e-5b3d-8ceb-ff40ec074008",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "etIn",
+      "fromProperty": "name",
+      "toId": "etName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "mark",
+      "toId": "etName",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "mark",
+      "toId": "etRoot",
+      "toProperty": "borderTopColor"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "leftText",
+      "toId": "etLeft",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "fillWidth",
+      "toId": "etFill",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "restWidth",
+      "toId": "etRest",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "fillColor",
+      "toId": "etFill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "etIn",
+      "fromProperty": "say",
+      "toId": "etSay",
+      "toProperty": "text"
+    }
+  ]
+}

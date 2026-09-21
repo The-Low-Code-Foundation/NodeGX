@@ -1,0 +1,293 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c606387c-4fce-539e-8470-3afddf07a300",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pcIn",
+      "type": "Component Inputs",
+      "label": "The projects",
+      "ports": [
+        {
+          "name": "groups",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "worth",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasWorth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whenColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "soft",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "weekText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sparkTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "bars",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "boxes",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "firstLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "pcOut",
+      "type": "Component Outputs",
+      "label": "What you did in the card",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "plan",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "pcScrim",
+      "type": "Group",
+      "label": "Behind the card",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "position": "fixed",
+        "backgroundColor": "var(--scrim)",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "styleCss": "z-index: 40;"
+      },
+      "children": [
+        "pcCard"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pcCard",
+      "type": "Group",
+      "label": "The card",
+      "parent": "pcScrim",
+      "parameters": {
+        "cssClassName": "planner-over",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 88,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 1040,
+          "unit": "px"
+        },
+        "height": {
+          "value": 84,
+          "unit": "%"
+        },
+        "styleCss": "overflow: hidden;"
+      },
+      "children": [
+        "pcList",
+        "pcDetailWrap"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pcList",
+      "type": "Group",
+      "label": "Every project",
+      "parent": "pcCard",
+      "parameters": {
+        "cssClassName": "planner-over-col",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 38,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--background)",
+        "borderRightStyle": "solid",
+        "borderRightWidth": "var(--border-1)",
+        "borderRightColor": "var(--border)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "styleCss": "overflow: auto;"
+      },
+      "children": [
+        "pcEach"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pcEach",
+      "type": "For Each",
+      "label": "One section per group",
+      "parent": "pcList",
+      "parameters": {
+        "template": "/Week/Project group",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pcDetailWrap",
+      "type": "Group",
+      "label": "The one you picked",
+      "parent": "pcCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 62,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "cssClassName": "planner-over-col",
+        "styleCss": "overflow: auto;"
+      },
+      "children": [
+        "pcDetail"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pcDetail",
+      "type": "/Week/Project detail",
+      "label": "That project in full",
+      "parent": "pcDetailWrap",
+      "x": 220,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "pcScrim"
+  ]
+}

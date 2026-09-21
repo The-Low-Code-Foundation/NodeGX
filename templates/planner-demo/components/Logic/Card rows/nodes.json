@@ -1,0 +1,349 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6ba83b4d-c965-55c9-8394-891a8f5a8715",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "kdIn",
+      "type": "Component Inputs",
+      "label": "The projects",
+      "ports": [
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "weekStart",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selectedId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "kdOut",
+      "type": "Component Outputs",
+      "label": "The card",
+      "ports": [
+        {
+          "name": "groups",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "worth",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasWorth",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "when",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "whenColor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "soft",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "planLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "canPlan",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "weekText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sparkTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "facts",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "bars",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "boxes",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "firstLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lastLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "resolvedId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "kdWork",
+      "type": "JavaScriptFunction",
+      "label": "Group them, then open one",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar ENV_KEYS = [\"billable\",\"building\",\"admin\",\"hobby\",\"dormant\"];\nvar ENV_NAMES = {\"billable\":\"Billable\",\"building\":\"Building\",\"admin\":\"Admin and asks\",\"hobby\":\"Hobby\",\"dormant\":\"Dormant, worth a nudge\"};\nfunction envMark(k) { return 'var(--env-' + k + ')'; }\nfunction envInk(k) { return 'var(--env-' + k + '-ink)'; }\nfunction envSoft(k) { return 'var(--env-' + k + '-soft)'; }\n\nvar projects = Inputs.projects || [];\nvar blocks = Inputs.blocks || [];\nvar monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());\nvar today = startOfToday();\nvar todayKey = dayKey(today);\n\nvar weekKeys = [];\nfor (var i = 0; i < 6; i++) weekKeys.push(dayKey(addDays(monday, i)));\n\nfunction hoursFor(projectId, dayKeyWanted) {\n  var total = 0;\n  for (var b = 0; b < blocks.length; b++) {\n    var blk = blocks[b];\n    if (!blk || blk.projectId !== projectId) continue;\n    if (dayKeyWanted && blk.date !== dayKeyWanted) continue;\n    if (!dayKeyWanted && weekKeys.indexOf(blk.date) < 0) continue;\n    total += hoursOf(blk);\n  }\n  return total;\n}\nfunction placed(projectId) {\n  for (var b = 0; b < blocks.length; b++) {\n    var blk = blocks[b];\n    if (blk && blk.isMove && blk.projectId === projectId && weekKeys.indexOf(blk.date) >= 0) return true;\n  }\n  return false;\n}\nfunction isLate(p) {\n  var d = p && p.moveDue ? parseDay(p.moveDue) : null;\n  return !!d && d.getTime() < today.getTime();\n}\n\n// The four groups, in the order R4 and R8 put them.\nvar GROUPS = [\n  { kind: 'earning', env: 'billable', name: 'Billable' },\n  { kind: 'building', env: 'building', name: 'Building' },\n  { kind: 'hobby', env: 'hobby', name: 'Hobby' },\n  { kind: 'dormant', env: 'dormant', name: ENV_NAMES.dormant }\n];\n\nvar selected = String(Inputs.selectedId || '');\nvar found = null;\nfor (var s2 = 0; s2 < projects.length; s2++) if (projects[s2] && projects[s2].id === selected) found = projects[s2];\n\nvar groups = [];\nfor (var g = 0; g < GROUPS.length; g++) {\n  var grp = GROUPS[g];\n  var rows = [], groupHours = 0;\n  for (var p = 0; p < projects.length; p++) {\n    var proj = projects[p];\n    // The Admin row is overhead, not a project you decide about.\n    if (!proj || proj.kind === 'admin' || proj.kind !== grp.kind) continue;\n    var t = hoursFor(proj.id, null);\n    groupHours += t;\n    if (!found) found = proj;\n    var late = isLate(proj);\n    rows.push({\n      id: proj.id,\n      name: proj.name || '',\n      hoursText: t > 0 ? hText(t) + ' h' : '—',\n      move: (late ? '! ' : '→ ') + (proj.move || ''),\n      hasMove: !!proj.move,\n      moveColor: late ? 'var(--destructive)' : 'var(--muted-foreground)',\n      mark: envMark(grp.env),\n      barWidth: { value: Math.round(Math.min(100, (t / 10) * 100)), unit: '%' },\n      barRest: { value: 100 - Math.round(Math.min(100, (t / 10) * 100)), unit: '%' },\n      rowBackground: proj.id === selected ? 'var(--muted)' : 'transparent'\n    });\n  }\n  groups.push({\n    name: grp.name,\n    hours: groupHours > 0 ? hText(groupHours) + ' h this week' : 'nothing this week',\n    color: envInk(grp.env),\n    rows: rows\n  });\n}\nOutputs.groups = groups;\n\nvar one = found || {};\nvar oneEnv = envelopeOf(one);\nOutputs.resolvedId = one.id || '';\nOutputs.name = one.name || 'No projects yet';\nOutputs.sub = one.sub || 'Add a project and it appears here.';\nOutputs.move = one.move || '';\nOutputs.hasMove = !!one.move;\nOutputs.worth = one.moveWorth || '';\nOutputs.hasWorth = !!one.moveWorth;\nOutputs.when = one.moveWhen || '';\nOutputs.whenColor = isLate(one) ? 'var(--destructive)' : 'var(--muted-foreground)';\nOutputs.mark = envMark(oneEnv);\nOutputs.soft = envSoft(oneEnv);\nvar already = one.id ? placed(one.id) : false;\nOutputs.planLabel = already ? '✓ In the week' : 'Put 30 min in the week';\n// R9 — \"fixes only\" has no button to spend more hours on it.\nOutputs.canPlan = !!one.move && !one.moveStop;\n\nvar weekTotal = one.id ? hoursFor(one.id, null) : 0;\nvar rateText = num(one.rate, 0) > 0 && weekTotal > 0 ? ' · ' + money(weekTotal * num(one.rate, 0)) : '';\nOutputs.weekText = 'This week · ' + (weekTotal > 0 ? hText(weekTotal) + ' h' : 'nothing') + rateText;\nOutputs.sparkTitle = num(one.rate, 0) > 0 ? 'Last six months, €' : 'Last six months, hours';\n\nvar facts = [];\nvar given = one.facts || [];\nfor (var f = 0; f < given.length; f++) {\n  var fact = given[f];\n  if (!fact) continue;\n  facts.push({ label: String(fact[0] || ''), value: String(fact[1] || '') });\n}\nOutputs.facts = facts;\n\n// Scaled against this project's own maximum, never a shared one.\nvar history = one.history || [];\nvar max = 1;\nfor (var h = 0; h < history.length; h++) max = Math.max(max, num(history[h], 0));\nvar bars = [];\nfor (var h2 = 0; h2 < 6; h2++) {\n  var v = num(history[h2], 0);\n  bars.push({ height: { value: Math.max(6, Math.round((v / max) * 100)), unit: '%' }, mark: envMark(oneEnv) });\n}\nOutputs.bars = bars;\nvar sixAgo = new Date(today.getFullYear(), today.getMonth() - 5, 1);\nOutputs.firstLabel = MON[sixAgo.getMonth()];\nOutputs.lastLabel = MON[today.getMonth()];\n\nvar boxes = [];\nfor (var d = 0; d < 6; d++) {\n  var key = weekKeys[d];\n  var dv = one.id ? hoursFor(one.id, key) : 0;\n  boxes.push({ value: dv > 0 ? hText(dv) : '·', label: DOW[d], background: key === todayKey ? 'var(--muted)' : 'transparent' });\n}\nOutputs.boxes = boxes;\n\nOutputs.say = one.say || '';"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-weekStart",
+          "displayName": "weekStart",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-selectedId",
+          "displayName": "selectedId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-groups",
+          "displayName": "groups",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-resolvedId",
+          "displayName": "resolvedId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sub",
+          "displayName": "sub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-move",
+          "displayName": "move",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasMove",
+          "displayName": "hasMove",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-worth",
+          "displayName": "worth",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasWorth",
+          "displayName": "hasWorth",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-when",
+          "displayName": "when",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whenColor",
+          "displayName": "whenColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mark",
+          "displayName": "mark",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-soft",
+          "displayName": "soft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-planLabel",
+          "displayName": "planLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canPlan",
+          "displayName": "canPlan",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-weekText",
+          "displayName": "weekText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sparkTitle",
+          "displayName": "sparkTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-facts",
+          "displayName": "facts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bars",
+          "displayName": "bars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-firstLabel",
+          "displayName": "firstLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lastLabel",
+          "displayName": "lastLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-boxes",
+          "displayName": "boxes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-say",
+          "displayName": "say",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

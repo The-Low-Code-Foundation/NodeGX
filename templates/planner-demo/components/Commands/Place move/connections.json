@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "76f159fd-32f0-5ab9-8b65-2d50eeda7f28",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "PlacemoveIn",
+      "fromProperty": "projectId",
+      "toId": "PlacemoveGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "PlacemoveIn",
+      "fromProperty": "move",
+      "toId": "PlacemoveGuard",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "PlacemoveIn",
+      "fromProperty": "date",
+      "toId": "PlacemoveGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "PlacemoveIn",
+      "fromProperty": "placed",
+      "toId": "PlacemoveGuard",
+      "toProperty": "in-placed"
+    },
+    {
+      "fromId": "PlacemoveIn",
+      "fromProperty": "do",
+      "toId": "PlacemoveGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-projectId",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-date",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-what",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-planned",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-empty",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-actual"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-done",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-isMove",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-isMove"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-empty",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-todoTaskId"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-position",
+      "toId": "PlacemoveWrite",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "PlacemoveGuard",
+      "fromProperty": "out-go",
+      "toId": "PlacemoveWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "PlacemoveWrite",
+      "fromProperty": "out-done",
+      "toId": "PlacemoveOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "PlacemoveWrite",
+      "fromProperty": "out-failure",
+      "toId": "PlacemoveProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "PlacemoveWrite",
+      "fromProperty": "out-id",
+      "toId": "PlacemoveOut",
+      "toProperty": "blockId"
+    }
+  ]
+}

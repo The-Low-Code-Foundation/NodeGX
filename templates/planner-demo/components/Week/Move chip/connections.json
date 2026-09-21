@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fdd4574e-169e-5140-81e5-d77ed2e78754",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mcIn",
+      "fromProperty": "mark",
+      "toId": "mcDot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "projectName",
+      "toId": "mcWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "move",
+      "toId": "mcWhat",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "worth",
+      "toId": "mcWorth",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "hasWorth",
+      "toId": "mcWorth",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "ink",
+      "toId": "mcWorth",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "placed",
+      "toId": "mcTick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "ink",
+      "toId": "mcTick",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "soft",
+      "toId": "mcRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "late",
+      "toId": "mcRoot",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "projectId",
+      "toId": "mcOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "move",
+      "toId": "mcOut",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "placed",
+      "toId": "mcOut",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "mcRoot",
+      "fromProperty": "onClick",
+      "toId": "mcOut",
+      "toProperty": "press"
+    },
+    {
+      "fromId": "mcPress",
+      "fromProperty": "onClick",
+      "toId": "mcOut",
+      "toProperty": "press"
+    }
+  ]
+}

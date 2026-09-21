@@ -1,0 +1,159 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cb49be51-55db-5c85-8945-e9dfda0366ae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ceIn",
+      "type": "Component Inputs",
+      "label": "The event",
+      "ports": [
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amountColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "running",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "low",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "edge",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ceRoot",
+      "type": "Group",
+      "label": "Cash event",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize",
+        "rowGap": "var(--space-0)",
+        "minWidth": {
+          "value": 128,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "ceWhen",
+        "ceAmount",
+        "ceLabel",
+        "ceRunning"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ceWhen",
+      "type": "Text",
+      "label": "When",
+      "parent": "ceRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ceAmount",
+      "type": "Text",
+      "label": "How much",
+      "parent": "ceRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ceLabel",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "ceRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ceRunning",
+      "type": "Text",
+      "label": "The balance after it",
+      "parent": "ceRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "ceRoot"
+  ]
+}

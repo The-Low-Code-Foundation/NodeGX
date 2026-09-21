@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "098d2ee0-a73d-556e-8e10-df2e381ae5cd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dcIn",
+      "fromProperty": "day",
+      "toId": "dcHead",
+      "toProperty": "day"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "focusText",
+      "toId": "dcHead",
+      "toProperty": "focusText"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "focusColor",
+      "toId": "dcHead",
+      "toProperty": "focusColor"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "caption",
+      "toId": "dcHead",
+      "toProperty": "caption"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "captionColor",
+      "toId": "dcHead",
+      "toProperty": "captionColor"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "doneWidth",
+      "toId": "dcHead",
+      "toProperty": "doneWidth"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "plannedWidth",
+      "toId": "dcHead",
+      "toProperty": "plannedWidth"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "restWidth",
+      "toId": "dcHead",
+      "toProperty": "restWidth"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "doneColor",
+      "toId": "dcHead",
+      "toProperty": "doneColor"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "plannedColor",
+      "toId": "dcHead",
+      "toProperty": "plannedColor"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "columnBackground",
+      "toId": "dcRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "columnClass",
+      "toId": "dcRoot",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "blocks",
+      "toId": "dcEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "dcEach",
+      "fromProperty": "itemOutputSignal-toggle",
+      "toId": "dcOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "dcEach",
+      "fromProperty": "itemOutputSignal-openProject",
+      "toId": "dcOut",
+      "toProperty": "openProject"
+    },
+    {
+      "fromId": "dcEach",
+      "fromProperty": "itemOutputSignal-openLog",
+      "toId": "dcOut",
+      "toProperty": "openLog"
+    },
+    {
+      "fromId": "dcEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "dcOut",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "dcEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "dcOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "dcEach",
+      "fromProperty": "itemOutput-done",
+      "toId": "dcOut",
+      "toProperty": "done"
+    }
+  ]
+}

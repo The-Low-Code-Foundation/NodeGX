@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ad356c02-2737-598d-8ffb-70dc807d6244",
+  "name": "Drop block",
+  "path": "/Commands/Drop block",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Drops a block you are not going to do. The block goes; nothing else does."
+}

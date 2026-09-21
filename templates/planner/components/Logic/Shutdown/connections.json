@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6f206d00-2e31-56b5-815c-7f5091f40617",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "suIn",
+      "fromProperty": "projects",
+      "toId": "suWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "blocks",
+      "toId": "suWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "todayKey",
+      "toId": "suWork",
+      "toProperty": "in-todayKey"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "tomorrowKey",
+      "toId": "suWork",
+      "toProperty": "in-tomorrowKey"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "todayLong",
+      "toId": "suWork",
+      "toProperty": "in-todayLong"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "tomorrowLong",
+      "toId": "suWork",
+      "toProperty": "in-tomorrowLong"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "unplacedDormant",
+      "toId": "suWork",
+      "toProperty": "in-unplacedDormant"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "target",
+      "toId": "suWork",
+      "toProperty": "in-target"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "billableUsed",
+      "toId": "suWork",
+      "toProperty": "in-billableUsed"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "billableLeft",
+      "toId": "suWork",
+      "toProperty": "in-billableLeft"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "perDay",
+      "toId": "suWork",
+      "toProperty": "in-perDay"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "buildingLeft",
+      "toId": "suWork",
+      "toProperty": "in-buildingLeft"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "daysLeft",
+      "toId": "suWork",
+      "toProperty": "in-daysLeft"
+    },
+    {
+      "fromId": "suIn",
+      "fromProperty": "focusHours",
+      "toId": "suWork",
+      "toProperty": "in-focusHours"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-title",
+      "toId": "suOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-dayLine",
+      "toId": "suOut",
+      "toProperty": "dayLine"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-monthLine",
+      "toId": "suOut",
+      "toProperty": "monthLine"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-concern",
+      "toId": "suOut",
+      "toProperty": "concern"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-carryRows",
+      "toId": "suOut",
+      "toProperty": "carryRows"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-nothingToCarry",
+      "toId": "suOut",
+      "toProperty": "nothingToCarry"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-tomorrowTitle",
+      "toId": "suOut",
+      "toProperty": "tomorrowTitle"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-tomorrowList",
+      "toId": "suOut",
+      "toProperty": "tomorrowList"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-tomorrowFocus",
+      "toId": "suOut",
+      "toProperty": "tomorrowFocus"
+    },
+    {
+      "fromId": "suWork",
+      "fromProperty": "out-tomorrowFocusColor",
+      "toId": "suOut",
+      "toProperty": "tomorrowFocusColor"
+    }
+  ]
+}

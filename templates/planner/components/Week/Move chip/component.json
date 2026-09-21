@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "22e85de0-bd6f-5df2-8c3d-cc40b23c663d",
+  "name": "Move chip",
+  "path": "/Week/Move chip",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One project’s next move as a chip: a dot in its envelope colour, whose move it is, what it is worth, and whether it already has time in the week."
+}

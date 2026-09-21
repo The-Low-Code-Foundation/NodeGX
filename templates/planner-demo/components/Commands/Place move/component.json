@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "76f159fd-32f0-5ab9-8b65-2d50eeda7f28",
+  "name": "Place move",
+  "path": "/Commands/Place move",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Puts 30 minutes for a project’s next move in the first day of the week with room under the focus ceiling."
+}

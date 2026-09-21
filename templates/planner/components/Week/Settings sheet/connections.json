@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "080ef6c4-b9ea-5935-80ec-b9997f2f7afa",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "stIn",
+      "fromProperty": "shown",
+      "toId": "stScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "targetLine",
+      "toId": "stTarget",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "planLine",
+      "toId": "stPlanLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "rate",
+      "toId": "stRate",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stRate",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "householdNeed",
+      "toId": "stNeed",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stNeed",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "householdNeed"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "partnerIncome",
+      "toId": "stPartner",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stPartner",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "partnerIncome"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "focusHours",
+      "toId": "stFocus",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stFocus",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "partnerDay",
+      "toId": "stPartnerDay",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stPartnerDay",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "partnerDay"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "costsDay",
+      "toId": "stCostsDay",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stCostsDay",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "costsDay"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "invoiceDay",
+      "toId": "stInvoiceDay",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stInvoiceDay",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "invoiceDay"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "paymentTermsDays",
+      "toId": "stTerms",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stTerms",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "paymentTermsDays"
+    },
+    {
+      "fromId": "stSave",
+      "fromProperty": "onClick",
+      "toId": "stOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "stPlan",
+      "fromProperty": "onClick",
+      "toId": "stOut",
+      "toProperty": "planMonth"
+    },
+    {
+      "fromId": "stClose",
+      "fromProperty": "onClick",
+      "toId": "stOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "stScrim",
+      "fromProperty": "onClick",
+      "toId": "stOut",
+      "toProperty": "close"
+    }
+  ]
+}

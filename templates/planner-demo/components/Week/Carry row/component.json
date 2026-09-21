@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b324063b-a374-535d-8a5b-a8ab6fd04988",
+  "name": "Carry row",
+  "path": "/Week/Carry row",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block that did not get done today, with the two things you can do about it: carry it to tomorrow, or drop it."
+}

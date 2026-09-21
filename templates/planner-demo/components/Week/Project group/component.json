@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e49a3536-f56a-552c-8cac-1bc682d56ada",
+  "name": "Project group",
+  "path": "/Week/Project group",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One group of projects in the card: what the group is, how many hours it has this week, and a row per project."
+}

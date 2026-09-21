@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bfec9b3b-d880-54ff-8fe4-7bf1a598a40d",
+  "name": "Unlog block",
+  "path": "/Commands/Unlog block",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Puts a logged block back to not done, and forgets the hours it took."
+}

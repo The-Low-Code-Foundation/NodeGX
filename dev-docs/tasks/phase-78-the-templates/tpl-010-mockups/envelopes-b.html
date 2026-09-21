@@ -1,0 +1,373 @@
+<title>Envelopes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@90,600;90,700;90,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#eef1f4; --surface:#ffffff; --surface-2:#f6f8fa; --surface-3:#e9edf1;
+  --ink:#141a20; --ink-2:#4a5561; --ink-3:#7d8893; --line:#dce2e8; --line-2:#c9d1d9;
+  --bill:#2a78d6; --bill-soft:#e3eefb; --build:#4a3aa7; --build-soft:#ece9f8;
+  --admin:#6b7680; --admin-soft:#eceff2; --hobby:#c98500; --hobby-soft:#fbf1d9; --dormant:#7d8893; --dormant-soft:#f0f2f4;
+  --good:#1d7d1d; --good-soft:#e6f3e6; --crit:#c23230; --crit-soft:#fbe5e4; --warn:#9a6600;
+  --shadow:0 1px 2px rgba(20,26,32,.06), 0 8px 24px -12px rgba(20,26,32,.18);
+  --shadow-lg:0 24px 64px -24px rgba(20,26,32,.45);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121517; --surface:#1b1f23; --surface-2:#22272c; --surface-3:#2a3036;
+    --ink:#f0f3f5; --ink-2:#b4bdc6; --ink-3:#818c97; --line:#2c3339; --line-2:#3a434b;
+    --bill:#3987e5; --bill-soft:#1d3350; --build:#9085e9; --build-soft:#2a2547;
+    --admin:#98a3ad; --admin-soft:#2a3036; --hobby:#e2a93a; --hobby-soft:#3a2e12; --dormant:#818c97; --dormant-soft:#22272c;
+    --good:#5ec25e; --good-soft:#1c2f1c; --crit:#f07472; --crit-soft:#3e1f1e; --warn:#e2a93a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6); --shadow-lg:0 24px 64px -24px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121517; --surface:#1b1f23; --surface-2:#22272c; --surface-3:#2a3036;
+  --ink:#f0f3f5; --ink-2:#b4bdc6; --ink-3:#818c97; --line:#2c3339; --line-2:#3a434b;
+  --bill:#3987e5; --bill-soft:#1d3350; --build:#9085e9; --build-soft:#2a2547;
+  --admin:#98a3ad; --admin-soft:#2a3036; --hobby:#e2a93a; --hobby-soft:#3a2e12; --dormant:#818c97; --dormant-soft:#22272c;
+  --good:#5ec25e; --good-soft:#1c2f1c; --crit:#f07472; --crit-soft:#3e1f1e; --warn:#e2a93a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6); --shadow-lg:0 24px 64px -24px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;margin:0;padding-inline:16px;padding-block:0 20px}
+.num{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.app{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:12px 0}
+.bar h1{font-family:"Archivo",sans-serif;font-stretch:90%;font-size:18px;font-weight:800;margin:0;letter-spacing:-.01em}
+.nav{display:flex;align-items:center;gap:4px}
+.nav button{background:var(--surface);border:1px solid var(--line);border-radius:6px;width:30px;height:30px;color:var(--ink-2)}
+.nav .wk{font-weight:600;padding:0 8px}
+.spacer{flex:1}
+.example{font-size:12px;font-weight:600;color:var(--warn);background:var(--hobby-soft);padding:2px 8px;border-radius:4px}
+.ghost{background:var(--surface);border:1px solid var(--line-2);border-radius:6px;padding:6px 12px;color:var(--ink)}
+.primary{background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:7px 14px;font-weight:600}
+
+/* envelopes */
+.envs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:900px){.envs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.env{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;display:grid;gap:4px;border-top:3px solid var(--c)}
+.env .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.env .name{font-weight:700;font-size:13px}
+.env .left{font-size:12px;color:var(--ink-2)} .env .left b{color:var(--ink);font-weight:600;font-size:13px}
+.env .track{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden}
+.env .fill{height:100%;background:var(--c);border-radius:2px} .env .fill.over{background:var(--crit)}
+.env .say{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* moves strip */
+.moves{display:flex;align-items:flex-start;gap:8px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.moves .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;white-space:nowrap}
+.moves .lab b{color:var(--ink);font-weight:700;display:block;letter-spacing:0;text-transform:none;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:3px 10px 3px 8px;font-size:12px;white-space:nowrap;color:var(--ink);max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.chip i{width:8px;height:8px;border-radius:2px;background:var(--c);flex:none}
+.chip b{font-weight:600} .chip .w{color:var(--good);font-weight:600} .chip.build .w{color:var(--build)}
+.chip.late{border-color:var(--crit);background:var(--crit-soft)} .chip.late b::before{content:"! ";color:var(--crit)}
+.chip.placed{opacity:.55;cursor:default;text-decoration:line-through}
+.chip.placed b::after{content:" ✓";text-decoration:none;display:inline-block}
+.chip:hover:not(.placed){border-color:var(--ink)}
+
+/* week */
+.weekwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.week{display:grid;grid-template-columns:repeat(5,minmax(132px,1fr)) minmax(104px,.6fr);min-width:780px}
+.col{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:330px}
+.col:last-child{border-right:0} .col.today{background:var(--surface-2)}
+.col .dh{padding:7px 8px 5px;border-bottom:1px solid var(--line);display:grid;gap:3px}
+.col .dh .d{display:flex;justify-content:space-between;align-items:baseline} .col .dh .d b{font-weight:700}
+.col.today .dh .d b::after{content:"today";font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--bill);margin-left:6px}
+.col .dh .cap{font-size:12px;color:var(--ink-3)} .col .dh .cap.over{color:var(--crit);font-weight:600}
+.captrack{height:5px;border-radius:2px;background:var(--surface-3);overflow:hidden;display:flex;gap:1px} .captrack i{display:block;height:100%}
+.col .body{padding:5px;display:grid;gap:4px;align-content:start;flex:1} .col.sat .body{opacity:.75}
+.blk{display:grid;grid-template-columns:16px 1fr auto;gap:5px;align-items:start;padding:5px 6px 5px 5px;border-radius:6px;background:var(--s);border-left:3px solid var(--c)}
+.blk .chk{width:14px;height:14px;border:1.5px solid var(--c);border-radius:3px;margin-top:2px;display:grid;place-items:center;font-size:10px;color:var(--bg);background:transparent;padding:0}
+.blk.done .chk{background:var(--c)}
+.blk .who{border:0;background:transparent;padding:0;text-align:left;font-weight:600;font-size:13px;line-height:1.3;text-decoration:underline dotted transparent;text-underline-offset:3px}
+.blk .who:hover{text-decoration-color:var(--ink-3)}
+.blk.done .who,.blk.done .what{text-decoration:line-through;color:var(--ink-3)}
+.blk .what{font-size:12px;color:var(--ink-2);line-height:1.3}
+.blk .h{font-size:12px;color:var(--ink-2);white-space:nowrap} .blk.done .h{color:var(--ink);font-weight:600}
+.blk.todo{background:var(--crit-soft);border-left-color:var(--crit)} .blk.todo .chk{border-color:var(--crit)} .blk.todo.done .chk{background:var(--crit)}
+.blk.todo .who::before{content:"! ";color:var(--crit)}
+.blk.new{outline:2px solid var(--ink);outline-offset:1px}
+
+/* cash strip */
+.cash{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:grid;gap:6px}
+.cash .hd{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 16px;font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.cash .hd .bal{text-transform:none;letter-spacing:0;color:var(--ink-2);font-weight:500} .cash .hd .bal b{color:var(--ink);font-weight:600}
+.cashwrap{overflow-x:auto} .stripe{display:flex;gap:6px;min-width:820px}
+.ev{flex:1;min-width:110px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 9px;display:grid;gap:1px}
+.ev .dt{font-size:11px;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;font-weight:600} .ev .amt{font-weight:600;font-size:14px}
+.ev .amt.in{color:var(--good)} .ev .amt.out{color:var(--crit)} .ev .lb{font-size:12px;color:var(--ink-2)} .ev.low{border-color:var(--crit)} .ev .run{font-size:11px;color:var(--ink-3)}
+
+/* project card modal (Trello frame) */
+.scrim{position:fixed;inset:0;background:rgba(10,14,18,.45);opacity:0;pointer-events:none;transition:opacity .15s;z-index:4} .scrim.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;inset:0;display:grid;place-items:center;padding:24px 16px;pointer-events:none;z-index:5}
+.card{width:min(880px,100%);max-height:calc(100vh - 48px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:270px 1fr;overflow:hidden;transform:translateY(12px);opacity:0;transition:transform .15s,opacity .15s;pointer-events:none}
+.modal.on .card{transform:none;opacity:1;pointer-events:auto}
+@media (max-width:760px){.card{grid-template-columns:1fr;max-height:calc(100vh - 32px)}.card .list{max-height:38vh}}
+@media (prefers-reduced-motion:reduce){.card,.scrim{transition:none}}
+.card .list{border-right:1px solid var(--line);overflow:auto;background:var(--surface-2);padding:10px 8px;display:grid;gap:2px;align-content:start}
+.card .list .gl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--c);font-weight:700;padding:8px 8px 3px}
+.card .list .gl small{color:var(--ink-3);font-weight:500;letter-spacing:0;text-transform:none;margin-left:6px}
+.pi{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;border:0;background:transparent;border-radius:6px;padding:6px 8px;text-align:left;width:100%}
+.pi:hover{background:var(--surface-3)} .pi.on{background:var(--surface);box-shadow:var(--shadow)}
+.pi .n{font-weight:600;font-size:13px} .pi .h{font-size:12px;color:var(--ink-2);text-align:right}
+.pi .m{grid-column:1/-1;font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .pi .m.late{color:var(--crit)}
+.pi .bar{grid-column:1/-1;height:4px;border-radius:2px;background:var(--surface-3);overflow:hidden} .pi .bar i{display:block;height:100%;background:var(--c)}
+.card .detail{overflow:auto;padding:16px 20px 18px;display:grid;gap:14px;align-content:start}
+.detail .top{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.detail h2{font-family:"Archivo",sans-serif;font-stretch:90%;font-size:20px;font-weight:800;margin:0}
+.detail .sub{font-size:13px;color:var(--ink-2)}
+.detail .x{border:0;background:transparent;font-size:22px;line-height:1;color:var(--ink-2);padding:2px 6px}
+.dl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px}
+.mcard{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--c);border-radius:6px;padding:10px 12px;display:grid;gap:4px}
+.mcard .mt{font-weight:600;font-size:15px;line-height:1.3;text-wrap:balance}
+.mcard .mm{font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mcard .mm .w{color:var(--good);font-weight:600} .mcard.build .mm .w{color:var(--build)} .mcard .mm .late{color:var(--crit);font-weight:600}
+.mcard .plan{justify-self:start;margin-top:4px;border:1px solid var(--line-2);background:var(--surface);border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600}
+.mcard .plan.in{border-color:var(--good);color:var(--good);background:var(--good-soft);cursor:default}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px} @media (max-width:520px){.two{grid-template-columns:1fr}}
+.spark{height:48px;display:flex;align-items:flex-end;gap:3px}
+.spark i{flex:1;background:var(--c);border-radius:2px 2px 0 0;min-height:2px;opacity:.85} .spark i.now{opacity:1;outline:1px solid var(--ink);outline-offset:-1px}
+.sparkx{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin-top:3px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 12px;font-size:13px;color:var(--ink-2)} .kv b{color:var(--ink);font-weight:600;text-align:right}
+.wkrow{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--ink-2)}
+.wkrow .dbox{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:4px 6px;text-align:center;min-width:0}
+.wkrow .dbox b{display:block;color:var(--ink);font-weight:600} .wkrow .dbox.today{border-color:var(--bill)}
+.detail .say{font-size:13px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:10px}
+
+/* shutdown drawer */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(102%);transition:transform .2s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);z-index:6}
+.drawer.on{transform:none} @media (prefers-reduced-motion:reduce){.drawer{transition:none}}
+.drawer .dh{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.drawer .dh h2{font-family:"Archivo",sans-serif;font-stretch:90%;font-size:16px;font-weight:700;margin:0}
+.drawer .dh button{background:transparent;border:0;color:var(--ink-2);font-size:20px;line-height:1;padding:4px 6px}
+.drawer .dbody{overflow:auto;padding:14px 16px;display:grid;gap:14px;align-content:start;flex:1}
+.coach{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:8px} .coach p{margin:0}
+.coach .concern{border-left:3px solid var(--warn);padding-left:10px;color:var(--ink-2)}
+.carry{display:grid;gap:6px}
+.carry .r{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 6px 6px 10px;font-size:13px}
+.carry .r span{font-weight:600} .carry .r small{display:block;color:var(--ink-2);font-weight:400;font-size:12px}
+.carry button{border:1px solid var(--line-2);background:var(--surface);border-radius:5px;padding:4px 9px;font-size:12px;color:var(--ink-2)}
+.ask{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.ask input{flex:1;font:inherit;padding:8px 10px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink)}
+.ask button{background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:8px 12px;font-weight:600}
+.empty{font-size:13px;color:var(--ink-3)}
+</style>
+
+<div class="app">
+  <div class="bar">
+    <h1>Envelopes</h1>
+    <div class="nav"><button aria-label="Previous week">‹</button><span class="wk">Week 39 · 21 – 26 Sep</span><button aria-label="Next week">›</button></div>
+    <span class="example">Example data</span>
+    <span class="spacer"></span>
+    <button class="ghost" id="btnProjects">Projects</button>
+    <button class="primary" id="btnShut">Shut down Wednesday</button>
+  </div>
+  <div class="envs" id="envs"></div>
+  <div class="moves"><div class="lab"><b>Moves</b>by urgency</div><div class="chips" id="chips"></div></div>
+  <div class="weekwrap"><div class="week" id="week"></div></div>
+  <div class="cash">
+    <div class="hd"><span>Cash, next six weeks</span><span class="bal">Balance today <b class="num">€3,200</b> · September invoiced so far <b class="num" id="invSoFar"></b> · Due by the 7th</span></div>
+    <div class="cashwrap"><div class="stripe" id="cash"></div></div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="card" role="dialog" aria-label="Projects">
+    <div class="list" id="plist"></div>
+    <div class="detail" id="pdetail"></div>
+  </div>
+</div>
+
+<aside class="drawer" id="drawer" aria-label="Shutdown">
+  <div class="dh"><h2>Shutdown · Wednesday 23</h2><button id="btnClose" aria-label="Close">×</button></div>
+  <div class="dbody">
+    <div class="coach"><div class="dl">Coach</div><p id="cDay"></p><p id="cMonth"></p><p class="concern" id="cConcern"></p></div>
+    <div><div class="dl">Not done today</div><div class="carry" id="carry"></div></div>
+    <div><div class="dl">Thursday as it stands</div><div class="kv" id="tom"></div></div>
+  </div>
+  <form class="ask" id="askForm"><input id="askIn" placeholder="Tell the coach what happened, or what to change"><button type="submit">Send</button></form>
+</aside>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const CAP = 6, TODAY = 2, DAYS_LEFT = 5;
+  const DAYS = ['Mon 21','Tue 22','Wed 23','Thu 24','Fri 25','Sat 26'];
+  const G = {
+    bill:{name:'Billable', c:'var(--bill)', s:'var(--bill-soft)', budget:69, before:38},
+    build:{name:'Building', c:'var(--build)', s:'var(--build-soft)', budget:20, before:6},
+    admin:{name:'Admin and asks', c:'var(--admin)', s:'var(--admin-soft)', budget:12, before:7},
+    hobby:{name:'Hobby', c:'var(--hobby)', s:'var(--hobby-soft)', budget:0, before:14},
+    dormant:{name:'Dormant, worth a nudge', c:'var(--dormant)', s:'var(--dormant-soft)'},
+  };
+  const P = [
+    {id:'bramble', g:'bill', name:'Bramble & Co', sub:'Retainer · €1,120 / mo · 14 h', rate:80, move:'Offer the user-testing add-on they asked about', worth:'+€700 / mo', when:'Fri, on the call', due:4, sp:[0,0,1120,1120,1120,1120], facts:[['Slot','1 of 3, filled'],['Notice','30 days, none given'],['Last paid','5 Sep, on time'],['Budget this month','14 of 14 h']], say:'Steady. The add-on is the cheapest €700 a month you will ever earn.'},
+    {id:'northline', g:'bill', name:'Northline Languages', sub:'Training days via broker', rate:80, move:'Ask for November dates while you are in the room', worth:'+€1,120 in Nov', when:'Thu', due:3, sp:[1120,0,560,0,560,1120], facts:[['Broker cut','30%'],['Days this month','1 done, 1 Thursday'],['Last paid','2 Sep'],['Pattern','1 to 2 days a month']], say:'Your best-proven avenue. Every extra broker like this one is another slot.'},
+    {id:'salon', g:'bill', name:'Salon Collective', sub:'Hourly · cheap rate', rate:18, move:'Propose a fixed €800 a month for maintenance and small features', worth:'+€400 / mo', when:'With the 30 Sep invoice', due:9, sp:[400,600,500,400,400,400], facts:[['Slot','2 of 3, half'],['Rate vs yours','28%'],['Hours this month','22'],['Decision','slow burner, review 1 Dec']], say:'Kept on purpose. Flag it if it passes 25 hours in a month.'},
+    {id:'uplift', g:'bill', name:'Uplift', sub:'One-off consulting', rate:65, move:'Ask whether the launch needs a testing pass', worth:'€500 one-off', when:'Wed, on the call', due:2, sp:[500,0,0,500,0,0], facts:[['Pattern','€500 every few months'],['Last paid','June'],['Not a slot','counted when it lands']], say:'Nice when it comes. Never plan around it.'},
+    {id:'coaching', g:'build', name:'Coaching offer', sub:'Rung 2 → 3 of the learning brand', move:'Send the email to the 500-person list', worth:'+€1,800 / mo if 3 say yes', when:'Wed, 30 min', due:2, sp:[0,0,0,0,0,5.5], facts:[['Invested','5.5 h, €358 at your rate'],['Returned','€0'],['Fills','slot 3 if it lands'],['Rung 3 due','31 Oct']], say:'The one that turns 380 hours of builder work into money. Half an hour from sent.'},
+    {id:'builder', g:'build', name:'Builder tool', sub:'Asset · rung 1 done', move:'Fixes only. It pays through coaching, not by itself', worth:'', when:'', due:99, stop:true, sp:[40,45,50,55,55,6], facts:[['Invested','380 h, €24,700'],['Produced','the list, the coaching product'],['Returned','€0 direct']], say:'Done is done. Every hour here now is an hour the coaching email does not get.'},
+    {id:'practice', g:'build', name:'Practice group', sub:'Rung 4', move:'Set up the first free weekly call', worth:'feeds coaching', when:'Fri, 2 h', due:4, sp:[0,0,0,0,0,0], facts:[['To start','6 h, then 1 h a week'],['Pays via','the paid tier'],['Why','the part of the destination you care about']], say:'Cheap to run, and it is the reason for the whole thing.'},
+    {id:'admin', g:'admin', name:'Admin', sub:'Invoices, email, tooling, asks', move:'', due:99, stop:true, sp:[10,9,11,8,9,7], facts:[['This month','7 h before this week'],['Rule','invoices count here, and so do asks to dormant clients']], say:'Overhead. Keep it under 12 hours.'},
+    {id:'jazz', g:'hobby', name:'The Jazz Room', sub:'Website for a friend', move:'Ask if the fundraiser is happening. If yes it becomes a slot candidate', worth:'€2,000 / mo, only if funded', when:'By 31 Oct', due:30, sp:[12,14,10,8,8,9], facts:[['Since April','61 h'],['Returned','€0'],['Decision','hobby, no review']], say:'Evenings and weekends, or not at all. No guilt either way.'},
+    {id:'meridian', g:'dormant', name:'Meridian Events', sub:'Ex fractional CTO client', move:'Offer a two-day systems audit before their October event', worth:'€1,300 one-off', when:'This week', due:4, sp:[4500,4500,0,0,0,0], facts:[['Last paid','March'],['They still run','autumn conference season'],['Relationship','warm, ended on budget']], say:'They know what you can do. One email, and it is a yes or a no.'},
+    {id:'foundera', g:'dormant', name:'Founder A', sub:'Ex client · asked about a retainer', move:'Send the fixed monthly offer: security review and release testing', worth:'+€600 / mo', when:'Mon, overdue', due:-1, late:true, sp:[800,1200,600,0,0,0], facts:[['Asked','26 days ago'],['Last paid','June'],['Would fill','slot 3']], say:'They asked you. This is the easiest slot on the board and it is 26 days late.'},
+    {id:'copperfield', g:'dormant', name:'Copperfield', sub:'Ex client · offered to promote you', move:'Send her the one paragraph she can forward, with a date', worth:'training leads', when:'This week, 20 min', due:4, sp:[0,2400,2400,0,0,0], facts:[['Offer made','41 days ago'],['Her network','operations leads'],['Costs you','one paragraph']], say:'Offers like this die of no concrete ask, not of bad will.'},
+    {id:'nl-elearn', g:'dormant', name:'Northline e-learning', sub:'Delivered project', move:'Ask if module two is on their autumn plan', worth:'€2,000 project', when:'Thu, same trip', due:3, sp:[0,0,2000,2000,0,0], facts:[['Delivered','July'],['Natural next phase','a second module']], say:'Same trip as the workshop. Ask in person.'},
+  ];
+  const byId = Object.fromEntries(P.map(p=>[p.id,p]));
+  let B = [
+    {p:'admin', d:0, what:'Invoice Salon Collective, August', h:.25, done:true, todo:true},
+    {p:'bramble', d:0, what:'Security review, login flow', h:2, done:true, actual:2.5},
+    {p:'northline', d:0, what:'Workshop prep', h:1.5, done:true},
+    {p:'coaching', d:0, what:'Draft the mailing-list email', h:1.5, done:true},
+    {p:'salon', d:0, what:'Booking bug', h:1, done:true},
+    {p:'admin', d:0, what:'Log and email', h:.5, done:true},
+    {p:'bramble', d:1, what:'Security review, sessions', h:2, done:true},
+    {p:'salon', d:1, what:'Stylist profile page', h:1.5, done:true},
+    {p:'coaching', d:1, what:'One-page offer with price', h:1.5, done:true, actual:2.5},
+    {p:'jazz', d:1, what:'Gig listings', h:1, done:true},
+    {p:'admin', d:1, what:'Email', h:.5, done:true},
+    {p:'salon', d:2, what:'Stylist profile page', h:1.5, done:true},
+    {p:'bramble', d:2, what:'Write up findings', h:2, done:true},
+    {p:'coaching', d:2, what:'Send the email to 500 people', h:.5, done:false, move:true},
+    {p:'uplift', d:2, what:'Consulting call, launch checklist', h:1, done:false},
+    {p:'admin', d:2, what:'Email', h:.5, done:false},
+    {p:'northline', d:3, what:'AI workshop, on site, full day', h:7, done:false},
+    {p:'bramble', d:4, what:'Retainer hours', h:1.5, done:false},
+    {p:'salon', d:4, what:'Payments bug', h:2, done:false},
+    {p:'practice', d:4, what:'Set up the first free call', h:2, done:false, move:true},
+    {p:'admin', d:4, what:'Month-end invoices, draft', h:.5, done:false},
+    {p:'jazz', d:5, what:'Site, if you feel like it', h:2, done:false},
+  ];
+  const hrs = b => b.done ? (b.actual ?? b.h) : b.h;
+  const h1 = n => (Math.round(n*4)/4).toString();
+  const fmt = n => '€' + Math.round(n).toLocaleString('en-GB');
+  const envOf = p => p.g==='dormant' ? 'admin' : p.g;
+  const used = env => G[env].before + B.filter(b=>b.done && envOf(byId[b.p])===env).reduce((s,b)=>s+hrs(b),0);
+  const focus = d => B.filter(b=>b.d===d && ['bill','build'].includes(envOf(byId[b.p]))).reduce((s,b)=>s+hrs(b),0);
+  const placed = p => B.some(b=>b.p===p.id && b.move);
+  let sel = null, lastNew = null;
+
+  function placeMove(p){
+    if(placed(p) || p.stop || !p.move) return;
+    let day = p.due<0 ? TODAY : Math.min(Math.max(TODAY, p.due), 4); if(p.due>=9) day = TODAY;
+    while(day<5 && focus(day)+.5 > CAP) day++;
+    const b = {p:p.id, d:Math.min(day,4), what:p.move, h:.5, done:false, move:true}; B.push(b); lastNew = b;
+  }
+
+  function renderEnvs(){
+    const el = $('envs'); el.innerHTML = '';
+    ['bill','build','admin','hobby'].forEach(k=>{
+      const e = G[k], u = used(k), left = e.budget - u, pct = e.budget ? Math.min(100,u/e.budget*100) : (u>0?100:0);
+      let say;
+      if(k==='bill') say = left>0 ? `${h1(left/DAYS_LEFT)} h a day for the ${DAYS_LEFT} days left` : 'Month covered';
+      else if(k==='build') say = left>0 ? `${h1(left)} h left to spend on rungs` : 'Budget spent';
+      else if(k==='admin') say = `${h1(Math.max(0,left))} h left. Invoices and asks count here`;
+      else say = `Not budgeted, not counted, not a problem`;
+      el.insertAdjacentHTML('beforeend', `<div class="env" style="--c:${e.c}"><div class="hd"><span class="name">${e.name}</span><span class="left"><b class="num">${h1(Math.max(0,left))} h</b> left</span></div><div class="track"><div class="fill ${u>e.budget&&k!=='hobby'?'over':''}" style="width:${pct}%"></div></div><div class="say"><span class="num">${h1(u)}</span> of <span class="num">${e.budget}</span> · ${say}</div></div>`);
+    });
+  }
+  function renderChips(){
+    const list = P.filter(p=>p.move && !p.stop).sort((a,b)=>a.due-b.due);
+    $('chips').innerHTML = list.map(p=>{ const pl = placed(p); return `<button class="chip ${p.g} ${p.late?'late':''} ${pl?'placed':''}" data-p="${p.id}" title="${pl?'Already in the week':'Click to put 30 minutes in the week'}"><i style="--c:${G[p.g].c}"></i><b>${p.name}:</b> ${p.move}${p.worth?` <span class="w">${p.worth}</span>`:''}</button>`; }).join('');
+    $('chips').querySelectorAll('.chip').forEach(c=> c.addEventListener('click', ()=>{ const p = byId[c.dataset.p]; if(placed(p)) { openCard(p.id); return; } placeMove(p); renderAll(); }));
+  }
+  function renderWeek(){
+    const w = $('week'); w.innerHTML = '';
+    DAYS.forEach((d,i)=>{
+      const col = document.createElement('div'); col.className = 'col' + (i===TODAY?' today':'') + (i===5?' sat':'');
+      const f = focus(i), total = B.filter(b=>b.d===i).reduce((s,b)=>s+hrs(b),0);
+      const segs = B.filter(b=>b.d===i).map(b=>`<i style="flex:${hrs(b)};background:${G[envOf(byId[b.p])].c};opacity:${b.done?1:.45}"></i>`).join('');
+      col.innerHTML = `<div class="dh"><div class="d"><b>${d}</b><span class="num cap ${f>CAP?'over':''}">${h1(f)} / ${CAP} h</span></div><div class="captrack">${segs}<i style="flex:${Math.max(0,8-total)};background:transparent"></i></div><div class="cap">${f>CAP?'Over the focus ceiling. Nothing else goes here.':i<TODAY?'Logged':i===TODAY?'In progress':i===5?'Optional':'Planned'}</div></div><div class="body"></div>`;
+      const body = col.querySelector('.body');
+      B.filter(b=>b.d===i).forEach(b=>{
+        const p = byId[b.p], env = envOf(p);
+        const el = document.createElement('div'); el.className = 'blk' + (b.done?' done':'') + (b.todo?' todo':'') + (b===lastNew?' new':'');
+        el.style.setProperty('--c', G[env].c); el.style.setProperty('--s', G[env].s);
+        const hh = b.done && b.actual!=null && b.actual!==b.h ? `${h1(b.actual)} h` : `${h1(b.h)} h`;
+        el.innerHTML = `<button class="chk" aria-label="Log ${b.what}" aria-pressed="${b.done}">${b.done?'✓':''}</button><span><button class="who" title="Open ${p.name}">${p.name}</button><br><span class="what">${b.what}</span></span><span class="h num">${hh}</span>`;
+        el.querySelector('.chk').addEventListener('click', ()=>{ b.done = !b.done; lastNew = null; renderAll(); });
+        el.querySelector('.who').addEventListener('click', ()=> openCard(p.id));
+        body.appendChild(el);
+      });
+      w.appendChild(col);
+    });
+  }
+  function renderCash(){
+    $('cash').innerHTML = [
+      {dt:'Sun 28 Sep', amt:1500, lb:"Partner's contract", run:'after: €4,700'},
+      {dt:'Wed 30 Sep', amt:0, lb:'Invoices go out', run:'~€3,400 if the week goes to plan'},
+      {dt:'Thu 1 Oct', amt:-4500, lb:'Household costs', run:'after: €200', low:true},
+      {dt:'By Tue 7 Oct', amt:3400, lb:'September invoices due', run:'after: €3,600'},
+      {dt:'Wed 28 Oct', amt:1500, lb:"Partner's contract", run:'after: €5,100'},
+      {dt:'Sun 1 Nov', amt:-4500, lb:'Household costs', run:'after: €600', low:true},
+    ].map(e=>`<div class="ev ${e.low?'low':''}"><div class="dt">${e.dt}</div><div class="amt num ${e.amt>0?'in':e.amt<0?'out':''}">${e.amt>0?'+':''}${e.amt?('€'+Math.abs(e.amt).toLocaleString('en-GB')):'—'}</div><div class="lb">${e.lb}</div><div class="run num">${e.run}</div></div>`).join('');
+    $('invSoFar').textContent = fmt(2080 + P.filter(p=>p.rate).reduce((s,p)=>s + B.filter(b=>b.p===p.id&&b.done).reduce((x,b)=>x+hrs(b),0)*p.rate, 0));
+  }
+
+  // ---- project card (Trello frame) ----
+  function renderCard(){
+    const groups = ['bill','build','hobby','dormant'];
+    $('plist').innerHTML = groups.map(g=>{
+      const ps = P.filter(p=>p.g===g && p.id!=='admin');
+      const gh = ps.reduce((s,p)=>s+B.filter(b=>b.p===p.id).reduce((x,b)=>x+hrs(b),0),0);
+      return `<div class="gl" style="--c:${G[g].c}">${G[g].name}<small class="num">${gh?h1(gh)+' h this week':'nothing this week'}</small></div>` + ps.map(p=>{
+        const t = B.filter(b=>b.p===p.id).reduce((x,b)=>x+hrs(b),0);
+        return `<button class="pi ${sel===p.id?'on':''}" data-p="${p.id}" style="--c:${G[g].c}"><span class="n">${p.name}</span><span class="h num">${t?h1(t)+' h':'—'}</span>${p.move?`<span class="m ${p.late?'late':''}">${p.late?'! ':'→ '}${p.move}</span>`:''}<span class="bar"><i style="width:${Math.min(100,t/10*100)}%"></i></span></button>`; }).join('');
+    }).join('');
+    $('plist').querySelectorAll('.pi').forEach(b=> b.addEventListener('click', ()=>{ sel = b.dataset.p; renderCard(); }));
+    const p = byId[sel] || P[0]; const c = G[p.g].c, mx = Math.max(...p.sp,1), pl = placed(p);
+    const t = B.filter(b=>b.p===p.id).reduce((x,b)=>x+hrs(b),0);
+    $('pdetail').innerHTML = `
+      <div class="top"><div><h2>${p.name}</h2><div class="sub">${p.sub}</div></div><button class="x" id="cardClose" aria-label="Close">×</button></div>
+      ${p.move ? `<div class="mcard ${p.g}" style="--c:${c}"><div class="dl" style="margin:0">Next move</div><div class="mt">${p.move}</div><div class="mm">${p.worth?`<span class="w">${p.worth}</span>`:'<span></span>'}<span class="${p.late?'late':''}">${p.when||''}</span></div>${p.stop?'':`<button class="plan ${pl?'in':''}" id="planBtn">${pl?'✓ In the week':'Put 30 min in the week'}</button>`}</div>` : ''}
+      <div><div class="dl">This week · <span class="num">${t?h1(t)+' h':'nothing'}</span>${p.rate&&t?` · <span class="num">${fmt(t*p.rate)}</span>`:''}</div><div class="wkrow">${DAYS.map((d,i)=>{ const v = B.filter(b=>b.p===p.id&&b.d===i).reduce((x,b)=>x+hrs(b),0); return `<div class="dbox ${i===TODAY?'today':''}"><b class="num">${v?h1(v):'·'}</b>${d.split(' ')[0]}</div>`; }).join('')}</div></div>
+      <div class="two">
+        <div><div class="dl">Last six months${p.rate?', €':', hours'}</div><div class="spark" style="--c:${c}">${p.sp.map((v,i)=>`<i style="height:${Math.max(6,v/mx*100)}%" class="${i===5?'now':''}" title="${v}"></i>`).join('')}</div><div class="sparkx"><span>Apr</span><span>Sep</span></div></div>
+        <div><div class="dl">Facts</div><div class="kv">${p.facts.map(([a,b])=>`<span>${a}</span><b>${b}</b>`).join('')}</div></div>
+      </div>
+      <div class="say">${p.say}</div>`;
+    $('cardClose').addEventListener('click', closeCard);
+    const pb = $('planBtn'); if(pb) pb.addEventListener('click', ()=>{ placeMove(p); renderAll(); closeCard(); });
+  }
+  function openCard(id){ sel = id || sel || 'bramble'; renderCard(); $('modal').classList.add('on'); $('modal').setAttribute('aria-hidden','false'); $('scrim').classList.add('on'); }
+  function closeCard(){ $('modal').classList.remove('on'); $('modal').setAttribute('aria-hidden','true'); if(!$('drawer').classList.contains('on')) $('scrim').classList.remove('on'); }
+
+  // ---- shutdown ----
+  function renderDrawer(){
+    const td = B.filter(b=>b.d===TODAY), nd = td.filter(b=>!b.done);
+    const dBill = td.filter(b=>b.done&&envOf(byId[b.p])==='bill').reduce((s,b)=>s+hrs(b),0), dBuild = td.filter(b=>b.done&&envOf(byId[b.p])==='build').reduce((s,b)=>s+hrs(b),0);
+    const uB = used('bill'), leftB = G.bill.budget-uB, leftBu = G.build.budget-used('build');
+    $('cDay').textContent = `Wednesday: ${h1(dBill)} h billed, ${h1(dBuild)} h building. ${nd.length} block${nd.length===1?'':'s'} not done.`;
+    $('cMonth').textContent = leftB>0 ? `Month: ${h1(uB)} of ${G.bill.budget} billable. ${h1(leftB)} to go over ${DAYS_LEFT} days is ${h1(leftB/DAYS_LEFT)} a day. Thursday's workshop covers two of those on its own. Building has ${h1(leftBu)} h left, enough for the practice group on Friday.` : `Month: billable envelope is full.`;
+    const unsent = nd.find(b=>b.p==='coaching'); const unplaced = P.filter(p=>p.g==='dormant' && !placed(p));
+    $('cConcern').textContent = unsent ? `One thing: the coaching email still isn't sent. Half an hour, and it's the rung the October money depends on. Carry it to Thursday morning, or tell me why not.` : unplaced.length ? `One thing: ${unplaced.length} dormant moves are still on the strip with no time in the week. ${unplaced[0].name} is the one to start with.` : `No concerns tonight.`;
+    const carry = $('carry'); carry.innerHTML = nd.length ? '' : '<div class="empty">Everything logged. Nice.</div>';
+    nd.forEach(b=>{ const r = document.createElement('div'); r.className='r'; r.innerHTML = `<div><span>${byId[b.p].name}</span><small>${b.what} · ${h1(b.h)} h</small></div>`;
+      const c = document.createElement('button'); c.textContent='Carry to Thu'; c.addEventListener('click', ()=>{ b.d = TODAY+1; renderAll(); });
+      const x = document.createElement('button'); x.textContent='Drop'; x.addEventListener('click', ()=>{ B.splice(B.indexOf(b),1); renderAll(); });
+      r.appendChild(c); r.appendChild(x); carry.appendChild(r); });
+    const tm = B.filter(b=>b.d===TODAY+1), tf = focus(TODAY+1);
+    $('tom').innerHTML = tm.map(b=>`<span>${byId[b.p].name} · ${b.what}</span><b class="num">${h1(b.h)} h</b>`).join('') + `<span style="color:var(--ink-2)">Focus total</span><b class="num" style="${tf>CAP?'color:var(--crit)':''}">${h1(tf)} / ${CAP} h</b>`;
+  }
+  const openD = ()=>{ renderDrawer(); $('drawer').classList.add('on'); $('scrim').classList.add('on'); };
+  const closeD = ()=>{ $('drawer').classList.remove('on'); if(!$('modal').classList.contains('on')) $('scrim').classList.remove('on'); };
+
+  function renderAll(){ renderEnvs(); renderChips(); renderWeek(); renderCash(); if($('modal').classList.contains('on')) renderCard(); if($('drawer').classList.contains('on')) renderDrawer(); }
+  renderAll();
+
+  $('btnProjects').addEventListener('click', ()=> openCard(null));
+  $('btnShut').addEventListener('click', openD); $('btnClose').addEventListener('click', closeD);
+  $('scrim').addEventListener('click', ()=>{ closeCard(); closeD(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeCard(); closeD(); } });
+  $('askForm').addEventListener('submit', e=>{ e.preventDefault(); const v = $('askIn').value.trim(); if(!v) return; $('cConcern').textContent = `Heard: "${v}". In the real app this goes to the coach in Claude Code through the MCP server, and it writes the change back into the week.`; $('askIn').value=''; });
+})();
+</script>

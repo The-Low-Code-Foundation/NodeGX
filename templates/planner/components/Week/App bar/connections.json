@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "32427230-2eff-5233-885d-c226d6e03968",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "abIn",
+      "fromProperty": "weekLabel",
+      "toId": "abWeekLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "abPrev",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "previousWeek"
+    },
+    {
+      "fromId": "abNext",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "nextWeek"
+    },
+    {
+      "fromId": "abProjects",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "openProjects"
+    },
+    {
+      "fromId": "abSettings",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "openSettings"
+    },
+    {
+      "fromId": "abShut",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "shutDown"
+    },
+    {
+      "fromId": "abSignOut",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "signOut"
+    }
+  ]
+}

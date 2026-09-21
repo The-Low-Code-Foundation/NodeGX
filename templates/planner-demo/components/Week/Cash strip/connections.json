@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "15c682d5-a9f7-5fde-8492-d0509c6d9389",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "csIn",
+      "fromProperty": "balanceText",
+      "toId": "csBalance",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "invoicedText",
+      "toId": "csInvoiced",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "termsText",
+      "toId": "csTerms",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "rows",
+      "toId": "csEach",
+      "toProperty": "items"
+    }
+  ]
+}

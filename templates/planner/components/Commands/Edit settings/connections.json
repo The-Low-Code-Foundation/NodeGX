@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5f218695-e218-5b59-8acc-eb93929ef4b3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "settingsId",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-settingsId"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "rate",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "householdNeed",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-householdNeed"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "partnerIncome",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-partnerIncome"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "focusHours",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-focusHours"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "partnerDay",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-partnerDay"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "costsDay",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-costsDay"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "invoiceDay",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-invoiceDay"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "paymentTermsDays",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-paymentTermsDays"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "do",
+      "toId": "EditsettinGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-rate",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-rate"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-householdNeed",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-householdNeed"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-partnerIncome",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-partnerIncome"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-focusHours",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-focusHours"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-partnerDay",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-partnerDay"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-costsDay",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-costsDay"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-invoiceDay",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-invoiceDay"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-paymentTermsDays",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-paymentTermsDays"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "settingsId",
+      "toId": "EditsettinWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-go",
+      "toId": "EditsettinWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "EditsettinWrite",
+      "fromProperty": "done",
+      "toId": "EditsettinOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditsettinWrite",
+      "fromProperty": "failure",
+      "toId": "EditsettinProblem",
+      "toProperty": "do"
+    }
+  ]
+}

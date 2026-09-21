@@ -1,0 +1,77 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c8336c39-b6d8-517b-829c-15ebd49d6827",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dkIn",
+      "type": "Component Inputs",
+      "label": "The six days",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "dkOut",
+      "type": "Component Outputs",
+      "label": "Which day was pressed",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "dkRoot",
+      "type": "Group",
+      "label": "Day picker",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "cssClassName": "planner-pinned planner-daypicker",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "dkEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dkEach",
+      "type": "For Each",
+      "label": "One chip per day",
+      "parent": "dkRoot",
+      "parameters": {
+        "template": "/Week/Day pick",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "dkRoot"
+  ]
+}

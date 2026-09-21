@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "240eb697-a3ae-5471-887e-95fa4e9aa609",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dlIn",
+      "type": "Component Inputs",
+      "label": "The week",
+      "ports": [
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "weekStart",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focusHours",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "newBlockId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pickedDay",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dlOut",
+      "type": "Component Outputs",
+      "label": "The columns",
+      "ports": [
+        {
+          "name": "columns",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "picker",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "todayKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tomorrowKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "todayLong",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tomorrowLong",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "firstOpenDay",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "dlWork",
+      "type": "JavaScriptFunction",
+      "label": "Build the six columns",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar ENV_KEYS = [\"billable\",\"building\",\"admin\",\"hobby\",\"dormant\"];\nvar ENV_NAMES = {\"billable\":\"Billable\",\"building\":\"Building\",\"admin\":\"Admin and asks\",\"hobby\":\"Hobby\",\"dormant\":\"Dormant, worth a nudge\"};\nfunction envMark(k) { return 'var(--env-' + k + ')'; }\nfunction envInk(k) { return 'var(--env-' + k + '-ink)'; }\nfunction envSoft(k) { return 'var(--env-' + k + '-soft)'; }\n\nvar projects = Inputs.projects || [];\nvar blocks = Inputs.blocks || [];\nvar monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());\nvar focus = num(Inputs.focusHours, 6);\nvar newId = String(Inputs.newBlockId || '');\nvar today = startOfToday();\nvar todayKey = dayKey(today);\n\n// The phone shows one day. Which one: what the picker last chose, if it is still in the week\n// on screen; otherwise today; otherwise the Monday. The arrows move the week, so a day picked\n// last week has to fall back rather than leave the phone showing nothing.\nvar weekKeys = [];\nfor (var w = 0; w < 6; w++) weekKeys.push(dayKey(addDays(monday, w)));\nvar picked = String(Inputs.pickedDay || '');\nif (weekKeys.indexOf(picked) < 0) picked = weekKeys.indexOf(todayKey) >= 0 ? todayKey : weekKeys[0];\n\nvar byId = {};\nfor (var i = 0; i < projects.length; i++) if (projects[i]) byId[projects[i].id] = projects[i];\n\n/** The bar is drawn against a fixed eight hours so the six days are comparable. */\nvar SCALE = 8;\nvar columns = [];\nvar pickerRows = [];\nvar firstOpen = '';\nfor (var d = 0; d < 6; d++) {\n  var day = addDays(monday, d);\n  var key = dayKey(day);\n  var mine = [];\n  for (var b = 0; b < blocks.length; b++) if (blocks[b] && blocks[b].date === key) mine.push(blocks[b]);\n  mine.sort(function (x, y) { return num(x.position, 0) - num(y.position, 0); });\n\n  var focused = 0, doneH = 0, plannedH = 0;\n  var rows = [];\n  for (var m = 0; m < mine.length; m++) {\n    var blk = mine[m];\n    var proj = byId[blk.projectId] || { name: 'Unknown project', kind: 'admin' };\n    var env = envelopeOf(proj);\n    var h = hoursOf(blk);\n    if (env === 'billable' || env === 'building') focused += h;\n    if (blk.done) doneH += h; else plannedH += h;\n    // The hours on a block are the hours it counts for. Written out a second time here, this\n    // read the empty actual of every logged block as nought and put \"0 h\" on the whole week.\n    rows.push({\n      id: blk.id,\n      projectId: blk.projectId,\n      projectName: proj.name || '',\n      what: blk.what || '',\n      hoursText: hText(h) + ' h',\n      done: !!blk.done,\n      tickColor: envMark(env),\n      tickFill: blk.done ? envMark(env) : 'transparent',\n      tickInk: blk.done ? 'var(--surface)' : 'transparent',\n      mark: envMark(env),\n      soft: envSoft(env),\n      isNew: !!newId && blk.id === newId,\n      fromTodo: !!blk.todoTaskId\n    });\n  }\n\n  var donePct = Math.round(Math.min(100, (doneH / SCALE) * 100));\n  var plannedPct = Math.min(100 - donePct, Math.round(Math.min(100, (plannedH / SCALE) * 100)));\n  var over = focused > focus;\n  var isToday = key === todayKey;\n  var isPast = day.getTime() < today.getTime();\n  var caption;\n  if (over) caption = 'Over the focus ceiling. Nothing else goes here.';\n  else if (isPast) caption = 'Logged';\n  else if (isToday) caption = 'In progress';\n  else if (d === 5) caption = 'Optional';\n  else caption = 'Planned';\n\n  if (!firstOpen && !isPast && focused + 0.5 <= focus) firstOpen = key;\n\n  columns.push({\n    day: DOW[d] + ' ' + day.getDate(),\n    focusText: hText(focused) + ' / ' + hText(focus) + ' h',\n    focusColor: over ? 'var(--destructive)' : 'var(--muted-foreground)',\n    caption: caption,\n    captionColor: over ? 'var(--destructive)' : 'var(--muted-foreground)',\n    doneWidth: { value: donePct, unit: '%' },\n    plannedWidth: { value: plannedPct, unit: '%' },\n    restWidth: { value: Math.max(0, 100 - donePct - plannedPct), unit: '%' },\n    doneColor: over ? 'var(--destructive)' : 'var(--env-billable)',\n    plannedColor: over ? 'var(--destructive)' : 'var(--env-building)',\n    blocks: rows,\n    isToday: isToday,\n    columnBackground: isToday ? 'var(--muted)' : 'transparent',\n    columnClass: 'planner-pinned planner-day' + (key === picked ? ' planner-day-picked' : '')\n  });\n\n  pickerRows.push({\n    key: key,\n    label: DOW[d] + ' ' + day.getDate(),\n    ink: key === picked ? 'var(--primary-foreground)' : 'var(--muted-foreground)',\n    chipFill: key === picked ? 'var(--primary)' : 'transparent',\n    edge: key === picked ? 'var(--primary)' : 'var(--border)'\n  });\n}\n\n// Nothing with room this week: the move goes in the last day rather than nowhere.\nif (!firstOpen) firstOpen = dayKey(addDays(monday, 4));\n\nOutputs.columns = columns;\nOutputs.picker = pickerRows;\nOutputs.todayKey = todayKey;\nOutputs.tomorrowKey = dayKey(addDays(today, 1));\nOutputs.todayLong = DOW_LONG[(today.getDay() + 6) % 7] + ' ' + today.getDate();\nOutputs.tomorrowLong = DOW_LONG[(addDays(today, 1).getDay() + 6) % 7];\nOutputs.firstOpenDay = firstOpen;"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-weekStart",
+          "displayName": "weekStart",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-focusHours",
+          "displayName": "focusHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-newBlockId",
+          "displayName": "newBlockId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedDay",
+          "displayName": "pickedDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-columns",
+          "displayName": "columns",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-picker",
+          "displayName": "picker",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-todayKey",
+          "displayName": "todayKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tomorrowKey",
+          "displayName": "tomorrowKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-todayLong",
+          "displayName": "todayLong",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tomorrowLong",
+          "displayName": "tomorrowLong",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-firstOpenDay",
+          "displayName": "firstOpenDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

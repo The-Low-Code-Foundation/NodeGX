@@ -1,0 +1,84 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f6f1f52d-d64e-5685-8c75-ddf0bdcbf585",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dpIn",
+      "type": "Component Inputs",
+      "label": "The day",
+      "ports": [
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "chipFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edge",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "dpOut",
+      "type": "Component Outputs",
+      "label": "Which day was pressed",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "dpBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Show this day",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 40,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "dpBtn"
+  ]
+}

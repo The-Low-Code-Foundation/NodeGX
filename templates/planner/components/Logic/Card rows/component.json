@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "db160aa9-8fad-58e0-818c-8686683d93cc",
+  "name": "Card rows",
+  "path": "/Logic/Card rows",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the projects card draws: the four groups with their hours this week, and every field of whichever project is selected."
+}

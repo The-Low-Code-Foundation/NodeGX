@@ -1,0 +1,201 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "62c8bb03-347f-52cf-8b00-1059d548e14a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "csIn",
+      "type": "Component Inputs",
+      "label": "The money",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "balanceText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "invoicedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "termsText",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "csRoot",
+      "type": "Group",
+      "label": "Cash strip",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "cssClassName": "planner-pinned"
+      },
+      "children": [
+        "csHead",
+        "csScroll"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "csHead",
+      "type": "Group",
+      "label": "The three numbers",
+      "parent": "csRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "csTitle",
+        "csNums"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "csTitle",
+      "type": "Text",
+      "label": "What this row is",
+      "parent": "csHead",
+      "parameters": {
+        "text": "Cash, next six weeks",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "csNums",
+      "type": "Group",
+      "label": "Balance, invoiced, terms",
+      "parent": "csHead",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "csBalance",
+        "csInvoiced",
+        "csTerms"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "csBalance",
+      "type": "Text",
+      "label": "Balance today",
+      "parent": "csNums",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "csInvoiced",
+      "type": "Text",
+      "label": "Invoiced this month",
+      "parent": "csNums",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "csTerms",
+      "type": "Text",
+      "label": "When it arrives",
+      "parent": "csNums",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "csScroll",
+      "type": "Group",
+      "label": "The events",
+      "parent": "csRoot",
+      "parameters": {
+        "cssClassName": "planner-scroll-x",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "csEach"
+      ],
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "csEach",
+      "type": "For Each",
+      "label": "One box per event",
+      "parent": "csScroll",
+      "parameters": {
+        "template": "/Week/Cash event",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "csRoot"
+  ]
+}

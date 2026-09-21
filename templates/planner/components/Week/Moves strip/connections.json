@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d8614a51-e9f9-55d6-8f6d-f5804039950d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "msIn",
+      "fromProperty": "rows",
+      "toId": "msEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "empty",
+      "toId": "msEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msEach",
+      "fromProperty": "itemOutputSignal-press",
+      "toId": "msOut",
+      "toProperty": "press"
+    },
+    {
+      "fromId": "msEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "msOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "msEach",
+      "fromProperty": "itemOutput-move",
+      "toId": "msOut",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "msEach",
+      "fromProperty": "itemOutput-placed",
+      "toId": "msOut",
+      "toProperty": "placed"
+    }
+  ]
+}

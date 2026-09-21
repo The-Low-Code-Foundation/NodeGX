@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7412abf3-ba1f-570e-8018-41c01a758eec",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "frIn",
+      "type": "Component Inputs",
+      "label": "The fact",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "frRoot",
+      "type": "Group",
+      "label": "Fact",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "frLabel",
+        "frValue"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "frLabel",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "frRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "frValue",
+      "type": "Text",
+      "label": "What it says",
+      "parent": "frRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "frRoot"
+  ]
+}

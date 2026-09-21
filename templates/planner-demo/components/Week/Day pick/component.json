@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f6f1f52d-d64e-5685-8c75-ddf0bdcbf585",
+  "name": "Day pick",
+  "path": "/Week/Day pick",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One day on the phone’s day picker: press it and the week shows that day."
+}

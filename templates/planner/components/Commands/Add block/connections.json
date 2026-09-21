@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "16b2f62b-37ef-513e-81e1-ca48b22a0db8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddblockIn",
+      "fromProperty": "projectId",
+      "toId": "AddblockGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "AddblockIn",
+      "fromProperty": "date",
+      "toId": "AddblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "AddblockIn",
+      "fromProperty": "what",
+      "toId": "AddblockGuard",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "AddblockIn",
+      "fromProperty": "planned",
+      "toId": "AddblockGuard",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "AddblockIn",
+      "fromProperty": "do",
+      "toId": "AddblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-projectId",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-date",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-what",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-planned",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-planned"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-actual"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-done",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-done"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-isMove",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-isMove"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-todoTaskId"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-position",
+      "toId": "AddblockWrite",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "AddblockGuard",
+      "fromProperty": "out-go",
+      "toId": "AddblockWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddblockWrite",
+      "fromProperty": "done",
+      "toId": "AddblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddblockWrite",
+      "fromProperty": "failure",
+      "toId": "AddblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

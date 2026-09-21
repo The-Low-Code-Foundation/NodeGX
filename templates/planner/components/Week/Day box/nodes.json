@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "db85e34e-88dc-5648-8713-5e50f1dc7db3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dxIn",
+      "type": "Component Inputs",
+      "label": "The day",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "background",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "dxRoot",
+      "type": "Group",
+      "label": "Day box",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 16,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "alignItems": "center",
+        "borderRadius": "var(--radius-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "dxValue",
+        "dxLabel"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dxValue",
+      "type": "Text",
+      "label": "Hours that day",
+      "parent": "dxRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dxLabel",
+      "type": "Text",
+      "label": "Which day",
+      "parent": "dxRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "dxRoot"
+  ]
+}

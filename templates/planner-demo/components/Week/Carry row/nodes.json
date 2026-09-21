@@ -1,0 +1,198 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b324063b-a374-535d-8a5b-a8ab6fd04988",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "crIn",
+      "type": "Component Inputs",
+      "label": "The block",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "what",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hoursText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "carryLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "crOut",
+      "type": "Component Outputs",
+      "label": "What you chose",
+      "ports": [
+        {
+          "name": "carry",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "drop",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "crRoot",
+      "type": "Group",
+      "label": "Carry row",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "crMain",
+        "crCarry",
+        "crDrop"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "crMain",
+      "type": "Group",
+      "label": "Which block",
+      "parent": "crRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "crWho",
+        "crWhat"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "crWho",
+      "type": "Text",
+      "label": "Whose",
+      "parent": "crMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "crWhat",
+      "type": "Text",
+      "label": "What it was",
+      "parent": "crMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "crCarry",
+      "type": "net.noodl.controls.button",
+      "label": "Carry it to tomorrow",
+      "parent": "crRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Carry"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "crDrop",
+      "type": "net.noodl.controls.button",
+      "label": "Drop it",
+      "parent": "crRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Drop"
+      },
+      "x": 100,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "crRoot"
+  ]
+}

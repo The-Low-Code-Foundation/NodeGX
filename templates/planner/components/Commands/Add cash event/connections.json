@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "75c65880-1258-53d6-8da3-46b9af6c9fbd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddcasheveIn",
+      "fromProperty": "date",
+      "toId": "AddcasheveGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "AddcasheveIn",
+      "fromProperty": "amount",
+      "toId": "AddcasheveGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "AddcasheveIn",
+      "fromProperty": "label",
+      "toId": "AddcasheveGuard",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "AddcasheveIn",
+      "fromProperty": "kind",
+      "toId": "AddcasheveGuard",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "AddcasheveIn",
+      "fromProperty": "recurring",
+      "toId": "AddcasheveGuard",
+      "toProperty": "in-recurring"
+    },
+    {
+      "fromId": "AddcasheveIn",
+      "fromProperty": "do",
+      "toId": "AddcasheveGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddcasheveGuard",
+      "fromProperty": "out-date",
+      "toId": "AddcasheveWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "AddcasheveGuard",
+      "fromProperty": "out-amount",
+      "toId": "AddcasheveWrite",
+      "toProperty": "prop-amount"
+    },
+    {
+      "fromId": "AddcasheveGuard",
+      "fromProperty": "out-label",
+      "toId": "AddcasheveWrite",
+      "toProperty": "prop-label"
+    },
+    {
+      "fromId": "AddcasheveGuard",
+      "fromProperty": "out-kind",
+      "toId": "AddcasheveWrite",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "AddcasheveGuard",
+      "fromProperty": "out-recurring",
+      "toId": "AddcasheveWrite",
+      "toProperty": "prop-recurring"
+    },
+    {
+      "fromId": "AddcasheveGuard",
+      "fromProperty": "out-go",
+      "toId": "AddcasheveWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddcasheveWrite",
+      "fromProperty": "done",
+      "toId": "AddcasheveOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddcasheveWrite",
+      "fromProperty": "failure",
+      "toId": "AddcasheveProblem",
+      "toProperty": "do"
+    }
+  ]
+}

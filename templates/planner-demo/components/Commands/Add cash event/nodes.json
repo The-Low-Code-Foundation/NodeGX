@@ -1,0 +1,242 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1bda9296-795d-5a51-8a99-1fd39b444e20",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "AddcasheveIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "recurring",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "AddcasheveOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "AddcasheveGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar date = String(Inputs.date || '');\nvar label = String(Inputs.label || '').trim();\nvar amount = num(Inputs.amount, NaN);\nif (!parseDay(date) || label === '' || !isFinite(amount)) return;\nvar kind = String(Inputs.kind || 'cost');\nvar known = ['income', 'cost', 'invoice-out', 'invoice-due'];\nif (known.indexOf(kind) < 0) kind = 'cost';\n// A cost is money leaving, whichever sign was typed.\nif (kind === 'cost' && amount > 0) amount = -amount;\nOutputs.date = date;\nOutputs.amount = amount;\nOutputs.label = label;\nOutputs.kind = kind;\nOutputs.recurring = String(Inputs.recurring || '') === 'monthly' ? 'monthly' : '';\nOutputs.go();",
+        "runOnChange-in-date": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-label": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-recurring": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-label",
+          "displayName": "label",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-recurring",
+          "displayName": "recurring",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-date",
+          "displayName": "date",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-amount",
+          "displayName": "amount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "displayName": "label",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kind",
+          "displayName": "kind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recurring",
+          "displayName": "recurring",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddcasheveWrite",
+      "type": "JavaScriptFunction",
+      "label": "Add the event, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-planner-demo-v1\";\nfunction demoEmpty() { return {\"Block\":[],\"CashEvent\":[],\"MonthPlan\":[],\"Project\":[],\"Settings\":[]}; }\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__plannerDemo === 'string') raw = window.__plannerDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__plannerDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar store = demoLoad() || demoEmpty();\nvar list = store[\"CashEvent\"] || (store[\"CashEvent\"] = []);\nvar now = new Date().toISOString();\nvar record = { id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), createdAt: now, updatedAt: now };\nrecord.date = Inputs.date;\nrecord.amount = Inputs.amount;\nrecord.label = Inputs.label;\nrecord.kind = Inputs.kind;\nrecord.recurring = Inputs.recurring;\nlist.push(record);\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = record.id;\nOutputs.done();",
+        "runOnChange-in-date": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-label": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-recurring": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-label",
+          "displayName": "label",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-recurring",
+          "displayName": "recurring",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddcasheveProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

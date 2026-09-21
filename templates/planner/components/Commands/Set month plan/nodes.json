@@ -1,0 +1,219 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e48f81f2-6ee2-5812-885a-49c0e2f89f2c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "SetmonthplIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "month",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billable",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "building",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "admin",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "hobby",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "workingDays",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "openingBalance",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "SetmonthplOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "SetmonthplGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar month = String(Inputs.month || '');\nif (!/^\\d{4}-\\d{2}$/.test(month)) return;\nOutputs.month = month;\nOutputs.billable = q(num(Inputs.billable, 0));\nOutputs.building = q(num(Inputs.building, 0));\nOutputs.admin = q(num(Inputs.admin, 12));\n// R4 — Hobby is budgeted at zero on purpose, and going over it is reported, never flagged.\nOutputs.hobby = q(num(Inputs.hobby, 0));\nOutputs.workingDays = Math.max(1, Math.round(num(Inputs.workingDays, 22)));\nOutputs.openingBalance = num(Inputs.openingBalance, 0);\nOutputs.go();",
+        "runOnChange-in-month": false,
+        "runOnChange-in-billable": false,
+        "runOnChange-in-building": false,
+        "runOnChange-in-admin": false,
+        "runOnChange-in-hobby": false,
+        "runOnChange-in-workingDays": false,
+        "runOnChange-in-openingBalance": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-month",
+          "displayName": "month",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billable",
+          "displayName": "billable",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-building",
+          "displayName": "building",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-admin",
+          "displayName": "admin",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hobby",
+          "displayName": "hobby",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-workingDays",
+          "displayName": "workingDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-openingBalance",
+          "displayName": "openingBalance",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-month",
+          "displayName": "month",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billable",
+          "displayName": "billable",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-building",
+          "displayName": "building",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-admin",
+          "displayName": "admin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hobby",
+          "displayName": "hobby",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-workingDays",
+          "displayName": "workingDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-openingBalance",
+          "displayName": "openingBalance",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "SetmonthplWrite",
+      "type": "NewDbModelProperties",
+      "label": "Write this month’s plan",
+      "parameters": {
+        "collectionName": "MonthPlan"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "SetmonthplProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

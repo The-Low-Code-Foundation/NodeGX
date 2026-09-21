@@ -1,0 +1,153 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "141910b7-6cbe-5e17-8679-170c37abbce8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "UnlogblockIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "blockId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "UnlogblockOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "UnlogblockGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.blockId || '');\nif (id === '') return;\nOutputs.done = false;\nOutputs.empty = '';\nOutputs.go();",
+        "runOnChange-in-blockId": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-blockId",
+          "displayName": "blockId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "UnlogblockWrite",
+      "type": "JavaScriptFunction",
+      "label": "Put it back to not done, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-planner-demo-v1\";\nfunction demoEmpty() { return {\"Block\":[],\"CashEvent\":[],\"MonthPlan\":[],\"Project\":[],\"Settings\":[]}; }\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__plannerDemo === 'string') raw = window.__plannerDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__plannerDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Block\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.done = Inputs.done;\nrecord.actual = Inputs.actual;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-done": false,
+        "runOnChange-in-actual": false,
+        "runOnChange-in-modelId": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-modelId",
+          "displayName": "modelId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-done",
+          "displayName": "done",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actual",
+          "displayName": "actual",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "UnlogblockProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

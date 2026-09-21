@@ -1,0 +1,1183 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0493c500-2d97-5a99-870d-3d73a9a0fa9c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "twPage",
+      "fromProperty": "didMount",
+      "toId": "twData",
+      "toProperty": "thisWeek"
+    },
+    {
+      "fromId": "twPage",
+      "fromProperty": "didMount",
+      "toId": "twKeys",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twKeys",
+      "fromProperty": "out-escape",
+      "toId": "twClearCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twKeys",
+      "fromProperty": "out-escape",
+      "toId": "twCloseDrawer",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twKeys",
+      "fromProperty": "out-escape",
+      "toId": "twCloseSheet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twKeys",
+      "fromProperty": "out-escape",
+      "toId": "twClearLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "previousWeek",
+      "toId": "twData",
+      "toProperty": "previousWeek"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "nextWeek",
+      "toId": "twData",
+      "toProperty": "nextWeek"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "weekLabel",
+      "toId": "twBar",
+      "toProperty": "weekLabel"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twEnv",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "blocks",
+      "toId": "twEnv",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "monthPlans",
+      "toId": "twEnv",
+      "toProperty": "monthPlans"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twEnv",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "weekStart",
+      "toId": "twEnv",
+      "toProperty": "weekStart"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twDays",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "blocks",
+      "toId": "twDays",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "weekStart",
+      "toId": "twDays",
+      "toProperty": "weekStart"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twMovesLogic",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "blocks",
+      "toId": "twMovesLogic",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "weekStart",
+      "toId": "twMovesLogic",
+      "toProperty": "weekStart"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twCardRows",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "blocks",
+      "toId": "twCardRows",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "weekStart",
+      "toId": "twCardRows",
+      "toProperty": "weekStart"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "focusHours",
+      "toId": "twDays",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "cmdPlace",
+      "fromProperty": "blockId",
+      "toId": "twDays",
+      "toProperty": "newBlockId"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "cashEvents",
+      "toId": "twCashLogic",
+      "toProperty": "cashEvents"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twCashLogic",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twSettings",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "invoicedText",
+      "toId": "twCashLogic",
+      "toProperty": "invoicedText"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "rows",
+      "toId": "twEnvEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "planLine",
+      "toId": "twPlanLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "twMovesLogic",
+      "fromProperty": "rows",
+      "toId": "twMoves",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "twMovesLogic",
+      "fromProperty": "empty",
+      "toId": "twMoves",
+      "toProperty": "empty"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "columns",
+      "toId": "twDayEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "twCashLogic",
+      "fromProperty": "rows",
+      "toId": "twCash",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "twCashLogic",
+      "fromProperty": "balanceText",
+      "toId": "twCash",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "twCashLogic",
+      "fromProperty": "termsText",
+      "toId": "twCash",
+      "toProperty": "termsText"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "invoicedText",
+      "toId": "twCash",
+      "toProperty": "invoicedText"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutputSignal-toggle",
+      "toId": "twTick",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutput-done",
+      "toId": "twTick",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutput-blockId",
+      "toId": "cmdLog",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutput-blockId",
+      "toId": "cmdUnlog",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twTick",
+      "fromProperty": "onfalse",
+      "toId": "cmdLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twTick",
+      "fromProperty": "ontrue",
+      "toId": "cmdUnlog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "twSetCard",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutputSignal-openProject",
+      "toId": "twSetCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoves",
+      "fromProperty": "press",
+      "toId": "twChip",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "twMoves",
+      "fromProperty": "placed",
+      "toId": "twChip",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "twMoves",
+      "fromProperty": "projectId",
+      "toId": "twSetCard",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twChip",
+      "fromProperty": "ontrue",
+      "toId": "twSetCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoves",
+      "fromProperty": "projectId",
+      "toId": "cmdPlace",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "twMoves",
+      "fromProperty": "move",
+      "toId": "cmdPlace",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "twMoves",
+      "fromProperty": "placed",
+      "toId": "cmdPlace",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "firstOpenDay",
+      "toId": "cmdPlace",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twChip",
+      "fromProperty": "onfalse",
+      "toId": "cmdPlace",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "openProjects",
+      "toId": "twAllProjects",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twAllProjects",
+      "fromProperty": "out-any",
+      "toId": "twSetCard",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twAllProjects",
+      "fromProperty": "out-any",
+      "toId": "twSetCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twVarCard",
+      "fromProperty": "value",
+      "toId": "twCardRows",
+      "toProperty": "selectedId"
+    },
+    {
+      "fromId": "twVarCard",
+      "fromProperty": "value",
+      "toId": "twCardShown",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "twCardShown",
+      "fromProperty": "out-shown",
+      "toId": "twCard",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "groups",
+      "toId": "twCard",
+      "toProperty": "groups"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "name",
+      "toId": "twCard",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "sub",
+      "toId": "twCard",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "move",
+      "toId": "twCard",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "hasMove",
+      "toId": "twCard",
+      "toProperty": "hasMove"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "worth",
+      "toId": "twCard",
+      "toProperty": "worth"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "hasWorth",
+      "toId": "twCard",
+      "toProperty": "hasWorth"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "when",
+      "toId": "twCard",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "whenColor",
+      "toId": "twCard",
+      "toProperty": "whenColor"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "mark",
+      "toId": "twCard",
+      "toProperty": "mark"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "soft",
+      "toId": "twCard",
+      "toProperty": "soft"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "planLabel",
+      "toId": "twCard",
+      "toProperty": "planLabel"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "canPlan",
+      "toId": "twCard",
+      "toProperty": "canPlan"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "weekText",
+      "toId": "twCard",
+      "toProperty": "weekText"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "sparkTitle",
+      "toId": "twCard",
+      "toProperty": "sparkTitle"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "say",
+      "toId": "twCard",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "facts",
+      "toId": "twCard",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "bars",
+      "toId": "twCard",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "boxes",
+      "toId": "twCard",
+      "toProperty": "boxes"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "firstLabel",
+      "toId": "twCard",
+      "toProperty": "firstLabel"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "lastLabel",
+      "toId": "twCard",
+      "toProperty": "lastLabel"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "projectId",
+      "toId": "twSetCard",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "pick",
+      "toId": "twSetCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "close",
+      "toId": "twClearCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "resolvedId",
+      "toId": "cmdPlace",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "move",
+      "toId": "cmdPlace",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "plan",
+      "toId": "cmdPlace",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "shutDown",
+      "toId": "twOpenDrawer",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twVarDrawer",
+      "fromProperty": "value",
+      "toId": "twDrawerShown",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "twDrawerShown",
+      "fromProperty": "out-shown",
+      "toId": "twDrawer",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "twDrawer",
+      "fromProperty": "close",
+      "toId": "twCloseDrawer",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twShutLogic",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "blocks",
+      "toId": "twShutLogic",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "todayKey",
+      "toId": "twShutLogic",
+      "toProperty": "todayKey"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "tomorrowKey",
+      "toId": "twShutLogic",
+      "toProperty": "tomorrowKey"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "todayLong",
+      "toId": "twShutLogic",
+      "toProperty": "todayLong"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "tomorrowLong",
+      "toId": "twShutLogic",
+      "toProperty": "tomorrowLong"
+    },
+    {
+      "fromId": "twMovesLogic",
+      "fromProperty": "unplacedDormant",
+      "toId": "twShutLogic",
+      "toProperty": "unplacedDormant"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "target",
+      "toId": "twShutLogic",
+      "toProperty": "target"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "billableUsed",
+      "toId": "twShutLogic",
+      "toProperty": "billableUsed"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "billableLeft",
+      "toId": "twShutLogic",
+      "toProperty": "billableLeft"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "perDay",
+      "toId": "twShutLogic",
+      "toProperty": "perDay"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "buildingLeft",
+      "toId": "twShutLogic",
+      "toProperty": "buildingLeft"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "daysLeft",
+      "toId": "twShutLogic",
+      "toProperty": "daysLeft"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "focusHours",
+      "toId": "twShutLogic",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "title",
+      "toId": "twDrawer",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "dayLine",
+      "toId": "twDrawer",
+      "toProperty": "dayLine"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "monthLine",
+      "toId": "twDrawer",
+      "toProperty": "monthLine"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "concern",
+      "toId": "twDrawer",
+      "toProperty": "concern"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "carryRows",
+      "toId": "twDrawer",
+      "toProperty": "carryRows"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "nothingToCarry",
+      "toId": "twDrawer",
+      "toProperty": "nothingToCarry"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "tomorrowTitle",
+      "toId": "twDrawer",
+      "toProperty": "tomorrowTitle"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "tomorrowList",
+      "toId": "twDrawer",
+      "toProperty": "tomorrowList"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "tomorrowFocus",
+      "toId": "twDrawer",
+      "toProperty": "tomorrowFocus"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "tomorrowFocusColor",
+      "toId": "twDrawer",
+      "toProperty": "tomorrowFocusColor"
+    },
+    {
+      "fromId": "twDrawer",
+      "fromProperty": "blockId",
+      "toId": "cmdCarry",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "tomorrowKey",
+      "toId": "cmdCarry",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twDrawer",
+      "fromProperty": "carry",
+      "toId": "cmdCarry",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twDrawer",
+      "fromProperty": "blockId",
+      "toId": "cmdDrop",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twDrawer",
+      "fromProperty": "drop",
+      "toId": "cmdDrop",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "picker",
+      "toId": "twPicker",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "twPicker",
+      "fromProperty": "key",
+      "toId": "twSetPhoneDay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twPicker",
+      "fromProperty": "pick",
+      "toId": "twSetPhoneDay",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twVarPhoneDay",
+      "fromProperty": "value",
+      "toId": "twDays",
+      "toProperty": "pickedDay"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutput-blockId",
+      "toId": "twSetLog",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twDayEach",
+      "fromProperty": "itemOutputSignal-openLog",
+      "toId": "twSetLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twVarLog",
+      "fromProperty": "value",
+      "toId": "twLogRow",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "blocks",
+      "toId": "twLogRow",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twLogRow",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-shown",
+      "toId": "twLog",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-title",
+      "toId": "twLog",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-plannedLine",
+      "toId": "twLog",
+      "toProperty": "plannedLine"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-what",
+      "toId": "twLog",
+      "toProperty": "what"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-actual",
+      "toId": "twLog",
+      "toProperty": "actual"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-saveLabel",
+      "toId": "twLog",
+      "toProperty": "saveLabel"
+    },
+    {
+      "fromId": "twLogRow",
+      "fromProperty": "out-unlogShown",
+      "toId": "twLog",
+      "toProperty": "unlogShown"
+    },
+    {
+      "fromId": "twVarLog",
+      "fromProperty": "value",
+      "toId": "cmdSave",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twVarLog",
+      "fromProperty": "value",
+      "toId": "cmdUndo",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "what",
+      "toId": "cmdSave",
+      "toProperty": "what"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "what",
+      "toId": "cmdUndo",
+      "toProperty": "what"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "actual",
+      "toId": "cmdSave",
+      "toProperty": "actual"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "actual",
+      "toId": "cmdUndo",
+      "toProperty": "actual"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "save",
+      "toId": "cmdSave",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "unlog",
+      "toId": "cmdUndo",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twLog",
+      "fromProperty": "close",
+      "toId": "twClearLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdSave",
+      "fromProperty": "done",
+      "toId": "twClearLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdUndo",
+      "fromProperty": "done",
+      "toId": "twClearLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "openSettings",
+      "toId": "twOpenSheet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twVarSheet",
+      "fromProperty": "value",
+      "toId": "twSheetShown",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "twSheetShown",
+      "fromProperty": "out-shown",
+      "toId": "twSheet",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "close",
+      "toId": "twCloseSheet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "targetLine",
+      "toId": "twSheet",
+      "toProperty": "targetLine"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "planLine",
+      "toId": "twSheet",
+      "toProperty": "planLine"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-rate",
+      "toId": "twSheet",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "rate",
+      "toId": "cmdSettings",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-householdNeed",
+      "toId": "twSheet",
+      "toProperty": "householdNeed"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "householdNeed",
+      "toId": "cmdSettings",
+      "toProperty": "householdNeed"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-partnerIncome",
+      "toId": "twSheet",
+      "toProperty": "partnerIncome"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "partnerIncome",
+      "toId": "cmdSettings",
+      "toProperty": "partnerIncome"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-focusHours",
+      "toId": "twSheet",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "focusHours",
+      "toId": "cmdSettings",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-partnerDay",
+      "toId": "twSheet",
+      "toProperty": "partnerDay"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "partnerDay",
+      "toId": "cmdSettings",
+      "toProperty": "partnerDay"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-costsDay",
+      "toId": "twSheet",
+      "toProperty": "costsDay"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "costsDay",
+      "toId": "cmdSettings",
+      "toProperty": "costsDay"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-invoiceDay",
+      "toId": "twSheet",
+      "toProperty": "invoiceDay"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "invoiceDay",
+      "toId": "cmdSettings",
+      "toProperty": "invoiceDay"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-paymentTermsDays",
+      "toId": "twSheet",
+      "toProperty": "paymentTermsDays"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "paymentTermsDays",
+      "toId": "cmdSettings",
+      "toProperty": "paymentTermsDays"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-id",
+      "toId": "cmdSettings",
+      "toProperty": "settingsId"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "save",
+      "toId": "cmdSettings",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "month",
+      "toId": "cmdMonthPlan",
+      "toProperty": "month"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "target",
+      "toId": "cmdMonthPlan",
+      "toProperty": "billable"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "buildingLeft",
+      "toId": "cmdMonthPlan",
+      "toProperty": "building"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "daysLeft",
+      "toId": "cmdMonthPlan",
+      "toProperty": "workingDays"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-openingBalance",
+      "toId": "cmdMonthPlan",
+      "toProperty": "openingBalance"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "planMonth",
+      "toId": "cmdMonthPlan",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twVarProblem",
+      "fromProperty": "value",
+      "toId": "twProblem",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "twVarProblem",
+      "fromProperty": "value",
+      "toId": "twHasProblem",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "twHasProblem",
+      "fromProperty": "out-shown",
+      "toId": "twProblem",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmdAddBlock",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdLog",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdSave",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdUndo",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdUnlog",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdCarry",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdDrop",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdPlace",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdEditProject",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdMonthPlan",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdCashEvent",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdSettings",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "reset",
+      "toId": "twData",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "reset",
+      "toId": "twClearCard",
+      "toProperty": "do"
+    }
+  ]
+}

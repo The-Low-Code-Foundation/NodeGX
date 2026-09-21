@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "800c6670-0a91-5b1d-80b9-ded88105d307",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bkIn",
+      "fromProperty": "soft",
+      "toId": "bkRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "mark",
+      "toId": "bkRoot",
+      "toProperty": "borderLeftColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "tickColor",
+      "toId": "bkTick",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "tickFill",
+      "toId": "bkTick",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "tickInk",
+      "toId": "bkTick",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "projectName",
+      "toId": "bkWho",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "mark",
+      "toId": "bkWho",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "what",
+      "toId": "bkWhat",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "hoursText",
+      "toId": "bkHours",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "id",
+      "toId": "bkOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "projectId",
+      "toId": "bkOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "done",
+      "toId": "bkOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "bkTick",
+      "fromProperty": "onClick",
+      "toId": "bkOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "bkWho",
+      "fromProperty": "onClick",
+      "toId": "bkOut",
+      "toProperty": "openProject"
+    },
+    {
+      "fromId": "bkWhat",
+      "fromProperty": "onClick",
+      "toId": "bkOut",
+      "toProperty": "openLog"
+    },
+    {
+      "fromId": "bkHours",
+      "fromProperty": "onClick",
+      "toId": "bkOut",
+      "toProperty": "openLog"
+    }
+  ]
+}

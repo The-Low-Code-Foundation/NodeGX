@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "72ee87c8-c894-5729-8787-2a81680b1b12",
+  "name": "Project detail",
+  "path": "/Week/Project detail",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One project in full: its next move and what that move is worth, its hours this week, six months of history, its facts, and the one line about it."
+}

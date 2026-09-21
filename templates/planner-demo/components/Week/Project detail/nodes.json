@@ -1,0 +1,650 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "51610a68-a4e5-5fb0-802e-d9fbd39f0d56",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pdIn",
+      "type": "Component Inputs",
+      "label": "The project",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "worth",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasWorth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whenColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "soft",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "weekText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sparkTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "bars",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "boxes",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "firstLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "pdOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "plan",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "pdRoot",
+      "type": "Group",
+      "label": "Project detail",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "pdTop",
+        "pdMove",
+        "pdWeek",
+        "pdTwo",
+        "pdSayBox"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pdTop",
+      "type": "Group",
+      "label": "Name and close",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "pdNames",
+        "pdClose"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pdNames",
+      "type": "Group",
+      "label": "What it is called",
+      "parent": "pdTop",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pdName",
+        "pdSub"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pdName",
+      "type": "Text",
+      "label": "Project name",
+      "parent": "pdNames",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h2"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pdSub",
+      "type": "Text",
+      "label": "One line about it",
+      "parent": "pdNames",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "pdClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the card",
+      "parent": "pdTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pdMove",
+      "type": "Group",
+      "label": "Its next move",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pdMoveLabel",
+        "pdMoveText",
+        "pdMoveMeta",
+        "pdPlan"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "pdMoveLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "Next move",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "pdMoveText",
+      "type": "Text",
+      "label": "The move",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pdMoveMeta",
+      "type": "Group",
+      "label": "Worth and when",
+      "parent": "pdMove",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "pdWorth",
+        "pdWhen"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "pdWorth",
+      "type": "Text",
+      "label": "What it is worth",
+      "parent": "pdMoveMeta",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "pdWhen",
+      "type": "Text",
+      "label": "When to do it",
+      "parent": "pdMoveMeta",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "pdPlan",
+      "type": "net.noodl.controls.button",
+      "label": "Put it in the week",
+      "parent": "pdMove",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Put 30 min in the week"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "pdWeek",
+      "type": "Group",
+      "label": "This week",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pdWeekLabel",
+        "pdBoxes"
+      ],
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "pdWeekLabel",
+      "type": "Text",
+      "label": "How much this week",
+      "parent": "pdWeek",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "pdBoxes",
+      "type": "/Week/Day boxes",
+      "label": "The six days",
+      "parent": "pdWeek",
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "pdTwo",
+      "type": "Group",
+      "label": "History and facts",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-4)"
+      },
+      "children": [
+        "pdHistory",
+        "pdFacts"
+      ],
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "pdHistory",
+      "type": "Group",
+      "label": "Six months",
+      "parent": "pdTwo",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pdSparkTitle",
+        "pdSpark"
+      ],
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "pdSparkTitle",
+      "type": "Text",
+      "label": "What the bars are",
+      "parent": "pdHistory",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "pdSpark",
+      "type": "/Week/Sparkline",
+      "label": "The bars",
+      "parent": "pdHistory",
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "pdFacts",
+      "type": "Group",
+      "label": "Facts",
+      "parent": "pdTwo",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pdFactsLabel",
+        "pdFactEach"
+      ],
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "pdFactsLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "pdFacts",
+      "parameters": {
+        "text": "Facts",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "pdFactEach",
+      "type": "For Each",
+      "label": "One row per fact",
+      "parent": "pdFacts",
+      "parameters": {
+        "template": "/Week/Fact row",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "pdSayBox",
+      "type": "Group",
+      "label": "The one line about it",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pdSay"
+      ],
+      "x": 100,
+      "y": 2800
+    },
+    {
+      "id": "pdSay",
+      "type": "Text",
+      "label": "What to remember about it",
+      "parent": "pdSayBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 2920
+    }
+  ],
+  "visualRoots": [
+    "pdRoot"
+  ]
+}

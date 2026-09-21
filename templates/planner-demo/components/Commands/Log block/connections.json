@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1c2a2ebd-ffa1-537e-8f08-a6ee6329bcfb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "LogblockIn",
+      "fromProperty": "blockId",
+      "toId": "LogblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "LogblockIn",
+      "fromProperty": "actual",
+      "toId": "LogblockGuard",
+      "toProperty": "in-actual"
+    },
+    {
+      "fromId": "LogblockIn",
+      "fromProperty": "do",
+      "toId": "LogblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "LogblockGuard",
+      "fromProperty": "out-done",
+      "toId": "LogblockWrite",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "LogblockGuard",
+      "fromProperty": "out-actual",
+      "toId": "LogblockWrite",
+      "toProperty": "in-actual"
+    },
+    {
+      "fromId": "LogblockIn",
+      "fromProperty": "blockId",
+      "toId": "LogblockWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "LogblockGuard",
+      "fromProperty": "out-go",
+      "toId": "LogblockWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "LogblockWrite",
+      "fromProperty": "out-done",
+      "toId": "LogblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "LogblockWrite",
+      "fromProperty": "out-failure",
+      "toId": "LogblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

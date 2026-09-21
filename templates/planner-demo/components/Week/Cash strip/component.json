@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "15c682d5-a9f7-5fde-8492-d0509c6d9389",
+  "name": "Cash strip",
+  "path": "/Week/Cash strip",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The next six weeks of money as a row of events, with the balance today and what has been invoiced this month above it."
+}

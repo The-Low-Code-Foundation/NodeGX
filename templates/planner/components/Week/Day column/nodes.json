@@ -1,0 +1,198 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "098d2ee0-a73d-556e-8e10-df2e381ae5cd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dcIn",
+      "type": "Component Inputs",
+      "label": "The day and its blocks",
+      "ports": [
+        {
+          "name": "day",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focusText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focusColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "caption",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "captionColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "plannedWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "restWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "doneColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "plannedColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "isToday",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "columnBackground",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "columnClass",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "dcOut",
+      "type": "Component Outputs",
+      "label": "What happened in the day",
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openLog",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "blockId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "dcRoot",
+      "type": "Group",
+      "label": "Day column",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "cssClassName": "planner-pinned planner-day",
+        "alignItems": "stretch",
+        "borderRadius": "var(--radius-md)",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": "var(--border-1)",
+        "borderLeftColor": "var(--border-subtle)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "dcHead",
+        "dcBody"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dcHead",
+      "type": "/Week/Day header",
+      "label": "The head of this day",
+      "parent": "dcRoot",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dcBody",
+      "type": "Group",
+      "label": "The blocks",
+      "parent": "dcRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "dcEach"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "dcEach",
+      "type": "For Each",
+      "label": "One block per thing planned",
+      "parent": "dcBody",
+      "parameters": {
+        "template": "/Week/Block",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "dcRoot"
+  ]
+}

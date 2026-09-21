@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "48986e68-7ebc-542d-80ba-92e2cb5a7510",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dhIn",
+      "fromProperty": "day",
+      "toId": "dhDay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "focusText",
+      "toId": "dhFocus",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "focusColor",
+      "toId": "dhFocus",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "doneWidth",
+      "toId": "dhDone",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "doneColor",
+      "toId": "dhDone",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "plannedWidth",
+      "toId": "dhPlanned",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "restWidth",
+      "toId": "dhRest",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "plannedColor",
+      "toId": "dhPlanned",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "caption",
+      "toId": "dhCaption",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dhIn",
+      "fromProperty": "captionColor",
+      "toId": "dhCaption",
+      "toProperty": "color"
+    }
+  ]
+}

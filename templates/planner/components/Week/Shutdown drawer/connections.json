@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0a6d435b-72b0-58c7-8286-8e281b7836a9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sdIn",
+      "fromProperty": "shown",
+      "toId": "sdScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "title",
+      "toId": "sdTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "dayLine",
+      "toId": "sdDay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "monthLine",
+      "toId": "sdMonth",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "concern",
+      "toId": "sdConcern",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "carryRows",
+      "toId": "sdEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "nothingToCarry",
+      "toId": "sdAllDone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "tomorrowTitle",
+      "toId": "sdTomorrowLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "tomorrowList",
+      "toId": "sdTomorrowList",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "tomorrowFocus",
+      "toId": "sdFocus",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sdIn",
+      "fromProperty": "tomorrowFocusColor",
+      "toId": "sdFocus",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "sdEach",
+      "fromProperty": "itemOutputSignal-carry",
+      "toId": "sdOut",
+      "toProperty": "carry"
+    },
+    {
+      "fromId": "sdEach",
+      "fromProperty": "itemOutputSignal-drop",
+      "toId": "sdOut",
+      "toProperty": "drop"
+    },
+    {
+      "fromId": "sdEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "sdOut",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "sdClose",
+      "fromProperty": "onClick",
+      "toId": "sdOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "sdScrim",
+      "fromProperty": "onClick",
+      "toId": "sdOut",
+      "toProperty": "close"
+    }
+  ]
+}

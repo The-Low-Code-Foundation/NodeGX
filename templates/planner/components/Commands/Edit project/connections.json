@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e67456bc-fa3c-5a5f-885f-56181c97ccf7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projectId",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "name",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "sub",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "kind",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "rate",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "move",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveWorth",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveWorth"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveWhen",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveWhen"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveDue",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveDue"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveStop",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveStop"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "say",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "do",
+      "toId": "EditprojecGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-name",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-sub",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-sub"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-kind",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-rate",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-rate"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-move",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-move"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveWorth",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-moveWorth"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveWhen",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-moveWhen"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveDue",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-moveDue"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveStop",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-moveStop"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-say",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-say"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projectId",
+      "toId": "EditprojecWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-go",
+      "toId": "EditprojecWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "EditprojecWrite",
+      "fromProperty": "done",
+      "toId": "EditprojecOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditprojecWrite",
+      "fromProperty": "failure",
+      "toId": "EditprojecProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c8336c39-b6d8-517b-829c-15ebd49d6827",
+  "name": "Day picker",
+  "path": "/Week/Day picker",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Mon to Sat as six chips, for the phone, where the week shows one day at a time."
+}

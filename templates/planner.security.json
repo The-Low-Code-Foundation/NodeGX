@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": true
+  },
+  "collections": {
+    "Project": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "Block": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "authenticated"
+      },
+      "creatorOwns": true
+    },
+    "MonthPlan": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "CashEvent": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "Settings": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    }
+  },
+  "functions": {},
+  "files": {
+    "upload": "nobody",
+    "read": "nobody",
+    "delete": "nobody"
+  },
+  "signup": "public"
+}

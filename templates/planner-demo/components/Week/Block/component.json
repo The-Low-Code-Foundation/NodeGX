@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "89f2a3aa-b79c-581e-8750-9d905cd8bec2",
+  "name": "Block",
+  "path": "/Week/Block",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block of time in a day: a tick to log it, whose project it is, what it is, and how many hours."
+}

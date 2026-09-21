@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "db160aa9-8fad-58e0-818c-8686683d93cc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "kdIn",
+      "fromProperty": "projects",
+      "toId": "kdWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "kdIn",
+      "fromProperty": "blocks",
+      "toId": "kdWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "kdIn",
+      "fromProperty": "weekStart",
+      "toId": "kdWork",
+      "toProperty": "in-weekStart"
+    },
+    {
+      "fromId": "kdIn",
+      "fromProperty": "selectedId",
+      "toId": "kdWork",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-groups",
+      "toId": "kdOut",
+      "toProperty": "groups"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-name",
+      "toId": "kdOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-sub",
+      "toId": "kdOut",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-move",
+      "toId": "kdOut",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-hasMove",
+      "toId": "kdOut",
+      "toProperty": "hasMove"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-worth",
+      "toId": "kdOut",
+      "toProperty": "worth"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-hasWorth",
+      "toId": "kdOut",
+      "toProperty": "hasWorth"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-when",
+      "toId": "kdOut",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-whenColor",
+      "toId": "kdOut",
+      "toProperty": "whenColor"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-mark",
+      "toId": "kdOut",
+      "toProperty": "mark"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-soft",
+      "toId": "kdOut",
+      "toProperty": "soft"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-planLabel",
+      "toId": "kdOut",
+      "toProperty": "planLabel"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-canPlan",
+      "toId": "kdOut",
+      "toProperty": "canPlan"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-weekText",
+      "toId": "kdOut",
+      "toProperty": "weekText"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-sparkTitle",
+      "toId": "kdOut",
+      "toProperty": "sparkTitle"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-say",
+      "toId": "kdOut",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-facts",
+      "toId": "kdOut",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-bars",
+      "toId": "kdOut",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-boxes",
+      "toId": "kdOut",
+      "toProperty": "boxes"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-firstLabel",
+      "toId": "kdOut",
+      "toProperty": "firstLabel"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-lastLabel",
+      "toId": "kdOut",
+      "toProperty": "lastLabel"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-resolvedId",
+      "toId": "kdOut",
+      "toProperty": "resolvedId"
+    }
+  ]
+}

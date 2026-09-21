@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5f11333d-487d-56c9-81eb-76f40fe64ad1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sbIn",
+      "fromProperty": "height",
+      "toId": "sbBar",
+      "toProperty": "height"
+    },
+    {
+      "fromId": "sbIn",
+      "fromProperty": "mark",
+      "toId": "sbBar",
+      "toProperty": "backgroundColor"
+    }
+  ]
+}

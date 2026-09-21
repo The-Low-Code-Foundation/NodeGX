@@ -1,0 +1,184 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "db9be992-44dd-5844-835c-496bc5007f12",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "msIn",
+      "type": "Component Inputs",
+      "label": "The moves",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "empty",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "msOut",
+      "type": "Component Outputs",
+      "label": "A chip was pressed",
+      "ports": [
+        {
+          "name": "press",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "placed",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "msRoot",
+      "type": "Group",
+      "label": "Moves strip",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-pinned"
+      },
+      "children": [
+        "msLabel",
+        "msScroll"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "msLabel",
+      "type": "Group",
+      "label": "What this row is",
+      "parent": "msRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize",
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "msTitle",
+        "msBy"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "msTitle",
+      "type": "Text",
+      "label": "Moves",
+      "parent": "msLabel",
+      "parameters": {
+        "text": "Moves",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "msBy",
+      "type": "Text",
+      "label": "In what order",
+      "parent": "msLabel",
+      "parameters": {
+        "text": "by urgency",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "msScroll",
+      "type": "Group",
+      "label": "The chips",
+      "parent": "msRoot",
+      "parameters": {
+        "cssClassName": "planner-scroll-x",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "msEach",
+        "msEmpty"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "msEach",
+      "type": "For Each",
+      "label": "One chip per move",
+      "parent": "msScroll",
+      "parameters": {
+        "template": "/Week/Move chip",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "msEmpty",
+      "type": "Text",
+      "label": "When there is nothing to chase",
+      "parent": "msScroll",
+      "parameters": {
+        "text": "No moves waiting. Every project has its next step in the week.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "msRoot"
+  ]
+}

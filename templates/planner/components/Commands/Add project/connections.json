@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6a297d4e-bb5e-5998-8169-36b6bdf277b7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "name",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "sub",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "kind",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "rate",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "do",
+      "toId": "AddprojectGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-name",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-sub",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-sub"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-kind",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-rate",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-rate"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-move"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveWorth"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveWhen"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveDue"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-no",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveStop"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-rung"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-say"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-position",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-go",
+      "toId": "AddprojectWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "done",
+      "toId": "AddprojectOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "failure",
+      "toId": "AddprojectProblem",
+      "toProperty": "do"
+    }
+  ]
+}

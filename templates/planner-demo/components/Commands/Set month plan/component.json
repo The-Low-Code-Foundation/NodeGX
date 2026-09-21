@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8472d35f-ead5-5ce9-84be-0b471fa51b2d",
+  "name": "Set month plan",
+  "path": "/Commands/Set month plan",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Writes this month’s plan: what each envelope gets, how many working days there are, and what the balance starts at."
+}

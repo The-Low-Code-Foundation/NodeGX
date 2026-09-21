@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4d13656a-ae0c-57f7-8cb2-530b37b4a83a",
+  "name": "Log sheet",
+  "path": "/Week/Log sheet",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What a block of time actually came to: the hours it really took and what happened, over the week."
+}

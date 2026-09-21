@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cb49be51-55db-5c85-8945-e9dfda0366ae",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ceIn",
+      "fromProperty": "when",
+      "toId": "ceWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "amount",
+      "toId": "ceAmount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "amountColor",
+      "toId": "ceAmount",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "label",
+      "toId": "ceLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "running",
+      "toId": "ceRunning",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "edge",
+      "toId": "ceRoot",
+      "toProperty": "borderColor"
+    }
+  ]
+}

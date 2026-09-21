@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cb49be51-55db-5c85-8945-e9dfda0366ae",
+  "name": "Cash event",
+  "path": "/Week/Cash event",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing that happens to the money: when it lands, how much, what it is, and what the balance is afterwards."
+}

@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d47bd9fa-ebc6-5d08-82b7-996446d1263b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pnThisWeek",
+      "fromProperty": "out-monday",
+      "toId": "pnStart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "thisWeek",
+      "toId": "pnStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "previousWeek",
+      "toId": "pnCount",
+      "toProperty": "decrease"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "nextWeek",
+      "toId": "pnCount",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "thisWeek",
+      "toId": "pnCount",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "pnCount",
+      "fromProperty": "currentCount",
+      "toId": "pnStep",
+      "toProperty": "in-offset"
+    },
+    {
+      "fromId": "pnStep",
+      "fromProperty": "out-monday",
+      "toId": "pnStart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pnStep",
+      "fromProperty": "out-moved",
+      "toId": "pnStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pnWeek",
+      "fromProperty": "value",
+      "toId": "pnWindow",
+      "toProperty": "in-weekStart"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-weekStart",
+      "toId": "pnOut",
+      "toProperty": "weekStart"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-weekLabel",
+      "toId": "pnOut",
+      "toProperty": "weekLabel"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-month",
+      "toId": "pnOut",
+      "toProperty": "month"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-ready",
+      "toId": "pnReady",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "refresh",
+      "toId": "pnReady",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-fetch",
+      "toId": "pnReady",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-from",
+      "toId": "pnBlocks",
+      "toProperty": "qp-from"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-to",
+      "toId": "pnBlocks",
+      "toProperty": "qp-to"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-month",
+      "toId": "pnMonth",
+      "toProperty": "qp-month"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnProjects",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnBlocks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnMonth",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnCash",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnSettings",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnProjects",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pnBlocks",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "pnMonth",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "monthPlans"
+    },
+    {
+      "fromId": "pnCash",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "cashEvents"
+    },
+    {
+      "fromId": "pnSettings",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "pnBlocks",
+      "fromProperty": "fetched",
+      "toId": "pnOut",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "pnProjects",
+      "fromProperty": "failure",
+      "toId": "pnLoadProblem",
+      "toProperty": "do"
+    }
+  ]
+}

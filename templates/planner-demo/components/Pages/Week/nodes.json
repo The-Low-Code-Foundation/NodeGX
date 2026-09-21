@@ -1,0 +1,900 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0493c500-2d97-5a99-870d-3d73a9a0fa9c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "twPage",
+      "type": "Page",
+      "label": "Week",
+      "parameters": {
+        "title": "Envelopes",
+        "urlPath": ""
+      },
+      "children": [
+        "twRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "twRoot",
+      "type": "Group",
+      "label": "Page",
+      "parent": "twPage",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "cssClassName": "planner-pinned planner-page",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "twBar",
+        "twDemoNotice",
+        "twProblem",
+        "twPlanLine",
+        "twEnvs",
+        "twMoves",
+        "twPicker",
+        "twWeekRow",
+        "twCash",
+        "twCard",
+        "twDrawer",
+        "twSheet",
+        "twLog"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "twBar",
+      "type": "/Week/App bar",
+      "label": "The top line",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "twDemoNotice",
+      "type": "Text",
+      "label": "It is a demo",
+      "parent": "twRoot",
+      "parameters": {
+        "text": "This is a demo with an invented week in it. Nothing you change leaves this browser, and Reset demo puts the example week back.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "twProblem",
+      "type": "Text",
+      "label": "When something did not save",
+      "parent": "twRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "twPlanLine",
+      "type": "Text",
+      "label": "Whether this month is planned",
+      "parent": "twRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "twEnvs",
+      "type": "Group",
+      "label": "The envelopes",
+      "parent": "twRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-pinned planner-envs"
+      },
+      "children": [
+        "twEnvEach"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "twEnvEach",
+      "type": "For Each",
+      "label": "One tile per envelope",
+      "parent": "twEnvs",
+      "parameters": {
+        "template": "/Week/Envelope tile",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "twMoves",
+      "type": "/Week/Moves strip",
+      "label": "The moves",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "twPicker",
+      "type": "/Week/Day picker",
+      "label": "Which day, on a phone",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "twWeekRow",
+      "type": "Group",
+      "label": "The six days",
+      "parent": "twRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-0)",
+        "cssClassName": "planner-pinned planner-week"
+      },
+      "children": [
+        "twDayEach"
+      ],
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "twDayEach",
+      "type": "For Each",
+      "label": "One column per day",
+      "parent": "twWeekRow",
+      "parameters": {
+        "template": "/Week/Day column",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "twCash",
+      "type": "/Week/Cash strip",
+      "label": "The money",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "twCard",
+      "type": "/Week/Project card",
+      "label": "The projects",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "twDrawer",
+      "type": "/Week/Shutdown drawer",
+      "label": "The evening",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "twSheet",
+      "type": "/Week/Settings sheet",
+      "label": "The settings",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "twLog",
+      "type": "/Week/Log sheet",
+      "label": "What a block came to",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "twData",
+      "type": "/Logic/Planner data",
+      "label": "Your week, kept in this browser",
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "twEnv",
+      "type": "/Logic/Envelopes",
+      "label": "The envelopes",
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "twDays",
+      "type": "/Logic/Day columns",
+      "label": "The six columns",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "twMovesLogic",
+      "type": "/Logic/Moves",
+      "label": "The moves, by urgency",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "twCashLogic",
+      "type": "/Logic/Cash line",
+      "label": "The money",
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "twShutLogic",
+      "type": "/Logic/Shutdown",
+      "label": "What tonight says",
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "twCardRows",
+      "type": "/Logic/Card rows",
+      "label": "The projects card",
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "twVarCard",
+      "type": "Variable2",
+      "label": "Which project the card is showing",
+      "parameters": {
+        "name": "plannerCardProject"
+      },
+      "x": 470,
+      "y": 4480
+    },
+    {
+      "id": "twSetCard",
+      "type": "Set Variable",
+      "label": "Show a project",
+      "parameters": {
+        "name": "plannerCardProject",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "twClearCard",
+      "type": "Set Variable",
+      "label": "Close the card",
+      "parameters": {
+        "name": "plannerCardProject",
+        "setWith": "string",
+        "value": ""
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "twAllProjects",
+      "type": "JavaScriptFunction",
+      "label": "Open the card on no project in particular",
+      "parameters": {
+        "functionScript": "Outputs.any = '*';"
+      },
+      "x": 470,
+      "y": 400,
+      "ports": [
+        {
+          "name": "out-any",
+          "displayName": "any",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twCardShown",
+      "type": "JavaScriptFunction",
+      "label": "Is the card open?",
+      "parameters": {
+        "functionScript": "Outputs.shown = String(Inputs.id || '') !== '';"
+      },
+      "x": 470,
+      "y": 2680,
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twVarDrawer",
+      "type": "Variable2",
+      "label": "Is the evening drawer open?",
+      "parameters": {
+        "name": "plannerDrawerOpen"
+      },
+      "x": 470,
+      "y": 4600
+    },
+    {
+      "id": "twOpenDrawer",
+      "type": "Set Variable",
+      "label": "Open the drawer",
+      "parameters": {
+        "name": "plannerDrawerOpen",
+        "setWith": "boolean",
+        "value": true
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "twCloseDrawer",
+      "type": "Set Variable",
+      "label": "Close the drawer",
+      "parameters": {
+        "name": "plannerDrawerOpen",
+        "setWith": "boolean",
+        "value": false
+      },
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "twVarPhoneDay",
+      "type": "Variable2",
+      "label": "Which day the phone is showing",
+      "parameters": {
+        "name": "plannerPhoneDay"
+      },
+      "x": 470,
+      "y": 4720
+    },
+    {
+      "id": "twSetPhoneDay",
+      "type": "Set Variable",
+      "label": "Show that day on the phone",
+      "parameters": {
+        "name": "plannerPhoneDay",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "twVarLog",
+      "type": "Variable2",
+      "label": "Which block the log sheet is showing",
+      "parameters": {
+        "name": "plannerLogBlock"
+      },
+      "x": 470,
+      "y": 4840
+    },
+    {
+      "id": "twSetLog",
+      "type": "Set Variable",
+      "label": "Open the log sheet on a block",
+      "parameters": {
+        "name": "plannerLogBlock",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "twClearLog",
+      "type": "Set Variable",
+      "label": "Close the log sheet",
+      "parameters": {
+        "name": "plannerLogBlock",
+        "setWith": "string",
+        "value": ""
+      },
+      "x": 470,
+      "y": 4000
+    },
+    {
+      "id": "twLogRow",
+      "type": "JavaScriptFunction",
+      "label": "The block the log sheet is showing",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar id = String(Inputs.id || '');\nvar blocks = Inputs.blocks || [];\nvar b = null;\nfor (var i = 0; i < blocks.length; i++) if (blocks[i] && blocks[i].id === id) { b = blocks[i]; break; }\nif (!b) {\n  Outputs.shown = false;\n  Outputs.title = '';\n  Outputs.plannedLine = '';\n  Outputs.what = '';\n  Outputs.actual = '';\n  Outputs.saveLabel = 'Log it';\n  Outputs.unlogShown = false;\n  Outputs.done = false;\n  return;\n}\nvar projects = Inputs.projects || [];\nvar p = null;\nfor (var j = 0; j < projects.length; j++) if (projects[j] && projects[j].id === b.projectId) { p = projects[j]; break; }\nvar day = parseDay(b.date);\nvar when = day ? DOW_LONG[(day.getDay() + 6) % 7] + ' ' + day.getDate() + ' ' + MON[day.getMonth()] : String(b.date || '');\nOutputs.shown = true;\nOutputs.title = (p ? String(p.name || '') : 'This block') + ' · ' + when;\nOutputs.plannedLine = 'Planned at ' + hText(num(b.planned, 0)) + ' h. Leave the hours empty if it took as long as it was meant to.';\nOutputs.what = String(b.what || '');\n// An empty actual stays empty in the box (see Commands/Save block): the placeholder is the\n// plan, and a number here means somebody measured it.\nOutputs.actual = b.actual === null || b.actual === undefined || b.actual === '' ? '' : String(q(num(b.actual, 0)));\nOutputs.saveLabel = b.done === true ? 'Save' : 'Log it';\nOutputs.unlogShown = b.done === true;\nOutputs.done = b.done === true;"
+      },
+      "x": 470,
+      "y": 4120,
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-plannedLine",
+          "displayName": "plannedLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-what",
+          "displayName": "what",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-actual",
+          "displayName": "actual",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveLabel",
+          "displayName": "saveLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-unlogShown",
+          "displayName": "unlogShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twVarSheet",
+      "type": "Variable2",
+      "label": "Is the settings sheet open?",
+      "parameters": {
+        "name": "plannerSheetOpen"
+      },
+      "x": 470,
+      "y": 4960
+    },
+    {
+      "id": "twOpenSheet",
+      "type": "Set Variable",
+      "label": "Open the settings",
+      "parameters": {
+        "name": "plannerSheetOpen",
+        "setWith": "boolean",
+        "value": true
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "twCloseSheet",
+      "type": "Set Variable",
+      "label": "Close the settings",
+      "parameters": {
+        "name": "plannerSheetOpen",
+        "setWith": "boolean",
+        "value": false
+      },
+      "x": 470,
+      "y": 3400
+    },
+    {
+      "id": "twDrawerShown",
+      "type": "JavaScriptFunction",
+      "label": "Is the drawer open?",
+      "parameters": {
+        "functionScript": "Outputs.shown = Inputs.open === true;"
+      },
+      "x": 470,
+      "y": 3040,
+      "ports": [
+        {
+          "name": "in-open",
+          "displayName": "open",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twSheetShown",
+      "type": "JavaScriptFunction",
+      "label": "Is the settings sheet open?",
+      "parameters": {
+        "functionScript": "Outputs.shown = Inputs.open === true;"
+      },
+      "x": 470,
+      "y": 3520,
+      "ports": [
+        {
+          "name": "in-open",
+          "displayName": "open",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twKeys",
+      "type": "JavaScriptFunction",
+      "label": "Escape closes what is over the week",
+      "parameters": {
+        "functionScript": "var fire = function (e) {\n  if (e.key !== 'Escape' && e.key !== 'Esc') return;\n  Outputs.escape();\n};\nif (window.__plannerEscape) document.removeEventListener('keydown', window.__plannerEscape);\nwindow.__plannerEscape = fire;\ndocument.addEventListener('keydown', fire);"
+      },
+      "x": 470,
+      "y": 40,
+      "ports": [
+        {
+          "name": "out-escape",
+          "displayName": "escape",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twVarProblem",
+      "type": "Variable2",
+      "label": "What did not save",
+      "parameters": {
+        "name": "plannerProblem"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "twHasProblem",
+      "type": "JavaScriptFunction",
+      "label": "Is there a problem to show?",
+      "parameters": {
+        "functionScript": "Outputs.shown = String(Inputs.text || '') !== '';"
+      },
+      "x": 470,
+      "y": 880,
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twTick",
+      "type": "Condition",
+      "label": "Was it already done?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "twChip",
+      "type": "Condition",
+      "label": "Is that move already in the week?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "twSettings",
+      "type": "JavaScriptFunction",
+      "label": "Your settings, unpacked",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar s = (Inputs.settings || [])[0] || {};\nOutputs.id = s.id || '';\nOutputs.rate = String(num(s.rate, 0));\nOutputs.householdNeed = String(num(s.householdNeed, 0));\nOutputs.partnerIncome = String(num(s.partnerIncome, 0));\nOutputs.focusHours = String(num(s.focusHours, 6));\nOutputs.partnerDay = String(num(s.partnerDay, 28));\nOutputs.costsDay = String(num(s.costsDay, 1));\nOutputs.invoiceDay = String(num(s.invoiceDay, 28));\nOutputs.paymentTermsDays = String(num(s.paymentTermsDays, 7));\nOutputs.openingBalance = num(s.openingBalance, 0);"
+      },
+      "x": 470,
+      "y": 3640,
+      "ports": [
+        {
+          "name": "in-settings",
+          "displayName": "settings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rate",
+          "displayName": "rate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-householdNeed",
+          "displayName": "householdNeed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-partnerIncome",
+          "displayName": "partnerIncome",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-focusHours",
+          "displayName": "focusHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-partnerDay",
+          "displayName": "partnerDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-costsDay",
+          "displayName": "costsDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-invoiceDay",
+          "displayName": "invoiceDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-paymentTermsDays",
+          "displayName": "paymentTermsDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-openingBalance",
+          "displayName": "openingBalance",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cmdAddBlock",
+      "type": "/Commands/Add block",
+      "label": "Put a block in a day",
+      "x": 470,
+      "y": 5080
+    },
+    {
+      "id": "cmdLog",
+      "type": "/Commands/Log block",
+      "label": "Log a block",
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "cmdSave",
+      "type": "/Commands/Save block",
+      "label": "Save what a block came to",
+      "parameters": {
+        "logged": true
+      },
+      "x": 470,
+      "y": 4240
+    },
+    {
+      "id": "cmdUndo",
+      "type": "/Commands/Save block",
+      "label": "Save it, and put it back to not done",
+      "parameters": {
+        "logged": false
+      },
+      "x": 470,
+      "y": 4360
+    },
+    {
+      "id": "cmdUnlog",
+      "type": "/Commands/Unlog block",
+      "label": "Put a block back",
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "cmdCarry",
+      "type": "/Commands/Carry block",
+      "label": "Carry a block to tomorrow",
+      "x": 470,
+      "y": 3160
+    },
+    {
+      "id": "cmdDrop",
+      "type": "/Commands/Drop block",
+      "label": "Drop a block",
+      "x": 470,
+      "y": 3280
+    },
+    {
+      "id": "cmdPlace",
+      "type": "/Commands/Place move",
+      "label": "Put a move in the week",
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "cmdAddProject",
+      "type": "/Commands/Add project",
+      "label": "Add a project",
+      "x": 470,
+      "y": 5200
+    },
+    {
+      "id": "cmdEditProject",
+      "type": "/Commands/Edit project",
+      "label": "Change a project",
+      "x": 470,
+      "y": 5320
+    },
+    {
+      "id": "cmdMonthPlan",
+      "type": "/Commands/Set month plan",
+      "label": "Plan this month",
+      "x": 470,
+      "y": 3760
+    },
+    {
+      "id": "cmdCashEvent",
+      "type": "/Commands/Add cash event",
+      "label": "Add a cash event",
+      "x": 470,
+      "y": 5440
+    },
+    {
+      "id": "cmdSettings",
+      "type": "/Commands/Edit settings",
+      "label": "Save the settings",
+      "x": 470,
+      "y": 3880
+    }
+  ],
+  "visualRoots": [
+    "twPage"
+  ]
+}

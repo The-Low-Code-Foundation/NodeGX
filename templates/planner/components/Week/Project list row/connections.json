@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6769d649-eca5-5af2-8105-03235bbab717",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "prIn",
+      "fromProperty": "name",
+      "toId": "prName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hoursText",
+      "toId": "prHours",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "move",
+      "toId": "prMove",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasMove",
+      "toId": "prMove",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "moveColor",
+      "toId": "prMove",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "mark",
+      "toId": "prBar",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "barWidth",
+      "toId": "prBar",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "barRest",
+      "toId": "prBarRest",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "rowBackground",
+      "toId": "prRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "id",
+      "toId": "prOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "prRoot",
+      "fromProperty": "onClick",
+      "toId": "prOut",
+      "toProperty": "pick"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f6f1f52d-d64e-5685-8c75-ddf0bdcbf585",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dpIn",
+      "fromProperty": "label",
+      "toId": "dpBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "ink",
+      "toId": "dpBtn",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "chipFill",
+      "toId": "dpBtn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "edge",
+      "toId": "dpBtn",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "key",
+      "toId": "dpOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "dpBtn",
+      "fromProperty": "onClick",
+      "toId": "dpOut",
+      "toProperty": "pick"
+    }
+  ]
+}

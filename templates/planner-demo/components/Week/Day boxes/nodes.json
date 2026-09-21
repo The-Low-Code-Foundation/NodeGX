@@ -1,0 +1,57 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cd9492de-1db8-5238-8288-d19612c8e8e7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dbIn",
+      "type": "Component Inputs",
+      "label": "The six days",
+      "ports": [
+        {
+          "name": "boxes",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "dbRoot",
+      "type": "Group",
+      "label": "Day boxes",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "dbEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dbEach",
+      "type": "For Each",
+      "label": "One box per day",
+      "parent": "dbRoot",
+      "parameters": {
+        "template": "/Week/Day box",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "dbRoot"
+  ]
+}

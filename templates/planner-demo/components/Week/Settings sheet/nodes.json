@@ -1,0 +1,644 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e87aa1ad-839f-5800-8025-55f5d06552a5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stIn",
+      "type": "Component Inputs",
+      "label": "What they are now",
+      "ports": [
+        {
+          "name": "rate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "householdNeed",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "partnerIncome",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focusHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "partnerDay",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "costsDay",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "invoiceDay",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "paymentTermsDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "targetLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "stOut",
+      "type": "Component Outputs",
+      "label": "What they should be",
+      "ports": [
+        {
+          "name": "rate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "householdNeed",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "partnerIncome",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "focusHours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "partnerDay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "costsDay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "invoiceDay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "paymentTermsDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "planMonth",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "stScrim",
+      "type": "Group",
+      "label": "Behind the sheet",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "position": "fixed",
+        "backgroundColor": "var(--scrim)",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "styleCss": "z-index: 60;"
+      },
+      "children": [
+        "stCard"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stCard",
+      "type": "Group",
+      "label": "The sheet",
+      "parent": "stScrim",
+      "parameters": {
+        "cssClassName": "planner-over",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "column",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "maxHeight": {
+          "value": 88,
+          "unit": "%"
+        },
+        "styleCss": "overflow: auto;",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "stHead",
+        "stTarget",
+        "stRate",
+        "stNeed",
+        "stPartner",
+        "stFocus",
+        "stPartnerDay",
+        "stCostsDay",
+        "stInvoiceDay",
+        "stTerms",
+        "stPlanLine",
+        "stButtons"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "stHead",
+      "type": "Group",
+      "label": "Title and close",
+      "parent": "stCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "stTitle",
+        "stClose"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "stTitle",
+      "type": "Text",
+      "label": "Settings",
+      "parent": "stHead",
+      "parameters": {
+        "text": "Settings",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "as": "h2"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "stClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the sheet",
+      "parent": "stHead",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "stTarget",
+      "type": "Text",
+      "label": "What these come to",
+      "parent": "stCard",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "stRate",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your rate, per hour",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Your rate, per hour",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "stNeed",
+      "type": "net.noodl.controls.textinput",
+      "label": "What the household needs a month",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "What the household needs a month",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "stPartner",
+      "type": "net.noodl.controls.textinput",
+      "label": "What your partner brings a month",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "What your partner brings a month",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "stFocus",
+      "type": "net.noodl.controls.textinput",
+      "label": "Focused hours a day",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Focused hours a day",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "stPartnerDay",
+      "type": "net.noodl.controls.textinput",
+      "label": "Day their contract pays",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Day their contract pays",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "stCostsDay",
+      "type": "net.noodl.controls.textinput",
+      "label": "Day the household costs go out",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Day the household costs go out",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "stInvoiceDay",
+      "type": "net.noodl.controls.textinput",
+      "label": "Day you invoice",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Day you invoice",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "stTerms",
+      "type": "net.noodl.controls.textinput",
+      "label": "Days you give them to pay",
+      "parent": "stCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Days you give them to pay",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "stPlanLine",
+      "type": "Text",
+      "label": "Whether this month is planned",
+      "parent": "stCard",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "stButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "stCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "stSave",
+        "stPlan"
+      ],
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "stSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "stButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "stPlan",
+      "type": "net.noodl.controls.button",
+      "label": "Plan this month",
+      "parent": "stButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Plan this month"
+      },
+      "x": 220,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "stScrim"
+  ]
+}

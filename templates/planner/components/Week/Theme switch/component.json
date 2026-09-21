@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "630224f6-0847-52d7-8680-8d3f7d06adb4",
+  "name": "Theme switch",
+  "path": "/Week/Theme switch",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The moon or the sun in the app bar. The page follows the system until the person presses it; choosing the system’s own theme again goes back to following the system."
+}

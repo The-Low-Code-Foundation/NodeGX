@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "acbf218f-df6e-5e70-8d2e-018e2497a5db",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "what",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "actual",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-actual"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "logged",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-logged"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "do",
+      "toId": "SaveblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-what",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-done",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-done"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-actual",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-actual"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-go",
+      "toId": "SaveblockWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "SaveblockWrite",
+      "fromProperty": "done",
+      "toId": "SaveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SaveblockWrite",
+      "fromProperty": "failure",
+      "toId": "SaveblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

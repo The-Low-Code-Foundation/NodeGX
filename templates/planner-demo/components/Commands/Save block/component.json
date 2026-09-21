@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ba4e3675-8671-5d52-8ce2-5ac468f35f05",
+  "name": "Save block",
+  "path": "/Commands/Save block",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves what a block of time came to: what happened in it, the hours it really took, and whether it is done."
+}

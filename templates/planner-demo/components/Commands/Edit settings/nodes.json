@@ -1,0 +1,347 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b16e5793-abda-5e91-86a1-03fd3a4e054c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "EditsettinIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "settingsId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rate",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "householdNeed",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "partnerIncome",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "focusHours",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "partnerDay",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "costsDay",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "invoiceDay",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "paymentTermsDays",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "EditsettinOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "EditsettinGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar id = String(Inputs.settingsId || '');\nif (id === '') return;\nfunction day(v, fallback) { var n = Math.round(num(v, fallback)); return n < 1 ? fallback : n > 28 ? 28 : n; }\nOutputs.rate = Math.max(0, num(Inputs.rate, 0));\nOutputs.householdNeed = Math.max(0, num(Inputs.householdNeed, 0));\nOutputs.partnerIncome = Math.max(0, num(Inputs.partnerIncome, 0));\n// R3 — the ceiling is what makes the plan honest, so it cannot be set to nothing.\nOutputs.focusHours = Math.min(16, Math.max(1, num(Inputs.focusHours, 6)));\nOutputs.partnerDay = day(Inputs.partnerDay, 28);\nOutputs.costsDay = day(Inputs.costsDay, 1);\nOutputs.invoiceDay = day(Inputs.invoiceDay, 28);\nOutputs.paymentTermsDays = Math.min(90, Math.max(0, Math.round(num(Inputs.paymentTermsDays, 7))));\nOutputs.go();",
+        "runOnChange-in-settingsId": false,
+        "runOnChange-in-rate": false,
+        "runOnChange-in-householdNeed": false,
+        "runOnChange-in-partnerIncome": false,
+        "runOnChange-in-focusHours": false,
+        "runOnChange-in-partnerDay": false,
+        "runOnChange-in-costsDay": false,
+        "runOnChange-in-invoiceDay": false,
+        "runOnChange-in-paymentTermsDays": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-settingsId",
+          "displayName": "settingsId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rate",
+          "displayName": "rate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-householdNeed",
+          "displayName": "householdNeed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-partnerIncome",
+          "displayName": "partnerIncome",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-focusHours",
+          "displayName": "focusHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-partnerDay",
+          "displayName": "partnerDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-costsDay",
+          "displayName": "costsDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-invoiceDay",
+          "displayName": "invoiceDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-paymentTermsDays",
+          "displayName": "paymentTermsDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rate",
+          "displayName": "rate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-householdNeed",
+          "displayName": "householdNeed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-partnerIncome",
+          "displayName": "partnerIncome",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-focusHours",
+          "displayName": "focusHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-partnerDay",
+          "displayName": "partnerDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-costsDay",
+          "displayName": "costsDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-invoiceDay",
+          "displayName": "invoiceDay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-paymentTermsDays",
+          "displayName": "paymentTermsDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "EditsettinWrite",
+      "type": "JavaScriptFunction",
+      "label": "Save the settings, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-planner-demo-v1\";\nfunction demoEmpty() { return {\"Block\":[],\"CashEvent\":[],\"MonthPlan\":[],\"Project\":[],\"Settings\":[]}; }\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__plannerDemo === 'string') raw = window.__plannerDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__plannerDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Settings\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.rate = Inputs.rate;\nrecord.householdNeed = Inputs.householdNeed;\nrecord.partnerIncome = Inputs.partnerIncome;\nrecord.focusHours = Inputs.focusHours;\nrecord.partnerDay = Inputs.partnerDay;\nrecord.costsDay = Inputs.costsDay;\nrecord.invoiceDay = Inputs.invoiceDay;\nrecord.paymentTermsDays = Inputs.paymentTermsDays;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-rate": false,
+        "runOnChange-in-householdNeed": false,
+        "runOnChange-in-partnerIncome": false,
+        "runOnChange-in-focusHours": false,
+        "runOnChange-in-partnerDay": false,
+        "runOnChange-in-costsDay": false,
+        "runOnChange-in-invoiceDay": false,
+        "runOnChange-in-paymentTermsDays": false,
+        "runOnChange-in-modelId": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-modelId",
+          "displayName": "modelId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rate",
+          "displayName": "rate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-householdNeed",
+          "displayName": "householdNeed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-partnerIncome",
+          "displayName": "partnerIncome",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-focusHours",
+          "displayName": "focusHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-partnerDay",
+          "displayName": "partnerDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-costsDay",
+          "displayName": "costsDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-invoiceDay",
+          "displayName": "invoiceDay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-paymentTermsDays",
+          "displayName": "paymentTermsDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "EditsettinProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8472d35f-ead5-5ce9-84be-0b471fa51b2d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "month",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-month"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "billable",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-billable"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "building",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-building"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "admin",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-admin"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "hobby",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-hobby"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "workingDays",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-workingDays"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "openingBalance",
+      "toId": "SetmonthplGuard",
+      "toProperty": "in-openingBalance"
+    },
+    {
+      "fromId": "SetmonthplIn",
+      "fromProperty": "do",
+      "toId": "SetmonthplGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-month",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-month"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-billable",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-billable"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-building",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-building"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-admin",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-admin"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-hobby",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-hobby"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-workingDays",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-workingDays"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-openingBalance",
+      "toId": "SetmonthplWrite",
+      "toProperty": "in-openingBalance"
+    },
+    {
+      "fromId": "SetmonthplGuard",
+      "fromProperty": "out-go",
+      "toId": "SetmonthplWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SetmonthplWrite",
+      "fromProperty": "out-done",
+      "toId": "SetmonthplOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SetmonthplWrite",
+      "fromProperty": "out-failure",
+      "toId": "SetmonthplProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "240eb697-a3ae-5471-887e-95fa4e9aa609",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dlIn",
+      "fromProperty": "projects",
+      "toId": "dlWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "dlIn",
+      "fromProperty": "blocks",
+      "toId": "dlWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "dlIn",
+      "fromProperty": "weekStart",
+      "toId": "dlWork",
+      "toProperty": "in-weekStart"
+    },
+    {
+      "fromId": "dlIn",
+      "fromProperty": "focusHours",
+      "toId": "dlWork",
+      "toProperty": "in-focusHours"
+    },
+    {
+      "fromId": "dlIn",
+      "fromProperty": "newBlockId",
+      "toId": "dlWork",
+      "toProperty": "in-newBlockId"
+    },
+    {
+      "fromId": "dlIn",
+      "fromProperty": "pickedDay",
+      "toId": "dlWork",
+      "toProperty": "in-pickedDay"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-columns",
+      "toId": "dlOut",
+      "toProperty": "columns"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-picker",
+      "toId": "dlOut",
+      "toProperty": "picker"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-todayKey",
+      "toId": "dlOut",
+      "toProperty": "todayKey"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-tomorrowKey",
+      "toId": "dlOut",
+      "toProperty": "tomorrowKey"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-todayLong",
+      "toId": "dlOut",
+      "toProperty": "todayLong"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-tomorrowLong",
+      "toId": "dlOut",
+      "toProperty": "tomorrowLong"
+    },
+    {
+      "fromId": "dlWork",
+      "fromProperty": "out-firstOpenDay",
+      "toId": "dlOut",
+      "toProperty": "firstOpenDay"
+    }
+  ]
+}

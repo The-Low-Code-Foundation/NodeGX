@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "35a4352a-da81-5925-8ca4-c08ddaa6474b",
+  "name": "Sparkline",
+  "path": "/Week/Sparkline",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Six months of a project as six bars, the last one being this month."
+}

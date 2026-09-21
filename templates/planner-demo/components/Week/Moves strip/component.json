@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "db9be992-44dd-5844-835c-496bc5007f12",
+  "name": "Moves strip",
+  "path": "/Week/Moves strip",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The one line of next moves under the envelopes, most urgent first, with the dormant projects on it too."
+}

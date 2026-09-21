@@ -1,0 +1,239 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "48986e68-7ebc-542d-80ba-92e2cb5a7510",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dhIn",
+      "type": "Component Inputs",
+      "label": "The day",
+      "ports": [
+        {
+          "name": "day",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focusText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focusColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "caption",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "captionColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "plannedWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "restWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "doneColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "plannedColor",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "dhRoot",
+      "type": "Group",
+      "label": "Day header",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "dhTop",
+        "dhTrack",
+        "dhCaption"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dhTop",
+      "type": "Group",
+      "label": "Day and hours",
+      "parent": "dhRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "dhDay",
+        "dhFocus"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dhDay",
+      "type": "Text",
+      "label": "Which day",
+      "parent": "dhTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "dhFocus",
+      "type": "Text",
+      "label": "Focused hours",
+      "parent": "dhTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "dhTrack",
+      "type": "Group",
+      "label": "Logged against planned",
+      "parent": "dhRoot",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 4,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-sm)",
+        "flexDirection": "row",
+        "alignItems": "stretch"
+      },
+      "children": [
+        "dhDone",
+        "dhPlanned",
+        "dhRest"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "dhDone",
+      "type": "Group",
+      "label": "Logged",
+      "parent": "dhTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "dhPlanned",
+      "type": "Group",
+      "label": "Still planned",
+      "parent": "dhTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "opacity": 0.45,
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "dhRest",
+      "type": "Group",
+      "label": "Room left in the day",
+      "parent": "dhTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "transparent"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "dhCaption",
+      "type": "Text",
+      "label": "What kind of day",
+      "parent": "dhRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "dhRoot"
+  ]
+}

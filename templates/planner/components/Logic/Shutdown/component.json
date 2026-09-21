@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6f206d00-2e31-56b5-815c-7f5091f40617",
+  "name": "Shutdown",
+  "path": "/Logic/Shutdown",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the evening drawer says: what today came to, where the month stands, the one thing worth raising, what did not get done, and tomorrow as it stands."
+}

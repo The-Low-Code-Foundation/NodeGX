@@ -1,0 +1,143 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "35a4352a-da81-5925-8ca4-c08ddaa6474b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "skIn",
+      "type": "Component Inputs",
+      "label": "The six months",
+      "ports": [
+        {
+          "name": "bars",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "firstLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "skRoot",
+      "type": "Group",
+      "label": "Sparkline",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)"
+      },
+      "children": [
+        "skBars",
+        "skAxis"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "skBars",
+      "type": "Group",
+      "label": "The bars",
+      "parent": "skRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-1)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 36,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "skEach"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "skEach",
+      "type": "For Each",
+      "label": "One bar per month",
+      "parent": "skBars",
+      "parameters": {
+        "template": "/Week/Spark bar",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "skAxis",
+      "type": "Group",
+      "label": "First and last month",
+      "parent": "skRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "skFirst",
+        "skLast"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "skFirst",
+      "type": "Text",
+      "label": "Six months ago",
+      "parent": "skAxis",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "skLast",
+      "type": "Text",
+      "label": "This month",
+      "parent": "skAxis",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "skRoot"
+  ]
+}

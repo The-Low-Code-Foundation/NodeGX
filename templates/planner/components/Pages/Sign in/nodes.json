@@ -1,0 +1,412 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dfcbf2f3-587a-5609-856f-9f0c02a69236",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "siPage",
+      "type": "Page",
+      "label": "Sign in",
+      "parameters": {
+        "title": "Sign in",
+        "urlPath": "sign-in"
+      },
+      "children": [
+        "siRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "siRoot",
+      "type": "Group",
+      "label": "Page",
+      "parent": "siPage",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "alignItems": "center",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-16)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "siTop",
+        "siCard"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "siTop",
+      "type": "Group",
+      "label": "Top right",
+      "parent": "siRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-0)",
+        "justifyContent": "flex-end",
+        "paddingBottom": "var(--space-12)"
+      },
+      "children": [
+        "siTheme"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "siTheme",
+      "type": "/Week/Theme switch",
+      "label": "Light or dark",
+      "parent": "siTop",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "siCard",
+      "type": "Group",
+      "label": "Sign-in card",
+      "parent": "siRoot",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-4)",
+        "maxWidth": {
+          "value": 400,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)"
+      },
+      "children": [
+        "siTitle",
+        "siLead",
+        "siEmail",
+        "siPassword",
+        "siError",
+        "siButtons"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "siTitle",
+      "type": "Text",
+      "label": "App name",
+      "parent": "siCard",
+      "parameters": {
+        "text": "Envelopes",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "siLead",
+      "type": "Text",
+      "label": "What this is",
+      "parent": "siCard",
+      "parameters": {
+        "text": "Sign in, or create an account. Your week is kept on your server, so every device you sign in on sees the same one.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "siEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email",
+      "parent": "siCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "email",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Email",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "siPassword",
+      "type": "net.noodl.controls.textinput",
+      "label": "Password",
+      "parent": "siCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "password",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Password",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "siError",
+      "type": "Text",
+      "label": "Why it did not work",
+      "parent": "siCard",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "siButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "siCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "siSignIn",
+        "siCreate"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "siSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "siButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Sign in"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "siCreate",
+      "type": "net.noodl.controls.button",
+      "label": "Create account",
+      "parent": "siButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Create account"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "siLogIn",
+      "type": "net.noodl.user.LogIn",
+      "label": "Sign in",
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "siSignUp",
+      "type": "net.noodl.user.SignUp",
+      "label": "Create the account",
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "siUser",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "siAuth",
+      "type": "Condition",
+      "label": "Already signed in?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "siToWeek",
+      "type": "RouterNavigate",
+      "label": "Go to the week",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Week"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "siVarError",
+      "type": "Variable2",
+      "label": "What did not work",
+      "parameters": {
+        "name": "plannerSignInError"
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "siSetError",
+      "type": "Set Variable",
+      "label": "Say what did not work",
+      "parameters": {
+        "name": "plannerSignInError",
+        "setWith": "string"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "siClearError",
+      "type": "Set Variable",
+      "label": "Put the old error away",
+      "parameters": {
+        "name": "plannerSignInError",
+        "setWith": "string",
+        "value": ""
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "siHasError",
+      "type": "JavaScriptFunction",
+      "label": "Is there an error to show?",
+      "parameters": {
+        "functionScript": "Outputs.shown = String(Inputs.text || '') !== '';"
+      },
+      "x": 530,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "siPage"
+  ]
+}

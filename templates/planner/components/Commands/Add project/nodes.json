@@ -1,0 +1,180 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6a297d4e-bb5e-5998-8169-36b6bdf277b7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "AddprojectIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rate",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "AddprojectOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "AddprojectGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "var name = String(Inputs.name || '').trim();\nif (name === '') return;\nvar kind = String(Inputs.kind || 'earning');\nvar known = ['earning', 'building', 'hobby', 'dormant', 'admin'];\nif (known.indexOf(kind) < 0) kind = 'earning';\nOutputs.name = name;\nOutputs.sub = String(Inputs.sub || '');\nOutputs.kind = kind;\nOutputs.rate = Number(Inputs.rate) || 0;\nOutputs.empty = '';\nOutputs.no = false;\nOutputs.position = Date.now();\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-sub": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-rate": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sub",
+          "displayName": "sub",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rate",
+          "displayName": "rate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sub",
+          "displayName": "sub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kind",
+          "displayName": "kind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rate",
+          "displayName": "rate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-no",
+          "displayName": "no",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-position",
+          "displayName": "position",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddprojectWrite",
+      "type": "NewDbModelProperties",
+      "label": "Add the project",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "AddprojectProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

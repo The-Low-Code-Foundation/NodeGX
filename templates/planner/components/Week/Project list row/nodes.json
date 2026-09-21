@@ -1,0 +1,244 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6769d649-eca5-5af2-8105-03235bbab717",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "prIn",
+      "type": "Component Inputs",
+      "label": "The project",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hoursText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "moveColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "barWidth",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "barRest",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "rowBackground",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "prOut",
+      "type": "Component Outputs",
+      "label": "Picked",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "prRoot",
+      "type": "Group",
+      "label": "Project row",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "prTop",
+        "prMove",
+        "prTrack"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "prTop",
+      "type": "Group",
+      "label": "Name and hours",
+      "parent": "prRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "prName",
+        "prHours"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "prName",
+      "type": "Text",
+      "label": "Project name",
+      "parent": "prTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "prHours",
+      "type": "Text",
+      "label": "Hours this week",
+      "parent": "prTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "prMove",
+      "type": "Text",
+      "label": "Its next move",
+      "parent": "prRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "prTrack",
+      "type": "Group",
+      "label": "How much of the week",
+      "parent": "prRoot",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 4,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-sm)",
+        "flexDirection": "row",
+        "alignItems": "stretch"
+      },
+      "children": [
+        "prBar",
+        "prBarRest"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "prBar",
+      "type": "Group",
+      "label": "Its share",
+      "parent": "prTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "prBarRest",
+      "type": "Group",
+      "label": "The rest of the week",
+      "parent": "prTrack",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "transparent"
+      },
+      "x": 160,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "prRoot"
+  ]
+}

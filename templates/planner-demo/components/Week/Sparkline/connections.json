@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "35a4352a-da81-5925-8ca4-c08ddaa6474b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "skIn",
+      "fromProperty": "bars",
+      "toId": "skEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "firstLabel",
+      "toId": "skFirst",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "lastLabel",
+      "toId": "skLast",
+      "toProperty": "text"
+    }
+  ]
+}

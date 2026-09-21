@@ -1,0 +1,94 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "630224f6-0847-52d7-8680-8d3f7d06adb4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "thRoot",
+      "type": "Group",
+      "label": "Theme switch",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "thToDark",
+        "thToLight"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "thToDark",
+      "type": "net.noodl.controls.button",
+      "label": "Use dark theme",
+      "parent": "thRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "☾",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "cssClassName": "planner-theme-to-dark"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "thToLight",
+      "type": "net.noodl.controls.button",
+      "label": "Use light theme",
+      "parent": "thRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "☼",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "cssClassName": "planner-theme-to-light"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "thFlip",
+      "type": "JavaScriptFunction",
+      "label": "Switch to the other theme",
+      "parameters": {
+        "functionScript": "var KEY = \"nodegx-planner-theme\";\nfunction systemTheme() {\n  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n}\nfunction chosenTheme() {\n  var v = null;\n  try { v = window.localStorage.getItem(KEY); } catch (e) { v = window.__plannerTheme || null; }\n  return v === 'dark' || v === 'light' ? v : null;\n}\nfunction remember(v) {\n  window.__plannerTheme = v;\n  try { if (v) window.localStorage.setItem(KEY, v); else window.localStorage.removeItem(KEY); } catch (e) {}\n}\nfunction applyTheme(v) {\n  if (v) document.documentElement.setAttribute('data-theme', v);\n  else document.documentElement.removeAttribute('data-theme');\n}\nvar showing = chosenTheme() || systemTheme();\nvar next = showing === 'dark' ? 'light' : 'dark';\nvar keep = next === systemTheme() ? null : next;\nremember(keep);\napplyTheme(keep);"
+      },
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "thRoot"
+  ]
+}

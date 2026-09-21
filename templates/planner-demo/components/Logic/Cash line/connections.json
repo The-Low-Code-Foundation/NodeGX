@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "aa005b85-8067-5acc-804b-f0e7576d3b08",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "clIn",
+      "fromProperty": "cashEvents",
+      "toId": "clWork",
+      "toProperty": "in-cashEvents"
+    },
+    {
+      "fromId": "clIn",
+      "fromProperty": "settings",
+      "toId": "clWork",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "clIn",
+      "fromProperty": "invoicedText",
+      "toId": "clWork",
+      "toProperty": "in-invoicedText"
+    },
+    {
+      "fromId": "clWork",
+      "fromProperty": "out-rows",
+      "toId": "clOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "clWork",
+      "fromProperty": "out-balanceText",
+      "toId": "clOut",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "clWork",
+      "fromProperty": "out-termsText",
+      "toId": "clOut",
+      "toProperty": "termsText"
+    }
+  ]
+}

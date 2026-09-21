@@ -1,0 +1,511 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "70f73ec9-bae4-519a-8df9-6a401b7fed7c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sdIn",
+      "type": "Component Inputs",
+      "label": "Tonight",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dayLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "monthLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "concern",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "carryRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "nothingToCarry",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tomorrowTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tomorrowList",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tomorrowFocus",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tomorrowFocusColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "sdOut",
+      "type": "Component Outputs",
+      "label": "What you chose",
+      "ports": [
+        {
+          "name": "carry",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "drop",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "blockId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "sdScrim",
+      "type": "Group",
+      "label": "Behind the drawer",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "position": "fixed",
+        "backgroundColor": "var(--scrim)",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "justifyContent": "flex-end",
+        "styleCss": "z-index: 50;"
+      },
+      "children": [
+        "sdPanel"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sdPanel",
+      "type": "Group",
+      "label": "The drawer",
+      "parent": "sdScrim",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 34,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "styleCss": "overflow: auto;",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "sdHead",
+        "sdCoach",
+        "sdCarrySection",
+        "sdTomorrow"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sdHead",
+      "type": "Group",
+      "label": "Which evening",
+      "parent": "sdPanel",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "sdTitle",
+        "sdClose"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "sdTitle",
+      "type": "Text",
+      "label": "Shutdown",
+      "parent": "sdHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "as": "h2"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "sdClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the drawer",
+      "parent": "sdHead",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "sdCoach",
+      "type": "Group",
+      "label": "What today came to",
+      "parent": "sdPanel",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "sdDay",
+        "sdMonth",
+        "sdConcern"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "sdDay",
+      "type": "Text",
+      "label": "Today",
+      "parent": "sdCoach",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "sdMonth",
+      "type": "Text",
+      "label": "The month",
+      "parent": "sdCoach",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "sdConcern",
+      "type": "Text",
+      "label": "The one thing",
+      "parent": "sdCoach",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "sdCarrySection",
+      "type": "Group",
+      "label": "Not done today",
+      "parent": "sdPanel",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "sdCarryLabel",
+        "sdEach",
+        "sdAllDone"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "sdCarryLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "sdCarrySection",
+      "parameters": {
+        "text": "Not done today",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "sdEach",
+      "type": "For Each",
+      "label": "One row per block not done",
+      "parent": "sdCarrySection",
+      "parameters": {
+        "template": "/Week/Carry row",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "sdAllDone",
+      "type": "Text",
+      "label": "When everything is logged",
+      "parent": "sdCarrySection",
+      "parameters": {
+        "text": "Everything logged. Nice.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "sdTomorrow",
+      "type": "Group",
+      "label": "Tomorrow as it stands",
+      "parent": "sdPanel",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "sdTomorrowLabel",
+        "sdTomorrowList",
+        "sdFocusRow"
+      ],
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "sdTomorrowLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "sdTomorrow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "sdTomorrowList",
+      "type": "Text",
+      "label": "What is in it",
+      "parent": "sdTomorrow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "sdFocusRow",
+      "type": "Group",
+      "label": "Focus total",
+      "parent": "sdTomorrow",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "sdFocusLabel",
+        "sdFocus"
+      ],
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "sdFocusLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "sdFocusRow",
+      "parameters": {
+        "text": "Focus total",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "sdFocus",
+      "type": "Text",
+      "label": "How much",
+      "parent": "sdFocusRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 280,
+      "y": 2200
+    }
+  ],
+  "visualRoots": [
+    "sdScrim"
+  ]
+}

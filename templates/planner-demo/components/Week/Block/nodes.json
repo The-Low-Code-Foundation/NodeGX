@@ -1,0 +1,280 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "89f2a3aa-b79c-581e-8750-9d905cd8bec2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bkIn",
+      "type": "Component Inputs",
+      "label": "The block",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "what",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hoursText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tickColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "soft",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isNew",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "fromTodo",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "bkOut",
+      "type": "Component Outputs",
+      "label": "What you did to it",
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openLog",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "bkRoot",
+      "type": "Group",
+      "label": "Block",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "bkTick",
+        "bkMain",
+        "bkHours"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bkTick",
+      "type": "net.noodl.controls.button",
+      "label": "Log it",
+      "parent": "bkRoot",
+      "parameters": {
+        "label": "✓",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 11,
+          "unit": "px"
+        },
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 16,
+          "unit": "px"
+        },
+        "height": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "bkMain",
+      "type": "Group",
+      "label": "Whose, and what",
+      "parent": "bkRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "bkWho",
+        "bkWhat"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "bkWho",
+      "type": "net.noodl.controls.button",
+      "label": "Open the project",
+      "parent": "bkMain",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "bkWhat",
+      "type": "net.noodl.controls.button",
+      "label": "What it is — opens the log sheet",
+      "parent": "bkMain",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "styleCss": "text-align: left; justify-content: flex-start;"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "bkHours",
+      "type": "net.noodl.controls.button",
+      "label": "How long — opens the log sheet",
+      "parent": "bkRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "bkRoot"
+  ]
+}

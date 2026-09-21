@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "499ee90d-d93e-507a-8d3a-0236574000c3",
+  "name": "Add block",
+  "path": "/Commands/Add block",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Puts a block of time in a day: which project, what it is, and how many hours."
+}

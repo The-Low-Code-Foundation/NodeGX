@@ -1,0 +1,44 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5f11333d-487d-56c9-81eb-76f40fe64ad1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sbIn",
+      "type": "Component Inputs",
+      "label": "The month",
+      "ports": [
+        {
+          "name": "height",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "sbBar",
+      "type": "Group",
+      "label": "The bar",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 40,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "sbBar"
+  ]
+}

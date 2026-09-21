@@ -1,0 +1,319 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5ec5d8da-9952-58c0-8974-8b2eac9c4345",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "abIn",
+      "type": "Component Inputs",
+      "label": "Which week",
+      "ports": [
+        {
+          "name": "weekLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "abOut",
+      "type": "Component Outputs",
+      "label": "What was pressed",
+      "ports": [
+        {
+          "name": "previousWeek",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "nextWeek",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openProjects",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openSettings",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "shutDown",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "reset",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "abRoot",
+      "type": "Group",
+      "label": "App bar",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between",
+        "cssClassName": "planner-appbar"
+      },
+      "children": [
+        "abTitle",
+        "abNav",
+        "abRight"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "abTitle",
+      "type": "Text",
+      "label": "App name",
+      "parent": "abRoot",
+      "parameters": {
+        "text": "Envelopes",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "as": "h1"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "abNav",
+      "type": "Group",
+      "label": "Which week",
+      "parent": "abRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)"
+      },
+      "children": [
+        "abPrev",
+        "abWeekLabel",
+        "abNext"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "abPrev",
+      "type": "net.noodl.controls.button",
+      "label": "The week before",
+      "parent": "abNav",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "‹",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "abWeekLabel",
+      "type": "Text",
+      "label": "The week on screen",
+      "parent": "abNav",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "abNext",
+      "type": "net.noodl.controls.button",
+      "label": "The week after",
+      "parent": "abNav",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "›",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "abRight",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "abRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "abProjects",
+        "abSettings",
+        "abTheme",
+        "abShut",
+        "abReset"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "abProjects",
+      "type": "net.noodl.controls.button",
+      "label": "Open the projects",
+      "parent": "abRight",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Projects"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "abSettings",
+      "type": "net.noodl.controls.button",
+      "label": "Open the settings",
+      "parent": "abRight",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "⚙",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "abTheme",
+      "type": "/Week/Theme switch",
+      "label": "Light or dark",
+      "parent": "abRight",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "abShut",
+      "type": "net.noodl.controls.button",
+      "label": "Shut down for today",
+      "parent": "abRight",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Shut down"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "abReset",
+      "type": "net.noodl.controls.button",
+      "label": "Reset demo",
+      "parent": "abRight",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Reset demo"
+      },
+      "x": 160,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "abRoot"
+  ]
+}
