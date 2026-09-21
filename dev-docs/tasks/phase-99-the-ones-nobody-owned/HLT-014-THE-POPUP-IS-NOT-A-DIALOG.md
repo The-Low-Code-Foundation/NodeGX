@@ -1,5 +1,12 @@
 # HLT-014 — The popup is not a dialog
 
+> ✅ **BUILT 2026-09-21 (P99 s11) — AC1–AC8 met; §3.1's validator warning is the row's one remaining
+> slice.** Driven: HEAD 7/7 fired · fixed 25/25 (both layouts) · export 14/14, mutant 11/14 ·
+> templates 18/18 (HEAD 9/18). 🔴 AC7 found a regression §3's shape would have shipped — the toast
+> prefab opens its toast through Show Popup, and a modal toast froze the page for three seconds — so
+> Show Popup also gained **`Modal`** (default on), which the toast sets off.
+> [Verdict](./verdicts/HLT-014/2026-09-21/VERDICT.md).
+
 🔴 **Opened 2026-09-21 from the Digital Bricks Training stream (its sprint 48), at Richard's
 request** — *"let's maybe plan a task for this issue in phase 99 of NodeGX to tackle the problem
 for future projects? You decide what the best long term solution is."* Measured by reading the
@@ -84,23 +91,23 @@ once this lands is that stream's decision, not this task's.
 
 ## 5. Acceptance criteria
 
-1. **(the drive, first)** On a fixture project with one Show Popup, the HEAD build is measured and
+1. ✅ 7/7 fired on HEAD — 8 of 20 Tabs on the page, focus on `body` after close. **(the drive, first)** On a fixture project with one Show Popup, the HEAD build is measured and
    recorded: Escape leaves **1** popup open, `[role=dialog]` is **0**, focus after close is on
    `body`, and Tab reaches the page underneath. This confirms §2 by driving rather than by reading.
-2. **(the number)** The same drive on the fixed build: Escape → **0** popups and `Cancelled` fired
+2. ✅ 25/25 — Tab graded as *never reaches the page* (verdict §3: two Tabs leave to the browser UI, as a native modal `<dialog>` allows). **(the number)** The same drive on the fixed build: Escape → **0** popups and `Cancelled` fired
    once; `[role=dialog][aria-modal=true]` = **1** with a non-empty accessible name; after close,
    `document.activeElement` **is** the opener; 20 Tabs never leave the popup; the app root carries
    `inert` while open and not after.
-3. **Stack policy `stack`:** two popups, Escape closes only the top, focus goes to the lower one,
+3. ✅ **Stack policy `stack`:** two popups, Escape closes only the top, focus goes to the lower one,
    and only the lower one is not `inert`.
-4. **`Close on Escape` off:** Escape leaves the popup open and fires nothing.
-5. **Replaced (`Dismissed`) returns focus too** — the path most likely to be forgotten.
-6. **The export matches:** the same drive against an exported copy of the fixture gives the same
+4. ✅ **`Close on Escape` off:** Escape leaves the popup open and fires nothing.
+5. ✅ **Replaced (`Dismissed`) returns focus too** — the path most likely to be forgotten.
+6. ✅ 14/14; the role mutant fails exactly its 3 rows. Arms A/B/D — the export defers `Show On Top` and consumed outputs. **The export matches:** the same drive against an exported copy of the fixture gives the same
    numbers as criterion 2. Demonstrated failing by removing the emitted helper's `role`.
-7. **The shipped templates:** every template using Show Popup (today only `landing-pages`,
+7. ✅ three uses, not one (`toast` and `image-cropper` prefabs too); toast opted out via the new `Modal`, cropper given a name, WorkCard correct as is. **The shipped templates:** every template using Show Popup (today only `landing-pages`,
    `Site/WorkCard`) is driven, and any popup that relied on Escape doing nothing is named and either
    opted out or recorded as correct to close.
-8. `test:ci` at the floor and **`test:main` green** (§7 — they are different gates).
+8. ✅ see the verdict. `test:ci` at the floor and **`test:main` green** (§7 — they are different gates).
 
 ## 6. Landmines
 

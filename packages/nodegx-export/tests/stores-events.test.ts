@@ -111,6 +111,7 @@ import { FarewellCard } from '../components/FarewellCard';
 import { GreetingBadge } from '../components/GreetingBadge';
 import { GreetingCard } from '../components/GreetingCard';
 import { celebrate } from '../events';
+import { PopupDialog } from '../lib/popupDialog';
 import { visitorName } from '../stores/variables';
 import styles from './Home.module.css';
 
@@ -196,9 +197,9 @@ export function HomePage() {
 
       {openPopup === 'AboutDialog' &&
         createPortal(
-          <div className={styles.popupLayer}>
+          <PopupDialog className={styles.popupLayer} onCancel={() => setOpenPopup(null)}>
             <AboutDialog onClose={() => setOpenPopup(null)} />
-          </div>,
+          </PopupDialog>,
           document.body
         )}
     </div>

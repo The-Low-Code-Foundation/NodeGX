@@ -175,6 +175,12 @@
  *  - Regenerating moved **49** hash lines in the golden, all of them `README.md`, with **no**
  *    project added or removed and **no** non-README line touched (diffed against a pre-regenerate
  *    snapshot, key by key).
+ *
+ * ✅ **Regenerated again for HLT-014 (P99), 2026-09-21** — a popup slot now renders the emitted
+ * `PopupDialog` from `src/lib/popupDialog.ts`. Predicted before regenerating and then counted: the
+ * three corpus projects with a popup slot (`charts`, `cheer`, `kits`) move exactly four entries each
+ * — `src/pages/Home.tsx`, the new `src/lib/popupDialog.ts`, and `EXPORT-REPORT.md` / `@report`,
+ * whose file count went 34 → 35. **12** lines, no other project, no other file.
  */
 import * as fs from 'fs';
 import * as path from 'path';

@@ -41,6 +41,7 @@ import { MEDIA_LIB_PATH, mediaLibSource } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH, componentObjectLibSource } from './componentObjectLib';
 import { DRAG_LIB_PATH, dragLibSource } from './dragLib';
 import { PAGE_STACK_LIB_PATH, pageStackLibSource } from './pageStackLib';
+import { POPUP_DIALOG_LIB_PATH, popupDialogLibSource } from './popupDialogLib';
 import { EmittedCopy, emitKits } from './kits';
 import { README_PATH, renderReadme } from './readme';
 import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
@@ -174,6 +175,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let dragLibUsed = false;
   // EXP-011 §61.
   let pageStackLibUsed = false;
+  let popupDialogLibUsed = false;
   const reportComponents: ReportComponent[] = [];
   for (const plan of project.plans) {
     if (plan.skipReason) {
@@ -239,6 +241,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.componentObjectLib) componentObjectLibUsed = true;
     if (emitted.dragLib) dragLibUsed = true;
     if (emitted.pageStackLib) pageStackLibUsed = true;
+    if (emitted.popupDialogLib) popupDialogLibUsed = true;
   }
 
   /**
@@ -331,6 +334,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §61. Owed by a rendered stack, a push, a pop, or a component the stack pushes (its reserved prop's type).
   if (pageStackLibUsed) {
     files[PAGE_STACK_LIB_PATH] = GENERATED_MODULE_TS + pageStackLibSource();
+  }
+  // HLT-014. Owed by any component that renders a popup slot.
+  if (popupDialogLibUsed) {
+    files[POPUP_DIALOG_LIB_PATH] = GENERATED_MODULE_TS + popupDialogLibSource();
   }
   if (screenLibUsed) {
     files[SCREEN_LIB_PATH] = GENERATED_MODULE_TS + screenLibSource();

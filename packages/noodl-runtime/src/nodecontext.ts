@@ -134,7 +134,7 @@ interface NodeContext extends RuntimeNodeContext {
   warningTypes: Record<string, boolean>;
   bundleFetchesInFlight: Map<string, Promise<void>>;
   isUpdating?: boolean;
-  onShowPopup?: (group: any) => void;
+  onShowPopup?: (group: any, options?: PopupShowOptions) => void;
   onClosePopup?: (group: any) => void;
 
   setRootComponent(rootComponent: any): void;
@@ -180,10 +180,14 @@ interface NodeContext extends RuntimeNodeContext {
   endBlockRun(nodeId: string, recorder: BlockRunRecorder): void;
   clearTrace(): void;
   sendGlobalEventFromEventSender(channelName: string, inputValues: unknown): void;
-  setPopupCallbacks(callbacks: { onShow: (group: any) => void; onClose: (group: any) => void }): void;
+  setPopupCallbacks(callbacks: {
+    onShow: (group: any, options?: PopupShowOptions) => void;
+    onClose: (group: any) => void;
+  }): void;
   /** Open popups, oldest first. At most one entry unless a node opts into `'stack'`. */
   popupStack: PopupStackEntry[];
   _dismissOpenPopups(): void;
+  cancelTopPopup(): boolean;
   showPopup(popupComponent: string, params: Record<string, unknown>, args?: any): Promise<void>;
   setWarningTypes(warningTypes: Record<string, boolean>): void;
 }
@@ -194,6 +198,26 @@ interface PopupStackEntry {
   dismissed: boolean;
   /** Close this popup implicitly, because something replaced it. */
   dismiss(): void;
+  /** HLT-014. `false` only when the Show Popup node opted out of Escape. */
+  closeOnEscape: boolean;
+  /**
+   * HLT-014. `false` for a popup that is not a dialog — a toast. It never takes Escape and nothing
+   * goes inert behind it; the host is told so through {@link PopupShowOptions.modal}.
+   */
+  modal: boolean;
+  /** Close this popup because the person cancelled it (Escape). Set once the group exists. */
+  cancel?(): void;
+}
+
+/**
+ * HLT-014 — what the popup host needs to make the container a dialog, beyond the group itself.
+ * The runtime owns none of the DOM; it hands the host the author's choices.
+ */
+interface PopupShowOptions {
+  /** Show Popup's `Accessible Name`. Empty means "name it from the popup's first heading". */
+  accessibleName?: string;
+  /** Show Popup's `Modal`. `false` means an overlay that is not a dialog: no semantics, no inert, no focus move. */
+  modal?: boolean;
 }
 
 interface NodeContextArgs {
@@ -1148,6 +1172,29 @@ NodeContext.prototype._dismissOpenPopups = function () {
 };
 
 /**
+ * HLT-014 — the person pressed Escape: close the **top** popup, and only that one.
+ *
+ * The popup host calls this from its one key listener; the stack is the runtime's, so the
+ * decision is too. Returns whether the key was spent — `true` also for a popup already on its way
+ * out, so a second Escape inside the same frame does not reach through to the popup beneath it.
+ * A popup whose node set `Close On Escape` off spends nothing: the key belongs to whatever else
+ * wants it. Popups whose node set `Modal` off are not dialogs and are skipped entirely.
+ */
+NodeContext.prototype.cancelTopPopup = function () {
+  // The top MODAL popup: a toast shown over a dialog is not what Escape is aimed at, and it must not
+  // shield the dialog beneath it from the key either.
+  let top: PopupStackEntry | undefined;
+  for (let i = this.popupStack.length - 1; i >= 0 && !top; i--) {
+    if (this.popupStack[i].modal) top = this.popupStack[i];
+  }
+  if (!top || !top.closeOnEscape) return false;
+  // Still being built (the rAF attach has not run): nothing is on screen to cancel yet.
+  if (!top.cancel) return false;
+  top.cancel();
+  return true;
+};
+
+/**
  * Show a popup, subject to the stack policy.
  *
  * **The policy exists because there was none.** `scheduleShow` coalesces repeated pulses
@@ -1167,9 +1214,11 @@ NodeContext.prototype.showPopup = async function (popupComponent, params, args) 
 
   const nodeScope = this.rootComponent.nodeScope;
 
-  const entry = {
+  const entry: PopupStackEntry = {
     group: undefined,
     dismissed: false,
+    closeOnEscape: args?.closeOnEscape !== false,
+    modal: args?.modal !== false,
     dismiss: () => {
       if (entry.dismissed) return;
       entry.dismissed = true;
@@ -1231,7 +1280,9 @@ NodeContext.prototype.showPopup = async function (popupComponent, params, args) 
   // `closepopup.ts` finds it by walking up (`componentwalk.ts`) from wherever it sits. The
   // push is kept for the nodes that already had it — identical behaviour, no reliance on
   // walk ordering for graphs that work today — and the pull is the fallback.
-  const closeHandler = (action, results) => {
+  // HLT-014: two ways out on the popup's own terms — its graph's Close Popup, or the person's
+  // Escape — and one teardown, so the two cannot drift. Only what is reported differs.
+  const leave = (report: () => void) => {
     //close next frame so all nodes have a chance to update before being deleted
     this.scheduleNextFrame(() => {
       //avoid double callbacks
@@ -1246,8 +1297,16 @@ NodeContext.prototype.showPopup = async function (popupComponent, params, args) 
 
       this.onClosePopup(group);
       nodeScope.deleteNode(group);
-      args && args.onClosePopup && args.onClosePopup(action, results);
+      report();
     });
+  };
+  const closeHandler = (action, results) => {
+    leave(() => args && args.onClosePopup && args.onClosePopup(action, results));
+  };
+  // `Cancelled`, never `Closed`: `Closed` is where an author commits what the popup produced,
+  // and a person who pressed Escape produced nothing. It is the same reason `Dismissed` exists.
+  entry.cancel = () => {
+    leave(() => args && args.onCancelPopup && args.onCancelPopup());
   };
 
   // Read by `closepopup.ts`'s upward walk. Set unconditionally: a popup whose only Close
@@ -1263,7 +1322,7 @@ NodeContext.prototype.showPopup = async function (popupComponent, params, args) 
   }
 
   entry.group = group;
-  this.onShowPopup(group);
+  this.onShowPopup(group, { accessibleName: args?.accessibleName || undefined, modal: entry.modal });
 
   requestAnimationFrame(() => {
     //hack to make the react components have the right props

@@ -696,6 +696,9 @@
       "targetComponent": "ComponentType"
     },
     "NavigationShowPopup": {
+      "accessibleName": "BasicType",
+      "closeOnEscape": "BooleanType",
+      "modal": "BooleanType",
       "show": null,
       "stackPolicy": "EnumType",
       "target": "ComponentType"

@@ -2,8 +2,10 @@
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
 HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
-HLT-008 ✅ (s10 — P93 AC7 awaits Richard).**
-Open: **HLT-007, 009, 014**, then **HLT-010 last**. (HLT-014 was opened by the DBT stream at 15:47 — read its file.)
+HLT-008 ✅ (s10 — P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left).**
+Open: **HLT-007, 009, 015, 016**, then **HLT-010 last**. (HLT-015 and HLT-016 were opened by the DBT
+stream at 20:02 — backend rows, both block that template; read their files. HLT-016's shape is
+*"to be ruled"* — ask Richard before building it.)
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
 tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
 `TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
@@ -24,10 +26,43 @@ one stored identity, and one local backend ("Puppy test 3 backend", `backend_msj
 owned by both.** The editor now says so on the launcher; the repair is his call, not the
 product's. See HLT-011 AC4.
 
-**Suggested: HLT-014 or HLT-010** (HLT-008 was built in s10; HLT-013 in s9; HLT-012 in s8) — both were opened from a measurement rather than from a guess,
-so their §2 is the kind that has held twice out of twice here (HLT-005's and HLT-011's both
-measured TRUE). ⚠️ **HLT-009's template is another stream's** — it committed to it again on
+**Suggested: HLT-015** (a decided shape, blocks the DBT template's L171) **or HLT-010** — but
+HLT-010 now inherits three runtime error classes from s11 (its §2b), one of which (`Layout is
+"node"` on every popup) needs a layout decision before it can budget at 0. ⚠️ **HLT-009's template is another stream's** — it committed to it again on
 2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s11 leaves you — HLT-014, the popup is a dialog
+
+**Built: HEAD 7/7 fired · fixed 25/25 in both layouts · export 14/14, `role` mutant 11/14 ·
+templates 18/18 (HEAD 9/18).** [Verdict](./verdicts/HLT-014/2026-09-21/VERDICT.md).
+
+- 🔴 **Show Popup gained `Modal` (default on) — not in §3's decided shape.** AC7 drove every shipped
+  use and found the toast prefab opens its toast through Show Popup: a modal toast froze the page for
+  three seconds. The toast sets it off. Anything else that uses Show Popup for a notice needs the same.
+- 🔴 **`@noodl/mcp` is red on HEAD at 8** — measured in a clean HEAD worktree and again with only
+  s11's diff: identical, same numbers. Not this phase's rows; `test:packages` runs it. Name it before
+  assuming a red `noodl-mcp` is yours.
+- ⚠️ **Tab to the browser UI is not an escape.** With the page `inert`, a Tab past the popup's last
+  control leaves the document (`activeElement` reads `body`), as a native modal `<dialog>` allows.
+  The drive sorts `page` from `chrome`; the first run scored both as escapes.
+- ⚠️ **A hand-written fixture must use the on-disk connection keys** (`fromId`/`fromProperty`).
+  `render-from-disk` also accepts `sourceId`/`sourcePort`, the exporter does not — the export arm read
+  "nothing opened" for that alone. `scripts/library/drives/harness.js` probes still use the loose form.
+- 📋 **Left:** §3.1's validator warning (no name, no heading). A new diagnostic code here owes a corpus
+  measurement and an examples row; the image-cropper was its one shipped case, fixed by hand.
+
+## Tools s11 leaves you
+
+- **`scripts/devtools/exported-app-harness.js` — `withExportedPage({ projectDir, transform })`**: the
+  first way to DRIVE an exported app that survives a session. Working-tree exporter bundled by esbuild,
+  the emitted app bundled by esbuild (router v7 installed once into `$TMPDIR/nodegx-exported-app-deps`,
+  React aliased to the checkout's single copy), served, and a page shaped like `withRenderedPage`'s.
+  `transform` edits the emitted files first — that is how the mutant arm is made.
+- **`drive-hlt014-popup.js`** (`--expect head`, `--body-scroll`, `--export`, `--mutate-role`) and
+  **`drive-hlt014-templates.js`** — real mouse and keys over CDP, Chrome's own AX tree for the name
+  (`Accessibility.queryAXTree`), and outcomes counted by the GRAPH (a `Counter` per signal).
+- **`popup-dialog.ts`** (viewer) and **`src/lib/popupDialog.ts`** (export) — the two copies of one
+  contract, graded by one drive. Change one, run the drive in both modes.
 
 ## 🔴 What s10 leaves you — HLT-008, the board
 

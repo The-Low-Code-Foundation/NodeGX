@@ -7,6 +7,7 @@ import { Highlighter } from './highlighter';
 import { bindInputInjector } from './inputinjector';
 import Inspector from './inspector';
 import NoodlJSAPI from './noodl-js-api';
+import { PopupDialogLayer } from './popup-dialog';
 import projectSettings from './project-settings';
 import { createNodeFromReactComponent } from './react-component-node';
 import registerNodes from './register-nodes';
@@ -204,6 +205,10 @@ export default class Viewer extends React.Component {
     const { noodlRuntime } = props;
     this.runningDeployed = this.props.projectData !== undefined;
     this.focusTracker = new FocusTracker();
+    // HLT-014 — the popup container is a modal dialog; this layer is its one owner.
+    this.containerRef = React.createRef();
+    this.popupDialogs = new PopupDialogLayer(() => this.containerRef.current);
+    this.onDocumentKeyDown = this.onDocumentKeyDown.bind(this);
 
     noodlRuntime.context.setNodeFocused = this.setNodeFocused.bind(this);
     noodlRuntime.context.setNodeUnmounted = (node) => this.focusTracker.nodeUnmounted(node);
@@ -214,7 +219,8 @@ export default class Viewer extends React.Component {
     noodlRuntime.setDebugInspectorsEnabled(enableDebugInspectors);
 
     noodlRuntime.context.setPopupCallbacks({
-      onShow: (popup) => {
+      onShow: (popup, options) => {
+        this.popupDialogs.shown(popup, options);
         const newPopupArray = this.state.popups.concat([popup]);
 
         const bodyScroll = noodlRuntime.getProjectSettings().bodyScroll;
@@ -231,6 +237,7 @@ export default class Viewer extends React.Component {
         });
       },
       onClose: (popup) => {
+        this.popupDialogs.closed(popup);
         const newPopupArray = this.state.popups.filter((p) => p !== popup);
 
         this.setState({
@@ -400,6 +407,29 @@ export default class Viewer extends React.Component {
     this.focusTracker.onClickCapture(e.target);
   }
 
+  componentDidMount() {
+    // HLT-014 §6: ONE listener for the viewer's life, reading the top of the runtime's stack —
+    // one registered per popup leaks under `replace`, where a popup has two ways out of the stack.
+    // In the editor this is the preview's own document; the editor forwards only modified keys
+    // out of it (`CanvasView.ts`), so a plain Escape here never reaches the editor's handlers.
+    document.addEventListener('keydown', this.onDocumentKeyDown);
+  }
+
+  componentDidUpdate(_prevProps, prevState) {
+    if (prevState.popups !== this.state.popups) this.popupDialogs.afterRender();
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.onDocumentKeyDown);
+    this.popupDialogs.dispose();
+  }
+
+  onDocumentKeyDown(e) {
+    if (e.key !== 'Escape' || e.defaultPrevented || this.state.popups.length === 0) return;
+    // Something inside the popup already used the key (a select closing its list, say).
+    if (this.props.noodlRuntime.context.cancelTopPopup()) e.preventDefault();
+  }
+
   render() {
     const rootComponent = this.props.noodlRuntime.rootComponent;
     if (this.state.waitingForExport) return null;
@@ -424,7 +454,7 @@ export default class Viewer extends React.Component {
         flexDirection: 'column'
       };
       return (
-        <div style={style} onClickCapture={(e) => this.onClickCapture(e)}>
+        <div ref={this.containerRef} style={style} onClickCapture={(e) => this.onClickCapture(e)}>
           <div style={{ ...style, isolation: 'isolate' }}>{rootComponent.render()}</div>
           {this.state.popups.length ? (
             <div style={{ ...style, isolation: 'isolate' }}>{this.state.popups.map((p) => p.render())}</div>
@@ -434,6 +464,7 @@ export default class Viewer extends React.Component {
     } else {
       return (
         <div
+          ref={this.containerRef}
           style={{
             margin: 0,
             padding: 0,

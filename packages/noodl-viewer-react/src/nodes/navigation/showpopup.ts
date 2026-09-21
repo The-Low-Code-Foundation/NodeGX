@@ -20,6 +20,12 @@ interface ShowPopupInstance extends NodeInstance {
     target?: string;
     hasScheduledShow?: boolean;
     stackPolicy?: PopupStackPolicy;
+    /** HLT-014. Unset means on: a popup nobody can Escape is the defect, not the default. */
+    closeOnEscape?: boolean;
+    /** HLT-014. What a screen reader announces; empty means "from the popup's first heading". */
+    accessibleName?: string;
+    /** HLT-014. Unset means on. Off is for an overlay that is not a dialog, such as a toast. */
+    modal?: boolean;
     /** Message for the `Error` output; see NDA-004. */
     lastError?: string;
     /**
@@ -73,6 +79,46 @@ const ShowPopupNode: NodeDefinitionOptions = {
         this._internal.stackPolicy = value === 'stack' ? 'stack' : 'replace';
       }
     },
+    /**
+     * HLT-014 — the popup is a modal dialog, so Escape closes it and `Cancelled` fires. This is
+     * the one exception an author needs: a popup that must not close that way, such as a form
+     * with unsaved work. It is an opt-OUT on purpose.
+     */
+    closeOnEscape: {
+      type: 'boolean',
+      displayName: 'Close On Escape',
+      group: 'General',
+      default: true,
+      description: 'Lets the person close the popup with the Escape key, which fires Cancelled. Turn off for a popup that must be finished or closed by its own buttons',
+      set: function (this: ShowPopupInstance, value: boolean) {
+        this._internal.closeOnEscape = value !== false;
+      }
+    },
+    /**
+     * HLT-014 AC7 — found by driving the shipped toast prefab, which opens its toast through Show
+     * Popup. A modal toast made the whole page inert for its three seconds: a click into a field
+     * underneath did nothing and focus was taken from wherever the person was typing. A toast is
+     * not a dialog. Off restores exactly what a popup did before HLT-014.
+     */
+    modal: {
+      type: 'boolean',
+      displayName: 'Modal',
+      group: 'General',
+      default: true,
+      description: 'A modal popup is a dialog: the page behind it cannot be used, focus moves into it and Escape closes it. Turn off for an overlay that is not a dialog, such as a toast',
+      set: function (this: ShowPopupInstance, value: boolean) {
+        this._internal.modal = value !== false;
+      }
+    },
+    accessibleName: {
+      type: 'string',
+      displayName: 'Accessible Name',
+      group: 'General',
+      description: 'What a screen reader announces when the popup opens. Leave empty to use the first heading inside the popup',
+      set: function (this: ShowPopupInstance, value: string) {
+        this._internal.accessibleName = typeof value === 'string' ? value : undefined;
+      }
+    },
     show: {
       type: 'signal',
       displayName: 'Show',
@@ -103,6 +149,17 @@ const ShowPopupNode: NodeDefinitionOptions = {
       displayName: 'Dismissed',
       group: 'Events',
       description: 'Fires when another popup replaced this one before the user closed it, so there are no Close Results'
+    },
+    /**
+     * HLT-014 — the person closed the popup themselves, with Escape. Its own port rather than
+     * `Closed` for `Dismissed`'s reason: `Closed` is where an author commits what the popup
+     * produced, and a cancelled popup produced nothing.
+     */
+    Cancelled: {
+      type: 'signal',
+      displayName: 'Cancelled',
+      group: 'Events',
+      description: 'Fires when the person closed the popup with the Escape key, so there are no Close Results'
     },
     /**
      * ERG-001 §4 — `Done` is **added**, and none of the three ports above became it.
@@ -192,6 +249,12 @@ const ShowPopupNode: NodeDefinitionOptions = {
       const shown = this.context.showPopup(this._internal.target, this._internal.popupParams, {
         senderNode: this.nodeScope.componentOwner,
         stackPolicy: this._internal.stackPolicy ?? 'replace',
+        closeOnEscape: this._internal.closeOnEscape !== false,
+        modal: this._internal.modal !== false,
+        accessibleName: this._internal.accessibleName,
+        onCancelPopup: () => {
+          this.sendSignalOnOutput('Cancelled');
+        },
         // NDA-010 §3. Separate from `Closed` on purpose: this popup went away because
         // another one replaced it, which is not the user finishing with it. An author's
         // `Closed` branch is where the save-or-commit work goes, and running it for an

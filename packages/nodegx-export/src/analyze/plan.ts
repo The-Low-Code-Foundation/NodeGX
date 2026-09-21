@@ -3457,6 +3457,15 @@ export interface PopupSlotPlan {
   targetLegacy: string;
   /** Literal `popupParam-*` values, keyed by the target's input port name — props at emit. */
   params: Array<{ input: string; value: string | number | boolean }>;
+  /**
+   * HLT-014 — Show Popup's `Close On Escape`. The emitted `PopupDialog` closes on Escape unless this is
+   * `false`, matching the runtime's default-on.
+   */
+  closeOnEscape: boolean;
+  /** HLT-014 — Show Popup's `Accessible Name`; absent means "named by the popup's first heading". */
+  label?: string;
+  /** HLT-014 — Show Popup's `Modal`. `false` renders the plain overlay: not a dialog (a toast). */
+  modal: boolean;
 }
 
 export interface ComponentFilePlan {
@@ -9693,15 +9702,23 @@ function planComponent(
   // params share a key; distinct param sets on one target take numeric suffixes in compile
   // order. plan.popups is filtered to the keys that actually attached, after pass 2.
   const slotRegistry: PopupSlotPlan[] = [];
-  const slotFor = (targetLegacy: string, params: PopupSlotPlan['params']): string => {
-    const identity = JSON.stringify([targetLegacy, params]);
-    const existing = slotRegistry.find((s) => JSON.stringify([s.targetLegacy, s.params]) === identity);
+  const slotFor = (
+    targetLegacy: string,
+    params: PopupSlotPlan['params'],
+    dialog: Pick<PopupSlotPlan, 'closeOnEscape' | 'label' | 'modal'>
+  ): string => {
+    // HLT-014: two nodes opening one target as DIFFERENT dialogs (one Escape-proof, one not; two names)
+    // are two slots — sharing one would give the second node the first one's dialog.
+    const identityOf = (x: Pick<PopupSlotPlan, 'targetLegacy' | 'params' | 'closeOnEscape' | 'label' | 'modal'>) =>
+      JSON.stringify([x.targetLegacy, x.params, x.closeOnEscape, x.label ?? null, x.modal]);
+    const identity = identityOf({ targetLegacy, params, ...dialog });
+    const existing = slotRegistry.find((s) => identityOf(s) === identity);
     if (existing) return existing.slotKey;
     const base = pascalCase(lastSegment(targetLegacy.replace(/^\//, '')));
     let key = base;
     let counter = 2;
     while (slotRegistry.some((s) => s.slotKey === key)) key = `${base}${counter++}`;
-    slotRegistry.push({ slotKey: key, targetLegacy, params });
+    slotRegistry.push({ slotKey: key, targetLegacy, params, ...dialog });
     return key;
   };
 
@@ -9814,10 +9831,24 @@ function planComponent(
       }
       params.push({ input, value: param.value.value });
     }
+    // HLT-014 — the two dialog inputs. Literal only: the runtime reads both at open, and a wired value
+    // would have to be snapshotted exactly as `popupParam-*` would, which this slice does not do.
+    for (const port of ['closeOnEscape', 'accessibleName', 'modal']) {
+      if (wiredPorts.has(`${node.id}:${port}`)) {
+        return { defer: `${port} is wired — only a literal Modal / Close On Escape / Accessible Name translates` };
+      }
+    }
+    const closeOnEscape = literalParam(node, 'closeOnEscape') !== false;
+    const accessibleName = literalParam(node, 'accessibleName');
+    const dialog = {
+      modal: literalParam(node, 'modal') !== false,
+      closeOnEscape,
+      ...(typeof accessibleName === 'string' && accessibleName !== '' ? { label: accessibleName } : {})
+    };
     const chain = doneChainOf(node);
     if ('defer' in chain) return chain;
     return {
-      action: { kind: 'popup-show', slotKey: slotFor(target, params), then: chain.then },
+      action: { kind: 'popup-show', slotKey: slotFor(target, params, dialog), then: chain.then },
       consumes: chain.consumes,
       collapses: chain.collapses,
       subscribes: chain.subscribes

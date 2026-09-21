@@ -68,6 +68,7 @@ import { SCREEN_LIB_PATH } from './screenLib';
 import { MEDIA_ATTRS, MEDIA_LIB_PATH, MediaHelper, absoluteUrl } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH } from './componentObjectLib';
 import { PAGE_STACK_LIB_PATH } from './pageStackLib';
+import { POPUP_DIALOG_LIB_PATH } from './popupDialogLib';
 import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, Decl, iconSourceOf, RoleCss, StyleRole, WIRED_STYLE_SINKS } from './style';
 
 const GENERATED_TS = '// @nodegx:generated (visual — provenance markers complete in EXP-007)\n';
@@ -277,6 +278,8 @@ export interface EmittedComponent {
   dragLib: boolean;
   /** EXP-011 §61. `src/lib/pageStack.ts` is owed when this component renders a stack, pushes, pops, or is pushed. */
   pageStackLib: boolean;
+  /** HLT-014 — a popup slot rendered, so `src/lib/popupDialog.ts` is owed. */
+  popupDialogLib: boolean;
   /**
    * EXP-014 §14.5. Which of `src/lib/media.ts`'s helpers this component prints a WIRED src / srcSet /
    * poster through. Filled by `contentAttrs` at the point the attribute is printed — the same
@@ -4313,6 +4316,11 @@ export function emitComponent(
     const specifier = `${relRoot}/${PAGE_STACK_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${[...usedPageStackNames].sort().join(', ')} } from '${specifier}';`);
   }
+  // HLT-014. `src/lib/popupDialog.ts`, owed by any rendered MODAL popup slot.
+  if (plan.popups.some((p) => p.modal)) {
+    const specifier = `${relRoot}/${POPUP_DIALOG_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { PopupDialog } from '${specifier}';`);
+  }
   // EXP-011 §59. `src/lib/screen.ts`, earned where a viewport read printed (the hook line prints for the same set).
   const screenHooks = plan.screenResolutions.filter((s) => usedScreenNodeIds.has(s.nodeId));
   if (screenHooks.length > 0) {
@@ -5899,12 +5907,33 @@ export function emitComponent(
         slotAttrs.push(jsxAttr(attr, p.value));
       }
       const attrs = [...slotAttrs, ...(closable ? [`onClose={() => ${popupSetter}(null)}`] : [])];
+      // HLT-014 — the slot's container is the runtime's modal dialog, not a bare div: semantics, `inert`
+      // behind it, focus in and back, and Escape → close. Escape closes a slot whose target has no
+      // Close Popup too; that is the runtime's behaviour, where `cancelTopPopup` needs none.
+      const dialogAttrs = [
+        `className={styles.${popupLayerClass}}`,
+        ...(slot.label !== undefined ? [jsxAttr('label', slot.label)] : []),
+        ...(slot.closeOnEscape ? [] : ['closeOnEscape={false}']),
+        `onCancel={() => ${popupSetter}(null)}`
+      ];
+      // `Modal` off: the plain overlay a popup always was — a toast is not a dialog.
+      if (!slot.modal) {
+        return [
+          `${pad(indent)}{${popupState} === ${tsLiteral(slot.slotKey)} &&`,
+          `${pad(indent + 2)}createPortal(`,
+          `${pad(indent + 4)}<div className={styles.${popupLayerClass}}>`,
+          ...element(target.symbol, attrs, null, indent + 6, false),
+          `${pad(indent + 4)}</div>,`,
+          `${pad(indent + 4)}document.body`,
+          `${pad(indent + 2)})}`
+        ];
+      }
       return [
         `${pad(indent)}{${popupState} === ${tsLiteral(slot.slotKey)} &&`,
         `${pad(indent + 2)}createPortal(`,
-        `${pad(indent + 4)}<div className={styles.${popupLayerClass}}>`,
+        `${pad(indent + 4)}<PopupDialog ${dialogAttrs.join(' ')}>`,
         ...element(target.symbol, attrs, null, indent + 6, false),
-        `${pad(indent + 4)}</div>,`,
+        `${pad(indent + 4)}</PopupDialog>,`,
         `${pad(indent + 4)}document.body`,
         `${pad(indent + 2)})}`
       ];
@@ -7068,6 +7097,7 @@ export function emitComponent(
     dragLib: plan.drags.length > 0,
     // EXP-011 §61.
     pageStackLib: usedPageStackNames.size > 0,
+    popupDialogLib: plan.popups.some((p) => p.modal),
     mediaHelpers: usedMediaHelpers
   };
 }

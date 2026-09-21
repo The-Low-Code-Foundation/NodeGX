@@ -54,6 +54,25 @@ rows are visible in the s4 log as the only three lines without one.
    drive reads 0 of its `404` and that 0 means nothing
    ([[a-window-opened-after-the-event-attributes-nothing]]).
 
+## 2b. 🔴 Three classes HLT-014 found in the RUNTIME, not the editor — 2026-09-21
+
+HLT-014's drives run the viewer bundle and templates in headless Chrome, and read three error classes
+on **both** builds (not caused by it — measured on HEAD). The editor-log budget above never sees them
+unless a drive opens a popup inside the preview; an app-side budget would:
+
+1. **`group/layout-not-a-flex-direction`, once per popup opened, in every app.** `NodeContext.showPopup`
+   gives every popup container `flexDirection: 'node'`, and NDA-012 (2026-08-01) made Group raise that.
+   ⚠️ Not a one-word fix: `'node'` reaches the popup's children as `parentLayout`, where it means
+   *neither row nor column*. `'column'` turns a popup root's percentage height into `flex-grow`, `'none'`
+   positions it absolutely. Owner needed before this row can budget the class at 0.
+2. **The toast prefab's `Toast Component` script throws** `Cannot read properties of null (reading
+   'style')` on every toast (`library/prefabs/toast`).
+3. `starter-imagery/…webp` fails to load when `templates/landing-pages` is served from disk — harness-side
+   (`render-from-disk` has no `starter-imagery` module), recorded so it is not budgeted as an app defect.
+
+Reproduce: `node scripts/devtools/drive-hlt014-popup.js` and `drive-hlt014-templates.js` print each as
+*pre-existing* with a count.
+
 ## 3. Scope
 
 **In:** a gate that drives the editor, reads the renderer log and fails on errors above a named

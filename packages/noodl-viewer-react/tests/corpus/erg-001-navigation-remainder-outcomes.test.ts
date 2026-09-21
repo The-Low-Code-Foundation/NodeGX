@@ -515,6 +515,9 @@ describe('ERG-001 §4: Show Popup', () => {
 
   test('(pinned control) Closed and Dismissed survive, and there is no Unchanged', () => {
     expect(signalPortsOf(ShowPopupModule).sort()).toEqual([
+      // HLT-014 added `Cancelled` (the person pressed Escape) — a later event like the two
+      // below, not an outcome of `Show`, so this pin's point about `Unchanged` is untouched.
+      'Cancelled',
       'Closed',
       'Dismissed',
       'completed',

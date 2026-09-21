@@ -92,6 +92,10 @@ describe('the fixture pair (POPUPS-TARGET §6)', () => {
     expect(home).toContain(`{openPopup === 'AboutDialog' &&`);
     expect(home).toContain('createPortal(');
     expect(home).toContain(`<AboutDialog onClose={() => setOpenPopup(null)} />`);
+    // HLT-014: the slot's container is the runtime's modal dialog, and Escape empties the slot.
+    expect(home).toContain(`<PopupDialog className={styles.popupLayer} onCancel={() => setOpenPopup(null)}>`);
+    expect(home).toContain(`import { PopupDialog } from '../lib/popupDialog';`);
+    expect(app.files['src/lib/popupDialog.ts']).toContain(`role: 'dialog'`);
     expect(home).toContain('document.body');
     expect(home).toContain(`import { createPortal } from 'react-dom';`);
     expect(app.files['src/pages/Home.module.css']).toContain('.popupLayer {\n  position: fixed;\n  inset: 0;\n}');
@@ -108,7 +112,10 @@ describe('the fixture pair (POPUPS-TARGET §6)', () => {
     const plan = planProject(ir, index);
     const home = plan.byLegacyPath.get('/Pages/Home')!;
     expect(home.dispositions['showAbout']).toEqual({ kind: 'collapsed', into: 'aboutButton' });
-    expect(home.popups).toEqual([{ slotKey: 'AboutDialog', targetLegacy: '/Components/AboutDialog', params: [] }]);
+    expect(home.popups).toEqual([
+      // HLT-014: the slot is a dialog, Escape-closable unless the node says otherwise.
+      { slotKey: 'AboutDialog', targetLegacy: '/Components/AboutDialog', params: [], modal: true, closeOnEscape: true }
+    ]);
     const dialog = plan.byLegacyPath.get('/Components/AboutDialog')!;
     expect(dialog.dispositions['aboutClose']).toEqual({ kind: 'collapsed', into: 'aboutOkButton' });
     expect(dialog.dispositions['aboutOutputs']).toEqual({ kind: 'static' });
@@ -337,5 +344,48 @@ describe('close side rulings (POPUPS-TARGET §4)', () => {
     expect(
       (plan.byLegacyPath.get('/Components/AboutDialog')!.dispositions['aboutClose'] as { reason: string }).reason
     ).toContain('its failure output is consumed');
+  });
+});
+
+/**
+ * HLT-014 §3.5 — the slot's container is the runtime's modal dialog. The behaviour of the emitted
+ * `PopupDialog` is graded in a browser by `scripts/devtools/drive-hlt014-popup.js --export` (and its
+ * `--mutate-role` control); these rows pin what the exporter hands it.
+ */
+describe('HLT-014: a popup slot is a dialog', () => {
+  const emitted = (source: ExportIR) => emitApp(source, catalog).files['src/pages/Home.tsx'];
+
+  test('Close On Escape off reaches the slot, and the default prints nothing', () => {
+    const source = cloneIr();
+    setParam(nodeOf(source, 'Pages/Home', 'showAbout'), 'closeOnEscape', false);
+    expect(emitted(source)).toContain(
+      `<PopupDialog className={styles.popupLayer} closeOnEscape={false} onCancel={() => setOpenPopup(null)}>`
+    );
+    // The default-on case carries no attribute at all (the fixture pair above).
+    expect(app.files['src/pages/Home.tsx']).not.toContain('closeOnEscape');
+  });
+
+  test('an Accessible Name becomes the label', () => {
+    const source = cloneIr();
+    setParam(nodeOf(source, 'Pages/Home', 'showAbout'), 'accessibleName', 'About this app');
+    expect(emitted(source)).toContain(`<PopupDialog className={styles.popupLayer} label="About this app"`);
+  });
+
+  test('Modal off is the plain overlay — no dialog, and no lib owed', () => {
+    const source = cloneIr();
+    setParam(nodeOf(source, 'Pages/Home', 'showAbout'), 'modal', false);
+    const out = emitApp(source, catalog);
+    expect(out.files['src/pages/Home.tsx']).toContain('<div className={styles.popupLayer}>');
+    expect(out.files['src/pages/Home.tsx']).not.toContain('PopupDialog');
+    expect(out.files['src/lib/popupDialog.ts']).toBeUndefined();
+  });
+
+  test('a wired dialog input defers, like a wired target', () => {
+    const source = cloneIr();
+    wire(source, 'Pages/Home', 'aboutButton', 'onClick', 'showAbout', 'closeOnEscape', 'value');
+    const plan = planProject(source, index);
+    expect((plan.byLegacyPath.get('/Pages/Home')!.dispositions['showAbout'] as { reason: string }).reason).toContain(
+      'closeOnEscape is wired'
+    );
   });
 });

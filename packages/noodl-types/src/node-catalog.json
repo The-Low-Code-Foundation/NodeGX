@@ -17676,6 +17676,41 @@
       "docs": "https://docs.noodl.net/nodes/popups/show-popup",
       "inputs": [
         {
+          "name": "accessibleName",
+          "displayName": "Accessible Name",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What a screen reader announces when the popup opens. Leave empty to use the first heading inside the popup"
+        },
+        {
+          "name": "closeOnEscape",
+          "displayName": "Close On Escape",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Lets the person close the popup with the Escape key, which fires Cancelled. Turn off for a popup that must be finished or closed by its own buttons"
+        },
+        {
+          "name": "modal",
+          "displayName": "Modal",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "A modal popup is a dialog: the page behind it cannot be used, focus moves into it and Escape closes it. Turn off for an overlay that is not a dialog, such as a toast"
+        },
+        {
           "name": "show",
           "displayName": "Show",
           "group": "Actions",
@@ -17722,6 +17757,17 @@
         }
       ],
       "outputs": [
+        {
+          "name": "Cancelled",
+          "displayName": "Cancelled",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when the person closed the popup with the Escape key, so there are no Close Results"
+        },
         {
           "name": "Closed",
           "displayName": "Closed",
