@@ -1,8 +1,9 @@
 # P99 — next session
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
-HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9).**
-Open: **HLT-007, 008, 009, 014**, then **HLT-010 last**. (HLT-014 was opened by the DBT stream at 15:47 — read its file.)
+HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
+HLT-008 ✅ (s10 — P93 AC7 awaits Richard).**
+Open: **HLT-007, 009, 014**, then **HLT-010 last**. (HLT-014 was opened by the DBT stream at 15:47 — read its file.)
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
 tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
 `TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
@@ -23,10 +24,29 @@ one stored identity, and one local backend ("Puppy test 3 backend", `backend_msj
 owned by both.** The editor now says so on the launcher; the repair is his call, not the
 product's. See HLT-011 AC4.
 
-**Suggested: HLT-014 or HLT-010** (HLT-013 was built in s9; HLT-012 in s8) — both were opened from a measurement rather than from a guess,
+**Suggested: HLT-014 or HLT-010** (HLT-008 was built in s10; HLT-013 in s9; HLT-012 in s8) — both were opened from a measurement rather than from a guess,
 so their §2 is the kind that has held twice out of twice here (HLT-005's and HLT-011's both
 measured TRUE). ⚠️ **HLT-009's template is another stream's** — it committed to it again on
 2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s10 leaves you — HLT-008, the board
+
+**Built: 21/21 driven arms on the fixed build, 9/20 on HEAD** (`scripts/devtools/drive-hlt008-board.js`,
+fixture `tvw008-board-fixture.js --out "…/HLT-008 Board"`). [Verdict](./verdicts/HLT-008/2026-09-21/VERDICT.md).
+
+- 📋 **For Richard: P93 AC7** — `shots/hlt008-fixed-ac7-light.png` / `-ac7-dark.png`. Two things
+  worth his eye: on the board the scope menu's list heading now reads `Components` (the rows still
+  open a component on the Workbench), and in light theme white frames sit on a light board.
+- 🔴 **The board's harness set `layout: 'none'` on a Group — no such port** (`flexDirection`). Every
+  frame stacked in a column. **HLT-009 is the same class** in a template; the board's harness keys
+  are now graded against `noodl-types/src/node-catalog.json` (`tests-unit/hlt-008`) — the pattern
+  to copy for any generated graph.
+- ⚠️ **A `<webview>` takes every pointer/wheel event over its whole box; `clip-path` on the host
+  moves hit-testing too** (measured, both directions). That is how the board gets its gutters back.
+- ⚠️ **Capture trap:** `setDeviceMetricsOverride` with `deviceScaleFactor: 1` draws a DPR-2 guest at
+  half size in a screenshot. Pin DSF 2 before believing a picture of a `<webview>`.
+- **HLT-010 inherits** a half-second `executeJavaScript` poll on the board (guarded; 0 errors across
+  every run) — count it if the renderer-error gate ever sees one.
 
 ## 🔴 What s9 leaves you — HLT-013, and a docs site that could not build
 

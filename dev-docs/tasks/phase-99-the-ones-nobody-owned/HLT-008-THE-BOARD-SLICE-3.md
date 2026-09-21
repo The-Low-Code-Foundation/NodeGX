@@ -1,5 +1,11 @@
 # HLT-008 — The board, slice 3
 
+> ✅ **BUILT 2026-09-21 (P99 s10).** 21/21 driven arms on the fixed build, 9/20 on HEAD — see the
+> [verdict](./verdicts/HLT-008/2026-09-21/VERDICT.md). AC1–AC6 and AC8's `test:main` half are met
+> here; 📋 **AC7 is Richard's WORTHY on `shots/hlt008-fixed-ac7-{light,dark}.png` and closes in P93.**
+> ⚠️ §2 is corrected by the verdict §2: B2/B3 are the one `<webview>` painted white over the union
+> of the frames, and B5's content half was a harness port Group does not have (`layout`).
+
 **Richard drove the board by hand on 2026-09-20 — the first time anyone but a script had touched it
 — and ruled P93 `TVW-008` AC7 NOT WORTHY on six defects. He then ruled the work into this phase.**
 
