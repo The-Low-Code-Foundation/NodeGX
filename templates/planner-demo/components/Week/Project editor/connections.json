@@ -1,0 +1,259 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "196e8a7d-aaca-5492-8720-6073a69467df",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "peIn",
+      "fromProperty": "shown",
+      "toId": "peRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "title",
+      "toId": "peTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "name",
+      "toId": "peName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peName",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "sub",
+      "toId": "peSub",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peSub",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "rate",
+      "toId": "peRate",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peRate",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "slot",
+      "toId": "peSlot",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peSlot",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "slot"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "rung",
+      "toId": "peRung",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peRung",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "rung"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "move",
+      "toId": "peMove",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peMove",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "moveWorth",
+      "toId": "peWorth",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peWorth",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "moveWorth"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "moveWhen",
+      "toId": "peWhen",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peWhen",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "moveWhen"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "say",
+      "toId": "peSay",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peSay",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "kinds",
+      "toId": "peKind",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "kind",
+      "toId": "peKind",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "value",
+      "toId": "peOut",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "moveDue",
+      "toId": "peDue",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "peDue",
+      "fromProperty": "Value",
+      "toId": "peOut",
+      "toProperty": "moveDue"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "shown",
+      "toId": "peOpened",
+      "toProperty": "in-shown"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "moveStop",
+      "toId": "peOpened",
+      "toProperty": "in-moveStop"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-moveStopOn",
+      "toId": "peStop",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-moveStopOff",
+      "toId": "peStop",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peSub",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peRate",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peSlot",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peRung",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peMove",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peWorth",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peWhen",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peSay",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peStop",
+      "fromProperty": "checked",
+      "toId": "peOut",
+      "toProperty": "moveStop"
+    },
+    {
+      "fromId": "peSave",
+      "fromProperty": "onClick",
+      "toId": "peOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "peCancel",
+      "fromProperty": "onClick",
+      "toId": "peOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "peClose",
+      "fromProperty": "onClick",
+      "toId": "peOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

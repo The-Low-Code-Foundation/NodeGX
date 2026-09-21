@@ -1,0 +1,281 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1cdf4d3d-b306-5e4d-841b-2b6a2e01cbab",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wdpIn",
+      "type": "Component Inputs",
+      "label": "Date picker settings",
+      "ports": [
+        {
+          "name": "Value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "Label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "Show Label",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "Min",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "Max",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "Disabled",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "First Day Of Week",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "Width",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Align X",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Align Y",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Margin Top",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Margin Right",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Margin Bottom",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Margin Left",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "Position",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "wdpOut",
+      "type": "Component Outputs",
+      "label": "The date",
+      "ports": [
+        {
+          "name": "Value",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "Date",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "Changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "wdpRoot",
+      "type": "Group",
+      "label": "Date picker",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "wdpLabel",
+        "wdpField"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wdpLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "wdpRoot",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wdpField",
+      "type": "Group",
+      "label": "Field (the script draws the input and calendar here)",
+      "parent": "wdpRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "wdpScript",
+      "type": "JavaScriptFunction",
+      "label": "Draw the field and calendar",
+      "parameters": {
+        "functionScript": "var CSS_ID = \"ndg-date-picker-css\";\nvar CSS = \".ndg-dp { position: relative; display: flex; align-items: center; width: 100%; box-sizing: border-box; }\\n.ndg-dp-input {\\n  box-sizing: border-box; width: 100%; min-height: 40px; margin: 0;\\n  font: inherit; font-size: var(--text-base, 16px); line-height: 1.25;\\n  color: var(--foreground, #1c1c1c); background-color: var(--background, #ffffff);\\n  border: var(--border-1, 1px) solid var(--border-control, #8a8f98); border-radius: var(--radius-md, 6px);\\n  padding: var(--space-2, 8px) var(--space-3, 12px);\\n  -webkit-appearance: none; appearance: none;\\n}\\n.ndg-dp-input:focus { outline: none; border-color: var(--ring, #3b82f6); box-shadow: 0 0 0 1px var(--ring, #3b82f6); }\\n.ndg-dp-input:disabled { opacity: 0.5; cursor: not-allowed; }\\n.ndg-dp-input::-webkit-date-and-time-value { text-align: left; }\\n.ndg-dp--empty .ndg-dp-input::-webkit-datetime-edit { color: var(--muted-foreground, #6b7280); }\\n.ndg-dp--enhanced .ndg-dp-input { padding-right: calc(var(--space-3, 12px) + 28px); }\\n.ndg-dp--enhanced .ndg-dp-input::-webkit-calendar-picker-indicator { display: none; }\\n.ndg-dp-button { display: none; }\\n.ndg-dp--enhanced .ndg-dp-button {\\n  display: flex; align-items: center; justify-content: center; box-sizing: border-box;\\n  position: absolute; top: 0; bottom: 0; right: var(--space-1, 4px); margin: auto 0;\\n  width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--radius-sm, 4px);\\n  background: transparent; color: var(--muted-foreground, #6b7280); cursor: pointer;\\n}\\n.ndg-dp--enhanced .ndg-dp-button:hover { background-color: var(--muted, #f1f1f1); color: var(--foreground, #1c1c1c); }\\n.ndg-dp-button:disabled { opacity: 0.5; cursor: not-allowed; }\\n.ndg-dp-pop {\\n  position: fixed; z-index: 10000; box-sizing: border-box; width: 296px; padding: var(--space-3, 12px);\\n  color: var(--foreground, #1c1c1c); background-color: var(--surface-raised, var(--background, #ffffff));\\n  border: var(--border-1, 1px) solid var(--border, #e2e2e2); border-radius: var(--radius-lg, 8px);\\n  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.12), 0 4px 6px -4px rgba(0, 0, 0, 0.1));\\n  font-size: var(--text-sm, 14px); line-height: 1.25; -webkit-user-select: none; user-select: none;\\n}\\n.ndg-dp-pop button {\\n  font: inherit; color: inherit; margin: 0; border: 0; background: transparent; cursor: pointer;\\n  border-radius: var(--radius-md, 6px); box-sizing: border-box;\\n}\\n.ndg-dp-pop button:focus { outline: none; }\\n.ndg-dp-pop button:focus-visible { outline: 2px solid var(--ring, #3b82f6); outline-offset: 1px; }\\n.ndg-dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2, 8px); }\\n.ndg-dp-title { font-weight: var(--font-semibold, 600); font-size: var(--text-sm, 14px); }\\n.ndg-dp-nav { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--muted-foreground, #6b7280); }\\n.ndg-dp-nav:hover { background-color: var(--muted, #f1f1f1); color: var(--foreground, #1c1c1c); }\\n.ndg-dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }\\n.ndg-dp-dow { text-align: center; font-size: var(--text-xs, 12px); color: var(--muted-foreground, #6b7280); padding: var(--space-1, 4px) 0; }\\n.ndg-dp-day { height: 36px; padding: 0; text-align: center; font-variant-numeric: tabular-nums; }\\n.ndg-dp-day:hover { background-color: var(--muted, #f1f1f1); }\\n.ndg-dp-day.is-outside { color: var(--muted-foreground, #6b7280); }\\n.ndg-dp-day.is-today { box-shadow: inset 0 0 0 1px var(--border-strong, #9ca3af); font-weight: var(--font-semibold, 600); }\\n.ndg-dp-day.is-selected, .ndg-dp-day.is-selected:hover { background-color: var(--primary, #2563eb); color: var(--primary-foreground, #ffffff); box-shadow: none; }\\n.ndg-dp-day:disabled { opacity: 0.35; cursor: not-allowed; background: transparent; }\\n.ndg-dp-foot { display: flex; justify-content: space-between; margin-top: var(--space-2, 8px); padding-top: var(--space-2, 8px); border-top: var(--border-1, 1px) solid var(--border, #e2e2e2); }\\n.ndg-dp-foot button { padding: var(--space-1, 4px) var(--space-2, 8px); color: var(--primary, #2563eb); font-weight: var(--font-medium, 500); }\\n.ndg-dp-foot button:hover { background-color: var(--muted, #f1f1f1); }\\n.ndg-dp-foot button:disabled { opacity: 0.35; cursor: not-allowed; }\";\nvar S = this.datePicker || (this.datePicker = {});\nS.Outputs = Outputs;\nS.mounts = Inputs.mounted;\nS.label = String(Inputs.label || 'Date');\nS.min = normal(Inputs.min);\nS.max = normal(Inputs.max);\nS.disabled = Inputs.disabled === true || Inputs.disabled === 'true';\nS.firstDay = firstDayOfWeek(Inputs.firstDayOfWeek);\n\nvar hostNode = Inputs.host;\nvar host = hostNode && typeof hostNode.getDOMElement === 'function' ? hostNode.getDOMElement() : null;\nif (!host || typeof document === 'undefined') return;\n\nif (!document.getElementById(CSS_ID)) {\n  var sheet = document.createElement('style');\n  sheet.id = CSS_ID;\n  sheet.textContent = CSS;\n  document.head.appendChild(sheet);\n}\n\nif (!S.wrap || S.host !== host || !host.contains(S.wrap)) build(host);\n\nS.input.min = S.min;\nS.input.max = S.max;\nS.input.disabled = S.disabled;\nS.button.disabled = S.disabled;\nS.input.setAttribute('aria-label', S.label);\n\nvar incoming = normal(Inputs.value);\nif (incoming !== S.lastIncoming) {\n  S.lastIncoming = incoming;\n  var busy = document.activeElement === S.input && S.typed;\n  if (!busy) {\n    S.input.value = incoming;\n    S.committed = incoming;\n    publish(incoming);\n    syncEmpty();\n    if (S.pop) render();\n  }\n}\nif (S.disabled && S.pop) close(false);\n\n// ── dates ──────────────────────────────────────────────────────────────────\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction toDay(v) {\n  if (v instanceof Date) return isNaN(v.getTime()) ? null : new Date(v.getFullYear(), v.getMonth(), v.getDate());\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})/.exec(String(v === undefined || v === null ? '' : v).trim());\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]) - 1, da = Number(m[3]);\n  var d = new Date(y, mo, da);\n  return d.getFullYear() === y && d.getMonth() === mo && d.getDate() === da ? d : null;\n}\nfunction normal(v) { var d = toDay(v); return d ? iso(d) : ''; }\nfunction addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }\nfunction addMonths(d, n) {\n  var last = new Date(d.getFullYear(), d.getMonth() + n + 1, 0).getDate();\n  return new Date(d.getFullYear(), d.getMonth() + n, Math.min(d.getDate(), last));\n}\nfunction today() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }\nfunction inRange(s) { return (!S.min || s >= S.min) && (!S.max || s <= S.max); }\nfunction firstDayOfWeek(v) {\n  var n = Number(v);\n  if (v !== undefined && v !== null && v !== '' && n >= 0 && n <= 6) return Math.floor(n);\n  try {\n    var loc = new Intl.Locale(navigator.language || 'en-GB');\n    var info = loc.getWeekInfo ? loc.getWeekInfo() : loc.weekInfo;\n    if (info && info.firstDay) return info.firstDay % 7;\n  } catch (e) {}\n  return 1;\n}\nfunction fmt(d, opts, fallback) {\n  try { return new Intl.DateTimeFormat(undefined, opts).format(d); } catch (e) { return fallback; }\n}\n\n// ── the value ─────────────────────────────────────────────────────────────\nfunction publish(v) {\n  S.Outputs.value = v;\n  if (S.lastDate !== v) {\n    S.lastDate = v;\n    S.Outputs.date = v ? toDay(v) : null;\n  }\n}\nfunction commit(v) {\n  v = normal(v);\n  S.typed = false;\n  if (S.input.value !== v) S.input.value = v;\n  syncEmpty();\n  if (v === S.committed) return;\n  S.committed = v;\n  publish(v);\n  S.Outputs.changed();\n}\nfunction commitTyped() {\n  if (!S.typed) return;\n  var input = S.input;\n  if (input.value === '' && input.validity && input.validity.badInput) {\n    // Half a date: the browser reports '' — put the last value back rather than clear it.\n    input.value = S.committed || '';\n    S.typed = false;\n    syncEmpty();\n    return;\n  }\n  if (input.type !== 'date' && input.value !== '' && !toDay(input.value)) {\n    input.value = S.committed || '';\n    S.typed = false;\n    syncEmpty();\n    return;\n  }\n  commit(input.value);\n}\nfunction syncEmpty() { S.wrap.classList.toggle('ndg-dp--empty', !S.input.value); }\n\n// ── the field ─────────────────────────────────────────────────────────────\nfunction build(el) {\n  if (S.wrap && S.wrap.parentNode) S.wrap.parentNode.removeChild(S.wrap);\n  if (S.pop) close(false);\n  S.host = el;\n  S.typed = false;\n\n  var wrap = document.createElement('div');\n  wrap.className = 'ndg-dp ndg-dp--empty';\n  var input = document.createElement('input');\n  input.type = 'date';\n  input.className = 'ndg-dp-input';\n  if (input.type !== 'date') input.placeholder = 'YYYY-MM-DD';\n  var button = document.createElement('button');\n  button.type = 'button';\n  button.className = 'ndg-dp-button';\n  button.tabIndex = -1;\n  button.setAttribute('aria-label', 'Choose a date');\n  button.innerHTML = '<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/></svg>';\n  wrap.appendChild(input);\n  wrap.appendChild(button);\n  el.appendChild(wrap);\n  S.wrap = wrap;\n  S.input = input;\n  S.button = button;\n\n  input.addEventListener('keydown', function (e) {\n    if (e.key === 'Enter') { e.preventDefault(); S.typed = true; commitTyped(); close(false); return; }\n    if (e.key === 'Escape') { if (S.pop) { e.preventDefault(); close(false); } return; }\n    if (S.enhanced && (e.key === 'F4' || (e.altKey && e.key === 'ArrowDown'))) { e.preventDefault(); open(true); return; }\n    if (e.key !== 'Tab' && e.key !== 'Shift') S.typed = true;\n  });\n  input.addEventListener('input', function () {\n    syncEmpty();\n    if (S.pop) { var d = toDay(input.value); if (d) { S.focus = d; render(); } }\n  });\n  input.addEventListener('change', function () {\n    syncEmpty();\n    // A typed segment waits for Enter or blur; the system picker's choice is a decision.\n    if (!S.typed) commit(input.value);\n  });\n  input.addEventListener('blur', function () {\n    setTimeout(function () {\n      if (S.pop && S.pop.contains(document.activeElement)) return;\n      commitTyped();\n    }, 0);\n  });\n  input.addEventListener('click', function (e) {\n    if (!S.enhanced || S.disabled) return;\n    e.preventDefault();\n    open(false);\n  });\n  button.addEventListener('mousedown', function (e) { e.preventDefault(); });\n  button.addEventListener('click', function () {\n    if (S.disabled) return;\n    if (S.pop) close(false);\n    else { input.focus(); open(false); }\n  });\n\n  // Enhance only where a pointer can aim at a 36px day, where the browser's own calendar button can\n  // be hidden, and only once a calendar has drawn. 🔴 Firefox draws its button inside the field with no\n  // pseudo-element to hide it, so enhancing there showed TWO calendar icons (Richard, 2026-09-16) —\n  // Firefox keeps its own picker instead.\n  S.enhanced = false;\n  var fine = !window.matchMedia || window.matchMedia('(pointer: fine)').matches;\n  // 🔴 An ENGINE check, because nothing can be measured: CSS.supports('selector(::-webkit-…)') is false in\n  // Chrome too, and getComputedStyle cannot read the button's pseudo-element in either engine. Gecko is the\n  // one engine that draws a button no CSS can hide ('mozInnerScreenX' exists only there; Firefox 148 true,\n  // Chrome false, measured 2026-09-16).\n  var gecko = typeof window !== 'undefined' && 'mozInnerScreenX' in window;\n  if (fine && !gecko && input.type === 'date') {\n    try {\n      S.view = today();\n      S.focus = today();\n      renderInto(document.createElement('div'));\n      S.enhanced = true;\n      wrap.classList.add('ndg-dp--enhanced');\n    } catch (err) {\n      console.warn('Date Picker: using the system date picker —', err);\n    }\n  }\n  // A remount draws a new field: it shows the date this one last held, not a blank.\n  if (S.committed !== undefined) { input.value = S.committed; syncEmpty(); }\n}\n\n// ── the popup ─────────────────────────────────────────────────────────────\nfunction open(focusGrid) {\n  if (S.disabled || !S.enhanced) return;\n  try {\n    if (!S.pop) {\n      var sel = toDay(S.input.value);\n      S.focus = sel || today();\n      var pop = document.createElement('div');\n      pop.className = 'ndg-dp-pop';\n      pop.setAttribute('role', 'dialog');\n      pop.setAttribute('aria-label', S.label);\n      pop.style.fontFamily = window.getComputedStyle(S.input).fontFamily;\n      pop.addEventListener('mousedown', function (e) { e.preventDefault(); });\n      pop.addEventListener('keydown', onPopKey);\n      pop.addEventListener('click', onPopClick);\n      pop.addEventListener('focusout', function () {\n        setTimeout(function () {\n          var a = document.activeElement;\n          if (S.pop && !S.pop.contains(a) && a !== S.input) close(false);\n        }, 0);\n      });\n      S.pop = pop;\n      render();\n      document.body.appendChild(pop);\n      S.onOutside = function (e) { if (S.pop && !S.pop.contains(e.target) && !S.wrap.contains(e.target)) close(false); };\n      S.onMove = function () { place(); };\n      document.addEventListener('pointerdown', S.onOutside, true);\n      window.addEventListener('resize', S.onMove);\n      window.addEventListener('scroll', S.onMove, true);\n      place();\n    }\n    if (focusGrid) focusDay();\n  } catch (err) {\n    // The calendar failed where it matters: hand the field back to the system picker.\n    console.warn('Date Picker: the calendar failed, using the system date picker —', err);\n    close(false);\n    S.enhanced = false;\n    S.wrap.classList.remove('ndg-dp--enhanced');\n    try { if (S.input.showPicker) S.input.showPicker(); } catch (e2) {}\n  }\n}\nfunction close(refocus) {\n  var pop = S.pop;\n  if (!pop) return;\n  S.pop = null;\n  document.removeEventListener('pointerdown', S.onOutside, true);\n  window.removeEventListener('resize', S.onMove);\n  window.removeEventListener('scroll', S.onMove, true);\n  if (pop.parentNode) pop.parentNode.removeChild(pop);\n  if (refocus && S.input && document.body.contains(S.input)) S.input.focus();\n}\nfunction place() {\n  var pop = S.pop;\n  if (!pop) return;\n  if (!document.body.contains(S.input)) { close(false); return; }\n  var r = S.input.getBoundingClientRect();\n  var w = pop.offsetWidth, h = pop.offsetHeight, vw = window.innerWidth, vh = window.innerHeight, gap = 4, edge = 8;\n  var top = r.bottom + gap;\n  if (top + h > vh - edge && r.top - gap - h >= edge) top = r.top - gap - h;\n  top = Math.max(edge, Math.min(top, vh - h - edge));\n  var left = Math.max(edge, Math.min(r.left, vw - w - edge));\n  pop.style.top = Math.round(top) + 'px';\n  pop.style.left = Math.round(left) + 'px';\n}\nfunction render() {\n  if (!S.pop) return;\n  var hadFocus = S.pop.contains(document.activeElement);\n  renderInto(S.pop);\n  if (hadFocus) focusDay();\n}\nfunction renderInto(pop) {\n  var focus = S.focus || today();\n  var y = focus.getFullYear(), m = focus.getMonth();\n  var first = new Date(y, m, 1);\n  var start = addDays(first, -((first.getDay() - S.firstDay + 7) % 7));\n  var selected = normal(S.input.value);\n  var now = iso(today());\n  var focusIso = iso(focus);\n  var title = fmt(first, { month: 'long', year: 'numeric' }, y + '-' + pad(m + 1));\n  var html = '<div class=\"ndg-dp-head\">' +\n    '<button type=\"button\" class=\"ndg-dp-nav\" data-nav=\"-1\" aria-label=\"Previous month\">' + chevron('15 18 9 12 15 6') + '</button>' +\n    '<div class=\"ndg-dp-title\" aria-live=\"polite\">' + esc(title) + '</div>' +\n    '<button type=\"button\" class=\"ndg-dp-nav\" data-nav=\"1\" aria-label=\"Next month\">' + chevron('9 18 15 12 9 6') + '</button>' +\n    '</div><div class=\"ndg-dp-grid\" role=\"grid\">';\n  for (var i = 0; i < 7; i++) {\n    var wd = addDays(start, i);\n    html += '<div class=\"ndg-dp-dow\" aria-hidden=\"true\">' + esc(fmt(wd, { weekday: 'short' }, ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][wd.getDay()]).slice(0, 2)) + '</div>';\n  }\n  for (var k = 0; k < 42; k++) {\n    var d = addDays(start, k);\n    var s = iso(d);\n    var cls = 'ndg-dp-day' + (d.getMonth() !== m ? ' is-outside' : '') + (s === now ? ' is-today' : '') + (s === selected ? ' is-selected' : '');\n    html += '<button type=\"button\" role=\"gridcell\" class=\"' + cls + '\" data-day=\"' + s + '\"' +\n      ' tabindex=\"' + (s === focusIso ? '0' : '-1') + '\"' +\n      ' aria-selected=\"' + (s === selected ? 'true' : 'false') + '\"' +\n      (s === now ? ' aria-current=\"date\"' : '') +\n      (inRange(s) ? '' : ' disabled') +\n      ' aria-label=\"' + esc(fmt(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }, s)) + '\">' + d.getDate() + '</button>';\n  }\n  html += '</div><div class=\"ndg-dp-foot\">' +\n    '<button type=\"button\" data-pick=\"today\"' + (inRange(now) ? '' : ' disabled') + '>Today</button>' +\n    '<button type=\"button\" data-pick=\"clear\"' + (selected ? '' : ' disabled') + '>Clear</button></div>';\n  pop.innerHTML = html;\n}\nfunction chevron(points) {\n  return '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"' + points + '\"/></svg>';\n}\nfunction esc(s) { return String(s).replace(/[&<>\"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]; }); }\nfunction focusDay() {\n  if (!S.pop) return;\n  var b = S.pop.querySelector('[data-day=\"' + iso(S.focus) + '\"]');\n  if (b) b.focus();\n}\nfunction pick(s, fromKeyboard) {\n  commit(s);\n  close(fromKeyboard);\n}\nfunction onPopClick(e) {\n  var t = e.target.closest ? e.target.closest('button') : null;\n  if (!t || t.disabled) return;\n  var fromKeyboard = e.detail === 0;\n  if (t.getAttribute('data-nav')) {\n    S.focus = addMonths(S.focus, Number(t.getAttribute('data-nav')));\n    render();\n    return;\n  }\n  if (t.getAttribute('data-day')) { pick(t.getAttribute('data-day'), fromKeyboard); return; }\n  if (t.getAttribute('data-pick') === 'today') { pick(iso(today()), fromKeyboard); return; }\n  if (t.getAttribute('data-pick') === 'clear') pick('', fromKeyboard);\n}\nfunction onPopKey(e) {\n  var onDay = e.target && e.target.getAttribute && e.target.getAttribute('data-day');\n  if (e.key === 'Escape') { e.preventDefault(); close(true); return; }\n  if (!onDay) return;\n  var next = null;\n  if (e.key === 'ArrowLeft') next = addDays(S.focus, -1);\n  else if (e.key === 'ArrowRight') next = addDays(S.focus, 1);\n  else if (e.key === 'ArrowUp') next = addDays(S.focus, -7);\n  else if (e.key === 'ArrowDown') next = addDays(S.focus, 7);\n  else if (e.key === 'PageUp') next = addMonths(S.focus, e.shiftKey ? -12 : -1);\n  else if (e.key === 'PageDown') next = addMonths(S.focus, e.shiftKey ? 12 : 1);\n  else if (e.key === 'Home') next = addDays(S.focus, -((S.focus.getDay() - S.firstDay + 7) % 7));\n  else if (e.key === 'End') next = addDays(S.focus, 6 - ((S.focus.getDay() - S.firstDay + 7) % 7));\n  if (!next) return;\n  e.preventDefault();\n  S.focus = next;\n  renderInto(S.pop);\n  focusDay();\n}"
+      },
+      "ports": [
+        {
+          "name": "in-host",
+          "plug": "input",
+          "type": "*",
+          "displayName": "host",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mounted",
+          "plug": "input",
+          "type": "*",
+          "displayName": "mounted",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-value",
+          "plug": "input",
+          "type": "*",
+          "displayName": "value",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-label",
+          "plug": "input",
+          "type": "*",
+          "displayName": "label",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-min",
+          "plug": "input",
+          "type": "*",
+          "displayName": "min",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-max",
+          "plug": "input",
+          "type": "*",
+          "displayName": "max",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-disabled",
+          "plug": "input",
+          "type": "*",
+          "displayName": "disabled",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-firstDayOfWeek",
+          "plug": "input",
+          "type": "*",
+          "displayName": "firstDayOfWeek",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-value",
+          "plug": "output",
+          "type": "*",
+          "displayName": "value",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-date",
+          "plug": "output",
+          "type": "*",
+          "displayName": "date",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "changed",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "wdpMounts",
+      "type": "JavaScriptFunction",
+      "label": "Count mounts (a remount is a new element to draw into)",
+      "parameters": {
+        "functionScript": "this.mounts = (this.mounts || 0) + 1;\nOutputs.mounts = this.mounts;"
+      },
+      "ports": [
+        {
+          "name": "out-mounts",
+          "plug": "output",
+          "type": "*",
+          "displayName": "mounts",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "wdpRoot"
+  ]
+}

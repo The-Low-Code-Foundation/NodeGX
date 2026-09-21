@@ -14,6 +14,16 @@
           "type": "array"
         },
         {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "detailShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
           "name": "name",
           "plug": "output",
           "type": "string"
@@ -114,12 +124,82 @@
           "type": "string"
         },
         {
-          "name": "shown",
+          "name": "edShown",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "edTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edKinds",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "edName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edSub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edKind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edRate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edSlot",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edRung",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edMove",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edMoveWorth",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edMoveWhen",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edMoveDue",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edMoveStop",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "edSay",
+          "plug": "output",
+          "type": "string"
         }
       ],
-      "x": 470,
+      "x": 530,
       "y": 40
     },
     {
@@ -146,9 +226,89 @@
           "name": "close",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "newProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edSub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edKind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edRate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edSlot",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edRung",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMove",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMoveWorth",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMoveWhen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMoveDue",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMoveStop",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "edSay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edSave",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edCancel",
+          "plug": "input",
+          "type": "signal"
         }
       ],
-      "x": 470,
+      "x": 530,
       "y": 400
     },
     {
@@ -185,6 +345,7 @@
       "parent": "pcScrim",
       "parameters": {
         "cssClassName": "planner-over",
+        "clickBubbling": "never",
         "backgroundColor": "var(--surface)",
         "borderStyle": "solid",
         "borderWidth": "var(--border-1)",
@@ -239,7 +400,8 @@
         "styleCss": "overflow: auto;"
       },
       "children": [
-        "pcEach"
+        "pcEach",
+        "pcNew"
       ],
       "x": 160,
       "y": 280
@@ -255,6 +417,33 @@
       },
       "x": 220,
       "y": 400
+    },
+    {
+      "id": "pcNew",
+      "type": "net.noodl.controls.button",
+      "label": "Start a new project",
+      "parent": "pcList",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "label": "+ New project"
+      },
+      "x": 220,
+      "y": 520
     },
     {
       "id": "pcDetailWrap",
@@ -273,18 +462,47 @@
         "styleCss": "overflow: auto;"
       },
       "children": [
-        "pcDetail"
+        "pcDetailBox",
+        "pcEditor"
       ],
       "x": 160,
-      "y": 520
+      "y": 640
+    },
+    {
+      "id": "pcDetailBox",
+      "type": "Group",
+      "label": "The project as it is",
+      "parent": "pcDetailWrap",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pcDetail"
+      ],
+      "x": 220,
+      "y": 760
     },
     {
       "id": "pcDetail",
       "type": "/Week/Project detail",
       "label": "That project in full",
+      "parent": "pcDetailBox",
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "pcEditor",
+      "type": "/Week/Project editor",
+      "label": "That project as a form",
       "parent": "pcDetailWrap",
       "x": 220,
-      "y": 640
+      "y": 1000
     }
   ],
   "visualRoots": [

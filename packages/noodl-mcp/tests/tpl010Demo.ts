@@ -39,7 +39,11 @@
 import { C, LOAD_PROBLEM_TEXT, PROBLEM_TEXT, signalOnly, TPL010_COMPONENTS, Tpl010Component } from './tpl010Components';
 import { composition } from './tpl010Theme';
 
-export const DEMO_STORAGE_KEY = 'nodegx-planner-demo-v1';
+/**
+ * v2 since R2.4: blocks carry the time logged on them (R22). A browser holding the v1 week reads
+ * fine but would never show a block half done, so the key moves and the new week is seeded.
+ */
+export const DEMO_STORAGE_KEY = 'nodegx-planner-demo-v2';
 export const DEMO_PROBLEM_TEXT = 'That change did not save in this browser. Try again, or reset the demo.';
 export const DEMO_LOAD_PROBLEM_TEXT = 'The example week could not be read from this browser. Reset the demo to start again.';
 export const DEMO_NOTICE =
@@ -399,11 +403,11 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
   ];
 
   var blocks = [];
-  function block(id, date, what, planned, done, actual, isMove) {
+  function block(id, date, what, planned, done, actual, isMove, entries) {
     blocks.push({
       id: 'seed-block-' + blocks.length, projectId: 'seed-' + id, date: date, what: what,
       planned: planned, actual: actual === null ? '' : actual, done: done, isMove: isMove,
-      todoTaskId: '', position: blocks.length + 1, createdAt: stamp, updatedAt: stamp
+      entries: entries || [], todoTaskId: '', position: blocks.length + 1, createdAt: stamp, updatedAt: stamp
     });
   }
 
@@ -438,8 +442,10 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
   // visit decides is which column is today, and therefore how much of it is already logged.
   var week = [
     ['admin', -2, 'Invoice Salon Collective for last month', 0.25, true, null, false],
-    ['bramble', -2, 'Security review, the login flow', 2, true, 2.5, false],
-    ['northline', -2, 'Workshop prep', 1.5, true, null, false],
+    // R22 — two blocks with time logged on them and not done, in the week's first column so they
+    // are behind or on today whichever day the visit is: "1.75 of 2 h", "1 of 1.5 h".
+    ['bramble', -2, 'Security review, the login flow', 2, true, 2.5, false, [[1, 'Login flow, first pass'], [0.75, 'Password reset path']]],
+    ['northline', -2, 'Workshop prep', 1.5, true, null, false, [[0.5, 'Outline and timings'], [0.5, 'Exercises for the afternoon']]],
     ['coaching', -2, 'Draft the mailing-list email', 1.5, true, null, false],
     ['salon', -2, 'Booking bug', 1, true, null, false],
     ['admin', -2, 'Log the day and clear email', 0.5, true, null, false],
@@ -466,7 +472,17 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     var col = b[1] + 2;
     // Behind you it is logged, today is as the story has it, ahead of you it is a plan.
     var done = col < todayCol ? true : col === todayCol ? b[4] : false;
-    block(b[0], cols[col], b[2], b[3], done, done ? b[5] : null, b[6]);
+    var sittings = b[7] && col <= todayCol ? b[7] : null;
+    if (sittings) {
+      var entries = [], sum = 0;
+      for (var e = 0; e < sittings.length; e++) {
+        entries.push({ day: cols[col], hours: sittings[e][0], note: sittings[e][1] });
+        sum += sittings[e][0];
+      }
+      block(b[0], cols[col], b[2], b[3], false, sum, b[6], entries);
+    } else {
+      block(b[0], cols[col], b[2], b[3], done, done ? b[5] : null, b[6]);
+    }
   }
 
   var eom = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);
@@ -480,10 +496,11 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     return { id: 'seed-cash-' + id, date: date, amount: amount, label: label, kind: kind, recurring: recurring, createdAt: stamp, updatedAt: stamp };
   }
   var cashEvents = [
-    cash('partner', key(new Date(monday.getFullYear(), monday.getMonth(), 28)), 1500, 'Partner’s contract', 'in', 'monthly'),
-    cash('invoices', key(eom), 0, 'Invoices go out', 'note', ''),
+    // The kinds the money-event editor writes (R2.4): the seed said 'in' and 'note' before it existed.
+    cash('partner', key(new Date(monday.getFullYear(), monday.getMonth(), 28)), 1500, 'Partner’s contract', 'income', 'monthly'),
+    cash('invoices', key(eom), 0, 'Invoices go out', 'invoice-out', ''),
     cash('household', key(new Date(monday.getFullYear(), monday.getMonth() + 1, 1)), -4500, 'Household costs', 'cost', 'monthly'),
-    cash('due', key(new Date(monday.getFullYear(), monday.getMonth() + 1, 7)), 3400, 'Last month’s invoices due', 'in', '')
+    cash('due', key(new Date(monday.getFullYear(), monday.getMonth() + 1, 7)), 3400, 'Last month’s invoices due', 'invoice-due', '')
   ];
 
   var settings = {

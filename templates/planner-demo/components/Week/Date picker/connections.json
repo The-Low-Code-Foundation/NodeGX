@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1cdf4d3d-b306-5e4d-841b-2b6a2e01cbab",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wdpField",
+      "fromProperty": "this",
+      "toId": "wdpScript",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "wdpField",
+      "fromProperty": "didMount",
+      "toId": "wdpMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wdpMounts",
+      "fromProperty": "out-mounts",
+      "toId": "wdpScript",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Value",
+      "toId": "wdpScript",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Label",
+      "toId": "wdpScript",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Min",
+      "toId": "wdpScript",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Max",
+      "toId": "wdpScript",
+      "toProperty": "in-max"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Disabled",
+      "toId": "wdpScript",
+      "toProperty": "in-disabled"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "First Day Of Week",
+      "toId": "wdpScript",
+      "toProperty": "in-firstDayOfWeek"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Width",
+      "toId": "wdpRoot",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Align X",
+      "toId": "wdpRoot",
+      "toProperty": "alignX"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Align Y",
+      "toId": "wdpRoot",
+      "toProperty": "alignY"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Margin Top",
+      "toId": "wdpRoot",
+      "toProperty": "marginTop"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Margin Right",
+      "toId": "wdpRoot",
+      "toProperty": "marginRight"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Margin Bottom",
+      "toId": "wdpRoot",
+      "toProperty": "marginBottom"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Margin Left",
+      "toId": "wdpRoot",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Position",
+      "toId": "wdpRoot",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Label",
+      "toId": "wdpLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wdpIn",
+      "fromProperty": "Show Label",
+      "toId": "wdpLabel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wdpScript",
+      "fromProperty": "out-value",
+      "toId": "wdpOut",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "wdpScript",
+      "fromProperty": "out-date",
+      "toId": "wdpOut",
+      "toProperty": "Date"
+    },
+    {
+      "fromId": "wdpScript",
+      "fromProperty": "out-changed",
+      "toId": "wdpOut",
+      "toProperty": "Changed"
+    }
+  ]
+}

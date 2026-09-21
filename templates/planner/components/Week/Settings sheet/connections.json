@@ -130,6 +130,120 @@
       "toProperty": "planMonth"
     },
     {
+      "fromId": "stIn",
+      "fromProperty": "cashRows",
+      "toId": "stCash",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashFormShown",
+      "toId": "stCash",
+      "toProperty": "formShown"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashFormTitle",
+      "toId": "stCash",
+      "toProperty": "formTitle"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashKinds",
+      "toId": "stCash",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashDate",
+      "toId": "stCash",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashAmount",
+      "toId": "stCash",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashLabel",
+      "toId": "stCash",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashKind",
+      "toId": "stCash",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "cashMonthly",
+      "toId": "stCash",
+      "toProperty": "monthly"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "pick",
+      "toId": "stOut",
+      "toProperty": "cashPick"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "pickId",
+      "toId": "stOut",
+      "toProperty": "cashPickId"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "add",
+      "toId": "stOut",
+      "toProperty": "cashAdd"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "date",
+      "toId": "stOut",
+      "toProperty": "cashDate"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "amount",
+      "toId": "stOut",
+      "toProperty": "cashAmount"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "label",
+      "toId": "stOut",
+      "toProperty": "cashLabel"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "kind",
+      "toId": "stOut",
+      "toProperty": "cashKind"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "monthly",
+      "toId": "stOut",
+      "toProperty": "cashMonthly"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "save",
+      "toId": "stOut",
+      "toProperty": "cashSave"
+    },
+    {
+      "fromId": "stCash",
+      "fromProperty": "cancel",
+      "toId": "stOut",
+      "toProperty": "cashCancel"
+    },
+    {
       "fromId": "stClose",
       "fromProperty": "onClick",
       "toId": "stOut",

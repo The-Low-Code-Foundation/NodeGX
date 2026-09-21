@@ -14,7 +14,7 @@ Every component here is *computed* from the template when `npm run template:plan
 demo can never be older than the template. The transform lives in
 `packages/noodl-mcp/tests/tpl010Demo.ts` and changes exactly this:
 
-- **`Logic/Planner data`** reads the week from this browser's local storage (`nodegx-planner-demo-v1`),
+- **`Logic/Planner data`** reads the week from this browser's local storage (`nodegx-planner-demo-v2`),
   and puts the example week there the first time it finds none. It keeps the template’s own week
   window and arrows, so `‹ ›` moves through the weeks the way the app does.
 - **Every command writes to that same store.** Each record node became one Function with the same

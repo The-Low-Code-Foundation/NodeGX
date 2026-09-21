@@ -59,6 +59,11 @@
           "type": "string"
         },
         {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "blocks",
           "plug": "output",
           "type": "array"
@@ -116,6 +121,16 @@
           "name": "done",
           "plug": "input",
           "type": "boolean"
+        },
+        {
+          "name": "addBlock",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "dayKey",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 410,
@@ -173,7 +188,8 @@
         "paddingBottom": "var(--space-2)"
       },
       "children": [
-        "dcEach"
+        "dcEach",
+        "dcAdd"
       ],
       "x": 100,
       "y": 280
@@ -189,6 +205,33 @@
       },
       "x": 160,
       "y": 400
+    },
+    {
+      "id": "dcAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Put a block in this day",
+      "parent": "dcBody",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-xs)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "label": "+ Add"
+      },
+      "x": 160,
+      "y": 520
     }
   ],
   "visualRoots": [

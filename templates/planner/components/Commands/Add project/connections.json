@@ -29,6 +29,54 @@
     },
     {
       "fromId": "AddprojectIn",
+      "fromProperty": "slot",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-slot"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "rung",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-rung"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "move",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveWorth",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveWorth"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveWhen",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveWhen"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveDue",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveDue"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveStop",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveStop"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "say",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "AddprojectIn",
       "fromProperty": "do",
       "toId": "AddprojectGuard",
       "toProperty": "run"
@@ -59,43 +107,49 @@
     },
     {
       "fromId": "AddprojectGuard",
-      "fromProperty": "out-empty",
+      "fromProperty": "out-slot",
       "toId": "AddprojectWrite",
-      "toProperty": "prop-move"
+      "toProperty": "prop-slot"
     },
     {
       "fromId": "AddprojectGuard",
-      "fromProperty": "out-empty",
-      "toId": "AddprojectWrite",
-      "toProperty": "prop-moveWorth"
-    },
-    {
-      "fromId": "AddprojectGuard",
-      "fromProperty": "out-empty",
-      "toId": "AddprojectWrite",
-      "toProperty": "prop-moveWhen"
-    },
-    {
-      "fromId": "AddprojectGuard",
-      "fromProperty": "out-empty",
-      "toId": "AddprojectWrite",
-      "toProperty": "prop-moveDue"
-    },
-    {
-      "fromId": "AddprojectGuard",
-      "fromProperty": "out-no",
-      "toId": "AddprojectWrite",
-      "toProperty": "prop-moveStop"
-    },
-    {
-      "fromId": "AddprojectGuard",
-      "fromProperty": "out-empty",
+      "fromProperty": "out-rung",
       "toId": "AddprojectWrite",
       "toProperty": "prop-rung"
     },
     {
       "fromId": "AddprojectGuard",
-      "fromProperty": "out-empty",
+      "fromProperty": "out-move",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-move"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveWorth",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveWorth"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveWhen",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveWhen"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveDue",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveDue"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveStop",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveStop"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-say",
       "toId": "AddprojectWrite",
       "toProperty": "prop-say"
     },
@@ -122,6 +176,12 @@
       "fromProperty": "failure",
       "toId": "AddprojectProblem",
       "toProperty": "do"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "id",
+      "toId": "AddprojectOut",
+      "toProperty": "projectId"
     }
   ]
 }

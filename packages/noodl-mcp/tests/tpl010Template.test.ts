@@ -263,7 +263,7 @@ describe('§3 the rules the week depends on', () => {
    * block has to be pressable, and the sheet has to be filled from the block rather than from
    * whatever the last press left in it.
    */
-  it('🔴 AC4 — a block’s words and its hours are buttons that open the log sheet', () => {
+  it('🔴 AC4 — a block’s words and its hours are buttons that open the block sheet', () => {
     const blk = component(built, C.block);
     const buttons = nodesOf(blk).filter((n) => n.type === 'net.noodl.controls.button');
     expect(buttons.map((n) => n.id).sort()).toEqual(['bkHours', 'bkTick', 'bkWhat', 'bkWho'].sort());
@@ -274,18 +274,99 @@ describe('§3 the rules the week depends on', () => {
     expect(wires.filter((w) => w.toProperty === 'openLog').map((w) => w.fromId).sort()).toEqual(['bkHours', 'bkWhat']);
   });
 
-  it('🔴 AC4 — the log sheet’s two boxes are filled from the block, and read back from the box', () => {
-    const wires = connectionsOf(built, C.logSheet);
+  it('🔴 AC4 / R2.4 — every box on the week is filled through startValue and read back from onTextChanged', () => {
     // 🔴 `startValue` in, `onTextChanged` out. `text` is the box's OUTPUT: a value wired into
     // it lands nowhere, and reading `startValue` back gives what was PUT there, not what was
     // typed. Setting `startValue` while the box is unfocused re-publishes `onTextChanged`,
-    // which is the only reason the sheet can be reused for a second block without carrying
-    // the first one's words into it.
-    for (const [id, field] of [['lgWhat', 'what'], ['lgActual', 'actual']] as const) {
-      expect(wires.some((w) => w.toId === id && w.toProperty === 'startValue' && w.fromProperty === field)).toBe(true);
-      expect(wires.some((w) => w.fromId === id && w.fromProperty === 'onTextChanged' && w.toProperty === field)).toBe(true);
-      expect(wires.some((w) => w.toId === id && w.toProperty === 'text')).toBe(false);
+    // which is the only reason a sheet can be reused for a second block without carrying
+    // the first one's words into it. R2.4's three editors brought fifteen more boxes; this
+    // walks every one of them rather than a list that has to be remembered.
+    const boxes: string[] = [];
+    const wrong: string[] = [];
+    for (const c of componentsOf(built).filter((x) => x.name.startsWith('/Week/'))) {
+      const wires = connectionsOf(built, c.name);
+      for (const n of nodesOf(c).filter((x) => x.type === 'net.noodl.controls.textinput')) {
+        boxes.push(`${c.name} ${n.id}`);
+        if (!wires.some((w) => w.toId === n.id && w.toProperty === 'startValue')) wrong.push(`${c.name} ${n.id} has no startValue`);
+        if (!wires.some((w) => w.fromId === n.id && w.fromProperty === 'onTextChanged')) wrong.push(`${c.name} ${n.id} is never read`);
+        if (wires.some((w) => w.toId === n.id && w.toProperty === 'text')) wrong.push(`${c.name} ${n.id} is written through text`);
+      }
     }
+    expect(wrong).toEqual([]);
+    expect(boxes.length).toBeGreaterThanOrEqual(8 + 4 + 9 + 2);
+  });
+
+  /**
+   * 🔴 R2.4-8 — the defect R2.4 exists for, as a permanent assertion. `Add block`, `Add project`,
+   * `Edit project` and `Add cash event` were placed on the week with nothing wired into `do`,
+   * so in the hosted app a person could write their settings and a month plan and nothing else.
+   */
+  it('🔴 R2.4-8 — every command placed on the week is pressed by something', () => {
+    const page = component(built, C.pageWeek);
+    const wires = connectionsOf(built, C.pageWeek);
+    const commands = nodesOf(page).filter((n) => n.type.startsWith('/Commands/'));
+    expect(commands.length).toBeGreaterThanOrEqual(12);
+    const unpressed = commands.filter((n) => !wires.some((w) => w.toId === n.id && w.toProperty === 'do')).map((n) => `${n.id} ${n.type}`);
+    expect(unpressed).toEqual([]);
+  });
+
+  /**
+   * 🔴 Found by deploying R2.4: the project editor's row wrote its outputs as `Outputs[name]`
+   * in a loop. The door declares a Function's ports by reading the script for `Outputs.<name>`,
+   * so eight wires into the editor were kept in the file and went nowhere — every gate passed,
+   * and only the deploy's wire check said so.
+   */
+  it('🔴 every wire out of a Function names an output its script actually writes', () => {
+    const missing: string[] = [];
+    for (const c of componentsOf(built)) {
+      const nodes = new Map(nodesOf(c).map((n) => [n.id, n]));
+      for (const w of connectionsOf(built, c.name)) {
+        const n = nodes.get(w.fromId);
+        if (!n || n.type !== 'JavaScriptFunction' || !w.fromProperty.startsWith('out-')) continue;
+        const name = w.fromProperty.slice(4);
+        const src = String((n.parameters as { functionScript?: string })?.functionScript ?? '');
+        if (!new RegExp(`Outputs\\.${name}\\b`).test(src)) missing.push(`${c.name} ${n.id}.${name}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  /**
+   * 🔴 Driven, R2.4: a Text Input compares an arriving start value with the last one it was
+   * sent, so a sheet opening with '' on a box last sent '' kept the note typed and abandoned
+   * last time. Every box in the three editors is cleared as its sheet closes.
+   */
+  it('🔴 R2.4 — every box in the three editors is cleared when its sheet closes', () => {
+    const unCleared: string[] = [];
+    for (const name of [C.blockSheet, C.projectEditor, C.cashEditor]) {
+      const wires = connectionsOf(built, name);
+      for (const n of nodesOf(component(built, name)).filter((x) => x.type === 'net.noodl.controls.textinput')) {
+        if (!wires.some((w) => w.toId === n.id && w.toProperty === 'clear' && w.fromProperty === 'out-closed')) unCleared.push(`${name} ${n.id}`);
+      }
+    }
+    expect(unCleared).toEqual([]);
+  });
+
+  /**
+   * 🔴 Driven, R2.4: the scrim's close heard every click inside the card that was not a button
+   * or a box — a sentence, a gap, the words beside a checkbox — and shut the sheet unsaved.
+   */
+  it('🔴 a click inside a card or a sheet stays inside it', () => {
+    const panels: Array<[string, string]> = [
+      [C.projectCard, 'pcCard'], [C.shutdownDrawer, 'sdPanel'], [C.settingsSheet, 'stCard'], [C.blockSheet, 'bsCard']
+    ];
+    for (const [name, id] of panels) {
+      const node = nodesOf(component(built, name)).find((n) => n.id === id);
+      expect(`${name} ${id} ${(node?.parameters as Record<string, unknown>)?.clickBubbling}`).toBe(`${name} ${id} never`);
+    }
+  });
+
+  /** R16a — the tick opens the sheet; nothing logs a block on one press any more. */
+  it('🔴 R16a — the tick opens the block sheet and writes nothing', () => {
+    const wires = connectionsOf(built, C.pageWeek);
+    const fromTick = wires.filter((w) => w.fromId === 'twDayEach' && w.fromProperty === 'itemOutputSignal-toggle').map((w) => `${w.toId}.${w.toProperty}`);
+    expect(fromTick.sort()).toEqual(['twClearNewDay.do', 'twModeTick.do', 'twSetLog.do']);
+    expect(nodesOf(component(built, C.pageWeek)).some((n) => n.type === '/Commands/Log block' || n.type === '/Commands/Unlog block')).toBe(false);
   });
 
   /**
@@ -465,31 +546,105 @@ describe('§4 the arithmetic, run rather than read', () => {
     expect(rows.some((r) => r.low === true)).toBe(false);
   });
 
-  /** AC4, run: what the sheet writes for each of the three things a person can do in it. */
-  it('🔴 AC4 — Save block writes the words, and an empty hours box still means “as long as it was meant to”', () => {
+  /** R23, run: what the block sheet writes about the block itself. */
+  it('R2.4-6 — Save block writes the project, the words, the hours and the day, and refuses a block that is not one', () => {
     const guard = scriptOf(built, C.saveBlock, 'SaveblockGuard');
+    const moved = run(guard, { blockId: 'b1', projectId: 'p-build', what: '  Security review  ', planned: 1.3, date: '2026-09-24' });
+    expect(moved.signals).toEqual(['go']);
+    expect(moved.outputs).toEqual({ projectId: 'p-build', what: 'Security review', planned: 1.25, date: '2026-09-24' });
+    // A block with no words, no project, no day or no hours is not a block. Nothing is written at all.
+    const ok = { blockId: 'b1', projectId: 'p-earn', what: 'Work', planned: 1, date: '2026-09-24' };
+    for (const bad of [{ what: '   ' }, { blockId: '' }, { projectId: '' }, { date: 'Thursday' }, { planned: 0 }]) {
+      expect(run(guard, { ...ok, ...bad }).signals).toEqual([]);
+    }
+  });
 
-    const logged = run(guard, { blockId: 'b1', what: '  Security review  ', actual: 3.5, logged: true });
-    expect(logged.signals).toEqual(['go']);
-    expect(logged.outputs.what).toBe('Security review');
-    expect(logged.outputs.done).toBe(true);
-    expect(logged.outputs.actual).toBe(3.5);
+  /**
+   * R2.4-4 and R2.4-8 — *Add time* three ways. The entries are the proof of work; `actual` is
+   * their sum; *Done* is its own decision and is off unless it is ticked.
+   */
+  it('🔴 R2.4-4 — Add time: no entries, one entry, and one entry with Done', () => {
+    const guard = scriptOf(built, C.addTime, 'AddtimeGuard');
 
-    // 🔴 The whole point: nothing typed in the hours box writes '' and NOT nought. hoursOf
-    // reads an empty actual as the plan, and a measured-looking number nobody measured is the
-    // lie the envelopes would then be built on.
-    const noHours = run(guard, { blockId: 'b1', what: 'Security review', actual: '', logged: true });
-    expect(noHours.outputs.actual).toBe('');
-    expect(noHours.outputs.done).toBe(true);
+    // No entries yet: half an hour with a note is logged, and the block stays open.
+    const first = run(guard, { blockId: 'b1', entries: [], actual: '', hours: 0.5, note: ' Login flow ', day: '2026-09-23', logged: false });
+    expect(first.signals).toEqual(['go']);
+    expect(first.outputs).toEqual({ entries: [{ day: '2026-09-23', hours: 0.5, note: 'Login flow' }], actual: 0.5, done: false });
 
-    const putBack = run(guard, { blockId: 'b1', what: 'Security review', actual: 3.5, logged: false });
-    expect(putBack.outputs.done).toBe(false);
-    expect(putBack.outputs.actual).toBe('');
+    // One entry already: a second half hour with Done ticked appends, sums and closes it.
+    const second = run(guard, { blockId: 'b1', entries: first.outputs.entries, actual: 0.5, hours: 0.5, note: 'Sessions', day: '2026-09-24', logged: true });
+    expect(second.outputs.entries).toEqual([
+      { day: '2026-09-23', hours: 0.5, note: 'Login flow' },
+      { day: '2026-09-24', hours: 0.5, note: 'Sessions' }
+    ]);
+    expect(second.outputs.actual).toBe(1);
+    expect(second.outputs.done).toBe(true);
 
-    // A block with no words is not a block, and blanking the field would erase the line the
-    // week draws. Nothing is written at all.
-    expect(run(guard, { blockId: 'b1', what: '   ', actual: 2, logged: true }).signals).toEqual([]);
-    expect(run(guard, { blockId: '', what: 'Work', actual: 2, logged: true }).signals).toEqual([]);
+    // 🔴 Done with no hours and no entries still means "as long as it was meant to": '' and
+    // NOT nought. A block logged before R22 keeps the hours it was logged at.
+    expect(run(guard, { blockId: 'b1', entries: [], actual: '', hours: '', note: '', day: '2026-09-24', logged: true }).outputs.actual).toBe('');
+    expect(run(guard, { blockId: 'b1', entries: [], actual: 2.5, hours: '', note: '', day: '2026-09-24', logged: true }).outputs.actual).toBe(2.5);
+    // Unticking Done opens the block again; the time already logged stays.
+    const reopened = run(guard, { blockId: 'b1', entries: second.outputs.entries, actual: 1, hours: '', note: '', day: '2026-09-24', logged: false });
+    expect(reopened.outputs.done).toBe(false);
+    expect(reopened.outputs.actual).toBe(1);
+    expect(run(guard, { blockId: '', entries: [], actual: '', hours: 1, note: '', day: '2026-09-24', logged: true }).signals).toEqual([]);
+  });
+
+  it('🔴 R2.4-4 — an open block with time on it spends that time, and reads “0.5 of 1 h” in its day', () => {
+    const open = { ...block(MONDAY, 'p-earn', 1, false), entries: [{ day: MONDAY, hours: 0.5, note: 'Login flow' }], actual: 0.5 };
+    const env = run(ENVELOPES(), { projects: PROJECTS, blocks: [open], monthPlans: [], settings, weekStart: MONDAY });
+    expect(env.outputs.billableUsed).toBe(0.5);
+    const days = run(scriptOf(built, C.dayColumns, 'dlWork'), { projects: PROJECTS, blocks: [open], weekStart: MONDAY, focusHours: 6, newBlockId: '' });
+    const monday = (days.outputs.columns as Array<Record<string, unknown>>)[0];
+    expect((monday.blocks as Array<Record<string, string>>)[0].hoursText).toBe('0.5 of 1 h');
+    // The day still holds the whole hour for it: the ceiling is a plan, and the plan is an hour.
+    expect(monday.focusText).toBe('1 / 6 h');
+    expect(monday.key).toBe(MONDAY);
+  });
+
+  /** R16a and R2.4-5, run against the page's own Function. */
+  it('🔴 R2.4-5 — the tick opens the sheet with Done on and what is left of the plan; the words open it with Done off', () => {
+    const row = scriptOf(built, C.pageWeek, 'twSheetRow');
+    const b = { ...block(MONDAY, 'p-earn', 1.5, false), entries: [{ day: MONDAY, hours: 0.5, note: 'Login flow' }], actual: 0.5 };
+    const ticked = run(row, { id: b.id, newDay: '', mode: 'tick', blocks: [b], projects: PROJECTS }).outputs;
+    expect([ticked.shown, ticked.done, ticked.hours, ticked.timeShown]).toEqual([true, true, '1', true]);
+    expect(ticked.loggedLine).toBe('0.5 of 1.5 h logged. It stays open until Done is ticked.');
+    expect(ticked.entries).toEqual([{ dayText: 'Mon 21 Sep', hoursText: '0.5 h', note: 'Login flow' }]);
+    const words = run(row, { id: b.id, newDay: '', mode: '', blocks: [b], projects: PROJECTS }).outputs;
+    expect([words.done, words.hours]).toEqual([false, '']);
+    const closed = run(row, { id: '', newDay: '', mode: '', blocks: [b], projects: PROJECTS }).outputs;
+    expect(closed.shown).toBe(false);
+    // The + on a day: a new block on that day, with no time section.
+    const fresh = run(row, { id: '', newDay: '2026-09-24', mode: '', blocks: [b], projects: PROJECTS }).outputs;
+    expect([fresh.shown, fresh.isNew, fresh.timeShown, fresh.date, fresh.title]).toEqual([true, true, false, '2026-09-24', 'New block · Thursday 24 Sep']);
+    expect((fresh.projects as unknown[]).length).toBe(PROJECTS.length);
+  });
+
+  it('R2.4-1 / R2.4-2 — a project is born with its move, and editing one writes every field it shows', () => {
+    const add = run(scriptOf(built, C.addProject, 'AddprojectGuard'), {
+      name: ' Harbour Books ', sub: 'New retainer', kind: 'earning', rate: 75, slot: '3 of 3', rung: '',
+      move: 'Send the proposal', moveWorth: '+€600 / mo', moveWhen: 'Friday', moveDue: '2026-09-25', moveStop: false, say: ''
+    });
+    expect(add.signals).toEqual(['go']);
+    expect(add.outputs).toMatchObject({ name: 'Harbour Books', kind: 'earning', rate: 75, move: 'Send the proposal', moveDue: '2026-09-25', moveStop: false });
+    const edit = run(scriptOf(built, C.editProject, 'EditprojecGuard'), {
+      projectId: 'p-earn', name: 'Bramble & Co', sub: 'Retainer', kind: 'nonsense', rate: '', slot: '', rung: '',
+      move: 'Offer the testing add-on', moveWorth: '', moveWhen: '', moveDue: 'Friday', moveStop: true, say: ''
+    });
+    expect(edit.outputs).toMatchObject({ kind: 'earning', rate: 0, move: 'Offer the testing add-on', moveDue: '', moveStop: true });
+    expect(run(scriptOf(built, C.editProject, 'EditprojecGuard'), { projectId: '', name: 'X' }).signals).toEqual([]);
+  });
+
+  it('R2.4-7 — a money event is a cost, money in or a marker whichever sign was typed, and the old spellings still read', () => {
+    const add = scriptOf(built, C.addCashEvent, 'AddcasheveGuard');
+    const base = { date: '2026-10-05', label: 'Accountant', monthly: false };
+    expect(run(add, { ...base, amount: 300, kind: 'cost' }).outputs).toMatchObject({ amount: -300, kind: 'cost', recurring: '' });
+    expect(run(add, { ...base, amount: -900, kind: 'income', monthly: true }).outputs).toMatchObject({ amount: 900, recurring: 'monthly' });
+    expect(run(add, { ...base, amount: 1500, kind: 'in' }).outputs.kind).toBe('income');
+    const edit = scriptOf(built, C.editCashEvent, 'EditcashevGuard');
+    expect(run(edit, { ...base, cashId: 'c1', amount: 4600, kind: 'cost' }).outputs).toMatchObject({ amount: -4600 });
+    expect(run(edit, { ...base, cashId: '', amount: 1, kind: 'cost' }).signals).toEqual([]);
   });
 
   /**

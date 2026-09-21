@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "26c4c5f7-544d-54eb-863f-341c44927890",
+  "name": "Add time",
+  "path": "/Commands/Add time",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Logs a sitting against a block — how long, and what you did — and says whether the block is now done."
+}

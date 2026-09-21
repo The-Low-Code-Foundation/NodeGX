@@ -7,5 +7,5 @@
   "created": "2026-09-20T00:00:00.000Z",
   "modified": "2026-09-20T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "Saves what a block of time came to: what happened in it, the hours it really took, and whether it is done."
+  "description": "Saves what a block is: which project, what it is, the hours it is planned at, and which day."
 }

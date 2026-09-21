@@ -1,0 +1,993 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eee9b460-b683-58c7-85fb-dbe19f333e10",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "peIn",
+      "type": "Component Inputs",
+      "label": "The project as it is",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kinds",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "slot",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rung",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveWorth",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveWhen",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveDue",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveStop",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "say",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "peOut",
+      "type": "Component Outputs",
+      "label": "The project as it should be",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "slot",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rung",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moveWorth",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moveWhen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moveDue",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moveStop",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "say",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "peRoot",
+      "type": "Group",
+      "label": "Project editor",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "peTop",
+        "peName",
+        "peSub",
+        "peKindRow",
+        "peSlotRow",
+        "peMoveBox",
+        "peSay",
+        "peButtons"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "peTop",
+      "type": "Group",
+      "label": "Title and close",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "peTitle",
+        "peClose"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "peTitle",
+      "type": "Text",
+      "label": "What this form is",
+      "parent": "peTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentSize",
+        "as": "h2"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "peClose",
+      "type": "net.noodl.controls.button",
+      "label": "Stop editing",
+      "parent": "peTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "peName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "peRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Name",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "peSub",
+      "type": "net.noodl.controls.textinput",
+      "label": "One line about it",
+      "parent": "peRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "One line about it",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "peKindRow",
+      "type": "Group",
+      "label": "Kind and rate",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "peKindBox",
+        "peRateBox"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "peKindBox",
+      "type": "Group",
+      "label": "What kind of work",
+      "parent": "peKindRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 60,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peKind"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "peKind",
+      "type": "net.noodl.controls.options",
+      "label": "What kind of work",
+      "parent": "peKindBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick one",
+        "useLabel": true,
+        "label": "What kind of work",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "peRateBox",
+      "type": "Group",
+      "label": "Rate",
+      "parent": "peKindRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 40,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peRate"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "peRate",
+      "type": "net.noodl.controls.textinput",
+      "label": "Rate, per hour",
+      "parent": "peRateBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Rate, per hour",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "peSlotRow",
+      "type": "Group",
+      "label": "Slot and rung",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "peSlotBox",
+        "peRungBox"
+      ],
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "peSlotBox",
+      "type": "Group",
+      "label": "Slot",
+      "parent": "peSlotRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peSlot"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "peRungBox",
+      "type": "Group",
+      "label": "Rung",
+      "parent": "peSlotRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peRung"
+      ],
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "peSlot",
+      "type": "net.noodl.controls.textinput",
+      "label": "Slot",
+      "parent": "peSlotBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Slot",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "peRung",
+      "type": "net.noodl.controls.textinput",
+      "label": "Rung",
+      "parent": "peRungBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Rung",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "peMoveBox",
+      "type": "Group",
+      "label": "Its next move",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "peMoveLabel",
+        "peMove",
+        "peMoveMeta",
+        "peDue",
+        "peStop"
+      ],
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "peMoveLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "peMoveBox",
+      "parameters": {
+        "text": "Next move",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "peMove",
+      "type": "net.noodl.controls.textinput",
+      "label": "The move",
+      "parent": "peMoveBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "The move",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "peMoveMeta",
+      "type": "Group",
+      "label": "Worth and when",
+      "parent": "peMoveBox",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "peWorthBox",
+        "peWhenBox"
+      ],
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "peWorthBox",
+      "type": "Group",
+      "label": "Worth",
+      "parent": "peMoveMeta",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peWorth"
+      ],
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "peWhenBox",
+      "type": "Group",
+      "label": "When",
+      "parent": "peMoveMeta",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peWhen"
+      ],
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "peWorth",
+      "type": "net.noodl.controls.textinput",
+      "label": "What it is worth",
+      "parent": "peWorthBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "What it is worth",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "peWhen",
+      "type": "net.noodl.controls.textinput",
+      "label": "When, in words",
+      "parent": "peWhenBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "When, in words",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "peDue",
+      "type": "/Week/Date picker",
+      "label": "Due by",
+      "parent": "peMoveBox",
+      "parameters": {
+        "Label": "Due by",
+        "Show Label": true
+      },
+      "x": 160,
+      "y": 2920
+    },
+    {
+      "id": "peStop",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Fixes only",
+      "parent": "peMoveBox",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Fixes only — keep it off the moves strip",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 3040
+    },
+    {
+      "id": "peOpened",
+      "type": "JavaScriptFunction",
+      "label": "Clear the boxes on close; tick Fixes only to match the project",
+      "parameters": {
+        "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\nvar moveStopWant = shown ? Inputs.moveStop === true : null;\nif (moveStopWant !== null && (!this.wasShown || this.moveStopLast !== moveStopWant)) { if (moveStopWant) Outputs.moveStopOn(); else Outputs.moveStopOff(); }\nthis.moveStopLast = moveStopWant;\nthis.wasShown = shown;"
+      },
+      "x": 530,
+      "y": 3040,
+      "ports": [
+        {
+          "name": "in-shown",
+          "displayName": "shown",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-moveStop",
+          "displayName": "moveStop",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-closed",
+          "displayName": "closed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moveStopOn",
+          "displayName": "moveStopOn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moveStopOff",
+          "displayName": "moveStopOff",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "peSay",
+      "type": "net.noodl.controls.textinput",
+      "label": "What to remember about it",
+      "parent": "peRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "What to remember about it",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 3160
+    },
+    {
+      "id": "peButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "peSave",
+        "peCancel"
+      ],
+      "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "peSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save the project",
+      "parent": "peButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "peCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Stop editing without saving",
+      "parent": "peButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 3520
+    }
+  ],
+  "visualRoots": [
+    "peRoot"
+  ]
+}

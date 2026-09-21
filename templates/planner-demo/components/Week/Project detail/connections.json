@@ -130,6 +130,12 @@
       "toProperty": "plan"
     },
     {
+      "fromId": "pdEdit",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "edit"
+    },
+    {
       "fromId": "pdClose",
       "fromProperty": "onClick",
       "toId": "pdOut",

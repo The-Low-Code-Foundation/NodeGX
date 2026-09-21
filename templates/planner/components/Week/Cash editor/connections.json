@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f443460a-d654-5e35-88ef-7442a7debd91",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "rows",
+      "toId": "ceEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ceEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "ceOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "ceEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "ceOut",
+      "toProperty": "pickId"
+    },
+    {
+      "fromId": "ceAdd",
+      "fromProperty": "onClick",
+      "toId": "ceOut",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "formShown",
+      "toId": "ceForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "formTitle",
+      "toId": "ceFormTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "label",
+      "toId": "ceWhat",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ceWhat",
+      "fromProperty": "onTextChanged",
+      "toId": "ceOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "amount",
+      "toId": "ceAmount-2",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ceAmount-2",
+      "fromProperty": "onTextChanged",
+      "toId": "ceOut",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "date",
+      "toId": "ceDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "ceDate",
+      "fromProperty": "Value",
+      "toId": "ceOut",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "kinds",
+      "toId": "ceKind",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "kind",
+      "toId": "ceKind",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ceKind",
+      "fromProperty": "value",
+      "toId": "ceOut",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "formShown",
+      "toId": "ceOpened",
+      "toProperty": "in-formShown"
+    },
+    {
+      "fromId": "ceIn-2",
+      "fromProperty": "monthly",
+      "toId": "ceOpened",
+      "toProperty": "in-monthly"
+    },
+    {
+      "fromId": "ceOpened",
+      "fromProperty": "out-monthlyOn",
+      "toId": "ceMonthly",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "ceOpened",
+      "fromProperty": "out-monthlyOff",
+      "toId": "ceMonthly",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "ceOpened",
+      "fromProperty": "out-closed",
+      "toId": "ceWhat",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "ceOpened",
+      "fromProperty": "out-closed",
+      "toId": "ceAmount-2",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "ceMonthly",
+      "fromProperty": "checked",
+      "toId": "ceOut",
+      "toProperty": "monthly"
+    },
+    {
+      "fromId": "ceSave",
+      "fromProperty": "onClick",
+      "toId": "ceOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "ceCancel",
+      "fromProperty": "onClick",
+      "toId": "ceOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

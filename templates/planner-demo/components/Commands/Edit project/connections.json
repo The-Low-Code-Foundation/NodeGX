@@ -35,6 +35,18 @@
     },
     {
       "fromId": "EditprojecIn",
+      "fromProperty": "slot",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-slot"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "rung",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-rung"
+    },
+    {
+      "fromId": "EditprojecIn",
       "fromProperty": "move",
       "toId": "EditprojecGuard",
       "toProperty": "in-move"
@@ -98,6 +110,18 @@
       "fromProperty": "out-rate",
       "toId": "EditprojecWrite",
       "toProperty": "in-rate"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-slot",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-slot"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-rung",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-rung"
     },
     {
       "fromId": "EditprojecGuard",

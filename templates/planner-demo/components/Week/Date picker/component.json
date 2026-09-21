@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1cdf4d3d-b306-5e4d-841b-2b6a2e01cbab",
+  "name": "Date picker",
+  "path": "/Week/Date picker",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A date field with a calendar. Value is YYYY-MM-DD; Changed fires when a person picks, types or clears a date. On a phone or tablet the device’s own date picker opens; on a computer a keyboard-friendly calendar drops down, and if it cannot draw, the browser’s own date picker is used instead."
+}

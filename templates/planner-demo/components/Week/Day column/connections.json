@@ -116,6 +116,18 @@
       "fromProperty": "itemOutput-done",
       "toId": "dcOut",
       "toProperty": "done"
+    },
+    {
+      "fromId": "dcIn",
+      "fromProperty": "key",
+      "toId": "dcOut",
+      "toProperty": "dayKey"
+    },
+    {
+      "fromId": "dcAdd",
+      "fromProperty": "onClick",
+      "toId": "dcOut",
+      "toProperty": "addBlock"
     }
   ]
 }

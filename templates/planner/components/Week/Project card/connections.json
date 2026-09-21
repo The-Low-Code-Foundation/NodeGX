@@ -29,6 +29,12 @@
     },
     {
       "fromId": "pcIn",
+      "fromProperty": "detailShown",
+      "toId": "pcDetailBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
       "fromProperty": "name",
       "toId": "pcDetail",
       "toProperty": "name"
@@ -155,9 +161,195 @@
     },
     {
       "fromId": "pcDetail",
+      "fromProperty": "edit",
+      "toId": "pcOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "pcDetail",
       "fromProperty": "close",
       "toId": "pcOut",
       "toProperty": "close"
+    },
+    {
+      "fromId": "pcNew",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "newProject"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edShown",
+      "toId": "pcEditor",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edTitle",
+      "toId": "pcEditor",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edKinds",
+      "toId": "pcEditor",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edName",
+      "toId": "pcEditor",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edSub",
+      "toId": "pcEditor",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edKind",
+      "toId": "pcEditor",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edRate",
+      "toId": "pcEditor",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edSlot",
+      "toId": "pcEditor",
+      "toProperty": "slot"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edRung",
+      "toId": "pcEditor",
+      "toProperty": "rung"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMove",
+      "toId": "pcEditor",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveWorth",
+      "toId": "pcEditor",
+      "toProperty": "moveWorth"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveWhen",
+      "toId": "pcEditor",
+      "toProperty": "moveWhen"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveDue",
+      "toId": "pcEditor",
+      "toProperty": "moveDue"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveStop",
+      "toId": "pcEditor",
+      "toProperty": "moveStop"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edSay",
+      "toId": "pcEditor",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "name",
+      "toId": "pcOut",
+      "toProperty": "edName"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "sub",
+      "toId": "pcOut",
+      "toProperty": "edSub"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "kind",
+      "toId": "pcOut",
+      "toProperty": "edKind"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "rate",
+      "toId": "pcOut",
+      "toProperty": "edRate"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "slot",
+      "toId": "pcOut",
+      "toProperty": "edSlot"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "rung",
+      "toId": "pcOut",
+      "toProperty": "edRung"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "move",
+      "toId": "pcOut",
+      "toProperty": "edMove"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveWorth",
+      "toId": "pcOut",
+      "toProperty": "edMoveWorth"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveWhen",
+      "toId": "pcOut",
+      "toProperty": "edMoveWhen"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveDue",
+      "toId": "pcOut",
+      "toProperty": "edMoveDue"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveStop",
+      "toId": "pcOut",
+      "toProperty": "edMoveStop"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "say",
+      "toId": "pcOut",
+      "toProperty": "edSay"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "save",
+      "toId": "pcOut",
+      "toProperty": "edSave"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "cancel",
+      "toId": "pcOut",
+      "toProperty": "edCancel"
     },
     {
       "fromId": "pcScrim",

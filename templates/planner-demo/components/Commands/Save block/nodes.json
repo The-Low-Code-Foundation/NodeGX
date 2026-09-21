@@ -14,19 +14,24 @@
           "type": "string"
         },
         {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "what",
           "plug": "output",
           "type": "string"
         },
         {
-          "name": "actual",
+          "name": "planned",
           "plug": "output",
           "type": "number"
         },
         {
-          "name": "logged",
+          "name": "date",
           "plug": "output",
-          "type": "boolean"
+          "type": "string"
         },
         {
           "name": "do",
@@ -56,11 +61,12 @@
       "type": "JavaScriptFunction",
       "label": "Is there anything to write?",
       "parameters": {
-        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar id = String(Inputs.blockId || '');\nvar what = String(Inputs.what || '').trim();\n// A block with no words is not a block — `Add block` refuses one too, and blanking the\n// field here would quietly erase the line the week draws.\nif (id === '' || what === '') return;\nvar done = Inputs.logged === true;\nvar actual = num(Inputs.actual, NaN);\nOutputs.what = what;\nOutputs.done = done;\nOutputs.actual = done && isFinite(actual) && actual > 0 ? q(actual) : '';\nOutputs.go();",
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\nvar id = String(Inputs.blockId || '');\nvar pid = String(Inputs.projectId || '');\nvar what = String(Inputs.what || '').trim();\nvar date = String(Inputs.date || '');\nvar planned = q(num(Inputs.planned, 0));\n// A block with no words, no project, no day or no hours is not a block — Add block refuses one\n// too, and blanking a field here would quietly erase the line the week draws.\nif (id === '' || pid === '' || what === '' || !parseDay(date) || planned <= 0) return;\nOutputs.projectId = pid;\nOutputs.what = what;\nOutputs.planned = planned;\nOutputs.date = date;\nOutputs.go();",
         "runOnChange-in-blockId": false,
+        "runOnChange-in-projectId": false,
         "runOnChange-in-what": false,
-        "runOnChange-in-actual": false,
-        "runOnChange-in-logged": false
+        "runOnChange-in-planned": false,
+        "runOnChange-in-date": false
       },
       "x": 40,
       "y": 280,
@@ -73,6 +79,13 @@
           "group": "Inputs"
         },
         {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
           "name": "in-what",
           "displayName": "what",
           "plug": "input",
@@ -80,15 +93,15 @@
           "group": "Inputs"
         },
         {
-          "name": "in-logged",
-          "displayName": "logged",
+          "name": "in-date",
+          "displayName": "date",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
         },
         {
-          "name": "in-actual",
-          "displayName": "actual",
+          "name": "in-planned",
+          "displayName": "planned",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
@@ -101,6 +114,13 @@
           "group": "Outputs"
         },
         {
+          "name": "out-projectId",
+          "displayName": "projectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-what",
           "displayName": "what",
           "plug": "output",
@@ -108,15 +128,15 @@
           "group": "Outputs"
         },
         {
-          "name": "out-done",
-          "displayName": "done",
+          "name": "out-planned",
+          "displayName": "planned",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
         },
         {
-          "name": "out-actual",
-          "displayName": "actual",
+          "name": "out-date",
+          "displayName": "date",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -126,12 +146,13 @@
     {
       "id": "SaveblockWrite",
       "type": "JavaScriptFunction",
-      "label": "Save what it came to, in this browser",
+      "label": "Save what the block is, in this browser",
       "parameters": {
-        "functionScript": "var DEMO_KEY = \"nodegx-planner-demo-v1\";\nfunction demoEmpty() { return {\"Block\":[],\"CashEvent\":[],\"MonthPlan\":[],\"Project\":[],\"Settings\":[]}; }\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__plannerDemo === 'string') raw = window.__plannerDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__plannerDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Block\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.what = Inputs.what;\nrecord.done = Inputs.done;\nrecord.actual = Inputs.actual;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "functionScript": "var DEMO_KEY = \"nodegx-planner-demo-v2\";\nfunction demoEmpty() { return {\"Block\":[],\"CashEvent\":[],\"MonthPlan\":[],\"Project\":[],\"Settings\":[]}; }\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__plannerDemo === 'string') raw = window.__plannerDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__plannerDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Block\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.projectId = Inputs.projectId;\nrecord.what = Inputs.what;\nrecord.planned = Inputs.planned;\nrecord.date = Inputs.date;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-projectId": false,
         "runOnChange-in-what": false,
-        "runOnChange-in-done": false,
-        "runOnChange-in-actual": false,
+        "runOnChange-in-planned": false,
+        "runOnChange-in-date": false,
         "runOnChange-in-modelId": false
       },
       "x": 40,
@@ -145,6 +166,13 @@
           "group": "Inputs"
         },
         {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
           "name": "in-what",
           "displayName": "what",
           "plug": "input",
@@ -152,15 +180,15 @@
           "group": "Inputs"
         },
         {
-          "name": "in-done",
-          "displayName": "done",
+          "name": "in-planned",
+          "displayName": "planned",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
         },
         {
-          "name": "in-actual",
-          "displayName": "actual",
+          "name": "in-date",
+          "displayName": "date",
           "plug": "input",
           "type": "*",
           "group": "Inputs"

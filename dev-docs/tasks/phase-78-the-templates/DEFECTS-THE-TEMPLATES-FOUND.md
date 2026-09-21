@@ -54,6 +54,8 @@ failure this file's first house rule exists to prevent.
 | D76 | 🔴 open — measured 09-20 | **NONE** | product (`For Each`) | any repeated row that answers one event with two signals — a field that must save AND close, a button that must record AND navigate |
 | **D18** | 🔴 open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
 | D77 | 🔴 open — measured 09-21; **both templates worked around 09-21** | **NONE** | product (icon ports + the door) | anyone who wires an icon in a project that has not installed the icon module — which is every template, because a template ships no modules |
+| D78 | 🔴 open — measured 09-21; **TPL-010 worked around 09-21** | **NONE** | product (`Text Input`) | anyone who reuses one form for a second record — a modal edit sheet, a wizard step, a row editor — and leaves a field empty |
+| D79 | ⚠️ open — measured 09-21 | **NONE** | devtools (`nodegx-deploy` wire check) | anyone reading a deploy's report: every `For Each` item signal is reported as a wire that cannot work, so the real broken wire hides among false ones |
 | **D19** | ⚠️ open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
 | **D20** | 🔴 open (08-29) | **DEF-006** — **filed** as §0(c) (was `NONE`, s17) | product | every agent styling on-system |
 | **D21** | ✅ disproved (08-29) | — | — | (would have been: every agent placing a component) |
@@ -3085,3 +3087,52 @@ working state — the names were being read off buttons nobody could see — but
 2026-09-21). `templates/todo-list/` and `templates/todo-list-demo/` on disk are ahead of the shelf
 until `publish-templates-to-shelf.sh` runs — and that script refuses a moved file count, so its
 expected counts may need updating first. Owner `NONE`.
+
+## D78 — 🔴 A Text Input drops an arriving value equal to the last one it was sent, whatever the field now shows
+
+**Measured 2026-09-21 (TPL-010-R2.4), driven in a deployed demo.** The planner's block sheet is one
+sheet reused for every block. Its *What you did* box is filled from the block's row through
+`startValue`, which says `''` for every block (a new sitting starts empty). A note was typed and
+saved on one block; the sheet was then opened on a **different** block, and the box still held the
+first block's note (screenshot in the R2.4 drive). Nothing in the graph was wrong.
+
+**Why.** `text-input.ts` `startValue.set` ends `if (this._internal.text === text) return;`, and
+`_internal.text` is written only by an arriving value and by `Clear` (`:228`, `:496`) — never by
+typing, which reaches `onTextChanged` through the React component. So the comparison is against
+the last value the box was SENT, not the text it shows. Sent `''`, typed into, sent `''` again: the
+second `''` is dropped. `null` does not help: on a text box it becomes `''` before the comparison.
+
+**Where it bites a person.** Every form that is opened on one record after another — an edit
+modal, a detail pane, a step in a flow — and has a field whose value is empty for both records. The
+first person's words appear in the second person's form, and saving writes them there.
+
+**The cheapest door.** Compare against what the field holds (`outputPropValues.onTextChanged`,
+already kept) instead of `_internal.text`, or update `_internal.text` as the person types. Both
+are one line; the first keeps "a value that is already showing is a no-op", which is what the
+guard was for.
+
+**How TPL-010 works around it.** Each sheet pulses `Clear` on every box as it CLOSES (a Function
+that watches `shown`), which resets both the box and the remembered value — so the next opening's
+`''` is already true and any other value arrives. Clearing on close rather than open is what stops
+it racing the opening values. `tpl010Template.test.ts` §3 fails if any box in the three editors
+loses its clear wire.
+
+## D79 — ⚠️ The deploy's wire check reports every `For Each` item signal as a wire that cannot work
+
+**Measured 2026-09-21 (TPL-010-R2.4).** `nodegx-deploy.cjs templates/planner-demo …` reports
+`/Pages/Week: the wire twDayEach.itemOutputSignal-openLog → twSetLog.do cannot work (Source port
+doesn't exist.). It was published as it is.` — and the same for `toggle`, `openProject`, `addBlock`
+and the project card's `pick`. The committed build before R2.4 (`60c50a90d`) reports the same set
+for the wires it had, and every one of them is driven working in a browser (TPL-010 s3, and the
+R2.4 drive: 25/25 clauses, each through one of these wires). A For Each's item ports are dynamic,
+made from the template component's outputs, and the check does not make them.
+
+**Where it bites a person.** The report is right about other things: in the same run it named
+eight real broken wires (a Function writing its outputs as `Outputs[name]`, which the door does not
+declare as ports) — and they arrived mixed in with the false ones, indistinguishable by form. A
+person who learns to skim past "cannot work" lines will skim past the real one.
+
+**The cheapest door.** Resolve `itemOutput-*` / `itemOutputSignal-*` against the For Each's
+`template` component's outputs before calling a source port missing, as the editor does when it
+draws the node.
+

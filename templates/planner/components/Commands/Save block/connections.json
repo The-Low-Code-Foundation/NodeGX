@@ -11,21 +11,27 @@
     },
     {
       "fromId": "SaveblockIn",
+      "fromProperty": "projectId",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SaveblockIn",
       "fromProperty": "what",
       "toId": "SaveblockGuard",
       "toProperty": "in-what"
     },
     {
       "fromId": "SaveblockIn",
-      "fromProperty": "actual",
+      "fromProperty": "planned",
       "toId": "SaveblockGuard",
-      "toProperty": "in-actual"
+      "toProperty": "in-planned"
     },
     {
       "fromId": "SaveblockIn",
-      "fromProperty": "logged",
+      "fromProperty": "date",
       "toId": "SaveblockGuard",
-      "toProperty": "in-logged"
+      "toProperty": "in-date"
     },
     {
       "fromId": "SaveblockIn",
@@ -35,21 +41,27 @@
     },
     {
       "fromId": "SaveblockGuard",
+      "fromProperty": "out-projectId",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "SaveblockGuard",
       "fromProperty": "out-what",
       "toId": "SaveblockWrite",
       "toProperty": "prop-what"
     },
     {
       "fromId": "SaveblockGuard",
-      "fromProperty": "out-done",
+      "fromProperty": "out-planned",
       "toId": "SaveblockWrite",
-      "toProperty": "prop-done"
+      "toProperty": "prop-planned"
     },
     {
       "fromId": "SaveblockGuard",
-      "fromProperty": "out-actual",
+      "fromProperty": "out-date",
       "toId": "SaveblockWrite",
-      "toProperty": "prop-actual"
+      "toProperty": "prop-date"
     },
     {
       "fromId": "SaveblockIn",

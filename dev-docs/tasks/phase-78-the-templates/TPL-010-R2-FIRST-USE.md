@@ -2,7 +2,8 @@
 
 **Opened 2026-09-21**, from Richard's first session with `templates/planner-demo/` in a browser, with the approved mockup
 open beside it. Six pieces of feedback, each researched against the build below and written as a task with its own
-acceptance criteria. **Status: ⬜ nothing built; every ruling approved 2026-09-21.** Prerequisite: TPL-010 as it stands (gates 30/30).
+acceptance criteria. **Status: R2.6 ✅, R2.1 ✅ (waiting on R2.1-6), R2.4 ✅ built and driven (s2); R2.3, R2.2, R2.5 ⬜. Every ruling
+approved 2026-09-21.** Prerequisite: TPL-010 as it stands (gates 30/30).
 
 The seventh ask from the same message — Claude Code as the coach, with every row and every setting open to it over MCP —
 is its own task, [TPL-010-MCP](TPL-010-MCP-THE-COACH.md), because it lives on the hosted backend and not in the template.
@@ -178,7 +179,7 @@ sent. *Mark paid* takes a date. A one-off project has the same box with *covers*
 
 ---
 
-## R2.3 — Put 30 min in the week: pick the day, then show it
+## R2.3 — Put 30 min in the week: pick the day, then show it — ⬜ (work item 1 done in R2.4)
 
 **Richard:** *"'Put 30 mins in the week' is a good idea for a button, but not clear. I'd rather a date picker input
 where I can pick where I want that activity to go in the project modal, then see afterwards on each 'next action' which
@@ -216,8 +217,8 @@ week yet, so I know which ones are outstanding and not being dealt with."*
 
 ### The work
 
-1. `Week/Date picker` from `datePicker.ts` (the TPL-008 s7 graph; it needs the mount-count wire and the `dynamicports`
-   the s7 log describes — copy the working instance from `tpl008Components.ts`, not the prefab).
+1. ✅ *done in R2.4 (s2)* — `Week/Date picker` from `datePickerGraph('wdp')`, the same call TPL-008 makes; the block
+   sheet, the project editor and the money events all use it, and the R2.4 drive picks dates through it.
 2. `Week/Project detail`: the date and hours fields, three buttons, the *In the week* line. `Commands/Place move` gains
    `date` and `planned` inputs (defaults kept); `Commands/Move block` (a date update; also what R2.4's editor uses);
    `Commands/Drop block` already exists.
@@ -238,7 +239,7 @@ week yet, so I know which ones are outstanding and not being dealt with."*
 
 ---
 
-## R2.4 — Nothing can be added or edited, and a tick is not a log
+## R2.4 — Nothing can be added or edited, and a tick is not a log — ✅ built and driven s2
 
 **Richard:** *"The 'next moves' seem to be purely dummy data? I don't see how you can add a new 'next move' to a
 project. For that matter, I don't even see how to add a new project. For that matter, I don't even see how to add a new
@@ -305,14 +306,14 @@ can't send that kind of detail to a client as proof of what I did when I'm billi
 
 | AC | Criterion |
 |---|---|
-| R2.4-1 | **+ New project** writes a `Project` with a move and it appears in the card's list, on the strip, and in the block sheet's project list without a reload |
-| R2.4-2 | *Edit* changes Bramble's move text; the strip's chip and the card read the new text; nothing else in the row changed |
-| R2.4-3 | **+** on Thursday opens the block sheet on Thursday; saving a 1 h block for Uplift puts it in Thursday's column and Thursday's header moves by 1 h |
-| R2.4-4 | On a 1 h block, *Add time* 0.5 h with a note leaves it **not done**, reading *0.5 of 1 h*; the envelope moves by 0.5; a second *Add time* 0.5 h with *Done* ticked reads *1 h* and done; the block's `entries` has two rows with both notes |
-| R2.4-5 | The tick opens the sheet with *Done* on and hours prefilled with what is left; Save logs it; Escape leaves the block untouched |
-| R2.4-6 | Changing a block's date in the sheet moves it between columns; changing its project changes its colour and which envelope it counts in |
-| R2.4-7 | A cash event added in Settings appears on the strip on the next read; editing its amount changes the running balance after it |
-| R2.4-8 | Gates: every command placed on `Pages/Week` has its `do` wired from something (the defect this task exists for becomes a permanent assertion); `Add time` three ways (no entries, one, one with done) |
+| R2.4-1 | **+ New project** writes a `Project` with a move and it appears in the card's list, on the strip, and in the block sheet's project list without a reload — ✅ s2, driven: *Harbour Books* written with its move, kind and rate; the card opens on it; the chip is on the strip after Escape; it is in the block sheet's Dropdown |
+| R2.4-2 | *Edit* changes Bramble's move text; the strip's chip and the card read the new text; nothing else in the row changed — ✅ s2, driven: the stored row differs from before in `move` and nothing else (`updatedAt` aside); the chip reads the new words |
+| R2.4-3 | **+** on Thursday opens the block sheet on Thursday; saving a 1 h block for Uplift puts it in Thursday's column and Thursday's header moves by 1 h — ✅ s2, driven: *New block · Thursday 24 Sep*; one Block, Uplift, 2026-09-24, 1 h; in the column, the sheet closed, Thursday's header changed |
+| R2.4-4 | On a 1 h block, *Add time* 0.5 h with a note leaves it **not done**, reading *0.5 of 1 h*; the envelope moves by 0.5; a second *Add time* 0.5 h with *Done* ticked reads *1 h* and done; the block's `entries` has two rows with both notes — ✅ s2, driven end to end (store, week text, Billable tile) and gated three ways |
+| R2.4-5 | The tick opens the sheet with *Done* on and hours prefilled with what is left; Save logs it; Escape leaves the block untouched — ✅ s2, driven: Done ticked, hours = the plan (1.5); Escape leaves the stored row byte-identical; tick → Save logs it at 1.5 |
+| R2.4-6 | Changing a block's date in the sheet moves it between columns; changing its project changes its colour and which envelope it counts in — ✅ s2, driven: Friday → Thursday and Salon → Practice group in one save, through the Date picker and the Dropdown |
+| R2.4-7 | A cash event added in Settings appears on the strip on the next read; editing its amount changes the running balance after it — ✅ s2, driven: *Accountant, the year end* written as −300 on its day and on the strip; Household costs 4,500 → 4,700 moves its running balance |
+| R2.4-8 | Gates: every command placed on `Pages/Week` has its `do` wired from something (the defect this task exists for becomes a permanent assertion); `Add time` three ways (no entries, one, one with done) — ✅ s2: both gates, plus five more (below) |
 
 ---
 
@@ -466,3 +467,57 @@ at every viewport. Where the build departs from the task's own words, and why:
   move's words end in an ellipsis, as the mockup's do. 390×844: overflowing 16 → 1 (the cash row, which scrolls by design).
 - **Not done:** the week's Saturday column is not narrowed (the mockup's `.6fr`), the day header's bar is one colour
   (the mockup segments it by envelope), and done blocks are not struck through. None is in R2.1's work list.
+
+### s2 — 2026-09-21: R2.4 built, gated and driven
+**Done and driven**, on a deployed build of `templates/planner-demo` with real clicks (`scripts/devtools/drive-tpl010-r24.js`,
+**25/25 clauses, 0 console errors**). Gates **tpl010 43/43** (33 before: the old AC4 pair rewritten for the block sheet, ten new),
+**tpl008 25/25**; the generator is byte-identical across two runs. What was built: `Week/Block sheet` (grew out of the log sheet),
+`Week/Entry row`, `Week/Date picker`, `Week/Project editor` (in the card's right pane, with *Edit* on the detail and
+**+ New project** at the foot of the list), `Week/Cash editor` and `Week/Cash row` (in the Settings sheet), **+ Add** at the
+foot of every day; `Commands/Add time` and `Commands/Edit cash event` new, `Save block` / `Add project` / `Edit project` /
+`Add cash event` rewritten; `Log block` and `Unlog block` gone. `spentOf` in the shared arithmetic: an open block spends its
+entries (envelopes, *invoiced so far*, the drawer's day line) while its day still holds the whole plan.
+
+**Where the build departs from the task's words, and why:**
+- **An entry is `{ day, hours, note }`, not `{ on, … }`.** `on` is a Noodl Object's own method, and the gate on reserved row
+  names already lists it: an entry read back as an Object would answer `entry.on` with a function.
+- **No *Not done yet* button.** Work item 6 kept `Log block` / `Unlog block` for it; the sheet's *Done* checkbox already says
+  it — untick and Save — so both commands are gone and the gate asserts nothing on the page places them. One way to do a thing.
+- **One Save, two writes.** *Save* on an existing block runs `Save block` (project, words, hours, day) and, when that is
+  written, `Add time` (entries, `actual`, `done`) — so each command stays one write and the sheet closes on the second.
+- **The Date picker arrived here, not in R2.3** — three editors needed a day before the move box did. R2.3's work item 1 is done.
+- **The project editor has no billing terms yet** — R23 lists them, but the fields (`invoiceDay`, `termsDays`, `agreedHours`,
+  `cycle`) are R2.2's and do not exist until it is built. `slot`, `rung` and `say` are editable now.
+- **Money events have four kinds** — money in, money out, *invoices go out* (a marker) and *an invoice falls due* — the four
+  `Add cash event` already knew. The seed wrote `in` and `note`; it now writes `income` and `invoice-out`, and both commands
+  read the old spellings as the new ones rather than turning them into a cost. R20 will retire the typed invoice rows.
+- **The demo's storage key is v2**, so a browser holding the v1 week gets the new seed (two blocks half logged) on arrival.
+
+**Found by driving, and fixed:**
+- 🔴 **A click inside any card or sheet closed it** — the card, the drawer, the settings, and the log sheet before this, on
+  any press that was not a button or a box (a sentence, a gap). The comment said *"a click inside must not shut it"*; nothing
+  made that true. The Done checkbox's words exposed it: pressing them shut the sheet with the time unsaved. Every panel now
+  has `clickBubbling: 'never'`, gated.
+- 🔴 **A reused sheet kept the last sheet's typed words** in any box whose opening value was empty — product defect **D78**
+  (a Text Input compares an arriving value with the last one SENT, not the box). Worked around by clearing every box as its
+  sheet closes, gated. The old log sheet had it too, for an abandoned hours box.
+- 🔴 **The Done box opened unticked from the tick** — the sheet's `shown` and `done` can arrive in two runs of a Function, and
+  one that acted only on the edge of opening saw a block not yet done. It now ticks to match whenever either changes while open.
+- 🔴 **Eight wires into the project editor went nowhere**: its row wrote `Outputs[name]` in a loop, and the door declares a
+  Function's ports by reading `Outputs.<name>`. Every gate passed; only the deploy's wire check said so. A new gate walks every
+  Function wire in the template against its script. The same check reports every For Each item signal as broken, which is
+  false (they are driven working) — filed as **D79**; one pre-existing true report remains: `Logic/Cash line`'s
+  `invoicedText` goes into a Function that never reads it (harmless, left).
+- The checkbox's product default border is `#000000` — no box at all on the dark surface. `--border-control` now.
+
+**Readings at this build** (measure-from-disk, `templates/planner-demo`): 1280×900 / 1423×680 / 390×844 all **0 unreachable**,
+`scrollWidth` = viewport, 0 console errors; 390×844 overflowing 1 (the cash row, by design). **The fold moved:** at 1280×900
+`pageHeight` is **1061** (990 at R2.1) and the week box ends at **927**, where it ended at ~855 — the week no longer fits
+above the fold at the viewport R5 was ruled on. Two causes, measured on the seed's tallest column (Monday): **+ Add** is 24 px
+plus its gap, and *"1.75 of 2 h"* is wide enough to wrap the block's words onto more lines in a sixth of 1,100 px. Rendered and
+looked at: the new-block sheet, the add-time sheet, the tick sheet, the project editor (dark and light), the money events,
+and the block sheet at 390×844 (full width, no sideways scroll).
+
+**Richard's, and not decided here:** the fold (R2.6-2 grows by this) — the cheapest recoveries are the **+** moved into the day
+header beside the day's name (0 px, but not "at the foot" as R23 says), and a shorter partial reading such as *"1.75/2 h"*
+(R22 names *"0.5 of 1 h"*). R2.1-6, R2.6-5 unchanged.

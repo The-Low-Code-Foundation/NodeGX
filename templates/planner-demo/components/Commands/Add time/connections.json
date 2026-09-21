@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0ac9e21a-4898-520c-8cf7-14d49a49f10f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "blockId",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "entries",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "actual",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-actual"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "hours",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-hours"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "note",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "day",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-day"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "logged",
+      "toId": "AddtimeGuard",
+      "toProperty": "in-logged"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "do",
+      "toId": "AddtimeGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddtimeGuard",
+      "fromProperty": "out-entries",
+      "toId": "AddtimeWrite",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "AddtimeGuard",
+      "fromProperty": "out-actual",
+      "toId": "AddtimeWrite",
+      "toProperty": "in-actual"
+    },
+    {
+      "fromId": "AddtimeGuard",
+      "fromProperty": "out-done",
+      "toId": "AddtimeWrite",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "AddtimeIn",
+      "fromProperty": "blockId",
+      "toId": "AddtimeWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "AddtimeGuard",
+      "fromProperty": "out-go",
+      "toId": "AddtimeWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddtimeWrite",
+      "fromProperty": "out-done",
+      "toId": "AddtimeOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddtimeWrite",
+      "fromProperty": "out-failure",
+      "toId": "AddtimeProblem",
+      "toProperty": "do"
+    }
+  ]
+}

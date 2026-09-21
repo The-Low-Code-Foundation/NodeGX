@@ -29,9 +29,9 @@
     },
     {
       "fromId": "AddcasheveIn",
-      "fromProperty": "recurring",
+      "fromProperty": "monthly",
       "toId": "AddcasheveGuard",
-      "toProperty": "in-recurring"
+      "toProperty": "in-monthly"
     },
     {
       "fromId": "AddcasheveIn",

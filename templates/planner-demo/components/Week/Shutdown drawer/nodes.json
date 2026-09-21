@@ -129,6 +129,7 @@
       "label": "The drawer",
       "parent": "sdScrim",
       "parameters": {
+        "clickBubbling": "never",
         "flexDirection": "column",
         "sizeMode": "explicit",
         "width": {

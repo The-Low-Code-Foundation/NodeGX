@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f443460a-d654-5e35-88ef-7442a7debd91",
+  "name": "Cash editor",
+  "path": "/Week/Cash editor",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The money events the cash strip is worked out from, as a list you can add to and edit: when, how much, what it is, and whether it happens every month."
+}

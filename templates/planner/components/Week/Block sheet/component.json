@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ce248651-7c15-5bd9-8202-f2f3b2fa213d",
+  "name": "Block sheet",
+  "path": "/Week/Block sheet",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block over the week: its project, what it is, its hours and its day; the time logged on it so far; and a line to add the time you just spent."
+}

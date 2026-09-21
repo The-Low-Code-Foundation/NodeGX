@@ -62,6 +62,51 @@
           "name": "shown",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "cashRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "cashFormShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "cashFormTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cashKinds",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "cashDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cashAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cashLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cashKind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cashMonthly",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 470,
@@ -126,6 +171,56 @@
           "name": "close",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "cashPick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cashPickId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cashAdd",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cashDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cashAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cashLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cashKind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cashMonthly",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "cashSave",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cashCancel",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 470,
@@ -165,6 +260,7 @@
       "parent": "stScrim",
       "parameters": {
         "cssClassName": "planner-over",
+        "clickBubbling": "never",
         "backgroundColor": "var(--surface)",
         "borderStyle": "solid",
         "borderWidth": "var(--border-1)",
@@ -203,7 +299,8 @@
         "stInvoiceDay",
         "stTerms",
         "stPlanLine",
-        "stButtons"
+        "stButtons",
+        "stCash"
       ],
       "x": 100,
       "y": 160
@@ -638,6 +735,14 @@
       },
       "x": 220,
       "y": 2080
+    },
+    {
+      "id": "stCash",
+      "type": "/Week/Cash editor",
+      "label": "The money events",
+      "parent": "stCard",
+      "x": 160,
+      "y": 2200
     }
   ],
   "visualRoots": [

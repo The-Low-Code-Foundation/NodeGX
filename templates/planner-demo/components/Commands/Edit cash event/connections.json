@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f74e377e-06d9-5faf-8ccf-748591fbbeb4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "cashId",
+      "toId": "EditcashevGuard",
+      "toProperty": "in-cashId"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "date",
+      "toId": "EditcashevGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "amount",
+      "toId": "EditcashevGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "label",
+      "toId": "EditcashevGuard",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "kind",
+      "toId": "EditcashevGuard",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "monthly",
+      "toId": "EditcashevGuard",
+      "toProperty": "in-monthly"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "do",
+      "toId": "EditcashevGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditcashevGuard",
+      "fromProperty": "out-date",
+      "toId": "EditcashevWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "EditcashevGuard",
+      "fromProperty": "out-amount",
+      "toId": "EditcashevWrite",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "EditcashevGuard",
+      "fromProperty": "out-label",
+      "toId": "EditcashevWrite",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "EditcashevGuard",
+      "fromProperty": "out-kind",
+      "toId": "EditcashevWrite",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "EditcashevGuard",
+      "fromProperty": "out-recurring",
+      "toId": "EditcashevWrite",
+      "toProperty": "in-recurring"
+    },
+    {
+      "fromId": "EditcashevIn",
+      "fromProperty": "cashId",
+      "toId": "EditcashevWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "EditcashevGuard",
+      "fromProperty": "out-go",
+      "toId": "EditcashevWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditcashevWrite",
+      "fromProperty": "out-done",
+      "toId": "EditcashevOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditcashevWrite",
+      "fromProperty": "out-failure",
+      "toId": "EditcashevProblem",
+      "toProperty": "do"
+    }
+  ]
+}

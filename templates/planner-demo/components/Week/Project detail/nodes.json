@@ -123,13 +123,18 @@
           "type": "signal"
         },
         {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
           "name": "close",
           "plug": "input",
           "type": "signal"
         }
       ],
       "x": 470,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "pdRoot",
@@ -176,7 +181,7 @@
       },
       "children": [
         "pdNames",
-        "pdClose"
+        "pdTopButtons"
       ],
       "x": 100,
       "y": 160
@@ -244,10 +249,51 @@
       "y": 520
     },
     {
+      "id": "pdTopButtons",
+      "type": "Group",
+      "label": "Edit and close",
+      "parent": "pdTop",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)"
+      },
+      "children": [
+        "pdEdit",
+        "pdClose"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pdEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit this project",
+      "parent": "pdTopButtons",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Edit"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
       "id": "pdClose",
       "type": "net.noodl.controls.button",
       "label": "Close the card",
-      "parent": "pdTop",
+      "parent": "pdTopButtons",
       "parameters": {
         "backgroundColor": "transparent",
         "color": "var(--muted-foreground)",
@@ -268,8 +314,8 @@
         "paddingLeft": "var(--space-2)",
         "paddingRight": "var(--space-2)"
       },
-      "x": 160,
-      "y": 640
+      "x": 220,
+      "y": 880
     },
     {
       "id": "pdMove",
@@ -302,7 +348,7 @@
         "pdPlan"
       ],
       "x": 100,
-      "y": 760
+      "y": 1000
     },
     {
       "id": "pdMoveLabel",
@@ -325,7 +371,7 @@
         "sizeMode": "contentSize"
       },
       "x": 160,
-      "y": 880
+      "y": 1120
     },
     {
       "id": "pdMoveText",
@@ -343,7 +389,7 @@
         }
       },
       "x": 160,
-      "y": 1000
+      "y": 1240
     },
     {
       "id": "pdMoveMeta",
@@ -366,7 +412,7 @@
         "pdWhen"
       ],
       "x": 160,
-      "y": 1120
+      "y": 1360
     },
     {
       "id": "pdWorth",
@@ -381,7 +427,7 @@
         "fontWeight": "var(--font-semibold)"
       },
       "x": 220,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "pdWhen",
@@ -395,7 +441,7 @@
         "sizeMode": "contentSize"
       },
       "x": 220,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "pdPlan",
@@ -417,7 +463,7 @@
         "label": "Put 30 min in the week"
       },
       "x": 160,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "pdWeek",
@@ -438,7 +484,7 @@
         "pdBoxes"
       ],
       "x": 100,
-      "y": 1600
+      "y": 1840
     },
     {
       "id": "pdWeekLabel",
@@ -465,7 +511,7 @@
         }
       },
       "x": 160,
-      "y": 1720
+      "y": 1960
     },
     {
       "id": "pdBoxes",
@@ -473,7 +519,7 @@
       "label": "The six days",
       "parent": "pdWeek",
       "x": 160,
-      "y": 1840
+      "y": 2080
     },
     {
       "id": "pdTwo",
@@ -495,7 +541,7 @@
         "pdFacts"
       ],
       "x": 100,
-      "y": 1960
+      "y": 2200
     },
     {
       "id": "pdHistory",
@@ -516,7 +562,7 @@
         "pdSpark"
       ],
       "x": 160,
-      "y": 2080
+      "y": 2320
     },
     {
       "id": "pdSparkTitle",
@@ -543,7 +589,7 @@
         }
       },
       "x": 220,
-      "y": 2200
+      "y": 2440
     },
     {
       "id": "pdSpark",
@@ -551,7 +597,7 @@
       "label": "The bars",
       "parent": "pdHistory",
       "x": 220,
-      "y": 2320
+      "y": 2560
     },
     {
       "id": "pdFacts",
@@ -572,7 +618,7 @@
         "pdFactEach"
       ],
       "x": 160,
-      "y": 2440
+      "y": 2680
     },
     {
       "id": "pdFactsLabel",
@@ -599,7 +645,7 @@
         }
       },
       "x": 220,
-      "y": 2560
+      "y": 2800
     },
     {
       "id": "pdFactEach",
@@ -611,7 +657,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 2680
+      "y": 2920
     },
     {
       "id": "pdSayBox",
@@ -637,7 +683,7 @@
         "pdSay"
       ],
       "x": 100,
-      "y": 2800
+      "y": 3040
     },
     {
       "id": "pdSay",
@@ -655,7 +701,7 @@
         }
       },
       "x": 160,
-      "y": 2920
+      "y": 3160
     }
   ],
   "visualRoots": [

@@ -1,0 +1,786 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ce248651-7c15-5bd9-8202-f2f3b2fa213d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bsIn",
+      "type": "Component Inputs",
+      "label": "The block it is showing",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "what",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planned",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "loggedLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "entries",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "saveLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "bsOut",
+      "type": "Component Outputs",
+      "label": "What it should become",
+      "ports": [
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "what",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "planned",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "bsScrim",
+      "type": "Group",
+      "label": "Behind the sheet",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "position": "fixed",
+        "backgroundColor": "var(--scrim)",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "styleCss": "z-index: 60;"
+      },
+      "children": [
+        "bsCard"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bsCard",
+      "type": "Group",
+      "label": "The sheet",
+      "parent": "bsScrim",
+      "parameters": {
+        "cssClassName": "planner-over",
+        "clickBubbling": "never",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "maxHeight": {
+          "value": 88,
+          "unit": "%"
+        },
+        "styleCss": "overflow: auto;",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "bsHead",
+        "bsProject",
+        "bsWhat",
+        "bsWhen",
+        "bsTime",
+        "bsButtons"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "bsHead",
+      "type": "Group",
+      "label": "Whose block, and close",
+      "parent": "bsCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "bsTitle",
+        "bsClose"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "bsTitle",
+      "type": "Text",
+      "label": "Whose block this is",
+      "parent": "bsHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentSize",
+        "as": "h2"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "bsClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the sheet",
+      "parent": "bsHead",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "bsProject",
+      "type": "net.noodl.controls.options",
+      "label": "Which project",
+      "parent": "bsCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick a project",
+        "useLabel": true,
+        "label": "Project",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "bsWhat",
+      "type": "net.noodl.controls.textinput",
+      "label": "What it is",
+      "parent": "bsCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "What it is",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "bsWhen",
+      "type": "Group",
+      "label": "Hours and day",
+      "parent": "bsCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "bsPlannedBox",
+        "bsDateBox"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "bsPlannedBox",
+      "type": "Group",
+      "label": "Hours planned",
+      "parent": "bsWhen",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 40,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "bsPlanned"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "bsPlanned",
+      "type": "net.noodl.controls.textinput",
+      "label": "Hours planned",
+      "parent": "bsPlannedBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Hours planned",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "bsDateBox",
+      "type": "Group",
+      "label": "Which day",
+      "parent": "bsWhen",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 60,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "bsDate"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "bsDate",
+      "type": "/Week/Date picker",
+      "label": "Which day",
+      "parent": "bsDateBox",
+      "parameters": {
+        "Label": "Day",
+        "Show Label": true
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "bsTime",
+      "type": "Group",
+      "label": "The time on it",
+      "parent": "bsCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "bsTimeLabel",
+        "bsLogged",
+        "bsEntries",
+        "bsAdd",
+        "bsDone"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "bsTimeLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "bsTime",
+      "parameters": {
+        "text": "Time logged",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "bsLogged",
+      "type": "Text",
+      "label": "How much so far",
+      "parent": "bsTime",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "bsEntries",
+      "type": "For Each",
+      "label": "One line per sitting",
+      "parent": "bsTime",
+      "parameters": {
+        "template": "/Week/Entry row",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "bsAdd",
+      "type": "Group",
+      "label": "Add time",
+      "parent": "bsTime",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "bsHoursBox",
+        "bsNoteBox"
+      ],
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "bsHoursBox",
+      "type": "Group",
+      "label": "How long",
+      "parent": "bsAdd",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 30,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "bsHours"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "bsHours",
+      "type": "net.noodl.controls.textinput",
+      "label": "Add time, in hours",
+      "parent": "bsHoursBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Add time, h",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "bsNoteBox",
+      "type": "Group",
+      "label": "What you did",
+      "parent": "bsAdd",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 70,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "bsNote"
+      ],
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "bsNote",
+      "type": "net.noodl.controls.textinput",
+      "label": "What you did",
+      "parent": "bsNoteBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "What you did",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "bsDone",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Done",
+      "parent": "bsTime",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Done — nothing more to do on it",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "bsOpened",
+      "type": "JavaScriptFunction",
+      "label": "Clear the boxes on close; tick Done to match the block",
+      "parameters": {
+        "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\nvar doneWant = shown ? Inputs.done === true : null;\nif (doneWant !== null && (!this.wasShown || this.doneLast !== doneWant)) { if (doneWant) Outputs.doneOn(); else Outputs.doneOff(); }\nthis.doneLast = doneWant;\nthis.wasShown = shown;"
+      },
+      "x": 590,
+      "y": 2560,
+      "ports": [
+        {
+          "name": "in-shown",
+          "displayName": "shown",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-done",
+          "displayName": "done",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-closed",
+          "displayName": "closed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doneOn",
+          "displayName": "doneOn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doneOff",
+          "displayName": "doneOff",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "bsButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "bsCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "bsSave"
+      ],
+      "x": 160,
+      "y": 2680
+    },
+    {
+      "id": "bsSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "bsButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 220,
+      "y": 2800
+    }
+  ],
+  "visualRoots": [
+    "bsScrim"
+  ]
+}

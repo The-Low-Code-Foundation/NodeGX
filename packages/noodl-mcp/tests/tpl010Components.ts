@@ -30,6 +30,7 @@
  *
  * @module noodl-mcp/tests/tpl010Components
  */
+import { DATE_PICKER_DESCRIPTION, DATE_PICKER_INPUTS, DATE_PICKER_OUTPUTS, datePickerGraph } from './datePicker';
 import { composition, ENVELOPE_KEYS, ENVELOPE_NAMES, THEME_BOOT_SCRIPT, THEME_FLIP_SCRIPT, THEME_TO_DARK_CLASS, THEME_TO_LIGHT_CLASS, themeCss } from './tpl010Theme';
 
 export const ROUTER = 'Main';
@@ -74,7 +75,12 @@ export const C = {
   factRow: '/Week/Fact row',
   projectGroup: '/Week/Project group',
   settingsSheet: '/Week/Settings sheet',
-  logSheet: '/Week/Log sheet',
+  blockSheet: '/Week/Block sheet',
+  entryRow: '/Week/Entry row',
+  datePicker: '/Week/Date picker',
+  projectEditor: '/Week/Project editor',
+  cashEditor: '/Week/Cash editor',
+  cashRow: '/Week/Cash row',
   dayPicker: '/Week/Day picker',
   dayPick: '/Week/Day pick',
 
@@ -86,9 +92,8 @@ export const C = {
   shutdown: '/Logic/Shutdown',
 
   addBlock: '/Commands/Add block',
-  logBlock: '/Commands/Log block',
   saveBlock: '/Commands/Save block',
-  unlogBlock: '/Commands/Unlog block',
+  addTime: '/Commands/Add time',
   carryBlock: '/Commands/Carry block',
   dropBlock: '/Commands/Drop block',
   placeMove: '/Commands/Place move',
@@ -96,6 +101,7 @@ export const C = {
   editProject: '/Commands/Edit project',
   setMonthPlan: '/Commands/Set month plan',
   addCashEvent: '/Commands/Add cash event',
+  editCashEvent: '/Commands/Edit cash event',
   editSettings: '/Commands/Edit settings',
 
   pageWeek: '/Pages/Week',
@@ -120,6 +126,14 @@ export const VAR = {
    * gives a real boolean from the first frame, where a bare Variable gives `undefined`.
    */
   logBlock: 'plannerLogBlock',
+  /** How the block sheet was opened: `tick` (R16a — Done starts ticked) or empty (the words or the hours). */
+  logMode: 'plannerLogMode',
+  /** The day a NEW block goes in, from the + at the foot of a column. Empty unless one is being made. */
+  newDay: 'plannerNewDay',
+  /** The card's right-hand pane: empty shows the project, `edit` its form, `new` an empty form (R23). */
+  cardEdit: 'plannerCardEdit',
+  /** The money event being edited in the settings: empty, `new`, or its id (R23). */
+  cashEdit: 'plannerCashEdit',
   /** Which day the phone is showing. Empty until the picker is pressed, which means today. */
   phoneDay: 'plannerPhoneDay',
   /** What the backend said when signing in did not work. */
@@ -365,6 +379,16 @@ const PINNED = { cssClassName: 'planner-pinned', width: pct(100) };
 /** The same pinned track, named so the phone breakpoint can reach it (R5's second answer). */
 const pinnedAs = (...classes: string[]) => ({ cssClassName: ['planner-pinned', ...classes].join(' '), width: pct(100) });
 
+/**
+ * 🔴 **A click inside a card is not a click on the scrim behind it.** Every visual node carries
+ * a live Click, and a click bubbles to the ancestors whose Click is wired — so the scrim's
+ * *close* heard every press inside the card that was not a button or a box: a sentence, the
+ * gap between two fields, and (found driving R2.4) the words beside a checkbox, which closed
+ * the block sheet with the time still unsaved. The comments said the card did not shut on a
+ * click inside it; nothing made that true until this.
+ */
+const KEEPS_CLICKS = { clickBubbling: 'never' };
+
 const CARD = {
   backgroundColor: 'var(--surface)',
   borderStyle: 'solid',
@@ -394,6 +418,32 @@ function hoursOf(b) {
     return num(a, num(b.planned, 0));
   }
   return num(b.planned, 0);
+}
+/**
+ * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.
+ * 🔴 Not "on", which the task file wrote: "on" is a Noodl Object's own method, and an entry
+ * read back as an Object would answer entry.on with a function.
+ */
+function entriesOf(b) {
+  var list = (b && b.entries) || [];
+  var out = [];
+  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);
+  return out;
+}
+function loggedOf(b) {
+  var list = entriesOf(b), t = 0;
+  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);
+  return t;
+}
+/**
+ * What a block has SPENT, which is not what it counts for in its day. A done block spent what
+ * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is
+ * half an hour out of the envelope, while the day still holds the whole hour for it (R22).
+ */
+function spentOf(b) {
+  if (!b) return 0;
+  if (b.done) return hoursOf(b);
+  return loggedOf(b);
 }
 /** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */
 function q(n) { return Math.round(num(n, 0) * 4) / 4; }
@@ -644,8 +694,9 @@ const BLOCK_FIELDS: Array<[string, string]> = [
 /**
  * One block of time in one day.
  *
- * The tick logs it. R: a logged block shows the hours it ACTUALLY took when they differ from
- * the plan (AC4), and the hours arrive here already resolved — `Logic/Day columns` decides,
+ * The tick opens the block sheet ready to log it (R16a). A logged block shows the hours it
+ * ACTUALLY took when they differ from the plan (AC4), an open one with time on it shows
+ * *0.5 of 1 h* (R22), and the hours arrive here already resolved — `Logic/Day columns` decides,
  * because the envelope totals and this line must never disagree.
  *
  * `fromTodo` draws the red edge of an overdue money-linked task pushed over from the todo
@@ -739,8 +790,8 @@ const BLOCK: Tpl010Component = {
     wire('bkIn', 'done', 'bkOut', 'done'),
     wire('bkTick', 'onClick', 'bkOut', 'toggle'),
     wire('bkWho', 'onClick', 'bkOut', 'openProject'),
-    // AC4 — the tick is the one-press log ("it took as long as it was meant to"); the words
-    // and the hours open the sheet, where the hours it really took and what happened go in.
+    // R16a — the tick opens the block sheet with Done ticked (the page routes it); the words and
+    // the hours open the same sheet with Done off, for adding a sitting without closing the block.
     wire('bkWhat', 'onClick', 'bkOut', 'openLog'),
     wire('bkHours', 'onClick', 'bkOut', 'openLog')
   ]
@@ -1138,6 +1189,8 @@ const DAY_HEADER: Tpl010Component = {
 
 const DAY_COLUMN_FIELDS: Array<[string, string]> = [
   ...DAY_HEADER_FIELDS,
+  // The day as YYYY-MM-DD, which is what the + at the foot hands to the block sheet (R23).
+  ['key', 'string'],
   ['blocks', 'array'],
   ['isToday', 'boolean'],
   ['columnBackground', 'string'],
@@ -1154,7 +1207,7 @@ const DAY_COLUMN: Tpl010Component = {
   description: 'One day of the week: its head, then every block of time in it, top to bottom.',
   ...iface(DAY_COLUMN_FIELDS, [
     ['toggle', 'signal'], ['openProject', 'signal'], ['openLog', 'signal'],
-    ['blockId', 'string'], ['projectId', 'string'], ['done', 'boolean']
+    ['blockId', 'string'], ['projectId', 'string'], ['done', 'boolean'], ['addBlock', 'signal'], ['dayKey', 'string']
   ]),
   repeats: { source: 'array', rowFields: BLOCK_FIELDS.map(([n]) => n) },
   instantiates: [C.dayHeader, C.block],
@@ -1162,7 +1215,7 @@ const DAY_COLUMN: Tpl010Component = {
     inputs('dcIn', 'The day and its blocks', DAY_COLUMN_FIELDS),
     outputs('dcOut', 'What happened in the day', [
       ['toggle', 'signal'], ['openProject', 'signal'], ['openLog', 'signal'],
-      ['blockId', 'string'], ['projectId', 'string'], ['done', 'boolean']
+      ['blockId', 'string'], ['projectId', 'string'], ['done', 'boolean'], ['addBlock', 'signal'], ['dayKey', 'string']
     ]),
     group('dcRoot', 'Day column', undefined, {
       ...COLUMN('var(--space-0)'),
@@ -1180,7 +1233,19 @@ const DAY_COLUMN: Tpl010Component = {
       paddingTop: 'var(--space-1)',
       paddingBottom: 'var(--space-2)'
     }),
-    place('dcEach', FOR_EACH, 'One block per thing planned', 'dcBody', { template: C.block, templateType: 'explicit' })
+    place('dcEach', FOR_EACH, 'One block per thing planned', 'dcBody', { template: C.block, templateType: 'explicit' }),
+    // R23 — a new block starts from the day it goes in. Quiet on purpose: six of these sit under
+    // the week, and none of them is the thing the eye should land on.
+    place('dcAdd', BUTTON, 'Put a block in this day', 'dcBody', {
+      ...BTN_GHOST,
+      borderStyle: 'dashed',
+      width: pct(100),
+      sizeMode: 'contentHeight',
+      paddingTop: 'var(--space-1)',
+      paddingBottom: 'var(--space-1)',
+      fontSize: 'var(--text-xs)',
+      label: '+ Add'
+    })
   ],
   connections: [
     ...DAY_HEADER_FIELDS.map(([n]) => wire('dcIn', n, 'dcHead', n)),
@@ -1192,7 +1257,9 @@ const DAY_COLUMN: Tpl010Component = {
     wire('dcEach', 'itemOutputSignal-openLog', 'dcOut', 'openLog'),
     wire('dcEach', 'itemOutput-id', 'dcOut', 'blockId'),
     wire('dcEach', 'itemOutput-projectId', 'dcOut', 'projectId'),
-    wire('dcEach', 'itemOutput-done', 'dcOut', 'done')
+    wire('dcEach', 'itemOutput-done', 'dcOut', 'done'),
+    wire('dcIn', 'key', 'dcOut', 'dayKey'),
+    wire('dcAdd', 'onClick', 'dcOut', 'addBlock')
   ]
 };
 
@@ -1239,444 +1306,493 @@ const CASH_STRIP: Tpl010Component = {
 };
 
 /**
- * The right-hand half of the projects card: one project, whole.
- *
- * R9 is the reason the move card can be missing its button. A building project that is
- * finished says **"fixes only"** (`moveStop`) and gets no *Put 30 min in the week*, so a
- * done asset stops absorbing hours — the mockup's Builder tool, whose own line is *"Every
- * hour here now is an hour the coaching email does not get."*
- *
- * Four fact slots, not a repeater: `Project.facts` is a short fixed list a person types in
- * the editor (Q2), and no project in the approved mockup carries more than four.
+ * The library's Date Picker, built from the one source TPL-008 uses (`datePicker.ts`), so the
+ * block sheet, the project editor and the money events all pick a day the same way — the
+ * system picker on a phone, a keyboard-friendly calendar on a computer. R2.3 asked for it in
+ * the move box; R2.4's three editors needed it first, so it arrived here.
  */
-const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [
-  ['name', 'string'], ['sub', 'string'],
-  ['move', 'string'], ['hasMove', 'boolean'], ['worth', 'string'], ['hasWorth', 'boolean'],
-  ['when', 'string'], ['whenColor', 'string'], ['mark', 'string'], ['soft', 'string'],
-  ['planLabel', 'string'], ['canPlan', 'boolean'],
-  ['weekText', 'string'], ['sparkTitle', 'string'], ['say', 'string'],
-  ['facts', 'array'], ['bars', 'array'], ['boxes', 'array'],
-  ['firstLabel', 'string'], ['lastLabel', 'string']
-];
-
-const PROJECT_DETAIL: Tpl010Component = {
-  path: 'Week/Project detail',
-  description: 'One project in full: its next move and what that move is worth, its hours this week, six months of history, its facts, and the one line about it.',
-  ...iface(PROJECT_DETAIL_FIELDS, [['plan', 'signal'], ['close', 'signal']]),
-  repeats: { source: 'array', rowFields: FACT_FIELDS.map(([n]) => n) },
-  instantiates: [C.sparkline, C.dayBoxes, C.factRow],
-  nodes: [
-    inputs('pdIn', 'The project', PROJECT_DETAIL_FIELDS),
-    outputs('pdOut', 'What you did', [['plan', 'signal'], ['close', 'signal']]),
-    group('pdRoot', 'Project detail', undefined, { ...COLUMN('var(--space-3)'), paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-4)' }),
-    group('pdTop', 'Name and close', 'pdRoot', { ...ROW('var(--space-2)'), alignItems: 'flex-start', justifyContent: 'space-between' }),
-    group('pdNames', 'What it is called', 'pdTop', { ...COLUMN('var(--space-0)'), width: pct(100) }),
-    text('pdName', 'Project name', 'pdNames', '', { ...wide(T_TITLE), as: 'h2' }),
-    text('pdSub', 'One line about it', 'pdNames', '', wide(T_META)),
-    place('pdClose', BUTTON, 'Close the card', 'pdTop', BTN_ICON('icon-x', 'Close')),
-
-    group('pdMove', 'Its next move', 'pdRoot', {
-      ...COLUMN('var(--space-1)'),
-      borderRadius: 'var(--radius-md)',
-      borderLeftStyle: 'solid',
-      borderLeftWidth: px(3),
-      paddingLeft: 'var(--space-3)',
-      paddingRight: 'var(--space-3)',
-      paddingTop: 'var(--space-2)',
-      paddingBottom: 'var(--space-2)'
-    }),
-    text('pdMoveLabel', 'Label', 'pdMove', 'Next move', { ...T_LABEL, sizeMode: 'contentSize' }),
-    text('pdMoveText', 'The move', 'pdMove', '', { ...wide(T_BODY) }),
-    group('pdMoveMeta', 'Worth and when', 'pdMove', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
-    text('pdWorth', 'What it is worth', 'pdMoveMeta', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
-    text('pdWhen', 'When to do it', 'pdMoveMeta', '', { ...T_META, sizeMode: 'contentSize' }),
-    place('pdPlan', BUTTON, 'Put it in the week', 'pdMove', { ...BTN_PRIMARY, label: 'Put 30 min in the week' }),
-
-    group('pdWeek', 'This week', 'pdRoot', COLUMN('var(--space-1)')),
-    text('pdWeekLabel', 'How much this week', 'pdWeek', '', wide(T_LABEL)),
-    place('pdBoxes', C.dayBoxes, 'The six days', 'pdWeek'),
-
-    group('pdTwo', 'History and facts', 'pdRoot', { ...ROW('var(--space-4)'), alignItems: 'flex-start' }),
-    group('pdHistory', 'Six months', 'pdTwo', { ...COLUMN('var(--space-1)'), width: pct(50) }),
-    text('pdSparkTitle', 'What the bars are', 'pdHistory', '', wide(T_LABEL)),
-    place('pdSpark', C.sparkline, 'The bars', 'pdHistory'),
-    group('pdFacts', 'Facts', 'pdTwo', { ...COLUMN('var(--space-1)'), width: pct(50) }),
-    text('pdFactsLabel', 'Label', 'pdFacts', 'Facts', wide(T_LABEL)),
-    place('pdFactEach', FOR_EACH, 'One row per fact', 'pdFacts', { template: C.factRow, templateType: 'explicit' }),
-
-    // Text draws type and nothing else — it has no padding, background or radius of its
-    // own — so the tinted box the one line sits in is a Group around it.
-    group('pdSayBox', 'The one line about it', 'pdRoot', {
-      ...COLUMN('var(--space-0)'),
-      backgroundColor: 'var(--muted)',
-      borderRadius: 'var(--radius-md)',
-      paddingLeft: 'var(--space-3)',
-      paddingRight: 'var(--space-3)',
-      paddingTop: 'var(--space-2)',
-      paddingBottom: 'var(--space-2)'
-    }),
-    text('pdSay', 'What to remember about it', 'pdSayBox', '', wide(T_META))
-  ],
-  connections: [
-    wire('pdIn', 'name', 'pdName', 'text'),
-    wire('pdIn', 'sub', 'pdSub', 'text'),
-    wire('pdIn', 'hasMove', 'pdMove', 'mounted'),
-    wire('pdIn', 'mark', 'pdMove', 'borderLeftColor'),
-    wire('pdIn', 'soft', 'pdMove', 'backgroundColor'),
-    wire('pdIn', 'move', 'pdMoveText', 'text'),
-    wire('pdIn', 'worth', 'pdWorth', 'text'),
-    wire('pdIn', 'hasWorth', 'pdWorth', 'mounted'),
-    wire('pdIn', 'when', 'pdWhen', 'text'),
-    wire('pdIn', 'whenColor', 'pdWhen', 'color'),
-    wire('pdIn', 'planLabel', 'pdPlan', 'label'),
-    // R9 — a finished asset has no button to spend more hours on it.
-    wire('pdIn', 'canPlan', 'pdPlan', 'mounted'),
-    wire('pdIn', 'weekText', 'pdWeekLabel', 'text'),
-    wire('pdIn', 'sparkTitle', 'pdSparkTitle', 'text'),
-    wire('pdIn', 'say', 'pdSay', 'text'),
-    wire('pdIn', 'facts', 'pdFactEach', 'items'),
-    wire('pdIn', 'bars', 'pdSpark', 'bars'),
-    wire('pdIn', 'firstLabel', 'pdSpark', 'firstLabel'),
-    wire('pdIn', 'lastLabel', 'pdSpark', 'lastLabel'),
-    wire('pdIn', 'boxes', 'pdBoxes', 'boxes'),
-    wire('pdPlan', 'onClick', 'pdOut', 'plan'),
-    wire('pdClose', 'onClick', 'pdOut', 'close')
-  ]
-};
-
-/** One group in the card's list: its name, its hours this week, and its projects. */
-const PROJECT_GROUP_FIELDS: Array<[string, string]> = [['name', 'string'], ['hours', 'string'], ['color', 'string'], ['rows', 'array']];
-
-const PROJECT_GROUP: Tpl010Component = {
-  path: 'Week/Project group',
-  description: 'One group of projects in the card: what the group is, how many hours it has this week, and a row per project.',
-  ...iface(PROJECT_GROUP_FIELDS, [['pick', 'signal'], ['id', 'string']]),
-  repeats: { source: 'array', rowFields: PROJECT_ROW_FIELDS.map(([n]) => n) },
-  instantiates: [C.projectListRow],
-  nodes: [
-    inputs('pgIn', 'The group', PROJECT_GROUP_FIELDS),
-    outputs('pgOut', 'Picked', [['pick', 'signal'], ['id', 'string']]),
-    group('pgRoot', 'Project group', undefined, COLUMN('var(--space-1)')),
-    group('pgHead', 'Group head', 'pgRoot', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
-    text('pgName', 'Group name', 'pgHead', '', { ...T_LABEL, sizeMode: 'contentSize' }),
-    text('pgHours', 'Hours this week', 'pgHead', '', { ...T_NUM, sizeMode: 'contentSize' }),
-    place('pgEach', FOR_EACH, 'One row per project', 'pgRoot', { template: C.projectListRow, templateType: 'explicit' })
-  ],
-  connections: [
-    wire('pgIn', 'name', 'pgName', 'text'),
-    wire('pgIn', 'color', 'pgName', 'color'),
-    wire('pgIn', 'hours', 'pgHours', 'text'),
-    wire('pgIn', 'rows', 'pgEach', 'items'),
-    wire('pgEach', 'itemOutputSignal-pick', 'pgOut', 'pick'),
-    wire('pgEach', 'itemOutput-id', 'pgOut', 'id')
-  ]
+const DATE_PICKER: Tpl010Component = {
+  path: 'Week/Date picker',
+  description: DATE_PICKER_DESCRIPTION,
+  inputs: DATE_PICKER_INPUTS.map(({ name, type, description }) => ({ name, type, description })),
+  outputs: DATE_PICKER_OUTPUTS.map(({ name, type, description }) => ({ name, type, description })),
+  ...datePickerGraph('wdp')
 };
 
 /**
- * R6 — the projects, **behind a button, as a card over the week**, the Trello frame: a
- * grouped list on the left, one project on the right.
+ * 🔴 **Every box is cleared as its sheet closes.** A Text Input compares an arriving
+ * `startValue` with the last one it was SENT, not with what is in the box — so a sheet that
+ * opens with `''` on a box that was last sent `''` sends nothing, and the half hour typed and
+ * abandoned last time is still there (driven, R2.4: the block sheet opened on the next block
+ * with the previous block's note in it). `null` does not help: on a text box it means `''`.
+ * `Clear` resets both the box and what it was last sent, so after a close an opening `''` is
+ * already true and any other value arrives. Clearing on the CLOSE, not the open, is what keeps
+ * it from racing the values the opening sends.
  *
- * Rejected on the way and recorded so nobody rebuilds them: a card grid (*"no mental frame
- * of reference"*), inline expanding rows in a timesheet (*"too long … below the fold gets
- * forgotten"*), and tabs.
- *
- * The four groups are a repeater over `Week/Project group`, not four hand-written sections.
- * They are fixed by R4 and R8, so four copies looked defensible until the door pointed out
- * that four copies is four places to change — and the groups are data anyway, right down to
- * their colour.
+ * A Checkbox has no start value to compare at all, so the same Function ticks or unticks it —
+ * whenever the sheet is open and what it should show changes, not only on the edge of opening:
+ * the sheet's `shown` and its `done` can arrive in two runs, and a Function that acted only on
+ * the first saw an open sheet on a block that was not done yet (driven: the tick opened the
+ * sheet with Done unticked).
  */
-const PROJECT_CARD_FIELDS: Array<[string, string]> = [['groups', 'array'], ...PROJECT_DETAIL_FIELDS];
+const SHEET_SCRIPT = (boxes: string[], shownInput = 'shown') =>
+  `var shown = Inputs.${shownInput} === true;
+if (this.wasShown && !shown) Outputs.closed();
+${boxes
+  .map(
+    (b) => `var ${b}Want = shown ? Inputs.${b} === true : null;
+if (${b}Want !== null && (!this.wasShown || this.${b}Last !== ${b}Want)) { if (${b}Want) Outputs.${b}On(); else Outputs.${b}Off(); }
+this.${b}Last = ${b}Want;`
+  )
+  .join('\n')}
+this.wasShown = shown;`;
 
-const PROJECT_CARD: Tpl010Component = {
-  path: 'Week/Project card',
-  description: 'The projects as a card over the week: every project grouped by what it is for on the left, and whichever one you picked on the right.',
-  ...iface([...PROJECT_CARD_FIELDS, ['shown', 'boolean']], [['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['close', 'signal']]),
-  repeats: { source: 'array', rowFields: PROJECT_GROUP_FIELDS.map(([n]) => n) },
-  instantiates: [C.projectGroup, C.projectDetail],
+const ENTRY_ROW_FIELDS: Array<[string, string]> = [['dayText', 'string'], ['hoursText', 'string'], ['note', 'string']];
+
+/** R22 — one sitting on a block: the day, how long, and what was done. The line a client can be sent. */
+const ENTRY_ROW: Tpl010Component = {
+  path: 'Week/Entry row',
+  description: 'One sitting logged against a block: which day, how long, and what was done.',
+  ...iface(ENTRY_ROW_FIELDS, []),
   nodes: [
-    inputs('pcIn', 'The projects', [...PROJECT_CARD_FIELDS, ['shown', 'boolean']]),
-    outputs('pcOut', 'What you did in the card', [['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['close', 'signal']]),
-    group('pcScrim', 'Behind the card', undefined, {
-      sizeMode: 'explicit',
-      width: pct(100),
-      height: pct(100),
-      position: 'fixed',
-      backgroundColor: 'var(--scrim)',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      styleCss: 'z-index: 40;'
-    }),
-    group('pcCard', 'The card', 'pcScrim', {
-      cssClassName: 'planner-over',
-      ...CARD,
-      flexDirection: 'row',
-      alignItems: 'stretch',
-      sizeMode: 'explicit',
-      width: pct(88),
-      maxWidth: px(1040),
-      height: pct(84),
-      styleCss: 'overflow: hidden;'
-    }),
-    group('pcList', 'Every project', 'pcCard', {
-      cssClassName: 'planner-over-col',
-      ...COLUMN('var(--space-3)'),
-      width: pct(38),
-      backgroundColor: 'var(--background)',
-      borderRightStyle: 'solid',
-      borderRightWidth: 'var(--border-1)',
-      borderRightColor: 'var(--border)',
-      paddingLeft: 'var(--space-2)',
-      paddingRight: 'var(--space-2)',
-      paddingTop: 'var(--space-3)',
-      paddingBottom: 'var(--space-3)',
-      styleCss: 'overflow: auto;'
-    }),
-    place('pcEach', FOR_EACH, 'One section per group', 'pcList', { template: C.projectGroup, templateType: 'explicit' }),
-    group('pcDetailWrap', 'The one you picked', 'pcCard', {
-      ...COLUMN('var(--space-0)'),
-      width: pct(62),
-      cssClassName: 'planner-over-col',
-      styleCss: 'overflow: auto;'
-    }),
-    place('pcDetail', C.projectDetail, 'That project in full', 'pcDetailWrap')
+    inputs('erIn', 'The sitting', ENTRY_ROW_FIELDS),
+    group('erRoot', 'One sitting', undefined, { ...ROW('var(--space-2)'), alignItems: 'flex-start' }),
+    text('erDay', 'Which day', 'erRoot', '', { ...T_META, sizeMode: 'contentSize' }),
+    text('erHours', 'How long', 'erRoot', '', { ...T_NUM, sizeMode: 'contentSize' }),
+    text('erNote', 'What was done', 'erRoot', '', { ...wide(T_META), color: 'var(--foreground)' })
   ],
   connections: [
-    wire('pcIn', 'shown', 'pcScrim', 'mounted'),
-    wire('pcIn', 'groups', 'pcEach', 'items'),
-    wire('pcEach', 'itemOutputSignal-pick', 'pcOut', 'pick'),
-    wire('pcEach', 'itemOutput-id', 'pcOut', 'projectId'),
-    ...PROJECT_DETAIL_FIELDS.map(([n]) => wire('pcIn', n, 'pcDetail', n)),
-    wire('pcDetail', 'plan', 'pcOut', 'plan'),
-    wire('pcDetail', 'close', 'pcOut', 'close'),
-    // The scrim closes the card; the card itself does not (a click inside must not shut it).
-    wire('pcScrim', 'onClick', 'pcOut', 'close')
+    wire('erIn', 'dayText', 'erDay', 'text'),
+    wire('erIn', 'hoursText', 'erHours', 'text'),
+    wire('erIn', 'note', 'erNote', 'text')
   ]
 };
 
-const DRAWER_FIELDS: Array<[string, string]> = [
+/** A labelled box, the one shape every field in the three editors takes. */
+const BOX = (label: string, type: 'text' | 'number' | 'textArea' = 'text') => ({
+  ...FIELD,
+  type,
+  useLabel: true,
+  label,
+  labelSpacing: 6,
+  labelfontSize: 'var(--text-sm)',
+  labelcolor: 'var(--foreground)'
+});
+
+/** A checkbox whose words are its own label, so the words are the click target (TPL-001's finding). */
+const TICK_BOX = (label: string) => ({
+  checked: false,
+  width: px(18),
+  height: px(18),
+  // The product's default border is #000000, which is no border at all on the dark surface.
+  borderColor: 'var(--border-control)',
+  borderRadius: 'var(--radius-sm)',
+  useLabel: true,
+  label,
+  labelSpacing: px(8),
+  labelfontSize: 'var(--text-sm)',
+  labelcolor: 'var(--foreground)'
+});
+
+/**
+ * A Dropdown drawn as the boxes beside it are: full width, the field's border and ground, and its
+ * words as its own label. Left to its defaults it is content-width with a #000000 border, which
+ * is a black box on the light palette and no box at all on the dark one.
+ */
+const PICK = (label: string) => {
+  const { type: _type, ...field } = FIELD as Record<string, unknown>;
+  return {
+    ...field,
+    placeholder: 'Pick one',
+    useLabel: true,
+    label,
+    labelSpacing: 6,
+    labelfontSize: 'var(--text-sm)',
+    labelcolor: 'var(--foreground)'
+  };
+};
+
+/** The scrim and the card every sheet over the week sits in. */
+const sheetFrame = (p: string, width: number, z: number) => [
+  group(`${p}Scrim`, 'Behind the sheet', undefined, {
+    sizeMode: 'explicit',
+    width: pct(100),
+    height: pct(100),
+    position: 'fixed',
+    backgroundColor: 'var(--scrim)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    styleCss: `z-index: ${z};`
+  }),
+  group(`${p}Card`, 'The sheet', `${p}Scrim`, {
+    cssClassName: 'planner-over', ...KEEPS_CLICKS,
+    ...CARD,
+    ...COLUMN('var(--space-3)'),
+    // As tall as what is in it, up to 88% of the window; past that it scrolls inside itself.
+    width: pct(50),
+    maxWidth: px(width),
+    maxHeight: pct(88),
+    styleCss: 'overflow: auto;',
+    paddingLeft: 'var(--space-4)',
+    paddingRight: 'var(--space-4)',
+    paddingTop: 'var(--space-4)',
+    paddingBottom: 'var(--space-4)'
+  })
+];
+
+const BLOCK_SHEET_FIELDS: Array<[string, string]> = [
+  ['shown', 'boolean'],
   ['title', 'string'],
-  ['dayLine', 'string'],
-  ['monthLine', 'string'],
-  ['concern', 'string'],
-  ['carryRows', 'array'],
-  ['nothingToCarry', 'boolean'],
-  ['tomorrowTitle', 'string'],
-  ['tomorrowList', 'string'],
-  ['tomorrowFocus', 'string'],
-  ['tomorrowFocusColor', 'string'],
-  ['shown', 'boolean']
+  // The Dropdown's items are an `optionslist`; `*` so an array of { Label, Value } arrives there.
+  ['projects', '*'],
+  ['projectId', 'string'],
+  ['what', 'string'],
+  ['planned', 'string'],
+  ['date', 'string'],
+  ['timeShown', 'boolean'],
+  ['loggedLine', 'string'],
+  ['entries', 'array'],
+  ['hours', 'string'],
+  ['note', 'string'],
+  ['done', 'boolean'],
+  ['saveLabel', 'string']
+];
+const BLOCK_SHEET_OUTS: Array<[string, string]> = [
+  ['projectId', 'string'], ['what', 'string'], ['planned', 'string'], ['date', 'string'],
+  ['hours', 'string'], ['note', 'string'], ['done', 'boolean'], ['save', 'signal'], ['close', 'signal']
 ];
 
 /**
- * R12 — the evening. **In the template this is rules over data, not a model**: today's hours,
- * where the month stands, one concern, what to do with what is not done, and tomorrow as it
- * stands. The coach that talks back is a later task and needs a `Decision` collection this
- * template does not ship.
+ * **R23 — the block sheet: everything about one block, and the time that went into it.**
  *
- * **One concern, in one order** (AC5): an unsent building move first, because that is the rung
- * next month's money depends on; then a dormant project with no time in the week (R8); then
- * *"No concerns tonight."* The rule Richard set and this obeys: **a concern is raised once.**
+ * It grew out of the log sheet (AC4), which held one number. Richard, after the first hour of
+ * use: *"If I work 30 mins on a task that's supposed to take 1 hour, it's not necessarily done …
+ * I can't send that kind of detail to a client as proof of what I did."* So:
+ *
+ * - **the block itself** — whose it is, what it is, the hours it is planned at and its day —
+ *   is edited here, and a new block is born here from the **+** at the foot of a day;
+ * - **the time** is a list of sittings (R22). *Add time* appends one; the block stays open
+ *   unless *Done* is ticked, and *Done* is off by default — except when the tick opened the
+ *   sheet (R16a), where it starts ticked with the hours still to go already filled in.
+ *
+ * The week does not grow (R5): all of this is over it, and none of it is in it.
  */
-const SHUTDOWN_DRAWER: Tpl010Component = {
-  path: 'Week/Shutdown drawer',
-  description: 'The evening drawer: what today came to, where the month stands, the one thing worth saying, what to do with what is not done, and tomorrow as it stands.',
-  ...iface(DRAWER_FIELDS, [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal']]),
-  repeats: { source: 'array', rowFields: CARRY_ROW_FIELDS.map(([n]) => n) },
-  instantiates: [C.carryRow],
+const BLOCK_SHEET: Tpl010Component = {
+  path: 'Week/Block sheet',
+  description: 'One block over the week: its project, what it is, its hours and its day; the time logged on it so far; and a line to add the time you just spent.',
+  ...iface(BLOCK_SHEET_FIELDS, BLOCK_SHEET_OUTS),
+  repeats: { source: 'array', rowFields: ENTRY_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.entryRow, C.datePicker],
   nodes: [
-    inputs('sdIn', 'Tonight', DRAWER_FIELDS),
-    outputs('sdOut', 'What you chose', [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal']]),
-    group('sdScrim', 'Behind the drawer', undefined, {
-      sizeMode: 'explicit',
-      width: pct(100),
-      height: pct(100),
-      position: 'fixed',
-      backgroundColor: 'var(--scrim)',
-      flexDirection: 'row',
-      alignItems: 'stretch',
-      justifyContent: 'flex-end',
-      styleCss: 'z-index: 50;'
+    inputs('bsIn', 'The block it is showing', BLOCK_SHEET_FIELDS),
+    outputs('bsOut', 'What it should become', BLOCK_SHEET_OUTS),
+    ...sheetFrame('bs', 480, 60),
+    group('bsHead', 'Whose block, and close', 'bsCard', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('bsTitle', 'Whose block this is', 'bsHead', '', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
+    place('bsClose', BUTTON, 'Close the sheet', 'bsHead', BTN_ICON('icon-x', 'Close')),
+
+    place('bsProject', 'net.noodl.controls.options', 'Which project', 'bsCard', { ...PICK('Project'), placeholder: 'Pick a project' }),
+    place('bsWhat', TEXT_INPUT, 'What it is', 'bsCard', BOX('What it is')),
+    group('bsWhen', 'Hours and day', 'bsCard', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('bsPlannedBox', 'Hours planned', 'bsWhen', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    place('bsPlanned', TEXT_INPUT, 'Hours planned', 'bsPlannedBox', BOX('Hours planned', 'number')),
+    group('bsDateBox', 'Which day', 'bsWhen', { ...COLUMN('var(--space-0)'), width: pct(60) }),
+    place('bsDate', C.datePicker, 'Which day', 'bsDateBox', { Label: 'Day', 'Show Label': true }),
+
+    group('bsTime', 'The time on it', 'bsCard', {
+      ...COLUMN('var(--space-2)'),
+      borderTopStyle: 'solid',
+      borderTopWidth: 'var(--border-1)',
+      borderTopColor: 'var(--border)',
+      paddingTop: 'var(--space-3)'
     }),
-    group('sdPanel', 'The drawer', 'sdScrim', {
+    text('bsTimeLabel', 'Label', 'bsTime', 'Time logged', wide(T_LABEL)),
+    text('bsLogged', 'How much so far', 'bsTime', '', wide(T_META)),
+    place('bsEntries', FOR_EACH, 'One line per sitting', 'bsTime', { template: C.entryRow, templateType: 'explicit' }),
+    group('bsAdd', 'Add time', 'bsTime', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('bsHoursBox', 'How long', 'bsAdd', { ...COLUMN('var(--space-0)'), width: pct(30) }),
+    place('bsHours', TEXT_INPUT, 'Add time, in hours', 'bsHoursBox', BOX('Add time, h', 'number')),
+    group('bsNoteBox', 'What you did', 'bsAdd', { ...COLUMN('var(--space-0)'), width: pct(70) }),
+    place('bsNote', TEXT_INPUT, 'What you did', 'bsNoteBox', BOX('What you did')),
+    place('bsDone', 'net.noodl.controls.checkbox', 'Done', 'bsTime', TICK_BOX('Done — nothing more to do on it')),
+    derive('bsOpened', 'Clear the boxes on close; tick Done to match the block', SHEET_SCRIPT(['done'])),
+
+    group('bsButtons', 'Buttons', 'bsCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('bsSave', BUTTON, 'Save', 'bsButtons', { ...BTN_PRIMARY, label: 'Save' })
+  ],
+  connections: [
+    wire('bsIn', 'shown', 'bsScrim', 'mounted'),
+    wire('bsIn', 'title', 'bsTitle', 'text'),
+    wire('bsIn', 'projects', 'bsProject', 'items'),
+    // Setting the Dropdown from the graph does not fire Changed, and does publish Value.
+    wire('bsIn', 'projectId', 'bsProject', 'value'),
+    wire('bsProject', 'value', 'bsOut', 'projectId'),
+    // 🔴 `text` is a box's OUTPUT. Putting a value INTO it is `startValue`.
+    wire('bsIn', 'what', 'bsWhat', 'startValue'),
+    wire('bsWhat', 'onTextChanged', 'bsOut', 'what'),
+    wire('bsIn', 'planned', 'bsPlanned', 'startValue'),
+    wire('bsPlanned', 'onTextChanged', 'bsOut', 'planned'),
+    wire('bsIn', 'date', 'bsDate', 'Value'),
+    wire('bsDate', 'Value', 'bsOut', 'date'),
+    // A new block has no time on it yet: the section is for a block that exists.
+    wire('bsIn', 'timeShown', 'bsTime', 'mounted'),
+    wire('bsIn', 'loggedLine', 'bsLogged', 'text'),
+    wire('bsIn', 'entries', 'bsEntries', 'items'),
+    wire('bsIn', 'hours', 'bsHours', 'startValue'),
+    wire('bsHours', 'onTextChanged', 'bsOut', 'hours'),
+    wire('bsIn', 'note', 'bsNote', 'startValue'),
+    wire('bsNote', 'onTextChanged', 'bsOut', 'note'),
+    wire('bsIn', 'shown', 'bsOpened', 'in-shown'),
+    wire('bsIn', 'done', 'bsOpened', 'in-done'),
+    wire('bsOpened', 'out-doneOn', 'bsDone', 'check'),
+    wire('bsOpened', 'out-doneOff', 'bsDone', 'uncheck'),
+    ...['bsWhat', 'bsPlanned', 'bsHours', 'bsNote'].map((id) => wire('bsOpened', 'out-closed', id, 'clear')),
+    wire('bsDone', 'checked', 'bsOut', 'done'),
+    wire('bsIn', 'saveLabel', 'bsSave', 'label'),
+    wire('bsSave', 'onClick', 'bsOut', 'save'),
+    wire('bsClose', 'onClick', 'bsOut', 'close'),
+    wire('bsScrim', 'onClick', 'bsOut', 'close')
+  ]
+};
+
+/** A port passed through a parent component under a prefix, so two children's `name` cannot collide. */
+const under = (prefix: string, name: string) => prefix + name[0].toUpperCase() + name.slice(1);
+
+/** What the project editor holds: every field of a Project a person types (R23). */
+const PROJECT_EDIT_VALUES: Array<[string, string]> = [
+  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'string'], ['slot', 'string'], ['rung', 'string'],
+  ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string']
+];
+const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['title', 'string'], ['kinds', '*'], ...PROJECT_EDIT_VALUES];
+const PROJECT_EDITOR_OUTS: Array<[string, string]> = [...PROJECT_EDIT_VALUES, ['save', 'signal'], ['cancel', 'signal']];
+
+/** The typed boxes: `[field, label, id, box type, parent]`. Placed one by one below, because child order is draw order. */
+const PROJECT_BOXES: Array<[string, string, string, 'text' | 'number', string]> = [
+  ['name', 'Name', 'peName', 'text', 'peRoot'],
+  ['sub', 'One line about it', 'peSub', 'text', 'peRoot'],
+  ['rate', 'Rate, per hour', 'peRate', 'number', 'peRateBox'],
+  ['slot', 'Slot', 'peSlot', 'text', 'peSlotBox'],
+  ['rung', 'Rung', 'peRung', 'text', 'peRungBox'],
+  ['move', 'The move', 'peMove', 'text', 'peMoveBox'],
+  ['moveWorth', 'What it is worth', 'peWorth', 'text', 'peWorthBox'],
+  ['moveWhen', 'When, in words', 'peWhen', 'text', 'peWhenBox'],
+  ['say', 'What to remember about it', 'peSay', 'text', 'peRoot']
+];
+const peBox = (field: string) => {
+  const found = PROJECT_BOXES.find(([f]) => f === field);
+  if (!found) throw new Error(`tpl010: no project box for ${field}`);
+  const [, label, id, type, parent] = found;
+  return place(id, TEXT_INPUT, label, parent, BOX(label, type));
+};
+
+/**
+ * **R23 — the project editor, in the card's right-hand pane.**
+ *
+ * *"I don't see how you can add a new 'next move' to a project. For that matter, I don't even see
+ * how to add a new project."* The commands to do both existed and nothing pressed them. This is
+ * what presses them: *Edit* on a project's detail, or **+ New project** at the foot of the list,
+ * and the pane the detail was in becomes this form.
+ *
+ * **A move is edited here and nowhere else.** A project whose move block is done gets its next
+ * move by being given a new one here — which is why the move's fields sit in their own box, the
+ * same box the detail draws the move in.
+ *
+ * The billing terms R23 lists belong to R2.2 and arrive with it: the fields they would edit
+ * (`invoiceDay`, `termsDays`, `agreedHours`, `cycle`) do not exist until then.
+ */
+const PROJECT_EDITOR: Tpl010Component = {
+  path: 'Week/Project editor',
+  description: 'One project as a form: its name, what kind of work it is, its rate, and its next move — what it is, what it is worth and when.',
+  ...iface(PROJECT_EDITOR_FIELDS, PROJECT_EDITOR_OUTS),
+  instantiates: [C.datePicker],
+  nodes: [
+    inputs('peIn', 'The project as it is', PROJECT_EDITOR_FIELDS),
+    outputs('peOut', 'The project as it should be', PROJECT_EDITOR_OUTS),
+    group('peRoot', 'Project editor', undefined, {
       ...COLUMN('var(--space-3)'),
-      backgroundColor: 'var(--surface)',
-      sizeMode: 'explicit',
-      width: pct(34),
-      maxWidth: px(420),
-      height: pct(100),
-      styleCss: 'overflow: auto;',
       paddingLeft: 'var(--space-4)',
       paddingRight: 'var(--space-4)',
-      paddingTop: 'var(--space-4)',
+      paddingTop: 'var(--space-3)',
       paddingBottom: 'var(--space-4)'
     }),
-    group('sdHead', 'Which evening', 'sdPanel', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
-    text('sdTitle', 'Shutdown', 'sdHead', '', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
-    place('sdClose', BUTTON, 'Close the drawer', 'sdHead', BTN_ICON('icon-x', 'Close')),
+    group('peTop', 'Title and close', 'peRoot', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('peTitle', 'What this form is', 'peTop', '', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
+    place('peClose', BUTTON, 'Stop editing', 'peTop', BTN_ICON('icon-x', 'Stop editing')),
+    peBox('name'),
+    peBox('sub'),
+    group('peKindRow', 'Kind and rate', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peKindBox', 'What kind of work', 'peKindRow', { ...COLUMN('var(--space-0)'), width: pct(60) }),
+    place('peKind', 'net.noodl.controls.options', 'What kind of work', 'peKindBox', PICK('What kind of work')),
+    group('peRateBox', 'Rate', 'peKindRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    peBox('rate'),
+    group('peSlotRow', 'Slot and rung', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peSlotBox', 'Slot', 'peSlotRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    group('peRungBox', 'Rung', 'peSlotRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    peBox('slot'),
+    peBox('rung'),
 
-    group('sdCoach', 'What today came to', 'sdPanel', {
+    group('peMoveBox', 'Its next move', 'peRoot', {
       ...COLUMN('var(--space-2)'),
       backgroundColor: 'var(--muted)',
       borderRadius: 'var(--radius-md)',
       paddingLeft: 'var(--space-3)',
       paddingRight: 'var(--space-3)',
-      paddingTop: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
       paddingBottom: 'var(--space-3)'
     }),
-    text('sdDay', 'Today', 'sdCoach', '', wide(T_BODY)),
-    text('sdMonth', 'The month', 'sdCoach', '', wide(T_META)),
-    text('sdConcern', 'The one thing', 'sdCoach', '', { ...wide(T_BODY), fontWeight: 'var(--font-semibold)' }),
-
-    group('sdCarrySection', 'Not done today', 'sdPanel', COLUMN('var(--space-1)')),
-    text('sdCarryLabel', 'Label', 'sdCarrySection', 'Not done today', wide(T_LABEL)),
-    place('sdEach', FOR_EACH, 'One row per block not done', 'sdCarrySection', { template: C.carryRow, templateType: 'explicit' }),
-    text('sdAllDone', 'When everything is logged', 'sdCarrySection', 'Everything logged. Nice.', wide(T_META)),
-
-    group('sdTomorrow', 'Tomorrow as it stands', 'sdPanel', COLUMN('var(--space-1)')),
-    text('sdTomorrowLabel', 'Label', 'sdTomorrow', '', wide(T_LABEL)),
-    text('sdTomorrowList', 'What is in it', 'sdTomorrow', '', wide(T_META)),
-    group('sdFocusRow', 'Focus total', 'sdTomorrow', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
-    text('sdFocusLabel', 'Label', 'sdFocusRow', 'Focus total', { ...T_META, sizeMode: 'contentSize' }),
-    text('sdFocus', 'How much', 'sdFocusRow', '', { ...T_NUM, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' })
+    text('peMoveLabel', 'Label', 'peMoveBox', 'Next move', wide(T_LABEL)),
+    peBox('move'),
+    group('peMoveMeta', 'Worth and when', 'peMoveBox', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peWorthBox', 'Worth', 'peMoveMeta', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    group('peWhenBox', 'When', 'peMoveMeta', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    peBox('moveWorth'),
+    peBox('moveWhen'),
+    place('peDue', C.datePicker, 'Due by', 'peMoveBox', { Label: 'Due by', 'Show Label': true }),
+    place('peStop', 'net.noodl.controls.checkbox', 'Fixes only', 'peMoveBox', TICK_BOX('Fixes only — keep it off the moves strip')),
+    derive('peOpened', 'Clear the boxes on close; tick Fixes only to match the project', SHEET_SCRIPT(['moveStop'])),
+    peBox('say'),
+    group('peButtons', 'Buttons', 'peRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('peSave', BUTTON, 'Save the project', 'peButtons', { ...BTN_PRIMARY, label: 'Save' }),
+    place('peCancel', BUTTON, 'Stop editing without saving', 'peButtons', { ...BTN_OUTLINE, label: 'Cancel' })
   ],
   connections: [
-    wire('sdIn', 'shown', 'sdScrim', 'mounted'),
-    wire('sdIn', 'title', 'sdTitle', 'text'),
-    wire('sdIn', 'dayLine', 'sdDay', 'text'),
-    wire('sdIn', 'monthLine', 'sdMonth', 'text'),
-    wire('sdIn', 'concern', 'sdConcern', 'text'),
-    wire('sdIn', 'carryRows', 'sdEach', 'items'),
-    wire('sdIn', 'nothingToCarry', 'sdAllDone', 'mounted'),
-    wire('sdIn', 'tomorrowTitle', 'sdTomorrowLabel', 'text'),
-    wire('sdIn', 'tomorrowList', 'sdTomorrowList', 'text'),
-    wire('sdIn', 'tomorrowFocus', 'sdFocus', 'text'),
-    wire('sdIn', 'tomorrowFocusColor', 'sdFocus', 'color'),
-    wire('sdEach', 'itemOutputSignal-carry', 'sdOut', 'carry'),
-    wire('sdEach', 'itemOutputSignal-drop', 'sdOut', 'drop'),
-    wire('sdEach', 'itemOutput-id', 'sdOut', 'blockId'),
-    wire('sdClose', 'onClick', 'sdOut', 'close'),
-    wire('sdScrim', 'onClick', 'sdOut', 'close')
+    wire('peIn', 'shown', 'peRoot', 'mounted'),
+    wire('peIn', 'title', 'peTitle', 'text'),
+    ...PROJECT_BOXES.flatMap(([field, , id]) => [wire('peIn', field, id, 'startValue'), wire(id, 'onTextChanged', 'peOut', field)]),
+    wire('peIn', 'kinds', 'peKind', 'items'),
+    wire('peIn', 'kind', 'peKind', 'value'),
+    wire('peKind', 'value', 'peOut', 'kind'),
+    wire('peIn', 'moveDue', 'peDue', 'Value'),
+    wire('peDue', 'Value', 'peOut', 'moveDue'),
+    wire('peIn', 'shown', 'peOpened', 'in-shown'),
+    wire('peIn', 'moveStop', 'peOpened', 'in-moveStop'),
+    wire('peOpened', 'out-moveStopOn', 'peStop', 'check'),
+    wire('peOpened', 'out-moveStopOff', 'peStop', 'uncheck'),
+    ...PROJECT_BOXES.map(([, , id]) => wire('peOpened', 'out-closed', id, 'clear')),
+    wire('peStop', 'checked', 'peOut', 'moveStop'),
+    wire('peSave', 'onClick', 'peOut', 'save'),
+    wire('peCancel', 'onClick', 'peOut', 'cancel'),
+    wire('peClose', 'onClick', 'peOut', 'cancel')
   ]
 };
 
-/**
- * The only screen that holds money (§2: *"These are the only fields that hold real money in
- * the hosted app"*), and the reason the template ships with invented numbers and the hosted
- * app keeps the real ones.
- *
- * R2's arithmetic is stated on the sheet rather than hidden: the month's billable target is
- * `(what the household needs − what the partner brings) ÷ your rate`. Q3 rules that the month
- * plan is **not** written automatically on the 1st — *Plan this month* writes it, and the week
- * asks for it until it exists.
- */
-const LOG_SHEET_FIELDS: Array<[string, string]> = [
-  ['shown', 'boolean'],
-  ['title', 'string'],
-  ['plannedLine', 'string'],
-  ['what', 'string'],
-  ['actual', 'string'],
-  ['saveLabel', 'string'],
-  ['unlogShown', 'boolean']
-];
-const LOG_SHEET_OUTS: Array<[string, string]> = [
-  ['what', 'string'], ['actual', 'string'], ['save', 'signal'], ['unlog', 'signal'], ['close', 'signal']
+const CASH_ROW_FIELDS: Array<[string, string]> = [['id', 'string'], ['whenText', 'string'], ['label', 'string'], ['amountText', 'string'], ['repeatText', 'string']];
+
+/** One typed money event in the settings: when, what, how much, and whether it repeats. Press it to edit it. */
+const CASH_ROW: Tpl010Component = {
+  path: 'Week/Cash row',
+  description: 'One money event in the settings: when it happens, what it is, how much, and whether it happens every month.',
+  ...iface(CASH_ROW_FIELDS, [['pick', 'signal'], ['id', 'string']]),
+  nodes: [
+    inputs('crIn', 'The event', CASH_ROW_FIELDS),
+    outputs('crOut', 'Picked', [['pick', 'signal'], ['id', 'string']]),
+    group('crRoot', 'One money event', undefined, {
+      ...ROW('var(--space-2)'),
+      borderBottomStyle: 'solid',
+      borderBottomWidth: 'var(--border-1)',
+      borderBottomColor: 'var(--border)',
+      paddingTop: 'var(--space-1)',
+      paddingBottom: 'var(--space-1)'
+    }),
+    text('crWhen', 'When', 'crRoot', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-xs)' }),
+    group('crWords', 'What it is', 'crRoot', { ...COLUMN('var(--space-0)'), width: pct(100) }),
+    text('crLabel', 'What it is', 'crWords', '', { ...wide(T_BODY), fontSize: 'var(--text-sm)' }),
+    text('crRepeat', 'Whether it repeats', 'crWords', '', wide(T_META)),
+    text('crAmount', 'How much', 'crRoot', '', { ...T_NUM, sizeMode: 'contentSize' }),
+    // The row is not focusable; the button is the keyboard's way in (the chip's + argument, R2.1).
+    place('crEdit', BUTTON, 'Edit this event', 'crRoot', { ...BTN_GHOST, label: 'Edit' })
+  ],
+  connections: [
+    wire('crIn', 'whenText', 'crWhen', 'text'),
+    wire('crIn', 'label', 'crLabel', 'text'),
+    wire('crIn', 'repeatText', 'crRepeat', 'text'),
+    wire('crIn', 'amountText', 'crAmount', 'text'),
+    wire('crIn', 'id', 'crOut', 'id'),
+    wire('crRoot', 'onClick', 'crOut', 'pick'),
+    wire('crEdit', 'onClick', 'crOut', 'pick')
+  ]
+};
+
+const CASH_EDIT_VALUES: Array<[string, string]> = [['date', 'string'], ['amount', 'string'], ['label', 'string'], ['kind', 'string'], ['monthly', 'boolean']];
+const CASH_EDITOR_FIELDS: Array<[string, string]> = [['rows', 'array'], ['formShown', 'boolean'], ['formTitle', 'string'], ['kinds', '*'], ...CASH_EDIT_VALUES];
+const CASH_EDITOR_OUTS: Array<[string, string]> = [
+  ['pick', 'signal'], ['pickId', 'string'], ['add', 'signal'], ...CASH_EDIT_VALUES, ['save', 'signal'], ['cancel', 'signal']
 ];
 
 /**
- * **AC4 — where the hours a block really took go in.**
- *
- * Richard ruled this after the first drive: *"like the todo app, when you click to interact
- * with a card or whatever you get a modal where you can add hours, what happened"*. The week
- * itself stays exactly as the approved mockup draws it — R5 says it fits a laptop and never
- * grows, and a row of editable fields across six columns is the quickest way to break that.
- * So the correction lives over the week, not in it: press a block's words or its hours and
- * this opens on that block.
- *
- * The tick keeps its one-press meaning — *it took as long as it was meant to* — and is still
- * the fast path. This sheet is for the evening when it did not.
- *
- * 🔴 **Why the two boxes can be trusted to follow the block.** A Text Input's value input is
- * `startValue` and its value OUTPUT is `onTextChanged`, and setting `startValue` while the
- * box is not focused re-publishes `onTextChanged` (`text-input.ts` `setText`). Without that
- * the sheet would carry the last block's words into the next block it opened on — so the
- * behaviour is load-bearing, not incidental, and the gate holds it.
+ * **R23 — the money events, in the settings sheet.** The partner's contract, the household
+ * costs, the one-offs: what the cash strip runs its balance through. Until now they could only
+ * be seeded. A list, a press to edit one, and *+ Add a money event* for a new one; the form is
+ * only there while something is being edited, so the sheet stays a list you can read.
  */
-const LOG_SHEET: Tpl010Component = {
-  path: 'Week/Log sheet',
-  description: 'What a block of time actually came to: the hours it really took and what happened, over the week.',
-  ...iface(LOG_SHEET_FIELDS, LOG_SHEET_OUTS),
+const CASH_EDITOR: Tpl010Component = {
+  path: 'Week/Cash editor',
+  description: 'The money events the cash strip is worked out from, as a list you can add to and edit: when, how much, what it is, and whether it happens every month.',
+  ...iface(CASH_EDITOR_FIELDS, CASH_EDITOR_OUTS),
+  repeats: { source: 'array', rowFields: CASH_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.cashRow, C.datePicker],
   nodes: [
-    inputs('lgIn', 'The block it is showing', LOG_SHEET_FIELDS),
-    outputs('lgOut', 'What it should become', LOG_SHEET_OUTS),
-    group('lgScrim', 'Behind the sheet', undefined, {
-      sizeMode: 'explicit',
-      width: pct(100),
-      height: pct(100),
-      position: 'fixed',
-      backgroundColor: 'var(--scrim)',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      styleCss: 'z-index: 60;'
+    inputs('ceIn', 'The money events', CASH_EDITOR_FIELDS),
+    outputs('ceOut', 'What to change', CASH_EDITOR_OUTS),
+    group('ceRoot', 'Money events', undefined, {
+      ...COLUMN('var(--space-2)'),
+      borderTopStyle: 'solid',
+      borderTopWidth: 'var(--border-1)',
+      borderTopColor: 'var(--border)',
+      paddingTop: 'var(--space-3)'
     }),
-    group('lgCard', 'The sheet', 'lgScrim', {
-      cssClassName: 'planner-over',
-      ...CARD,
-      ...COLUMN('var(--space-3)'),
-      sizeMode: 'explicit',
-      width: pct(50),
-      maxWidth: px(460),
-      maxHeight: pct(88),
-      styleCss: 'overflow: auto;',
-      paddingLeft: 'var(--space-4)',
-      paddingRight: 'var(--space-4)',
-      paddingTop: 'var(--space-4)',
-      paddingBottom: 'var(--space-4)'
+    text('ceLabel', 'Label', 'ceRoot', 'Money coming and going', wide(T_LABEL)),
+    text('ceHint', 'What belongs here', 'ceRoot', 'Everything the cash strip counts besides your hours: your partner’s contract, the household costs, one-offs.', wide(T_META)),
+    place('ceEach', FOR_EACH, 'One row per event', 'ceRoot', { template: C.cashRow, templateType: 'explicit' }),
+    place('ceAdd', BUTTON, 'Add a money event', 'ceRoot', { ...BTN_GHOST, borderStyle: 'dashed', label: '+ Add a money event' }),
+    group('ceForm', 'The event being edited', 'ceRoot', {
+      ...COLUMN('var(--space-2)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-3)'
     }),
-    group('lgHead', 'Whose block, and close', 'lgCard', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
-    text('lgTitle', 'Whose block this is', 'lgHead', '', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
-    place('lgClose', BUTTON, 'Close the sheet', 'lgHead', BTN_ICON('icon-x', 'Close')),
-    text('lgPlanned', 'What it was planned at', 'lgCard', '', wide(T_META)),
-    place('lgWhat', TEXT_INPUT, 'What happened', 'lgCard', {
-      ...FIELD,
-      type: 'text',
-      useLabel: true,
-      label: 'What happened',
-      labelSpacing: 6,
-      labelfontSize: 'var(--text-sm)',
-      labelcolor: 'var(--foreground)'
-    }),
-    place('lgActual', TEXT_INPUT, 'Hours it took', 'lgCard', {
-      ...FIELD,
-      type: 'number',
-      useLabel: true,
-      label: 'Hours it took',
-      labelSpacing: 6,
-      labelfontSize: 'var(--text-sm)',
-      labelcolor: 'var(--foreground)'
-    }),
-    group('lgButtons', 'Buttons', 'lgCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
-    place('lgSave', BUTTON, 'Log it', 'lgButtons', { ...BTN_PRIMARY, label: 'Log it' }),
-    place('lgUnlog', BUTTON, 'Put it back to not done', 'lgButtons', { ...BTN_OUTLINE, label: 'Not done yet' })
+    text('ceFormTitle', 'Which event', 'ceForm', '', { ...wide(T_BODY), fontWeight: 'var(--font-semibold)' }),
+    place('ceWhat', TEXT_INPUT, 'What it is', 'ceForm', BOX('What it is')),
+    group('ceRow', 'Amount and day', 'ceForm', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('ceAmountBox', 'How much', 'ceRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    place('ceAmount', TEXT_INPUT, 'How much', 'ceAmountBox', BOX('How much', 'number')),
+    group('ceDateBox', 'When', 'ceRow', { ...COLUMN('var(--space-0)'), width: pct(60) }),
+    place('ceDate', C.datePicker, 'When', 'ceDateBox', { Label: 'When', 'Show Label': true }),
+    place('ceKind', 'net.noodl.controls.options', 'In or out', 'ceForm', PICK('In or out')),
+    place('ceMonthly', 'net.noodl.controls.checkbox', 'Every month', 'ceForm', TICK_BOX('Every month, on this day')),
+    derive('ceOpened', 'Clear the boxes on close; tick Every month to match the event', SHEET_SCRIPT(['monthly'], 'formShown')),
+    group('ceButtons', 'Buttons', 'ceForm', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('ceSave', BUTTON, 'Save the event', 'ceButtons', { ...BTN_PRIMARY, label: 'Save' }),
+    place('ceCancel', BUTTON, 'Stop editing the event', 'ceButtons', { ...BTN_OUTLINE, label: 'Cancel' })
   ],
   connections: [
-    wire('lgIn', 'shown', 'lgScrim', 'mounted'),
-    wire('lgIn', 'title', 'lgTitle', 'text'),
-    wire('lgIn', 'plannedLine', 'lgPlanned', 'text'),
-    // 🔴 `text` is the box's OUTPUT. Putting a value INTO it is `startValue`.
-    wire('lgIn', 'what', 'lgWhat', 'startValue'),
-    wire('lgIn', 'actual', 'lgActual', 'startValue'),
-    wire('lgWhat', 'onTextChanged', 'lgOut', 'what'),
-    wire('lgActual', 'onTextChanged', 'lgOut', 'actual'),
-    wire('lgIn', 'saveLabel', 'lgSave', 'label'),
-    // Only a block that is already logged can be put back, so the button is not there
-    // offering to undo something that has not happened.
-    wire('lgIn', 'unlogShown', 'lgUnlog', 'mounted'),
-    wire('lgSave', 'onClick', 'lgOut', 'save'),
-    wire('lgUnlog', 'onClick', 'lgOut', 'unlog'),
-    wire('lgClose', 'onClick', 'lgOut', 'close'),
-    wire('lgScrim', 'onClick', 'lgOut', 'close')
+    wire('ceIn', 'rows', 'ceEach', 'items'),
+    wire('ceEach', 'itemOutputSignal-pick', 'ceOut', 'pick'),
+    wire('ceEach', 'itemOutput-id', 'ceOut', 'pickId'),
+    wire('ceAdd', 'onClick', 'ceOut', 'add'),
+    wire('ceIn', 'formShown', 'ceForm', 'mounted'),
+    wire('ceIn', 'formTitle', 'ceFormTitle', 'text'),
+    wire('ceIn', 'label', 'ceWhat', 'startValue'),
+    wire('ceWhat', 'onTextChanged', 'ceOut', 'label'),
+    wire('ceIn', 'amount', 'ceAmount', 'startValue'),
+    wire('ceAmount', 'onTextChanged', 'ceOut', 'amount'),
+    wire('ceIn', 'date', 'ceDate', 'Value'),
+    wire('ceDate', 'Value', 'ceOut', 'date'),
+    wire('ceIn', 'kinds', 'ceKind', 'items'),
+    wire('ceIn', 'kind', 'ceKind', 'value'),
+    wire('ceKind', 'value', 'ceOut', 'kind'),
+    wire('ceIn', 'formShown', 'ceOpened', 'in-formShown'),
+    wire('ceIn', 'monthly', 'ceOpened', 'in-monthly'),
+    wire('ceOpened', 'out-monthlyOn', 'ceMonthly', 'check'),
+    wire('ceOpened', 'out-monthlyOff', 'ceMonthly', 'uncheck'),
+    ...['ceWhat', 'ceAmount'].map((id) => wire('ceOpened', 'out-closed', id, 'clear')),
+    wire('ceMonthly', 'checked', 'ceOut', 'monthly'),
+    wire('ceSave', 'onClick', 'ceOut', 'save'),
+    wire('ceCancel', 'onClick', 'ceOut', 'cancel')
   ]
 };
 
@@ -1749,15 +1865,383 @@ const DAY_PICKER: Tpl010Component = {
   ]
 };
 
+/**
+ * The right-hand half of the projects card: one project, whole.
+ *
+ * R9 is the reason the move card can be missing its button. A building project that is
+ * finished says **"fixes only"** (`moveStop`) and gets no *Put 30 min in the week*, so a
+ * done asset stops absorbing hours — the mockup's Builder tool, whose own line is *"Every
+ * hour here now is an hour the coaching email does not get."*
+ *
+ * Four fact slots, not a repeater: `Project.facts` is a short fixed list a person types in
+ * the editor (Q2), and no project in the approved mockup carries more than four.
+ */
+const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [
+  ['name', 'string'], ['sub', 'string'],
+  ['move', 'string'], ['hasMove', 'boolean'], ['worth', 'string'], ['hasWorth', 'boolean'],
+  ['when', 'string'], ['whenColor', 'string'], ['mark', 'string'], ['soft', 'string'],
+  ['planLabel', 'string'], ['canPlan', 'boolean'],
+  ['weekText', 'string'], ['sparkTitle', 'string'], ['say', 'string'],
+  ['facts', 'array'], ['bars', 'array'], ['boxes', 'array'],
+  ['firstLabel', 'string'], ['lastLabel', 'string']
+];
+
+const PROJECT_DETAIL: Tpl010Component = {
+  path: 'Week/Project detail',
+  description: 'One project in full: its next move and what that move is worth, its hours this week, six months of history, its facts, and the one line about it.',
+  ...iface(PROJECT_DETAIL_FIELDS, [['plan', 'signal'], ['edit', 'signal'], ['close', 'signal']]),
+  repeats: { source: 'array', rowFields: FACT_FIELDS.map(([n]) => n) },
+  instantiates: [C.sparkline, C.dayBoxes, C.factRow],
+  nodes: [
+    inputs('pdIn', 'The project', PROJECT_DETAIL_FIELDS),
+    outputs('pdOut', 'What you did', [['plan', 'signal'], ['edit', 'signal'], ['close', 'signal']]),
+    group('pdRoot', 'Project detail', undefined, { ...COLUMN('var(--space-3)'), paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-4)' }),
+    group('pdTop', 'Name and close', 'pdRoot', { ...ROW('var(--space-2)'), alignItems: 'flex-start', justifyContent: 'space-between' }),
+    group('pdNames', 'What it is called', 'pdTop', { ...COLUMN('var(--space-0)'), width: pct(100) }),
+    text('pdName', 'Project name', 'pdNames', '', { ...wide(T_TITLE), as: 'h2' }),
+    text('pdSub', 'One line about it', 'pdNames', '', wide(T_META)),
+    group('pdTopButtons', 'Edit and close', 'pdTop', ROW_TIGHT('var(--space-1)')),
+    // R23 — the only way into the project editor for a project that exists.
+    place('pdEdit', BUTTON, 'Edit this project', 'pdTopButtons', { ...BTN_GHOST, label: 'Edit' }),
+    place('pdClose', BUTTON, 'Close the card', 'pdTopButtons', BTN_ICON('icon-x', 'Close')),
+
+    group('pdMove', 'Its next move', 'pdRoot', {
+      ...COLUMN('var(--space-1)'),
+      borderRadius: 'var(--radius-md)',
+      borderLeftStyle: 'solid',
+      borderLeftWidth: px(3),
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)'
+    }),
+    text('pdMoveLabel', 'Label', 'pdMove', 'Next move', { ...T_LABEL, sizeMode: 'contentSize' }),
+    text('pdMoveText', 'The move', 'pdMove', '', { ...wide(T_BODY) }),
+    group('pdMoveMeta', 'Worth and when', 'pdMove', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('pdWorth', 'What it is worth', 'pdMoveMeta', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
+    text('pdWhen', 'When to do it', 'pdMoveMeta', '', { ...T_META, sizeMode: 'contentSize' }),
+    place('pdPlan', BUTTON, 'Put it in the week', 'pdMove', { ...BTN_PRIMARY, label: 'Put 30 min in the week' }),
+
+    group('pdWeek', 'This week', 'pdRoot', COLUMN('var(--space-1)')),
+    text('pdWeekLabel', 'How much this week', 'pdWeek', '', wide(T_LABEL)),
+    place('pdBoxes', C.dayBoxes, 'The six days', 'pdWeek'),
+
+    group('pdTwo', 'History and facts', 'pdRoot', { ...ROW('var(--space-4)'), alignItems: 'flex-start' }),
+    group('pdHistory', 'Six months', 'pdTwo', { ...COLUMN('var(--space-1)'), width: pct(50) }),
+    text('pdSparkTitle', 'What the bars are', 'pdHistory', '', wide(T_LABEL)),
+    place('pdSpark', C.sparkline, 'The bars', 'pdHistory'),
+    group('pdFacts', 'Facts', 'pdTwo', { ...COLUMN('var(--space-1)'), width: pct(50) }),
+    text('pdFactsLabel', 'Label', 'pdFacts', 'Facts', wide(T_LABEL)),
+    place('pdFactEach', FOR_EACH, 'One row per fact', 'pdFacts', { template: C.factRow, templateType: 'explicit' }),
+
+    // Text draws type and nothing else — it has no padding, background or radius of its
+    // own — so the tinted box the one line sits in is a Group around it.
+    group('pdSayBox', 'The one line about it', 'pdRoot', {
+      ...COLUMN('var(--space-0)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)'
+    }),
+    text('pdSay', 'What to remember about it', 'pdSayBox', '', wide(T_META))
+  ],
+  connections: [
+    wire('pdIn', 'name', 'pdName', 'text'),
+    wire('pdIn', 'sub', 'pdSub', 'text'),
+    wire('pdIn', 'hasMove', 'pdMove', 'mounted'),
+    wire('pdIn', 'mark', 'pdMove', 'borderLeftColor'),
+    wire('pdIn', 'soft', 'pdMove', 'backgroundColor'),
+    wire('pdIn', 'move', 'pdMoveText', 'text'),
+    wire('pdIn', 'worth', 'pdWorth', 'text'),
+    wire('pdIn', 'hasWorth', 'pdWorth', 'mounted'),
+    wire('pdIn', 'when', 'pdWhen', 'text'),
+    wire('pdIn', 'whenColor', 'pdWhen', 'color'),
+    wire('pdIn', 'planLabel', 'pdPlan', 'label'),
+    // R9 — a finished asset has no button to spend more hours on it.
+    wire('pdIn', 'canPlan', 'pdPlan', 'mounted'),
+    wire('pdIn', 'weekText', 'pdWeekLabel', 'text'),
+    wire('pdIn', 'sparkTitle', 'pdSparkTitle', 'text'),
+    wire('pdIn', 'say', 'pdSay', 'text'),
+    wire('pdIn', 'facts', 'pdFactEach', 'items'),
+    wire('pdIn', 'bars', 'pdSpark', 'bars'),
+    wire('pdIn', 'firstLabel', 'pdSpark', 'firstLabel'),
+    wire('pdIn', 'lastLabel', 'pdSpark', 'lastLabel'),
+    wire('pdIn', 'boxes', 'pdBoxes', 'boxes'),
+    wire('pdPlan', 'onClick', 'pdOut', 'plan'),
+    wire('pdEdit', 'onClick', 'pdOut', 'edit'),
+    wire('pdClose', 'onClick', 'pdOut', 'close')
+  ]
+};
+
+/** One group in the card's list: its name, its hours this week, and its projects. */
+const PROJECT_GROUP_FIELDS: Array<[string, string]> = [['name', 'string'], ['hours', 'string'], ['color', 'string'], ['rows', 'array']];
+
+const PROJECT_GROUP: Tpl010Component = {
+  path: 'Week/Project group',
+  description: 'One group of projects in the card: what the group is, how many hours it has this week, and a row per project.',
+  ...iface(PROJECT_GROUP_FIELDS, [['pick', 'signal'], ['id', 'string']]),
+  repeats: { source: 'array', rowFields: PROJECT_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.projectListRow],
+  nodes: [
+    inputs('pgIn', 'The group', PROJECT_GROUP_FIELDS),
+    outputs('pgOut', 'Picked', [['pick', 'signal'], ['id', 'string']]),
+    group('pgRoot', 'Project group', undefined, COLUMN('var(--space-1)')),
+    group('pgHead', 'Group head', 'pgRoot', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('pgName', 'Group name', 'pgHead', '', { ...T_LABEL, sizeMode: 'contentSize' }),
+    text('pgHours', 'Hours this week', 'pgHead', '', { ...T_NUM, sizeMode: 'contentSize' }),
+    place('pgEach', FOR_EACH, 'One row per project', 'pgRoot', { template: C.projectListRow, templateType: 'explicit' })
+  ],
+  connections: [
+    wire('pgIn', 'name', 'pgName', 'text'),
+    wire('pgIn', 'color', 'pgName', 'color'),
+    wire('pgIn', 'hours', 'pgHours', 'text'),
+    wire('pgIn', 'rows', 'pgEach', 'items'),
+    wire('pgEach', 'itemOutputSignal-pick', 'pgOut', 'pick'),
+    wire('pgEach', 'itemOutput-id', 'pgOut', 'id')
+  ]
+};
+
+/**
+ * R6 — the projects, **behind a button, as a card over the week**, the Trello frame: a
+ * grouped list on the left, one project on the right.
+ *
+ * Rejected on the way and recorded so nobody rebuilds them: a card grid (*"no mental frame
+ * of reference"*), inline expanding rows in a timesheet (*"too long … below the fold gets
+ * forgotten"*), and tabs.
+ *
+ * The four groups are a repeater over `Week/Project group`, not four hand-written sections.
+ * They are fixed by R4 and R8, so four copies looked defensible until the door pointed out
+ * that four copies is four places to change — and the groups are data anyway, right down to
+ * their colour.
+ */
+/**
+ * The editor's ports, passed through the card under `ed…` — the detail beside it has a `name`
+ * and a `move` of its own, and a component cannot have two inputs called `name`.
+ */
+const CARD_EDITOR_INS: Array<[string, string]> = PROJECT_EDITOR_FIELDS.map(([n, t]) => [under('ed', n), t]);
+const CARD_EDITOR_OUTS: Array<[string, string]> = PROJECT_EDITOR_OUTS.map(([n, t]) => [under('ed', n), t]);
+const PROJECT_CARD_FIELDS: Array<[string, string]> = [
+  ['groups', 'array'], ['shown', 'boolean'], ['detailShown', 'boolean'], ...PROJECT_DETAIL_FIELDS, ...CARD_EDITOR_INS
+];
+const PROJECT_CARD_OUTS: Array<[string, string]> = [
+  ['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['close', 'signal'], ['edit', 'signal'], ['newProject', 'signal'],
+  ...CARD_EDITOR_OUTS
+];
+
+const PROJECT_CARD: Tpl010Component = {
+  path: 'Week/Project card',
+  description: 'The projects as a card over the week: every project grouped by what it is for on the left, and whichever one you picked on the right — or the form to change it, or to start a new one.',
+  ...iface(PROJECT_CARD_FIELDS, PROJECT_CARD_OUTS),
+  repeats: { source: 'array', rowFields: PROJECT_GROUP_FIELDS.map(([n]) => n) },
+  instantiates: [C.projectGroup, C.projectDetail, C.projectEditor],
+  nodes: [
+    inputs('pcIn', 'The projects', PROJECT_CARD_FIELDS),
+    outputs('pcOut', 'What you did in the card', PROJECT_CARD_OUTS),
+    group('pcScrim', 'Behind the card', undefined, {
+      sizeMode: 'explicit',
+      width: pct(100),
+      height: pct(100),
+      position: 'fixed',
+      backgroundColor: 'var(--scrim)',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      styleCss: 'z-index: 40;'
+    }),
+    group('pcCard', 'The card', 'pcScrim', {
+      cssClassName: 'planner-over', ...KEEPS_CLICKS,
+      ...CARD,
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      sizeMode: 'explicit',
+      width: pct(88),
+      maxWidth: px(1040),
+      height: pct(84),
+      styleCss: 'overflow: hidden;'
+    }),
+    group('pcList', 'Every project', 'pcCard', {
+      cssClassName: 'planner-over-col',
+      ...COLUMN('var(--space-3)'),
+      width: pct(38),
+      backgroundColor: 'var(--background)',
+      borderRightStyle: 'solid',
+      borderRightWidth: 'var(--border-1)',
+      borderRightColor: 'var(--border)',
+      paddingLeft: 'var(--space-2)',
+      paddingRight: 'var(--space-2)',
+      paddingTop: 'var(--space-3)',
+      paddingBottom: 'var(--space-3)',
+      styleCss: 'overflow: auto;'
+    }),
+    place('pcEach', FOR_EACH, 'One section per group', 'pcList', { template: C.projectGroup, templateType: 'explicit' }),
+    // R23 — where a project is born. At the foot of the list, because that is where the next one goes.
+    place('pcNew', BUTTON, 'Start a new project', 'pcList', {
+      ...BTN_GHOST,
+      borderStyle: 'dashed',
+      width: pct(100),
+      sizeMode: 'contentHeight',
+      label: '+ New project'
+    }),
+    group('pcDetailWrap', 'The one you picked', 'pcCard', {
+      ...COLUMN('var(--space-0)'),
+      width: pct(62),
+      cssClassName: 'planner-over-col',
+      styleCss: 'overflow: auto;'
+    }),
+    // Two boxes, one showing: the project as it is, or the form that changes it.
+    group('pcDetailBox', 'The project as it is', 'pcDetailWrap', COLUMN('var(--space-0)')),
+    place('pcDetail', C.projectDetail, 'That project in full', 'pcDetailBox'),
+    place('pcEditor', C.projectEditor, 'That project as a form', 'pcDetailWrap')
+  ],
+  connections: [
+    wire('pcIn', 'shown', 'pcScrim', 'mounted'),
+    wire('pcIn', 'groups', 'pcEach', 'items'),
+    wire('pcEach', 'itemOutputSignal-pick', 'pcOut', 'pick'),
+    wire('pcEach', 'itemOutput-id', 'pcOut', 'projectId'),
+    wire('pcIn', 'detailShown', 'pcDetailBox', 'mounted'),
+    ...PROJECT_DETAIL_FIELDS.map(([n]) => wire('pcIn', n, 'pcDetail', n)),
+    wire('pcDetail', 'plan', 'pcOut', 'plan'),
+    wire('pcDetail', 'edit', 'pcOut', 'edit'),
+    wire('pcDetail', 'close', 'pcOut', 'close'),
+    wire('pcNew', 'onClick', 'pcOut', 'newProject'),
+    ...PROJECT_EDITOR_FIELDS.map(([n]) => wire('pcIn', under('ed', n), 'pcEditor', n)),
+    ...PROJECT_EDITOR_OUTS.map(([n]) => wire('pcEditor', n, 'pcOut', under('ed', n))),
+    // The scrim closes the card; the card itself does not (a click inside must not shut it).
+    wire('pcScrim', 'onClick', 'pcOut', 'close')
+  ]
+};
+
+const DRAWER_FIELDS: Array<[string, string]> = [
+  ['title', 'string'],
+  ['dayLine', 'string'],
+  ['monthLine', 'string'],
+  ['concern', 'string'],
+  ['carryRows', 'array'],
+  ['nothingToCarry', 'boolean'],
+  ['tomorrowTitle', 'string'],
+  ['tomorrowList', 'string'],
+  ['tomorrowFocus', 'string'],
+  ['tomorrowFocusColor', 'string'],
+  ['shown', 'boolean']
+];
+
+/**
+ * R12 — the evening. **In the template this is rules over data, not a model**: today's hours,
+ * where the month stands, one concern, what to do with what is not done, and tomorrow as it
+ * stands. The coach that talks back is a later task and needs a `Decision` collection this
+ * template does not ship.
+ *
+ * **One concern, in one order** (AC5): an unsent building move first, because that is the rung
+ * next month's money depends on; then a dormant project with no time in the week (R8); then
+ * *"No concerns tonight."* The rule Richard set and this obeys: **a concern is raised once.**
+ */
+const SHUTDOWN_DRAWER: Tpl010Component = {
+  path: 'Week/Shutdown drawer',
+  description: 'The evening drawer: what today came to, where the month stands, the one thing worth saying, what to do with what is not done, and tomorrow as it stands.',
+  ...iface(DRAWER_FIELDS, [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal']]),
+  repeats: { source: 'array', rowFields: CARRY_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.carryRow],
+  nodes: [
+    inputs('sdIn', 'Tonight', DRAWER_FIELDS),
+    outputs('sdOut', 'What you chose', [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal']]),
+    group('sdScrim', 'Behind the drawer', undefined, {
+      sizeMode: 'explicit',
+      width: pct(100),
+      height: pct(100),
+      position: 'fixed',
+      backgroundColor: 'var(--scrim)',
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      justifyContent: 'flex-end',
+      styleCss: 'z-index: 50;'
+    }),
+    group('sdPanel', 'The drawer', 'sdScrim', {
+      ...KEEPS_CLICKS,
+      ...COLUMN('var(--space-3)'),
+      backgroundColor: 'var(--surface)',
+      sizeMode: 'explicit',
+      width: pct(34),
+      maxWidth: px(420),
+      height: pct(100),
+      styleCss: 'overflow: auto;',
+      paddingLeft: 'var(--space-4)',
+      paddingRight: 'var(--space-4)',
+      paddingTop: 'var(--space-4)',
+      paddingBottom: 'var(--space-4)'
+    }),
+    group('sdHead', 'Which evening', 'sdPanel', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('sdTitle', 'Shutdown', 'sdHead', '', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
+    place('sdClose', BUTTON, 'Close the drawer', 'sdHead', BTN_ICON('icon-x', 'Close')),
+
+    group('sdCoach', 'What today came to', 'sdPanel', {
+      ...COLUMN('var(--space-2)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-3)',
+      paddingBottom: 'var(--space-3)'
+    }),
+    text('sdDay', 'Today', 'sdCoach', '', wide(T_BODY)),
+    text('sdMonth', 'The month', 'sdCoach', '', wide(T_META)),
+    text('sdConcern', 'The one thing', 'sdCoach', '', { ...wide(T_BODY), fontWeight: 'var(--font-semibold)' }),
+
+    group('sdCarrySection', 'Not done today', 'sdPanel', COLUMN('var(--space-1)')),
+    text('sdCarryLabel', 'Label', 'sdCarrySection', 'Not done today', wide(T_LABEL)),
+    place('sdEach', FOR_EACH, 'One row per block not done', 'sdCarrySection', { template: C.carryRow, templateType: 'explicit' }),
+    text('sdAllDone', 'When everything is logged', 'sdCarrySection', 'Everything logged. Nice.', wide(T_META)),
+
+    group('sdTomorrow', 'Tomorrow as it stands', 'sdPanel', COLUMN('var(--space-1)')),
+    text('sdTomorrowLabel', 'Label', 'sdTomorrow', '', wide(T_LABEL)),
+    text('sdTomorrowList', 'What is in it', 'sdTomorrow', '', wide(T_META)),
+    group('sdFocusRow', 'Focus total', 'sdTomorrow', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('sdFocusLabel', 'Label', 'sdFocusRow', 'Focus total', { ...T_META, sizeMode: 'contentSize' }),
+    text('sdFocus', 'How much', 'sdFocusRow', '', { ...T_NUM, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' })
+  ],
+  connections: [
+    wire('sdIn', 'shown', 'sdScrim', 'mounted'),
+    wire('sdIn', 'title', 'sdTitle', 'text'),
+    wire('sdIn', 'dayLine', 'sdDay', 'text'),
+    wire('sdIn', 'monthLine', 'sdMonth', 'text'),
+    wire('sdIn', 'concern', 'sdConcern', 'text'),
+    wire('sdIn', 'carryRows', 'sdEach', 'items'),
+    wire('sdIn', 'nothingToCarry', 'sdAllDone', 'mounted'),
+    wire('sdIn', 'tomorrowTitle', 'sdTomorrowLabel', 'text'),
+    wire('sdIn', 'tomorrowList', 'sdTomorrowList', 'text'),
+    wire('sdIn', 'tomorrowFocus', 'sdFocus', 'text'),
+    wire('sdIn', 'tomorrowFocusColor', 'sdFocus', 'color'),
+    wire('sdEach', 'itemOutputSignal-carry', 'sdOut', 'carry'),
+    wire('sdEach', 'itemOutputSignal-drop', 'sdOut', 'drop'),
+    wire('sdEach', 'itemOutput-id', 'sdOut', 'blockId'),
+    wire('sdClose', 'onClick', 'sdOut', 'close'),
+    wire('sdScrim', 'onClick', 'sdOut', 'close')
+  ]
+};
+
+/**
+ * The only screen that holds money (§2: *"These are the only fields that hold real money in
+ * the hosted app"*), and the reason the template ships with invented numbers and the hosted
+ * app keeps the real ones.
+ *
+ * R2's arithmetic is stated on the sheet rather than hidden: the month's billable target is
+ * `(what the household needs − what the partner brings) ÷ your rate`. Q3 rules that the month
+ * plan is **not** written automatically on the 1st — *Plan this month* writes it, and the week
+ * asks for it until it exists.
+ */
 const SETTINGS_FIELDS: Array<[string, string]> = [
   ['rate', 'string'], ['householdNeed', 'string'], ['partnerIncome', 'string'], ['focusHours', 'string'],
   ['partnerDay', 'string'], ['costsDay', 'string'], ['invoiceDay', 'string'], ['paymentTermsDays', 'string'],
-  ['targetLine', 'string'], ['planLine', 'string'], ['shown', 'boolean']
+  ['targetLine', 'string'], ['planLine', 'string'], ['shown', 'boolean'],
+  // R23 — the money events, passed through to the editor under "cash…".
+  ...CASH_EDITOR_FIELDS.map(([n, t]): [string, string] => [under('cash', n), t])
 ];
 const SETTINGS_OUTS: Array<[string, string]> = [
   ['rate', 'string'], ['householdNeed', 'string'], ['partnerIncome', 'string'], ['focusHours', 'string'],
   ['partnerDay', 'string'], ['costsDay', 'string'], ['invoiceDay', 'string'], ['paymentTermsDays', 'string'],
-  ['save', 'signal'], ['planMonth', 'signal'], ['close', 'signal']
+  ['save', 'signal'], ['planMonth', 'signal'], ['close', 'signal'],
+  ...CASH_EDITOR_OUTS.map(([n, t]): [string, string] => [under('cash', n), t])
 ];
 
 const SETTINGS_NUMBERS: Array<[string, string, string]> = [
@@ -1773,8 +2257,9 @@ const SETTINGS_NUMBERS: Array<[string, string, string]> = [
 
 const SETTINGS_SHEET: Tpl010Component = {
   path: 'Week/Settings sheet',
-  description: 'The numbers the whole week is worked out from: your rate, what the household needs, what your partner brings, your focus ceiling, and the four days money moves.',
+  description: 'The numbers the whole week is worked out from: your rate, what the household needs, what your partner brings, your focus ceiling, the four days money moves, and the money events the cash strip counts.',
   ...iface(SETTINGS_FIELDS, SETTINGS_OUTS),
+  instantiates: [C.cashEditor],
   nodes: [
     inputs('stIn', 'What they are now', SETTINGS_FIELDS),
     outputs('stOut', 'What they should be', SETTINGS_OUTS),
@@ -1790,7 +2275,7 @@ const SETTINGS_SHEET: Tpl010Component = {
       styleCss: 'z-index: 60;'
     }),
     group('stCard', 'The sheet', 'stScrim', {
-      cssClassName: 'planner-over',
+      cssClassName: 'planner-over', ...KEEPS_CLICKS,
       ...CARD,
       ...COLUMN('var(--space-3)'),
       sizeMode: 'explicit',
@@ -1821,7 +2306,8 @@ const SETTINGS_SHEET: Tpl010Component = {
     text('stPlanLine', 'Whether this month is planned', 'stCard', '', wide(T_META)),
     group('stButtons', 'Buttons', 'stCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
     place('stSave', BUTTON, 'Save', 'stButtons', { ...BTN_PRIMARY, label: 'Save' }),
-    place('stPlan', BUTTON, 'Plan this month', 'stButtons', { ...BTN_OUTLINE, label: 'Plan this month' })
+    place('stPlan', BUTTON, 'Plan this month', 'stButtons', { ...BTN_OUTLINE, label: 'Plan this month' }),
+    place('stCash', C.cashEditor, 'The money events', 'stCard')
   ],
   connections: [
     wire('stIn', 'shown', 'stScrim', 'mounted'),
@@ -1831,6 +2317,8 @@ const SETTINGS_SHEET: Tpl010Component = {
     ...SETTINGS_NUMBERS.flatMap(([name, , id]) => [wire('stIn', name, id, 'startValue'), wire(id, 'onTextChanged', 'stOut', name)]),
     wire('stSave', 'onClick', 'stOut', 'save'),
     wire('stPlan', 'onClick', 'stOut', 'planMonth'),
+    ...CASH_EDITOR_FIELDS.map(([n]) => wire('stIn', under('cash', n), 'stCash', n)),
+    ...CASH_EDITOR_OUTS.map(([n]) => wire('stCash', n, 'stOut', under('cash', n))),
     wire('stClose', 'onClick', 'stOut', 'close'),
     wire('stScrim', 'onClick', 'stOut', 'close')
   ]
@@ -2066,15 +2554,15 @@ var target = rate > 0 ? Math.ceil(Math.max(0, need - partner) / rate) : 0;
 var byId = {};
 for (var p = 0; p < projects.length; p++) if (projects[p]) byId[projects[p].id] = projects[p];
 
-// Spent this month, per envelope. Only a LOGGED block has been spent.
+// Spent this month, per envelope: a done block, and the entries logged on an open one (R22).
 var used = { billable: 0, building: 0, admin: 0, hobby: 0 };
 for (var b = 0; b < blocks.length; b++) {
   var blk = blocks[b];
-  if (!blk || !blk.done) continue;
+  if (!blk) continue;
   var d = parseDay(blk.date);
   if (!d || d.getFullYear() + '-' + pad(d.getMonth() + 1) !== month) continue;
   var env = envelopeOf(byId[blk.projectId]);
-  used[env] = used[env] + hoursOf(blk);
+  used[env] = used[env] + spentOf(blk);
 }
 
 // R3 — working days left in the month, counted from today, Mon–Sat, Saturday included (Q4).
@@ -2160,12 +2648,12 @@ Outputs.targetLine = rate > 0
 var invoiced = 0;
 for (var q2 = 0; q2 < blocks.length; q2++) {
   var bb = blocks[q2];
-  if (!bb || !bb.done) continue;
+  if (!bb) continue;
   var dd = parseDay(bb.date);
   if (!dd || dd.getFullYear() + '-' + pad(dd.getMonth() + 1) !== month) continue;
   var pr = byId[bb.projectId];
   if (!pr || pr.kind !== 'earning') continue;
-  invoiced += hoursOf(bb) * num(pr.rate, rate);
+  invoiced += spentOf(bb) * num(pr.rate, rate);
 }
 Outputs.invoicedText = money(invoiced) + ' invoiced so far';`
     )
@@ -2251,12 +2739,15 @@ for (var d = 0; d < 6; d++) {
     if (blk.done) doneH += h; else plannedH += h;
     // The hours on a block are the hours it counts for. Written out a second time here, this
     // read the empty actual of every logged block as nought and put "0 h" on the whole week.
+    // R22 — an open block with time logged on it reads "0.5 of 1 h": what has gone in, of what
+    // the day is holding for it.
+    var logged = blk.done ? 0 : loggedOf(blk);
     rows.push({
       id: blk.id,
       projectId: blk.projectId,
       projectName: proj.name || '',
       what: blk.what || '',
-      hoursText: hText(h) + ' h',
+      hoursText: logged > 0 ? hText(logged) + ' of ' + hText(h) + ' h' : hText(h) + ' h',
       done: !!blk.done,
       // R13b — the tick is ink, not the envelope: the left edge is the block's one colour.
       tickFill: blk.done ? 'var(--foreground)' : 'transparent',
@@ -2283,6 +2774,7 @@ for (var d = 0; d < 6; d++) {
   if (!firstOpen && !isPast && focused + 0.5 <= focus) firstOpen = key;
 
   columns.push({
+    key: key,
     day: DOW[d] + ' ' + day.getDate(),
     focusText: hText(focused) + ' / ' + hText(focus) + ' h',
     focusColor: over ? 'var(--destructive)' : 'var(--muted-foreground)',
@@ -2567,10 +3059,9 @@ for (var b = 0; b < blocks.length; b++) {
 var billed = 0, built = 0;
 for (var t = 0; t < todayBlocks.length; t++) {
   var tb = todayBlocks[t];
-  if (!tb.done) continue;
   var env = envelopeOf(byId[tb.projectId]);
-  if (env === 'billable') billed += hoursOf(tb);
-  else if (env === 'building') built += hoursOf(tb);
+  if (env === 'billable') billed += spentOf(tb);
+  else if (env === 'building') built += spentOf(tb);
 }
 
 Outputs.title = 'Shutdown · ' + todayLong;
@@ -2927,89 +3418,73 @@ Outputs.go();`,
 });
 
 /**
- * AC4 — logging a block with hours that differ from the plan shows the actual hours, moves the
- * envelope and changes the day header's bar. All three follow from one written field, because
- * `hoursOf` is the only rule that reads it and every total goes through `hoursOf`.
+ * R23 — what the block sheet writes about the block itself: whose it is, what it is, the hours
+ * it is planned at and its day. Changing the project changes the block's colour and the envelope
+ * it counts in; changing the day moves it between columns (R2.4-6). The time that went into it
+ * is not this command's: that is `Add time`, which the page runs straight after this one.
  */
-const LOG_BLOCK = command({
-  path: 'Commands/Log block',
-  description: 'Logs a block as done, with the hours it actually took if they were not the hours planned.',
-  ins: [['blockId', 'string'], ['actual', 'number']],
+const SAVE_BLOCK = command({
+  path: 'Commands/Save block',
+  description: 'Saves what a block is: which project, what it is, the hours it is planned at, and which day.',
+  ins: [['blockId', 'string'], ['projectId', 'string'], ['what', 'string'], ['planned', 'number'], ['date', 'string']],
   guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
-if (id === '') return;
-var actual = num(Inputs.actual, NaN);
-// 🔴 No actual given leaves the field EMPTY rather than copying the plan into it.
-// hoursOf falls back to planned when actual is null, so an empty field means "it took
-// as long as it was meant to" — and writing the plan in here instead would make every
-// logged block look like it had been measured, which is a lie the envelopes would
-// then be built on.
-Outputs.actual = isFinite(actual) && actual > 0 ? q(actual) : '';
-Outputs.done = true;
+var pid = String(Inputs.projectId || '');
+var what = String(Inputs.what || '').trim();
+var date = String(Inputs.date || '');
+var planned = q(num(Inputs.planned, 0));
+// A block with no words, no project, no day or no hours is not a block — Add block refuses one
+// too, and blanking a field here would quietly erase the line the week draws.
+if (id === '' || pid === '' || what === '' || !parseDay(date) || planned <= 0) return;
+Outputs.projectId = pid;
+Outputs.what = what;
+Outputs.planned = planned;
+Outputs.date = date;
 Outputs.go();`,
-  guardIns: ['blockId', 'actual'],
+  guardIns: ['blockId', 'projectId', 'what', 'planned', 'date'],
   write: {
     kind: 'update',
     collection: 'Block',
-    label: 'Mark it done',
-    props: [['done', 'done'], ['actual', 'actual']],
+    label: 'Save what the block is',
+    props: [['projectId', 'projectId'], ['what', 'what'], ['planned', 'planned'], ['date', 'date']],
     idFromInput: 'blockId'
   }
 });
 
 /**
- * AC4 — what the log sheet writes: the hours a block really took, and what happened in it.
+ * **R22 — time is logged in entries.** *Add time* appends one sitting — `{ day, hours, note }` —
+ * and `actual` becomes the sum of them, kept as a column so every `hoursOf` reader is unchanged.
+ * *Done* is its own decision, read from the checkbox, and it is **off** unless the person ticks it.
  *
- * 🔴 **One command, both directions.** "Log it" and "Not done yet" are the same write with
- * `done` flipped, which keeps ONE producer on `blockId` — the open block. Wiring the sheet
- * into the existing `Log block`/`Unlog block` pair instead would have put a second producer
- * on each of their `blockId` ports beside the tick's, and a value port with two producers is
- * the stale-value trap this file opens with.
- *
- * 🔴 **An empty box still means "as long as it was meant to".** The sheet's hours box starts
- * at whatever the block already holds, which is usually empty, and clearing it writes `''`
- * again rather than nought — `hoursOf` reads an empty actual as the plan, and writing a
- * measured-looking number nobody measured is the lie the envelopes would then be built on.
+ * 🔴 **An empty box is still "as long as it was meant to".** No entries and *Done* ticked writes
+ * `actual` as it already was — `''` for a block nobody measured, so `hoursOf` reads the plan —
+ * and never a number nobody measured. A block logged before R22 keeps the hours it was logged at.
  */
-const SAVE_BLOCK = command({
-  path: 'Commands/Save block',
-  description: 'Saves what a block of time came to: what happened in it, the hours it really took, and whether it is done.',
-  ins: [['blockId', 'string'], ['what', 'string'], ['actual', 'number'], ['logged', 'boolean']],
+const ADD_TIME = command({
+  path: 'Commands/Add time',
+  description: 'Logs a sitting against a block — how long, and what you did — and says whether the block is now done.',
+  ins: [['blockId', 'string'], ['entries', 'array'], ['actual', '*'], ['hours', 'number'], ['note', 'string'], ['day', 'string'], ['logged', 'boolean']],
   guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
-var what = String(Inputs.what || '').trim();
-// A block with no words is not a block — \`Add block\` refuses one too, and blanking the
-// field here would quietly erase the line the week draws.
-if (id === '' || what === '') return;
-var done = Inputs.logged === true;
-var actual = num(Inputs.actual, NaN);
-Outputs.what = what;
-Outputs.done = done;
-Outputs.actual = done && isFinite(actual) && actual > 0 ? q(actual) : '';
-Outputs.go();`,
-  guardIns: ['blockId', 'what', 'actual', 'logged'],
-  write: {
-    kind: 'update',
-    collection: 'Block',
-    label: 'Save what it came to',
-    props: [['what', 'what'], ['done', 'done'], ['actual', 'actual']],
-    idFromInput: 'blockId'
-  }
-});
-
-const UNLOG_BLOCK = command({
-  path: 'Commands/Unlog block',
-  description: 'Puts a logged block back to not done, and forgets the hours it took.',
-  ins: [['blockId', 'string']],
-  guard: `var id = String(Inputs.blockId || '');
 if (id === '') return;
-Outputs.done = false;
-Outputs.empty = '';
+var list = [];
+var before = entriesOf({ entries: Inputs.entries });
+for (var i = 0; i < before.length; i++) list.push({ day: String(before[i].day || ''), hours: q(before[i].hours), note: String(before[i].note || '') });
+var h = q(num(Inputs.hours, 0));
+var day = parseDay(Inputs.day) ? String(Inputs.day) : dayKey(startOfToday());
+if (h > 0) list.push({ day: day, hours: h, note: String(Inputs.note || '').trim() });
+var done = Inputs.logged === true;
+var total = 0;
+for (var j = 0; j < list.length; j++) total += list[j].hours;
+var was = Inputs.actual;
+Outputs.entries = list;
+Outputs.actual = list.length ? q(total) : (done && was !== null && was !== undefined && was !== '' && isFinite(Number(was)) ? q(was) : '');
+Outputs.done = done;
 Outputs.go();`,
-  guardIns: ['blockId'],
+  guardIns: ['blockId', 'entries', 'actual', 'hours', 'note', 'day', 'logged'],
   write: {
     kind: 'update',
     collection: 'Block',
-    label: 'Put it back to not done',
-    props: [['done', 'done'], ['actual', 'empty']],
+    label: 'Log the time',
+    props: [['entries', 'entries'], ['actual', 'actual'], ['done', 'done']],
     idFromInput: 'blockId'
   }
 });
@@ -3090,34 +3565,54 @@ Outputs.go();`,
   extraWires: (p) => [wire(`${p}Write`, 'id', `${p}Out`, 'blockId')]
 });
 
-const ADD_PROJECT = command({
-  path: 'Commands/Add project',
-  description: 'Adds a project: what it is called, one line about it, and what kind of work it is.',
-  ins: [['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'number']],
-  guard: `var name = String(Inputs.name || '').trim();
+/**
+ * The fields a person types into a project, checked the same way whether it is new or not —
+ * so a project born in the editor and one changed in it can never disagree about what a
+ * kind is or what an empty due date means.
+ */
+const PROJECT_GUARD = `var name = String(Inputs.name || '').trim();
 if (name === '') return;
 var kind = String(Inputs.kind || 'earning');
 var known = ['earning', 'building', 'hobby', 'dormant', 'admin'];
 if (known.indexOf(kind) < 0) kind = 'earning';
+var due = String(Inputs.moveDue || '');
 Outputs.name = name;
-Outputs.sub = String(Inputs.sub || '');
+Outputs.sub = String(Inputs.sub || '').trim();
 Outputs.kind = kind;
-Outputs.rate = Number(Inputs.rate) || 0;
-Outputs.empty = '';
-Outputs.no = false;
+Outputs.rate = Math.max(0, num(Inputs.rate, 0));
+Outputs.slot = String(Inputs.slot || '').trim();
+Outputs.rung = String(Inputs.rung || '').trim();
+Outputs.move = String(Inputs.move || '').trim();
+Outputs.moveWorth = String(Inputs.moveWorth || '').trim();
+Outputs.moveWhen = String(Inputs.moveWhen || '').trim();
+Outputs.moveDue = parseDay(due) ? due : '';
+Outputs.moveStop = Inputs.moveStop === true;
+Outputs.say = String(Inputs.say || '').trim();`;
+
+const PROJECT_INS: Array<[string, string]> = [
+  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'number'], ['slot', 'string'], ['rung', 'string'],
+  ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string']
+];
+const PROJECT_PROPS: Array<[string, string]> = PROJECT_INS.map(([n]) => [n, n]);
+
+/** R2.4-1 — a project is born in the editor, with its first move if it has one. */
+const ADD_PROJECT = command({
+  path: 'Commands/Add project',
+  description: 'Adds a project: what it is called, what kind of work it is, its rate, and its first move.',
+  ins: PROJECT_INS,
+  guard: `${PLANNER_FNS}${PROJECT_GUARD}
 Outputs.position = Date.now();
 Outputs.go();`,
-  guardIns: ['name', 'sub', 'kind', 'rate'],
+  guardIns: PROJECT_INS.map(([n]) => n),
+  extraOuts: [['projectId', 'string']],
   write: {
     kind: 'create',
     collection: 'Project',
     label: 'Add the project',
-    props: [
-      ['name', 'name'], ['sub', 'sub'], ['kind', 'kind'], ['rate', 'rate'],
-      ['move', 'empty'], ['moveWorth', 'empty'], ['moveWhen', 'empty'], ['moveDue', 'empty'],
-      ['moveStop', 'no'], ['rung', 'empty'], ['say', 'empty'], ['position', 'position']
-    ]
-  }
+    props: [...PROJECT_PROPS, ['position', 'position']]
+  },
+  // The card opens on the project it just made.
+  extraWires: (p) => [wire(`${p}Write`, 'id', `${p}Out`, 'projectId')]
 });
 
 /**
@@ -3128,38 +3623,16 @@ Outputs.go();`,
 const EDIT_PROJECT = command({
   path: 'Commands/Edit project',
   description: 'Changes a project: its name, what kind of work it is, its rate, and what its next move is.',
-  ins: [
-    ['projectId', 'string'], ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'number'],
-    ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string']
-  ],
-  guard: `${PLANNER_FNS}var id = String(Inputs.projectId || '');
-var name = String(Inputs.name || '').trim();
-if (id === '' || name === '') return;
-var kind = String(Inputs.kind || 'earning');
-var known = ['earning', 'building', 'hobby', 'dormant', 'admin'];
-if (known.indexOf(kind) < 0) kind = 'earning';
-var due = String(Inputs.moveDue || '');
-Outputs.name = name;
-Outputs.sub = String(Inputs.sub || '');
-Outputs.kind = kind;
-Outputs.rate = num(Inputs.rate, 0);
-Outputs.move = String(Inputs.move || '');
-Outputs.moveWorth = String(Inputs.moveWorth || '');
-Outputs.moveWhen = String(Inputs.moveWhen || '');
-Outputs.moveDue = parseDay(due) ? due : '';
-Outputs.moveStop = Inputs.moveStop === true;
-Outputs.say = String(Inputs.say || '');
+  ins: [['projectId', 'string'], ...PROJECT_INS],
+  guard: `${PLANNER_FNS}if (String(Inputs.projectId || '') === '') return;
+${PROJECT_GUARD}
 Outputs.go();`,
-  guardIns: ['projectId', 'name', 'sub', 'kind', 'rate', 'move', 'moveWorth', 'moveWhen', 'moveDue', 'moveStop', 'say'],
+  guardIns: ['projectId', ...PROJECT_INS.map(([n]) => n)],
   write: {
     kind: 'update',
     collection: 'Project',
     label: 'Change the project',
-    props: [
-      ['name', 'name'], ['sub', 'sub'], ['kind', 'kind'], ['rate', 'rate'],
-      ['move', 'move'], ['moveWorth', 'moveWorth'], ['moveWhen', 'moveWhen'], ['moveDue', 'moveDue'],
-      ['moveStop', 'moveStop'], ['say', 'say']
-    ],
+    props: PROJECT_PROPS,
     idFromInput: 'projectId'
   }
 });
@@ -3199,32 +3672,52 @@ Outputs.go();`,
   }
 });
 
-const ADD_CASH_EVENT = command({
-  path: 'Commands/Add cash event',
-  description: 'Adds something that happens to the money: when, how much, what it is, and whether it happens every month.',
-  ins: [['date', 'string'], ['amount', 'number'], ['label', 'string'], ['kind', 'string'], ['recurring', 'string']],
-  guard: `${PLANNER_FNS}var date = String(Inputs.date || '');
+/**
+ * A money event as typed: a cost is money leaving whichever sign was typed, money in is money
+ * arriving, and a note (*"Invoices go out"*) keeps what it was given, usually nothing. Before R2.4
+ * the seed wrote `in` and `note` where this command wrote `income` and `invoice-out`, so the two
+ * old spellings are read as the new ones rather than turned into a cost.
+ */
+const CASH_GUARD = `var date = String(Inputs.date || '');
 var label = String(Inputs.label || '').trim();
 var amount = num(Inputs.amount, NaN);
 if (!parseDay(date) || label === '' || !isFinite(amount)) return;
 var kind = String(Inputs.kind || 'cost');
+if (kind === 'in') kind = 'income';
+if (kind === 'note') kind = 'invoice-out';
 var known = ['income', 'cost', 'invoice-out', 'invoice-due'];
 if (known.indexOf(kind) < 0) kind = 'cost';
-// A cost is money leaving, whichever sign was typed.
-if (kind === 'cost' && amount > 0) amount = -amount;
+if (kind === 'cost') amount = -Math.abs(amount);
+if (kind === 'income' || kind === 'invoice-due') amount = Math.abs(amount);
 Outputs.date = date;
 Outputs.amount = amount;
 Outputs.label = label;
 Outputs.kind = kind;
-Outputs.recurring = String(Inputs.recurring || '') === 'monthly' ? 'monthly' : '';
+Outputs.recurring = Inputs.monthly === true ? 'monthly' : '';`;
+
+const CASH_EVENT_INS: Array<[string, string]> = [['date', 'string'], ['amount', 'number'], ['label', 'string'], ['kind', 'string'], ['monthly', 'boolean']];
+const CASH_EVENT_PROPS: Array<[string, string]> = [['date', 'date'], ['amount', 'amount'], ['label', 'label'], ['kind', 'kind'], ['recurring', 'recurring']];
+
+const ADD_CASH_EVENT = command({
+  path: 'Commands/Add cash event',
+  description: 'Adds something that happens to the money: when, how much, what it is, and whether it happens every month.',
+  ins: CASH_EVENT_INS,
+  guard: `${PLANNER_FNS}${CASH_GUARD}
 Outputs.go();`,
-  guardIns: ['date', 'amount', 'label', 'kind', 'recurring'],
-  write: {
-    kind: 'create',
-    collection: 'CashEvent',
-    label: 'Add the event',
-    props: [['date', 'date'], ['amount', 'amount'], ['label', 'label'], ['kind', 'kind'], ['recurring', 'recurring']]
-  }
+  guardIns: CASH_EVENT_INS.map(([n]) => n),
+  write: { kind: 'create', collection: 'CashEvent', label: 'Add the event', props: CASH_EVENT_PROPS }
+});
+
+/** R2.4-7 — editing an amount changes every running balance after it, because the strip is read, not stored. */
+const EDIT_CASH_EVENT = command({
+  path: 'Commands/Edit cash event',
+  description: 'Changes something that happens to the money: when, how much, what it is, or whether it happens every month.',
+  ins: [['cashId', 'string'], ...CASH_EVENT_INS],
+  guard: `${PLANNER_FNS}if (String(Inputs.cashId || '') === '') return;
+${CASH_GUARD}
+Outputs.go();`,
+  guardIns: ['cashId', ...CASH_EVENT_INS.map(([n]) => n)],
+  write: { kind: 'update', collection: 'CashEvent', label: 'Change the event', props: CASH_EVENT_PROPS, idFromInput: 'cashId' }
 });
 
 /**
@@ -3343,10 +3836,10 @@ const PAGE_WEEK: Tpl010Component = {
   description: 'The week: the envelopes, the moves, six days of blocks and the cash strip, with the projects card and the evening drawer over the top of it.',
   instantiates: [
     C.appBar, C.envelopeTile, C.movesStrip, C.dayColumn, C.cashStrip, C.projectCard, C.shutdownDrawer, C.settingsSheet,
-    C.logSheet, C.dayPicker,
+    C.blockSheet, C.dayPicker,
     C.plannerData, C.envelopes, C.dayColumns, C.moves, C.cashLine, C.shutdown, '/Logic/Card rows',
-    C.addBlock, C.logBlock, C.saveBlock, C.unlogBlock, C.carryBlock, C.dropBlock, C.placeMove,
-    C.addProject, C.editProject, C.setMonthPlan, C.addCashEvent, C.editSettings
+    C.addBlock, C.saveBlock, C.addTime, C.carryBlock, C.dropBlock, C.placeMove,
+    C.addProject, C.editProject, C.setMonthPlan, C.addCashEvent, C.editCashEvent, C.editSettings
   ],
   repeats: { source: 'array', rowFields: ENVELOPE_TILE_FIELDS.map(([n]) => n) },
   nodes: [
@@ -3381,7 +3874,7 @@ const PAGE_WEEK: Tpl010Component = {
     place('twCard', C.projectCard, 'The projects', 'twRoot'),
     place('twDrawer', C.shutdownDrawer, 'The evening', 'twRoot'),
     place('twSheet', C.settingsSheet, 'The settings', 'twRoot'),
-    place('twLog', C.logSheet, 'What a block came to', 'twRoot'),
+    place('twLog', C.blockSheet, 'One block, and the time on it', 'twRoot'),
 
     // ── Who you are ──
     logic('twUser', 'net.noodl.user.User', 'Who is signed in'),
@@ -3412,47 +3905,242 @@ const PAGE_WEEK: Tpl010Component = {
     logic('twVarPhoneDay', VARIABLE, 'Which day the phone is showing', { name: VAR.phoneDay }),
     logic('twSetPhoneDay', SET_VARIABLE, 'Show that day on the phone', { name: VAR.phoneDay, setWith: 'string' }),
 
-    logic('twVarLog', VARIABLE, 'Which block the log sheet is showing', { name: VAR.logBlock }),
-    logic('twSetLog', SET_VARIABLE, 'Open the log sheet on a block', { name: VAR.logBlock, setWith: 'string' }),
-    logic('twClearLog', SET_VARIABLE, 'Close the log sheet', { name: VAR.logBlock, setWith: 'string', value: '' }),
+    logic('twVarLog', VARIABLE, 'Which block the sheet is showing', { name: VAR.logBlock }),
+    logic('twSetLog', SET_VARIABLE, 'Open the sheet on a block', { name: VAR.logBlock, setWith: 'string' }),
+    logic('twClearLog', SET_VARIABLE, 'Close the sheet', { name: VAR.logBlock, setWith: 'string', value: '' }),
+    logic('twVarMode', VARIABLE, 'How the sheet was opened', { name: VAR.logMode }),
+    logic('twModeTick', SET_VARIABLE, 'Opened by the tick', { name: VAR.logMode, setWith: 'string', value: 'tick' }),
+    logic('twModeWords', SET_VARIABLE, 'Opened by the words or the hours', { name: VAR.logMode, setWith: 'string', value: '' }),
+    logic('twVarNewDay', VARIABLE, 'Which day a new block goes in', { name: VAR.newDay }),
+    logic('twSetNewDay', SET_VARIABLE, 'Start a new block on a day', { name: VAR.newDay, setWith: 'string' }),
+    logic('twClearNewDay', SET_VARIABLE, 'Stop making a new block', { name: VAR.newDay, setWith: 'string', value: '' }),
 
     /**
-     * AC4 — the sheet is filled from the block itself, looked up by id, so it always opens on
-     * what is actually stored rather than on whatever the last press left behind.
+     * R23 — the block sheet is filled from the block itself, looked up by id, so it always opens
+     * on what is actually stored rather than on whatever the last press left behind. With no
+     * block and a day, it is a new block on that day.
      */
     derive(
-      'twLogRow',
-      'The block the log sheet is showing',
+      'twSheetRow',
+      'What the block sheet is showing',
       `${PLANNER_FNS}var id = String(Inputs.id || '');
+var newDay = String(Inputs.newDay || '');
 var blocks = Inputs.blocks || [];
+var projects = Inputs.projects || [];
+var items = [];
+for (var k = 0; k < projects.length; k++) if (projects[k]) items.push({ Label: String(projects[k].name || ''), Value: String(projects[k].id) });
+Outputs.projects = items;
 var b = null;
-for (var i = 0; i < blocks.length; i++) if (blocks[i] && blocks[i].id === id) { b = blocks[i]; break; }
-if (!b) {
+if (id !== '') for (var i = 0; i < blocks.length; i++) if (blocks[i] && blocks[i].id === id) { b = blocks[i]; break; }
+function longDay(s) {
+  var d = parseDay(s);
+  return d ? DOW_LONG[(d.getDay() + 6) % 7] + ' ' + d.getDate() + ' ' + MON[d.getMonth()] : String(s || '');
+}
+if (!b && !parseDay(newDay)) {
+  // Closed. The sheet clears its own boxes as it closes (Week/Block sheet), so these are only
+  // what a closed sheet holds.
   Outputs.shown = false;
+  Outputs.isNew = false;
+  Outputs.timeShown = false;
   Outputs.title = '';
-  Outputs.plannedLine = '';
+  Outputs.projectId = '';
   Outputs.what = '';
-  Outputs.actual = '';
-  Outputs.saveLabel = 'Log it';
-  Outputs.unlogShown = false;
+  Outputs.planned = '';
+  Outputs.date = '';
+  Outputs.loggedLine = '';
+  Outputs.entries = [];
+  Outputs.hours = '';
+  Outputs.note = '';
   Outputs.done = false;
+  Outputs.saveLabel = 'Save';
+  Outputs.before = [];
+  Outputs.actual = '';
   return;
 }
-var projects = Inputs.projects || [];
+if (!b) {
+  Outputs.shown = true;
+  Outputs.isNew = true;
+  Outputs.timeShown = false;
+  Outputs.title = 'New block · ' + longDay(newDay);
+  Outputs.projectId = '';
+  Outputs.what = '';
+  Outputs.planned = '1';
+  Outputs.date = newDay;
+  Outputs.loggedLine = '';
+  Outputs.entries = [];
+  Outputs.hours = '';
+  Outputs.note = '';
+  Outputs.done = false;
+  Outputs.saveLabel = 'Put it in the day';
+  Outputs.before = [];
+  Outputs.actual = '';
+  return;
+}
 var p = null;
 for (var j = 0; j < projects.length; j++) if (projects[j] && projects[j].id === b.projectId) { p = projects[j]; break; }
-var day = parseDay(b.date);
-var when = day ? DOW_LONG[(day.getDay() + 6) % 7] + ' ' + day.getDate() + ' ' + MON[day.getMonth()] : String(b.date || '');
+var planned = num(b.planned, 0);
+var list = entriesOf(b);
+var logged = loggedOf(b);
+var tick = String(Inputs.mode || '') === 'tick';
+var rows = [];
+for (var e = 0; e < list.length; e++) {
+  var ed = parseDay(list[e].day);
+  rows.push({
+    dayText: ed ? DOW[(ed.getDay() + 6) % 7] + ' ' + ed.getDate() + ' ' + MON[ed.getMonth()] : '',
+    hoursText: hText(list[e].hours) + ' h',
+    note: String(list[e].note || '')
+  });
+}
 Outputs.shown = true;
-Outputs.title = (p ? String(p.name || '') : 'This block') + ' · ' + when;
-Outputs.plannedLine = 'Planned at ' + hText(num(b.planned, 0)) + ' h. Leave the hours empty if it took as long as it was meant to.';
+Outputs.isNew = false;
+Outputs.timeShown = true;
+Outputs.title = (p ? String(p.name || '') : 'This block') + ' · ' + longDay(b.date);
+Outputs.projectId = String(b.projectId || '');
 Outputs.what = String(b.what || '');
-// An empty actual stays empty in the box (see Commands/Save block): the placeholder is the
-// plan, and a number here means somebody measured it.
-Outputs.actual = b.actual === null || b.actual === undefined || b.actual === '' ? '' : String(q(num(b.actual, 0)));
-Outputs.saveLabel = b.done === true ? 'Save' : 'Log it';
-Outputs.unlogShown = b.done === true;
-Outputs.done = b.done === true;`
+Outputs.planned = String(q(planned));
+Outputs.date = String(b.date || '');
+Outputs.entries = rows;
+Outputs.before = list;
+Outputs.actual = b.actual === null || b.actual === undefined ? '' : b.actual;
+// R16a — the tick opens this with Done ticked and what is left of the plan already in the box,
+// so "it took as long as it was meant to" is two presses and the hours are stated, not assumed.
+var left = q(Math.max(0, planned - logged));
+Outputs.hours = tick && !b.done && left > 0 ? String(left) : '';
+Outputs.note = '';
+Outputs.done = b.done === true || tick;
+if (b.done && list.length === 0) Outputs.loggedLine = 'Done, at ' + hText(hoursOf(b)) + ' h.';
+else if (list.length > 0) Outputs.loggedLine = hText(logged) + ' of ' + hText(planned) + ' h logged' + (b.done ? ', and done.' : '. It stays open until Done is ticked.');
+else Outputs.loggedLine = 'Nothing logged on it yet.';
+Outputs.saveLabel = 'Save';`
+    ),
+
+    logic('twVarEdit', VARIABLE, 'What the card’s right-hand pane is showing', { name: VAR.cardEdit }),
+    logic('twEditOn', SET_VARIABLE, 'Edit the project', { name: VAR.cardEdit, setWith: 'string', value: 'edit' }),
+    logic('twEditNew', SET_VARIABLE, 'Start a new project', { name: VAR.cardEdit, setWith: 'string', value: 'new' }),
+    logic('twEditOff', SET_VARIABLE, 'Stop editing', { name: VAR.cardEdit, setWith: 'string', value: '' }),
+
+    /** R23 — the project editor, filled from the project the card is showing, or empty for a new one. */
+    derive(
+      'twEditRow',
+      'What the project editor is showing',
+      `${PLANNER_FNS}var mode = String(Inputs.mode || '');
+var id = String(Inputs.id || '');
+var projects = Inputs.projects || [];
+Outputs.kinds = [
+  { Label: 'Billable: a client who pays', Value: 'earning' },
+  { Label: 'Building: pays later, if it lands', Value: 'building' },
+  { Label: 'Hobby', Value: 'hobby' },
+  { Label: 'Dormant: a client worth a nudge', Value: 'dormant' },
+  { Label: 'Admin', Value: 'admin' }
+];
+var p = null;
+for (var i = 0; i < projects.length; i++) if (projects[i] && projects[i].id === id) { p = projects[i]; break; }
+var editing = mode === 'new' || (mode === 'edit' && !!p);
+Outputs.editing = editing;
+Outputs.detailShown = !editing;
+Outputs.isNew = mode === 'new';
+// 🔴 Every output spelled out as Outputs.<name>: the door declares a Function's ports by reading
+// the script, and a port written as Outputs[name] is a port nobody declared — the wire into
+// the editor is kept, and the deploy reports it as going nowhere.
+if (!editing) {
+  // Closed. The editor clears its own boxes as it closes (Week/Project editor).
+  Outputs.name = '';
+  Outputs.sub = '';
+  Outputs.slot = '';
+  Outputs.rung = '';
+  Outputs.move = '';
+  Outputs.moveWorth = '';
+  Outputs.moveWhen = '';
+  Outputs.say = '';
+  Outputs.rate = '';
+  Outputs.kind = '';
+  Outputs.moveDue = '';
+  Outputs.moveStop = false;
+  Outputs.title = '';
+  return;
+}
+var src = mode === 'new' ? {} : p;
+function str(v) { return v === undefined || v === null ? '' : String(v); }
+Outputs.name = str(src.name);
+Outputs.sub = str(src.sub);
+Outputs.slot = str(src.slot);
+Outputs.rung = str(src.rung);
+Outputs.move = str(src.move);
+Outputs.moveWorth = str(src.moveWorth);
+Outputs.moveWhen = str(src.moveWhen);
+Outputs.say = str(src.say);
+Outputs.rate = num(src.rate, 0) > 0 ? String(num(src.rate, 0)) : '';
+Outputs.kind = String(src.kind || 'earning');
+Outputs.moveDue = parseDay(src.moveDue) ? String(src.moveDue) : '';
+Outputs.moveStop = src.moveStop === true;
+Outputs.title = mode === 'new' ? 'New project' : 'Edit ' + String(p.name || 'the project');`
+    ),
+
+    logic('twVarCash', VARIABLE, 'Which money event is being edited', { name: VAR.cashEdit }),
+    logic('twSetCash', SET_VARIABLE, 'Edit a money event', { name: VAR.cashEdit, setWith: 'string' }),
+    logic('twCashNew', SET_VARIABLE, 'Start a new money event', { name: VAR.cashEdit, setWith: 'string', value: 'new' }),
+    logic('twCashOff', SET_VARIABLE, 'Stop editing the money event', { name: VAR.cashEdit, setWith: 'string', value: '' }),
+
+    /** R23 — the typed money events as a list, and the one being edited as a form. */
+    derive(
+      'twCashForm',
+      'The money events, and the one being edited',
+      `${PLANNER_FNS}var mode = String(Inputs.mode || '');
+var events = Inputs.cashEvents || [];
+Outputs.kinds = [
+  { Label: 'Money in', Value: 'income' },
+  { Label: 'Money out', Value: 'cost' },
+  { Label: 'Invoices go out (a marker)', Value: 'invoice-out' },
+  { Label: 'An invoice falls due', Value: 'invoice-due' }
+];
+function kindOf(k) { k = String(k || 'cost'); return k === 'in' ? 'income' : k === 'note' ? 'invoice-out' : k; }
+var list = [];
+for (var i = 0; i < events.length; i++) if (events[i]) list.push(events[i]);
+list.sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : String(a.date || '') > String(b.date || '') ? 1 : 0; });
+var rows = [], found = null;
+for (var r = 0; r < list.length; r++) {
+  var e = list[r];
+  var d = parseDay(e.date);
+  var monthly = e.recurring === 'monthly';
+  var amt = num(e.amount, 0);
+  rows.push({
+    id: e.id,
+    whenText: d ? (monthly ? 'the ' + d.getDate() + (d.getDate() % 10 === 1 && d.getDate() !== 11 ? 'st' : d.getDate() % 10 === 2 && d.getDate() !== 12 ? 'nd' : d.getDate() % 10 === 3 && d.getDate() !== 13 ? 'rd' : 'th') : d.getDate() + ' ' + MON[d.getMonth()]) : '',
+    label: String(e.label || ''),
+    amountText: amt === 0 ? '—' : (amt > 0 ? '+' : '') + money(amt),
+    repeatText: monthly ? 'Every month' : 'Once'
+  });
+  if (e.id === mode) found = e;
+}
+Outputs.rows = rows;
+var open = mode === 'new' || !!found;
+Outputs.formShown = open;
+Outputs.isNew = mode === 'new';
+Outputs.id = found ? String(found.id) : '';
+if (!open) {
+  Outputs.formTitle = '';
+  Outputs.label = '';
+  Outputs.amount = '';
+  Outputs.date = '';
+  Outputs.kind = '';
+  Outputs.monthly = false;
+  return;
+}
+if (!found) {
+  Outputs.formTitle = 'A new money event';
+  Outputs.label = '';
+  Outputs.amount = '';
+  Outputs.date = dayKey(startOfToday());
+  Outputs.kind = 'cost';
+  Outputs.monthly = false;
+  return;
+}
+Outputs.formTitle = 'Change “' + String(found.label || '') + '”';
+Outputs.label = String(found.label || '');
+Outputs.amount = String(Math.abs(num(found.amount, 0)));
+Outputs.date = String(found.date || '');
+Outputs.kind = kindOf(found.kind);
+Outputs.monthly = found.recurring === 'monthly';`
     ),
 
     logic('twVarSheet', VARIABLE, 'Is the settings sheet open?', { name: VAR.sheetOpen }),
@@ -3495,9 +4183,11 @@ document.addEventListener('keydown', fire);`,
     logic('twVarProblem', VARIABLE, 'What did not save', { name: VAR.problem }),
     derive('twHasProblem', 'Is there a problem to show?', "Outputs.shown = String(Inputs.text || '') !== '';"),
 
-    // ── The two routed presses ──
-    logic('twTick', CONDITION, 'Was it already done?', signalOnly('condition')),
+    // ── The routed presses ──
     logic('twChip', CONDITION, 'Is that move already in the week?', signalOnly('condition')),
+    logic('twIsNewBlock', CONDITION, 'Is the sheet making a new block?', signalOnly('condition')),
+    logic('twIsNewProject', CONDITION, 'Is the editor making a new project?', signalOnly('condition')),
+    logic('twIsNewCash', CONDITION, 'Is it a new money event?', signalOnly('condition')),
 
     /** The settings row, unpacked once for the sheet and for the commands that write it. */
     derive(
@@ -3518,10 +4208,8 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
 
     // ── The commands ──
     logic('cmdAddBlock', C.addBlock, 'Put a block in a day'),
-    logic('cmdLog', C.logBlock, 'Log a block'),
-    logic('cmdSave', C.saveBlock, 'Save what a block came to', { logged: true }),
-    logic('cmdUndo', C.saveBlock, 'Save it, and put it back to not done', { logged: false }),
-    logic('cmdUnlog', C.unlogBlock, 'Put a block back'),
+    logic('cmdSave', C.saveBlock, 'Save what a block is'),
+    logic('cmdTime', C.addTime, 'Log the time on a block'),
     logic('cmdCarry', C.carryBlock, 'Carry a block to tomorrow'),
     logic('cmdDrop', C.dropBlock, 'Drop a block'),
     logic('cmdPlace', C.placeMove, 'Put a move in the week'),
@@ -3529,6 +4217,7 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     logic('cmdEditProject', C.editProject, 'Change a project'),
     logic('cmdMonthPlan', C.setMonthPlan, 'Plan this month'),
     logic('cmdCashEvent', C.addCashEvent, 'Add a cash event'),
+    logic('cmdEditCash', C.editCashEvent, 'Change a cash event'),
     logic('cmdSettings', C.editSettings, 'Save the settings')
   ],
   connections: [
@@ -3544,6 +4233,9 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twKeys', 'out-escape', 'twCloseDrawer', 'do'),
     wire('twKeys', 'out-escape', 'twCloseSheet', 'do'),
     wire('twKeys', 'out-escape', 'twClearLog', 'do'),
+    wire('twKeys', 'out-escape', 'twClearNewDay', 'do'),
+    wire('twKeys', 'out-escape', 'twEditOff', 'do'),
+    wire('twKeys', 'out-escape', 'twCashOff', 'do'),
     wire('twAuth', 'onfalse', 'twToSignIn', 'navigate'),
     wire('twBar', 'signOut', 'twLogOut', 'login'),
     wire('twLogOut', 'done', 'twToSignIn', 'navigate'),
@@ -3576,13 +4268,10 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twCashLogic', 'termsText', 'twCash', 'termsText'),
     wire('twEnv', 'invoicedText', 'twCash', 'invoicedText'),
 
-    // A block's tick: done unlogs, not-done logs.
-    wire('twDayEach', 'itemOutputSignal-toggle', 'twTick', 'eval'),
-    wire('twDayEach', 'itemOutput-done', 'twTick', 'condition'),
-    wire('twDayEach', 'itemOutput-blockId', 'cmdLog', 'blockId'),
-    wire('twDayEach', 'itemOutput-blockId', 'cmdUnlog', 'blockId'),
-    wire('twTick', 'onfalse', 'cmdLog', 'do'),
-    wire('twTick', 'ontrue', 'cmdUnlog', 'do'),
+    // R16a — a block's tick opens the block sheet with Done ticked; it never logs by itself.
+    wire('twDayEach', 'itemOutputSignal-toggle', 'twModeTick', 'do'),
+    wire('twDayEach', 'itemOutputSignal-toggle', 'twClearNewDay', 'do'),
+    wire('twDayEach', 'itemOutputSignal-toggle', 'twSetLog', 'do'),
 
     // A block's project name opens the card on that project (AC7).
     wire('twDayEach', 'itemOutput-projectId', 'twSetCard', 'value'),
@@ -3609,7 +4298,31 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     ...CARD_ROWS_OUTS.filter(([n]) => n !== 'resolvedId').map(([n]) => wire('twCardRows', n, 'twCard', n)),
     wire('twCard', 'projectId', 'twSetCard', 'value'),
     wire('twCard', 'pick', 'twSetCard', 'do'),
+    wire('twCard', 'pick', 'twEditOff', 'do'),
     wire('twCard', 'close', 'twClearCard', 'do'),
+    wire('twCard', 'close', 'twEditOff', 'do'),
+
+    // R23 — the project editor, in the card's right-hand pane.
+    wire('twCard', 'edit', 'twEditOn', 'do'),
+    wire('twCard', 'newProject', 'twEditNew', 'do'),
+    wire('twCard', 'edCancel', 'twEditOff', 'do'),
+    wire('twVarEdit', 'value', 'twEditRow', 'in-mode'),
+    wire('twCardRows', 'resolvedId', 'twEditRow', 'in-id'),
+    wire('twData', 'projects', 'twEditRow', 'in-projects'),
+    wire('twEditRow', 'out-editing', 'twCard', 'edShown'),
+    wire('twEditRow', 'out-detailShown', 'twCard', 'detailShown'),
+    ...PROJECT_EDITOR_FIELDS.filter(([n]) => n !== 'shown').map(([n]) => wire('twEditRow', `out-${n}`, 'twCard', under('ed', n))),
+    wire('twEditRow', 'out-isNew', 'twIsNewProject', 'condition'),
+    wire('twCard', 'edSave', 'twIsNewProject', 'eval'),
+    wire('twIsNewProject', 'ontrue', 'cmdAddProject', 'do'),
+    wire('twIsNewProject', 'onfalse', 'cmdEditProject', 'do'),
+    wire('twCardRows', 'resolvedId', 'cmdEditProject', 'projectId'),
+    ...PROJECT_EDIT_VALUES.flatMap(([n]) => [wire('twCard', under('ed', n), 'cmdAddProject', n), wire('twCard', under('ed', n), 'cmdEditProject', n)]),
+    // The card opens on the project it just made, and the form closes on the WRITE, not the press.
+    wire('cmdAddProject', 'projectId', 'twSetCard', 'value'),
+    wire('cmdAddProject', 'done', 'twSetCard', 'do'),
+    wire('cmdAddProject', 'done', 'twEditOff', 'do'),
+    wire('cmdEditProject', 'done', 'twEditOff', 'do'),
     // The card's own Put 30 min button, on the project it is showing.
     wire('twCardRows', 'resolvedId', 'cmdPlace', 'projectId'),
     wire('twCardRows', 'move', 'cmdPlace', 'move'),
@@ -3640,34 +4353,66 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twPicker', 'pick', 'twSetPhoneDay', 'do'),
     wire('twVarPhoneDay', 'value', 'twDays', 'pickedDay'),
 
-    // The log sheet (AC4): a block's words or its hours open it on that block.
+    // R23 — the block sheet. A block's words or its hours open it with Done off (R22)...
     wire('twDayEach', 'itemOutput-blockId', 'twSetLog', 'value'),
+    wire('twDayEach', 'itemOutputSignal-openLog', 'twModeWords', 'do'),
+    wire('twDayEach', 'itemOutputSignal-openLog', 'twClearNewDay', 'do'),
     wire('twDayEach', 'itemOutputSignal-openLog', 'twSetLog', 'do'),
-    wire('twVarLog', 'value', 'twLogRow', 'in-id'),
-    wire('twData', 'blocks', 'twLogRow', 'in-blocks'),
-    wire('twData', 'projects', 'twLogRow', 'in-projects'),
-    ...(['shown', 'title', 'plannedLine', 'what', 'actual', 'saveLabel', 'unlogShown'] as const).map((n) =>
-      wire('twLogRow', `out-${n}`, 'twLog', n)
-    ),
+    // ...and the + at the foot of a day opens it on a new block in that day.
+    wire('twDayEach', 'itemOutput-dayKey', 'twSetNewDay', 'value'),
+    wire('twDayEach', 'itemOutputSignal-addBlock', 'twClearLog', 'do'),
+    wire('twDayEach', 'itemOutputSignal-addBlock', 'twSetNewDay', 'do'),
+    wire('twVarLog', 'value', 'twSheetRow', 'in-id'),
+    wire('twVarNewDay', 'value', 'twSheetRow', 'in-newDay'),
+    wire('twVarMode', 'value', 'twSheetRow', 'in-mode'),
+    wire('twData', 'blocks', 'twSheetRow', 'in-blocks'),
+    wire('twData', 'projects', 'twSheetRow', 'in-projects'),
+    ...BLOCK_SHEET_FIELDS.map(([n]) => wire('twSheetRow', `out-${n}`, 'twLog', n)),
+    // Save: a new block is written by Add block; an existing one by Save block, then Add time.
+    wire('twSheetRow', 'out-isNew', 'twIsNewBlock', 'condition'),
+    wire('twLog', 'save', 'twIsNewBlock', 'eval'),
+    wire('twIsNewBlock', 'ontrue', 'cmdAddBlock', 'do'),
+    wire('twIsNewBlock', 'onfalse', 'cmdSave', 'do'),
+    ...(['projectId', 'what', 'planned', 'date'] as const).flatMap((n) => [wire('twLog', n, 'cmdAddBlock', n), wire('twLog', n, 'cmdSave', n)]),
     wire('twVarLog', 'value', 'cmdSave', 'blockId'),
-    wire('twVarLog', 'value', 'cmdUndo', 'blockId'),
-    wire('twLog', 'what', 'cmdSave', 'what'),
-    wire('twLog', 'what', 'cmdUndo', 'what'),
-    wire('twLog', 'actual', 'cmdSave', 'actual'),
-    wire('twLog', 'actual', 'cmdUndo', 'actual'),
-    wire('twLog', 'save', 'cmdSave', 'do'),
-    wire('twLog', 'unlog', 'cmdUndo', 'do'),
+    wire('twVarLog', 'value', 'cmdTime', 'blockId'),
+    wire('twSheetRow', 'out-before', 'cmdTime', 'entries'),
+    wire('twSheetRow', 'out-actual', 'cmdTime', 'actual'),
+    wire('twLog', 'hours', 'cmdTime', 'hours'),
+    wire('twLog', 'note', 'cmdTime', 'note'),
+    wire('twLog', 'done', 'cmdTime', 'logged'),
+    wire('twDays', 'todayKey', 'cmdTime', 'day'),
+    // Two writes, one after the other: what the block is, then the time on it. Only the second
+    // closes the sheet, so a block that did not save stays open with its words still in it.
+    wire('cmdSave', 'done', 'cmdTime', 'do'),
     wire('twLog', 'close', 'twClearLog', 'do'),
-    // The sheet closes on the WRITE, not on the press: if it did not save, it stays open with
-    // the words still in it and the one sentence a failed write shows underneath.
-    wire('cmdSave', 'done', 'twClearLog', 'do'),
-    wire('cmdUndo', 'done', 'twClearLog', 'do'),
+    wire('twLog', 'close', 'twClearNewDay', 'do'),
+    wire('cmdTime', 'done', 'twClearLog', 'do'),
+    wire('cmdAddBlock', 'done', 'twClearNewDay', 'do'),
 
     // The settings sheet.
     wire('twBar', 'openSettings', 'twOpenSheet', 'do'),
     wire('twVarSheet', 'value', 'twSheetShown', 'in-open'),
     wire('twSheetShown', 'out-shown', 'twSheet', 'shown'),
     wire('twSheet', 'close', 'twCloseSheet', 'do'),
+    wire('twSheet', 'close', 'twCashOff', 'do'),
+
+    // R23 — the money events, in the settings sheet.
+    wire('twSheet', 'cashPickId', 'twSetCash', 'value'),
+    wire('twSheet', 'cashPick', 'twSetCash', 'do'),
+    wire('twSheet', 'cashAdd', 'twCashNew', 'do'),
+    wire('twSheet', 'cashCancel', 'twCashOff', 'do'),
+    wire('twVarCash', 'value', 'twCashForm', 'in-mode'),
+    wire('twData', 'cashEvents', 'twCashForm', 'in-cashEvents'),
+    ...CASH_EDITOR_FIELDS.map(([n]) => wire('twCashForm', `out-${n}`, 'twSheet', under('cash', n))),
+    wire('twCashForm', 'out-isNew', 'twIsNewCash', 'condition'),
+    wire('twSheet', 'cashSave', 'twIsNewCash', 'eval'),
+    wire('twIsNewCash', 'ontrue', 'cmdCashEvent', 'do'),
+    wire('twIsNewCash', 'onfalse', 'cmdEditCash', 'do'),
+    wire('twCashForm', 'out-id', 'cmdEditCash', 'cashId'),
+    ...CASH_EDIT_VALUES.flatMap(([n]) => [wire('twSheet', under('cash', n), 'cmdCashEvent', n), wire('twSheet', under('cash', n), 'cmdEditCash', n)]),
+    wire('cmdCashEvent', 'done', 'twCashOff', 'do'),
+    wire('cmdEditCash', 'done', 'twCashOff', 'do'),
     wire('twEnv', 'targetLine', 'twSheet', 'targetLine'),
     wire('twEnv', 'planLine', 'twSheet', 'planLine'),
     ...(['rate', 'householdNeed', 'partnerIncome', 'focusHours', 'partnerDay', 'costsDay', 'invoiceDay', 'paymentTermsDays'] as const).flatMap((n) => [
@@ -3691,7 +4436,7 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twHasProblem', 'out-shown', 'twProblem', 'mounted'),
 
     // After any change, load the week again.
-    ...['cmdAddBlock', 'cmdLog', 'cmdSave', 'cmdUndo', 'cmdUnlog', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdCashEvent', 'cmdSettings'].map(
+    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdCashEvent', 'cmdEditCash', 'cmdSettings'].map(
       (id) => wire(id, 'done', 'twData', 'refresh')
     )
   ]
@@ -3811,9 +4556,8 @@ export const APP_WIRES: unknown[] = [];
 export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   // Commands: they write, and nothing places them but the page.
   ADD_BLOCK,
-  LOG_BLOCK,
   SAVE_BLOCK,
-  UNLOG_BLOCK,
+  ADD_TIME,
   CARRY_BLOCK,
   DROP_BLOCK,
   PLACE_MOVE,
@@ -3821,6 +4565,7 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   EDIT_PROJECT,
   SET_MONTH_PLAN,
   ADD_CASH_EVENT,
+  EDIT_CASH_EVENT,
   EDIT_SETTINGS,
   // Logic: the only places a number or a sentence is decided.
   PLANNER_DATA,
@@ -3849,11 +4594,16 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   DAY_HEADER,
   DAY_COLUMN,
   CASH_STRIP,
+  DATE_PICKER,
+  ENTRY_ROW,
+  CASH_ROW,
   PROJECT_DETAIL,
+  PROJECT_EDITOR,
   PROJECT_CARD,
   SHUTDOWN_DRAWER,
+  CASH_EDITOR,
   SETTINGS_SHEET,
-  LOG_SHEET,
+  BLOCK_SHEET,
   DAY_PICK,
   DAY_PICKER,
   // The pages.
