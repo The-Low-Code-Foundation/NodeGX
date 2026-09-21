@@ -21,6 +21,39 @@ has the receipt: `captureThumbnail` was written down four times, by four session
 🔴 **The defect is not any one of the 264. It is that a green suite and a noisy editor were
 compatible states.**
 
+## 2a. 🔴 The budget MUST classify two populations, or it is nonsense — HLT-004, 2026-09-21
+
+**`.logs/dev.log` mixes two kinds of "renderer error" under one `[renderer:error]` tag**
+(`scripts/devtools/dev-debug.js:120`), and only one of them is the editor's:
+
+| source | what it is | can the app suppress it? |
+|---|---|---|
+| `Runtime.consoleAPICalled` / `Runtime.exceptionThrown` | **the application's** — a `console.error`, an uncaught throw | yes |
+| `Log.entryAdded`, level `error` | **Chromium's network stack**, e.g. `Failed to load resource: … 401` | 🔴 **no** |
+
+A network entry is written **before any JavaScript sees the response**, so no `catch`, no
+`res.ok` check and no amount of error handling removes one. **Only not making the request does.**
+
+✅ **The distinction is mechanically available and costs nothing:** an application console line in
+this log carries a **`(file.tsx:NNN)` prefix** and a network line carries **none**. HLT-004's three
+rows are visible in the s4 log as the only three lines without one.
+
+⇒ **Consequences this task must absorb:**
+
+1. 🔴 **A correctly handled `401` or `404` is not a defect, and a budget that counts it will be
+   switched off** — by somebody who is right to. The per-class budget needs a class for *network
+   responses the client models as ordinary outcomes*, and its number is not automatically 0.
+2. ⚠️ **264 read as 264 application faults because of this tag**, and three of them never were.
+   The phase's headline number is right about the log and slightly wrong about the editor.
+3. ⚠️ **The gate's own reach arm inherits HLT-004's**: a launch that never mounts the launcher's
+   community surfaces writes none of these lines and passes. `/api/v1/me` is requested on every
+   launch and needs no credential, so it is the known-firing signal
+   ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+4. ⚠️ **Some classes only appear on a surface the drive must reach.** `whatsnewRender()` runs from
+   `EditorPage.tsx:152` — on **opening a project**, never on the launcher — so a launcher-only
+   drive reads 0 of its `404` and that 0 means nothing
+   ([[a-window-opened-after-the-event-attributes-nothing]]).
+
 ## 3. Scope
 
 **In:** a gate that drives the editor, reads the renderer log and fails on errors above a named
