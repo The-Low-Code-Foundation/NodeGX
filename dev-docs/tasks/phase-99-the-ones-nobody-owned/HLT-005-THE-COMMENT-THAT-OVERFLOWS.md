@@ -1,7 +1,11 @@
 # HLT-005 — The comment that overflows
 
-✅ **BUILT 2026-09-21 (s6) — 0px of reachable horizontal scroll on a driven session in all four
-cells, control 1,253px and 497px on the identical build.**
+✅ **BUILT 2026-09-21 (s6), `228feddb1` — 0px of reachable horizontal scroll on a driven session in
+all four cells, control 1,253px and 497px on the identical build.**
+⚠️ That sha is a **sibling stream's** commit (*"DBT template L164: the roster"*): a peer committed
+in the window between this task's `git add` and its `git commit`, and a pathspec commit takes the
+index. The content is complete and correct there.
+[[staged-files-get-swept-by-a-siblings-commit]]
 [verdict](./verdicts/HLT-005/2026-09-21/VERDICT.md) · `scripts/devtools/drive-hlt005-comment.js`
 
 🔴 **§2 measured TRUE — the first task file in this phase that did.** Five before it were

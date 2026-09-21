@@ -1,5 +1,14 @@
 # HLT-005 — verdict, 2026-09-21 (session 6)
 
+⚠️ **Commit: `228feddb1`, and it does not say so.** Every file of this task was **swept into a
+sibling stream's commit** — `"DBT template L164: the roster"`, 39 files — because a `git commit`
+with a pathspec commits *the index*, and the DBT session ran its own commit in the window between
+my `git add` and my `git commit`. The content is correct and complete in `228feddb1`; only the
+message and the company it keeps are wrong. History was **not** rewritten: it is shared, and a peer
+is committing to it every few minutes. Worked example of
+[[staged-files-get-swept-by-a-siblings-commit]] — the register entry for this row is `228feddb1`,
+and this paragraph is why.
+
 **The comment field wraps inside the panel. 0px of reachable horizontal scroll on a driven
 session, in all four cells; control 1,253px and 497px on the identical build.**
 

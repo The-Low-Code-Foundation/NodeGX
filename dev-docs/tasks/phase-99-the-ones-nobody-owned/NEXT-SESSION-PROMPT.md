@@ -79,6 +79,20 @@ exactly why 264 events looked like 264 application faults.
   have MEASURED.** Two are marked; the rest were not measured and guessing turns a read that works
   signed out into one that silently stops.
 
+## 🔴 A sibling stream swept s6's whole commit — use a temporary index here
+
+**HLT-005's twelve files landed inside `228feddb1 "DBT template L164: the roster"`.** The DBT
+session committed in the window between my `git add` and my `git commit`, and a pathspec `git
+commit` takes **the index**, not the pathspec. Nothing was lost and nothing was rewritten — that
+history is shared and a peer commits to it every few minutes — but this phase's register now needs
+a sentence to explain a sha.
+
+⇒ **On this checkout, commit through a pinned temporary index with a compare-and-swap**, not `git
+add` + `git commit`: `BASE=$(git rev-parse HEAD)`, `GIT_INDEX_FILE=… git read-tree $BASE`, stage,
+`write-tree`, `commit-tree -p $BASE`, then `git update-ref HEAD $NEW $BASE` — which **refuses** if
+HEAD moved under you. See [[commit-your-delta-through-a-temporary-index]] and
+[[staged-files-get-swept-by-a-siblings-commit]].
+
 ## 🔴 Three traps s6 paid for — all three printed a verdict first
 
 **Six instrument faults in this phase now.** See [[an-instrument-must-be-armed-before-it-measures]].
