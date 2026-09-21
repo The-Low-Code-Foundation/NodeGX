@@ -255,7 +255,7 @@
       "path": "Todo/Action row",
       "type": "visual",
       "nodeCount": 18,
-      "connectionCount": 31,
+      "connectionCount": 30,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -319,6 +319,6 @@
   "stats": {
     "totalComponents": 39,
     "totalNodes": 361,
-    "totalConnections": 688
+    "totalConnections": 687
   }
 }

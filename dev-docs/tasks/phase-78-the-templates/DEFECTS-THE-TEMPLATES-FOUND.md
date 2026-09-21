@@ -53,6 +53,7 @@ failure this file's first house rule exists to prevent.
 | D17 | ✅ answered s5 | — | — | — |
 | D76 | 🔴 open — measured 09-20 | **NONE** | product (`For Each`) | any repeated row that answers one event with two signals — a field that must save AND close, a button that must record AND navigate |
 | **D18** | 🔴 open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
+| D77 | 🔴 open — measured 09-21; **both templates worked around 09-21** | **NONE** | product (icon ports + the door) | anyone who wires an icon in a project that has not installed the icon module — which is every template, because a template ships no modules |
 | **D19** | ⚠️ open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
 | **D20** | 🔴 open (08-29) | **DEF-006** — **filed** as §0(c) (was `NONE`, s17) | product | every agent styling on-system |
 | **D21** | ✅ disproved (08-29) | — | — | (would have been: every agent placing a component) |
@@ -3030,3 +3031,57 @@ TPL-008 the same press dropped the save on one run and not another.
 **The cheapest door** is not a fix to the semantics but a diagnostic: `itemOutputSignalTriggered`
 already knows it is discarding a name, so a second signal in one update could raise
 `repeater/item-signal-replaced` naming both. Queueing them instead would be the real fix. Owner `NONE`.
+
+## D77 — 🔴 An icon port in a project without the icon module renders an empty box, and nothing says so
+
+**What was done.** TPL-010's app bar was built the way TPL-008's header was: `useIcon: true`,
+`iconSourceType: 'icon'`, `iconIconSource: { class: 'lucide', code: 'icon-chevron-left' }`. The
+door accepted it, `validate_project` reported no error, and the render measured no error. Driven in
+a browser (`drive-page.js dom 'button'`), the week's `‹` button is **8 px by 8 px with no glyph in
+it** — and so are `›`, the settings, the theme switch's moon and sun, a move chip's plus and all
+three close buttons. Nine controls, invisible and effectively unhittable, on a screen that had
+passed every automated check in the build.
+
+**Why.** Lucide is a **library module** (`library/modules/lucide-icons`), and a template ships no
+modules — TPL-010's own writer refuses to write one with a non-empty `noodl_modules`. The viewer
+renders the port as `<span class="lucide icon-chevron-left"></span>`: correct markup for a font
+that is not there, so it is a span of nothing. The button's label is hidden by the `font-size: 0`
+that D72's workaround requires, so nothing else gives it size either.
+
+**Where it bites a person.** Every project that wires an icon without installing the module, which
+includes every template by construction, and any agent following a template as its pattern. It is
+invisible to the graph, to the validator and to a measured render, because "no images, no icons" is
+already a warning the page is expected to carry.
+
+**The cheapest door** is a diagnostic at the door: a write that sets `iconSourceType: 'icon'` in a
+project whose `noodl_modules` has no icon module is a `icon-without-its-module` warning naming the
+node — the same shape as the existing port checks. A second, independent door is the render report,
+which already walks the DOM and could measure "an element asking for an icon font that resolves to
+zero glyph boxes".
+
+**How TPL-010 works around it.** Every icon is a character (`‹ › ⚙ ☾ ☼ + ✕ ✓`) at the size the icon
+was, in the colour the icon was — which is what the approved mockup did in the first place, and
+which needs no module on any machine. `tpl010Template.test.ts` §3 now fails if any node in the
+template asks for an icon again.
+
+**TPL-008, re-measured and fixed (2026-09-21).** The suspicion was right. `templates/todo-list-demo`
+rendered **"17 text elements and not one picture or glyph — no images, no icons"** while four of its
+components (`Theme switch`, `Reminders switch`, `Action row`, `Task row`) asked for Lucide, and the
+artefact ships no icon font. Ten glyph buttons on that one screen were empty boxes, and had been
+since the template was published to the community shelf. Same character swap — `✓ ☾ ☼ ▲ ▼ ≡`, plus
+`🔕 🔔` for the bell pair, because Unicode has no crossed-out bell outside the emoji block, so those
+two render in colour where the rest do not. After: **27 texts**, ten glyph buttons at 26–28px, every
+one reachable, **zero empty-text visible buttons**. `tpl008Template.test.ts`'s D72 gate became the
+D77 gate and keeps its eleven-button control list.
+
+🔴 **What the workaround costs, in both templates: the accessible name.** D72 says the label IS a
+Button's name and there is no second port. The label has to carry the glyph now, so a screen reader
+reads "☾" where it read "Use dark theme", and TPL-008's tick box lost `checkLabel`, which said
+*Mark done* / *Mark not done* per row. A trade between two faults rather than a regression from a
+working state — the names were being read off buttons nobody could see — but it is real, and
+**D72 is the port that would give both back**. Worth weighing the two together.
+
+⚠️ **TPL-008 is on the community shelf and has NOT been republished** (Richard: do not publish,
+2026-09-21). `templates/todo-list/` and `templates/todo-list-demo/` on disk are ahead of the shelf
+until `publish-templates-to-shelf.sh` runs — and that script refuses a moved file count, so its
+expected counts may need updating first. Owner `NONE`.

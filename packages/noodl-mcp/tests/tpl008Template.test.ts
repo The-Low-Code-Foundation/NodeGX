@@ -223,40 +223,56 @@ describe('§4 the look Richard approved', () => {
     expect([...sizes].sort()).toEqual(['"var(--text-base)"', '"var(--text-sm)"', '"var(--text-xl)"']);
   });
 
-  it('🔴 every icon button has a name a screen reader can say, and hides the words (D72: Button has no accessible-name port)', () => {
-    // The label is the name; `font-size: 0` hides the words and the icon keeps its own size.
-    const seen: string[] = [];
-    const loud: string[] = [];
+  /**
+   * 🔴 **D77 — an icon port in a project with no icon module renders nothing, and nothing says
+   * so.** Lucide is a library module; a template ships none. Every one of the buttons below was
+   * drawing `<span class="lucide icon-…"></span>` — an empty box — and had been since this
+   * template was published to the shelf. Measured 2026-09-21 on `templates/todo-list-demo`:
+   * *"17 text elements and not one picture or glyph"*. The glyph is the label now.
+   *
+   * The control is the list: the rule has to reach every icon button there is — two moves and a
+   * tick box per row kind, (s8) the next action's Description button, the theme switch's moon
+   * and sun, and (s6) the reminders bell's two.
+   */
+  it('🔴 no node asks for an icon, and every button that used one draws a character instead (D77)', () => {
+    const asking: string[] = [];
+    for (const { component, node } of allNodes()) {
+      const p = (node.parameters ?? {}) as Record<string, unknown>;
+      if (p.useIcon === true || JSON.stringify(p).includes('"lucide"')) asking.push(`${component} ${node.id}`);
+    }
+    expect(asking).toEqual([]);
+
+    const GLYPH_BUTTONS = [
+      '/Todo/Action row arCheck',
+      '/Todo/Action row arDescOpen',
+      '/Todo/Action row arDown',
+      '/Todo/Action row arUp',
+      '/Todo/Task row trClose',
+      '/Todo/Task row trDown',
+      '/Todo/Task row trUp',
+      '/Todo/Reminders switch rmTurnOff',
+      '/Todo/Reminders switch rmTurnOn',
+      '/Todo/Theme switch thToDark',
+      '/Todo/Theme switch thToLight'
+    ].sort();
+
+    const drawn: string[] = [];
+    const silent: string[] = [];
     for (const c of componentsOf()) {
-      const wires = c.graph?.connections ?? [];
       for (const n of nodesOf(c).filter((x) => x.type === 'net.noodl.controls.button')) {
-        const p = (n.parameters ?? {}) as { useIcon?: boolean; label?: string; styleCss?: string };
-        if (!p.useIcon) continue;
-        seen.push(`${c.name} ${n.id}`);
-        const named = String(p.label ?? '').trim() !== '' || wires.some((w) => w.toId === n.id && w.toProperty === 'label');
-        if (!named) loud.push(`${c.name} ${n.id} has no name`);
-        if (!/font-size:\s*0/.test(String(p.styleCss ?? ''))) loud.push(`${c.name} ${n.id} shows its words`);
+        const key = `${c.name} ${n.id}`;
+        if (!GLYPH_BUTTONS.includes(key)) continue;
+        drawn.push(key);
+        const p = (n.parameters ?? {}) as { label?: string; styleCss?: string };
+        const label = String(p.label ?? '');
+        // One character, and nothing hiding it: `font-size: 0` was the old workaround and it
+        // is what made these buttons invisible once the icon failed to arrive.
+        if (label.trim() === '') silent.push(`${key} has no glyph`);
+        if (/font-size:\s*0/.test(String(p.styleCss ?? ''))) silent.push(`${key} is hidden by font-size: 0`);
       }
     }
-    // The control: the rule reached every icon button there is — two moves and a tick box per
-    // row kind, (s8) the next action's Description button, the theme switch's moon and sun,
-    // and (s6) the reminders bell's two.
-    expect(seen.sort()).toEqual(
-      [
-        '/Todo/Action row arCheck',
-        '/Todo/Action row arDescOpen',
-        '/Todo/Action row arDown',
-        '/Todo/Action row arUp',
-        '/Todo/Task row trClose',
-        '/Todo/Task row trDown',
-        '/Todo/Task row trUp',
-        '/Todo/Reminders switch rmTurnOff',
-        '/Todo/Reminders switch rmTurnOn',
-        '/Todo/Theme switch thToDark',
-        '/Todo/Theme switch thToLight'
-      ].sort()
-    );
-    expect(loud).toEqual([]);
+    expect(drawn.sort()).toEqual(GLYPH_BUTTONS);
+    expect(silent).toEqual([]);
   });
 
   it('every pair it draws passes WCAG AA in BOTH palettes, recomputed from the tokens', () => {
@@ -342,8 +358,11 @@ describe('§4b light and dark — following the system, and the switch at the to
         return [b.id, p.cssClassName, p.label];
       })
     ).toEqual([
-      ['rmTurnOn', REMINDERS_TURN_ON_CLASS, 'Turn reminders on'],
-      ['rmTurnOff', REMINDERS_TURN_OFF_CLASS, 'Turn reminders off']
+      // D77: the crossed-out bell turns them on, the ringing one turns them off. These were
+      // 'Turn reminders on' / 'Turn reminders off' when the label was a hidden name and an
+      // icon drew the bell — an icon that was never installed, so nothing drew at all.
+      ['rmTurnOn', REMINDERS_TURN_ON_CLASS, '🔕'],
+      ['rmTurnOff', REMINDERS_TURN_OFF_CLASS, '🔔']
     ]);
     const toggle = nodesOf(sw).find((n) => n.type === 'JavaScriptFunction');
     expect((toggle?.parameters as { functionScript?: string })?.functionScript).toBe(REMINDERS_TOGGLE_SCRIPT);
@@ -473,7 +492,15 @@ describe('§5 the scripts', () => {
     const { outputs } = run(SELECTED_SCRIPT, { tasks, actions, events: [], selectedId: 'a' });
     const rows = outputs.actionRows as Array<Record<string, unknown>>;
     expect(rows.map((r) => [r.id, r.num])).toEqual([['x1', '1'], ['x2', '2'], ['x0', '']]);
-    expect(rows.map((r) => r.checkLabel)).toEqual(['Mark done', 'Mark done', 'Mark not done']);
+    // ⚠️ `checkLabel` is gone: it named the tick box for a screen reader, and the label now
+    // has to carry the tick itself (D72 — a Button has no accessible-name port; D77 — the icon
+    // that used to carry it is not installed). The colour is what still says done or not.
+    expect(rows.map((r) => r.checkIconColor)).toEqual([
+      'var(--border-control)',
+      'var(--border-control)',
+      'var(--primary-foreground)'
+    ]);
+    expect(rows.every((r) => !('checkLabel' in r))).toBe(true);
     expect((outputs.openActionRows as unknown[]).length).toBe(2);
     expect(String(outputs.rankLine)).toMatch(/^#1 of 3/);
     expect(outputs.nextActionPosition).toBe(3);

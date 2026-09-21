@@ -150,7 +150,36 @@ const UPDATE = 'SetDbModelProperties';
 
 const px = (value: number) => ({ value, unit: 'px' });
 const pct = (value: number) => ({ value, unit: '%' });
-const icon = (code: string) => ({ class: 'lucide', code, codeAsClass: true });
+/**
+ * 🔴 **D77 — lucide is a library module, and a template ships none.** The icon ports take a
+ * `{ class: 'lucide', code }` and the viewer writes `<span class="lucide icon-moon">`: correct
+ * markup for a font that is not there, so it is a span of nothing. Measured 2026-09-21 on the
+ * shipped `templates/todo-list-demo` — *"17 text elements and not one picture or glyph"*. Every
+ * icon button in this template was an empty box, and had been since it was published.
+ *
+ * So every icon here is a **character** now, at the size the icon was, in the colour the icon
+ * was. No module, and it draws in any font on any machine. `tpl008Template.test.ts` fails if a
+ * node asks for an icon again — the same gate TPL-010 carries.
+ */
+const GLYPH: Record<string, string> = {
+  'icon-check': '✓',
+  'icon-moon': '☾',
+  'icon-sun': '☼',
+  'icon-chevron-up': '▲',
+  'icon-chevron-down': '▼',
+  'icon-align-left': '≡',
+  // ⚠️ The one pair with no monochrome character: Unicode has no crossed-out bell outside the
+  // emoji block, and the design is *"the crossed-out bell says reminders are off"*. These two
+  // render in colour where ☾ and ☼ do not. Worth a word instead if that reads badly in the header.
+  'icon-bell-off': '🔕',
+  'icon-bell-ring': '🔔'
+};
+
+const glyph = (code: string): string => {
+  const g = GLYPH[code];
+  if (!g) throw new Error(`tpl008: no character stands in for ${code}; add one to GLYPH or use a word`);
+  return g;
+};
 
 // ── Node helpers ────────────────────────────────────────────────────────────
 
@@ -250,42 +279,44 @@ const BTN_GHOST = {
   sizeMode: 'contentSize'
 };
 /**
- * 🔴 **D72 — a Button has no accessible-name port**, so an icon button with `label: ''`
- * is a `<button>` with no name: silent to a screen reader. The label IS the name —
- * `Button.tsx` writes it inside the `<button>` — and `font-size: 0` on the button hides
- * the words while the icon keeps its own size (`iconSize` is set on the glyph). The
- * drive reads the names back from Chrome's accessibility tree.
+ * 🔴 **D72 — a Button has no accessible-name port.** The label IS the name: `Button.tsx`
+ * writes it inside the `<button>`, and there is no second port to put a name in. This used
+ * to be worked around with `font-size: 0`, which hid the words and let the icon carry the
+ * picture — but the icon was never there (D77), so the workaround hid the only thing these
+ * buttons had. The glyph is the label now and the name went with it. D72 is the port that
+ * would give both back. The drive reads the names back from Chrome's accessibility tree.
  */
-const HIDDEN_LABEL = 'font-size: 0;';
-/** A ghost button's box without its type size: `font-size: 0` is the only size these carry. */
-const BTN_ICON = (code: string, name: string) => ({
+/**
+ * A ghost button whose whole label is one character (D77).
+ *
+ * 🔴 **This costs the accessible name.** D72 above is why: the label is the only thing that
+ * names a Button, and the label now has to carry the glyph, so a screen reader reads "☾" where
+ * it used to read "Use dark theme". That name was being read off a button nobody could see, so
+ * this is a trade between two faults, not a regression from a working state — but it is a real
+ * cost and D72 is the port that would end it. `name` is kept as the node's editor label.
+ */
+const BTN_ICON = (code: string, _name: string) => ({
   backgroundColor: 'transparent',
-  color: 'var(--foreground)',
+  color: 'var(--muted-foreground)',
   borderStyle: 'none',
   borderRadius: 'var(--radius-md)',
-  paddingTop: 'var(--space-2)',
-  paddingBottom: 'var(--space-2)',
+  paddingTop: 'var(--space-1)',
+  paddingBottom: 'var(--space-1)',
   sizeMode: 'contentSize',
-  label: name,
-  styleCss: HIDDEN_LABEL,
-  useIcon: true,
-  iconSourceType: 'icon',
-  iconIconSource: icon(code),
-  iconSize: 16,
-  iconSpacing: 0,
-  iconColor: 'var(--muted-foreground)',
+  label: glyph(code),
+  fontSize: 'var(--text-base)',
   paddingLeft: 'var(--space-2)',
   paddingRight: 'var(--space-2)'
 });
-/** The round tick box. Its fill and colours are wired, so a done row and an open row share one node. */
+/**
+ * The round tick box. Its fill and colours are wired, so a done row and an open row share one
+ * node — and the tick itself is a character (D77), so `color` is what the row wires where
+ * `iconColor` used to be.
+ */
 const BTN_CHECK = {
-  styleCss: HIDDEN_LABEL,
-  useIcon: true,
-  iconSourceType: 'icon',
-  iconIconSource: icon('icon-check'),
-  iconSize: 14,
-  iconSpacing: 0,
-  iconColor: 'var(--border-control)',
+  label: glyph('icon-check'),
+  fontSize: 'var(--text-sm)',
+  color: 'var(--border-control)',
   backgroundColor: 'transparent',
   borderStyle: 'solid',
   borderWidth: 'var(--border-2)',
@@ -548,7 +579,7 @@ const TASK_ROW: Tpl008Component = {
     text('trMeta', 'Deadline and next action', 'trMain', '', wide(T_META)),
     place('trUp', BUTTON, 'Move up', 'trRow', BTN_ICON('icon-chevron-up', 'Move up')),
     place('trDown', BUTTON, 'Move down', 'trRow', BTN_ICON('icon-chevron-down', 'Move down')),
-    place('trClose', BUTTON, 'Close it', 'trRow', { ...BTN_CHECK, label: 'Close this task', marginLeft: 'var(--space-1)' })
+    place('trClose', BUTTON, 'Close it', 'trRow', { ...BTN_CHECK, marginLeft: 'var(--space-1)' })
   ],
   connections: [
     wire('trIn', 'rank', 'trRank', 'text'),
@@ -851,8 +882,7 @@ const ACTION_ROW_FIELDS: Array<[string, string]> = [
   ['canDown', 'boolean'],
   ['checkBg', 'string'],
   ['checkIconColor', 'string'],
-  ['checkBorder', 'string'],
-  ['checkLabel', 'string']
+  ['checkBorder', 'string']
 ];
 const ACTION_ROW_OUTS: Array<[string, string]> = [
   ['tick', 'signal'],
@@ -922,7 +952,7 @@ const ACTION_ROW: Tpl008Component = {
     group('arRoot', 'Next action', undefined, { ...COLUMN('var(--space-0)'), ...RULE_BELOW, paddingTop: 'var(--space-1)', paddingBottom: 'var(--space-1)' }),
     group('arTop', 'The line', 'arRoot', ROW('var(--space-2)')),
     text('arNum', 'Its place', 'arTop', '', { ...T_META, sizeMode: 'contentHeight', width: px(20), textAlignX: 'right', fontVariantNumeric: 'tabular-nums' }),
-    place('arCheck', BUTTON, 'Tick box', 'arTop', { ...BTN_CHECK, label: 'Mark done' }),
+    place('arCheck', BUTTON, 'Tick box', 'arTop', BTN_CHECK),
     place('arTitle', TEXT_INPUT, 'Title', 'arTop', ROW_TITLE_FIELD),
     place('arDescOpen', BUTTON, 'Open the description', 'arTop', BTN_ICON('icon-align-left', 'Description')),
     group('arMove', 'Move buttons', 'arTop', { flexDirection: 'row', alignItems: 'center', sizeMode: 'contentSize' }),
@@ -950,9 +980,8 @@ const ACTION_ROW: Tpl008Component = {
     wire('arIn', 'canUp', 'arUp', 'enabled'),
     wire('arIn', 'canDown', 'arDown', 'enabled'),
     wire('arIn', 'checkBg', 'arCheck', 'backgroundColor'),
-    wire('arIn', 'checkIconColor', 'arCheck', 'iconColor'),
+    wire('arIn', 'checkIconColor', 'arCheck', 'color'),
     wire('arIn', 'checkBorder', 'arCheck', 'borderColor'),
-    wire('arIn', 'checkLabel', 'arCheck', 'label'),
     wire('arIn', 'done', 'arWhich', 'condition'),
     wire('arIn', 'id', 'arOut', 'id'),
     wire('arIn', 'title', 'arOut', 'title'),
@@ -1317,7 +1346,6 @@ function row(x, index, count) {
     checkBg: isDone ? 'var(--primary)' : 'transparent',
     checkIconColor: isDone ? 'var(--primary-foreground)' : 'var(--border-control)',
     checkBorder: isDone ? 'var(--primary)' : 'var(--border-control)',
-    checkLabel: isDone ? 'Mark not done' : 'Mark done',
     position: num(x.position, 0)
   };
 }

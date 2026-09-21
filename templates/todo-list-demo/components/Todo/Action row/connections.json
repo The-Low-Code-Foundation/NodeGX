@@ -85,19 +85,13 @@
       "fromId": "arIn",
       "fromProperty": "checkIconColor",
       "toId": "arCheck",
-      "toProperty": "iconColor"
+      "toProperty": "color"
     },
     {
       "fromId": "arIn",
       "fromProperty": "checkBorder",
       "toId": "arCheck",
       "toProperty": "borderColor"
-    },
-    {
-      "fromId": "arIn",
-      "fromProperty": "checkLabel",
-      "toId": "arCheck",
-      "toProperty": "label"
     },
     {
       "fromId": "arIn",

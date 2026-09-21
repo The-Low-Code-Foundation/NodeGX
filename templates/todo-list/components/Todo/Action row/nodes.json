@@ -87,11 +87,6 @@
           "name": "checkBorder",
           "plug": "output",
           "type": "string"
-        },
-        {
-          "name": "checkLabel",
-          "plug": "output",
-          "type": "string"
         }
       ],
       "x": 470,
@@ -244,17 +239,9 @@
       "label": "Tick box",
       "parent": "arTop",
       "parameters": {
-        "styleCss": "font-size: 0;",
-        "useIcon": true,
-        "iconSourceType": "icon",
-        "iconIconSource": {
-          "class": "lucide",
-          "code": "icon-check",
-          "codeAsClass": true
-        },
-        "iconSize": 14,
-        "iconSpacing": 0,
-        "iconColor": "var(--border-control)",
+        "label": "✓",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--border-control)",
         "backgroundColor": "transparent",
         "borderStyle": "solid",
         "borderWidth": "var(--border-2)",
@@ -272,8 +259,7 @@
         "paddingLeft": "var(--space-0)",
         "paddingRight": "var(--space-0)",
         "paddingTop": "var(--space-0)",
-        "paddingBottom": "var(--space-0)",
-        "label": "Mark done"
+        "paddingBottom": "var(--space-0)"
       },
       "x": 160,
       "y": 400
@@ -313,24 +299,14 @@
       "parent": "arTop",
       "parameters": {
         "backgroundColor": "transparent",
-        "color": "var(--foreground)",
+        "color": "var(--muted-foreground)",
         "borderStyle": "none",
         "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
         "sizeMode": "contentSize",
-        "label": "Description",
-        "styleCss": "font-size: 0;",
-        "useIcon": true,
-        "iconSourceType": "icon",
-        "iconIconSource": {
-          "class": "lucide",
-          "code": "icon-align-left",
-          "codeAsClass": true
-        },
-        "iconSize": 16,
-        "iconSpacing": 0,
-        "iconColor": "var(--muted-foreground)",
+        "label": "≡",
+        "fontSize": "var(--text-base)",
         "paddingLeft": "var(--space-2)",
         "paddingRight": "var(--space-2)"
       },
@@ -361,24 +337,14 @@
       "parent": "arMove",
       "parameters": {
         "backgroundColor": "transparent",
-        "color": "var(--foreground)",
+        "color": "var(--muted-foreground)",
         "borderStyle": "none",
         "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
         "sizeMode": "contentSize",
-        "label": "Move up",
-        "styleCss": "font-size: 0;",
-        "useIcon": true,
-        "iconSourceType": "icon",
-        "iconIconSource": {
-          "class": "lucide",
-          "code": "icon-chevron-up",
-          "codeAsClass": true
-        },
-        "iconSize": 16,
-        "iconSpacing": 0,
-        "iconColor": "var(--muted-foreground)",
+        "label": "▲",
+        "fontSize": "var(--text-base)",
         "paddingLeft": "var(--space-2)",
         "paddingRight": "var(--space-2)"
       },
@@ -392,24 +358,14 @@
       "parent": "arMove",
       "parameters": {
         "backgroundColor": "transparent",
-        "color": "var(--foreground)",
+        "color": "var(--muted-foreground)",
         "borderStyle": "none",
         "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
         "sizeMode": "contentSize",
-        "label": "Move down",
-        "styleCss": "font-size: 0;",
-        "useIcon": true,
-        "iconSourceType": "icon",
-        "iconIconSource": {
-          "class": "lucide",
-          "code": "icon-chevron-down",
-          "codeAsClass": true
-        },
-        "iconSize": 16,
-        "iconSpacing": 0,
-        "iconColor": "var(--muted-foreground)",
+        "label": "▼",
+        "fontSize": "var(--text-base)",
         "paddingLeft": "var(--space-2)",
         "paddingRight": "var(--space-2)"
       },
