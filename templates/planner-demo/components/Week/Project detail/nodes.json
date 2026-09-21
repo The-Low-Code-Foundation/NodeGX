@@ -59,14 +59,54 @@
           "type": "string"
         },
         {
-          "name": "planLabel",
+          "name": "canPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "unplaced",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placedLine",
           "plug": "output",
           "type": "string"
         },
         {
-          "name": "canPlan",
+          "name": "planDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "minDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLast",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "moveKey",
+          "plug": "output",
+          "type": "string"
         },
         {
           "name": "weekText",
@@ -109,7 +149,7 @@
           "type": "string"
         }
       ],
-      "x": 470,
+      "x": 530,
       "y": 400
     },
     {
@@ -123,6 +163,16 @@
           "type": "signal"
         },
         {
+          "name": "moveIt",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "takeOut",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
           "name": "edit",
           "plug": "input",
           "type": "signal"
@@ -131,10 +181,20 @@
           "name": "close",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "planDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "planHours",
+          "plug": "input",
+          "type": "string"
         }
       ],
-      "x": 470,
-      "y": 1720
+      "x": 530,
+      "y": 2200
     },
     {
       "id": "pdRoot",
@@ -345,7 +405,10 @@
         "pdMoveLabel",
         "pdMoveText",
         "pdMoveMeta",
-        "pdPlan"
+        "pdPlaced",
+        "pdLast",
+        "pdPlan",
+        "pdActs"
       ],
       "x": 100,
       "y": 1000
@@ -444,10 +507,212 @@
       "y": 1600
     },
     {
+      "id": "pdPlaced",
+      "type": "Text",
+      "label": "Where the move is in the week",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "pdLast",
+      "type": "Text",
+      "label": "What happened to the last one",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
       "id": "pdPlan",
+      "type": "Group",
+      "label": "Its day and hours",
+      "parent": "pdMove",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "paddingTop": "var(--space-1)"
+      },
+      "children": [
+        "pdDateBox",
+        "pdHoursBox"
+      ],
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "pdDateBox",
+      "type": "Group",
+      "label": "Which day",
+      "parent": "pdPlan",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 55,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pdDate"
+      ],
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "pdDate",
+      "type": "/Week/Date picker",
+      "label": "Which day",
+      "parent": "pdDateBox",
+      "parameters": {
+        "Label": "Day",
+        "Show Label": true
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "pdHoursBox",
+      "type": "Group",
+      "label": "How long",
+      "parent": "pdPlan",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pdHours"
+      ],
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "pdHours",
+      "type": "net.noodl.controls.textinput",
+      "label": "How long, in hours",
+      "parent": "pdHoursBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Hours",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "pdReset",
+      "type": "JavaScriptFunction",
+      "label": "Put the hours back when the project changes",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (this.key !== undefined && this.key !== key) { Outputs.blur(); Outputs.reset(); }\nthis.key = key;"
+      },
+      "x": 530,
+      "y": 2440,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-blur",
+          "displayName": "blur",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reset",
+          "displayName": "reset",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pdActs",
+      "type": "Group",
+      "label": "What to do with it",
+      "parent": "pdMove",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "pdPut",
+        "pdMoveIt",
+        "pdTakeOut"
+      ],
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "pdPut",
       "type": "net.noodl.controls.button",
       "label": "Put it in the week",
-      "parent": "pdMove",
+      "parent": "pdActs",
       "parameters": {
         "backgroundColor": "var(--primary)",
         "color": "var(--primary-foreground)",
@@ -460,10 +725,57 @@
         "fontSize": "var(--text-sm)",
         "fontWeight": "var(--font-semibold)",
         "sizeMode": "contentSize",
-        "label": "Put 30 min in the week"
+        "label": "Put it in the week"
       },
-      "x": 160,
-      "y": 1720
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "pdMoveIt",
+      "type": "net.noodl.controls.button",
+      "label": "Move it to that day",
+      "parent": "pdActs",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Move it"
+      },
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "pdTakeOut",
+      "type": "net.noodl.controls.button",
+      "label": "Take it out of the week",
+      "parent": "pdActs",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Take it out"
+      },
+      "x": 220,
+      "y": 2920
     },
     {
       "id": "pdWeek",
@@ -484,7 +796,7 @@
         "pdBoxes"
       ],
       "x": 100,
-      "y": 1840
+      "y": 3040
     },
     {
       "id": "pdWeekLabel",
@@ -511,7 +823,7 @@
         }
       },
       "x": 160,
-      "y": 1960
+      "y": 3160
     },
     {
       "id": "pdBoxes",
@@ -519,7 +831,7 @@
       "label": "The six days",
       "parent": "pdWeek",
       "x": 160,
-      "y": 2080
+      "y": 3280
     },
     {
       "id": "pdTwo",
@@ -541,7 +853,7 @@
         "pdFacts"
       ],
       "x": 100,
-      "y": 2200
+      "y": 3400
     },
     {
       "id": "pdHistory",
@@ -562,7 +874,7 @@
         "pdSpark"
       ],
       "x": 160,
-      "y": 2320
+      "y": 3520
     },
     {
       "id": "pdSparkTitle",
@@ -589,7 +901,7 @@
         }
       },
       "x": 220,
-      "y": 2440
+      "y": 3640
     },
     {
       "id": "pdSpark",
@@ -597,7 +909,7 @@
       "label": "The bars",
       "parent": "pdHistory",
       "x": 220,
-      "y": 2560
+      "y": 3760
     },
     {
       "id": "pdFacts",
@@ -618,7 +930,7 @@
         "pdFactEach"
       ],
       "x": 160,
-      "y": 2680
+      "y": 3880
     },
     {
       "id": "pdFactsLabel",
@@ -645,7 +957,7 @@
         }
       },
       "x": 220,
-      "y": 2800
+      "y": 4000
     },
     {
       "id": "pdFactEach",
@@ -657,7 +969,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 2920
+      "y": 4120
     },
     {
       "id": "pdSayBox",
@@ -683,7 +995,7 @@
         "pdSay"
       ],
       "x": 100,
-      "y": 3040
+      "y": 4240
     },
     {
       "id": "pdSay",
@@ -701,7 +1013,7 @@
         }
       },
       "x": 160,
-      "y": 3160
+      "y": 4360
     }
   ],
   "visualRoots": [

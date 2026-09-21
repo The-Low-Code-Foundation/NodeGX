@@ -17,6 +17,12 @@
     },
     {
       "fromId": "kdIn",
+      "fromProperty": "moveBlocks",
+      "toId": "kdWork",
+      "toProperty": "in-moveBlocks"
+    },
+    {
+      "fromId": "kdIn",
       "fromProperty": "weekStart",
       "toId": "kdWork",
       "toProperty": "in-weekStart"
@@ -26,6 +32,12 @@
       "fromProperty": "selectedId",
       "toId": "kdWork",
       "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "kdIn",
+      "fromProperty": "firstOpenDay",
+      "toId": "kdWork",
+      "toProperty": "in-firstOpenDay"
     },
     {
       "fromId": "kdWork",
@@ -95,15 +107,63 @@
     },
     {
       "fromId": "kdWork",
-      "fromProperty": "out-planLabel",
-      "toId": "kdOut",
-      "toProperty": "planLabel"
-    },
-    {
-      "fromId": "kdWork",
       "fromProperty": "out-canPlan",
       "toId": "kdOut",
       "toProperty": "canPlan"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-placed",
+      "toId": "kdOut",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-unplaced",
+      "toId": "kdOut",
+      "toProperty": "unplaced"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-placedLine",
+      "toId": "kdOut",
+      "toProperty": "placedLine"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-planDate",
+      "toId": "kdOut",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-planHours",
+      "toId": "kdOut",
+      "toProperty": "planHours"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-minDate",
+      "toId": "kdOut",
+      "toProperty": "minDate"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-lastLine",
+      "toId": "kdOut",
+      "toProperty": "lastLine"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-hasLast",
+      "toId": "kdOut",
+      "toProperty": "hasLast"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-moveKey",
+      "toId": "kdOut",
+      "toProperty": "moveKey"
     },
     {
       "fromId": "kdWork",
@@ -158,6 +218,12 @@
       "fromProperty": "out-resolvedId",
       "toId": "kdOut",
       "toProperty": "resolvedId"
+    },
+    {
+      "fromId": "kdWork",
+      "fromProperty": "out-placedBlockId",
+      "toId": "kdOut",
+      "toProperty": "placedBlockId"
     }
   ]
 }

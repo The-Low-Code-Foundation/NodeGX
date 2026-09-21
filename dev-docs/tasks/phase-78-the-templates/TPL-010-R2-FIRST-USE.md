@@ -2,7 +2,7 @@
 
 **Opened 2026-09-21**, from Richard's first session with `templates/planner-demo/` in a browser, with the approved mockup
 open beside it. Six pieces of feedback, each researched against the build below and written as a task with its own
-acceptance criteria. **Status: R2.6 ✅, R2.1 ✅ (waiting on R2.1-6), R2.4 ✅ built and driven (s2); R2.3, R2.2, R2.5 ⬜. Every ruling
+acceptance criteria. **Status: R2.6 ✅, R2.1 ✅ (waiting on R2.1-6), R2.4 ✅ built and driven (s2); R2.3 ✅ built and driven (s4); R2.5 ⬜; R2.2 folded into [TPL-010-M](TPL-010-MONEY.md) (2026-09-21). Every ruling
 approved 2026-09-21.** Prerequisite: TPL-010 as it stands (gates 30/30).
 
 The seventh ask from the same message — Claude Code as the coach, with every row and every setting open to it over MCP —
@@ -89,6 +89,12 @@ visual noise for ADHD people like me."*
 ---
 
 ## R2.2 — The project card has no money in it
+
+> **Largely superseded 2026-09-21 by [TPL-010-M — the money](TPL-010-MONEY.md)** (§6 there). R18 `Invoice`, R20 (derived
+> invoice events) and R19's `invoiceDay` / `cycle` are replaced: a client's bill is a money item the person types, on the
+> project, with the project's payment terms pre-filling its due date. Should / will / agreed, R21, and the past list are
+> kept and **built as part of TPL-010-M**. R2.2-4 (*Raise the invoice* with its blocks) is left for later. Read TPL-010-M,
+> not the rest of this section, before building.
 
 **Richard:** *"I don't see where in the projects modal we can put in when the next bill is going out, i.e. which
 billable hours will go into it (anything before and up to that date), and when that will be due. That is what will give
@@ -179,7 +185,7 @@ sent. *Mark paid* takes a date. A one-off project has the same box with *covers*
 
 ---
 
-## R2.3 — Put 30 min in the week: pick the day, then show it — ⬜ (work item 1 done in R2.4)
+## R2.3 — Put 30 min in the week: pick the day, then show it — ✅ built and driven s4
 
 **Richard:** *"'Put 30 mins in the week' is a good idea for a button, but not clear. I'd rather a date picker input
 where I can pick where I want that activity to go in the project modal, then see afterwards on each 'next action' which
@@ -230,12 +236,12 @@ week yet, so I know which ones are outstanding and not being dealt with."*
 
 | AC | Criterion |
 |---|---|
-| R2.3-1 | Opening Bramble & Co's card shows the date field on `firstOpenDay` and hours 0.5; picking Friday and 1 h writes one Block on Friday at 1 h; the box reads *In the week: Fri 25 · 1 h* |
-| R2.3-2 | *Move it* to Thursday changes that block's date and nothing else in the store; *Take it out* deletes it and the box returns to the fields |
-| R2.3-3 | A move placed on a day in **next** week still reads placed this week, and a chip press then opens the card rather than writing (R7c) |
-| R2.3-4 | Logging the move block done makes the move read unplaced again with *done* beside the last day |
-| R2.3-5 | In the card's list, unplaced moves are full-strength and placed ones muted with their day; on the strip a placed chip shows *✓ Thu*; the gate walks the rows for both states |
-| R2.3-6 | AC3 still passes unchanged: the chip's one press writes 0.5 h into the first open day |
+| R2.3-1 | Opening Bramble & Co's card shows the date field on `firstOpenDay` and hours 0.5; picking Friday and 1 h writes one Block on Friday at 1 h; the box reads *In the week: Fri 25 · 1 h* — ✅ s4, driven (a day three ahead, 1 h, one move Block, *In the week: Thu 24 · 1 h*) and gated |
+| R2.3-2 | *Move it* to Thursday changes that block's date and nothing else in the store; *Take it out* deletes it and the box returns to the fields — ✅ s4, driven (diff of the row: `date` only; the box back at 0.5) |
+| R2.3-3 | A move placed on a day in **next** week still reads placed this week, and a chip press then opens the card rather than writing (R7c) — ✅ s4, driven (*✓ Tue 29* on this week's strip; the press opened the card, Block count unchanged) and gated |
+| R2.3-4 | Logging the move block done makes the move read unplaced again with *done* beside the last day — ✅ s4, driven (chip unticked; card *✓ Done Wed 23. Put the next one in, or change the move.*) and gated |
+| R2.3-5 | In the card's list, unplaced moves are full-strength and placed ones muted with their day; on the strip a placed chip shows *✓ Thu*; the gate walks the rows for both states — ✅ s4, gated both states, driven (list *✓ Thu 24 · Offer…*, strip *✓ Wed*) |
+| R2.3-6 | AC3 still passes unchanged: the chip's one press writes 0.5 h into the first open day — ✅ s4, driven (Meridian's +: one 0.5 h move block) and gated (no hours wired to the chip's command) |
 
 ---
 
@@ -318,6 +324,10 @@ can't send that kind of detail to a client as proof of what I did when I'm billi
 ---
 
 ## R2.5 — Where the numbers come from is not configurable enough
+
+> **Amended 2026-09-21 by [TPL-010-M](TPL-010-MONEY.md) §4.3:** R24's *Money* section is replaced by three fields (rate,
+> savings target, lowest balance before red); every other money number becomes a money item. Capacity, the split and the
+> guardrails are unchanged.
 
 **Richard:** *"Where do I set my config? Like the number of productive hours I work in a day, the ratio of billable vs
 building vs admin, recommendations for those, making sure I'm not doing too many hobby or building hours, etc.?"*
@@ -425,7 +435,7 @@ if it's below the fold. Scrolling down doesn't work."*
 ## Not in this round
 
 - The MCP coach — [TPL-010-MCP](TPL-010-MCP-THE-COACH.md).
-- Month view, recurring cash rules with exceptions (board, *"explicitly later"*).
+- Month view (board, *"explicitly later"*). Recurring cash rules with exceptions are now [TPL-010-M](TPL-010-MONEY.md).
 - The phone reading of a 685px chip (AC8's open question) — R7a's wrapping may answer it; measure after R2.1.
 
 ## Session log
@@ -521,3 +531,56 @@ and the block sheet at 390×844 (full width, no sideways scroll).
 **Richard's, and not decided here:** the fold (R2.6-2 grows by this) — the cheapest recoveries are the **+** moved into the day
 header beside the day's name (0 px, but not "at the foot" as R23 says), and a shorter partial reading such as *"1.75/2 h"*
 (R22 names *"0.5 of 1 h"*). R2.1-6, R2.6-5 unchanged.
+
+### s3 — 2026-09-21: the money moved out to its own task
+Richard, seeing the money events inside Settings, asked for a Money modal of its own, with every money number a money
+item (partner, household, tax, clients' bills), repeats that can be changed one at a time, ticks for what happened, hoped
+money with a likelihood, and a week page that says how far off target and break-even the month is. He overruled
+deriving client bills from project terms: the person types them, the terms pre-fill. Written as
+[TPL-010-M](TPL-010-MONEY.md), which absorbs R2.2 and the money part of R2.5. Nothing built.
+
+### s4 — 2026-09-21: R2.3 built, gated and driven
+**Done and driven** on a deployed build of `templates/planner-demo` with real clicks (`scripts/devtools/drive-tpl010-r23.js`,
+**19/19 clauses, 0 console errors**); the R2.4 drive re-run on the same build **25/25**. Gates **tpl010 48/48** (43 before: five
+new), **tpl008 43/43**; the generator writes the same files on two runs running. `measure-from-disk` 1280×900 / 1423×680 /
+390×844: **0 unreachable**, `scrollWidth` = viewport, 0 console errors; 390×844 overflowing 1 (the cash row, by design). The
+deploy's wire check: nothing new; the one true report is still `Logic/Cash line`'s `invoicedText` (D79's For Each reports aside).
+
+**What was built:** `Logic/Planner data` has a sixth query, **the move blocks from four weeks back** (`moveBlocks`, filtered on
+the date only — which blocks are moves is read in the scripts, so the demo and the backend compare nothing but a date string).
+`moveOf()` and `shortDay()` in the shared arithmetic. `Logic/Moves` and `Logic/Card rows` read placed from it (R7c).
+`Week/Project detail`'s move box: the day (`Week/Date picker`, `Min` today) and the hours (0.5), *Put it in the week*; placed,
+*In the week: Thu 24 · 1 h*, the day for *Move it*, and *Take it out*; after a done one, *✓ Done Wed 23*. `Commands/Place move`
+takes `planned` (nothing sent = the chip's 0.5; 0 or words refused); **`Commands/Move block`** new (the day only, never into the
+past, not to the day it is already on). The page gives the card's box its **own** `Place move`, `Move block` and `Drop block`,
+so the chip's one press (AC3) is wired exactly as before. R7d: the chip's marker is hollow until placed; a placed chip is the
+mockup's (faded, move struck through) with *✓ Thu* where the ✓ was; in the card's list unplaced moves are full-strength
+(red when late) and placed ones muted with *✓ Thu 24 ·*.
+
+**Where the build departs from the task's words, and why:**
+- **The strip's day is the weekday within six days, the date past that** (*✓ Tue*, *✓ Thu 8*): R7d says *✓ Thu*, and a move put
+  in the Thursday after next would otherwise read as this Thursday.
+- **Unplaced chips are full-strength on the strip, not muted.** R7d's first sentence says muted text for unplaced; its last says
+  the strip keeps the mockup's line-through, which is on the *placed* chip (`.chip.placed` in `envelopes-b.html`). Both cannot
+  hold; the mockup's was kept, and the card's list follows R7d's own reversal (unplaced is what the eye lands on).
+- **Placed, the box has no hours field** — *Move it* changes the day only (R2.3-2), so hours are for placing.
+- **The day field does not reset between two unplaced projects**: the date picker has no `Set`, and its prefill (`firstOpenDay`)
+  is the same for both. The day it shows is the day that is written. The hours box does reset (below).
+
+**Found by driving, and fixed:**
+- 🔴 **Projects opened the card once per page load** — and it did on the committed build before this session too (probed on
+  HEAD `8fb8cbb8f`'s demo). The button reached the card's one Set Variable through a Function saying `'*'`, which publishes only
+  when the value changes, so the second press sent nothing. The same Set Variable took its `value` from five sources, so a chip
+  pressed twice could open whichever project was picked in between. Each way into the card now has its own Set Variable, and
+  Projects presses one whose value is `'*'`; gated. The R2.4 drive never pressed Projects twice without a project being created
+  in between, which is why it passed.
+- 🔴 **The hours typed on one project were still there on the next** (D78's shape, in a box that never closes). Fixed with the
+  box's `Set` whenever the project or its state changes — **after a Blur**: `Set` leaves a focused box alone, and pressing a
+  project in the list does not move focus off it (probed: focus on BODY afterwards, value unchanged; blurred first, 0.5).
+- `Logic/Moves` kept a `weekStart` input it no longer read; the deploy's wire check said so, and it is gone.
+
+**Readings that are Richard's:** the fold moved again. At 1280×900 `pageHeight` is **1087** (1061 at s2) and the week box ends at
+**953** (927): the strip is one row taller (224 → 250 px) because *✓ Fri* makes a placed chip too wide to share its row. Cheapest
+recovery if wanted: drop the **+** on a placed chip (the chip itself still opens the card), about 20 px per placed chip — not done,
+because the + is the chip's only button for a keyboard. The placed chip's 0.55 opacity is the mockup's and below the contrast
+floor by design; the AC10 gate does not see opacity. R2.1-6, R2.6-2, R2.6-5 unchanged.

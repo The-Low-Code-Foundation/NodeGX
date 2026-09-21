@@ -74,14 +74,54 @@
           "type": "string"
         },
         {
-          "name": "planLabel",
+          "name": "canPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "unplaced",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placedLine",
           "plug": "output",
           "type": "string"
         },
         {
-          "name": "canPlan",
+          "name": "planDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "minDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLast",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "moveKey",
+          "plug": "output",
+          "type": "string"
         },
         {
           "name": "weekText",
@@ -221,6 +261,26 @@
           "name": "plan",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "moveIt",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "takeOut",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "planDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "planHours",
+          "plug": "input",
+          "type": "string"
         },
         {
           "name": "close",

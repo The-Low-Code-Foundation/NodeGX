@@ -65,14 +65,110 @@
     },
     {
       "fromId": "pdIn",
-      "fromProperty": "planLabel",
+      "fromProperty": "canPlan",
       "toId": "pdPlan",
-      "toProperty": "label"
+      "toProperty": "mounted"
     },
     {
       "fromId": "pdIn",
       "fromProperty": "canPlan",
-      "toId": "pdPlan",
+      "toId": "pdActs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "placed",
+      "toId": "pdPlaced",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "placedLine",
+      "toId": "pdPlaced",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "hasLast",
+      "toId": "pdLast",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "lastLine",
+      "toId": "pdLast",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "planDate",
+      "toId": "pdDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "minDate",
+      "toId": "pdDate",
+      "toProperty": "Min"
+    },
+    {
+      "fromId": "pdDate",
+      "fromProperty": "Value",
+      "toId": "pdOut",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "unplaced",
+      "toId": "pdHoursBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "planHours",
+      "toId": "pdHours",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "pdHours",
+      "fromProperty": "onTextChanged",
+      "toId": "pdOut",
+      "toProperty": "planHours"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "moveKey",
+      "toId": "pdReset",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "pdReset",
+      "fromProperty": "out-blur",
+      "toId": "pdHours",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "pdReset",
+      "fromProperty": "out-reset",
+      "toId": "pdHours",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "unplaced",
+      "toId": "pdPut",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "placed",
+      "toId": "pdMoveIt",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "placed",
+      "toId": "pdTakeOut",
       "toProperty": "mounted"
     },
     {
@@ -124,10 +220,22 @@
       "toProperty": "boxes"
     },
     {
-      "fromId": "pdPlan",
+      "fromId": "pdPut",
       "fromProperty": "onClick",
       "toId": "pdOut",
       "toProperty": "plan"
+    },
+    {
+      "fromId": "pdMoveIt",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "moveIt"
+    },
+    {
+      "fromId": "pdTakeOut",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "takeOut"
     },
     {
       "fromId": "pdEdit",

@@ -23,6 +23,12 @@
     },
     {
       "fromId": "PlacemoveIn",
+      "fromProperty": "planned",
+      "toId": "PlacemoveGuard",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "PlacemoveIn",
       "fromProperty": "placed",
       "toId": "PlacemoveGuard",
       "toProperty": "in-placed"

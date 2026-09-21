@@ -95,15 +95,63 @@
     },
     {
       "fromId": "pcIn",
-      "fromProperty": "planLabel",
-      "toId": "pcDetail",
-      "toProperty": "planLabel"
-    },
-    {
-      "fromId": "pcIn",
       "fromProperty": "canPlan",
       "toId": "pcDetail",
       "toProperty": "canPlan"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "placed",
+      "toId": "pcDetail",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "unplaced",
+      "toId": "pcDetail",
+      "toProperty": "unplaced"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "placedLine",
+      "toId": "pcDetail",
+      "toProperty": "placedLine"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "planDate",
+      "toId": "pcDetail",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "planHours",
+      "toId": "pcDetail",
+      "toProperty": "planHours"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "minDate",
+      "toId": "pcDetail",
+      "toProperty": "minDate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "lastLine",
+      "toId": "pcDetail",
+      "toProperty": "lastLine"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasLast",
+      "toId": "pcDetail",
+      "toProperty": "hasLast"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "moveKey",
+      "toId": "pcDetail",
+      "toProperty": "moveKey"
     },
     {
       "fromId": "pcIn",
@@ -158,6 +206,30 @@
       "fromProperty": "plan",
       "toId": "pcOut",
       "toProperty": "plan"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "moveIt",
+      "toId": "pcOut",
+      "toProperty": "moveIt"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "takeOut",
+      "toId": "pcOut",
+      "toProperty": "takeOut"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "planDate",
+      "toId": "pcOut",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "planHours",
+      "toId": "pcOut",
+      "toProperty": "planHours"
     },
     {
       "fromId": "pcDetail",

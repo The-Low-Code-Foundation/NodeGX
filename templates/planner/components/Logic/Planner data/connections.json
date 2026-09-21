@@ -112,6 +112,12 @@
       "toProperty": "qp-month"
     },
     {
+      "fromId": "pnWindow",
+      "fromProperty": "out-moveSince",
+      "toId": "pnMoveBlocks",
+      "toProperty": "qp-moveSince"
+    },
+    {
       "fromId": "pnReady",
       "fromProperty": "ontrue",
       "toId": "pnProjects",
@@ -121,6 +127,12 @@
       "fromId": "pnReady",
       "fromProperty": "ontrue",
       "toId": "pnBlocks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnMoveBlocks",
       "toProperty": "storageFetch"
     },
     {
@@ -152,6 +164,12 @@
       "fromProperty": "items",
       "toId": "pnOut",
       "toProperty": "blocks"
+    },
+    {
+      "fromId": "pnMoveBlocks",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "moveBlocks"
     },
     {
       "fromId": "pnMonth",

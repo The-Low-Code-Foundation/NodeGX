@@ -7,5 +7,5 @@
   "created": "2026-09-20T00:00:00.000Z",
   "modified": "2026-09-20T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "Puts 30 minutes for a project’s next move in the first day of the week with room under the focus ceiling."
+  "description": "Puts a project’s next move in the week: on the day and for the hours chosen, or 30 minutes in the first day with room under the focus ceiling."
 }

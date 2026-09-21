@@ -55,7 +55,15 @@
       "path": "Commands/Place move",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 18,
+      "connectionCount": 19,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Move block": {
+      "path": "Commands/Move block",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 9,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -111,7 +119,7 @@
       "path": "Logic/Planner data",
       "type": "visual",
       "nodeCount": 12,
-      "connectionCount": 28,
+      "connectionCount": 30,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -135,7 +143,7 @@
       "path": "Logic/Moves",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 7,
+      "connectionCount": 6,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -159,7 +167,7 @@
       "path": "Logic/Card rows",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 26,
+      "connectionCount": 37,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -231,7 +239,7 @@
       "path": "Week/Move chip",
       "type": "visual",
       "nodeCount": 9,
-      "connectionCount": 12,
+      "connectionCount": 15,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -334,8 +342,8 @@
     "Week/Project detail": {
       "path": "Week/Project detail",
       "type": "visual",
-      "nodeCount": 29,
-      "connectionCount": 23,
+      "nodeCount": 40,
+      "connectionCount": 41,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -351,7 +359,7 @@
       "path": "Week/Project card",
       "type": "visual",
       "nodeCount": 11,
-      "connectionCount": 59,
+      "connectionCount": 71,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -406,15 +414,15 @@
     "Pages/Week": {
       "path": "Pages/Week",
       "type": "page",
-      "nodeCount": 79,
-      "connectionCount": 313,
+      "nodeCount": 85,
+      "connectionCount": 332,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 51,
-    "totalNodes": 495,
-    "totalConnections": 1043
+    "totalComponents": 52,
+    "totalNodes": 517,
+    "totalConnections": 1117
   }
 }

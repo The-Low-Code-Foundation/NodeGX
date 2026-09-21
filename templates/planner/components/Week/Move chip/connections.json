@@ -7,7 +7,25 @@
       "fromId": "mcIn",
       "fromProperty": "mark",
       "toId": "mcDot",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "dotFill",
+      "toId": "mcDot",
       "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "chipClass",
+      "toId": "mcRoot",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "tick",
+      "toId": "mcTick",
+      "toProperty": "text"
     },
     {
       "fromId": "mcIn",

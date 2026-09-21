@@ -112,6 +112,12 @@
       "toProperty": "in-month"
     },
     {
+      "fromId": "pnWindow",
+      "fromProperty": "out-moveSince",
+      "toId": "pnRead",
+      "toProperty": "in-moveSince"
+    },
+    {
       "fromId": "pnReady",
       "fromProperty": "ontrue",
       "toId": "pnRead",
@@ -128,6 +134,12 @@
       "fromProperty": "out-blocks",
       "toId": "pnOut",
       "toProperty": "blocks"
+    },
+    {
+      "fromId": "pnRead",
+      "fromProperty": "out-moveBlocks",
+      "toId": "pnOut",
+      "toProperty": "moveBlocks"
     },
     {
       "fromId": "pnRead",

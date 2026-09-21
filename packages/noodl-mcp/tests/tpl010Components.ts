@@ -97,6 +97,7 @@ export const C = {
   carryBlock: '/Commands/Carry block',
   dropBlock: '/Commands/Drop block',
   placeMove: '/Commands/Place move',
+  moveBlock: '/Commands/Move block',
   addProject: '/Commands/Add project',
   editProject: '/Commands/Edit project',
   setMonthPlan: '/Commands/Set month plan',
@@ -483,6 +484,25 @@ function money(n, symbol) {
   var s = Math.abs(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return sign + (symbol || '€') + s;
 }
+/**
+ * R7c — where a project's move stands. 'live' is the earliest move block on or after today that
+ * is not done, wherever the week on screen is: that, and only that, is "placed". 'last' is the
+ * latest move block of any kind, so a move whose block was done can say so (R2.3-4).
+ */
+function moveOf(projectId, moveBlocks, today) {
+  var live = null, last = null;
+  var list = moveBlocks || [];
+  for (var i = 0; i < list.length; i++) {
+    var b = list[i];
+    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;
+    if (!last || String(b.date) > String(last.date)) last = b;
+    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;
+    if (!live || String(b.date) < String(live.date)) live = b;
+  }
+  return { live: live, last: last };
+}
+/** "Thu 24" — the day a move went to, short enough for a chip. */
+function shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }
 `;
 
 /** The five envelope keys, and their colour tokens, available to any Function that builds rows. */
@@ -606,7 +626,10 @@ const MOVE_CHIP_FIELDS: Array<[string, string]> = [
   ['placed', 'boolean'],
   ['late', 'boolean'],
   ['edge', 'string'],
-  ['hint', 'string']
+  ['hint', 'string'],
+  ['tick', 'string'],
+  ['dotFill', 'string'],
+  ['chipClass', 'string']
 ];
 
 /**
@@ -639,12 +662,25 @@ const MOVE_CHIP: Tpl010Component = {
       paddingTop: 'var(--space-0-5)',
       paddingBottom: 'var(--space-0-5)'
     }),
-    group('mcDot', 'Which envelope', 'mcRoot', { sizeMode: 'explicit', width: px(8), height: px(8), borderRadius: 'var(--radius-sm)' }),
+    // R7d — the marker is hollow until the move has a day, and filled once it has one.
+    group('mcDot', 'Which envelope', 'mcRoot', {
+      sizeMode: 'explicit',
+      width: px(8),
+      height: px(8),
+      borderRadius: 'var(--radius-sm)',
+      borderStyle: 'solid',
+      borderWidth: px(1.5)
+    }),
     text('mcWho', 'Whose move', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)', color: 'var(--foreground)' }),
     text('mcWhat', 'The move', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize', cssClassName: 'planner-chip-what' }),
     text('mcWorth', 'What it is worth', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
-    // Placed reads as done, not as disabled: the chip still opens the card (AC3).
-    text('mcTick', 'Already in the week', 'mcRoot', '✓', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
+    // Placed reads as done, not as disabled: the chip still opens the card (AC3). R7d: and it says which day.
+    text('mcTick', 'Already in the week, and which day', 'mcRoot', '', {
+      ...T_META,
+      sizeMode: 'contentSize',
+      fontWeight: 'var(--font-semibold)',
+      cssClassName: 'planner-chip-tick'
+    }),
     place('mcPress', BUTTON, 'Put it in the week', 'mcRoot', {
       ...BTN_ICON('icon-plus', 'Put 30 minutes in the week'),
       fontSize: px(13),
@@ -656,7 +692,10 @@ const MOVE_CHIP: Tpl010Component = {
     })
   ],
   connections: [
-    wire('mcIn', 'mark', 'mcDot', 'backgroundColor'),
+    wire('mcIn', 'mark', 'mcDot', 'borderColor'),
+    wire('mcIn', 'dotFill', 'mcDot', 'backgroundColor'),
+    wire('mcIn', 'chipClass', 'mcRoot', 'cssClassName'),
+    wire('mcIn', 'tick', 'mcTick', 'text'),
     wire('mcIn', 'projectName', 'mcWho', 'text'),
     wire('mcIn', 'move', 'mcWhat', 'text'),
     wire('mcIn', 'worth', 'mcWorth', 'text'),
@@ -1869,7 +1908,7 @@ const DAY_PICKER: Tpl010Component = {
  * The right-hand half of the projects card: one project, whole.
  *
  * R9 is the reason the move card can be missing its button. A building project that is
- * finished says **"fixes only"** (`moveStop`) and gets no *Put 30 min in the week*, so a
+ * finished says **"fixes only"** (`moveStop`) and gets no move box (R7b), so a
  * done asset stops absorbing hours — the mockup's Builder tool, whose own line is *"Every
  * hour here now is an hour the coaching email does not get."*
  *
@@ -1880,21 +1919,44 @@ const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [
   ['name', 'string'], ['sub', 'string'],
   ['move', 'string'], ['hasMove', 'boolean'], ['worth', 'string'], ['hasWorth', 'boolean'],
   ['when', 'string'], ['whenColor', 'string'], ['mark', 'string'], ['soft', 'string'],
-  ['planLabel', 'string'], ['canPlan', 'boolean'],
+  // R7b — the move box: a day and hours before it is placed; its day, Move it and Take it out after.
+  ['canPlan', 'boolean'], ['placed', 'boolean'], ['unplaced', 'boolean'], ['placedLine', 'string'],
+  ['planDate', 'string'], ['planHours', 'string'], ['minDate', 'string'], ['lastLine', 'string'], ['hasLast', 'boolean'],
+  ['moveKey', 'string'],
   ['weekText', 'string'], ['sparkTitle', 'string'], ['say', 'string'],
   ['facts', 'array'], ['bars', 'array'], ['boxes', 'array'],
   ['firstLabel', 'string'], ['lastLabel', 'string']
 ];
 
+const PROJECT_DETAIL_OUTS: Array<[string, string]> = [
+  ['plan', 'signal'], ['moveIt', 'signal'], ['takeOut', 'signal'], ['edit', 'signal'], ['close', 'signal'],
+  ['planDate', 'string'], ['planHours', 'string']
+];
+
+/**
+ * **R7b — the move box takes a day and hours.** Richard: *"I'd rather a date picker input where I
+ * can pick where I want that activity to go … then see afterwards on each 'next action' which date
+ * the action has been set for."* Unplaced, the box is the move, a day (`firstOpenDay`) and hours
+ * (0.5) and *Put it in the week*. Placed (R7c: a live move block on or after today) it says
+ * *In the week: Thu 24 · 0.5 h*, keeps the day field for *Move it*, and offers *Take it out*.
+ *
+ * 🔴 **The hours box is reset with `Set`, not cleared.** It stays mounted while the card moves from
+ * project to project and its prefill is 0.5 every time — a value it was already sent, so a Text
+ * Input would keep the 2 typed on the last project (D78). `Set` writes the last Value back into
+ * the box, so each time the project or its state changes the box says 0.5 again — after a Blur, because
+ * Set leaves a focused box alone and a press on the list does not move focus. The day field
+ * has no `Set`: between two unplaced projects it keeps a picked day, and the day it shows is the
+ * day that is written.
+ */
 const PROJECT_DETAIL: Tpl010Component = {
   path: 'Week/Project detail',
   description: 'One project in full: its next move and what that move is worth, its hours this week, six months of history, its facts, and the one line about it.',
-  ...iface(PROJECT_DETAIL_FIELDS, [['plan', 'signal'], ['edit', 'signal'], ['close', 'signal']]),
+  ...iface(PROJECT_DETAIL_FIELDS, PROJECT_DETAIL_OUTS),
   repeats: { source: 'array', rowFields: FACT_FIELDS.map(([n]) => n) },
-  instantiates: [C.sparkline, C.dayBoxes, C.factRow],
+  instantiates: [C.sparkline, C.dayBoxes, C.factRow, C.datePicker],
   nodes: [
     inputs('pdIn', 'The project', PROJECT_DETAIL_FIELDS),
-    outputs('pdOut', 'What you did', [['plan', 'signal'], ['edit', 'signal'], ['close', 'signal']]),
+    outputs('pdOut', 'What you did', PROJECT_DETAIL_OUTS),
     group('pdRoot', 'Project detail', undefined, { ...COLUMN('var(--space-3)'), paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-4)' }),
     group('pdTop', 'Name and close', 'pdRoot', { ...ROW('var(--space-2)'), alignItems: 'flex-start', justifyContent: 'space-between' }),
     group('pdNames', 'What it is called', 'pdTop', { ...COLUMN('var(--space-0)'), width: pct(100) }),
@@ -1920,7 +1982,22 @@ const PROJECT_DETAIL: Tpl010Component = {
     group('pdMoveMeta', 'Worth and when', 'pdMove', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
     text('pdWorth', 'What it is worth', 'pdMoveMeta', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
     text('pdWhen', 'When to do it', 'pdMoveMeta', '', { ...T_META, sizeMode: 'contentSize' }),
-    place('pdPlan', BUTTON, 'Put it in the week', 'pdMove', { ...BTN_PRIMARY, label: 'Put 30 min in the week' }),
+    text('pdPlaced', 'Where the move is in the week', 'pdMove', '', { ...wide(T_BODY), fontWeight: 'var(--font-semibold)' }),
+    text('pdLast', 'What happened to the last one', 'pdMove', '', wide(T_META)),
+    group('pdPlan', 'Its day and hours', 'pdMove', { ...ROW('var(--space-3)'), alignItems: 'flex-end', paddingTop: 'var(--space-1)' }),
+    group('pdDateBox', 'Which day', 'pdPlan', { ...COLUMN('var(--space-0)'), width: pct(55) }),
+    place('pdDate', C.datePicker, 'Which day', 'pdDateBox', { Label: 'Day', 'Show Label': true }),
+    group('pdHoursBox', 'How long', 'pdPlan', { ...COLUMN('var(--space-0)'), width: pct(45) }),
+    place('pdHours', TEXT_INPUT, 'How long, in hours', 'pdHoursBox', BOX('Hours', 'number')),
+    derive(
+      'pdReset',
+      'Put the hours back when the project changes',
+      "var key = String(Inputs.key || '');\nif (this.key !== undefined && this.key !== key) { Outputs.blur(); Outputs.reset(); }\nthis.key = key;"
+    ),
+    group('pdActs', 'What to do with it', 'pdMove', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('pdPut', BUTTON, 'Put it in the week', 'pdActs', { ...BTN_PRIMARY, label: 'Put it in the week' }),
+    place('pdMoveIt', BUTTON, 'Move it to that day', 'pdActs', { ...BTN_OUTLINE, label: 'Move it' }),
+    place('pdTakeOut', BUTTON, 'Take it out of the week', 'pdActs', { ...BTN_GHOST, label: 'Take it out' }),
 
     group('pdWeek', 'This week', 'pdRoot', COLUMN('var(--space-1)')),
     text('pdWeekLabel', 'How much this week', 'pdWeek', '', wide(T_LABEL)),
@@ -1958,9 +2035,28 @@ const PROJECT_DETAIL: Tpl010Component = {
     wire('pdIn', 'hasWorth', 'pdWorth', 'mounted'),
     wire('pdIn', 'when', 'pdWhen', 'text'),
     wire('pdIn', 'whenColor', 'pdWhen', 'color'),
-    wire('pdIn', 'planLabel', 'pdPlan', 'label'),
     // R9 — a finished asset has no button to spend more hours on it.
     wire('pdIn', 'canPlan', 'pdPlan', 'mounted'),
+    wire('pdIn', 'canPlan', 'pdActs', 'mounted'),
+    wire('pdIn', 'placed', 'pdPlaced', 'mounted'),
+    wire('pdIn', 'placedLine', 'pdPlaced', 'text'),
+    wire('pdIn', 'hasLast', 'pdLast', 'mounted'),
+    wire('pdIn', 'lastLine', 'pdLast', 'text'),
+    wire('pdIn', 'planDate', 'pdDate', 'Value'),
+    wire('pdIn', 'minDate', 'pdDate', 'Min'),
+    wire('pdDate', 'Value', 'pdOut', 'planDate'),
+    // Moving a placed move changes its day only (R2.3-2), so the hours are for placing.
+    wire('pdIn', 'unplaced', 'pdHoursBox', 'mounted'),
+    wire('pdIn', 'planHours', 'pdHours', 'startValue'),
+    wire('pdHours', 'onTextChanged', 'pdOut', 'planHours'),
+    wire('pdIn', 'moveKey', 'pdReset', 'in-key'),
+    // 🔴 Blur first: Set will not write over a box that has focus, and pressing a project in the
+    // list does not take focus off it (driven: the 2 typed on Bramble was still there on Northline).
+    wire('pdReset', 'out-blur', 'pdHours', 'blur'),
+    wire('pdReset', 'out-reset', 'pdHours', 'set'),
+    wire('pdIn', 'unplaced', 'pdPut', 'mounted'),
+    wire('pdIn', 'placed', 'pdMoveIt', 'mounted'),
+    wire('pdIn', 'placed', 'pdTakeOut', 'mounted'),
     wire('pdIn', 'weekText', 'pdWeekLabel', 'text'),
     wire('pdIn', 'sparkTitle', 'pdSparkTitle', 'text'),
     wire('pdIn', 'say', 'pdSay', 'text'),
@@ -1969,7 +2065,9 @@ const PROJECT_DETAIL: Tpl010Component = {
     wire('pdIn', 'firstLabel', 'pdSpark', 'firstLabel'),
     wire('pdIn', 'lastLabel', 'pdSpark', 'lastLabel'),
     wire('pdIn', 'boxes', 'pdBoxes', 'boxes'),
-    wire('pdPlan', 'onClick', 'pdOut', 'plan'),
+    wire('pdPut', 'onClick', 'pdOut', 'plan'),
+    wire('pdMoveIt', 'onClick', 'pdOut', 'moveIt'),
+    wire('pdTakeOut', 'onClick', 'pdOut', 'takeOut'),
     wire('pdEdit', 'onClick', 'pdOut', 'edit'),
     wire('pdClose', 'onClick', 'pdOut', 'close')
   ]
@@ -2026,7 +2124,8 @@ const PROJECT_CARD_FIELDS: Array<[string, string]> = [
   ['groups', 'array'], ['shown', 'boolean'], ['detailShown', 'boolean'], ...PROJECT_DETAIL_FIELDS, ...CARD_EDITOR_INS
 ];
 const PROJECT_CARD_OUTS: Array<[string, string]> = [
-  ['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['close', 'signal'], ['edit', 'signal'], ['newProject', 'signal'],
+  ['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['moveIt', 'signal'], ['takeOut', 'signal'],
+  ['planDate', 'string'], ['planHours', 'string'], ['close', 'signal'], ['edit', 'signal'], ['newProject', 'signal'],
   ...CARD_EDITOR_OUTS
 ];
 
@@ -2102,7 +2201,7 @@ const PROJECT_CARD: Tpl010Component = {
     wire('pcEach', 'itemOutput-id', 'pcOut', 'projectId'),
     wire('pcIn', 'detailShown', 'pcDetailBox', 'mounted'),
     ...PROJECT_DETAIL_FIELDS.map(([n]) => wire('pcIn', n, 'pcDetail', n)),
-    wire('pcDetail', 'plan', 'pcOut', 'plan'),
+    ...(['plan', 'moveIt', 'takeOut', 'planDate', 'planHours'] as const).map((n) => wire('pcDetail', n, 'pcOut', n)),
     wire('pcDetail', 'edit', 'pcOut', 'edit'),
     wire('pcDetail', 'close', 'pcOut', 'close'),
     wire('pcNew', 'onClick', 'pcOut', 'newProject'),
@@ -2331,7 +2430,7 @@ const SETTINGS_SHEET: Tpl010Component = {
 const PLANNER_DATA_INS: Array<[string, string]> = [['refresh', 'signal'], ['previousWeek', 'signal'], ['nextWeek', 'signal'], ['thisWeek', 'signal']];
 const PLANNER_DATA_OUTS: Array<[string, string]> = [
   ['projects', 'array'], ['blocks', 'array'], ['monthPlans', 'array'], ['cashEvents', 'array'], ['settings', 'array'],
-  ['weekStart', 'string'], ['weekLabel', 'string'], ['month', 'string'], ['loaded', 'signal']
+  ['moveBlocks', 'array'], ['weekStart', 'string'], ['weekLabel', 'string'], ['month', 'string'], ['loaded', 'signal']
 ];
 
 /**
@@ -2354,7 +2453,7 @@ const PLANNER_DATA_OUTS: Array<[string, string]> = [
  */
 const PLANNER_DATA: Tpl010Component = {
   path: 'Logic/Planner data',
-  description: 'The five queries the week is drawn from: your projects, the blocks in the weeks on screen, this month’s plan, the money coming and going, and your settings.',
+  description: 'The six queries the week is drawn from: your projects, the blocks in the weeks on screen, the move blocks from four weeks back, this month’s plan, the money coming and going, and your settings.',
   ...iface(PLANNER_DATA_INS, PLANNER_DATA_OUTS),
   nodes: [
     inputs('pnIn', 'When to load', PLANNER_DATA_INS),
@@ -2412,6 +2511,8 @@ Outputs.weekLabel = monday.getDate() + (sameMonth ? '' : ' ' + MON[monday.getMon
 // keeps the labels sensible before anyone has, and this keeps the FETCH from following it:
 // a Function runs once when it mounts, and at that moment nobody is signed in yet.
 Outputs.ready = !!parseDay(Inputs.weekStart);
+// R7c — the move blocks are asked for from four weeks back, whatever week is on screen.
+Outputs.moveSince = dayKey(addDays(startOfToday(), -28));
 // Last line on purpose: the values above are delivered before the pulse that acts on them,
 // so the query parameters a fetch uses are never a week behind the week on screen.
 Outputs.fetch();`
@@ -2440,6 +2541,22 @@ Outputs.fetch();`
         ]
       },
       visualSort: [{ property: 'position', order: 'ascending' }]
+    }),
+    /**
+     * R7c — **placed means a live move block on or after today**, not "in the week on screen".
+     * A move put in next week sits outside the window above whenever next week is next month, and
+     * a chip reading *unplaced* there is a chip that writes a second block. So the move blocks
+     * have a window of their own: from four weeks back — far enough to say *done* beside the last
+     * one (R2.3-4) — to whatever is planned ahead. It filters on the date only; which blocks are
+     * moves is read in the scripts, so the demo and the backend compare nothing but a date string.
+     */
+    logic('pnMoveBlocks', QUERY, 'The move blocks, from four weeks back', {
+      collectionName: 'Block',
+      ...QUERY_OFF,
+      'runOnChange-qp-moveSince': false,
+      storageLimit: 1000,
+      visualFilter: { combinator: 'and', rules: [{ property: 'date', operator: 'greater than or equal to', input: 'moveSince' }] },
+      visualSort: [{ property: 'date', order: 'ascending' }]
     }),
     logic('pnMonth', QUERY, 'This month’s plan', {
       collectionName: 'MonthPlan',
@@ -2483,10 +2600,12 @@ Outputs.fetch();`
     wire('pnWindow', 'out-from', 'pnBlocks', 'qp-from'),
     wire('pnWindow', 'out-to', 'pnBlocks', 'qp-to'),
     wire('pnWindow', 'out-month', 'pnMonth', 'qp-month'),
-    ...['pnProjects', 'pnBlocks', 'pnMonth', 'pnCash', 'pnSettings'].map((q) => wire('pnReady', 'ontrue', q, 'storageFetch')),
+    wire('pnWindow', 'out-moveSince', 'pnMoveBlocks', 'qp-moveSince'),
+    ...['pnProjects', 'pnBlocks', 'pnMoveBlocks', 'pnMonth', 'pnCash', 'pnSettings'].map((q) => wire('pnReady', 'ontrue', q, 'storageFetch')),
 
     wire('pnProjects', 'items', 'pnOut', 'projects'),
     wire('pnBlocks', 'items', 'pnOut', 'blocks'),
+    wire('pnMoveBlocks', 'items', 'pnOut', 'moveBlocks'),
     wire('pnMonth', 'items', 'pnOut', 'monthPlans'),
     wire('pnCash', 'items', 'pnOut', 'cashEvents'),
     wire('pnSettings', 'items', 'pnOut', 'settings'),
@@ -2818,7 +2937,8 @@ Outputs.firstOpenDay = firstOpen;`
   ]
 };
 
-const MOVES_INS: Array<[string, string]> = [['projects', 'array'], ['blocks', 'array'], ['weekStart', 'string']];
+// R7c — no week in: placed is read from today, whichever week is on screen.
+const MOVES_INS: Array<[string, string]> = [['projects', 'array'], ['moveBlocks', 'array']];
 const MOVES_OUTS: Array<[string, string]> = [['rows', 'array'], ['empty', 'boolean'], ['unplacedDormant', 'string'], ['unsentBuilding', 'string']];
 
 /**
@@ -2843,21 +2963,7 @@ const MOVES: Tpl010Component = {
       'Sort the moves by urgency',
       `${PLANNER_FNS}${ENVELOPE_FNS}
 var projects = Inputs.projects || [];
-var blocks = Inputs.blocks || [];
-var monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());
-var saturday = addDays(monday, 5);
 var today = startOfToday();
-
-/** Placed = this project has a move block somewhere in the week on screen. */
-function placed(p) {
-  for (var i = 0; i < blocks.length; i++) {
-    var b = blocks[i];
-    if (!b || !b.isMove || b.projectId !== p.id) continue;
-    var d = parseDay(b.date);
-    if (d && d.getTime() >= monday.getTime() && d.getTime() <= saturday.getTime()) return true;
-  }
-  return false;
-}
 
 var withMove = [];
 for (var i = 0; i < projects.length; i++) {
@@ -2882,7 +2988,13 @@ for (var k = 0; k < withMove.length; k++) {
   var it = withMove[k];
   var p2 = it.p;
   var env = envelopeOf(p2);
-  var isPlaced = placed(p2);
+  // R7c — placed is a live move block on or after today, whichever week is on screen.
+  var live = moveOf(p2.id, Inputs.moveBlocks, today).live;
+  var isPlaced = !!live;
+  var liveDay = live ? parseDay(live.date) : null;
+  // R7d — the day sits where the tick is. Within the next six days the weekday says it; past that
+  // the date is needed too, or a Thursday next week reads as this one.
+  var soon = liveDay && liveDay.getTime() - today.getTime() < 6 * 86400000;
   rows.push({
     projectId: p2.id,
     projectName: p2.name || '',
@@ -2895,7 +3007,11 @@ for (var k = 0; k < withMove.length; k++) {
     placed: isPlaced,
     late: it.late,
     edge: it.late ? 'var(--destructive)' : 'var(--border-strong)',
-    hint: isPlaced ? 'Already in the week' : 'Put 30 minutes in the week'
+    hint: isPlaced ? 'Already in the week' : 'Put 30 minutes in the week',
+    // R7d — hollow marker unplaced, filled placed; a placed chip is the mockup's: faded and struck through.
+    tick: isPlaced ? '\u2713 ' + (soon ? DOW[(liveDay.getDay() + 6) % 7] : shortDay(live.date)) : '',
+    dotFill: isPlaced ? envMark(env) : 'transparent',
+    chipClass: isPlaced ? 'planner-chip planner-chip-placed' : 'planner-chip'
   });
   if (!isPlaced && p2.kind === 'dormant' && !unplacedDormant) unplacedDormant = p2.name || '';
   if (!isPlaced && p2.kind === 'building' && !unsentBuilding) unsentBuilding = p2.name || '';
@@ -3133,8 +3249,11 @@ Outputs.tomorrowFocusColor = tomorrowFocus > focus ? 'var(--destructive)' : 'var
   ]
 };
 
-const CARD_ROWS_INS: Array<[string, string]> = [['projects', 'array'], ['blocks', 'array'], ['weekStart', 'string'], ['selectedId', 'string']];
-const CARD_ROWS_OUTS: Array<[string, string]> = [['groups', 'array'], ...PROJECT_DETAIL_FIELDS, ['resolvedId', 'string']];
+const CARD_ROWS_INS: Array<[string, string]> = [
+  ['projects', 'array'], ['blocks', 'array'], ['moveBlocks', 'array'], ['weekStart', 'string'], ['selectedId', 'string'], ['firstOpenDay', 'string']
+];
+/** The last two are for the commands the card presses, not for the card to draw. */
+const CARD_ROWS_OUTS: Array<[string, string]> = [['groups', 'array'], ...PROJECT_DETAIL_FIELDS, ['resolvedId', 'string'], ['placedBlockId', 'string']];
 
 /**
  * The card's four groups and the one project on the right (R6, AC7).
@@ -3182,13 +3301,8 @@ function hoursFor(projectId, dayKeyWanted) {
   }
   return total;
 }
-function placed(projectId) {
-  for (var b = 0; b < blocks.length; b++) {
-    var blk = blocks[b];
-    if (blk && blk.isMove && blk.projectId === projectId && weekKeys.indexOf(blk.date) >= 0) return true;
-  }
-  return false;
-}
+// R7c — placed is a live move block on or after today, whichever week is on screen.
+function liveMove(projectId) { return moveOf(projectId, Inputs.moveBlocks, today).live; }
 function isLate(p) {
   var d = p && p.moveDue ? parseDay(p.moveDue) : null;
   return !!d && d.getTime() < today.getTime();
@@ -3218,13 +3332,16 @@ for (var g = 0; g < GROUPS.length; g++) {
     groupHours += t;
     if (!found) found = proj;
     var late = isLate(proj);
+    var live = liveMove(proj.id);
     rows.push({
       id: proj.id,
       name: proj.name || '',
       hoursText: t > 0 ? hText(t) + ' h' : '\u2014',
-      move: (late ? '! ' : '\u2192 ') + (proj.move || ''),
+      // R7d — the unplaced moves are what the eye should land on here: full strength, and red when
+      // late. A placed one goes muted and says its day.
+      move: live ? '\u2713 ' + shortDay(live.date) + ' \u00b7 ' + (proj.move || '') : (late ? '! ' : '\u2192 ') + (proj.move || ''),
       hasMove: !!proj.move,
-      moveColor: late ? 'var(--destructive)' : 'var(--muted-foreground)',
+      moveColor: live ? 'var(--muted-foreground)' : late ? 'var(--destructive)' : 'var(--foreground)',
       mark: envMark(grp.env),
       barWidth: { value: Math.round(Math.min(100, (t / 10) * 100)), unit: '%' },
       barRest: { value: 100 - Math.round(Math.min(100, (t / 10) * 100)), unit: '%' },
@@ -3253,10 +3370,28 @@ Outputs.when = one.moveWhen || '';
 Outputs.whenColor = isLate(one) ? 'var(--destructive)' : 'var(--muted-foreground)';
 Outputs.mark = envMark(oneEnv);
 Outputs.soft = envSoft(oneEnv);
-var already = one.id ? placed(one.id) : false;
-Outputs.planLabel = already ? '\u2713 In the week' : 'Put 30 min in the week';
 // R9 — "fixes only" has no button to spend more hours on it.
-Outputs.canPlan = !!one.move && !one.moveStop;
+var canPlan = !!one.move && !one.moveStop;
+Outputs.canPlan = canPlan;
+// R7b — the move box. Placed: its day and hours, and the day field on that day for Move it.
+// Unplaced: the first open day and half an hour, which is what the chip would have done.
+var state = one.id ? moveOf(one.id, Inputs.moveBlocks, today) : { live: null, last: null };
+var live = state.live;
+var liveDay = live ? parseDay(live.date) : null;
+Outputs.placed = canPlan && !!live;
+Outputs.unplaced = canPlan && !live;
+Outputs.placedBlockId = live ? String(live.id) : '';
+Outputs.placedLine = live ? 'In the week: ' + shortDay(live.date) + (liveDay.getMonth() !== today.getMonth() ? ' ' + MON[liveDay.getMonth()] : '') + ' \u00b7 ' + hText(hoursOf(live)) + ' h' : '';
+var first = parseDay(Inputs.firstOpenDay);
+Outputs.planDate = live ? String(live.date) : first && first.getTime() >= today.getTime() ? dayKey(first) : todayKey;
+Outputs.planHours = '0.5';
+Outputs.minDate = todayKey;
+// R2.3-4 — the move whose block was done reads unplaced again, and says when it was last done.
+var last = state.last;
+Outputs.lastLine = !live && last ? (last.done ? '\u2713 Done ' + shortDay(last.date) + '. Put the next one in, or change the move.' : 'Was in ' + shortDay(last.date) + ', and not done.') : '';
+Outputs.hasLast = canPlan && !live && !!last;
+// Which project and which state — the hours box is put back to 0.5 whenever this changes.
+Outputs.moveKey = (one.id || '') + (live ? ':' + live.id : ':open');
 
 var weekTotal = one.id ? hoursFor(one.id, null) : 0;
 var rateText = num(one.rate, 0) > 0 && weekTotal > 0 ? ' \u00b7 ' + money(weekTotal * num(one.rate, 0)) : '';
@@ -3531,26 +3666,33 @@ Outputs.go();`,
  * R7 and AC3 — a chip becomes **half an hour in the first day that has room under the
  * ceiling**. Half an hour, because the point of the strip is that a move is small: the whole
  * argument for sending the email is that it costs thirty minutes.
+ *
+ * R7b — the card's move box sends the day and the hours the person chose. Nothing sent for the
+ * hours is the chip's half hour; hours sent that are not more than nought are refused, not rounded
+ * up to a half hour nobody asked for.
  */
 const PLACE_MOVE = command({
   path: 'Commands/Place move',
-  description: 'Puts 30 minutes for a project’s next move in the first day of the week with room under the focus ceiling.',
-  ins: [['projectId', 'string'], ['move', 'string'], ['date', 'string'], ['placed', 'boolean']],
+  description: 'Puts a project’s next move in the week: on the day and for the hours chosen, or 30 minutes in the first day with room under the focus ceiling.',
+  ins: [['projectId', 'string'], ['move', 'string'], ['date', 'string'], ['planned', '*'], ['placed', 'boolean']],
   guard: `${PLANNER_FNS}var pid = String(Inputs.projectId || '');
 var move = String(Inputs.move || '').trim();
 var date = String(Inputs.date || '');
 // Pressing a placed chip opens the card; it never writes a second block (AC3).
 if (pid === '' || move === '' || !parseDay(date) || Inputs.placed === true) return;
+var given = Inputs.planned;
+var planned = given === undefined || given === null || String(given).trim() === '' ? 0.5 : q(num(given, 0));
+if (planned <= 0) return;
 Outputs.projectId = pid;
 Outputs.what = move;
 Outputs.date = date;
-Outputs.planned = 0.5;
+Outputs.planned = planned;
 Outputs.done = false;
 Outputs.isMove = true;
 Outputs.empty = '';
 Outputs.position = Date.now();
 Outputs.go();`,
-  guardIns: ['projectId', 'move', 'date', 'placed'],
+  guardIns: ['projectId', 'move', 'date', 'planned', 'placed'],
   extraOuts: [['blockId', 'string']],
   write: {
     kind: 'create',
@@ -3563,6 +3705,31 @@ Outputs.go();`,
   },
   // The page outlines the block that was just written, so a chip press is visibly a block.
   extraWires: (p) => [wire(`${p}Write`, 'id', `${p}Out`, 'blockId')]
+});
+
+/**
+ * R7b, R2.3-2 — *Move it* changes the move block's day and nothing else. The same shape as
+ * `Carry block`, kept apart because carrying is always to tomorrow and this is to any day from
+ * today on: a move put in the past would stop being placed (R7c) the moment it was written.
+ */
+const MOVE_BLOCK = command({
+  path: 'Commands/Move block',
+  description: 'Moves a block to another day, from today on. Only its day changes.',
+  ins: [['blockId', 'string'], ['date', 'string'], ['from', 'string']],
+  guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
+var date = String(Inputs.date || '');
+var d = parseDay(date);
+if (id === '' || !d || d.getTime() < startOfToday().getTime() || date === String(Inputs.from || '')) return;
+Outputs.date = date;
+Outputs.go();`,
+  guardIns: ['blockId', 'date', 'from'],
+  write: {
+    kind: 'update',
+    collection: 'Block',
+    label: 'Move it to that day',
+    props: [['date', 'date']],
+    idFromInput: 'blockId'
+  }
 });
 
 /**
@@ -3838,7 +4005,7 @@ const PAGE_WEEK: Tpl010Component = {
     C.appBar, C.envelopeTile, C.movesStrip, C.dayColumn, C.cashStrip, C.projectCard, C.shutdownDrawer, C.settingsSheet,
     C.blockSheet, C.dayPicker,
     C.plannerData, C.envelopes, C.dayColumns, C.moves, C.cashLine, C.shutdown, '/Logic/Card rows',
-    C.addBlock, C.saveBlock, C.addTime, C.carryBlock, C.dropBlock, C.placeMove,
+    C.addBlock, C.saveBlock, C.addTime, C.carryBlock, C.dropBlock, C.placeMove, C.moveBlock,
     C.addProject, C.editProject, C.setMonthPlan, C.addCashEvent, C.editCashEvent, C.editSettings
   ],
   repeats: { source: 'array', rowFields: ENVELOPE_TILE_FIELDS.map(([n]) => n) },
@@ -3893,9 +4060,20 @@ const PAGE_WEEK: Tpl010Component = {
 
     // ── What is open ──
     logic('twVarCard', VARIABLE, 'Which project the card is showing', { name: VAR.cardProject }),
-    logic('twSetCard', SET_VARIABLE, 'Show a project', { name: VAR.cardProject, setWith: 'string' }),
+    /**
+     * 🔴 **One Set Variable per way in.** These were one ‘Show a project’ fed by five sources, and
+     * the Projects button reached it through a Function that said ‘*’ — which publishes only when
+     * the value CHANGES, so the button opened the card once per page load and never again (driven,
+     * R2.3; the same on the build before it). A shared ‘value’ is also whichever source spoke
+     * last: a chip pressed twice could open the project picked in the list in between. Each way in
+     * now has its own node, fed by nothing but itself.
+     */
+    logic('twCardFromBlock', SET_VARIABLE, 'Show the block’s project', { name: VAR.cardProject, setWith: 'string' }),
+    logic('twCardFromChip', SET_VARIABLE, 'Show the chip’s project', { name: VAR.cardProject, setWith: 'string' }),
+    logic('twCardAll', SET_VARIABLE, 'Open the card on no project in particular', { name: VAR.cardProject, setWith: 'string', value: '*' }),
+    logic('twCardPick', SET_VARIABLE, 'Show the project picked in the list', { name: VAR.cardProject, setWith: 'string' }),
+    logic('twCardNew', SET_VARIABLE, 'Show the project just made', { name: VAR.cardProject, setWith: 'string' }),
     logic('twClearCard', SET_VARIABLE, 'Close the card', { name: VAR.cardProject, setWith: 'string', value: '' }),
-    logic('twAllProjects', FUNCTION, 'Open the card on no project in particular', { functionScript: "Outputs.any = '*';" }),
     derive('twCardShown', 'Is the card open?', "Outputs.shown = String(Inputs.id || '') !== '';"),
 
     logic('twVarDrawer', VARIABLE, 'Is the evening drawer open?', { name: VAR.drawerOpen }),
@@ -4213,6 +4391,11 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     logic('cmdCarry', C.carryBlock, 'Carry a block to tomorrow'),
     logic('cmdDrop', C.dropBlock, 'Drop a block'),
     logic('cmdPlace', C.placeMove, 'Put a move in the week'),
+    // R7b — the card's move box has commands of its own, so a chip press can never send the card's
+    // day, or the card's press the chip's.
+    logic('cmdPlaceDay', C.placeMove, 'Put a move in the week on the day chosen'),
+    logic('cmdMoveBlock', C.moveBlock, 'Move the move to another day'),
+    logic('cmdTakeOut', C.dropBlock, 'Take the move out of the week'),
     logic('cmdAddProject', C.addProject, 'Add a project'),
     logic('cmdEditProject', C.editProject, 'Change a project'),
     logic('cmdMonthPlan', C.setMonthPlan, 'Plan this month'),
@@ -4248,8 +4431,9 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     // Everything is worked out from the same five arrays.
     ...(['projects', 'blocks', 'monthPlans', 'settings', 'weekStart'] as const).map((n) => wire('twData', n, 'twEnv', n)),
     ...(['projects', 'blocks', 'weekStart'] as const).map((n) => wire('twData', n, 'twDays', n)),
-    ...(['projects', 'blocks', 'weekStart'] as const).map((n) => wire('twData', n, 'twMovesLogic', n)),
-    ...(['projects', 'blocks', 'weekStart'] as const).map((n) => wire('twData', n, 'twCardRows', n)),
+    ...(['projects', 'moveBlocks'] as const).map((n) => wire('twData', n, 'twMovesLogic', n)),
+    ...(['projects', 'blocks', 'moveBlocks', 'weekStart'] as const).map((n) => wire('twData', n, 'twCardRows', n)),
+    wire('twDays', 'firstOpenDay', 'twCardRows', 'firstOpenDay'),
     wire('twEnv', 'focusHours', 'twDays', 'focusHours'),
     wire('cmdPlace', 'blockId', 'twDays', 'newBlockId'),
     wire('twData', 'cashEvents', 'twCashLogic', 'cashEvents'),
@@ -4274,14 +4458,14 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twDayEach', 'itemOutputSignal-toggle', 'twSetLog', 'do'),
 
     // A block's project name opens the card on that project (AC7).
-    wire('twDayEach', 'itemOutput-projectId', 'twSetCard', 'value'),
-    wire('twDayEach', 'itemOutputSignal-openProject', 'twSetCard', 'do'),
+    wire('twDayEach', 'itemOutput-projectId', 'twCardFromBlock', 'value'),
+    wire('twDayEach', 'itemOutputSignal-openProject', 'twCardFromBlock', 'do'),
 
     // A chip: placed opens the card, unplaced writes half an hour (AC3).
     wire('twMoves', 'press', 'twChip', 'eval'),
     wire('twMoves', 'placed', 'twChip', 'condition'),
-    wire('twMoves', 'projectId', 'twSetCard', 'value'),
-    wire('twChip', 'ontrue', 'twSetCard', 'do'),
+    wire('twMoves', 'projectId', 'twCardFromChip', 'value'),
+    wire('twChip', 'ontrue', 'twCardFromChip', 'do'),
     wire('twMoves', 'projectId', 'cmdPlace', 'projectId'),
     wire('twMoves', 'move', 'cmdPlace', 'move'),
     wire('twMoves', 'placed', 'cmdPlace', 'placed'),
@@ -4289,15 +4473,13 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twChip', 'onfalse', 'cmdPlace', 'do'),
 
     // The card.
-    wire('twBar', 'openProjects', 'twAllProjects', 'run'),
-    wire('twAllProjects', 'out-any', 'twSetCard', 'value'),
-    wire('twAllProjects', 'out-any', 'twSetCard', 'do'),
+    wire('twBar', 'openProjects', 'twCardAll', 'do'),
     wire('twVarCard', 'value', 'twCardRows', 'selectedId'),
     wire('twVarCard', 'value', 'twCardShown', 'in-id'),
     wire('twCardShown', 'out-shown', 'twCard', 'shown'),
-    ...CARD_ROWS_OUTS.filter(([n]) => n !== 'resolvedId').map(([n]) => wire('twCardRows', n, 'twCard', n)),
-    wire('twCard', 'projectId', 'twSetCard', 'value'),
-    wire('twCard', 'pick', 'twSetCard', 'do'),
+    ...CARD_ROWS_OUTS.filter(([n]) => n !== 'resolvedId' && n !== 'placedBlockId').map(([n]) => wire('twCardRows', n, 'twCard', n)),
+    wire('twCard', 'projectId', 'twCardPick', 'value'),
+    wire('twCard', 'pick', 'twCardPick', 'do'),
     wire('twCard', 'pick', 'twEditOff', 'do'),
     wire('twCard', 'close', 'twClearCard', 'do'),
     wire('twCard', 'close', 'twEditOff', 'do'),
@@ -4319,14 +4501,24 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twCardRows', 'resolvedId', 'cmdEditProject', 'projectId'),
     ...PROJECT_EDIT_VALUES.flatMap(([n]) => [wire('twCard', under('ed', n), 'cmdAddProject', n), wire('twCard', under('ed', n), 'cmdEditProject', n)]),
     // The card opens on the project it just made, and the form closes on the WRITE, not the press.
-    wire('cmdAddProject', 'projectId', 'twSetCard', 'value'),
-    wire('cmdAddProject', 'done', 'twSetCard', 'do'),
+    wire('cmdAddProject', 'projectId', 'twCardNew', 'value'),
+    wire('cmdAddProject', 'done', 'twCardNew', 'do'),
     wire('cmdAddProject', 'done', 'twEditOff', 'do'),
     wire('cmdEditProject', 'done', 'twEditOff', 'do'),
-    // The card's own Put 30 min button, on the project it is showing.
-    wire('twCardRows', 'resolvedId', 'cmdPlace', 'projectId'),
-    wire('twCardRows', 'move', 'cmdPlace', 'move'),
-    wire('twCard', 'plan', 'cmdPlace', 'do'),
+    // R7b — the card's move box, on the project it is showing: put it in on the day and hours chosen,
+    // move it to another day, or take it out.
+    wire('twCardRows', 'resolvedId', 'cmdPlaceDay', 'projectId'),
+    wire('twCardRows', 'move', 'cmdPlaceDay', 'move'),
+    wire('twCardRows', 'placed', 'cmdPlaceDay', 'placed'),
+    wire('twCard', 'planDate', 'cmdPlaceDay', 'date'),
+    wire('twCard', 'planHours', 'cmdPlaceDay', 'planned'),
+    wire('twCard', 'plan', 'cmdPlaceDay', 'do'),
+    wire('twCardRows', 'placedBlockId', 'cmdMoveBlock', 'blockId'),
+    wire('twCardRows', 'planDate', 'cmdMoveBlock', 'from'),
+    wire('twCard', 'planDate', 'cmdMoveBlock', 'date'),
+    wire('twCard', 'moveIt', 'cmdMoveBlock', 'do'),
+    wire('twCardRows', 'placedBlockId', 'cmdTakeOut', 'blockId'),
+    wire('twCard', 'takeOut', 'cmdTakeOut', 'do'),
 
     // The evening drawer.
     wire('twBar', 'shutDown', 'twOpenDrawer', 'do'),
@@ -4436,7 +4628,7 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twHasProblem', 'out-shown', 'twProblem', 'mounted'),
 
     // After any change, load the week again.
-    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdCashEvent', 'cmdEditCash', 'cmdSettings'].map(
+    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdPlaceDay', 'cmdMoveBlock', 'cmdTakeOut', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdCashEvent', 'cmdEditCash', 'cmdSettings'].map(
       (id) => wire(id, 'done', 'twData', 'refresh')
     )
   ]
@@ -4561,6 +4753,7 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   CARRY_BLOCK,
   DROP_BLOCK,
   PLACE_MOVE,
+  MOVE_BLOCK,
   ADD_PROJECT,
   EDIT_PROJECT,
   SET_MONTH_PLAN,

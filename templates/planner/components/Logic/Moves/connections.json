@@ -11,15 +11,9 @@
     },
     {
       "fromId": "mvIn",
-      "fromProperty": "blocks",
+      "fromProperty": "moveBlocks",
       "toId": "mvWork",
-      "toProperty": "in-blocks"
-    },
-    {
-      "fromId": "mvIn",
-      "fromProperty": "weekStart",
-      "toId": "mvWork",
-      "toProperty": "in-weekStart"
+      "toProperty": "in-moveBlocks"
     },
     {
       "fromId": "mvWork",

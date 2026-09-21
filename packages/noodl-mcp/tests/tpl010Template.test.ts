@@ -362,6 +362,50 @@ describe('§3 the rules the week depends on', () => {
   });
 
   /** R16a — the tick opens the sheet; nothing logs a block on one press any more. */
+  /**
+   * R7b — the chip and the card's move box press different commands. One shared Place move took the
+   * card’s project and move and the chip’s `placed` and day, so whichever was pressed second could
+   * write with the other's inputs.
+   */
+  it('🔴 R2.3 — the chip keeps its one press (AC3); the card places, moves and takes out with commands of its own', () => {
+    const page = component(built, C.pageWeek);
+    const wires = connectionsOf(built, C.pageWeek);
+    const into = (id: string) => wires.filter((w) => w.toId === id).map((w) => `${w.fromId}.${w.fromProperty}>${w.toProperty}`).sort();
+    const typeOf = (id: string) => nodesOf(page).find((n) => n.id === id)?.type;
+    expect(into('cmdPlace')).toEqual(['twChip.onfalse>do', 'twDays.firstOpenDay>date', 'twMoves.move>move', 'twMoves.placed>placed', 'twMoves.projectId>projectId']);
+    expect(typeOf('cmdPlaceDay')).toBe(C.placeMove);
+    expect(into('cmdPlaceDay')).toEqual([
+      'twCard.plan>do', 'twCard.planDate>date', 'twCard.planHours>planned', 'twCardRows.move>move', 'twCardRows.placed>placed', 'twCardRows.resolvedId>projectId'
+    ]);
+    expect(typeOf('cmdMoveBlock')).toBe('/Commands/Move block');
+    expect(into('cmdMoveBlock')).toEqual(['twCard.moveIt>do', 'twCard.planDate>date', 'twCardRows.placedBlockId>blockId', 'twCardRows.planDate>from']);
+    expect(typeOf('cmdTakeOut')).toBe(C.dropBlock);
+    expect(into('cmdTakeOut')).toEqual(['twCard.takeOut>do', 'twCardRows.placedBlockId>blockId']);
+    // R7c — the strip and the card read the move blocks, not the week's.
+    expect(into('twMovesLogic')).toContain('twData.moveBlocks>moveBlocks');
+    expect(into('twMovesLogic')).not.toContain('twData.blocks>blocks');
+    expect(into('twCardRows')).toContain('twData.moveBlocks>moveBlocks');
+  });
+
+  /**
+   * 🔴 Found driving R2.3: **Projects opened the card once per page load.** It reached the shared
+   * Set Variable through a Function saying ‘*’, which publishes only on a change, so the second
+   * press sent nothing. Every way into the card now has a Set Variable of its own.
+   */
+  it('🔴 every way into the card sets it with a node of its own, and Projects needs no Function to do it', () => {
+    const page = component(built, C.pageWeek);
+    const wires = connectionsOf(built, C.pageWeek);
+    const setters = nodesOf(page).filter((n) => n.type === 'Set Variable' && (n.parameters as Record<string, unknown>).name === 'plannerCardProject');
+    const shared = setters
+      .map((n) => ({ id: n.id, values: wires.filter((w) => w.toId === n.id && w.toProperty === 'value').length, dos: wires.filter((w) => w.toId === n.id && w.toProperty === 'do').length }))
+      // A fixed value (Close the card) can be pressed from anywhere; a wired one must have one source.
+      .filter((n) => n.values > 1 || (n.values > 0 && n.dos > 1));
+    expect(shared).toEqual([]);
+    const all = wires.find((w) => w.fromId === 'twBar' && w.fromProperty === 'openProjects');
+    const target = setters.find((n) => n.id === all?.toId);
+    expect(`${all?.toProperty} ${(target?.parameters as Record<string, unknown>)?.value}`).toBe('do *');
+  });
+
   it('🔴 R16a — the tick opens the block sheet and writes nothing', () => {
     const wires = connectionsOf(built, C.pageWeek);
     const fromTick = wires.filter((w) => w.fromId === 'twDayEach' && w.fromProperty === 'itemOutputSignal-toggle').map((w) => `${w.toId}.${w.toProperty}`);
@@ -521,14 +565,96 @@ describe('§4 the arithmetic, run rather than read', () => {
   });
 
   it('R9 — a finished asset is off the strip, an overdue move is first, and a placed one reads as placed', () => {
-    const blocks = [{ ...block('2026-09-23', 'p-build', 0.5, false), isMove: true }];
-    const { outputs } = run(scriptOf(built, C.moves, 'mvWork'), { projects: PROJECTS, blocks, weekStart: MONDAY });
+    const moveBlocks = [{ ...block('2026-09-26', 'p-build', 0.5, false), isMove: true }];
+    const { outputs } = run(scriptOf(built, C.moves, 'mvWork'), { projects: PROJECTS, moveBlocks, weekStart: MONDAY });
     const rows = outputs.rows as Array<Record<string, unknown>>;
     expect(rows.map((r) => r.projectId)).toEqual(['p-dormant', 'p-build', 'p-earn']);
     expect(rows[0].late).toBe(true);
     expect(rows[1].placed).toBe(true);
     expect(outputs.unplacedDormant).toBe('Founder A');
     expect(outputs.unsentBuilding).toBe('');
+  });
+
+  /**
+   * R7c — placed is a live move block on or after today, whichever week is on screen. Today is
+   * Friday 25 September here. A move put in next Tuesday reads placed THIS week (R2.3-3), so the chip
+   * opens the card rather than writing a second block; a done move block, and one left in the past
+   * undone, do not count (R2.3-4).
+   */
+  it('🔴 R2.3-3 / R2.3-4 — placed is a live move block from today on, not a block in the week on screen', () => {
+    const MOVES = scriptOf(built, C.moves, 'mvWork');
+    const move = (date: string, projectId: string, done = false) => ({ ...block(date, projectId, 0.5, done), isMove: true });
+    const rowsFor = (moveBlocks: unknown[]) =>
+      Object.fromEntries(
+        (run(MOVES, { projects: PROJECTS, moveBlocks, weekStart: MONDAY }).outputs.rows as Array<Record<string, unknown>>).map((r) => [r.projectId, r])
+      );
+
+    const next = rowsFor([move('2026-09-29', 'p-earn'), move('2026-10-08', 'p-build')]);
+    expect(next['p-earn'].placed).toBe(true);
+    // R7d — the day sits where the tick is: the weekday within six days, the date past that.
+    expect(next['p-earn'].tick).toBe('\u2713 Tue');
+    expect(next['p-build'].tick).toBe('\u2713 Thu 8');
+    expect(next['p-earn'].dotFill).toBe('var(--env-billable)');
+    expect(next['p-earn'].chipClass).toBe('planner-chip planner-chip-placed');
+
+    const gone = rowsFor([move('2026-09-24', 'p-earn', true), move('2026-09-22', 'p-build', false)]);
+    for (const id of ['p-earn', 'p-build']) {
+      expect(`${id} ${gone[id].placed} ${gone[id].tick} ${gone[id].dotFill} ${gone[id].chipClass}`).toBe(`${id} false  transparent planner-chip`);
+    }
+  });
+
+  /**
+   * R7b and R7d in the card: the move box and the list, for both states, from the rows the card draws.
+   */
+  it('🔴 R2.3-1 / R2.3-5 — the card: a day and hours before, "In the week" after, and the list muted only where placed', () => {
+    const CARD = scriptOf(built, '/Logic/Card rows', 'kdWork');
+    const ins = { projects: PROJECTS, blocks: [], weekStart: MONDAY, firstOpenDay: '2026-09-26' };
+    const listRow = (out: Record<string, unknown>, id: string) =>
+      (out.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows).find((r) => r.id === id) as Record<string, unknown>;
+
+    const open = run(CARD, { ...ins, moveBlocks: [], selectedId: 'p-earn' }).outputs;
+    expect([open.placed, open.unplaced, open.planDate, open.planHours, open.minDate, open.hasLast]).toEqual([false, true, '2026-09-26', '0.5', '2026-09-25', false]);
+    expect(open.placedBlockId).toBe('');
+    expect(listRow(open, 'p-earn').move).toBe('\u2192 Offer the add-on');
+    expect(listRow(open, 'p-earn').moveColor).toBe('var(--foreground)');
+    // A late move that is not placed stays red — red is for exactly this (R13).
+    expect(listRow(open, 'p-dormant').moveColor).toBe('var(--destructive)');
+
+    const live = { ...block('2026-09-29', 'p-earn', 1, false), id: 'mv1', isMove: true };
+    const placed = run(CARD, { ...ins, moveBlocks: [live], selectedId: 'p-earn' }).outputs;
+    expect([placed.placed, placed.unplaced, placed.placedBlockId, placed.planDate]).toEqual([true, false, 'mv1', '2026-09-29']);
+    expect(placed.placedLine).toBe('In the week: Tue 29 \u00b7 1 h');
+    expect(listRow(placed, 'p-earn').move).toBe('\u2713 Tue 29 \u00b7 Offer the add-on');
+    expect(listRow(placed, 'p-earn').moveColor).toBe('var(--muted-foreground)');
+    // The hours box is put back whenever the project or its state changes.
+    expect(placed.moveKey).not.toBe(open.moveKey);
+
+    const done = run(CARD, { ...ins, moveBlocks: [{ ...live, date: '2026-09-24', done: true }], selectedId: 'p-earn' }).outputs;
+    expect([done.placed, done.unplaced, done.hasLast]).toEqual([false, true, true]);
+    expect(done.lastLine).toMatch(/^\u2713 Done Thu 24\./);
+
+    // R9 — "fixes only" has no move box at all.
+    const stop = run(CARD, { ...ins, moveBlocks: [], selectedId: 'p-done' }).outputs;
+    expect([stop.canPlan, stop.placed, stop.unplaced]).toEqual([false, false, false]);
+  });
+
+  it('R2.3-1 / R2.3-2 / R2.3-6 — Place move takes the day and hours chosen, Move block changes only the day', () => {
+    const place = scriptOf(built, C.placeMove, 'PlacemoveGuard');
+    const ok = { projectId: 'p-earn', move: 'Offer the add-on', date: '2026-09-25' };
+    const chosen = run(place, { ...ok, planned: '1' });
+    expect(chosen.signals).toEqual(['go']);
+    expect([chosen.outputs.date, chosen.outputs.planned, chosen.outputs.isMove]).toEqual(['2026-09-25', 1, true]);
+    // AC3, unchanged: the chip sends no hours, and that is half an hour.
+    expect(run(place, ok).outputs.planned).toBe(0.5);
+    for (const bad of [{ planned: '0' }, { planned: 'lots' }, { placed: true }, { date: '' }]) expect(run(place, { ...ok, ...bad }).signals).toEqual([]);
+
+    const moveIt = scriptOf(built, '/Commands/Move block', 'MoveblockGuard');
+    const moved = run(moveIt, { blockId: 'mv1', date: '2026-09-24', from: '2026-09-29' });
+    expect(moved.signals).toEqual([]); // the past: a move put there would stop being placed
+    const ahead = run(moveIt, { blockId: 'mv1', date: '2026-10-01', from: '2026-09-29' });
+    expect(ahead.signals).toEqual(['go']);
+    expect(ahead.outputs).toEqual({ date: '2026-10-01' });
+    expect(run(moveIt, { blockId: 'mv1', date: '2026-09-29', from: '2026-09-29' }).signals).toEqual([]);
   });
 
   it('the cash strip expands a monthly event over the six weeks ahead and runs the balance through it', () => {

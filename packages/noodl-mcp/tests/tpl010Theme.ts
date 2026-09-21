@@ -274,6 +274,10 @@ export function themeCss(): string {
     '   On a laptop no chip reaches it; on a phone the 685px Founder A chip ends in an ellipsis. */',
     '.planner-chip { max-width: 100%; min-width: 0; overflow: hidden; }',
     '.planner-chip-what { flex: 0 1 auto !important; min-width: 0 !important; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }',
+    // R7d — a placed chip is the mockup's: faded, its move struck through, the tick and its day not.
+    '.planner-chip-placed { opacity: 0.55; }',
+    '.planner-chip-placed .planner-chip-what { text-decoration: line-through; }',
+    '.planner-chip-tick { flex: none !important; white-space: nowrap; }',
     '',
     '/* R15 — a sideways strip inside the page grid must not widen the page. */',
     '.planner-scroll-x { min-width: 0; overflow-x: auto; }',

@@ -67,6 +67,21 @@
           "name": "hint",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "tick",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dotFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "chipClass",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 350,
@@ -147,7 +162,12 @@
           "value": 8,
           "unit": "px"
         },
-        "borderRadius": "var(--radius-sm)"
+        "borderRadius": "var(--radius-sm)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        }
       },
       "x": 100,
       "y": 160
@@ -200,14 +220,15 @@
     {
       "id": "mcTick",
       "type": "Text",
-      "label": "Already in the week",
+      "label": "Already in the week, and which day",
       "parent": "mcRoot",
       "parameters": {
-        "text": "✓",
+        "text": "",
         "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize",
-        "fontWeight": "var(--font-semibold)"
+        "fontWeight": "var(--font-semibold)",
+        "cssClassName": "planner-chip-tick"
       },
       "x": 100,
       "y": 640

@@ -161,15 +161,9 @@
     },
     {
       "fromId": "twData",
-      "fromProperty": "blocks",
+      "fromProperty": "moveBlocks",
       "toId": "twMovesLogic",
-      "toProperty": "blocks"
-    },
-    {
-      "fromId": "twData",
-      "fromProperty": "weekStart",
-      "toId": "twMovesLogic",
-      "toProperty": "weekStart"
+      "toProperty": "moveBlocks"
     },
     {
       "fromId": "twData",
@@ -185,9 +179,21 @@
     },
     {
       "fromId": "twData",
+      "fromProperty": "moveBlocks",
+      "toId": "twCardRows",
+      "toProperty": "moveBlocks"
+    },
+    {
+      "fromId": "twData",
       "fromProperty": "weekStart",
       "toId": "twCardRows",
       "toProperty": "weekStart"
+    },
+    {
+      "fromId": "twDays",
+      "fromProperty": "firstOpenDay",
+      "toId": "twCardRows",
+      "toProperty": "firstOpenDay"
     },
     {
       "fromId": "twEnv",
@@ -300,13 +306,13 @@
     {
       "fromId": "twDayEach",
       "fromProperty": "itemOutput-projectId",
-      "toId": "twSetCard",
+      "toId": "twCardFromBlock",
       "toProperty": "value"
     },
     {
       "fromId": "twDayEach",
       "fromProperty": "itemOutputSignal-openProject",
-      "toId": "twSetCard",
+      "toId": "twCardFromBlock",
       "toProperty": "do"
     },
     {
@@ -324,13 +330,13 @@
     {
       "fromId": "twMoves",
       "fromProperty": "projectId",
-      "toId": "twSetCard",
+      "toId": "twCardFromChip",
       "toProperty": "value"
     },
     {
       "fromId": "twChip",
       "fromProperty": "ontrue",
-      "toId": "twSetCard",
+      "toId": "twCardFromChip",
       "toProperty": "do"
     },
     {
@@ -366,19 +372,7 @@
     {
       "fromId": "twBar",
       "fromProperty": "openProjects",
-      "toId": "twAllProjects",
-      "toProperty": "run"
-    },
-    {
-      "fromId": "twAllProjects",
-      "fromProperty": "out-any",
-      "toId": "twSetCard",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "twAllProjects",
-      "fromProperty": "out-any",
-      "toId": "twSetCard",
+      "toId": "twCardAll",
       "toProperty": "do"
     },
     {
@@ -467,15 +461,63 @@
     },
     {
       "fromId": "twCardRows",
-      "fromProperty": "planLabel",
-      "toId": "twCard",
-      "toProperty": "planLabel"
-    },
-    {
-      "fromId": "twCardRows",
       "fromProperty": "canPlan",
       "toId": "twCard",
       "toProperty": "canPlan"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "placed",
+      "toId": "twCard",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "unplaced",
+      "toId": "twCard",
+      "toProperty": "unplaced"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "placedLine",
+      "toId": "twCard",
+      "toProperty": "placedLine"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "planDate",
+      "toId": "twCard",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "planHours",
+      "toId": "twCard",
+      "toProperty": "planHours"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "minDate",
+      "toId": "twCard",
+      "toProperty": "minDate"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "lastLine",
+      "toId": "twCard",
+      "toProperty": "lastLine"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "hasLast",
+      "toId": "twCard",
+      "toProperty": "hasLast"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "moveKey",
+      "toId": "twCard",
+      "toProperty": "moveKey"
     },
     {
       "fromId": "twCardRows",
@@ -528,13 +570,13 @@
     {
       "fromId": "twCard",
       "fromProperty": "projectId",
-      "toId": "twSetCard",
+      "toId": "twCardPick",
       "toProperty": "value"
     },
     {
       "fromId": "twCard",
       "fromProperty": "pick",
-      "toId": "twSetCard",
+      "toId": "twCardPick",
       "toProperty": "do"
     },
     {
@@ -864,13 +906,13 @@
     {
       "fromId": "cmdAddProject",
       "fromProperty": "projectId",
-      "toId": "twSetCard",
+      "toId": "twCardNew",
       "toProperty": "value"
     },
     {
       "fromId": "cmdAddProject",
       "fromProperty": "done",
-      "toId": "twSetCard",
+      "toId": "twCardNew",
       "toProperty": "do"
     },
     {
@@ -888,19 +930,73 @@
     {
       "fromId": "twCardRows",
       "fromProperty": "resolvedId",
-      "toId": "cmdPlace",
+      "toId": "cmdPlaceDay",
       "toProperty": "projectId"
     },
     {
       "fromId": "twCardRows",
       "fromProperty": "move",
-      "toId": "cmdPlace",
+      "toId": "cmdPlaceDay",
       "toProperty": "move"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "placed",
+      "toId": "cmdPlaceDay",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "planDate",
+      "toId": "cmdPlaceDay",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "planHours",
+      "toId": "cmdPlaceDay",
+      "toProperty": "planned"
     },
     {
       "fromId": "twCard",
       "fromProperty": "plan",
-      "toId": "cmdPlace",
+      "toId": "cmdPlaceDay",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "placedBlockId",
+      "toId": "cmdMoveBlock",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "planDate",
+      "toId": "cmdMoveBlock",
+      "toProperty": "from"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "planDate",
+      "toId": "cmdMoveBlock",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "moveIt",
+      "toId": "cmdMoveBlock",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "placedBlockId",
+      "toId": "cmdTakeOut",
+      "toProperty": "blockId"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "takeOut",
+      "toId": "cmdTakeOut",
       "toProperty": "do"
     },
     {
@@ -1859,6 +1955,24 @@
     },
     {
       "fromId": "cmdPlace",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdPlaceDay",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdMoveBlock",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdTakeOut",
       "fromProperty": "done",
       "toId": "twData",
       "toProperty": "refresh"

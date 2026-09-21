@@ -1,5 +1,23 @@
 # Phase 78 — next session
 
+> ### ⬜ 2026-09-21 — TPL-010-M THE PLANNER'S MONEY: WRITTEN, NOT BUILT — START HERE FOR THE PLANNER
+>
+> Read [TPL-010-M](TPL-010-MONEY.md) first. Richard wants money out of Settings and into its own modal (€ in the app bar):
+> every money number is a money item (partner, household, tax, each client's bills) that happens once or repeats weekly /
+> monthly / quarterly / yearly with a start and an end; each repeat can be changed alone and is **ticked by hand** when it
+> happens (unticked + past = late, listed first); hoped money carries a likelihood; the bottom of the week says break-even,
+> target, how far off, what might come and the lowest point. **He overruled deriving client bills from project terms** —
+> the person types each bill; the project's payment terms only pre-fill the due date (M5).
+> - **First:** get Richard's yes on the proposed rulings **M10–M16** (data shape, balance readings, smoothed target,
+>   the three lines on the week, late money as the drawer's first concern, move → hoped money).
+> - **Then step 0, a mockup** in `nodegx-template-crm/mockups/money.html` (invented data), rendered at 1280×900, 1423×680
+>   and 390×844 and looked at, **approved by Richard before any graph**.
+> - It absorbs R2.2 and R2.5's money section ([R2](TPL-010-R2-FIRST-USE.md) s3). Board order: R2.3 (✅ built and driven 2026-09-21, R2 s4), then M, then R2.5.
+> - Build against `packages/noodl-mcp/src/server` (working tree), apply the four sheet traps up front (M §5.8), demo key v3.
+> - Local demo: `npm run template:planner`, then `node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planner-demo
+>   <site>/templates/planner --base-url /templates/planner/ --allow-development-engine` (the dev viewer is refused
+>   otherwise; fine locally, never for publishing) and serve `<site>` statically.
+
 > ### 🟢 2026-09-15 — T3 RULED AND DONE: FOUR TEMPLATES ARE ON THE COMMUNITY SHELF
 >
 > Richard wanted a visitor who likes a demo on nodegx.io to download NodeGX and find it in the launcher's **Templates** tab. Ruled:
