@@ -188,7 +188,22 @@ export function ComponentTree({
         } else {
           return (
             <ComponentItem
-              key={node.data.id}
+              // HLT-003 — total, so the key cannot silently become `undefined`.
+              //
+              // React logged *"Each child in a list should have a unique `key`
+              // prop … Check the render method of `ComponentTree`"* on
+              // 2026-09-20 14:19, and every branch of this map already passed a
+              // key — which is the tell: `key={undefined}` is reported as a
+              // *missing* key, not a bad one. No component in the drive corpus
+              // is missing `id`, so the row that produced it is not reproducible
+              // here and the sighting is recorded rather than claimed fixed.
+              //
+              // `name` is the fallback because it is the other identity this
+              // component already trusts: line ~119 uses it as the match id and
+              // `isSelected` compares it to `activeComponentName`. Not an index,
+              // which would silence React and lose the row's identity across a
+              // reorder.
+              key={node.data.id ?? node.data.name}
               component={node.data}
               level={level}
               isSelected={node.data.name === activeComponentName}

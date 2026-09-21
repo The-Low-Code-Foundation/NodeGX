@@ -108,7 +108,32 @@ export function usePreviewStrip(canvasComponent: string | undefined, enabled: bo
 
   useEffect(() => {
     const group = { id: 'usePreviewStrip.graph' };
-    EventDispatcher.instance.on(GRAPH_EVENTS, () => setCounter((c) => c + 1), group);
+    // 🔴 HLT-003 — deferred, because a graph event can arrive **during another
+    // component's render**.
+    //
+    // These three events are emitted from model construction, not only from user
+    // edits: `NodeGraphModel.fromJSON` → `addRoot` → `Model.notifyListeners`. And
+    // one caller builds graph models *inside a `useMemo`* — `ComponentBoard`'s
+    // `buildBoardExport`, which runs in the render phase on purpose (see its
+    // note on `boardExportSignature`). So on the first board mount this listener
+    // ran with React mid-render and bumped state belonging to `VisualCanvas`,
+    // which is the whole of "Cannot update a component (`VisualCanvas`) while
+    // rendering a different component (`ComponentBoard`)" — one event per
+    // session, in every session that opened the board, since the board shipped.
+    //
+    // A microtask cannot interrupt a synchronous render, so the bump lands after
+    // the render completes and before paint: the strip recomputes in the same
+    // frame it would have, and nothing about *what* it computes changes. Fixing
+    // it at the subscriber rather than at `buildBoardExport` is deliberate —
+    // this hook is the thing that turns a global event into React state, so it
+    // is the thing that owes React the phase discipline, and any other
+    // render-phase producer is covered by the same line.
+    //
+    // ⚠️ The two listeners above are left immediate on purpose: `viewer-navigated`
+    // is emitted by `CanvasView` on `load-commit` and by the route pill, neither
+    // of which is a render, and no measured event attributes to them. If one ever
+    // does, it wants this same treatment rather than a second mechanism.
+    EventDispatcher.instance.on(GRAPH_EVENTS, () => queueMicrotask(() => setCounter((c) => c + 1)), group);
     return () => {
       EventDispatcher.instance.off(group);
     };

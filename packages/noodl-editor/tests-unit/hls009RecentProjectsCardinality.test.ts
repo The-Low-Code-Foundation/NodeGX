@@ -89,7 +89,12 @@ describe('HLS-009 AC3 — one writer of the recent-projects store', () => {
     // 🔴 Two-sided. A gate that only asserted "at most one" would pass forever the day the write
     // is renamed and this scan stops seeing anything — the failure mode `nodeDocBudget` calls a
     // budget that passes by measuring nothing.
-    expect(writers).toEqual(['packages/noodl-editor/src/editor/src/utils/LocalProjectsModel.ts:88']);
+    // HLT-003 moved this from :88 to :100 — the write itself did not change and there is still
+    // exactly one. `fetch()` gained a comment above it explaining why the entries are
+    // de-duplicated by directory before being stored, which pushed `store()` twelve lines down.
+    // The pin is a location, not a budget: the property being held is the ONE in "exactly one",
+    // and that is what the two-sided assertion below still measures.
+    expect(writers).toEqual(['packages/noodl-editor/src/editor/src/utils/LocalProjectsModel.ts:100']);
   });
 
   /**

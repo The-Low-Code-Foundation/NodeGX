@@ -1,7 +1,7 @@
 # Phase 99 — The ones nobody owned
 
 **Scoped:** 2026-09-20, from Richard driving the editor by hand for 42 minutes and from the log that
-drive left behind, read against `cline-dev` HEAD `55dd19523`. **Status: 📋 building — HLT-001 ✅, HLT-002 ✅, eight to go.
+drive left behind, read against `cline-dev` HEAD `55dd19523`. **Status: 📋 building — HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, seven to go (plus HLT-011, opened by HLT-003).
 Prefix: `HLT`.**
 
 > "Let's write a phase with bug fixing tasks to unfuck this fucker."
@@ -51,8 +51,8 @@ and the price was four rediscoveries.
 |---|---|---|---|
 | 1 | React *"synchronously unmount a root while React was already rendering"* | **132** | ✅ **0** (HLT-001, 2026-09-20) |
 | 2 | `GUEST_VIEW_MANAGER_CALL: UnknownVizError` unhandled rejections | **116** | ✅ **0** (HLT-002, 2026-09-20) |
-| 3 | React duplicate-key errors | **10** | 0 |
-| 4 | Other React correctness warnings (null `value` prop, missing key, setState-during-render) | **3** | 0 |
+| 3 | React duplicate-key errors | **10** | ✅ **0** (HLT-003, 2026-09-21) |
+| 4 | Other React correctness warnings (null `value` prop, missing key, setState-during-render) | **3** | ✅ **0** (HLT-003, 2026-09-21) |
 | 5 | Failed network requests in a normal launch (404 `feed.json`, 401 `profile`, 401 `path`) | **3** | 0, or each one *explained* by a row that says why it is correct |
 | | **total renderer error events in 42 minutes** | **264** | **0** |
 
@@ -94,7 +94,7 @@ that ships red and gets switched off ([[a-gate-can-have-a-hole-shaped-like-the-d
 |---|---|---|
 | [HLT-001](./HLT-001-THE-SYNCHRONOUS-UNMOUNT.md) | ✅ **BUILT 2026-09-20 — 0 on a driven session, control 1,538.** ⚠️ §3's census was wrong: **78** call sites in 60 files, not 19, and **eleven** already deferred, not one. 🔴 And the first fix **traded** the error for two others (`removeChild` ×8/run, double-`createRoot` ×2/run) that a drive counting only this message called a clean pass — both now 0. [verdict](./verdicts/HLT-001/2026-09-20/VERDICT.md) | — |
 | [HLT-002](./HLT-002-THE-THUMBNAIL-NOBODY-CAUGHT.md) | ✅ **BUILT 2026-09-20 — 0 on a 21-minute session, 41 real captures beside it.** 🔴 §2's own thesis, sharper than expected: the task file's *"a webview that is not attached"* is **wrong** — `captureThumbnail` has carried an attachment guard since the initial commit, and at all seven measured failures the webview was attached, DOM-ready and in a visible window. **It is hidden, not detached** (BEN-004 R3), so nothing in this file changed between P56's 6 and Richard's 116 — **the editor changed around it**. ⚠️ And a **second regime emits nothing at all**: with the window occluded `capturePage()` never settles, so every instrument ever pointed at this was blind to it. [verdict](./verdicts/HLT-002/2026-09-20/VERDICT.md) | — |
-| [HLT-003](./HLT-003-THE-REACT-CORRECTNESS-WARNINGS.md) | ⚠️ **A THIRD sighting, HLT-002's session: 46 duplicate-key events in the last 3,000 log lines** — on a session that included several reloads, so it is a floor for that window rather than a per-session count. Recorded here rather than filed, per §7. ⚠️ **HLT-001's drive read 27 duplicate-key events, not 10** — on a 9-component copy of *Pixel Dungeon*, not Richard's project, so it is a second sighting rather than a correction; re-measure on your own drive. 13 events: 10 duplicate-key errors (the repeated key is a component id, so a list is keyed on something that is not unique per render), plus a null `value` prop, a missing key, and a setState-during-render | — |
+| [HLT-003](./HLT-003-THE-REACT-CORRECTNESS-WARNINGS.md) | ✅ **BUILT 2026-09-21 — all four at 0 on a driven session, each on a surface the drive PROVES it reached, each beside a control that fired.** 🔴 §2 was wrong three ways and the corrections are the value: the arguments were never *lost* (the old wrapper appended them all — the setState warning already said `VisualCanvas ComponentBoard ComponentBoard` in plain text), the name that IS missing is one **React 19 never passes** and is reachable only from inside the `console.error` via `ReactSharedInternals.getCurrentStack`, and the duplicate key is **the launcher's**, not a project entity's — the bursts start ~10s *before* any project opens. Cause: **two different projects share one stored `id`** and **one directory is registered twice**, so *neither* field was unique. [verdict](./verdicts/HLT-003/2026-09-21/VERDICT.md) | — |
 | [HLT-004](./HLT-004-THE-THREE-FAILED-REQUESTS.md) | 3 requests fail on every launch: `feed.json` **404**, `profile` **401**, `path` **401**. ⚠️ Some may be correct for a signed-out or offline editor — the deliverable is that each one is **either fixed or explained by a committed note**, never left ambiguous | — |
 
 ### Track B — the property editor and the styles seam
@@ -116,7 +116,8 @@ that ships red and gets switched off ([[a-gate-can-have-a-hole-shaped-like-the-d
 | id | task | depends on |
 |---|---|---|
 | [HLT-009](./HLT-009-THE-INERT-PARAMETERS.md) | `digital-bricks-training` sets `width` and `sizeMode` on three `dbt-lesson.*` node types that declare neither, on 6 nodes — so the sizing a reader copies does nothing ([[an-inert-parameter-in-a-corpus-example-teaches-a-lie]]). ⚠️ **That template is being built RIGHT NOW in numbered sprints by another stream** (`0a0fd7f0d`, sprints 44–45). Message its owner before touching a file; this may already be its next sprint's work | — |
-| [HLT-010](./HLT-010-THE-GATE-THAT-WOULD-HAVE-CAUGHT-IT.md) | 🔴 **The structural fix, and the reason this phase is not just ten bug fixes.** Nothing in CI reads the renderer log, so 264 errors survived a green suite. Build the gate: a driven session that fails on renderer errors above a named, per-class budget, with every current class at **0**. ⚠️ Written **last** — a budget set while the counts are non-zero ships red and gets switched off. Also: fix P94's stale README header | HLT-001…009 |
+| [HLT-011](./HLT-011-THE-TWO-PROJECTS-WITH-ONE-IDENTITY.md) | 🔴 **Opened by HLT-003, 2026-09-21 — measured, not speculative.** Two different projects (`tut001-drive`, `Puppy test 3`) carry one `id` in `recently_opened_project.json`. HLT-003 stopped the React warning by keying the grid on the **directory**, the row's real identity — it did **not** touch the id, because `projectmodel.ts` documents `project.id` as the ownership half of `findReusableBackend` and re-minting one silently changes which project owns a backend. Still broken: `getProjectEntryWithId` returns the **first** match, so a click on either colliding card opens **the other project**, and per-project local settings and git auth are keyed on the same id | — |
+| [HLT-010](./HLT-010-THE-GATE-THAT-WOULD-HAVE-CAUGHT-IT.md) | 🔴 **The structural fix, and the reason this phase is not just ten bug fixes.** Nothing in CI reads the renderer log, so 264 errors survived a green suite. Build the gate: a driven session that fails on renderer errors above a named, per-class budget, with every current class at **0**. ⚠️ Written **last** — a budget set while the counts are non-zero ships red and gets switched off. Also: fix P94's stale README header. ⚠️ **And it must run `test:main` as well as `test:ci`** — HLT-003 found a gate that only `test:main` runs sitting red for a day behind a green `test:ci`, so a renderer-error budget wired into one of them inherits exactly that blind spot | HLT-001…009, HLT-011 |
 
 ## 5a. 🔴 What HLT-001 changed for every task after it
 
@@ -153,6 +154,12 @@ Everything else in §5 is a defect with a measured count and needs no ruling.
 - 🔴 **Editing editor `src/` full-reloads a peer's editor.** One heavy job at a time; announce a
   launch and announce the teardown to everyone you announced the launch to.
 - 🔴 **Drive a copy of a real project** — opening one writes three files into it.
+- 🔴 **Run `test:main` as well as `test:ci`, every time. They are different gates and neither is a
+  superset.** HLT-002 shipped a user-visible string carrying P93's retired word "bench"
+  (`thumbnailCapture.ts`), turning the TVW-009 vocabulary ratchet red. `test:ci` does not run that
+  gate, HLT-002's verdict recorded `test:ci` at the floor, and the board read green for a day.
+  Found and fixed by HLT-003; the *reason* nobody saw it is the reusable part
+  ([[two-gates-covering-the-ends-of-a-chain-read-as-coverage]]).
 - The hex ratchet, icon-url gate, token check, vocabulary ratchet and the P92 scale gate stay green
   at every commit. The `test:ci` floor is the eight by name (3 SUB-006, 3 SUB-011, 2 NDA-017).
 

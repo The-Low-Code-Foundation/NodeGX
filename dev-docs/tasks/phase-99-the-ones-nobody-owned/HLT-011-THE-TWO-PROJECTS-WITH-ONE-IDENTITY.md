@@ -1,0 +1,86 @@
+# HLT-011 — The two projects with one identity
+
+**Opened by HLT-003 on 2026-09-21, from a measurement rather than a suspicion. Two different
+projects on this machine carry the same project `id`, and the launcher addresses rows by it.**
+
+## 1. The person sentence
+
+> **Clicking a project on the launcher opens that project, and the settings it remembers are its
+> own.**
+
+## 2. What is measured, and what is only mechanism
+
+**Measured**, `<userData>/recently_opened_project.json`, 2026-09-21, 104 entries:
+
+| entry | directory | `id` |
+|---|---|---|
+| `tut001-drive` | `…/NodeGX test projects/tut001-drive` | `692d3658-f11a-10db-e6c8-6b000f774898` |
+| `Puppy test 3` | `…/NodeGX test projects/Puppy test 3` | `692d3658-f11a-10db-e6c8-6b000f774898` |
+
+Also measured: `tut001-drive/nodegx.project.json` carries that same `id` on disk; `Puppy test 3`'s
+project file has **no `id` field at all**. And a 128-bit `Math.random` collision across 104 entries
+is not a credible explanation, so the id was **copied, not generated**.
+
+**Mechanism, read from the code and not yet driven:**
+
+- `LocalProjectsModel.getProjectEntryWithId` is a `.find(…)` — it returns the **first** match. The
+  launcher grid's `onClick` passes `project.id`, and `fetch()` sorts most-recently-opened first, so
+  today a click on *Puppy test 3* resolves to *tut001-drive*.
+- `projectmodel.ts` documents `project.id` as *"the project's durable identity, and the ownership
+  key a backend is bound to"*, read by `BackendServices/provisionBackend.ts` as the ownership half
+  of `findReusableBackend`. Two unrelated projects claim one backend's ownership.
+- `_addProject`'s own comment says the id is *"used internally to store project specific local
+  settings"*, and `loadProject` calls `setCurrentGlobalGitAuth(projectEntry.id)`. Both are shared
+  between the two projects.
+
+🔴 **None of the three consequences above has been driven.** They are what the code says, which is
+why this is a row with acceptance criteria rather than a claim in a verdict
+([[a-relayed-conclusion-decays-faster-than-a-relayed-measurement]]).
+
+## 3. What HLT-003 already did, and deliberately did not do
+
+**Did:** the launcher grid now keys on the project **directory** — a row *is* a project directory —
+and `recentProjectRows.ts` guarantees one row per directory. That removed all 62 duplicate-key
+events. HLT-003's verdict has the control pair.
+
+**Deliberately did not:** touch the colliding `id`. Re-minting one of the two would silently change
+which project owns a backend, which is a decision about ownership, not a repair of a warning. The
+collision is **still present in the store** and is therefore still reproducible for whoever builds
+this.
+
+## 4. Scope
+
+**In:** how the launcher addresses a row it wants to open, and whether two projects can hold one
+durable id. The three consequences in §2, each driven before it is fixed.
+
+**Out:** the React key (HLT-003, done). The `nodegx.project.json` format. Any change to what
+`findReusableBackend` *means* — if the fix needs that, it needs a ruling first.
+
+## 5. Acceptance criteria
+
+1. **(drive it first)** A driven session demonstrates the misrouted open: with the two colliding
+   entries present, clicking the lower card opens the other project. If it does **not** reproduce,
+   that is the finding and this row closes as disproved — with the reading recorded.
+2. **Addressing a row does not depend on a field that can collide.** The launcher opens by
+   something unique per row. ⚠️ Note `retainedProjectDirectory` is unique only *because* HLT-003's
+   de-duplication makes it so; a fix that leans on it inherits that dependency and should say so.
+3. **Two projects cannot come to share a durable id**, or if they can, the editor detects it and
+   says so rather than resolving it silently. A spec covers whichever is chosen.
+4. **The existing collision is healed or explicitly left**, with the reason written down. If healed,
+   a control shows what happened to the backend ownership and git auth that were keyed on it —
+   silently moving either is the defect this row exists to avoid causing.
+5. `test:ci` at the floor (8 by name); `typecheck:editor` 0; `test:main` green.
+
+## 6. Landmines
+
+- 🔴 **`project.id` is persisted and read back, and "copy a real project to drive it" is this
+  team's standard practice.** Whatever the fix is, a copied directory must not be able to
+  manufacture a second entry with the first one's identity.
+- 🔴 **`projectmodel.ts`'s constructor comment warns against minting on load** — *"two copies of the
+  same project would then diverge silently"*. That note anticipated this and chose the other
+  failure. Read it before changing where ids come from.
+- ⚠️ **The launcher store is 7.4 MB** because entries carry base64 thumbnails. Read it with a script,
+  not by opening it.
+- ⚠️ **HLS-009 AC3 pins the single writer of that store by `file:line`.** Editing
+  `LocalProjectsModel.ts` above line 100 moves it and turns that gate red; the pin is a location,
+  the property is the *count*.

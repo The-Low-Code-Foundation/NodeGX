@@ -112,7 +112,11 @@ export const CAPTURE_SKIP_EXPLANATION: Record<CaptureSkipReason, string> = {
   'no-webview': 'the preview has no webview yet',
   'not-dom-ready': 'the preview page has not finished loading',
   detached: 'the preview webview is not in the document',
-  'not-drawn': 'the app preview is hidden behind the bench or the board, so nothing is being drawn',
+  // HLT-003: "Workbench", not "bench". P93's TVW-009 retired the bare word on any user-visible
+  // string and `scripts/vocabulary-ratchet.js` names the replacement itself — this sentence
+  // arrived with HLT-002 (`32c92b1c3`) and turned that gate red, which `test:ci` does not run and
+  // so nobody saw. Unretired words only; "board" is current.
+  'not-drawn': 'the app preview is hidden behind the Workbench or the board, so nothing is being drawn',
   'window-hidden': 'the editor window is minimised or fully occluded'
 };
 

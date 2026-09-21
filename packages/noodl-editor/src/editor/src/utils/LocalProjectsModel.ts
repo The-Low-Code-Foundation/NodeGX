@@ -17,6 +17,7 @@ import { createProjectFromTemplate } from '../models/template/createFromTemplate
 import { installPresetFonts, installStarterAssets } from '../models/template/starterAssets';
 import { GitHubOAuthService } from '../services/GitHubOAuthService';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
+import { dedupeProjectRowsByDirectory } from './recentProjectRows';
 import { tracker } from './tracker';
 import { guid } from './utils';
 
@@ -74,8 +75,19 @@ export class LocalProjectsModel extends Model {
 
     existingFolders.sort((a, b) => b.latestAccessed - a.latestAccessed);
 
-    if (!this.projectEntries || (this.projectEntries && !isEqual(this.projectEntries, existingFolders))) {
-      this.projectEntries = existingFolders;
+    // HLT-003. Sorted first, deduplicated second: the survivor of a duplicated
+    // directory is the most recently opened one, whose name and thumbnail are
+    // the current ones. `_addProject` has never checked whether a directory is
+    // already registered, so a re-opened folder could be stored twice and the
+    // grid drew the same project twice — and re-keying that grid on the
+    // directory (which is what makes HLT-003's duplicate-key warning go away)
+    // needs the directory to be unique. See `recentProjectRows`.
+    const rows = dedupeProjectRowsByDirectory(existingFolders);
+
+    if (!this.projectEntries || (this.projectEntries && !isEqual(this.projectEntries, rows))) {
+      this.projectEntries = rows;
+      // Writes the repaired list back, so a duplicate is healed once rather
+      // than re-filtered on every launch.
       this.store();
 
       this.notifyListeners('myProjectsChanged');

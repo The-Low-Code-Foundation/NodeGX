@@ -298,7 +298,14 @@ export function Projects({}: ProjectsViewProps) {
                 <LauncherCardGrid>
                   {projects.map((project) => (
                     <LauncherProjectCard
-                      key={project.id}
+                      // HLT-003: the directory, not the id. Two different
+                      // projects can carry the same stored `id` — measured, and
+                      // the single cause of all 62 duplicate-key events phase 99
+                      // recorded — whereas a row *is* a project directory.
+                      // `LocalProjectsModel.fetch` guarantees one row per
+                      // directory; without that guarantee this key would collide
+                      // wherever the id one did not.
+                      key={project.localPath}
                       {...project}
                       onClick={() => onLaunchProject?.(project.id)}
                       onMigrateProject={() => onMigrateProject?.(project.id)}

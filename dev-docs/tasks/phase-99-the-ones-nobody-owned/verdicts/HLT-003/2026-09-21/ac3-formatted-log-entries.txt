@@ -1,0 +1,47 @@
+# HLT-003 AC3 — React warnings as bugtracker now writes them
+#
+# Extracted from <userData>/debug on 2026-09-21. These are the SUBSTITUTED messages with
+# the component stack appended, which is what names the component. .logs/dev.log shows the
+# RAW console args instead (it is the dev launcher's CDP mirror, a different channel), so
+# it still prints %s — that is not a failure of this fix.
+
+=== log-2026-09-21T05-52-42Z.txt ===
+2026-09-21T05:56:45.066Z  ERROR  Cannot update a component (`VisualCanvas`) while rendering a different component (`ComponentBoard`). To locate the bad setState() call inside `ComponentBoard`, follow the stack trace as described in <url>
+        at ComponentBoard (webpack-internal://<path>:79:27)
+        at div (<anonymous>)
+        at div (<anonymous>)
+        at VisualCanvas (webpack-internal://<path>:89:25)
+
+=== log-2026-09-21T05-58-43Z.txt ===
+2026-09-21T06:00:07.401Z  ERROR  Cannot update a component (`VisualCanvas`) while rendering a different component (`ComponentBoard`). To locate the bad setState() call inside `ComponentBoard`, follow the stack trace as described in <url>
+        at ComponentBoard (webpack-internal://<path>:79:27)
+        at div (<anonymous>)
+        at div (<anonymous>)
+        at VisualCanvas (webpack-internal://<path>:89:25)
+2026-09-21T06:10:21.109Z  ERROR  `value` prop on `input` should not be null. Consider using an empty string to clear the component or `undefined` for uncontrolled components.
+        at input (<anonymous>)
+2026-09-21T06:11:39.949Z  ERROR  Each child in a list should have a unique "key" prop.
+    
+    Check the top-level render call using <ul>. See <url> for more information.
+        at li (<anonymous>)
+
+=== log-2026-09-21T06-14-44Z.txt ===
+2026-09-21T06:15:46.085Z  ERROR  Encountered two children with the same key, `.$~/...
+        at li (<anonymous>)
+        at ul (<anonymous>)
+        at LauncherCardGrid (webpack-internal://<path>:59:29)
+        at div (<anonymous>)
+        at div (<anonymous>)
+        at div (<anonymous>)
+        at div (<anonymous>)
+        at LauncherPage (webpack-internal://<path>:28:25)
+        at Projects (webpack-internal://<path>:39:19)
+        at div (<anonymous>)
+--
+2026-09-21T06:15:50.828Z  ERROR  `value` prop on `input` should not be null. Consider using an empty string to clear the component or `undefined` for uncontrolled components.
+        at input (<anonymous>)
+2026-09-21T06:15:52.997Z  ERROR  Each child in a list should have a unique "key" prop.
+    
+    Check the top-level render call using <ul>. See <url> for more information.
+        at li (<anonymous>)
+

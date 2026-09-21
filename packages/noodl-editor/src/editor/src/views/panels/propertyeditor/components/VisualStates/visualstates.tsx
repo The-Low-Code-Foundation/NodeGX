@@ -62,9 +62,28 @@ export class VisualStates extends React.Component<VisualStatesProps, State> {
   }
 
   renderVisualStates() {
+    // HLT-003 — keyed on `name`, and the `react/jsx-key` suppression that used
+    // to sit on this line is gone.
+    //
+    // 🔴 The lint had already found this defect and been switched off, which is
+    // the phase's own thesis showing up in one line of code: React logged *"Each
+    // child in a list should have a unique `key` prop … Check the render method
+    // of `VisualStates`"* in Richard's 2026-09-20 session, and the rule that
+    // would have caught it before it shipped was disabled rather than answered.
+    //
+    // `name` is the identity, not `label` and not the index: a visual state is
+    // declared as `{ name: 'hover', label: 'Hover' }` (see any node in
+    // `noodl-viewer-react/src/nodes/visual`), `name` is what every transition
+    // and every stored parameter is keyed on, and two states of one node type
+    // cannot share it. An index would have silenced React and left the rows
+    // unable to keep their identity across a reorder, which is the one thing a
+    // key is for.
     return this.state.visualStates.map((state) => (
-      // eslint-disable-next-line react/jsx-key
-      <div className="property-editor-visual-state-item" onClick={this.onVisualStateClicked.bind(this, state)}>
+      <div
+        key={state.name}
+        className="property-editor-visual-state-item"
+        onClick={this.onVisualStateClicked.bind(this, state)}
+      >
         <div
           className={
             'property-editor-visual-state-item-label ' + (this.state.selectedVisualState === state ? 'selected' : '')

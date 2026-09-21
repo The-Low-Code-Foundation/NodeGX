@@ -1,0 +1,32 @@
+HLT-003 warnings drive — --expect firing
+project: /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive
+
+ok    the counter is armed before anything is driven
+ok    the editor router was found — ok
+ok    the driven project is the copy this drive names — /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive
+ok    REACH — the board mounted and drew frames — mode=board, frames=2
+ok    REACH — the property input rendered from a null style value — [{"value":""}]
+ok    the field is CONTROLLED and empty, which is what the null broke — {"value":""}
+ok    REACH — the visual-state rows are on screen — 3 rows
+ok    REACH — the launcher grid rendered its rows — 104 cards
+ok    PRODUCT CONTROL — a duplicate DIRECTORY makes the fixed key collide — 0 → 1
+ok    DETECTOR CONTROL — the counter sees a raw <input value={null}> — 0 → 1
+ok    DETECTOR CONTROL — the counter sees a keyless list — 0 → 1
+
+counts: {
+  "duplicateKey": 1,
+  "missingKey": 1,
+  "nullValue": 1,
+  "setStateInRender": 0,
+  "otherErrors": 0,
+  "samples": [
+    "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-uniqu | .$/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive",
+    "`value` prop on `%s` should not be null. Consider using an empty string to clear the component or `undefined` for uncontrolled components. | input",
+    "Each child in a list should have a unique \"key\" prop.%s%s See https://react.dev/link/warning-keys for more information. | \n\nCheck the top-level render call using <ul>. | "
+  ]
+}
+reach:  {"boardFrames":2,"nullValueInputs":1,"visualStateRows":3,"launcherCards":104}
+
+wrote dev-docs/tasks/phase-99-the-ones-nobody-owned/verdicts/HLT-003/2026-09-21/drive-control.json
+
+PASS

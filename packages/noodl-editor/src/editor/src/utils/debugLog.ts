@@ -163,3 +163,84 @@ export function formatEntry(options: FormatEntryOptions): string {
 export function logFileName(at: Date = new Date()): string {
   return `log-${at.toISOString().replace(/:/g, '-').replace(/\.\d+Z$/, 'Z')}.txt`;
 }
+
+/**
+ * HLT-003 — apply a `console.*` format string to its arguments, the way the
+ * devtools console does before anyone reads it.
+ *
+ * ⚠️ **The premise this was written from was wrong, and the correction is the
+ * useful part.** HLT-003 §2 recorded that `%s` reaching the log unformatted
+ * meant "the component names are **lost**", and that `bugtracker.ts` was
+ * "swallowing React's arguments". It was not: the old wrapper joined *every*
+ * argument onto the message, so nothing was dropped — the setState-during-render
+ * warning in Richard's 2026-09-20 session already said `… (`%s`) while
+ * rendering a different component (`%s`) … VisualCanvas ComponentBoard
+ * ComponentBoard` in plain text. What was missing is only the *substitution*, so
+ * a reader had to map three trailing words onto three placeholders by eye and
+ * guess which one was the renderer.
+ *
+ * Two things therefore matter here, and only the second is new:
+ *
+ * 1. Placeholders are filled from the arguments, and anything left over is still
+ *    appended — a log that silently dropped an argument would be a regression on
+ *    the writer this replaces.
+ * 2. `%c` **consumes** its argument and prints nothing, because it is a CSS run.
+ *    Electron's own security warning is `%cElectron Security Warning …` plus
+ *    `font-weight: bold;`, which is why every log in `<userData>/debug` has a
+ *    stray `font-weight: bold;` in the middle of a sentence.
+ *
+ * The `componentStack` argument is the part that actually names a component, and
+ * it cannot come from the arguments at all — see `bugtracker.ts`. React 19 hands
+ * the duplicate-key warning **only** the key, and hands the missing-key warning
+ * two empty strings; both instead expose the owner through
+ * `ReactSharedInternals.getCurrentStack`, live only for the duration of the
+ * `console.error` call.
+ *
+ * Substitution happens only when an argument is actually available, so a lone
+ * string that happens to contain a percent sign is left exactly as it was.
+ */
+export function formatConsoleArgs(args: readonly unknown[], componentStack?: string | null): string {
+  const parts: string[] = [];
+  let remaining: readonly unknown[] = args;
+
+  const format = args[0];
+  if (typeof format === 'string' && /%[sdifjoOc%]/.test(format)) {
+    const values = args.slice(1);
+    let next = 0;
+    const filled = format.replace(/%([sdifjoOc%])/g, (whole, kind: string) => {
+      if (kind === '%') return '%';
+      // More placeholders than arguments: leave the placeholder visible rather
+      // than inventing an empty string, so the log shows that React (or a call
+      // site) passed fewer arguments than its own format string promised.
+      if (next >= values.length) return whole;
+      const value = values[next++];
+      switch (kind) {
+        case 'c':
+          return '';
+        case 'd':
+        case 'i': {
+          const n = Number(value);
+          return Number.isFinite(n) ? String(Math.trunc(n)) : 'NaN';
+        }
+        case 'f': {
+          const n = Number(value);
+          return Number.isFinite(n) ? String(n) : 'NaN';
+        }
+        default:
+          return stringifyArgument(value);
+      }
+    });
+    parts.push(filled);
+    remaining = values.slice(next);
+  }
+
+  for (const value of remaining) parts.push(stringifyArgument(value));
+
+  let text = parts.filter((part) => part !== '').join(' ');
+
+  if (typeof componentStack === 'string' && componentStack.trim() !== '') {
+    text += componentStack.startsWith('\n') ? componentStack : `\n${componentStack}`;
+  }
+
+  return text;
+}
