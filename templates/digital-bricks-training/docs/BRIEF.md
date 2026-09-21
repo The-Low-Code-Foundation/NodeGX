@@ -10,9 +10,9 @@ Language trainers and small-business learners reading a lesson about their own p
 
 ## Deliberately out of scope
 
-- The backend, every write, auth and the model calls (Richard's, in flight)
-- i18n — every string is a node parameter until a string-table kit exists
-- The coach's surfaces, the assistant dock, the confusion control, signals, onboarding
+- Every write, the model calls and onboarding (the backend's READ path is sprint 49; writes wait on a NodeGX compare-and-swap primitive)
+- A second locale (the string table exists — sprint 46 — and holds English only)
+- The coach's composers, the assistant dock, the confusion control
 - Rendering mermaid, recharts charts, the five interactive widgets and TTS audio — placeholders carrying their data, with the reason in the kit README
 - A dark theme
 

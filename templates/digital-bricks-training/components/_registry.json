@@ -59,14 +59,6 @@
       "modified": "2026-09-19T21:14:19.087Z",
       "created": "2026-09-19T21:09:41.072Z"
     },
-    "Course/Step row": {
-      "path": "Course/Step row",
-      "type": "visual",
-      "nodeCount": 4,
-      "connectionCount": 2,
-      "modified": "2026-09-19T21:09:48.149Z",
-      "created": "2026-09-19T21:09:48.149Z"
-    },
     "Pages/Lesson": {
       "path": "Pages/Lesson",
       "type": "page",

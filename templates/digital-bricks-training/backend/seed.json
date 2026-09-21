@@ -1,0 +1,2330 @@
+{
+  "users": [
+    {
+      "username": "trainer@example.test",
+      "email": "trainer@example.test",
+      "firstName": "Richard",
+      "lastName": "Osborne",
+      "createdAt": "2026-01-05T09:00:00.000Z",
+      "roles": [
+        "staff"
+      ]
+    },
+    {
+      "username": "ade.bello@example.test",
+      "email": "ade.bello@example.test",
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-09-02T09:00:00.000Z"
+    },
+    {
+      "username": "marie.dubois@example.test",
+      "email": "marie.dubois@example.test",
+      "firstName": "Marie",
+      "lastName": "Dubois",
+      "createdAt": "2026-08-11T10:00:00.000Z"
+    },
+    {
+      "username": "sam.okafor@example.test",
+      "email": "sam.okafor@example.test",
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-09-15T08:12:00.000Z"
+    },
+    {
+      "username": "j.hughes@example.test",
+      "email": "j.hughes@example.test",
+      "firstName": "Allotment",
+      "lastName": "waiting list",
+      "createdAt": "2026-08-20T10:00:00.000Z"
+    },
+    {
+      "username": "l-invoice",
+      "email": null,
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-08-25T10:00:00.000Z"
+    },
+    {
+      "username": "priya@example.test",
+      "email": "priya@example.test",
+      "firstName": "Priya",
+      "lastName": "Shah",
+      "createdAt": "2026-05-02T10:00:00.000Z"
+    },
+    {
+      "username": "eleni.k@example.test",
+      "email": "eleni.k@example.test",
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-08-30T10:00:00.000Z"
+    },
+    {
+      "username": "tom.reyes@example.test",
+      "email": "tom.reyes@example.test",
+      "firstName": "Tomás",
+      "lastName": "Reyes",
+      "createdAt": "2026-06-10T10:00:00.000Z"
+    },
+    {
+      "username": "noor.a@example.test",
+      "email": "noor.a@example.test",
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-09-16T10:00:00.000Z"
+    },
+    {
+      "username": "dana.k@example.test",
+      "email": "dana.k@example.test",
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-08-28T10:00:00.000Z"
+    }
+  ],
+  "rows": {
+    "ArtifactSubmission": [
+      {
+        "submissionId": "artifact-1",
+        "learnerId": "l-priya",
+        "attempt": 1,
+        "submittedAt": "2026-08-26T18:40:00.000Z",
+        "evaluation": {
+          "summary": "(seeded)"
+        },
+        "conceptId": "scoping-what-to-build",
+        "sectionId": "artifact",
+        "deliverableId": "obj-fields"
+      },
+      {
+        "submissionId": "artifact-2",
+        "learnerId": "l-priya",
+        "attempt": 1,
+        "submittedAt": "2026-09-03T19:00:00.000Z",
+        "evaluation": null,
+        "conceptId": "what-an-api-is",
+        "sectionId": "artifact",
+        "deliverableId": null
+      }
+    ],
+    "Assignment": [
+      {
+        "assignmentId": "brief-fields",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "One page: every field your booking form asks for",
+        "brief": "List every field the form asks a parent for, and beside each one write why you need it. If you cannot say why, that is the interesting row.",
+        "dueAt": "2026-09-09T22:59:59.999Z",
+        "submissionModes": [
+          "text"
+        ],
+        "criteria": [
+          "Every field has a reason beside it",
+          "At least one field you decided to drop"
+        ],
+        "deliverableId": null,
+        "status": "issued"
+      },
+      {
+        "assignmentId": "brief-rules",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "A one-page plan for the booking rules",
+        "brief": "Write the rules a booking has to obey, in plain sentences: how far ahead, how late a cancellation, what happens when two parents ask for the same slot.",
+        "dueAt": "2026-09-25T22:59:59.999Z",
+        "submissionModes": [
+          "text",
+          "link"
+        ],
+        "criteria": [
+          "Each rule is one sentence",
+          "The double-booking case has an answer",
+          "A rule you are not sure about is marked as such"
+        ],
+        "deliverableId": null,
+        "status": "issued"
+      }
+    ],
+    "AssignmentSubmission": [
+      {
+        "submissionId": "assignment-1",
+        "learnerId": "l-priya",
+        "attempt": 1,
+        "submittedAt": "2026-09-08T20:10:00.000Z",
+        "evaluation": null,
+        "assignmentId": "brief-fields"
+      }
+    ],
+    "CoachNote": [
+      {
+        "noteId": "note-spring",
+        "learnerId": "l-priya",
+        "authorEmail": "trainer@example.test",
+        "body": "She is ready to build. The autumn programme can start from the booking form itself.",
+        "sessionId": null,
+        "anchorKind": null,
+        "anchorId": null,
+        "visibility": "shared",
+        "createdAt": "2026-05-20T08:30:00.000Z",
+        "editedAt": null
+      },
+      {
+        "noteId": "note-api",
+        "learnerId": "l-priya",
+        "authorEmail": "trainer@example.test",
+        "body": "You said the API lesson was the first time the whole thing clicked. Worth remembering when the next unfamiliar word turns up — it was the example that did it, not the explanation.",
+        "sessionId": null,
+        "anchorKind": "lesson",
+        "anchorId": "lesson:what-an-api-is",
+        "visibility": "shared",
+        "createdAt": "2026-09-02T15:02:00.000Z",
+        "editedAt": null
+      },
+      {
+        "noteId": "note-pace",
+        "learnerId": "l-priya",
+        "authorEmail": "trainer@example.test",
+        "body": "Term has started and the evenings have gone. We agreed to keep the same end date and drop the third objective rather than rush all three.",
+        "sessionId": null,
+        "anchorKind": null,
+        "anchorId": null,
+        "visibility": "shared",
+        "createdAt": "2026-09-10T08:45:00.000Z",
+        "editedAt": null
+      },
+      {
+        "noteId": "note-orphan",
+        "learnerId": "l-priya",
+        "authorEmail": "trainer@example.test",
+        "body": "Anchored to something that is not on this page — it must still render as its own card rather than disappearing.",
+        "sessionId": null,
+        "anchorKind": "lesson",
+        "anchorId": "lesson:a-lesson-not-on-this-page",
+        "visibility": "shared",
+        "createdAt": "2026-09-12T09:00:00.000Z",
+        "editedAt": null
+      }
+    ],
+    "CoachingSession": [
+      {
+        "sessionId": "sess-spring",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-spring",
+        "title": "What a booking has to know",
+        "startsAt": "2026-04-15T12:00:00.000Z",
+        "durationMinutes": 30,
+        "meetingLink": null,
+        "summary": "A booking needs a child, a day and a parent to reach. Everything else can wait.",
+        "cancelledAt": null,
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-aug",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "Scope review — what v1 actually is",
+        "startsAt": "2026-08-21T13:00:00.000Z",
+        "durationMinutes": 45,
+        "meetingLink": null,
+        "summary": "We cut the reminder emails out of v1. You are building the booking form and nothing else until it takes a real booking.",
+        "cancelledAt": null,
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-sep",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "Fortnightly check-in",
+        "startsAt": "2026-09-04T13:00:00.000Z",
+        "durationMinutes": 30,
+        "meetingLink": null,
+        "summary": "You read the API lesson back to me in your own words and got it right, which is the thing we set out to be able to do. The end-to-end objective is the one we are not going to reach this term.",
+        "cancelledAt": null,
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-cancelled",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "Fortnightly check-in",
+        "startsAt": "2026-09-16T13:00:00.000Z",
+        "durationMinutes": 30,
+        "meetingLink": null,
+        "summary": null,
+        "cancelledAt": "2026-09-15T17:20:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-oct",
+        "learnerId": "l-priya",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "The booking rules, read out loud",
+        "startsAt": "2026-09-24T13:00:00.000Z",
+        "durationMinutes": 45,
+        "meetingLink": "https://meet.example.test/booking-rules",
+        "summary": null,
+        "cancelledAt": null,
+        "createdByEmail": "trainer@example.test"
+      }
+    ],
+    "Cohort": [
+      {
+        "cohortId": "c-sunday",
+        "name": "Sunday Builders",
+        "isDefault": false
+      },
+      {
+        "cohortId": "c-q4",
+        "name": "Q4 intensive",
+        "isDefault": false
+      },
+      {
+        "cohortId": "c-spring",
+        "name": "Spring cohort",
+        "isDefault": false
+      }
+    ],
+    "CohortMember": [
+      {
+        "cohortId": "c-sunday",
+        "learnerId": "l-recipe",
+        "displayName": "Builder 1",
+        "removedAt": null
+      },
+      {
+        "cohortId": "c-q4",
+        "learnerId": "l-marie",
+        "displayName": "Builder 1",
+        "removedAt": null
+      },
+      {
+        "cohortId": "c-sunday",
+        "learnerId": "l-marie",
+        "displayName": "Builder 2",
+        "removedAt": null
+      },
+      {
+        "cohortId": "c-q4",
+        "learnerId": "l-allotment",
+        "displayName": "Builder 2",
+        "removedAt": null
+      },
+      {
+        "cohortId": "c-spring",
+        "learnerId": "l-priya",
+        "displayName": "Builder 1",
+        "removedAt": null
+      },
+      {
+        "cohortId": "c-q4",
+        "learnerId": "l-cycling",
+        "displayName": "Builder 3",
+        "removedAt": null
+      }
+    ],
+    "Concept": [
+      {
+        "conceptId": "what-a-form-is",
+        "title": "What a form is, and what it remembers"
+      },
+      {
+        "conceptId": "tables-and-rows",
+        "title": "Tables and rows, using your list of bookings"
+      },
+      {
+        "conceptId": "naming-what-you-want",
+        "title": "Naming what you want before you ask for it"
+      },
+      {
+        "conceptId": "scoping-what-to-build",
+        "title": "Scoping the booking form down to one slice"
+      },
+      {
+        "conceptId": "what-an-api-is",
+        "title": "What an API is, using your booking form"
+      },
+      {
+        "conceptId": "frontend-and-backend",
+        "title": "Frontend and backend: who does what in your booking form"
+      },
+      {
+        "conceptId": "where-your-data-lives",
+        "title": "Where your bookings actually live"
+      },
+      {
+        "conceptId": "when-to-leave-the-chat",
+        "title": "Whether to leave the chat at all"
+      },
+      {
+        "conceptId": "documenting-as-you-go",
+        "title": "Writing down what the booking form decided"
+      }
+    ],
+    "Conversation": [
+      {
+        "conversationId": "conv-l-marie",
+        "learnerId": "l-marie",
+        "anchorKind": null,
+        "anchorId": null,
+        "subject": "A question for my coach"
+      },
+      {
+        "conversationId": "conv-api",
+        "learnerId": "l-priya",
+        "anchorKind": "lesson",
+        "anchorId": "lesson:what-an-api-is",
+        "subject": "Is the calendar the API or is my form?"
+      }
+    ],
+    "ConversationMessage": [
+      {
+        "messageId": "msg-l-marie-1",
+        "conversationId": "conv-l-marie",
+        "authorRole": "learner",
+        "authorUsername": "marie.dubois@example.test",
+        "body": "Can we look at this on Thursday?",
+        "createdAt": "2026-09-18T21:30:00.000Z",
+        "readAt": null
+      },
+      {
+        "messageId": "msg-1",
+        "conversationId": "conv-api",
+        "authorRole": "coach",
+        "authorUsername": "trainer@example.test",
+        "body": "Your form is the one asking. The calendar is the one being asked — so the calendar has the API, and your form is the caller.",
+        "createdAt": "2026-09-08T21:30:00.000Z",
+        "readAt": "2026-09-08T21:30:00.000Z"
+      }
+    ],
+    "DeliverableConcept": [
+      {
+        "deliverableId": "obj-rules",
+        "conceptId": "naming-what-you-want"
+      },
+      {
+        "deliverableId": "obj-fields",
+        "conceptId": "scoping-what-to-build"
+      },
+      {
+        "deliverableId": "obj-fields",
+        "conceptId": "frontend-and-backend"
+      },
+      {
+        "deliverableId": "obj-storage",
+        "conceptId": "where-your-data-lives"
+      },
+      {
+        "deliverableId": "obj-storage",
+        "conceptId": "backups-and-restores"
+      }
+    ],
+    "DimensionRating": [
+      {
+        "ratingId": "rt-sess-aug-dim-question",
+        "dimensionId": "dim-question",
+        "sessionId": "sess-aug",
+        "evaluationId": null,
+        "score": 5
+      },
+      {
+        "ratingId": "rt-sess-aug-dim-explain",
+        "dimensionId": "dim-explain",
+        "sessionId": "sess-aug",
+        "evaluationId": null,
+        "score": 6
+      },
+      {
+        "ratingId": "rt-eval-initial-dim-question",
+        "dimensionId": "dim-question",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 4
+      },
+      {
+        "ratingId": "rt-eval-initial-dim-explain",
+        "dimensionId": "dim-explain",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 5
+      },
+      {
+        "ratingId": "rt-eval-initial-dim-ship",
+        "dimensionId": "dim-ship",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 3
+      },
+      {
+        "ratingId": "rt-sess-sep-dim-question",
+        "dimensionId": "dim-question",
+        "sessionId": "sess-sep",
+        "evaluationId": null,
+        "score": 7
+      },
+      {
+        "ratingId": "rt-sess-sep-dim-explain",
+        "dimensionId": "dim-explain",
+        "sessionId": "sess-sep",
+        "evaluationId": null,
+        "score": 7
+      }
+    ],
+    "LearnerDeliverable": [
+      {
+        "deliverableId": "obj-rules",
+        "learnerId": "l-priya",
+        "slug": "bookingRules",
+        "title": "The booking rules, written down",
+        "description": "Who can book, how many places there are, and what happens when a session is full. One page, in plain words a parent would understand.",
+        "expectedCoreFields": [
+          "whoCanBook",
+          "howManyPlaces",
+          "whatHappensWhenFull"
+        ],
+        "position": 0,
+        "archivedAt": null
+      },
+      {
+        "deliverableId": "obj-fields",
+        "learnerId": "l-priya",
+        "slug": "fieldList",
+        "title": "Every field the form asks for",
+        "description": "The list of things the form asks a parent, and why each one is there.",
+        "expectedCoreFields": [
+          "parentDetails",
+          "childDetails",
+          "sessionChoice"
+        ],
+        "position": 1,
+        "archivedAt": null
+      },
+      {
+        "deliverableId": "obj-emails",
+        "learnerId": "l-priya",
+        "slug": "confirmationEmails",
+        "title": "The email a parent gets after booking",
+        "description": "Set aside in September: the club decided a text message is enough for now.",
+        "expectedCoreFields": [
+          "confirmationText"
+        ],
+        "position": 2,
+        "archivedAt": "2026-09-10T08:45:00.000Z"
+      },
+      {
+        "deliverableId": "obj-storage",
+        "learnerId": "l-priya",
+        "slug": "whereBookingsLive",
+        "title": "Where the bookings are kept",
+        "description": "Which place holds the bookings, and who can see them.",
+        "expectedCoreFields": [
+          "storageChoice",
+          "whoCanSeeThem"
+        ],
+        "position": 3,
+        "archivedAt": null
+      }
+    ],
+    "LearnerInvite": [
+      {
+        "inviteId": "inv-l-marie",
+        "label": "Marie Dubois",
+        "claimedByLearnerId": "l-marie",
+        "claimedAt": "2026-08-11T10:00:00.000Z",
+        "status": "claimed",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "inviteId": "inv-l-allotment",
+        "label": "Allotment waiting list",
+        "claimedByLearnerId": "l-allotment",
+        "claimedAt": "2026-08-20T10:00:00.000Z",
+        "status": "claimed",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "inviteId": "inv-l-priya",
+        "label": "Priya Shah",
+        "claimedByLearnerId": "l-priya",
+        "claimedAt": "2026-05-02T10:00:00.000Z",
+        "status": "claimed",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "inviteId": "inv-l-cycling",
+        "label": "Tomás Reyes",
+        "claimedByLearnerId": "l-cycling",
+        "claimedAt": "2026-06-10T10:00:00.000Z",
+        "status": "claimed",
+        "createdByEmail": "trainer@example.test"
+      }
+    ],
+    "LearnerProfile": [
+      {
+        "learnerId": "l-recipe",
+        "username": "ade.bello@example.test",
+        "coachEmail": null
+      },
+      {
+        "learnerId": "l-marie",
+        "username": "marie.dubois@example.test",
+        "coachEmail": "trainer@example.test"
+      },
+      {
+        "learnerId": "l-sam",
+        "username": "sam.okafor@example.test",
+        "coachEmail": null
+      },
+      {
+        "learnerId": "l-allotment",
+        "username": "j.hughes@example.test",
+        "coachEmail": "trainer@example.test"
+      },
+      {
+        "learnerId": "l-invoice",
+        "username": "l-invoice",
+        "coachEmail": null
+      },
+      {
+        "learnerId": "l-priya",
+        "username": "priya@example.test",
+        "coachEmail": "trainer@example.test"
+      },
+      {
+        "learnerId": "l-choir",
+        "username": "eleni.k@example.test",
+        "coachEmail": null
+      },
+      {
+        "learnerId": "l-cycling",
+        "username": "tom.reyes@example.test",
+        "coachEmail": "trainer@example.test"
+      },
+      {
+        "learnerId": "l-lingo",
+        "username": "noor.a@example.test",
+        "coachEmail": null
+      },
+      {
+        "learnerId": "l-csv",
+        "username": "dana.k@example.test",
+        "coachEmail": null
+      }
+    ],
+    "LearningPath": [
+      {
+        "pathId": "path-l-recipe",
+        "learnerId": "l-recipe",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-09-02T09:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-marie",
+        "learnerId": "l-marie",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-08-11T10:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-allotment",
+        "learnerId": "l-allotment",
+        "programmeId": null,
+        "replanBlockedAt": "2026-09-13T09:00:00.000Z",
+        "createdAt": "2026-08-20T10:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-invoice",
+        "learnerId": "l-invoice",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-08-25T10:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-choir",
+        "learnerId": "l-choir",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-08-30T10:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-cycling",
+        "learnerId": "l-cycling",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-06-10T10:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-csv",
+        "learnerId": "l-csv",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-08-28T10:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-priya-prog-spring",
+        "learnerId": "l-priya",
+        "programmeId": "prog-spring",
+        "replanBlockedAt": null,
+        "createdAt": "2026-03-02T09:00:00.000Z"
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "learnerId": "l-priya",
+        "programmeId": "prog-autumn",
+        "replanBlockedAt": null,
+        "createdAt": "2026-08-10T09:00:00.000Z"
+      }
+    ],
+    "Lesson": [
+      {
+        "learnerId": "l-csv",
+        "conceptId": "what-is-a-backend",
+        "title": "What a backend means for your Client-intake CSV sanitiser",
+        "hook": "Right now your sanitiser cleans intake.csv on your own machine, and it works. The moment you send it to a colleague, every rule you wrote stays behind on your laptop — the file opens, nothing validates, and it will look like it ran fine.",
+        "landing": "You can now say where a backend would sit in your sanitiser's flow, and why it isn't there yet.",
+        "conceptVersion": 4,
+        "projectContextVersion": 1,
+        "generationVersion": 4,
+        "generatedByTier": "senior_teacher",
+        "steps": [
+          {
+            "id": "step-1",
+            "title": "Whether your sanitiser needs a backend at all",
+            "goal": "You can say, in one sentence, why intake.csv doesn't need a server yet.",
+            "sectionIds": [
+              "s-01",
+              "s-02",
+              "s-03",
+              "s-04",
+              "s-05"
+            ],
+            "unlocks": "You can tell whether intake.csv needs a server, without guessing."
+          },
+          {
+            "id": "step-2",
+            "title": "The two walls that force one",
+            "goal": "You can name the moment your project would cross into needing a backend.",
+            "sectionIds": [
+              "s-06",
+              "s-06b",
+              "s-07",
+              "s-08",
+              "s-09",
+              "s-10"
+            ],
+            "unlocks": "You can name the moment your sanitiser would cross the line."
+          },
+          {
+            "id": "step-3",
+            "title": "Seeing it on your own project",
+            "goal": "You can point at where a backend would sit in your sanitiser's flow.",
+            "sectionIds": [
+              "s-11",
+              "s-11b",
+              "s-12",
+              "s-13",
+              "s-14",
+              "s-15"
+            ],
+            "unlocks": "You can point at where a backend would sit in your own flow."
+          },
+          {
+            "id": "step-4",
+            "title": "Writing it down for your dossier",
+            "goal": "You have your own answer recorded, ready to hand to an assistant.",
+            "sectionIds": [
+              "s-16",
+              "s-17",
+              "s-18",
+              "s-19",
+              "s-20",
+              "s-21"
+            ],
+            "unlocks": "You can describe your sanitiser's shape to an AI assistant."
+          }
+        ],
+        "sections": [
+          {
+            "id": "s-01",
+            "kind": "answer_capsule",
+            "text": "Your CSV sanitiser doesn't need a backend yet — it takes intake.csv, cleans it, and hands it back, all inside the browser. A backend becomes necessary the moment someone else needs to see the cleaned data too, or it has to persist after you close the tab."
+          },
+          {
+            "id": "s-02",
+            "kind": "reading",
+            "markdown": "## Why your CSV sanitiser is currently browser-only\n\nRight now, `intake.csv` lives on your machine. You drop it in, the sanitiser validates each row, and you get a clean file back. That entire loop happens inside your browser tab — nothing touches a server.\n\nThat's the correct architecture for what you've described. Adding a backend before you need it would mean hosting a server, keeping it running, and paying for it — all for no benefit yet.\n\nThe question isn't \"should I have a backend?\" It's \"**when** will I hit the wall that forces me to add one?\""
+          },
+          {
+            "id": "s-03",
+            "kind": "callout",
+            "tone": "jargon",
+            "markdown": "**Backend** — a program running on a computer you don't sit in front of (a data centre machine). For your CSV sanitiser, that would be a program that receives your intake.csv, processes it, and stores the result somewhere both you and a colleague could reach."
+          },
+          {
+            "id": "s-04",
+            "kind": "callout",
+            "tone": "tip",
+            "markdown": "The two walls that force a backend: **sharing** (someone else must see the same data) and **permanence** (the work must survive closing the browser). Your sanitiser currently hits neither wall."
+          },
+          {
+            "id": "s-05",
+            "kind": "code_block",
+            "language": "typescript",
+            "code": "// Browser-only: intake.csv is read locally, cleaned in memory, downloaded.\n// No server involved.\nasync function sanitiseFile(file: File): Promise<Blob> {\n  const text = await file.text();\n  const rows = parseCSV(text);\n  const cleaned = rows.map(validateRow);\n  return new Blob([toCSV(cleaned)], { type: \"text/csv\" });\n}",
+            "explanation": "This is the shape of your current sanitiser — it reads the file, processes it, and produces a download. The whole thing runs in the browser. There is no `fetch` call, no server URL, no storage. That's fine, and correct, for what you're building now."
+          },
+          {
+            "id": "s-06",
+            "kind": "quiz",
+            "question": "Your manager asks you to let the whole intake team see the sanitised output without each person running their own copy. Which wall are you hitting?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "The permanence wall — the data needs to outlive a browser session.",
+                  "correct": false,
+                  "feedback": "Close, but permanence is about the data surviving time (e.g. it must still be there tomorrow). Sharing is the more immediate need here — multiple people accessing the same result."
+                },
+                {
+                  "text": "The sharing wall — more than one person needs to see the same data.",
+                  "correct": true,
+                  "feedback": "Exactly. Once a second person needs to see the same cleaned output, it can't live only in your browser. That's the sharing wall, and it's when a backend earns its place."
+                },
+                {
+                  "text": "Neither wall — email the CSV to your colleagues.",
+                  "correct": false,
+                  "feedback": "Emailing is a workaround, not a wall. But if the requirement is that the team sees it in real time as intake arrives, emailing breaks down quickly. The sharing wall is real."
+                }
+              ]
+            }
+          },
+          {
+            "id": "s-06b",
+            "kind": "quiz",
+            "question": "In one sentence: why doesn't your sanitiser need a backend yet?",
+            "variant": {
+              "type": "say_it_back",
+              "rubric": "Names either sharing (only one person needs the data) or permanence (the data doesn't need to survive closing the browser) as the reason."
+            }
+          },
+          {
+            "id": "s-07",
+            "kind": "activity",
+            "title": "Map your sanitiser's walls",
+            "steps": [
+              "Open intake.csv in a spreadsheet. Who else currently sees this data?",
+              "Ask: does this cleaned output need to exist tomorrow, or only during the current session?",
+              "Write one sentence answering: 'I will need a backend when ______.'"
+            ],
+            "capturesProjectFact": {
+              "field": "backendTrigger",
+              "prompt": "Finish the sentence: 'I will need a backend for this project when ______.' (Be specific about what event or requirement would trigger it.)"
+            }
+          },
+          {
+            "id": "s-08",
+            "kind": "mermaid",
+            "source": "graph LR\n  A[intake.csv] -->|drop in| B[Browser: sanitiser]\n  B -->|cleaned output| C[Download]\n  \n  style B fill:#1e3a5f,color:#fff\n  style A fill:#f8fafc\n  style C fill:#ecfdf5",
+            "caption": "Your current architecture: entirely browser-side. No server in the loop."
+          },
+          {
+            "id": "s-09",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 400 120\" xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"120\">\n  <rect x=\"10\" y=\"30\" width=\"100\" height=\"60\" rx=\"8\" fill=\"#f0f9ff\" stroke=\"#bae6fd\" stroke-width=\"2\"/>\n  <text x=\"60\" y=\"65\" text-anchor=\"middle\" font-size=\"13\" fill=\"#0369a1\">Browser</text>\n  <rect x=\"290\" y=\"30\" width=\"100\" height=\"60\" rx=\"8\" fill=\"#fef3c7\" stroke=\"#fde68a\" stroke-width=\"2\"/>\n  <text x=\"340\" y=\"65\" text-anchor=\"middle\" font-size=\"13\" fill=\"#92400e\">Backend</text>\n  <line x1=\"160\" y1=\"60\" x2=\"285\" y2=\"60\" stroke=\"#94a3b8\" stroke-width=\"1.5\" stroke-dasharray=\"6,4\"/>\n  <text x=\"220\" y=\"50\" text-anchor=\"middle\" font-size=\"11\" fill=\"#94a3b8\">sharing or</text>\n  <text x=\"220\" y=\"70\" text-anchor=\"middle\" font-size=\"11\" fill=\"#94a3b8\">permanence wall</text>\n</svg>",
+            "caption": "The wall you cross when sharing or permanence forces a backend."
+          },
+          {
+            "id": "s-10",
+            "kind": "chart",
+            "chartType": "bar",
+            "data": [
+              {
+                "phase": "Browser only",
+                "complexity": 1,
+                "cost": 0
+              },
+              {
+                "phase": "Add backend",
+                "complexity": 4,
+                "cost": 5
+              },
+              {
+                "phase": "Add DB",
+                "complexity": 6,
+                "cost": 8
+              }
+            ],
+            "xKey": "phase",
+            "yKeys": [
+              "complexity",
+              "cost"
+            ],
+            "caption": "Rough complexity and running cost at each phase. Stay browser-only until a wall forces you over."
+          },
+          {
+            "id": "s-11",
+            "kind": "interactive_widget",
+            "widgetKey": "csv-sanitiser",
+            "params": {
+              "columns": [
+                {
+                  "name": "name",
+                  "rules": [
+                    "trim",
+                    "required"
+                  ]
+                },
+                {
+                  "name": "email",
+                  "rules": [
+                    "trim",
+                    "lowercase",
+                    "required",
+                    "email"
+                  ]
+                },
+                {
+                  "name": "date",
+                  "rules": [
+                    "trim",
+                    "required",
+                    "date"
+                  ]
+                }
+              ],
+              "sampleRow": "  John Smith , JOHN@EXAMPLE.COM , 2024-01-15"
+            },
+            "caption": "Paste one row from your intake.csv and watch each column get validated."
+          },
+          {
+            "id": "s-11b",
+            "kind": "interactive_widget",
+            "widgetKey": "prompt-upgrade",
+            "params": {
+              "scenario": "You want an AI assistant to help you write the validation rules section of your CSV sanitiser's documentation.",
+              "baselinePrompt": "Write documentation for my CSV sanitiser's validation rules.",
+              "baselineOutput": "## Validation Rules\n\nThe sanitiser validates each column according to configured rules such as trimming whitespace, checking required fields, and validating email format. Rows that fail validation are flagged for review.",
+              "baselineNote": "Passes — it's accurate and readable, but generic enough to describe almost any validator. Nothing here is specific to your intake.csv or its actual columns.",
+              "question": "Which upgrade moves this from passing to top-band?",
+              "candidates": [
+                {
+                  "prompt": "Write documentation for my CSV sanitiser's validation rules. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date).",
+                  "output": "## Validation Rules\n\n- **name**: trimmed, required\n- **email**: trimmed, lowercased, required, validated as an email address\n- **date**: trimmed, required, validated as a date\n\nRows failing any rule are flagged for review.",
+                  "band": "passing",
+                  "why": "Grounds the output in your real columns instead of a generic description — accurate, but still just a restatement of the rules with no guidance for the reader."
+                },
+                {
+                  "prompt": "Write documentation for my CSV sanitiser's validation rules. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date). Include one example of a row that fails each rule and why.",
+                  "output": "## Validation Rules\n\n- **name**: trimmed, required. Fails on: empty string.\n- **email**: trimmed, lowercased, required, validated as an email. Fails on: \"not-an-email\".\n- **date**: trimmed, required, validated as a date. Fails on: \"15/13/2024\" (invalid month).\n\nRows failing any rule are flagged for review with the specific failure reason.",
+                  "band": "stronger",
+                  "why": "Adds concrete failure examples, which is what makes documentation usable by someone debugging a rejected row — a real step up in usefulness, not just accuracy."
+                },
+                {
+                  "prompt": "Write documentation for my CSV sanitiser's validation rules, for a teammate who will maintain this code after me. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date). For each rule: state what it checks, give one example of a row that fails it and why, and note anything a maintainer should know before changing that rule (e.g. what would break downstream). Ask me if you're missing context on any column before writing.",
+                  "output": "## Validation Rules — Maintainer Notes\n\n- **name**: trimmed, required. Fails on: empty string. *Before changing:* downstream reporting assumes name is never blank.\n- **email**: trimmed, lowercased, required, validated as an email. Fails on: \"not-an-email\". *Before changing:* lowercasing is load-bearing — the dedup step matches on exact string.\n- **date**: trimmed, required, validated as a date. Fails on: \"15/13/2024\". *Before changing:* confirm the expected date format with whoever owns intake.csv upstream.\n\nOne thing I'm not certain of: is there a maximum row count this needs to handle? Let me know and I'll add a note on performance if relevant.",
+                  "band": "top_band",
+                  "why": "Names the audience (a future maintainer) and asks for missing context rather than guessing — exactly what the jury rewards: the prompt directs the assistant to surface what it doesn't know instead of inventing it."
+                }
+              ]
+            },
+            "caption": "Try upgrading the baseline prompt yourself before checking the gradient."
+          },
+          {
+            "id": "s-12",
+            "kind": "annotated_screenshot",
+            "storageKey": "concepts/what-is-a-backend/browser-devtools.png",
+            "overlaySvg": "<svg viewBox=\"0 0 800 500\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect x=\"20\" y=\"20\" width=\"200\" height=\"40\" rx=\"4\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"3\"/>\n  <text x=\"230\" y=\"45\" font-size=\"14\" fill=\"#ef4444\" font-weight=\"bold\">No network calls here</text>\n</svg>",
+            "caption": "Browser DevTools Network tab for a browser-only sanitiser — no requests to any server."
+          },
+          {
+            "id": "s-13",
+            "kind": "curated_video",
+            "url": "https://www.youtube.com/watch?v=WXsD0ZgxjRw",
+            "startSeconds": 45,
+            "endSeconds": 180,
+            "whyItMatters": "This clip explains the client/server split in plain terms — the same mental model applies to your sanitiser sitting on the browser side of that line."
+          },
+          {
+            "id": "s-14",
+            "kind": "human_recording",
+            "storageKey": "recordings/richard/backend-decision-point.mp3",
+            "contextualIntro": "Richard explains the exact moment he adds a backend to a project like yours — what changes in the requirements, and what he asks himself first."
+          },
+          {
+            "id": "s-15",
+            "kind": "audio",
+            "source": {
+              "type": "tts",
+              "text": "Your CSV sanitiser doesn't need a backend yet. Stay browser-only until the sharing wall or the permanence wall forces your hand. When you hit one of those walls, the smallest backend that solves that specific problem is the right backend.",
+              "lang": "en"
+            }
+          },
+          {
+            "id": "s-16",
+            "kind": "voice_interaction",
+            "prompt": "In your own words: describe the moment when your CSV sanitiser would need a backend. What would change in your project that forces you to add one?",
+            "lang": "en",
+            "rubric": "Learner correctly identifies either sharing (multiple people accessing the same data) or permanence (data must survive closing the browser) as the trigger. Partial credit if they identify the general concept without naming the specific wall."
+          },
+          {
+            "id": "s-17",
+            "kind": "capture",
+            "prompt": "In your own words, what is the trainee's stated goal for this needs analysis?",
+            "field": "needs_analysis.statedGoal",
+            "hint": "One sentence is enough — you'll refine it later."
+          },
+          {
+            "id": "s-18",
+            "kind": "capture",
+            "prompt": "What is the trainee's current comfort level with AI tools, in their own words?",
+            "field": "needs_analysis.currentSkillLevel",
+            "hint": "e.g. \"never used one\", \"uses it for email\"…"
+          },
+          {
+            "id": "s-19",
+            "kind": "capture",
+            "prompt": "What would success look like for this trainee, by the end of the course?",
+            "field": "needs_analysis.successCriteria"
+          },
+          {
+            "id": "s-20",
+            "kind": "prep_pack",
+            "title": "Your Needs Analysis prep pack",
+            "instructions": "Use ONLY the facts below to draft the first section of a Needs Analysis for this trainee. Do not invent anything missing — ask the trainer instead.",
+            "factFields": [
+              "needs_analysis.statedGoal",
+              "needs_analysis.currentSkillLevel",
+              "needs_analysis.successCriteria"
+            ]
+          },
+          {
+            "id": "s-21",
+            "kind": "handover_pack",
+            "title": "What your sanitiser's repo should already know",
+            "intro": "Your sanitiser has lived in a chat window so far. Before you open it with a coding agent on your own machine, it needs three documents that say what it is and how it gets worked on — otherwise the agent starts every session guessing.",
+            "files": [
+              {
+                "path": "CLAUDE.md",
+                "purpose": "How this project works, written to the agent that will edit it."
+              },
+              {
+                "path": "PROJECT.md",
+                "purpose": "What the sanitiser is for and what it deliberately does not do yet."
+              },
+              {
+                "path": "docs/TASK-001-validate-one-column.md",
+                "purpose": "The first slice: validate the email column and nothing else."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "PathStep": [
+      {
+        "pathId": "path-l-recipe",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 8,
+        "conceptId": "what-json-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 9,
+        "conceptId": "what-a-database-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-recipe",
+        "position": 10,
+        "conceptId": "tables-and-the-join",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 8,
+        "conceptId": "what-json-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 9,
+        "conceptId": "what-a-database-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 10,
+        "conceptId": "tables-and-the-join",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-marie",
+        "position": 11,
+        "conceptId": "where-your-data-lives",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 8,
+        "conceptId": "what-json-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-allotment",
+        "position": 9,
+        "conceptId": "what-a-database-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 8,
+        "conceptId": "what-json-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 9,
+        "conceptId": "what-a-database-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 10,
+        "conceptId": "tables-and-the-join",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 11,
+        "conceptId": "where-your-data-lives",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 12,
+        "conceptId": "scoping-what-to-build",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-invoice",
+        "position": 13,
+        "conceptId": "plan-then-act",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-choir",
+        "position": 8,
+        "conceptId": "what-json-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 8,
+        "conceptId": "what-json-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 9,
+        "conceptId": "what-a-database-is",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 10,
+        "conceptId": "tables-and-the-join",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 11,
+        "conceptId": "where-your-data-lives",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 12,
+        "conceptId": "scoping-what-to-build",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 13,
+        "conceptId": "plan-then-act",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 14,
+        "conceptId": "the-prototype-is-a-sketch",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-cycling",
+        "position": 15,
+        "conceptId": "reading-what-the-ai-did",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-csv",
+        "position": 7,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-spring",
+        "position": 0,
+        "conceptId": "what-a-form-is",
+        "status": "complete",
+        "rationale": "Every text you get is a form a parent filled in by hand, with none of the fields you need.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-spring",
+        "position": 1,
+        "conceptId": "tables-and-rows",
+        "status": "complete",
+        "rationale": "Your notebook of bookings is already a table: one row per child per day.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 0,
+        "conceptId": "naming-what-you-want",
+        "status": "complete",
+        "rationale": "Your intake form keeps collecting the wrong dates, and every fix so far has been a guess at what the form should say.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 1,
+        "conceptId": "scoping-what-to-build",
+        "status": "complete",
+        "rationale": "Booking, reminders and invoicing are three projects. This is the one that has to work by half term.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 2,
+        "conceptId": "what-an-api-is",
+        "status": "complete",
+        "rationale": "Your form has to ask the calendar whether a slot is free. That question is the API.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 3,
+        "conceptId": "frontend-and-backend",
+        "status": "in_progress",
+        "rationale": "The form in the browser and the thing that remembers a booking are two different programs, and you are about to have to say which is which.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 4,
+        "conceptId": "where-your-data-lives",
+        "status": "locked",
+        "rationale": "A booking has to still be there on Monday. That is a different question from whether the form works.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 5,
+        "conceptId": "when-to-leave-the-chat",
+        "status": "locked",
+        "rationale": "Your form may never need to leave the assistant you are building it in, and staying is a real answer.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya-prog-autumn",
+        "position": 6,
+        "conceptId": "documenting-as-you-go",
+        "status": "locked",
+        "rationale": "By half term you will not remember why cancellations close at 24 hours, and neither will the assistant.",
+        "removedAt": null
+      }
+    ],
+    "Programme": [
+      {
+        "programmeId": "p-recipe",
+        "learnerId": "l-recipe",
+        "title": "Autumn programme",
+        "status": "active",
+        "startsOn": null,
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-09-02T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "p-marie",
+        "learnerId": "l-marie",
+        "title": "Q4 intensive",
+        "status": "active",
+        "startsOn": null,
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-08-11T10:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "p-allot",
+        "learnerId": "l-allotment",
+        "title": "Q4 intensive",
+        "status": "active",
+        "startsOn": null,
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-08-20T10:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "p-invoice",
+        "learnerId": "l-invoice",
+        "title": "Solo programme",
+        "status": "closed",
+        "startsOn": null,
+        "endsOn": null,
+        "archivedAt": null,
+        "createdAt": "2026-08-25T10:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "p-cyc-0",
+        "learnerId": "l-cycling",
+        "title": "Summer programme",
+        "status": "closed",
+        "startsOn": null,
+        "endsOn": "2026-08-29",
+        "archivedAt": null,
+        "createdAt": "2026-06-10T10:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "p-cyc-1",
+        "learnerId": "l-cycling",
+        "title": "Q4 intensive",
+        "status": "active",
+        "startsOn": null,
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-06-10T10:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "prog-autumn",
+        "learnerId": "l-priya",
+        "title": "Autumn programme",
+        "status": "active",
+        "startsOn": "2026-08-10",
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-08-10T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "prog-spring",
+        "learnerId": "l-priya",
+        "title": "Spring programme",
+        "status": "closed",
+        "startsOn": "2026-03-02",
+        "endsOn": "2026-07-31",
+        "archivedAt": "2026-08-01T09:00:00.000Z",
+        "createdAt": "2026-03-02T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      }
+    ],
+    "ProgrammeDimension": [
+      {
+        "dimensionId": "dim-question",
+        "programmeId": "prog-autumn",
+        "label": "Asking a better question",
+        "target": 8,
+        "deliverableId": null,
+        "position": 0,
+        "archivedAt": null
+      },
+      {
+        "dimensionId": "dim-explain",
+        "programmeId": "prog-autumn",
+        "label": "Explaining it back in your own words",
+        "target": 7,
+        "deliverableId": null,
+        "position": 1,
+        "archivedAt": null
+      },
+      {
+        "dimensionId": "dim-ship",
+        "programmeId": "prog-autumn",
+        "label": "Getting something working end to end",
+        "target": 10,
+        "deliverableId": null,
+        "position": 2,
+        "archivedAt": "2026-09-10T08:45:00.000Z"
+      }
+    ],
+    "ProgrammeEvaluation": [
+      {
+        "evaluationId": "eval-spring-initial",
+        "programmeId": "prog-spring",
+        "kind": "initial",
+        "dueOn": "2026-03-04",
+        "completedAt": "2026-03-04T10:00:00.000Z",
+        "summary": "You want parents to stop texting you for places. We agreed to spend the spring on what a form is before building one.",
+        "criteria": [],
+        "nextStep": "Write down the three questions a parent asks you most often."
+      },
+      {
+        "evaluationId": "eval-spring-final",
+        "programmeId": "prog-spring",
+        "kind": "final",
+        "dueOn": "2026-07-24",
+        "completedAt": "2026-07-24T10:00:00.000Z",
+        "summary": "You can say what the form has to hold and why. The autumn is for building it.",
+        "criteria": [],
+        "nextStep": "Start the autumn programme with the booking form's field list."
+      },
+      {
+        "evaluationId": "eval-initial",
+        "programmeId": "prog-autumn",
+        "kind": "initial",
+        "dueOn": "2026-08-12",
+        "completedAt": "2026-08-12T09:00:00.000Z",
+        "summary": "You arrive able to describe the problem clearly and with no experience of directing a tool to build any of it. That is the ordinary starting point and it is where we set the two objectives.",
+        "criteria": [],
+        "nextStep": "Bring the booking form's field list to the next session."
+      },
+      {
+        "evaluationId": "eval-mid",
+        "programmeId": "prog-autumn",
+        "kind": "mid",
+        "dueOn": "2026-10-16",
+        "completedAt": null,
+        "summary": null,
+        "criteria": [],
+        "nextStep": null
+      },
+      {
+        "evaluationId": "eval-final",
+        "programmeId": "prog-autumn",
+        "kind": "final",
+        "dueOn": "2026-12-11",
+        "completedAt": null,
+        "summary": null,
+        "criteria": [],
+        "nextStep": null
+      },
+      {
+        "evaluationId": "eval-impact",
+        "programmeId": "prog-autumn",
+        "kind": "impact",
+        "dueOn": "2027-01-29",
+        "completedAt": null,
+        "summary": null,
+        "criteria": [],
+        "nextStep": null
+      }
+    ],
+    "Progress": [
+      {
+        "learnerId": "l-marie",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T16:40:00.000Z",
+        "updatedAt": "2026-09-20T16:40:00.000Z"
+      },
+      {
+        "learnerId": "l-marie",
+        "conceptId": "html-the-structure",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T16:40:00.000Z",
+        "updatedAt": "2026-09-20T16:40:00.000Z"
+      },
+      {
+        "learnerId": "l-marie",
+        "conceptId": "css-making-it-look-right",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T16:40:00.000Z",
+        "updatedAt": "2026-09-20T16:40:00.000Z"
+      },
+      {
+        "learnerId": "l-marie",
+        "conceptId": "javascript-making-it-do-things",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T16:40:00.000Z",
+        "updatedAt": "2026-09-20T16:40:00.000Z"
+      },
+      {
+        "learnerId": "l-allotment",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-14T11:00:00.000Z",
+        "updatedAt": "2026-09-14T11:00:00.000Z"
+      },
+      {
+        "learnerId": "l-allotment",
+        "conceptId": "html-the-structure",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-14T11:00:00.000Z",
+        "updatedAt": "2026-09-14T11:00:00.000Z"
+      },
+      {
+        "learnerId": "l-invoice",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-12T15:00:00.000Z",
+        "updatedAt": "2026-09-12T15:00:00.000Z"
+      },
+      {
+        "learnerId": "l-choir",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T07:10:00.000Z",
+        "updatedAt": "2026-09-20T07:10:00.000Z"
+      },
+      {
+        "learnerId": "l-choir",
+        "conceptId": "html-the-structure",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T07:10:00.000Z",
+        "updatedAt": "2026-09-20T07:10:00.000Z"
+      },
+      {
+        "learnerId": "l-choir",
+        "conceptId": "css-making-it-look-right",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-20T07:10:00.000Z",
+        "updatedAt": "2026-09-20T07:10:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "html-the-structure",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "css-making-it-look-right",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "javascript-making-it-do-things",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "frontend-and-backend",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "what-is-a-backend",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "what-an-api-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "endpoints-and-requests",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "conceptId": "what-json-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-21T06:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-csv",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-15T17:20:00.000Z",
+        "updatedAt": "2026-09-15T17:20:00.000Z"
+      },
+      {
+        "learnerId": "l-csv",
+        "conceptId": "html-the-structure",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-15T17:20:00.000Z",
+        "updatedAt": "2026-09-15T17:20:00.000Z"
+      },
+      {
+        "learnerId": "l-csv",
+        "conceptId": "css-making-it-look-right",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-15T17:20:00.000Z",
+        "updatedAt": "2026-09-15T17:20:00.000Z"
+      },
+      {
+        "learnerId": "l-csv",
+        "conceptId": "javascript-making-it-do-things",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-15T17:20:00.000Z",
+        "updatedAt": "2026-09-15T17:20:00.000Z"
+      },
+      {
+        "learnerId": "l-csv",
+        "conceptId": "frontend-and-backend",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-15T17:20:00.000Z",
+        "updatedAt": "2026-09-15T17:20:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "what-a-form-is",
+        "confidence": 6,
+        "reachedWowMoment": false,
+        "completedAt": "2026-03-11T19:30:00.000Z",
+        "updatedAt": "2026-03-11T19:30:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "tables-and-rows",
+        "confidence": 7,
+        "reachedWowMoment": true,
+        "completedAt": "2026-05-02T18:10:00.000Z",
+        "updatedAt": "2026-05-02T18:10:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "naming-what-you-want",
+        "confidence": 7,
+        "reachedWowMoment": false,
+        "completedAt": "2026-08-12T16:20:00.000Z",
+        "updatedAt": "2026-08-12T16:20:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "scoping-what-to-build",
+        "confidence": 8,
+        "reachedWowMoment": true,
+        "completedAt": "2026-08-19T09:05:00.000Z",
+        "updatedAt": "2026-08-19T09:05:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "what-an-api-is",
+        "confidence": 6,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-02T11:15:00.000Z",
+        "updatedAt": "2026-09-02T11:15:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "frontend-and-backend",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": null,
+        "updatedAt": "2026-08-10T09:00:00.000Z"
+      }
+    ],
+    "ProjectContext": [
+      {
+        "learnerId": "l-recipe",
+        "projectName": "Recipe cost calculator",
+        "problemStatement": null,
+        "facts": {},
+        "version": 1,
+        "createdAt": "2026-09-02T09:00:00.000Z",
+        "updatedAt": "2026-09-02T09:00:00.000Z"
+      },
+      {
+        "learnerId": "l-marie",
+        "projectName": "Parent evening booking",
+        "problemStatement": null,
+        "facts": {},
+        "version": 3,
+        "createdAt": "2026-08-11T10:00:00.000Z",
+        "updatedAt": "2026-09-20T16:40:00.000Z"
+      },
+      {
+        "learnerId": "l-allotment",
+        "projectName": "Allotment waiting list app",
+        "problemStatement": null,
+        "facts": {},
+        "version": 2,
+        "createdAt": "2026-08-20T10:00:00.000Z",
+        "updatedAt": "2026-09-14T11:00:00.000Z"
+      },
+      {
+        "learnerId": "l-invoice",
+        "projectName": "Invoice payment tracker",
+        "problemStatement": null,
+        "facts": {},
+        "version": 2,
+        "createdAt": "2026-08-25T10:00:00.000Z",
+        "updatedAt": "2026-09-12T15:00:00.000Z"
+      },
+      {
+        "learnerId": "l-choir",
+        "projectName": "Choir rota",
+        "problemStatement": null,
+        "facts": {},
+        "version": 1,
+        "createdAt": "2026-08-30T10:00:00.000Z",
+        "updatedAt": "2026-09-20T07:10:00.000Z"
+      },
+      {
+        "learnerId": "l-cycling",
+        "projectName": "Cycling club ride log",
+        "problemStatement": null,
+        "facts": {},
+        "version": 4,
+        "createdAt": "2026-06-10T10:00:00.000Z",
+        "updatedAt": "2026-09-21T06:00:00.000Z"
+      },
+      {
+        "learnerId": "l-lingo",
+        "projectName": "Language exchange matcher",
+        "problemStatement": null,
+        "facts": {},
+        "version": 1,
+        "createdAt": "2026-09-16T10:00:00.000Z",
+        "updatedAt": "2026-09-17T19:00:00.000Z"
+      },
+      {
+        "learnerId": "l-csv",
+        "projectName": "Client-intake CSV sanitiser",
+        "problemStatement": null,
+        "facts": {},
+        "version": 1,
+        "createdAt": "2026-08-28T10:00:00.000Z",
+        "updatedAt": "2026-09-15T17:20:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "projectName": "After-school club booking form",
+        "problemStatement": "Parents book places by text message and I lose half of them. I want one form that shows what is still free and remembers who booked.",
+        "facts": {
+          "projectGoal": "A booking form for the after-school club that parents can use without texting me.",
+          "bookingRules.whoCanBook": "Any parent with a child in Year 3 or Year 4 at the school.",
+          "fieldList.parentDetails": "Name, phone number, and an email if they have one.",
+          "bookingRules.whatHappensWhenFull": "They go on a waiting list and I text them if a place comes up.",
+          "clubSize": "Twenty-four children, twice a week.",
+          "bookingRules.cancellationWindow": "Up to 24 hours before. <b>Not</b> after that, **really** <img src=x onerror=\"window.__pwned=1\">",
+          "bookingRules.howManyPlaces": "Twelve places each session.",
+          "confirmationEmails.confirmationText": "Thanks, your child has a place on Tuesday. Reply STOP to cancel."
+        },
+        "version": 5,
+        "createdAt": "2026-05-02T10:00:00.000Z",
+        "updatedAt": "2026-09-09T22:05:00.000Z"
+      }
+    ],
+    "SessionPrep": [
+      {
+        "prepId": "prep-sess-aug-0",
+        "sessionId": "sess-aug",
+        "position": 0,
+        "conceptId": "scoping-what-to-build",
+        "assignmentId": null,
+        "resourceLabel": null,
+        "resourceUrl": null,
+        "resourceStorageKey": null
+      },
+      {
+        "prepId": "prep-sess-oct-0",
+        "sessionId": "sess-oct",
+        "position": 0,
+        "conceptId": null,
+        "assignmentId": "brief-rules",
+        "resourceLabel": null,
+        "resourceUrl": null,
+        "resourceStorageKey": null
+      },
+      {
+        "prepId": "prep-sess-oct-1",
+        "sessionId": "sess-oct",
+        "position": 1,
+        "conceptId": "frontend-and-backend",
+        "assignmentId": null,
+        "resourceLabel": null,
+        "resourceUrl": null,
+        "resourceStorageKey": null
+      },
+      {
+        "prepId": "res-1",
+        "sessionId": "sess-oct",
+        "position": 2,
+        "conceptId": null,
+        "assignmentId": null,
+        "resourceLabel": "The double-booking problem, one page",
+        "resourceUrl": "https://example.test/double-booking",
+        "resourceStorageKey": null
+      }
+    ],
+    "Signal": [
+      {
+        "signalId": "sig-confused",
+        "learnerId": "l-priya",
+        "conceptId": "what-an-api-is",
+        "sectionId": "reading-what-an-api-is",
+        "kind": "explicit_confusion",
+        "utterance": "I still don't get which one is doing the asking.",
+        "createdAt": "2026-09-03T20:41:00.000Z"
+      },
+      {
+        "signalId": "sig-quiz",
+        "learnerId": "l-priya",
+        "conceptId": "frontend-and-backend",
+        "sectionId": "quiz-where-does-it-run",
+        "kind": "failed_quiz",
+        "utterance": null,
+        "createdAt": "2026-09-05T19:12:00.000Z"
+      },
+      {
+        "signalId": "sig-build",
+        "learnerId": "l-priya",
+        "conceptId": "file-permissions-and-why-a-folder-can-refuse-you",
+        "sectionId": null,
+        "kind": "build_error",
+        "utterance": "It keeps saying permission denied when I try to save the file.",
+        "createdAt": "2026-09-09T22:05:00.000Z"
+      }
+    ]
+  }
+}

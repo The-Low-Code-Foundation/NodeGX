@@ -1,0 +1,1083 @@
+{
+  "_about": [
+    "THE COLLECTIONS THE READ PATH NEEDS (TASK-L169 §1). The source of truth for this template's schema: NodeGX keeps a collection's schema in the backend, not the project, so tools/setup-backend.mjs applies this file through POST /admin/schema/apply.",
+    "One collection per PRODUCT TABLE a page reads, named after it (PascalCase singular). Only the columns a payload reads. No `id` column: it is reserved at the adapter layer (FED-002 R3/R14), so the product's key is a named field with a unique index.",
+    "Domain timestamps (completedAt, startsAt, dueAt, …) are ISO-8601 STRINGS, not Date: a read function serialises them exactly as the product's JSON does. createdAt/updatedAt are the backend's own and are carried over from the product by admin import.",
+    "NOT ENFORCED HERE, and the read path does not need them: enum values are plain strings (sprint 50's write functions validate them); the product's CHECK constraints coaching_sessions_one_scope, assignments_one_scope and session_prep_one_target have no NodeGX equivalent (index declarations take fields/unique/order only); and learning_path_steps' unique (path_id, position) holds only on LIVE rows in the product (L113) — declared here only because the seed carries no removed step. A partial unique index is part of OpenNoodl HLT-016.",
+    "LearnerProfile.userId and ConversationMessage.authorUserId are a _User's objectId. seed.json names users by username (it cannot know an objectId), and tools/setup-backend.mjs resolves them when it creates the users — the product's learner_profiles.account_id, one layer over."
+  ],
+  "tables": [
+    {
+      "name": "ArtifactSubmission",
+      "columns": [
+        {
+          "name": "submissionId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "attempt",
+          "type": "Number"
+        },
+        {
+          "name": "submittedAt",
+          "type": "String"
+        },
+        {
+          "name": "evaluation",
+          "type": "Object"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "sectionId",
+          "type": "String"
+        },
+        {
+          "name": "deliverableId",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "submissionId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId",
+            "conceptId",
+            "sectionId",
+            "attempt"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "Assignment",
+      "columns": [
+        {
+          "name": "assignmentId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "cohortId",
+          "type": "String"
+        },
+        {
+          "name": "programmeId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "brief",
+          "type": "String"
+        },
+        {
+          "name": "dueAt",
+          "type": "String"
+        },
+        {
+          "name": "submissionModes",
+          "type": "Array"
+        },
+        {
+          "name": "criteria",
+          "type": "Array"
+        },
+        {
+          "name": "deliverableId",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "assignmentId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        },
+        {
+          "fields": [
+            "cohortId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AssignmentSubmission",
+      "columns": [
+        {
+          "name": "submissionId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "attempt",
+          "type": "Number"
+        },
+        {
+          "name": "submittedAt",
+          "type": "String"
+        },
+        {
+          "name": "evaluation",
+          "type": "Object"
+        },
+        {
+          "name": "assignmentId",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "submissionId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "assignmentId",
+            "learnerId",
+            "attempt"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CoachNote",
+      "columns": [
+        {
+          "name": "noteId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "authorEmail",
+          "type": "String"
+        },
+        {
+          "name": "body",
+          "type": "String"
+        },
+        {
+          "name": "sessionId",
+          "type": "String"
+        },
+        {
+          "name": "anchorKind",
+          "type": "String"
+        },
+        {
+          "name": "anchorId",
+          "type": "String"
+        },
+        {
+          "name": "visibility",
+          "type": "String"
+        },
+        {
+          "name": "editedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "noteId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CoachingSession",
+      "columns": [
+        {
+          "name": "sessionId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "cohortId",
+          "type": "String"
+        },
+        {
+          "name": "programmeId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "startsAt",
+          "type": "String"
+        },
+        {
+          "name": "durationMinutes",
+          "type": "Number"
+        },
+        {
+          "name": "meetingLink",
+          "type": "String"
+        },
+        {
+          "name": "summary",
+          "type": "String"
+        },
+        {
+          "name": "cancelledAt",
+          "type": "String"
+        },
+        {
+          "name": "createdByEmail",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "sessionId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        },
+        {
+          "fields": [
+            "cohortId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cohort",
+      "columns": [
+        {
+          "name": "cohortId",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "isDefault",
+          "type": "Boolean"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "cohortId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "CohortMember",
+      "columns": [
+        {
+          "name": "cohortId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "displayName",
+          "type": "String"
+        },
+        {
+          "name": "removedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "cohortId",
+            "learnerId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concept",
+      "columns": [
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "conceptId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "Conversation",
+      "columns": [
+        {
+          "name": "conversationId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "anchorKind",
+          "type": "String"
+        },
+        {
+          "name": "anchorId",
+          "type": "String"
+        },
+        {
+          "name": "subject",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "conversationId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConversationMessage",
+      "columns": [
+        {
+          "name": "messageId",
+          "type": "String"
+        },
+        {
+          "name": "conversationId",
+          "type": "String"
+        },
+        {
+          "name": "authorRole",
+          "type": "String"
+        },
+        {
+          "name": "authorUserId",
+          "type": "String"
+        },
+        {
+          "name": "body",
+          "type": "String"
+        },
+        {
+          "name": "readAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "messageId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "conversationId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DeliverableConcept",
+      "columns": [
+        {
+          "name": "deliverableId",
+          "type": "String"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "deliverableId",
+            "conceptId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "DimensionRating",
+      "columns": [
+        {
+          "name": "ratingId",
+          "type": "String"
+        },
+        {
+          "name": "dimensionId",
+          "type": "String"
+        },
+        {
+          "name": "sessionId",
+          "type": "String"
+        },
+        {
+          "name": "evaluationId",
+          "type": "String"
+        },
+        {
+          "name": "score",
+          "type": "Number"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "ratingId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "LearnerDeliverable",
+      "columns": [
+        {
+          "name": "deliverableId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "slug",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "description",
+          "type": "String"
+        },
+        {
+          "name": "expectedCoreFields",
+          "type": "Array"
+        },
+        {
+          "name": "position",
+          "type": "Number"
+        },
+        {
+          "name": "archivedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "deliverableId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId",
+            "slug"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "LearnerInvite",
+      "columns": [
+        {
+          "name": "inviteId",
+          "type": "String"
+        },
+        {
+          "name": "label",
+          "type": "String"
+        },
+        {
+          "name": "claimedByLearnerId",
+          "type": "String"
+        },
+        {
+          "name": "claimedAt",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "type": "String"
+        },
+        {
+          "name": "createdByEmail",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "inviteId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "claimedByLearnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LearnerProfile",
+      "columns": [
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "userId",
+          "type": "String"
+        },
+        {
+          "name": "coachEmail",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "learnerId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "userId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "LearningPath",
+      "columns": [
+        {
+          "name": "pathId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "programmeId",
+          "type": "String"
+        },
+        {
+          "name": "replanBlockedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "pathId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lesson",
+      "columns": [
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "hook",
+          "type": "String"
+        },
+        {
+          "name": "landing",
+          "type": "String"
+        },
+        {
+          "name": "conceptVersion",
+          "type": "Number"
+        },
+        {
+          "name": "projectContextVersion",
+          "type": "Number"
+        },
+        {
+          "name": "generationVersion",
+          "type": "Number"
+        },
+        {
+          "name": "generatedByTier",
+          "type": "String"
+        },
+        {
+          "name": "steps",
+          "type": "Array"
+        },
+        {
+          "name": "sections",
+          "type": "Array"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "learnerId",
+            "conceptId",
+            "conceptVersion",
+            "generationVersion"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "PathStep",
+      "columns": [
+        {
+          "name": "pathId",
+          "type": "String"
+        },
+        {
+          "name": "position",
+          "type": "Number"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "type": "String"
+        },
+        {
+          "name": "rationale",
+          "type": "String"
+        },
+        {
+          "name": "removedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "pathId",
+            "position"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "Programme",
+      "columns": [
+        {
+          "name": "programmeId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "type": "String"
+        },
+        {
+          "name": "startsOn",
+          "type": "String"
+        },
+        {
+          "name": "endsOn",
+          "type": "String"
+        },
+        {
+          "name": "archivedAt",
+          "type": "String"
+        },
+        {
+          "name": "createdByEmail",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "programmeId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ProgrammeDimension",
+      "columns": [
+        {
+          "name": "dimensionId",
+          "type": "String"
+        },
+        {
+          "name": "programmeId",
+          "type": "String"
+        },
+        {
+          "name": "label",
+          "type": "String"
+        },
+        {
+          "name": "target",
+          "type": "Number"
+        },
+        {
+          "name": "deliverableId",
+          "type": "String"
+        },
+        {
+          "name": "position",
+          "type": "Number"
+        },
+        {
+          "name": "archivedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "dimensionId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "programmeId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ProgrammeEvaluation",
+      "columns": [
+        {
+          "name": "evaluationId",
+          "type": "String"
+        },
+        {
+          "name": "programmeId",
+          "type": "String"
+        },
+        {
+          "name": "kind",
+          "type": "String"
+        },
+        {
+          "name": "dueOn",
+          "type": "String"
+        },
+        {
+          "name": "completedAt",
+          "type": "String"
+        },
+        {
+          "name": "summary",
+          "type": "String"
+        },
+        {
+          "name": "criteria",
+          "type": "Array"
+        },
+        {
+          "name": "nextStep",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "evaluationId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "programmeId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "columns": [
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "confidence",
+          "type": "Number"
+        },
+        {
+          "name": "reachedWowMoment",
+          "type": "Boolean"
+        },
+        {
+          "name": "completedAt",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "learnerId",
+            "conceptId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "ProjectContext",
+      "columns": [
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "projectName",
+          "type": "String"
+        },
+        {
+          "name": "problemStatement",
+          "type": "String"
+        },
+        {
+          "name": "facts",
+          "type": "Object"
+        },
+        {
+          "name": "version",
+          "type": "Number"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "learnerId"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "SessionPrep",
+      "columns": [
+        {
+          "name": "prepId",
+          "type": "String"
+        },
+        {
+          "name": "sessionId",
+          "type": "String"
+        },
+        {
+          "name": "position",
+          "type": "Number"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "assignmentId",
+          "type": "String"
+        },
+        {
+          "name": "resourceLabel",
+          "type": "String"
+        },
+        {
+          "name": "resourceUrl",
+          "type": "String"
+        },
+        {
+          "name": "resourceStorageKey",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "prepId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "sessionId",
+            "position"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    {
+      "name": "Signal",
+      "columns": [
+        {
+          "name": "signalId",
+          "type": "String"
+        },
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "sectionId",
+          "type": "String"
+        },
+        {
+          "name": "kind",
+          "type": "String"
+        },
+        {
+          "name": "utterance",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "signalId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "learnerId"
+          ]
+        }
+      ]
+    }
+  ]
+}

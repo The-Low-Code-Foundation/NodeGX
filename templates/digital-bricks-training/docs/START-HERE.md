@@ -85,10 +85,12 @@ is ported from the product's own code and says so.
 
 ## Where the backend plugs in
 
-Nothing in this template fetches. The seam is two places:
+Nothing in this template fetches **yet** — sprint 49 is putting a NodeGX backend behind the three
+fixtures below (the next section). The seam is these places:
 
-- **Data/Fixture lesson** — replace its `Static Data` node with a query; the component's outputs
-  (`title`, `hook`, `landing`, `steps`, `sections`) do not change.
+- **Data/Fixture lesson** — the lesson page's lesson. Replace its `Static Data` node with a query; the
+  component's outputs (`title`, `hook`, `landing`, `steps`, `sections`) do not change. It belongs to
+  the CSV-sanitiser learner (`l-csv`), **not** to Priya, and `/course` no longer places it (below).
 - **Data/Fixture programme** — the same, for the learner's timeline: its outputs (`projectName`,
   `problemStatement`, `endsOn`, `entries`, `dimensions`, `learnerId`, `history`) do not change
   either. `history` becomes the gated query for a finished programme's entries.
@@ -97,6 +99,48 @@ Nothing in this template fetches. The seam is two places:
 - **Lesson/Section row** — the kit's `Section` node emits `Acted`, `Saved` (+ `Field`, `Value`),
   `Submitted` (+ `Content`), `Write requested`, `Listen requested` and the rest. They are wired to
   the row's outputs and nowhere else yet. Wire them to Cloud Functions when they exist.
+
+## The backend, so far (sprint 49)
+
+The pages still read the fixtures. What exists is the backend they will read from, built from those
+same fixtures:
+
+```bash
+# a local backend on this project (the policy file is applied on its first start)
+node <OpenNoodl>/packages/nodegx-backend/bin/nodegx-backend.js serve \
+  --data-dir /tmp/dbt-backend --port 8577 --token <admin credential> --project-dir .
+node tools/build-seed.mjs                                            # fixtures → backend/seed.json
+node tools/setup-backend.mjs --backend http://127.0.0.1:8577 --token <admin credential>
+node tools/check-seed.mjs    --backend http://127.0.0.1:8577 --token <admin credential>
+```
+
+- **`backend/schema.json` is the schema.** NodeGX keeps a collection's schema in the backend, not
+  the project, so a template carries it as a file and `setup-backend.mjs` applies it. 25 collections,
+  one per product table a page reads, with the product's keys as unique indexes.
+- **`backend/seed.json` is GENERATED** from the three fixtures — never edit it. `build-seed.mjs`
+  fails by name on any fixture field it cannot place, and it stores **nothing derived**: no timeline
+  `state`, no counts, no `lastActivity`. The read functions derive those (sprint 49, L170).
+- **`nodegx.security.json` closes everything.** Every collection is `nobody` to every client and
+  public sign-up is `nobody`. The pages will call functions, never read a collection, so there is
+  one gate and it is in one file.
+- **Users have no password** — this product has none. They are created with the admin credential.
+- **`setup-backend.mjs` refuses a backend that already holds data**, so it cannot write over a live
+  one. Start a fresh data directory instead.
+- **A NodeGX defect it works around, named in the tool:** a field holding an empty object `{}`
+  cannot be written (a 500, or an import that rolls back). So an empty `facts` is left off the row
+  and reads back as `null`, which every reader treats as `{}`.
+
+**The fixtures were made into one consistent world first**, because one database could not hold
+all three as they were. Each change, and what it changed on screen:
+
+| change | why | on screen |
+|---|---|---|
+| The CSV-sanitiser lesson belongs to a new learner, `l-csv` | it names a project that is not Priya's | `/people` gains one row |
+| `/course`'s lesson card reads Priya's next openable path step (title, why, Start/Continue) through `Logic/Standing`, not the lesson fixture | the product's up-next card never reads a cached lesson | the card shows *Frontend and backend…*, and its step list is gone |
+| Priya's artifact on `what-an-api-is` gets its timeline entry | the product puts every artifact submission on the timeline | `/course` and `/learner` gain one *What you sent in* row |
+| Her artifact on `what-is-a-backend` is gone from her submissions | it was the other learner's lesson | nothing visible |
+| Artifact 1's timeline entry files it under `obj-fields` | the submissions list already did, and exactly one objective names that concept | nothing visible |
+| `l-recipe` has a last activity | a learner with a project context has one, by the product's own rule | *No activity yet* becomes a date, and the row moves |
 
 ## How it is built, in the graph
 
@@ -377,7 +421,9 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in and the staff gate, every coach composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
+The read functions and the pages reading them (sprint 49, L170–L171); every write (sprint 50,
+which waits on a NodeGX compare-and-swap primitive, OpenNoodl HLT-016); sign-in (magic links,
+after OpenNoodl HLT-015) and the staff gate on the pages; every coach composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 
 ## Licences

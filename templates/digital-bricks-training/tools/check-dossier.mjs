@@ -200,9 +200,18 @@ for (const sub of fx.submissions) {
    (DossierMeter's stepTitleByConceptId). L167 filed one on the lesson page's own
    concept, which is off this programme, so both branches are reached. */
 const onPath = new Set(fx.concepts.map((c) => c.id));
-const filed = coach.segments.flatMap((s) => s.submissions);
-check(filed.filter((x) => onPath.has(x.conceptId)).length > 0 && filed.filter((x) => !onPath.has(x.conceptId)).length > 0,
-  'AC4: the fixture needs a filed submission both on and off the path');
+/* The OFF-path branch used to be reached by a fixture submission on the lesson
+   page's concept — which belonged to a different learner's project, one of the
+   contradictions sprint 49 decision 5 removed (TASK-L169 §3b). The fixture now
+   reaches the on-path branch and a PROBE reaches the other, so the rule is still
+   exercised both ways rather than losing a branch to a correction. */
+const OFF_PATH = { conceptId: 'a-concept-off-this-path', attempt: 1, submittedAt: '2026-09-15T17:20:00.000Z', evaluated: false, deliverableId: fx.deliverables[0].id };
+const probed = dossier('coach', { submissions: [...fx.submissions, OFF_PATH] });
+check(!onPath.has(OFF_PATH.conceptId), 'AC4: the off-path probe names a concept that IS on the path');
+const filed = probed.segments.flatMap((s) => s.submissions);
+check(coach.segments.flatMap((s) => s.submissions).some((x) => onPath.has(x.conceptId)),
+  'AC4: the fixture needs a filed submission on the path');
+check(filed.some((x) => !onPath.has(x.conceptId)), 'AC4: the probe did not reach the off-path branch');
 check(filed.every((x) => (onPath.has(x.conceptId) ? x.title && x.title !== x.conceptId : x.title === x.conceptId)),
   'AC4: a filed submission is not named by its lesson title, or an off-path one lost its slug');
 
@@ -288,11 +297,17 @@ check(html.every((x) => !/\d\s*%|\d+\s*(\/|of)\s*\d+|✗/.test(visible(x) + ' ' 
 const rev = (props) => SSR.renderToString(React.createElement(kitNode('DossierReveal'), props));
 check(rev({ open: false, segment: learner.segments[0] }) === '<div class="dbt-dossier-reveal"></div>', 'L167: a closed reveal renders something');
 check(rev({ open: true, segment: learner.segments[0] }) === '<div class="dbt-dossier-reveal"></div>', 'L167: an open reveal rendered during a server render');
-// The fixture reaches L167 AC6: one filed submission on the lesson page's concept.
-const lessonConcept = JSON.parse(nodeIn('Data/Fixture lesson', 'fx_data').parameters.json)[0].conceptId;
-check(learner.segments.some((s) => s.submissions.some((x) => x.conceptId === lessonConcept)) &&
-  learner.segments.some((s) => s.submissions.some((x) => x.conceptId !== lessonConcept)),
-  'L167 AC6: the meter needs work filed on the lesson page and work filed elsewhere');
+/* L167 AC6: work filed on the lesson the card opens, and work filed elsewhere.
+   The card's lesson is the next OPENABLE path step now (sprint 49 decision 7),
+   not the lesson fixture, which belongs to another learner. The fixture holds no
+   filed work on that step, so a probe puts some there. */
+const cardLesson = fx.entries.find((e) => e.kind === 'lesson' && (e.status === 'available' || e.status === 'in_progress'));
+check(cardLesson, 'L167 AC6: the fixture has no openable lesson for the card');
+const onCard = { conceptId: cardLesson.conceptId, attempt: 1, submittedAt: '2026-09-18T10:00:00.000Z', evaluated: false, deliverableId: fx.deliverables[0].id };
+const withCard = dossier('learner', { submissions: [...fx.submissions, onCard] });
+check(withCard.segments.some((s) => s.submissions.some((x) => x.conceptId === cardLesson.conceptId)) &&
+  withCard.segments.some((s) => s.submissions.some((x) => x.conceptId !== cardLesson.conceptId)),
+  'L167 AC6: the meter needs work filed on the lesson the card opens and work filed elsewhere');
 check(learner.segments.every((s) => s.id === s.slug), 'L167: a segment row is not keyed by its slug');
 
 /* DECISION 1, AS A GUARD: the reveal is the kit's, never Show Popup, and a

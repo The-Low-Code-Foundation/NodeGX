@@ -28,24 +28,6 @@
       "toProperty": "items"
     },
     {
-      "fromId": "cs_fixture",
-      "fromProperty": "title",
-      "toId": "cs_lesson_title",
-      "toProperty": "text"
-    },
-    {
-      "fromId": "cs_fixture",
-      "fromProperty": "landing",
-      "toId": "cs_landing",
-      "toProperty": "text"
-    },
-    {
-      "fromId": "cs_fixture",
-      "fromProperty": "steps",
-      "toId": "cs_steps",
-      "toProperty": "items"
-    },
-    {
       "fromId": "cs_open",
       "fromProperty": "onClick",
       "toId": "cs_go",
@@ -196,18 +178,6 @@
       "toProperty": "text"
     },
     {
-      "fromId": "t_cs_steps_label",
-      "fromProperty": "Translation",
-      "toId": "cs_steps_label",
-      "toProperty": "text"
-    },
-    {
-      "fromId": "t_cs_open",
-      "fromProperty": "Translation",
-      "toId": "cs_open",
-      "toProperty": "label"
-    },
-    {
       "fromId": "t_cs_prog_label",
       "fromProperty": "Translation",
       "toId": "cs_prog_label",
@@ -352,12 +322,6 @@
       "toProperty": "copy"
     },
     {
-      "fromId": "cs_fixture",
-      "fromProperty": "conceptId",
-      "toId": "cs_dos_reveal",
-      "toProperty": "lessonConceptId"
-    },
-    {
       "fromId": "cs_dos_reveal",
       "fromProperty": "onClosed",
       "toId": "cs_dos_close",
@@ -380,6 +344,36 @@
       "fromProperty": "Translation",
       "toId": "cs_dos_title",
       "toProperty": "text"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonTitle",
+      "toId": "cs_lesson_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonWhy",
+      "toId": "cs_landing",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasNextLesson",
+      "toId": "cs_card",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonAction",
+      "toId": "cs_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonConceptId",
+      "toId": "cs_dos_reveal",
+      "toProperty": "lessonConceptId"
     }
   ]
 }

@@ -146,6 +146,36 @@
       "fromProperty": "copy",
       "toId": "st_fn",
       "toProperty": "in-copy"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-hasNextLesson",
+      "toId": "st_out",
+      "toProperty": "hasNextLesson"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-nextLessonTitle",
+      "toId": "st_out",
+      "toProperty": "nextLessonTitle"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-nextLessonWhy",
+      "toId": "st_out",
+      "toProperty": "nextLessonWhy"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-nextLessonConceptId",
+      "toId": "st_out",
+      "toProperty": "nextLessonConceptId"
+    },
+    {
+      "fromId": "st_fn",
+      "fromProperty": "out-nextLessonAction",
+      "toId": "st_out",
+      "toProperty": "nextLessonAction"
     }
   ]
 }

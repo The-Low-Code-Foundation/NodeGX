@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": false
+  },
+  "collections": {},
+  "functions": {},
+  "files": {
+    "upload": "nobody",
+    "read": "nobody",
+    "delete": "nobody"
+  },
+  "signup": "nobody"
+}

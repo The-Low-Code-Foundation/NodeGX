@@ -136,8 +136,6 @@
         "cs_card_eyebrow",
         "cs_lesson_title",
         "cs_landing",
-        "cs_steps_label",
-        "cs_steps",
         "cs_actions"
       ],
       "parameters": {
@@ -216,34 +214,6 @@
         "fontSize": "var(--text-base)",
         "lineHeight": "var(--leading-relaxed)",
         "color": "var(--muted-foreground)"
-      }
-    },
-    {
-      "id": "cs_steps_label",
-      "type": "Text",
-      "label": "Steps label",
-      "x": 280,
-      "y": 960,
-      "parent": "cs_card",
-      "parameters": {
-        "fontSize": "var(--text-xs)",
-        "fontWeight": "var(--font-bold)",
-        "letterSpacing": "var(--tracking-widest)",
-        "textTransform": "uppercase",
-        "color": "var(--muted-foreground)",
-        "marginTop": "var(--space-3)"
-      }
-    },
-    {
-      "id": "cs_steps",
-      "type": "For Each",
-      "label": "One row per step",
-      "x": 280,
-      "y": 1040,
-      "parent": "cs_card",
-      "parameters": {
-        "templateType": "explicit",
-        "template": "/Course/Step row"
       }
     },
     {
@@ -366,13 +336,6 @@
       "label": "Order, group, fold, preview",
       "x": 900,
       "y": 420
-    },
-    {
-      "id": "cs_fixture",
-      "type": "/Data/Fixture lesson",
-      "label": "The lesson (fixture until the backend lands)",
-      "x": 900,
-      "y": 700
     },
     {
       "id": "cs_go",
@@ -585,34 +548,6 @@
       },
       "metadata": {
         "comment": "Was the literal \"The lesson you are in\" on cs_card_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
-      }
-    },
-    {
-      "id": "t_cs_steps_label",
-      "type": "Translation",
-      "label": "course:card.steps",
-      "x": 1000,
-      "y": 2290,
-      "parameters": {
-        "Key": "card.steps",
-        "Namespace": "course"
-      },
-      "metadata": {
-        "comment": "Was the literal \"In this lesson\" on cs_steps_label.text. It lives in Data/Strings now (TASK-L161)."
-      }
-    },
-    {
-      "id": "t_cs_open",
-      "type": "Translation",
-      "label": "course:card.open",
-      "x": 1000,
-      "y": 2380,
-      "parameters": {
-        "Key": "card.open",
-        "Namespace": "course"
-      },
-      "metadata": {
-        "comment": "Was the literal \"Open the lesson\" on cs_open.label. It lives in Data/Strings now (TASK-L161)."
       }
     },
     {
