@@ -806,8 +806,16 @@ export class HttpServer {
         access: { kind: 'public' },
         handler: (ctx) => this.oauth.requestMagicLink(ctx)
       },
+      // HLT-015: the GET is the link a mail scanner fetches, so it renders a
+      // button and spends nothing; only the button's POST redeems the token.
       {
         method: 'GET',
+        pattern: 'auth/magic-link/callback',
+        access: { kind: 'public' },
+        handler: (ctx) => this.oauth.openMagicLink(ctx)
+      },
+      {
+        method: 'POST',
         pattern: 'auth/magic-link/callback',
         access: { kind: 'public' },
         handler: (ctx) => this.oauth.magicLinkCallback(ctx)

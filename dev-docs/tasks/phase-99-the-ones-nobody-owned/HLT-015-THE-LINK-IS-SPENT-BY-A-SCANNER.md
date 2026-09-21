@@ -1,5 +1,11 @@
 # HLT-015 — The link is spent by a scanner
 
+✅ **BUILT 2026-09-21 (P99 s12), AC1–6. AC7 is the DBT stream's (its L171).** On a real socket,
+3 `curl` GETs and 1 Chrome load of a fresh link: 200 *"Sign in to …"*, no cookie, no redirect,
+token row byte-identical, **0** sessions. HEAD: the 1st GET signed in and Chrome met *"Sign-in link
+expired"*. §2 measured TRUE. The shipped email carried the defect's sentence too, and now does not.
+[Verdict](./verdicts/HLT-015/2026-09-21/VERDICT.md).
+
 🔴 **Opened 2026-09-21 from the Digital Bricks Training stream (its sprint 49), at Richard's
 request** — asked whether the template should accept NodeGX's magic-link flow or fix it in core, he
 chose core: *"Fix it in NodeGX core."* Measured by reading the source; §4's first criterion is the

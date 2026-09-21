@@ -123,8 +123,17 @@ Behaviour worth stating explicitly, because it looks like a bug otherwise:
   its way"*, not *"check your inbox"*. A UI that appears to know hands back the
   oracle the endpoint just removed.
 - A link is single-use and short-lived (15 minutes by default, capped at 24
-  hours). Anyone who opens it is signed in, so the shipped email template says
-  not to forward it.
+  hours).
+- **Opening the link spends nothing.** It opens a small *"Sign in to <your
+  app>"* page with one button, and only pressing that button signs in and uses
+  up the link. Many company mailboxes (Microsoft Defender Safe Links, Mimecast,
+  Proofpoint) and chat unfurlers fetch every link in a message before the
+  person sees it; if opening the link used it up, those people would always
+  meet *"Sign-in link expired"*, and the scanner would be the one signed in.
+  The button is a plain form, with no script, so it works in a mail app's
+  built-in browser.
+- Whoever presses the button is signed in, so the shipped email template still
+  says not to forward the link.
 
 ## Wiring it into your app
 

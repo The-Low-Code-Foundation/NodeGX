@@ -2,10 +2,11 @@
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
 HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
-HLT-008 ✅ (s10 — P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left).**
-Open: **HLT-007, 009, 015, 016**, then **HLT-010 last**. (HLT-015 and HLT-016 were opened by the DBT
-stream at 20:02 — backend rows, both block that template; read their files. HLT-016's shape is
-*"to be ruled"* — ask Richard before building it.)
+HLT-008 ✅ (s10 — P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left),
+HLT-015 ✅ (s12 — AC7 is the DBT stream's).**
+Open: **HLT-007, 009, 016, 017**, then **HLT-010 last**. HLT-016 and HLT-017 both have shapes
+*"to be ruled"*. Ask Richard before building either. HLT-017 (a drop target) was opened by the
+planner stream at 22:33 on 2026-09-21, and its README row was still uncommitted at s12's close.
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
 tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
 `TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
@@ -26,10 +27,35 @@ one stored identity, and one local backend ("Puppy test 3 backend", `backend_msj
 owned by both.** The editor now says so on the launcher; the repair is his call, not the
 product's. See HLT-011 AC4.
 
-**Suggested: HLT-015** (a decided shape, blocks the DBT template's L171) **or HLT-010** — but
+**Suggested: HLT-010**, now that HLT-015 is done. But
 HLT-010 now inherits three runtime error classes from s11 (its §2b), one of which (`Layout is
 "node"` on every popup) needs a layout decision before it can budget at 0. ⚠️ **HLT-009's template is another stream's** — it committed to it again on
 2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s12 leaves you — HLT-015, the scanner no longer spends the link
+
+**Built, AC1–6: 3 `curl` GETs + 1 Chrome load → 200, no cookie, no redirect, token row
+byte-identical, 0 sessions. HEAD: the 1st GET signed in (302 + `nodegx_auth`), and Chrome met
+*"Sign-in link expired"*.** [Verdict](./verdicts/HLT-015/2026-09-21/VERDICT.md).
+
+- 📋 **AC7 belongs to the DBT stream** (its L171: request → SMTP sandbox → curl twice → sign in
+  in a browser). It asked to be told when this was committed, and it was told. It is also the
+  first *click* on the button: s12's press was a `curl` form POST.
+- 🔴 **The email carried the defect's sentence.** The shipped `magicLink` template said *"Anyone who
+  opens it is signed in"* in both bodies. A task whose §6 names one doc sentence can have the same
+  sentence in the product's own copy. Search for the phrase, not just the doc.
+- 🔴 **Backend `jest` is red at 2 suites on HEAD, and they are not this phase's:**
+  `tpl008-theme-drive` / `tpl008-todo-drive`, *"no theme switch is drawn"*. They are red with HEAD's
+  auth files parked back in (8/9). Somebody's Todo-template theme switch is gone. Name it before
+  assuming a red backend run is yours.
+- ⚠️ `HttpServer.ts:88` `applyAdminSecurityHeaders` unused. That is a pre-existing eslint error, not
+  in s12's hunks.
+- ⚠️ **The shell's `grep` skipped `HttpServer.ts` as binary** and read as *"nothing mounts the
+  magic-link routes"*. Use `/usr/bin/grep -a` on this package.
+- **Tool:** `verdicts/HLT-015/2026-09-21/hlt015.drive.test.ts` + `jest.drive.config.js` drive a real
+  `BackendService` on a real socket from `src/` (ts-node cannot resolve `@cloud-runtime`; jest's
+  mapper can). ⚠️ Never call `execFileSync` against the server from inside its own process: it
+  blocks the event loop the server answers on, and the first run hung for three minutes.
 
 ## 🔴 What s11 leaves you — HLT-014, the popup is a dialog
 

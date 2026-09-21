@@ -89,11 +89,14 @@ export class EmailTokenStore {
   }
 
   /**
-   * The same single-use consumption, returning the WHOLE row rather than just
-   * its userId — what a flow needs when it stored `extra` fields at issue time
-   * (BAK-004 magic links). `consume` above is this, projected.
+   * Every check `consumeRow` makes, and no write — the row is neither consumed
+   * nor touched. For a request that must not spend a token merely by arriving
+   * (HLT-015: a magic link's GET, which mail scanners fetch before the person
+   * does). A row it returns can still be spent by someone else before the
+   * caller acts on it, so nothing may be GRANTED on a peek; only `consumeRow`
+   * grants.
    */
-  async consumeRow(token: string, kind: TokenKind, expectedUserId?: string): Promise<Record<string, unknown> | null> {
+  async peekRow(token: string, kind: TokenKind, expectedUserId?: string): Promise<Record<string, unknown> | null> {
     const tokenHash = hashToken(token);
     const { results } = await this.facade.rawQuery('_EmailToken', { where: { tokenHash }, limit: 1 });
     const row = results[0];
@@ -102,6 +105,17 @@ export class EmailTokenStore {
     if (row.consumedAt) return null;
     if (typeof row.expiresAt !== 'string' || new Date(row.expiresAt).getTime() < Date.now()) return null;
     if (expectedUserId && row.userId !== expectedUserId) return null;
+    return row;
+  }
+
+  /**
+   * The same single-use consumption, returning the WHOLE row rather than just
+   * its userId — what a flow needs when it stored `extra` fields at issue time
+   * (BAK-004 magic links). `consume` above is this, projected.
+   */
+  async consumeRow(token: string, kind: TokenKind, expectedUserId?: string): Promise<Record<string, unknown> | null> {
+    const row = await this.peekRow(token, kind, expectedUserId);
+    if (!row) return null;
 
     // Mark consumed FIRST — a concurrent second consume() on the same row now
     // sees consumedAt set and reads null, even though this isn't a single

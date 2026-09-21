@@ -243,9 +243,14 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // Reviewed and left in the `admin` budget: it is a once-per-file operator
     // action that holds a write lock for seconds per GB, so the thing that
     // should stop it being called in a loop is the lock, not a token bucket.
+    // HLT-015 moved `auth` by 1: `POST /auth/magic-link/callback`. Opening a
+    // magic link no longer spends it — the GET renders a button and the button
+    // POSTs — so the redeem is a route of its own. `auth` like its GET, since
+    // the pattern is one entry in AUTH_PATTERNS; the handler adds its own
+    // stricter per-flow bucket on top, as every magic-link step does.
     expect(counts).toEqual({
       admin: 80,
-      auth: 15,
+      auth: 16,
       data: 19,
       files: 4,
       functions: 1,

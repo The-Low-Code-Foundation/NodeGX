@@ -56,20 +56,20 @@ export const DEFAULT_TEMPLATES: Record<TemplateId, EmailTemplate> = {
    * BAK-004 passwordless sign-in. Note what this one does NOT say: no username
    * (the link may be the recipient's first contact with the backend, before any
    * account exists) and an explicit warning, because unlike a reset link this
-   * one signs the clicker straight in — a forwarded magic link is a handed-over
-   * account.
+   * one signs in whoever presses the button it opens — a forwarded magic link
+   * is a handed-over account. (Opening it alone signs no one in: HLT-015.)
    */
   magicLink: {
     subject: 'Your sign-in link for {{appName}}',
     text:
       'Open the link below to sign in to {{appName}}:\n\n' +
       '{{magicLinkUrl}}\n\n' +
-      'This link expires in {{expiresIn}} and can only be used once. Anyone who opens it is signed in, so ' +
+      'This link expires in {{expiresIn}} and can only be used once. Anyone who has it can sign in with it, so ' +
       "don't forward it. If you didn't ask to sign in, you can ignore this email.\n",
     html:
       '<p>Open the link below to sign in to <strong>{{appName}}</strong>:</p>' +
       '<p><a href="{{magicLinkUrl}}">Sign in to {{appName}}</a></p>' +
-      '<p>This link expires in {{expiresIn}} and can only be used once. Anyone who opens it is signed in, so ' +
+      '<p>This link expires in {{expiresIn}} and can only be used once. Anyone who has it can sign in with it, so ' +
       "don't forward it. If you didn't ask to sign in, you can ignore this email.</p>"
   }
 };

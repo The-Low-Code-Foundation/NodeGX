@@ -6,7 +6,8 @@
  *   GET  /oauth/:provider/callback          <- 302 back from the provider, then 302 to the app
  *   POST /oauth/exchange   { code }         the app trades the handoff code for a session
  *   POST /auth/magic-link  { email, redirect }
- *   GET  /auth/magic-link/callback?token=   the click in the inbox
+ *   GET  /auth/magic-link/callback?token=   the click in the inbox: a page, spends nothing
+ *   POST /auth/magic-link/callback  token=  the page's button: spends the link, signs in
  *
  * Not to be confused with the EDITOR's `noodl://` OAuth (NodeGX cloud sign-in),
  * which is unrelated and untouched. This is plain web redirects on the deployed
@@ -76,8 +77,8 @@ import type { RateLimiter } from '../ops/rate-limit';
 import type { RateLimitPolicy } from '../ops/model';
 import type { AuditLog } from '../ops/audit';
 import { AUDIT_AUTH_CREDENTIALS_REVOKED, AUDIT_AUTH_SIGN_IN } from '../ops/audit-actions';
-import { HttpError, readJSONBody, sendJSON } from './http-util';
-import { page, sendErrorPage, sendHTML } from './mini-page';
+import { HttpError, readJSONBody, readRawBody, sendJSON } from './http-util';
+import { escapeHtml, page, sendErrorPage, sendHTML } from './mini-page';
 import type { RequestContext } from './HttpServer';
 
 /** The query parameter the runtime looks for on load. Also in docs and in the node's help text. */
@@ -149,6 +150,14 @@ export class OAuthRoutes {
   private static readonly START_POLICY: RateLimitPolicy = { ratePerMinute: 20, burst: 20 };
   private static readonly MAGIC_SEND_POLICY: RateLimitPolicy = { ratePerMinute: 5 / 15, burst: 5 };
   private static readonly EXCHANGE_POLICY: RateLimitPolicy = { ratePerMinute: 30, burst: 30 };
+  /** Redeeming a link — the step that mints a session. */
+  private static readonly MAGIC_CONSUME_POLICY: RateLimitPolicy = { ratePerMinute: 20 / 15, burst: 20 };
+  /**
+   * Opening one. Looser than the consume, because a mail scanner may fetch the
+   * same link several times before the person does, and a page that spends
+   * nothing is not worth guarding as tightly as one that signs you in.
+   */
+  private static readonly MAGIC_OPEN_POLICY: RateLimitPolicy = { ratePerMinute: 60 / 15, burst: 60 };
 
   constructor(deps: OAuthRoutesDeps) {
     this.deps = deps;
@@ -605,7 +614,53 @@ export class OAuthRoutes {
   }
 
   /**
-   * `GET /auth/magic-link/callback?token=` — the click.
+   * `GET /auth/magic-link/callback?token=` — the click. It spends NOTHING
+   * (HLT-015).
+   *
+   * Mail scanners — Defender Safe Links, Mimecast, Proofpoint — and link
+   * unfurlers fetch every URL in a message before the person sees it. When this
+   * GET consumed the token, those mailboxes met "Sign-in link expired" on every
+   * click, and whatever fetched the link was signed in as the person. So the
+   * GET only checks the token and renders one button; the button's form POST
+   * below is what redeems it.
+   *
+   * An unknown, expired and spent token all render the same page as a missing
+   * one, byte for byte, so the GET is no oracle for which tokens exist.
+   */
+  async openMagicLink(ctx: RequestContext): Promise<void> {
+    this.enforce(ctx, 'auth:magic-open', OAuthRoutes.MAGIC_OPEN_POLICY);
+
+    const token = ctx.query.token || '';
+    const row = token ? await this.deps.tokens.peekRow(token, 'magic') : null;
+    // The token is in this page's URL: keep it out of caches and out of the
+    // Referer of anything the page might load.
+    ctx.res.setHeader('Cache-Control', 'no-store');
+    ctx.res.setHeader('Referrer-Policy', 'no-referrer');
+    if (!row) {
+      this.sendMagicLinkExpired(ctx);
+      return;
+    }
+
+    const heading = `Sign in to ${this.deps.backendName}`;
+    sendHTML(
+      ctx.res,
+      200,
+      page(
+        heading,
+        `<h2>${escapeHtml(heading)}</h2>` +
+          // Relative, so it posts back to wherever this page was served from —
+          // behind a proxy prefix too. A plain form: no script, so it works in
+          // a mail client's in-app browser and under any CSP.
+          '<form method="POST" action="callback">' +
+          `<input type="hidden" name="token" value="${escapeHtml(token)}">` +
+          '<button type="submit" autofocus>Sign in</button>' +
+          '</form>'
+      )
+    );
+  }
+
+  /**
+   * `POST /auth/magic-link/callback` (form or JSON body `token`) — the press.
    *
    * Runs through the SAME linking rule as an OIDC sign-in, by presenting itself
    * as a verified-email assertion from a provider called `magic-link`. That is
@@ -615,17 +670,14 @@ export class OAuthRoutes {
    * for an attacker to find the gap in.
    */
   async magicLinkCallback(ctx: RequestContext): Promise<void> {
-    this.enforce(ctx, 'auth:magic-consume', { ratePerMinute: 20 / 15, burst: 20 });
+    this.enforce(ctx, 'auth:magic-consume', OAuthRoutes.MAGIC_CONSUME_POLICY);
 
-    const token = ctx.query.token || '';
+    const body = await this.readTokenBody(ctx.req);
+    const token = typeof body.token === 'string' ? body.token : '';
     const row = token ? await this.deps.tokens.consumeRow(token, 'magic') : null;
+    ctx.res.setHeader('Cache-Control', 'no-store');
     if (!row) {
-      sendErrorPage(
-        ctx.res,
-        400,
-        'Sign-in link expired',
-        'This sign-in link is invalid, expired, or has already been used. Request a new one from the app.'
-      );
+      this.sendMagicLinkExpired(ctx);
       return;
     }
 
@@ -648,6 +700,23 @@ export class OAuthRoutes {
     };
 
     await this.finishSignIn(ctx, identity, 'magic link', this.deps.auth.config.magicLink.allowSignup, redirectUrl);
+  }
+
+  private sendMagicLinkExpired(ctx: RequestContext): void {
+    sendErrorPage(
+      ctx.res,
+      400,
+      'Sign-in link expired',
+      'This sign-in link is invalid, expired, or has already been used. Request a new one from the app.'
+    );
+  }
+
+  /** The page's button posts a form; a script may post JSON. Either carries `token`. */
+  private async readTokenBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
+    const contentType = String(req.headers['content-type'] || '');
+    if (!contentType.includes('application/x-www-form-urlencoded')) return readJSONBody(req);
+    const params = new URLSearchParams((await readRawBody(req, 16 * 1024)).toString('utf-8'));
+    return Object.fromEntries(params);
   }
 
   // ==========================================================================
