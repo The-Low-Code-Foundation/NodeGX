@@ -43,7 +43,7 @@ Input ports are created for each "{tag}" appearing in the "format" parameter str
 
 ## Ports at runtime
 
-Input ports are created from the `format` parameter: each unique {tag} yields one string input named exactly <tag> (no braces). The editor updates the port list live as the format is edited. An authoring tool must first set `format`, then may connect to or set parameters for each tag name it wrote; no other inputs exist.
+Input ports are created from the `format` parameter: each unique {tag} yields one string input named exactly &lt;tag> (no braces). The editor updates the port list live as the format is edited. An authoring tool must first set `format`, then may connect to or set parameters for each tag name it wrote; no other inputs exist.
 
 ## Patterns
 

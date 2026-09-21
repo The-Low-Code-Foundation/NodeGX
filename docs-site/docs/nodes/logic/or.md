@@ -31,7 +31,7 @@ Use it when any one of several conditions should be enough — e.g. show a secti
 
 _This node's port list changes at runtime (numbered-inputs); the tables above may be incomplete for a given instance._
 
-Accepts an unbounded numbered series of inputs (see numberedInputs); ports are named "<base> <N>" counting from 0.
+Accepts an unbounded numbered series of inputs (see numberedInputs); ports are named "&lt;base> &lt;N>" counting from 0.
 
 ## Ports at runtime
 

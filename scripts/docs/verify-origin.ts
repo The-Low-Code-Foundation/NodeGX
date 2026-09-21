@@ -63,7 +63,8 @@
  *
  * Usage:
  *   npm run docs:verify-origin
- *   ts-node -P ./scripts/tsconfig.json ./scripts/docs/verify-origin.ts [--json]
+ *   npm run docs:verify-origin -- --library-docs   # + every Read docs button, post-deploy
+ *   ts-node -P ./scripts/tsconfig.json ./scripts/docs/verify-origin.ts [--json] [--library-docs]
  *
  * Exit codes: 0 = every required probe is 200, 1 = ORIGIN GONE or PATH MOVED,
  * 2 = UNAVAILABLE, or this gate's own failure paths are broken.
@@ -96,9 +97,18 @@ require.cache[REMOTE_STUB_ID] = {
 import getContentEndpoint from '../../packages/noodl-editor/src/editor/src/utils/getContentEndpoint';
 import getDocsEndpoint from '../../packages/noodl-editor/src/editor/src/utils/getDocsEndpoint';
 import { nodeDocsPath } from '../../packages/noodl-editor/src/editor/src/utils/nodeDocs';
+import { hasLibraryDocsPage } from '../../packages/noodl-editor/src/editor/src/models/libraryDocsPages';
 /* eslint-enable import/first */
 
 const AS_JSON = process.argv.slice(2).includes('--json');
+/**
+ * HLT-013: also ask the deployed docs site for every "Read docs" button the node
+ * picker draws. Off by default because it grades a **deploy**, not a commit: the
+ * pages ship when `deploy-docs.yml` runs after a merge to `main`, so on the PR
+ * that adds a page this stage is red by construction. `deploy-docs.yml` runs it
+ * after deploying; the PR side is `docs-site`'s build of the commit itself.
+ */
+const LIBRARY_DOCS = process.argv.slice(2).includes('--library-docs');
 
 const ATTEMPTS = 3;
 const TIMEOUT_MS = 20_000;
@@ -147,7 +157,12 @@ interface Origin {
    * called both of them dead.
    */
   liveness: Probe;
-  probes: Probe[];
+  /**
+   * The pages to ask for. A function when the list has to be **derived from
+   * what the editor will actually do** rather than written down here — see
+   * `libraryDocsProbes`, where the answer lives in a payload this gate fetches.
+   */
+  probes: Probe[] | (() => Promise<Probe[]>);
 }
 
 type Verdict = 'ok' | 'PATH MOVED';
@@ -265,7 +280,48 @@ function docsProbes(): Probe[] {
   ];
 }
 
-const ORIGINS: Origin[] = [
+
+/**
+ * 🔴 HLT-013 — every "Read docs" button the node picker will draw, asked for.
+ *
+ * Until HLT-013 this gate probed the four library *indexes* and passed, while
+ * all 78 links those indexes name 404'd: the card joined a docs path onto the
+ * content origin. A gate that grades the payload and not what the editor
+ * builds out of it has a hole exactly the shape of that defect.
+ *
+ * So the list is **derived, never written down**: fetch the live module and
+ * prefab indexes the editor fetches, keep the entries `ModuleCard` will draw a
+ * button for (`hasLibraryDocsPage`, the same function it calls), and ask the
+ * docs origin for each one at `getDocsEndpoint() + entry.docs` — the exact URL
+ * the button opens. An entry whose page nobody wrote draws no button and is not
+ * asked about; an entry that gains a page is asked about on the next run with
+ * no edit here.
+ *
+ * ⚠️ These are read from the docs origin **as deployed**, so this stage runs
+ * only with `--library-docs` — see `LIBRARY_DOCS`. Between a merge and the
+ * deploy it reads PATH MOVED, correctly: the button is in the build and the
+ * page is not yet served.
+ *
+ * An index that cannot be fetched is a failure of this stage, not a skip — the
+ * content origin's own section says why, and an empty probe list would pass.
+ */
+async function libraryDocsProbes(): Promise<Probe[]> {
+  const probes: Probe[] = [];
+  for (const kind of ['modules', 'prefabs']) {
+    const url = `${getContentEndpoint()}/library/${kind}/index.json`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`library-docs: ${url} answered ${res.status}; cannot derive the buttons to check.`);
+    const entries = (await res.json()) as { label?: string; docs?: string }[];
+    for (const e of entries) {
+      if (!hasLibraryDocsPage(e.docs)) continue;
+      probes.push({ path: e.docs.replace(/\/+$/, ''), what: `"Read docs" on ${e.label ?? e.docs}` });
+    }
+  }
+  if (!probes.length) throw new Error('library-docs: derived zero buttons — the manifest or the index is empty, and zero probes would pass.');
+  return probes;
+}
+
+const ALL_ORIGINS: Origin[] = [
   {
     name: 'docs',
     endpoint: getDocsEndpoint(),
@@ -295,11 +351,26 @@ const ORIGINS: Origin[] = [
       { path: '/library/prefabs/index.json', what: 'the prefab library index' },
       { path: '/library/modules/index.json', what: 'the module library index' },
       { path: '/lessons/index.json', what: 'the Learn lesson list' },
-      { path: '/tutorials/index.json', what: 'the tutorials list' },
+      // ⚠️ `/tutorials/index.json` was probed here until HLT-013 and is not any
+      // more: it is served, and **nothing reads it**. `tutorialsmodel.js` had
+      // zero importers (the live tutorials come from the community API), so this
+      // gate was spending a probe guarding a payload no person could reach while
+      // 78 links they could press were dead. A probe is only worth its line if a
+      // consumer is behind it.
       { path: '/whats-new/feed.json', what: "the what's-new feed", optional: true }
     ]
+  },
+  {
+    name: 'library-docs',
+    endpoint: getDocsEndpoint(),
+    source: 'packages/noodl-editor/src/editor/src/views/NodePicker/components/ModuleCard/ModuleCard.tsx',
+    suffix: '/docs',
+    liveness: { path: '/', what: 'the docs site itself' },
+    probes: libraryDocsProbes
   }
 ];
+
+const ORIGINS = ALL_ORIGINS.filter((o) => o.name !== 'library-docs' || LIBRARY_DOCS);
 
 /** The site root: the endpoint with its build-shaped suffix taken off. */
 function siteRoot(origin: Origin): string {
@@ -318,8 +389,8 @@ async function run(origin: Origin) {
   const liveness = await resolve(siteRoot(origin), origin.liveness);
   // Nothing below a dead liveness probe is worth asking: on a gone origin every
   // page 404s, and printing ten of them buries the one fact that matters.
-  const pages =
-    liveness.status === 200 ? await Promise.all(origin.probes.map((p) => resolve(origin.endpoint, p))) : [];
+  const list = typeof origin.probes === 'function' ? await origin.probes() : origin.probes;
+  const pages = liveness.status === 200 ? await Promise.all(list.map((p) => resolve(origin.endpoint, p))) : [];
   return { origin, liveness, pages, verdict: classify(liveness, pages) };
 }
 
@@ -355,7 +426,7 @@ async function main() {
       )
     );
   } else {
-    console.log('LIB-008 — both editor origins, resolved by calling the editor\'s own functions.\n');
+    console.log('LIB-008 — both editor origins, and every library docs link, resolved by calling the editor\'s own functions.\n');
     for (const r of runs) {
       console.log(`${r.origin.name}: ${r.origin.endpoint}`);
       const show = (p: Result, label: string) => {

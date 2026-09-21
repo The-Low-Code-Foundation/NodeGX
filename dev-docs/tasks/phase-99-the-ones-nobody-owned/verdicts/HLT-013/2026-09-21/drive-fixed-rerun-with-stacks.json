@@ -1,0 +1,520 @@
+{
+  "summary": {
+    "arm": "fixed",
+    "at": "2026-09-21T17:06:03.081Z",
+    "cardIsFixed": true,
+    "openedDir": "/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/85a506c0-0366-453d-a85b-84e46050577a/scratchpad/hlt013-project",
+    "cards": 78,
+    "buttons": 70,
+    "pressesThatMissed": 0,
+    "toDocsOrigin": 70,
+    "toContentOrigin": 0,
+    "answered200": 70,
+    "answered404": 0,
+    "other": []
+  },
+  "tabs": {
+    "Prefabs": {
+      "cards": 46,
+      "buttons": 44,
+      "presses": [
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/accordion/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/accordion/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/advanced-columns/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/advanced-columns/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/app-shell/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/app-shell/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/auth-pages/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/auth-pages/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/avatar/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/avatar/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/card-grid/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/card-grid/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/confirm-dialog/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/confirm-dialog/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/crud-screen/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/crud-screen/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/date-picker/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/date-picker/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/email-verification/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/email-verification/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/file-upload/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/file-upload/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/filters/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/filters/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/form/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/form/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/form-fields/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/form-fields/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/format-date/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/format-date/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/format-full-name/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/format-full-name/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/list-with-icons/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/list-with-icons/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/mailgun/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/mailgun/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/media-query/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/media-query/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/multi-select/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/multi-select/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/navigation-menu/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/navigation-menu/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/oauth2/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/oauth2/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/page-header/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/page-header/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/pagination/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/pagination/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/progress-circle/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/progress-circle/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/rating/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/rating/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/sanitise-email/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/sanitise-email/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/search-bar/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/search-bar/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/sendgrid/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/sendgrid/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/settings-page/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/settings-page/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/shake-detector/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/shake-detector/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/states-kit/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/states-kit/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/stepper/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/stepper/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/stripe/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/stripe/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/supabase/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/supabase/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/tab-bar/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/tab-bar/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/table/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/table/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/tags/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/tags/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/time-picker/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/time-picker/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/toast/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/toast/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/toggle/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/toggle/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/totp/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/totp/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/user-menu/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/user-menu/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/xano/",
+          "target": "http://localhost:3917/NodeGX/docs/library/prefabs/xano/",
+          "status": 200
+        }
+      ]
+    },
+    "Modules": {
+      "cards": 32,
+      "buttons": 26,
+      "presses": [
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/chartjs/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/chartjs/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/clipboard/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/clipboard/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/custom-html/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/custom-html/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/data-context/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/data-context/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/drag-to-reorder/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/drag-to-reorder/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/file-download/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/file-download/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/font-awesome-brands/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/font-awesome-brands/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/font-awesome-solid/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/font-awesome-solid/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/validation/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/validation/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/geospatial-analysis/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/geospatial-analysis/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/graphql/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/graphql/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/i18next/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/i18next/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/intl-format/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/intl-format/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/keyboard-shortcuts/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/keyboard-shortcuts/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/lottie/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/lottie/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/maplibre/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/maplibre/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/markdown/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/markdown/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/marquee/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/marquee/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/material-icons/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/material-icons/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/media-recorder/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/media-recorder/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/pdf-viewer/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/pdf-viewer/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/qr-scanner/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/qr-scanner/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/rich-text-editor/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/rich-text-editor/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/simple-tooltips/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/simple-tooltips/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/virtual-list/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/virtual-list/",
+          "status": 200
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/webcamera/",
+          "target": "http://localhost:3917/NodeGX/docs/library/modules/webcamera/",
+          "status": 200
+        }
+      ]
+    }
+  }
+}

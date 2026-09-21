@@ -1,0 +1,20 @@
+
+> @thelowcodefoundation/repo@1.1.0 docs:verify-origin
+> ts-node -P ./scripts/tsconfig.json ./scripts/docs/verify-origin.ts
+
+LIB-008 — both editor origins, and every library docs link, resolved by calling the editor's own functions.
+
+docs: https://the-low-code-foundation.github.io/NodeGX/docs
+   ok   200                    liveness /  — the docs site itself
+   ok   200                             /nodes/logic/and  — a node page (property panel, node picker)
+   ok   200                             /nodes/cloud-services/net-noodl-user-log-in  — a node whose legacy URL and route disagree
+   ok   200                             /custom-nodes  — the hand-authored custom-nodes guide
+
+content: https://the-low-code-foundation.github.io/nodegx-content/static
+   ok   200                    liveness /README.md  — the content repo's README, served above /static
+   ok   200                             /library/prefabs/index.json  — the prefab library index
+   ok   200                             /library/modules/index.json  — the module library index
+   ok   200                             /lessons/index.json  — the Learn lesson list
+   note 404                             /whats-new/feed.json  — the what's-new feed
+
+Both origins serve every page the editor asks them for.

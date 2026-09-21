@@ -1,0 +1,576 @@
+{
+  "summary": {
+    "arm": "firing",
+    "at": "2026-09-21T17:03:37.602Z",
+    "cardIsFixed": false,
+    "openedDir": "/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/85a506c0-0366-453d-a85b-84e46050577a/scratchpad/hlt013-project",
+    "cards": 78,
+    "buttons": 78,
+    "pressesThatMissed": 1,
+    "toDocsOrigin": 0,
+    "toContentOrigin": 78,
+    "answered200": 0,
+    "answered404": 78,
+    "other": []
+  },
+  "tabs": {
+    "Prefabs": {
+      "cards": 46,
+      "buttons": 46,
+      "presses": [
+        {
+          "hit": true,
+          "recorded": 2,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/accordion/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/accordion/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/advanced-columns/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/advanced-columns/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/app-shell/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/app-shell/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/auth-pages/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/auth-pages/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/avatar/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/avatar/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/card-grid/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/card-grid/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/confirm-dialog/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/confirm-dialog/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/crud-screen/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/crud-screen/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/date-picker/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/date-picker/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/email-verification/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/email-verification/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/file-upload/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/file-upload/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/filters/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/filters/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/form/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/form/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/form-fields/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/form-fields/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/format-date/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/format-date/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/format-full-name/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/format-full-name/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/image-cropper/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/image-cropper/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/list-with-icons/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/list-with-icons/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/mailgun/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/mailgun/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/media-query/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/media-query/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/multi-select/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/multi-select/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/navigation-menu/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/navigation-menu/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/oauth2/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/oauth2/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/page-header/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/page-header/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/pagination/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/pagination/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/panning-and-zooming/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/panning-and-zooming/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/progress-circle/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/progress-circle/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/rating/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/rating/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/sanitise-email/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/sanitise-email/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/search-bar/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/search-bar/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/sendgrid/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/sendgrid/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/settings-page/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/settings-page/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/shake-detector/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/shake-detector/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/states-kit/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/states-kit/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/stepper/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/stepper/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/stripe/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/stripe/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/supabase/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/supabase/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/tab-bar/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/tab-bar/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/table/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/table/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/tags/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/tags/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/time-picker/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/time-picker/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/toast/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/toast/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/toggle/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/toggle/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/totp/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/totp/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/user-menu/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/user-menu/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/xano/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/prefabs/xano/",
+          "status": 404
+        }
+      ]
+    },
+    "Modules": {
+      "cards": 32,
+      "buttons": 32,
+      "presses": [
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/chartjs/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/chartjs/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/clipboard/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/clipboard/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/confetti/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/confetti/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/custom-html/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/custom-html/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/data-context/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/data-context/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/drag-to-reorder/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/drag-to-reorder/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/example-node-kit/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/example-node-kit/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/file-download/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/file-download/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/font-awesome-brands/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/font-awesome-brands/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/font-awesome-solid/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/font-awesome-solid/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/validation/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/validation/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/geospatial-analysis/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/geospatial-analysis/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/graphql/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/graphql/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/i18next/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/i18next/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/intl-format/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/intl-format/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/keyboard-shortcuts/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/keyboard-shortcuts/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/lottie/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/lottie/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/lucide-icons/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/lucide-icons/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/maplibre/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/maplibre/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/markdown/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/markdown/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/marquee/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/marquee/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/material-icons/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/material-icons/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/media-recorder/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/media-recorder/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/mqtt/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/mqtt/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/nodegx-charts/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/nodegx-charts/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/pdf-viewer/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/pdf-viewer/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/qr-code/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/qr-code/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/qr-scanner/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/qr-scanner/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/rich-text-editor/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/rich-text-editor/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/simple-tooltips/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/simple-tooltips/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/virtual-list/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/virtual-list/",
+          "status": 404
+        },
+        {
+          "hit": true,
+          "recorded": 1,
+          "url": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/webcamera/",
+          "target": "https://the-low-code-foundation.github.io/nodegx-content/static/library/modules/webcamera/",
+          "status": 404
+        }
+      ]
+    }
+  }
+}

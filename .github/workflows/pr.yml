@@ -268,6 +268,26 @@ jobs:
       # an id used to pass every gate with zero failures.
       - run: node scripts/node-catalog/validate-project.js --self-test
 
+  docs-site:
+    name: Docs site builds (HLT-013)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # 🔴 HLT-013. Until this job existed, nothing on a PR built the docs site —
+      # only `deploy-docs.yml` did, after a merge to `main`. So a node description
+      # containing `<a href="x"/>` (landed 2026-09-18) became a real anchor, the
+      # site's `onBrokenLinks: 'throw'` refused it, and the NEXT docs deploy would
+      # have failed with nothing earlier to say so.
+      #
+      # The generated trees first, so staleness fails as staleness: the node
+      # reference, and the library reference the node picker's "Read docs" button
+      # opens (70 pages, which is why those 70 buttons exist at all). Then the
+      # build itself, which is the only thing that resolves every link.
+      - run: npm run docs:nodes:check
+      - run: npm run docs:library:check
+      - run: npm --prefix docs-site run build
+
   docs-origin:
     name: Docs origin reachable (LIB-008)
     runs-on: ubuntu-latest

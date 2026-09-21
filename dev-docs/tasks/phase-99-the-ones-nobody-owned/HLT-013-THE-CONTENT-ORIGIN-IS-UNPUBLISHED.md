@@ -1,5 +1,11 @@
 # HLT-013 — The content origin is unpublished, and six features read from it
 
+> ✅ **BUILT 2026-09-21 (session 9) — and §2 below is WRONG; read the [verdict](./verdicts/HLT-013/2026-09-21/VERDICT.md) first.**
+> The content origin is alive and its `/static` suffix is right. Every 404 in §2's probe list is
+> what a *healthy* legacy Pages site answers, and `docs:verify-origin` exited 0 throughout. The
+> defect was every library "Read docs" link (78 × 404) plus a docs site that had stopped building.
+> §2 is kept as written because the phase grades its task files by what measurement did to them.
+
 🔴 **Opened by HLT-004, 2026-09-21 — measured, not speculative.** Not a row about a missing feed
 file. **The entire origin answers 404**, and the editor reads six payloads from it.
 

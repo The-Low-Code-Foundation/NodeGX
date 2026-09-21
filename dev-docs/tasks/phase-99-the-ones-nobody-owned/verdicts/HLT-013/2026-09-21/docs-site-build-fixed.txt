@@ -1,0 +1,12 @@
+
+> @noodl/docs-site@1.0.0 build
+> docusaurus build
+
+[INFO] [en] Creating an optimized production build...
+Warn: `blogDir` doesn't exist: "/Users/richardosborne/vscode_projects/OpenNoodl/docs-site/blog".
+[webpackbar] ℹ Compiling Client
+[webpackbar] ℹ Compiling Server
+[webpackbar] ✔ Server: Compiled successfully in 2.74s
+[webpackbar] ✔ Client: Compiled successfully in 4.65s
+[SUCCESS] Generated static files in "build".
+[INFO] Use `npm run serve` command to test your build locally.

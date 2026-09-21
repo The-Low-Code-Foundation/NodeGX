@@ -1,8 +1,8 @@
 # P99 — next session
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
-HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8).**
-Open: **HLT-007, 008, 009, 013**, then **HLT-010 last**.
+HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9).**
+Open: **HLT-007, 008, 009, 014**, then **HLT-010 last**. (HLT-014 was opened by the DBT stream at 15:47 — read its file.)
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
 tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
 `TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
@@ -23,10 +23,41 @@ one stored identity, and one local backend ("Puppy test 3 backend", `backend_msj
 owned by both.** The editor now says so on the launcher; the repair is his call, not the
 product's. See HLT-011 AC4.
 
-**Suggested: HLT-013** (HLT-012 was built in s8) — both were opened from a measurement rather than from a guess,
+**Suggested: HLT-014 or HLT-010** (HLT-013 was built in s9; HLT-012 in s8) — both were opened from a measurement rather than from a guess,
 so their §2 is the kind that has held twice out of twice here (HLT-005's and HLT-011's both
 measured TRUE). ⚠️ **HLT-009's template is another stream's** — it committed to it again on
 2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s9 leaves you — HLT-013, and a docs site that could not build
+
+**Built: 70 "Read docs" presses → 70 × 200 on a driven session; control 78 → 78 × 404.** The
+title was wrong — the content origin is alive; the dead thing was every library docs link, plus
+the docs site itself (see the [verdict](./verdicts/HLT-013/2026-09-21/VERDICT.md)).
+
+- 🔴 **The pages go live on the next merge to `main`** (`deploy-docs.yml`). Until then
+  `npm run docs:verify-origin -- --library-docs` reads **PATH MOVED × 70, correctly**. After the
+  deploy it must read 0 — the new `verify` job in `deploy-docs.yml` asks it on its own. If it is
+  red after a deploy, that is a real finding, not the pre-deploy state.
+- **HLT-010 inherits a new PR job, `docs-site`** (`docs:nodes:check`, `docs:library:check`, the
+  site build). Nothing built the docs site on a PR before, which is how a node description broke
+  every future deploy for three days unseen. Fold it into HLT-010's accounting; do not duplicate it.
+- ⚠️ **Owned, not fixed:** the first "Read docs" press after a reload opened twice on 2 of 4 drives,
+  on both builds; not reproduced with stacks armed. §6 of the verdict. Unowned otherwise — if you
+  drive a `PrimaryButton` with an `href`, count opens per press.
+- ⚠️ **The drive's `ev()` keeps only the LAST LINE of the CLI output.** Return booleans from the
+  renderer, never a multi-line string to test in Node — it graded a fixed build as HEAD once.
+
+## Tools s9 leaves you
+
+- **`npm run docs:library` / `:check` / `:import`** — the library reference, assembled from
+  `library/<type>/<slug>/README.md` (authored, wins) and `docs-site/imported-prose/` (pinned
+  upstream import). Writes `models/libraryDocsPages.ts`, which the card asks. **A README in a
+  `library/` entry + `npm run docs:library` is all it takes to give an entry its button back.**
+- **`scripts/devtools/drive-hlt013-read-docs.js`** — presses real buttons and **records**
+  `platform.openExternal` instead of opening a browser; `--docs-root` grades built-not-deployed pages.
+- **`escapeAngles` in `generate-node-docs.js`** — catalog prose is text. `tests-unit/hlt-013`
+  scans every generated node page for a raw tag outside code, so a new prose field that forgets it
+  fails there.
 
 ## 🔴 What s8 leaves you — and the one thing it wants Richard's eye on
 

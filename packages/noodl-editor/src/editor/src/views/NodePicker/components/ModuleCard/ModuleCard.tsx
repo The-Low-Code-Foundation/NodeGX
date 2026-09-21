@@ -1,8 +1,10 @@
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 
+import { hasLibraryDocsPage } from '@noodl-models/libraryDocsPages';
 import { describeIncompatibility, IModule, ModuleLibraryModel } from '@noodl-models/modulelibrarymodel';
 import getContentEndpoint from '@noodl-utils/getContentEndpoint';
+import getDocsEndpoint from '@noodl-utils/getDocsEndpoint';
 import { tracker } from '@noodl-utils/tracker';
 
 import { FeedbackType } from '@noodl-constants/FeedbackType';
@@ -26,7 +28,25 @@ enum CardState {
 
 export type ModuleCardProps = IModule;
 
+/**
+ * The origin the card's **payloads** come from: the entry's icon and its
+ * project zip. Those are content, and they are served, and they stay here.
+ */
 const endpoint = getContentEndpoint();
+
+/**
+ * 🔴 HLT-013 — the origin the card's **documentation** comes from, which is a
+ * different one, and getting that wrong is why all 78 "Read docs" buttons 404'd.
+ *
+ * The index entry's `docs` field is a docs path (`/library/modules/chartjs/`),
+ * and this card was joining it onto `getContentEndpoint()` — which carries the
+ * `/static` suffix the legacy Pages build needs to reach the payloads. The
+ * prose was never under `/static`. ALPHA-006 B5 named this card as one of four
+ * links owed a repoint; LIB-008 moved the other three and this one was missed,
+ * because it is the only one of the four that does not call `getDocsEndpoint`
+ * and so did not turn up in the sweep that found them.
+ */
+const docsEndpoint = getDocsEndpoint();
 
 export function ModuleCard(module: ModuleCardProps) {
   const { label, desc, icon, project, docs, tags } = module;
@@ -121,7 +141,17 @@ export function ModuleCard(module: ModuleCardProps) {
               isDisabled={!isCompatible}
               hasRightSpacing
             />
-            <PrimaryButton variant={PrimaryButtonVariant.Ghost} label="Read docs" href={endpoint + docs} />
+            {/*
+              ⚠️ Rendered only when a page exists at that path. Eight of the 78
+              entries have no prose anywhere — measured 2026-09-21, not guessed —
+              and a button to a page nobody wrote is the defect this row closes,
+              not a smaller version of it. `hasLibraryDocsPage` is generated from
+              the site's own tree, so an entry gets its button back the day a
+              page is written for it and nothing here has to be remembered.
+            */}
+            {hasLibraryDocsPage(docs) && (
+              <PrimaryButton variant={PrimaryButtonVariant.Ghost} label="Read docs" href={docsEndpoint + docs} />
+            )}
           </div>
         </div>
 

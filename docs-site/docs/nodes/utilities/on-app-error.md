@@ -34,10 +34,10 @@ Put one in the app's root component to make failures visible at all — log them
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `code` | String | — | Stable kebab-case identifier for this kind of error, namespaced by node type, as in run-tasks/task-failed |
-| `componentName` | String | — | Component the failing node sits in, or <runtime> when the error was raised outside any node |
+| `componentName` | String | — | Component the failing node sits in, or &lt;runtime> when the error was raised outside any node |
 | `message` | String | — | Human-readable account of what went wrong, safe to reword between releases — match on Code instead |
-| `nodeId` | String | — | Graph id of the node that raised the error, or <runtime> when it was raised outside any node |
-| `nodeType` | String | — | Kind of node that raised the error, or <runtime> when it was raised outside any node |
+| `nodeId` | String | — | Graph id of the node that raised the error, or &lt;runtime> when it was raised outside any node |
+| `nodeType` | String | — | Kind of node that raised the error, or &lt;runtime> when it was raised outside any node |
 
 ### Failure outputs
 

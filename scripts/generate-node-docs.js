@@ -116,8 +116,44 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
+/**
+ * 🔴 HLT-013 — catalog prose is text, and markdown reads a `<tag>` in it as markup.
+ *
+ * 15 of the 199 generated pages carried something shaped like a tag in an
+ * ordinary sentence, outside any code span: `<p>` and `<tag>` as placeholders,
+ * and real element names where the node's subject *is* markup — `<item>` and
+ * `<!ENTITY>` on Parse XML. (47 pages mention a tag at all; the other 32 already
+ * had it in backticks, which is the form that renders.)
+ * CommonMark passes raw HTML straight through, so every one of them was being
+ * rendered as an element instead of shown as the word the sentence needs: the
+ * reader of Parse XML's own description could not see the `<item>` it is
+ * telling them about.
+ *
+ * It surfaced as a build failure rather than a reading problem, which is the
+ * only reason it was found: `<a href="x"/>` in Parse XML's description became a
+ * real anchor, and `onBrokenLinks: 'throw'` refused the whole site over a link
+ * to `x` that nobody had written. That description landed on 2026-09-18 and the
+ * last `deploy-docs.yml` run was 2026-09-11 — so no deploy had tried it yet, and
+ * **the next merge to `main` would have failed the docs deploy**. No PR gate
+ * builds the site, so nothing earlier would have said so.
+ *
+ * Applied field by field, and `tests-unit/hlt-013` scans every generated page
+ * for a raw tag outside code — so a new prose field that forgets it is caught
+ * by the corpus, not by a reader.
+ *
+ * Only `<` needs escaping — `&lt;` is the literal `<` again in the rendered page
+ * — and only outside code, where a `<tag>` is already shown verbatim and an
+ * entity would be displayed as the five characters `&lt;`.
+ */
+function escapeAngles(text) {
+  const parts = String(text ?? '').split(/(```[\s\S]*?```|`[^`\n]*`)/g);
+  return parts
+    .map((part, i) => (i % 2 === 1 ? part : part.replace(/<(?=[a-zA-Z!/])/g, '&lt;')))
+    .join('');
+}
+
 function escapeMd(text) {
-  return String(text ?? '').replace(/\|/g, '\\|');
+  return escapeAngles(text).replace(/\|/g, '\\|');
 }
 
 function formatType(type) {
@@ -168,7 +204,7 @@ function renderDynamicPorts(dynamicPorts) {
     '## Dynamic ports\n',
     `_This node's port list changes at runtime (${dynamicPorts.mechanisms.join(', ')}); the tables above may be incomplete for a given instance._\n`
   ];
-  if (dynamicPorts.description) parts.push(`${dynamicPorts.description}\n`);
+  if (dynamicPorts.description) parts.push(`${escapeAngles(dynamicPorts.description)}\n`);
   if (Array.isArray(dynamicPorts.declaredPortGroups) && dynamicPorts.declaredPortGroups.length) {
     const rows = dynamicPorts.declaredPortGroups.map(
       (g) =>
@@ -269,9 +305,9 @@ function main() {
         parts.push(':::note\nThis node is not offered directly in the node picker.\n:::\n');
       }
 
-      if (e.summary) parts.push(`${e.summary}\n`);
-      if (e.description) parts.push(`${e.description}\n`);
-      if (e.whenToUse) parts.push(`## When to use it\n\n${e.whenToUse}\n`);
+      if (e.summary) parts.push(`${escapeAngles(e.summary)}\n`);
+      if (e.description) parts.push(`${escapeAngles(e.description)}\n`);
+      if (e.whenToUse) parts.push(`## When to use it\n\n${escapeAngles(e.whenToUse)}\n`);
 
       const meta = [
         `| | |`,
@@ -279,7 +315,7 @@ function main() {
         `| Category | ${escapeMd(cat.label)} |`,
         `| Type name | \`${node.typeName}\` |`,
         `| Available in | ${(node.availableIn || []).join(', ') || '—'} |`,
-        `| SSR compatibility | ${node.ssr ? node.ssr.compat + (node.ssr.note ? ` — ${node.ssr.note}` : '') : '—'} |`,
+        `| SSR compatibility | ${node.ssr ? node.ssr.compat + (node.ssr.note ? ` — ${escapeMd(node.ssr.note)}` : '') : '—'} |`,
         `| Provided by | \`${node.providedBy || '—'}\` |`
       ];
       parts.push(`## At a glance\n\n${meta.join('\n')}\n`);
@@ -288,18 +324,18 @@ function main() {
       parts.push(renderPortsSection('Outputs', node.outputs || []));
       parts.push(renderDynamicPorts(node.dynamicPorts));
 
-      if (e.runtimeBehavior) parts.push(`## Ports at runtime\n\n${e.runtimeBehavior}\n`);
+      if (e.runtimeBehavior) parts.push(`## Ports at runtime\n\n${escapeAngles(e.runtimeBehavior)}\n`);
       if (Array.isArray(e.patterns) && e.patterns.length) {
-        parts.push(`## Patterns\n\n${e.patterns.map((p) => `- ${p}`).join('\n')}\n`);
+        parts.push(`## Patterns\n\n${e.patterns.map((p) => `- ${escapeAngles(p)}`).join('\n')}\n`);
       }
       if (Array.isArray(e.antiPatterns) && e.antiPatterns.length) {
-        parts.push(`## Watch out for\n\n${e.antiPatterns.map((p) => `- ${p}`).join('\n')}\n`);
+        parts.push(`## Watch out for\n\n${e.antiPatterns.map((p) => `- ${escapeAngles(p)}`).join('\n')}\n`);
       }
       if (Array.isArray(e.examples) && e.examples.length) {
         const examples = e.examples.map((id) => examplesById.get(id)).filter(Boolean);
         if (examples.length) {
           parts.push(
-            `## Examples\n\n${examples.map((ex) => `**${ex.title}**\n\n${ex.description}`).join('\n\n')}\n`
+            `## Examples\n\n${examples.map((ex) => `**${escapeAngles(ex.title)}**\n\n${escapeAngles(ex.description)}`).join('\n\n')}\n`
           );
         }
       }
