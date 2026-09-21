@@ -160,6 +160,10 @@ Everything else in §5 is a defect with a measured count and needs no ruling.
   gate, HLT-002's verdict recorded `test:ci` at the floor, and the board read green for a day.
   Found and fixed by HLT-003; the *reason* nobody saw it is the reusable part
   ([[two-gates-covering-the-ends-of-a-chain-read-as-coverage]]).
+  **So every verdict here says WHICH gates it ran**, and a task about to write a user-visible
+  string owes the vocabulary ratchet a thought before it writes it — the gate reads context, not
+  text ([[a-vocabulary-gate-must-read-context-not-text]]). HLT-001's verdict was amended this way
+  after the fact: `test:main` is green at `62decf7e1` (526/526, 8,418/8,418), which contains it.
 - The hex ratchet, icon-url gate, token check, vocabulary ratchet and the P92 scale gate stay green
   at every commit. The `test:ci` floor is the eight by name (3 SUB-006, 3 SUB-011, 2 NDA-017).
 

@@ -83,7 +83,9 @@ migration. This task makes an existing teardown safe, it does not redesign teard
    a spec proves the root's DOM is gone after the deferral, not just that React stopped complaining.
    A `try/catch` or a suppressed console would pass AC1 and fail the product
    ([[verify-the-consequence-not-just-the-mechanism]]).
-5. `test:ci` at the floor; `typecheck:editor` 0.
+5. `test:ci` at the floor; `typecheck:editor` 0. ⚠️ **And `test:main`** — the vocabulary and hex
+   ratchets live there and `test:ci` cannot see them; see the phase README §7. (Verified green at
+   `62decf7e1`: 526/526, 8418/8418.)
 6. **(added while building, and it is the one that nearly got away)** The drive counts the two
    errors a *deferred* teardown can cause — `Failed to execute 'removeChild'` and *"already been
    passed to createRoot()"* — and both read **0**. A drive that counts only AC1's message cannot

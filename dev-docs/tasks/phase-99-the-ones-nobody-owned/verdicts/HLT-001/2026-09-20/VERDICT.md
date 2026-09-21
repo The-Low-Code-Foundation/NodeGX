@@ -138,3 +138,23 @@ a behaviour change and it is written into the seam's docblock rather than left f
 **The `other console errors during the drive: 9` figure is not zero and is not this task's.** It is
 left recorded rather than filed as an observation — HLT-003 and HLT-004 own that population, and
 §7 of the phase README is explicit that a row leaves here with an owner or not at all.
+
+
+## 7. The gates, and which of them this verdict actually ran (added 2026-09-21)
+
+| gate | reading | when |
+|---|---|---|
+| `test:ci` (noodl-editor) | 8 failures — **the floor by name** (2 NDA-017, 3 SUB-011, 3 SUB-006), 3,026 specs | 2026-09-20, before the commit |
+| `typecheck:editor` | 0 | 2026-09-20 |
+| `test:main` | **526/526 suites, 8,418/8,418 tests, exit 0** | 2026-09-21, at `62decf7e1` — which contains this commit |
+
+🔴 **`test:ci` at the floor is not "the gates are green", and this phase proved it the expensive
+way.** The hex/icon/token/vocabulary ratchets live in `test:main`; a per-package `test:ci` cannot see
+them. HLT-002's commit shipped a string the TVW-009 vocabulary ratchet retires and left `test:main`
+red at HEAD, and its verdict — recording `test:ci` at the floor, exactly as its AC asked — had no way
+to know ([[a-new-session-reader-owes-the-uni-001-sweep]] is the same family: the gate that matters is
+not the one the task names).
+
+This verdict originally recorded only the first two rows. The third was measured afterwards, on a
+HEAD that already contained this commit, so it is evidence **about** these 76 files rather than a
+claim made on their behalf: the seam's docblocks and this phase's prose pass the ratchets.
