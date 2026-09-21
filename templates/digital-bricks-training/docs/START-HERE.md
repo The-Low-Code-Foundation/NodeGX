@@ -9,14 +9,6 @@ connected.
 Press **Run**. Home → *Open your course* → *Open the lesson*. Every step is a live chip; nothing is
 locked, numbered or scored. Home → *See it as their coach* opens **People**, the coach's roster.
 
-> **Known defect, not this template's: moving between pages crashes today.** Pressing either Home
-> button blanks the page with `Cannot read properties of undefined (reading 'call')`, thrown from
-> `noodl_modules/i18next-noodl` as the old page unmounts. The runtime's `nodedefinition.ts` stopped
-> mutating a node's `methods` into descriptors (NDA-017), and the old SDK shim bundled into that
-> module still reads `methods.onNodeDeleted.value`. It arrived with the first `Translation` node
-> (TASK-L161) and is recorded in TASK-L164. Until it is fixed, open a page by its URL
-> (`/course`, `/lesson`, `/people`).
-
 ## The first thing to change
 
 Open **Data/Fixture lesson** and find the node labelled **"EDIT — this is the lesson"**. It is a
