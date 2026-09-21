@@ -43,8 +43,17 @@
           "value": 100,
           "unit": "%"
         },
-        "rowGap": "var(--space-1)",
-        "cssClassName": "planner-pinned"
+        "rowGap": "var(--space-1-5)",
+        "cssClassName": "planner-pinned",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
       },
       "children": [
         "csHead",
@@ -84,7 +93,10 @@
       "parent": "csHead",
       "parameters": {
         "text": "Cash, next six weeks",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -125,6 +137,7 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentSize"
       },
@@ -140,6 +153,7 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentSize"
       },
@@ -153,7 +167,7 @@
       "parent": "csNums",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize"
       },

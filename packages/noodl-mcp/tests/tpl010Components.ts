@@ -218,20 +218,22 @@ function iface(ins: Array<[string, string]>, outs: Array<[string, string]>) {
 
 // ── The look, from the product's own compositions ───────────────────────────
 
-const T_META = composition('meta');
+/** R2.1 — the mockup's small line is 12px, not the vocabulary's 14. */
+const T_META = { ...composition('meta'), fontSize: 'var(--text-xs)' };
 const T_BODY = composition('body');
-const T_TITLE = composition('cardTitle');
+/** R13a — Archivo, heavy and narrow, for the app's name and every card's heading. */
+const T_TITLE = { ...composition('cardTitle'), fontFamily: 'var(--font-display)', fontWeight: 'var(--font-extrabold)', cssClassName: 'planner-display' };
 const T_ERROR = { ...composition('fieldError'), color: 'var(--destructive)' };
 /** The small uppercase label over a strip or a drawer section. */
 const T_LABEL = {
-  fontSize: 'var(--text-sm)',
+  fontSize: px(11),
   fontWeight: 'var(--font-semibold)',
   color: 'var(--muted-foreground)',
   letterSpacing: { value: 0.06, unit: 'em' },
   textTransform: 'uppercase'
 };
 /** A number a person compares against another number. Tabular, always. */
-const T_NUM = { ...composition('meta'), fontVariantNumeric: 'tabular-nums', color: 'var(--foreground)' };
+const T_NUM = { ...composition('meta'), fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--foreground)' };
 
 const wide = (params: Record<string, unknown>) => ({ ...params, sizeMode: 'contentHeight', width: pct(100) });
 
@@ -516,8 +518,8 @@ const ENVELOPE_TILE: Tpl010Component = {
       justifyContent: 'space-between',
       cssClassName: 'planner-env-head'
     }),
-    text('etName', 'Envelope name', 'etHead', '', { ...T_LABEL, sizeMode: 'contentSize' }),
-    text('etLeft', 'Hours left', 'etHead', '', { ...T_NUM, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
+    text('etName', 'Envelope name', 'etHead', '', { ...T_META, sizeMode: 'contentSize', fontSize: px(13), color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
+    text('etLeft', 'Hours left', 'etHead', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: px(13), fontWeight: 'var(--font-semibold)' }),
     group('etTrack', 'The bar', 'etRoot', {
       sizeMode: 'explicit',
       width: pct(100),
@@ -533,7 +535,6 @@ const ENVELOPE_TILE: Tpl010Component = {
   ],
   connections: [
     wire('etIn', 'name', 'etName', 'text'),
-    wire('etIn', 'mark', 'etName', 'color'),
     wire('etIn', 'mark', 'etRoot', 'borderTopColor'),
     wire('etIn', 'leftText', 'etLeft', 'text'),
     wire('etIn', 'fillWidth', 'etFill', 'width'),
@@ -554,6 +555,7 @@ const MOVE_CHIP_FIELDS: Array<[string, string]> = [
   ['soft', 'string'],
   ['placed', 'boolean'],
   ['late', 'boolean'],
+  ['edge', 'string'],
   ['hint', 'string']
 ];
 
@@ -575,24 +577,33 @@ const MOVE_CHIP: Tpl010Component = {
     // project up again and cannot look up a different one.
     outputs('mcOut', 'Pressed', [['press', 'signal'], ['projectId', 'string'], ['move', 'string'], ['placed', 'boolean']]),
     group('mcRoot', 'Move chip', undefined, {
-      ...ROW_TIGHT('var(--space-2)'),
+      ...ROW_TIGHT('var(--space-1-5)'),
+      cssClassName: 'planner-chip',
       backgroundColor: 'var(--surface)',
       borderStyle: 'solid',
       borderWidth: 'var(--border-1)',
-      borderColor: 'var(--border)',
-      borderRadius: 'var(--radius-md)',
+      borderColor: 'var(--border-strong)',
+      borderRadius: 'var(--radius-full)',
       paddingLeft: 'var(--space-2)',
-      paddingRight: 'var(--space-2)',
-      paddingTop: 'var(--space-1)',
-      paddingBottom: 'var(--space-1)'
+      paddingRight: 'var(--space-1)',
+      paddingTop: 'var(--space-0-5)',
+      paddingBottom: 'var(--space-0-5)'
     }),
     group('mcDot', 'Which envelope', 'mcRoot', { sizeMode: 'explicit', width: px(8), height: px(8), borderRadius: 'var(--radius-sm)' }),
     text('mcWho', 'Whose move', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)', color: 'var(--foreground)' }),
-    text('mcWhat', 'The move', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize' }),
+    text('mcWhat', 'The move', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize', cssClassName: 'planner-chip-what' }),
     text('mcWorth', 'What it is worth', 'mcRoot', '', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
     // Placed reads as done, not as disabled: the chip still opens the card (AC3).
     text('mcTick', 'Already in the week', 'mcRoot', '✓', { ...T_META, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)' }),
-    place('mcPress', BUTTON, 'Put it in the week', 'mcRoot', { ...BTN_ICON('icon-plus', 'Put 30 minutes in the week'), fontSize: px(13) })
+    place('mcPress', BUTTON, 'Put it in the week', 'mcRoot', {
+      ...BTN_ICON('icon-plus', 'Put 30 minutes in the week'),
+      fontSize: px(13),
+      lineHeight: { value: 13, unit: 'px' },
+      paddingLeft: 'var(--space-1)',
+      paddingRight: 'var(--space-1)',
+      paddingTop: 'var(--space-0)',
+      paddingBottom: 'var(--space-0)'
+    })
   ],
   connections: [
     wire('mcIn', 'mark', 'mcDot', 'backgroundColor'),
@@ -600,12 +611,10 @@ const MOVE_CHIP: Tpl010Component = {
     wire('mcIn', 'move', 'mcWhat', 'text'),
     wire('mcIn', 'worth', 'mcWorth', 'text'),
     wire('mcIn', 'hasWorth', 'mcWorth', 'mounted'),
-    wire('mcIn', 'ink', 'mcWorth', 'color'),
     wire('mcIn', 'placed', 'mcTick', 'mounted'),
-    wire('mcIn', 'ink', 'mcTick', 'color'),
-    wire('mcIn', 'soft', 'mcRoot', 'backgroundColor'),
     // R7's red: a move whose date has passed. Red is reserved for exactly this and the ceiling (R13).
-    wire('mcIn', 'late', 'mcRoot', 'borderColor'),
+    // 🔴 This was `late` (a boolean) wired into a colour port, so a late chip never went red.
+    wire('mcIn', 'edge', 'mcRoot', 'borderColor'),
     // 🔴 The hint used to be wired into this button's label, where `font-size: 0` hid it.
     // The label is the `+` now, so wiring a sentence into it would print the sentence in
     // the middle of the chip. What the press does is said by the chip: a placed one shows ✓.
@@ -624,7 +633,6 @@ const BLOCK_FIELDS: Array<[string, string]> = [
   ['what', 'string'],
   ['hoursText', 'string'],
   ['done', 'boolean'],
-  ['tickColor', 'string'],
   ['tickFill', 'string'],
   ['tickInk', 'string'],
   ['mark', 'string'],
@@ -664,7 +672,7 @@ const BLOCK: Tpl010Component = {
       borderLeftStyle: 'solid',
       borderLeftWidth: px(3),
       paddingLeft: 'var(--space-1)',
-      paddingRight: 'var(--space-1)',
+      paddingRight: 'var(--space-1-5)',
       paddingTop: 'var(--space-1)',
       paddingBottom: 'var(--space-1)'
     }),
@@ -682,8 +690,10 @@ const BLOCK: Tpl010Component = {
       paddingRight: 'var(--space-0)',
       paddingTop: 'var(--space-0)',
       paddingBottom: 'var(--space-0)',
-      fontSize: 'var(--text-sm)',
-      fontWeight: 'var(--font-semibold)'
+      fontSize: px(13),
+      fontWeight: 'var(--font-semibold)',
+      color: 'var(--foreground)',
+      styleCss: 'text-align: left; justify-content: flex-start;'
     }),
     place('bkWhat', BUTTON, 'What it is — opens the log sheet', 'bkMain', {
       ...BTN_GHOST,
@@ -716,12 +726,10 @@ const BLOCK: Tpl010Component = {
   connections: [
     wire('bkIn', 'soft', 'bkRoot', 'backgroundColor'),
     wire('bkIn', 'mark', 'bkRoot', 'borderLeftColor'),
-    wire('bkIn', 'tickColor', 'bkTick', 'borderColor'),
     wire('bkIn', 'tickFill', 'bkTick', 'backgroundColor'),
     // Transparent until it is logged, so an empty box is an empty box and not a faint ✓.
     wire('bkIn', 'tickInk', 'bkTick', 'color'),
     wire('bkIn', 'projectName', 'bkWho', 'label'),
-    wire('bkIn', 'mark', 'bkWho', 'color'),
     // 🔴 A Button's words are its `label`, not its `text` — `text` is a Text node's port and
     // wiring into it here lands nothing and says nothing.
     wire('bkIn', 'what', 'bkWhat', 'label'),
@@ -763,8 +771,9 @@ const CASH_EVENT: Tpl010Component = {
     inputs('ceIn', 'The event', CASH_EVENT_FIELDS),
     group('ceRoot', 'Cash event', undefined, {
       ...COLUMN_TIGHT('var(--space-0)'),
-      minWidth: px(128),
-      backgroundColor: 'var(--surface)',
+      cssClassName: 'planner-cash-ev',
+      minWidth: px(110),
+      backgroundColor: 'var(--background)',
       borderStyle: 'solid',
       borderWidth: 'var(--border-1)',
       borderRadius: 'var(--radius-md)',
@@ -1026,11 +1035,26 @@ const MOVES_STRIP: Tpl010Component = {
   nodes: [
     inputs('msIn', 'The moves', [['rows', 'array'], ['empty', 'boolean']]),
     outputs('msOut', 'A chip was pressed', [['press', 'signal'], ['projectId', 'string'], ['move', 'string'], ['placed', 'boolean']]),
-    group('msRoot', 'Moves strip', undefined, { ...ROW('var(--space-2)'), ...PINNED, alignItems: 'center' }),
-    group('msLabel', 'What this row is', 'msRoot', COLUMN_TIGHT('var(--space-0)')),
-    text('msTitle', 'Moves', 'msLabel', 'Moves', { ...T_LABEL, sizeMode: 'contentSize' }),
-    text('msBy', 'In what order', 'msLabel', 'by urgency', { ...T_META, sizeMode: 'contentSize' }),
-    group('msScroll', 'The chips', 'msRoot', { ...SCROLL_X, columnGap: 'var(--space-2)', alignItems: 'center' }),
+    group('msRoot', 'Moves strip', undefined, {
+      ...ROW('var(--space-2)'),
+      ...PINNED,
+      ...CARD,
+      alignItems: 'flex-start',
+      paddingLeft: 'var(--space-2-5)',
+      paddingRight: 'var(--space-2-5)',
+      paddingTop: 'var(--space-1-5)',
+      paddingBottom: 'var(--space-1-5)'
+    }),
+
+    text('msTitle', 'Moves', 'msLabel', 'Moves', { ...T_META, sizeMode: 'contentSize', color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
+    text('msBy', 'In what order', 'msLabel', 'by urgency', { ...T_LABEL, sizeMode: 'contentSize' }),
+    // R7a — the chips wrap, as the approved mockup does; a wrapping row has no content width
+    // to push the page with, so R15's pin is kept only as the class.
+    group('msScroll', 'The chips', 'msRoot', { ...ROW('var(--space-1-5)'), ...PINNED, flexWrap: 'wrap', rowGap: 'var(--space-1-5)' }),
+    // The label is the first thing IN the wrapping row, not a column beside it: it still sits
+    // top-left as the mockup draws it, and every row after the first gets the strip's full
+    // width — the 90px a side column took was exactly what kept two chips off one line.
+    group('msLabel', 'What this row is', 'msScroll', { ...COLUMN_TIGHT('var(--space-0)'), paddingRight: 'var(--space-1)' }),
     place('msEach', FOR_EACH, 'One chip per move', 'msScroll', { template: C.moveChip, templateType: 'explicit' }),
     text('msEmpty', 'When there is nothing to chase', 'msScroll', 'No moves waiting. Every project has its next step in the week.', wide(T_META))
   ],
@@ -1071,9 +1095,18 @@ const DAY_HEADER: Tpl010Component = {
   ...iface(DAY_HEADER_FIELDS, []),
   nodes: [
     inputs('dhIn', 'The day', DAY_HEADER_FIELDS),
-    group('dhRoot', 'Day header', undefined, { ...COLUMN('var(--space-1)'), paddingBottom: 'var(--space-1)' }),
+    group('dhRoot', 'Day header', undefined, {
+      ...COLUMN('var(--space-1)'),
+      paddingLeft: 'var(--space-2)',
+      paddingRight: 'var(--space-2)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-1)',
+      borderBottomStyle: 'solid',
+      borderBottomWidth: 'var(--border-1)',
+      borderBottomColor: 'var(--border)'
+    }),
     group('dhTop', 'Day and hours', 'dhRoot', { ...ROW('var(--space-1)'), justifyContent: 'space-between' }),
-    text('dhDay', 'Which day', 'dhTop', '', { ...T_META, sizeMode: 'contentSize', color: 'var(--foreground)', fontWeight: 'var(--font-semibold)' }),
+    text('dhDay', 'Which day', 'dhTop', '', { ...T_META, sizeMode: 'contentSize', fontSize: 'var(--text-sm)', color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
     text('dhFocus', 'Focused hours', 'dhTop', '', { ...T_NUM, sizeMode: 'contentSize' }),
     group('dhTrack', 'Logged against planned', 'dhRoot', {
       sizeMode: 'explicit',
@@ -1132,20 +1165,21 @@ const DAY_COLUMN: Tpl010Component = {
       ['blockId', 'string'], ['projectId', 'string'], ['done', 'boolean']
     ]),
     group('dcRoot', 'Day column', undefined, {
-      ...COLUMN('var(--space-1)'),
+      ...COLUMN('var(--space-0)'),
       ...pinnedAs('planner-day'),
       alignItems: 'stretch',
-      borderRadius: 'var(--radius-md)',
-      borderLeftStyle: 'solid',
-      borderLeftWidth: 'var(--border-1)',
-      borderLeftColor: 'var(--border-subtle)',
-      paddingLeft: 'var(--space-2)',
+      borderRightStyle: 'solid',
+      borderRightWidth: 'var(--border-1)',
+      borderRightColor: 'var(--border)'
+    }),
+    place('dcHead', C.dayHeader, 'The head of this day', 'dcRoot'),
+    group('dcBody', 'The blocks', 'dcRoot', {
+      ...COLUMN('var(--space-1)'),
+      paddingLeft: 'var(--space-1)',
       paddingRight: 'var(--space-1)',
       paddingTop: 'var(--space-1)',
       paddingBottom: 'var(--space-2)'
     }),
-    place('dcHead', C.dayHeader, 'The head of this day', 'dcRoot'),
-    group('dcBody', 'The blocks', 'dcRoot', COLUMN('var(--space-1)')),
     place('dcEach', FOR_EACH, 'One block per thing planned', 'dcBody', { template: C.block, templateType: 'explicit' })
   ],
   connections: [
@@ -1178,7 +1212,15 @@ const CASH_STRIP: Tpl010Component = {
   instantiates: [C.cashEvent],
   nodes: [
     inputs('csIn', 'The money', [['rows', 'array'], ['balanceText', 'string'], ['invoicedText', 'string'], ['termsText', 'string']]),
-    group('csRoot', 'Cash strip', undefined, { ...COLUMN('var(--space-1)'), ...PINNED }),
+    group('csRoot', 'Cash strip', undefined, {
+      ...COLUMN('var(--space-1-5)'),
+      ...PINNED,
+      ...CARD,
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)'
+    }),
     group('csHead', 'The three numbers', 'csRoot', { ...ROW('var(--space-3)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
     text('csTitle', 'What this row is', 'csHead', 'Cash, next six weeks', { ...T_LABEL, sizeMode: 'contentSize' }),
     group('csNums', 'Balance, invoiced, terms', 'csHead', ROW_TIGHT('var(--space-3)')),
@@ -2216,8 +2258,8 @@ for (var d = 0; d < 6; d++) {
       what: blk.what || '',
       hoursText: hText(h) + ' h',
       done: !!blk.done,
-      tickColor: envMark(env),
-      tickFill: blk.done ? envMark(env) : 'transparent',
+      // R13b — the tick is ink, not the envelope: the left edge is the block's one colour.
+      tickFill: blk.done ? 'var(--foreground)' : 'transparent',
       tickInk: blk.done ? 'var(--surface)' : 'transparent',
       mark: envMark(env),
       soft: envSoft(env),
@@ -2360,6 +2402,7 @@ for (var k = 0; k < withMove.length; k++) {
     soft: isPlaced ? envSoft(env) : 'var(--surface)',
     placed: isPlaced,
     late: it.late,
+    edge: it.late ? 'var(--destructive)' : 'var(--border-strong)',
     hint: isPlaced ? 'Already in the week' : 'Put 30 minutes in the week'
   });
   if (!isPlaced && p2.kind === 'dormant' && !unplacedDormant) unplacedDormant = p2.name || '';
@@ -3258,7 +3301,7 @@ const APP_BAR: Tpl010Component = {
     text('abTitle', 'App name', 'abRoot', 'Envelopes', { ...T_TITLE, sizeMode: 'contentSize', as: 'h1' }),
     group('abNav', 'Which week', 'abRoot', ROW_TIGHT('var(--space-1)')),
     place('abPrev', BUTTON, 'The week before', 'abNav', BTN_ICON('icon-chevron-left', 'Previous week')),
-    text('abWeekLabel', 'The week on screen', 'abNav', '', { ...T_NUM, sizeMode: 'contentSize' }),
+    text('abWeekLabel', 'The week on screen', 'abNav', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)' }),
     place('abNext', BUTTON, 'The week after', 'abNav', BTN_ICON('icon-chevron-right', 'Next week')),
     group('abRight', 'Buttons', 'abRoot', ROW_TIGHT('var(--space-2)')),
     place('abProjects', BUTTON, 'Open the projects', 'abRight', { ...BTN_GHOST, label: 'Projects' }),
@@ -3309,7 +3352,7 @@ const PAGE_WEEK: Tpl010Component = {
   nodes: [
     { id: 'twPage', type: 'Page', label: 'Week', parameters: { title: 'Envelopes', urlPath: '' } },
     group('twRoot', 'Page', 'twPage', {
-      ...COLUMN('var(--space-3)'),
+      ...COLUMN('var(--space-2-5)'),
       ...pinnedAs('planner-page'),
       paddingTop: 'var(--space-3)',
       paddingBottom: 'var(--space-3)',
@@ -3330,7 +3373,7 @@ const PAGE_WEEK: Tpl010Component = {
     // ── The moves, the week, the money ──
     place('twMoves', C.movesStrip, 'The moves', 'twRoot'),
     place('twPicker', C.dayPicker, 'Which day, on a phone', 'twRoot'),
-    group('twWeekRow', 'The six days', 'twRoot', { ...ROW('var(--space-0)'), ...pinnedAs('planner-week'), alignItems: 'flex-start' }),
+    group('twWeekRow', 'The six days', 'twRoot', { ...ROW('var(--space-0)'), ...pinnedAs('planner-week'), ...CARD, alignItems: 'stretch' }),
     place('twDayEach', FOR_EACH, 'One column per day', 'twWeekRow', { template: C.dayColumn, templateType: 'explicit' }),
     place('twCash', C.cashStrip, 'The money', 'twRoot'),
 

@@ -182,9 +182,11 @@
       "parameters": {
         "text": "",
         "fontSize": "var(--text-xl)",
-        "fontWeight": "var(--font-semibold)",
+        "fontWeight": "var(--font-extrabold)",
         "lineHeight": "var(--leading-snug)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
         "sizeMode": "contentSize",
         "as": "h2"
       },
@@ -226,7 +228,7 @@
       "parent": "lgCard",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {

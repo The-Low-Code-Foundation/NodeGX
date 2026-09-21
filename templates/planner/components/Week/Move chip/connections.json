@@ -35,31 +35,13 @@
     },
     {
       "fromId": "mcIn",
-      "fromProperty": "ink",
-      "toId": "mcWorth",
-      "toProperty": "color"
-    },
-    {
-      "fromId": "mcIn",
       "fromProperty": "placed",
       "toId": "mcTick",
       "toProperty": "mounted"
     },
     {
       "fromId": "mcIn",
-      "fromProperty": "ink",
-      "toId": "mcTick",
-      "toProperty": "color"
-    },
-    {
-      "fromId": "mcIn",
-      "fromProperty": "soft",
-      "toId": "mcRoot",
-      "toProperty": "backgroundColor"
-    },
-    {
-      "fromId": "mcIn",
-      "fromProperty": "late",
+      "fromProperty": "edge",
       "toId": "mcRoot",
       "toProperty": "borderColor"
     },

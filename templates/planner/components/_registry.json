@@ -223,7 +223,7 @@
       "path": "Week/Envelope tile",
       "type": "visual",
       "nodeCount": 9,
-      "connectionCount": 8,
+      "connectionCount": 7,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -231,7 +231,7 @@
       "path": "Week/Move chip",
       "type": "visual",
       "nodeCount": 9,
-      "connectionCount": 15,
+      "connectionCount": 12,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -239,7 +239,7 @@
       "path": "Week/Block",
       "type": "visual",
       "nodeCount": 8,
-      "connectionCount": 16,
+      "connectionCount": 14,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -383,6 +383,6 @@
   "stats": {
     "totalComponents": 47,
     "totalNodes": 410,
-    "totalConnections": 758
+    "totalConnections": 752
   }
 }

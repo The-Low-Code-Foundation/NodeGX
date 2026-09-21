@@ -74,7 +74,13 @@
           "unit": "%"
         },
         "rowGap": "var(--space-1)",
-        "paddingBottom": "var(--space-1)"
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-1)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
       },
       "children": [
         "dhTop",
@@ -117,7 +123,7 @@
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
         "sizeMode": "contentSize",
-        "fontWeight": "var(--font-semibold)"
+        "fontWeight": "var(--font-bold)"
       },
       "x": 160,
       "y": 280
@@ -131,6 +137,7 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentSize"
       },
@@ -221,7 +228,7 @@
       "parent": "dhRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {

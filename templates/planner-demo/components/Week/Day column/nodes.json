@@ -132,17 +132,12 @@
           "value": 100,
           "unit": "%"
         },
-        "rowGap": "var(--space-1)",
+        "rowGap": "var(--space-0)",
         "cssClassName": "planner-pinned planner-day",
         "alignItems": "stretch",
-        "borderRadius": "var(--radius-md)",
-        "borderLeftStyle": "solid",
-        "borderLeftWidth": "var(--border-1)",
-        "borderLeftColor": "var(--border-subtle)",
-        "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-1)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-2)"
+        "borderRightStyle": "solid",
+        "borderRightWidth": "var(--border-1)",
+        "borderRightColor": "var(--border)"
       },
       "children": [
         "dcHead",
@@ -171,7 +166,11 @@
           "value": 100,
           "unit": "%"
         },
-        "rowGap": "var(--space-1)"
+        "rowGap": "var(--space-1)",
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-2)"
       },
       "children": [
         "dcEach"

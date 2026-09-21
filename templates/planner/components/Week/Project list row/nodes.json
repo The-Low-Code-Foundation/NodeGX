@@ -137,7 +137,7 @@
       "parent": "prTop",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--foreground)",
         "sizeMode": "contentSize",
         "fontWeight": "var(--font-semibold)"
@@ -154,6 +154,7 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentSize"
       },
@@ -167,7 +168,7 @@
       "parent": "prRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {

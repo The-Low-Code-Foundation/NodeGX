@@ -19,7 +19,7 @@
           "type": "boolean"
         }
       ],
-      "x": 410,
+      "x": 470,
       "y": 640
     },
     {
@@ -48,7 +48,7 @@
           "type": "boolean"
         }
       ],
-      "x": 410,
+      "x": 470,
       "y": 760
     },
     {
@@ -57,38 +57,29 @@
       "label": "Moves strip",
       "parameters": {
         "flexDirection": "row",
-        "alignItems": "center",
+        "alignItems": "flex-start",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
           "unit": "%"
         },
         "columnGap": "var(--space-2)",
-        "cssClassName": "planner-pinned"
+        "cssClassName": "planner-pinned",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
       },
       "children": [
-        "msLabel",
         "msScroll"
       ],
       "x": 40,
       "y": 40
-    },
-    {
-      "id": "msLabel",
-      "type": "Group",
-      "label": "What this row is",
-      "parent": "msRoot",
-      "parameters": {
-        "flexDirection": "column",
-        "sizeMode": "contentSize",
-        "rowGap": "var(--space-0)"
-      },
-      "children": [
-        "msTitle",
-        "msBy"
-      ],
-      "x": 100,
-      "y": 160
     },
     {
       "id": "msTitle",
@@ -97,7 +88,25 @@
       "parent": "msLabel",
       "parameters": {
         "text": "Moves",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "msBy",
+      "type": "Text",
+      "label": "In what order",
+      "parent": "msLabel",
+      "parameters": {
+        "text": "by urgency",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -107,22 +116,8 @@
         "textTransform": "uppercase",
         "sizeMode": "contentSize"
       },
-      "x": 160,
-      "y": 280
-    },
-    {
-      "id": "msBy",
-      "type": "Text",
-      "label": "In what order",
-      "parent": "msLabel",
-      "parameters": {
-        "text": "by urgency",
-        "fontSize": "var(--text-sm)",
-        "color": "var(--muted-foreground)",
-        "sizeMode": "contentSize"
-      },
-      "x": 160,
-      "y": 400
+      "x": 220,
+      "y": 520
     },
     {
       "id": "msScroll",
@@ -130,22 +125,43 @@
       "label": "The chips",
       "parent": "msRoot",
       "parameters": {
-        "cssClassName": "planner-scroll-x",
+        "flexDirection": "row",
+        "alignItems": "center",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
           "unit": "%"
         },
-        "flexDirection": "row",
-        "alignItems": "center",
-        "columnGap": "var(--space-2)"
+        "columnGap": "var(--space-1-5)",
+        "cssClassName": "planner-pinned",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1-5)"
       },
       "children": [
+        "msLabel",
         "msEach",
         "msEmpty"
       ],
       "x": 100,
-      "y": 520
+      "y": 160
+    },
+    {
+      "id": "msLabel",
+      "type": "Group",
+      "label": "What this row is",
+      "parent": "msScroll",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize",
+        "rowGap": "var(--space-0)",
+        "paddingRight": "var(--space-1)"
+      },
+      "children": [
+        "msTitle",
+        "msBy"
+      ],
+      "x": 160,
+      "y": 280
     },
     {
       "id": "msEach",
@@ -166,7 +182,7 @@
       "parent": "msScroll",
       "parameters": {
         "text": "No moves waiting. Every project has its next step in the week.",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {

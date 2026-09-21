@@ -123,15 +123,13 @@
       "parent": "etHead",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
-        "fontWeight": "var(--font-semibold)",
-        "color": "var(--muted-foreground)",
-        "letterSpacing": {
-          "value": 0.06,
-          "unit": "em"
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
         },
-        "textTransform": "uppercase",
-        "sizeMode": "contentSize"
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-bold)"
       },
       "x": 160,
       "y": 280
@@ -143,8 +141,12 @@
       "parent": "etHead",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentSize",
         "fontWeight": "var(--font-semibold)"
@@ -218,7 +220,7 @@
       "parent": "etRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {

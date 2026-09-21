@@ -88,9 +88,11 @@
       "parameters": {
         "text": "Envelopes",
         "fontSize": "var(--text-xl)",
-        "fontWeight": "var(--font-semibold)",
+        "fontWeight": "var(--font-extrabold)",
         "lineHeight": "var(--leading-snug)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
         "sizeMode": "contentSize",
         "as": "h1"
       },
@@ -153,8 +155,10 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
-        "sizeMode": "contentSize"
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
       },
       "x": 160,
       "y": 520

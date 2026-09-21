@@ -26,7 +26,7 @@ import {
   preparePlannerDemoArtefact,
   TEMPLATE_ID
 } from './tpl010Template';
-import { themeCss } from './tpl010Theme';
+import { CONTRAST_PAIRS, FONTS_URL, themeCss, TPL010_DARK_TOKENS, TPL010_TOKENS } from './tpl010Theme';
 
 jest.setTimeout(600_000);
 
@@ -148,6 +148,41 @@ describe('§1 the artefact is the build', () => {
     expect(componentsOf(built).map((c) => c.name).sort()).toEqual(['/App', ...TPL010_COMPONENTS.map((c) => `/${c.path}`)].sort());
     const router = allNodes(built).find((n) => n.node.type === 'Router')?.node;
     expect((router?.parameters as { pages?: unknown })?.pages).toEqual({ startPage: C.pageWeek, routes: [C.pageWeek, C.pageSignIn] });
+  });
+
+  it('🔴 AC10 / R2.1-5 — every pair the planner draws clears its floor, recomputed in BOTH palettes', () => {
+    // The theme's header said a gate recomputed these; until R2.1 none did.
+    const lum = (hex: string) => {
+      const n = hex.replace('#', '');
+      const [r, g, b] = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const ratio = (a: string, b: string) => {
+      const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+    const light = new Map(TPL010_TOKENS.map((t) => [t.name, t.value]));
+    const dark = new Map([...light, ...TPL010_DARK_TOKENS.map((t) => [t.name, t.value] as [string, string])]);
+    const failing: string[] = [];
+    for (const [name, set] of [['light', light], ['dark', dark]] as const) {
+      for (const { fg, bg, floor } of CONTRAST_PAIRS) {
+        const f = set.get(fg);
+        const b = set.get(bg);
+        expect([fg, f]).toEqual([fg, expect.stringMatching(/^#[0-9a-f]{6}$/i)]);
+        expect([bg, b]).toEqual([bg, expect.stringMatching(/^#[0-9a-f]{6}$/i)]);
+        const r = ratio(f as string, b as string);
+        if (r < floor) failing.push(`${name}: ${fg} on ${bg} = ${r.toFixed(2)} < ${floor}`);
+      }
+    }
+    expect(failing).toEqual([]);
+  });
+
+  it('🔴 R13a — the mockup\u2019s three faces: the import is the first rule, and the three tokens are set', () => {
+    expect(themeCss().split('\n')[0]).toBe(`@import url("${FONTS_URL}");`);
+    const set = new Map(TPL010_TOKENS.map((t) => [t.name, t.value]));
+    expect(set.get('--font-sans')).toMatch(/^"Public Sans",/);
+    expect(set.get('--font-display')).toMatch(/^"Archivo",/);
+    expect(set.get('--font-mono')).toMatch(/^"IBM Plex Mono",/);
   });
 
   it('🔴 R5b — the page scrolls when the week does not fit, in the template and the demo, and never sideways', () => {

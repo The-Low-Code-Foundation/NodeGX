@@ -12,12 +12,6 @@
     {
       "fromId": "etIn",
       "fromProperty": "mark",
-      "toId": "etName",
-      "toProperty": "color"
-    },
-    {
-      "fromId": "etIn",
-      "fromProperty": "mark",
       "toId": "etRoot",
       "toProperty": "borderTopColor"
     },

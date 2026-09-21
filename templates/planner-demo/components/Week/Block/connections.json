@@ -17,12 +17,6 @@
     },
     {
       "fromId": "bkIn",
-      "fromProperty": "tickColor",
-      "toId": "bkTick",
-      "toProperty": "borderColor"
-    },
-    {
-      "fromId": "bkIn",
       "fromProperty": "tickFill",
       "toId": "bkTick",
       "toProperty": "backgroundColor"
@@ -38,12 +32,6 @@
       "fromProperty": "projectName",
       "toId": "bkWho",
       "toProperty": "label"
-    },
-    {
-      "fromId": "bkIn",
-      "fromProperty": "mark",
-      "toId": "bkWho",
-      "toProperty": "color"
     },
     {
       "fromId": "bkIn",

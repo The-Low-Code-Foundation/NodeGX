@@ -132,7 +132,11 @@ export const TPL010_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   { name: '--radius-lg', value: '8px' },
   { name: '--radius-xl', value: '8px' },
   { name: '--radius-2xl', value: '10px' },
-  { name: '--font-sans', value: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' },
+  // R13a (2026-09-21) — the approved mockup's three faces, loaded by the @import at the top of
+  // themeCss(). Offline, each stack falls through to the system's own and nothing breaks.
+  { name: '--font-sans', value: '"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif' },
+  { name: '--font-display', value: '"Archivo", "Public Sans", system-ui, sans-serif' },
+  { name: '--font-mono', value: '"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace' },
   // What the card and the drawer sit on. A token, not a literal, so the two dim the page
   // by the same amount and a re-theme reaches them.
   { name: '--scrim', value: 'rgba(20, 26, 32, 0.45)' },
@@ -189,7 +193,10 @@ export const CONTRAST_PAIRS: ReadonlyArray<{ fg: string; bg: string; floor: numb
   { fg: '--border-control', bg: '--background', floor: 3 },
   { fg: '--border-control', bg: '--surface', floor: 3 },
   // The envelopes: the mark on every ground it is drawn on, then the same hue as text.
+  // R13b — a block's words are ink now, not the envelope's colour, and they sit on its soft fill.
   ...ENVELOPE_KEYS.flatMap((k) => [
+    { fg: '--foreground', bg: `--env-${k}-soft`, floor: 4.5 },
+    { fg: '--muted-foreground', bg: `--env-${k}-soft`, floor: 4.5 },
     { fg: `--env-${k}`, bg: '--surface', floor: 3 },
     { fg: `--env-${k}`, bg: '--background', floor: 3 },
     { fg: `--env-${k}`, bg: `--env-${k}-soft`, floor: 3 },
@@ -235,6 +242,14 @@ export const THEME_TO_LIGHT_CLASS = 'planner-theme-to-light';
  * and a narrow laptop window or a tablet in portrait is as unable to give it as a phone is.
  */
 export const PHONE_MAX_WIDTH = 700;
+
+/** R5a — the mockup's 1060px plus the page's own 16px gutters, rounded. */
+export const PAGE_MAX_WIDTH = 1100;
+
+/** R13a — the three families and the weights the mockup asks for, and nothing else. */
+export const FONTS_URL =
+  'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@90,600;90,700;90,800' +
+  '&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap';
 /** The day picker exists only under the breakpoint; this is the class that hides it above. */
 export const PHONE_PICKER_CLASS = 'planner-daypicker';
 
@@ -242,7 +257,23 @@ export function themeCss(): string {
   const tokens = TPL010_DARK_TOKENS.map((t) => `    ${t.name}: ${t.value};`).join('\n');
   const hide = (cls: string) => `.${cls} { display: none !important; }`;
   return [
+    // R13a — must be the first rule in the stylesheet, or the browser ignores it.
+    `@import url("${FONTS_URL}");`,
     'html, body { background-color: var(--background); }',
+    '',
+    '/* R5a — the week is designed at the mockup\u2019s width; above it the page shows ground either side. */',
+    `.planner-page { max-width: ${PAGE_MAX_WIDTH}px; margin-left: auto; margin-right: auto; }`,
+    '/* R13a — Archivo is drawn at 90% width in the mockup; no port sets font-stretch. */',
+    '.planner-display { font-stretch: 90%; letter-spacing: -0.01em; }',
+    '/* R2.1 — the six days are one box with a line between each, as the mockup draws them. */',
+    '.planner-week { overflow: hidden; }',
+    '.planner-week > .planner-day:last-child { border-right-width: 0 !important; }',
+    '/* R2.1 — six cash events fill the strip rather than stopping at 60% of it. */',
+    '.planner-cash-ev { flex: 1 1 110px !important; }',
+    '/* R7a — a chip is never wider than its strip: the move\u2019s words give way, as the mockup\u2019s do.',
+    '   On a laptop no chip reaches it; on a phone the 685px Founder A chip ends in an ellipsis. */',
+    '.planner-chip { max-width: 100%; min-width: 0; overflow: hidden; }',
+    '.planner-chip-what { flex: 0 1 auto !important; min-width: 0 !important; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }',
     '',
     '/* R15 — a sideways strip inside the page grid must not widen the page. */',
     '.planner-scroll-x { min-width: 0; overflow-x: auto; }',

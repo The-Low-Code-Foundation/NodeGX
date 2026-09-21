@@ -29,7 +29,7 @@
           "value": 100,
           "unit": "%"
         },
-        "rowGap": "var(--space-3)",
+        "rowGap": "var(--space-2-5)",
         "cssClassName": "planner-pinned planner-page",
         "paddingTop": "var(--space-3)",
         "paddingBottom": "var(--space-3)",
@@ -88,7 +88,7 @@
       "parent": "twRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {
@@ -156,14 +156,19 @@
       "parent": "twRoot",
       "parameters": {
         "flexDirection": "row",
-        "alignItems": "flex-start",
+        "alignItems": "stretch",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
           "unit": "%"
         },
         "columnGap": "var(--space-0)",
-        "cssClassName": "planner-pinned planner-week"
+        "cssClassName": "planner-pinned planner-week",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)"
       },
       "children": [
         "twDayEach"

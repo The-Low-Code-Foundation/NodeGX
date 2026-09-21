@@ -59,6 +59,11 @@
           "type": "boolean"
         },
         {
+          "name": "edge",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "hint",
           "plug": "output",
           "type": "string"
@@ -104,16 +109,17 @@
         "flexDirection": "row",
         "alignItems": "center",
         "sizeMode": "contentSize",
-        "columnGap": "var(--space-2)",
+        "columnGap": "var(--space-1-5)",
+        "cssClassName": "planner-chip",
         "backgroundColor": "var(--surface)",
         "borderStyle": "solid",
         "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border)",
-        "borderRadius": "var(--radius-md)",
+        "borderColor": "var(--border-strong)",
+        "borderRadius": "var(--radius-full)",
         "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-2)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-1)"
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)"
       },
       "children": [
         "mcDot",
@@ -153,7 +159,7 @@
       "parent": "mcRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--foreground)",
         "sizeMode": "contentSize",
         "fontWeight": "var(--font-semibold)"
@@ -168,9 +174,10 @@
       "parent": "mcRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
-        "sizeMode": "contentSize"
+        "sizeMode": "contentSize",
+        "cssClassName": "planner-chip-what"
       },
       "x": 100,
       "y": 400
@@ -182,7 +189,7 @@
       "parent": "mcRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize",
         "fontWeight": "var(--font-semibold)"
@@ -197,7 +204,7 @@
       "parent": "mcRoot",
       "parameters": {
         "text": "✓",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize",
         "fontWeight": "var(--font-semibold)"
@@ -215,8 +222,8 @@
         "color": "var(--muted-foreground)",
         "borderStyle": "none",
         "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-1)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
         "sizeMode": "contentSize",
         "label": "+",
         "fontSize": {
@@ -224,11 +231,11 @@
           "unit": "px"
         },
         "lineHeight": {
-          "value": 16,
+          "value": 13,
           "unit": "px"
         },
-        "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-2)"
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)"
       },
       "x": 100,
       "y": 760

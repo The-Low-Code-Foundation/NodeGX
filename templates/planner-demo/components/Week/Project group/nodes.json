@@ -101,7 +101,10 @@
       "parent": "pgHead",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -123,6 +126,7 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentSize"
       },

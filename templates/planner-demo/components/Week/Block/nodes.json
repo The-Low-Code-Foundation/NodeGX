@@ -39,11 +39,6 @@
           "type": "boolean"
         },
         {
-          "name": "tickColor",
-          "plug": "output",
-          "type": "string"
-        },
-        {
           "name": "tickFill",
           "plug": "output",
           "type": "string"
@@ -136,7 +131,7 @@
           "unit": "px"
         },
         "paddingLeft": "var(--space-1)",
-        "paddingRight": "var(--space-1)",
+        "paddingRight": "var(--space-1-5)",
         "paddingTop": "var(--space-1)",
         "paddingBottom": "var(--space-1)"
       },
@@ -219,10 +214,14 @@
         "paddingBottom": "var(--space-0)",
         "borderRadius": "var(--radius-md)",
         "backgroundColor": "transparent",
-        "color": "var(--muted-foreground)",
+        "color": "var(--foreground)",
         "borderStyle": "none",
-        "fontSize": "var(--text-sm)",
-        "fontWeight": "var(--font-semibold)"
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "styleCss": "text-align: left; justify-content: flex-start;"
       },
       "x": 160,
       "y": 400
@@ -242,7 +241,7 @@
         "backgroundColor": "transparent",
         "color": "var(--muted-foreground)",
         "borderStyle": "none",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "width": {
           "value": 100,
           "unit": "%"
@@ -268,6 +267,7 @@
         "color": "var(--foreground)",
         "borderStyle": "none",
         "fontSize": "var(--text-sm)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums"
       },
       "x": 100,

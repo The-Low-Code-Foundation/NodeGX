@@ -20,7 +20,7 @@ R2.4 before R2.3 and R2.2 because both need the editors R2.4 adds.
 
 ---
 
-## R2.1 — The look: it is close, and it is not the mockup
+## R2.1 — The look: it is close, and it is not the mockup — ✅ built s1, waiting on R2.1-6 (Richard)
 
 **Richard:** *"it's close, but ugly in comparison. Font needs changing to match mockup, background colours of the cards
 aren't the same transparency maybe? Moves by urgency is very hard to navigate scrolling left to right. The 'cash next six
@@ -78,11 +78,11 @@ visual noise for ADHD people like me."*
 
 | AC | Criterion |
 |---|---|
-| R2.1-1 | Rendered at 1280×900 in both palettes beside `envelopes-b.html` at the same size: a person cannot tell which is the mockup from the type. Public Sans, Archivo and IBM Plex Mono are what `getComputedStyle` reports on body, h1 and a block's hours |
-| R2.1-2 | The moves strip has **no horizontal scrollbar** at 1280 and at 1100; the chips wrap; `scrollWidth` still equals the viewport (R15) |
-| R2.1-3 | The cash events fill the strip's width at 1280 with no scrollbar; the header line sits inside the same box |
-| R2.1-4 | On any block exactly one element has an envelope colour in its computed style, besides the background (R13b) |
-| R2.1-5 | AC10 recomputed: every remaining pair passes AA in both palettes |
+| R2.1-1 | Rendered at 1280×900 in both palettes beside `envelopes-b.html` at the same size: a person cannot tell which is the mockup from the type. Public Sans, Archivo and IBM Plex Mono are what `getComputedStyle` reports on body, h1 and a block's hours — ✅ s1: all three `document.fonts` loaded; body `"Public Sans"`, h1 `Archivo 800 90%`, hours `"IBM Plex Mono"`, in dark and light. The "cannot tell" half is R2.1-6 |
+| R2.1-2 | The moves strip has **no horizontal scrollbar** at 1280 and at 1100; the chips wrap; `scrollWidth` still equals the viewport (R15) — ✅ s1: 1280 → 1280, 1100 → 1100, 0 overflowing; 11 chips on 8 rows |
+| R2.1-3 | The cash events fill the strip's width at 1280 with no scrollbar; the header line sits inside the same box — ✅ s1: six events at `flex: 1 1 110px` span the box |
+| R2.1-4 | On any block exactly one element has an envelope colour in its computed style, besides the background (R13b) — ✅ s1, measured in the DOM: 22 blocks, **0** with the mark on a second element, both palettes |
+| R2.1-5 | AC10 recomputed: every remaining pair passes AA in both palettes — ✅ s1: **the gate did not exist** (the theme's header claimed one); written now, with the ten new text-on-soft pairs R13b creates. Tightest: 5.00 (light muted text on Building's soft) |
 | R2.1-6 | Richard, on his laptop: *"that's the mockup"* — or one named thing that still is not |
 
 ---
@@ -414,9 +414,9 @@ if it's below the fold. Scrolling down doesn't work."*
 | AC | Criterion |
 |---|---|
 | R2.6-1 | At 1440×800 every text on the page is reachable (`measure-from-disk` 0 unreachable) and `scrollWidth` = 1440 — ✅ s1: 0 unreachable, 1440, `pageHeight` 806, 0 console errors. The case he hit, **1423×680** (a 1423×800 screen less the browser's chrome): **28 unreachable before, 0 after**, the page 806 tall and scrolling |
-| R2.6-2 | At 1280×900 `pageHeight` ≤ 900 — the week still fits where R5 was ruled — in both palettes, after R2.1 — 🟡 s1, **before** R2.1: 900 / 1280 in dark and light (driven, the ☼ toggle), 0 errors. Re-measure after R2.1 |
+| R2.6-2 | At 1280×900 `pageHeight` ≤ 900 — the week still fits where R5 was ruled — in both palettes, after R2.1 — ❌ **as written; ✅ as R5b means it.** Before R2.1: 900. After: `pageHeight` **990** — the week ends at ~855 and is inside the fold; the cash strip is one scroll below. The approved mockup renders the same way at 1280×900 (its cash strip is below the fold too), so "that's the mockup" and "≤ 900" cannot both hold. **Richard's call** — R7a's six-chips-plus-"+N more" fallback would buy ~100px |
 | R2.6-3 | At 390×844 nothing regressed from s3: 0 unreachable, `scrollWidth` 390, 0 console errors — ✅ s1: identical to the committed s3 build (0 / 390 / 993 tall / 16 overflowing / 0 errors — the 16 were there before; R7a is the likely fix) |
-| R2.6-4 | The card, the drawer and the sheets still open **fixed** over a scrolled page (they are `position: fixed`; measured after scrolling 300px) — 🟡 s1: **the log sheet** opened at scrollTop 213 (the page's maximum at 1423×680) sits at 35–557 inside a 593 viewport, under a fixed scrim. The card and the drawer are opened from the app bar, which is scrolled away at that point — not yet measured |
+| R2.6-4 | The card, the drawer and the sheets still open **fixed** over a scrolled page (they are `position: fixed`; measured after scrolling 300px) — ✅ s1: card 49–564 in a 613 viewport and the drawer's heading at 16, both after `scrollTop = 300`; **the log sheet** opened at scrollTop 213 (the page's maximum at 1423×680) sits at 35–557 inside a 593 viewport, under a fixed scrim. The card and the drawer are opened from the app bar, which is scrolled away at that point — not yet measured |
 | R2.6-5 | Richard, on his laptop: the cash strip is there when he scrolls |
 
 ---
@@ -447,3 +447,22 @@ every width. One new gate pins both (**tpl010 31/31**). Readings: see R2.6's tab
 not see:** `measure-from-disk` at 1423×800 showed the cash strip on screen and would have passed the old build too —
 the bug only appears at the viewport a 1423×800 *screen* leaves, which is ~1423×593–680. Measure at that height from
 now on, not at the screen size.
+
+### s1 (cont.) — R2.1 built
+**Done, gated, rendered and looked at** in both palettes at 1280, 1100, 1423×680 and 390. Gates **tpl010 33/33** (two new:
+AC10's contrast recomputed in both palettes, R13a's import and tokens), tpl008 25/25. 0 console errors, 0 unreachable
+at every viewport. Where the build departs from the task's own words, and why:
+- **A done tick is filled with `--foreground`, not the envelope mark** (work item 6 said mark). With the mark, a logged
+  block carries its colour twice and R2.1-4 fails; ink keeps R13b's one carrier and the ✓ still reads at a glance.
+- **The chip keeps its `+`.** The mockup has none, and removing it would have fitted two chips per line at once — but
+  the chip's Group is not focusable, so the `+` is the only keyboard path to *put it in the week*. Instead the strip's
+  label moved **into** the wrapping row as its first item, which gave every later row the full width.
+- **T_META is 12px** (`--text-xs`), where the vocabulary's `meta` is 14. The mockup's small line is 12 everywhere, and
+  at 14 no two chips fit one line. It reaches the card and the sheets too.
+- **Two defects found by rendering, fixed:** a chip's `late` (a boolean) was wired into `borderColor`, so a late move
+  never drew its red edge (now `edge`, a colour); and AC10's contrast gate, which the theme's header comment described,
+  was never written.
+- **The phone's 685px chip (AC8's open question) is answered by R7a:** `.planner-chip { max-width: 100% }` and the
+  move's words end in an ellipsis, as the mockup's do. 390×844: overflowing 16 → 1 (the cash row, which scrolls by design).
+- **Not done:** the week's Saturday column is not narrowed (the mockup's `.6fr`), the day header's bar is one colour
+  (the mockup segments it by envelope), and done blocks are not struck through. None is in R2.1's work list.

@@ -210,9 +210,11 @@
       "parameters": {
         "text": "",
         "fontSize": "var(--text-xl)",
-        "fontWeight": "var(--font-semibold)",
+        "fontWeight": "var(--font-extrabold)",
         "lineHeight": "var(--leading-snug)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
@@ -230,7 +232,7 @@
       "parent": "pdNames",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {
@@ -309,7 +311,10 @@
       "parent": "pdMove",
       "parameters": {
         "text": "Next move",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -370,7 +375,7 @@
       "parent": "pdMoveMeta",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize",
         "fontWeight": "var(--font-semibold)"
@@ -385,7 +390,7 @@
       "parent": "pdMoveMeta",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize"
       },
@@ -442,7 +447,10 @@
       "parent": "pdWeek",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -517,7 +525,10 @@
       "parent": "pdHistory",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -570,7 +581,10 @@
       "parent": "pdFacts",
       "parameters": {
         "text": "Facts",
-        "fontSize": "var(--text-sm)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
         "letterSpacing": {
@@ -632,7 +646,7 @@
       "parent": "pdSayBox",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {

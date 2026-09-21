@@ -55,11 +55,12 @@
         "flexDirection": "column",
         "sizeMode": "contentSize",
         "rowGap": "var(--space-0)",
+        "cssClassName": "planner-cash-ev",
         "minWidth": {
-          "value": 128,
+          "value": 110,
           "unit": "px"
         },
-        "backgroundColor": "var(--surface)",
+        "backgroundColor": "var(--background)",
         "borderStyle": "solid",
         "borderWidth": "var(--border-1)",
         "borderRadius": "var(--radius-md)",
@@ -84,7 +85,7 @@
       "parent": "ceRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {
@@ -104,6 +105,7 @@
         "text": "",
         "fontSize": "var(--text-sm)",
         "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
         "fontVariantNumeric": "tabular-nums",
         "sizeMode": "contentHeight",
         "width": {
@@ -122,7 +124,7 @@
       "parent": "ceRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {
@@ -140,7 +142,7 @@
       "parent": "ceRoot",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-sm)",
+        "fontSize": "var(--text-xs)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {
