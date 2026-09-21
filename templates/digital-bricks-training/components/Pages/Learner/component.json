@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e3ebd137-c26f-4f5b-8df7-ea5b6a462368",
+  "name": "Learner",
+  "path": "/Pages/Learner",
+  "type": "page",
+  "created": "2026-09-21T13:01:49.422Z",
+  "modified": "2026-09-21T13:12:45.717Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's page about one learner: three facts, which programme, then their programme exactly as they read it, or the activity log — two readings of one assembly, each pointing at the other."
+}

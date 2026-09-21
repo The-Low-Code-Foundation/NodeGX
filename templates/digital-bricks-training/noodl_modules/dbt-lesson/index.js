@@ -1493,6 +1493,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
   var TL_COPY = {
     fold: 'Fold this back up',
     ask: 'Ask your coach about this',
+    showInLog: 'Show in the activity log',
     comments_one: '{n} comment',
     comments_other: '{n} comments',
     notes_one: '{n} note',
@@ -2035,6 +2036,32 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
           )
         : null,
       /*
+       * SHOW IN THE ACTIVITY LOG (TASK-L165 §4, ported from PathList.tsx's
+       * `mode === "staff" && open`), on a COACH's open card only. The programme
+       * and the log are two readings of one assembly and each points at the
+       * other; this is the programme's half. It EMITS the entry's id and nothing
+       * else — the page owns both directions of "which row is being pointed
+       * at" (L138), so the row decides nothing about where that lands.
+       *
+       * A learner never sees it: they have no activity log, and a control that
+       * leads nowhere is L81's rung.
+       */
+      open && audience === 'coach'
+        ? h(
+            'button',
+            {
+              type: 'button',
+              className: 'path-show-in-log',
+              onClick: function () {
+                emit(p, 'onAnchorKind', kind);
+                emit(p, 'onAnchorId', str(entry.id));
+                emit(p, 'onShowInLog');
+              }
+            },
+            TL_COPY.showInLog
+          )
+        : null,
+      /*
        * Re-folding is reversible, and only offered on rows that STARTED folded:
        * `now` and `ahead` are never collapsible, so there is no control on them
        * to press by accident.
@@ -2101,6 +2128,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
       onToggled: sig('Toggled', 'The reader opened or re-folded this row.'),
       onOpened: sig('Opened', 'The reader opened this row. Fires on open only.'),
       onAskRequested: sig('Ask requested', 'The learner asked their coach about this entry. Anchor kind and Anchor id already hold what it is about.'),
+      onShowInLog: sig('Show in log', 'A coach asked to see this entry in the activity log. Anchor id already holds which one. Never fires for a learner.'),
       onAnchorKind: out('string', 'Anchor kind', 'The entry’s kind — what the question is about.'),
       onAnchorId: out('string', 'Anchor id', 'The entry’s id — what the question is about.')
     }

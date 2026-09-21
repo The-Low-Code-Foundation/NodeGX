@@ -1,0 +1,313 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cf72f86e-30db-4d73-ad89-8ddc80917e46",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ps_in",
+      "type": "Component Inputs",
+      "label": "Their programmes and everything that happened",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "programmes",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "entries",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "history",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "dimensions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "endsOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "ps_opts",
+      "type": "JavaScriptFunction",
+      "label": "What the select offers — never reads the select",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * WHAT THE SELECT OFFERS (TASK-L165 §2). PORTED: ProgrammeScope.tsx.\n *\n * THIS FUNCTION MUST NEVER READ THE SELECT'S OWN VALUE. A Dropdown handed a new\n * `items` array resets itself to its `value` parameter (L164, measured), so\n * options recomputed on every choice would snap the select straight back to\n * the current programme in the same tick, and the control would look dead.\n *\n * \"current\" means the CURRENT programme — what is on their page now. The\n * product uses \"\" for it; a NodeGX Dropdown adds its own hidden placeholder\n * option at value \"\", so two options shared one value and choosing the\n * current programme again after a finished one was ambiguous (measured on the\n * first render). A word nobody's programme id can be is unambiguous, and the\n * default is still a static parameter that needs no wire.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('People/Programme scope: no people.learner copy');\nconst programmes = plain(Inputs.programmes) || [];\n\n/* PORTED, NEVER RE-DERIVED: currentProgramme -> src/lib/programme/current.ts.\n   The active, unarchived one whose agreed end has not passed, nearest end\n   first; among EXPIRED ends the nearest is the LATEST (the product's first\n   implementation got that direction wrong); then the most recently created. */\nconst currentProgramme = (list, now) => {\n  const live = list.filter((p) => p.status === 'active' && p.archivedAt === null);\n  if (live.length === 0) return null;\n  const today = now.toISOString().slice(0, 10);\n  const expired = (p) => p.endsOn !== null && p.endsOn !== undefined && p.endsOn < today;\n  return live.slice().sort((a, b) => {\n    if (expired(a) !== expired(b)) return expired(a) ? 1 : -1;\n    if (a.endsOn !== b.endsOn) {\n      if (a.endsOn === null) return 1;\n      if (b.endsOn === null) return -1;\n      const nearestFirst = a.endsOn < b.endsOn ? -1 : 1;\n      return expired(a) ? -nearestFirst : nearestFirst;\n    }\n    return a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0;\n  })[0];\n};\n\nconst FORMAT = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });\nconst day = (d) => (d ? FORMAT.format(new Date(d + 'T12:00:00.000Z')) : '');\n\n/* STRUCTURALLY ABSENT BELOW TWO (sprint 35 §5.2): a select with one option is a\n   control that does nothing, and the common case must not get worse. */\nOutputs.hasSelect = programmes.length >= 2;\nOutputs.label = W.scope.label;\nconst current = currentProgramme(programmes, new Date());\nOutputs.options = [{ Label: current ? fill(W.scope.current, { title: current.title }) : W.scope.everything, Value: 'current' }].concat(\n  programmes\n    .filter((p) => !current || p.id !== current.id)\n    .map((p) => ({\n      Label: fill(W.scope.option, { title: p.title, from: day(p.startsOn) }) +\n        (p.endsOn ? fill(W.scope.optionTo, { to: day(p.endsOn) }) : '') +\n        (p.archivedAt !== null ? W.scope.finished : ''),\n      Value: p.id\n    }))\n);\n"
+      },
+      "metadata": {
+        "comment": "Reads the programmes and the words, and nothing else. See the script's first comment: this is the half of the control that must not depend on what was chosen."
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-programmes",
+          "displayName": "programmes",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasSelect",
+          "displayName": "hasSelect",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "displayName": "label",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-options",
+          "displayName": "options",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ps_fn",
+      "type": "JavaScriptFunction",
+      "label": "What is being read",
+      "x": 560,
+      "y": 420,
+      "parameters": {
+        "functionScript": "/*\n * WHAT IS BEING READ (TASK-L165 §2). BOTH surfaces read this, which is why the\n * control sits above the nav rather than inside either (L137: the selector sat\n * on one tab only, so on the tab named after the programme there was no way to\n * say which programme you were reading).\n *\n *  - \"current\" is what is on their page NOW — the live list, untouched, which is the\n *    list the learner's own page is built from. A coach reading the current\n *    programme reads exactly what their client reads (L116, criterion 1).\n *  - any other id is a FINISHED programme's history: a STRICT filter, because\n *    that is what the product's history read returns (scopeToProgramme,\n *    model.ts). In the product it is a separate, gated fetch; here it is the\n *    fixture's `history`.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('People/Programme scope: no people.learner copy');\nconst live = plain(Inputs.entries);\nif (!live) return;\nconst programmes = plain(Inputs.programmes) || [];\nconst history = plain(Inputs.history) || [];\nconst dimensions = plain(Inputs.dimensions) || [];\nconst chosen = String(Inputs.chosen || '');\nconst viewing = chosen && chosen !== 'current' ? programmes.find((p) => p.id === chosen) || null : null;\n\nconst FORMAT = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });\nconst day = (d) => (d ? FORMAT.format(new Date(d + 'T12:00:00.000Z')) : '');\n\nif (!viewing) {\n  Outputs.entries = live;\n  /* The live programme's own objectives. A second agreement's targets drawn on\n     this programme's axis is the average L127 §2 forbids in a different\n     costume, so the dimensions are scoped with the entries. */\n  const ids = new Set(live.map((e) => e.programmeId).filter(Boolean));\n  Outputs.dimensions = dimensions.filter((d) => ids.has(d.programmeId));\n  Outputs.endsOn = Inputs.endsOn || '';\n  Outputs.viewing = false;\n  Outputs.reading = '';\n} else {\n  Outputs.entries = live.concat(history).filter((e) => e.programmeId === viewing.id);\n  Outputs.dimensions = dimensions.filter((d) => d.programmeId === viewing.id);\n  Outputs.endsOn = viewing.endsOn || '';\n  Outputs.viewing = true;\n  /* A COUNT of nothing, and never a mark: whether the person \"finished\" is not a\n     question this product asks, and a history page is exactly where that\n     framing would come back looking harmless (L124 §4). */\n  Outputs.reading = fill(W.scope.reading, {\n    title: viewing.title,\n    from: day(viewing.startsOn),\n    to: viewing.endsOn ? fill(W.scope.optionTo, { to: day(viewing.endsOn) }) : ''\n  });\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-entries",
+          "displayName": "entries",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-programmes",
+          "displayName": "programmes",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-history",
+          "displayName": "history",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-dimensions",
+          "displayName": "dimensions",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-chosen",
+          "displayName": "chosen",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-endsOn",
+          "displayName": "endsOn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-entries",
+          "displayName": "entries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dimensions",
+          "displayName": "dimensions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endsOn",
+          "displayName": "endsOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-viewing",
+          "displayName": "viewing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reading",
+          "displayName": "reading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ps_root",
+      "type": "Group",
+      "label": "The scope — absent below two programmes",
+      "x": 40,
+      "y": 420,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "dbt-programme-scope"
+      },
+      "metadata": {
+        "comment": "`mounted`, never `visible`: absent means not in the tree (the commerce: null posture), not an invisible box holding its space."
+      },
+      "children": [
+        "ps_lab",
+        "ps_sel",
+        "ps_read"
+      ]
+    },
+    {
+      "id": "ps_lab",
+      "type": "Text",
+      "label": "Which programme",
+      "parent": "ps_root",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 540
+    },
+    {
+      "id": "ps_sel",
+      "type": "net.noodl.controls.options",
+      "label": "Programme",
+      "parent": "ps_root",
+      "parameters": {
+        "value": "current",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "dbt-programme-scope-select"
+      },
+      "metadata": {
+        "comment": "Value \"current\" is the current programme — a static default, so nothing needs to feed it and nothing can reset it. Not \"\" (the product's): this Dropdown puts its own hidden placeholder at \"\"."
+      },
+      "x": 100,
+      "y": 660
+    },
+    {
+      "id": "ps_read",
+      "type": "Text",
+      "label": "Which programme is being read",
+      "parent": "ps_root",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 780
+    },
+    {
+      "id": "ps_out",
+      "type": "Component Outputs",
+      "label": "What both surfaces read",
+      "x": 1000,
+      "y": 420,
+      "ports": [
+        {
+          "name": "entries",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "dimensions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "endsOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "viewing",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "ps_root"
+  ]
+}

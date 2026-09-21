@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a9959bb1-ea25-4ed5-9882-160184a31998",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ff_in",
+      "fromProperty": "copy",
+      "toId": "ff_load",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "ff_vfil",
+      "fromProperty": "value",
+      "toId": "ff_save",
+      "toProperty": "in-filter"
+    },
+    {
+      "fromId": "ff_vld",
+      "fromProperty": "value",
+      "toId": "ff_save",
+      "toProperty": "in-loaded"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "kind",
+      "toId": "ff_tog",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "toggleKind",
+      "toId": "ff_tog",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "clear",
+      "toId": "ff_clr",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "rowId",
+      "toId": "ff_row",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "toggleRow",
+      "toId": "ff_row",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "feed",
+      "toId": "ff_pipe",
+      "toProperty": "in-feed"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "programmeRows",
+      "toId": "ff_pipe",
+      "toProperty": "in-programmeRows"
+    },
+    {
+      "fromId": "ff_in",
+      "fromProperty": "copy",
+      "toId": "ff_pipe",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "ff_vfil",
+      "fromProperty": "value",
+      "toId": "ff_pipe",
+      "toProperty": "in-filter"
+    },
+    {
+      "fromId": "ff_vld",
+      "fromProperty": "value",
+      "toId": "ff_pipe",
+      "toProperty": "in-loaded"
+    },
+    {
+      "fromId": "ff_vopen",
+      "fromProperty": "value",
+      "toId": "ff_pipe",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "ff_vfoc",
+      "fromProperty": "value",
+      "toId": "ff_pipe",
+      "toProperty": "in-focus"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-chips",
+      "toId": "ff_out",
+      "toProperty": "chips"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-hasChips",
+      "toId": "ff_out",
+      "toProperty": "hasChips"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-showEverything",
+      "toId": "ff_out",
+      "toProperty": "showEverything"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-showEverythingLabel",
+      "toId": "ff_out",
+      "toProperty": "showEverythingLabel"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-lede",
+      "toId": "ff_out",
+      "toProperty": "lede"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-rows",
+      "toId": "ff_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-hasRows",
+      "toId": "ff_out",
+      "toProperty": "hasRows"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-hasEmpty",
+      "toId": "ff_out",
+      "toProperty": "hasEmpty"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-emptyText",
+      "toId": "ff_out",
+      "toProperty": "emptyText"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-scrollSelector",
+      "toId": "ff_out",
+      "toProperty": "scrollSelector"
+    },
+    {
+      "fromId": "ff_pipe",
+      "fromProperty": "out-scroll",
+      "toId": "ff_out",
+      "toProperty": "scroll"
+    }
+  ]
+}

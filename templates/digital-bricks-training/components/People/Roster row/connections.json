@@ -62,6 +62,30 @@
       "fromProperty": "hasAwaitingLine",
       "toId": "rr_awaiting",
       "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "name",
+      "toId": "rr_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "hasPage",
+      "toId": "rr_open",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "noPage",
+      "toId": "rr_name",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_open",
+      "fromProperty": "onClick",
+      "toId": "rr_out",
+      "toProperty": "open"
     }
   ]
 }

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8304d420-2fd6-4390-9f95-1a009c1d110f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fe_in",
+      "fromProperty": "kindLabel",
+      "toId": "fe_kind",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "when",
+      "toId": "fe_when",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "title",
+      "toId": "fe_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "about",
+      "toId": "fe_about",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "hasAbout",
+      "toId": "fe_about",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "canJump",
+      "toId": "fe_jump",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "jumpLabel",
+      "toId": "fe_jump",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "open",
+      "toId": "fe_det",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "body",
+      "toId": "fe_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "hasBody",
+      "toId": "fe_body",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fe_open",
+      "fromProperty": "onClick",
+      "toId": "fe_out",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "fe_jump",
+      "fromProperty": "onClick",
+      "toId": "fe_out",
+      "toProperty": "jump"
+    },
+    {
+      "fromId": "fe_in",
+      "fromProperty": "className",
+      "toId": "fe_row",
+      "toProperty": "cssClassName"
+    }
+  ]
+}

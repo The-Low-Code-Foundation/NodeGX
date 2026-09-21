@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8304d420-2fd6-4390-9f95-1a009c1d110f",
+  "name": "Feed row",
+  "path": "/People/Feed row",
+  "type": "visual",
+  "created": "2026-09-21T12:53:36.320Z",
+  "modified": "2026-09-21T13:14:34.829Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One entry in the coach's activity log: what kind of thing, when, what it is and what it is about, with a way back to the same entry on their programme. The detail does not exist until it is opened."
+}

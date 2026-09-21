@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a9959bb1-ea25-4ed5-9882-160184a31998",
+  "name": "Feed filter",
+  "path": "/Logic/Feed filter",
+  "type": "logic",
+  "created": "2026-09-21T12:57:08.389Z",
+  "modified": "2026-09-21T12:57:13.768Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's activity log: which kinds are chips, which rows are showing, which are open, and what happens when the programme points at a row here. The one owner of the saved filter's storage key."
+}

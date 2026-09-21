@@ -1863,6 +1863,25 @@
   margin: 8px 0 0;
 }
 
+/* LIFTED from globals.css 1856–1871 (TASK-L165): the coach's way from a
+   programme card to the same entry in the activity log. The ask control's
+   quiet weight, because it is the same kind of thing: a word that points. */
+.path-show-in-log {
+  display: block;
+  margin: 6px 0 0;
+  background: transparent;
+  border: 0;
+  padding: 2px 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+}
+.path-show-in-log:hover,
+.path-show-in-log:focus-visible { color: var(--thread-deep); }
+
 .path-ask {
   display: block;
   margin: 8px 0 0;

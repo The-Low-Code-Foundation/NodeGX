@@ -104,6 +104,12 @@
       "fromProperty": "out-programmeOptions",
       "toId": "rf_out",
       "toProperty": "programmeOptions"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "withPage",
+      "toId": "rf_fn",
+      "toProperty": "in-withPage"
     }
   ]
 }

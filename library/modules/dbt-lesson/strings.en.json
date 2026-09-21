@@ -63,6 +63,7 @@
   "timeline": {
     "fold": "Fold this back up",
     "ask": "Ask your coach about this",
+    "showInLog": "Show in the activity log",
     "comments_one": "{n} comment",
     "comments_other": "{n} comments",
     "notes_one": "{n} note",

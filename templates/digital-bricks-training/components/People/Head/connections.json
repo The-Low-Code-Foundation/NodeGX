@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9364e4d2-b426-4c25-bf78-45f860cdce65",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hd_in",
+      "fromProperty": "person",
+      "toId": "hd_fn",
+      "toProperty": "in-person"
+    },
+    {
+      "fromId": "hd_in",
+      "fromProperty": "entries",
+      "toId": "hd_fn",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "hd_in",
+      "fromProperty": "copy",
+      "toId": "hd_fn",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "hd_fn",
+      "fromProperty": "out-facts",
+      "toId": "hd_rep",
+      "toProperty": "items"
+    }
+  ]
+}

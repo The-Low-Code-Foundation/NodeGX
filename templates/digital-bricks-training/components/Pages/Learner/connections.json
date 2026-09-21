@@ -1,0 +1,517 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e3ebd137-c26f-4f5b-8df7-ea5b6a462368",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lr_lang",
+      "fromProperty": "value",
+      "toId": "lr_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_who",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "lr_roster",
+      "fromProperty": "people",
+      "toId": "lr_who",
+      "toProperty": "in-people"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "learnerId",
+      "toId": "lr_who",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-displayName",
+      "toId": "lr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-meta",
+      "toId": "lr_meta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-eyebrow",
+      "toId": "lr_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-back",
+      "toId": "lr_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-tabTitle",
+      "toId": "lr_tab_title",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-paceEyebrow",
+      "toId": "lr_pace_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-trajectoryEyebrow",
+      "toId": "lr_traj_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-person",
+      "toId": "lr_head",
+      "toProperty": "person"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_head",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_live",
+      "fromProperty": "inOrder",
+      "toId": "lr_head",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "entries",
+      "toId": "lr_live",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_live",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "audience",
+      "toId": "lr_live",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "lr_who",
+      "fromProperty": "out-programmes",
+      "toId": "lr_scope",
+      "toProperty": "programmes"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "entries",
+      "toId": "lr_scope",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "history",
+      "toId": "lr_scope",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "dimensions",
+      "toId": "lr_scope",
+      "toProperty": "dimensions"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "endsOn",
+      "toId": "lr_scope",
+      "toProperty": "endsOn"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_scope",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_scope",
+      "fromProperty": "entries",
+      "toId": "lr_scoped",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_scoped",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "audience",
+      "toId": "lr_scoped",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "lr_scope",
+      "fromProperty": "entries",
+      "toId": "lr_standing",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "lr_scope",
+      "fromProperty": "dimensions",
+      "toId": "lr_standing",
+      "toProperty": "dimensions"
+    },
+    {
+      "fromId": "lr_scope",
+      "fromProperty": "endsOn",
+      "toId": "lr_standing",
+      "toProperty": "endsOn"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_standing",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "hasPace",
+      "toId": "lr_pace",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "paceView",
+      "toId": "lr_pace_chart",
+      "toProperty": "view"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "parPoints",
+      "toId": "lr_pace_chart",
+      "toProperty": "par"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "paceHeadline",
+      "toId": "lr_pace_chart",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "legendActual",
+      "toId": "lr_pace_chart",
+      "toProperty": "legendActual"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "legendPar",
+      "toId": "lr_pace_chart",
+      "toProperty": "legendPar"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "hasTrajectory",
+      "toId": "lr_traj",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "trajectoryRows",
+      "toId": "lr_traj_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "hasEarlier",
+      "toId": "lr_traj_caption",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_standing",
+      "fromProperty": "earlierCaption",
+      "toId": "lr_traj_caption",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_v_surface",
+      "fromProperty": "value",
+      "toId": "lr_tabs",
+      "toProperty": "in-surface"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_tabs",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-isProgramme",
+      "toId": "lr_prog_surface",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-isLog",
+      "toId": "lr_log_surface",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-programmeLabel",
+      "toId": "lr_tab_prog",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-logLabel",
+      "toId": "lr_tab_log",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-programmeBg",
+      "toId": "lr_tab_prog",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-programmeFg",
+      "toId": "lr_tab_prog",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-programmeBorder",
+      "toId": "lr_tab_prog",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-logBg",
+      "toId": "lr_tab_log",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-logFg",
+      "toId": "lr_tab_log",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-logBorder",
+      "toId": "lr_tab_log",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "lr_tab_prog",
+      "fromProperty": "onClick",
+      "toId": "lr_to_prog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lr_tab_log",
+      "fromProperty": "onClick",
+      "toId": "lr_to_log",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lr_scoped",
+      "fromProperty": "ordered",
+      "toId": "lr_point",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "lr_v_pfocus",
+      "fromProperty": "value",
+      "toId": "lr_point",
+      "toProperty": "in-focus"
+    },
+    {
+      "fromId": "lr_v_popened",
+      "fromProperty": "value",
+      "toId": "lr_point",
+      "toProperty": "in-opened"
+    },
+    {
+      "fromId": "lr_point",
+      "fromProperty": "out-rows",
+      "toId": "lr_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lr_point",
+      "fromProperty": "out-scrollSelector",
+      "toId": "lr_view_prog",
+      "toProperty": "selector"
+    },
+    {
+      "fromId": "lr_point",
+      "fromProperty": "out-scroll",
+      "toId": "lr_view_prog",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "lr_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "lr_to_log_focus",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "lr_rows",
+      "fromProperty": "itemOutputSignal-showInLog",
+      "toId": "lr_to_log_focus",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lr_scoped",
+      "fromProperty": "feed",
+      "toId": "lr_feed",
+      "toProperty": "feed"
+    },
+    {
+      "fromId": "lr_scoped",
+      "fromProperty": "ordered",
+      "toId": "lr_feed",
+      "toProperty": "programmeRows"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_feed",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "lede",
+      "toId": "lr_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "chips",
+      "toId": "lr_chip_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "hasChips",
+      "toId": "lr_chips",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "showEverything",
+      "toId": "lr_all",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "showEverythingLabel",
+      "toId": "lr_all",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "hasEmpty",
+      "toId": "lr_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "emptyText",
+      "toId": "lr_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "hasRows",
+      "toId": "lr_log",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "rows",
+      "toId": "lr_log_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lr_chip_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "lr_feed",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "lr_chip_each",
+      "fromProperty": "itemOutputSignal-toggle",
+      "toId": "lr_feed",
+      "toProperty": "toggleKind"
+    },
+    {
+      "fromId": "lr_all",
+      "fromProperty": "onClick",
+      "toId": "lr_feed",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "lr_log_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "lr_feed",
+      "toProperty": "rowId"
+    },
+    {
+      "fromId": "lr_log_each",
+      "fromProperty": "itemOutputSignal-toggle",
+      "toId": "lr_feed",
+      "toProperty": "toggleRow"
+    },
+    {
+      "fromId": "lr_log_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "lr_to_prog_focus",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "rows",
+      "toId": "lr_to_prog_focus",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "lr_log_each",
+      "fromProperty": "itemOutputSignal-jump",
+      "toId": "lr_to_prog_focus",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "scrollSelector",
+      "toId": "lr_view_log",
+      "toProperty": "selector"
+    },
+    {
+      "fromId": "lr_feed",
+      "fromProperty": "scroll",
+      "toId": "lr_view_log",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "lr_back",
+      "fromProperty": "onClick",
+      "toId": "lr_go_people",
+      "toProperty": "navigate"
+    }
+  ]
+}

@@ -32,6 +32,18 @@
       "fromProperty": "audience",
       "toId": "ot_fn",
       "toProperty": "in-audience"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-feed",
+      "toId": "ot_out",
+      "toProperty": "feed"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-inOrder",
+      "toId": "ot_out",
+      "toProperty": "inOrder"
     }
   ]
 }

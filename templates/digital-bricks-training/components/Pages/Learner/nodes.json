@@ -1,0 +1,1085 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e3ebd137-c26f-4f5b-8df7-ea5b6a462368",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lr_page",
+      "type": "Page",
+      "label": "Learner",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "urlPath": "learner",
+        "title": "Coaching"
+      },
+      "children": [
+        "lr_band"
+      ]
+    },
+    {
+      "id": "lr_band",
+      "type": "Group",
+      "label": "Page band",
+      "parent": "lr_page",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "lr_shell"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lr_shell",
+      "type": "Group",
+      "label": "Column",
+      "parent": "lr_band",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      },
+      "children": [
+        "lr_back",
+        "lr_eyebrow",
+        "lr_title",
+        "lr_meta",
+        "lr_head",
+        "lr_scope",
+        "lr_nav",
+        "lr_prog_surface",
+        "lr_log_surface"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "lr_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to everyone",
+      "parent": "lr_shell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-coach-back",
+        "backgroundColor": "transparent",
+        "color": "var(--thread-deep)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "borderStyle": "none"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "lr_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "lr_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "lr_title",
+      "type": "Text",
+      "label": "Who this is — displayName",
+      "parent": "lr_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "lr_meta",
+      "type": "Text",
+      "label": "Their email, and their project when the title is their name",
+      "parent": "lr_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "lr_head",
+      "type": "/People/Head",
+      "label": "Where they are, what they just did, what is next",
+      "parent": "lr_shell",
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "lr_scope",
+      "type": "/People/Programme scope",
+      "label": "Which programme — above the nav, because both surfaces read it",
+      "parent": "lr_shell",
+      "metadata": {
+        "comment": "ABOVE the nav and never inside a surface (L137). Both surfaces read what it chooses, and a copy on each is two controls over one piece of state; the sprint-39 version put it on one tab only, and on the tab named after the programme there was no way to say which programme you were reading."
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "lr_nav",
+      "type": "Group",
+      "label": "The two surfaces",
+      "parent": "lr_shell",
+      "parameters": {
+        "as": "nav",
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": "var(--space-2)",
+        "cssClassName": "dbt-coach-tabs"
+      },
+      "children": [
+        "lr_tab_prog",
+        "lr_tab_log"
+      ],
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "lr_tab_prog",
+      "type": "net.noodl.controls.button",
+      "label": "Their programme",
+      "parent": "lr_nav",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-coach-tab",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "lr_tab_log",
+      "type": "net.noodl.controls.button",
+      "label": "Activity log",
+      "parent": "lr_nav",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-coach-tab",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "lr_prog_surface",
+      "type": "Group",
+      "label": "Surface A — their programme, as they read it",
+      "parent": "lr_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)",
+        "cssClassName": "dbt-coach-surface-programme"
+      },
+      "metadata": {
+        "comment": "`mounted`: the surface a coach is not reading does not exist, so nothing in it runs (L119's <details> finding)."
+      },
+      "children": [
+        "lr_pace",
+        "lr_traj",
+        "lr_thread"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "lr_pace",
+      "type": "Group",
+      "label": "Their pace",
+      "parent": "lr_prog_surface",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "lr_pace_eyebrow",
+        "lr_pace_chart"
+      ],
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "lr_pace_eyebrow",
+      "type": "Text",
+      "label": "Pace eyebrow",
+      "parent": "lr_pace",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "lr_pace_chart",
+      "type": "dbt-lesson.PaceTracker",
+      "label": "The same chart they read",
+      "parent": "lr_pace",
+      "metadata": {
+        "comment": "THE SAME CHART THE LEARNER READS (L127 §6): the same kit node, the same series, the same par line. Only the headline above it is addressed to a different reader, composed by Logic/Standing from the coach's words. No width/sizeMode here: a kit node's root gets an empty style, so they would be discarded in silence (sprint 45) — the kit stylesheet sizes it."
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "lr_traj",
+      "type": "Group",
+      "label": "How it is going",
+      "parent": "lr_prog_surface",
+      "parameters": {
+        "as": "section",
+        "cssClassName": "trajectory",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "lr_traj_eyebrow",
+        "lr_traj_rows",
+        "lr_traj_caption"
+      ],
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "lr_traj_eyebrow",
+      "type": "Text",
+      "label": "Trajectory eyebrow",
+      "parent": "lr_traj",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 340,
+      "y": 2080
+    },
+    {
+      "id": "lr_traj_rows",
+      "type": "Group",
+      "label": "The rows",
+      "parent": "lr_traj",
+      "parameters": {
+        "cssClassName": "trajectory-rows",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "lr_traj_each"
+      ],
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "lr_traj_each",
+      "type": "For Each",
+      "label": "One row per objective, then their own confidence",
+      "parent": "lr_traj_rows",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Trajectory row"
+      },
+      "x": 400,
+      "y": 2320
+    },
+    {
+      "id": "lr_traj_caption",
+      "type": "Text",
+      "label": "What the faint marks are",
+      "parent": "lr_traj",
+      "parameters": {
+        "as": "p",
+        "cssClassName": "trajectory-earlier-caption",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "lr_thread",
+      "type": "Group",
+      "label": "The thread — their programme's rows and nothing else",
+      "parent": "lr_prog_surface",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "path dbt-coach-programme"
+      },
+      "metadata": {
+        "comment": "Holds the repeater and NOTHING else, so its Nth child is the Nth row — which is how a jump from the log finds a row without the row carrying an id in its DOM. Putting one there would change the learner's page, which must stay byte-identical (criterion 11)."
+      },
+      "children": [
+        "lr_rows"
+      ],
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "lr_rows",
+      "type": "For Each",
+      "label": "Their programme, row for row — the SAME Course/Timeline row the learner's page places",
+      "parent": "lr_thread",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Timeline row"
+      },
+      "metadata": {
+        "comment": "ONE component, two audiences — never a copy (TASK-L165 §3, L127 §6). In the product this is StaffProgramme rendering PathList in mode=\"staff\". What the audience changes is only about writes and routes: no ask control, and a message draws. The order, the fold and the grouping are L116's and L130's, shared; tools/check-learner-page.mjs fails if a second timeline-row component appears or either page stops placing this one."
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "lr_log_surface",
+      "type": "Group",
+      "label": "Surface B — the activity log",
+      "parent": "lr_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "cssClassName": "dbt-coach-surface-log"
+      },
+      "children": [
+        "lr_lede",
+        "lr_chips",
+        "lr_empty",
+        "lr_log"
+      ],
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "lr_lede",
+      "type": "Text",
+      "label": "What the log is",
+      "parent": "lr_log_surface",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "lr_chips",
+      "type": "Group",
+      "label": "Show only — absent when there is only one kind",
+      "parent": "lr_log_surface",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "dbt-feed-filter"
+      },
+      "metadata": {
+        "comment": "A wrapping row of content-sized chips is the intent, not a grid: the uncollapsible-multi-column warning is answered here the way L164 answered it for the cohort pills and sprint 44 for the lesson stepper."
+      },
+      "children": [
+        "lr_chip_each",
+        "lr_all"
+      ],
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "lr_chip_each",
+      "type": "For Each",
+      "label": "One chip per kind they have",
+      "parent": "lr_chips",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Feed chip"
+      },
+      "x": 340,
+      "y": 3160
+    },
+    {
+      "id": "lr_all",
+      "type": "net.noodl.controls.button",
+      "label": "Show everything",
+      "parent": "lr_chips",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-feed-chip dbt-feed-all",
+        "backgroundColor": "transparent",
+        "color": "var(--thread-deep)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderStyle": "none"
+      },
+      "x": 340,
+      "y": 3280
+    },
+    {
+      "id": "lr_empty",
+      "type": "Text",
+      "label": "Nothing of that kind",
+      "parent": "lr_log_surface",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "lr_log",
+      "type": "Group",
+      "label": "The log — in the model's order, not newest first",
+      "parent": "lr_log_surface",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "dbt-coach-log"
+      },
+      "metadata": {
+        "comment": "THE ORDER IS THE MODEL'S. The task doc says newest-first; the product's own feed renders the model's order as a recorded deviation, because a coach and their client must not disagree about the shape of the fortnight (TimelineFeed.tsx, L119 criterion 1). Ported rather than re-decided."
+      },
+      "children": [
+        "lr_log_each"
+      ],
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "lr_log_each",
+      "type": "For Each",
+      "label": "One row per entry",
+      "parent": "lr_log",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Feed row"
+      },
+      "x": 340,
+      "y": 3640
+    },
+    {
+      "id": "lr_programme",
+      "type": "/Data/Fixture programme",
+      "label": "Their programme (fixture until the backend lands)",
+      "x": 1400,
+      "y": 40
+    },
+    {
+      "id": "lr_roster",
+      "type": "/Data/Fixture roster",
+      "label": "The coach's people (fixture until the backend lands)",
+      "x": 1400,
+      "y": 200
+    },
+    {
+      "id": "lr_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen, in the coach's voice",
+      "x": 1400,
+      "y": 360,
+      "parameters": {
+        "audience": "coach"
+      }
+    },
+    {
+      "id": "lr_lang",
+      "type": "Variable",
+      "label": "language — from the one owner in App",
+      "x": 1100,
+      "y": 360,
+      "parameters": {
+        "name": "language"
+      }
+    },
+    {
+      "id": "lr_who",
+      "type": "JavaScriptFunction",
+      "label": "Who this page is about",
+      "x": 1800,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * WHO THIS PAGE IS ABOUT (TASK-L165 §5).\n *\n * The programme fixture says whose programme it is; the roster says who that\n * is. An explicit join on the learner id, never a match on a project's name.\n *\n * TWO NAME CHAINS, DELIBERATELY DIFFERENT, AND MERGING THEM IS THE DEFECT.\n * PORTED: displayName / audienceName -> LearnerShell.tsx.\n *\n *  - displayName = coachLabel ?? projectName ?? email ?? learnerId. The page's\n *    <h1>: any label that identifies the row is fine in a heading.\n *  - audienceName = coachLabel ?? email ?? \"this learner\". Wherever the page\n *    speaks ABOUT the person — here, the browser tab. It SKIPS projectName,\n *    because L128's audience control read \"Shared with Bristol Community Garden\n *    Booking Site\": a project named as though it were a person. The last\n *    fallback is words, never an id.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('Pages/Learner: no people.learner copy');\nconst people = plain(Inputs.people);\nconst id = String(Inputs.learnerId || '');\nif (!people || !id) return;\nconst person = people.find((p) => p.learnerId === id);\nif (!person) throw new Error('Pages/Learner: the programme belongs to \"' + id + '\", who is not on the roster — the two fixtures disagree about who this is');\nconst or = (...xs) => xs.find((x) => x !== null && x !== undefined && x !== '');\nconst displayName = or(person.coachLabel, person.projectName, person.email, person.learnerId);\nconst audienceName = or(person.coachLabel, person.email) || W.thisLearner;\nOutputs.person = person;\nOutputs.programmes = person.programmes || [];\nOutputs.displayName = displayName;\nOutputs.audienceName = audienceName;\nOutputs.meta = (person.email || W.noEmail) + (person.coachLabel && person.projectName ? ' · ' + person.projectName : '');\nOutputs.tabTitle = fill(W.tabTitle, { name: audienceName });\nOutputs.eyebrow = W.eyebrow;\nOutputs.back = W.back;\nOutputs.paceEyebrow = W.pace.eyebrow;\nOutputs.trajectoryEyebrow = W.trajectory.eyebrow;\n"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-people",
+          "displayName": "people",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "displayName": "learnerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-person",
+          "displayName": "person",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-programmes",
+          "displayName": "programmes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-displayName",
+          "displayName": "displayName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-audienceName",
+          "displayName": "audienceName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-meta",
+          "displayName": "meta",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tabTitle",
+          "displayName": "tabTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyebrow",
+          "displayName": "eyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-back",
+          "displayName": "back",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-paceEyebrow",
+          "displayName": "paceEyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-trajectoryEyebrow",
+          "displayName": "trajectoryEyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "lr_tab_title",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 2200,
+      "y": 40,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB. `Page.title` is read off the node's PARAMETERS at\n// export time into the router index, and a connection to that port is silently ignored\n// (TASK-L161 §1). So the parameter stays as the build-time fallback and the translated\n// value overrides it here — the same node every page carries.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "displayName": "title",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "lr_fresh",
+      "type": "JavaScriptFunction",
+      "label": "A fresh page",
+      "x": 1800,
+      "y": 520,
+      "parameters": {
+        "in-page": "learner",
+        "functionScript": "/*\n * A FRESH PAGE (TASK-L165). The surface, the open rows and the two pointers are\n * app variables — they have to be, because the rows that press them are inside\n * repeaters — and an app variable outlives the page. So arriving starts on\n * their programme with nothing open and nothing pointed at, exactly as a newly\n * mounted page does in the product. The SAVED filter is not touched: it is the\n * coach's preference and is meant to outlive the page (Logic/Feed filter).\n */\nif (!Inputs.page) return;\nNoodl.Variables.dbtCoachSurface = 'programme';\nNoodl.Variables.dbtFeedOpen = [];\nNoodl.Variables.dbtProgrammeOpened = [];\nNoodl.Variables.dbtLogFocus = '';\nNoodl.Variables.dbtProgrammeFocus = '';\n"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "displayName": "page",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "lr_v_surface",
+      "type": "Variable2",
+      "label": "Which surface",
+      "x": 1800,
+      "y": 760,
+      "parameters": {
+        "name": "dbtCoachSurface"
+      }
+    },
+    {
+      "id": "lr_tabs",
+      "type": "JavaScriptFunction",
+      "label": "Which surface is showing",
+      "x": 2200,
+      "y": 760,
+      "parameters": {
+        "functionScript": "/* Two surfaces, one showing. Anything that is not the log is the programme, so a\n   page that has not been told yet opens on the programme — the reading a coach\n   asked for first (L135). A Button paints its colours inline, so the tab that is\n   on carries its colours as tokens rather than as a class. */\nfunction plain(x) { return x && typeof x === 'object' && x.data ? x.data : x; }\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('Pages/Learner: no people.learner copy');\nconst isLog = Inputs.surface === 'log';\nconst on = { bg: 'var(--primary)', fg: 'var(--primary-foreground)', border: 'var(--foreground)' };\nconst off = { bg: 'var(--surface-raised)', fg: 'var(--foreground)', border: 'var(--border-subtle)' };\nconst p = isLog ? off : on;\nconst l = isLog ? on : off;\nOutputs.isProgramme = !isLog;\nOutputs.isLog = isLog;\nOutputs.programmeLabel = W.surface.programme;\nOutputs.logLabel = W.surface.log;\nOutputs.programmeBg = p.bg; Outputs.programmeFg = p.fg; Outputs.programmeBorder = p.border;\nOutputs.logBg = l.bg; Outputs.logFg = l.fg; Outputs.logBorder = l.border;\n"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-surface",
+          "displayName": "surface",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-isProgramme",
+          "displayName": "isProgramme",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isLog",
+          "displayName": "isLog",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-programmeLabel",
+          "displayName": "programmeLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logLabel",
+          "displayName": "logLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-programmeBg",
+          "displayName": "programmeBg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-programmeFg",
+          "displayName": "programmeFg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-programmeBorder",
+          "displayName": "programmeBorder",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logBg",
+          "displayName": "logBg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logFg",
+          "displayName": "logFg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logBorder",
+          "displayName": "logBorder",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "lr_to_prog",
+      "type": "Set Variable",
+      "label": "To their programme",
+      "x": 2600,
+      "y": 700,
+      "parameters": {
+        "name": "dbtCoachSurface",
+        "setWith": "string",
+        "value": "programme"
+      }
+    },
+    {
+      "id": "lr_to_log",
+      "type": "Set Variable",
+      "label": "To the activity log",
+      "x": 2600,
+      "y": 820,
+      "parameters": {
+        "name": "dbtCoachSurface",
+        "setWith": "string",
+        "value": "log"
+      }
+    },
+    {
+      "id": "lr_scoped",
+      "type": "/Logic/Ordered timeline",
+      "label": "The programme being read, as the coach reads it",
+      "x": 1400,
+      "y": 900
+    },
+    {
+      "id": "lr_live",
+      "type": "/Logic/Ordered timeline",
+      "label": "What is on their page now — for the head",
+      "x": 1400,
+      "y": 1080,
+      "metadata": {
+        "comment": "The head is about the person NOW, whichever programme is being read below it (the product's Head reads the live timeline, not the scope). The same component as the one above, over the live entries: one owner of the order, two inputs."
+      }
+    },
+    {
+      "id": "lr_standing",
+      "type": "/Logic/Standing",
+      "label": "Pace and trajectory, in the coach's words",
+      "x": 1400,
+      "y": 1260
+    },
+    {
+      "id": "lr_v_pfocus",
+      "type": "Variable2",
+      "label": "Which row the log is pointing at",
+      "x": 1800,
+      "y": 1000,
+      "parameters": {
+        "name": "dbtProgrammeFocus"
+      }
+    },
+    {
+      "id": "lr_v_popened",
+      "type": "Variable2",
+      "label": "Rows opened by a jump",
+      "x": 1800,
+      "y": 1120,
+      "parameters": {
+        "name": "dbtProgrammeOpened"
+      }
+    },
+    {
+      "id": "lr_point",
+      "type": "JavaScriptFunction",
+      "label": "Point at a programme row",
+      "x": 2200,
+      "y": 1000,
+      "parameters": {
+        "functionScript": "/*\n * THE LOG POINTS AT THE PROGRAMME (TASK-L165 §4, L135 §3). The shell owns both\n * directions of \"which row is being pointed at\" (L138), and this is one of them.\n *\n * A pointed-at row OPENS by being handed `collapsed: false`. The kit row keys\n * its open state on its id AND that value, so a changed value re-derives it —\n * and nothing about the row's own component or the learner's page changes.\n * The set is STICKY: the row stays open after the pointer is handed back, and\n * if the coach folds it again that is their click, which the row keeps.\n *\n * The ORDER, the FOLD of every other row and the GROUPING are untouched. This\n * is not a re-fold for the coach — it is the one row the coach asked to see.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst rows = plain(Inputs.rows);\nif (!rows) return;\nconst opened = new Set(plain(Inputs.opened) || []);\nconst focus = String(Inputs.focus || '');\nif (focus) {\n  const i = rows.findIndex((r) => r.id === focus);\n  if (i !== -1 && !opened.has(focus)) {\n    opened.add(focus);\n    Noodl.Variables.dbtProgrammeOpened = Array.from(opened);\n  }\n  if (i !== -1) {\n    /* By POSITION, because the thread holds this repeater and nothing else: a\n       row's id is not in its DOM, and putting it there would change the\n       learner's page (criterion 11). */\n    Outputs.scrollSelector = '.dbt-coach-programme > :nth-child(' + (i + 1) + ')';\n    Outputs.scroll();\n  }\n  Noodl.Variables.dbtProgrammeFocus = '';\n}\nOutputs.rows = rows.map((r) => (opened.has(r.id) && r.collapsed ? Object.assign({}, r, { collapsed: false }) : r));\n"
+      },
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-opened",
+          "displayName": "opened",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-focus",
+          "displayName": "focus",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-scroll",
+          "displayName": "scroll",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-scrollSelector",
+          "displayName": "scrollSelector",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "lr_to_log_focus",
+      "type": "JavaScriptFunction",
+      "label": "Show in the activity log",
+      "x": 2600,
+      "y": 1000,
+      "parameters": {
+        "functionScript": "/* A programme card asked to be shown in the log. The log is told WHICH row\n   and the surface changes; Logic/Feed filter does the rest — clearing a\n   filter that hides it, opening it — because it owns the log. */\nconst id = String(Inputs.id || '');\nif (!id) return;\nNoodl.Variables.dbtLogFocus = id;\nNoodl.Variables.dbtCoachSurface = 'log';\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY. Since NDA-017 §2, wiring Run no longer makes a Function's value inputs passive — each has its own Run On Value Change box, ticked by default — so without these unticked it also ran whenever a row's id arrived: opening a row in the log jumped to the programme (measured, TASK-L165)."
+      }
+    },
+    {
+      "id": "lr_to_prog_focus",
+      "type": "JavaScriptFunction",
+      "label": "Show on their programme",
+      "x": 2600,
+      "y": 1200,
+      "parameters": {
+        "functionScript": "/* A log row asked to be shown on the programme. The ROW's id is what the\n   repeater hands back; what it POINTS AT is on the row (a signal points at its\n   lesson, a note at what it is about), resolved once, by Logic/Ordered timeline. */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst id = String(Inputs.id || '');\nconst row = (plain(Inputs.rows) || []).find((r) => r.id === id);\nif (!row || !row.canJump) return;\nNoodl.Variables.dbtProgrammeFocus = row.jumpTo;\nNoodl.Variables.dbtCoachSurface = 'programme';\n",
+        "runOnChange-in-id": false,
+        "runOnChange-in-rows": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY. Since NDA-017 §2, wiring Run no longer makes a Function's value inputs passive — each has its own Run On Value Change box, ticked by default — so without these unticked it also ran whenever a row's id arrived: opening a row in the log jumped to the programme (measured, TASK-L165)."
+      }
+    },
+    {
+      "id": "lr_feed",
+      "type": "/Logic/Feed filter",
+      "label": "The log: chips, rows, the saved filter",
+      "x": 1400,
+      "y": 1440,
+      "metadata": {
+        "comment": "OUTSIDE both surfaces, so the saved filter is read once when the page arrives rather than when the log mounts. That placement is what keeps L138's race from arising at all; the node's own `loaded` guard is what stops it coming back if it is ever moved."
+      }
+    },
+    {
+      "id": "lr_view_prog",
+      "type": "/Logic/Bring into view",
+      "label": "Bring a programme row into view",
+      "x": 2600,
+      "y": 1400,
+      "parameters": {
+        "openSelector": ".is-open"
+      }
+    },
+    {
+      "id": "lr_view_log",
+      "type": "/Logic/Bring into view",
+      "label": "Bring a log row into view",
+      "x": 2600,
+      "y": 1560,
+      "parameters": {
+        "openSelector": ".dbt-feed-detail"
+      }
+    },
+    {
+      "id": "lr_go_people",
+      "type": "RouterNavigate",
+      "label": "Back to the roster",
+      "x": 2200,
+      "y": 280,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/People"
+      }
+    }
+  ],
+  "visualRoots": [
+    "lr_page"
+  ]
+}

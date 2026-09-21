@@ -1,0 +1,88 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b002e026-f677-4157-8603-0d41df3dea69",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fc_in",
+      "type": "Component Inputs",
+      "label": "One kind",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "border",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fc_btn",
+      "type": "net.noodl.controls.button",
+      "label": "The chip",
+      "x": 40,
+      "y": 260,
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-feed-chip",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        }
+      },
+      "metadata": {
+        "comment": "A built-in Button paints its background, colour and border INLINE, so a class alone cannot show which chips are on: all three ride the row data as tokens (the Lesson/Step chip pattern). The label is the kind's word from timeline.kind — the same word the programme card wears — and never a number."
+      }
+    },
+    {
+      "id": "fc_out",
+      "type": "Component Outputs",
+      "label": "Pressed",
+      "x": 420,
+      "y": 260,
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "fc_btn"
+  ]
+}

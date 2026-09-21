@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "184c0aea-3eec-43f0-b8fb-a7b420bd5b79",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hf_in",
+      "fromProperty": "label",
+      "toId": "hf_l",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hf_in",
+      "fromProperty": "value",
+      "toId": "hf_v",
+      "toProperty": "text"
+    }
+  ]
+}

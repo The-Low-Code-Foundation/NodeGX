@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "184c0aea-3eec-43f0-b8fb-a7b420bd5b79",
+  "name": "Head fact",
+  "path": "/People/Head fact",
+  "type": "visual",
+  "created": "2026-09-21T12:54:23.871Z",
+  "modified": "2026-09-21T12:54:23.871Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One label-and-fact pair in the head of the coach's page about one learner."
+}

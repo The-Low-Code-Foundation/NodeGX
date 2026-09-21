@@ -3,11 +3,11 @@
 A learning platform with no course catalogue: the learner's own project is the spine of their
 curriculum, and every lesson is written for it. This template is the **front-end half**, built
 entirely out of NodeGX nodes — the sticker-book design system, a lesson kit of section renderers,
-the learner's three pages, and the first of the coach's — reading fixtures until a backend is
-connected.
+the learner's three pages, and the coach's two — reading fixtures until a backend is connected.
 
 Press **Run**. Home → *Open your course* → *Open the lesson*. Every step is a live chip; nothing is
-locked, numbered or scored. Home → *See it as their coach* opens **People**, the coach's roster.
+locked, numbered or scored. Home → *See it as their coach* opens **People**, the coach's roster, and the one linked name on it
+opens **Learner**, the coach's page about that person.
 
 ## The first thing to change
 
@@ -45,6 +45,11 @@ entry on their timeline.
       "conceptId": "what-an-api-is", "title": "…", "rationale": "…", "status": "complete" }
   ] }
 ```
+
+Two more fields exist for the coach's page and the learner's page never reads them: `learnerId`
+says whose programme this is (the coach's page finds them on the roster by it — an explicit join,
+never a match on a project's name), and `history` holds the entries of their OTHER programmes,
+which in the product is a separate, gated read a coach makes by choosing a finished programme.
 
 An entry's **id is namespaced by its kind** (`lesson:<conceptId>`, `session:<uuid>`): two tables
 produce the same uuid space, and a key collision renders one row and drops the other. `at` is
@@ -85,7 +90,8 @@ Nothing in this template fetches. The seam is two places:
 - **Data/Fixture lesson** — replace its `Static Data` node with a query; the component's outputs
   (`title`, `hook`, `landing`, `steps`, `sections`) do not change.
 - **Data/Fixture programme** — the same, for the learner's timeline: its outputs (`projectName`,
-  `problemStatement`, `endsOn`, `entries`, `dimensions`) do not change either.
+  `problemStatement`, `endsOn`, `entries`, `dimensions`, `learnerId`, `history`) do not change
+  either. `history` becomes the gated query for a finished programme's entries.
 - **Data/Fixture roster** — the coach's people, as `getRoster()` would return them: every account,
   nullable derived fields, in the server's order. Its outputs (`people`, `count`) do not change.
 - **Lesson/Section row** — the kit's `Section` node emits `Acted`, `Saved` (+ `Field`, `Value`),
@@ -202,15 +208,60 @@ somebody who signed up and never finished setting up.
   *"No activity yet"* rather than *"never"*, and a waiting-for-a-reply line that is **a date, not a
   count**. No pace, rating or ranking column, ever — comparing learners is the one thing a roster
   would do most naturally and must not do.
-- **A name is not a link yet.** It opens the learner's page, and that page does not exist yet
-  (TASK-L165). A control that goes nowhere is worse than a name.
+- **One name is a link**: the person whose programme this template holds. The other eight stay
+  names, because opening that one programme under somebody else's name would be a page about the
+  wrong person. With a backend every name links and `Logic/Roster filter`'s `hasPage` goes.
 
 **The gate is not here.** In the product the roster is behind the staff check, and a learner can
 never reach it. This template has no sign-in, so the Home button is how you see the coach's side —
 in a real deployment that is the backend's job, never a button. And because a template's fixtures
 are project data, **the trainer's private labels (`coachLabel`) are in the page source of every
-page**, though they render on the roster alone. With a backend, the roster arrives from a gated
+page**, though they render on the coach's two pages alone. With a backend, the roster arrives from a gated
 query and they are nowhere else.
+
+## The coach's page about one learner
+
+**`Pages/Learner`** is where the template's central claim stops being an argument: **a coach and
+their client read the same assembly.** Their programme on this page is `Logic/Ordered timeline`
+with `audience: coach`, through the **same** `Course/Timeline row` the learner's own page places —
+not a copy. `tools/check-learner-page.mjs` runs both projections over the fixture and compares them
+field by field: the coach's list minus its signals IS the learner's, and the only field allowed to
+differ is whether a message is unread, which depends on who is reading. It fails if a second
+timeline-row component ever appears.
+
+Above everything, three facts (**People/Head** — where they are, what they just did, what is next),
+then **People/Programme scope**, then two surfaces:
+
+- **Their programme** — the same pace chart, the same objective gauges and the same programme the
+  learner reads, in the coach's words, plus the three moments they got stuck and the message thread
+  that only a coach's programme draws. No ask control: it would post as the coach.
+- **Activity log** — every entry as its own row, in the **model's order, not newest first**. That is
+  the product's own recorded choice (a coach and their client must not disagree about the shape of
+  the fortnight). **Logic/Feed filter** owns the chips — one per kind this person has, words only,
+  never a count — and the saved filter, under one key for every learner because it is the coach's
+  preference, not a fact about anyone.
+
+**The scope sits above the two surfaces**, because both read what it chooses; a copy on each would
+be two controls over one piece of state. It is absent when there is only one programme.
+
+**Each surface points at the other.** *Show in the activity log* on a programme card, *Show on their
+programme* on a log row. A saved filter that would hide the row being pointed at is cleared, and one
+that would not is left alone. **Logic/Bring into view** scrolls only once the row is there AND open,
+never in the same moment as the change that opens it.
+
+Two mechanics worth knowing before you edit this page:
+
+- **A `Function` whose `Run` is wired still runs when its inputs change**, unless each input's *Run On
+  Value Change* box is unticked (`runOnChange-in-<name>: false`). Wiring Run used to make them
+  passive; it no longer does. Missing it here meant opening a row in the log also jumped to the
+  programme. `tools/check-learner-page.mjs` fails on any run-driven Function in the template that
+  forgets.
+- **A `Dropdown` reserves `""` for its own hidden placeholder**, so the scope's "current programme" is
+  the value `current`, not the product's `""`.
+
+**Nothing on this page writes.** The product's version is mostly composers — schedule a session,
+change the path, set up a programme, write a review, reply — and every one would be a control that
+cannot save. *What they must produce* (the dossier) is not built on either side yet.
 
 ## What is a placeholder, and why
 
@@ -222,8 +273,7 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in and the staff gate, **the coach's page about one learner**
-(`Pages/Learner` — the roster is here, the page it opens is not yet), the
+The backend and every write, sign-in and the staff gate, every coach composer, the dossier, the
 assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 

@@ -44,6 +44,18 @@
       "fromProperty": "out-loaded",
       "toId": "fp_out",
       "toProperty": "loaded"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-learnerId",
+      "toId": "fp_out",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-history",
+      "toId": "fp_out",
+      "toProperty": "history"
     }
   ]
 }

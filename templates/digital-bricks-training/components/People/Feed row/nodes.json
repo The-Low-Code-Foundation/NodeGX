@@ -1,0 +1,305 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8304d420-2fd6-4390-9f95-1a009c1d110f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fe_in",
+      "type": "Component Inputs",
+      "label": "One entry, already worded",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "className",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "about",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasAbout",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasBody",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canJump",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "jumpLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fe_row",
+      "type": "Group",
+      "label": "The row",
+      "x": 40,
+      "y": 380,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomColor": "var(--border-subtle)",
+        "cssClassName": "dbt-feed-entry"
+      },
+      "children": [
+        "fe_head",
+        "fe_open",
+        "fe_about",
+        "fe_jump",
+        "fe_det"
+      ],
+      "metadata": {
+        "comment": "Its class carries the entry's id (`dbt-entry-<id>`) so the programme's \"Show in the activity log\" can find THIS row after the log mounts and opens it. The id is in this row's class only — the programme's rows stay exactly the learner's (TASK-L165 criterion 11)."
+      }
+    },
+    {
+      "id": "fe_head",
+      "type": "Group",
+      "label": "Kind and date",
+      "parent": "fe_row",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "children": [
+        "fe_kind",
+        "fe_when"
+      ],
+      "x": 100,
+      "y": 500
+    },
+    {
+      "id": "fe_kind",
+      "type": "Text",
+      "label": "Kind",
+      "parent": "fe_head",
+      "parameters": {
+        "as": "span",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "dbt-feed-kind",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 620
+    },
+    {
+      "id": "fe_when",
+      "type": "Text",
+      "label": "When",
+      "parent": "fe_head",
+      "parameters": {
+        "as": "span",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 740
+    },
+    {
+      "id": "fe_open",
+      "type": "net.noodl.controls.button",
+      "label": "The title — opens and closes the row",
+      "parent": "fe_row",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-feed-open",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "fontWeight": 800,
+        "fontSize": "var(--text-base)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "borderStyle": "none",
+        "styleCss": "text-align: left; justify-content: flex-start;"
+      },
+      "metadata": {
+        "comment": "A button rather than a link: it changes what is on screen and does not navigate. Paints transparent and in ink INLINE because a Button does, so the title reads as a title rather than as a call to action."
+      },
+      "x": 100,
+      "y": 860
+    },
+    {
+      "id": "fe_about",
+      "type": "Text",
+      "label": "What it is about",
+      "parent": "fe_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "dbt-feed-about"
+      },
+      "metadata": {
+        "comment": "Mounted only when there IS something to say: an anchored entry whose target is unnamed renders nothing rather than an empty 'about' (L135 criterion 1's negative)."
+      },
+      "x": 100,
+      "y": 980
+    },
+    {
+      "id": "fe_jump",
+      "type": "net.noodl.controls.button",
+      "label": "Show on their programme",
+      "parent": "fe_row",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-feed-jump",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "borderStyle": "none"
+      },
+      "metadata": {
+        "comment": "The log's half of the interlock (L135 §3). Absent — not disabled — when the thing it would point at is not a row on the programme: a control with nothing behind it is L142's rule, plain text or nothing."
+      },
+      "x": 100,
+      "y": 1100
+    },
+    {
+      "id": "fe_det",
+      "type": "Group",
+      "label": "The detail — not mounted until open",
+      "parent": "fe_row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-2)",
+        "cssClassName": "dbt-feed-detail"
+      },
+      "metadata": {
+        "comment": "`mounted`, never `visible` and never a <details>: a closed row's detail does not EXIST (L119 — a bare <details> still mounts its children, which is how two staff tabs ran their load effects for a learner with no path)."
+      },
+      "children": [
+        "fe_body"
+      ],
+      "x": 100,
+      "y": 1220
+    },
+    {
+      "id": "fe_body",
+      "type": "Text",
+      "label": "What it says, as text",
+      "parent": "fe_det",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "TEXT, never HTML: a coach's note and a learner's message are markdown someone typed, and this template's only render path for markdown is the kit's sanitised one on the programme card. Here it is the words, as characters."
+      },
+      "x": 160,
+      "y": 1340
+    },
+    {
+      "id": "fe_out",
+      "type": "Component Outputs",
+      "label": "What the coach pressed",
+      "x": 520,
+      "y": 380,
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "jump",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "fe_row"
+  ]
+}

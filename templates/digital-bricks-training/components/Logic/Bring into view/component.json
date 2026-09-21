@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1473c034-1e98-4ee6-b4d8-03f20b46e29c",
+  "name": "Bring into view",
+  "path": "/Logic/Bring into view",
+  "type": "logic",
+  "created": "2026-09-21T12:58:10.071Z",
+  "modified": "2026-09-21T12:58:10.071Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Scrolls a row into view once it exists AND has opened — never in the same moment as the change that opens it."
+}

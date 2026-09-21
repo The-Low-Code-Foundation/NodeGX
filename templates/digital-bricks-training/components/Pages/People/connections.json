@@ -134,6 +134,18 @@
       "fromProperty": "Translation",
       "toId": "seo_pp_page",
       "toProperty": "in-title"
+    },
+    {
+      "fromId": "pp_programme",
+      "fromProperty": "learnerId",
+      "toId": "pp_filter",
+      "toProperty": "withPage"
+    },
+    {
+      "fromId": "pp_rows",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "pp_open",
+      "toProperty": "navigate"
     }
   ]
 }

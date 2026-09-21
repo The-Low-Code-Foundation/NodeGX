@@ -80,6 +80,12 @@
       "fromProperty": "audience",
       "toId": "tr_row",
       "toProperty": "audience"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onShowInLog",
+      "toId": "tr_out",
+      "toProperty": "showInLog"
     }
   ]
 }

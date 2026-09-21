@@ -45,7 +45,8 @@
             "/Pages/Lesson",
             "/Pages/Course",
             "/Pages/Palette",
-            "/Pages/People"
+            "/Pages/People",
+            "/Pages/Learner"
           ]
         }
       }

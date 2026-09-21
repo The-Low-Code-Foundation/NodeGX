@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cf72f86e-30db-4d73-ad89-8ddc80917e46",
+  "name": "Programme scope",
+  "path": "/People/Programme scope",
+  "type": "visual",
+  "created": "2026-09-21T12:55:40.855Z",
+  "modified": "2026-09-21T12:55:40.855Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Which of a learner's programmes the coach is reading. It sits above both surfaces because both read what it chooses, and it is structurally absent when there is only one programme to choose."
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b002e026-f677-4157-8603-0d41df3dea69",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fc_in",
+      "fromProperty": "label",
+      "toId": "fc_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "bg",
+      "toId": "fc_btn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "fg",
+      "toId": "fc_btn",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "border",
+      "toId": "fc_btn",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "fc_btn",
+      "fromProperty": "onClick",
+      "toId": "fc_out",
+      "toProperty": "toggle"
+    }
+  ]
+}

@@ -513,6 +513,24 @@
           "group": "Inputs"
         }
       ]
+    },
+    {
+      "id": "pp_programme",
+      "type": "/Data/Fixture programme",
+      "label": "Whose programme this template holds",
+      "x": 1400,
+      "y": 900
+    },
+    {
+      "id": "pp_open",
+      "type": "RouterNavigate",
+      "label": "Into their page",
+      "x": 1400,
+      "y": 1060,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Learner"
+      }
     }
   ],
   "visualRoots": [

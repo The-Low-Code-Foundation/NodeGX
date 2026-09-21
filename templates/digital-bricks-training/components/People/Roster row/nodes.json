@@ -64,6 +64,16 @@
           "name": "hasAwaitingLine",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "hasPage",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noPage",
+          "plug": "output",
+          "type": "boolean"
         }
       ]
     },
@@ -75,6 +85,7 @@
       "y": 40,
       "children": [
         "rr_name",
+        "rr_open",
         "rr_email",
         "rr_meta",
         "rr_cohorts",
@@ -116,6 +127,31 @@
       },
       "metadata": {
         "comment": "Not a control yet: the page it opens is L165's, and a link to a page that does not exist is a control that goes nowhere (L81). The display-name chain is coachLabel, projectName, email, learnerId — so there is always something here."
+      }
+    },
+    {
+      "id": "rr_open",
+      "type": "net.noodl.controls.button",
+      "label": "Display name — a link, for the one person whose page this template holds",
+      "parent": "rr_row",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-roster-open",
+        "backgroundColor": "transparent",
+        "color": "var(--thread-deep)",
+        "fontFamily": "var(--font-display)",
+        "fontWeight": 800,
+        "fontSize": "var(--text-lg)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "borderStyle": "none",
+        "styleCss": "text-align: left; justify-content: flex-start; text-decoration: underline; text-underline-offset: 3px;"
+      },
+      "metadata": {
+        "comment": "The name, as a control, on the row whose programme exists (TASK-L165). The same words as the plain name beside it, which it replaces rather than joins: mounted on hasPage, and the name on noPage, so a row carries exactly one of the two."
       }
     },
     {
@@ -211,6 +247,20 @@
       "metadata": {
         "comment": "A DATE, never a count (L119 §5): three unanswered messages give one date."
       }
+    },
+    {
+      "id": "rr_out",
+      "type": "Component Outputs",
+      "label": "Opened",
+      "x": 520,
+      "y": 40,
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
     }
   ],
   "visualRoots": [

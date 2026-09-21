@@ -141,6 +141,23 @@
       "metadata": {
         "comment": "NOTHING WRITES THIS SPRINT (sprint 45 decision 6). The control emits and the graph decides where it goes — a Log until a backend exists, a Cloud Function after. Wiring it to a fake success would be worse than wiring it here."
       }
+    },
+    {
+      "id": "tr_out",
+      "type": "Component Outputs",
+      "label": "What the row asked for",
+      "x": 840,
+      "y": 480,
+      "ports": [
+        {
+          "name": "showInLog",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "A COACH asked to see this entry in the activity log (TASK-L165). The For Each that places this row bubbles it up as itemOutputSignal-showInLog with the entry's id in itemActionItemId — the Lesson/Step chip pattern. It never fires on the learner's page, and nothing there listens for it."
+      }
     }
   ],
   "visualRoots": [

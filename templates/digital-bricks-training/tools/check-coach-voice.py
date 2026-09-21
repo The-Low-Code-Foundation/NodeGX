@@ -51,6 +51,12 @@ COACH_NAMESPACES = ('timeline', 'standing', 'people')
 COACH_IS_YOU = {
     'timeline.messageFromCoach': "the coach's own turn in the conversation -- 'You wrote' addresses "
                                  "the coach, which is the whole point of overriding it",
+    'people.learner.headline.note': "the page head naming a note the COACH wrote -- 'A note you wrote' "
+                                    "is the product's own phrase (LearnerShell.tsx headline) and the "
+                                    "coach is the only reader of the people namespace (TASK-L165)",
+    'people.learner.log.lede': "the activity log's lede -- 'your notes, your messages' are the "
+                               "coach's, beside 'what they sent in'; the product's own sentence "
+                               "(TimelineFeed.tsx), read by a coach only (TASK-L165)",
 }
 
 # ── INHERITED AND NEVER RENDERED TO A COACH ─────────────────────────────────

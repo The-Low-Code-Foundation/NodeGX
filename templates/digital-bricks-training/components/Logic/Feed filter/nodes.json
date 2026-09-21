@@ -1,0 +1,418 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a9959bb1-ea25-4ed5-9882-160184a31998",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ff_in",
+      "type": "Component Inputs",
+      "label": "The log's rows, the programme's rows, the words, and what was pressed",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "feed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "programmeRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "toggleKind",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "clear",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "rowId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "toggleRow",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ff_vfil",
+      "type": "Variable2",
+      "label": "The filter, in memory",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "name": "dbtFeedFilter"
+      }
+    },
+    {
+      "id": "ff_vld",
+      "type": "Variable2",
+      "label": "Has the saved filter been read yet",
+      "x": 40,
+      "y": 640,
+      "parameters": {
+        "name": "dbtFeedFilterLoaded"
+      },
+      "metadata": {
+        "comment": "NOT derived from the filter's length. \"Nothing saved\" and \"not read yet\" are both the empty array, and only one of them is safe to act on (TimelineFeed.tsx, L138 — driving is what found it)."
+      }
+    },
+    {
+      "id": "ff_vopen",
+      "type": "Variable2",
+      "label": "Which log rows are open",
+      "x": 40,
+      "y": 760,
+      "parameters": {
+        "name": "dbtFeedOpen"
+      }
+    },
+    {
+      "id": "ff_vfoc",
+      "type": "Variable2",
+      "label": "Which row the programme is pointing at",
+      "x": 40,
+      "y": 880,
+      "parameters": {
+        "name": "dbtLogFocus"
+      }
+    },
+    {
+      "id": "ff_load",
+      "type": "JavaScriptFunction",
+      "label": "Read the saved filter once",
+      "x": 600,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * THE SAVED FILTER, READ (TASK-L165 §4). PORTED: timeline-filter-store.ts.\n *\n * ONE OWNER OF THE KEY: this node reads it and `Save it` beside it writes it,\n * and nothing else in the template names it. ONE KEY FOR EVERY LEARNER: the\n * preference is about how the COACH works, not about the person on screen.\n *\n * Unknown members are DROPPED rather than kept: a kind renamed in the\n * vocabulary must not leave a saved filter matching nothing, which reads\n * exactly like an empty log. The vocabulary is `timeline.kind` — the same map\n * the chips and the cards take their words from — never a list kept beside it.\n *\n * Storage unavailable (a private window, a browser that blocks it) degrades to\n * \"no saved filter\", which is also what a first-time reader gets.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst vocabulary = Object.keys(((plain(Inputs.copy) || {}).timeline || {}).kind || {});\nlet saved = [];\ntry {\n  const raw = window.localStorage.getItem(Inputs.key);\n  const parsed = raw ? JSON.parse(raw) : [];\n  if (Array.isArray(parsed)) saved = parsed.filter((k) => vocabulary.indexOf(k) !== -1);\n} catch (e) {\n  saved = [];\n}\n/* The filter FIRST, then the flag: anything waiting on the flag must find the\n   filter already there when it looks. */\nNoodl.Variables.dbtFeedFilter = saved;\nNoodl.Variables.dbtFeedFilterLoaded = true;\n",
+        "in-key": "db:staff-feed-filter:v1"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "ff_save",
+      "type": "JavaScriptFunction",
+      "label": "Save it",
+      "x": 600,
+      "y": 520,
+      "parameters": {
+        "functionScript": "/*\n * THE SAVED FILTER, WRITTEN — the other half of the one owner. Only once the\n * saved value has been READ: writing before then would overwrite what the coach\n * chose last time with the empty array a page starts with.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nif (Inputs.loaded !== true) return;\ntry {\n  window.localStorage.setItem(Inputs.key, JSON.stringify(plain(Inputs.filter) || []));\n} catch (e) {\n  /* Storage full or unavailable — the filter keeps working in memory. */\n}\n",
+        "in-key": "db:staff-feed-filter:v1"
+      },
+      "ports": [
+        {
+          "name": "in-loaded",
+          "displayName": "loaded",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-filter",
+          "displayName": "filter",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "ff_tog",
+      "type": "JavaScriptFunction",
+      "label": "A chip was pressed",
+      "x": 1100,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/* A chip adds its kind or takes it away. `[]` is \"everything\" — there is one\n   representation of unfiltered and no third state to get wrong. */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst kind = String(Inputs.kind || '');\nif (!kind) return;\nconst current = plain(Noodl.Variables.dbtFeedFilter) || [];\nNoodl.Variables.dbtFeedFilter = current.indexOf(kind) !== -1 ? current.filter((k) => k !== kind) : current.concat([kind]);\n",
+        "runOnChange-in-kind": false
+      },
+      "ports": [
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY. Since NDA-017 §2, wiring Run no longer makes a Function's value inputs passive — each has its own Run On Value Change box, ticked by default — so without these unticked it also ran whenever a row's id arrived: opening a row in the log jumped to the programme (measured, TASK-L165)."
+      }
+    },
+    {
+      "id": "ff_clr",
+      "type": "JavaScriptFunction",
+      "label": "Show everything",
+      "x": 1100,
+      "y": 280,
+      "parameters": {
+        "functionScript": "Noodl.Variables.dbtFeedFilter = [];\n"
+      }
+    },
+    {
+      "id": "ff_row",
+      "type": "JavaScriptFunction",
+      "label": "A row was opened or closed",
+      "x": 1100,
+      "y": 440,
+      "parameters": {
+        "functionScript": "/* Which rows are open is page state, NEVER saved: a log that remembered would\n   come back as a wall one expansion at a time (L130). */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst id = String(Inputs.id || '');\nif (!id) return;\nconst open = plain(Noodl.Variables.dbtFeedOpen) || [];\nNoodl.Variables.dbtFeedOpen = open.indexOf(id) !== -1 ? open.filter((x) => x !== id) : open.concat([id]);\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY. Since NDA-017 §2, wiring Run no longer makes a Function's value inputs passive — each has its own Run On Value Change box, ticked by default — so without these unticked it also ran whenever a row's id arrived: opening a row in the log jumped to the programme (measured, TASK-L165)."
+      }
+    },
+    {
+      "id": "ff_pipe",
+      "type": "JavaScriptFunction",
+      "label": "Chips, rows, and the jump",
+      "x": 600,
+      "y": 900,
+      "parameters": {
+        "functionScript": "/*\n * THE ACTIVITY LOG (TASK-L165 §4). PORTED: TimelineFeed.tsx.\n *\n * It ASSEMBLES NOTHING and ORDERS NOTHING: the rows arrive from\n * Logic/Ordered timeline in the model's order, already previewed. What this\n * decides is only what a log decides — which kinds are chips, which rows are\n * showing, which are open — and the words a coach reads beside them.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst copy = plain(Inputs.copy) || {};\nconst W = (copy.people || {}).learner;\nif (!W) throw new Error('Logic/Feed filter: no people.learner copy');\nconst KIND = (copy.timeline || {}).kind || {};\nconst feed = plain(Inputs.feed);\nif (!feed) return;\nconst filter = plain(Inputs.filter) || [];\nconst loaded = Inputs.loaded === true;\nconst open = new Set(plain(Inputs.open) || []);\nconst onProgramme = new Set((plain(Inputs.programmeRows) || []).map((r) => r.id));\n\n/* ── BEING POINTED AT MEANS OPEN, AND VISIBLE FIRST (L138 §3) ──────────────\n   The programme's \"Show in the activity log\" names a row here. Opening it is\n   not enough on its own: the filter is remembered, so a jump can land on a row\n   the filter has hidden and do nothing at all — L129's recorded trap. So the\n   filter is cleared WHEN, AND ONLY WHEN, the target is hidden; clearing it\n   every time would throw away a choice the coach made, for no reason.\n\n   AND IT WAITS FOR THE SAVED FILTER. In the product the log is unmounted while\n   the coach reads the programme, so a jump mounted it with the pointer already\n   set while the saved filter was still being read: the first look saw `[]`,\n   found the target \"visible\", opened it, and the filter landed a moment later\n   and hid it again. Here the owner sits ABOVE both surfaces and reads storage\n   once, at page load, so that ordering cannot arise — and the guard is kept\n   anyway, because moving this node under a surface would bring it straight\n   back and nothing would say so. `loaded` is its own value, never\n   `filter.length`: \"nothing saved\" and \"not read yet\" are both `[]`. */\nconst focus = String(Inputs.focus || '');\nif (focus && loaded) {\n  const target = feed.find((r) => r.id === focus);\n  if (target) {\n    if (filter.length > 0 && filter.indexOf(target.kind) === -1) Noodl.Variables.dbtFeedFilter = [];\n    if (!open.has(focus)) Noodl.Variables.dbtFeedOpen = Array.from(open).concat([focus]);\n    Outputs.scrollSelector = '.dbt-entry-' + focus.replace(/[^A-Za-z0-9_-]/g, '_');\n    Outputs.scroll();\n  }\n  /* Handed back, so pressing the same link twice works. Each write above re-runs\n     this node with the new state, which is what renders it. */\n  Noodl.Variables.dbtLogFocus = '';\n  return;\n}\n\n/* A CHIP EXISTS ONLY FOR A KIND THIS PERSON HAS: a filter for a kind with no\n   entries is a control that does nothing. In the vocabulary's order, which is\n   the label map's — derived, never restated. NO COUNT ON A CHIP, EVER: \"Signals\n   7\" is a tally of somebody's confusion presented as a number (TimelineFeed.tsx\n   rejects it by name). And no chips at all for a person with one kind, because\n   a filter that can only show everything is not a filter. */\nconst present = new Set(feed.map((r) => r.kind));\nconst kinds = Object.keys(KIND).filter((k) => present.has(k));\nOutputs.hasChips = kinds.length > 1;\nOutputs.chips = kinds.map((k) => {\n  const on = filter.indexOf(k) !== -1;\n  return {\n    id: k,\n    label: KIND[k],\n    bg: on ? 'var(--primary)' : 'var(--surface-raised)',\n    fg: on ? 'var(--primary-foreground)' : 'var(--foreground)',\n    border: on ? 'var(--foreground)' : 'var(--border-subtle)'\n  };\n});\nOutputs.showEverything = filter.length > 0;\nOutputs.showEverythingLabel = W.log.showEverything;\nOutputs.lede = W.log.lede;\n\nconst aboutText = (a) => {\n  if (!a || !a.title && !a.anchorKind) return '';\n  const what = a.anchorKind\n    ? (a.title ? fill(W.log.aboutAnchored, { kind: W.log.anchorKind[a.anchorKind] || a.anchorKind, title: a.title }) : (W.log.anchorKind[a.anchorKind] || a.anchorKind))\n    : a.title;\n  return fill(W.log.about, { what: what });\n};\n\nconst visible = filter.length === 0 ? feed : feed.filter((r) => filter.indexOf(r.kind) !== -1);\nOutputs.rows = visible.map((r) => {\n  const about = aboutText(r.about);\n  return {\n    id: r.id,\n    kind: r.kind,\n    className: 'dbt-feed-entry dbt-entry-' + r.id.replace(/[^A-Za-z0-9_-]/g, '_'),\n    kindLabel: r.kindLabel,\n    when: r.when || W.log.onPath,\n    title: r.title,\n    about: about,\n    hasAbout: about !== '',\n    open: open.has(r.id),\n    body: r.body,\n    hasBody: String(r.body || '').trim() !== '',\n    /* Only where the thing it points at IS a row on their programme: a control\n       with nothing behind it is worse than none (L142). */\n    canJump: onProgramme.has(r.jumpTo),\n    jumpTo: r.jumpTo,\n    jumpLabel: W.log.showOnProgramme\n  };\n});\nOutputs.hasRows = visible.length > 0;\nOutputs.hasEmpty = visible.length === 0;\nOutputs.emptyText = feed.length === 0 ? W.log.nothing : W.log.noneOfThat;\n"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-feed",
+          "displayName": "feed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-filter",
+          "displayName": "filter",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-loaded",
+          "displayName": "loaded",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-open",
+          "displayName": "open",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-programmeRows",
+          "displayName": "programmeRows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-focus",
+          "displayName": "focus",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-scroll",
+          "displayName": "scroll",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-scrollSelector",
+          "displayName": "scrollSelector",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasChips",
+          "displayName": "hasChips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chips",
+          "displayName": "chips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showEverything",
+          "displayName": "showEverything",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showEverythingLabel",
+          "displayName": "showEverythingLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lede",
+          "displayName": "lede",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasRows",
+          "displayName": "hasRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasEmpty",
+          "displayName": "hasEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ff_out",
+      "type": "Component Outputs",
+      "label": "What the log draws",
+      "x": 1500,
+      "y": 900,
+      "ports": [
+        {
+          "name": "chips",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasChips",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showEverything",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showEverythingLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lede",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasRows",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasEmpty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "emptyText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "scrollSelector",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "scroll",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}
