@@ -68,7 +68,8 @@
         "lr_scope",
         "lr_nav",
         "lr_prog_surface",
-        "lr_log_surface"
+        "lr_log_surface",
+        "lr_obj_surface"
       ],
       "x": 160,
       "y": 280
@@ -162,18 +163,21 @@
     {
       "id": "lr_nav",
       "type": "Group",
-      "label": "The two surfaces",
+      "label": "The three surfaces",
       "parent": "lr_shell",
       "parameters": {
         "as": "nav",
         "sizeMode": "contentSize",
         "flexDirection": "row",
         "columnGap": "var(--space-2)",
-        "cssClassName": "dbt-coach-tabs"
+        "cssClassName": "dbt-coach-tabs",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
       },
       "children": [
         "lr_tab_prog",
-        "lr_tab_log"
+        "lr_tab_log",
+        "lr_tab_obj"
       ],
       "x": 220,
       "y": 1120
@@ -233,6 +237,34 @@
       },
       "x": 280,
       "y": 1360
+    },
+    {
+      "id": "lr_tab_obj",
+      "type": "net.noodl.controls.button",
+      "label": "What they must produce",
+      "parent": "lr_nav",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "dbt-coach-tab",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 1480
     },
     {
       "id": "lr_prog_surface",
@@ -458,6 +490,37 @@
       ],
       "x": 220,
       "y": 2800
+    },
+    {
+      "id": "lr_obj_surface",
+      "type": "Group",
+      "label": "Surface C — what they must produce",
+      "parent": "lr_shell",
+      "children": [
+        "lr_objectives"
+      ],
+      "x": 220,
+      "y": 3600,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "MOUNTED, never visible (L157: visibility keeps the space and keeps the rows). The section is its own component because this page was already 54 nodes; one instance here is a real reduction, not a rename. NOT filtered by the programme scope above the nav (TASK-L168 §2): objectives are per learner, so it is fed the fixture directly, never the scope's entries."
+      }
+    },
+    {
+      "id": "lr_objectives",
+      "type": "/People/What they must produce",
+      "label": "Their project, their objectives, what they have told us",
+      "parent": "lr_obj_surface",
+      "x": 220,
+      "y": 3700,
+      "parameters": {}
     },
     {
       "id": "lr_lede",
@@ -772,7 +835,7 @@
       "x": 2200,
       "y": 760,
       "parameters": {
-        "functionScript": "/* Two surfaces, one showing. Anything that is not the log is the programme, so a\n   page that has not been told yet opens on the programme — the reading a coach\n   asked for first (L135). A Button paints its colours inline, so the tab that is\n   on carries its colours as tokens rather than as a class. */\nfunction plain(x) { return x && typeof x === 'object' && x.data ? x.data : x; }\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('Pages/Learner: no people.learner copy');\nconst isLog = Inputs.surface === 'log';\nconst on = { bg: 'var(--primary)', fg: 'var(--primary-foreground)', border: 'var(--foreground)' };\nconst off = { bg: 'var(--surface-raised)', fg: 'var(--foreground)', border: 'var(--border-subtle)' };\nconst p = isLog ? off : on;\nconst l = isLog ? on : off;\nOutputs.isProgramme = !isLog;\nOutputs.isLog = isLog;\nOutputs.programmeLabel = W.surface.programme;\nOutputs.logLabel = W.surface.log;\nOutputs.programmeBg = p.bg; Outputs.programmeFg = p.fg; Outputs.programmeBorder = p.border;\nOutputs.logBg = l.bg; Outputs.logFg = l.fg; Outputs.logBorder = l.border;\n"
+        "functionScript": "/* Three surfaces, one showing (L135, TASK-L168). Anything that is not one of the\n   other two is the programme, so a page that has not been told yet opens on the\n   programme — the reading a coach asked for first. A Button paints its colours\n   inline, so the tab that is on carries its colours as tokens rather than as a\n   class. The third tab's words are `dossierCoach.heading`: one owner for the\n   phrase the tab and the section both say. */\nfunction plain(x) { return x && typeof x === 'object' && x.data ? x.data : x; }\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst C = plain(Inputs.copy) || {};\nconst W = (C.people || {}).learner;\nif (!W) throw new Error('Pages/Learner: no people.learner copy');\nif (!C.dossierCoach || !C.dossierCoach.heading) throw new Error('Pages/Learner: no dossierCoach copy (TASK-L168)');\nconst which = Inputs.surface === 'log' ? 'log' : Inputs.surface === 'objectives' ? 'objectives' : 'programme';\nconst on = { bg: 'var(--primary)', fg: 'var(--primary-foreground)', border: 'var(--foreground)' };\nconst off = { bg: 'var(--surface-raised)', fg: 'var(--foreground)', border: 'var(--border-subtle)' };\nconst p = which === 'programme' ? on : off;\nconst l = which === 'log' ? on : off;\nconst o = which === 'objectives' ? on : off;\nOutputs.isProgramme = which === 'programme';\nOutputs.isLog = which === 'log';\nOutputs.isObjectives = which === 'objectives';\nOutputs.programmeLabel = W.surface.programme;\nOutputs.logLabel = W.surface.log;\nOutputs.objectivesLabel = C.dossierCoach.heading;\nOutputs.programmeBg = p.bg; Outputs.programmeFg = p.fg; Outputs.programmeBorder = p.border;\nOutputs.logBg = l.bg; Outputs.logFg = l.fg; Outputs.logBorder = l.border;\nOutputs.objectivesBg = o.bg; Outputs.objectivesFg = o.fg; Outputs.objectivesBorder = o.border;\n"
       },
       "ports": [
         {
@@ -858,6 +921,41 @@
           "plug": "output",
           "type": "*",
           "group": "Outputs"
+        },
+        {
+          "name": "out-isObjectives",
+          "displayName": "isObjectives",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-objectivesLabel",
+          "displayName": "objectivesLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-objectivesBg",
+          "displayName": "objectivesBg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-objectivesFg",
+          "displayName": "objectivesFg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-objectivesBorder",
+          "displayName": "objectivesBorder",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
         }
       ]
     },
@@ -883,6 +981,18 @@
         "name": "dbtCoachSurface",
         "setWith": "string",
         "value": "log"
+      }
+    },
+    {
+      "id": "lr_to_obj",
+      "type": "Set Variable",
+      "label": "To what they must produce",
+      "x": 2600,
+      "y": 940,
+      "parameters": {
+        "name": "dbtCoachSurface",
+        "setWith": "string",
+        "value": "objectives"
       }
     },
     {

@@ -512,6 +512,96 @@
       "fromProperty": "onClick",
       "toId": "lr_go_people",
       "toProperty": "navigate"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-isObjectives",
+      "toId": "lr_obj_surface",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-objectivesLabel",
+      "toId": "lr_tab_obj",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-objectivesBg",
+      "toId": "lr_tab_obj",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-objectivesFg",
+      "toId": "lr_tab_obj",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "lr_tabs",
+      "fromProperty": "out-objectivesBorder",
+      "toId": "lr_tab_obj",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "lr_tab_obj",
+      "fromProperty": "onClick",
+      "toId": "lr_to_obj",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "deliverables",
+      "toId": "lr_objectives",
+      "toProperty": "deliverables"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "facts",
+      "toId": "lr_objectives",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "submissions",
+      "toId": "lr_objectives",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "concepts",
+      "toId": "lr_objectives",
+      "toProperty": "concepts"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "onboardingFacts",
+      "toId": "lr_objectives",
+      "toProperty": "onboardingFacts"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "projectName",
+      "toId": "lr_objectives",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "problemStatement",
+      "toId": "lr_objectives",
+      "toProperty": "problemStatement"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "copy",
+      "toId": "lr_objectives",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lr_strings",
+      "fromProperty": "audience",
+      "toId": "lr_objectives",
+      "toProperty": "audience"
     }
   ]
 }

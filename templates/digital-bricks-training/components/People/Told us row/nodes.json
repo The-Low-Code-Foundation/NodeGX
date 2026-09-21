@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7b6ac05f-86e7-434f-8005-a6d1c1e927a5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tu_in",
+      "type": "Component Inputs",
+      "label": "One fact, already labelled",
+      "x": 600,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "tu_pair",
+      "type": "Group",
+      "label": "The pair",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "tu_label",
+        "tu_value"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomColor": "var(--border-subtle)",
+        "cssClassName": "dbt-told-us"
+      },
+      "metadata": {
+        "comment": "The product's is a <dt>/<dd> pair inside a <dl>; the catalogue has no dl/dt/dd, so it is two paragraphs (People/Head fact's call). Not Head fact itself: its label is an uppercase eyebrow, and these labels are whole phrases."
+      }
+    },
+    {
+      "id": "tu_label",
+      "type": "Text",
+      "label": "What it is",
+      "x": 40,
+      "y": 160,
+      "parent": "tu_pair",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      },
+      "metadata": {
+        "comment": "Logic/Dossier's label: an onboarding fact by its authored label, a namespaced one as '<objective> · <fact>'. Never the raw dotted key."
+      }
+    },
+    {
+      "id": "tu_value",
+      "type": "Text",
+      "label": "Their words",
+      "x": 40,
+      "y": 240,
+      "parent": "tu_pair",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "Learner-typed text. A Text node sets text, never HTML, so a '<b>' or an '<img onerror>' they typed is shown as the characters they typed (criterion 6)."
+      }
+    }
+  ],
+  "visualRoots": [
+    "tu_pair"
+  ]
+}

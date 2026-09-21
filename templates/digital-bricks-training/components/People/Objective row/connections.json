@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f819d91b-89f4-48d2-bf65-ee74477e47f2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "or_in",
+      "fromProperty": "title",
+      "toId": "or_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "archived",
+      "toId": "or_pill",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "archivedLabel",
+      "toId": "or_pill_t",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "filedUnder",
+      "toId": "or_filed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "description",
+      "toId": "or_desc",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "hasDescription",
+      "toId": "or_desc",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "expecting",
+      "toId": "or_expect",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "hasExpecting",
+      "toId": "or_expect",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "needs",
+      "toId": "or_needs",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_in",
+      "fromProperty": "hasNeeds",
+      "toId": "or_needs",
+      "toProperty": "mounted"
+    }
+  ]
+}

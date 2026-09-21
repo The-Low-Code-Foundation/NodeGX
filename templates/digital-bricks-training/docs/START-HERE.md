@@ -230,7 +230,7 @@ differ is whether a message is unread, which depends on who is reading. It fails
 timeline-row component ever appears.
 
 Above everything, three facts (**People/Head** — where they are, what they just did, what is next),
-then **People/Programme scope**, then two surfaces:
+then **People/Programme scope**, then three surfaces:
 
 - **Their programme** — the same pace chart, the same objective gauges and the same programme the
   learner reads, in the coach's words, plus the three moments they got stuck and the message thread
@@ -240,9 +240,12 @@ then **People/Programme scope**, then two surfaces:
   the fortnight). **Logic/Feed filter** owns the chips — one per kind this person has, words only,
   never a count — and the saved filter, under one key for every learner because it is the coach's
   preference, not a fact about anyone.
+- **What they must produce** — their project, the objectives agreed with them, and everything they
+  have told us. Read-only; see "What they must produce" below.
 
-**The scope sits above the two surfaces**, because both read what it chooses; a copy on each would
-be two controls over one piece of state. It is absent when there is only one programme.
+**The scope sits above the nav**, because the first two surfaces read what it chooses; a copy on
+each would be two controls over one piece of state. It is absent when there is only one programme.
+**The third surface ignores it, and that is not a bug**: see below.
 
 **Each surface points at the other.** *Show in the activity log* on a programme card, *Show on their
 programme* on a log row. A saved filter that would hide the row being pointed at is cleared, and one
@@ -261,8 +264,7 @@ Two mechanics worth knowing before you edit this page:
 
 **Nothing on this page writes.** The product's version is mostly composers — schedule a session,
 change the path, set up a programme, write a review, reply — and every one would be a control that
-cannot save. *What they must produce* is drawn on the learner's side (next section) and not yet on
-this page.
+cannot save.
 
 ## What they must produce
 
@@ -295,6 +297,38 @@ Things worth knowing before you change it:
   which is not on this programme — the lesson fixture and the programme fixture are two different
   projects. So it renders as its slug, and it is the one piece of work on `/course` that links
   anywhere (below).
+
+### On the coach's page: *What they must produce*
+
+The third surface on `Pages/Learner` is **People/What they must produce**, one section component
+placed once (the page was already past the validator's ~40-node advisory, so the section is its own
+component rather than eight more nodes on the page). It places the **same** `Logic/Dossier` the
+learner's meter reads, with `audience: coach`, and one Function that only fills in sentences — it
+computes nothing about an objective. In the product's order:
+
+1. **Their project** — its name, and the problem it solves in their words.
+2. **The objectives**, one **People/Objective row** each, in the order they arrive (the product's
+   query orders by position; the fixture is in that order): the title, an **Archived** pill on an
+   archived one and nothing else about its state, where its answers are filed, what it is for, what
+   it expects, and what it needs from their programme — **the concepts as text**, by title.
+3. **What they have told us**, one **People/Told us row** per fact — an archived objective's answers
+   included, and their own words shown as text.
+
+Things worth knowing before you change it:
+
+- **Nothing on it writes.** The product's rows carry Move up, Move down, Edit, Archive, a concept
+  picker and an assignment composer; every one writes, so none is here. The product's empty
+  sentence *"Nothing set yet. Add the first thing you have agreed they will produce."* keeps only its
+  first half, because the second points at a control that is not on the page.
+- **The programme scope does not filter it, and the product does the same.** Objectives belong to
+  the LEARNER, not to a programme: `learner_deliverables.programme_id` exists and nothing writes it.
+  So choosing a finished programme leaves this surface exactly as it was (measured: byte-identical),
+  while *Their programme* changes under it. It is fed straight from the fixture, never from the scope.
+- **The one sentence it says to the coach about the learner's side is exact**: they see each title
+  on their own course page, *apart from the archived ones* — the archived objective is off the meter.
+- **`tools/check-objectives.py`** holds all three rules: no control of any kind in the section or its
+  rows, nothing reaching the section from the programme scope, and the surface gated on `mounted`
+  rather than `visible`.
 
 ### The meter and its reveal, on `/course`
 
@@ -343,8 +377,7 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in and the staff gate, every coach composer, the coach's objectives
-surface (the data and the learner's meter are here — see above), the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
+The backend and every write, sign-in and the staff gate, every coach composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 
 ## Licences

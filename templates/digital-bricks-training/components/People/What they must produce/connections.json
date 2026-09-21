@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a174c5bd-2561-49ef-b6af-c8a1f6d479d8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wm_in",
+      "fromProperty": "deliverables",
+      "toId": "wm_dossier",
+      "toProperty": "deliverables"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "facts",
+      "toId": "wm_dossier",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "submissions",
+      "toId": "wm_dossier",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "concepts",
+      "toId": "wm_dossier",
+      "toProperty": "concepts"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "onboardingFacts",
+      "toId": "wm_dossier",
+      "toProperty": "onboardingFacts"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "copy",
+      "toId": "wm_dossier",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "audience",
+      "toId": "wm_dossier",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "wm_dossier",
+      "fromProperty": "segments",
+      "toId": "wm_words",
+      "toProperty": "in-segments"
+    },
+    {
+      "fromId": "wm_dossier",
+      "fromProperty": "toldUs",
+      "toId": "wm_words",
+      "toProperty": "in-toldUs"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "copy",
+      "toId": "wm_words",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "projectName",
+      "toId": "wm_words",
+      "toProperty": "in-projectName"
+    },
+    {
+      "fromId": "wm_in",
+      "fromProperty": "problemStatement",
+      "toId": "wm_words",
+      "toProperty": "in-problemStatement"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-hasProject",
+      "toId": "wm_project",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-projectName",
+      "toId": "wm_pname",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-problemStatement",
+      "toId": "wm_pstate",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-heading",
+      "toId": "wm_obj_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-intro",
+      "toId": "wm_obj_intro",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-emptyText",
+      "toId": "wm_obj_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-hasEmpty",
+      "toId": "wm_obj_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-hasRows",
+      "toId": "wm_obj_rows",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-rows",
+      "toId": "wm_obj_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-toldUsHeading",
+      "toId": "wm_told_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-toldEmptyText",
+      "toId": "wm_told_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-hasToldEmpty",
+      "toId": "wm_told_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-hasTold",
+      "toId": "wm_told_rows",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wm_words",
+      "fromProperty": "out-told",
+      "toId": "wm_told_each",
+      "toProperty": "items"
+    }
+  ]
+}
