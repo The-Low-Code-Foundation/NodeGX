@@ -1,79 +1,94 @@
 # P99 — next session
 
-**Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-006 ✅ (s4, `149695838`).**
-Open: **HLT-004, 005, 007, 008, 009, 011, 012**, then **HLT-010 last**.
+**Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-006 ✅ (s4, AC5 ruled
+WORTHY by Richard 2026-09-21).**
+Open: **HLT-005, 007, 008, 009, 011, 012, 013**, then **HLT-010 last**.
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
 **before claiming a row** — peers have been building this phase in parallel.
 
 ## Start here
 
-**The one thing s4 leaves open is not a task — it is Richard's look.** HLT-006 met every
-acceptance criterion except **AC5**: six frames are committed in [shots/](./shots/) and he has not
-ruled WORTHY on them yet.
+**Nothing is waiting on Richard.** HLT-006's AC5 was his last open criterion and he ruled it:
+*"I'm happy with the colour pallet fix from HLT 006."* Pick a row and build it.
 
-- `hlt006-picker-{dark,light}.png` — the picker open, 25 named tokens with swatches and values
-- `hlt006-palette-row-{dark,light}.png` — scrolled to the foot: `Palette 61` closed, then
-  *Colors in project*
-- `hlt006-control-{dark,light}.png` — the same surface with the enumeration suppressed
+**Suggested: HLT-005.** It is a genuinely one-line fix with a named file and line
+(`NodeComment.tsx:145`, `flex: '0 0 auto'` in a row flex container) and a control sitting beside it
+(the Properties tab, which uses `flex: 1`). ⚠️ Measure §2 first anyway — see below.
 
-**Ask him in plain words, showing the pictures.** Do not re-open the design on his behalf.
-
-## 🔴 The pattern this phase has established, four times out of four
+## 🔴 The pattern this phase has established, FIVE times out of five
 
 **Every task file so far has been materially wrong, and the correction was the work each time.**
 HLT-001's census (78 sites, not 19). HLT-002's "detached" webview (hidden, not detached).
 HLT-003's three wrong claims. HLT-006's §2 (right about enumeration, blind to the echo).
+**HLT-004's §2 assumed three responses were mishandled; all three were already handled.**
 
 ⇒ **Measure your row's §2 before writing a line.** See
 [[measure-the-artefact-before-believing-the-task-file]]. Budget a first hour for it; it has paid
-for itself every single time.
+for itself every single time, without exception.
 
-## What s4 changed for the rows after it
+## 🔴 What s5 changed for every row after it, and for HLT-010 especially
 
-- **`ColourTokensForPicking.ts` is the shared token enumeration** (`models/StyleTokensModel/`).
-  The colour picker and the Styles panel both read through it. **HLT-012 extends it; do not start
-  a second list** — a second copy of "which tokens belong where" is exactly how HLT-007(b) happened.
-- **A leaf module, not the barrel.** `@noodl-models/StyleTokensModel`'s `index.ts` re-exports
-  `StyleTokensModel`, which drags `projectmodel` → `bugtracker` → Electron and makes a jest suite
-  report `Tests: 0 total`. Import the leaf path.
-- **`scripts/devtools/drive-hlt006-token-picker.js`** is a worked template for a picker drive:
-  reach arm (hit-test), a control that is proven by CALLING the mutated seam, an unarm step, and
-  a duplicate arm for the trade the fix itself can cause.
+**A renderer "error" is not necessarily the editor's.** `.logs/dev.log` mixes two populations:
 
-## 🔴 Three traps s4 paid for — do not re-derive them
+- `Runtime.consoleAPICalled` / `Runtime.exceptionThrown` — **the application's**. These carry a
+  `(file.tsx:NNN)` prefix in the log.
+- `Log.entryAdded` at level `error` — **Chromium's network stack**, e.g.
+  `Failed to load resource: … 401`. Written **before any JavaScript sees the response**, with
+  **nothing a `catch` can do about it**, and carrying **no** file prefix.
 
-1. **A webpack export cannot be monkey-patched, and both refusals look like success.**
-   `m.fn = mutant` is a **silent no-op** (exports are getter-only via `__webpack_require__.d`) —
-   the arm checking `typeof m.fn === 'function'` stayed true, so the drive printed *"armed"* and
-   reported the **fixed** number on an unmutated run. `Object.defineProperty` then **throws**
-   (non-configurable). ✅ Mutate the **data** — a prototype method — and **prove it by calling it**.
-2. **That mutation outlives your process.** It sits on a prototype in the *renderer*, so a fixed
-   run started after a control run reads the control's zero and calls the fix broken. Unarm first
-   and grade that you did.
-3. **`Icon` renders an empty `<span>`,** so `header.querySelector('span')` returns the icon, not
-   the label. A working disclosure graded as absent for one run because of it.
+🔴 **HLT-010 must classify these separately or its budget is nonsense.** A correctly handled 401 on
+a route that requires a credential is not a defect, and no amount of error handling will remove its
+line — only not making the request will. The distinction is mechanically available: the file prefix.
 
-## Rules that bit in s4 and will bite again
+⚠️ **And `dev-debug.js:120` mirrors BOTH into one file under one `[renderer:error]` tag**, which is
+exactly why 264 events looked like 264 application faults.
 
-- 🔴 **A pipe eats the exit code.** `npm run test:ci … | tail -40` reported *"exited with code 0"*
-  over an `npm error … code 1`. Read the runner's own line — `3036 specs, 8 failures, seed …` —
-  and check the 8 **by name**, never the exit status through a pipe.
-- 🔴 **Backticks inside a template literal end it.** A comment reading ``NOT the first `overflow`
-  div`` inside a CDP `ev(\`…\`)` string broke the drive with `missing ) after argument list`.
-- ⚠️ **CSS changes need a webpack rebuild before you shoot.** A frame taken four seconds after the
-  edit is a picture of the *old* rule. Poll the live `document.styleSheets` for your declaration
-  before capturing.
-- ⚠️ **`MEMORY.md` is at its 17,510 budget exactly.** File new findings into a memory that already
-  has a pointer, or into a `*-pointers.md` index — both cost the index nothing. Do not trim another
-  session's trap to pay for your row.
+## Tools s5 leaves you
+
+- **`scripts/devtools/drive-hlt004-requests.js`** — a worked launcher drive. Two independent
+  instruments (`performance.getEntriesByType('resource')` and the log), a reach arm, and a control
+  that varies **the data in a store** rather than patching anything.
+- **`confirmStoredSession()`** (`communitysignin.ts`) — the credential lifecycle. If you need to
+  know whether the editor is *really* signed in, this is the one place that asks.
+- **`get(path, { credentialed: true })`** in `communityapi.ts` — mark a route that cannot be
+  answered without a token and no caller will request it without one. ⚠️ **Only mark routes you
+  have MEASURED.** Two are marked; the rest were not measured and guessing turns a read that works
+  signed out into one that silently stops.
+
+## 🔴 Three traps s5 paid for — do not re-derive them
+
+1. **`process.exit()` inside a `try` SKIPS the `finally`.** The drive's teardown never ran, and what
+   it restores was **Richard's real session file**, which stayed deleted until it was put back by
+   hand. A teardown that only runs on the happy path is not a teardown.
+2. **A health probe that could never match.** `/ok|renderer|attached/` against `cdp health`'s
+   stdout — which is JSON with the keys `url`, `title`, `mountPoint`, `rootChildren`,
+   `visibleText`, `reactMounted`, and matches none of those words. It printed *"the editor came up
+   — FAIL"* about an editor that was up and had already produced the measurement. **Read
+   `reactMounted`.** Fourth instrument fault in this phase.
+3. **Deleting a branch can blind another phase's gate.** `useLearnerPath`'s `session === null`
+   branch looked like a duplicate once the client held the rule. It is
+   `uni-001/session-readers.test.ts`'s **known-firing control**, and the assertion beside it goes
+   **vacuous** without it. The spec said so in those words and was right.
+
+## Rules that bit in s5 and will bite again
+
+- 🔴 **Check the `test:ci` floor BY NAME.** 8 failures is the floor *count*; the floor is
+  `{SUB-006: 3, SUB-011: 3, NDA-017: 2}`. Read `packages/noodl-editor/tests/test-results.json` —
+  its `failures[].fullName` — rather than eyeballing the number.
+- 🔴 **A pipe eats the exit code.** Redirect to a file and read `$?`; `${PIPESTATUS[0]}` is bash and
+  this shell is **zsh**, where it is silently empty.
+- 🔴 **Re-drive after your last source edit.** A control pair taken before an edit proves something
+  about a build nobody is shipping.
+- ⚠️ **`MEMORY.md` is at its 17,510 budget.** File new findings into a memory that already has a
+  pointer, or into a `*-pointers.md` index.
 
 ## Gates, both, every time (README §7)
 
 ```
 npm run typecheck:editor && npm run typecheck:editor-tests
-cd packages/noodl-editor && npm run test:main      # 527/527, 8425/8425 at 149695838
-cd packages/noodl-editor && npm run test:ci        # floor: 8 by name — 3 SUB-006, 3 SUB-011, 2 NDA-017
+cd packages/noodl-editor && npm run test:main      # 528/528, 8439/8439 after HLT-004
+cd packages/noodl-editor && npm run test:ci        # floor: 8 BY NAME — 3 SUB-006, 3 SUB-011, 2 NDA-017
 npm run lint:ci                                    # ratchet, 876 vs 3916 baseline
 ```
 
@@ -82,6 +97,8 @@ alias condition, no P99 file named.
 
 ## Driving
 
-`npm run dev:debug -- --quiet` (background, ~90s), then `npm run cdp -- health`. **Drive a copy** —
-opening a project writes three files into it. **`npm run dev:stop` when done**, and announce the
-teardown to whoever you announced the launch to. One heavy job at a time.
+`npm run dev:debug -- --quiet` (background, ~90s warm, ~4min after a source change), then
+`npm run cdp -- health`. **Drive a copy** — opening a project writes three files into it.
+**`npm run dev:stop` when done**, and announce the teardown to whoever you announced the launch to.
+One heavy job at a time. ⚠️ **`node scripts/devtools/stop-dev.js --list` first** to see what a
+teardown would reap.

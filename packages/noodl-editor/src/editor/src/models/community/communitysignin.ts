@@ -214,3 +214,78 @@ export async function signOutOfCommunity(
   await clearCommunitySession(deps.store ?? JSONStorage);
   return { revokedOnPlatform };
 }
+
+/**
+ * HLT-004 — confirm the credential this editor is about to claim it has, and forget it if the
+ * platform does not know it.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * 🔴 **NOTHING OWNED A TOKEN'S DEATH, AND THIS IS THE MEASUREMENT THAT SAYS SO.** Before this
+ * function, `clearCommunitySession` had **exactly one caller in the repository** — the
+ * deliberate sign-out above. Twenty-nine places in the editor handle a read or write coming
+ * back `unauthenticated`, and every one of them renders a sentence; **not one of them forgets
+ * the credential the platform just rejected.** So a token that has expired is re-sent on every
+ * launch, for ever, and the launcher keeps drawing the handle cached beside it. Measured on
+ * this machine 2026-09-21: a session written 2026-08-20, two `401`s in every launch's renderer
+ * log, and a card reading *"signed in as @richardosborne14"* the whole time.
+ *
+ * 🔴 **IT ASKS `/api/v1/me`, NOT THE ROUTE THAT FAILED, AND THE DIFFERENCE IS THE SAFETY
+ * PROPERTY.** Forgetting on a 401 from any authenticated route would hand every one of them a
+ * veto over the account: one route briefly misconfigured, one deploy answering 401 where it
+ * meant 503, and every editor on earth silently signs itself out. `/api/v1/me` is the route
+ * built to answer *who is the viewer* — it returns **200 for everybody**, signed in or out, so
+ * a 401 from it is not a thing that happens and there is no failure mode to confuse. The
+ * answer is read, not the status: `viewer: null` **while we are holding a token** is the
+ * platform saying, unambiguously, that this credential buys nothing.
+ *
+ * ⚠️ **EVERY INCONCLUSIVE ANSWER KEEPS THE SESSION.** Offline, DNS gone, a 500, a body that
+ * will not parse — all of them leave the token exactly where it is. The asymmetry is
+ * deliberate: wrongly forgetting costs somebody their sign-in over a flaky café connection,
+ * and wrongly keeping costs one request that was going to be made anyway. Only a **positive,
+ * parsed `viewer: null` from a 200** is treated as an answer.
+ *
+ * ⚠️ **It does NOT revoke, and that is the difference from {@link signOutOfCommunity}.** The
+ * token is already refused; presenting it to `/api/auth/signout` would spend a round trip to
+ * collect a second rejection. There is no live session on the platform to tidy up — that is
+ * precisely what was just established.
+ *
+ * ⚠️ **The clear stays in this module.** `communitysession.ts`'s header is explicit that *"a
+ * second place that writes this key is a second place a stale token can come from"*, so this
+ * lives beside sign-out rather than in the hook that calls it.
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+export async function confirmStoredSession(
+  deps: SignInDeps & { readStore?: SessionStore } = {}
+): Promise<'none' | 'live' | 'forgotten' | 'inconclusive'> {
+  const existing = await readCommunitySession(deps.readStore ?? JSONStorage);
+  // No credential is not a problem to be solved; it is the ordinary state of a new install.
+  if (!existing) return 'none';
+
+  const baseUrl = (deps.baseUrl ?? COMMUNITY_URL).replace(/\/+$/, '');
+  const doFetch = deps.fetchImpl ?? ((globalThis as { fetch?: typeof fetch }).fetch as typeof fetch);
+
+  let response: Response;
+  try {
+    response = await doFetch(`${baseUrl}/api/v1/me`, {
+      headers: { accept: 'application/json', authorization: `Bearer ${existing.token}` }
+    });
+  } catch {
+    return 'inconclusive';
+  }
+  if (!response.ok) return 'inconclusive';
+
+  let body: { viewer?: unknown };
+  try {
+    body = (await response.json()) as { viewer?: unknown };
+  } catch {
+    return 'inconclusive';
+  }
+  // 🔴 `viewer` ABSENT IS NOT `viewer` NULL. A payload that never carried the field is a
+  // platform this client does not understand — an inconclusive answer, not a verdict on the
+  // token ([[an-arm-with-no-predicate-in-it]] is the shape this guard exists to avoid).
+  if (!('viewer' in body)) return 'inconclusive';
+  if (body.viewer !== null) return 'live';
+
+  await clearCommunitySession(deps.store ?? JSONStorage);
+  return 'forgotten';
+}

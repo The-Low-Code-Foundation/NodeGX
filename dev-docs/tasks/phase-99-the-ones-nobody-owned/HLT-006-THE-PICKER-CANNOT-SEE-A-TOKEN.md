@@ -113,7 +113,7 @@ layer holds; one enumeration source shared with the Styles panel.
 **Out:** deleting the legacy layer; importing legacy styles; the Styles panel (P94, closed); the
 paint bug in P94's §3.2 unless it is the same seam — and if it is, that is a **finding with a row**.
 
-## 5. Acceptance criteria — ✅ **all met except AC5, which is Richard's look**
+## 5. Acceptance criteria — ✅ **ALL MET. AC5 ruled WORTHY by Richard, 2026-09-21**
 
 1. **(person)** On a project whose `metadata.styles` is `null` and which has design tokens, opening
    a node's colour picker offers those tokens, named, and picking one sets the parameter to the
@@ -133,7 +133,7 @@ paint bug in P94's §3.2 unless it is the same seam — and if it is, that is a 
 5. **(AC4b) The echo does not double the enumeration.** A token already used on a node appears **once**,
    in the tokens section, not again under *Colors in project*. This is the defect the fix itself
    could introduce, and it is counted ([[a-drive-that-counts-only-the-cured-error-cannot-see-a-trade]]).
-6. **(AC5)** Screenshots both themes; **Richard rules WORTHY** — 📋 the one criterion still open.
+6. **(AC5)** Screenshots both themes; **Richard rules WORTHY** — ✅ **RULED 2026-09-21**, on the six frames in [shots/](./shots/): *“I’m happy with the colour pallet fix from HLT 006”*.
 7. **(AC6)** `test:ci` at the floor — ✅ 8 by name. And `test:main` green (P99 §7): ✅ 527/527, 8425/8425.
 
 ## 6. Landmines

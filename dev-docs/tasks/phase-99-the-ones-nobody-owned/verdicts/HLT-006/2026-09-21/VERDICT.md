@@ -98,7 +98,7 @@ P99 §5a, applied ([[a-drive-that-counts-only-the-cured-error-cannot-see-a-trade
 | 4 | ~~typography/spacing in the text picker~~ | 🔴 **RETIRED — wrong surface.** → [HLT-012](../../HLT-012-THE-NUMERIC-FIELDS-CANNOT-OFFER-A-TOKEN.md) |
 | 4′ | 91 tokens do not arrive as 91 rows | ✅ 30 rows drawn; "Palette 61" closed and filterable |
 | 4b | the echo does not double the enumeration | ✅ 0 duplicate row names; control shows the subtraction working (5 → 13) |
-| 5 | screenshots both themes; **Richard rules WORTHY** | 📋 six frames shot — `hlt006-{picker,palette-row}-{dark,light}.png`, `hlt006-control-{dark,light}.png`. **Awaiting his look.** |
+| 5 | screenshots both themes; **Richard rules WORTHY** | ✅ six frames shot — `hlt006-{picker,palette-row}-{dark,light}.png`, `hlt006-control-{dark,light}.png`. **RULED WORTHY 2026-09-21**: *“I’m happy with the colour pallet fix from HLT 006”*. |
 | 6 | `test:ci` at the floor | ✅ 8 by name |
 
 ## ⚠️ Measured, owned, not filed as an observation
