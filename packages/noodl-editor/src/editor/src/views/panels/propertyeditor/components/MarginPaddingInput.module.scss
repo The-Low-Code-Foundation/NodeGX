@@ -178,3 +178,28 @@
     }
   }
 }
+
+/* HLT-012 — the edge glyph, once it is the token picker's button.
+
+   It keeps the `.GlyphBox` box exactly: same width, same padding, same place. The only things
+   that change are the cursor, a hover tint and — when the field holds a token — the colour, which
+   is the one mark distinguishing `var(--space-3)` from a number somebody typed. Nothing is added
+   to the 60px field, because there is nothing to add it to. */
+.GlyphBox.is-pickable {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: -1px;
+  }
+}
+
+.GlyphBox.is-token {
+  color: var(--theme-color-primary);
+}

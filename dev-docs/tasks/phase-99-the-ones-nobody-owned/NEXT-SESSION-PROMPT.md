@@ -1,8 +1,8 @@
 # P99 — next session
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
-HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7).**
-Open: **HLT-007, 008, 009, 012, 013**, then **HLT-010 last**.
+HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8).**
+Open: **HLT-007, 008, 009, 013**, then **HLT-010 last**.
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
 tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
 `TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
@@ -15,16 +15,51 @@ Read [README.md](./README.md) §5 for the board and §7 for the rules every task
 
 ## Start here
 
-**Nothing is waiting on Richard** for a criterion. ⚠️ But there IS one thing for him, opened by
+🔴 **One criterion is waiting on Richard: HLT-012's AC5** — his WORTHY on the four frames in
+`shots/hlt012-*`. See the s8 section below for the two decisions in them worth his eye.
+⚠️ And there is a second thing for him, opened by
 s7 and left deliberately: **two of his real projects — `tut001-drive` and `Puppy test 3` — share
 one stored identity, and one local backend ("Puppy test 3 backend", `backend_msjck0y2ukxwv`) is
 owned by both.** The editor now says so on the launcher; the repair is his call, not the
 product's. See HLT-011 AC4.
 
-**Suggested: HLT-012 or HLT-013** — both were opened from a measurement rather than from a guess,
+**Suggested: HLT-013** (HLT-012 was built in s8) — both were opened from a measurement rather than from a guess,
 so their §2 is the kind that has held twice out of twice here (HLT-005's and HLT-011's both
 measured TRUE). ⚠️ **HLT-009's template is another stream's** — it committed to it again on
 2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s8 leaves you — and the one thing it wants Richard's eye on
+
+**HLT-012 is built: 13 font sizes and 31 spacings offered from the fields themselves, control 0.**
+📋 **AC5 is open — four frames in `shots/hlt012-*`.** Two things worth his eye: the affordance is a
+`{ }` button inside the numeric field, but on the margin/padding box it *is* the edge glyph (a 60px
+field has room for nothing else), so one question has two different-looking answers; and the picker
+has **no search box**, because the longest list it can draw is 31 rows.
+
+🔴 **A shared instrument in this phase's drives has a hole, and it cost a run.** `HIT()` accepts
+`el.contains(at) || at.contains(el)`. The second arm makes any **ancestor** at the point count as a
+hit — so a button 568px below the fold, with its coordinates clamped into the viewport, reported
+`hit: true`, the drive pressed the panel background, and the run read a confident **0 tokens
+offered** on a build that was working. `drive-hlt012-token-fields.js` scrolls the element into view
+and tests `el.contains(at)` only. **The copies in the HLT-001/002/003/005/006/011 drives still carry
+the old form**; anything pressing a row inside the property panel's scroller should take the new one.
+
+🔴 **And a top-level import switched OFF two sibling suites.** Adding
+`import { StyleTokensModel }` to a file on `marginPaddingEdit`'s import path made
+`tests-unit/rel-014` report **`Tests: 0 total`** — 86 specs grading nothing while the runner printed
+PASS for everything it could still load. Defer the `require` to call time, the way `Ports.ts`
+documents. Run the *sibling* suites after adding any import to a property-editor module.
+
+## Tools s8 leaves you
+
+- **`models/StyleTokensModel/TokensForPicking.ts`** (was `ColourTokensForPicking.ts`) — the ONE
+  table of which tokens belong on which parameter, colour and non-colour. `PORT_TOKEN_RULES` is
+  ordered and the order is the decision; `tests-unit/hlt-012/portTokenRules.test.ts` grades it
+  against `node-catalog.json` and pins the seven ports a generic-first rewrite gets wrong.
+- **`DataTypes/tokenFieldPopout.ts`** — one opener, three rows. Anything else that wants to offer a
+  token from a field calls it rather than growing a fourth copy of the plumbing.
+- **`ScrubPortState.isToken`** — the third flag meaning *the parameter is not a magnitude right
+  now*, beside `isConnected` and `isExpressionMode`.
 
 ## 🔴 What s7 changed for the phase's thesis, and for every drive after it
 

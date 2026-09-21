@@ -1,5 +1,25 @@
 # HLT-012 — The numeric fields cannot offer a token
 
+## ✅ BUILT 2026-09-21 (s8) — 13 font sizes and 31 spacings offered on a driven session, control 0.
+
+[verdict](./verdicts/HLT-012/2026-09-21/VERDICT.md) · `scripts/devtools/drive-hlt012-token-fields.js`
+(17/17 arms each direction) · AC5 (Richard's WORTHY) is the one criterion still open.
+
+🔴 **§2 was re-measured before a line was written, and it was right about everything it counted and
+wrong about what it counted.** Every per-parameter number below is exact. But:
+
+- **There are FOUR fields, not three, and the fourth is not numeric.** `fontFamily` carries
+  `var(--font-mono)` on `Puppy test 3` and `TextConfig` stamps `var(--font-sans)` on every new
+  Text; that port is `type: { name: 'font' }` — a `PickerTypeView`. §4's *"In"* line excluded the
+  one field that was already a picker ([[a-tasks-out-of-scope-line-can-contain-the-defect]]).
+- **18 parameters / 35 distinct tokens, not 19 / 36** — and the table below omits `marginTop`.
+- **The offer cannot be keyed off "is it a number field".** 166 numeric ports in the catalog; only
+  **86** reach a field that can hold a token; only **64** should be offered one. `maxRetries` and
+  `timeout` are number ports.
+- **§6's scrub landmine measured TRUE** — a one-pixel drag replaced a token with the port's
+  default, silently. Closed by `ScrubPortState.isToken`.
+- **§6's third landmine is answered: no ramp split needed.** The longest list is `spacing` at 31.
+
 ## 🔴 Opened by HLT-006, 2026-09-21 (s4) — measured, not speculative.
 
 ## 1. The person sentence

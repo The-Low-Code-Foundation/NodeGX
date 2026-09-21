@@ -63,6 +63,14 @@ export interface MarginPaddingInputProps {
   onUpdateComps: (comps: string[], value: MarginPaddingParam | undefined, opts?: WriteOpts) => void;
   /** Clear every side of one group, as one undo step. */
   onResetSide: (side: MarginPaddingSide) => void;
+  /**
+   * HLT-012 — open the design-token picker for one field, writing every comp the field owns.
+   *
+   * ⚠️ **`comps`, not a single port**, and that is what makes the affordance unambiguous here:
+   * the `↕` pair field already means "both sides", so its token button means the same thing the
+   * typing in it does. An expanded edge field passes one.
+   */
+  onOpenTokenPicker?: (comps: string[], anchor: HTMLElement, current?: string) => void;
 }
 
 export interface MarginPaddingConnection {
@@ -186,6 +194,15 @@ interface BoxFieldProps {
   /** A mixed pair: no unit suffix. */
   hideUnit?: boolean;
   dataComp: string;
+  /**
+   * HLT-012 — the field holds a design token. Two consequences, both measured:
+   * the glyph becomes the picker's button and marks itself, and the drag-to-scrub is off
+   * (see `ScrubPortState.isToken`: a token has no magnitude to start a gesture from, so a
+   * one-pixel drag would replace it with the port's default).
+   */
+  isToken?: boolean;
+  /** Absent when this parameter has no scale, or when the whole widget was given no opener. */
+  onOpenTokenPicker?: (anchor: HTMLElement) => void;
   /** Returns what to put back in the box on a refusal, or `null` when the edit was taken. */
   onCommit: (text: string, unit: string) => string | null;
   scrubStart: MarginPaddingValue;
@@ -207,6 +224,8 @@ function BoxField({
   isChanged,
   hideUnit,
   dataComp,
+  isToken,
+  onOpenTokenPicker,
   onCommit,
   scrubStart,
   onScrub
@@ -244,9 +263,33 @@ function BoxField({
 
   return (
     <div className={classNames(css['Field'], isChanged && css['is-changed'])} title={title} data-comp={dataComp}>
-      <span className={css['GlyphBox']}>
-        <EdgeGlyph glyph={glyph} />
-      </span>
+      {/* 🔴 HLT-012 — the edge glyph IS the token button, and nothing new was drawn to make it one.
+          A 60px field has no room for a second control, and this file already records what
+          happens when one is added on hover: a px↔% toggle drawn that way took the clicks meant
+          for the value (`120` + Enter stored `0%`). The glyph is always there, always the same
+          size, and sits outside the input, so no press that was going to the value can reach it. */}
+      {onOpenTokenPicker ? (
+        <button
+          type="button"
+          className={classNames(css['GlyphBox'], css['is-pickable'], isToken && css['is-token'])}
+          title={isToken ? 'Design token — pick a different one' : 'Pick a design token'}
+          aria-label="Pick a design token"
+          data-test={`token-button-${dataComp}`}
+          // `mouseDown` with the default prevented: the value input commits on blur, and a press
+          // that blurred a half-typed field would write it on the way to opening the picker.
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenTokenPicker(e.currentTarget as HTMLElement);
+          }}
+        >
+          <EdgeGlyph glyph={glyph} />
+        </button>
+      ) : (
+        <span className={css['GlyphBox']}>
+          <EdgeGlyph glyph={glyph} />
+        </span>
+      )}
       <input
         ref={inputRef}
         type="text"
@@ -255,7 +298,8 @@ function BoxField({
         // An unset side types from empty; what it inherits stays visible as the placeholder.
         placeholder={placeholder ?? (draft !== null && editText === '' ? shownText : undefined)}
         aria-label={title}
-        onMouseDown={scrub.onMouseDown}
+        // HLT-012 — a token is not a magnitude, so there is nothing for a gesture to start from.
+        onMouseDown={isToken ? undefined : scrub.onMouseDown}
         onFocus={() => {
           startedFrom.current = editText;
           setDraft(editText);
@@ -306,7 +350,8 @@ export function MarginPaddingInput({
   connections,
   onUpdate,
   onUpdateComps,
-  onResetSide
+  onResetSide,
+  onOpenTokenPicker
 }: MarginPaddingInputProps) {
   // The values from before a scrub, for the one undo step at its end. A ref, not state: the
   // drag writes continuously and every write re-renders this component from the view.
@@ -352,6 +397,12 @@ export function MarginPaddingInput({
         isChanged={comps.some((comp) => values[comp] !== undefined)}
         hideUnit={shown.kind === 'mixed'}
         dataComp={`${side}-${axis}`}
+        isToken={isToken}
+        onOpenTokenPicker={
+          onOpenTokenPicker
+            ? (anchor) => onOpenTokenPicker(comps, anchor, isToken ? String(shown.value) : undefined)
+            : undefined
+        }
         scrubStart={scrubStartOf(values[comps[0]], defaults[comps[0]], MARGIN_PADDING_UNITS[0])}
         onScrub={(value, phase) => scrubComps(comps, value, phase)}
         onCommit={(text, unit) => {
@@ -389,6 +440,12 @@ export function MarginPaddingInput({
         isZero={isZeroValue(own)}
         isChanged={values[comp] !== undefined}
         dataComp={comp}
+        isToken={isToken}
+        onOpenTokenPicker={
+          onOpenTokenPicker
+            ? (anchor) => onOpenTokenPicker([comp], anchor, isToken ? String(own) : undefined)
+            : undefined
+        }
         scrubStart={scrubStartOf(values[comp], defaults[comp], MARGIN_PADDING_UNITS[0])}
         onScrub={(value, phase) => scrubComps([comp], value, phase)}
         onCommit={(text, unit) => {

@@ -491,3 +491,24 @@
 .variants-pick-variant-item:hover .token-item-value {
   color: var(--theme-color-fg-default);
 }
+
+/* HLT-012 — the token picker a numeric field opens.
+
+   🔴 **The name stops wrapping here, and only here.** `.variant-item-name` carries
+   `overflow-wrap: anywhere` because a colour STYLE is user-named and can be a sentence. A design
+   token is not: the longest shipped name is `--tracking-widest`, and the three `--display-*` rows
+   were the only ones that wrapped — each into three lines, beside a `clamp(1.875rem, 1.2rem + …)`
+   value, which is what the first driven shot photographed. One line per token, both columns
+   truncating, is the shape every other row in this popout already had. */
+.token-field-picker .variant-item-name {
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A resolved value can be a whole `clamp()` expression, so it gets a ceiling rather than half the
+   row: the name is what a person is reading down, the value is what confirms the choice. */
+.token-field-picker .token-item-value {
+  max-width: 45%;
+}

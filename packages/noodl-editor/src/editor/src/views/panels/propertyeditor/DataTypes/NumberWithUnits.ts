@@ -8,6 +8,7 @@ import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
@@ -174,6 +175,7 @@ export class NumberWithUnits extends TypeView {
         onFocus: () => transformOriginFocus.focus(this.name),
         onBlur: () => transformOriginFocus.blur(this.name),
         scrub: this.scrubBinding(),
+        ...this.tokenPickerProps(),
         onCommit: (text: string) => this.updateValue(text, this.unit),
         onUnitChange: (unit: string, currentText: string) => this.updateValue(currentText, unit),
         onReset: () => {
@@ -185,6 +187,34 @@ export class NumberWithUnits extends TypeView {
         }
       })
     );
+  }
+
+  /**
+   * HLT-012 — the design-token affordance for this row, or nothing when this parameter has no
+   * scale that fits it.
+   *
+   * ⚠️ **`isToken` reads the STORED parameter, not the displayed text.** `value` stringifies
+   * whatever it gets, so `var(--space-3)` and the literal characters somebody typed are the same
+   * string by the time they reach the field; only the parameter says which one is a reference.
+   */
+  private tokenPickerProps() {
+    if (!fieldOffersTokens(this.name)) return {};
+
+    const stored = this.numberWithUnits;
+    return {
+      isToken: isTokenReference(stored),
+      onOpenTokenPicker: (anchor: HTMLElement) =>
+        openTokenFieldPopout({
+          view: this,
+          portName: this.name,
+          anchor,
+          currentValue: isTokenReference(stored) ? String(stored) : undefined,
+          onSelect: (reference: string) => {
+            this.parent.setParameter(this.name, reference);
+            this.refreshFromModel();
+          }
+        })
+    };
   }
 
   /**
@@ -201,7 +231,11 @@ export class NumberWithUnits extends TypeView {
    * `ScrubPortState` for why one of them being enough is not a reason to have only one.
    */
   private scrubBinding() {
-    const spec = scrubSpecForPortType(this.type, this.unit, { isConnected: this.isConnected });
+    const spec = scrubSpecForPortType(this.type, this.unit, {
+      isConnected: this.isConnected,
+      // HLT-012 — a field holding a token has no magnitude to drag from; see `ScrubPortState.isToken`.
+      isToken: isTokenReference(this.numberWithUnits)
+    });
     if (!spec) return undefined;
 
     return {

@@ -117,6 +117,20 @@ export interface ScrubPortState {
    * above.
    */
   isExpressionMode?: boolean;
+  /**
+   * HLT-012 — whether the stored parameter is a design-token reference.
+   *
+   * 🔴 **A token has no number in it to drag from, and the failure is silent and destructive.**
+   * `numericPart('var(--space-3)')` is `undefined`, so `scrubStartValue` falls through to the
+   * port's default and a gesture starts from *that* — one pixel of accidental drag on a padding
+   * field replaces `var(--space-3)` with `1`, and the only thing that changes on screen is a
+   * number the author was not looking at. HLT-012 §6 names this as the thing to check before
+   * offering a token; it was true, so the row is not draggable while it holds one.
+   *
+   * ⚠️ The same reasoning as `isExpressionMode` directly above, which is why it is a sibling flag
+   * and not a second mechanism: both are "the parameter is not a magnitude right now".
+   */
+  isToken?: boolean;
 }
 
 /**
@@ -131,7 +145,7 @@ export interface ScrubPortState {
  *   connection or being edited as an expression. See {@link ScrubPortState}.
  */
 export function scrubSpecForPortType(type: unknown, unit?: string | null, state?: ScrubPortState): ScrubSpec | null {
-  if (state?.isConnected || state?.isExpressionMode) return null;
+  if (state?.isConnected || state?.isExpressionMode || state?.isToken) return null;
 
   const name = portTypeName(type);
   if (name !== 'number' && name !== 'dimension') return null;

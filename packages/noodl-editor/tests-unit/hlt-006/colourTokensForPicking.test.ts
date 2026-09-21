@@ -24,7 +24,7 @@ import {
   allColourTokens,
   colourTokensForPicking,
   tokenReferenceStrings
-} from '../../src/editor/src/models/StyleTokensModel/ColourTokensForPicking';
+} from '../../src/editor/src/models/StyleTokensModel/TokensForPicking';
 import {
   buildEffectiveTokens,
   readStoredTokens,

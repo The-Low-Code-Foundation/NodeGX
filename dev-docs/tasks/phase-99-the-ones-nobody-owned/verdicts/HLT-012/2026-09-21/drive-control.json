@@ -1,0 +1,114 @@
+{
+  "arm": "control",
+  "at": "2026-09-21T13:17:44.160Z",
+  "project": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/4ee74133-aedc-4cd9-bcba-9fa78e589e14/scratchpad/hlt012-drive-copy",
+  "arms": [
+    {
+      "name": "the CDP endpoint on 9222 can be accounted for",
+      "ok": true,
+      "detail": "listener 81539, ancestry 81539<81538<81483<76178<76037<75905<75825<75460<75428<75408<75383<75381"
+    },
+    {
+      "name": "the renderer module registry is reachable",
+      "ok": true,
+      "detail": "__wreq=true"
+    },
+    {
+      "name": "the driven project is the COPY this run was pointed at",
+      "ok": true,
+      "detail": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/4ee74133-aedc-4cd9-bcba-9fa78e589e14/scratchpad/hlt012-drive-copy"
+    },
+    {
+      "name": "🔴 the driven project has the REAL shape — no legacy style layer, design tokens present (AC4)",
+      "ok": true,
+      "detail": "metadata.styles=absent, customTokens=28"
+    },
+    {
+      "name": "🔴 REACH — a node with a Font Size ROW is selected",
+      "ok": true,
+      "detail": "{\"component\":\"/#__page__/Home\",\"nodeId\":\"1079d2e6-5662-447e-be1e-c823e7bf58ad\",\"typename\":\"Text\",\"selected\":true}"
+    },
+    {
+      "name": "🔴 REACH — the property panel rendered, with a Font Size row on it",
+      "ok": true,
+      "detail": "25 rows, fontSize=true"
+    },
+    {
+      "name": "🔴 THE NUMBER (a) — the Font Size row draws a token button [arm: control]",
+      "ok": true,
+      "detail": "{\"found\":false}"
+    },
+    {
+      "name": "🔴 THE NUMBER (b) — font sizes offered on a driven session [arm: control]",
+      "ok": true,
+      "detail": "0 rows under []; first values []"
+    },
+    {
+      "name": "🔴 AC3 — the Font Size list is font sizes ONLY, never the spacing ramp",
+      "ok": true,
+      "detail": "not offered in this arm"
+    },
+    {
+      "name": "🔴 THE CONSEQUENCE — picking a row stores `var(--text-xl)` on the node [arm: control]",
+      "ok": true,
+      "detail": "null → null"
+    },
+    {
+      "name": "🔴 AC3 — no button on a row with no scale (opacity, rotation, z-index) [arm: control]",
+      "ok": true,
+      "detail": "0 buttons on 25 rows; offered=[], wrongly-offered=[]"
+    },
+    {
+      "name": "⚠️ THE TRADE — a field holding a token is not draggable [arm: control]",
+      "ok": true,
+      "detail": "{\"value\":\"42\",\"scrubbable\":true,\"className\":\"PropertyPanelBaseInput-module__Root--fKd55 PropertyPanelBaseInput-module__is-changed--ev1sv PropertyPanelBaseInput-modul\"}"
+    },
+    {
+      "name": "⚠️ THE TRADE — a typed number still commits with the button beside it [arm: control]",
+      "ok": true,
+      "detail": "{\"stored\":\"{\\\"value\\\":42,\\\"unit\\\":\\\"px\\\"}\"}"
+    },
+    {
+      "name": "🔴 REACH — a node with a padding BOX is selected",
+      "ok": true,
+      "detail": "{\"component\":\"/#__page__/Home\",\"nodeId\":\"e82d69fb-927d-45e7-af21-ccf6bc4b5e84\",\"typename\":\"Page\",\"selected\":true}"
+    },
+    {
+      "name": "🔴 THE NUMBER (c) — the padding box's ↕ field draws a token button [arm: control]",
+      "ok": true,
+      "detail": "{\"found\":false}"
+    },
+    {
+      "name": "🔴 THE NUMBER (d) — spacing tokens offered on the padding box [arm: control]",
+      "ok": true,
+      "detail": "0 rows under []"
+    },
+    {
+      "name": "🔴 THE CONSEQUENCE — a `↕` pick writes BOTH sides, as typing in that field does [arm: control]",
+      "ok": true,
+      "detail": "null"
+    }
+  ],
+  "fontOffer": {
+    "open": false,
+    "rows": 0,
+    "headings": [],
+    "tokens": []
+  },
+  "padOffer": {
+    "rows": 0,
+    "headings": [],
+    "tokens": []
+  },
+  "stored": {
+    "before": null,
+    "after": null
+  },
+  "padStored": null,
+  "noScale": {
+    "present": 25,
+    "buttons": 0,
+    "offered": [],
+    "refused": []
+  }
+}

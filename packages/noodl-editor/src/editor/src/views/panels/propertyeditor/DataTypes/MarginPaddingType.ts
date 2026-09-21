@@ -11,6 +11,7 @@ import { MarginPaddingConnection, MarginPaddingInput } from '../components/Margi
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
 import { sameParameterValue } from './scrubCommit';
+import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class MarginPaddingType extends TypeView {
@@ -230,6 +231,7 @@ export class MarginPaddingType extends TypeView {
         },
         onUpdate: (comp, value, opts) => this.update(comp, value, opts),
         onUpdateComps: (comps, value, opts) => this.updateComps(comps, value, opts),
+        onOpenTokenPicker: (comps, anchor, current) => this.openTokenPicker(comps, anchor, current),
         // A wired edge's typed value is not shown, so the reset does not reach it either.
         onResetSide: (side) =>
           this.updateComps(
@@ -239,6 +241,36 @@ export class MarginPaddingType extends TypeView {
           )
       })
     );
+  }
+
+  /**
+   * HLT-012 — pick a spacing token for one field of the box.
+   *
+   * 🔴 **The whole field is written, which is what the field already means.** A `↕` press writes
+   * `margin-top` and `margin-bottom`, because typing `8` there writes both; a press on an
+   * expanded edge writes one. `updateComps` gives the write one undo entry however many sides it
+   * touched, so picking a token on a pair is one undo away from gone — the same as typing in it.
+   *
+   * ⚠️ **The port NAME decides which tokens are offered, not the comp.** They differ:
+   * `padding-left` is the comp, `paddingLeft` is the port, and `tokenCategoriesForPort` reads
+   * port names. The first present comp supplies it; all eight are spacing, so the answer is the
+   * same whichever it is, and asking through the real port keeps it true if that ever changes.
+   */
+  private openTokenPicker(comps: string[], anchor: HTMLElement, current?: string) {
+    const present = comps.filter((comp) => this.ports[comp]);
+    if (present.length === 0) return;
+
+    const portName = this.ports[present[0]].name;
+    if (!fieldOffersTokens(portName)) return;
+
+    openTokenFieldPopout({
+      view: this,
+      portName,
+      anchor,
+      currentValue: current,
+      onSelect: (reference: string) =>
+        this.updateComps(present, reference, { label: `change ${sideOf(present[0])}` })
+    });
   }
 
   dispose() {

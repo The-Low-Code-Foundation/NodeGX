@@ -27,10 +27,13 @@ export {
   allColourTokens,
   colourTokensForPicking,
   PALETTE_COLOUR_CATEGORY,
+  PORT_TOKEN_RULES,
   SEMANTIC_COLOUR_CATEGORY,
-  tokenReferenceStrings
-} from './ColourTokensForPicking';
-export type { ColourTokensForPicking } from './ColourTokensForPicking';
+  tokenCategoriesForPort,
+  tokenReferenceStrings,
+  tokensForPicking
+} from './TokensForPicking';
+export type { ColourTokensForPicking, PortTokenRule, TokenPickGroup } from './TokensForPicking';
 export { STYLE_COMPOSITIONS, formatCompositionValue } from './StyleCompositions';
 export type { VocabComposition, VocabCompositionGroup, VocabParamValue } from './StyleCompositions';
 export type {

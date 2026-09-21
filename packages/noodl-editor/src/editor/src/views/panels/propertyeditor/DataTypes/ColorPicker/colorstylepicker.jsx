@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
-import { colourTokensForPicking, tokenReferenceStrings } from '@noodl-models/StyleTokensModel/ColourTokensForPicking';
+import { colourTokensForPicking, tokenReferenceStrings } from '@noodl-models/StyleTokensModel/TokensForPicking';
 import { StyleTokensModel } from '@noodl-models/StyleTokensModel/StyleTokensModel';
 import { StylesModel } from '@noodl-models/StylesModel';
 

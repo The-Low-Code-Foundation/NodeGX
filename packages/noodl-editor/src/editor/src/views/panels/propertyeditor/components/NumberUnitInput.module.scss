@@ -104,3 +104,44 @@
     outline-offset: 1px;
   }
 }
+
+/* HLT-012 — the design-token button, inside the field on its trailing edge.
+
+   🔴 **Always drawn, never on hover**, and that is this file's own history rather than a
+   preference: the margin/padding box tried a hover-revealed px↔% toggle and it took the clicks
+   meant for the value (`120` + Enter stored `0%`). A control that appears under a pointer already
+   moving towards the field is a control that intercepts it.
+
+   It is the width of the `%` suffix it sits beside, so a field that has one loses nothing a unit
+   would not have taken anyway. */
+.TokenButton {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid transparent;
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-highlight);
+    background-color: var(--theme-color-bg-3);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: -1px;
+  }
+
+  /* The field holds a token: the button is the thing that says so, because the value box shows
+     `var(--space-3)` as text and nothing else distinguishes it from something typed. */
+  &.is-token {
+    color: var(--theme-color-primary);
+    border-left-color: var(--theme-color-border-default);
+  }
+}

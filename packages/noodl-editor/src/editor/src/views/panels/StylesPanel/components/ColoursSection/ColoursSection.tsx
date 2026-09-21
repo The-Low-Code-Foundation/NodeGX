@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
 // The leaf module, not the barrel — see TokenCategorySection's note on the `Tests: 0` it causes.
-import { allColourTokens } from '@noodl-models/StyleTokensModel/ColourTokensForPicking';
+import { allColourTokens } from '@noodl-models/StyleTokensModel/TokensForPicking';
 import { StylesModel } from '@noodl-models/StylesModel';
 import { escapeHtml } from '@noodl-utils/escapeHtml';
 
