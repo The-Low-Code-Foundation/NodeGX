@@ -6,7 +6,7 @@
   "settings": {
     "htmlTitle": "Planner",
     "navigationPathType": "path",
-    "bodyScroll": false
+    "bodyScroll": true
   },
   "structure": {
     "componentsDir": "components",

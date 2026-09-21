@@ -373,7 +373,7 @@ building vs admin, recommendations for those, making sure I'm not doing too many
 
 ---
 
-## R2.6 — The page does not scroll, so the cash strip is off the bottom
+## R2.6 — The page does not scroll, so the cash strip is off the bottom — ✅ built s1 (R2.6-2 re-measured after R2.1; R2.6-5 is Richard's)
 
 **Richard:** *"Classic NodeGX app problem: I can't scroll down to the bottom of the page to see the six weeks cash stuff
 if it's below the fold. Scrolling down doesn't work."*
@@ -413,10 +413,10 @@ if it's below the fold. Scrolling down doesn't work."*
 
 | AC | Criterion |
 |---|---|
-| R2.6-1 | At 1440×800 every text on the page is reachable (`measure-from-disk` 0 unreachable) and `scrollWidth` = 1440 |
-| R2.6-2 | At 1280×900 `pageHeight` ≤ 900 — the week still fits where R5 was ruled — in both palettes, after R2.1 |
-| R2.6-3 | At 390×844 nothing regressed from s3: 0 unreachable, `scrollWidth` 390, 0 console errors |
-| R2.6-4 | The card, the drawer and the sheets still open **fixed** over a scrolled page (they are `position: fixed`; measured after scrolling 300px) |
+| R2.6-1 | At 1440×800 every text on the page is reachable (`measure-from-disk` 0 unreachable) and `scrollWidth` = 1440 — ✅ s1: 0 unreachable, 1440, `pageHeight` 806, 0 console errors. The case he hit, **1423×680** (a 1423×800 screen less the browser's chrome): **28 unreachable before, 0 after**, the page 806 tall and scrolling |
+| R2.6-2 | At 1280×900 `pageHeight` ≤ 900 — the week still fits where R5 was ruled — in both palettes, after R2.1 — 🟡 s1, **before** R2.1: 900 / 1280 in dark and light (driven, the ☼ toggle), 0 errors. Re-measure after R2.1 |
+| R2.6-3 | At 390×844 nothing regressed from s3: 0 unreachable, `scrollWidth` 390, 0 console errors — ✅ s1: identical to the committed s3 build (0 / 390 / 993 tall / 16 overflowing / 0 errors — the 16 were there before; R7a is the likely fix) |
+| R2.6-4 | The card, the drawer and the sheets still open **fixed** over a scrolled page (they are `position: fixed`; measured after scrolling 300px) — 🟡 s1: **the log sheet** opened at scrollTop 213 (the page's maximum at 1423×680) sits at 35–557 inside a 593 viewport, under a fixed scrim. The card and the drawer are opened from the app bar, which is scrolled away at that point — not yet measured |
 | R2.6-5 | Richard, on his laptop: the cash strip is there when he scrolls |
 
 ---
@@ -439,3 +439,11 @@ Richard ruled on all of them in one pass: **R13a** (the mockup's fonts), **R13b*
 (the strip wraps), **R5a** (1100px max width), **R16a** (the tick opens the sheet), **R5b** (the page scrolls), and the
 additive **R7b–d, R18–R25** as written. No wording changed. Build order stands: R2.6, R2.1, R2.4, R2.3, R2.2, R2.5.
 TPL-010 as built (gates 30/30) committed before any of it, so R2 builds on a tracked base.
+
+### s1 (cont.) — R2.6 built
+`bodyScroll: true` and `scroll: 'page'` in `tpl010Template.ts`; `themeCss()` loses the phone-only `body > #root` override
+(the shell's own `.body-scroll` rule now applies at every width) and keeps `.planner-page { overflow-x: hidden }` at
+every width. One new gate pins both (**tpl010 31/31**). Readings: see R2.6's table. **What the tool could and could
+not see:** `measure-from-disk` at 1423×800 showed the cash strip on screen and would have passed the old build too —
+the bug only appears at the viewport a 1423×800 *screen* leaves, which is ~1423×593–680. Measure at that height from
+now on, not at the screen size.

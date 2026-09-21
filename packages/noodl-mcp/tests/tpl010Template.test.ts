@@ -26,6 +26,7 @@ import {
   preparePlannerDemoArtefact,
   TEMPLATE_ID
 } from './tpl010Template';
+import { themeCss } from './tpl010Theme';
 
 jest.setTimeout(600_000);
 
@@ -147,6 +148,16 @@ describe('§1 the artefact is the build', () => {
     expect(componentsOf(built).map((c) => c.name).sort()).toEqual(['/App', ...TPL010_COMPONENTS.map((c) => `/${c.path}`)].sort());
     const router = allNodes(built).find((n) => n.node.type === 'Router')?.node;
     expect((router?.parameters as { pages?: unknown })?.pages).toEqual({ startPage: C.pageWeek, routes: [C.pageWeek, C.pageSignIn] });
+  });
+
+  it('🔴 R5b — the page scrolls when the week does not fit, in the template and the demo, and never sideways', () => {
+    // 28 of 205 texts were out of reach on a 1423x680 laptop viewport while `bodyScroll` was false (R2.6).
+    for (const dir of [ARTEFACT, DEMO_ARTEFACT]) {
+      const project = JSON.parse(fs.readFileSync(path.join(dir, 'nodegx.project.json'), 'utf8'));
+      expect(project.settings.bodyScroll).toBe(true);
+    }
+    expect(themeCss()).not.toMatch(/#root/);
+    expect(themeCss()).toMatch(/^\.planner-page \{ overflow-x: hidden; \}$/m);
   });
 });
 

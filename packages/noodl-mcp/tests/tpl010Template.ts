@@ -79,8 +79,9 @@ function writeSkeleton(dir: string, name: string): void {
         name,
         version: '4',
         nodegxVersion: '1.1.0',
-        // 🔴 R5 — the week fits above the fold and never grows, so the page does NOT scroll.
-        settings: { htmlTitle: name, navigationPathType: 'path', bodyScroll: false },
+        // R5b (2026-09-21) — the week fits a laptop as a design target; when it does not
+        // (a 1,423x800 window, a phone) the PAGE scrolls, so nothing is ever out of reach.
+        settings: { htmlTitle: name, navigationPathType: 'path', bodyScroll: true },
         structure: { componentsDir: 'components', assetsDir: 'assets' }
       },
       null,
@@ -166,9 +167,8 @@ export async function buildPlannerTemplateProject(options: BuildOptions = {}): P
           : 'A week planner for a freelancer, in hours rather than project prices. Four envelopes — billable, building, admin and hobby — ' +
             'budgeted once a month, six day columns of blocks, one line of next moves sorted by urgency, and the next six weeks of cash. ' +
             `Stored in the NodeGX backend (${COLLECTIONS.join(', ')}), private to whoever signed in.`,
-        // R5 — the week fits above the fold and never grows, so the app fills the
-        // viewport and the page itself does not scroll (`bodyScroll: false` above).
-        scroll: 'app',
+        // R5b — the page scrolls when the week does not fit (`bodyScroll: true` above).
+        scroll: 'page',
         operations: components.map((c) => ({
           kind: 'create',
           target: c.path,
