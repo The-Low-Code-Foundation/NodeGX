@@ -1,24 +1,54 @@
 # P99 — next session
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
-HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21).**
-Open: **HLT-007, 008, 009, 011, 012, 013**, then **HLT-010 last**.
-⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** — check the board and the file mtimes
-before taking it ([[a-peer-may-be-doing-your-exact-task]]).
+HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7).**
+Open: **HLT-007, 008, 009, 012, 013**, then **HLT-010 last**.
+⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
+tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
+`TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
+row ([[a-peer-may-be-doing-your-exact-task]], [[an-uncommitted-pile-can-be-live-in-production]]).
+⚠️ That pile also means `test:main` reads **+1 suite / +5 specs** above what this phase's commits
+account for. Do not attribute the delta to your own work.
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
 **before claiming a row** — peers have been building this phase in parallel.
 
 ## Start here
 
-**Nothing is waiting on Richard.** HLT-006's AC5 was his last open criterion and he ruled it:
-*"I'm happy with the colour pallet fix from HLT 006."* Pick a row and build it.
+**Nothing is waiting on Richard** for a criterion. ⚠️ But there IS one thing for him, opened by
+s7 and left deliberately: **two of his real projects — `tut001-drive` and `Puppy test 3` — share
+one stored identity, and one local backend ("Puppy test 3 backend", `backend_msjck0y2ukxwv`) is
+owned by both.** The editor now says so on the launcher; the repair is his call, not the
+product's. See HLT-011 AC4.
 
-**Suggested: HLT-011 or HLT-012** — both were opened from a measurement rather than from a guess,
-so their §2 is the one kind that has not yet been wrong here. HLT-011 (`getProjectEntryWithId`
-returns the **first** match, so a click on either colliding launcher card opens the *other*
-project) is the sharper person sentence. ⚠️ **HLT-009's template is another stream's** — it
-committed to it again on 2026-09-21 (`60f811920`); ask before touching a file.
+**Suggested: HLT-012 or HLT-013** — both were opened from a measurement rather than from a guess,
+so their §2 is the kind that has held twice out of twice here (HLT-005's and HLT-011's both
+measured TRUE). ⚠️ **HLT-009's template is another stream's** — it committed to it again on
+2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s7 changed for the phase's thesis, and for every drive after it
+
+**HLT-011's defect was not disowned — it was MANUFACTURED by a session's own instrument.** P73
+`TUT-001`'s verdict records cloning a launcher store entry so a drive copy would inherit the real
+project's backend, id and all. Four phases later that collision surfaced as HLT-003's
+duplicate-key warning, and it is still on Richard's disk. ⇒ **A drive fixture is a write to the
+user's machine and it outlives the session that made it.** s7's own drive therefore seeds a whole
+throwaway profile (`NOODL_USER_DATA_DIR`) rather than adding a row to his store — copy that shape.
+
+## Tools s7 leaves you
+
+- **`scripts/devtools/drive-hlt011-identity.js`** — the first P99 drive whose **arms are two
+  builds**, because the data *is* the defect and removing it removes the measurement. It parks the
+  changed files, `git show HEAD:<path> > <path>`, drives the control, and copies them back —
+  never `git checkout --`, which would take a peer's unstaged work with it. It is also the first
+  that drives a **seeded profile**: three fixture projects, two sharing an id, one that cannot
+  collide and is clicked first as the known-firing signal beside the reading.
+- **`LocalProjectsModel.getProjectEntryWithDirectory`** — the launcher's addressing seam. A row is
+  a project directory. ⚠️ `getProjectEntryWithId` still exists and still returns the first match;
+  its docblock names the two callers allowed to use it.
+- **`findDurableIdCollisions` / `findRowByDirectory`** (`recentProjectRows.ts`) — pure, so the
+  properties are graded against the real colliding rows by a plain-Node runner that cannot import
+  the model.
 
 ## 🔴 The pattern this phase established, five times out of five — and the sixth that broke it
 

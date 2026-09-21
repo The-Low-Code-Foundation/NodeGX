@@ -1,5 +1,19 @@
 # HLT-011 — The two projects with one identity
 
+✅ **BUILT 2026-09-21 (session 7). Clicking the second of two cards sharing one identity opens the
+second project — driven, control opens the first one on the identical fixture, 9/9 arms each.**
+[verdict](./verdicts/HLT-011/2026-09-21/VERDICT.md) ·
+`scripts/devtools/drive-hlt011-identity.js` · `tests-unit/hlt-011/projectIdentity.test.ts` (12)
+
+🔴 **§2 measured TRUE — the second task file in this phase that did — and the origin turned out to
+be written down already.** P73 `TUT-001`'s verdict records *making* this collision: it cloned the
+store entry of the project it copied so the copy would inherit the backend. That backend is
+`backend_msjck0y2ukxwv`, **"Puppy test 3 backend"**, and both projects own it today. A drive
+fixture is a write to the user's machine, and it outlives the session that made it.
+
+⚠️ **AC4: the collision on Richard's machine is LEFT, deliberately and explicitly** — re-minting
+an id moves a datastore. The editor now *says* it; the repair is a person's call.
+
 **Opened by HLT-003 on 2026-09-21, from a measurement rather than a suspicion. Two different
 projects on this machine carry the same project `id`, and the launcher addresses rows by it.**
 
@@ -58,18 +72,18 @@ durable id. The three consequences in §2, each driven before it is fixed.
 
 ## 5. Acceptance criteria
 
-1. **(drive it first)** A driven session demonstrates the misrouted open: with the two colliding
+1. ✅ **(drove it first)** A driven session demonstrates the misrouted open: with the two colliding
    entries present, clicking the lower card opens the other project. If it does **not** reproduce,
    that is the finding and this row closes as disproved — with the reading recorded.
-2. **Addressing a row does not depend on a field that can collide.** The launcher opens by
+2. ✅ **Addressing a row does not depend on a field that can collide.** The launcher opens by
    something unique per row. ⚠️ Note `retainedProjectDirectory` is unique only *because* HLT-003's
    de-duplication makes it so; a fix that leans on it inherits that dependency and should say so.
-3. **Two projects cannot come to share a durable id**, or if they can, the editor detects it and
+3. ✅ **Two projects cannot come to share a durable id**, or if they can, the editor detects it and
    says so rather than resolving it silently. A spec covers whichever is chosen.
-4. **The existing collision is healed or explicitly left**, with the reason written down. If healed,
+4. ✅ **The existing collision is explicitly LEFT**, with the reason written down. If healed,
    a control shows what happened to the backend ownership and git auth that were keyed on it —
    silently moving either is the defect this row exists to avoid causing.
-5. `test:ci` at the floor (8 by name); `typecheck:editor` 0; `test:main` green.
+5. ✅ `test:ci` at the floor (8 by name); `typecheck:editor` 0; `test:main` green.
 
 ## 6. Landmines
 

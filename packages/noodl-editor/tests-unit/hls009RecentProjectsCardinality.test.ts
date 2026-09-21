@@ -94,7 +94,12 @@ describe('HLS-009 AC3 — one writer of the recent-projects store', () => {
     // de-duplicated by directory before being stored, which pushed `store()` twelve lines down.
     // The pin is a location, not a budget: the property being held is the ONE in "exactly one",
     // and that is what the two-sided assertion below still measures.
-    expect(writers).toEqual(['packages/noodl-editor/src/editor/src/utils/LocalProjectsModel.ts:100']);
+    // HLT-011 moved it again, :100 to :114, for the same kind of reason and with the same
+    // property intact: a field, a comment and a read of the rows the fetch just built
+    // (`findDurableIdCollisions`) sit above `store()`. 🔴 The collision that row is about is
+    // REPORTED and never repaired, so nothing was added here that writes: the array is still
+    // one element long, which is the assertion, and the number after the colon is the address.
+    expect(writers).toEqual(['packages/noodl-editor/src/editor/src/utils/LocalProjectsModel.ts:114']);
   });
 
   /**

@@ -72,7 +72,7 @@ export function Projects({}: ProjectsViewProps) {
 
   const { getProjectMeta, getProjectsInFolder, folders, moveProjectToFolder } = useProjectOrganization();
 
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [selectedProjectPath, setSelectedProjectPath] = useState(null);
   const [movingProject, setMovingProject] = useState<LauncherProjectData | null>(null);
 
   // Filter projects based on selected folder
@@ -119,12 +119,22 @@ export function Projects({}: ProjectsViewProps) {
     propertyNameToFilter: 'cloudSyncMeta.type'
   });
 
-  function onOpenProjectSettings(projectDataId: LauncherProjectData['id']) {
-    setSelectedProjectId(projectDataId);
+  /**
+   * HLT-011 — a project is addressed by its directory, never by `id`.
+   *
+   * 🔴 `LauncherProjectData.id` is the stored `project.id`, and two projects can
+   * carry one: the host resolves it with `.find`, which answers about whichever
+   * row is sorted first. Driven 2026-09-21 — clicking the second of two
+   * colliding cards opened the first card's project. `localPath` is the row's
+   * own identity and `LocalProjectsModel.fetch` guarantees one row per
+   * directory, which is the same guarantee the grid's `key` leans on.
+   */
+  function onOpenProjectSettings(projectPath: LauncherProjectData['localPath']) {
+    setSelectedProjectPath(projectPath);
   }
 
   function onCloseProjectSettings() {
-    setSelectedProjectId(null);
+    setSelectedProjectPath(null);
   }
 
   function onMoveToFolder(project: LauncherProjectData) {
@@ -152,10 +162,10 @@ export function Projects({}: ProjectsViewProps) {
 
   function buildMenuItems(project: LauncherProjectData) {
     const items: any[] = [
-      { label: 'Launch project', onClick: () => onLaunchProject?.(project.id) },
-      { label: 'Open project folder', onClick: () => onOpenProjectFolder?.(project.id) },
+      { label: 'Launch project', onClick: () => onLaunchProject?.(project.localPath) },
+      { label: 'Open project folder', onClick: () => onOpenProjectFolder?.(project.localPath) },
       { label: 'Move to folder...', onClick: () => onMoveToFolder(project) },
-      { label: 'Open project settings', onClick: () => onOpenProjectSettings(project.id) }
+      { label: 'Open project settings', onClick: () => onOpenProjectSettings(project.localPath) }
     ];
 
     /**
@@ -166,21 +176,21 @@ export function Projects({}: ProjectsViewProps) {
      * by hiding the offer — a feature that appears and disappears with a session reads as broken.
      */
     if (onShareAsTemplate) {
-      items.push({ label: 'Share as template…', onClick: () => onShareAsTemplate(project.id) });
+      items.push({ label: 'Share as template…', onClick: () => onShareAsTemplate(project.localPath) });
     }
 
     // React 17 projects keep the migrate / read-only capability the old expandable
     // runtime banner used to offer — moved into the kebab so the card stays compact.
     if (project.runtimeInfo?.version === 'react17') {
       items.push('divider');
-      items.push({ label: 'Assisted migration…', onClick: () => onMigrateProject?.(project.id) });
-      items.push({ label: 'Open read-only', onClick: () => onOpenReadOnly?.(project.id) });
+      items.push({ label: 'Assisted migration…', onClick: () => onMigrateProject?.(project.localPath) });
+      items.push({ label: 'Open read-only', onClick: () => onOpenReadOnly?.(project.localPath) });
     }
 
     items.push('divider');
     items.push({
       label: 'Delete project',
-      onClick: () => onDeleteProject?.(project.id),
+      onClick: () => onDeleteProject?.(project.localPath),
       icon: IconName.Trash,
       isDangerous: true
     });
@@ -284,9 +294,9 @@ export function Projects({}: ProjectsViewProps) {
               {shareTemplateModal && <ShareTemplateModal {...shareTemplateModal} />}
 
               <ProjectSettingsModal
-                isVisible={selectedProjectId !== null}
+                isVisible={selectedProjectPath !== null}
                 onClose={onCloseProjectSettings}
-                projectData={projects.find((project) => project.id === selectedProjectId)}
+                projectData={projects.find((project) => project.localPath === selectedProjectPath)}
               />
 
               {projects.length === 0 ? (
@@ -307,9 +317,9 @@ export function Projects({}: ProjectsViewProps) {
                       // wherever the id one did not.
                       key={project.localPath}
                       {...project}
-                      onClick={() => onLaunchProject?.(project.id)}
-                      onMigrateProject={() => onMigrateProject?.(project.id)}
-                      onOpenReadOnly={() => onOpenReadOnly?.(project.id)}
+                      onClick={() => onLaunchProject?.(project.localPath)}
+                      onMigrateProject={() => onMigrateProject?.(project.localPath)}
+                      onOpenReadOnly={() => onOpenReadOnly?.(project.localPath)}
                       contextMenuItems={buildMenuItems(project)}
                     />
                   ))}
