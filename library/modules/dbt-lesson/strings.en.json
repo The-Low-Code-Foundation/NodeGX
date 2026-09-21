@@ -89,6 +89,9 @@
     "evaluationCriteria": "What we looked at",
     "evaluationNextStep": "What would move it",
     "submissionEvaluated": "read and commented on",
-    "submissionNotYet": "not assessed yet"
+    "submissionNotYet": "not assessed yet",
+    "messageFromLearner": "You wrote",
+    "messageFromCoach": "Your coach wrote",
+    "messageUnread": "New"
   }
 }

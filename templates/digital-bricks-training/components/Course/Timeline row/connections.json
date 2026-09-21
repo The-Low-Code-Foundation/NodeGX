@@ -68,6 +68,18 @@
       "fromProperty": "onAskRequested",
       "toId": "tr_log",
       "toProperty": "log"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "copy",
+      "toId": "tr_row",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "audience",
+      "toId": "tr_row",
+      "toProperty": "audience"
     }
   ]
 }

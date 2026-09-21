@@ -144,19 +144,40 @@ a template in two languages.
 
 ### What the table does NOT own yet, and it is deliberate
 
-Two sets of strings on **`Pages/Course`** are still English in place, by decision rather than by
-oversight:
+Two kit nodes — **`RatingGauge`** and **`PaceTracker`** — are still handed no copy object, so the
+handful of strings they draw themselves render the kit's built-in English whatever the language is.
+Everything else on all four pages changes language.
 
-- the **timeline's own labels** — `Lesson`, `Coaching session`, `Brief`, `Review`, `Coming up`,
-  `Yours to pick up` and the four review names — which live in a `COPY` map inside
-  `Logic/Ordered timeline`'s function;
-- the kit strings drawn by **`TimelineRow`**, **`RatingGauge`** and **`PaceTracker`**, which are
-  the three kit nodes this template does not hand a copy object to, so they render the kit's
-  built-in English.
+`/course`'s timeline labels and `Logic/Standing`'s sentences used to be on this list too; TASK-L163
+moved them, which is what gave `/course` a string table at all. `Pages/Lesson` and `Pages/Course`
+both show the shape to copy: a `/Data/Strings` instance, a `Variable` named `language`, and the copy
+folded into each repeated row.
 
-They do not change language. If you add a locale, `/course` stays English until those are wired —
-`Pages/Lesson` shows the shape to copy: a `/Data/Strings` instance, a `Variable` named `language`,
-and the copy folded into each repeated row.
+## And one value decides WHO IS READING
+
+A coach and their client read the **same programme**, assembled once, and must not read the same
+sentences: *"You've finished 7 things"* is right for one of them and wrong for the other. So
+`Data/Strings` takes an **`audience`** — `learner` or `coach` — and the coach's words are an
+**overlay on the English base, exactly as a locale is**. Thirty override keys replace sixty-five
+duplicated strings, and a neutral one (`Lesson`, `Brief`, `Review`, `goal`) keeps a single owner
+and cannot drift between audiences. The overlay lives under a `coach` key in the same node you
+write page copy in.
+
+**There is no default.** Every `/Data/Strings` instance says who is reading, and an instance that
+does not throws by name rather than quietly serving the learner's words to somebody else —
+`tools/check-coach-voice.py` catches it before the page does.
+
+That tool also catches the failure this whole arrangement creates. A locale miss falls back to
+English: wrong language, right meaning, and visible. **A voice miss falls back to the LEARNER's
+sentence** — it tells a coach *"Your coach hasn't written this one up yet"* about their own review,
+which is grammatical, in the right language, and invisible. So it resolves the coach's bundle the
+way the graph does and fails on any string that still addresses the reader as the learner.
+
+**A learner's programme and a coach's differ in exactly two ways**, both ported from the product:
+a learner's drops every `signal` (our inference about their confusion — `Logic/Ordered timeline`
+does it, which is the projection's own layer), and a learner's row does not draw a `message` (a
+conversation belongs to the thread — `TimelineRow` does it, which is the renderer's layer). Nothing
+else differs, and the entries are loaded once for both on purpose.
 
 ## What is a placeholder, and why
 
@@ -168,8 +189,9 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in, the coach's surfaces, the assistant, the confusion control
-and the signals, onboarding — and a **second locale**: see "Every string has one owner" above for
+The backend and every write, sign-in, **the coach's PAGES** — the words and the projection are
+here and `Pages/People` and `Pages/Learner` are not, so nothing renders a coach's view yet — the
+assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 
 ## Licences

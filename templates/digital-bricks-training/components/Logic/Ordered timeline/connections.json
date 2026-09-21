@@ -20,6 +20,18 @@
       "fromProperty": "out-loaded",
       "toId": "ot_out",
       "toProperty": "loaded"
+    },
+    {
+      "fromId": "ot_in",
+      "fromProperty": "copy",
+      "toId": "ot_fn",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "ot_in",
+      "fromProperty": "audience",
+      "toId": "ot_fn",
+      "toProperty": "in-audience"
     }
   ]
 }

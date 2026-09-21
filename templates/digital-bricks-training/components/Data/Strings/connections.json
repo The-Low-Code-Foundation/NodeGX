@@ -110,6 +110,24 @@
       "fromProperty": "out-resolved",
       "toId": "str_split",
       "toProperty": "in-language"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "audience",
+      "toId": "str_split",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-audience",
+      "toId": "str_out",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-standing",
+      "toId": "str_out",
+      "toProperty": "standing"
     }
   ]
 }

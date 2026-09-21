@@ -140,6 +140,12 @@
       "fromProperty": "out-loaded",
       "toId": "st_out",
       "toProperty": "loaded"
+    },
+    {
+      "fromId": "st_in",
+      "fromProperty": "copy",
+      "toId": "st_fn",
+      "toProperty": "in-copy"
     }
   ]
 }

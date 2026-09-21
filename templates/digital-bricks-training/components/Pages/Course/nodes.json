@@ -688,6 +688,32 @@
       "metadata": {
         "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
       }
+    },
+    {
+      "id": "cs_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen",
+      "x": 1480,
+      "y": 40,
+      "parameters": {
+        "audience": "learner"
+      },
+      "metadata": {
+        "comment": "TASK-L163. /course had no string table at all, which is exactly why the timeline's labels and Logic/Standing's sentences were the last English-in-place strings on it (sprint 46 decision 003, now reversed). One instance per page; `copy` is the whole bundle and goes to both Logic nodes, and `audience` is the value they read rather than a second parameter each, so who is reading is decided in ONE place on this page."
+      }
+    },
+    {
+      "id": "cs_lang_var",
+      "type": "Variable",
+      "label": "language — from the one owner in App",
+      "x": 1840,
+      "y": 40,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, NEVER A SECOND DECISION — the same node Pages/Lesson carries. The one OWNER is the `i18next` node in App; this only carries its answer, and check-language-owner.py fails the build on any /Data/Strings instance that is not told (TASK-L162 §2)."
+      }
     }
   ],
   "visualRoots": [

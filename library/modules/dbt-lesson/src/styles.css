@@ -1847,6 +1847,22 @@
   margin-top: 0;
 }
 
+/* THEIR OWN WORDS ON A SIGNAL (TASK-L163), lifted from the product's
+   `.people-signal-utterance`. The thread tint and NOT `--warm-tint`: warm is
+   reserved for a human's words about a person, and a signal is the platform
+   noticing. No red, no ✗, no count. */
+.path-signal-utterance {
+  font-family: var(--font-prose);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  background: var(--thread-tint);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  max-width: 60ch;
+  margin: 8px 0 0;
+}
+
 .path-ask {
   display: block;
   margin: 8px 0 0;

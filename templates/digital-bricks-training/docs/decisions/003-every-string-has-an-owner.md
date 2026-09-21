@@ -40,19 +40,29 @@ which was to draft French for review on the grounds that a switch with one local
 condition nothing can change. The answer is about what **ships**, not about what is **proven**: the
 switch was driven against a throwaway pseudo-locale and the pseudo-locale was deleted before commit.
 
-**`/course`'s strings are deliberately NOT in the table, permanently.** *Richard, 2026-09-20, against
-the recommendation,* which was to ship this task and give the gap its own task. Measured: twelve
-learner-facing strings render from a hardcoded `COPY` map inside `Logic/Ordered timeline`'s function
-— invisible to `tools/check-strings.py`, which reads node parameters and not function bodies — and
-three of the four kit-node sites (`TimelineRow`, `RatingGauge`, `PaceTracker`) are never handed a
-copy object, so they render the kit's built-in English whatever the language is. The superseded
-options were (a) grow this task to close it and (b) a follow-up task. `START-HERE.md` names the gap
-rather than leaving it to be discovered, and the claim this template makes is narrowed to match.
+**REVERSED 2026-09-21 by TASK-L163 — see decision 004.** Richard reversed it the same week, and for
+a reason this decision did not have: not language, but AUDIENCE. A coach reads the same assembly and
+cannot read *"Note from your coach"* about their own note, so those strings had to move whatever the
+i18n argument was. What the reversal cost is in 004; what it bought is that the claim below is now
+true of `/course` as well. **The two kit nodes `RatingGauge` and `PaceTracker` are still unwired and
+that half of the gap stands.** The superseded decision, verbatim:
+
+> **`/course`'s strings are deliberately NOT in the table, permanently.** *Richard, 2026-09-20, against
+> the recommendation,* which was to ship this task and give the gap its own task. Measured: twelve
+> learner-facing strings render from a hardcoded `COPY` map inside `Logic/Ordered timeline`'s function
+> — invisible to `tools/check-strings.py`, which reads node parameters and not function bodies — and
+> three of the four kit-node sites (`TimelineRow`, `RatingGauge`, `PaceTracker`) are never handed a
+> copy object, so they render the kit's built-in English whatever the language is. The superseded
+> options were (a) grow this task to close it and (b) a follow-up task. `START-HERE.md` names the gap
+> rather than leaving it to be discovered, and the claim this template makes is narrowed to match.
 
 ## What this template may claim
 
 > Every learner-facing string on the three pages has one owner, and the language is one value.
 
-Not *"the template is in two languages"* and not *"i18n is finished"*. There is one locale; the only
-non-English rendering anybody has seen was a pseudo-locale that was deleted; `/course` carries a
-named, deliberate exception.
+Not *"the template is in two languages"* and not *"i18n is finished"*. There is one locale and the
+only non-English rendering anybody has seen was a pseudo-locale that was deleted.
+
+**Corrected 2026-09-21:** *"three pages"* is now four, `/course`'s named exception is gone (L163),
+and the sentence has gained a second half — **and the words change with who is reading, not only
+with the language.** Two kit nodes remain unwired; `START-HERE.md` names which.

@@ -10,18 +10,64 @@
       "x": 40,
       "y": 40,
       "ports": [
-        { "name": "id", "plug": "output", "type": "string" },
-        { "name": "entry", "plug": "output", "type": "object" },
-        { "name": "kindLabel", "plug": "output", "type": "string" },
-        { "name": "title", "plug": "output", "type": "string" },
-        { "name": "when", "plug": "output", "type": "string" },
-        { "name": "collapsed", "plug": "output", "type": "boolean" },
-        { "name": "notes", "plug": "output", "type": "array" },
-        { "name": "heading", "plug": "output", "type": "string" },
-        { "name": "hasHeading", "plug": "output", "type": "boolean" }
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "entry",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "kindLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "collapsed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "notes",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHeading",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "audience",
+          "plug": "output",
+          "type": "string"
+        }
       ],
       "metadata": {
-        "comment": "Every port here is a field of the row object `Logic/Ordered timeline` emits, bound by NAME by the page's For Each. `open` and `body` are gone: the kit node owns whether a row is open, because the fold's guarantee is that a closed row's children are not mounted — and the card's prose now goes through the kit's one sanitised markdown path rather than arriving as flat text."
+        "comment": "One row of the programme. `copy` and `audience` arrive folded into the row's own data by Logic/Ordered timeline, which is how a For Each reaches a repeated component at all — and wiring `copy` through to the kit node is what TASK-L163 closes: until then TimelineRow was one of the three kit nodes handed no copy object, so it rendered its built-in English whatever the language or the audience was."
       }
     },
     {
@@ -30,9 +76,15 @@
       "label": "The row",
       "x": 360,
       "y": 40,
-      "children": ["tr_heading", "tr_row"],
+      "children": [
+        "tr_heading",
+        "tr_row"
+      ],
       "parameters": {
-        "width": { "value": 100, "unit": "%" },
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
         "sizeMode": "contentHeight",
         "flexDirection": "column"
       }
@@ -66,7 +118,10 @@
       "y": 360,
       "parent": "tr_root",
       "parameters": {
-        "width": { "value": 100, "unit": "%" },
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
         "sizeMode": "contentHeight"
       },
       "metadata": {
@@ -88,5 +143,7 @@
       }
     }
   ],
-  "visualRoots": ["tr_root"]
+  "visualRoots": [
+    "tr_root"
+  ]
 }

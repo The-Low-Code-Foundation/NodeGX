@@ -1514,7 +1514,16 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     evaluationCriteria: 'What we looked at',
     evaluationNextStep: 'What would move it',
     submissionEvaluated: 'read and commented on',
-    submissionNotYet: 'not assessed yet'
+    submissionNotYet: 'not assessed yet',
+    /*
+     * A MESSAGE IS DRAWN FOR A COACH ONLY (L163), so these three are the
+     * LEARNER-voice base that a coach overlay replaces. They are not dead: a
+     * graph that places TimelineRow with `audience` unset renders the kit's own
+     * English, which is what makes the unwired case work at all.
+     */
+    messageFromLearner: 'You wrote',
+    messageFromCoach: 'Your coach wrote',
+    messageUnread: 'New'
   };
 
   /**
@@ -1628,11 +1637,28 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     submission: function () {
       return h('g', null, gp('M8 12.5V3.5'), gp('M4.5 7L8 3.5 11.5 7'));
     },
-    // Neither reaches a learner's programme: `message` belongs to the
-    // conversation (L118) and `projectForLearner` drops every `signal` before a
-    // learner's payload exists. Listed so the map stays TOTAL rather than short.
-    message: null,
-    signal: null
+    // ── THESE TWO WERE `null` UNTIL TASK-L163, AND THE PREMISE EXPIRED ──────
+    // They read: "Neither reaches a learner's programme." That was true of the
+    // LEARNER and is now false of the COACH, who reads the same assembly
+    // (L116's one model, two projections). Repaired rather than deleted (L80):
+    // what decides which audience draws which is the `audience` INPUT, not a
+    // `null` here — a null in a total map is a decision nobody can override,
+    // and a prop is a decision the graph makes.
+    //   signal  — drawn for a coach only; the graph drops it for a learner,
+    //             which is `projectForLearner`'s own layer.
+    //   message — drawn for a coach only; the ROW suppresses it for a learner,
+    //             which is `PathList`'s layer. Two mechanisms, each in the
+    //             layer the product puts it in.
+    // The maps are still TOTAL over the kinds: an unhandled kind throws by name.
+    //
+    // A message: a line of speech.
+    message: function () {
+      return h('g', null, gp('M2.5 4.5h11v6.5h-6L4 13.5V11H2.5z'));
+    },
+    // A signal: a pause, not a cross. The platform noticing, never a black mark.
+    signal: function () {
+      return h('g', null, gp('M8 3.5v5.5'), gc(8, 12.2, 0.6));
+    }
   };
 
   /** Sprint 8's check, unchanged — a completed lesson keeps its tick rather than taking the book. */
@@ -1677,9 +1703,28 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     lesson: 'learner',
     assignment: 'learner',
     submission: 'learner',
+    /*
+     * BOTH STAY 'none' AS A KIND, AND ONE OF THEM IS ANSWERED PER ROW (L163).
+     * A SIGNAL is neither party speaking — it is the platform noticing, which is
+     * `signal-labels.ts`'s own header and the reason it must never read as the
+     * learner failing. A MESSAGE genuinely is one of the two voices, but WHICH
+     * one is a fact about the row (`entry.authorRole`) rather than about the
+     * kind, so `voiceOf` below answers it and this map stays what it is: a
+     * mapping from KIND to voice, total over the kinds.
+     */
     message: 'none',
     signal: 'none'
   };
+
+  /**
+   * Whose entry THIS row is. A kind answers it for six of the eight; a message
+   * carries its own author, and attributing it to the kind would paint a
+   * coach's reply and a learner's question in the same wash.
+   */
+  function voiceOf(entry) {
+    if (entry && entry.kind === 'message') return str(entry.authorRole) === 'coach' ? 'coach' : 'learner';
+    return VOICE[entry && entry.kind] || 'none';
+  }
 
   /** Knot and card by STATE, not by kind — what a learner wants at a glance is what is done, in play and coming. */
   function stateClass(entry) {
@@ -1759,8 +1804,38 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     submission: function (e, TL_COPY) {
       return [meta(e.evaluated ? TL_COPY.submissionEvaluated : TL_COPY.submissionNotYet)];
     },
-    message: null,
-    signal: null
+    /*
+     * ── DRAWN FOR A COACH, AND THE `null`s EXPIRED WITH THEIR PREMISE (L163) ─
+     * See the note on `GLYPH`. `audience` decides who draws them; these two
+     * decide what a drawn one says.
+     */
+    message: function (e, TL_COPY) {
+      return [
+        meta(str(e.authorRole) === 'coach' ? TL_COPY.messageFromCoach : TL_COPY.messageFromLearner),
+        md(e.body, 'path-card-body')
+      ];
+    },
+    /*
+     * THEIR OWN WORDS, QUOTED AS THEY WROTE THEM (TASK-L140, ported). No red, no
+     * `--warm`, no ✗ and no count of them anywhere — a programme view reads as
+     * *where they are up to* rather than as a log, so a signal on it is one step
+     * from reading as a black mark. WHICH signal it was is the row's `title`,
+     * which the graph resolved; WHERE it happened is the row's `when`/location.
+     */
+    signal: function (e) {
+      return [
+        /*
+         * WHERE IT HAPPENED, resolved by the GRAPH (`signalLocation`, ported
+         * from `timeline-preview.ts`) because only the graph holds the other
+         * entries to look a concept title up in. The product draws this on the
+         * FOLDED line; this row's folded line has no slot for it and adding one
+         * is a port L163 does not need, so it reads on the open card instead —
+         * recorded as a deviation rather than a silent difference.
+         */
+        e.locationLabel ? meta(str(e.locationLabel)) : null,
+        e.utterance ? h('p', { className: 'path-signal-utterance' }, '\u201C' + str(e.utterance) + '\u201D') : null
+      ];
+    }
   };
 
   /** A coach's note, drawn the same way whether it is its own row or carried under the card it points at. */
@@ -1831,9 +1906,29 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     if (!Object.prototype.hasOwnProperty.call(CARD, kind)) {
       throw new Error('dbt-lesson.TimelineRow: no card rule for entry kind "' + kind + '"');
     }
-    // The one kind this surface has never drawn. Nothing mounts, so the zero is
-    // a row that does not exist rather than a row that is empty.
-    if (CARD[kind] === null) return null;
+    /*
+     * ── WHO IS READING, AND THERE IS DELIBERATELY NO DEFAULT (L163 §3) ───────
+     * A graph that forgot to wire this would otherwise render the wrong
+     * audience's words and nobody would find out — `service.ts:17-26`'s "one
+     * forgotten argument away" in a node's clothes. Unset is a NAMED failure at
+     * the one place it is decidable, not a silent guess.
+     *
+     * The kit's own default is the LEARNER, and that is a different thing from
+     * a graph default: an unwired node renders the English this kit ships,
+     * which is what keeps a bare placement working (L160 AC1).
+     */
+    var audience = str(p.audience) || 'learner';
+    if (audience !== 'learner' && audience !== 'coach') {
+      throw new Error('dbt-lesson.TimelineRow: Audience must be "learner" or "coach", not "' + audience + '"');
+    }
+
+    /*
+     * A CONVERSATION BELONGS TO THE THREAD, NOT TO THE PROGRAMME (L117/L118) —
+     * for a LEARNER. Nothing mounts, so the zero is a row that does not exist
+     * rather than a row that is empty. A coach reads it here, because their
+     * programme surface is the one place the whole fortnight is in one list.
+     */
+    if (kind === 'message' && audience === 'learner') return null;
 
     var isDone = kind === 'lesson' ? entry.status === 'complete' : entry.state === 'done';
     var startsFolded = isDone;
@@ -1858,7 +1953,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     if (notes.length) carries.push(plural(TL_COPY.notes_one, TL_COPY.notes_other, notes.length));
     if (comments) carries.push(plural(TL_COPY.comments_one, TL_COPY.comments_other, comments));
 
-    var cls = [stateClass(entry), 'timeline-' + kind, 'timeline-voice-' + (VOICE[kind] || 'none'), open ? 'is-open' : 'is-folded'].join(' ');
+    var cls = [stateClass(entry), 'timeline-' + kind, 'timeline-voice-' + voiceOf(entry), open ? 'is-open' : 'is-folded'].join(' ');
 
     var body = open
       ? h.apply(
@@ -1916,8 +2011,15 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
        * ASK YOUR COACH ABOUT THIS (L131 §3), on an OPEN card only — a folded row
        * is one line the reader can open, and hanging a second control off it
        * would make it two. It EMITS; nothing here writes (sprint 45 decision 6).
+       *
+       * AND ON A LEARNER'S ROW ONLY (L163 §4). It posts as whoever is signed in,
+       * so on a coach's surface it would write the COACH's question into their
+       * client's thread — L135's `mode="staff"` reasoning, ported. Suppressing
+       * it is also why `timeline.ask` needs no coach wording: it is the one
+       * string the coach map inherits and never renders, which
+       * `tools/check-coach-voice.py` records by name rather than excusing.
        */
-      open
+      open && audience === 'learner'
         ? h(
             'button',
             {
@@ -1987,6 +2089,11 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
       collapsed: port('boolean', 'Starts folded', { default: false, description: 'Derived from the programme by the graph, never stored. What the reader does after is this node’s own state.' }),
       notes: obj('Notes', { description: 'The coach’s notes anchored to this entry. Its LENGTH is the count on the folded line — never a separate number.' }),
       comments: num('Comments', { default: 0, description: 'How many comments this entry’s thread holds. Words and a number on the folded line, never a badge.' }),
+      audience: text('Audience', {
+        default: 'learner',
+        description:
+          'Who is reading: "learner" or "coach". A coach also sees messages; a learner does not, and only a learner gets the ask control. Anything else throws by name — there is no third audience and no silent guess.'
+      }),
       copy: COPY_PORT,
       assetBase: ASSET_BASE
     },

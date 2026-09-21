@@ -69,7 +69,10 @@
       "x": 760,
       "y": 40,
       "metadata": {
-        "comment": "Mounted HERE, in the root, because a Translation node takes no wire — it reads the module-scoped i18next instance. A bundle loaded inside a page would leave every other page unresolved until someone had visited that one. TASK-L161 §0."
+        "comment": "Mounted HERE, in the root, because a Translation node takes no wire — it reads the module-scoped i18next instance. A bundle loaded inside a page would leave every other page unresolved until someone had visited that one. TASK-L161 §0. App's instance feeds the i18next Language Bundles, whose namespaces (common, home, course, lesson, palette) have no coach wording — so the value is immaterial HERE and is still written down, because an input with no default is what stops a page serving the wrong audience's words in silence (TASK-L163 §3)."
+      },
+      "parameters": {
+        "audience": "learner"
       }
     },
     {

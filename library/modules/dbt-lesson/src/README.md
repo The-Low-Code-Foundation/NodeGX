@@ -48,7 +48,7 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 | node | ports in | ports out |
 |---|---|---|
 | `Section` | `copy` (object), `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
-| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
+| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
 | `PaceTracker` | `view` (object), `par` (array), `headline`, `legendActual`, `legendPar` | — |
 | `RatingGauge` | `gauge` (object) | — |
 | `Reading` | `markdown`, `detail` | — |
@@ -97,8 +97,21 @@ is the first of those. A folded row's card is not in the tree at all.
 - **Words and a number, never a badge.** `1 note · 2 comments` on a folded line, in the same
   recessive ink as the date. The count is the `notes` array's LENGTH, never a number sent beside it,
   so a folded line cannot promise a note the open card does not hold.
-- **A kind with no glyph or card rule throws by name** rather than drawing nothing — `null` in those
-  maps is a decision, not an omission.
+- **A kind with no glyph or card rule throws by name** rather than drawing nothing. The maps are
+  TOTAL over the eight kinds and none of them is `null` any more: `signal` and `message` were, with
+  a comment saying neither reaches a learner's programme, and that premise expired the moment a
+  coach read the same assembly.
+- **`audience` decides what a reader sees, and it has no default that means "whatever you forgot".**
+  `learner` or `coach`; anything else throws by name. A coach also sees a `message`; a learner does
+  not, because a conversation belongs to the thread. Only a learner gets the **ask control** — it
+  posts as whoever is signed in, so on a coach's surface it would write the coach's own question
+  into their client's thread.
+- **A signal reads as the platform noticing, never as the learner failing.** Their own words, quoted
+  as they wrote them, with where it happened above; no red, no warm, no ✗, and no count of them
+  anywhere. Its glyph is a pause, not a cross. WHERE it happened is resolved by the graph, which is
+  the only place the other entries are — this node is handed the answer, not the lookup.
+- **A message's voice is the row's, not the kind's.** `authorRole` says who wrote it; attributing it
+  to the kind would paint a coach's reply and a learner's question in the same wash.
 
 
 ## `PaceTracker` and `RatingGauge` — two panels that must be able to not exist

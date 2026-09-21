@@ -230,6 +230,30 @@
       "fromProperty": "Translation",
       "toId": "seo_cs_page",
       "toProperty": "in-title"
+    },
+    {
+      "fromId": "cs_lang_var",
+      "fromProperty": "value",
+      "toId": "cs_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_ordered",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "audience",
+      "toId": "cs_ordered",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_standing",
+      "toProperty": "copy"
     }
   ]
 }

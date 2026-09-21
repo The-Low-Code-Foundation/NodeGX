@@ -32,6 +32,14 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 - **Nothing gates, nothing scores, nothing is red.** A wrong quiz answer is warm; `Correct` is a
   port for the graph, never a count on screen. `--warm` is encouragement and a human voice; `--go`
   is done. Every colour is a class the stylesheet owns.
+- **Every node takes ONE `copy` input, and English is built in.** A node is handed the whole
+  resolved string object rather than eighty string parameters, and it falls back **per call** to
+  the English in `kit.js` — so a kit node whose graph forgot to wire `copy` renders English, never
+  a blank and never a raw key. `kit.js` is the one place that English is WRITTEN;
+  `strings.en.json` is GENERATED from it by `build.mjs` and is what a graph seeds its string table
+  from. The kit never calls `t()` itself and never knows what language it is in: it renders the
+  object it is given, and the graph decides which language that object is.
+
 - **React is the runtime's global.** The bundle maps `react` and `react/jsx-runtime` onto it and
   carries no React of its own.
 
@@ -39,8 +47,8 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 
 | node | ports in | ports out |
 |---|---|---|
-| `Section` | `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
-| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
+| `Section` | `copy` (object), `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
+| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
 | `PaceTracker` | `view` (object), `par` (array), `headline`, `legendActual`, `legendPar` | — |
 | `RatingGauge` | `gauge` (object) | — |
 | `Reading` | `markdown`, `detail` | — |
@@ -89,8 +97,21 @@ is the first of those. A folded row's card is not in the tree at all.
 - **Words and a number, never a badge.** `1 note · 2 comments` on a folded line, in the same
   recessive ink as the date. The count is the `notes` array's LENGTH, never a number sent beside it,
   so a folded line cannot promise a note the open card does not hold.
-- **A kind with no glyph or card rule throws by name** rather than drawing nothing — `null` in those
-  maps is a decision, not an omission.
+- **A kind with no glyph or card rule throws by name** rather than drawing nothing. The maps are
+  TOTAL over the eight kinds and none of them is `null` any more: `signal` and `message` were, with
+  a comment saying neither reaches a learner's programme, and that premise expired the moment a
+  coach read the same assembly.
+- **`audience` decides what a reader sees, and it has no default that means "whatever you forgot".**
+  `learner` or `coach`; anything else throws by name. A coach also sees a `message`; a learner does
+  not, because a conversation belongs to the thread. Only a learner gets the **ask control** — it
+  posts as whoever is signed in, so on a coach's surface it would write the coach's own question
+  into their client's thread.
+- **A signal reads as the platform noticing, never as the learner failing.** Their own words, quoted
+  as they wrote them, with where it happened above; no red, no warm, no ✗, and no count of them
+  anywhere. Its glyph is a pause, not a cross. WHERE it happened is resolved by the graph, which is
+  the only place the other entries are — this node is handed the answer, not the lookup.
+- **A message's voice is the row's, not the kind's.** `authorRole` says who wrote it; attributing it
+  to the kind would paint a coach's reply and a learner's question in the same wash.
 
 
 ## `PaceTracker` and `RatingGauge` — two panels that must be able to not exist

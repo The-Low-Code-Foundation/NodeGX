@@ -273,7 +273,10 @@
       "x": 760,
       "y": 40,
       "metadata": {
-        "comment": "One instance per page. Its `copy` output is the whole bundle; Logic/Sections for step puts it on every row, and the For Each maps it onto Section row's Copy input by name. Delete this node and the lesson still renders — in the English the kit ships (TASK-L160)."
+        "comment": "One instance per page. Its `copy` output is the whole bundle; Logic/Sections for step puts it on every row, and the For Each maps it onto Section row's Copy input by name. Delete this node and the lesson still renders — in the English the kit ships (TASK-L160). A lesson is the learner's surface. When a coach can read one, this is the line that changes — one word, in the instance, rather than a flag threaded through the kit (TASK-L163 §3)."
+      },
+      "parameters": {
+        "audience": "learner"
       }
     },
     {
