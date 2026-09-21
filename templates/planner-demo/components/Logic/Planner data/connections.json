@@ -118,6 +118,18 @@
       "toProperty": "in-moveSince"
     },
     {
+      "fromId": "pnWindow",
+      "fromProperty": "out-marksSince",
+      "toId": "pnRead",
+      "toProperty": "in-marksSince"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-marksSince",
+      "toId": "pnOut",
+      "toProperty": "marksSince"
+    },
+    {
       "fromId": "pnReady",
       "fromProperty": "ontrue",
       "toId": "pnRead",
@@ -149,9 +161,21 @@
     },
     {
       "fromId": "pnRead",
-      "fromProperty": "out-cashEvents",
+      "fromProperty": "out-moneyItems",
       "toId": "pnOut",
-      "toProperty": "cashEvents"
+      "toProperty": "moneyItems"
+    },
+    {
+      "fromId": "pnRead",
+      "fromProperty": "out-moneyMarks",
+      "toId": "pnOut",
+      "toProperty": "moneyMarks"
+    },
+    {
+      "fromId": "pnRead",
+      "fromProperty": "out-balanceReadings",
+      "toId": "pnOut",
+      "toProperty": "balanceReadings"
     },
     {
       "fromId": "pnRead",

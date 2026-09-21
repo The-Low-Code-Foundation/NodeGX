@@ -24,6 +24,11 @@
           "type": "*"
         },
         {
+          "name": "billings",
+          "plug": "output",
+          "type": "*"
+        },
+        {
           "name": "name",
           "plug": "output",
           "type": "string"
@@ -80,6 +85,21 @@
         },
         {
           "name": "say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billing",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "termsDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "agreedHours",
           "plug": "output",
           "type": "string"
         }
@@ -153,6 +173,21 @@
           "type": "string"
         },
         {
+          "name": "billing",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "termsDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "agreedHours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "save",
           "plug": "input",
           "type": "signal"
@@ -188,6 +223,7 @@
         "peName",
         "peSub",
         "peKindRow",
+        "peBillRow",
         "peSlotRow",
         "peMoveBox",
         "peSay",
@@ -457,6 +493,185 @@
       "y": 1240
     },
     {
+      "id": "peBillRow",
+      "type": "Group",
+      "label": "Billing",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "peBillingBox",
+        "peTermsBox",
+        "peAgreedBox"
+      ],
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "peBillingBox",
+      "type": "Group",
+      "label": "Hourly or fixed",
+      "parent": "peBillRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 40,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peBilling"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "peBilling",
+      "type": "net.noodl.controls.options",
+      "label": "Hourly or fixed",
+      "parent": "peBillingBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick one",
+        "useLabel": true,
+        "label": "Billing",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "peTermsBox",
+      "type": "Group",
+      "label": "Payment terms",
+      "parent": "peBillRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 30,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peTerms"
+      ],
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "peAgreedBox",
+      "type": "Group",
+      "label": "Agreed hours",
+      "parent": "peBillRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 30,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "peAgreed"
+      ],
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "peTerms",
+      "type": "net.noodl.controls.textinput",
+      "label": "Payment terms, days",
+      "parent": "peTermsBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Payment terms, days",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "peAgreed",
+      "type": "net.noodl.controls.textinput",
+      "label": "Agreed hours a month",
+      "parent": "peAgreedBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Agreed hours a month",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 2080
+    },
+    {
       "id": "peSlotRow",
       "type": "Group",
       "label": "Slot and rung",
@@ -476,7 +691,7 @@
         "peRungBox"
       ],
       "x": 100,
-      "y": 1360
+      "y": 2200
     },
     {
       "id": "peSlotBox",
@@ -496,7 +711,7 @@
         "peSlot"
       ],
       "x": 160,
-      "y": 1480
+      "y": 2320
     },
     {
       "id": "peRungBox",
@@ -516,7 +731,7 @@
         "peRung"
       ],
       "x": 160,
-      "y": 1720
+      "y": 2560
     },
     {
       "id": "peSlot",
@@ -548,7 +763,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 220,
-      "y": 1600
+      "y": 2440
     },
     {
       "id": "peRung",
@@ -580,7 +795,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 220,
-      "y": 1840
+      "y": 2680
     },
     {
       "id": "peMoveBox",
@@ -610,7 +825,7 @@
         "peStop"
       ],
       "x": 100,
-      "y": 1960
+      "y": 2800
     },
     {
       "id": "peMoveLabel",
@@ -637,7 +852,7 @@
         }
       },
       "x": 160,
-      "y": 2080
+      "y": 2920
     },
     {
       "id": "peMove",
@@ -669,7 +884,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 160,
-      "y": 2200
+      "y": 3040
     },
     {
       "id": "peMoveMeta",
@@ -691,7 +906,7 @@
         "peWhenBox"
       ],
       "x": 160,
-      "y": 2320
+      "y": 3160
     },
     {
       "id": "peWorthBox",
@@ -711,7 +926,7 @@
         "peWorth"
       ],
       "x": 220,
-      "y": 2440
+      "y": 3280
     },
     {
       "id": "peWhenBox",
@@ -731,7 +946,7 @@
         "peWhen"
       ],
       "x": 220,
-      "y": 2680
+      "y": 3520
     },
     {
       "id": "peWorth",
@@ -763,7 +978,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 280,
-      "y": 2560
+      "y": 3400
     },
     {
       "id": "peWhen",
@@ -795,7 +1010,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 280,
-      "y": 2800
+      "y": 3640
     },
     {
       "id": "peDue",
@@ -807,7 +1022,7 @@
         "Show Label": true
       },
       "x": 160,
-      "y": 2920
+      "y": 3760
     },
     {
       "id": "peStop",
@@ -836,7 +1051,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 160,
-      "y": 3040
+      "y": 3880
     },
     {
       "id": "peOpened",
@@ -846,7 +1061,7 @@
         "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\nvar moveStopWant = shown ? Inputs.moveStop === true : null;\nif (moveStopWant !== null && (!this.wasShown || this.moveStopLast !== moveStopWant)) { if (moveStopWant) Outputs.moveStopOn(); else Outputs.moveStopOff(); }\nthis.moveStopLast = moveStopWant;\nthis.wasShown = shown;"
       },
       "x": 530,
-      "y": 3040,
+      "y": 3880,
       "ports": [
         {
           "name": "in-shown",
@@ -915,7 +1130,7 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 100,
-      "y": 3160
+      "y": 4000
     },
     {
       "id": "peButtons",
@@ -938,7 +1153,7 @@
         "peCancel"
       ],
       "x": 100,
-      "y": 3280
+      "y": 4120
     },
     {
       "id": "peSave",
@@ -960,7 +1175,7 @@
         "label": "Save"
       },
       "x": 160,
-      "y": 3400
+      "y": 4240
     },
     {
       "id": "peCancel",
@@ -984,7 +1199,7 @@
         "label": "Cancel"
       },
       "x": 160,
-      "y": 3520
+      "y": 4360
     }
   ],
   "visualRoots": [

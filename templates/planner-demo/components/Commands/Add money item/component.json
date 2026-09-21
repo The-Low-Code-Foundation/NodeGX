@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a2789e06-6a29-50d5-8bf9-ef0b5b56b930",
+  "name": "Add money item",
+  "path": "/Commands/Add money item",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds something that happens to the money: what it is, in or out, how much, how often and from when, until when, whose it is, and how likely."
+}

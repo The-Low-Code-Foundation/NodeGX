@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6882932d-971e-52de-8f83-1c0c93b30b7c",
+  "name": "Record balance",
+  "path": "/Commands/Record balance",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Records what the bank says, on a day. Every projection starts from the latest one."
+}

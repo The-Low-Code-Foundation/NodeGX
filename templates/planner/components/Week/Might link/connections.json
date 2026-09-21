@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a4547d09-df3c-5e47-8f3b-fe2e5a2a7947",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mlIn",
+      "fromProperty": "name",
+      "toId": "mlName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "odds",
+      "toId": "mlOdds",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "move",
+      "toId": "mlMove",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "projectId",
+      "toId": "mlOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "mlName",
+      "fromProperty": "onClick",
+      "toId": "mlOut",
+      "toProperty": "open"
+    }
+  ]
+}

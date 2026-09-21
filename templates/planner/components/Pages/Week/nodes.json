@@ -48,6 +48,7 @@
         "twCard",
         "twDrawer",
         "twSheet",
+        "twMoney",
         "twLog"
       ],
       "x": 100,
@@ -221,19 +222,27 @@
       "y": 1720
     },
     {
+      "id": "twMoney",
+      "type": "/Week/Money sheet",
+      "label": "Money",
+      "parent": "twRoot",
+      "x": 160,
+      "y": 1840
+    },
+    {
       "id": "twLog",
       "type": "/Week/Block sheet",
       "label": "One block, and the time on it",
       "parent": "twRoot",
       "x": 160,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "twUser",
       "type": "net.noodl.user.User",
       "label": "Who is signed in",
       "x": 470,
-      "y": 7240
+      "y": 11440
     },
     {
       "id": "twAuth",
@@ -254,7 +263,7 @@
         "target": "/Pages/Sign in"
       },
       "x": 470,
-      "y": 7360
+      "y": 11560
     },
     {
       "id": "twLogOut",
@@ -275,42 +284,63 @@
       "type": "/Logic/Envelopes",
       "label": "The envelopes",
       "x": 470,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "twDays",
       "type": "/Logic/Day columns",
       "label": "The six columns",
       "x": 470,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "twMovesLogic",
       "type": "/Logic/Moves",
       "label": "The moves, by urgency",
       "x": 470,
-      "y": 1240
+      "y": 1360
     },
     {
-      "id": "twCashLogic",
-      "type": "/Logic/Cash line",
-      "label": "The money",
+      "id": "twMoneyLogic",
+      "type": "/Logic/Money",
+      "label": "The money, drawn",
       "x": 470,
-      "y": 2800
+      "y": 2920
+    },
+    {
+      "id": "twMoneyView",
+      "type": "/Logic/Money pane",
+      "label": "What the Money pane and the card’s Billing show",
+      "x": 470,
+      "y": 3280
+    },
+    {
+      "id": "twMarkPane",
+      "type": "/Logic/Mark",
+      "label": "The mark a press in the pane writes",
+      "x": 470,
+      "y": 7120
+    },
+    {
+      "id": "twMarkBal",
+      "type": "/Logic/Mark",
+      "label": "The mark an answer in Record balance writes",
+      "x": 470,
+      "y": 7240
     },
     {
       "id": "twShutLogic",
       "type": "/Logic/Shutdown",
       "label": "What tonight says",
       "x": 470,
-      "y": 4600
+      "y": 5440
     },
     {
       "id": "twCardRows",
       "type": "/Logic/Card rows",
       "label": "The projects card",
       "x": 470,
-      "y": 2920
+      "y": 3400
     },
     {
       "id": "twVarCard",
@@ -320,7 +350,7 @@
         "name": "plannerCardProject"
       },
       "x": 470,
-      "y": 7480
+      "y": 11680
     },
     {
       "id": "twCardFromBlock",
@@ -331,7 +361,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "twCardFromChip",
@@ -342,7 +372,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "twCardAll",
@@ -365,7 +395,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 3040
+      "y": 3520
     },
     {
       "id": "twCardNew",
@@ -376,7 +406,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 7600
+      "y": 11800
     },
     {
       "id": "twClearCard",
@@ -388,7 +418,7 @@
         "value": ""
       },
       "x": 470,
-      "y": 3160
+      "y": 3640
     },
     {
       "id": "twCardShown",
@@ -398,7 +428,7 @@
         "functionScript": "Outputs.shown = String(Inputs.id || '') !== '';"
       },
       "x": 470,
-      "y": 3280,
+      "y": 3760,
       "ports": [
         {
           "name": "in-id",
@@ -424,7 +454,7 @@
         "name": "plannerDrawerOpen"
       },
       "x": 470,
-      "y": 7720
+      "y": 11920
     },
     {
       "id": "twOpenDrawer",
@@ -448,7 +478,7 @@
         "value": false
       },
       "x": 470,
-      "y": 4720
+      "y": 5560
     },
     {
       "id": "twVarPhoneDay",
@@ -458,7 +488,7 @@
         "name": "plannerPhoneDay"
       },
       "x": 470,
-      "y": 7840
+      "y": 12040
     },
     {
       "id": "twSetPhoneDay",
@@ -469,7 +499,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "twVarLog",
@@ -479,7 +509,7 @@
         "name": "plannerLogBlock"
       },
       "x": 470,
-      "y": 7960
+      "y": 12160
     },
     {
       "id": "twSetLog",
@@ -490,7 +520,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "twClearLog",
@@ -502,7 +532,7 @@
         "value": ""
       },
       "x": 470,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "twVarMode",
@@ -512,7 +542,7 @@
         "name": "plannerLogMode"
       },
       "x": 470,
-      "y": 8080
+      "y": 12280
     },
     {
       "id": "twModeTick",
@@ -524,7 +554,7 @@
         "value": "tick"
       },
       "x": 470,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "twModeWords",
@@ -536,7 +566,7 @@
         "value": ""
       },
       "x": 470,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "twVarNewDay",
@@ -546,7 +576,7 @@
         "name": "plannerNewDay"
       },
       "x": 470,
-      "y": 8200
+      "y": 12400
     },
     {
       "id": "twSetNewDay",
@@ -557,7 +587,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "twClearNewDay",
@@ -569,7 +599,7 @@
         "value": ""
       },
       "x": 470,
-      "y": 2680
+      "y": 2800
     },
     {
       "id": "twSheetRow",
@@ -579,7 +609,7 @@
         "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar id = String(Inputs.id || '');\nvar newDay = String(Inputs.newDay || '');\nvar blocks = Inputs.blocks || [];\nvar projects = Inputs.projects || [];\nvar items = [];\nfor (var k = 0; k < projects.length; k++) if (projects[k]) items.push({ Label: String(projects[k].name || ''), Value: String(projects[k].id) });\nOutputs.projects = items;\nvar b = null;\nif (id !== '') for (var i = 0; i < blocks.length; i++) if (blocks[i] && blocks[i].id === id) { b = blocks[i]; break; }\nfunction longDay(s) {\n  var d = parseDay(s);\n  return d ? DOW_LONG[(d.getDay() + 6) % 7] + ' ' + d.getDate() + ' ' + MON[d.getMonth()] : String(s || '');\n}\nif (!b && !parseDay(newDay)) {\n  // Closed. The sheet clears its own boxes as it closes (Week/Block sheet), so these are only\n  // what a closed sheet holds.\n  Outputs.shown = false;\n  Outputs.isNew = false;\n  Outputs.timeShown = false;\n  Outputs.title = '';\n  Outputs.projectId = '';\n  Outputs.what = '';\n  Outputs.planned = '';\n  Outputs.date = '';\n  Outputs.loggedLine = '';\n  Outputs.entries = [];\n  Outputs.hours = '';\n  Outputs.note = '';\n  Outputs.done = false;\n  Outputs.saveLabel = 'Save';\n  Outputs.before = [];\n  Outputs.actual = '';\n  return;\n}\nif (!b) {\n  Outputs.shown = true;\n  Outputs.isNew = true;\n  Outputs.timeShown = false;\n  Outputs.title = 'New block · ' + longDay(newDay);\n  Outputs.projectId = '';\n  Outputs.what = '';\n  Outputs.planned = '1';\n  Outputs.date = newDay;\n  Outputs.loggedLine = '';\n  Outputs.entries = [];\n  Outputs.hours = '';\n  Outputs.note = '';\n  Outputs.done = false;\n  Outputs.saveLabel = 'Put it in the day';\n  Outputs.before = [];\n  Outputs.actual = '';\n  return;\n}\nvar p = null;\nfor (var j = 0; j < projects.length; j++) if (projects[j] && projects[j].id === b.projectId) { p = projects[j]; break; }\nvar planned = num(b.planned, 0);\nvar list = entriesOf(b);\nvar logged = loggedOf(b);\nvar tick = String(Inputs.mode || '') === 'tick';\nvar rows = [];\nfor (var e = 0; e < list.length; e++) {\n  var ed = parseDay(list[e].day);\n  rows.push({\n    dayText: ed ? DOW[(ed.getDay() + 6) % 7] + ' ' + ed.getDate() + ' ' + MON[ed.getMonth()] : '',\n    hoursText: hText(list[e].hours) + ' h',\n    note: String(list[e].note || '')\n  });\n}\nOutputs.shown = true;\nOutputs.isNew = false;\nOutputs.timeShown = true;\nOutputs.title = (p ? String(p.name || '') : 'This block') + ' · ' + longDay(b.date);\nOutputs.projectId = String(b.projectId || '');\nOutputs.what = String(b.what || '');\nOutputs.planned = String(q(planned));\nOutputs.date = String(b.date || '');\nOutputs.entries = rows;\nOutputs.before = list;\nOutputs.actual = b.actual === null || b.actual === undefined ? '' : b.actual;\n// R16a — the tick opens this with Done ticked and what is left of the plan already in the box,\n// so \"it took as long as it was meant to\" is two presses and the hours are stated, not assumed.\nvar left = q(Math.max(0, planned - logged));\nOutputs.hours = tick && !b.done && left > 0 ? String(left) : '';\nOutputs.note = '';\nOutputs.done = b.done === true || tick;\nif (b.done && list.length === 0) Outputs.loggedLine = 'Done, at ' + hText(hoursOf(b)) + ' h.';\nelse if (list.length > 0) Outputs.loggedLine = hText(logged) + ' of ' + hText(planned) + ' h logged' + (b.done ? ', and done.' : '. It stays open until Done is ticked.');\nelse Outputs.loggedLine = 'Nothing logged on it yet.';\nOutputs.saveLabel = 'Save';"
       },
       "x": 470,
-      "y": 6640,
+      "y": 10840,
       "ports": [
         {
           "name": "in-id",
@@ -745,7 +775,7 @@
         "name": "plannerCardEdit"
       },
       "x": 470,
-      "y": 8320
+      "y": 12520
     },
     {
       "id": "twEditOn",
@@ -757,7 +787,7 @@
         "value": "edit"
       },
       "x": 470,
-      "y": 3400
+      "y": 3880
     },
     {
       "id": "twEditNew",
@@ -769,7 +799,7 @@
         "value": "new"
       },
       "x": 470,
-      "y": 3520
+      "y": 4000
     },
     {
       "id": "twEditOff",
@@ -781,17 +811,17 @@
         "value": ""
       },
       "x": 470,
-      "y": 3640
+      "y": 4120
     },
     {
       "id": "twEditRow",
       "type": "JavaScriptFunction",
       "label": "What the project editor is showing",
       "parameters": {
-        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar mode = String(Inputs.mode || '');\nvar id = String(Inputs.id || '');\nvar projects = Inputs.projects || [];\nOutputs.kinds = [\n  { Label: 'Billable: a client who pays', Value: 'earning' },\n  { Label: 'Building: pays later, if it lands', Value: 'building' },\n  { Label: 'Hobby', Value: 'hobby' },\n  { Label: 'Dormant: a client worth a nudge', Value: 'dormant' },\n  { Label: 'Admin', Value: 'admin' }\n];\nvar p = null;\nfor (var i = 0; i < projects.length; i++) if (projects[i] && projects[i].id === id) { p = projects[i]; break; }\nvar editing = mode === 'new' || (mode === 'edit' && !!p);\nOutputs.editing = editing;\nOutputs.detailShown = !editing;\nOutputs.isNew = mode === 'new';\n// 🔴 Every output spelled out as Outputs.<name>: the door declares a Function's ports by reading\n// the script, and a port written as Outputs[name] is a port nobody declared — the wire into\n// the editor is kept, and the deploy reports it as going nowhere.\nif (!editing) {\n  // Closed. The editor clears its own boxes as it closes (Week/Project editor).\n  Outputs.name = '';\n  Outputs.sub = '';\n  Outputs.slot = '';\n  Outputs.rung = '';\n  Outputs.move = '';\n  Outputs.moveWorth = '';\n  Outputs.moveWhen = '';\n  Outputs.say = '';\n  Outputs.rate = '';\n  Outputs.kind = '';\n  Outputs.moveDue = '';\n  Outputs.moveStop = false;\n  Outputs.title = '';\n  return;\n}\nvar src = mode === 'new' ? {} : p;\nfunction str(v) { return v === undefined || v === null ? '' : String(v); }\nOutputs.name = str(src.name);\nOutputs.sub = str(src.sub);\nOutputs.slot = str(src.slot);\nOutputs.rung = str(src.rung);\nOutputs.move = str(src.move);\nOutputs.moveWorth = str(src.moveWorth);\nOutputs.moveWhen = str(src.moveWhen);\nOutputs.say = str(src.say);\nOutputs.rate = num(src.rate, 0) > 0 ? String(num(src.rate, 0)) : '';\nOutputs.kind = String(src.kind || 'earning');\nOutputs.moveDue = parseDay(src.moveDue) ? String(src.moveDue) : '';\nOutputs.moveStop = src.moveStop === true;\nOutputs.title = mode === 'new' ? 'New project' : 'Edit ' + String(p.name || 'the project');"
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar mode = String(Inputs.mode || '');\nvar id = String(Inputs.id || '');\nvar projects = Inputs.projects || [];\nOutputs.kinds = [\n  { Label: 'Billable: a client who pays', Value: 'earning' },\n  { Label: 'Building: pays later, if it lands', Value: 'building' },\n  { Label: 'Hobby', Value: 'hobby' },\n  { Label: 'Dormant: a client worth a nudge', Value: 'dormant' },\n  { Label: 'Admin', Value: 'admin' }\n];\nOutputs.billings = [\n  { Label: 'Hourly: billed for the hours', Value: 'hourly' },\n  { Label: 'Fixed: a set amount for the agreed work', Value: 'fixed' }\n];\nvar p = null;\nfor (var i = 0; i < projects.length; i++) if (projects[i] && projects[i].id === id) { p = projects[i]; break; }\nvar editing = mode === 'new' || (mode === 'edit' && !!p);\nOutputs.editing = editing;\nOutputs.detailShown = !editing;\nOutputs.isNew = mode === 'new';\n// 🔴 Every output spelled out as Outputs.<name>: the door declares a Function's ports by reading\n// the script, and a port written as Outputs[name] is a port nobody declared — the wire into\n// the editor is kept, and the deploy reports it as going nowhere.\nif (!editing) {\n  // Closed. The editor clears its own boxes as it closes (Week/Project editor).\n  Outputs.name = '';\n  Outputs.sub = '';\n  Outputs.slot = '';\n  Outputs.rung = '';\n  Outputs.move = '';\n  Outputs.moveWorth = '';\n  Outputs.moveWhen = '';\n  Outputs.say = '';\n  Outputs.rate = '';\n  Outputs.kind = '';\n  Outputs.moveDue = '';\n  Outputs.moveStop = false;\n  Outputs.billing = '';\n  Outputs.termsDays = '';\n  Outputs.agreedHours = '';\n  Outputs.title = '';\n  return;\n}\nvar src = mode === 'new' ? {} : p;\nfunction str(v) { return v === undefined || v === null ? '' : String(v); }\nOutputs.name = str(src.name);\nOutputs.sub = str(src.sub);\nOutputs.slot = str(src.slot);\nOutputs.rung = str(src.rung);\nOutputs.move = str(src.move);\nOutputs.moveWorth = str(src.moveWorth);\nOutputs.moveWhen = str(src.moveWhen);\nOutputs.say = str(src.say);\nOutputs.rate = num(src.rate, 0) > 0 ? String(num(src.rate, 0)) : '';\nOutputs.kind = String(src.kind || 'earning');\nOutputs.moveDue = parseDay(src.moveDue) ? String(src.moveDue) : '';\nOutputs.moveStop = src.moveStop === true;\n// M21 — hourly unless it says fixed; the terms a new bill's due date is pre-filled from (M5).\nOutputs.billing = src.billing === 'fixed' ? 'fixed' : 'hourly';\nOutputs.termsDays = String(num(src.termsDays, 14));\nOutputs.agreedHours = num(src.agreedHours, 0) > 0 ? String(num(src.agreedHours, 0)) : '';\nOutputs.title = mode === 'new' ? 'New project' : 'Edit ' + String(p.name || 'the project');"
       },
       "x": 470,
-      "y": 3760,
+      "y": 4240,
       "ports": [
         {
           "name": "in-mode",
@@ -817,6 +847,13 @@
         {
           "name": "out-kinds",
           "displayName": "kinds",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billings",
+          "displayName": "billings",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -927,6 +964,27 @@
           "group": "Outputs"
         },
         {
+          "name": "out-billing",
+          "displayName": "billing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-termsDays",
+          "displayName": "termsDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-agreedHours",
+          "displayName": "agreedHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-title",
           "displayName": "title",
           "plug": "output",
@@ -936,152 +994,774 @@
       ]
     },
     {
-      "id": "twVarCash",
+      "id": "twVarMoney",
       "type": "Variable2",
-      "label": "Which money event is being edited",
+      "label": "Is Money open?",
       "parameters": {
-        "name": "plannerCashEdit"
+        "name": "plannerMoneyOpen"
       },
       "x": 470,
-      "y": 8440
+      "y": 12640
     },
     {
-      "id": "twSetCash",
+      "id": "twMoneyOn",
       "type": "Set Variable",
-      "label": "Edit a money event",
+      "label": "Open Money",
       "parameters": {
-        "name": "plannerCashEdit",
-        "setWith": "string"
+        "name": "plannerMoneyOpen",
+        "setWith": "boolean",
+        "value": true
       },
       "x": 470,
-      "y": 5200
+      "y": 6160
     },
     {
-      "id": "twCashNew",
+      "id": "twMoneyOff",
       "type": "Set Variable",
-      "label": "Start a new money event",
+      "label": "Close Money",
       "parameters": {
-        "name": "plannerCashEdit",
-        "setWith": "string",
-        "value": "new"
+        "name": "plannerMoneyOpen",
+        "setWith": "boolean",
+        "value": false
       },
       "x": 470,
-      "y": 5320
+      "y": 7360
     },
     {
-      "id": "twCashOff",
-      "type": "Set Variable",
-      "label": "Stop editing the money event",
-      "parameters": {
-        "name": "plannerCashEdit",
-        "setWith": "string",
-        "value": ""
-      },
-      "x": 470,
-      "y": 5440
-    },
-    {
-      "id": "twCashForm",
+      "id": "twMoneyShown",
       "type": "JavaScriptFunction",
-      "label": "The money events, and the one being edited",
+      "label": "Is Money open?",
       "parameters": {
-        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar mode = String(Inputs.mode || '');\nvar events = Inputs.cashEvents || [];\nOutputs.kinds = [\n  { Label: 'Money in', Value: 'income' },\n  { Label: 'Money out', Value: 'cost' },\n  { Label: 'Invoices go out (a marker)', Value: 'invoice-out' },\n  { Label: 'An invoice falls due', Value: 'invoice-due' }\n];\nfunction kindOf(k) { k = String(k || 'cost'); return k === 'in' ? 'income' : k === 'note' ? 'invoice-out' : k; }\nvar list = [];\nfor (var i = 0; i < events.length; i++) if (events[i]) list.push(events[i]);\nlist.sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : String(a.date || '') > String(b.date || '') ? 1 : 0; });\nvar rows = [], found = null;\nfor (var r = 0; r < list.length; r++) {\n  var e = list[r];\n  var d = parseDay(e.date);\n  var monthly = e.recurring === 'monthly';\n  var amt = num(e.amount, 0);\n  rows.push({\n    id: e.id,\n    whenText: d ? (monthly ? 'the ' + d.getDate() + (d.getDate() % 10 === 1 && d.getDate() !== 11 ? 'st' : d.getDate() % 10 === 2 && d.getDate() !== 12 ? 'nd' : d.getDate() % 10 === 3 && d.getDate() !== 13 ? 'rd' : 'th') : d.getDate() + ' ' + MON[d.getMonth()]) : '',\n    label: String(e.label || ''),\n    amountText: amt === 0 ? '—' : (amt > 0 ? '+' : '') + money(amt),\n    repeatText: monthly ? 'Every month' : 'Once'\n  });\n  if (e.id === mode) found = e;\n}\nOutputs.rows = rows;\nvar open = mode === 'new' || !!found;\nOutputs.formShown = open;\nOutputs.isNew = mode === 'new';\nOutputs.id = found ? String(found.id) : '';\nif (!open) {\n  Outputs.formTitle = '';\n  Outputs.label = '';\n  Outputs.amount = '';\n  Outputs.date = '';\n  Outputs.kind = '';\n  Outputs.monthly = false;\n  return;\n}\nif (!found) {\n  Outputs.formTitle = 'A new money event';\n  Outputs.label = '';\n  Outputs.amount = '';\n  Outputs.date = dayKey(startOfToday());\n  Outputs.kind = 'cost';\n  Outputs.monthly = false;\n  return;\n}\nOutputs.formTitle = 'Change “' + String(found.label || '') + '”';\nOutputs.label = String(found.label || '');\nOutputs.amount = String(Math.abs(num(found.amount, 0)));\nOutputs.date = String(found.date || '');\nOutputs.kind = kindOf(found.kind);\nOutputs.monthly = found.recurring === 'monthly';"
+        "functionScript": "Outputs.shown = Inputs.open === true;"
       },
       "x": 470,
-      "y": 5560,
+      "y": 7480,
       "ports": [
         {
-          "name": "in-mode",
-          "displayName": "mode",
+          "name": "in-open",
+          "displayName": "open",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
         },
         {
-          "name": "in-cashEvents",
-          "displayName": "cashEvents",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        },
-        {
-          "name": "out-kinds",
-          "displayName": "kinds",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-rows",
-          "displayName": "rows",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-formShown",
-          "displayName": "formShown",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-isNew",
-          "displayName": "isNew",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-id",
-          "displayName": "id",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-formTitle",
-          "displayName": "formTitle",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-label",
-          "displayName": "label",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-amount",
-          "displayName": "amount",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-date",
-          "displayName": "date",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-kind",
-          "displayName": "kind",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-monthly",
-          "displayName": "monthly",
+          "name": "out-shown",
+          "displayName": "shown",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
         }
       ]
+    },
+    {
+      "id": "twVarFilter",
+      "type": "Variable2",
+      "label": "Which list Money shows",
+      "parameters": {
+        "name": "plannerMoneyFilter"
+      },
+      "x": 470,
+      "y": 12760
+    },
+    {
+      "id": "twFilterUp",
+      "type": "Set Variable",
+      "label": "Show Upcoming",
+      "parameters": {
+        "name": "plannerMoneyFilter",
+        "setWith": "string",
+        "value": "up"
+      },
+      "x": 470,
+      "y": 7600
+    },
+    {
+      "id": "twFilterPast",
+      "type": "Set Variable",
+      "label": "Show Past",
+      "parameters": {
+        "name": "plannerMoneyFilter",
+        "setWith": "string",
+        "value": "past"
+      },
+      "x": 470,
+      "y": 7720
+    },
+    {
+      "id": "twFilterRec",
+      "type": "Set Variable",
+      "label": "Show Recurring",
+      "parameters": {
+        "name": "plannerMoneyFilter",
+        "setWith": "string",
+        "value": "rec"
+      },
+      "x": 470,
+      "y": 7840
+    },
+    {
+      "id": "twHorizon",
+      "type": "Counter",
+      "label": "How many more three months to show",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "twVarSel",
+      "type": "Variable2",
+      "label": "The repeat Money has picked",
+      "parameters": {
+        "name": "plannerMoneySel"
+      },
+      "x": 470,
+      "y": 12880
+    },
+    {
+      "id": "twSelFromList",
+      "type": "Set Variable",
+      "label": "Pick the line pressed in the list",
+      "parameters": {
+        "name": "plannerMoneySel",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 13000
+    },
+    {
+      "id": "twSelFromStrip",
+      "type": "Set Variable",
+      "label": "Pick the box pressed under the week",
+      "parameters": {
+        "name": "plannerMoneySel",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 13120
+    },
+    {
+      "id": "twSelFromChase",
+      "type": "Set Variable",
+      "label": "Pick the late money the drawer raised",
+      "parameters": {
+        "name": "plannerMoneySel",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 13240
+    },
+    {
+      "id": "twSelFromPart",
+      "type": "Set Variable",
+      "label": "Pick the line answered Part of it",
+      "parameters": {
+        "name": "plannerMoneySel",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 13360
+    },
+    {
+      "id": "twSelClear",
+      "type": "Set Variable",
+      "label": "Pick nothing",
+      "parameters": {
+        "name": "plannerMoneySel",
+        "setWith": "string",
+        "value": ""
+      },
+      "x": 470,
+      "y": 6280
+    },
+    {
+      "id": "twVarMoneyMode",
+      "type": "Variable2",
+      "label": "What Money’s pane is",
+      "parameters": {
+        "name": "plannerMoneyMode"
+      },
+      "x": 470,
+      "y": 13480
+    },
+    {
+      "id": "twPaneNone",
+      "type": "Set Variable",
+      "label": "The summary, or the line picked",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": ""
+      },
+      "x": 470,
+      "y": 6400
+    },
+    {
+      "id": "twPaneChange",
+      "type": "Set Variable",
+      "label": "Change this one",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "change"
+      },
+      "x": 470,
+      "y": 7960
+    },
+    {
+      "id": "twPaneEdit",
+      "type": "Set Variable",
+      "label": "Change the item",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "edit"
+      },
+      "x": 470,
+      "y": 8080
+    },
+    {
+      "id": "twPaneNew",
+      "type": "Set Variable",
+      "label": "Add money",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "new"
+      },
+      "x": 470,
+      "y": 8200
+    },
+    {
+      "id": "twPaneNewBill",
+      "type": "Set Variable",
+      "label": "A bill for the project on the card",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "newBill"
+      },
+      "x": 470,
+      "y": 4360
+    },
+    {
+      "id": "twPaneNewHope",
+      "type": "Set Variable",
+      "label": "Hoped money from the project on the card",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "newHope"
+      },
+      "x": 470,
+      "y": 4480
+    },
+    {
+      "id": "twPaneEnd",
+      "type": "Set Variable",
+      "label": "End the item",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "end"
+      },
+      "x": 470,
+      "y": 8320
+    },
+    {
+      "id": "twPaneBalance",
+      "type": "Set Variable",
+      "label": "Record balance",
+      "parameters": {
+        "name": "plannerMoneyMode",
+        "setWith": "string",
+        "value": "balance"
+      },
+      "x": 470,
+      "y": 8440
+    },
+    {
+      "id": "twVarMoneyItem",
+      "type": "Variable2",
+      "label": "The item Money’s pane is about",
+      "parameters": {
+        "name": "plannerMoneyItem"
+      },
+      "x": 470,
+      "y": 13600
+    },
+    {
+      "id": "twItemFromList",
+      "type": "Set Variable",
+      "label": "The item pressed in Recurring",
+      "parameters": {
+        "name": "plannerMoneyItem",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 13720
+    },
+    {
+      "id": "twItemFromPane",
+      "type": "Set Variable",
+      "label": "The item the picked line comes from",
+      "parameters": {
+        "name": "plannerMoneyItem",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 8560
+    },
+    {
+      "id": "twItemFromCard",
+      "type": "Set Variable",
+      "label": "The project on the card",
+      "parameters": {
+        "name": "plannerMoneyItem",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 4600
+    },
+    {
+      "id": "twCardFromMight",
+      "type": "Set Variable",
+      "label": "Show the project you might earn from",
+      "parameters": {
+        "name": "plannerCardProject",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 3040
+    },
+    {
+      "id": "twPickRoute",
+      "type": "JavaScriptFunction",
+      "label": "A line or an item?",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || ''), kind = String(Inputs.kind || '');\nif (key === '') return;\nif (kind === 'item') { Outputs.item = key; Outputs.toItem(); return; }\nOutputs.sel = key + '|' + (kind || 'pay');\nOutputs.toRepeat();",
+        "runOnChange-in-key": false,
+        "runOnChange-in-kind": false
+      },
+      "x": 470,
+      "y": 8680,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-toItem",
+          "displayName": "toItem",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toRepeat",
+          "displayName": "toRepeat",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-item",
+          "displayName": "item",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sel",
+          "displayName": "sel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twStripRoute",
+      "type": "JavaScriptFunction",
+      "label": "The box pressed, as a line",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();",
+        "runOnChange-in-key": false
+      },
+      "x": 470,
+      "y": 3160,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sel",
+          "displayName": "sel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twChaseRoute",
+      "type": "JavaScriptFunction",
+      "label": "The late money, as a line",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();",
+        "runOnChange-in-key": false
+      },
+      "x": 470,
+      "y": 5680,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sel",
+          "displayName": "sel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twPartRoute",
+      "type": "JavaScriptFunction",
+      "label": "The line answered Part of it",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();",
+        "runOnChange-in-key": false
+      },
+      "x": 470,
+      "y": 8800,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sel",
+          "displayName": "sel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActTick",
+      "type": "JavaScriptFunction",
+      "label": "Tick it",
+      "parameters": {
+        "functionScript": "Outputs.action = 'tick';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 8920,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActChange",
+      "type": "JavaScriptFunction",
+      "label": "Save this one",
+      "parameters": {
+        "functionScript": "Outputs.action = 'change';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9040,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActReset",
+      "type": "JavaScriptFunction",
+      "label": "Back to the item",
+      "parameters": {
+        "functionScript": "Outputs.action = 'reset';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9160,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActSkip",
+      "type": "JavaScriptFunction",
+      "label": "Skip this one",
+      "parameters": {
+        "functionScript": "Outputs.action = 'skip';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9280,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActLost",
+      "type": "JavaScriptFunction",
+      "label": "Mark as lost",
+      "parameters": {
+        "functionScript": "Outputs.action = 'lost';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9400,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActUntick",
+      "type": "JavaScriptFunction",
+      "label": "Untick",
+      "parameters": {
+        "functionScript": "Outputs.action = 'untick';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9520,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActSent",
+      "type": "JavaScriptFunction",
+      "label": "Mark as sent",
+      "parameters": {
+        "functionScript": "Outputs.action = 'sent';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9640,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActUnsend",
+      "type": "JavaScriptFunction",
+      "label": "Not sent after all",
+      "parameters": {
+        "functionScript": "Outputs.action = 'unsend';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9760,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActHappened",
+      "type": "JavaScriptFunction",
+      "label": "It happened (Record balance)",
+      "parameters": {
+        "functionScript": "Outputs.action = 'happened';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 9880,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twActBalLost",
+      "type": "JavaScriptFunction",
+      "label": "It is lost (Record balance)",
+      "parameters": {
+        "functionScript": "Outputs.action = 'lost';\nOutputs.go();"
+      },
+      "x": 470,
+      "y": 10000,
+      "ports": [
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-action",
+          "displayName": "action",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "twIsNewItem",
+      "type": "Condition",
+      "label": "Is it a new money item?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 10120
     },
     {
       "id": "twVarSheet",
@@ -1091,7 +1771,7 @@
         "name": "plannerSheetOpen"
       },
       "x": 470,
-      "y": 8560
+      "y": 13840
     },
     {
       "id": "twOpenSheet",
@@ -1103,7 +1783,7 @@
         "value": true
       },
       "x": 470,
-      "y": 760
+      "y": 880
     },
     {
       "id": "twCloseSheet",
@@ -1115,7 +1795,7 @@
         "value": false
       },
       "x": 470,
-      "y": 5680
+      "y": 6520
     },
     {
       "id": "twDrawerShown",
@@ -1125,7 +1805,7 @@
         "functionScript": "Outputs.shown = Inputs.open === true;"
       },
       "x": 470,
-      "y": 4840,
+      "y": 5800,
       "ports": [
         {
           "name": "in-open",
@@ -1151,7 +1831,7 @@
         "functionScript": "Outputs.shown = Inputs.open === true;"
       },
       "x": 470,
-      "y": 5800,
+      "y": 6640,
       "ports": [
         {
           "name": "in-open",
@@ -1196,7 +1876,7 @@
         "name": "plannerProblem"
       },
       "x": 470,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "twHasProblem",
@@ -1206,7 +1886,7 @@
         "functionScript": "Outputs.shown = String(Inputs.text || '') !== '';"
       },
       "x": 470,
-      "y": 1000,
+      "y": 1120,
       "ports": [
         {
           "name": "in-text",
@@ -1232,7 +1912,7 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "twIsNewBlock",
@@ -1242,7 +1922,7 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 6760
+      "y": 10960
     },
     {
       "id": "twIsNewProject",
@@ -1252,7 +1932,7 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 3880
+      "y": 4720
     },
     {
       "id": "twIsNewCash",
@@ -1262,17 +1942,17 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 5920
+      "y": 13960
     },
     {
       "id": "twSettings",
       "type": "JavaScriptFunction",
       "label": "Your settings, unpacked",
       "parameters": {
-        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar s = (Inputs.settings || [])[0] || {};\nOutputs.id = s.id || '';\nOutputs.rate = String(num(s.rate, 0));\nOutputs.householdNeed = String(num(s.householdNeed, 0));\nOutputs.partnerIncome = String(num(s.partnerIncome, 0));\nOutputs.focusHours = String(num(s.focusHours, 6));\nOutputs.partnerDay = String(num(s.partnerDay, 28));\nOutputs.costsDay = String(num(s.costsDay, 1));\nOutputs.invoiceDay = String(num(s.invoiceDay, 28));\nOutputs.paymentTermsDays = String(num(s.paymentTermsDays, 7));\nOutputs.openingBalance = num(s.openingBalance, 0);"
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar s = (Inputs.settings || [])[0] || {};\nOutputs.id = s.id || '';\nOutputs.rate = String(num(s.rate, 0));\nOutputs.focusHours = String(num(s.focusHours, 6));\nOutputs.savingsTarget = String(num(s.savingsTarget, 0));\nOutputs.lowWaterMark = String(num(s.lowWaterMark, 0));"
       },
       "x": 470,
-      "y": 6040,
+      "y": 6760,
       "ports": [
         {
           "name": "in-settings",
@@ -1296,20 +1976,6 @@
           "group": "Outputs"
         },
         {
-          "name": "out-householdNeed",
-          "displayName": "householdNeed",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-partnerIncome",
-          "displayName": "partnerIncome",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
           "name": "out-focusHours",
           "displayName": "focusHours",
           "plug": "output",
@@ -1317,36 +1983,15 @@
           "group": "Outputs"
         },
         {
-          "name": "out-partnerDay",
-          "displayName": "partnerDay",
+          "name": "out-savingsTarget",
+          "displayName": "savingsTarget",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
         },
         {
-          "name": "out-costsDay",
-          "displayName": "costsDay",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-invoiceDay",
-          "displayName": "invoiceDay",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-paymentTermsDays",
-          "displayName": "paymentTermsDays",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-openingBalance",
-          "displayName": "openingBalance",
+          "name": "out-lowWaterMark",
+          "displayName": "lowWaterMark",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -1358,105 +2003,140 @@
       "type": "/Commands/Add block",
       "label": "Put a block in a day",
       "x": 470,
-      "y": 6880
+      "y": 11080
     },
     {
       "id": "cmdSave",
       "type": "/Commands/Save block",
       "label": "Save what a block is",
       "x": 470,
-      "y": 7000
+      "y": 11200
     },
     {
       "id": "cmdTime",
       "type": "/Commands/Add time",
       "label": "Log the time on a block",
       "x": 470,
-      "y": 7120
+      "y": 11320
     },
     {
       "id": "cmdCarry",
       "type": "/Commands/Carry block",
       "label": "Carry a block to tomorrow",
       "x": 470,
-      "y": 4960
+      "y": 5920
     },
     {
       "id": "cmdDrop",
       "type": "/Commands/Drop block",
       "label": "Drop a block",
       "x": 470,
-      "y": 5080
+      "y": 6040
     },
     {
       "id": "cmdPlace",
       "type": "/Commands/Place move",
       "label": "Put a move in the week",
       "x": 470,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "cmdPlaceDay",
       "type": "/Commands/Place move",
       "label": "Put a move in the week on the day chosen",
       "x": 470,
-      "y": 4000
+      "y": 4840
     },
     {
       "id": "cmdMoveBlock",
       "type": "/Commands/Move block",
       "label": "Move the move to another day",
       "x": 470,
-      "y": 4120
+      "y": 4960
     },
     {
       "id": "cmdTakeOut",
       "type": "/Commands/Drop block",
       "label": "Take the move out of the week",
       "x": 470,
-      "y": 4240
+      "y": 5080
     },
     {
       "id": "cmdAddProject",
       "type": "/Commands/Add project",
       "label": "Add a project",
       "x": 470,
-      "y": 4360
+      "y": 5200
     },
     {
       "id": "cmdEditProject",
       "type": "/Commands/Edit project",
       "label": "Change a project",
       "x": 470,
-      "y": 4480
+      "y": 5320
     },
     {
       "id": "cmdMonthPlan",
       "type": "/Commands/Set month plan",
       "label": "Plan this month",
       "x": 470,
-      "y": 6160
-    },
-    {
-      "id": "cmdCashEvent",
-      "type": "/Commands/Add cash event",
-      "label": "Add a cash event",
-      "x": 470,
-      "y": 6280
-    },
-    {
-      "id": "cmdEditCash",
-      "type": "/Commands/Edit cash event",
-      "label": "Change a cash event",
-      "x": 470,
-      "y": 6400
+      "y": 6880
     },
     {
       "id": "cmdSettings",
       "type": "/Commands/Edit settings",
       "label": "Save the settings",
       "x": 470,
-      "y": 6520
+      "y": 7000
+    },
+    {
+      "id": "cmdAddItem",
+      "type": "/Commands/Add money item",
+      "label": "Add a money item",
+      "x": 470,
+      "y": 10240
+    },
+    {
+      "id": "cmdEditItem",
+      "type": "/Commands/Edit money item",
+      "label": "Change a money item",
+      "x": 470,
+      "y": 10360
+    },
+    {
+      "id": "cmdEndItem",
+      "type": "/Commands/End money item",
+      "label": "End a money item",
+      "x": 470,
+      "y": 10480
+    },
+    {
+      "id": "cmdAgreeItem",
+      "type": "/Commands/Agree money item",
+      "label": "Hoped money is agreed",
+      "x": 470,
+      "y": 10600
+    },
+    {
+      "id": "cmdAddMark",
+      "type": "/Commands/Add mark",
+      "label": "Mark a repeat for the first time",
+      "x": 470,
+      "y": 14080
+    },
+    {
+      "id": "cmdEditMark",
+      "type": "/Commands/Edit mark",
+      "label": "Change the mark on a repeat",
+      "x": 470,
+      "y": 14200
+    },
+    {
+      "id": "cmdRecordBalance",
+      "type": "/Commands/Record balance",
+      "label": "Record the balance",
+      "x": 470,
+      "y": 10720
     }
   ],
   "visualRoots": [

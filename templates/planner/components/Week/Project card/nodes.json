@@ -164,6 +164,36 @@
           "type": "string"
         },
         {
+          "name": "billingShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "billingTerms",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hopeShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hopedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHoped",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
           "name": "edShown",
           "plug": "output",
           "type": "boolean"
@@ -175,6 +205,11 @@
         },
         {
           "name": "edKinds",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "edBillings",
           "plug": "output",
           "type": "*"
         },
@@ -235,6 +270,21 @@
         },
         {
           "name": "edSay",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edBilling",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edTermsDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edAgreedHours",
           "plug": "output",
           "type": "string"
         }
@@ -298,6 +348,16 @@
           "type": "signal"
         },
         {
+          "name": "addBill",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addHope",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
           "name": "edName",
           "plug": "input",
           "type": "string"
@@ -354,6 +414,21 @@
         },
         {
           "name": "edSay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edBilling",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edTermsDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edAgreedHours",
           "plug": "input",
           "type": "string"
         },

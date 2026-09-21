@@ -202,6 +202,42 @@
       "toProperty": "lastLabel"
     },
     {
+      "fromId": "pcIn",
+      "fromProperty": "billingShown",
+      "toId": "pcDetail",
+      "toProperty": "billingShown"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "billingTerms",
+      "toId": "pcDetail",
+      "toProperty": "billingTerms"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "billingRows",
+      "toId": "pcDetail",
+      "toProperty": "billingRows"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hopeShown",
+      "toId": "pcDetail",
+      "toProperty": "hopeShown"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hopedText",
+      "toId": "pcDetail",
+      "toProperty": "hopedText"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasHoped",
+      "toId": "pcDetail",
+      "toProperty": "hasHoped"
+    },
+    {
       "fromId": "pcDetail",
       "fromProperty": "plan",
       "toId": "pcOut",
@@ -239,6 +275,18 @@
     },
     {
       "fromId": "pcDetail",
+      "fromProperty": "addBill",
+      "toId": "pcOut",
+      "toProperty": "addBill"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "addHope",
+      "toId": "pcOut",
+      "toProperty": "addHope"
+    },
+    {
+      "fromId": "pcDetail",
       "fromProperty": "close",
       "toId": "pcOut",
       "toProperty": "close"
@@ -266,6 +314,12 @@
       "fromProperty": "edKinds",
       "toId": "pcEditor",
       "toProperty": "kinds"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edBillings",
+      "toId": "pcEditor",
+      "toProperty": "billings"
     },
     {
       "fromId": "pcIn",
@@ -340,6 +394,24 @@
       "toProperty": "say"
     },
     {
+      "fromId": "pcIn",
+      "fromProperty": "edBilling",
+      "toId": "pcEditor",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edTermsDays",
+      "toId": "pcEditor",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edAgreedHours",
+      "toId": "pcEditor",
+      "toProperty": "agreedHours"
+    },
+    {
       "fromId": "pcEditor",
       "fromProperty": "name",
       "toId": "pcOut",
@@ -410,6 +482,24 @@
       "fromProperty": "say",
       "toId": "pcOut",
       "toProperty": "edSay"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "billing",
+      "toId": "pcOut",
+      "toProperty": "edBilling"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "termsDays",
+      "toId": "pcOut",
+      "toProperty": "edTermsDays"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "agreedHours",
+      "toId": "pcOut",
+      "toProperty": "edAgreedHours"
     },
     {
       "fromId": "pcEditor",

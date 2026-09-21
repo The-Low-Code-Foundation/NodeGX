@@ -1,0 +1,1249 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "394bb5ba-d41d-5e80-8afb-cde6c8177e37",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mvpIn",
+      "type": "Component Inputs",
+      "label": "What is picked",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "readings",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "settings",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "since",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "sel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "itemId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cardProject",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mvpOut",
+      "type": "Component Outputs",
+      "label": "What to show",
+      "ports": [
+        {
+          "name": "cardClass",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sumShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "sumLines",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "sumNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sumBalanceLines",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "rpShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSubColor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpAmountText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpAmountColor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpDetail",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpTickShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpTickHead",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpTickOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpTickAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpRemaining",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "rpRests",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rpRestDefault",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChangeLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSkipShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpLostShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpChangeShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpChDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChHint",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpResetShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpClosedShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpClosedText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpHopedShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpHopedText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpBillShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpBillText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSendShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpSentOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSentAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSentAmountShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpUnsendShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpFromShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rpFromText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpItemLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpEndShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "endShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "endTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "endText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "endChoices",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "endAt",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "balOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balHint",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "balHasRows",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "balNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "edKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edSub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edDirs",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "edRepeats",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "edProjects",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "edProjectTerms",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "edSaveLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edDir",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edRepeat",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edUntil",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMonthEnd",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "edProjectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edBillDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edBillLeadDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edFromHours",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "edLikelihood",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billingShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "billingTerms",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hopeShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hopedText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasHoped",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "isNewItem",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "editItemId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "endItemId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "agreeItemId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changeKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pickedItemId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "mvpWork",
+      "type": "JavaScriptFunction",
+      "label": "Fill the pane",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\n\nfunction mD(s) { var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || '')); return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : NaN; }\nfunction mS(t) { return new Date(t).toISOString().slice(0, 10); }\nfunction mOk(s) { return isFinite(mD(s)); }\nfunction mAddDays(s, n) { return mS(mD(s) + n * 86400000); }\nfunction mDim(y, m0) { return new Date(Date.UTC(y, m0 + 1, 0)).getUTCDate(); }\nfunction mAddMonths(s, k, monthEnd) {\n  var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)), d = Number(s.slice(8, 10));\n  var t = m - 1 + k, Y = y + Math.floor(t / 12), M = ((t % 12) + 12) % 12;\n  var day = monthEnd ? mDim(Y, M) : Math.min(d, mDim(Y, M));\n  return mS(Date.UTC(Y, M, day));\n}\nfunction mMonth(s) { return String(s).slice(0, 7); }\nfunction mMonthEnd(s) { var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)); return mS(Date.UTC(y, m - 1, mDim(y, m - 1))); }\nfunction mBetween(a, b) { return Math.round((mD(b) - mD(a)) / 86400000); }\nvar MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\nvar WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\nfunction mWeekday(s) { return new Date(mD(s)).getUTCDay(); }\n/** \"Wed 16 Sep\" */\nfunction mDay(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate() + ' ' + MON[t.getUTCMonth()]; }\n/** \"Wed 16\" */\nfunction mShort(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate(); }\nfunction mOrd(n) { return n + (n % 100 > 10 && n % 100 < 14 ? 'th' : n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th'); }\nfunction mEur(n, signed) {\n  var v = Math.round(num(n, 0));\n  var s = '€' + Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  if (v < 0) return '−' + s;\n  return signed && v > 0 ? '+' + s : s;\n}\nfunction mEur2(n) {\n  var v = Math.round(num(n, 0) * 100) / 100;\n  var whole = Math.floor(Math.abs(v)), cents = Math.round((Math.abs(v) - whole) * 100);\n  var s = '€' + whole.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',') + (cents ? '.' + (cents < 10 ? '0' : '') + cents : '');\n  return v < 0 ? '−' + s : s;\n}\n\n/** M3 — every scheduled date of an item up to and including 'to', stopping at its 'until'. */\nfunction repeatsOf(it, to) {\n  var out = [];\n  if (!it || !mOk(it.date)) return out;\n  var until = mOk(it.until) && it.until < to ? it.until : to;\n  var rep = String(it.repeat || 'once');\n  for (var k = 0; k < 800; k++) {\n    var s;\n    if (rep === 'weekly') s = mAddDays(it.date, 7 * k);\n    else if (rep === 'monthly') s = mAddMonths(it.date, k, it.monthEnd === true);\n    else if (rep === 'quarterly') s = mAddMonths(it.date, 3 * k, it.monthEnd === true);\n    else if (rep === 'yearly') s = mAddMonths(it.date, 12 * k, false);\n    else { if (k > 0) break; s = it.date; }\n    if (s > until) break;\n    out.push(s);\n  }\n  return out;\n}\nfunction markKey(itemId, occurs) { return String(itemId) + '|' + String(occurs); }\nfunction marksById(marks) {\n  var by = {};\n  for (var i = 0; i < (marks || []).length; i++) { var m = marks[i]; if (m && m.itemId) by[markKey(m.itemId, m.occurs)] = m; }\n  return by;\n}\n/** A tick is a payment: { day, amount }, signed as its item is. */\nfunction paymentsOf(m) {\n  var out = [], list = (m && m.payments) || [];\n  for (var i = 0; i < list.length; i++) if (list[i] && mOk(list[i].day) && num(list[i].amount, 0) !== 0) out.push({ day: String(list[i].day), amount: num(list[i].amount, 0) });\n  return out;\n}\nfunction isClient(it, projectsById) {\n  var p = it && it.projectId ? projectsById[it.projectId] : null;\n  return !!p && (num(it.amount, 0) > 0 || it.fromHours === true);\n}\nfunction billingOf(p) { return p && p.billing === 'fixed' ? 'fixed' : 'hourly'; }\n\n/**\n * The money context: everything a repeat needs to know about the world. Built once per run.\n * 'blocks' are the time the hours bills are counted from (M23).\n */\nfunction moneyContext(items, marks, projects, blocks, today, since) {\n  var byP = {};\n  for (var i = 0; i < (projects || []).length; i++) if (projects[i]) byP[projects[i].id] = projects[i];\n  var list = [];\n  for (var j = 0; j < (items || []).length; j++) if (items[j] && items[j].id) list.push(items[j]);\n  // Marks are read for thirteen months back ('since'). A repeat older than that is history: without its\n  // mark it would read as unticked, and a weekly item two years old would be a hundred late rows.\n  return { items: list, marks: marksById(marks), projects: byP, blocks: blocks || [], today: today, since: mOk(since) ? String(since) : '' };\n}\n/** M23 — the hours logged on a project from 'from' to 'to', both inclusive. */\nfunction hoursBetween(ctx, projectId, from, to) {\n  var t = 0;\n  for (var i = 0; i < ctx.blocks.length; i++) {\n    var b = ctx.blocks[i];\n    if (!b || b.projectId !== projectId) continue;\n    var d = String(b.date || '');\n    if (d < from || d > to) continue;\n    t += spentOf(b);\n  }\n  return q(t);\n}\n/** When the bill before this one went out, for the same project — the start of an hours bill's period. */\nfunction previousBillOut(ctx, projectId, before) {\n  var best = '';\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId !== projectId || !isClient(it, ctx.projects)) continue;\n    var reps = repeatsOf(it, before);\n    for (var r = 0; r < reps.length; r++) {\n      var m = ctx.marks[markKey(it.id, reps[r])];\n      var out = (m && mOk(m.sentOn)) ? String(m.sentOn) : billOutOf(it, reps[r]);\n      if (out && out < before && out > best) best = out;\n    }\n  }\n  return best;\n}\nfunction billOutOf(it, occurs) {\n  if (it.repeat === 'once' || !it.repeat) return mOk(it.billDate) ? String(it.billDate) : '';\n  var lead = Number(it.billLeadDays);\n  return it.billLeadDays === null || it.billLeadDays === undefined || it.billLeadDays === '' || !isFinite(lead) ? '' : mAddDays(occurs, -Math.round(lead));\n}\n\n/** One repeat of one item, with its mark applied. */\nfunction occOf(ctx, it, occurs) {\n  var key = markKey(it.id, occurs);\n  var m = ctx.marks[key] || null;\n  var client = isClient(it, ctx.projects);\n  var p = it.projectId ? ctx.projects[it.projectId] || null : null;\n  var billOut = client ? billOutOf(it, occurs) : '';\n  var sentOn = m && mOk(m.sentOn) ? String(m.sentOn) : '';\n  var marked = m && m.amount !== null && m.amount !== undefined && m.amount !== '' && isFinite(Number(m.amount));\n  var hoursBill = it.fromHours === true && !marked && !!p;\n  var hours = 0, amount;\n  if (hoursBill) {\n    var end = billOut || occurs;\n    var start = previousBillOut(ctx, it.projectId, end);\n    start = start ? mAddDays(start, 1) : end.slice(0, 8) + '01';\n    hours = hoursBetween(ctx, it.projectId, start, end < ctx.today ? end : ctx.today);\n    amount = Math.round(hours * num(p.rate, 0) * 100) / 100;\n  } else amount = marked ? num(m.amount, 0) : num(it.amount, 0);\n  if (amount > 0 !== num(it.amount, 0) > 0 && !hoursBill && num(it.amount, 0) !== 0) amount = -amount;\n  var pays = paymentsOf(m);\n  var paid = 0, lastOn = '';\n  for (var i = 0; i < pays.length; i++) { paid += pays[i].amount; if (pays[i].day > lastOn) lastOn = pays[i].day; }\n  paid = Math.round(paid * 100) / 100;\n  var lostOn = m && mOk(m.lostOn) ? String(m.lostOn) : '';\n  var skip = !!(m && m.skip === true);\n  // A ticked repeat is closed — changing its item afterwards does not reopen the past (M4). Only a part\n  // payment with the rest still owed stays open, and Logic/Mark keeps what was due on its mark for that.\n  var closed = skip || !!lostOn || (pays.length > 0 && (!marked || Math.abs(paid) >= Math.abs(amount) - 0.005));\n  return {\n    it: it, key: key, itemId: it.id, occurs: occurs, m: m, markId: m ? String(m.id || '') : '',\n    date: m && mOk(m.date) ? String(m.date) : occurs,\n    amount: amount, paid: paid, remaining: Math.round((amount - paid) * 100) / 100, lastOn: lastOn, payments: pays,\n    closed: closed, skip: skip, lostOn: lostOn, client: client, project: p,\n    hoped: num(it.likelihood, 100) < 100, likelihood: Math.max(0, Math.min(100, Math.round(num(it.likelihood, 100)))),\n    changed: marked && !it.fromHours && num(m.amount, 0) !== num(it.amount, 0), moved: !!(m && mOk(m.date) && m.date !== occurs),\n    billOut: billOut, sentOn: sentOn, hoursBill: hoursBill, hours: hours\n  };\n}\nfunction allOccs(ctx, to) {\n  var out = [];\n  for (var i = 0; i < ctx.items.length; i++) {\n    var reps = repeatsOf(ctx.items[i], to);\n    for (var r = 0; r < reps.length; r++) if (!ctx.since || reps[r] >= ctx.since) out.push(occOf(ctx, ctx.items[i], reps[r]));\n  }\n  return out;\n}\nfunction byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : b.remaining - a.remaining; }\n\n/** M11 — the latest reading, and every payment ticked after it. */\nfunction balanceNow(ctx, readings) {\n  var r = null;\n  for (var i = 0; i < (readings || []).length; i++) {\n    var x = readings[i];\n    if (!x || !mOk(x.date)) continue;\n    if (!r || x.date > r.date || (x.date === r.date && String(x.createdAt || '') > String(r.createdAt || ''))) r = x;\n  }\n  var from = r ? String(r.date) : '', bal = r ? num(r.amount, 0) : 0, since = 0;\n  for (var k in ctx.marks) {\n    var pays = paymentsOf(ctx.marks[k]);\n    for (var p = 0; p < pays.length; p++) if (!r || pays[p].day > from) { bal += pays[p].amount; since++; }\n  }\n  return { balance: Math.round(bal * 100) / 100, since: since, readOn: from, readAmount: r ? num(r.amount, 0) : 0, hasReading: !!r };\n}\n\n/** Every open, expected repeat up to 'to' — late ones first, counted today — with the balance after each. */\nfunction projection(ctx, readings, to) {\n  var now = balanceNow(ctx, readings);\n  var os = allOccs(ctx, to);\n  var late = [], future = [], hoped = [], bills = [];\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (o.closed) continue;\n    if (o.billOut && !o.sentOn && o.billOut <= to) bills.push(o);\n    if (o.hoped) { if (o.date >= ctx.today && o.date <= to) hoped.push(o); continue; }\n    if (o.date < ctx.today) late.push(o);\n    else if (o.date <= to) future.push(o);\n  }\n  late.sort(byDate); future.sort(byDate); hoped.sort(byDate);\n  bills.sort(function (a, b) { return a.billOut < b.billOut ? -1 : a.billOut > b.billOut ? 1 : 0; });\n  var run = now.balance, after = {};\n  for (var l = 0; l < late.length; l++) { run += late[l].remaining; after[late[l].key] = Math.round(run * 100) / 100; }\n  for (var f = 0; f < future.length; f++) { run += future[f].remaining; after[future[f].key] = Math.round(run * 100) / 100; }\n  return { now: now, occs: os, late: late, future: future, hoped: hoped, bills: bills, after: after };\n}\n\n/** M12 — what one item counts for in a month's target. */\nfunction perMonth(it) {\n  var a = num(it.amount, 0), r = String(it.repeat || 'once');\n  return r === 'weekly' ? a * 52 / 12 : r === 'monthly' ? a : r === 'quarterly' ? a / 3 : r === 'yearly' ? a / 12 : 0;\n}\nfunction activeOn(it, day) { return mOk(it.date) && (!mOk(it.until) || String(it.until) >= day); }\n\n/** M12, M13, M22 — break-even, target, and the billable hours the month needs. */\nfunction moneyTargets(ctx, settings) {\n  var today = ctx.today, mk = mMonth(today);\n  var outs = [], ins = [], out = 0, inn = 0;\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId || num(it.likelihood, 100) < 100 || String(it.repeat || 'once') === 'once' || !activeOn(it, today)) continue;\n    var pm = perMonth(it);\n    if (pm < 0) { outs.push(it); out -= pm; } else if (pm > 0) { ins.push(it); inn += pm; }\n  }\n  var breakEven = Math.round((out - inn) * 100) / 100;\n  var target = Math.round((breakEven + Math.max(0, num(settings.savingsTarget, 0))) * 100) / 100;\n  var rate = num(settings.rate, 0);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(today.slice(0, 8) + '01', 1, false)));\n  var fixed = [], fixedSum = 0, agreedIds = [], agreed = 0;\n  for (var j = 0; j < os.length; j++) {\n    var o = os[j];\n    if (!o.client || o.hoped || o.skip || o.lostOn || billingOf(o.project) !== 'fixed') continue;\n    if (mMonth(o.billOut || o.date) !== mk) continue;\n    fixed.push(o); fixedSum += o.amount;\n    if (agreedIds.indexOf(o.it.projectId) < 0 && num(o.project.agreedHours, 0) > 0) { agreedIds.push(o.it.projectId); agreed += num(o.project.agreedHours, 0); }\n  }\n  var byHour = Math.max(0, target - fixedSum);\n  var hourly = rate > 0 ? Math.ceil(byHour / rate - 1e-9) : 0;\n  return {\n    outs: outs, ins: ins, out: out, inn: inn, breakEven: breakEven, target: target, rate: rate,\n    fixed: fixed, fixedSum: fixedSum, agreedIds: agreedIds, agreed: agreed, byHour: byHour, hourly: hourly,\n    hours: rate > 0 ? hourly + agreed : 0\n  };\n}\n\n/** M14 line 1 and M17 — the month by the day its bills go out. */\nfunction monthLine(ctx, t) {\n  var mk = mMonth(ctx.today);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(ctx.today.slice(0, 8) + '01', 1, false)));\n  var sent = 0, all = 0;\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (!o.client || o.hoped || o.skip || o.lostOn || mMonth(o.billOut || o.date) !== mk) continue;\n    all += o.amount;\n    if (o.sentOn || (!o.billOut && o.paid)) sent += o.amount;\n  }\n  var toGo = t.target - all;\n  var hours = t.rate > 0 ? Math.ceil(Math.max(0, toGo) / t.rate - 1e-9) : 0;\n  var text = toGo > 0\n    ? 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(sent) + ' so far, ' + mEur(all) +\n      ' with the bills still to go out this month · ' + mEur(toGo) + ' to target' + (t.rate > 0 ? ', about ' + hours + ' h.' : '.')\n    : 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(all) + ' this month · ' + mEur(-toGo) + ' past target.';\n  return { sent: sent, all: all, toGo: toGo, hours: hours, text: text, name: MONTH_LONG[Number(mk.slice(5, 7)) - 1] };\n}\n\n/** M7, M14 line 2 — each hoped item's next repeat, weighted by its likelihood. */\nfunction mightEarn(ctx) {\n  var nexts = [], weighted = 0, all = 0;\n  var to = mAddMonths(ctx.today, 24, false);\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (num(it.likelihood, 100) >= 100 || !activeOn(it, ctx.today)) continue;\n    var reps = repeatsOf(it, to);\n    for (var r = 0; r < reps.length; r++) {\n      var o = occOf(ctx, it, reps[r]);\n      if (o.date >= ctx.today && !o.closed) { nexts.push(o); weighted += o.amount * o.likelihood / 100; all += o.amount; break; }\n    }\n  }\n  return { nexts: nexts, weighted: weighted, all: all };\n}\n\n/** M14 line 3 — the lowest the balance goes in the next six weeks, counting from today. */\nfunction lowestPoint(ctx, readings) {\n  var p = projection(ctx, readings, mAddDays(ctx.today, 42));\n  var lo = { balance: p.now.balance, date: ctx.today };\n  var list = p.late.concat(p.future);\n  for (var i = 0; i < list.length; i++) { var b = p.after[list[i].key]; if (b < lo.balance) lo = { balance: b, date: list[i].date < ctx.today ? ctx.today : list[i].date }; }\n  return lo;\n}\n\n/** \"every month on the 28th, from Jul 2026, no end\" */\nfunction scheduleWords(it, today) {\n  var d = new Date(mD(it.date)), day = d.getUTCDate(), r = String(it.repeat || 'once');\n  if (r === 'once') return 'once, ' + mDay(it.date);\n  var w = r === 'weekly' ? 'every ' + WEEKDAY_LONG[d.getUTCDay()]\n    : r === 'monthly' ? 'every month on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : r === 'quarterly' ? 'every three months on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : 'every year on ' + day + ' ' + MON[d.getUTCMonth()];\n  var end = mOk(it.until) ? (String(it.until) < today ? 'ended ' + mDay(it.until) : 'until ' + MON[Number(String(it.until).slice(5, 7)) - 1] + ' ' + String(it.until).slice(0, 4)) : 'no end';\n  return w + ', from ' + MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ', ' + end;\n}\nfunction repeatWord(it) { var r = String(it.repeat || 'once'); return r === 'quarterly' ? 'every 3 months' : r === 'once' ? '' : r; }\n/** M11a — what the rest of a short payment is called. */\nfunction restWords(o) { return o.client ? ['Still owed', 'Lost'] : o.amount > 0 ? ['Still to come', 'That’s all'] : ['Still to pay', 'That’s all']; }\nfunction projectName(o) { return o.project ? String(o.project.name || '') : ''; }\nvar settings = (Inputs.settings || [])[0] || {};\nvar today = dayKey(startOfToday());\nvar ctx = moneyContext(Inputs.items, Inputs.marks, Inputs.projects, Inputs.blocks, today, Inputs.since);\nvar readings = Inputs.readings || [];\nvar low = num(settings.lowWaterMark, 0);\nvar open = Inputs.open === true;\nvar sel = String(Inputs.sel || ''), mode = String(Inputs.mode || ''), itemArg = String(Inputs.itemId || '');\nvar parts = sel.split('|');\nvar MUTED = 'var(--muted-foreground)', INK = 'var(--foreground)', LATE = 'var(--env-hobby-ink)';\nfunction itemById(id) { for (var i = 0; i < ctx.items.length; i++) if (ctx.items[i].id === id) return ctx.items[i]; return null; }\nvar editing = mode === 'edit' || mode === 'new' || mode === 'newBill' || mode === 'newHope';\nvar picked = null, kind = parts[2] || 'pay';\nif (!editing && mode !== 'end' && mode !== 'balance' && parts.length >= 2) {\n  var pit = itemById(parts[0]);\n  // Only a repeat that still exists: an item ended before it (M10) has no such repeat any more.\n  if (pit && mOk(parts[1]) && repeatsOf(pit, parts[1]).indexOf(parts[1]) >= 0) picked = occOf(ctx, pit, parts[1]);\n}\nvar showSum = open && !editing && mode !== 'end' && mode !== 'balance' && !picked;\nOutputs.cardClass = 'planner-over planner-money' + (open && (editing || mode === 'end' || mode === 'balance' || !!picked) ? ' planner-money-pane' : '');\n\n// ── The summary (M12, M13, M22) ──\nvar t = moneyTargets(ctx, settings);\nvar lines = [];\nfunction line(label, value) { lines.push({ label: label, value: value }); }\nline('Going out, a month', mEur2(t.out));\nfor (var o1 = 0; o1 < t.outs.length; o1++) line('   ' + t.outs[o1].label + (t.outs[o1].repeat !== 'monthly' ? ' (' + mEur(t.outs[o1].amount) + ' ' + repeatWord(t.outs[o1]) + ')' : ''), mEur2(-perMonth(t.outs[o1])));\nline('Coming in, a month', mEur2(t.inn));\nfor (var i1 = 0; i1 < t.ins.length; i1++) line('   ' + t.ins[i1].label + (t.ins[i1].repeat !== 'monthly' ? ' (' + mEur(t.ins[i1].amount) + ' ' + repeatWord(t.ins[i1]) + ')' : ''), mEur2(perMonth(t.ins[i1])));\nline('Break-even', mEur2(t.breakEven));\nline('+ savings target (Settings)', mEur(num(settings.savingsTarget, 0)));\nline('Target', mEur2(t.target));\nfor (var f1 = 0; f1 < t.fixed.length; f1++) line('\\u2212 ' + projectName(t.fixed[f1]) + ', fixed, bills ' + mShort(t.fixed[f1].billOut || t.fixed[f1].date), mEur(t.fixed[f1].amount));\nline('To earn by the hour', mEur2(t.byHour));\nline('\\u00f7 your usual rate, ' + mEur(t.rate) + ' an hour', t.hourly + ' h');\nfor (var a1 = 0; a1 < t.agreedIds.length; a1++) line('+ ' + String(ctx.projects[t.agreedIds[a1]].name || '') + '\\u2019s agreed hours', num(ctx.projects[t.agreedIds[a1]].agreedHours, 0) + ' h');\nline('Billable this month', t.hours + ' h');\nOutputs.sumShown = showSum;\nOutputs.sumLines = lines;\nOutputs.sumNote = 'A fixed bill is covered however long the work takes, so it comes off before the hours are worked out; the hours you agreed still go in the envelope. Client money is what the billable hours turn into. One-off items are not in the target; they show on the cash line on their day.';\nvar now = balanceNow(ctx, readings);\nvar lo = lowestPoint(ctx, readings);\nOutputs.sumBalanceLines = [\n  { label: now.hasReading ? 'Read ' + mDay(now.readOn) : 'No reading yet', value: mEur(now.readAmount) },\n  { label: 'Ticked since', value: mEur(now.balance - now.readAmount, true) },\n  { label: 'Now', value: mEur(now.balance) },\n  { label: 'Lowest in six weeks', value: mEur(lo.balance) + ' \\u00b7 ' + mDay(lo.date) }\n];\n\n// ── One repeat (§4.1) ──\nvar o = picked;\nOutputs.rpShown = open && !!o;\nOutputs.rpKey = sel + '|' + mode;\nvar isBill = !!o && kind === 'bill';\nvar late = !!o && !o.closed && !o.hoped && o.date < today;\nvar it = o ? o.it : {};\nvar pn = o ? projectName(o) : '';\nOutputs.rpTitle = o ? String(it.label || '') + (isBill ? ' \\u00b7 the bill' : '') : '';\nOutputs.rpSub = !o ? '' : isBill ? (pn + ' \\u00b7 ' + mEur(o.amount) + ' \\u00b7 due ' + mDay(o.date))\n  : (o.client ? 'Due ' : o.amount > 0 ? 'Comes in ' : 'Goes out ') + mDay(o.date) + (o.moved ? ' (moved from ' + mDay(o.occurs) + ')' : '') +\n    (late ? ' \\u00b7 ' + mBetween(o.date, today) + ' days late' : '') + (pn && String(it.label || '').indexOf(pn) !== 0 ? ' \\u00b7 ' + pn : '');\nOutputs.rpSubColor = late ? LATE : MUTED;\nOutputs.rpAmountText = o ? mEur(o.amount, true) + (o.changed ? '  \\u00b7 usually ' + mEur(it.amount) : '') : '';\nOutputs.rpAmountColor = o && o.amount > 0 ? 'var(--env-billable-ink)' : INK;\nvar detail = [];\nif (o && o.hoped) detail.push('Hoped, ' + o.likelihood + '%: about ' + mEur(o.amount * o.likelihood / 100) + ' weighted, and never in a balance.');\nif (o && o.hoursBill) detail.push(hText(o.hours) + ' h logged \\u00d7 ' + mEur(o.project ? o.project.rate : 0) + ' an hour, so far. It grows as hours are logged, until the bill is marked sent.');\nif (o && o.client && !isBill) detail.push(o.sentOn ? 'Bill sent ' + mDay(o.sentOn) + '.' : o.billOut ? 'Bill goes out ' + mDay(o.billOut) + '.' : '');\nif (o && o.m && o.m.note) detail.push(String(o.m.note));\nOutputs.rpDetail = detail.filter(function (x) { return !!x; }).join(' ');\nvar canTick = !!o && !isBill && !o.closed && !o.hoped;\nOutputs.rpTickShown = canTick;\nOutputs.rpTickHead = o && o.paid ? mEur(o.paid) + ' paid so far \\u00b7 the rest' : 'Did it happen?';\nOutputs.rpTickOn = today;\nOutputs.rpTickAmount = canTick ? String(Math.abs(o.remaining)) : '';\nOutputs.rpRemaining = canTick ? Math.abs(o.remaining) : 0;\nvar rw = o ? restWords(o) : ['Still owed', 'Lost'];\nOutputs.rpRests = [{ Label: rw[0], Value: 'owed' }, { Label: rw[1], Value: 'lost' }];\nOutputs.rpRestDefault = 'owed';\nOutputs.rpChangeLabel = it.repeat && it.repeat !== 'once' ? 'Change this one' : 'Change the date or amount';\nOutputs.rpSkipShown = canTick && !!it.repeat && it.repeat !== 'once';\nOutputs.rpLostShown = canTick && o.client;\nOutputs.rpChangeShown = !!o && !isBill && !o.closed && mode === 'change';\nOutputs.rpChDate = o ? o.date : '';\nOutputs.rpChAmount = o ? String(Math.abs(o.amount)) : '';\nOutputs.rpChNote = o && o.m && o.m.note ? String(o.m.note) : '';\nOutputs.rpChHint = it.repeat && it.repeat !== 'once' ? 'Only this one. The item stays ' + mEur(it.amount) + ', and changing the item later leaves this one alone.' : 'This is the only one.';\nOutputs.rpResetShown = !!o && (o.changed || o.moved);\nvar closedText = '';\nif (o && o.closed) {\n  if (o.skip) closedText = '\\u2713 Skipped.';\n  else if (o.lostOn) closedText = o.paid ? '\\u2713 ' + mEur(o.paid) + ' came in. The other ' + mEur(o.amount - o.paid) + ' was written off on ' + mDay(o.lostOn) + '.' : '\\u2713 Written off on ' + mDay(o.lostOn) + '.';\n  else {\n    var d0 = mBetween(o.date, o.lastOn);\n    closedText = '\\u2713 ' + (o.amount > 0 ? 'Came in' : 'Went out') + ' ' + mDay(o.lastOn) + ': ' + mEur(o.paid) + '.' +\n      (o.client ? (d0 > 0 ? ' ' + d0 + ' days late.' : d0 < 0 ? ' ' + (-d0) + ' days early.' : ' On time.') : '') +\n      (o.payments.length > 1 ? ' In ' + o.payments.length + ' parts.' : '');\n  }\n}\nOutputs.rpClosedShown = !!o && !isBill && o.closed;\nOutputs.rpClosedText = closedText;\nOutputs.rpHopedShown = !!o && !isBill && o.hoped && !o.closed;\nOutputs.rpHopedText = o && o.hoped ? 'Hoped money is never in a balance. When it is agreed, set it to 100% and it counts.' +\n  (o.project && o.project.move ? ' What makes it real: ' + String(o.project.move) + '.' : '') : '';\nOutputs.rpBillShown = isBill;\nOutputs.rpBillText = isBill ? (o.sentOn ? '\\u2713 Sent ' + mDay(o.sentOn) + '. Due ' + mDay(o.date) + (o.closed ? ', and paid.' : '.') : 'Goes out ' + mDay(o.billOut) + '. Marking it sent records the day it went out; the payment is its own tick on ' + mDay(o.date) + '.') : '';\nOutputs.rpSendShown = isBill && !o.sentOn;\nOutputs.rpSentOn = today;\nOutputs.rpSentAmount = isBill && o.hoursBill ? String(o.amount) : '';\nOutputs.rpSentAmountShown = isBill && o.hoursBill;\nOutputs.rpUnsendShown = isBill && !!o.sentOn && !o.closed;\nOutputs.rpFromShown = !!o;\nvar hand = 0;\nif (o) for (var mk in ctx.marks) if (mk.indexOf(it.id + '|') === 0 && ctx.marks[mk].amount !== '' && ctx.marks[mk].amount !== null && ctx.marks[mk].amount !== undefined) hand++;\nOutputs.rpFromText = !o ? '' : it.repeat && it.repeat !== 'once'\n  ? String(it.label || '') + ' \\u00b7 ' + (it.fromHours ? 'from the hours' : mEur(it.amount, true)) + ' \\u00b7 ' + scheduleWords(it, today) + (pn ? ' \\u00b7 ' + pn : '') +\n    (o.hoped ? ' \\u00b7 hoped ' + o.likelihood + '%' : '') + (hand ? '. ' + hand + ' repeat' + (hand === 1 ? '' : 's') + ' changed by hand; changing the item leaves ' + (hand === 1 ? 'it' : 'them') + ' alone.' : '')\n  : (pn ? pn + ' \\u00b7 one bill' : 'A one-off item') + (it.note ? ' \\u00b7 ' + String(it.note) : '');\nOutputs.rpItemLabel = it.repeat && it.repeat !== 'once' ? 'Change the item' : 'Change it';\nOutputs.rpEndShown = !!o && !!it.repeat && it.repeat !== 'once';\nOutputs.changeKey = o ? o.key : '';\nOutputs.pickedItemId = o ? String(it.id) : '';\n\n// ── End it (M10: nothing is deleted) ──\nvar endIt = mode === 'end' ? itemById(itemArg) : null;\nOutputs.endShown = open && !!endIt;\nOutputs.endItemId = endIt ? endIt.id : '';\nvar choices = [], def = '', ticked = 0;\nif (endIt) {\n  var reps = repeatsOf(endIt, mAddMonths(today, 12, false));\n  var from = mAddDays(today, -70);\n  for (var r = 0; r < reps.length; r++) {\n    var mm = ctx.marks[markKey(endIt.id, reps[r])];\n    var tk = !!(mm && paymentsOf(mm).length);\n    if (tk) ticked++;\n    if (reps[r] < today) def = reps[r];\n    if (reps[r] >= from && choices.length < 20) choices.push({ Label: mDay(reps[r]) + (tk ? ' \\u00b7 ticked' : ''), Value: reps[r] });\n  }\n  if (!def && reps.length) def = reps[0];\n}\nOutputs.endTitle = endIt ? 'End ' + String(endIt.label || '') : '';\nOutputs.endText = endIt ? 'Nothing is deleted. ' + (ticked ? 'The ' + ticked + ' ticked repeat' + (ticked === 1 ? ' stays' : 's stay') + ' in Past; ' : '') + 'no repeat shows after the day you pick.' : '';\nOutputs.endChoices = choices;\nOutputs.endAt = def;\n\n// ── Record balance (M11, M11a) ──\nvar showBal = open && mode === 'balance';\nvar pr = projection(ctx, readings, today);\nvar balRows = [];\nfor (var b = 0; b < pr.late.length; b++) {\n  var lo2 = pr.late[b];\n  balRows.push({ key: lo2.key, label: lo2.it.label, sub: mEur(lo2.remaining, true) + ' \\u00b7 ' + mDay(lo2.date) + (lo2.paid ? ' \\u00b7 the rest' : ''), lostLabel: lo2.client ? 'Lost' : lo2.amount > 0 ? 'Won\\u2019t come' : 'Won\\u2019t be paid' });\n}\nOutputs.balShown = showBal;\nOutputs.balOn = today;\nOutputs.balHint = '';\nOutputs.balRows = balRows;\nOutputs.balHasRows = balRows.length > 0;\nOutputs.balNote = (balRows.length ? 'Not yet is doing nothing: it is counted as if it happens today, on top of this balance. ' : 'Nothing dated on or before today is unticked. ') +\n  'The app has it at ' + mEur(now.balance) + ' now.';\n\n// ── The item editor (§4.1, M5, M9, M16) ──\nvar target = mode === 'edit' ? itemById(itemArg) : null;\nvar proj = (mode === 'newBill' || mode === 'newHope') ? ctx.projects[itemArg] || null : null;\nvar showEd = open && (mode === 'new' || mode === 'newBill' || mode === 'newHope' || !!target);\nOutputs.edShown = showEd;\nOutputs.edKey = mode + '|' + itemArg + '|' + (open ? 'open' : '');\nOutputs.isNewItem = mode === 'new' || mode === 'newBill' || mode === 'newHope';\nOutputs.editItemId = target ? target.id : '';\nOutputs.edDirs = [{ Label: 'Comes in', Value: 'in' }, { Label: 'Goes out', Value: 'out' }];\nOutputs.edRepeats = [\n  { Label: 'Once', Value: 'once' }, { Label: 'Every week', Value: 'weekly' }, { Label: 'Every month', Value: 'monthly' },\n  { Label: 'Every three months', Value: 'quarterly' }, { Label: 'Once a year', Value: 'yearly' }\n];\nvar plist = [{ Label: 'No project', Value: 'none' }], terms = [];\nvar allP = Inputs.projects || [];\nfor (var q1 = 0; q1 < allP.length; q1++) {\n  var pp = allP[q1];\n  if (!pp || pp.kind === 'admin') continue;\n  plist.push({ Label: String(pp.name || ''), Value: String(pp.id) });\n  terms.push({ id: String(pp.id), name: String(pp.name || ''), billing: billingOf(pp), terms: num(pp.termsDays, 14), rate: num(pp.rate, 0) });\n}\nOutputs.edProjects = plist;\nOutputs.edProjectTerms = terms;\nfunction str(v) { return v === undefined || v === null ? '' : String(v); }\nif (target) {\n  var n1 = 0;\n  for (var k1 in ctx.marks) if (k1.indexOf(target.id + '|') === 0 && ctx.marks[k1].amount !== '' && ctx.marks[k1].amount !== null && ctx.marks[k1].amount !== undefined) n1++;\n  Outputs.edTitle = 'Change ' + str(target.label);\n  Outputs.edSub = target.repeat && target.repeat !== 'once' ? 'Changes every repeat you have not changed by hand' + (n1 ? ' (' + n1 + ' changed by hand stay' + (n1 === 1 ? 's' : '') + ' as ' + (n1 === 1 ? 'it is' : 'they are') + ').' : '.') : '';\n  Outputs.edSaveLabel = 'Save';\n  Outputs.edLabel = str(target.label);\n  Outputs.edDir = num(target.amount, 0) < 0 ? 'out' : 'in';\n  Outputs.edAmount = target.fromHours ? '' : String(Math.abs(num(target.amount, 0)));\n  Outputs.edRepeat = str(target.repeat || 'once');\n  Outputs.edDate = str(target.date);\n  Outputs.edUntil = mOk(target.until) ? str(target.until) : '';\n  Outputs.edMonthEnd = target.monthEnd === true;\n  Outputs.edProjectId = target.projectId ? str(target.projectId) : 'none';\n  Outputs.edBillDate = mOk(target.billDate) ? str(target.billDate) : '';\n  Outputs.edBillLeadDays = target.billLeadDays === null || target.billLeadDays === undefined || target.billLeadDays === '' ? '7' : str(target.billLeadDays);\n  Outputs.edFromHours = target.fromHours === true;\n  Outputs.edLikelihood = String(Math.round(num(target.likelihood, 100)));\n  Outputs.edNote = str(target.note);\n} else {\n  var hope = mode === 'newHope', bill = mode === 'newBill';\n  var tdays = proj ? num(proj.termsDays, 14) : 14;\n  Outputs.edTitle = hope ? 'Hoped money from ' + str(proj && proj.name) : bill ? 'A bill for ' + str(proj && proj.name) : showEd ? 'Add money' : '';\n  Outputs.edSub = hope ? 'Hoped money is never in a balance. The move and this stay separate; change either without the other.' : 'A label, an amount and a date is all it needs.';\n  Outputs.edSaveLabel = 'Add it';\n  Outputs.edLabel = proj ? str(proj.name) : '';\n  Outputs.edDir = 'in';\n  Outputs.edAmount = '';\n  Outputs.edRepeat = 'once';\n  Outputs.edDate = bill ? mAddDays(today, tdays) : hope ? mAddDays(today, 30) : today;\n  Outputs.edUntil = '';\n  Outputs.edMonthEnd = false;\n  Outputs.edProjectId = proj ? str(proj.id) : 'none';\n  Outputs.edBillDate = bill ? today : '';\n  Outputs.edBillLeadDays = '7';\n  Outputs.edFromHours = bill && !!proj && billingOf(proj) === 'hourly';\n  Outputs.edLikelihood = hope ? '25' : '100';\n  Outputs.edNote = hope && proj && proj.move ? str(proj.move) : '';\n}\nOutputs.agreeItemId = o && o.hoped ? it.id : '';\n\n// ── The project card's Billing (§4.2, M21–M24) ──\nvar cp = ctx.projects[String(Inputs.cardProject || '')] || null;\nvar earning = !!cp && cp.kind === 'earning';\nOutputs.billingShown = earning;\nvar fixed = billingOf(cp) === 'fixed';\nOutputs.billingTerms = !earning ? '' : (fixed ? 'Fixed price' : 'Hourly, ' + mEur(cp.rate) + ' an hour') + ' \\u00b7 payment terms ' + num(cp.termsDays, 14) + ' days' +\n  (num(cp.agreedHours, 0) > 0 ? ' \\u00b7 agreed ' + num(cp.agreedHours, 0) + ' h a month' : '');\nvar mine = [], hopedMine = [];\nfor (var y = 0; y < ctx.items.length; y++) {\n  var ci = ctx.items[y];\n  if (!cp || ci.projectId !== cp.id) continue;\n  (num(ci.likelihood, 100) < 100 ? hopedMine : mine).push(ci);\n}\nvar bills = [];\nfor (var y2 = 0; y2 < mine.length; y2++) {\n  var bi = mine[y2];\n  bills.push(bi.repeat && bi.repeat !== 'once'\n    ? '\\u21bb ' + scheduleWords(bi, today).replace('every month on the', 'every month, due on the') + ', ' + (bi.fromHours ? 'from the hours' : mEur(bi.amount))\n    : 'one bill, ' + (bi.fromHours ? 'from the hours' : mEur(bi.amount)) + (mOk(bi.billDate) ? ', goes out ' + mDay(bi.billDate) : '') + ', due ' + mDay(bi.date));\n}\nvar brows = [{ key: 'Bills', text: bills.length ? bills.join('\\n') : 'None yet.' }];\nvar ahead = mAddMonths(today, 12, false), open2 = [], done2 = [];\nfor (var y3 = 0; y3 < mine.length; y3++) {\n  var rr = repeatsOf(mine[y3], ahead);\n  for (var y4 = 0; y4 < rr.length; y4++) {\n    if (ctx.since && rr[y4] < ctx.since) continue;\n    var oc = occOf(ctx, mine[y3], rr[y4]);\n    if (oc.closed || oc.paid) done2.push(oc);\n    if (!oc.closed) open2.push(oc);\n  }\n}\nopen2.sort(function (a, b3) { var x = a.billOut || a.date, z = b3.billOut || b3.date; return x < z ? -1 : x > z ? 1 : 0; });\ndone2.sort(function (a, b3) { return a.date < b3.date ? 1 : a.date > b3.date ? -1 : 0; });\nvar nx = open2[0] || null;\nif (nx) brows.push({ key: 'Next', text: (nx.billOut && !nx.sentOn ? 'goes out ' + mDay(nx.billOut) + ' \\u00b7 ' : nx.sentOn ? 'sent ' + mDay(nx.sentOn) + ' \\u00b7 ' : '') +\n  mEur(nx.remaining) + ' \\u00b7 due ' + mDay(nx.date) + (nx.date < today ? ' \\u00b7 late' : '') });\nvar since = '';\nif (cp) { var pb = previousBillOut(ctx, cp.id, mAddDays(today, 1)); since = pb ? mAddDays(pb, 1) : today.slice(0, 8) + '01'; }\nvar logged = cp ? hoursBetween(ctx, cp.id, since, today) : 0;\nvar planned = 0;\nif (cp) for (var y5 = 0; y5 < ctx.blocks.length; y5++) { var bk = ctx.blocks[y5]; if (bk && bk.projectId === cp.id && String(bk.date) > today && !bk.done) planned += num(bk.planned, 0); }\nvar period = '';\nif (!earning) period = '';\nelse if (fixed) {\n  var fee = nx ? nx.amount : mine.length ? num(mine[0].amount, 0) : 0;\n  var agreed = num(cp.agreedHours, 0);\n  // M24 — the hours are a record; the bill does not move. The per-hour figure is a check on the price, never a target.\n  period = hText(logged) + ' h logged' + (agreed ? ' of ' + agreed + ' agreed' : '') + (planned ? ', ' + hText(logged + planned) + ' h with what\\u2019s planned' : '') +\n    ' \\u00b7 the bill is ' + mEur(fee) + ' whatever the hours' + (logged > 0 && fee ? ' \\u00b7 ' + mEur(fee / logged) + ' an hour so far' : '');\n} else {\n  var rate = num(cp.rate, 0);\n  period = hText(logged) + ' h \\u00d7 ' + mEur(rate) + ' = ' + mEur(logged * rate) + (planned ? ' \\u00b7 with what\\u2019s planned ' + hText(logged + planned) + ' h, ' + mEur((logged + planned) * rate) : '') + ' \\u00b7 the next bill fills from these';\n}\nvar past = [];\nfor (var y6 = 0; y6 < done2.length && past.length < 4; y6++) {\n  var dn = done2[y6];\n  var dl = dn.lastOn ? mBetween(dn.date, dn.lastOn) : 0;\n  past.push(MON[Number(dn.date.slice(5, 7)) - 1] + ' ' + mEur(dn.amount) + ', due ' + mShort(dn.date) + ', ' +\n    (dn.lostOn ? mEur(dn.amount - dn.paid) + ' lost' : dn.lastOn ? 'paid ' + mShort(dn.lastOn) + (dl > 0 ? ', ' + dl + ' days late' : dl < 0 ? ', ' + (-dl) + ' days early' : ', on time') : 'skipped'));\n}\nif (period) brows.push({ key: 'This period', text: period });\nif (past.length) brows.push({ key: 'Past', text: past.join('\\n') });\nOutputs.billingRows = earning ? brows : [];\nOutputs.hasHoped = hopedMine.length > 0;\nOutputs.hopedText = hopedMine.length ? 'Hoped money: ' + hopedMine.map(function (h) { return (h.fromHours ? 'from the hours' : mEur(h.amount)) + (h.repeat && h.repeat !== 'once' ? ' ' + repeatWord(h) : '') + ' \\u00b7 ' + Math.round(num(h.likelihood, 100)) + '%'; }).join(', ') + '. It is in Money.' : '';\nOutputs.hopeShown = !!cp && !!cp.move && !cp.moveStop && hopedMine.length === 0;"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-settings",
+          "displayName": "settings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-marks",
+          "displayName": "marks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-since",
+          "displayName": "since",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-readings",
+          "displayName": "readings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-open",
+          "displayName": "open",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sel",
+          "displayName": "sel",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-itemId",
+          "displayName": "itemId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cardProject",
+          "displayName": "cardProject",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-cardClass",
+          "displayName": "cardClass",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sumShown",
+          "displayName": "sumShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sumLines",
+          "displayName": "sumLines",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sumNote",
+          "displayName": "sumNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sumBalanceLines",
+          "displayName": "sumBalanceLines",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpShown",
+          "displayName": "rpShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpKey",
+          "displayName": "rpKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpTitle",
+          "displayName": "rpTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSub",
+          "displayName": "rpSub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSubColor",
+          "displayName": "rpSubColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpAmountText",
+          "displayName": "rpAmountText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpAmountColor",
+          "displayName": "rpAmountColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpDetail",
+          "displayName": "rpDetail",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpTickShown",
+          "displayName": "rpTickShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpTickHead",
+          "displayName": "rpTickHead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpTickOn",
+          "displayName": "rpTickOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpTickAmount",
+          "displayName": "rpTickAmount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpRemaining",
+          "displayName": "rpRemaining",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpRests",
+          "displayName": "rpRests",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpRestDefault",
+          "displayName": "rpRestDefault",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpChangeLabel",
+          "displayName": "rpChangeLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSkipShown",
+          "displayName": "rpSkipShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpLostShown",
+          "displayName": "rpLostShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpChangeShown",
+          "displayName": "rpChangeShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpChDate",
+          "displayName": "rpChDate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpChAmount",
+          "displayName": "rpChAmount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpChNote",
+          "displayName": "rpChNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpChHint",
+          "displayName": "rpChHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpResetShown",
+          "displayName": "rpResetShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpClosedShown",
+          "displayName": "rpClosedShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpClosedText",
+          "displayName": "rpClosedText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpHopedShown",
+          "displayName": "rpHopedShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpHopedText",
+          "displayName": "rpHopedText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpBillShown",
+          "displayName": "rpBillShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpBillText",
+          "displayName": "rpBillText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSendShown",
+          "displayName": "rpSendShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSentOn",
+          "displayName": "rpSentOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSentAmount",
+          "displayName": "rpSentAmount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpSentAmountShown",
+          "displayName": "rpSentAmountShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpUnsendShown",
+          "displayName": "rpUnsendShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpFromShown",
+          "displayName": "rpFromShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpFromText",
+          "displayName": "rpFromText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpItemLabel",
+          "displayName": "rpItemLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rpEndShown",
+          "displayName": "rpEndShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changeKey",
+          "displayName": "changeKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pickedItemId",
+          "displayName": "pickedItemId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endShown",
+          "displayName": "endShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endItemId",
+          "displayName": "endItemId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endTitle",
+          "displayName": "endTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endText",
+          "displayName": "endText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endChoices",
+          "displayName": "endChoices",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endAt",
+          "displayName": "endAt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balShown",
+          "displayName": "balShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balOn",
+          "displayName": "balOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balHint",
+          "displayName": "balHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balRows",
+          "displayName": "balRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balHasRows",
+          "displayName": "balHasRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balNote",
+          "displayName": "balNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edShown",
+          "displayName": "edShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edKey",
+          "displayName": "edKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isNewItem",
+          "displayName": "isNewItem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-editItemId",
+          "displayName": "editItemId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edDirs",
+          "displayName": "edDirs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edRepeats",
+          "displayName": "edRepeats",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edProjects",
+          "displayName": "edProjects",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edProjectTerms",
+          "displayName": "edProjectTerms",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edTitle",
+          "displayName": "edTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edSub",
+          "displayName": "edSub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edSaveLabel",
+          "displayName": "edSaveLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edLabel",
+          "displayName": "edLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edDir",
+          "displayName": "edDir",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edAmount",
+          "displayName": "edAmount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edRepeat",
+          "displayName": "edRepeat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edDate",
+          "displayName": "edDate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edUntil",
+          "displayName": "edUntil",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edMonthEnd",
+          "displayName": "edMonthEnd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edProjectId",
+          "displayName": "edProjectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edBillDate",
+          "displayName": "edBillDate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edBillLeadDays",
+          "displayName": "edBillLeadDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edFromHours",
+          "displayName": "edFromHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edLikelihood",
+          "displayName": "edLikelihood",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-edNote",
+          "displayName": "edNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-agreeItemId",
+          "displayName": "agreeItemId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billingShown",
+          "displayName": "billingShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billingTerms",
+          "displayName": "billingTerms",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billingRows",
+          "displayName": "billingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasHoped",
+          "displayName": "hasHoped",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hopedText",
+          "displayName": "hopedText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hopeShown",
+          "displayName": "hopeShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

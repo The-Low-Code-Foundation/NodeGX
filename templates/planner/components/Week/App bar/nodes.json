@@ -12,9 +12,19 @@
           "name": "weekLabel",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "lateCount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLate",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
-      "x": 410,
+      "x": 530,
       "y": 520
     },
     {
@@ -38,6 +48,11 @@
           "type": "signal"
         },
         {
+          "name": "openMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
           "name": "openSettings",
           "plug": "input",
           "type": "signal"
@@ -53,7 +68,7 @@
           "type": "signal"
         }
       ],
-      "x": 410,
+      "x": 530,
       "y": 400
     },
     {
@@ -200,10 +215,14 @@
         "flexDirection": "row",
         "alignItems": "center",
         "sizeMode": "contentSize",
-        "columnGap": "var(--space-2)"
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "planner-shrink-wrap"
       },
       "children": [
         "abProjects",
+        "abMoneyBox",
         "abSettings",
         "abTheme",
         "abShut",
@@ -236,6 +255,94 @@
       "y": 880
     },
     {
+      "id": "abMoneyBox",
+      "type": "Group",
+      "label": "Money",
+      "parent": "abRight",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-0-5)"
+      },
+      "children": [
+        "abMoney",
+        "abLateBox"
+      ],
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "abMoney",
+      "type": "net.noodl.controls.button",
+      "label": "Open Money",
+      "parent": "abMoneyBox",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "€",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "abLateBox",
+      "type": "Group",
+      "label": "How many are late",
+      "parent": "abMoneyBox",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-0)",
+        "backgroundColor": "var(--env-hobby-soft)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-1-5)",
+        "paddingRight": "var(--space-1-5)"
+      },
+      "children": [
+        "abLate"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "abLate",
+      "type": "Text",
+      "label": "How many are late",
+      "parent": "abLateBox",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "color": "var(--env-hobby-ink)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
       "id": "abSettings",
       "type": "net.noodl.controls.button",
       "label": "Open the settings",
@@ -261,7 +368,7 @@
         "paddingRight": "var(--space-2)"
       },
       "x": 160,
-      "y": 1000
+      "y": 1480
     },
     {
       "id": "abTheme",
@@ -269,7 +376,7 @@
       "label": "Light or dark",
       "parent": "abRight",
       "x": 160,
-      "y": 1120
+      "y": 1600
     },
     {
       "id": "abShut",
@@ -291,7 +398,7 @@
         "label": "Shut down"
       },
       "x": 160,
-      "y": 1240
+      "y": 1720
     },
     {
       "id": "abSignOut",
@@ -314,7 +421,7 @@
         "label": "Sign out"
       },
       "x": 160,
-      "y": 1360
+      "y": 1840
     }
   ],
   "visualRoots": [

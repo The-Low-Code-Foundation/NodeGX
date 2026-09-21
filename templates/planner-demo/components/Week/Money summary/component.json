@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e21142d0-07f0-5e1b-8743-144a997479ec",
+  "name": "Money summary",
+  "path": "/Week/Money summary",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What this month’s target is made of, line by line — what goes out, what comes in, the fixed bills, the hours — and where the balance stands."
+}

@@ -28,6 +28,24 @@
       "toProperty": "openProjects"
     },
     {
+      "fromId": "abMoney",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "openMoney"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "lateCount",
+      "toId": "abLate",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "hasLate",
+      "toId": "abLateBox",
+      "toProperty": "mounted"
+    },
+    {
       "fromId": "abSettings",
       "fromProperty": "onClick",
       "toId": "abOut",

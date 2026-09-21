@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9cc74f1d-358e-59a8-8b78-b2c55175da61",
+  "name": "Agree money item",
+  "path": "/Commands/Agree money item",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Hoped money that has been agreed: it becomes expected, and counts in every balance from now on."
+}

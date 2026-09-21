@@ -42,7 +42,27 @@
       },
       "creatorOwns": true
     },
-    "CashEvent": {
+    "MoneyItem": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "MoneyMark": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "BalanceReading": {
       "permissions": {
         "find": "authenticated",
         "get": "authenticated",

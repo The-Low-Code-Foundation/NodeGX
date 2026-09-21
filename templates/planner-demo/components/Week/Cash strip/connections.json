@@ -10,22 +10,88 @@
       "toProperty": "text"
     },
     {
+      "fromId": "csOpen",
+      "fromProperty": "onClick",
+      "toId": "csOut",
+      "toProperty": "open"
+    },
+    {
       "fromId": "csIn",
-      "fromProperty": "invoicedText",
-      "toId": "csInvoiced",
+      "fromProperty": "monthName",
+      "toId": "csMonthKey",
       "toProperty": "text"
     },
     {
       "fromId": "csIn",
-      "fromProperty": "termsText",
-      "toId": "csTerms",
+      "fromProperty": "monthText",
+      "toId": "csMonthText",
       "toProperty": "text"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "mightShown",
+      "toId": "csMight",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "mightLead",
+      "toId": "csMightLead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "mightRows",
+      "toId": "csMightEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "csMightEach",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "csOut",
+      "toProperty": "openProject"
+    },
+    {
+      "fromId": "csMightEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "csOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "lowText",
+      "toId": "csLowText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "lowColor",
+      "toId": "csLowText",
+      "toProperty": "color"
     },
     {
       "fromId": "csIn",
       "fromProperty": "rows",
       "toId": "csEach",
       "toProperty": "items"
+    },
+    {
+      "fromId": "csEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "csOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "csEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "csOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "csIn",
+      "fromProperty": "footText",
+      "toId": "csFoot",
+      "toProperty": "text"
     }
   ]
 }

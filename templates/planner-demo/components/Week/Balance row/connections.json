@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "37e4d834-0097-5768-87b6-b53bd7016c73",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "brIn",
+      "fromProperty": "label",
+      "toId": "brLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "sub",
+      "toId": "brSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "lostLabel",
+      "toId": "brLost",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "key",
+      "toId": "brOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "brHappened",
+      "fromProperty": "onClick",
+      "toId": "brOut",
+      "toProperty": "happened"
+    },
+    {
+      "fromId": "brPart",
+      "fromProperty": "onClick",
+      "toId": "brOut",
+      "toProperty": "part"
+    },
+    {
+      "fromId": "brLost",
+      "fromProperty": "onClick",
+      "toId": "brOut",
+      "toProperty": "lost"
+    }
+  ]
+}

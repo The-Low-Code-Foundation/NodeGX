@@ -238,6 +238,54 @@
       "toProperty": "takeOut"
     },
     {
+      "fromId": "pdIn",
+      "fromProperty": "hopeShown",
+      "toId": "pdHope",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdHope",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "addHope"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "hasHoped",
+      "toId": "pdHoped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "hopedText",
+      "toId": "pdHoped",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "billingShown",
+      "toId": "pdBilling",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "billingTerms",
+      "toId": "pdBillingTerms",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "billingRows",
+      "toId": "pdBillingEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pdAddBill",
+      "fromProperty": "onClick",
+      "toId": "pdOut",
+      "toProperty": "addBill"
+    },
+    {
       "fromId": "pdEdit",
       "fromProperty": "onClick",
       "toId": "pdOut",

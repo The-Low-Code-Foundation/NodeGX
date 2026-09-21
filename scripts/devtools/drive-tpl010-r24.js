@@ -27,7 +27,7 @@ if (!DIR) {
 }
 
 /** `DEMO_STORAGE_KEY` in `packages/noodl-mcp/tests/tpl010Demo.ts`. */
-const STORAGE_KEY = 'nodegx-planner-demo-v2';
+const STORAGE_KEY = 'nodegx-planner-demo-v3';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const results = [];
@@ -313,46 +313,8 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   const strip2 = await until(text, (s) => s.includes('Offer the testing add-on, with a start date'));
   check('the chip reads the new text', strip2.includes('Offer the testing add-on, with a start date'), '');
 
-  // ── R2.4-7: a money event added in Settings is on the strip; editing an amount moves the balance after it ──
-  await clickButton('⚙');
-  await until(text, (s) => s.includes('Money coming and going'));
-  await clickButton('+ Add a money event');
-  await until(text, (s) => s.includes('A new money event'));
-  const tenDays = new Date(today);
-  tenDays.setDate(today.getDate() + 10);
-  await fill('What it is', 'Accountant, the year end');
-  await fill('How much', '300');
-  await pickDate(dayKey(tenDays));
-  await shot('6-money-event');
-  const before7 = await store();
-  await clickButton('Save');
-  const s7 = await until(store, (s) => s.CashEvent.length === before7.CashEvent.length + 1);
-  const ev = s7.CashEvent.find((e) => e.label === 'Accountant, the year end');
-  check('the event is written as a cost on its day', !!ev && Number(ev.amount) === -300 && ev.date === dayKey(tenDays), JSON.stringify(ev));
-  await key('Escape');
-  const strip7 = await until(text, (s) => s.includes('Accountant, the year end'));
-  check('it appears on the cash strip on the next read', strip7.includes('Accountant, the year end'), '');
-  const runningAfter = async (label) =>
-    js(`(() => { const t = document.body.innerText; const i = t.lastIndexOf(${JSON.stringify(label)}); const j = t.indexOf('after:', i); return t.slice(j, j + 20).split('\\n')[0]; })()`);
-  const balBefore = await runningAfter('Household costs');
-  await clickButton('⚙');
-  await until(text, (s) => s.includes('Money coming and going'));
-  const household = s7.CashEvent.find((e) => e.label === 'Household costs');
-  await js(`(() => {
-    const rows = [...document.querySelectorAll('button')].filter((b) => b.textContent.trim() === 'Edit' && b.getClientRects().length);
-    const hit = rows.find((b) => { for (let el = b.parentElement; el; el = el.parentElement) { if (el.innerText && el.innerText.includes('Household costs')) return el.querySelectorAll('button').length === 1; } return false; });
-    window.__editHousehold = hit || null;
-  })()`);
-  const editAt = await centre('window.__editHousehold');
-  if (editAt) await press(editAt);
-  await until(text, (s) => s.includes('Change “Household costs”'));
-  await fill('How much', '4700');
-  await clickButton('Save');
-  await until(store, (s) => Number(byId(s, 'CashEvent', household.id).amount) === -4700);
-  await key('Escape');
-  await wait(800);
-  const balAfter = await runningAfter('Household costs');
-  check('editing an amount changes the running balance after it', !!editAt && balBefore !== balAfter, `${balBefore} → ${balAfter}`);
+  // ── R2.4-7 moved with TPL-010-M: money is not in Settings any more. Adding an item and changing one so the
+  // balance after it moves is driven by drive-tpl010-money.js (Add money, Change the item). ──
 
   await page.setViewport({ width: 1423, height: 680 });
   await wait(600);

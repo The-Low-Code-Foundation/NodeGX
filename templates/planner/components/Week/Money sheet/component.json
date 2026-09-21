@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "da43ae11-b523-5cc6-857b-74878d4b88fe",
+  "name": "Money sheet",
+  "path": "/Week/Money sheet",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Money modal: everything that comes in and goes out, as Upcoming, Past or Recurring, with the balance at the top, and whichever one you picked on the right — or the form to add or change one, or to record the balance."
+}

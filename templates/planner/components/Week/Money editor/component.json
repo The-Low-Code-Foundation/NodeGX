@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "578f5e7a-591f-5eb2-8d23-c0538710b45c",
+  "name": "Money editor",
+  "path": "/Week/Money editor",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One money item as a form: what it is, in or out, how much, how often and from when, until when, which project, when its bill goes out, how likely it is, and a note."
+}

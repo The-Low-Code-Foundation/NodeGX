@@ -34,6 +34,12 @@
       "toProperty": "in-weekStart"
     },
     {
+      "fromId": "enIn",
+      "fromProperty": "targetHours",
+      "toId": "enWork",
+      "toProperty": "in-targetHours"
+    },
+    {
       "fromId": "enWork",
       "fromProperty": "out-rows",
       "toId": "enOut",
@@ -92,18 +98,6 @@
       "fromProperty": "out-planLine",
       "toId": "enOut",
       "toProperty": "planLine"
-    },
-    {
-      "fromId": "enWork",
-      "fromProperty": "out-targetLine",
-      "toId": "enOut",
-      "toProperty": "targetLine"
-    },
-    {
-      "fromId": "enWork",
-      "fromProperty": "out-invoicedText",
-      "toId": "enOut",
-      "toProperty": "invoicedText"
     }
   ]
 }

@@ -1,0 +1,466 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a2789e06-6a29-50d5-8bf9-ef0b5b56b930",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "AddmoneyitIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dir",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "until",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "monthEnd",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billLeadDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fromHours",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "likelihood",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "AddmoneyitOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "AddmoneyitGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar label = String(Inputs.label || '').trim();\nvar date = String(Inputs.date || '');\nvar ok = /^\\d{4}-\\d{2}-\\d{2}$/;\nif (label === '' || !ok.test(date)) return;\nvar repeats = ['once', 'weekly', 'monthly', 'quarterly', 'yearly'];\nvar repeat = String(Inputs.repeat || 'once');\nif (repeats.indexOf(repeat) < 0) repeat = 'once';\nvar pid = String(Inputs.projectId || '');\nif (pid === 'none') pid = '';\nvar out = String(Inputs.dir || 'in') === 'out';\nvar client = pid !== '' && !out;\nvar fromHours = client && Inputs.fromHours === true;\nvar amount = Math.abs(num(Inputs.amount, NaN));\nif (!fromHours && (!isFinite(amount) || amount <= 0)) return;\nvar until = String(Inputs.until || '');\nOutputs.label = label;\nOutputs.amount = fromHours ? 0 : (out ? -1 : 1) * Math.round(amount * 100) / 100;\nOutputs.repeat = repeat;\nOutputs.date = date;\nOutputs.until = repeat !== 'once' && ok.test(until) && until >= date ? until : '';\nOutputs.monthEnd = (repeat === 'monthly' || repeat === 'quarterly') && Inputs.monthEnd === true;\nOutputs.projectId = pid;\nOutputs.billDate = client && repeat === 'once' && ok.test(String(Inputs.billDate || '')) ? String(Inputs.billDate) : '';\nvar lead = Math.round(num(Inputs.billLeadDays, NaN));\nOutputs.billLeadDays = client && repeat !== 'once' && isFinite(lead) && lead >= 0 ? lead : '';\nOutputs.fromHours = fromHours;\nvar likeRaw = String(Inputs.likelihood === undefined || Inputs.likelihood === null ? '' : Inputs.likelihood).trim();\nvar like = likeRaw === '' ? 100 : Math.round(Number(likeRaw));\nOutputs.likelihood = isFinite(like) ? Math.max(0, Math.min(100, like)) : 100;\nOutputs.note = String(Inputs.note || '').trim();\nOutputs.position = Date.now();\nOutputs.go();",
+        "runOnChange-in-label": false,
+        "runOnChange-in-dir": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-repeat": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-until": false,
+        "runOnChange-in-monthEnd": false,
+        "runOnChange-in-projectId": false,
+        "runOnChange-in-billDate": false,
+        "runOnChange-in-billLeadDays": false,
+        "runOnChange-in-fromHours": false,
+        "runOnChange-in-likelihood": false,
+        "runOnChange-in-note": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-label",
+          "displayName": "label",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-dir",
+          "displayName": "dir",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fromHours",
+          "displayName": "fromHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-until",
+          "displayName": "until",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-monthEnd",
+          "displayName": "monthEnd",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billDate",
+          "displayName": "billDate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billLeadDays",
+          "displayName": "billLeadDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-likelihood",
+          "displayName": "likelihood",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "displayName": "note",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "displayName": "label",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-amount",
+          "displayName": "amount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-repeat",
+          "displayName": "repeat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-date",
+          "displayName": "date",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-until",
+          "displayName": "until",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monthEnd",
+          "displayName": "monthEnd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectId",
+          "displayName": "projectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billDate",
+          "displayName": "billDate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billLeadDays",
+          "displayName": "billLeadDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fromHours",
+          "displayName": "fromHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-likelihood",
+          "displayName": "likelihood",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-note",
+          "displayName": "note",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-position",
+          "displayName": "position",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddmoneyitWrite",
+      "type": "JavaScriptFunction",
+      "label": "Add the money item, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-planner-demo-v3\";\nfunction demoEmpty() { return {\"BalanceReading\":[],\"Block\":[],\"MoneyItem\":[],\"MoneyMark\":[],\"MonthPlan\":[],\"Project\":[],\"Settings\":[]}; }\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__plannerDemo === 'string') raw = window.__plannerDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__plannerDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar store = demoLoad() || demoEmpty();\nvar list = store[\"MoneyItem\"] || (store[\"MoneyItem\"] = []);\nvar now = new Date().toISOString();\nvar record = { id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), createdAt: now, updatedAt: now };\nrecord.label = Inputs.label;\nrecord.amount = Inputs.amount;\nrecord.repeat = Inputs.repeat;\nrecord.date = Inputs.date;\nrecord.until = Inputs.until;\nrecord.monthEnd = Inputs.monthEnd;\nrecord.projectId = Inputs.projectId;\nrecord.billDate = Inputs.billDate;\nrecord.billLeadDays = Inputs.billLeadDays;\nrecord.fromHours = Inputs.fromHours;\nrecord.likelihood = Inputs.likelihood;\nrecord.note = Inputs.note;\nrecord.position = Inputs.position;\nlist.push(record);\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = record.id;\nOutputs.done();",
+        "runOnChange-in-label": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-repeat": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-until": false,
+        "runOnChange-in-monthEnd": false,
+        "runOnChange-in-projectId": false,
+        "runOnChange-in-billDate": false,
+        "runOnChange-in-billLeadDays": false,
+        "runOnChange-in-fromHours": false,
+        "runOnChange-in-likelihood": false,
+        "runOnChange-in-note": false,
+        "runOnChange-in-position": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-label",
+          "displayName": "label",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-until",
+          "displayName": "until",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-monthEnd",
+          "displayName": "monthEnd",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billDate",
+          "displayName": "billDate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billLeadDays",
+          "displayName": "billLeadDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fromHours",
+          "displayName": "fromHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-likelihood",
+          "displayName": "likelihood",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "displayName": "note",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-position",
+          "displayName": "position",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddmoneyitProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

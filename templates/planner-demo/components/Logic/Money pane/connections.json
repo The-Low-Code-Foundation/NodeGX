@@ -1,0 +1,613 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "394bb5ba-d41d-5e80-8afb-cde6c8177e37",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "items",
+      "toId": "mvpWork",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "marks",
+      "toId": "mvpWork",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "readings",
+      "toId": "mvpWork",
+      "toProperty": "in-readings"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "projects",
+      "toId": "mvpWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "blocks",
+      "toId": "mvpWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "settings",
+      "toId": "mvpWork",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "since",
+      "toId": "mvpWork",
+      "toProperty": "in-since"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "open",
+      "toId": "mvpWork",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "sel",
+      "toId": "mvpWork",
+      "toProperty": "in-sel"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "mode",
+      "toId": "mvpWork",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "itemId",
+      "toId": "mvpWork",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "mvpIn",
+      "fromProperty": "cardProject",
+      "toId": "mvpWork",
+      "toProperty": "in-cardProject"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-cardClass",
+      "toId": "mvpOut",
+      "toProperty": "cardClass"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-sumShown",
+      "toId": "mvpOut",
+      "toProperty": "sumShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-sumLines",
+      "toId": "mvpOut",
+      "toProperty": "sumLines"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-sumNote",
+      "toId": "mvpOut",
+      "toProperty": "sumNote"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-sumBalanceLines",
+      "toId": "mvpOut",
+      "toProperty": "sumBalanceLines"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpShown",
+      "toId": "mvpOut",
+      "toProperty": "rpShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpKey",
+      "toId": "mvpOut",
+      "toProperty": "rpKey"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpTitle",
+      "toId": "mvpOut",
+      "toProperty": "rpTitle"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSub",
+      "toId": "mvpOut",
+      "toProperty": "rpSub"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSubColor",
+      "toId": "mvpOut",
+      "toProperty": "rpSubColor"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpAmountText",
+      "toId": "mvpOut",
+      "toProperty": "rpAmountText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpAmountColor",
+      "toId": "mvpOut",
+      "toProperty": "rpAmountColor"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpDetail",
+      "toId": "mvpOut",
+      "toProperty": "rpDetail"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpTickShown",
+      "toId": "mvpOut",
+      "toProperty": "rpTickShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpTickHead",
+      "toId": "mvpOut",
+      "toProperty": "rpTickHead"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpTickOn",
+      "toId": "mvpOut",
+      "toProperty": "rpTickOn"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpTickAmount",
+      "toId": "mvpOut",
+      "toProperty": "rpTickAmount"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpRemaining",
+      "toId": "mvpOut",
+      "toProperty": "rpRemaining"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpRests",
+      "toId": "mvpOut",
+      "toProperty": "rpRests"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpRestDefault",
+      "toId": "mvpOut",
+      "toProperty": "rpRestDefault"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpChangeLabel",
+      "toId": "mvpOut",
+      "toProperty": "rpChangeLabel"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSkipShown",
+      "toId": "mvpOut",
+      "toProperty": "rpSkipShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpLostShown",
+      "toId": "mvpOut",
+      "toProperty": "rpLostShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpChangeShown",
+      "toId": "mvpOut",
+      "toProperty": "rpChangeShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpChDate",
+      "toId": "mvpOut",
+      "toProperty": "rpChDate"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpChAmount",
+      "toId": "mvpOut",
+      "toProperty": "rpChAmount"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpChNote",
+      "toId": "mvpOut",
+      "toProperty": "rpChNote"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpChHint",
+      "toId": "mvpOut",
+      "toProperty": "rpChHint"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpResetShown",
+      "toId": "mvpOut",
+      "toProperty": "rpResetShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpClosedShown",
+      "toId": "mvpOut",
+      "toProperty": "rpClosedShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpClosedText",
+      "toId": "mvpOut",
+      "toProperty": "rpClosedText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpHopedShown",
+      "toId": "mvpOut",
+      "toProperty": "rpHopedShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpHopedText",
+      "toId": "mvpOut",
+      "toProperty": "rpHopedText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpBillShown",
+      "toId": "mvpOut",
+      "toProperty": "rpBillShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpBillText",
+      "toId": "mvpOut",
+      "toProperty": "rpBillText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSendShown",
+      "toId": "mvpOut",
+      "toProperty": "rpSendShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSentOn",
+      "toId": "mvpOut",
+      "toProperty": "rpSentOn"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSentAmount",
+      "toId": "mvpOut",
+      "toProperty": "rpSentAmount"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpSentAmountShown",
+      "toId": "mvpOut",
+      "toProperty": "rpSentAmountShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpUnsendShown",
+      "toId": "mvpOut",
+      "toProperty": "rpUnsendShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpFromShown",
+      "toId": "mvpOut",
+      "toProperty": "rpFromShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpFromText",
+      "toId": "mvpOut",
+      "toProperty": "rpFromText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpItemLabel",
+      "toId": "mvpOut",
+      "toProperty": "rpItemLabel"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-rpEndShown",
+      "toId": "mvpOut",
+      "toProperty": "rpEndShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-endShown",
+      "toId": "mvpOut",
+      "toProperty": "endShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-endTitle",
+      "toId": "mvpOut",
+      "toProperty": "endTitle"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-endText",
+      "toId": "mvpOut",
+      "toProperty": "endText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-endChoices",
+      "toId": "mvpOut",
+      "toProperty": "endChoices"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-endAt",
+      "toId": "mvpOut",
+      "toProperty": "endAt"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-balShown",
+      "toId": "mvpOut",
+      "toProperty": "balShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-balOn",
+      "toId": "mvpOut",
+      "toProperty": "balOn"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-balHint",
+      "toId": "mvpOut",
+      "toProperty": "balHint"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-balRows",
+      "toId": "mvpOut",
+      "toProperty": "balRows"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-balHasRows",
+      "toId": "mvpOut",
+      "toProperty": "balHasRows"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-balNote",
+      "toId": "mvpOut",
+      "toProperty": "balNote"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edShown",
+      "toId": "mvpOut",
+      "toProperty": "edShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edKey",
+      "toId": "mvpOut",
+      "toProperty": "edKey"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edTitle",
+      "toId": "mvpOut",
+      "toProperty": "edTitle"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edSub",
+      "toId": "mvpOut",
+      "toProperty": "edSub"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edDirs",
+      "toId": "mvpOut",
+      "toProperty": "edDirs"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edRepeats",
+      "toId": "mvpOut",
+      "toProperty": "edRepeats"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edProjects",
+      "toId": "mvpOut",
+      "toProperty": "edProjects"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edProjectTerms",
+      "toId": "mvpOut",
+      "toProperty": "edProjectTerms"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edSaveLabel",
+      "toId": "mvpOut",
+      "toProperty": "edSaveLabel"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edLabel",
+      "toId": "mvpOut",
+      "toProperty": "edLabel"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edDir",
+      "toId": "mvpOut",
+      "toProperty": "edDir"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edAmount",
+      "toId": "mvpOut",
+      "toProperty": "edAmount"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edRepeat",
+      "toId": "mvpOut",
+      "toProperty": "edRepeat"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edDate",
+      "toId": "mvpOut",
+      "toProperty": "edDate"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edUntil",
+      "toId": "mvpOut",
+      "toProperty": "edUntil"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edMonthEnd",
+      "toId": "mvpOut",
+      "toProperty": "edMonthEnd"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edProjectId",
+      "toId": "mvpOut",
+      "toProperty": "edProjectId"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edBillDate",
+      "toId": "mvpOut",
+      "toProperty": "edBillDate"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edBillLeadDays",
+      "toId": "mvpOut",
+      "toProperty": "edBillLeadDays"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edFromHours",
+      "toId": "mvpOut",
+      "toProperty": "edFromHours"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edLikelihood",
+      "toId": "mvpOut",
+      "toProperty": "edLikelihood"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-edNote",
+      "toId": "mvpOut",
+      "toProperty": "edNote"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-billingShown",
+      "toId": "mvpOut",
+      "toProperty": "billingShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-billingTerms",
+      "toId": "mvpOut",
+      "toProperty": "billingTerms"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-billingRows",
+      "toId": "mvpOut",
+      "toProperty": "billingRows"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-hopeShown",
+      "toId": "mvpOut",
+      "toProperty": "hopeShown"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-hopedText",
+      "toId": "mvpOut",
+      "toProperty": "hopedText"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-hasHoped",
+      "toId": "mvpOut",
+      "toProperty": "hasHoped"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-isNewItem",
+      "toId": "mvpOut",
+      "toProperty": "isNewItem"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-editItemId",
+      "toId": "mvpOut",
+      "toProperty": "editItemId"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-endItemId",
+      "toId": "mvpOut",
+      "toProperty": "endItemId"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-agreeItemId",
+      "toId": "mvpOut",
+      "toProperty": "agreeItemId"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-changeKey",
+      "toId": "mvpOut",
+      "toProperty": "changeKey"
+    },
+    {
+      "fromId": "mvpWork",
+      "fromProperty": "out-pickedItemId",
+      "toId": "mvpOut",
+      "toProperty": "pickedItemId"
+    }
+  ]
+}

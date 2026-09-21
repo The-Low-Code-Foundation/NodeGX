@@ -11,6 +11,30 @@
     },
     {
       "fromId": "ceIn",
+      "fromProperty": "whenColor",
+      "toId": "ceWhen",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "background",
+      "toId": "ceRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "key",
+      "toId": "ceOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "ceRoot",
+      "fromProperty": "onClick",
+      "toId": "ceOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "ceIn",
       "fromProperty": "amount",
       "toId": "ceAmount",
       "toProperty": "text"

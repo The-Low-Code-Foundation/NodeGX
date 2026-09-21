@@ -1,0 +1,289 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c85e1b78-8798-58cf-8a9e-8fa464ed5671",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "msmIn",
+      "type": "Component Inputs",
+      "label": "The month",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "lines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "balanceLines",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "msmOut",
+      "type": "Component Outputs",
+      "label": "Pressed",
+      "ports": [
+        {
+          "name": "recordBalance",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "msmRoot",
+      "type": "Group",
+      "label": "This month’s target",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "msmBack",
+        "msmTitle",
+        "msmLead",
+        "msmLines",
+        "msmNote",
+        "msmBalance"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "msmBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the list",
+      "parent": "msmRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "‹ Money",
+        "cssClassName": "planner-phone-only"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "msmTitle",
+      "type": "Text",
+      "label": "Title",
+      "parent": "msmRoot",
+      "parameters": {
+        "text": "This month’s target",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h3"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "msmLead",
+      "type": "Text",
+      "label": "Where it comes from",
+      "parent": "msmRoot",
+      "parameters": {
+        "text": "From the expected money items that belong to no project. Yearly items count a twelfth a month, weekly ones 52 ÷ 12.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "msmLines",
+      "type": "Group",
+      "label": "The sum",
+      "parent": "msmRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "msmEach"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "msmEach",
+      "type": "For Each",
+      "label": "One line of the sum",
+      "parent": "msmLines",
+      "parameters": {
+        "template": "/Week/Fact row",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "msmNote",
+      "type": "Text",
+      "label": "What is not in it",
+      "parent": "msmRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "msmBalance",
+      "type": "Group",
+      "label": "The balance",
+      "parent": "msmRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "msmBalLabel",
+        "msmBalEach",
+        "msmRecord"
+      ],
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "msmBalLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "msmBalance",
+      "parameters": {
+        "text": "Balance",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "msmBalEach",
+      "type": "For Each",
+      "label": "One line about the balance",
+      "parent": "msmBalance",
+      "parameters": {
+        "template": "/Week/Fact row",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "msmRecord",
+      "type": "net.noodl.controls.button",
+      "label": "Record what the bank says",
+      "parent": "msmBalance",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Record balance"
+      },
+      "x": 160,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "msmRoot"
+  ]
+}

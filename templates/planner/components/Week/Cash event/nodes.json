@@ -9,7 +9,17 @@
       "label": "The event",
       "ports": [
         {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whenColor",
           "plug": "output",
           "type": "string"
         },
@@ -42,10 +52,34 @@
           "name": "edge",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "background",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 350,
       "y": 160
+    },
+    {
+      "id": "ceOut",
+      "type": "Component Outputs",
+      "label": "Pressed",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 40
     },
     {
       "id": "ceRoot",

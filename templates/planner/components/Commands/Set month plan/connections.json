@@ -41,12 +41,6 @@
     },
     {
       "fromId": "SetmonthplIn",
-      "fromProperty": "openingBalance",
-      "toId": "SetmonthplGuard",
-      "toProperty": "in-openingBalance"
-    },
-    {
-      "fromId": "SetmonthplIn",
       "fromProperty": "do",
       "toId": "SetmonthplGuard",
       "toProperty": "run"
@@ -86,12 +80,6 @@
       "fromProperty": "out-workingDays",
       "toId": "SetmonthplWrite",
       "toProperty": "prop-workingDays"
-    },
-    {
-      "fromId": "SetmonthplGuard",
-      "fromProperty": "out-openingBalance",
-      "toId": "SetmonthplWrite",
-      "toProperty": "prop-openingBalance"
     },
     {
       "fromId": "SetmonthplGuard",

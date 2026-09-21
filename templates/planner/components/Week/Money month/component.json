@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6ec2c118-5b2d-5122-896a-7b343590fd29",
+  "name": "Money month",
+  "path": "/Week/Money month",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One group of lines in the Money modal: its heading (a month with what comes in and goes out and where it ends, or Late), then a line for each thing in it."
+}

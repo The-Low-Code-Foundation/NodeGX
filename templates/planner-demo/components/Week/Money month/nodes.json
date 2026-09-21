@@ -1,0 +1,164 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "96ec68ac-aacf-52b5-8c7b-83a5f2bcc583",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mmIn",
+      "type": "Component Inputs",
+      "label": "The group",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "summary",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "mmOut",
+      "type": "Component Outputs",
+      "label": "Picked",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "mmRoot",
+      "type": "Group",
+      "label": "Money group",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)"
+      },
+      "children": [
+        "mmHead",
+        "mmEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mmHead",
+      "type": "Group",
+      "label": "Heading",
+      "parent": "mmRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap",
+        "paddingTop": "var(--space-2)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "children": [
+        "mmName",
+        "mmSummary"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mmName",
+      "type": "Text",
+      "label": "Which month",
+      "parent": "mmHead",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mmSummary",
+      "type": "Text",
+      "label": "In, out, net, and where it ends",
+      "parent": "mmHead",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "mmEach",
+      "type": "For Each",
+      "label": "One line per thing",
+      "parent": "mmRoot",
+      "parameters": {
+        "template": "/Week/Money row",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "mmRoot"
+  ]
+}

@@ -1,0 +1,475 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "00c53dff-79f0-5626-88bb-eeab4698657e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rpIn",
+      "fromProperty": "shown",
+      "toId": "rpRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "title",
+      "toId": "rpTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "sub",
+      "toId": "rpSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "subColor",
+      "toId": "rpSub",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "amountText",
+      "toId": "rpAmount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "amountColor",
+      "toId": "rpAmount",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "detail",
+      "toId": "rpDetail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "tickShown",
+      "toId": "rpTick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "tickHead",
+      "toId": "rpTickHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "tickOn",
+      "toId": "rpTickOn",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "rpTickOn",
+      "fromProperty": "Value",
+      "toId": "rpOut",
+      "toProperty": "tickOn"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "tickAmount",
+      "toId": "rpTickAmount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rpTickAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "rpOut",
+      "toProperty": "tickAmount"
+    },
+    {
+      "fromId": "rpTickAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "rpShort",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "remaining",
+      "toId": "rpShort",
+      "toProperty": "in-remaining"
+    },
+    {
+      "fromId": "rpShort",
+      "fromProperty": "out-short",
+      "toId": "rpRestLine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpShort",
+      "fromProperty": "out-short",
+      "toId": "rpRest",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpShort",
+      "fromProperty": "out-restLine",
+      "toId": "rpRestLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "rests",
+      "toId": "rpRest",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "restDefault",
+      "toId": "rpRest",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpRest",
+      "fromProperty": "value",
+      "toId": "rpOut",
+      "toProperty": "tickRest"
+    },
+    {
+      "fromId": "rpTickIt",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "tickShown",
+      "toId": "rpActs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "changeLabel",
+      "toId": "rpChangeOne",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rpChangeOne",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "changeOne"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "skipShown",
+      "toId": "rpSkip",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpSkip",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "skip"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "lostShown",
+      "toId": "rpLost",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpLost",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "lost"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "changeShown",
+      "toId": "rpChange",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "chDate",
+      "toId": "rpChDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "rpChDate",
+      "fromProperty": "Value",
+      "toId": "rpOut",
+      "toProperty": "chDate"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "chAmount",
+      "toId": "rpChAmount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rpChAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "rpOut",
+      "toProperty": "chAmount"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "chNote",
+      "toId": "rpChNote",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rpChNote",
+      "fromProperty": "onTextChanged",
+      "toId": "rpOut",
+      "toProperty": "chNote"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "chHint",
+      "toId": "rpChHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpSaveOne",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "saveOne"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "resetShown",
+      "toId": "rpResetOne",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpResetOne",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "resetOne"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "closedShown",
+      "toId": "rpClosed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "closedText",
+      "toId": "rpClosedText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpUntick",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "untick"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "hopedShown",
+      "toId": "rpHoped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "hopedText",
+      "toId": "rpHopedText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpAgreed",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "agreed"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "billShown",
+      "toId": "rpBill",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "billText",
+      "toId": "rpBillText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "sendShown",
+      "toId": "rpSend",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "sentOn",
+      "toId": "rpSentOn",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "rpSentOn",
+      "fromProperty": "Value",
+      "toId": "rpOut",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "sentAmountShown",
+      "toId": "rpSentAmountBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "sentAmount",
+      "toId": "rpSentAmount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rpSentAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "rpOut",
+      "toProperty": "sentAmount"
+    },
+    {
+      "fromId": "rpMarkSent",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "markSent"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "unsendShown",
+      "toId": "rpUnsend",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpUnsend",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "unsend"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "fromShown",
+      "toId": "rpFrom",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "fromText",
+      "toId": "rpFromText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "itemLabel",
+      "toId": "rpChangeItem",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rpChangeItem",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "changeItem"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "endShown",
+      "toId": "rpEndItem",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpEndItem",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "endItem"
+    },
+    {
+      "fromId": "rpBack",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "key",
+      "toId": "rpReset",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-blur",
+      "toId": "rpTickAmount",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-reset",
+      "toId": "rpTickAmount",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-blur",
+      "toId": "rpChAmount",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-reset",
+      "toId": "rpChAmount",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-blur",
+      "toId": "rpChNote",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-reset",
+      "toId": "rpChNote",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-blur",
+      "toId": "rpSentAmount",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "rpReset",
+      "fromProperty": "out-reset",
+      "toId": "rpSentAmount",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "shown",
+      "toId": "rpClosing",
+      "toProperty": "in-shown"
+    },
+    {
+      "fromId": "rpClosing",
+      "fromProperty": "out-closed",
+      "toId": "rpTickAmount",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "rpClosing",
+      "fromProperty": "out-closed",
+      "toId": "rpChAmount",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "rpClosing",
+      "fromProperty": "out-closed",
+      "toId": "rpChNote",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "rpClosing",
+      "fromProperty": "out-closed",
+      "toId": "rpSentAmount",
+      "toProperty": "clear"
+    }
+  ]
+}

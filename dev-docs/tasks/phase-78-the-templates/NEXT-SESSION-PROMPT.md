@@ -1,6 +1,6 @@
 # Phase 78 — next session
 
-> ### ⬜ 2026-09-21 — TPL-010-M THE PLANNER'S MONEY: WRITTEN, NOT BUILT — START HERE FOR THE PLANNER
+> ### 🟩 2026-09-21 — TPL-010-M THE PLANNER'S MONEY: BUILT, GATED, DRIVEN — START HERE FOR THE PLANNER
 >
 > Read [TPL-010-M](TPL-010-MONEY.md) first. Richard wants money out of Settings and into its own modal (€ in the app bar):
 > every money number is a money item (partner, household, tax, each client's bills) that happens once or repeats weekly /
@@ -8,10 +8,17 @@
 > happens (unticked + past = late, listed first); hoped money carries a likelihood; the bottom of the week says break-even,
 > target, how far off, what might come and the lowest point. **He overruled deriving client bills from project terms** —
 > the person types each bill; the project's payment terms only pre-fill the due date (M5).
-> - **First:** get Richard's yes on the proposed rulings **M10–M16** (data shape, balance readings, smoothed target,
->   the three lines on the week, late money as the drawer's first concern, move → hoped money).
-> - **Then step 0, a mockup** in `nodegx-template-crm/mockups/money.html` (invented data), rendered at 1280×900, 1423×680
->   and 390×844 and looked at, **approved by Richard before any graph**.
+> - ✅ **M10–M16 agreed** by Richard (s1), plus **M11a**: a payment can be *lost* or come *in part* (still owed / lost).
+> - ✅ **Step 0 mockup built and published** (s1): `nodegx-template-crm/mockups/money.html`,
+>   https://claude.ai/artifact/212cJarJjemstvgLdiPGjg. A working prototype; rendered at 1280×900, 1423×680, 390×844.
+> - ✅ **Mockup approved** by Richard 2026-09-21, four choices included (M s1). The build is open.
+> - ✅ **Billing types added after approval (M21–M24):** hourly (own rate) or fixed per project; the billable target counts
+>   fixed bills first; hourly bills fill from the hours until sent; fixed cards show €/h. Mockup v2 has them. Demo rate €50.
+> - ✅ **Built (M s2):** the Money modal, the strip's three lines, Billing on the card, late money in the drawer,
+>   billing types. Gates 61/61, `drive-tpl010-money.js` 40/40 on the deployed demo, R2.3 19/19, R2.4 22/22.
+> - **Next:** Richard tries it (M-14: his own month from nothing, on his laptop). Then R2.5 (Settings' other sections).
+> - **His:** R2.6-2 fold (page now 1229 at 1280×900), R2.1-6, R2.6-5, publish timing, D72, AC11.
+> - **For TPL-010-MCP:** the coach's list of collections gains `MoneyItem`, `MoneyMark`, `BalanceReading` (§8).
 > - It absorbs R2.2 and R2.5's money section ([R2](TPL-010-R2-FIRST-USE.md) s3). Board order: R2.3 (✅ built and driven 2026-09-21, R2 s4), then M, then R2.5.
 > - Build against `packages/noodl-mcp/src/server` (working tree), apply the four sheet traps up front (M §5.8), demo key v3.
 > - Local demo: `npm run template:planner`, then `node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planner-demo

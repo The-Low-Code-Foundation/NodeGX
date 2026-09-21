@@ -77,6 +77,24 @@
     },
     {
       "fromId": "AddprojectIn",
+      "fromProperty": "billing",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "termsDays",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "agreedHours",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-agreedHours"
+    },
+    {
+      "fromId": "AddprojectIn",
       "fromProperty": "do",
       "toId": "AddprojectGuard",
       "toProperty": "run"
@@ -152,6 +170,24 @@
       "fromProperty": "out-say",
       "toId": "AddprojectWrite",
       "toProperty": "in-say"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-billing",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-termsDays",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-agreedHours",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-agreedHours"
     },
     {
       "fromId": "AddprojectGuard",

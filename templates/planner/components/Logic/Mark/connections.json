@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7573f218-25d9-521d-829b-11199b6c8078",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mkIn",
+      "fromProperty": "items",
+      "toId": "mkWork",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "marks",
+      "toId": "mkWork",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "readings",
+      "toId": "mkWork",
+      "toProperty": "in-readings"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "projects",
+      "toId": "mkWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "blocks",
+      "toId": "mkWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "settings",
+      "toId": "mkWork",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "since",
+      "toId": "mkWork",
+      "toProperty": "in-since"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "key",
+      "toId": "mkWork",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "action",
+      "toId": "mkWork",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "tickOn",
+      "toId": "mkWork",
+      "toProperty": "in-tickOn"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "tickAmount",
+      "toId": "mkWork",
+      "toProperty": "in-tickAmount"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "tickRest",
+      "toId": "mkWork",
+      "toProperty": "in-tickRest"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "chDate",
+      "toId": "mkWork",
+      "toProperty": "in-chDate"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "chAmount",
+      "toId": "mkWork",
+      "toProperty": "in-chAmount"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "chNote",
+      "toId": "mkWork",
+      "toProperty": "in-chNote"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "sentOn",
+      "toId": "mkWork",
+      "toProperty": "in-sentOn"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "sentAmount",
+      "toId": "mkWork",
+      "toProperty": "in-sentAmount"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "go",
+      "toId": "mkWork",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-markId",
+      "toId": "mkOut",
+      "toProperty": "markId"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-itemId",
+      "toId": "mkOut",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-occurs",
+      "toId": "mkOut",
+      "toProperty": "occurs"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-amount",
+      "toId": "mkOut",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-date",
+      "toId": "mkOut",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-skip",
+      "toId": "mkOut",
+      "toProperty": "skip"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-payments",
+      "toId": "mkOut",
+      "toProperty": "payments"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-doneOn",
+      "toId": "mkOut",
+      "toProperty": "doneOn"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-doneAmount",
+      "toId": "mkOut",
+      "toProperty": "doneAmount"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-lostOn",
+      "toId": "mkOut",
+      "toProperty": "lostOn"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-sentOn",
+      "toId": "mkOut",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-note",
+      "toId": "mkOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-add",
+      "toId": "mkOut",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "mkWork",
+      "fromProperty": "out-edit",
+      "toId": "mkOut",
+      "toProperty": "edit"
+    }
+  ]
+}

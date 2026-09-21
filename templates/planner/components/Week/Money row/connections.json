@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8cf5e03f-ac7e-5604-80cf-b7a11fdabb5d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mrIn",
+      "fromProperty": "dateText",
+      "toId": "mrDate",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "dateColor",
+      "toId": "mrDate",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "label",
+      "toId": "mrLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "labelColor",
+      "toId": "mrLabel",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "sub",
+      "toId": "mrSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "subColor",
+      "toId": "mrSub",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "amountText",
+      "toId": "mrAmount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "amountColor",
+      "toId": "mrAmount",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "afterText",
+      "toId": "mrAfter",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "afterColor",
+      "toId": "mrAfter",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "tickShown",
+      "toId": "mrTick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "tickFill",
+      "toId": "mrTick",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "tickInk",
+      "toId": "mrTick",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "rowBackground",
+      "toId": "mrRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "rowEdge",
+      "toId": "mrRoot",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "rowEdgeStyle",
+      "toId": "mrRoot",
+      "toProperty": "borderStyle"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "key",
+      "toId": "mrOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "kind",
+      "toId": "mrOut",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "mrRoot",
+      "fromProperty": "onClick",
+      "toId": "mrOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "mrTick",
+      "fromProperty": "onClick",
+      "toId": "mrOut",
+      "toProperty": "pick"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cec835df-949d-5bd3-8878-aa2a8441927c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mbIn",
+      "fromProperty": "shown",
+      "toId": "mbRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "on",
+      "toId": "mbOn",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "mbOn",
+      "fromProperty": "Value",
+      "toId": "mbOut",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "hint",
+      "toId": "mbAmount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "mbAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "mbOut",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "hasRows",
+      "toId": "mbLate",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "rows",
+      "toId": "mbEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mbEach",
+      "fromProperty": "itemOutputSignal-happened",
+      "toId": "mbOut",
+      "toProperty": "happened"
+    },
+    {
+      "fromId": "mbEach",
+      "fromProperty": "itemOutputSignal-lost",
+      "toId": "mbOut",
+      "toProperty": "lost"
+    },
+    {
+      "fromId": "mbEach",
+      "fromProperty": "itemOutputSignal-part",
+      "toId": "mbOut",
+      "toProperty": "part"
+    },
+    {
+      "fromId": "mbEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "mbOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "note",
+      "toId": "mbNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mbSave",
+      "fromProperty": "onClick",
+      "toId": "mbOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "mbCancel",
+      "fromProperty": "onClick",
+      "toId": "mbOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "mbBack",
+      "fromProperty": "onClick",
+      "toId": "mbOut",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "shown",
+      "toId": "mbClosing",
+      "toProperty": "in-shown"
+    },
+    {
+      "fromId": "mbClosing",
+      "fromProperty": "out-closed",
+      "toId": "mbAmount",
+      "toProperty": "clear"
+    }
+  ]
+}

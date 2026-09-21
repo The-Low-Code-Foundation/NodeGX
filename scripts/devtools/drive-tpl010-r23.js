@@ -27,7 +27,7 @@ if (!DIR) {
 }
 
 /** `DEMO_STORAGE_KEY` in `packages/noodl-mcp/tests/tpl010Demo.ts`. */
-const STORAGE_KEY = 'nodegx-planner-demo-v2';
+const STORAGE_KEY = 'nodegx-planner-demo-v3';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const results = [];

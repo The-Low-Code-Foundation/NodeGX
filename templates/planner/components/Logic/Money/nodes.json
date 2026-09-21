@@ -1,0 +1,481 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "50c370cb-5b29-523e-81a6-b8d3252a14bd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "moIn",
+      "type": "Component Inputs",
+      "label": "The money",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "readings",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "settings",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "since",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "filter",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "horizon",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "sel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "moOut",
+      "type": "Component Outputs",
+      "label": "What to draw",
+      "ports": [
+        {
+          "name": "groups",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "empty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "emptyText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moreShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "modalBalance",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "upFill",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "upInk",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pastFill",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pastInk",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "recFill",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "recInk",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "stripRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "stripBalance",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monthName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monthText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mightShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "mightLead",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mightRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "lowText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lowColor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "footText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "targetHours",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "targetLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lateCount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasLate",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "lateConcern",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lateKey",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "moWork",
+      "type": "JavaScriptFunction",
+      "label": "Draw the money",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\n\nfunction mD(s) { var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || '')); return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : NaN; }\nfunction mS(t) { return new Date(t).toISOString().slice(0, 10); }\nfunction mOk(s) { return isFinite(mD(s)); }\nfunction mAddDays(s, n) { return mS(mD(s) + n * 86400000); }\nfunction mDim(y, m0) { return new Date(Date.UTC(y, m0 + 1, 0)).getUTCDate(); }\nfunction mAddMonths(s, k, monthEnd) {\n  var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)), d = Number(s.slice(8, 10));\n  var t = m - 1 + k, Y = y + Math.floor(t / 12), M = ((t % 12) + 12) % 12;\n  var day = monthEnd ? mDim(Y, M) : Math.min(d, mDim(Y, M));\n  return mS(Date.UTC(Y, M, day));\n}\nfunction mMonth(s) { return String(s).slice(0, 7); }\nfunction mMonthEnd(s) { var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)); return mS(Date.UTC(y, m - 1, mDim(y, m - 1))); }\nfunction mBetween(a, b) { return Math.round((mD(b) - mD(a)) / 86400000); }\nvar MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\nvar WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\nfunction mWeekday(s) { return new Date(mD(s)).getUTCDay(); }\n/** \"Wed 16 Sep\" */\nfunction mDay(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate() + ' ' + MON[t.getUTCMonth()]; }\n/** \"Wed 16\" */\nfunction mShort(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate(); }\nfunction mOrd(n) { return n + (n % 100 > 10 && n % 100 < 14 ? 'th' : n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th'); }\nfunction mEur(n, signed) {\n  var v = Math.round(num(n, 0));\n  var s = '€' + Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  if (v < 0) return '−' + s;\n  return signed && v > 0 ? '+' + s : s;\n}\nfunction mEur2(n) {\n  var v = Math.round(num(n, 0) * 100) / 100;\n  var whole = Math.floor(Math.abs(v)), cents = Math.round((Math.abs(v) - whole) * 100);\n  var s = '€' + whole.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',') + (cents ? '.' + (cents < 10 ? '0' : '') + cents : '');\n  return v < 0 ? '−' + s : s;\n}\n\n/** M3 — every scheduled date of an item up to and including 'to', stopping at its 'until'. */\nfunction repeatsOf(it, to) {\n  var out = [];\n  if (!it || !mOk(it.date)) return out;\n  var until = mOk(it.until) && it.until < to ? it.until : to;\n  var rep = String(it.repeat || 'once');\n  for (var k = 0; k < 800; k++) {\n    var s;\n    if (rep === 'weekly') s = mAddDays(it.date, 7 * k);\n    else if (rep === 'monthly') s = mAddMonths(it.date, k, it.monthEnd === true);\n    else if (rep === 'quarterly') s = mAddMonths(it.date, 3 * k, it.monthEnd === true);\n    else if (rep === 'yearly') s = mAddMonths(it.date, 12 * k, false);\n    else { if (k > 0) break; s = it.date; }\n    if (s > until) break;\n    out.push(s);\n  }\n  return out;\n}\nfunction markKey(itemId, occurs) { return String(itemId) + '|' + String(occurs); }\nfunction marksById(marks) {\n  var by = {};\n  for (var i = 0; i < (marks || []).length; i++) { var m = marks[i]; if (m && m.itemId) by[markKey(m.itemId, m.occurs)] = m; }\n  return by;\n}\n/** A tick is a payment: { day, amount }, signed as its item is. */\nfunction paymentsOf(m) {\n  var out = [], list = (m && m.payments) || [];\n  for (var i = 0; i < list.length; i++) if (list[i] && mOk(list[i].day) && num(list[i].amount, 0) !== 0) out.push({ day: String(list[i].day), amount: num(list[i].amount, 0) });\n  return out;\n}\nfunction isClient(it, projectsById) {\n  var p = it && it.projectId ? projectsById[it.projectId] : null;\n  return !!p && (num(it.amount, 0) > 0 || it.fromHours === true);\n}\nfunction billingOf(p) { return p && p.billing === 'fixed' ? 'fixed' : 'hourly'; }\n\n/**\n * The money context: everything a repeat needs to know about the world. Built once per run.\n * 'blocks' are the time the hours bills are counted from (M23).\n */\nfunction moneyContext(items, marks, projects, blocks, today, since) {\n  var byP = {};\n  for (var i = 0; i < (projects || []).length; i++) if (projects[i]) byP[projects[i].id] = projects[i];\n  var list = [];\n  for (var j = 0; j < (items || []).length; j++) if (items[j] && items[j].id) list.push(items[j]);\n  // Marks are read for thirteen months back ('since'). A repeat older than that is history: without its\n  // mark it would read as unticked, and a weekly item two years old would be a hundred late rows.\n  return { items: list, marks: marksById(marks), projects: byP, blocks: blocks || [], today: today, since: mOk(since) ? String(since) : '' };\n}\n/** M23 — the hours logged on a project from 'from' to 'to', both inclusive. */\nfunction hoursBetween(ctx, projectId, from, to) {\n  var t = 0;\n  for (var i = 0; i < ctx.blocks.length; i++) {\n    var b = ctx.blocks[i];\n    if (!b || b.projectId !== projectId) continue;\n    var d = String(b.date || '');\n    if (d < from || d > to) continue;\n    t += spentOf(b);\n  }\n  return q(t);\n}\n/** When the bill before this one went out, for the same project — the start of an hours bill's period. */\nfunction previousBillOut(ctx, projectId, before) {\n  var best = '';\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId !== projectId || !isClient(it, ctx.projects)) continue;\n    var reps = repeatsOf(it, before);\n    for (var r = 0; r < reps.length; r++) {\n      var m = ctx.marks[markKey(it.id, reps[r])];\n      var out = (m && mOk(m.sentOn)) ? String(m.sentOn) : billOutOf(it, reps[r]);\n      if (out && out < before && out > best) best = out;\n    }\n  }\n  return best;\n}\nfunction billOutOf(it, occurs) {\n  if (it.repeat === 'once' || !it.repeat) return mOk(it.billDate) ? String(it.billDate) : '';\n  var lead = Number(it.billLeadDays);\n  return it.billLeadDays === null || it.billLeadDays === undefined || it.billLeadDays === '' || !isFinite(lead) ? '' : mAddDays(occurs, -Math.round(lead));\n}\n\n/** One repeat of one item, with its mark applied. */\nfunction occOf(ctx, it, occurs) {\n  var key = markKey(it.id, occurs);\n  var m = ctx.marks[key] || null;\n  var client = isClient(it, ctx.projects);\n  var p = it.projectId ? ctx.projects[it.projectId] || null : null;\n  var billOut = client ? billOutOf(it, occurs) : '';\n  var sentOn = m && mOk(m.sentOn) ? String(m.sentOn) : '';\n  var marked = m && m.amount !== null && m.amount !== undefined && m.amount !== '' && isFinite(Number(m.amount));\n  var hoursBill = it.fromHours === true && !marked && !!p;\n  var hours = 0, amount;\n  if (hoursBill) {\n    var end = billOut || occurs;\n    var start = previousBillOut(ctx, it.projectId, end);\n    start = start ? mAddDays(start, 1) : end.slice(0, 8) + '01';\n    hours = hoursBetween(ctx, it.projectId, start, end < ctx.today ? end : ctx.today);\n    amount = Math.round(hours * num(p.rate, 0) * 100) / 100;\n  } else amount = marked ? num(m.amount, 0) : num(it.amount, 0);\n  if (amount > 0 !== num(it.amount, 0) > 0 && !hoursBill && num(it.amount, 0) !== 0) amount = -amount;\n  var pays = paymentsOf(m);\n  var paid = 0, lastOn = '';\n  for (var i = 0; i < pays.length; i++) { paid += pays[i].amount; if (pays[i].day > lastOn) lastOn = pays[i].day; }\n  paid = Math.round(paid * 100) / 100;\n  var lostOn = m && mOk(m.lostOn) ? String(m.lostOn) : '';\n  var skip = !!(m && m.skip === true);\n  // A ticked repeat is closed — changing its item afterwards does not reopen the past (M4). Only a part\n  // payment with the rest still owed stays open, and Logic/Mark keeps what was due on its mark for that.\n  var closed = skip || !!lostOn || (pays.length > 0 && (!marked || Math.abs(paid) >= Math.abs(amount) - 0.005));\n  return {\n    it: it, key: key, itemId: it.id, occurs: occurs, m: m, markId: m ? String(m.id || '') : '',\n    date: m && mOk(m.date) ? String(m.date) : occurs,\n    amount: amount, paid: paid, remaining: Math.round((amount - paid) * 100) / 100, lastOn: lastOn, payments: pays,\n    closed: closed, skip: skip, lostOn: lostOn, client: client, project: p,\n    hoped: num(it.likelihood, 100) < 100, likelihood: Math.max(0, Math.min(100, Math.round(num(it.likelihood, 100)))),\n    changed: marked && !it.fromHours && num(m.amount, 0) !== num(it.amount, 0), moved: !!(m && mOk(m.date) && m.date !== occurs),\n    billOut: billOut, sentOn: sentOn, hoursBill: hoursBill, hours: hours\n  };\n}\nfunction allOccs(ctx, to) {\n  var out = [];\n  for (var i = 0; i < ctx.items.length; i++) {\n    var reps = repeatsOf(ctx.items[i], to);\n    for (var r = 0; r < reps.length; r++) if (!ctx.since || reps[r] >= ctx.since) out.push(occOf(ctx, ctx.items[i], reps[r]));\n  }\n  return out;\n}\nfunction byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : b.remaining - a.remaining; }\n\n/** M11 — the latest reading, and every payment ticked after it. */\nfunction balanceNow(ctx, readings) {\n  var r = null;\n  for (var i = 0; i < (readings || []).length; i++) {\n    var x = readings[i];\n    if (!x || !mOk(x.date)) continue;\n    if (!r || x.date > r.date || (x.date === r.date && String(x.createdAt || '') > String(r.createdAt || ''))) r = x;\n  }\n  var from = r ? String(r.date) : '', bal = r ? num(r.amount, 0) : 0, since = 0;\n  for (var k in ctx.marks) {\n    var pays = paymentsOf(ctx.marks[k]);\n    for (var p = 0; p < pays.length; p++) if (!r || pays[p].day > from) { bal += pays[p].amount; since++; }\n  }\n  return { balance: Math.round(bal * 100) / 100, since: since, readOn: from, readAmount: r ? num(r.amount, 0) : 0, hasReading: !!r };\n}\n\n/** Every open, expected repeat up to 'to' — late ones first, counted today — with the balance after each. */\nfunction projection(ctx, readings, to) {\n  var now = balanceNow(ctx, readings);\n  var os = allOccs(ctx, to);\n  var late = [], future = [], hoped = [], bills = [];\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (o.closed) continue;\n    if (o.billOut && !o.sentOn && o.billOut <= to) bills.push(o);\n    if (o.hoped) { if (o.date >= ctx.today && o.date <= to) hoped.push(o); continue; }\n    if (o.date < ctx.today) late.push(o);\n    else if (o.date <= to) future.push(o);\n  }\n  late.sort(byDate); future.sort(byDate); hoped.sort(byDate);\n  bills.sort(function (a, b) { return a.billOut < b.billOut ? -1 : a.billOut > b.billOut ? 1 : 0; });\n  var run = now.balance, after = {};\n  for (var l = 0; l < late.length; l++) { run += late[l].remaining; after[late[l].key] = Math.round(run * 100) / 100; }\n  for (var f = 0; f < future.length; f++) { run += future[f].remaining; after[future[f].key] = Math.round(run * 100) / 100; }\n  return { now: now, occs: os, late: late, future: future, hoped: hoped, bills: bills, after: after };\n}\n\n/** M12 — what one item counts for in a month's target. */\nfunction perMonth(it) {\n  var a = num(it.amount, 0), r = String(it.repeat || 'once');\n  return r === 'weekly' ? a * 52 / 12 : r === 'monthly' ? a : r === 'quarterly' ? a / 3 : r === 'yearly' ? a / 12 : 0;\n}\nfunction activeOn(it, day) { return mOk(it.date) && (!mOk(it.until) || String(it.until) >= day); }\n\n/** M12, M13, M22 — break-even, target, and the billable hours the month needs. */\nfunction moneyTargets(ctx, settings) {\n  var today = ctx.today, mk = mMonth(today);\n  var outs = [], ins = [], out = 0, inn = 0;\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId || num(it.likelihood, 100) < 100 || String(it.repeat || 'once') === 'once' || !activeOn(it, today)) continue;\n    var pm = perMonth(it);\n    if (pm < 0) { outs.push(it); out -= pm; } else if (pm > 0) { ins.push(it); inn += pm; }\n  }\n  var breakEven = Math.round((out - inn) * 100) / 100;\n  var target = Math.round((breakEven + Math.max(0, num(settings.savingsTarget, 0))) * 100) / 100;\n  var rate = num(settings.rate, 0);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(today.slice(0, 8) + '01', 1, false)));\n  var fixed = [], fixedSum = 0, agreedIds = [], agreed = 0;\n  for (var j = 0; j < os.length; j++) {\n    var o = os[j];\n    if (!o.client || o.hoped || o.skip || o.lostOn || billingOf(o.project) !== 'fixed') continue;\n    if (mMonth(o.billOut || o.date) !== mk) continue;\n    fixed.push(o); fixedSum += o.amount;\n    if (agreedIds.indexOf(o.it.projectId) < 0 && num(o.project.agreedHours, 0) > 0) { agreedIds.push(o.it.projectId); agreed += num(o.project.agreedHours, 0); }\n  }\n  var byHour = Math.max(0, target - fixedSum);\n  var hourly = rate > 0 ? Math.ceil(byHour / rate - 1e-9) : 0;\n  return {\n    outs: outs, ins: ins, out: out, inn: inn, breakEven: breakEven, target: target, rate: rate,\n    fixed: fixed, fixedSum: fixedSum, agreedIds: agreedIds, agreed: agreed, byHour: byHour, hourly: hourly,\n    hours: rate > 0 ? hourly + agreed : 0\n  };\n}\n\n/** M14 line 1 and M17 — the month by the day its bills go out. */\nfunction monthLine(ctx, t) {\n  var mk = mMonth(ctx.today);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(ctx.today.slice(0, 8) + '01', 1, false)));\n  var sent = 0, all = 0;\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (!o.client || o.hoped || o.skip || o.lostOn || mMonth(o.billOut || o.date) !== mk) continue;\n    all += o.amount;\n    if (o.sentOn || (!o.billOut && o.paid)) sent += o.amount;\n  }\n  var toGo = t.target - all;\n  var hours = t.rate > 0 ? Math.ceil(Math.max(0, toGo) / t.rate - 1e-9) : 0;\n  var text = toGo > 0\n    ? 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(sent) + ' so far, ' + mEur(all) +\n      ' with the bills still to go out this month · ' + mEur(toGo) + ' to target' + (t.rate > 0 ? ', about ' + hours + ' h.' : '.')\n    : 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(all) + ' this month · ' + mEur(-toGo) + ' past target.';\n  return { sent: sent, all: all, toGo: toGo, hours: hours, text: text, name: MONTH_LONG[Number(mk.slice(5, 7)) - 1] };\n}\n\n/** M7, M14 line 2 — each hoped item's next repeat, weighted by its likelihood. */\nfunction mightEarn(ctx) {\n  var nexts = [], weighted = 0, all = 0;\n  var to = mAddMonths(ctx.today, 24, false);\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (num(it.likelihood, 100) >= 100 || !activeOn(it, ctx.today)) continue;\n    var reps = repeatsOf(it, to);\n    for (var r = 0; r < reps.length; r++) {\n      var o = occOf(ctx, it, reps[r]);\n      if (o.date >= ctx.today && !o.closed) { nexts.push(o); weighted += o.amount * o.likelihood / 100; all += o.amount; break; }\n    }\n  }\n  return { nexts: nexts, weighted: weighted, all: all };\n}\n\n/** M14 line 3 — the lowest the balance goes in the next six weeks, counting from today. */\nfunction lowestPoint(ctx, readings) {\n  var p = projection(ctx, readings, mAddDays(ctx.today, 42));\n  var lo = { balance: p.now.balance, date: ctx.today };\n  var list = p.late.concat(p.future);\n  for (var i = 0; i < list.length; i++) { var b = p.after[list[i].key]; if (b < lo.balance) lo = { balance: b, date: list[i].date < ctx.today ? ctx.today : list[i].date }; }\n  return lo;\n}\n\n/** \"every month on the 28th, from Jul 2026, no end\" */\nfunction scheduleWords(it, today) {\n  var d = new Date(mD(it.date)), day = d.getUTCDate(), r = String(it.repeat || 'once');\n  if (r === 'once') return 'once, ' + mDay(it.date);\n  var w = r === 'weekly' ? 'every ' + WEEKDAY_LONG[d.getUTCDay()]\n    : r === 'monthly' ? 'every month on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : r === 'quarterly' ? 'every three months on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : 'every year on ' + day + ' ' + MON[d.getUTCMonth()];\n  var end = mOk(it.until) ? (String(it.until) < today ? 'ended ' + mDay(it.until) : 'until ' + MON[Number(String(it.until).slice(5, 7)) - 1] + ' ' + String(it.until).slice(0, 4)) : 'no end';\n  return w + ', from ' + MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ', ' + end;\n}\nfunction repeatWord(it) { var r = String(it.repeat || 'once'); return r === 'quarterly' ? 'every 3 months' : r === 'once' ? '' : r; }\n/** M11a — what the rest of a short payment is called. */\nfunction restWords(o) { return o.client ? ['Still owed', 'Lost'] : o.amount > 0 ? ['Still to come', 'That’s all'] : ['Still to pay', 'That’s all']; }\nfunction projectName(o) { return o.project ? String(o.project.name || '') : ''; }\nvar settings = (Inputs.settings || [])[0] || {};\nvar today = dayKey(startOfToday());\nvar ctx = moneyContext(Inputs.items, Inputs.marks, Inputs.projects, Inputs.blocks, today, Inputs.since);\nvar readings = Inputs.readings || [];\nvar low = num(settings.lowWaterMark, 0);\nvar filter = String(Inputs.filter || 'up');\nvar sel = String(Inputs.sel || '');\nvar MUTED = 'var(--muted-foreground)', INK = 'var(--foreground)', LATE = 'var(--env-hobby-ink)', IN = 'var(--env-billable-ink)';\nfunction amountColor(a) { return a > 0 ? IN : INK; }\nfunction selected(key, kind) { return sel === key + '|' + kind; }\nfunction row(key, kind, x) {\n  var on = selected(key, kind);\n  return {\n    key: key, kind: kind,\n    dateText: x.date || '', dateColor: x.late ? LATE : MUTED,\n    label: x.label || '', labelColor: x.quiet ? MUTED : INK,\n    sub: x.sub || '', subColor: MUTED,\n    amountText: x.amount || '', amountColor: x.amountColor || INK,\n    afterText: x.after || '', afterColor: x.afterColor || MUTED,\n    tickShown: kind !== 'item' && !x.dashed,\n    tickFill: x.done ? 'var(--foreground)' : 'transparent', tickInk: x.done ? 'var(--surface)' : 'transparent',\n    rowBackground: on ? 'var(--surface)' : 'transparent',\n    rowEdge: on ? 'var(--border-strong)' : x.dashed ? 'var(--border-strong)' : 'transparent',\n    rowEdgeStyle: x.dashed ? 'dashed' : 'solid'\n  };\n}\nfunction payRow(o, after, late) {\n  var bits = [];\n  var pn = projectName(o);\n  if (pn && String(o.it.label || '').indexOf(pn) !== 0) bits.push(pn);\n  if (o.it.repeat && o.it.repeat !== 'once') bits.push('\\u21bb ' + repeatWord(o.it));\n  if (o.changed) bits.push('usually ' + mEur(o.it.amount));\n  if (o.moved) bits.push('moved from ' + mShort(o.occurs));\n  if (o.paid && !o.closed) bits.push(mEur(o.paid) + ' of ' + mEur(o.amount) + ' paid');\n  if (o.hoursBill && !o.sentOn) bits.push(hText(o.hours) + ' h \\u00d7 ' + mEur(o.project ? o.project.rate : 0) + ', from your hours');\n  if (o.client && o.sentOn) bits.push('bill sent ' + mShort(o.sentOn));\n  if (late) { var d = mBetween(o.date, today); bits.push((o.client ? 'due ' : '') + d + ' day' + (d === 1 ? '' : 's') + ' ago'); }\n  if (o.hoped) bits.push('hoped ' + o.likelihood + '%');\n  var shown = o.hoped ? o.amount : o.remaining;\n  return row(o.key, 'pay', {\n    date: mShort(o.date), late: late, label: o.it.label, quiet: o.hoped, sub: bits.join(' \\u00b7 '),\n    amount: mEur(shown, true), amountColor: o.hoped ? MUTED : amountColor(shown),\n    after: o.hoped ? '\\u2248 ' + mEur(o.amount * o.likelihood / 100) + ' weighted' : after === undefined ? '' : mEur(after),\n    afterColor: !o.hoped && after !== undefined && after < low ? 'var(--destructive)' : MUTED,\n    dashed: o.hoped\n  });\n}\nfunction billRow(o, late) {\n  return row(o.key, 'bill', {\n    date: mShort(o.billOut), late: late, label: o.it.label + ' \\u00b7 bill goes out', quiet: true,\n    sub: (late ? 'not sent yet \\u00b7 ' : '') + (o.hoursBill ? hText(o.hours) + ' h \\u00d7 ' + mEur(o.project ? o.project.rate : 0) + ' so far \\u00b7 ' : '') + 'due ' + mDay(o.date),\n    amount: '(' + mEur(o.amount) + ')', amountColor: MUTED\n  });\n}\n\n// ── The modal's list ──\n// Three months ahead, and three more each time Show three more months is pressed (a Counter).\nvar months = 3 + 3 * Math.max(0, Math.round(num(Inputs.horizon, 0)));\nvar horizon = mMonthEnd(mAddMonths(today.slice(0, 8) + '01', months, false));\nvar p = projection(ctx, readings, horizon);\nvar groups = [];\nif (filter === 'past') {\n  var ev = [];\n  for (var i = 0; i < p.occs.length; i++) {\n    var o = p.occs[i];\n    if (o.payments.length || o.lostOn || o.skip) ev.push({ d: o.lostOn || o.lastOn || o.date, o: o, t: 'pay' });\n    if (o.sentOn) ev.push({ d: o.sentOn, o: o, t: 'sent' });\n  }\n  ev.sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });\n  var byMonth = {}, order = [];\n  for (var e = 0; e < ev.length; e++) {\n    var x = ev[e], mk = mMonth(x.d), oo = x.o;\n    if (!byMonth[mk]) { byMonth[mk] = []; order.push(mk); }\n    if (x.t === 'sent') {\n      byMonth[mk].push(row(oo.key, 'bill', { date: mShort(x.d), done: true, label: oo.it.label + ' \\u00b7 bill sent', quiet: true, sub: 'due ' + mDay(oo.date), amount: '(' + mEur(oo.amount) + ')', amountColor: MUTED }));\n      continue;\n    }\n    var sub = [], moved = oo.paid;\n    if (oo.skip) { sub.push('skipped'); moved = 0; }\n    else if (oo.lostOn) sub.push(oo.paid ? mEur(oo.paid) + ' paid \\u00b7 ' + mEur(oo.amount - oo.paid) + (oo.client ? ' lost' : ' less than expected') : mEur(oo.amount) + (oo.client ? ' lost' : ' did not happen'));\n    else if (!oo.closed) sub.push('part paid \\u00b7 ' + mEur(oo.remaining) + ' still ' + (oo.amount > 0 ? 'owed' : 'to pay'));\n    if (!oo.skip && oo.lastOn) {\n      var late2 = mBetween(oo.date, oo.lastOn);\n      if (oo.client) sub.push('paid ' + mShort(oo.lastOn) + ' \\u00b7 ' + (late2 > 0 ? late2 + ' day' + (late2 === 1 ? '' : 's') + ' late' : late2 < 0 ? (-late2) + ' day' + (late2 === -1 ? '' : 's') + ' early' : 'on time'));\n      else sub.push((oo.amount > 0 ? 'came in ' : 'paid ') + mShort(oo.lastOn) + (oo.lastOn !== oo.date ? ' \\u00b7 was due ' + mShort(oo.date) : ''));\n    }\n    if (oo.changed && !oo.lostOn) sub.push('usually ' + mEur(oo.it.amount));\n    byMonth[mk].push(row(oo.key, 'pay', { date: mShort(x.d), done: true, label: oo.it.label, sub: sub.join(' \\u00b7 '), amount: moved ? mEur(moved, true) : '\\u2014', amountColor: amountColor(moved) }));\n  }\n  for (var g = 0; g < order.length; g++) groups.push({ name: MONTH_LONG[Number(order[g].slice(5, 7)) - 1] + ' ' + order[g].slice(0, 4), nameColor: MUTED, summary: '', rows: byMonth[order[g]] });\n} else if (filter === 'rec') {\n  var sets = [['In', []], ['Out', []], ['Clients', []], ['Hoped', []]];\n  for (var r = 0; r < ctx.items.length; r++) {\n    var it = ctx.items[r];\n    if (!it.repeat || it.repeat === 'once') continue;\n    var hoped = num(it.likelihood, 100) < 100;\n    var at = hoped ? 3 : isClient(it, ctx.projects) ? 2 : num(it.amount, 0) >= 0 ? 0 : 1;\n    sets[at][1].push(it);\n  }\n  for (var s2 = 0; s2 < sets.length; s2++) {\n    var list = sets[s2][1];\n    if (!list.length) continue;\n    var tot = 0;\n    for (var t = 0; t < list.length; t++) if (activeOn(list[t], today)) tot += perMonth(list[t]);\n    groups.push({\n      name: sets[s2][0], nameColor: MUTED,\n      summary: mEur(tot, true) + ' a month' + (sets[s2][0] === 'Hoped' ? ', before the odds' : ''),\n      rows: list.map(function (it2) {\n        var ended = !activeOn(it2, today);\n        return row(it2.id, 'item', {\n          date: ended ? 'ended' : repeatWord(it2), quiet: ended, label: it2.label,\n          sub: scheduleWords(it2, today) + (num(it2.likelihood, 100) < 100 ? ' \\u00b7 ' + Math.round(num(it2.likelihood, 100)) + '%' : ''),\n          amount: it2.fromHours ? 'from hours' : mEur(it2.amount, true), amountColor: amountColor(num(it2.amount, 0)),\n          after: it2.repeat === 'monthly' ? '' : mEur(perMonth(it2), true) + ' a month'\n        });\n      })\n    });\n  }\n} else {\n  var lateBills = [], futureBills = [];\n  for (var b = 0; b < p.bills.length; b++) (p.bills[b].billOut < today ? lateBills : futureBills).push(p.bills[b]);\n  if (p.late.length || lateBills.length) {\n    var lateRows = [];\n    for (var l = 0; l < p.late.length; l++) lateRows.push(payRow(p.late[l], p.after[p.late[l].key], true));\n    for (var lb = 0; lb < lateBills.length; lb++) lateRows.push(billRow(lateBills[lb], true));\n    groups.push({ name: 'Late', nameColor: LATE, summary: 'not ticked, counted as if today', rows: lateRows });\n  }\n  var lines = [];\n  for (var f = 0; f < p.future.length; f++) lines.push({ d: p.future[f].date, o: p.future[f], t: 'pay' });\n  for (var h = 0; h < p.hoped.length; h++) lines.push({ d: p.hoped[h].date, o: p.hoped[h], t: 'hope' });\n  for (var fb = 0; fb < futureBills.length; fb++) lines.push({ d: futureBills[fb].billOut, o: futureBills[fb], t: 'bill' });\n  lines.sort(function (a, b2) { return a.d < b2.d ? -1 : a.d > b2.d ? 1 : a.t === 'bill' ? -1 : b2.t === 'bill' ? 1 : 0; });\n  var carry = p.late.length ? p.after[p.late[p.late.length - 1].key] : p.now.balance;\n  var mks = [];\n  for (var m2 = 0; m2 < lines.length; m2++) if (mks.indexOf(mMonth(lines[m2].d)) < 0) mks.push(mMonth(lines[m2].d));\n  for (var k = 0; k < mks.length; k++) {\n    var inn = 0, out = 0, rows = [];\n    for (var z = 0; z < lines.length; z++) {\n      var ln = lines[z];\n      if (mMonth(ln.d) !== mks[k]) continue;\n      if (ln.t === 'bill') { rows.push(billRow(ln.o, false)); continue; }\n      if (ln.t === 'pay') { if (ln.o.remaining > 0) inn += ln.o.remaining; else out -= ln.o.remaining; carry = p.after[ln.o.key]; }\n      rows.push(payRow(ln.o, ln.t === 'pay' ? p.after[ln.o.key] : undefined, false));\n    }\n    groups.push({\n      name: MONTH_LONG[Number(mks[k].slice(5, 7)) - 1] + (mks[k].slice(0, 4) === today.slice(0, 4) ? '' : ' ' + mks[k].slice(0, 4)),\n      nameColor: MUTED,\n      summary: 'in ' + mEur(inn) + ' \\u00b7 out ' + mEur(out) + ' \\u00b7 net ' + mEur(inn - out, true) + ' \\u00b7 ends at ' + mEur(carry),\n      rows: rows\n    });\n  }\n}\nOutputs.groups = groups;\nOutputs.empty = groups.length === 0;\nOutputs.emptyText = filter === 'past' ? 'Nothing ticked yet. Tick a line in Upcoming when it happens.' : filter === 'rec' ? 'Nothing repeats yet. Add money and choose how often.' : 'Nothing coming in or going out. Add money to start.';\nOutputs.moreShown = filter === 'up';\nfunction tab(on) { return on ? 'var(--surface)' : 'transparent'; }\nfunction tabInk(on) { return on ? INK : MUTED; }\nOutputs.upFill = tab(filter === 'up'); Outputs.upInk = tabInk(filter === 'up');\nOutputs.pastFill = tab(filter === 'past'); Outputs.pastInk = tabInk(filter === 'past');\nOutputs.recFill = tab(filter === 'rec'); Outputs.recInk = tabInk(filter === 'rec');\nvar now = p.now;\nvar readText = now.hasReading ? 'read ' + mDay(now.readOn) : 'no reading yet';\nOutputs.modalBalance = 'Balance ' + mEur(now.balance) + ' \\u00b7 ' + readText + (now.since ? ' + ' + now.since + ' tick' + (now.since === 1 ? '' : 's') : '');\n\n// ── The bottom of the week (M14) ──\nvar t2 = moneyTargets(ctx, settings);\nvar ml = monthLine(ctx, t2);\nOutputs.stripBalance = 'Balance ' + mEur(now.balance) + ' \\u00b7 ' + readText + (now.since ? ', ' + now.since + ' tick' + (now.since === 1 ? '' : 's') + ' since' : '');\nOutputs.monthName = ml.name;\nOutputs.monthText = ml.text;\nvar me = mightEarn(ctx);\nOutputs.mightShown = me.nexts.length > 0;\nOutputs.mightLead = mEur(me.weighted) + ' more, weighted (' + mEur(me.all) + ' if all come through):';\nvar might = [];\nfor (var n = 0; n < me.nexts.length; n++) {\n  var mo = me.nexts[n], pr = mo.project;\n  var mv = pr && pr.move ? String(pr.move) : '';\n  might.push({ projectId: mo.it.projectId || '', name: pr ? String(pr.name || '') : mo.it.label, odds: mo.likelihood + '%', move: mv ? '\\u2192 ' + mv.charAt(0).toLowerCase() + mv.slice(1) : '' });\n}\nOutputs.mightRows = might;\nvar lo = lowestPoint(ctx, readings);\nvar red = lo.balance < low;\nOutputs.lowText = 'Lowest in six weeks: ' + mEur(lo.balance) + ' on ' + mDay(lo.date) + (red ? ', under your ' + mEur(low) + ' line.' : '.');\nOutputs.lowColor = red ? 'var(--destructive)' : INK;\nvar six = projection(ctx, readings, mAddDays(today, 42));\nvar boxes = [], candidates = six.late.concat(six.future.filter(function (x2) { return x2.it.repeat !== 'weekly'; }));\nfor (var c = 0; c < candidates.length && boxes.length < 6; c++) {\n  var bo = candidates[c], isLate = bo.date < today, aft = six.after[bo.key];\n  boxes.push({\n    key: bo.key,\n    when: isLate ? 'Due ' + mShort(bo.date) + ' \\u00b7 late' : mDay(bo.date),\n    whenColor: isLate ? LATE : MUTED,\n    amount: mEur(bo.remaining, true),\n    amountColor: amountColor(bo.remaining),\n    label: bo.it.label + (bo.paid && !bo.closed ? ' \\u00b7 the rest of ' + mEur(bo.amount) : ''),\n    running: 'after: ' + mEur(aft),\n    low: aft < low,\n    edge: aft < low ? 'var(--destructive)' : isLate ? 'var(--env-hobby)' : 'var(--border)',\n    background: isLate ? 'var(--env-hobby-soft)' : 'var(--background)'\n  });\n}\nOutputs.stripRows = boxes;\nvar weekly = [];\nfor (var w = 0; w < ctx.items.length; w++) {\n  var wi = ctx.items[w];\n  if (wi.repeat === 'weekly' && num(wi.likelihood, 100) >= 100 && activeOn(wi, today)) weekly.push(wi.label + ' ' + mEur(wi.amount));\n}\nOutputs.footText = weekly.length ? 'Weekly items are in every balance but get no box: ' + weekly.join(', ') + '.' : '';\n\n// ── What the rest of the week needs ──\nOutputs.targetHours = t2.hours;\nOutputs.targetLine = t2.rate > 0\n  ? 'Break-even ' + mEur2(t2.breakEven) + ', and with your ' + mEur(num(settings.savingsTarget, 0)) + ' savings target the month needs ' + mEur2(t2.target) +\n    '. The fixed bills going out this month cover ' + mEur(t2.fixedSum) + '; the rest at ' + mEur(t2.rate) + ' an hour is ' + t2.hourly + ' h, and ' +\n    (t2.agreed ? 'with ' + t2.agreed + ' agreed hours on fixed work ' : '') + 'that is ' + t2.hours + ' billable hours. Money shows the sum.'\n  : 'Put your usual hourly rate in and the month gets a billable target.';\nvar lateAll = p.late.length;\nOutputs.lateCount = String(lateAll);\nOutputs.hasLate = lateAll > 0;\nvar lc = null;\nfor (var q3 = 0; q3 < p.late.length; q3++) if (p.late[q3].client) { lc = p.late[q3]; break; }\n// M15 — late client money is the evening's first concern; a late cost is not (it is almost always paid and not ticked).\nOutputs.lateConcern = lc ? 'One thing: ' + (projectName(lc) || lc.it.label) + '\\u2019s ' + mEur(lc.remaining) + (lc.paid ? ' (the rest of the bill)' : '') +\n  ' was due on ' + mDay(lc.date) + ' and is not ticked. Chase it, or tick it.' : '';\nOutputs.lateKey = lc ? lc.key : '';"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-settings",
+          "displayName": "settings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-marks",
+          "displayName": "marks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-since",
+          "displayName": "since",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-readings",
+          "displayName": "readings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-filter",
+          "displayName": "filter",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sel",
+          "displayName": "sel",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-horizon",
+          "displayName": "horizon",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-groups",
+          "displayName": "groups",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moreShown",
+          "displayName": "moreShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-upFill",
+          "displayName": "upFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-upInk",
+          "displayName": "upInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pastFill",
+          "displayName": "pastFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pastInk",
+          "displayName": "pastInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recFill",
+          "displayName": "recFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recInk",
+          "displayName": "recInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-modalBalance",
+          "displayName": "modalBalance",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stripBalance",
+          "displayName": "stripBalance",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monthName",
+          "displayName": "monthName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monthText",
+          "displayName": "monthText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mightShown",
+          "displayName": "mightShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mightLead",
+          "displayName": "mightLead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mightRows",
+          "displayName": "mightRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lowText",
+          "displayName": "lowText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lowColor",
+          "displayName": "lowColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stripRows",
+          "displayName": "stripRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-footText",
+          "displayName": "footText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-targetHours",
+          "displayName": "targetHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-targetLine",
+          "displayName": "targetLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lateCount",
+          "displayName": "lateCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLate",
+          "displayName": "hasLate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lateConcern",
+          "displayName": "lateConcern",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lateKey",
+          "displayName": "lateKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

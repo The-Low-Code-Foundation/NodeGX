@@ -17,45 +17,21 @@
     },
     {
       "fromId": "EditsettinIn",
-      "fromProperty": "householdNeed",
-      "toId": "EditsettinGuard",
-      "toProperty": "in-householdNeed"
-    },
-    {
-      "fromId": "EditsettinIn",
-      "fromProperty": "partnerIncome",
-      "toId": "EditsettinGuard",
-      "toProperty": "in-partnerIncome"
-    },
-    {
-      "fromId": "EditsettinIn",
       "fromProperty": "focusHours",
       "toId": "EditsettinGuard",
       "toProperty": "in-focusHours"
     },
     {
       "fromId": "EditsettinIn",
-      "fromProperty": "partnerDay",
+      "fromProperty": "savingsTarget",
       "toId": "EditsettinGuard",
-      "toProperty": "in-partnerDay"
+      "toProperty": "in-savingsTarget"
     },
     {
       "fromId": "EditsettinIn",
-      "fromProperty": "costsDay",
+      "fromProperty": "lowWaterMark",
       "toId": "EditsettinGuard",
-      "toProperty": "in-costsDay"
-    },
-    {
-      "fromId": "EditsettinIn",
-      "fromProperty": "invoiceDay",
-      "toId": "EditsettinGuard",
-      "toProperty": "in-invoiceDay"
-    },
-    {
-      "fromId": "EditsettinIn",
-      "fromProperty": "paymentTermsDays",
-      "toId": "EditsettinGuard",
-      "toProperty": "in-paymentTermsDays"
+      "toProperty": "in-lowWaterMark"
     },
     {
       "fromId": "EditsettinIn",
@@ -71,45 +47,21 @@
     },
     {
       "fromId": "EditsettinGuard",
-      "fromProperty": "out-householdNeed",
-      "toId": "EditsettinWrite",
-      "toProperty": "prop-householdNeed"
-    },
-    {
-      "fromId": "EditsettinGuard",
-      "fromProperty": "out-partnerIncome",
-      "toId": "EditsettinWrite",
-      "toProperty": "prop-partnerIncome"
-    },
-    {
-      "fromId": "EditsettinGuard",
       "fromProperty": "out-focusHours",
       "toId": "EditsettinWrite",
       "toProperty": "prop-focusHours"
     },
     {
       "fromId": "EditsettinGuard",
-      "fromProperty": "out-partnerDay",
+      "fromProperty": "out-savingsTarget",
       "toId": "EditsettinWrite",
-      "toProperty": "prop-partnerDay"
+      "toProperty": "prop-savingsTarget"
     },
     {
       "fromId": "EditsettinGuard",
-      "fromProperty": "out-costsDay",
+      "fromProperty": "out-lowWaterMark",
       "toId": "EditsettinWrite",
-      "toProperty": "prop-costsDay"
-    },
-    {
-      "fromId": "EditsettinGuard",
-      "fromProperty": "out-invoiceDay",
-      "toId": "EditsettinWrite",
-      "toProperty": "prop-invoiceDay"
-    },
-    {
-      "fromId": "EditsettinGuard",
-      "fromProperty": "out-paymentTermsDays",
-      "toId": "EditsettinWrite",
-      "toProperty": "prop-paymentTermsDays"
+      "toProperty": "prop-lowWaterMark"
     },
     {
       "fromId": "EditsettinIn",

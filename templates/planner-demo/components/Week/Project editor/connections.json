@@ -53,6 +53,30 @@
     },
     {
       "fromId": "peIn",
+      "fromProperty": "termsDays",
+      "toId": "peTerms",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peTerms",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "agreedHours",
+      "toId": "peAgreed",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peAgreed",
+      "fromProperty": "onTextChanged",
+      "toId": "peOut",
+      "toProperty": "agreedHours"
+    },
+    {
+      "fromId": "peIn",
       "fromProperty": "slot",
       "toId": "peSlot",
       "toProperty": "startValue"
@@ -143,6 +167,24 @@
     },
     {
       "fromId": "peIn",
+      "fromProperty": "billings",
+      "toId": "peBilling",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "billing",
+      "toId": "peBilling",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "peBilling",
+      "fromProperty": "value",
+      "toId": "peOut",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "peIn",
       "fromProperty": "moveDue",
       "toId": "peDue",
       "toProperty": "Value"
@@ -193,6 +235,18 @@
       "fromId": "peOpened",
       "fromProperty": "out-closed",
       "toId": "peRate",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peTerms",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "peOpened",
+      "fromProperty": "out-closed",
+      "toId": "peAgreed",
       "toProperty": "clear"
     },
     {

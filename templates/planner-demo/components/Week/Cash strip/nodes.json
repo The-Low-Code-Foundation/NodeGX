@@ -19,18 +19,82 @@
           "type": "string"
         },
         {
-          "name": "invoicedText",
+          "name": "monthName",
           "plug": "output",
           "type": "string"
         },
         {
-          "name": "termsText",
+          "name": "monthText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mightShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "mightLead",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mightRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lowText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lowColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "footText",
           "plug": "output",
           "type": "string"
         }
       ],
       "x": 470,
       "y": 520
+    },
+    {
+      "id": "csOut",
+      "type": "Component Outputs",
+      "label": "Pressed",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 640
     },
     {
       "id": "csRoot",
@@ -57,7 +121,11 @@
       },
       "children": [
         "csHead",
-        "csScroll"
+        "csMonth",
+        "csMight",
+        "csLow",
+        "csScroll",
+        "csFoot"
       ],
       "x": 40,
       "y": 40
@@ -65,7 +133,7 @@
     {
       "id": "csHead",
       "type": "Group",
-      "label": "The three numbers",
+      "label": "Money, and the balance",
       "parent": "csRoot",
       "parameters": {
         "flexDirection": "row",
@@ -89,10 +157,10 @@
     {
       "id": "csTitle",
       "type": "Text",
-      "label": "What this row is",
+      "label": "What this is",
       "parent": "csHead",
       "parameters": {
-        "text": "Cash, next six weeks",
+        "text": "Money",
         "fontSize": {
           "value": 11,
           "unit": "px"
@@ -112,18 +180,20 @@
     {
       "id": "csNums",
       "type": "Group",
-      "label": "Balance, invoiced, terms",
+      "label": "The balance",
       "parent": "csHead",
       "parameters": {
         "flexDirection": "row",
         "alignItems": "center",
         "sizeMode": "contentSize",
-        "columnGap": "var(--space-3)"
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1)",
+        "cssClassName": "planner-shrink-wrap"
       },
       "children": [
         "csBalance",
-        "csInvoiced",
-        "csTerms"
+        "csOpen"
       ],
       "x": 160,
       "y": 400
@@ -131,7 +201,7 @@
     {
       "id": "csBalance",
       "type": "Text",
-      "label": "Balance today",
+      "label": "The balance",
       "parent": "csNums",
       "parameters": {
         "text": "",
@@ -145,39 +215,272 @@
       "y": 520
     },
     {
-      "id": "csInvoiced",
-      "type": "Text",
-      "label": "Invoiced this month",
+      "id": "csOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Open Money",
       "parent": "csNums",
       "parameters": {
-        "text": "",
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
         "fontSize": "var(--text-sm)",
-        "color": "var(--foreground)",
-        "fontFamily": "var(--font-mono)",
-        "fontVariantNumeric": "tabular-nums",
-        "sizeMode": "contentSize"
+        "label": "Open money"
       },
       "x": 220,
       "y": 640
     },
     {
-      "id": "csTerms",
+      "id": "csMonth",
+      "type": "Group",
+      "label": "The month",
+      "parent": "csRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-money-line"
+      },
+      "children": [
+        "csMonthKey",
+        "csMonthText"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "csMonthKey",
       "type": "Text",
-      "label": "When it arrives",
-      "parent": "csNums",
+      "label": "Which month",
+      "parent": "csMonth",
       "parameters": {
         "text": "",
-        "fontSize": "var(--text-xs)",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
-        "sizeMode": "contentSize"
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 92,
+          "unit": "px"
+        },
+        "cssClassName": "planner-money-key"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "csMonthText",
+      "type": "Text",
+      "label": "How the month stands",
+      "parent": "csMonth",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "csMight",
+      "type": "Group",
+      "label": "Might earn",
+      "parent": "csRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-money-line"
+      },
+      "children": [
+        "csMightKey",
+        "csMightWords"
+      ],
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "csMightKey",
+      "type": "Text",
+      "label": "Might earn",
+      "parent": "csMight",
+      "parameters": {
+        "text": "Might earn",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 92,
+          "unit": "px"
+        },
+        "cssClassName": "planner-money-key"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "csMightWords",
+      "type": "Group",
+      "label": "What and from whom",
+      "parent": "csMight",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)"
+      },
+      "children": [
+        "csMightLead",
+        "csMightEach"
+      ],
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "csMightLead",
+      "type": "Text",
+      "label": "How much",
+      "parent": "csMightWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
       },
       "x": 220,
-      "y": 760
+      "y": 1480
+    },
+    {
+      "id": "csMightEach",
+      "type": "For Each",
+      "label": "One hoped project",
+      "parent": "csMightWords",
+      "parameters": {
+        "template": "/Week/Might link",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "csLow",
+      "type": "Group",
+      "label": "The lowest point",
+      "parent": "csRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-money-line"
+      },
+      "children": [
+        "csLowKey",
+        "csLowText"
+      ],
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "csLowKey",
+      "type": "Text",
+      "label": "Lowest",
+      "parent": "csLow",
+      "parameters": {
+        "text": "Lowest",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 92,
+          "unit": "px"
+        },
+        "cssClassName": "planner-money-key"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "csLowText",
+      "type": "Text",
+      "label": "The lowest point",
+      "parent": "csLow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1960
     },
     {
       "id": "csScroll",
       "type": "Group",
-      "label": "The events",
+      "label": "The next six",
       "parent": "csRoot",
       "parameters": {
         "cssClassName": "planner-scroll-x",
@@ -194,7 +497,7 @@
         "csEach"
       ],
       "x": 100,
-      "y": 880
+      "y": 2080
     },
     {
       "id": "csEach",
@@ -206,7 +509,28 @@
         "templateType": "explicit"
       },
       "x": 160,
-      "y": 1000
+      "y": 2200
+    },
+    {
+      "id": "csFoot",
+      "type": "Text",
+      "label": "What has no box",
+      "parent": "csRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 2320
     }
   ],
   "visualRoots": [

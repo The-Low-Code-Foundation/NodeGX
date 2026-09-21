@@ -83,6 +83,24 @@
     },
     {
       "fromId": "EditprojecIn",
+      "fromProperty": "billing",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "termsDays",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "agreedHours",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-agreedHours"
+    },
+    {
+      "fromId": "EditprojecIn",
       "fromProperty": "do",
       "toId": "EditprojecGuard",
       "toProperty": "run"
@@ -158,6 +176,24 @@
       "fromProperty": "out-say",
       "toId": "EditprojecWrite",
       "toProperty": "prop-say"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-billing",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-billing"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-termsDays",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-termsDays"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-agreedHours",
+      "toId": "EditprojecWrite",
+      "toProperty": "prop-agreedHours"
     },
     {
       "fromId": "EditprojecIn",

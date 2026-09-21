@@ -71,7 +71,7 @@
       "path": "Commands/Add project",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 30,
+      "connectionCount": 36,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -79,28 +79,12 @@
       "path": "Commands/Edit project",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 30,
+      "connectionCount": 36,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
     "Commands/Set month plan": {
       "path": "Commands/Set month plan",
-      "type": "visual",
-      "nodeCount": 5,
-      "connectionCount": 18,
-      "modified": "2026-09-20T00:00:00.000Z",
-      "created": "2026-09-20T00:00:00.000Z"
-    },
-    "Commands/Add cash event": {
-      "path": "Commands/Add cash event",
-      "type": "visual",
-      "nodeCount": 5,
-      "connectionCount": 14,
-      "modified": "2026-09-20T00:00:00.000Z",
-      "created": "2026-09-20T00:00:00.000Z"
-    },
-    "Commands/Edit cash event": {
-      "path": "Commands/Edit cash event",
       "type": "visual",
       "nodeCount": 5,
       "connectionCount": 16,
@@ -111,15 +95,71 @@
       "path": "Commands/Edit settings",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 22,
+      "connectionCount": 14,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Add money item": {
+      "path": "Commands/Add money item",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 30,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Edit money item": {
+      "path": "Commands/Edit money item",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 31,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/End money item": {
+      "path": "Commands/End money item",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 8,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Agree money item": {
+      "path": "Commands/Agree money item",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 7,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Add mark": {
+      "path": "Commands/Add mark",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 26,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Edit mark": {
+      "path": "Commands/Edit mark",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 28,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Commands/Record balance": {
+      "path": "Commands/Record balance",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 9,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
     "Logic/Planner data": {
       "path": "Logic/Planner data",
       "type": "visual",
-      "nodeCount": 16,
-      "connectionCount": 33,
+      "nodeCount": 18,
+      "connectionCount": 39,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -127,7 +167,7 @@
       "path": "Logic/Envelopes",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 17,
+      "connectionCount": 16,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -147,11 +187,27 @@
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
-    "Logic/Cash line": {
-      "path": "Logic/Cash line",
+    "Logic/Money": {
+      "path": "Logic/Money",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 6,
+      "connectionCount": 37,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Logic/Money pane": {
+      "path": "Logic/Money pane",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 101,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Logic/Mark": {
+      "path": "Logic/Mark",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 32,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -159,7 +215,7 @@
       "path": "Logic/Shutdown",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 24,
+      "connectionCount": 26,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -182,8 +238,8 @@
     "Week/App bar": {
       "path": "Week/App bar",
       "type": "visual",
-      "nodeCount": 14,
-      "connectionCount": 7,
+      "nodeCount": 18,
+      "connectionCount": 10,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -254,8 +310,48 @@
     "Week/Cash event": {
       "path": "Week/Cash event",
       "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 10,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money row": {
+      "path": "Week/Money row",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 20,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money month": {
+      "path": "Week/Money month",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 7,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Balance row": {
+      "path": "Week/Balance row",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 7,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Might link": {
+      "path": "Week/Might link",
+      "type": "visual",
       "nodeCount": 6,
-      "connectionCount": 6,
+      "connectionCount": 5,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Key line": {
+      "path": "Week/Key line",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -310,8 +406,8 @@
     "Week/Cash strip": {
       "path": "Week/Cash strip",
       "type": "visual",
-      "nodeCount": 10,
-      "connectionCount": 4,
+      "nodeCount": 22,
+      "connectionCount": 15,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -331,27 +427,19 @@
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
-    "Week/Cash row": {
-      "path": "Week/Cash row",
-      "type": "visual",
-      "nodeCount": 9,
-      "connectionCount": 7,
-      "modified": "2026-09-20T00:00:00.000Z",
-      "created": "2026-09-20T00:00:00.000Z"
-    },
     "Week/Project detail": {
       "path": "Week/Project detail",
       "type": "visual",
-      "nodeCount": 40,
-      "connectionCount": 41,
+      "nodeCount": 47,
+      "connectionCount": 49,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
     "Week/Project editor": {
       "path": "Week/Project editor",
       "type": "visual",
-      "nodeCount": 33,
-      "connectionCount": 42,
+      "nodeCount": 40,
+      "connectionCount": 51,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -359,31 +447,71 @@
       "path": "Week/Project card",
       "type": "visual",
       "nodeCount": 11,
-      "connectionCount": 71,
+      "connectionCount": 86,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
     "Week/Shutdown drawer": {
       "path": "Week/Shutdown drawer",
       "type": "visual",
-      "nodeCount": 21,
-      "connectionCount": 16,
-      "modified": "2026-09-20T00:00:00.000Z",
-      "created": "2026-09-20T00:00:00.000Z"
-    },
-    "Week/Cash editor": {
-      "path": "Week/Cash editor",
-      "type": "visual",
-      "nodeCount": 21,
-      "connectionCount": 24,
+      "nodeCount": 22,
+      "connectionCount": 18,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
     "Week/Settings sheet": {
       "path": "Week/Settings sheet",
       "type": "visual",
-      "nodeCount": 21,
-      "connectionCount": 42,
+      "nodeCount": 19,
+      "connectionCount": 16,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money summary": {
+      "path": "Week/Money summary",
+      "type": "visual",
+      "nodeCount": 13,
+      "connectionCount": 6,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money repeat": {
+      "path": "Week/Money repeat",
+      "type": "visual",
+      "nodeCount": 59,
+      "connectionCount": 78,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money end": {
+      "path": "Week/Money end",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 9,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money balance": {
+      "path": "Week/Money balance",
+      "type": "visual",
+      "nodeCount": 20,
+      "connectionCount": 17,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money editor": {
+      "path": "Week/Money editor",
+      "type": "visual",
+      "nodeCount": 41,
+      "connectionCount": 70,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
+    "Week/Money sheet": {
+      "path": "Week/Money sheet",
+      "type": "visual",
+      "nodeCount": 28,
+      "connectionCount": 152,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -414,8 +542,8 @@
     "Pages/Week": {
       "path": "Pages/Week",
       "type": "page",
-      "nodeCount": 88,
-      "connectionCount": 335,
+      "nodeCount": 136,
+      "connectionCount": 673,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -429,8 +557,8 @@
     }
   },
   "stats": {
-    "totalComponents": 53,
-    "totalNodes": 546,
-    "totalConnections": 1144
+    "totalComponents": 69,
+    "totalNodes": 835,
+    "totalConnections": 2132
   }
 }

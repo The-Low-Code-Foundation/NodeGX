@@ -23,21 +23,27 @@
  *
  * ## Hours, not prices
  *
- * R2: the unit is **billable hours**. The month target is
- * `(householdNeed − partnerIncome) ÷ rate`, all three from `Settings`. R3: **six focused
+ * R2: the unit is **billable hours**. The month target is worked out from the money (TPL-010-M,
+ * M22): break-even and the savings target, less the fixed bills going out this month, ÷ the usual
+ * hourly rate, plus the fixed projects' agreed hours — `Logic/Money` says it. R3: **six focused
  * hours a day** is the ceiling, the per-day need is `hours left ÷ working days left`, and
  * what the ceiling leaves over is the building budget.
  *
  * @module noodl-mcp/tests/tpl010Components
  */
 import { DATE_PICKER_DESCRIPTION, DATE_PICKER_INPUTS, DATE_PICKER_OUTPUTS, datePickerGraph } from './datePicker';
+import { MONEY_FNS } from './tpl010Money';
 import { composition, ENVELOPE_KEYS, ENVELOPE_NAMES, THEME_BOOT_SCRIPT, THEME_FLIP_SCRIPT, THEME_TO_DARK_CLASS, THEME_TO_LIGHT_CLASS, themeCss } from './tpl010Theme';
 
 export const ROUTER = 'Main';
 export const APP_COMPONENT = 'App';
 
-/** R10, §2 of the task file. `Block` is the only one a person can delete (a dropped block). */
-export const COLLECTIONS = ['Project', 'Block', 'MonthPlan', 'CashEvent', 'Settings'] as const;
+/**
+ * R10, §2 of the task file. `Block` is the only one a person can delete (a dropped block).
+ * TPL-010-M (M10): `CashEvent` became `MoneyItem` + `MoneyMark` + `BalanceReading`, and nothing
+ * in them is deleted — ending an item sets its `until`, so the past keeps its history.
+ */
+export const COLLECTIONS = ['Project', 'Block', 'MonthPlan', 'MoneyItem', 'MoneyMark', 'BalanceReading', 'Settings'] as const;
 
 export interface Tpl010Component {
   path: string;
@@ -79,8 +85,17 @@ export const C = {
   entryRow: '/Week/Entry row',
   datePicker: '/Week/Date picker',
   projectEditor: '/Week/Project editor',
-  cashEditor: '/Week/Cash editor',
-  cashRow: '/Week/Cash row',
+  moneyRow: '/Week/Money row',
+  moneyMonth: '/Week/Money month',
+  moneySummary: '/Week/Money summary',
+  moneyRepeat: '/Week/Money repeat',
+  moneyEnd: '/Week/Money end',
+  moneyBalance: '/Week/Money balance',
+  moneyEditor: '/Week/Money editor',
+  moneySheet: '/Week/Money sheet',
+  balanceRow: '/Week/Balance row',
+  mightLink: '/Week/Might link',
+  keyLine: '/Week/Key line',
   dayPicker: '/Week/Day picker',
   dayPick: '/Week/Day pick',
 
@@ -88,7 +103,9 @@ export const C = {
   envelopes: '/Logic/Envelopes',
   dayColumns: '/Logic/Day columns',
   moves: '/Logic/Moves',
-  cashLine: '/Logic/Cash line',
+  money: '/Logic/Money',
+  moneyView: '/Logic/Money pane',
+  mark: '/Logic/Mark',
   shutdown: '/Logic/Shutdown',
 
   addBlock: '/Commands/Add block',
@@ -101,8 +118,13 @@ export const C = {
   addProject: '/Commands/Add project',
   editProject: '/Commands/Edit project',
   setMonthPlan: '/Commands/Set month plan',
-  addCashEvent: '/Commands/Add cash event',
-  editCashEvent: '/Commands/Edit cash event',
+  addMoneyItem: '/Commands/Add money item',
+  editMoneyItem: '/Commands/Edit money item',
+  endMoneyItem: '/Commands/End money item',
+  addMark: '/Commands/Add mark',
+  editMark: '/Commands/Edit mark',
+  recordBalance: '/Commands/Record balance',
+  agreeMoneyItem: '/Commands/Agree money item',
   editSettings: '/Commands/Edit settings',
 
   pageWeek: '/Pages/Week',
@@ -133,8 +155,18 @@ export const VAR = {
   newDay: 'plannerNewDay',
   /** The card's right-hand pane: empty shows the project, `edit` its form, `new` an empty form (R23). */
   cardEdit: 'plannerCardEdit',
-  /** The money event being edited in the settings: empty, `new`, or its id (R23). */
-  cashEdit: 'plannerCashEdit',
+  /** M1 — whether the Money modal is open. */
+  moneyOpen: 'plannerMoneyOpen',
+  /** M1 — the modal's filter: `up`, `past` or `rec`. Empty reads as `up`. */
+  moneyFilter: 'plannerMoneyFilter',
+  /** The repeat the right-hand pane is showing, as `itemId|occurs|kind` (kind `pay` or `bill`). Empty: the summary. */
+  moneySel: 'plannerMoneySel',
+  /** What the right-hand pane is: empty (the summary or the picked repeat), `edit` (an item), `new`, `end`, `balance`. */
+  moneyMode: 'plannerMoneyMode',
+  /** The item the editor or End it is about; empty for a new one. */
+  moneyItem: 'plannerMoneyItem',
+  /** Where a new item starts from (M5, M16): a JSON preset, or empty. */
+  moneyPreset: 'plannerMoneyPreset',
   /** Which day the phone is showing. Empty until the picker is pressed, which means today. */
   phoneDay: 'plannerPhoneDay',
   /** What the backend said when signing in did not work. */
@@ -295,6 +327,8 @@ const GLYPH: Record<string, string> = {
   'icon-chevron-left': '‹',
   'icon-chevron-right': '›',
   'icon-settings': '⚙',
+  // M1 — Money's own button, beside Projects. A character, like every icon here.
+  'icon-euro': '\u20ac',
   'icon-moon': '☾',
   'icon-sun': '☼',
   'icon-plus': '+',
@@ -837,13 +871,16 @@ const BLOCK: Tpl010Component = {
 };
 
 const CASH_EVENT_FIELDS: Array<[string, string]> = [
+  ['key', 'string'],
   ['when', 'string'],
+  ['whenColor', 'string'],
   ['amount', 'string'],
   ['amountColor', 'string'],
   ['label', 'string'],
   ['running', 'string'],
   ['low', 'boolean'],
-  ['edge', 'string']
+  ['edge', 'string'],
+  ['background', 'string']
 ];
 
 /**
@@ -855,10 +892,11 @@ const CASH_EVENT_FIELDS: Array<[string, string]> = [
  */
 const CASH_EVENT: Tpl010Component = {
   path: 'Week/Cash event',
-  description: 'One thing that happens to the money: when it lands, how much, what it is, and what the balance is afterwards.',
-  ...iface(CASH_EVENT_FIELDS, []),
+  description: 'One thing that happens to the money: when it lands, how much, what it is, and what the balance is afterwards. Press it to open it in Money.',
+  ...iface(CASH_EVENT_FIELDS, [['pick', 'signal'], ['key', 'string']]),
   nodes: [
     inputs('ceIn', 'The event', CASH_EVENT_FIELDS),
+    outputs('ceOut', 'Pressed', [['pick', 'signal'], ['key', 'string']]),
     group('ceRoot', 'Cash event', undefined, {
       ...COLUMN_TIGHT('var(--space-0)'),
       cssClassName: 'planner-cash-ev',
@@ -879,11 +917,211 @@ const CASH_EVENT: Tpl010Component = {
   ],
   connections: [
     wire('ceIn', 'when', 'ceWhen', 'text'),
+    wire('ceIn', 'whenColor', 'ceWhen', 'color'),
+    wire('ceIn', 'background', 'ceRoot', 'backgroundColor'),
+    // M14 — each box opens the Money modal on that repeat.
+    wire('ceIn', 'key', 'ceOut', 'key'),
+    wire('ceRoot', 'onClick', 'ceOut', 'pick'),
     wire('ceIn', 'amount', 'ceAmount', 'text'),
     wire('ceIn', 'amountColor', 'ceAmount', 'color'),
     wire('ceIn', 'label', 'ceLabel', 'text'),
     wire('ceIn', 'running', 'ceRunning', 'text'),
     wire('ceIn', 'edge', 'ceRoot', 'borderColor')
+  ]
+};
+
+// ── TPL-010-M: the money's leaves ───────────────────────────────────────────
+
+const MONEY_ROW_FIELDS: Array<[string, string]> = [
+  ['key', 'string'], ['kind', 'string'],
+  ['dateText', 'string'], ['dateColor', 'string'],
+  ['label', 'string'], ['labelColor', 'string'], ['sub', 'string'], ['subColor', 'string'],
+  ['amountText', 'string'], ['amountColor', 'string'], ['afterText', 'string'], ['afterColor', 'string'],
+  ['tickShown', 'boolean'], ['tickFill', 'string'], ['tickInk', 'string'],
+  ['rowBackground', 'string'], ['rowEdge', 'string'], ['rowEdgeStyle', 'string']
+];
+const PICKED: Array<[string, string]> = [['pick', 'signal'], ['key', 'string'], ['kind', 'string']];
+
+/**
+ * One line in the Money modal (§4.1): the tick, the date, what it is and where it came from, the
+ * amount and the balance after it. **The tick opens the pane rather than ticking** (R16a's
+ * pattern, M6): the date it happened and the amount that moved are asked every time. A hoped row
+ * is dashed and has no balance after it (M7); a bill's "goes out" line has its amount in brackets.
+ */
+const MONEY_ROW: Tpl010Component = {
+  path: 'Week/Money row',
+  description: 'One thing that happens to the money, in the Money modal: a tick, its date, what it is and where it came from, the amount, and the balance after it.',
+  ...iface(MONEY_ROW_FIELDS, PICKED),
+  nodes: [
+    inputs('mrIn', 'The line', MONEY_ROW_FIELDS),
+    outputs('mrOut', 'Picked', PICKED),
+    group('mrRoot', 'One money line', undefined, {
+      ...ROW('var(--space-2)'),
+      alignItems: 'flex-start',
+      borderStyle: 'solid',
+      borderWidth: 'var(--border-1)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-2)',
+      paddingRight: 'var(--space-2)',
+      paddingTop: 'var(--space-1-5)',
+      paddingBottom: 'var(--space-1-5)'
+    }),
+    place('mrTick', BUTTON, 'Tick it — opens it with the date and amount to confirm', 'mrRoot', BTN_CHECK),
+    text('mrDate', 'When', 'mrRoot', '', { ...T_META, sizeMode: 'explicit', width: px(58), cssClassName: 'planner-money-date' }),
+    group('mrMain', 'What it is', 'mrRoot', { ...COLUMN('var(--space-0)'), width: pct(100) }),
+    text('mrLabel', 'What it is', 'mrMain', '', { ...wide(T_BODY), fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)' }),
+    text('mrSub', 'Where it came from', 'mrMain', '', wide(T_META)),
+    group('mrNums', 'How much, and after', 'mrRoot', { ...COLUMN_TIGHT('var(--space-0)'), alignItems: 'flex-end' }),
+    text('mrAmount', 'How much', 'mrNums', '', { ...T_NUM, sizeMode: 'contentSize', fontWeight: 'var(--font-semibold)', textAlignX: 'right' }),
+    text('mrAfter', 'The balance after it', 'mrNums', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: px(11), textAlignX: 'right' })
+  ],
+  connections: [
+    wire('mrIn', 'dateText', 'mrDate', 'text'),
+    wire('mrIn', 'dateColor', 'mrDate', 'color'),
+    wire('mrIn', 'label', 'mrLabel', 'text'),
+    wire('mrIn', 'labelColor', 'mrLabel', 'color'),
+    wire('mrIn', 'sub', 'mrSub', 'text'),
+    wire('mrIn', 'subColor', 'mrSub', 'color'),
+    wire('mrIn', 'amountText', 'mrAmount', 'text'),
+    wire('mrIn', 'amountColor', 'mrAmount', 'color'),
+    wire('mrIn', 'afterText', 'mrAfter', 'text'),
+    wire('mrIn', 'afterColor', 'mrAfter', 'color'),
+    // An item in Recurring and a hoped line have nothing to tick (M7): the box is not drawn.
+    wire('mrIn', 'tickShown', 'mrTick', 'mounted'),
+    wire('mrIn', 'tickFill', 'mrTick', 'backgroundColor'),
+    wire('mrIn', 'tickInk', 'mrTick', 'color'),
+    wire('mrIn', 'rowBackground', 'mrRoot', 'backgroundColor'),
+    wire('mrIn', 'rowEdge', 'mrRoot', 'borderColor'),
+    wire('mrIn', 'rowEdgeStyle', 'mrRoot', 'borderStyle'),
+    wire('mrIn', 'key', 'mrOut', 'key'),
+    wire('mrIn', 'kind', 'mrOut', 'kind'),
+    wire('mrRoot', 'onClick', 'mrOut', 'pick'),
+    wire('mrTick', 'onClick', 'mrOut', 'pick')
+  ]
+};
+
+const MONEY_MONTH_FIELDS: Array<[string, string]> = [['name', 'string'], ['nameColor', 'string'], ['summary', 'string'], ['rows', 'array']];
+
+/** One heading in the Money modal — a month with its in, out, net and the balance at its end; or Late; or a group of the recurring items — and its lines. */
+const MONEY_MONTH: Tpl010Component = {
+  path: 'Week/Money month',
+  description: 'One group of lines in the Money modal: its heading (a month with what comes in and goes out and where it ends, or Late), then a line for each thing in it.',
+  ...iface(MONEY_MONTH_FIELDS, PICKED),
+  repeats: { source: 'array', rowFields: MONEY_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.moneyRow],
+  nodes: [
+    inputs('mmIn', 'The group', MONEY_MONTH_FIELDS),
+    outputs('mmOut', 'Picked', PICKED),
+    group('mmRoot', 'Money group', undefined, COLUMN('var(--space-0-5)')),
+    group('mmHead', 'Heading', 'mmRoot', { ...ROW('var(--space-2)'), justifyContent: 'space-between', flexWrap: 'wrap', paddingTop: 'var(--space-2)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }),
+    text('mmName', 'Which month', 'mmHead', '', { ...T_LABEL, sizeMode: 'contentSize', fontWeight: 'var(--font-bold)' }),
+    text('mmSummary', 'In, out, net, and where it ends', 'mmHead', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: px(12) }),
+    place('mmEach', FOR_EACH, 'One line per thing', 'mmRoot', { template: C.moneyRow, templateType: 'explicit' })
+  ],
+  connections: [
+    wire('mmIn', 'name', 'mmName', 'text'),
+    wire('mmIn', 'nameColor', 'mmName', 'color'),
+    wire('mmIn', 'summary', 'mmSummary', 'text'),
+    wire('mmIn', 'rows', 'mmEach', 'items'),
+    wire('mmEach', 'itemOutputSignal-pick', 'mmOut', 'pick'),
+    wire('mmEach', 'itemOutput-key', 'mmOut', 'key'),
+    wire('mmEach', 'itemOutput-kind', 'mmOut', 'kind')
+  ]
+};
+
+const BALANCE_ROW_FIELDS: Array<[string, string]> = [['key', 'string'], ['label', 'string'], ['sub', 'string'], ['lostLabel', 'string']];
+const BALANCE_ROW_OUTS: Array<[string, string]> = [['happened', 'signal'], ['lost', 'signal'], ['part', 'signal'], ['key', 'string']];
+
+/**
+ * M11 — one unticked thing dated on or before today, in *Record balance*: did it happen, did part
+ * of it, or is it lost. *Not yet* is doing nothing, and it is then counted as if it happens today.
+ * Each answer is written the moment it is pressed, so the list shortens as it is answered.
+ */
+const BALANCE_ROW: Tpl010Component = {
+  path: 'Week/Balance row',
+  description: 'One thing that should have happened by now and is not ticked, with the answers: it happened, part of it did, or it is lost.',
+  ...iface(BALANCE_ROW_FIELDS, BALANCE_ROW_OUTS),
+  nodes: [
+    inputs('brIn', 'The thing', BALANCE_ROW_FIELDS),
+    outputs('brOut', 'The answer', BALANCE_ROW_OUTS),
+    group('brRoot', 'One question', undefined, {
+      ...CARD,
+      ...COLUMN('var(--space-1)'),
+      paddingLeft: 'var(--space-2)',
+      paddingRight: 'var(--space-2)',
+      paddingTop: 'var(--space-1-5)',
+      paddingBottom: 'var(--space-1-5)'
+    }),
+    text('brLabel', 'What it is', 'brRoot', '', { ...wide(T_BODY), fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)' }),
+    text('brSub', 'How much and when', 'brRoot', '', wide(T_META)),
+    group('brButtons', 'The answers', 'brRoot', { ...ROW('var(--space-1-5)'), flexWrap: 'wrap' }),
+    place('brHappened', BUTTON, 'It happened', 'brButtons', { ...BTN_OUTLINE, label: 'Happened' }),
+    place('brPart', BUTTON, 'Part of it happened', 'brButtons', { ...BTN_GHOST, label: 'Part of it…' }),
+    place('brLost', BUTTON, 'It is lost', 'brButtons', { ...BTN_GHOST, label: 'Lost' })
+  ],
+  connections: [
+    wire('brIn', 'label', 'brLabel', 'text'),
+    wire('brIn', 'sub', 'brSub', 'text'),
+    wire('brIn', 'lostLabel', 'brLost', 'label'),
+    wire('brIn', 'key', 'brOut', 'key'),
+    wire('brHappened', 'onClick', 'brOut', 'happened'),
+    wire('brPart', 'onClick', 'brOut', 'part'),
+    wire('brLost', 'onClick', 'brOut', 'lost')
+  ]
+};
+
+const KEY_LINE_FIELDS: Array<[string, string]> = [['key', 'string'], ['text', 'string']];
+
+/** One line of Billing on a project's card (§4.2): what it is on the left, and what it says. On a phone the two stack. */
+const KEY_LINE: Tpl010Component = {
+  path: 'Week/Key line',
+  description: 'One line of a project’s billing: what it is, and what it says — the bills, the next one, this period, the past.',
+  ...iface(KEY_LINE_FIELDS, []),
+  nodes: [
+    inputs('klIn', 'The line', KEY_LINE_FIELDS),
+    group('klRoot', 'One billing line', undefined, { ...ROW('var(--space-2)'), alignItems: 'flex-start', cssClassName: 'planner-money-line' }),
+    text('klKey', 'What it is', 'klRoot', '', { ...T_LABEL, sizeMode: 'explicit', width: px(88), cssClassName: 'planner-money-key' }),
+    text('klText', 'What it says', 'klRoot', '', { ...wide(T_META), color: 'var(--foreground)' })
+  ],
+  connections: [wire('klIn', 'key', 'klKey', 'text'), wire('klIn', 'text', 'klText', 'text')]
+};
+
+const MIGHT_LINK_FIELDS: Array<[string, string]> = [['projectId', 'string'], ['name', 'string'], ['odds', 'string'], ['move', 'string']];
+
+/** M7, M14 line 2 — one hoped project: its name (opens its card), its odds, and the move that makes it real. */
+const MIGHT_LINK: Tpl010Component = {
+  path: 'Week/Might link',
+  description: 'One project you might earn from: its name, which opens its card, how likely it is, and the move that makes it real.',
+  ...iface(MIGHT_LINK_FIELDS, [['open', 'signal'], ['projectId', 'string']]),
+  nodes: [
+    inputs('mlIn', 'The hoped project', MIGHT_LINK_FIELDS),
+    outputs('mlOut', 'Opened', [['open', 'signal'], ['projectId', 'string']]),
+    group('mlRoot', 'One hoped project', undefined, { ...ROW('var(--space-1)'), alignItems: 'flex-start' }),
+    place('mlName', BUTTON, 'Open its card', 'mlRoot', {
+      ...BTN_GHOST,
+      borderStyle: 'none',
+      borderWidth: undefined,
+      borderColor: undefined,
+      backgroundColor: 'transparent',
+      sizeMode: 'contentSize',
+      paddingLeft: 'var(--space-0)',
+      paddingRight: 'var(--space-0)',
+      paddingTop: 'var(--space-0)',
+      paddingBottom: 'var(--space-0)',
+      fontSize: 'var(--text-sm)',
+      fontWeight: 'var(--font-semibold)',
+      color: 'var(--foreground)',
+      styleCss: 'text-decoration: underline; text-underline-offset: 3px;'
+    }),
+    text('mlOdds', 'How likely', 'mlRoot', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-sm)' }),
+    text('mlMove', 'The move that makes it real', 'mlRoot', '', { ...wide(T_META), fontSize: 'var(--text-sm)' })
+  ],
+  connections: [
+    wire('mlIn', 'name', 'mlName', 'label'),
+    wire('mlIn', 'odds', 'mlOdds', 'text'),
+    wire('mlIn', 'move', 'mlMove', 'text'),
+    wire('mlIn', 'projectId', 'mlOut', 'projectId'),
+    wire('mlName', 'onClick', 'mlOut', 'open')
   ]
 };
 
@@ -1303,21 +1541,35 @@ const DAY_COLUMN: Tpl010Component = {
 };
 
 /**
- * R10 — the next six weeks of money, under the week.
+ * **M14 — the bottom of the week page answers "how far off am I".** Three lines and the boxes:
  *
- * The header line carries the three numbers a freelancer checks first: the balance today,
- * what has been invoiced this month so far, and the rule that says when it actually arrives
- * (*"Due by the 7th"*, from `Settings.paymentTermsDays`). The events scroll sideways, so this
- * is the second `SCROLL_X` and the second half of R15.
+ * 1. **the month** — break-even, target, what is billed so far and with this month's bills
+ *    still to go out, and what is left to target in hours (M13, M17, M22). Never red; it is a plan;
+ * 2. **might earn** — the hoped money, weighted, each project named (it opens the card) with the
+ *    move that makes it real (M7). Only when there is some;
+ * 3. **the lowest point** in six weeks — red only under the low-water mark, the one red R10 built
+ *    the strip for.
+ *
+ * Then the six boxes, **late ones first** (M6), each opening the Money modal on its repeat. Weekly
+ * items are in every balance and get no box (M18); a line under the boxes names them.
  */
+const CASH_STRIP_FIELDS: Array<[string, string]> = [
+  ['rows', 'array'], ['balanceText', 'string'], ['monthName', 'string'], ['monthText', 'string'],
+  ['mightShown', 'boolean'], ['mightLead', 'string'], ['mightRows', 'array'], ['lowText', 'string'], ['lowColor', 'string'], ['footText', 'string']
+];
+const CASH_STRIP_OUTS: Array<[string, string]> = [['pick', 'signal'], ['key', 'string'], ['open', 'signal'], ['openProject', 'signal'], ['projectId', 'string']];
+const lineKey = (id: string, parent: string, words: string) =>
+  text(id, words, parent, words, { ...T_LABEL, sizeMode: 'explicit', width: px(92), cssClassName: 'planner-money-key' });
+
 const CASH_STRIP: Tpl010Component = {
   path: 'Week/Cash strip',
-  description: 'The next six weeks of money as a row of events, with the balance today and what has been invoiced this month above it.',
-  ...iface([['rows', 'array'], ['balanceText', 'string'], ['invoicedText', 'string'], ['termsText', 'string']], []),
+  description: 'The money under the week: how the month stands against break-even and the target, what you might earn and what makes it real, the lowest the balance goes in six weeks, and the next six things that move money — late ones first.',
+  ...iface(CASH_STRIP_FIELDS, CASH_STRIP_OUTS),
   repeats: { source: 'array', rowFields: CASH_EVENT_FIELDS.map(([n]) => n) },
-  instantiates: [C.cashEvent],
+  instantiates: [C.cashEvent, C.mightLink],
   nodes: [
-    inputs('csIn', 'The money', [['rows', 'array'], ['balanceText', 'string'], ['invoicedText', 'string'], ['termsText', 'string']]),
+    inputs('csIn', 'The money', CASH_STRIP_FIELDS),
+    outputs('csOut', 'Pressed', CASH_STRIP_OUTS),
     group('csRoot', 'Cash strip', undefined, {
       ...COLUMN('var(--space-1-5)'),
       ...PINNED,
@@ -1327,20 +1579,42 @@ const CASH_STRIP: Tpl010Component = {
       paddingTop: 'var(--space-2)',
       paddingBottom: 'var(--space-2)'
     }),
-    group('csHead', 'The three numbers', 'csRoot', { ...ROW('var(--space-3)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
-    text('csTitle', 'What this row is', 'csHead', 'Cash, next six weeks', { ...T_LABEL, sizeMode: 'contentSize' }),
-    group('csNums', 'Balance, invoiced, terms', 'csHead', ROW_TIGHT('var(--space-3)')),
-    text('csBalance', 'Balance today', 'csNums', '', { ...T_NUM, sizeMode: 'contentSize' }),
-    text('csInvoiced', 'Invoiced this month', 'csNums', '', { ...T_NUM, sizeMode: 'contentSize' }),
-    text('csTerms', 'When it arrives', 'csNums', '', { ...T_META, sizeMode: 'contentSize' }),
-    group('csScroll', 'The events', 'csRoot', { ...SCROLL_X, columnGap: 'var(--space-2)', alignItems: 'stretch' }),
-    place('csEach', FOR_EACH, 'One box per event', 'csScroll', { template: C.cashEvent, templateType: 'explicit' })
+    group('csHead', 'Money, and the balance', 'csRoot', { ...ROW('var(--space-3)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
+    text('csTitle', 'What this is', 'csHead', 'Money', { ...T_LABEL, sizeMode: 'contentSize' }),
+    group('csNums', 'The balance', 'csHead', { ...ROW_TIGHT('var(--space-3)'), flexWrap: 'wrap', rowGap: 'var(--space-1)', cssClassName: 'planner-shrink-wrap' }),
+    text('csBalance', 'The balance', 'csNums', '', { ...T_NUM, sizeMode: 'contentSize' }),
+    place('csOpen', BUTTON, 'Open Money', 'csNums', { ...BTN_GHOST, label: 'Open money', paddingTop: 'var(--space-0-5)', paddingBottom: 'var(--space-0-5)' }),
+    group('csMonth', 'The month', 'csRoot', { ...ROW('var(--space-2)'), alignItems: 'flex-start', cssClassName: 'planner-money-line' }),
+    text('csMonthKey', 'Which month', 'csMonth', '', { ...T_LABEL, sizeMode: 'explicit', width: px(92), cssClassName: 'planner-money-key' }),
+    text('csMonthText', 'How the month stands', 'csMonth', '', { ...wide(T_META), fontSize: 'var(--text-sm)', color: 'var(--foreground)' }),
+    group('csMight', 'Might earn', 'csRoot', { ...ROW('var(--space-2)'), alignItems: 'flex-start', cssClassName: 'planner-money-line' }),
+    lineKey('csMightKey', 'csMight', 'Might earn'),
+    group('csMightWords', 'What and from whom', 'csMight', COLUMN('var(--space-0-5)')),
+    text('csMightLead', 'How much', 'csMightWords', '', { ...wide(T_META), fontSize: 'var(--text-sm)', color: 'var(--foreground)' }),
+    place('csMightEach', FOR_EACH, 'One hoped project', 'csMightWords', { template: C.mightLink, templateType: 'explicit' }),
+    group('csLow', 'The lowest point', 'csRoot', { ...ROW('var(--space-2)'), alignItems: 'flex-start', cssClassName: 'planner-money-line' }),
+    lineKey('csLowKey', 'csLow', 'Lowest'),
+    text('csLowText', 'The lowest point', 'csLow', '', { ...wide(T_META), fontSize: 'var(--text-sm)' }),
+    group('csScroll', 'The next six', 'csRoot', { ...SCROLL_X, columnGap: 'var(--space-2)', alignItems: 'stretch' }),
+    place('csEach', FOR_EACH, 'One box per event', 'csScroll', { template: C.cashEvent, templateType: 'explicit' }),
+    text('csFoot', 'What has no box', 'csRoot', '', { ...wide(T_META), fontSize: px(11) })
   ],
   connections: [
     wire('csIn', 'balanceText', 'csBalance', 'text'),
-    wire('csIn', 'invoicedText', 'csInvoiced', 'text'),
-    wire('csIn', 'termsText', 'csTerms', 'text'),
-    wire('csIn', 'rows', 'csEach', 'items')
+    wire('csOpen', 'onClick', 'csOut', 'open'),
+    wire('csIn', 'monthName', 'csMonthKey', 'text'),
+    wire('csIn', 'monthText', 'csMonthText', 'text'),
+    wire('csIn', 'mightShown', 'csMight', 'mounted'),
+    wire('csIn', 'mightLead', 'csMightLead', 'text'),
+    wire('csIn', 'mightRows', 'csMightEach', 'items'),
+    wire('csMightEach', 'itemOutputSignal-open', 'csOut', 'openProject'),
+    wire('csMightEach', 'itemOutput-projectId', 'csOut', 'projectId'),
+    wire('csIn', 'lowText', 'csLowText', 'text'),
+    wire('csIn', 'lowColor', 'csLowText', 'color'),
+    wire('csIn', 'rows', 'csEach', 'items'),
+    wire('csEach', 'itemOutputSignal-pick', 'csOut', 'pick'),
+    wire('csEach', 'itemOutput-key', 'csOut', 'key'),
+    wire('csIn', 'footText', 'csFoot', 'text')
   ]
 };
 
@@ -1601,9 +1875,11 @@ const under = (prefix: string, name: string) => prefix + name[0].toUpperCase() +
 /** What the project editor holds: every field of a Project a person types (R23). */
 const PROJECT_EDIT_VALUES: Array<[string, string]> = [
   ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'string'], ['slot', 'string'], ['rung', 'string'],
-  ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string']
+  ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string'],
+  // M21 and §4.2 — hourly or fixed, the payment terms that pre-fill a bill's due date (M5), and the agreed hours.
+  ['billing', 'string'], ['termsDays', 'string'], ['agreedHours', 'string']
 ];
-const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['title', 'string'], ['kinds', '*'], ...PROJECT_EDIT_VALUES];
+const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['title', 'string'], ['kinds', '*'], ['billings', '*'], ...PROJECT_EDIT_VALUES];
 const PROJECT_EDITOR_OUTS: Array<[string, string]> = [...PROJECT_EDIT_VALUES, ['save', 'signal'], ['cancel', 'signal']];
 
 /** The typed boxes: `[field, label, id, box type, parent]`. Placed one by one below, because child order is draw order. */
@@ -1611,6 +1887,8 @@ const PROJECT_BOXES: Array<[string, string, string, 'text' | 'number', string]> 
   ['name', 'Name', 'peName', 'text', 'peRoot'],
   ['sub', 'One line about it', 'peSub', 'text', 'peRoot'],
   ['rate', 'Rate, per hour', 'peRate', 'number', 'peRateBox'],
+  ['termsDays', 'Payment terms, days', 'peTerms', 'number', 'peTermsBox'],
+  ['agreedHours', 'Agreed hours a month', 'peAgreed', 'number', 'peAgreedBox'],
   ['slot', 'Slot', 'peSlot', 'text', 'peSlotBox'],
   ['rung', 'Rung', 'peRung', 'text', 'peRungBox'],
   ['move', 'The move', 'peMove', 'text', 'peMoveBox'],
@@ -1665,6 +1943,13 @@ const PROJECT_EDITOR: Tpl010Component = {
     place('peKind', 'net.noodl.controls.options', 'What kind of work', 'peKindBox', PICK('What kind of work')),
     group('peRateBox', 'Rate', 'peKindRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
     peBox('rate'),
+    group('peBillRow', 'Billing', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peBillingBox', 'Hourly or fixed', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    place('peBilling', 'net.noodl.controls.options', 'Hourly or fixed', 'peBillingBox', PICK('Billing')),
+    group('peTermsBox', 'Payment terms', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(30) }),
+    group('peAgreedBox', 'Agreed hours', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(30) }),
+    peBox('termsDays'),
+    peBox('agreedHours'),
     group('peSlotRow', 'Slot and rung', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
     group('peSlotBox', 'Slot', 'peSlotRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
     group('peRungBox', 'Rung', 'peSlotRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
@@ -1702,6 +1987,9 @@ const PROJECT_EDITOR: Tpl010Component = {
     wire('peIn', 'kinds', 'peKind', 'items'),
     wire('peIn', 'kind', 'peKind', 'value'),
     wire('peKind', 'value', 'peOut', 'kind'),
+    wire('peIn', 'billings', 'peBilling', 'items'),
+    wire('peIn', 'billing', 'peBilling', 'value'),
+    wire('peBilling', 'value', 'peOut', 'billing'),
     wire('peIn', 'moveDue', 'peDue', 'Value'),
     wire('peDue', 'Value', 'peOut', 'moveDue'),
     wire('peIn', 'shown', 'peOpened', 'in-shown'),
@@ -1716,76 +2004,108 @@ const PROJECT_EDITOR: Tpl010Component = {
   ]
 };
 
-const CASH_ROW_FIELDS: Array<[string, string]> = [['id', 'string'], ['whenText', 'string'], ['label', 'string'], ['amountText', 'string'], ['repeatText', 'string']];
+// ── TPL-010-M: the Money modal ──────────────────────────────────────────────
 
-/** One typed money event in the settings: when, what, how much, and whether it repeats. Press it to edit it. */
-const CASH_ROW: Tpl010Component = {
-  path: 'Week/Cash row',
-  description: 'One money event in the settings: when it happens, what it is, how much, and whether it happens every month.',
-  ...iface(CASH_ROW_FIELDS, [['pick', 'signal'], ['id', 'string']]),
-  nodes: [
-    inputs('crIn', 'The event', CASH_ROW_FIELDS),
-    outputs('crOut', 'Picked', [['pick', 'signal'], ['id', 'string']]),
-    group('crRoot', 'One money event', undefined, {
-      ...ROW('var(--space-2)'),
-      borderBottomStyle: 'solid',
-      borderBottomWidth: 'var(--border-1)',
-      borderBottomColor: 'var(--border)',
-      paddingTop: 'var(--space-1)',
-      paddingBottom: 'var(--space-1)'
-    }),
-    text('crWhen', 'When', 'crRoot', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-xs)' }),
-    group('crWords', 'What it is', 'crRoot', { ...COLUMN('var(--space-0)'), width: pct(100) }),
-    text('crLabel', 'What it is', 'crWords', '', { ...wide(T_BODY), fontSize: 'var(--text-sm)' }),
-    text('crRepeat', 'Whether it repeats', 'crWords', '', wide(T_META)),
-    text('crAmount', 'How much', 'crRoot', '', { ...T_NUM, sizeMode: 'contentSize' }),
-    // The row is not focusable; the button is the keyboard's way in (the chip's + argument, R2.1).
-    place('crEdit', BUTTON, 'Edit this event', 'crRoot', { ...BTN_GHOST, label: 'Edit' })
-  ],
-  connections: [
-    wire('crIn', 'whenText', 'crWhen', 'text'),
-    wire('crIn', 'label', 'crLabel', 'text'),
-    wire('crIn', 'repeatText', 'crRepeat', 'text'),
-    wire('crIn', 'amountText', 'crAmount', 'text'),
-    wire('crIn', 'id', 'crOut', 'id'),
-    wire('crRoot', 'onClick', 'crOut', 'pick'),
-    wire('crEdit', 'onClick', 'crOut', 'pick')
-  ]
-};
-
-const CASH_EDIT_VALUES: Array<[string, string]> = [['date', 'string'], ['amount', 'string'], ['label', 'string'], ['kind', 'string'], ['monthly', 'boolean']];
-const CASH_EDITOR_FIELDS: Array<[string, string]> = [['rows', 'array'], ['formShown', 'boolean'], ['formTitle', 'string'], ['kinds', '*'], ...CASH_EDIT_VALUES];
-const CASH_EDITOR_OUTS: Array<[string, string]> = [
-  ['pick', 'signal'], ['pickId', 'string'], ['add', 'signal'], ...CASH_EDIT_VALUES, ['save', 'signal'], ['cancel', 'signal']
-];
+/** A back button for the phone, where the list and the pane take turns (§4.1). Hidden above the breakpoint. */
+const PHONE_BACK = (id: string, parent: string) => place(id, BUTTON, 'Back to the list', parent, { ...BTN_GHOST, label: '‹ Money', cssClassName: 'planner-phone-only' });
 
 /**
- * **R23 — the money events, in the settings sheet.** The partner's contract, the household
- * costs, the one-offs: what the cash strip runs its balance through. Until now they could only
- * be seeded. A list, a press to edit one, and *+ Add a money event* for a new one; the form is
- * only there while something is being edited, so the sheet stays a list you can read.
+ * 🔴 Trap 6 (memory: nodegx-sheet-traps). The pane stays mounted while the person moves from one
+ * repeat to the next, and its boxes are prefilled with values two repeats can share — so each
+ * time what it shows changes, every box is blurred and then Set back to what it was last sent.
  */
-const CASH_EDITOR: Tpl010Component = {
-  path: 'Week/Cash editor',
-  description: 'The money events the cash strip is worked out from, as a list you can add to and edit: when, how much, what it is, and whether it happens every month.',
-  ...iface(CASH_EDITOR_FIELDS, CASH_EDITOR_OUTS),
-  repeats: { source: 'array', rowFields: CASH_ROW_FIELDS.map(([n]) => n) },
-  instantiates: [C.cashRow, C.datePicker],
+const RESET_ON_KEY = "var key = String(Inputs.key || '');\nif (this.key !== undefined && this.key !== key) { Outputs.blur(); Outputs.reset(); }\nthis.key = key;";
+const resetBoxes = (resetId: string, boxes: string[]) =>
+  boxes.flatMap((b) => [wire(resetId, 'out-blur', b, 'blur'), wire(resetId, 'out-reset', b, 'set')]);
+
+const MONEY_SUMMARY_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['lines', 'array'], ['note', 'string'], ['balanceLines', 'array']];
+const MONEY_SUMMARY_OUTS: Array<[string, string]> = [['recordBalance', 'signal'], ['back', 'signal']];
+
+/**
+ * M12, M13, M22 — what the month's target is made of, line by line, and where the balance
+ * stands. It is the pane when nothing is picked, so the arithmetic is never hidden (R2's rule).
+ */
+const MONEY_SUMMARY: Tpl010Component = {
+  path: 'Week/Money summary',
+  description: 'What this month’s target is made of, line by line — what goes out, what comes in, the fixed bills, the hours — and where the balance stands.',
+  ...iface(MONEY_SUMMARY_FIELDS, MONEY_SUMMARY_OUTS),
+  repeats: { source: 'array', rowFields: FACT_FIELDS.map(([n]) => n) },
+  instantiates: [C.factRow],
   nodes: [
-    inputs('ceIn', 'The money events', CASH_EDITOR_FIELDS),
-    outputs('ceOut', 'What to change', CASH_EDITOR_OUTS),
-    group('ceRoot', 'Money events', undefined, {
-      ...COLUMN('var(--space-2)'),
+    inputs('msmIn', 'The month', MONEY_SUMMARY_FIELDS),
+    outputs('msmOut', 'Pressed', MONEY_SUMMARY_OUTS),
+    group('msmRoot', 'This month’s target', undefined, COLUMN('var(--space-3)')),
+    PHONE_BACK('msmBack', 'msmRoot'),
+    text('msmTitle', 'Title', 'msmRoot', 'This month’s target', { ...wide(T_TITLE), as: 'h3', fontSize: px(19) }),
+    text('msmLead', 'Where it comes from', 'msmRoot', 'From the expected money items that belong to no project. Yearly items count a twelfth a month, weekly ones 52 ÷ 12.', wide(T_META)),
+    group('msmLines', 'The sum', 'msmRoot', COLUMN('var(--space-1)')),
+    place('msmEach', FOR_EACH, 'One line of the sum', 'msmLines', { template: C.factRow, templateType: 'explicit' }),
+    text('msmNote', 'What is not in it', 'msmRoot', '', wide(T_META)),
+    group('msmBalance', 'The balance', 'msmRoot', {
+      ...COLUMN('var(--space-1)'),
       borderTopStyle: 'solid',
       borderTopWidth: 'var(--border-1)',
       borderTopColor: 'var(--border)',
       paddingTop: 'var(--space-3)'
     }),
-    text('ceLabel', 'Label', 'ceRoot', 'Money coming and going', wide(T_LABEL)),
-    text('ceHint', 'What belongs here', 'ceRoot', 'Everything the cash strip counts besides your hours: your partner’s contract, the household costs, one-offs.', wide(T_META)),
-    place('ceEach', FOR_EACH, 'One row per event', 'ceRoot', { template: C.cashRow, templateType: 'explicit' }),
-    place('ceAdd', BUTTON, 'Add a money event', 'ceRoot', { ...BTN_GHOST, borderStyle: 'dashed', label: '+ Add a money event' }),
-    group('ceForm', 'The event being edited', 'ceRoot', {
+    text('msmBalLabel', 'Label', 'msmBalance', 'Balance', wide(T_LABEL)),
+    place('msmBalEach', FOR_EACH, 'One line about the balance', 'msmBalance', { template: C.factRow, templateType: 'explicit' }),
+    place('msmRecord', BUTTON, 'Record what the bank says', 'msmBalance', { ...BTN_OUTLINE, label: 'Record balance' })
+  ],
+  connections: [
+    wire('msmIn', 'shown', 'msmRoot', 'mounted'),
+    wire('msmIn', 'lines', 'msmEach', 'items'),
+    wire('msmIn', 'note', 'msmNote', 'text'),
+    wire('msmIn', 'balanceLines', 'msmBalEach', 'items'),
+    wire('msmRecord', 'onClick', 'msmOut', 'recordBalance'),
+    wire('msmBack', 'onClick', 'msmOut', 'back')
+  ]
+};
+
+const MONEY_REPEAT_FIELDS: Array<[string, string]> = [
+  ['shown', 'boolean'], ['key', 'string'], ['title', 'string'], ['sub', 'string'], ['subColor', 'string'],
+  ['amountText', 'string'], ['amountColor', 'string'], ['detail', 'string'],
+  ['tickShown', 'boolean'], ['tickHead', 'string'], ['tickOn', 'string'], ['tickAmount', 'string'], ['remaining', 'number'],
+  ['rests', '*'], ['restDefault', 'string'],
+  ['changeLabel', 'string'], ['skipShown', 'boolean'], ['lostShown', 'boolean'],
+  ['changeShown', 'boolean'], ['chDate', 'string'], ['chAmount', 'string'], ['chNote', 'string'], ['chHint', 'string'], ['resetShown', 'boolean'],
+  ['closedShown', 'boolean'], ['closedText', 'string'],
+  ['hopedShown', 'boolean'], ['hopedText', 'string'],
+  ['billShown', 'boolean'], ['billText', 'string'], ['sendShown', 'boolean'], ['sentOn', 'string'], ['sentAmount', 'string'], ['sentAmountShown', 'boolean'], ['unsendShown', 'boolean'],
+  ['fromShown', 'boolean'], ['fromText', 'string'], ['itemLabel', 'string'], ['endShown', 'boolean']
+];
+const MONEY_REPEAT_OUTS: Array<[string, string]> = [
+  ['tick', 'signal'], ['tickOn', 'string'], ['tickAmount', 'string'], ['tickRest', 'string'],
+  ['changeOne', 'signal'], ['chDate', 'string'], ['chAmount', 'string'], ['chNote', 'string'], ['saveOne', 'signal'], ['resetOne', 'signal'],
+  ['skip', 'signal'], ['lost', 'signal'], ['untick', 'signal'], ['agreed', 'signal'],
+  ['markSent', 'signal'], ['sentOn', 'string'], ['sentAmount', 'string'], ['unsend', 'signal'],
+  ['changeItem', 'signal'], ['endItem', 'signal'], ['back', 'signal']
+];
+
+/**
+ * **One repeat, in the right-hand pane** (§4.1): its date, amount and where it came from; the tick
+ * (M6) with the day it happened and the amount that moved — and when that is less than was due,
+ * what the rest is (M11a: still owed, or lost); *Change this one*, *Skip this one*, *Mark as lost*;
+ * for a client bill, *Mark as sent* (with the amount, for a bill filled from the hours — M23);
+ * and below a rule, the item it comes from with *Change the item* and *End it* (M4).
+ */
+const MONEY_REPEAT: Tpl010Component = {
+  path: 'Week/Money repeat',
+  description: 'One thing that happens to the money, on its own: tick it with the day and the amount, change or skip this one, mark it lost or sent, and change or end the item it comes from.',
+  ...iface(MONEY_REPEAT_FIELDS, MONEY_REPEAT_OUTS),
+  instantiates: [C.datePicker],
+  nodes: [
+    inputs('rpIn', 'The repeat', MONEY_REPEAT_FIELDS),
+    outputs('rpOut', 'What to do with it', MONEY_REPEAT_OUTS),
+    group('rpRoot', 'One repeat', undefined, COLUMN('var(--space-3)')),
+    PHONE_BACK('rpBack', 'rpRoot'),
+    group('rpHead', 'What it is', 'rpRoot', COLUMN('var(--space-0-5)')),
+    text('rpTitle', 'What it is', 'rpHead', '', { ...wide(T_TITLE), as: 'h3', fontSize: px(19) }),
+    text('rpSub', 'When', 'rpHead', '', wide(T_META)),
+    text('rpAmount', 'How much', 'rpRoot', '', { ...wide(T_NUM), fontSize: px(24), fontWeight: 'var(--font-semibold)' }),
+    text('rpDetail', 'More about it', 'rpRoot', '', wide(T_META)),
+
+    group('rpTick', 'Did it happen?', 'rpRoot', {
       ...COLUMN('var(--space-2)'),
       backgroundColor: 'var(--muted)',
       borderRadius: 'var(--radius-md)',
@@ -1794,44 +2114,607 @@ const CASH_EDITOR: Tpl010Component = {
       paddingTop: 'var(--space-2)',
       paddingBottom: 'var(--space-3)'
     }),
-    text('ceFormTitle', 'Which event', 'ceForm', '', { ...wide(T_BODY), fontWeight: 'var(--font-semibold)' }),
-    place('ceWhat', TEXT_INPUT, 'What it is', 'ceForm', BOX('What it is')),
-    group('ceRow', 'Amount and day', 'ceForm', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
-    group('ceAmountBox', 'How much', 'ceRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
-    place('ceAmount', TEXT_INPUT, 'How much', 'ceAmountBox', BOX('How much', 'number')),
-    group('ceDateBox', 'When', 'ceRow', { ...COLUMN('var(--space-0)'), width: pct(60) }),
-    place('ceDate', C.datePicker, 'When', 'ceDateBox', { Label: 'When', 'Show Label': true }),
-    place('ceKind', 'net.noodl.controls.options', 'In or out', 'ceForm', PICK('In or out')),
-    place('ceMonthly', 'net.noodl.controls.checkbox', 'Every month', 'ceForm', TICK_BOX('Every month, on this day')),
-    derive('ceOpened', 'Clear the boxes on close; tick Every month to match the event', SHEET_SCRIPT(['monthly'], 'formShown')),
-    group('ceButtons', 'Buttons', 'ceForm', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
-    place('ceSave', BUTTON, 'Save the event', 'ceButtons', { ...BTN_PRIMARY, label: 'Save' }),
-    place('ceCancel', BUTTON, 'Stop editing the event', 'ceButtons', { ...BTN_OUTLINE, label: 'Cancel' })
+    text('rpTickHead', 'Label', 'rpTick', '', wide(T_LABEL)),
+    group('rpTickRow', 'The day and the amount', 'rpTick', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('rpTickOnBox', 'The day', 'rpTickRow', { ...COLUMN('var(--space-0)'), width: pct(55) }),
+    place('rpTickOn', C.datePicker, 'The day it happened', 'rpTickOnBox', { Label: 'Happened on', 'Show Label': true }),
+    group('rpTickAmountBox', 'The amount', 'rpTickRow', { ...COLUMN('var(--space-0)'), width: pct(45) }),
+    place('rpTickAmount', TEXT_INPUT, 'The amount that moved', 'rpTickAmountBox', BOX('Amount that moved, €', 'number')),
+    derive(
+      'rpShort',
+      'Is it less than was due?',
+      `var typed = String(Inputs.typed === undefined || Inputs.typed === null ? '' : Inputs.typed).trim();
+var v = Number(typed), left = Math.abs(Number(Inputs.remaining) || 0);
+var short = typed !== '' && isFinite(v) && v >= 0 && v < left - 0.005;
+Outputs.short = short;
+var rest = Math.round((left - (isFinite(v) ? v : 0)) * 100) / 100;
+Outputs.restLine = short ? 'That is \\u20ac' + rest + ' less than was due. The other \\u20ac' + rest + ' is:' : '';`
+    ),
+    text('rpRestLine', 'How much less', 'rpTick', '', wide(T_META)),
+    place('rpRest', 'net.noodl.controls.options', 'What the rest is', 'rpTick', PICK('The rest')),
+    place('rpTickIt', BUTTON, 'Tick it', 'rpTick', { ...BTN_PRIMARY, label: 'Tick it' }),
+
+    group('rpActs', 'Other things to do with it', 'rpRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('rpChangeOne', BUTTON, 'Change this one', 'rpActs', { ...BTN_OUTLINE }),
+    place('rpSkip', BUTTON, 'Skip this one', 'rpActs', { ...BTN_GHOST, label: 'Skip this one' }),
+    place('rpLost', BUTTON, 'Mark it as lost', 'rpActs', { ...BTN_GHOST, label: 'Mark as lost' }),
+
+    group('rpChange', 'This one, changed', 'rpRoot', {
+      ...COLUMN('var(--space-2)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-3)'
+    }),
+    group('rpChRow', 'Its day and amount', 'rpChange', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('rpChDateBox', 'Its day', 'rpChRow', { ...COLUMN('var(--space-0)'), width: pct(55) }),
+    place('rpChDate', C.datePicker, 'Its day', 'rpChDateBox', { Label: 'Date', 'Show Label': true }),
+    group('rpChAmountBox', 'Its amount', 'rpChRow', { ...COLUMN('var(--space-0)'), width: pct(45) }),
+    place('rpChAmount', TEXT_INPUT, 'Its amount', 'rpChAmountBox', BOX('Amount, €', 'number')),
+    place('rpChNote', TEXT_INPUT, 'A note about this one', 'rpChange', BOX('Note')),
+    text('rpChHint', 'What changing it does', 'rpChange', '', wide(T_META)),
+    group('rpChButtons', 'Buttons', 'rpChange', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('rpSaveOne', BUTTON, 'Save this one', 'rpChButtons', { ...BTN_PRIMARY, label: 'Save this one' }),
+    place('rpResetOne', BUTTON, 'Back to the item', 'rpChButtons', { ...BTN_GHOST, label: 'Back to the item' }),
+
+    group('rpClosed', 'What happened', 'rpRoot', {
+      ...COLUMN('var(--space-2)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)'
+    }),
+    text('rpClosedText', 'What happened', 'rpClosed', '', wide(T_BODY)),
+    place('rpUntick', BUTTON, 'Untick it', 'rpClosed', { ...BTN_GHOST, label: 'Untick' }),
+
+    group('rpHoped', 'Hoped money', 'rpRoot', COLUMN('var(--space-2)')),
+    text('rpHopedText', 'What hoped means', 'rpHoped', '', wide(T_META)),
+    place('rpAgreed', BUTTON, 'It is agreed', 'rpHoped', { ...BTN_OUTLINE, label: 'It’s agreed · set to 100%' }),
+
+    group('rpBill', 'The bill', 'rpRoot', {
+      ...COLUMN('var(--space-2)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-3)'
+    }),
+    text('rpBillText', 'When it goes out', 'rpBill', '', wide(T_META)),
+    group('rpSend', 'Sending it', 'rpBill', COLUMN('var(--space-2)')),
+    group('rpSendRow', 'The day and the amount', 'rpSend', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('rpSentOnBox', 'The day', 'rpSendRow', { ...COLUMN('var(--space-0)'), width: pct(55) }),
+    place('rpSentOn', C.datePicker, 'The day it went out', 'rpSentOnBox', { Label: 'Sent on', 'Show Label': true }),
+    group('rpSentAmountBox', 'The amount', 'rpSendRow', { ...COLUMN('var(--space-0)'), width: pct(45) }),
+    place('rpSentAmount', TEXT_INPUT, 'The amount on the bill', 'rpSentAmountBox', BOX('Amount, €', 'number')),
+    place('rpMarkSent', BUTTON, 'Mark it as sent', 'rpSend', { ...BTN_PRIMARY, label: 'Mark as sent' }),
+    place('rpUnsend', BUTTON, 'It was not sent after all', 'rpBill', { ...BTN_GHOST, label: 'Not sent after all' }),
+
+    group('rpFrom', 'The item it comes from', 'rpRoot', {
+      ...COLUMN('var(--space-2)'),
+      borderTopStyle: 'solid',
+      borderTopWidth: 'var(--border-1)',
+      borderTopColor: 'var(--border)',
+      paddingTop: 'var(--space-3)'
+    }),
+    text('rpFromLabel', 'Label', 'rpFrom', 'Comes from', wide(T_LABEL)),
+    text('rpFromText', 'The item', 'rpFrom', '', wide(T_META)),
+    group('rpFromButtons', 'Buttons', 'rpFrom', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('rpChangeItem', BUTTON, 'Change the item', 'rpFromButtons', { ...BTN_OUTLINE }),
+    place('rpEndItem', BUTTON, 'End the item', 'rpFromButtons', { ...BTN_GHOST, label: 'End it' }),
+
+    derive('rpReset', 'Put the boxes back when the repeat changes', RESET_ON_KEY),
+    derive('rpClosing', 'Clear the boxes when the pane closes', SHEET_SCRIPT([]))
   ],
   connections: [
-    wire('ceIn', 'rows', 'ceEach', 'items'),
-    wire('ceEach', 'itemOutputSignal-pick', 'ceOut', 'pick'),
-    wire('ceEach', 'itemOutput-id', 'ceOut', 'pickId'),
-    wire('ceAdd', 'onClick', 'ceOut', 'add'),
-    wire('ceIn', 'formShown', 'ceForm', 'mounted'),
-    wire('ceIn', 'formTitle', 'ceFormTitle', 'text'),
-    wire('ceIn', 'label', 'ceWhat', 'startValue'),
-    wire('ceWhat', 'onTextChanged', 'ceOut', 'label'),
-    wire('ceIn', 'amount', 'ceAmount', 'startValue'),
-    wire('ceAmount', 'onTextChanged', 'ceOut', 'amount'),
-    wire('ceIn', 'date', 'ceDate', 'Value'),
-    wire('ceDate', 'Value', 'ceOut', 'date'),
-    wire('ceIn', 'kinds', 'ceKind', 'items'),
-    wire('ceIn', 'kind', 'ceKind', 'value'),
-    wire('ceKind', 'value', 'ceOut', 'kind'),
-    wire('ceIn', 'formShown', 'ceOpened', 'in-formShown'),
-    wire('ceIn', 'monthly', 'ceOpened', 'in-monthly'),
-    wire('ceOpened', 'out-monthlyOn', 'ceMonthly', 'check'),
-    wire('ceOpened', 'out-monthlyOff', 'ceMonthly', 'uncheck'),
-    ...['ceWhat', 'ceAmount'].map((id) => wire('ceOpened', 'out-closed', id, 'clear')),
-    wire('ceMonthly', 'checked', 'ceOut', 'monthly'),
-    wire('ceSave', 'onClick', 'ceOut', 'save'),
-    wire('ceCancel', 'onClick', 'ceOut', 'cancel')
+    wire('rpIn', 'shown', 'rpRoot', 'mounted'),
+    wire('rpIn', 'title', 'rpTitle', 'text'),
+    wire('rpIn', 'sub', 'rpSub', 'text'),
+    wire('rpIn', 'subColor', 'rpSub', 'color'),
+    wire('rpIn', 'amountText', 'rpAmount', 'text'),
+    wire('rpIn', 'amountColor', 'rpAmount', 'color'),
+    wire('rpIn', 'detail', 'rpDetail', 'text'),
+    wire('rpIn', 'tickShown', 'rpTick', 'mounted'),
+    wire('rpIn', 'tickHead', 'rpTickHead', 'text'),
+    wire('rpIn', 'tickOn', 'rpTickOn', 'Value'),
+    wire('rpTickOn', 'Value', 'rpOut', 'tickOn'),
+    wire('rpIn', 'tickAmount', 'rpTickAmount', 'startValue'),
+    wire('rpTickAmount', 'onTextChanged', 'rpOut', 'tickAmount'),
+    wire('rpTickAmount', 'onTextChanged', 'rpShort', 'in-typed'),
+    wire('rpIn', 'remaining', 'rpShort', 'in-remaining'),
+    wire('rpShort', 'out-short', 'rpRestLine', 'mounted'),
+    wire('rpShort', 'out-short', 'rpRest', 'mounted'),
+    wire('rpShort', 'out-restLine', 'rpRestLine', 'text'),
+    wire('rpIn', 'rests', 'rpRest', 'items'),
+    wire('rpIn', 'restDefault', 'rpRest', 'value'),
+    wire('rpRest', 'value', 'rpOut', 'tickRest'),
+    wire('rpTickIt', 'onClick', 'rpOut', 'tick'),
+    wire('rpIn', 'tickShown', 'rpActs', 'mounted'),
+    wire('rpIn', 'changeLabel', 'rpChangeOne', 'label'),
+    wire('rpChangeOne', 'onClick', 'rpOut', 'changeOne'),
+    wire('rpIn', 'skipShown', 'rpSkip', 'mounted'),
+    wire('rpSkip', 'onClick', 'rpOut', 'skip'),
+    wire('rpIn', 'lostShown', 'rpLost', 'mounted'),
+    wire('rpLost', 'onClick', 'rpOut', 'lost'),
+    wire('rpIn', 'changeShown', 'rpChange', 'mounted'),
+    wire('rpIn', 'chDate', 'rpChDate', 'Value'),
+    wire('rpChDate', 'Value', 'rpOut', 'chDate'),
+    wire('rpIn', 'chAmount', 'rpChAmount', 'startValue'),
+    wire('rpChAmount', 'onTextChanged', 'rpOut', 'chAmount'),
+    wire('rpIn', 'chNote', 'rpChNote', 'startValue'),
+    wire('rpChNote', 'onTextChanged', 'rpOut', 'chNote'),
+    wire('rpIn', 'chHint', 'rpChHint', 'text'),
+    wire('rpSaveOne', 'onClick', 'rpOut', 'saveOne'),
+    wire('rpIn', 'resetShown', 'rpResetOne', 'mounted'),
+    wire('rpResetOne', 'onClick', 'rpOut', 'resetOne'),
+    wire('rpIn', 'closedShown', 'rpClosed', 'mounted'),
+    wire('rpIn', 'closedText', 'rpClosedText', 'text'),
+    wire('rpUntick', 'onClick', 'rpOut', 'untick'),
+    wire('rpIn', 'hopedShown', 'rpHoped', 'mounted'),
+    wire('rpIn', 'hopedText', 'rpHopedText', 'text'),
+    wire('rpAgreed', 'onClick', 'rpOut', 'agreed'),
+    wire('rpIn', 'billShown', 'rpBill', 'mounted'),
+    wire('rpIn', 'billText', 'rpBillText', 'text'),
+    wire('rpIn', 'sendShown', 'rpSend', 'mounted'),
+    wire('rpIn', 'sentOn', 'rpSentOn', 'Value'),
+    wire('rpSentOn', 'Value', 'rpOut', 'sentOn'),
+    wire('rpIn', 'sentAmountShown', 'rpSentAmountBox', 'mounted'),
+    wire('rpIn', 'sentAmount', 'rpSentAmount', 'startValue'),
+    wire('rpSentAmount', 'onTextChanged', 'rpOut', 'sentAmount'),
+    wire('rpMarkSent', 'onClick', 'rpOut', 'markSent'),
+    wire('rpIn', 'unsendShown', 'rpUnsend', 'mounted'),
+    wire('rpUnsend', 'onClick', 'rpOut', 'unsend'),
+    wire('rpIn', 'fromShown', 'rpFrom', 'mounted'),
+    wire('rpIn', 'fromText', 'rpFromText', 'text'),
+    wire('rpIn', 'itemLabel', 'rpChangeItem', 'label'),
+    wire('rpChangeItem', 'onClick', 'rpOut', 'changeItem'),
+    wire('rpIn', 'endShown', 'rpEndItem', 'mounted'),
+    wire('rpEndItem', 'onClick', 'rpOut', 'endItem'),
+    wire('rpBack', 'onClick', 'rpOut', 'back'),
+    wire('rpIn', 'key', 'rpReset', 'in-key'),
+    ...resetBoxes('rpReset', ['rpTickAmount', 'rpChAmount', 'rpChNote', 'rpSentAmount']),
+    wire('rpIn', 'shown', 'rpClosing', 'in-shown'),
+    ...['rpTickAmount', 'rpChAmount', 'rpChNote', 'rpSentAmount'].map((id) => wire('rpClosing', 'out-closed', id, 'clear'))
+  ]
+};
+
+const MONEY_END_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['title', 'string'], ['text', 'string'], ['choices', '*'], ['at', 'string']];
+const MONEY_END_OUTS: Array<[string, string]> = [['at', 'string'], ['go', 'signal'], ['cancel', 'signal'], ['back', 'signal']];
+
+/** M5 / M10 — *End it*: pick the last repeat that happens. Nothing is deleted; the ticked ones stay in Past. */
+const MONEY_END: Tpl010Component = {
+  path: 'Week/Money end',
+  description: 'Ending a money item: pick the last repeat that happens. Nothing is deleted, and the ones already ticked stay in Past.',
+  ...iface(MONEY_END_FIELDS, MONEY_END_OUTS),
+  nodes: [
+    inputs('meIn', 'The item', MONEY_END_FIELDS),
+    outputs('meOut', 'Ended', MONEY_END_OUTS),
+    group('meRoot', 'End an item', undefined, COLUMN('var(--space-3)')),
+    PHONE_BACK('meBack', 'meRoot'),
+    text('meTitle', 'Which item', 'meRoot', '', { ...wide(T_TITLE), as: 'h3', fontSize: px(19) }),
+    place('meAt', 'net.noodl.controls.options', 'The last one that happens', 'meRoot', PICK('The last one that happens')),
+    text('meText', 'What ending it does', 'meRoot', '', wide(T_META)),
+    group('meButtons', 'Buttons', 'meRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('meGo', BUTTON, 'End it', 'meButtons', { ...BTN_PRIMARY, label: 'End it' }),
+    place('meCancel', BUTTON, 'Do not end it', 'meButtons', { ...BTN_OUTLINE, label: 'Cancel' })
+  ],
+  connections: [
+    wire('meIn', 'shown', 'meRoot', 'mounted'),
+    wire('meIn', 'title', 'meTitle', 'text'),
+    wire('meIn', 'text', 'meText', 'text'),
+    wire('meIn', 'choices', 'meAt', 'items'),
+    wire('meIn', 'at', 'meAt', 'value'),
+    wire('meAt', 'value', 'meOut', 'at'),
+    wire('meGo', 'onClick', 'meOut', 'go'),
+    wire('meCancel', 'onClick', 'meOut', 'cancel'),
+    wire('meBack', 'onClick', 'meOut', 'back')
+  ]
+};
+
+const MONEY_BALANCE_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['on', 'string'], ['hint', 'string'], ['rows', 'array'], ['hasRows', 'boolean'], ['note', 'string']];
+const MONEY_BALANCE_OUTS: Array<[string, string]> = [
+  ['on', 'string'], ['amount', 'string'], ['save', 'signal'], ['cancel', 'signal'],
+  ['happened', 'signal'], ['lost', 'signal'], ['part', 'signal'], ['key', 'string'], ['back', 'signal']
+];
+
+/**
+ * M11 — **recording the balance is the moment of truth.** What the bank says, on a day; and every
+ * unticked thing dated on or before today, each answered where it stands (a Balance row).
+ */
+const MONEY_BALANCE: Tpl010Component = {
+  path: 'Week/Money balance',
+  description: 'Record what the bank says, and answer for everything that should have happened by now and is not ticked: it happened, part of it did, it is lost, or not yet.',
+  ...iface(MONEY_BALANCE_FIELDS, MONEY_BALANCE_OUTS),
+  repeats: { source: 'array', rowFields: BALANCE_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.datePicker, C.balanceRow],
+  nodes: [
+    inputs('mbIn', 'The reading', MONEY_BALANCE_FIELDS),
+    outputs('mbOut', 'Recorded', MONEY_BALANCE_OUTS),
+    group('mbRoot', 'Record balance', undefined, COLUMN('var(--space-3)')),
+    PHONE_BACK('mbBack', 'mbRoot'),
+    text('mbTitle', 'Title', 'mbRoot', 'Record balance', { ...wide(T_TITLE), as: 'h3', fontSize: px(19) }),
+    text('mbLead', 'What it is for', 'mbRoot', 'What your bank says. Every projection starts from the latest one.', wide(T_META)),
+    group('mbRow', 'The day and the balance', 'mbRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('mbOnBox', 'The day', 'mbRow', { ...COLUMN('var(--space-0)'), width: pct(55) }),
+    place('mbOn', C.datePicker, 'The day', 'mbOnBox', { Label: 'On', 'Show Label': true }),
+    group('mbAmountBox', 'The balance', 'mbRow', { ...COLUMN('var(--space-0)'), width: pct(45) }),
+    place('mbAmount', TEXT_INPUT, 'The balance', 'mbAmountBox', BOX('Balance, €', 'number')),
+    text('mbHint', 'What the app thinks it is', 'mbRoot', '', wide(T_META)),
+    group('mbLate', 'Not ticked yet', 'mbRoot', COLUMN('var(--space-2)')),
+    text('mbLateLabel', 'Label', 'mbLate', 'Not ticked yet, dated on or before today', wide(T_LABEL)),
+    place('mbEach', FOR_EACH, 'One question per thing', 'mbLate', { template: C.balanceRow, templateType: 'explicit' }),
+    text('mbNote', 'What not yet means', 'mbRoot', '', wide(T_META)),
+    group('mbButtons', 'Buttons', 'mbRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('mbSave', BUTTON, 'Record it', 'mbButtons', { ...BTN_PRIMARY, label: 'Record it' }),
+    place('mbCancel', BUTTON, 'Do not record it', 'mbButtons', { ...BTN_OUTLINE, label: 'Cancel' }),
+    derive('mbClosing', 'Clear the box when it closes', SHEET_SCRIPT([]))
+  ],
+  connections: [
+    wire('mbIn', 'shown', 'mbRoot', 'mounted'),
+    wire('mbIn', 'on', 'mbOn', 'Value'),
+    wire('mbOn', 'Value', 'mbOut', 'on'),
+    wire('mbIn', 'hint', 'mbAmount', 'startValue'),
+    wire('mbAmount', 'onTextChanged', 'mbOut', 'amount'),
+    wire('mbIn', 'hasRows', 'mbLate', 'mounted'),
+    wire('mbIn', 'rows', 'mbEach', 'items'),
+    wire('mbEach', 'itemOutputSignal-happened', 'mbOut', 'happened'),
+    wire('mbEach', 'itemOutputSignal-lost', 'mbOut', 'lost'),
+    wire('mbEach', 'itemOutputSignal-part', 'mbOut', 'part'),
+    wire('mbEach', 'itemOutput-key', 'mbOut', 'key'),
+    wire('mbIn', 'note', 'mbNote', 'text'),
+    wire('mbSave', 'onClick', 'mbOut', 'save'),
+    wire('mbCancel', 'onClick', 'mbOut', 'cancel'),
+    wire('mbBack', 'onClick', 'mbOut', 'back'),
+    wire('mbIn', 'shown', 'mbClosing', 'in-shown'),
+    wire('mbClosing', 'out-closed', 'mbAmount', 'clear')
+  ]
+};
+
+/** What the item editor holds: every field of a MoneyItem a person types (M9). */
+const MONEY_EDIT_VALUES: Array<[string, string]> = [
+  ['label', 'string'], ['dir', 'string'], ['amount', 'string'], ['repeat', 'string'], ['date', 'string'], ['until', 'string'],
+  ['monthEnd', 'boolean'], ['projectId', 'string'], ['billDate', 'string'], ['billLeadDays', 'string'], ['fromHours', 'boolean'],
+  ['likelihood', 'string'], ['note', 'string']
+];
+const MONEY_EDITOR_FIELDS: Array<[string, string]> = [
+  ['shown', 'boolean'], ['key', 'string'], ['title', 'string'], ['sub', 'string'], ['dirs', '*'], ['repeats', '*'], ['projects', '*'],
+  // One project per line as { id, billing, terms, rate }, so the form can say what a project changes as it is picked.
+  ['projectTerms', 'array'], ['saveLabel', 'string'],
+  ...MONEY_EDIT_VALUES
+];
+const MONEY_EDITOR_OUTS: Array<[string, string]> = [...MONEY_EDIT_VALUES, ['save', 'signal'], ['cancel', 'signal'], ['back', 'signal']];
+
+/**
+ * **The item editor** (§4.1, grows out of the cash editor). Label, in or out, amount, schedule
+ * (M3's five), the date, the last day of the month, until, project — and for a client: when the
+ * bill goes out, with the due date **pre-filled from the project's payment terms** (M5: that is
+ * the whole of the automation); for an hourly one, *fill the amount from the hours* (M23);
+ * likelihood (M7) and a note. Nothing is required but a label, an amount and a date (M9).
+ *
+ * The form rearranges itself as it is filled in — a monthly item offers the last day of the month,
+ * a client's one-off offers its bill date — so a Function inside it reads what is picked now, not
+ * what the pane last sent.
+ */
+const MONEY_EDITOR: Tpl010Component = {
+  path: 'Week/Money editor',
+  description: 'One money item as a form: what it is, in or out, how much, how often and from when, until when, which project, when its bill goes out, how likely it is, and a note.',
+  ...iface(MONEY_EDITOR_FIELDS, MONEY_EDITOR_OUTS),
+  instantiates: [C.datePicker],
+  nodes: [
+    inputs('edIn', 'The item as it is', MONEY_EDITOR_FIELDS),
+    outputs('edOut', 'The item as it should be', MONEY_EDITOR_OUTS),
+    group('edRoot', 'Money item editor', undefined, COLUMN('var(--space-3)')),
+    PHONE_BACK('edBack', 'edRoot'),
+    group('edHead', 'What this form is', 'edRoot', COLUMN('var(--space-0-5)')),
+    text('edTitle', 'What this form is', 'edHead', '', { ...wide(T_TITLE), as: 'h3', fontSize: px(19) }),
+    text('edSub', 'What saving it changes', 'edHead', '', wide(T_META)),
+    place('edLabel', TEXT_INPUT, 'What it is', 'edRoot', BOX('Label')),
+    group('edRow1', 'In or out, and how much', 'edRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('edDirBox', 'In or out', 'edRow1', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    place('edDir', 'net.noodl.controls.options', 'In or out', 'edDirBox', PICK('In or out')),
+    group('edAmountBox', 'How much', 'edRow1', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    place('edAmount', TEXT_INPUT, 'How much', 'edAmountBox', BOX('Amount, €', 'number')),
+    group('edRow2', 'How often, and whose', 'edRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('edRepeatBox', 'How often', 'edRow2', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    place('edRepeat', 'net.noodl.controls.options', 'How often', 'edRepeatBox', PICK('Happens')),
+    group('edProjectBox', 'Whose', 'edRow2', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    place('edProject', 'net.noodl.controls.options', 'Which project, if any', 'edProjectBox', { ...PICK('Project (optional)'), placeholder: 'No project' }),
+    group('edRow3', 'The dates', 'edRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end', flexWrap: 'wrap' }),
+    group('edBillBox', 'When the bill goes out', 'edRow3', { ...COLUMN('var(--space-0)'), width: pct(48) }),
+    place('edBillDate', C.datePicker, 'When the bill goes out', 'edBillBox', { Label: 'Bill goes out', 'Show Label': true }),
+    group('edDateBox', 'The date', 'edRow3', { ...COLUMN('var(--space-0)'), width: pct(48) }),
+    place('edDate', C.datePicker, 'The date', 'edDateBox', { 'Show Label': true }),
+    group('edUntilBox', 'Until', 'edRow3', { ...COLUMN('var(--space-0)'), width: pct(48) }),
+    place('edUntil', C.datePicker, 'The last date', 'edUntilBox', { Label: 'Last date (optional)', 'Show Label': true }),
+    text('edDueHint', 'Where the due date came from', 'edRoot', '', wide(T_META)),
+    place('edMonthEnd', 'net.noodl.controls.checkbox', 'On the last day of the month', 'edRoot', TICK_BOX('On the last day of the month')),
+    place('edLead', TEXT_INPUT, 'Bill goes out this many days before it is due', 'edRoot', BOX('Bill goes out, days before it’s due', 'number')),
+    place('edFromHours', 'net.noodl.controls.checkbox', 'Fill the amount from the hours', 'edRoot', TICK_BOX('Fill the amount from the hours logged (hourly)')),
+    group('edRow4', 'Likelihood and note', 'edRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('edLikeBox', 'How likely', 'edRow4', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    place('edLikelihood', TEXT_INPUT, 'How likely, in percent', 'edLikeBox', BOX('Likelihood, %', 'number')),
+    group('edNoteBox', 'A note', 'edRow4', { ...COLUMN('var(--space-0)'), width: pct(60) }),
+    place('edNote', TEXT_INPUT, 'A note', 'edNoteBox', BOX('Note (optional)')),
+    text('edLikeHint', 'What likelihood means', 'edRoot', '100 is expected. Less is hoped money, which is never in a balance.', wide(T_META)),
+    group('edButtons', 'Buttons', 'edRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('edSave', BUTTON, 'Save the item', 'edButtons', { ...BTN_PRIMARY }),
+    place('edCancel', BUTTON, 'Stop editing the item', 'edButtons', { ...BTN_OUTLINE, label: 'Cancel' }),
+    /**
+     * The form's own shape, from what is picked NOW. A client's one-off asks for the bill date and
+     * pre-fills the due date from the project's terms whenever the bill date or the project changes
+     * (M5); a typed due date stays until one of those changes again.
+     */
+    derive(
+      'edShape',
+      'Which fields this item needs',
+      `var rep = String(Inputs.repeat || 'once');
+var pid = String(Inputs.projectId || '');
+var dir = String(Inputs.dir || 'in');
+var list = Inputs.projectTerms || [];
+var p = null;
+for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === pid) p = list[i];
+var client = !!p && dir === 'in';
+Outputs.untilShown = rep !== 'once';
+Outputs.monthEndShown = rep === 'monthly' || rep === 'quarterly';
+Outputs.billShown = client && rep === 'once';
+Outputs.leadShown = client && rep !== 'once';
+Outputs.fromHoursShown = client && !!p && p.billing !== 'fixed';
+Outputs.dateLabel = client ? (rep === 'once' ? 'Due' : 'First due') : rep === 'once' ? 'Date' : 'First date';
+var bill = String(Inputs.billDate || '');
+var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(bill);
+var terms = p ? Number(p.terms) : NaN;
+var stamp = pid + '|' + bill;
+if (this.stamp === undefined) this.stamp = stamp;
+if (client && rep === 'once' && m && isFinite(terms) && this.stamp !== stamp) {
+  var d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + Math.round(terms)));
+  Outputs.due = d.toISOString().slice(0, 10);
+}
+this.stamp = stamp;
+Outputs.dueHint = client && rep === 'once' && isFinite(terms) ? 'Due ' + Math.round(terms) + ' days after the bill: ' + String(p.name || 'the project') + '\\u2019s payment terms.' : '';`
+    ),
+    derive('edClosing', 'Clear the boxes on close; tick the two boxes to match the item', SHEET_SCRIPT(['monthEnd', 'fromHours'])),
+    derive('edReset', 'Put the boxes back when the item changes', RESET_ON_KEY)
+  ],
+  connections: [
+    wire('edIn', 'shown', 'edRoot', 'mounted'),
+    wire('edIn', 'title', 'edTitle', 'text'),
+    wire('edIn', 'sub', 'edSub', 'text'),
+    wire('edIn', 'saveLabel', 'edSave', 'label'),
+    ...(
+      [['label', 'edLabel'], ['amount', 'edAmount'], ['billLeadDays', 'edLead'], ['likelihood', 'edLikelihood'], ['note', 'edNote']] as Array<[string, string]>
+    ).flatMap(([f, id]) => [wire('edIn', f, id, 'startValue'), wire(id, 'onTextChanged', 'edOut', f)]),
+    wire('edIn', 'dirs', 'edDir', 'items'),
+    wire('edIn', 'dir', 'edDir', 'value'),
+    wire('edDir', 'value', 'edOut', 'dir'),
+    wire('edIn', 'repeats', 'edRepeat', 'items'),
+    wire('edIn', 'repeat', 'edRepeat', 'value'),
+    wire('edRepeat', 'value', 'edOut', 'repeat'),
+    wire('edIn', 'projects', 'edProject', 'items'),
+    wire('edIn', 'projectId', 'edProject', 'value'),
+    wire('edProject', 'value', 'edOut', 'projectId'),
+    wire('edIn', 'billDate', 'edBillDate', 'Value'),
+    wire('edBillDate', 'Value', 'edOut', 'billDate'),
+    wire('edIn', 'date', 'edDate', 'Value'),
+    wire('edShape', 'out-due', 'edDate', 'Value'),
+    wire('edDate', 'Value', 'edOut', 'date'),
+    wire('edIn', 'until', 'edUntil', 'Value'),
+    wire('edUntil', 'Value', 'edOut', 'until'),
+    wire('edRepeat', 'value', 'edShape', 'in-repeat'),
+    wire('edProject', 'value', 'edShape', 'in-projectId'),
+    wire('edDir', 'value', 'edShape', 'in-dir'),
+    wire('edBillDate', 'Value', 'edShape', 'in-billDate'),
+    wire('edIn', 'projectTerms', 'edShape', 'in-projectTerms'),
+    wire('edShape', 'out-untilShown', 'edUntilBox', 'mounted'),
+    wire('edShape', 'out-monthEndShown', 'edMonthEnd', 'mounted'),
+    wire('edShape', 'out-billShown', 'edBillBox', 'mounted'),
+    wire('edShape', 'out-leadShown', 'edLead', 'mounted'),
+    wire('edShape', 'out-fromHoursShown', 'edFromHours', 'mounted'),
+    wire('edShape', 'out-dateLabel', 'edDate', 'Label'),
+    wire('edShape', 'out-dueHint', 'edDueHint', 'text'),
+    wire('edIn', 'shown', 'edClosing', 'in-shown'),
+    wire('edIn', 'monthEnd', 'edClosing', 'in-monthEnd'),
+    wire('edIn', 'fromHours', 'edClosing', 'in-fromHours'),
+    wire('edClosing', 'out-monthEndOn', 'edMonthEnd', 'check'),
+    wire('edClosing', 'out-monthEndOff', 'edMonthEnd', 'uncheck'),
+    wire('edClosing', 'out-fromHoursOn', 'edFromHours', 'check'),
+    wire('edClosing', 'out-fromHoursOff', 'edFromHours', 'uncheck'),
+    wire('edMonthEnd', 'checked', 'edOut', 'monthEnd'),
+    wire('edFromHours', 'checked', 'edOut', 'fromHours'),
+    ...['edLabel', 'edAmount', 'edLead', 'edLikelihood', 'edNote'].map((id) => wire('edClosing', 'out-closed', id, 'clear')),
+    wire('edIn', 'key', 'edReset', 'in-key'),
+    ...resetBoxes('edReset', ['edLabel', 'edAmount', 'edLead', 'edLikelihood', 'edNote']),
+    wire('edSave', 'onClick', 'edOut', 'save'),
+    wire('edCancel', 'onClick', 'edOut', 'cancel'),
+    wire('edBack', 'onClick', 'edOut', 'back')
+  ]
+};
+
+/** The pane's four parts and the editor, passed through the sheet under their own prefix (a sheet cannot have two inputs called `shown`). */
+const MONEY_PARTS: Array<{ prefix: string; id: string; type: string; label: string; ins: Array<[string, string]>; outs: Array<[string, string]> }> = [
+  { prefix: 'sum', id: 'msSum', type: C.moneySummary, label: 'What the target is made of', ins: MONEY_SUMMARY_FIELDS, outs: MONEY_SUMMARY_OUTS },
+  { prefix: 'rp', id: 'msRepeat', type: C.moneyRepeat, label: 'The repeat picked', ins: MONEY_REPEAT_FIELDS, outs: MONEY_REPEAT_OUTS },
+  { prefix: 'end', id: 'msEnd', type: C.moneyEnd, label: 'Ending an item', ins: MONEY_END_FIELDS, outs: MONEY_END_OUTS },
+  { prefix: 'bal', id: 'msBal', type: C.moneyBalance, label: 'Record balance', ins: MONEY_BALANCE_FIELDS, outs: MONEY_BALANCE_OUTS },
+  { prefix: 'ed', id: 'msEditor', type: C.moneyEditor, label: 'The item as a form', ins: MONEY_EDITOR_FIELDS, outs: MONEY_EDITOR_OUTS }
+];
+const MONEY_SHEET_OWN: Array<[string, string]> = [
+  ['shown', 'boolean'], ['cardClass', 'string'], ['groups', 'array'], ['empty', 'boolean'], ['emptyText', 'string'], ['moreShown', 'boolean'], ['balanceText', 'string'],
+  ['upFill', 'string'], ['upInk', 'string'], ['pastFill', 'string'], ['pastInk', 'string'], ['recFill', 'string'], ['recInk', 'string']
+];
+const MONEY_SHEET_OWN_OUTS: Array<[string, string]> = [
+  ['close', 'signal'], ['showUp', 'signal'], ['showPast', 'signal'], ['showRec', 'signal'], ['more', 'signal'],
+  ['add', 'signal'], ['record', 'signal'], ['pick', 'signal'], ['key', 'string'], ['kind', 'string']
+];
+const MONEY_SHEET_FIELDS: Array<[string, string]> = [...MONEY_SHEET_OWN, ...MONEY_PARTS.flatMap((pt) => pt.ins.map(([n, t]): [string, string] => [under(pt.prefix, n), t]))];
+const MONEY_SHEET_OUTS: Array<[string, string]> = [...MONEY_SHEET_OWN_OUTS, ...MONEY_PARTS.flatMap((pt) => pt.outs.map(([n, t]): [string, string] => [under(pt.prefix, n), t]))];
+
+const FILTER_BUTTON = (label: string) => ({
+  ...BTN_GHOST,
+  borderStyle: 'none',
+  borderWidth: undefined,
+  borderColor: undefined,
+  fontWeight: 'var(--font-semibold)',
+  paddingTop: 'var(--space-1)',
+  paddingBottom: 'var(--space-1)',
+  label
+});
+
+/**
+ * **M1 — the Money modal**, opened from the € in the app bar. The same frame as the projects card:
+ * the list on the left — *Upcoming · Past · Recurring* — and the picked thing on the right. Under
+ * the phone breakpoint it fills the screen and the list and the pane take turns (`cardClass`
+ * carries `planner-money-pane` while the pane is the one showing).
+ */
+const MONEY_SHEET: Tpl010Component = {
+  path: 'Week/Money sheet',
+  description: 'The Money modal: everything that comes in and goes out, as Upcoming, Past or Recurring, with the balance at the top, and whichever one you picked on the right — or the form to add or change one, or to record the balance.',
+  ...iface(MONEY_SHEET_FIELDS, MONEY_SHEET_OUTS),
+  repeats: { source: 'array', rowFields: MONEY_MONTH_FIELDS.map(([n]) => n) },
+  instantiates: [C.moneyMonth, C.moneySummary, C.moneyRepeat, C.moneyEnd, C.moneyBalance, C.moneyEditor],
+  nodes: [
+    inputs('msIn', 'The money', MONEY_SHEET_FIELDS),
+    outputs('msOut', 'What you did in it', MONEY_SHEET_OUTS),
+    group('msScrim', 'Behind the modal', undefined, {
+      sizeMode: 'explicit',
+      width: pct(100),
+      height: pct(100),
+      position: 'fixed',
+      backgroundColor: 'var(--scrim)',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      styleCss: 'z-index: 45;'
+    }),
+    group('msCard', 'The modal', 'msScrim', {
+      cssClassName: 'planner-over planner-money', ...KEEPS_CLICKS,
+      ...CARD,
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      sizeMode: 'explicit',
+      width: pct(92),
+      maxWidth: px(1100),
+      height: pct(88),
+      styleCss: 'overflow: hidden;'
+    }),
+    group('msTop', 'Title, filter, balance', 'msCard', {
+      ...ROW('var(--space-3)'),
+      flexWrap: 'wrap',
+      rowGap: 'var(--space-2)',
+      paddingLeft: 'var(--space-4)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2-5)',
+      paddingBottom: 'var(--space-2-5)',
+      borderBottomStyle: 'solid',
+      borderBottomWidth: 'var(--border-1)',
+      borderBottomColor: 'var(--border)'
+    }),
+    text('msTitle', 'Money', 'msTop', 'Money', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
+    group('msFilter', 'Which list', 'msTop', {
+      ...ROW_TIGHT('var(--space-0-5)'),
+      backgroundColor: 'var(--muted)',
+      borderRadius: 'var(--radius-md)',
+      paddingLeft: 'var(--space-0-5)',
+      paddingRight: 'var(--space-0-5)',
+      paddingTop: 'var(--space-0-5)',
+      paddingBottom: 'var(--space-0-5)'
+    }),
+    place('msUp', BUTTON, 'Show what is coming', 'msFilter', FILTER_BUTTON('Upcoming')),
+    place('msPast', BUTTON, 'Show what has happened', 'msFilter', FILTER_BUTTON('Past')),
+    place('msRec', BUTTON, 'Show what repeats', 'msFilter', FILTER_BUTTON('Recurring')),
+    group('msGap', 'Room between the filter and the balance', 'msTop', { sizeMode: 'explicit', width: px(1), height: px(1), styleCss: 'flex: 1 1 0;' }),
+    text('msBalance', 'The balance', 'msTop', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-sm)' }),
+    place('msClose', BUTTON, 'Close Money', 'msTop', BTN_ICON('icon-x', 'Close')),
+
+    group('msBody', 'The list and the pane', 'msCard', {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      sizeMode: 'explicit',
+      width: pct(100),
+      height: pct(100),
+      cssClassName: 'planner-money-body',
+      styleCss: 'overflow: hidden; min-height: 0; flex: 1 1 0;'
+    }),
+    group('msList', 'The list', 'msBody', {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      sizeMode: 'explicit',
+      width: pct(60),
+      height: pct(100),
+      backgroundColor: 'var(--background)',
+      borderRightStyle: 'solid',
+      borderRightWidth: 'var(--border-1)',
+      borderRightColor: 'var(--border)',
+      cssClassName: 'planner-over-col planner-money-list'
+    }),
+    group('msScroll', 'What is in it', 'msList', {
+      ...COLUMN('var(--space-1)'),
+      paddingLeft: 'var(--space-2)',
+      paddingRight: 'var(--space-2)',
+      paddingTop: 'var(--space-1)',
+      paddingBottom: 'var(--space-3)',
+      styleCss: 'overflow: auto; flex: 1 1 0; min-height: 0;'
+    }),
+    place('msEach', FOR_EACH, 'One group per month', 'msScroll', { template: C.moneyMonth, templateType: 'explicit' }),
+    text('msEmpty', 'When there is nothing', 'msScroll', '', { ...wide(T_META), marginLeft: 'var(--space-2)', marginTop: 'var(--space-3)' }),
+    place('msMore', BUTTON, 'Show three more months', 'msScroll', { ...BTN_GHOST, label: 'Show three more months' }),
+    group('msFoot', 'Add and record', 'msList', {
+      ...ROW('var(--space-2)'),
+      flexWrap: 'wrap',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)',
+      borderTopStyle: 'solid',
+      borderTopWidth: 'var(--border-1)',
+      borderTopColor: 'var(--border)'
+    }),
+    place('msAdd', BUTTON, 'Add money', 'msFoot', { ...BTN_PRIMARY, label: '+ Add money' }),
+    place('msRecord', BUTTON, 'Record the balance', 'msFoot', { ...BTN_OUTLINE, label: 'Record balance' }),
+    group('msSide', 'The one picked', 'msBody', {
+      ...COLUMN('var(--space-0)'),
+      width: pct(40),
+      cssClassName: 'planner-over-col planner-money-side',
+      paddingLeft: 'var(--space-4)',
+      paddingRight: 'var(--space-4)',
+      paddingTop: 'var(--space-3)',
+      paddingBottom: 'var(--space-4)',
+      styleCss: 'overflow: auto; min-height: 0;'
+    }),
+    ...MONEY_PARTS.map((pt) => place(pt.id, pt.type, pt.label, 'msSide'))
+  ],
+  connections: [
+    wire('msIn', 'shown', 'msScrim', 'mounted'),
+    // 🔴 `cssClassName` is one port: the wire REPLACES the parameter, so what it carries includes planner-over.
+    wire('msIn', 'cardClass', 'msCard', 'cssClassName'),
+    wire('msIn', 'balanceText', 'msBalance', 'text'),
+    ...(['up', 'past', 'rec'] as const).flatMap((f) => {
+      const id = f === 'up' ? 'msUp' : f === 'past' ? 'msPast' : 'msRec';
+      return [wire('msIn', `${f}Fill`, id, 'backgroundColor'), wire('msIn', `${f}Ink`, id, 'color')];
+    }),
+    wire('msUp', 'onClick', 'msOut', 'showUp'),
+    wire('msPast', 'onClick', 'msOut', 'showPast'),
+    wire('msRec', 'onClick', 'msOut', 'showRec'),
+    wire('msIn', 'groups', 'msEach', 'items'),
+    wire('msEach', 'itemOutputSignal-pick', 'msOut', 'pick'),
+    wire('msEach', 'itemOutput-key', 'msOut', 'key'),
+    wire('msEach', 'itemOutput-kind', 'msOut', 'kind'),
+    wire('msIn', 'empty', 'msEmpty', 'mounted'),
+    wire('msIn', 'emptyText', 'msEmpty', 'text'),
+    wire('msIn', 'moreShown', 'msMore', 'mounted'),
+    wire('msMore', 'onClick', 'msOut', 'more'),
+    wire('msAdd', 'onClick', 'msOut', 'add'),
+    wire('msRecord', 'onClick', 'msOut', 'record'),
+    wire('msClose', 'onClick', 'msOut', 'close'),
+    // The scrim closes the modal; the modal itself does not (a click inside must not shut it).
+    wire('msScrim', 'onClick', 'msOut', 'close'),
+    ...MONEY_PARTS.flatMap((pt) => [
+      ...pt.ins.map(([n]) => wire('msIn', under(pt.prefix, n), pt.id, n)),
+      ...pt.outs.map(([n]) => wire(pt.id, n, 'msOut', under(pt.prefix, n)))
+    ])
   ]
 };
 
@@ -1915,7 +2798,7 @@ const DAY_PICKER: Tpl010Component = {
  * Four fact slots, not a repeater: `Project.facts` is a short fixed list a person types in
  * the editor (Q2), and no project in the approved mockup carries more than four.
  */
-const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [
+const PROJECT_DETAIL_BASE: Array<[string, string]> = [
   ['name', 'string'], ['sub', 'string'],
   ['move', 'string'], ['hasMove', 'boolean'], ['worth', 'string'], ['hasWorth', 'boolean'],
   ['when', 'string'], ['whenColor', 'string'], ['mark', 'string'], ['soft', 'string'],
@@ -1927,10 +2810,20 @@ const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [
   ['facts', 'array'], ['bars', 'array'], ['boxes', 'array'],
   ['firstLabel', 'string'], ['lastLabel', 'string']
 ];
+/**
+ * §4.2 — **Billing**, on an earning project's card: hourly or fixed and the terms (M21), the bills
+ * it has, the next one, *this period* (M24: a fixed project's hours are a record and its €/h a
+ * check on the price; an hourly one's hours are the next bill — M23), and what was paid when.
+ * And M16: a move can become hoped money. These come from `Logic/Money pane`, not `Card rows`.
+ */
+const BILLING_FIELDS: Array<[string, string]> = [
+  ['billingShown', 'boolean'], ['billingTerms', 'string'], ['billingRows', 'array'], ['hopeShown', 'boolean'], ['hopedText', 'string'], ['hasHoped', 'boolean']
+];
+const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [...PROJECT_DETAIL_BASE, ...BILLING_FIELDS];
 
 const PROJECT_DETAIL_OUTS: Array<[string, string]> = [
   ['plan', 'signal'], ['moveIt', 'signal'], ['takeOut', 'signal'], ['edit', 'signal'], ['close', 'signal'],
-  ['planDate', 'string'], ['planHours', 'string']
+  ['planDate', 'string'], ['planHours', 'string'], ['addBill', 'signal'], ['addHope', 'signal']
 ];
 
 /**
@@ -1953,7 +2846,7 @@ const PROJECT_DETAIL: Tpl010Component = {
   description: 'One project in full: its next move and what that move is worth, its hours this week, six months of history, its facts, and the one line about it.',
   ...iface(PROJECT_DETAIL_FIELDS, PROJECT_DETAIL_OUTS),
   repeats: { source: 'array', rowFields: FACT_FIELDS.map(([n]) => n) },
-  instantiates: [C.sparkline, C.dayBoxes, C.factRow, C.datePicker],
+  instantiates: [C.sparkline, C.dayBoxes, C.factRow, C.datePicker, C.keyLine],
   nodes: [
     inputs('pdIn', 'The project', PROJECT_DETAIL_FIELDS),
     outputs('pdOut', 'What you did', PROJECT_DETAIL_OUTS),
@@ -1998,6 +2891,15 @@ const PROJECT_DETAIL: Tpl010Component = {
     place('pdPut', BUTTON, 'Put it in the week', 'pdActs', { ...BTN_PRIMARY, label: 'Put it in the week' }),
     place('pdMoveIt', BUTTON, 'Move it to that day', 'pdActs', { ...BTN_OUTLINE, label: 'Move it' }),
     place('pdTakeOut', BUTTON, 'Take it out of the week', 'pdActs', { ...BTN_GHOST, label: 'Take it out' }),
+    // M16 — the move can become hoped money, once; after that the card says what is hoped.
+    place('pdHope', BUTTON, 'Add the move as hoped money', 'pdMove', { ...BTN_GHOST, label: 'Add as hoped money' }),
+    text('pdHoped', 'The hoped money it already has', 'pdMove', '', wide(T_META)),
+
+    group('pdBilling', 'Billing', 'pdRoot', COLUMN('var(--space-1-5)')),
+    text('pdBillingLabel', 'Label', 'pdBilling', 'Billing', wide(T_LABEL)),
+    text('pdBillingTerms', 'Hourly or fixed, and the terms', 'pdBilling', '', { ...wide(T_META), color: 'var(--foreground)' }),
+    place('pdBillingEach', FOR_EACH, 'The bills, the next one, this period, the past', 'pdBilling', { template: C.keyLine, templateType: 'explicit' }),
+    place('pdAddBill', BUTTON, 'Add a bill for this project', 'pdBilling', { ...BTN_GHOST, borderStyle: 'dashed', label: '+ Add a bill' }),
 
     group('pdWeek', 'This week', 'pdRoot', COLUMN('var(--space-1)')),
     text('pdWeekLabel', 'How much this week', 'pdWeek', '', wide(T_LABEL)),
@@ -2068,6 +2970,14 @@ const PROJECT_DETAIL: Tpl010Component = {
     wire('pdPut', 'onClick', 'pdOut', 'plan'),
     wire('pdMoveIt', 'onClick', 'pdOut', 'moveIt'),
     wire('pdTakeOut', 'onClick', 'pdOut', 'takeOut'),
+    wire('pdIn', 'hopeShown', 'pdHope', 'mounted'),
+    wire('pdHope', 'onClick', 'pdOut', 'addHope'),
+    wire('pdIn', 'hasHoped', 'pdHoped', 'mounted'),
+    wire('pdIn', 'hopedText', 'pdHoped', 'text'),
+    wire('pdIn', 'billingShown', 'pdBilling', 'mounted'),
+    wire('pdIn', 'billingTerms', 'pdBillingTerms', 'text'),
+    wire('pdIn', 'billingRows', 'pdBillingEach', 'items'),
+    wire('pdAddBill', 'onClick', 'pdOut', 'addBill'),
     wire('pdEdit', 'onClick', 'pdOut', 'edit'),
     wire('pdClose', 'onClick', 'pdOut', 'close')
   ]
@@ -2126,6 +3036,7 @@ const PROJECT_CARD_FIELDS: Array<[string, string]> = [
 const PROJECT_CARD_OUTS: Array<[string, string]> = [
   ['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['moveIt', 'signal'], ['takeOut', 'signal'],
   ['planDate', 'string'], ['planHours', 'string'], ['close', 'signal'], ['edit', 'signal'], ['newProject', 'signal'],
+  ['addBill', 'signal'], ['addHope', 'signal'],
   ...CARD_EDITOR_OUTS
 ];
 
@@ -2203,6 +3114,8 @@ const PROJECT_CARD: Tpl010Component = {
     ...PROJECT_DETAIL_FIELDS.map(([n]) => wire('pcIn', n, 'pcDetail', n)),
     ...(['plan', 'moveIt', 'takeOut', 'planDate', 'planHours'] as const).map((n) => wire('pcDetail', n, 'pcOut', n)),
     wire('pcDetail', 'edit', 'pcOut', 'edit'),
+    wire('pcDetail', 'addBill', 'pcOut', 'addBill'),
+    wire('pcDetail', 'addHope', 'pcOut', 'addHope'),
     wire('pcDetail', 'close', 'pcOut', 'close'),
     wire('pcNew', 'onClick', 'pcOut', 'newProject'),
     ...PROJECT_EDITOR_FIELDS.map(([n]) => wire('pcIn', under('ed', n), 'pcEditor', n)),
@@ -2223,6 +3136,7 @@ const DRAWER_FIELDS: Array<[string, string]> = [
   ['tomorrowList', 'string'],
   ['tomorrowFocus', 'string'],
   ['tomorrowFocusColor', 'string'],
+  ['chaseShown', 'boolean'],
   ['shown', 'boolean']
 ];
 
@@ -2239,12 +3153,12 @@ const DRAWER_FIELDS: Array<[string, string]> = [
 const SHUTDOWN_DRAWER: Tpl010Component = {
   path: 'Week/Shutdown drawer',
   description: 'The evening drawer: what today came to, where the month stands, the one thing worth saying, what to do with what is not done, and tomorrow as it stands.',
-  ...iface(DRAWER_FIELDS, [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal']]),
+  ...iface(DRAWER_FIELDS, [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal'], ['chase', 'signal']]),
   repeats: { source: 'array', rowFields: CARRY_ROW_FIELDS.map(([n]) => n) },
   instantiates: [C.carryRow],
   nodes: [
     inputs('sdIn', 'Tonight', DRAWER_FIELDS),
-    outputs('sdOut', 'What you chose', [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal']]),
+    outputs('sdOut', 'What you chose', [['carry', 'signal'], ['drop', 'signal'], ['blockId', 'string'], ['close', 'signal'], ['chase', 'signal']]),
     group('sdScrim', 'Behind the drawer', undefined, {
       sizeMode: 'explicit',
       width: pct(100),
@@ -2286,6 +3200,8 @@ const SHUTDOWN_DRAWER: Tpl010Component = {
     text('sdDay', 'Today', 'sdCoach', '', wide(T_BODY)),
     text('sdMonth', 'The month', 'sdCoach', '', wide(T_META)),
     text('sdConcern', 'The one thing', 'sdCoach', '', { ...wide(T_BODY), fontWeight: 'var(--font-semibold)' }),
+    // M15 — late client money is the first concern, and the drawer opens it where it can be ticked.
+    place('sdChase', BUTTON, 'Open it in Money', 'sdCoach', { ...BTN_OUTLINE, label: 'Open it in Money' }),
 
     group('sdCarrySection', 'Not done today', 'sdPanel', COLUMN('var(--space-1)')),
     text('sdCarryLabel', 'Label', 'sdCarrySection', 'Not done today', wide(T_LABEL)),
@@ -2305,6 +3221,8 @@ const SHUTDOWN_DRAWER: Tpl010Component = {
     wire('sdIn', 'dayLine', 'sdDay', 'text'),
     wire('sdIn', 'monthLine', 'sdMonth', 'text'),
     wire('sdIn', 'concern', 'sdConcern', 'text'),
+    wire('sdIn', 'chaseShown', 'sdChase', 'mounted'),
+    wire('sdChase', 'onClick', 'sdOut', 'chase'),
     wire('sdIn', 'carryRows', 'sdEach', 'items'),
     wire('sdIn', 'nothingToCarry', 'sdAllDone', 'mounted'),
     wire('sdIn', 'tomorrowTitle', 'sdTomorrowLabel', 'text'),
@@ -2320,45 +3238,36 @@ const SHUTDOWN_DRAWER: Tpl010Component = {
 };
 
 /**
- * The only screen that holds money (§2: *"These are the only fields that hold real money in
- * the hosted app"*), and the reason the template ships with invented numbers and the hosted
- * app keeps the real ones.
+ * The numbers the week is worked out from, and no money list (M1, M2: money has its own modal
+ * now). §4.3: Settings keeps the focus ceiling and three money numbers a money item cannot say —
+ * **your usual hourly rate** (what the money still to earn by the hour is divided by, and where a
+ * new hourly project starts — M22), the **savings target** added to break-even to make the target
+ * (M13), and the **lowest balance before red** (M14). The household need, the partner's money and
+ * the four days money moves are money items now.
  *
- * R2's arithmetic is stated on the sheet rather than hidden: the month's billable target is
- * `(what the household needs − what the partner brings) ÷ your rate`. Q3 rules that the month
- * plan is **not** written automatically on the 1st — *Plan this month* writes it, and the week
- * asks for it until it exists.
+ * Q3 rules that the month plan is **not** written automatically on the 1st — *Plan this month*
+ * writes it, and the week asks for it until it exists.
  */
 const SETTINGS_FIELDS: Array<[string, string]> = [
-  ['rate', 'string'], ['householdNeed', 'string'], ['partnerIncome', 'string'], ['focusHours', 'string'],
-  ['partnerDay', 'string'], ['costsDay', 'string'], ['invoiceDay', 'string'], ['paymentTermsDays', 'string'],
-  ['targetLine', 'string'], ['planLine', 'string'], ['shown', 'boolean'],
-  // R23 — the money events, passed through to the editor under "cash…".
-  ...CASH_EDITOR_FIELDS.map(([n, t]): [string, string] => [under('cash', n), t])
+  ['rate', 'string'], ['focusHours', 'string'], ['savingsTarget', 'string'], ['lowWaterMark', 'string'],
+  ['targetLine', 'string'], ['planLine', 'string'], ['shown', 'boolean']
 ];
 const SETTINGS_OUTS: Array<[string, string]> = [
-  ['rate', 'string'], ['householdNeed', 'string'], ['partnerIncome', 'string'], ['focusHours', 'string'],
-  ['partnerDay', 'string'], ['costsDay', 'string'], ['invoiceDay', 'string'], ['paymentTermsDays', 'string'],
-  ['save', 'signal'], ['planMonth', 'signal'], ['close', 'signal'],
-  ...CASH_EDITOR_OUTS.map(([n, t]): [string, string] => [under('cash', n), t])
+  ['rate', 'string'], ['focusHours', 'string'], ['savingsTarget', 'string'], ['lowWaterMark', 'string'],
+  ['save', 'signal'], ['planMonth', 'signal'], ['close', 'signal'], ['openMoney', 'signal']
 ];
 
 const SETTINGS_NUMBERS: Array<[string, string, string]> = [
-  ['rate', 'Your rate, per hour', 'stRate'],
-  ['householdNeed', 'What the household needs a month', 'stNeed'],
-  ['partnerIncome', 'What your partner brings a month', 'stPartner'],
+  ['rate', 'Your usual hourly rate, €', 'stRate'],
   ['focusHours', 'Focused hours a day', 'stFocus'],
-  ['partnerDay', 'Day their contract pays', 'stPartnerDay'],
-  ['costsDay', 'Day the household costs go out', 'stCostsDay'],
-  ['invoiceDay', 'Day you invoice', 'stInvoiceDay'],
-  ['paymentTermsDays', 'Days you give them to pay', 'stTerms']
+  ['savingsTarget', 'Savings target, € a month', 'stSavings'],
+  ['lowWaterMark', 'Lowest balance before red, €', 'stLow']
 ];
 
 const SETTINGS_SHEET: Tpl010Component = {
   path: 'Week/Settings sheet',
-  description: 'The numbers the whole week is worked out from: your rate, what the household needs, what your partner brings, your focus ceiling, the four days money moves, and the money events the cash strip counts.',
+  description: 'The numbers the week is worked out from: your usual hourly rate, your focus ceiling, what you want to save a month, and how low the balance may go before it turns red. Money itself is in the Money modal.',
   ...iface(SETTINGS_FIELDS, SETTINGS_OUTS),
-  instantiates: [C.cashEditor],
   nodes: [
     inputs('stIn', 'What they are now', SETTINGS_FIELDS),
     outputs('stOut', 'What they should be', SETTINGS_OUTS),
@@ -2379,7 +3288,7 @@ const SETTINGS_SHEET: Tpl010Component = {
       ...COLUMN('var(--space-3)'),
       sizeMode: 'explicit',
       width: pct(50),
-      maxWidth: px(520),
+      maxWidth: px(480),
       maxHeight: pct(88),
       styleCss: 'overflow: auto;',
       paddingLeft: 'var(--space-4)',
@@ -2390,23 +3299,15 @@ const SETTINGS_SHEET: Tpl010Component = {
     group('stHead', 'Title and close', 'stCard', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
     text('stTitle', 'Settings', 'stHead', 'Settings', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
     place('stClose', BUTTON, 'Close the sheet', 'stHead', BTN_ICON('icon-x', 'Close')),
+    group('stMoneyRow', 'Where the money went', 'stCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    text('stMoneyWords', 'Where the money is now', 'stMoneyRow', 'What comes in and goes out lives in Money now.', wide(T_META)),
+    place('stToMoney', BUTTON, 'Open Money', 'stMoneyRow', { ...BTN_GHOST, label: 'Open Money (€)' }),
     text('stTarget', 'What these come to', 'stCard', '', wide(T_META)),
-    ...SETTINGS_NUMBERS.flatMap(([name, label, id]) => [
-      place(id, TEXT_INPUT, label, 'stCard', {
-        ...FIELD,
-        type: 'number',
-        useLabel: true,
-        label,
-        labelSpacing: 6,
-        labelfontSize: 'var(--text-sm)',
-        labelcolor: 'var(--foreground)'
-      })
-    ]),
+    ...SETTINGS_NUMBERS.map(([, label, id]) => place(id, TEXT_INPUT, label, 'stCard', BOX(label, 'number'))),
     text('stPlanLine', 'Whether this month is planned', 'stCard', '', wide(T_META)),
     group('stButtons', 'Buttons', 'stCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
     place('stSave', BUTTON, 'Save', 'stButtons', { ...BTN_PRIMARY, label: 'Save' }),
-    place('stPlan', BUTTON, 'Plan this month', 'stButtons', { ...BTN_OUTLINE, label: 'Plan this month' }),
-    place('stCash', C.cashEditor, 'The money events', 'stCard')
+    place('stPlan', BUTTON, 'Plan this month', 'stButtons', { ...BTN_OUTLINE, label: 'Plan this month' })
   ],
   connections: [
     wire('stIn', 'shown', 'stScrim', 'mounted'),
@@ -2416,8 +3317,7 @@ const SETTINGS_SHEET: Tpl010Component = {
     ...SETTINGS_NUMBERS.flatMap(([name, , id]) => [wire('stIn', name, id, 'startValue'), wire(id, 'onTextChanged', 'stOut', name)]),
     wire('stSave', 'onClick', 'stOut', 'save'),
     wire('stPlan', 'onClick', 'stOut', 'planMonth'),
-    ...CASH_EDITOR_FIELDS.map(([n]) => wire('stIn', under('cash', n), 'stCash', n)),
-    ...CASH_EDITOR_OUTS.map(([n]) => wire('stCash', n, 'stOut', under('cash', n))),
+    wire('stToMoney', 'onClick', 'stOut', 'openMoney'),
     wire('stClose', 'onClick', 'stOut', 'close'),
     wire('stScrim', 'onClick', 'stOut', 'close')
   ]
@@ -2429,8 +3329,9 @@ const SETTINGS_SHEET: Tpl010Component = {
 
 const PLANNER_DATA_INS: Array<[string, string]> = [['refresh', 'signal'], ['previousWeek', 'signal'], ['nextWeek', 'signal'], ['thisWeek', 'signal']];
 const PLANNER_DATA_OUTS: Array<[string, string]> = [
-  ['projects', 'array'], ['blocks', 'array'], ['monthPlans', 'array'], ['cashEvents', 'array'], ['settings', 'array'],
-  ['moveBlocks', 'array'], ['weekStart', 'string'], ['weekLabel', 'string'], ['month', 'string'], ['loaded', 'signal']
+  ['projects', 'array'], ['blocks', 'array'], ['monthPlans', 'array'], ['moneyItems', 'array'], ['moneyMarks', 'array'],
+  ['balanceReadings', 'array'], ['settings', 'array'], ['moveBlocks', 'array'], ['weekStart', 'string'], ['weekLabel', 'string'],
+  ['month', 'string'], ['marksSince', 'string'], ['loaded', 'signal']
 ];
 
 /**
@@ -2453,7 +3354,7 @@ const PLANNER_DATA_OUTS: Array<[string, string]> = [
  */
 const PLANNER_DATA: Tpl010Component = {
   path: 'Logic/Planner data',
-  description: 'The six queries the week is drawn from: your projects, the blocks in the weeks on screen, the move blocks from four weeks back, this month’s plan, the money coming and going, and your settings.',
+  description: 'The eight queries the week is drawn from: your projects, the blocks in the weeks on screen, the blocks from four weeks back, this month’s plan, your money items, the marks on them from thirteen months back, your balance readings, and your settings.',
   ...iface(PLANNER_DATA_INS, PLANNER_DATA_OUTS),
   nodes: [
     inputs('pnIn', 'When to load', PLANNER_DATA_INS),
@@ -2513,6 +3414,9 @@ Outputs.weekLabel = monday.getDate() + (sameMonth ? '' : ' ' + MON[monday.getMon
 Outputs.ready = !!parseDay(Inputs.weekStart);
 // R7c — the move blocks are asked for from four weeks back, whatever week is on screen.
 Outputs.moveSince = dayKey(addDays(startOfToday(), -28));
+// M10 — the marks on money items, from thirteen months back: a year of Past, and the month before it.
+var since = new Date(startOfToday().getFullYear(), startOfToday().getMonth() - 13, 1);
+Outputs.marksSince = dayKey(since);
 // Last line on purpose: the values above are delivered before the pulse that acts on them,
 // so the query parameters a fetch uses are never a week behind the week on screen.
 Outputs.fetch();`
@@ -2565,11 +3469,28 @@ Outputs.fetch();`
       storageLimit: 24,
       visualFilter: { combinator: 'and', rules: [{ property: 'month', operator: 'equal to', input: 'month' }] }
     }),
-    logic('pnCash', QUERY, 'The money coming and going', {
-      collectionName: 'CashEvent',
+    // M10 — every money item: they are few, and ending one keeps it (its `until`), so it is never deleted.
+    logic('pnItems', QUERY, 'Your money items', {
+      collectionName: 'MoneyItem',
       ...QUERY_OFF,
       storageLimit: 500,
-      visualSort: [{ property: 'date', order: 'ascending' }]
+      visualSort: [{ property: 'position', order: 'ascending' }]
+    }),
+    // The marks grow for ever — one per tick — so they are asked for from thirteen months back.
+    logic('pnMarks', QUERY, 'The marks on them, from thirteen months back', {
+      collectionName: 'MoneyMark',
+      ...QUERY_OFF,
+      'runOnChange-qp-marksSince': false,
+      storageLimit: 1000,
+      visualFilter: { combinator: 'and', rules: [{ property: 'occurs', operator: 'greater than or equal to', input: 'marksSince' }] },
+      visualSort: [{ property: 'occurs', order: 'ascending' }]
+    }),
+    // M11 — only the latest reading is where a projection starts; a few are kept for the summary.
+    logic('pnReadings', QUERY, 'Your latest balance readings', {
+      collectionName: 'BalanceReading',
+      ...QUERY_OFF,
+      storageLimit: 12,
+      visualSort: [{ property: 'date', order: 'descending' }]
     }),
     logic('pnSettings', QUERY, 'Your settings', { collectionName: 'Settings', ...QUERY_OFF, storageLimit: 1 }),
     logic('pnLoadProblem', SET_VARIABLE, 'Say the week did not load', { name: VAR.problem, setWith: 'string', value: LOAD_PROBLEM_TEXT })
@@ -2601,24 +3522,30 @@ Outputs.fetch();`
     wire('pnWindow', 'out-to', 'pnBlocks', 'qp-to'),
     wire('pnWindow', 'out-month', 'pnMonth', 'qp-month'),
     wire('pnWindow', 'out-moveSince', 'pnMoveBlocks', 'qp-moveSince'),
-    ...['pnProjects', 'pnBlocks', 'pnMoveBlocks', 'pnMonth', 'pnCash', 'pnSettings'].map((q) => wire('pnReady', 'ontrue', q, 'storageFetch')),
+    wire('pnWindow', 'out-marksSince', 'pnMarks', 'qp-marksSince'),
+    wire('pnWindow', 'out-marksSince', 'pnOut', 'marksSince'),
+    ...['pnProjects', 'pnBlocks', 'pnMoveBlocks', 'pnMonth', 'pnItems', 'pnMarks', 'pnReadings', 'pnSettings'].map((q) => wire('pnReady', 'ontrue', q, 'storageFetch')),
 
     wire('pnProjects', 'items', 'pnOut', 'projects'),
     wire('pnBlocks', 'items', 'pnOut', 'blocks'),
     wire('pnMoveBlocks', 'items', 'pnOut', 'moveBlocks'),
     wire('pnMonth', 'items', 'pnOut', 'monthPlans'),
-    wire('pnCash', 'items', 'pnOut', 'cashEvents'),
+    wire('pnItems', 'items', 'pnOut', 'moneyItems'),
+    wire('pnMarks', 'items', 'pnOut', 'moneyMarks'),
+    wire('pnReadings', 'items', 'pnOut', 'balanceReadings'),
     wire('pnSettings', 'items', 'pnOut', 'settings'),
     wire('pnBlocks', 'fetched', 'pnOut', 'loaded'),
     wire('pnProjects', 'failure', 'pnLoadProblem', 'do')
   ]
 };
 
-const ENVELOPES_INS: Array<[string, string]> = [['projects', 'array'], ['blocks', 'array'], ['monthPlans', 'array'], ['settings', 'array'], ['weekStart', 'string']];
+const ENVELOPES_INS: Array<[string, string]> = [
+  ['projects', 'array'], ['blocks', 'array'], ['monthPlans', 'array'], ['settings', 'array'], ['weekStart', 'string'], ['targetHours', 'number']
+];
 const ENVELOPES_OUTS: Array<[string, string]> = [
   ['rows', 'array'], ['target', 'number'], ['billableUsed', 'number'], ['billableLeft', 'number'],
   ['perDay', 'number'], ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number'],
-  ['hasPlan', 'boolean'], ['planLine', 'string'], ['targetLine', 'string'], ['invoicedText', 'string']
+  ['hasPlan', 'boolean'], ['planLine', 'string']
 ];
 
 /**
@@ -2630,8 +3557,8 @@ const ENVELOPES_OUTS: Array<[string, string]> = [
  *
  * ## The arithmetic AC2 pins down
  *
- * Target is R2: `ceil((householdNeed − partnerIncome) ÷ rate)`. With 5000, 1200 and 70 that
- * is 55 hours. With 41 logged and 5 working days left, `55 − 41 = 14`, and `14 ÷ 5 = 2.8`,
+ * Target is M22's, handed in by `Logic/Money` as `targetHours`. With 55 hours to reach, 41 logged
+ * and 5 working days left, `55 − 41 = 14`, and `14 ÷ 5 = 2.8`,
  * which is **2.75 h a day** once it is put in quarter hours — the unit a person plans in.
  *
  * R3 then decides Building, and this is the part worth reading twice: **the building budget
@@ -2663,12 +3590,9 @@ var month = monday.getFullYear() + '-' + pad(monday.getMonth() + 1);
 var plan = null;
 for (var i = 0; i < plans.length; i++) if (plans[i] && plans[i].month === month) plan = plans[i];
 
-var rate = num(settings.rate, 0);
-var need = num(settings.householdNeed, 0);
-var partner = num(settings.partnerIncome, 0);
 var focus = num(settings.focusHours, 6);
-// R2 — the month's target is hours, never a project price.
-var target = rate > 0 ? Math.ceil(Math.max(0, need - partner) / rate) : 0;
+// R2 — the month's target is hours, never a project price. M22 — worked out from the money, in Logic/Money.
+var target = Math.max(0, Math.round(num(Inputs.targetHours, 0)));
 
 var byId = {};
 for (var p = 0; p < projects.length; p++) if (projects[p]) byId[projects[p].id] = projects[p];
@@ -2758,23 +3682,7 @@ Outputs.focusHours = focus;
 Outputs.hasPlan = !!plan;
 Outputs.planLine = plan
   ? 'This month is planned: ' + hText(budgets.billable) + ' h billable, ' + hText(budgets.building) + ' h building.'
-  : 'This month has no plan yet. Press Plan this month and the envelopes start from your settings.';
-Outputs.targetLine = rate > 0
-  ? 'That is ' + target + ' billable hours this month — (' + money(need) + ' − ' + money(partner) + ') ÷ ' + money(rate) + ' an hour.'
-  : 'Put your rate in and the month gets a target.';
-
-// What has been invoiced this month so far: logged hours on earning projects, at their rate.
-var invoiced = 0;
-for (var q2 = 0; q2 < blocks.length; q2++) {
-  var bb = blocks[q2];
-  if (!bb) continue;
-  var dd = parseDay(bb.date);
-  if (!dd || dd.getFullYear() + '-' + pad(dd.getMonth() + 1) !== month) continue;
-  var pr = byId[bb.projectId];
-  if (!pr || pr.kind !== 'earning') continue;
-  invoiced += spentOf(bb) * num(pr.rate, rate);
-}
-Outputs.invoicedText = money(invoiced) + ' invoiced so far';`
+  : 'This month has no plan yet. Press Plan this month and the envelopes start from your settings.';`
     )
   ],
   connections: [
@@ -3029,85 +3937,718 @@ Outputs.unsentBuilding = unsentBuilding;`
   ]
 };
 
-const CASH_INS: Array<[string, string]> = [['cashEvents', 'array'], ['settings', 'array'], ['invoicedText', 'string']];
-const CASH_OUTS: Array<[string, string]> = [['rows', 'array'], ['balanceText', 'string'], ['termsText', 'string']];
+/** What every money Function is handed: the three collections, the projects and their time, the settings. */
+const MONEY_DATA_INS: Array<[string, string]> = [
+  ['items', 'array'], ['marks', 'array'], ['readings', 'array'], ['projects', 'array'], ['blocks', 'array'], ['settings', 'array'], ['since', 'string']
+];
+/** The opening lines every money Function shares: the context, the clock, the settings. */
+const MONEY_OPEN = `var settings = (Inputs.settings || [])[0] || {};
+var today = dayKey(startOfToday());
+var ctx = moneyContext(Inputs.items, Inputs.marks, Inputs.projects, Inputs.blocks, today, Inputs.since);
+var readings = Inputs.readings || [];
+var low = num(settings.lowWaterMark, 0);`;
+
+const MONEY_INS: Array<[string, string]> = [...MONEY_DATA_INS, ['filter', 'string'], ['horizon', 'number'], ['sel', 'string']];
+const MONEY_OUTS: Array<[string, string]> = [
+  // The modal's list.
+  ['groups', 'array'], ['empty', 'boolean'], ['emptyText', 'string'], ['moreShown', 'boolean'], ['modalBalance', 'string'],
+  ['upFill', 'string'], ['upInk', 'string'], ['pastFill', 'string'], ['pastInk', 'string'], ['recFill', 'string'], ['recInk', 'string'],
+  // The bottom of the week (M14).
+  ['stripRows', 'array'], ['stripBalance', 'string'], ['monthName', 'string'], ['monthText', 'string'],
+  ['mightShown', 'boolean'], ['mightLead', 'string'], ['mightRows', 'array'], ['lowText', 'string'], ['lowColor', 'string'], ['footText', 'string'],
+  // What the rest of the week needs from the money.
+  ['targetHours', 'number'], ['targetLine', 'string'], ['lateCount', 'string'], ['hasLate', 'boolean'],
+  ['lateConcern', 'string'], ['lateKey', 'string']
+];
 
 /**
- * R10 — the next six weeks, with the balance after each event, and **an event that leaves the
- * balance negative outlined red**. That outline is the whole reason the strip exists: it is
- * the one place the app is allowed to be alarming, and it is alarming about a date in the
- * future, which is still a plan.
+ * **TPL-010-M — the money, drawn.** Replaces `Logic/Cash line`. From the items, their marks and
+ * the latest balance reading (`MONEY_FNS`, run as gates with the clock held), it draws:
  *
- * A `recurring: 'monthly'` row is expanded on read rather than written twelve times, so
- * changing the rent changes every month of it.
+ * - **the modal's list** — *Upcoming* (Late first, then month by month to the horizon, each month
+ *   with in, out, net and where it ends; a client bill twice, on the day it goes out and the day it
+ *   is due; hoped money dashed, with no balance after it), *Past* (what was ticked, newest first,
+ *   with days early or late), *Recurring* (in, out, clients, hoped, each with its schedule in words);
+ * - **the bottom of the week** (M14) — the month, might earn, the lowest point, the six boxes;
+ * - **the Billable target** the envelopes are budgeted from (M22), the **late count** on the €,
+ *   and the **late client money** the evening drawer raises first (M15).
  */
-const CASH_LINE: Tpl010Component = {
-  path: 'Logic/Cash line',
-  description: 'The next six weeks of money: every event in order with the balance after it, and a red outline on any that takes you under.',
-  ...iface(CASH_INS, CASH_OUTS),
+const MONEY: Tpl010Component = {
+  path: 'Logic/Money',
+  description: 'The money, drawn: the Money modal’s list (upcoming, past or recurring), the lines and boxes at the bottom of the week, the month’s billable target, and what is late.',
+  ...iface(MONEY_INS, MONEY_OUTS),
   nodes: [
-    inputs('clIn', 'The money', CASH_INS),
-    outputs('clOut', 'The strip', CASH_OUTS),
+    inputs('moIn', 'The money', MONEY_INS),
+    outputs('moOut', 'What to draw', MONEY_OUTS),
     derive(
-      'clWork',
-      'Expand the months and run the balance',
-      `${PLANNER_FNS}
-var events = Inputs.cashEvents || [];
-var settings = (Inputs.settings || [])[0] || {};
-var today = startOfToday();
-var horizon = addDays(today, 42);
-var opening = num(settings.openingBalance, 0);
-
-var out = [];
-for (var i = 0; i < events.length; i++) {
-  var e = events[i];
-  if (!e) continue;
-  var when = parseDay(e.date);
-  if (!when) continue;
-  if (e.recurring === 'monthly') {
-    // Walk it forward from its own day-of-month until the horizon.
-    var cur = new Date(when.getTime());
-    while (cur.getTime() < today.getTime()) cur = new Date(cur.getFullYear(), cur.getMonth() + 1, cur.getDate());
-    while (cur.getTime() <= horizon.getTime()) {
-      out.push({ when: new Date(cur.getTime()), amount: num(e.amount, 0), label: e.label || '', kind: e.kind || 'cost' });
-      cur = new Date(cur.getFullYear(), cur.getMonth() + 1, cur.getDate());
-    }
-  } else if (when.getTime() >= today.getTime() && when.getTime() <= horizon.getTime()) {
-    out.push({ when: when, amount: num(e.amount, 0), label: e.label || '', kind: e.kind || 'cost' });
-  }
+      'moWork',
+      'Draw the money',
+      `${PLANNER_FNS}${MONEY_FNS}${MONEY_OPEN}
+var filter = String(Inputs.filter || 'up');
+var sel = String(Inputs.sel || '');
+var MUTED = 'var(--muted-foreground)', INK = 'var(--foreground)', LATE = 'var(--env-hobby-ink)', IN = 'var(--env-billable-ink)';
+function amountColor(a) { return a > 0 ? IN : INK; }
+function selected(key, kind) { return sel === key + '|' + kind; }
+function row(key, kind, x) {
+  var on = selected(key, kind);
+  return {
+    key: key, kind: kind,
+    dateText: x.date || '', dateColor: x.late ? LATE : MUTED,
+    label: x.label || '', labelColor: x.quiet ? MUTED : INK,
+    sub: x.sub || '', subColor: MUTED,
+    amountText: x.amount || '', amountColor: x.amountColor || INK,
+    afterText: x.after || '', afterColor: x.afterColor || MUTED,
+    tickShown: kind !== 'item' && !x.dashed,
+    tickFill: x.done ? 'var(--foreground)' : 'transparent', tickInk: x.done ? 'var(--surface)' : 'transparent',
+    rowBackground: on ? 'var(--surface)' : 'transparent',
+    rowEdge: on ? 'var(--border-strong)' : x.dashed ? 'var(--border-strong)' : 'transparent',
+    rowEdgeStyle: x.dashed ? 'dashed' : 'solid'
+  };
 }
-out.sort(function (a, b) { return a.when.getTime() - b.when.getTime(); });
-
-var running = opening;
-var rows = [];
-for (var k = 0; k < out.length; k++) {
-  var ev = out[k];
-  running += ev.amount;
-  var low = running < 0;
-  var amountText = ev.amount === 0 ? '—' : (ev.amount > 0 ? '+' : '') + money(ev.amount);
-  rows.push({
-    when: DOW[(ev.when.getDay() + 6) % 7] + ' ' + ev.when.getDate() + ' ' + MON[ev.when.getMonth()],
-    amount: amountText,
-    amountColor: ev.amount > 0 ? 'var(--env-billable-ink)' : ev.amount < 0 ? 'var(--muted-foreground)' : 'var(--muted-foreground)',
-    label: ev.label,
-    running: 'after: ' + money(running),
-    low: low,
-    edge: low ? 'var(--destructive)' : 'var(--border)'
+function payRow(o, after, late) {
+  var bits = [];
+  var pn = projectName(o);
+  if (pn && String(o.it.label || '').indexOf(pn) !== 0) bits.push(pn);
+  if (o.it.repeat && o.it.repeat !== 'once') bits.push('\\u21bb ' + repeatWord(o.it));
+  if (o.changed) bits.push('usually ' + mEur(o.it.amount));
+  if (o.moved) bits.push('moved from ' + mShort(o.occurs));
+  if (o.paid && !o.closed) bits.push(mEur(o.paid) + ' of ' + mEur(o.amount) + ' paid');
+  if (o.hoursBill && !o.sentOn) bits.push(hText(o.hours) + ' h \\u00d7 ' + mEur(o.project ? o.project.rate : 0) + ', from your hours');
+  if (o.client && o.sentOn) bits.push('bill sent ' + mShort(o.sentOn));
+  if (late) { var d = mBetween(o.date, today); bits.push((o.client ? 'due ' : '') + d + ' day' + (d === 1 ? '' : 's') + ' ago'); }
+  if (o.hoped) bits.push('hoped ' + o.likelihood + '%');
+  var shown = o.hoped ? o.amount : o.remaining;
+  return row(o.key, 'pay', {
+    date: mShort(o.date), late: late, label: o.it.label, quiet: o.hoped, sub: bits.join(' \\u00b7 '),
+    amount: mEur(shown, true), amountColor: o.hoped ? MUTED : amountColor(shown),
+    after: o.hoped ? '\\u2248 ' + mEur(o.amount * o.likelihood / 100) + ' weighted' : after === undefined ? '' : mEur(after),
+    afterColor: !o.hoped && after !== undefined && after < low ? 'var(--destructive)' : MUTED,
+    dashed: o.hoped
+  });
+}
+function billRow(o, late) {
+  return row(o.key, 'bill', {
+    date: mShort(o.billOut), late: late, label: o.it.label + ' \\u00b7 bill goes out', quiet: true,
+    sub: (late ? 'not sent yet \\u00b7 ' : '') + (o.hoursBill ? hText(o.hours) + ' h \\u00d7 ' + mEur(o.project ? o.project.rate : 0) + ' so far \\u00b7 ' : '') + 'due ' + mDay(o.date),
+    amount: '(' + mEur(o.amount) + ')', amountColor: MUTED
   });
 }
 
-Outputs.rows = rows;
-Outputs.balanceText = 'Balance today ' + money(opening);
-var terms = num(settings.paymentTermsDays, 7);
-var invoiceDay = num(settings.invoiceDay, 0);
-Outputs.termsText = invoiceDay > 0
-  ? 'Invoiced on the ' + invoiceDay + ', due within ' + terms + ' days'
-  : 'Due within ' + terms + ' days';`
+// ── The modal's list ──
+// Three months ahead, and three more each time Show three more months is pressed (a Counter).
+var months = 3 + 3 * Math.max(0, Math.round(num(Inputs.horizon, 0)));
+var horizon = mMonthEnd(mAddMonths(today.slice(0, 8) + '01', months, false));
+var p = projection(ctx, readings, horizon);
+var groups = [];
+if (filter === 'past') {
+  var ev = [];
+  for (var i = 0; i < p.occs.length; i++) {
+    var o = p.occs[i];
+    if (o.payments.length || o.lostOn || o.skip) ev.push({ d: o.lostOn || o.lastOn || o.date, o: o, t: 'pay' });
+    if (o.sentOn) ev.push({ d: o.sentOn, o: o, t: 'sent' });
+  }
+  ev.sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
+  var byMonth = {}, order = [];
+  for (var e = 0; e < ev.length; e++) {
+    var x = ev[e], mk = mMonth(x.d), oo = x.o;
+    if (!byMonth[mk]) { byMonth[mk] = []; order.push(mk); }
+    if (x.t === 'sent') {
+      byMonth[mk].push(row(oo.key, 'bill', { date: mShort(x.d), done: true, label: oo.it.label + ' \\u00b7 bill sent', quiet: true, sub: 'due ' + mDay(oo.date), amount: '(' + mEur(oo.amount) + ')', amountColor: MUTED }));
+      continue;
+    }
+    var sub = [], moved = oo.paid;
+    if (oo.skip) { sub.push('skipped'); moved = 0; }
+    else if (oo.lostOn) sub.push(oo.paid ? mEur(oo.paid) + ' paid \\u00b7 ' + mEur(oo.amount - oo.paid) + (oo.client ? ' lost' : ' less than expected') : mEur(oo.amount) + (oo.client ? ' lost' : ' did not happen'));
+    else if (!oo.closed) sub.push('part paid \\u00b7 ' + mEur(oo.remaining) + ' still ' + (oo.amount > 0 ? 'owed' : 'to pay'));
+    if (!oo.skip && oo.lastOn) {
+      var late2 = mBetween(oo.date, oo.lastOn);
+      if (oo.client) sub.push('paid ' + mShort(oo.lastOn) + ' \\u00b7 ' + (late2 > 0 ? late2 + ' day' + (late2 === 1 ? '' : 's') + ' late' : late2 < 0 ? (-late2) + ' day' + (late2 === -1 ? '' : 's') + ' early' : 'on time'));
+      else sub.push((oo.amount > 0 ? 'came in ' : 'paid ') + mShort(oo.lastOn) + (oo.lastOn !== oo.date ? ' \\u00b7 was due ' + mShort(oo.date) : ''));
+    }
+    if (oo.changed && !oo.lostOn) sub.push('usually ' + mEur(oo.it.amount));
+    byMonth[mk].push(row(oo.key, 'pay', { date: mShort(x.d), done: true, label: oo.it.label, sub: sub.join(' \\u00b7 '), amount: moved ? mEur(moved, true) : '\\u2014', amountColor: amountColor(moved) }));
+  }
+  for (var g = 0; g < order.length; g++) groups.push({ name: MONTH_LONG[Number(order[g].slice(5, 7)) - 1] + ' ' + order[g].slice(0, 4), nameColor: MUTED, summary: '', rows: byMonth[order[g]] });
+} else if (filter === 'rec') {
+  var sets = [['In', []], ['Out', []], ['Clients', []], ['Hoped', []]];
+  for (var r = 0; r < ctx.items.length; r++) {
+    var it = ctx.items[r];
+    if (!it.repeat || it.repeat === 'once') continue;
+    var hoped = num(it.likelihood, 100) < 100;
+    var at = hoped ? 3 : isClient(it, ctx.projects) ? 2 : num(it.amount, 0) >= 0 ? 0 : 1;
+    sets[at][1].push(it);
+  }
+  for (var s2 = 0; s2 < sets.length; s2++) {
+    var list = sets[s2][1];
+    if (!list.length) continue;
+    var tot = 0;
+    for (var t = 0; t < list.length; t++) if (activeOn(list[t], today)) tot += perMonth(list[t]);
+    groups.push({
+      name: sets[s2][0], nameColor: MUTED,
+      summary: mEur(tot, true) + ' a month' + (sets[s2][0] === 'Hoped' ? ', before the odds' : ''),
+      rows: list.map(function (it2) {
+        var ended = !activeOn(it2, today);
+        return row(it2.id, 'item', {
+          date: ended ? 'ended' : repeatWord(it2), quiet: ended, label: it2.label,
+          sub: scheduleWords(it2, today) + (num(it2.likelihood, 100) < 100 ? ' \\u00b7 ' + Math.round(num(it2.likelihood, 100)) + '%' : ''),
+          amount: it2.fromHours ? 'from hours' : mEur(it2.amount, true), amountColor: amountColor(num(it2.amount, 0)),
+          after: it2.repeat === 'monthly' ? '' : mEur(perMonth(it2), true) + ' a month'
+        });
+      })
+    });
+  }
+} else {
+  var lateBills = [], futureBills = [];
+  for (var b = 0; b < p.bills.length; b++) (p.bills[b].billOut < today ? lateBills : futureBills).push(p.bills[b]);
+  if (p.late.length || lateBills.length) {
+    var lateRows = [];
+    for (var l = 0; l < p.late.length; l++) lateRows.push(payRow(p.late[l], p.after[p.late[l].key], true));
+    for (var lb = 0; lb < lateBills.length; lb++) lateRows.push(billRow(lateBills[lb], true));
+    groups.push({ name: 'Late', nameColor: LATE, summary: 'not ticked, counted as if today', rows: lateRows });
+  }
+  var lines = [];
+  for (var f = 0; f < p.future.length; f++) lines.push({ d: p.future[f].date, o: p.future[f], t: 'pay' });
+  for (var h = 0; h < p.hoped.length; h++) lines.push({ d: p.hoped[h].date, o: p.hoped[h], t: 'hope' });
+  for (var fb = 0; fb < futureBills.length; fb++) lines.push({ d: futureBills[fb].billOut, o: futureBills[fb], t: 'bill' });
+  lines.sort(function (a, b2) { return a.d < b2.d ? -1 : a.d > b2.d ? 1 : a.t === 'bill' ? -1 : b2.t === 'bill' ? 1 : 0; });
+  var carry = p.late.length ? p.after[p.late[p.late.length - 1].key] : p.now.balance;
+  var mks = [];
+  for (var m2 = 0; m2 < lines.length; m2++) if (mks.indexOf(mMonth(lines[m2].d)) < 0) mks.push(mMonth(lines[m2].d));
+  for (var k = 0; k < mks.length; k++) {
+    var inn = 0, out = 0, rows = [];
+    for (var z = 0; z < lines.length; z++) {
+      var ln = lines[z];
+      if (mMonth(ln.d) !== mks[k]) continue;
+      if (ln.t === 'bill') { rows.push(billRow(ln.o, false)); continue; }
+      if (ln.t === 'pay') { if (ln.o.remaining > 0) inn += ln.o.remaining; else out -= ln.o.remaining; carry = p.after[ln.o.key]; }
+      rows.push(payRow(ln.o, ln.t === 'pay' ? p.after[ln.o.key] : undefined, false));
+    }
+    groups.push({
+      name: MONTH_LONG[Number(mks[k].slice(5, 7)) - 1] + (mks[k].slice(0, 4) === today.slice(0, 4) ? '' : ' ' + mks[k].slice(0, 4)),
+      nameColor: MUTED,
+      summary: 'in ' + mEur(inn) + ' \\u00b7 out ' + mEur(out) + ' \\u00b7 net ' + mEur(inn - out, true) + ' \\u00b7 ends at ' + mEur(carry),
+      rows: rows
+    });
+  }
+}
+Outputs.groups = groups;
+Outputs.empty = groups.length === 0;
+Outputs.emptyText = filter === 'past' ? 'Nothing ticked yet. Tick a line in Upcoming when it happens.' : filter === 'rec' ? 'Nothing repeats yet. Add money and choose how often.' : 'Nothing coming in or going out. Add money to start.';
+Outputs.moreShown = filter === 'up';
+function tab(on) { return on ? 'var(--surface)' : 'transparent'; }
+function tabInk(on) { return on ? INK : MUTED; }
+Outputs.upFill = tab(filter === 'up'); Outputs.upInk = tabInk(filter === 'up');
+Outputs.pastFill = tab(filter === 'past'); Outputs.pastInk = tabInk(filter === 'past');
+Outputs.recFill = tab(filter === 'rec'); Outputs.recInk = tabInk(filter === 'rec');
+var now = p.now;
+var readText = now.hasReading ? 'read ' + mDay(now.readOn) : 'no reading yet';
+Outputs.modalBalance = 'Balance ' + mEur(now.balance) + ' \\u00b7 ' + readText + (now.since ? ' + ' + now.since + ' tick' + (now.since === 1 ? '' : 's') : '');
+
+// ── The bottom of the week (M14) ──
+var t2 = moneyTargets(ctx, settings);
+var ml = monthLine(ctx, t2);
+Outputs.stripBalance = 'Balance ' + mEur(now.balance) + ' \\u00b7 ' + readText + (now.since ? ', ' + now.since + ' tick' + (now.since === 1 ? '' : 's') + ' since' : '');
+Outputs.monthName = ml.name;
+Outputs.monthText = ml.text;
+var me = mightEarn(ctx);
+Outputs.mightShown = me.nexts.length > 0;
+Outputs.mightLead = mEur(me.weighted) + ' more, weighted (' + mEur(me.all) + ' if all come through):';
+var might = [];
+for (var n = 0; n < me.nexts.length; n++) {
+  var mo = me.nexts[n], pr = mo.project;
+  var mv = pr && pr.move ? String(pr.move) : '';
+  might.push({ projectId: mo.it.projectId || '', name: pr ? String(pr.name || '') : mo.it.label, odds: mo.likelihood + '%', move: mv ? '\\u2192 ' + mv.charAt(0).toLowerCase() + mv.slice(1) : '' });
+}
+Outputs.mightRows = might;
+var lo = lowestPoint(ctx, readings);
+var red = lo.balance < low;
+Outputs.lowText = 'Lowest in six weeks: ' + mEur(lo.balance) + ' on ' + mDay(lo.date) + (red ? ', under your ' + mEur(low) + ' line.' : '.');
+Outputs.lowColor = red ? 'var(--destructive)' : INK;
+var six = projection(ctx, readings, mAddDays(today, 42));
+var boxes = [], candidates = six.late.concat(six.future.filter(function (x2) { return x2.it.repeat !== 'weekly'; }));
+for (var c = 0; c < candidates.length && boxes.length < 6; c++) {
+  var bo = candidates[c], isLate = bo.date < today, aft = six.after[bo.key];
+  boxes.push({
+    key: bo.key,
+    when: isLate ? 'Due ' + mShort(bo.date) + ' \\u00b7 late' : mDay(bo.date),
+    whenColor: isLate ? LATE : MUTED,
+    amount: mEur(bo.remaining, true),
+    amountColor: amountColor(bo.remaining),
+    label: bo.it.label + (bo.paid && !bo.closed ? ' \\u00b7 the rest of ' + mEur(bo.amount) : ''),
+    running: 'after: ' + mEur(aft),
+    low: aft < low,
+    edge: aft < low ? 'var(--destructive)' : isLate ? 'var(--env-hobby)' : 'var(--border)',
+    background: isLate ? 'var(--env-hobby-soft)' : 'var(--background)'
+  });
+}
+Outputs.stripRows = boxes;
+var weekly = [];
+for (var w = 0; w < ctx.items.length; w++) {
+  var wi = ctx.items[w];
+  if (wi.repeat === 'weekly' && num(wi.likelihood, 100) >= 100 && activeOn(wi, today)) weekly.push(wi.label + ' ' + mEur(wi.amount));
+}
+Outputs.footText = weekly.length ? 'Weekly items are in every balance but get no box: ' + weekly.join(', ') + '.' : '';
+
+// ── What the rest of the week needs ──
+Outputs.targetHours = t2.hours;
+Outputs.targetLine = t2.rate > 0
+  ? 'Break-even ' + mEur2(t2.breakEven) + ', and with your ' + mEur(num(settings.savingsTarget, 0)) + ' savings target the month needs ' + mEur2(t2.target) +
+    '. The fixed bills going out this month cover ' + mEur(t2.fixedSum) + '; the rest at ' + mEur(t2.rate) + ' an hour is ' + t2.hourly + ' h, and ' +
+    (t2.agreed ? 'with ' + t2.agreed + ' agreed hours on fixed work ' : '') + 'that is ' + t2.hours + ' billable hours. Money shows the sum.'
+  : 'Put your usual hourly rate in and the month gets a billable target.';
+var lateAll = p.late.length;
+Outputs.lateCount = String(lateAll);
+Outputs.hasLate = lateAll > 0;
+var lc = null;
+for (var q3 = 0; q3 < p.late.length; q3++) if (p.late[q3].client) { lc = p.late[q3]; break; }
+// M15 — late client money is the evening's first concern; a late cost is not (it is almost always paid and not ticked).
+Outputs.lateConcern = lc ? 'One thing: ' + (projectName(lc) || lc.it.label) + '\\u2019s ' + mEur(lc.remaining) + (lc.paid ? ' (the rest of the bill)' : '') +
+  ' was due on ' + mDay(lc.date) + ' and is not ticked. Chase it, or tick it.' : '';
+Outputs.lateKey = lc ? lc.key : '';`
     )
   ],
   connections: [
-    ...CASH_INS.map(([n]) => wire('clIn', n, 'clWork', `in-${n}`)),
-    ...CASH_OUTS.map(([n]) => wire('clWork', `out-${n}`, 'clOut', n))
+    ...MONEY_INS.map(([n]) => wire('moIn', n, 'moWork', `in-${n}`)),
+    ...MONEY_OUTS.map(([n]) => wire('moWork', `out-${n}`, 'moOut', n))
+  ]
+};
+
+const PANE_PART_OUTS: Array<[string, string]> = MONEY_PARTS.flatMap((pt) => pt.ins.map(([n, t]): [string, string] => [under(pt.prefix, n), t]));
+const MONEY_VIEW_INS: Array<[string, string]> = [...MONEY_DATA_INS, ['open', 'boolean'], ['sel', 'string'], ['mode', 'string'], ['itemId', 'string'], ['cardProject', 'string']];
+const MONEY_VIEW_OUTS: Array<[string, string]> = [
+  ['cardClass', 'string'], ...PANE_PART_OUTS, ...BILLING_FIELDS,
+  ['isNewItem', 'boolean'], ['editItemId', 'string'], ['endItemId', 'string'], ['agreeItemId', 'string'], ['changeKey', 'string'], ['pickedItemId', 'string']
+];
+
+/**
+ * **TPL-010-M — the right-hand pane, and the project card's Billing.** What is picked decides the
+ * pane: nothing is the summary of the month's target (M12, M13, M22); a line is that repeat
+ * (§4.1) — its tick, *Change this one*, *Skip*, *Mark as lost*, a bill's *Mark as sent*, and the
+ * item it comes from; a mode is the item editor (new, a project's bill — M5 — or its hoped money —
+ * M16), *End it*, or *Record balance* (M11). For the card it draws **Billing** (§4.2, M21–M24).
+ */
+const MONEY_VIEW: Tpl010Component = {
+  path: 'Logic/Money pane',
+  description: 'What the Money modal’s right-hand side shows — the month’s target, one repeat with what you can do to it, the item editor, ending an item, or recording the balance — and the Billing on a project’s card.',
+  ...iface(MONEY_VIEW_INS, MONEY_VIEW_OUTS),
+  nodes: [
+    inputs('mvpIn', 'What is picked', MONEY_VIEW_INS),
+    outputs('mvpOut', 'What to show', MONEY_VIEW_OUTS),
+    derive(
+      'mvpWork',
+      'Fill the pane',
+      `${PLANNER_FNS}${MONEY_FNS}${MONEY_OPEN}
+var open = Inputs.open === true;
+var sel = String(Inputs.sel || ''), mode = String(Inputs.mode || ''), itemArg = String(Inputs.itemId || '');
+var parts = sel.split('|');
+var MUTED = 'var(--muted-foreground)', INK = 'var(--foreground)', LATE = 'var(--env-hobby-ink)';
+function itemById(id) { for (var i = 0; i < ctx.items.length; i++) if (ctx.items[i].id === id) return ctx.items[i]; return null; }
+var editing = mode === 'edit' || mode === 'new' || mode === 'newBill' || mode === 'newHope';
+var picked = null, kind = parts[2] || 'pay';
+if (!editing && mode !== 'end' && mode !== 'balance' && parts.length >= 2) {
+  var pit = itemById(parts[0]);
+  // Only a repeat that still exists: an item ended before it (M10) has no such repeat any more.
+  if (pit && mOk(parts[1]) && repeatsOf(pit, parts[1]).indexOf(parts[1]) >= 0) picked = occOf(ctx, pit, parts[1]);
+}
+var showSum = open && !editing && mode !== 'end' && mode !== 'balance' && !picked;
+Outputs.cardClass = 'planner-over planner-money' + (open && (editing || mode === 'end' || mode === 'balance' || !!picked) ? ' planner-money-pane' : '');
+
+// ── The summary (M12, M13, M22) ──
+var t = moneyTargets(ctx, settings);
+var lines = [];
+function line(label, value) { lines.push({ label: label, value: value }); }
+line('Going out, a month', mEur2(t.out));
+for (var o1 = 0; o1 < t.outs.length; o1++) line('   ' + t.outs[o1].label + (t.outs[o1].repeat !== 'monthly' ? ' (' + mEur(t.outs[o1].amount) + ' ' + repeatWord(t.outs[o1]) + ')' : ''), mEur2(-perMonth(t.outs[o1])));
+line('Coming in, a month', mEur2(t.inn));
+for (var i1 = 0; i1 < t.ins.length; i1++) line('   ' + t.ins[i1].label + (t.ins[i1].repeat !== 'monthly' ? ' (' + mEur(t.ins[i1].amount) + ' ' + repeatWord(t.ins[i1]) + ')' : ''), mEur2(perMonth(t.ins[i1])));
+line('Break-even', mEur2(t.breakEven));
+line('+ savings target (Settings)', mEur(num(settings.savingsTarget, 0)));
+line('Target', mEur2(t.target));
+for (var f1 = 0; f1 < t.fixed.length; f1++) line('\\u2212 ' + projectName(t.fixed[f1]) + ', fixed, bills ' + mShort(t.fixed[f1].billOut || t.fixed[f1].date), mEur(t.fixed[f1].amount));
+line('To earn by the hour', mEur2(t.byHour));
+line('\\u00f7 your usual rate, ' + mEur(t.rate) + ' an hour', t.hourly + ' h');
+for (var a1 = 0; a1 < t.agreedIds.length; a1++) line('+ ' + String(ctx.projects[t.agreedIds[a1]].name || '') + '\\u2019s agreed hours', num(ctx.projects[t.agreedIds[a1]].agreedHours, 0) + ' h');
+line('Billable this month', t.hours + ' h');
+Outputs.sumShown = showSum;
+Outputs.sumLines = lines;
+Outputs.sumNote = 'A fixed bill is covered however long the work takes, so it comes off before the hours are worked out; the hours you agreed still go in the envelope. Client money is what the billable hours turn into. One-off items are not in the target; they show on the cash line on their day.';
+var now = balanceNow(ctx, readings);
+var lo = lowestPoint(ctx, readings);
+Outputs.sumBalanceLines = [
+  { label: now.hasReading ? 'Read ' + mDay(now.readOn) : 'No reading yet', value: mEur(now.readAmount) },
+  { label: 'Ticked since', value: mEur(now.balance - now.readAmount, true) },
+  { label: 'Now', value: mEur(now.balance) },
+  { label: 'Lowest in six weeks', value: mEur(lo.balance) + ' \\u00b7 ' + mDay(lo.date) }
+];
+
+// ── One repeat (§4.1) ──
+var o = picked;
+Outputs.rpShown = open && !!o;
+Outputs.rpKey = sel + '|' + mode;
+var isBill = !!o && kind === 'bill';
+var late = !!o && !o.closed && !o.hoped && o.date < today;
+var it = o ? o.it : {};
+var pn = o ? projectName(o) : '';
+Outputs.rpTitle = o ? String(it.label || '') + (isBill ? ' \\u00b7 the bill' : '') : '';
+Outputs.rpSub = !o ? '' : isBill ? (pn + ' \\u00b7 ' + mEur(o.amount) + ' \\u00b7 due ' + mDay(o.date))
+  : (o.client ? 'Due ' : o.amount > 0 ? 'Comes in ' : 'Goes out ') + mDay(o.date) + (o.moved ? ' (moved from ' + mDay(o.occurs) + ')' : '') +
+    (late ? ' \\u00b7 ' + mBetween(o.date, today) + ' days late' : '') + (pn && String(it.label || '').indexOf(pn) !== 0 ? ' \\u00b7 ' + pn : '');
+Outputs.rpSubColor = late ? LATE : MUTED;
+Outputs.rpAmountText = o ? mEur(o.amount, true) + (o.changed ? '  \\u00b7 usually ' + mEur(it.amount) : '') : '';
+Outputs.rpAmountColor = o && o.amount > 0 ? 'var(--env-billable-ink)' : INK;
+var detail = [];
+if (o && o.hoped) detail.push('Hoped, ' + o.likelihood + '%: about ' + mEur(o.amount * o.likelihood / 100) + ' weighted, and never in a balance.');
+if (o && o.hoursBill) detail.push(hText(o.hours) + ' h logged \\u00d7 ' + mEur(o.project ? o.project.rate : 0) + ' an hour, so far. It grows as hours are logged, until the bill is marked sent.');
+if (o && o.client && !isBill) detail.push(o.sentOn ? 'Bill sent ' + mDay(o.sentOn) + '.' : o.billOut ? 'Bill goes out ' + mDay(o.billOut) + '.' : '');
+if (o && o.m && o.m.note) detail.push(String(o.m.note));
+Outputs.rpDetail = detail.filter(function (x) { return !!x; }).join(' ');
+var canTick = !!o && !isBill && !o.closed && !o.hoped;
+Outputs.rpTickShown = canTick;
+Outputs.rpTickHead = o && o.paid ? mEur(o.paid) + ' paid so far \\u00b7 the rest' : 'Did it happen?';
+Outputs.rpTickOn = today;
+Outputs.rpTickAmount = canTick ? String(Math.abs(o.remaining)) : '';
+Outputs.rpRemaining = canTick ? Math.abs(o.remaining) : 0;
+var rw = o ? restWords(o) : ['Still owed', 'Lost'];
+Outputs.rpRests = [{ Label: rw[0], Value: 'owed' }, { Label: rw[1], Value: 'lost' }];
+Outputs.rpRestDefault = 'owed';
+Outputs.rpChangeLabel = it.repeat && it.repeat !== 'once' ? 'Change this one' : 'Change the date or amount';
+Outputs.rpSkipShown = canTick && !!it.repeat && it.repeat !== 'once';
+Outputs.rpLostShown = canTick && o.client;
+Outputs.rpChangeShown = !!o && !isBill && !o.closed && mode === 'change';
+Outputs.rpChDate = o ? o.date : '';
+Outputs.rpChAmount = o ? String(Math.abs(o.amount)) : '';
+Outputs.rpChNote = o && o.m && o.m.note ? String(o.m.note) : '';
+Outputs.rpChHint = it.repeat && it.repeat !== 'once' ? 'Only this one. The item stays ' + mEur(it.amount) + ', and changing the item later leaves this one alone.' : 'This is the only one.';
+Outputs.rpResetShown = !!o && (o.changed || o.moved);
+var closedText = '';
+if (o && o.closed) {
+  if (o.skip) closedText = '\\u2713 Skipped.';
+  else if (o.lostOn) closedText = o.paid ? '\\u2713 ' + mEur(o.paid) + ' came in. The other ' + mEur(o.amount - o.paid) + ' was written off on ' + mDay(o.lostOn) + '.' : '\\u2713 Written off on ' + mDay(o.lostOn) + '.';
+  else {
+    var d0 = mBetween(o.date, o.lastOn);
+    closedText = '\\u2713 ' + (o.amount > 0 ? 'Came in' : 'Went out') + ' ' + mDay(o.lastOn) + ': ' + mEur(o.paid) + '.' +
+      (o.client ? (d0 > 0 ? ' ' + d0 + ' days late.' : d0 < 0 ? ' ' + (-d0) + ' days early.' : ' On time.') : '') +
+      (o.payments.length > 1 ? ' In ' + o.payments.length + ' parts.' : '');
+  }
+}
+Outputs.rpClosedShown = !!o && !isBill && o.closed;
+Outputs.rpClosedText = closedText;
+Outputs.rpHopedShown = !!o && !isBill && o.hoped && !o.closed;
+Outputs.rpHopedText = o && o.hoped ? 'Hoped money is never in a balance. When it is agreed, set it to 100% and it counts.' +
+  (o.project && o.project.move ? ' What makes it real: ' + String(o.project.move) + '.' : '') : '';
+Outputs.rpBillShown = isBill;
+Outputs.rpBillText = isBill ? (o.sentOn ? '\\u2713 Sent ' + mDay(o.sentOn) + '. Due ' + mDay(o.date) + (o.closed ? ', and paid.' : '.') : 'Goes out ' + mDay(o.billOut) + '. Marking it sent records the day it went out; the payment is its own tick on ' + mDay(o.date) + '.') : '';
+Outputs.rpSendShown = isBill && !o.sentOn;
+Outputs.rpSentOn = today;
+Outputs.rpSentAmount = isBill && o.hoursBill ? String(o.amount) : '';
+Outputs.rpSentAmountShown = isBill && o.hoursBill;
+Outputs.rpUnsendShown = isBill && !!o.sentOn && !o.closed;
+Outputs.rpFromShown = !!o;
+var hand = 0;
+if (o) for (var mk in ctx.marks) if (mk.indexOf(it.id + '|') === 0 && ctx.marks[mk].amount !== '' && ctx.marks[mk].amount !== null && ctx.marks[mk].amount !== undefined) hand++;
+Outputs.rpFromText = !o ? '' : it.repeat && it.repeat !== 'once'
+  ? String(it.label || '') + ' \\u00b7 ' + (it.fromHours ? 'from the hours' : mEur(it.amount, true)) + ' \\u00b7 ' + scheduleWords(it, today) + (pn ? ' \\u00b7 ' + pn : '') +
+    (o.hoped ? ' \\u00b7 hoped ' + o.likelihood + '%' : '') + (hand ? '. ' + hand + ' repeat' + (hand === 1 ? '' : 's') + ' changed by hand; changing the item leaves ' + (hand === 1 ? 'it' : 'them') + ' alone.' : '')
+  : (pn ? pn + ' \\u00b7 one bill' : 'A one-off item') + (it.note ? ' \\u00b7 ' + String(it.note) : '');
+Outputs.rpItemLabel = it.repeat && it.repeat !== 'once' ? 'Change the item' : 'Change it';
+Outputs.rpEndShown = !!o && !!it.repeat && it.repeat !== 'once';
+Outputs.changeKey = o ? o.key : '';
+Outputs.pickedItemId = o ? String(it.id) : '';
+
+// ── End it (M10: nothing is deleted) ──
+var endIt = mode === 'end' ? itemById(itemArg) : null;
+Outputs.endShown = open && !!endIt;
+Outputs.endItemId = endIt ? endIt.id : '';
+var choices = [], def = '', ticked = 0;
+if (endIt) {
+  var reps = repeatsOf(endIt, mAddMonths(today, 12, false));
+  var from = mAddDays(today, -70);
+  for (var r = 0; r < reps.length; r++) {
+    var mm = ctx.marks[markKey(endIt.id, reps[r])];
+    var tk = !!(mm && paymentsOf(mm).length);
+    if (tk) ticked++;
+    if (reps[r] < today) def = reps[r];
+    if (reps[r] >= from && choices.length < 20) choices.push({ Label: mDay(reps[r]) + (tk ? ' \\u00b7 ticked' : ''), Value: reps[r] });
+  }
+  if (!def && reps.length) def = reps[0];
+}
+Outputs.endTitle = endIt ? 'End ' + String(endIt.label || '') : '';
+Outputs.endText = endIt ? 'Nothing is deleted. ' + (ticked ? 'The ' + ticked + ' ticked repeat' + (ticked === 1 ? ' stays' : 's stay') + ' in Past; ' : '') + 'no repeat shows after the day you pick.' : '';
+Outputs.endChoices = choices;
+Outputs.endAt = def;
+
+// ── Record balance (M11, M11a) ──
+var showBal = open && mode === 'balance';
+var pr = projection(ctx, readings, today);
+var balRows = [];
+for (var b = 0; b < pr.late.length; b++) {
+  var lo2 = pr.late[b];
+  balRows.push({ key: lo2.key, label: lo2.it.label, sub: mEur(lo2.remaining, true) + ' \\u00b7 ' + mDay(lo2.date) + (lo2.paid ? ' \\u00b7 the rest' : ''), lostLabel: lo2.client ? 'Lost' : lo2.amount > 0 ? 'Won\\u2019t come' : 'Won\\u2019t be paid' });
+}
+Outputs.balShown = showBal;
+Outputs.balOn = today;
+Outputs.balHint = '';
+Outputs.balRows = balRows;
+Outputs.balHasRows = balRows.length > 0;
+Outputs.balNote = (balRows.length ? 'Not yet is doing nothing: it is counted as if it happens today, on top of this balance. ' : 'Nothing dated on or before today is unticked. ') +
+  'The app has it at ' + mEur(now.balance) + ' now.';
+
+// ── The item editor (§4.1, M5, M9, M16) ──
+var target = mode === 'edit' ? itemById(itemArg) : null;
+var proj = (mode === 'newBill' || mode === 'newHope') ? ctx.projects[itemArg] || null : null;
+var showEd = open && (mode === 'new' || mode === 'newBill' || mode === 'newHope' || !!target);
+Outputs.edShown = showEd;
+Outputs.edKey = mode + '|' + itemArg + '|' + (open ? 'open' : '');
+Outputs.isNewItem = mode === 'new' || mode === 'newBill' || mode === 'newHope';
+Outputs.editItemId = target ? target.id : '';
+Outputs.edDirs = [{ Label: 'Comes in', Value: 'in' }, { Label: 'Goes out', Value: 'out' }];
+Outputs.edRepeats = [
+  { Label: 'Once', Value: 'once' }, { Label: 'Every week', Value: 'weekly' }, { Label: 'Every month', Value: 'monthly' },
+  { Label: 'Every three months', Value: 'quarterly' }, { Label: 'Once a year', Value: 'yearly' }
+];
+var plist = [{ Label: 'No project', Value: 'none' }], terms = [];
+var allP = Inputs.projects || [];
+for (var q1 = 0; q1 < allP.length; q1++) {
+  var pp = allP[q1];
+  if (!pp || pp.kind === 'admin') continue;
+  plist.push({ Label: String(pp.name || ''), Value: String(pp.id) });
+  terms.push({ id: String(pp.id), name: String(pp.name || ''), billing: billingOf(pp), terms: num(pp.termsDays, 14), rate: num(pp.rate, 0) });
+}
+Outputs.edProjects = plist;
+Outputs.edProjectTerms = terms;
+function str(v) { return v === undefined || v === null ? '' : String(v); }
+if (target) {
+  var n1 = 0;
+  for (var k1 in ctx.marks) if (k1.indexOf(target.id + '|') === 0 && ctx.marks[k1].amount !== '' && ctx.marks[k1].amount !== null && ctx.marks[k1].amount !== undefined) n1++;
+  Outputs.edTitle = 'Change ' + str(target.label);
+  Outputs.edSub = target.repeat && target.repeat !== 'once' ? 'Changes every repeat you have not changed by hand' + (n1 ? ' (' + n1 + ' changed by hand stay' + (n1 === 1 ? 's' : '') + ' as ' + (n1 === 1 ? 'it is' : 'they are') + ').' : '.') : '';
+  Outputs.edSaveLabel = 'Save';
+  Outputs.edLabel = str(target.label);
+  Outputs.edDir = num(target.amount, 0) < 0 ? 'out' : 'in';
+  Outputs.edAmount = target.fromHours ? '' : String(Math.abs(num(target.amount, 0)));
+  Outputs.edRepeat = str(target.repeat || 'once');
+  Outputs.edDate = str(target.date);
+  Outputs.edUntil = mOk(target.until) ? str(target.until) : '';
+  Outputs.edMonthEnd = target.monthEnd === true;
+  Outputs.edProjectId = target.projectId ? str(target.projectId) : 'none';
+  Outputs.edBillDate = mOk(target.billDate) ? str(target.billDate) : '';
+  Outputs.edBillLeadDays = target.billLeadDays === null || target.billLeadDays === undefined || target.billLeadDays === '' ? '7' : str(target.billLeadDays);
+  Outputs.edFromHours = target.fromHours === true;
+  Outputs.edLikelihood = String(Math.round(num(target.likelihood, 100)));
+  Outputs.edNote = str(target.note);
+} else {
+  var hope = mode === 'newHope', bill = mode === 'newBill';
+  var tdays = proj ? num(proj.termsDays, 14) : 14;
+  Outputs.edTitle = hope ? 'Hoped money from ' + str(proj && proj.name) : bill ? 'A bill for ' + str(proj && proj.name) : showEd ? 'Add money' : '';
+  Outputs.edSub = hope ? 'Hoped money is never in a balance. The move and this stay separate; change either without the other.' : 'A label, an amount and a date is all it needs.';
+  Outputs.edSaveLabel = 'Add it';
+  Outputs.edLabel = proj ? str(proj.name) : '';
+  Outputs.edDir = 'in';
+  Outputs.edAmount = '';
+  Outputs.edRepeat = 'once';
+  Outputs.edDate = bill ? mAddDays(today, tdays) : hope ? mAddDays(today, 30) : today;
+  Outputs.edUntil = '';
+  Outputs.edMonthEnd = false;
+  Outputs.edProjectId = proj ? str(proj.id) : 'none';
+  Outputs.edBillDate = bill ? today : '';
+  Outputs.edBillLeadDays = '7';
+  Outputs.edFromHours = bill && !!proj && billingOf(proj) === 'hourly';
+  Outputs.edLikelihood = hope ? '25' : '100';
+  Outputs.edNote = hope && proj && proj.move ? str(proj.move) : '';
+}
+Outputs.agreeItemId = o && o.hoped ? it.id : '';
+
+// ── The project card's Billing (§4.2, M21–M24) ──
+var cp = ctx.projects[String(Inputs.cardProject || '')] || null;
+var earning = !!cp && cp.kind === 'earning';
+Outputs.billingShown = earning;
+var fixed = billingOf(cp) === 'fixed';
+Outputs.billingTerms = !earning ? '' : (fixed ? 'Fixed price' : 'Hourly, ' + mEur(cp.rate) + ' an hour') + ' \\u00b7 payment terms ' + num(cp.termsDays, 14) + ' days' +
+  (num(cp.agreedHours, 0) > 0 ? ' \\u00b7 agreed ' + num(cp.agreedHours, 0) + ' h a month' : '');
+var mine = [], hopedMine = [];
+for (var y = 0; y < ctx.items.length; y++) {
+  var ci = ctx.items[y];
+  if (!cp || ci.projectId !== cp.id) continue;
+  (num(ci.likelihood, 100) < 100 ? hopedMine : mine).push(ci);
+}
+var bills = [];
+for (var y2 = 0; y2 < mine.length; y2++) {
+  var bi = mine[y2];
+  bills.push(bi.repeat && bi.repeat !== 'once'
+    ? '\\u21bb ' + scheduleWords(bi, today).replace('every month on the', 'every month, due on the') + ', ' + (bi.fromHours ? 'from the hours' : mEur(bi.amount))
+    : 'one bill, ' + (bi.fromHours ? 'from the hours' : mEur(bi.amount)) + (mOk(bi.billDate) ? ', goes out ' + mDay(bi.billDate) : '') + ', due ' + mDay(bi.date));
+}
+var brows = [{ key: 'Bills', text: bills.length ? bills.join('\\n') : 'None yet.' }];
+var ahead = mAddMonths(today, 12, false), open2 = [], done2 = [];
+for (var y3 = 0; y3 < mine.length; y3++) {
+  var rr = repeatsOf(mine[y3], ahead);
+  for (var y4 = 0; y4 < rr.length; y4++) {
+    if (ctx.since && rr[y4] < ctx.since) continue;
+    var oc = occOf(ctx, mine[y3], rr[y4]);
+    if (oc.closed || oc.paid) done2.push(oc);
+    if (!oc.closed) open2.push(oc);
+  }
+}
+open2.sort(function (a, b3) { var x = a.billOut || a.date, z = b3.billOut || b3.date; return x < z ? -1 : x > z ? 1 : 0; });
+done2.sort(function (a, b3) { return a.date < b3.date ? 1 : a.date > b3.date ? -1 : 0; });
+var nx = open2[0] || null;
+if (nx) brows.push({ key: 'Next', text: (nx.billOut && !nx.sentOn ? 'goes out ' + mDay(nx.billOut) + ' \\u00b7 ' : nx.sentOn ? 'sent ' + mDay(nx.sentOn) + ' \\u00b7 ' : '') +
+  mEur(nx.remaining) + ' \\u00b7 due ' + mDay(nx.date) + (nx.date < today ? ' \\u00b7 late' : '') });
+var since = '';
+if (cp) { var pb = previousBillOut(ctx, cp.id, mAddDays(today, 1)); since = pb ? mAddDays(pb, 1) : today.slice(0, 8) + '01'; }
+var logged = cp ? hoursBetween(ctx, cp.id, since, today) : 0;
+var planned = 0;
+if (cp) for (var y5 = 0; y5 < ctx.blocks.length; y5++) { var bk = ctx.blocks[y5]; if (bk && bk.projectId === cp.id && String(bk.date) > today && !bk.done) planned += num(bk.planned, 0); }
+var period = '';
+if (!earning) period = '';
+else if (fixed) {
+  var fee = nx ? nx.amount : mine.length ? num(mine[0].amount, 0) : 0;
+  var agreed = num(cp.agreedHours, 0);
+  // M24 — the hours are a record; the bill does not move. The per-hour figure is a check on the price, never a target.
+  period = hText(logged) + ' h logged' + (agreed ? ' of ' + agreed + ' agreed' : '') + (planned ? ', ' + hText(logged + planned) + ' h with what\\u2019s planned' : '') +
+    ' \\u00b7 the bill is ' + mEur(fee) + ' whatever the hours' + (logged > 0 && fee ? ' \\u00b7 ' + mEur(fee / logged) + ' an hour so far' : '');
+} else {
+  var rate = num(cp.rate, 0);
+  period = hText(logged) + ' h \\u00d7 ' + mEur(rate) + ' = ' + mEur(logged * rate) + (planned ? ' \\u00b7 with what\\u2019s planned ' + hText(logged + planned) + ' h, ' + mEur((logged + planned) * rate) : '') + ' \\u00b7 the next bill fills from these';
+}
+var past = [];
+for (var y6 = 0; y6 < done2.length && past.length < 4; y6++) {
+  var dn = done2[y6];
+  var dl = dn.lastOn ? mBetween(dn.date, dn.lastOn) : 0;
+  past.push(MON[Number(dn.date.slice(5, 7)) - 1] + ' ' + mEur(dn.amount) + ', due ' + mShort(dn.date) + ', ' +
+    (dn.lostOn ? mEur(dn.amount - dn.paid) + ' lost' : dn.lastOn ? 'paid ' + mShort(dn.lastOn) + (dl > 0 ? ', ' + dl + ' days late' : dl < 0 ? ', ' + (-dl) + ' days early' : ', on time') : 'skipped'));
+}
+if (period) brows.push({ key: 'This period', text: period });
+if (past.length) brows.push({ key: 'Past', text: past.join('\\n') });
+Outputs.billingRows = earning ? brows : [];
+Outputs.hasHoped = hopedMine.length > 0;
+Outputs.hopedText = hopedMine.length ? 'Hoped money: ' + hopedMine.map(function (h) { return (h.fromHours ? 'from the hours' : mEur(h.amount)) + (h.repeat && h.repeat !== 'once' ? ' ' + repeatWord(h) : '') + ' \\u00b7 ' + Math.round(num(h.likelihood, 100)) + '%'; }).join(', ') + '. It is in Money.' : '';
+Outputs.hopeShown = !!cp && !!cp.move && !cp.moveStop && hopedMine.length === 0;`
+    )
+  ],
+  connections: [
+    ...MONEY_VIEW_INS.map(([n]) => wire('mvpIn', n, 'mvpWork', `in-${n}`)),
+    ...MONEY_VIEW_OUTS.map(([n]) => wire('mvpWork', `out-${n}`, 'mvpOut', n))
+  ]
+};
+
+/** Every field a MoneyMark has (M10, M11a): one per repeat that differs from its item or was ticked. */
+export const MARK_FIELDS: Array<[string, string]> = [
+  ['itemId', 'string'], ['occurs', 'string'], ['amount', '*'], ['date', 'string'], ['skip', 'boolean'], ['payments', 'array'],
+  ['doneOn', 'string'], ['doneAmount', '*'], ['lostOn', 'string'], ['sentOn', 'string'], ['note', 'string']
+];
+const MARK_INS: Array<[string, string]> = [
+  ...MONEY_DATA_INS, ['key', 'string'], ['action', 'string'],
+  ['tickOn', 'string'], ['tickAmount', 'string'], ['tickRest', 'string'], ['chDate', 'string'], ['chAmount', 'string'], ['chNote', 'string'],
+  ['sentOn', 'string'], ['sentAmount', 'string'], ['go', 'signal']
+];
+const MARK_OUTS: Array<[string, string]> = [['markId', 'string'], ...MARK_FIELDS, ['add', 'signal'], ['edit', 'signal']];
+
+/**
+ * **One mark, from one press** (M6, M10, M11, M11a). Every button that changes a repeat — *Tick
+ * it*, *Save this one*, *Back to the item*, *Skip*, *Mark as lost*, *Untick*, *Mark as sent*, *Not
+ * sent after all*, and *Happened* / *Lost* in Record balance — says its `action` and presses `go`,
+ * and this works out the whole mark the repeat should have: the one it has, with that action
+ * applied. It then says `add` (no mark yet) or `edit`, so one pair of commands writes them all.
+ *
+ * - **A tick is a payment** (`payments`, `{ day, amount }` like a block's entries, R22), and
+ *   `doneOn` / `doneAmount` are kept in step with the list the way `actual` is with a block's time.
+ *   Less than was due asks what the rest is: *still owed* leaves the repeat open for the rest;
+ *   *lost* sets `lostOn` (M11a).
+ * - *Happened* in Record balance ticks what is left, on the repeat's own day — before the reading,
+ *   so it is not counted twice.
+ * - Marking an hours bill sent (M23) records its amount on the mark, and from then on it is fixed.
+ */
+const MARK: Tpl010Component = {
+  path: 'Logic/Mark',
+  description: 'Works out the mark a repeat should have after one press — a tick, a change to this one, a skip, lost, sent, or undoing one — and says whether it is a new mark or a changed one.',
+  ...iface(MARK_INS, MARK_OUTS),
+  nodes: [
+    inputs('mkIn', 'The press', MARK_INS),
+    outputs('mkOut', 'The mark', MARK_OUTS),
+    script(
+      'mkWork',
+      'Work out the mark',
+      `${PLANNER_FNS}${MONEY_FNS}${MONEY_OPEN}
+var parts = String(Inputs.key || '').split('|');
+var it = null;
+for (var i = 0; i < ctx.items.length; i++) if (ctx.items[i].id === parts[0]) it = ctx.items[i];
+if (!it || !mOk(parts[1])) return;
+var o = occOf(ctx, it, parts[1]);
+var m = o.m || {};
+var pays = paymentsOf(m);
+var sign = num(it.amount, 0) < 0 ? -1 : 1;
+function blank(v) { return v === undefined || v === null || v === ''; }
+function r2(n) { return Math.round(n * 100) / 100; }
+var amount = blank(m.amount) || !isFinite(Number(m.amount)) ? '' : num(m.amount, 0);
+var date = mOk(m.date) ? String(m.date) : '';
+var skip = m.skip === true;
+var lostOn = mOk(m.lostOn) ? String(m.lostOn) : '';
+var sentOn = mOk(m.sentOn) ? String(m.sentOn) : '';
+var note = blank(m.note) ? '' : String(m.note);
+var action = String(Inputs.action || '');
+if (action === 'tick' || action === 'happened') {
+  if (o.closed || o.hoped) return;
+  var left = Math.abs(o.remaining);
+  var amt = action === 'happened' ? left : Math.abs(num(Inputs.tickAmount, NaN));
+  if (!isFinite(amt)) return;
+  var day = action === 'happened' ? (o.date <= today ? o.date : today) : (mOk(Inputs.tickOn) ? String(Inputs.tickOn) : today);
+  var lose = action === 'tick' && amt < left - 0.005 && String(Inputs.tickRest || '') === 'lost';
+  if (amt <= 0 && !lose) return;
+  if (amt > 0) pays.push({ day: day, amount: sign * r2(amt) });
+  if (lose) lostOn = day;
+  // M11a — part of it, and the rest still owed: what was due is kept on the mark, so the rest is still
+  // measured against it if the item changes later. A full tick needs nothing kept: it is closed.
+  else if (amt < left - 0.005 && blank(amount)) amount = r2(o.amount);
+} else if (action === 'change') {
+  var ch = Math.abs(num(Inputs.chAmount, NaN));
+  if (isFinite(ch)) amount = !it.fromHours && r2(ch) === Math.abs(num(it.amount, 0)) ? '' : sign * r2(ch);
+  date = mOk(Inputs.chDate) && String(Inputs.chDate) !== o.occurs ? String(Inputs.chDate) : '';
+  note = String(Inputs.chNote || '').trim();
+} else if (action === 'reset') {
+  amount = it.fromHours && sentOn ? amount : '';
+  date = '';
+} else if (action === 'skip') {
+  if (o.closed) return;
+  skip = true;
+} else if (action === 'lost') {
+  if (o.closed) return;
+  lostOn = today;
+} else if (action === 'untick') {
+  if (lostOn) lostOn = '';
+  else if (skip) skip = false;
+  else if (pays.length) pays.pop();
+  else return;
+} else if (action === 'sent') {
+  sentOn = mOk(Inputs.sentOn) ? String(Inputs.sentOn) : today;
+  if (o.hoursBill) { var sa = Math.abs(num(Inputs.sentAmount, o.amount)); amount = r2(isFinite(sa) ? sa : o.amount); }
+} else if (action === 'unsend') {
+  if (!sentOn) return;
+  sentOn = '';
+  if (it.fromHours) amount = '';
+} else return;
+var total = 0, last = '';
+for (var p = 0; p < pays.length; p++) { total += pays[p].amount; if (pays[p].day > last) last = pays[p].day; }
+Outputs.markId = o.markId;
+Outputs.itemId = String(it.id);
+Outputs.occurs = o.occurs;
+Outputs.amount = amount;
+Outputs.date = date;
+Outputs.skip = skip;
+Outputs.payments = pays;
+Outputs.doneOn = last;
+Outputs.doneAmount = pays.length ? r2(total) : '';
+Outputs.lostOn = lostOn;
+Outputs.sentOn = sentOn;
+Outputs.note = note;
+if (o.markId) Outputs.edit(); else Outputs.add();`,
+      MARK_INS.filter(([, t]) => t !== 'signal').map(([n]) => n)
+    )
+  ],
+  connections: [
+    ...MARK_INS.filter(([, t]) => t !== 'signal').map(([n]) => wire('mkIn', n, 'mkWork', `in-${n}`)),
+    wire('mkIn', 'go', 'mkWork', 'run'),
+    ...MARK_OUTS.map(([n, t]) => wire('mkWork', `out-${n}`, 'mkOut', n))
   ]
 };
 
@@ -3115,10 +4656,10 @@ const SHUTDOWN_INS: Array<[string, string]> = [
   ['projects', 'array'], ['blocks', 'array'], ['todayKey', 'string'], ['tomorrowKey', 'string'],
   ['todayLong', 'string'], ['tomorrowLong', 'string'], ['unplacedDormant', 'string'],
   ['target', 'number'], ['billableUsed', 'number'], ['billableLeft', 'number'], ['perDay', 'number'],
-  ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number']
+  ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number'], ['lateConcern', 'string']
 ];
 const SHUTDOWN_OUTS: Array<[string, string]> = [
-  ['title', 'string'], ['dayLine', 'string'], ['monthLine', 'string'], ['concern', 'string'],
+  ['title', 'string'], ['dayLine', 'string'], ['monthLine', 'string'], ['concern', 'string'], ['chaseShown', 'boolean'],
   ['carryRows', 'array'], ['nothingToCarry', 'boolean'], ['tomorrowTitle', 'string'],
   ['tomorrowList', 'string'], ['tomorrowFocus', 'string'], ['tomorrowFocusColor', 'string']
 ];
@@ -3127,8 +4668,10 @@ const SHUTDOWN_OUTS: Array<[string, string]> = [
  * R12 — the evening, as **rules over data**. No model runs in the template; the MCP coach is
  * a later task and needs a `Decision` collection this one does not ship.
  *
- * ## One concern, and its order (AC5)
+ * ## One concern, and its order (AC5, and TPL-010-M's M15 in front of it)
  *
+ * 0. **Client money that is late and not ticked** (M15) — *"Chase it, or tick it."* A late cost is
+ *    not a concern: it is almost always paid and not ticked, and it waits in Money.
  * 1. **A building move planned for today and not logged.** First because it is the rung next
  *    month's money depends on, and it is the hour that quietly gets eaten by billable work.
  * 2. **A dormant project with no time in the week** (R8) — the easiest money on the board is
@@ -3203,7 +4746,11 @@ for (var u = 0; u < notDone.length; u++) {
   if (envelopeOf(byId[nb.projectId]) === 'building') { unloggedBuilding = nb; break; }
 }
 var dormant = String(Inputs.unplacedDormant || '');
-if (unloggedBuilding) {
+var lateMoney = String(Inputs.lateConcern || '');
+Outputs.chaseShown = lateMoney !== '';
+if (lateMoney) {
+  Outputs.concern = lateMoney;
+} else if (unloggedBuilding) {
   var who = (byId[unloggedBuilding.projectId] || {}).name || 'That building block';
   Outputs.concern = 'One thing: ' + who + ' — "' + (unloggedBuilding.what || '') + '" — is still not done. ' +
     hText(num(unloggedBuilding.planned, 0)) + ' h, and it is the rung next month leans on. Carry it to ' + tomorrowLong + ', or tell me why not.';
@@ -3253,7 +4800,7 @@ const CARD_ROWS_INS: Array<[string, string]> = [
   ['projects', 'array'], ['blocks', 'array'], ['moveBlocks', 'array'], ['weekStart', 'string'], ['selectedId', 'string'], ['firstOpenDay', 'string']
 ];
 /** The last two are for the commands the card presses, not for the card to draw. */
-const CARD_ROWS_OUTS: Array<[string, string]> = [['groups', 'array'], ...PROJECT_DETAIL_FIELDS, ['resolvedId', 'string'], ['placedBlockId', 'string']];
+const CARD_ROWS_OUTS: Array<[string, string]> = [['groups', 'array'], ...PROJECT_DETAIL_BASE, ['resolvedId', 'string'], ['placedBlockId', 'string']];
 
 /**
  * The card's four groups and the one project on the right (R6, AC7).
@@ -3754,11 +5301,16 @@ Outputs.moveWorth = String(Inputs.moveWorth || '').trim();
 Outputs.moveWhen = String(Inputs.moveWhen || '').trim();
 Outputs.moveDue = parseDay(due) ? due : '';
 Outputs.moveStop = Inputs.moveStop === true;
-Outputs.say = String(Inputs.say || '').trim();`;
+Outputs.say = String(Inputs.say || '').trim();
+// M21 — hourly or fixed; §4.2 — the payment terms a new bill's due date is pre-filled from (M5), and the agreed hours.
+Outputs.billing = String(Inputs.billing || '') === 'fixed' ? 'fixed' : 'hourly';
+Outputs.termsDays = Math.min(120, Math.max(0, Math.round(num(Inputs.termsDays, 14))));
+Outputs.agreedHours = Math.max(0, q(num(Inputs.agreedHours, 0)));`;
 
 const PROJECT_INS: Array<[string, string]> = [
   ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'number'], ['slot', 'string'], ['rung', 'string'],
-  ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string']
+  ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string'],
+  ['billing', 'string'], ['termsDays', 'number'], ['agreedHours', 'number']
 ];
 const PROJECT_PROPS: Array<[string, string]> = PROJECT_INS.map(([n]) => [n, n]);
 
@@ -3811,10 +5363,10 @@ Outputs.go();`,
  */
 const SET_MONTH_PLAN = command({
   path: 'Commands/Set month plan',
-  description: 'Writes this month’s plan: what each envelope gets, how many working days there are, and what the balance starts at.',
+  description: 'Writes this month’s plan: what each envelope gets, and how many working days there are.',
   ins: [
     ['month', 'string'], ['billable', 'number'], ['building', 'number'], ['admin', 'number'],
-    ['hobby', 'number'], ['workingDays', 'number'], ['openingBalance', 'number']
+    ['hobby', 'number'], ['workingDays', 'number']
   ],
   guard: `${PLANNER_FNS}var month = String(Inputs.month || '');
 if (!/^\\d{4}-\\d{2}$/.test(month)) return;
@@ -3825,102 +5377,195 @@ Outputs.admin = q(num(Inputs.admin, 12));
 // R4 — Hobby is budgeted at zero on purpose, and going over it is reported, never flagged.
 Outputs.hobby = q(num(Inputs.hobby, 0));
 Outputs.workingDays = Math.max(1, Math.round(num(Inputs.workingDays, 22)));
-Outputs.openingBalance = num(Inputs.openingBalance, 0);
 Outputs.go();`,
-  guardIns: ['month', 'billable', 'building', 'admin', 'hobby', 'workingDays', 'openingBalance'],
+  guardIns: ['month', 'billable', 'building', 'admin', 'hobby', 'workingDays'],
   write: {
     kind: 'create',
     collection: 'MonthPlan',
     label: 'Write this month’s plan',
     props: [
       ['month', 'month'], ['billable', 'billable'], ['building', 'building'], ['admin', 'admin'],
-      ['hobby', 'hobby'], ['workingDays', 'workingDays'], ['openingBalance', 'openingBalance']
+      ['hobby', 'hobby'], ['workingDays', 'workingDays']
     ]
   }
 });
 
+const MARK_GUARD = `var id = String(Inputs.itemId || '');
+if (id === '' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(Inputs.occurs || ''))) return;
+var list = Inputs.payments || [];
+var pays = [];
+for (var i = 0; i < list.length; i++) if (list[i] && isFinite(Number(list[i].amount))) pays.push({ day: String(list[i].day || ''), amount: Number(list[i].amount) });
+Outputs.itemId = id;
+Outputs.occurs = String(Inputs.occurs);
+Outputs.amount = Inputs.amount === undefined || Inputs.amount === null ? '' : Inputs.amount;
+Outputs.date = String(Inputs.date || '');
+Outputs.skip = Inputs.skip === true;
+Outputs.payments = pays;
+Outputs.doneOn = String(Inputs.doneOn || '');
+Outputs.doneAmount = Inputs.doneAmount === undefined || Inputs.doneAmount === null ? '' : Inputs.doneAmount;
+Outputs.lostOn = String(Inputs.lostOn || '');
+Outputs.sentOn = String(Inputs.sentOn || '');
+Outputs.note = String(Inputs.note || '');
+Outputs.go();`;
+const MARK_PROPS: Array<[string, string]> = MARK_FIELDS.map(([n]) => [n, n]);
+
+/** M6 / M10 — the first mark on a repeat: written by `Logic/Mark` when the repeat has none. */
+const ADD_MARK = command({
+  path: 'Commands/Add mark',
+  description: 'Writes the first mark on one repeat of a money item: a tick, a change to this one, a skip, lost, or sent.',
+  ins: MARK_FIELDS,
+  guard: MARK_GUARD,
+  guardIns: MARK_FIELDS.map(([n]) => n),
+  write: { kind: 'create', collection: 'MoneyMark', label: 'Mark the repeat', props: MARK_PROPS }
+});
+
+/** The same, for a repeat that already has a mark. Nothing is deleted: undoing a tick writes the mark without it. */
+const EDIT_MARK = command({
+  path: 'Commands/Edit mark',
+  description: 'Changes the mark on one repeat of a money item: another tick, a change, a skip, lost, sent, or undoing one of them.',
+  ins: [['markId', 'string'], ...MARK_FIELDS],
+  guard: `if (String(Inputs.markId || '') === '') return;\n${MARK_GUARD}`,
+  guardIns: ['markId', ...MARK_FIELDS.map(([n]) => n)],
+  write: { kind: 'update', collection: 'MoneyMark', label: 'Change the mark', props: MARK_PROPS, idFromInput: 'markId' }
+});
+
 /**
- * A money event as typed: a cost is money leaving whichever sign was typed, money in is money
- * arriving, and a note (*"Invoices go out"*) keeps what it was given, usually nothing. Before R2.4
- * the seed wrote `in` and `note` where this command wrote `income` and `invoice-out`, so the two
- * old spellings are read as the new ones rather than turned into a cost.
+ * M9 — a label, an amount and a date are all an item needs. Everything else is checked here and
+ * turned into what the list reads: the amount is signed by in or out; `until`, the last day of the
+ * month, the bill date and the days before due are kept only where the schedule and a client make
+ * them mean something; an hourly client's bill can leave its amount to the hours (M23).
  */
-const CASH_GUARD = `var date = String(Inputs.date || '');
-var label = String(Inputs.label || '').trim();
-var amount = num(Inputs.amount, NaN);
-if (!parseDay(date) || label === '' || !isFinite(amount)) return;
-var kind = String(Inputs.kind || 'cost');
-if (kind === 'in') kind = 'income';
-if (kind === 'note') kind = 'invoice-out';
-var known = ['income', 'cost', 'invoice-out', 'invoice-due'];
-if (known.indexOf(kind) < 0) kind = 'cost';
-if (kind === 'cost') amount = -Math.abs(amount);
-if (kind === 'income' || kind === 'invoice-due') amount = Math.abs(amount);
-Outputs.date = date;
-Outputs.amount = amount;
+const MONEY_ITEM_GUARD = `var label = String(Inputs.label || '').trim();
+var date = String(Inputs.date || '');
+var ok = /^\\d{4}-\\d{2}-\\d{2}$/;
+if (label === '' || !ok.test(date)) return;
+var repeats = ['once', 'weekly', 'monthly', 'quarterly', 'yearly'];
+var repeat = String(Inputs.repeat || 'once');
+if (repeats.indexOf(repeat) < 0) repeat = 'once';
+var pid = String(Inputs.projectId || '');
+if (pid === 'none') pid = '';
+var out = String(Inputs.dir || 'in') === 'out';
+var client = pid !== '' && !out;
+var fromHours = client && Inputs.fromHours === true;
+var amount = Math.abs(num(Inputs.amount, NaN));
+if (!fromHours && (!isFinite(amount) || amount <= 0)) return;
+var until = String(Inputs.until || '');
 Outputs.label = label;
-Outputs.kind = kind;
-Outputs.recurring = Inputs.monthly === true ? 'monthly' : '';`;
+Outputs.amount = fromHours ? 0 : (out ? -1 : 1) * Math.round(amount * 100) / 100;
+Outputs.repeat = repeat;
+Outputs.date = date;
+Outputs.until = repeat !== 'once' && ok.test(until) && until >= date ? until : '';
+Outputs.monthEnd = (repeat === 'monthly' || repeat === 'quarterly') && Inputs.monthEnd === true;
+Outputs.projectId = pid;
+Outputs.billDate = client && repeat === 'once' && ok.test(String(Inputs.billDate || '')) ? String(Inputs.billDate) : '';
+var lead = Math.round(num(Inputs.billLeadDays, NaN));
+Outputs.billLeadDays = client && repeat !== 'once' && isFinite(lead) && lead >= 0 ? lead : '';
+Outputs.fromHours = fromHours;
+var likeRaw = String(Inputs.likelihood === undefined || Inputs.likelihood === null ? '' : Inputs.likelihood).trim();
+var like = likeRaw === '' ? 100 : Math.round(Number(likeRaw));
+Outputs.likelihood = isFinite(like) ? Math.max(0, Math.min(100, like)) : 100;
+Outputs.note = String(Inputs.note || '').trim();`;
 
-const CASH_EVENT_INS: Array<[string, string]> = [['date', 'string'], ['amount', 'number'], ['label', 'string'], ['kind', 'string'], ['monthly', 'boolean']];
-const CASH_EVENT_PROPS: Array<[string, string]> = [['date', 'date'], ['amount', 'amount'], ['label', 'label'], ['kind', 'kind'], ['recurring', 'recurring']];
+const MONEY_ITEM_INS: Array<[string, string]> = [
+  ['label', 'string'], ['dir', 'string'], ['amount', 'string'], ['repeat', 'string'], ['date', 'string'], ['until', 'string'],
+  ['monthEnd', 'boolean'], ['projectId', 'string'], ['billDate', 'string'], ['billLeadDays', 'string'], ['fromHours', 'boolean'],
+  ['likelihood', 'string'], ['note', 'string']
+];
+const MONEY_ITEM_PROPS: Array<[string, string]> = [
+  ['label', 'label'], ['amount', 'amount'], ['repeat', 'repeat'], ['date', 'date'], ['until', 'until'], ['monthEnd', 'monthEnd'],
+  ['projectId', 'projectId'], ['billDate', 'billDate'], ['billLeadDays', 'billLeadDays'], ['fromHours', 'fromHours'],
+  ['likelihood', 'likelihood'], ['note', 'note']
+];
 
-const ADD_CASH_EVENT = command({
-  path: 'Commands/Add cash event',
-  description: 'Adds something that happens to the money: when, how much, what it is, and whether it happens every month.',
-  ins: CASH_EVENT_INS,
-  guard: `${PLANNER_FNS}${CASH_GUARD}
+/** M2 / M3 — everything that happens to money is one of these: once, or on a schedule with a start and an optional end. */
+const ADD_MONEY_ITEM = command({
+  path: 'Commands/Add money item',
+  description: 'Adds something that happens to the money: what it is, in or out, how much, how often and from when, until when, whose it is, and how likely.',
+  ins: MONEY_ITEM_INS,
+  guard: `${PLANNER_FNS}${MONEY_ITEM_GUARD}
+Outputs.position = Date.now();
 Outputs.go();`,
-  guardIns: CASH_EVENT_INS.map(([n]) => n),
-  write: { kind: 'create', collection: 'CashEvent', label: 'Add the event', props: CASH_EVENT_PROPS }
+  guardIns: MONEY_ITEM_INS.map(([n]) => n),
+  write: { kind: 'create', collection: 'MoneyItem', label: 'Add the money item', props: [...MONEY_ITEM_PROPS, ['position', 'position']] }
 });
 
-/** R2.4-7 — editing an amount changes every running balance after it, because the strip is read, not stored. */
-const EDIT_CASH_EVENT = command({
-  path: 'Commands/Edit cash event',
-  description: 'Changes something that happens to the money: when, how much, what it is, or whether it happens every month.',
-  ins: [['cashId', 'string'], ...CASH_EVENT_INS],
-  guard: `${PLANNER_FNS}if (String(Inputs.cashId || '') === '') return;
-${CASH_GUARD}
+/** M4 — changing the item changes every repeat not changed by hand; the marks are not touched. */
+const EDIT_MONEY_ITEM = command({
+  path: 'Commands/Edit money item',
+  description: 'Changes a money item. Every repeat you have not changed by hand follows it; the ones you have keep what you gave them.',
+  ins: [['itemId', 'string'], ...MONEY_ITEM_INS],
+  guard: `${PLANNER_FNS}if (String(Inputs.itemId || '') === '') return;
+${MONEY_ITEM_GUARD}
 Outputs.go();`,
-  guardIns: ['cashId', ...CASH_EVENT_INS.map(([n]) => n)],
-  write: { kind: 'update', collection: 'CashEvent', label: 'Change the event', props: CASH_EVENT_PROPS, idFromInput: 'cashId' }
+  guardIns: ['itemId', ...MONEY_ITEM_INS.map(([n]) => n)],
+  write: { kind: 'update', collection: 'MoneyItem', label: 'Change the money item', props: MONEY_ITEM_PROPS, idFromInput: 'itemId' }
+});
+
+/** M10 — *End it* sets the last day a repeat can land on. Nothing is deleted; the past keeps its history. */
+const END_MONEY_ITEM = command({
+  path: 'Commands/End money item',
+  description: 'Ends a money item after the day picked. Nothing is deleted; the repeats already ticked stay.',
+  ins: [['itemId', 'string'], ['until', 'string']],
+  guard: `var until = String(Inputs.until || '');
+if (String(Inputs.itemId || '') === '' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(until)) return;
+Outputs.until = until;
+Outputs.go();`,
+  guardIns: ['itemId', 'until'],
+  write: { kind: 'update', collection: 'MoneyItem', label: 'End the item', props: [['until', 'until']], idFromInput: 'itemId' }
+});
+
+/** M7 — hoped money becomes expected when it is agreed: its likelihood goes to 100 and it counts. */
+const AGREE_MONEY_ITEM = command({
+  path: 'Commands/Agree money item',
+  description: 'Hoped money that has been agreed: it becomes expected, and counts in every balance from now on.',
+  ins: [['itemId', 'string']],
+  guard: `if (String(Inputs.itemId || '') === '') return;
+Outputs.likelihood = 100;
+Outputs.go();`,
+  guardIns: ['itemId'],
+  write: { kind: 'update', collection: 'MoneyItem', label: 'It is agreed', props: [['likelihood', 'likelihood']], idFromInput: 'itemId' }
+});
+
+/** M11 — what the bank says, on a day. The latest one is where every projection starts. */
+const RECORD_BALANCE = command({
+  path: 'Commands/Record balance',
+  description: 'Records what the bank says, on a day. Every projection starts from the latest one.',
+  ins: [['date', 'string'], ['amount', 'string']],
+  guard: `${PLANNER_FNS}var date = String(Inputs.date || '');
+var raw = String(Inputs.amount === undefined || Inputs.amount === null ? '' : Inputs.amount).trim();
+var amount = Number(raw);
+if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || raw === '' || !isFinite(amount)) return;
+Outputs.date = date;
+Outputs.amount = Math.round(amount * 100) / 100;
+Outputs.note = '';
+Outputs.go();`,
+  guardIns: ['date', 'amount'],
+  write: { kind: 'create', collection: 'BalanceReading', label: 'Record the balance', props: [['date', 'date'], ['amount', 'amount'], ['note', 'note']] }
 });
 
 /**
- * 🔴 **The only command that writes real money.** §2: `Settings` is the one collection whose
- * fields are a person's actual rate and actual household number, which is why the template
- * ships with invented ones and the hosted app is the only place the real ones exist.
+ * 🔴 **One of the commands that writes real money** — with the money items. §4.3: the usual hourly
+ * rate, the focus ceiling, the savings target and the lowest balance before red. The template
+ * ships invented numbers and the hosted app is the only place the real ones exist.
  */
 const EDIT_SETTINGS = command({
   path: 'Commands/Edit settings',
-  description: 'Saves the numbers the whole week is worked out from: your rate, what the household needs, what your partner brings, and the days money moves.',
-  ins: [
-    ['settingsId', 'string'], ['rate', 'number'], ['householdNeed', 'number'], ['partnerIncome', 'number'],
-    ['focusHours', 'number'], ['partnerDay', 'number'], ['costsDay', 'number'], ['invoiceDay', 'number'], ['paymentTermsDays', 'number']
-  ],
+  description: 'Saves the numbers the week is worked out from: your usual hourly rate, your focus ceiling, your savings target, and the lowest balance before red.',
+  ins: [['settingsId', 'string'], ['rate', 'number'], ['focusHours', 'number'], ['savingsTarget', 'number'], ['lowWaterMark', 'number']],
   guard: `${PLANNER_FNS}var id = String(Inputs.settingsId || '');
 if (id === '') return;
-function day(v, fallback) { var n = Math.round(num(v, fallback)); return n < 1 ? fallback : n > 28 ? 28 : n; }
 Outputs.rate = Math.max(0, num(Inputs.rate, 0));
-Outputs.householdNeed = Math.max(0, num(Inputs.householdNeed, 0));
-Outputs.partnerIncome = Math.max(0, num(Inputs.partnerIncome, 0));
 // R3 — the ceiling is what makes the plan honest, so it cannot be set to nothing.
 Outputs.focusHours = Math.min(16, Math.max(1, num(Inputs.focusHours, 6)));
-Outputs.partnerDay = day(Inputs.partnerDay, 28);
-Outputs.costsDay = day(Inputs.costsDay, 1);
-Outputs.invoiceDay = day(Inputs.invoiceDay, 28);
-Outputs.paymentTermsDays = Math.min(90, Math.max(0, Math.round(num(Inputs.paymentTermsDays, 7))));
+Outputs.savingsTarget = Math.max(0, num(Inputs.savingsTarget, 0));
+Outputs.lowWaterMark = num(Inputs.lowWaterMark, 0);
 Outputs.go();`,
-  guardIns: ['settingsId', 'rate', 'householdNeed', 'partnerIncome', 'focusHours', 'partnerDay', 'costsDay', 'invoiceDay', 'paymentTermsDays'],
+  guardIns: ['settingsId', 'rate', 'focusHours', 'savingsTarget', 'lowWaterMark'],
   write: {
     kind: 'update',
     collection: 'Settings',
     label: 'Save the settings',
-    props: [
-      ['rate', 'rate'], ['householdNeed', 'householdNeed'], ['partnerIncome', 'partnerIncome'], ['focusHours', 'focusHours'],
-      ['partnerDay', 'partnerDay'], ['costsDay', 'costsDay'], ['invoiceDay', 'invoiceDay'], ['paymentTermsDays', 'paymentTermsDays']
-    ],
+    props: [['rate', 'rate'], ['focusHours', 'focusHours'], ['savingsTarget', 'savingsTarget'], ['lowWaterMark', 'lowWaterMark']],
     idFromInput: 'settingsId'
   }
 });
@@ -3930,7 +5575,7 @@ Outputs.go();`,
 // ════════════════════════════════════════════════════════════════════════════
 
 
-const APP_BAR_FIELDS: Array<[string, string]> = [['weekLabel', 'string']];
+const APP_BAR_FIELDS: Array<[string, string]> = [['weekLabel', 'string'], ['lateCount', 'string'], ['hasLate', 'boolean']];
 
 /**
  * The top line: what this is, which week, and the four things you can press.
@@ -3943,14 +5588,14 @@ const APP_BAR: Tpl010Component = {
   path: 'Week/App bar',
   description: 'The top line: the app’s name, which week is on screen with an arrow either side, and the buttons for projects, settings, theme, shutting down and signing out.',
   ...iface(APP_BAR_FIELDS, [
-    ['previousWeek', 'signal'], ['nextWeek', 'signal'], ['openProjects', 'signal'],
+    ['previousWeek', 'signal'], ['nextWeek', 'signal'], ['openProjects', 'signal'], ['openMoney', 'signal'],
     ['openSettings', 'signal'], ['shutDown', 'signal'], ['signOut', 'signal']
   ]),
   instantiates: [C.themeSwitch],
   nodes: [
     inputs('abIn', 'Which week', APP_BAR_FIELDS),
     outputs('abOut', 'What was pressed', [
-      ['previousWeek', 'signal'], ['nextWeek', 'signal'], ['openProjects', 'signal'],
+      ['previousWeek', 'signal'], ['nextWeek', 'signal'], ['openProjects', 'signal'], ['openMoney', 'signal'],
       ['openSettings', 'signal'], ['shutDown', 'signal'], ['signOut', 'signal']
     ]),
     group('abRoot', 'App bar', undefined, {
@@ -3963,8 +5608,20 @@ const APP_BAR: Tpl010Component = {
     place('abPrev', BUTTON, 'The week before', 'abNav', BTN_ICON('icon-chevron-left', 'Previous week')),
     text('abWeekLabel', 'The week on screen', 'abNav', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)' }),
     place('abNext', BUTTON, 'The week after', 'abNav', BTN_ICON('icon-chevron-right', 'Next week')),
-    group('abRight', 'Buttons', 'abRoot', ROW_TIGHT('var(--space-2)')),
+    // A group as wide as its buttons may still not fit a phone: it wraps rather than running off the edge.
+    group('abRight', 'Buttons', 'abRoot', { ...ROW_TIGHT('var(--space-2)'), flexWrap: 'wrap', rowGap: 'var(--space-2)', cssClassName: 'planner-shrink-wrap' }),
     place('abProjects', BUTTON, 'Open the projects', 'abRight', { ...BTN_GHOST, label: 'Projects' }),
+    // M1 — Money, same size as the settings button, with how many things are late beside it (M6).
+    group('abMoneyBox', 'Money', 'abRight', ROW_TIGHT('var(--space-0-5)')),
+    place('abMoney', BUTTON, 'Open Money', 'abMoneyBox', { ...BTN_ICON('icon-euro', 'Money'), color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
+    group('abLateBox', 'How many are late', 'abMoneyBox', {
+      ...ROW_TIGHT('var(--space-0)'),
+      backgroundColor: 'var(--env-hobby-soft)',
+      borderRadius: 'var(--radius-full)',
+      paddingLeft: 'var(--space-1-5)',
+      paddingRight: 'var(--space-1-5)'
+    }),
+    text('abLate', 'How many are late', 'abLateBox', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: px(11), fontWeight: 'var(--font-bold)', color: 'var(--env-hobby-ink)' }),
     place('abSettings', BUTTON, 'Open the settings', 'abRight', BTN_ICON('icon-settings', 'Settings')),
     place('abTheme', C.themeSwitch, 'Light or dark', 'abRight'),
     place('abShut', BUTTON, 'Shut down for today', 'abRight', { ...BTN_PRIMARY, label: 'Shut down' }),
@@ -3975,6 +5632,9 @@ const APP_BAR: Tpl010Component = {
     wire('abPrev', 'onClick', 'abOut', 'previousWeek'),
     wire('abNext', 'onClick', 'abOut', 'nextWeek'),
     wire('abProjects', 'onClick', 'abOut', 'openProjects'),
+    wire('abMoney', 'onClick', 'abOut', 'openMoney'),
+    wire('abIn', 'lateCount', 'abLate', 'text'),
+    wire('abIn', 'hasLate', 'abLateBox', 'mounted'),
     wire('abSettings', 'onClick', 'abOut', 'openSettings'),
     wire('abShut', 'onClick', 'abOut', 'shutDown'),
     wire('abSignOut', 'onClick', 'abOut', 'signOut')
@@ -3998,15 +5658,176 @@ const APP_BAR: Tpl010Component = {
  * - **the tick** — a done block unlogs, a not-done block logs;
  * - **the chip** — a placed move opens the card, an unplaced one writes half an hour (AC3).
  */
+/** `[node, label, action, the pane or balance output that presses it, which Logic/Mark]` */
+const MARK_ACTIONS: Array<[string, string, string, string, 'twMarkPane' | 'twMarkBal']> = [
+  ['twActTick', 'Tick it', 'tick', 'rpTick', 'twMarkPane'],
+  ['twActChange', 'Save this one', 'change', 'rpSaveOne', 'twMarkPane'],
+  ['twActReset', 'Back to the item', 'reset', 'rpResetOne', 'twMarkPane'],
+  ['twActSkip', 'Skip this one', 'skip', 'rpSkip', 'twMarkPane'],
+  ['twActLost', 'Mark as lost', 'lost', 'rpLost', 'twMarkPane'],
+  ['twActUntick', 'Untick', 'untick', 'rpUntick', 'twMarkPane'],
+  ['twActSent', 'Mark as sent', 'sent', 'rpMarkSent', 'twMarkPane'],
+  ['twActUnsend', 'Not sent after all', 'unsend', 'rpUnsend', 'twMarkPane'],
+  ['twActHappened', 'It happened (Record balance)', 'happened', 'balHappened', 'twMarkBal'],
+  ['twActBalLost', 'It is lost (Record balance)', 'lost', 'balLost', 'twMarkBal']
+];
+
+/** Every way into Money resets it to the summary of the month, on its three months. */
+const OPEN_MONEY = (from: string, signal: string) => [
+  wire(from, signal, 'twMoneyOn', 'do'),
+  wire(from, signal, 'twSelClear', 'do'),
+  wire(from, signal, 'twPaneNone', 'do'),
+  wire(from, signal, 'twHorizon', 'reset')
+];
+const TO_PANE_NONE = (from: string, signal: string) => [wire(from, signal, 'twSelClear', 'do'), wire(from, signal, 'twPaneNone', 'do')];
+
+/** The Money modal, the strip, the card's Billing and the drawer's late money, wired (TPL-010-M). */
+const MONEY_WIRES: unknown[] = [
+  // ── Ways in ──
+  ...OPEN_MONEY('twBar', 'openMoney'),
+  ...OPEN_MONEY('twCash', 'open'),
+  // M14 — a box under the week opens Money on its repeat.
+  wire('twCash', 'key', 'twStripRoute', 'in-key'),
+  wire('twCash', 'pick', 'twStripRoute', 'run'),
+  wire('twStripRoute', 'out-sel', 'twSelFromStrip', 'value'),
+  wire('twStripRoute', 'out-go', 'twSelFromStrip', 'do'),
+  wire('twStripRoute', 'out-go', 'twPaneNone', 'do'),
+  wire('twStripRoute', 'out-go', 'twMoneyOn', 'do'),
+  // M7 — a hoped project's name opens its card.
+  wire('twCash', 'projectId', 'twCardFromMight', 'value'),
+  wire('twCash', 'openProject', 'twCardFromMight', 'do'),
+  // M15 — the drawer's late money opens where it can be ticked.
+  wire('twMoneyLogic', 'lateKey', 'twChaseRoute', 'in-key'),
+  wire('twDrawer', 'chase', 'twChaseRoute', 'run'),
+  wire('twChaseRoute', 'out-sel', 'twSelFromChase', 'value'),
+  wire('twChaseRoute', 'out-go', 'twSelFromChase', 'do'),
+  wire('twChaseRoute', 'out-go', 'twPaneNone', 'do'),
+  wire('twChaseRoute', 'out-go', 'twMoneyOn', 'do'),
+  wire('twChaseRoute', 'out-go', 'twCloseDrawer', 'do'),
+  // M5 / M16 — the card's + Add a bill and Add as hoped money open the editor on that project.
+  wire('twCardRows', 'resolvedId', 'twItemFromCard', 'value'),
+  ...(['addBill', 'addHope'] as const).flatMap((sig) => [
+    wire('twCard', sig, 'twItemFromCard', 'do'),
+    wire('twCard', sig, sig === 'addBill' ? 'twPaneNewBill' : 'twPaneNewHope', 'do'),
+    wire('twCard', sig, 'twSelClear', 'do'),
+    wire('twCard', sig, 'twMoneyOn', 'do'),
+    wire('twCard', sig, 'twClearCard', 'do'),
+    wire('twCard', sig, 'twEditOff', 'do')
+  ]),
+  // §4.2 — the card's Billing, for the project it is showing.
+  wire('twCardRows', 'resolvedId', 'twMoneyView', 'cardProject'),
+  ...BILLING_FIELDS.map(([n]) => wire('twMoneyView', n, 'twCard', n)),
+
+  // ── What the modal shows ──
+  wire('twVarMoney', 'value', 'twMoneyShown', 'in-open'),
+  wire('twMoneyShown', 'out-shown', 'twMoney', 'shown'),
+  wire('twMoneyShown', 'out-shown', 'twMoneyView', 'open'),
+  wire('twVarFilter', 'value', 'twMoneyLogic', 'filter'),
+  wire('twHorizon', 'currentCount', 'twMoneyLogic', 'horizon'),
+  wire('twVarSel', 'value', 'twMoneyLogic', 'sel'),
+  wire('twVarSel', 'value', 'twMoneyView', 'sel'),
+  wire('twVarMoneyMode', 'value', 'twMoneyView', 'mode'),
+  wire('twVarMoneyItem', 'value', 'twMoneyView', 'itemId'),
+  ...(['groups', 'empty', 'emptyText', 'moreShown', 'upFill', 'upInk', 'pastFill', 'pastInk', 'recFill', 'recInk'] as const).map((n) => wire('twMoneyLogic', n, 'twMoney', n)),
+  wire('twMoneyLogic', 'modalBalance', 'twMoney', 'balanceText'),
+  wire('twMoneyView', 'cardClass', 'twMoney', 'cardClass'),
+  ...PANE_PART_OUTS.map(([n]) => wire('twMoneyView', n, 'twMoney', n)),
+
+  // ── The modal's own presses ──
+  wire('twMoney', 'close', 'twMoneyOff', 'do'),
+  ...TO_PANE_NONE('twMoney', 'close'),
+  wire('twMoney', 'showUp', 'twFilterUp', 'do'),
+  wire('twMoney', 'showPast', 'twFilterPast', 'do'),
+  wire('twMoney', 'showRec', 'twFilterRec', 'do'),
+  wire('twMoney', 'more', 'twHorizon', 'increase'),
+  wire('twMoney', 'add', 'twPaneNew', 'do'),
+  wire('twMoney', 'add', 'twSelClear', 'do'),
+  ...(['record', 'sumRecordBalance'] as const).flatMap((sig) => [wire('twMoney', sig, 'twPaneBalance', 'do'), wire('twMoney', sig, 'twSelClear', 'do')]),
+  wire('twMoney', 'key', 'twPickRoute', 'in-key'),
+  wire('twMoney', 'kind', 'twPickRoute', 'in-kind'),
+  wire('twMoney', 'pick', 'twPickRoute', 'run'),
+  wire('twPickRoute', 'out-sel', 'twSelFromList', 'value'),
+  wire('twPickRoute', 'out-toRepeat', 'twSelFromList', 'do'),
+  wire('twPickRoute', 'out-toRepeat', 'twPaneNone', 'do'),
+  wire('twPickRoute', 'out-item', 'twItemFromList', 'value'),
+  wire('twPickRoute', 'out-toItem', 'twItemFromList', 'do'),
+  wire('twPickRoute', 'out-toItem', 'twPaneEdit', 'do'),
+  wire('twPickRoute', 'out-toItem', 'twSelClear', 'do'),
+  // The phone's ‹ Money on each part goes back to the list.
+  ...(['sumBack', 'rpBack', 'endBack', 'balBack', 'edBack'] as const).flatMap((sig) => TO_PANE_NONE('twMoney', sig)),
+
+  // ── One repeat ──
+  wire('twMoney', 'rpChangeOne', 'twPaneChange', 'do'),
+  wire('twMoneyView', 'pickedItemId', 'twItemFromPane', 'value'),
+  wire('twMoney', 'rpChangeItem', 'twItemFromPane', 'do'),
+  wire('twMoney', 'rpChangeItem', 'twPaneEdit', 'do'),
+  wire('twMoney', 'rpEndItem', 'twItemFromPane', 'do'),
+  wire('twMoney', 'rpEndItem', 'twPaneEnd', 'do'),
+  wire('twMoneyView', 'agreeItemId', 'cmdAgreeItem', 'itemId'),
+  wire('twMoney', 'rpAgreed', 'cmdAgreeItem', 'do'),
+  // Saving or undoing a change to this one closes its form.
+  wire('twMoney', 'rpSaveOne', 'twPaneNone', 'do'),
+  wire('twMoney', 'rpResetOne', 'twPaneNone', 'do'),
+  // Every press that changes a repeat: its action, then Logic/Mark, then one of the two mark commands.
+  ...MARK_ACTIONS.flatMap(([id, , , from, markNode]) => [
+    wire('twMoney', from, id, 'run'),
+    wire(id, 'out-action', markNode, 'action'),
+    wire(id, 'out-go', markNode, 'go')
+  ]),
+  wire('twVarSel', 'value', 'twMarkPane', 'key'),
+  ...(['tickOn', 'tickAmount', 'tickRest', 'chDate', 'chAmount', 'chNote', 'sentOn', 'sentAmount'] as const).map((n) => wire('twMoney', under('rp', n), 'twMarkPane', n)),
+  wire('twMoney', 'balKey', 'twMarkBal', 'key'),
+  ...(['twMarkPane', 'twMarkBal'] as const).flatMap((mk) => [
+    ...MARK_FIELDS.flatMap(([n]) => [wire(mk, n, 'cmdAddMark', n), wire(mk, n, 'cmdEditMark', n)]),
+    wire(mk, 'markId', 'cmdEditMark', 'markId'),
+    wire(mk, 'add', 'cmdAddMark', 'do'),
+    wire(mk, 'edit', 'cmdEditMark', 'do')
+  ]),
+
+  // ── End it ──
+  wire('twMoneyView', 'endItemId', 'cmdEndItem', 'itemId'),
+  wire('twMoney', 'endAt', 'cmdEndItem', 'until'),
+  wire('twMoney', 'endGo', 'cmdEndItem', 'do'),
+  wire('cmdEndItem', 'done', 'twPaneNone', 'do'),
+  wire('cmdEndItem', 'done', 'twSelClear', 'do'),
+  wire('twMoney', 'endCancel', 'twPaneNone', 'do'),
+
+  // ── The item editor: a new item is Add money item, an existing one Edit money item ──
+  wire('twMoneyView', 'isNewItem', 'twIsNewItem', 'condition'),
+  wire('twMoney', 'edSave', 'twIsNewItem', 'eval'),
+  wire('twIsNewItem', 'ontrue', 'cmdAddItem', 'do'),
+  wire('twIsNewItem', 'onfalse', 'cmdEditItem', 'do'),
+  wire('twMoneyView', 'editItemId', 'cmdEditItem', 'itemId'),
+  ...MONEY_EDIT_VALUES.flatMap(([n]) => [wire('twMoney', under('ed', n), 'cmdAddItem', n), wire('twMoney', under('ed', n), 'cmdEditItem', n)]),
+  // The form closes on the WRITE, not the press.
+  wire('cmdAddItem', 'done', 'twPaneNone', 'do'),
+  wire('cmdEditItem', 'done', 'twPaneNone', 'do'),
+  wire('twMoney', 'edCancel', 'twPaneNone', 'do'),
+
+  // ── Record balance (M11) ──
+  wire('twMoney', 'balOn', 'cmdRecordBalance', 'date'),
+  wire('twMoney', 'balAmount', 'cmdRecordBalance', 'amount'),
+  wire('twMoney', 'balSave', 'cmdRecordBalance', 'do'),
+  wire('cmdRecordBalance', 'done', 'twPaneNone', 'do'),
+  wire('twMoney', 'balCancel', 'twPaneNone', 'do'),
+  // Part of it… opens that repeat, where the amount that came in is typed.
+  wire('twMoney', 'balKey', 'twPartRoute', 'in-key'),
+  wire('twMoney', 'balPart', 'twPartRoute', 'run'),
+  wire('twPartRoute', 'out-sel', 'twSelFromPart', 'value'),
+  wire('twPartRoute', 'out-go', 'twSelFromPart', 'do'),
+  wire('twPartRoute', 'out-go', 'twPaneNone', 'do')
+];
+
 const PAGE_WEEK: Tpl010Component = {
   path: 'Pages/Week',
-  description: 'The week: the envelopes, the moves, six days of blocks and the cash strip, with the projects card and the evening drawer over the top of it.',
+  description: 'The week: the envelopes, the moves, six days of blocks and the money under them, with the projects card, the Money modal and the evening drawer over the top of it.',
   instantiates: [
     C.appBar, C.envelopeTile, C.movesStrip, C.dayColumn, C.cashStrip, C.projectCard, C.shutdownDrawer, C.settingsSheet,
-    C.blockSheet, C.dayPicker,
-    C.plannerData, C.envelopes, C.dayColumns, C.moves, C.cashLine, C.shutdown, '/Logic/Card rows',
+    C.blockSheet, C.dayPicker, C.moneySheet,
+    C.plannerData, C.envelopes, C.dayColumns, C.moves, C.money, C.moneyView, C.mark, C.shutdown, '/Logic/Card rows',
     C.addBlock, C.saveBlock, C.addTime, C.carryBlock, C.dropBlock, C.placeMove, C.moveBlock,
-    C.addProject, C.editProject, C.setMonthPlan, C.addCashEvent, C.editCashEvent, C.editSettings
+    C.addProject, C.editProject, C.setMonthPlan, C.editSettings,
+    C.addMoneyItem, C.editMoneyItem, C.endMoneyItem, C.agreeMoneyItem, C.addMark, C.editMark, C.recordBalance
   ],
   repeats: { source: 'array', rowFields: ENVELOPE_TILE_FIELDS.map(([n]) => n) },
   nodes: [
@@ -4041,6 +5862,7 @@ const PAGE_WEEK: Tpl010Component = {
     place('twCard', C.projectCard, 'The projects', 'twRoot'),
     place('twDrawer', C.shutdownDrawer, 'The evening', 'twRoot'),
     place('twSheet', C.settingsSheet, 'The settings', 'twRoot'),
+    place('twMoney', C.moneySheet, 'Money', 'twRoot'),
     place('twLog', C.blockSheet, 'One block, and the time on it', 'twRoot'),
 
     // ── Who you are ──
@@ -4054,7 +5876,10 @@ const PAGE_WEEK: Tpl010Component = {
     logic('twEnv', C.envelopes, 'The envelopes'),
     logic('twDays', C.dayColumns, 'The six columns'),
     logic('twMovesLogic', C.moves, 'The moves, by urgency'),
-    logic('twCashLogic', C.cashLine, 'The money'),
+    logic('twMoneyLogic', C.money, 'The money, drawn'),
+    logic('twMoneyView', C.moneyView, 'What the Money pane and the card’s Billing show'),
+    logic('twMarkPane', C.mark, 'The mark a press in the pane writes'),
+    logic('twMarkBal', C.mark, 'The mark an answer in Record balance writes'),
     logic('twShutLogic', C.shutdown, 'What tonight says'),
     logic('twCardRows', '/Logic/Card rows', 'The projects card'),
 
@@ -4211,6 +6036,10 @@ Outputs.kinds = [
   { Label: 'Dormant: a client worth a nudge', Value: 'dormant' },
   { Label: 'Admin', Value: 'admin' }
 ];
+Outputs.billings = [
+  { Label: 'Hourly: billed for the hours', Value: 'hourly' },
+  { Label: 'Fixed: a set amount for the agreed work', Value: 'fixed' }
+];
 var p = null;
 for (var i = 0; i < projects.length; i++) if (projects[i] && projects[i].id === id) { p = projects[i]; break; }
 var editing = mode === 'new' || (mode === 'edit' && !!p);
@@ -4234,6 +6063,9 @@ if (!editing) {
   Outputs.kind = '';
   Outputs.moveDue = '';
   Outputs.moveStop = false;
+  Outputs.billing = '';
+  Outputs.termsDays = '';
+  Outputs.agreedHours = '';
   Outputs.title = '';
   return;
 }
@@ -4251,76 +6083,67 @@ Outputs.rate = num(src.rate, 0) > 0 ? String(num(src.rate, 0)) : '';
 Outputs.kind = String(src.kind || 'earning');
 Outputs.moveDue = parseDay(src.moveDue) ? String(src.moveDue) : '';
 Outputs.moveStop = src.moveStop === true;
+// M21 — hourly unless it says fixed; the terms a new bill's due date is pre-filled from (M5).
+Outputs.billing = src.billing === 'fixed' ? 'fixed' : 'hourly';
+Outputs.termsDays = String(num(src.termsDays, 14));
+Outputs.agreedHours = num(src.agreedHours, 0) > 0 ? String(num(src.agreedHours, 0)) : '';
 Outputs.title = mode === 'new' ? 'New project' : 'Edit ' + String(p.name || 'the project');`
     ),
 
-    logic('twVarCash', VARIABLE, 'Which money event is being edited', { name: VAR.cashEdit }),
-    logic('twSetCash', SET_VARIABLE, 'Edit a money event', { name: VAR.cashEdit, setWith: 'string' }),
-    logic('twCashNew', SET_VARIABLE, 'Start a new money event', { name: VAR.cashEdit, setWith: 'string', value: 'new' }),
-    logic('twCashOff', SET_VARIABLE, 'Stop editing the money event', { name: VAR.cashEdit, setWith: 'string', value: '' }),
-
-    /** R23 — the typed money events as a list, and the one being edited as a form. */
-    derive(
-      'twCashForm',
-      'The money events, and the one being edited',
-      `${PLANNER_FNS}var mode = String(Inputs.mode || '');
-var events = Inputs.cashEvents || [];
-Outputs.kinds = [
-  { Label: 'Money in', Value: 'income' },
-  { Label: 'Money out', Value: 'cost' },
-  { Label: 'Invoices go out (a marker)', Value: 'invoice-out' },
-  { Label: 'An invoice falls due', Value: 'invoice-due' }
-];
-function kindOf(k) { k = String(k || 'cost'); return k === 'in' ? 'income' : k === 'note' ? 'invoice-out' : k; }
-var list = [];
-for (var i = 0; i < events.length; i++) if (events[i]) list.push(events[i]);
-list.sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : String(a.date || '') > String(b.date || '') ? 1 : 0; });
-var rows = [], found = null;
-for (var r = 0; r < list.length; r++) {
-  var e = list[r];
-  var d = parseDay(e.date);
-  var monthly = e.recurring === 'monthly';
-  var amt = num(e.amount, 0);
-  rows.push({
-    id: e.id,
-    whenText: d ? (monthly ? 'the ' + d.getDate() + (d.getDate() % 10 === 1 && d.getDate() !== 11 ? 'st' : d.getDate() % 10 === 2 && d.getDate() !== 12 ? 'nd' : d.getDate() % 10 === 3 && d.getDate() !== 13 ? 'rd' : 'th') : d.getDate() + ' ' + MON[d.getMonth()]) : '',
-    label: String(e.label || ''),
-    amountText: amt === 0 ? '—' : (amt > 0 ? '+' : '') + money(amt),
-    repeatText: monthly ? 'Every month' : 'Once'
-  });
-  if (e.id === mode) found = e;
-}
-Outputs.rows = rows;
-var open = mode === 'new' || !!found;
-Outputs.formShown = open;
-Outputs.isNew = mode === 'new';
-Outputs.id = found ? String(found.id) : '';
-if (!open) {
-  Outputs.formTitle = '';
-  Outputs.label = '';
-  Outputs.amount = '';
-  Outputs.date = '';
-  Outputs.kind = '';
-  Outputs.monthly = false;
-  return;
-}
-if (!found) {
-  Outputs.formTitle = 'A new money event';
-  Outputs.label = '';
-  Outputs.amount = '';
-  Outputs.date = dayKey(startOfToday());
-  Outputs.kind = 'cost';
-  Outputs.monthly = false;
-  return;
-}
-Outputs.formTitle = 'Change “' + String(found.label || '') + '”';
-Outputs.label = String(found.label || '');
-Outputs.amount = String(Math.abs(num(found.amount, 0)));
-Outputs.date = String(found.date || '');
-Outputs.kind = kindOf(found.kind);
-Outputs.monthly = found.recurring === 'monthly';`
+    /**
+     * **M1 — the Money modal.** What it is showing is five variables: open, the filter, the repeat
+     * picked, the pane's mode, and the item the mode is about. Each way in sets them with nodes of
+     * its own (memory: nodegx-sheet-traps, trap 5), and every value a press needs travels WITH the
+     * press, from a Function that writes it and pulses in the same run (GAM-011's rule).
+     */
+    logic('twVarMoney', VARIABLE, 'Is Money open?', { name: VAR.moneyOpen }),
+    logic('twMoneyOn', SET_VARIABLE, 'Open Money', { name: VAR.moneyOpen, setWith: 'boolean', value: true }),
+    logic('twMoneyOff', SET_VARIABLE, 'Close Money', { name: VAR.moneyOpen, setWith: 'boolean', value: false }),
+    derive('twMoneyShown', 'Is Money open?', 'Outputs.shown = Inputs.open === true;'),
+    logic('twVarFilter', VARIABLE, 'Which list Money shows', { name: VAR.moneyFilter }),
+    logic('twFilterUp', SET_VARIABLE, 'Show Upcoming', { name: VAR.moneyFilter, setWith: 'string', value: 'up' }),
+    logic('twFilterPast', SET_VARIABLE, 'Show Past', { name: VAR.moneyFilter, setWith: 'string', value: 'past' }),
+    logic('twFilterRec', SET_VARIABLE, 'Show Recurring', { name: VAR.moneyFilter, setWith: 'string', value: 'rec' }),
+    logic('twHorizon', 'Counter', 'How many more three months to show', { startValue: 0 }),
+    logic('twVarSel', VARIABLE, 'The repeat Money has picked', { name: VAR.moneySel }),
+    logic('twSelFromList', SET_VARIABLE, 'Pick the line pressed in the list', { name: VAR.moneySel, setWith: 'string' }),
+    logic('twSelFromStrip', SET_VARIABLE, 'Pick the box pressed under the week', { name: VAR.moneySel, setWith: 'string' }),
+    logic('twSelFromChase', SET_VARIABLE, 'Pick the late money the drawer raised', { name: VAR.moneySel, setWith: 'string' }),
+    logic('twSelFromPart', SET_VARIABLE, 'Pick the line answered Part of it', { name: VAR.moneySel, setWith: 'string' }),
+    logic('twSelClear', SET_VARIABLE, 'Pick nothing', { name: VAR.moneySel, setWith: 'string', value: '' }),
+    logic('twVarMoneyMode', VARIABLE, 'What Money’s pane is', { name: VAR.moneyMode }),
+    ...([
+      ['twPaneNone', 'The summary, or the line picked', ''],
+      ['twPaneChange', 'Change this one', 'change'],
+      ['twPaneEdit', 'Change the item', 'edit'],
+      ['twPaneNew', 'Add money', 'new'],
+      ['twPaneNewBill', 'A bill for the project on the card', 'newBill'],
+      ['twPaneNewHope', 'Hoped money from the project on the card', 'newHope'],
+      ['twPaneEnd', 'End the item', 'end'],
+      ['twPaneBalance', 'Record balance', 'balance']
+    ] as Array<[string, string, string]>).map(([id, label, value]) => logic(id, SET_VARIABLE, label, { name: VAR.moneyMode, setWith: 'string', value })),
+    logic('twVarMoneyItem', VARIABLE, 'The item Money’s pane is about', { name: VAR.moneyItem }),
+    logic('twItemFromList', SET_VARIABLE, 'The item pressed in Recurring', { name: VAR.moneyItem, setWith: 'string' }),
+    logic('twItemFromPane', SET_VARIABLE, 'The item the picked line comes from', { name: VAR.moneyItem, setWith: 'string' }),
+    logic('twItemFromCard', SET_VARIABLE, 'The project on the card', { name: VAR.moneyItem, setWith: 'string' }),
+    logic('twCardFromMight', SET_VARIABLE, 'Show the project you might earn from', { name: VAR.cardProject, setWith: 'string' }),
+    /** A line in the list: a repeat opens in the pane; an item in Recurring opens in the editor. */
+    script(
+      'twPickRoute',
+      'A line or an item?',
+      `var key = String(Inputs.key || ''), kind = String(Inputs.kind || '');
+if (key === '') return;
+if (kind === 'item') { Outputs.item = key; Outputs.toItem(); return; }
+Outputs.sel = key + '|' + (kind || 'pay');
+Outputs.toRepeat();`,
+      ['key', 'kind']
     ),
-
+    script('twStripRoute', 'The box pressed, as a line', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();", ['key']),
+    script('twChaseRoute', 'The late money, as a line', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();", ['key']),
+    script('twPartRoute', 'The line answered Part of it', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();", ['key']),
+    // One Function per thing a press does to a repeat: it says which, and presses in the same run.
+    ...MARK_ACTIONS.map(([id, label, action]) => script(id, label, `Outputs.action = '${action}';\nOutputs.go();`, [])),
+    logic('twIsNewItem', CONDITION, 'Is it a new money item?', signalOnly('condition')),
     logic('twVarSheet', VARIABLE, 'Is the settings sheet open?', { name: VAR.sheetOpen }),
     logic('twOpenSheet', SET_VARIABLE, 'Open the settings', { name: VAR.sheetOpen, setWith: 'boolean', value: true }),
     logic('twCloseSheet', SET_VARIABLE, 'Close the settings', { name: VAR.sheetOpen, setWith: 'boolean', value: false }),
@@ -4374,14 +6197,9 @@ document.addEventListener('keydown', fire);`,
       `${PLANNER_FNS}var s = (Inputs.settings || [])[0] || {};
 Outputs.id = s.id || '';
 Outputs.rate = String(num(s.rate, 0));
-Outputs.householdNeed = String(num(s.householdNeed, 0));
-Outputs.partnerIncome = String(num(s.partnerIncome, 0));
 Outputs.focusHours = String(num(s.focusHours, 6));
-Outputs.partnerDay = String(num(s.partnerDay, 28));
-Outputs.costsDay = String(num(s.costsDay, 1));
-Outputs.invoiceDay = String(num(s.invoiceDay, 28));
-Outputs.paymentTermsDays = String(num(s.paymentTermsDays, 7));
-Outputs.openingBalance = num(s.openingBalance, 0);`
+Outputs.savingsTarget = String(num(s.savingsTarget, 0));
+Outputs.lowWaterMark = String(num(s.lowWaterMark, 0));`
     ),
 
     // ── The commands ──
@@ -4399,9 +6217,14 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     logic('cmdAddProject', C.addProject, 'Add a project'),
     logic('cmdEditProject', C.editProject, 'Change a project'),
     logic('cmdMonthPlan', C.setMonthPlan, 'Plan this month'),
-    logic('cmdCashEvent', C.addCashEvent, 'Add a cash event'),
-    logic('cmdEditCash', C.editCashEvent, 'Change a cash event'),
-    logic('cmdSettings', C.editSettings, 'Save the settings')
+    logic('cmdSettings', C.editSettings, 'Save the settings'),
+    logic('cmdAddItem', C.addMoneyItem, 'Add a money item'),
+    logic('cmdEditItem', C.editMoneyItem, 'Change a money item'),
+    logic('cmdEndItem', C.endMoneyItem, 'End a money item'),
+    logic('cmdAgreeItem', C.agreeMoneyItem, 'Hoped money is agreed'),
+    logic('cmdAddMark', C.addMark, 'Mark a repeat for the first time'),
+    logic('cmdEditMark', C.editMark, 'Change the mark on a repeat'),
+    logic('cmdRecordBalance', C.recordBalance, 'Record the balance')
   ],
   connections: [
     // Signed in, or sent away.
@@ -4418,7 +6241,9 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twKeys', 'out-escape', 'twClearLog', 'do'),
     wire('twKeys', 'out-escape', 'twClearNewDay', 'do'),
     wire('twKeys', 'out-escape', 'twEditOff', 'do'),
-    wire('twKeys', 'out-escape', 'twCashOff', 'do'),
+    wire('twKeys', 'out-escape', 'twMoneyOff', 'do'),
+    wire('twKeys', 'out-escape', 'twSelClear', 'do'),
+    wire('twKeys', 'out-escape', 'twPaneNone', 'do'),
     wire('twAuth', 'onfalse', 'twToSignIn', 'navigate'),
     wire('twBar', 'signOut', 'twLogOut', 'login'),
     wire('twLogOut', 'done', 'twToSignIn', 'navigate'),
@@ -4436,10 +6261,19 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twDays', 'firstOpenDay', 'twCardRows', 'firstOpenDay'),
     wire('twEnv', 'focusHours', 'twDays', 'focusHours'),
     wire('cmdPlace', 'blockId', 'twDays', 'newBlockId'),
-    wire('twData', 'cashEvents', 'twCashLogic', 'cashEvents'),
-    wire('twData', 'settings', 'twCashLogic', 'settings'),
     wire('twData', 'settings', 'twSettings', 'in-settings'),
-    wire('twEnv', 'invoicedText', 'twCashLogic', 'invoicedText'),
+    // The money: the same records into all four money Functions.
+    ...(['twMoneyLogic', 'twMoneyView', 'twMarkPane', 'twMarkBal'] as const).flatMap((id) => [
+      wire('twData', 'moneyItems', id, 'items'),
+      wire('twData', 'moneyMarks', id, 'marks'),
+      wire('twData', 'balanceReadings', id, 'readings'),
+      wire('twData', 'projects', id, 'projects'),
+      // The blocks from four weeks back are what an hours bill is counted from (M23).
+      wire('twData', 'moveBlocks', id, 'blocks'),
+      wire('twData', 'settings', id, 'settings'),
+      wire('twData', 'marksSince', id, 'since')
+    ]),
+    wire('twMoneyLogic', 'targetHours', 'twEnv', 'targetHours'),
 
     // The four tiles, the chips, the six columns, the money.
     wire('twEnv', 'rows', 'twEnvEach', 'items'),
@@ -4447,10 +6281,12 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twMovesLogic', 'rows', 'twMoves', 'rows'),
     wire('twMovesLogic', 'empty', 'twMoves', 'empty'),
     wire('twDays', 'columns', 'twDayEach', 'items'),
-    wire('twCashLogic', 'rows', 'twCash', 'rows'),
-    wire('twCashLogic', 'balanceText', 'twCash', 'balanceText'),
-    wire('twCashLogic', 'termsText', 'twCash', 'termsText'),
-    wire('twEnv', 'invoicedText', 'twCash', 'invoicedText'),
+    // M14 — the bottom of the week.
+    wire('twMoneyLogic', 'stripRows', 'twCash', 'rows'),
+    wire('twMoneyLogic', 'stripBalance', 'twCash', 'balanceText'),
+    ...(['monthName', 'monthText', 'mightShown', 'mightLead', 'mightRows', 'lowText', 'lowColor', 'footText'] as const).map((n) => wire('twMoneyLogic', n, 'twCash', n)),
+    wire('twMoneyLogic', 'lateCount', 'twBar', 'lateCount'),
+    wire('twMoneyLogic', 'hasLate', 'twBar', 'hasLate'),
 
     // R16a — a block's tick opens the block sheet with Done ticked; it never logs by itself.
     wire('twDayEach', 'itemOutputSignal-toggle', 'twModeTick', 'do'),
@@ -4528,6 +6364,7 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     ...(['projects', 'blocks'] as const).map((n) => wire('twData', n, 'twShutLogic', n)),
     ...(['todayKey', 'tomorrowKey', 'todayLong', 'tomorrowLong'] as const).map((n) => wire('twDays', n, 'twShutLogic', n)),
     wire('twMovesLogic', 'unplacedDormant', 'twShutLogic', 'unplacedDormant'),
+    wire('twMoneyLogic', 'lateConcern', 'twShutLogic', 'lateConcern'),
     ...(['target', 'billableUsed', 'billableLeft', 'perDay', 'buildingLeft', 'daysLeft', 'focusHours'] as const).map((n) =>
       wire('twEnv', n, 'twShutLogic', n)
     ),
@@ -4587,27 +6424,14 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twVarSheet', 'value', 'twSheetShown', 'in-open'),
     wire('twSheetShown', 'out-shown', 'twSheet', 'shown'),
     wire('twSheet', 'close', 'twCloseSheet', 'do'),
-    wire('twSheet', 'close', 'twCashOff', 'do'),
 
-    // R23 — the money events, in the settings sheet.
-    wire('twSheet', 'cashPickId', 'twSetCash', 'value'),
-    wire('twSheet', 'cashPick', 'twSetCash', 'do'),
-    wire('twSheet', 'cashAdd', 'twCashNew', 'do'),
-    wire('twSheet', 'cashCancel', 'twCashOff', 'do'),
-    wire('twVarCash', 'value', 'twCashForm', 'in-mode'),
-    wire('twData', 'cashEvents', 'twCashForm', 'in-cashEvents'),
-    ...CASH_EDITOR_FIELDS.map(([n]) => wire('twCashForm', `out-${n}`, 'twSheet', under('cash', n))),
-    wire('twCashForm', 'out-isNew', 'twIsNewCash', 'condition'),
-    wire('twSheet', 'cashSave', 'twIsNewCash', 'eval'),
-    wire('twIsNewCash', 'ontrue', 'cmdCashEvent', 'do'),
-    wire('twIsNewCash', 'onfalse', 'cmdEditCash', 'do'),
-    wire('twCashForm', 'out-id', 'cmdEditCash', 'cashId'),
-    ...CASH_EDIT_VALUES.flatMap(([n]) => [wire('twSheet', under('cash', n), 'cmdCashEvent', n), wire('twSheet', under('cash', n), 'cmdEditCash', n)]),
-    wire('cmdCashEvent', 'done', 'twCashOff', 'do'),
-    wire('cmdEditCash', 'done', 'twCashOff', 'do'),
-    wire('twEnv', 'targetLine', 'twSheet', 'targetLine'),
+    wire('twMoneyLogic', 'targetLine', 'twSheet', 'targetLine'),
+    wire('twSheet', 'openMoney', 'twCloseSheet', 'do'),
+    wire('twSheet', 'openMoney', 'twMoneyOn', 'do'),
+    wire('twSheet', 'openMoney', 'twSelClear', 'do'),
+    wire('twSheet', 'openMoney', 'twPaneNone', 'do'),
     wire('twEnv', 'planLine', 'twSheet', 'planLine'),
-    ...(['rate', 'householdNeed', 'partnerIncome', 'focusHours', 'partnerDay', 'costsDay', 'invoiceDay', 'paymentTermsDays'] as const).flatMap((n) => [
+    ...(['rate', 'focusHours', 'savingsTarget', 'lowWaterMark'] as const).flatMap((n) => [
       wire('twSettings', `out-${n}`, 'twSheet', n),
       wire('twSheet', n, 'cmdSettings', n)
     ]),
@@ -4619,7 +6443,6 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twEnv', 'target', 'cmdMonthPlan', 'billable'),
     wire('twEnv', 'buildingLeft', 'cmdMonthPlan', 'building'),
     wire('twEnv', 'daysLeft', 'cmdMonthPlan', 'workingDays'),
-    wire('twSettings', 'out-openingBalance', 'cmdMonthPlan', 'openingBalance'),
     wire('twSheet', 'planMonth', 'cmdMonthPlan', 'do'),
 
     // The one sentence a failed write shows.
@@ -4627,8 +6450,11 @@ Outputs.openingBalance = num(s.openingBalance, 0);`
     wire('twVarProblem', 'value', 'twHasProblem', 'in-text'),
     wire('twHasProblem', 'out-shown', 'twProblem', 'mounted'),
 
+    ...MONEY_WIRES,
+
     // After any change, load the week again.
-    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdPlaceDay', 'cmdMoveBlock', 'cmdTakeOut', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdCashEvent', 'cmdEditCash', 'cmdSettings'].map(
+    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdPlaceDay', 'cmdMoveBlock', 'cmdTakeOut', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdSettings',
+      'cmdAddItem', 'cmdEditItem', 'cmdEndItem', 'cmdAgreeItem', 'cmdAddMark', 'cmdEditMark', 'cmdRecordBalance'].map(
       (id) => wire(id, 'done', 'twData', 'refresh')
     )
   ]
@@ -4757,15 +6583,22 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   ADD_PROJECT,
   EDIT_PROJECT,
   SET_MONTH_PLAN,
-  ADD_CASH_EVENT,
-  EDIT_CASH_EVENT,
   EDIT_SETTINGS,
+  ADD_MONEY_ITEM,
+  EDIT_MONEY_ITEM,
+  END_MONEY_ITEM,
+  AGREE_MONEY_ITEM,
+  ADD_MARK,
+  EDIT_MARK,
+  RECORD_BALANCE,
   // Logic: the only places a number or a sentence is decided.
   PLANNER_DATA,
   ENVELOPES,
   DAY_COLUMNS,
   MOVES,
-  CASH_LINE,
+  MONEY,
+  MONEY_VIEW,
+  MARK,
   SHUTDOWN,
   CARD_ROWS,
   // Leaves, then what places them.
@@ -4780,6 +6613,11 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   MOVE_CHIP,
   BLOCK,
   CASH_EVENT,
+  MONEY_ROW,
+  MONEY_MONTH,
+  BALANCE_ROW,
+  MIGHT_LINK,
+  KEY_LINE,
   PROJECT_LIST_ROW,
   PROJECT_GROUP,
   CARRY_ROW,
@@ -4789,13 +6627,17 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   CASH_STRIP,
   DATE_PICKER,
   ENTRY_ROW,
-  CASH_ROW,
   PROJECT_DETAIL,
   PROJECT_EDITOR,
   PROJECT_CARD,
   SHUTDOWN_DRAWER,
-  CASH_EDITOR,
   SETTINGS_SHEET,
+  MONEY_SUMMARY,
+  MONEY_REPEAT,
+  MONEY_END,
+  MONEY_BALANCE,
+  MONEY_EDITOR,
+  MONEY_SHEET,
   BLOCK_SHEET,
   DAY_PICK,
   DAY_PICKER,

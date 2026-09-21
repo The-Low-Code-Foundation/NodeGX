@@ -1,0 +1,1661 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8a91291c-ce2c-52b0-85cb-865fee3e13fa",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rpIn",
+      "type": "Component Inputs",
+      "label": "The repeat",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amountText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amountColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "detail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tickHead",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "remaining",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "rests",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "restDefault",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "changeLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skipShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "lostShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "changeShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "chDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "chAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "chNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "chHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "resetShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "closedShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "closedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hopedShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hopedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "billText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sendShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "sentOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sentAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sentAmountShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "unsendShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "fromShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "fromText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "itemLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "endShown",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "rpOut",
+      "type": "Component Outputs",
+      "label": "What to do with it",
+      "ports": [
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "tickOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tickAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tickRest",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changeOne",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "chDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "chAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "chNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saveOne",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "resetOne",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "skip",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "lost",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "untick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "agreed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "markSent",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sentOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sentAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "unsend",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "changeItem",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "endItem",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "rpRoot",
+      "type": "Group",
+      "label": "One repeat",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "rpBack",
+        "rpHead",
+        "rpAmount",
+        "rpDetail",
+        "rpTick",
+        "rpActs",
+        "rpChange",
+        "rpClosed",
+        "rpHoped",
+        "rpBill",
+        "rpFrom"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rpBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the list",
+      "parent": "rpRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "‹ Money",
+        "cssClassName": "planner-phone-only"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rpHead",
+      "type": "Group",
+      "label": "What it is",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)"
+      },
+      "children": [
+        "rpTitle",
+        "rpSub"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rpTitle",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "rpHead",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h3"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rpSub",
+      "type": "Text",
+      "label": "When",
+      "parent": "rpHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rpAmount",
+      "type": "Text",
+      "label": "How much",
+      "parent": "rpRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 24,
+          "unit": "px"
+        },
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rpDetail",
+      "type": "Text",
+      "label": "More about it",
+      "parent": "rpRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rpTick",
+      "type": "Group",
+      "label": "Did it happen?",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "rpTickHead",
+        "rpTickRow",
+        "rpRestLine",
+        "rpRest",
+        "rpTickIt"
+      ],
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "rpTickHead",
+      "type": "Text",
+      "label": "Label",
+      "parent": "rpTick",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "rpTickRow",
+      "type": "Group",
+      "label": "The day and the amount",
+      "parent": "rpTick",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "rpTickOnBox",
+        "rpTickAmountBox"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "rpTickOnBox",
+      "type": "Group",
+      "label": "The day",
+      "parent": "rpTickRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 55,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "rpTickOn"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "rpTickOn",
+      "type": "/Week/Date picker",
+      "label": "The day it happened",
+      "parent": "rpTickOnBox",
+      "parameters": {
+        "Label": "Happened on",
+        "Show Label": true
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "rpTickAmountBox",
+      "type": "Group",
+      "label": "The amount",
+      "parent": "rpTickRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "rpTickAmount"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "rpTickAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "The amount that moved",
+      "parent": "rpTickAmountBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Amount that moved, €",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "rpShort",
+      "type": "JavaScriptFunction",
+      "label": "Is it less than was due?",
+      "parameters": {
+        "functionScript": "var typed = String(Inputs.typed === undefined || Inputs.typed === null ? '' : Inputs.typed).trim();\nvar v = Number(typed), left = Math.abs(Number(Inputs.remaining) || 0);\nvar short = typed !== '' && isFinite(v) && v >= 0 && v < left - 0.005;\nOutputs.short = short;\nvar rest = Math.round((left - (isFinite(v) ? v : 0)) * 100) / 100;\nOutputs.restLine = short ? 'That is \\u20ac' + rest + ' less than was due. The other \\u20ac' + rest + ' is:' : '';"
+      },
+      "x": 590,
+      "y": 1840,
+      "ports": [
+        {
+          "name": "in-typed",
+          "displayName": "typed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-remaining",
+          "displayName": "remaining",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-short",
+          "displayName": "short",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-restLine",
+          "displayName": "restLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rpRestLine",
+      "type": "Text",
+      "label": "How much less",
+      "parent": "rpTick",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "rpRest",
+      "type": "net.noodl.controls.options",
+      "label": "What the rest is",
+      "parent": "rpTick",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick one",
+        "useLabel": true,
+        "label": "The rest",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "rpTickIt",
+      "type": "net.noodl.controls.button",
+      "label": "Tick it",
+      "parent": "rpTick",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Tick it"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "rpActs",
+      "type": "Group",
+      "label": "Other things to do with it",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "rpChangeOne",
+        "rpSkip",
+        "rpLost"
+      ],
+      "x": 100,
+      "y": 2080
+    },
+    {
+      "id": "rpChangeOne",
+      "type": "net.noodl.controls.button",
+      "label": "Change this one",
+      "parent": "rpActs",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "rpSkip",
+      "type": "net.noodl.controls.button",
+      "label": "Skip this one",
+      "parent": "rpActs",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Skip this one"
+      },
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "rpLost",
+      "type": "net.noodl.controls.button",
+      "label": "Mark it as lost",
+      "parent": "rpActs",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Mark as lost"
+      },
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "rpChange",
+      "type": "Group",
+      "label": "This one, changed",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "rpChRow",
+        "rpChNote",
+        "rpChHint",
+        "rpChButtons"
+      ],
+      "x": 100,
+      "y": 2560
+    },
+    {
+      "id": "rpChRow",
+      "type": "Group",
+      "label": "Its day and amount",
+      "parent": "rpChange",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "rpChDateBox",
+        "rpChAmountBox"
+      ],
+      "x": 160,
+      "y": 2680
+    },
+    {
+      "id": "rpChDateBox",
+      "type": "Group",
+      "label": "Its day",
+      "parent": "rpChRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 55,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "rpChDate"
+      ],
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "rpChDate",
+      "type": "/Week/Date picker",
+      "label": "Its day",
+      "parent": "rpChDateBox",
+      "parameters": {
+        "Label": "Date",
+        "Show Label": true
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "rpChAmountBox",
+      "type": "Group",
+      "label": "Its amount",
+      "parent": "rpChRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "rpChAmount"
+      ],
+      "x": 220,
+      "y": 3040
+    },
+    {
+      "id": "rpChAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "Its amount",
+      "parent": "rpChAmountBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Amount, €",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "rpChNote",
+      "type": "net.noodl.controls.textinput",
+      "label": "A note about this one",
+      "parent": "rpChange",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Note",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 3280
+    },
+    {
+      "id": "rpChHint",
+      "type": "Text",
+      "label": "What changing it does",
+      "parent": "rpChange",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "rpChButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "rpChange",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "rpSaveOne",
+        "rpResetOne"
+      ],
+      "x": 160,
+      "y": 3520
+    },
+    {
+      "id": "rpSaveOne",
+      "type": "net.noodl.controls.button",
+      "label": "Save this one",
+      "parent": "rpChButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save this one"
+      },
+      "x": 220,
+      "y": 3640
+    },
+    {
+      "id": "rpResetOne",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the item",
+      "parent": "rpChButtons",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Back to the item"
+      },
+      "x": 220,
+      "y": 3760
+    },
+    {
+      "id": "rpClosed",
+      "type": "Group",
+      "label": "What happened",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "rpClosedText",
+        "rpUntick"
+      ],
+      "x": 100,
+      "y": 3880
+    },
+    {
+      "id": "rpClosedText",
+      "type": "Text",
+      "label": "What happened",
+      "parent": "rpClosed",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4000
+    },
+    {
+      "id": "rpUntick",
+      "type": "net.noodl.controls.button",
+      "label": "Untick it",
+      "parent": "rpClosed",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Untick"
+      },
+      "x": 160,
+      "y": 4120
+    },
+    {
+      "id": "rpHoped",
+      "type": "Group",
+      "label": "Hoped money",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "rpHopedText",
+        "rpAgreed"
+      ],
+      "x": 100,
+      "y": 4240
+    },
+    {
+      "id": "rpHopedText",
+      "type": "Text",
+      "label": "What hoped means",
+      "parent": "rpHoped",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4360
+    },
+    {
+      "id": "rpAgreed",
+      "type": "net.noodl.controls.button",
+      "label": "It is agreed",
+      "parent": "rpHoped",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "It’s agreed · set to 100%"
+      },
+      "x": 160,
+      "y": 4480
+    },
+    {
+      "id": "rpBill",
+      "type": "Group",
+      "label": "The bill",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "rpBillText",
+        "rpSend",
+        "rpUnsend"
+      ],
+      "x": 100,
+      "y": 4600
+    },
+    {
+      "id": "rpBillText",
+      "type": "Text",
+      "label": "When it goes out",
+      "parent": "rpBill",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4720
+    },
+    {
+      "id": "rpSend",
+      "type": "Group",
+      "label": "Sending it",
+      "parent": "rpBill",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "rpSendRow",
+        "rpMarkSent"
+      ],
+      "x": 160,
+      "y": 4840
+    },
+    {
+      "id": "rpSendRow",
+      "type": "Group",
+      "label": "The day and the amount",
+      "parent": "rpSend",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "rpSentOnBox",
+        "rpSentAmountBox"
+      ],
+      "x": 220,
+      "y": 4960
+    },
+    {
+      "id": "rpSentOnBox",
+      "type": "Group",
+      "label": "The day",
+      "parent": "rpSendRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 55,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "rpSentOn"
+      ],
+      "x": 280,
+      "y": 5080
+    },
+    {
+      "id": "rpSentOn",
+      "type": "/Week/Date picker",
+      "label": "The day it went out",
+      "parent": "rpSentOnBox",
+      "parameters": {
+        "Label": "Sent on",
+        "Show Label": true
+      },
+      "x": 340,
+      "y": 5200
+    },
+    {
+      "id": "rpSentAmountBox",
+      "type": "Group",
+      "label": "The amount",
+      "parent": "rpSendRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "rpSentAmount"
+      ],
+      "x": 280,
+      "y": 5320
+    },
+    {
+      "id": "rpSentAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "The amount on the bill",
+      "parent": "rpSentAmountBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Amount, €",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 5440
+    },
+    {
+      "id": "rpMarkSent",
+      "type": "net.noodl.controls.button",
+      "label": "Mark it as sent",
+      "parent": "rpSend",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Mark as sent"
+      },
+      "x": 220,
+      "y": 5560
+    },
+    {
+      "id": "rpUnsend",
+      "type": "net.noodl.controls.button",
+      "label": "It was not sent after all",
+      "parent": "rpBill",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Not sent after all"
+      },
+      "x": 160,
+      "y": 5680
+    },
+    {
+      "id": "rpFrom",
+      "type": "Group",
+      "label": "The item it comes from",
+      "parent": "rpRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "rpFromLabel",
+        "rpFromText",
+        "rpFromButtons"
+      ],
+      "x": 100,
+      "y": 5800
+    },
+    {
+      "id": "rpFromLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "rpFrom",
+      "parameters": {
+        "text": "Comes from",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 5920
+    },
+    {
+      "id": "rpFromText",
+      "type": "Text",
+      "label": "The item",
+      "parent": "rpFrom",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 6040
+    },
+    {
+      "id": "rpFromButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "rpFrom",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "rpChangeItem",
+        "rpEndItem"
+      ],
+      "x": 160,
+      "y": 6160
+    },
+    {
+      "id": "rpChangeItem",
+      "type": "net.noodl.controls.button",
+      "label": "Change the item",
+      "parent": "rpFromButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 6280
+    },
+    {
+      "id": "rpEndItem",
+      "type": "net.noodl.controls.button",
+      "label": "End the item",
+      "parent": "rpFromButtons",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "End it"
+      },
+      "x": 220,
+      "y": 6400
+    },
+    {
+      "id": "rpReset",
+      "type": "JavaScriptFunction",
+      "label": "Put the boxes back when the repeat changes",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (this.key !== undefined && this.key !== key) { Outputs.blur(); Outputs.reset(); }\nthis.key = key;"
+      },
+      "x": 590,
+      "y": 1600,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-blur",
+          "displayName": "blur",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reset",
+          "displayName": "reset",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rpClosing",
+      "type": "JavaScriptFunction",
+      "label": "Clear the boxes when the pane closes",
+      "parameters": {
+        "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\n\nthis.wasShown = shown;"
+      },
+      "x": 590,
+      "y": 1720,
+      "ports": [
+        {
+          "name": "in-shown",
+          "displayName": "shown",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-closed",
+          "displayName": "closed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "rpRoot"
+  ]
+}

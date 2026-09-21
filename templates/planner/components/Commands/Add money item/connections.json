@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "927225c3-5b16-5f30-8ff6-e650907ead17",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "label",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "dir",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-dir"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "amount",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "repeat",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "date",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "until",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "monthEnd",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-monthEnd"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "projectId",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "billDate",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-billDate"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "billLeadDays",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-billLeadDays"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "fromHours",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-fromHours"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "likelihood",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-likelihood"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "note",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "AddmoneyitIn",
+      "fromProperty": "do",
+      "toId": "AddmoneyitGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-label",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-label"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-amount",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-amount"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-repeat",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-repeat"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-date",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-until",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-until"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-monthEnd",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-monthEnd"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-projectId",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-billDate",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-billDate"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-billLeadDays",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-billLeadDays"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-fromHours",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-fromHours"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-likelihood",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-likelihood"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-note",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-note"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-position",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "AddmoneyitGuard",
+      "fromProperty": "out-go",
+      "toId": "AddmoneyitWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddmoneyitWrite",
+      "fromProperty": "done",
+      "toId": "AddmoneyitOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddmoneyitWrite",
+      "fromProperty": "failure",
+      "toId": "AddmoneyitProblem",
+      "toProperty": "do"
+    }
+  ]
+}

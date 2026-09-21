@@ -15,7 +15,8 @@ import * as path from 'path';
 import type { LegacyComponent, LegacyNode } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 import { validateSecurityConfig } from '../../nodegx-backend/src/security/model';
 
-import { C, COLLECTIONS, TPL010_COMPONENTS } from './tpl010Components';
+import { C, COLLECTIONS, PLANNER_FNS, TPL010_COMPONENTS } from './tpl010Components';
+import { MONEY_FNS } from './tpl010Money';
 import { BACKEND_NODE_TYPES, DEMO_CHANGED, DEMO_READ_SCRIPT, DEMO_STORAGE_KEY, TPL010_DEMO_COMPONENTS } from './tpl010Demo';
 import {
   AuthoredTemplate,
@@ -212,7 +213,7 @@ describe('§2 the policy, on a database holding somebody’s income', () => {
     expect(fs.readFileSync(path.join(ARTEFACT, POLICY_FILE))).toEqual(fs.readFileSync(POLICY_SOURCE));
   });
 
-  it('names exactly the five collections, keeps every row private, and lets nothing but a Block be deleted', () => {
+  it('names exactly the seven collections, keeps every row private, and lets nothing but a Block be deleted (M10: ending money keeps it)', () => {
     expect(Object.keys(policy.collections).sort()).toEqual([...COLLECTIONS].sort());
     for (const [name, rules] of Object.entries(policy.collections)) {
       expect(`${name} creatorOwns=${rules.creatorOwns}`).toBe(`${name} creatorOwns=true`);
@@ -336,9 +337,9 @@ describe('§3 the rules the week depends on', () => {
    * sent, so a sheet opening with '' on a box last sent '' kept the note typed and abandoned
    * last time. Every box in the three editors is cleared as its sheet closes.
    */
-  it('🔴 R2.4 — every box in the three editors is cleared when its sheet closes', () => {
+  it('🔴 R2.4 / TPL-010-M — every box in the editors and the Money pane is cleared when its sheet closes', () => {
     const unCleared: string[] = [];
-    for (const name of [C.blockSheet, C.projectEditor, C.cashEditor]) {
+    for (const name of [C.blockSheet, C.projectEditor, C.moneyEditor, C.moneyRepeat, C.moneyBalance]) {
       const wires = connectionsOf(built, name);
       for (const n of nodesOf(component(built, name)).filter((x) => x.type === 'net.noodl.controls.textinput')) {
         if (!wires.some((w) => w.toId === n.id && w.toProperty === 'clear' && w.fromProperty === 'out-closed')) unCleared.push(`${name} ${n.id}`);
@@ -353,7 +354,7 @@ describe('§3 the rules the week depends on', () => {
    */
   it('🔴 a click inside a card or a sheet stays inside it', () => {
     const panels: Array<[string, string]> = [
-      [C.projectCard, 'pcCard'], [C.shutdownDrawer, 'sdPanel'], [C.settingsSheet, 'stCard'], [C.blockSheet, 'bsCard']
+      [C.projectCard, 'pcCard'], [C.shutdownDrawer, 'sdPanel'], [C.settingsSheet, 'stCard'], [C.blockSheet, 'bsCard'], [C.moneySheet, 'msCard']
     ];
     for (const [name, id] of panels) {
       const node = nodesOf(component(built, name)).find((n) => n.id === id);
@@ -511,7 +512,8 @@ describe('§4 the arithmetic, run rather than read', () => {
       block('2026-09-09', 'p-earn', 21, true),
       block('2026-09-23', 'p-earn', 8, false) // planned, not logged: it has not been spent
     ];
-    const { outputs } = run(ENVELOPES(), { projects: PROJECTS, blocks, monthPlans: [], settings, weekStart: MONDAY });
+    // M22 — the target arrives from Logic/Money; the envelopes spend it.
+    const { outputs } = run(ENVELOPES(), { projects: PROJECTS, blocks, monthPlans: [], settings, weekStart: MONDAY, targetHours: 55 });
     expect(outputs.target).toBe(55);
     expect(outputs.billableUsed).toBe(41);
     expect(outputs.daysLeft).toBe(5);
@@ -657,21 +659,6 @@ describe('§4 the arithmetic, run rather than read', () => {
     expect(run(moveIt, { blockId: 'mv1', date: '2026-09-29', from: '2026-09-29' }).signals).toEqual([]);
   });
 
-  it('the cash strip expands a monthly event over the six weeks ahead and runs the balance through it', () => {
-    const { outputs } = run(scriptOf(built, C.cashLine, 'clWork'), {
-      cashEvents: [
-        { id: 'c1', date: '2026-08-28', amount: 1500, label: 'Partner’s contract', kind: 'in', recurring: 'monthly' },
-        { id: 'c2', date: '2026-10-01', amount: -4500, label: 'Household costs', kind: 'cost', recurring: '' }
-      ],
-      settings,
-      invoicedText: ''
-    });
-    const rows = outputs.rows as Array<Record<string, unknown>>;
-    expect(rows.map((r) => r.label)).toEqual(['Partner’s contract', 'Household costs', 'Partner’s contract']);
-    expect(rows.map((r) => r.running)).toEqual(['after: €4,700', 'after: €200', 'after: €1,700']);
-    expect(rows.some((r) => r.low === true)).toBe(false);
-  });
-
   /** R23, run: what the block sheet writes about the block itself. */
   it('R2.4-6 — Save block writes the project, the words, the hours and the day, and refuses a block that is not one', () => {
     const guard = scriptOf(built, C.saveBlock, 'SaveblockGuard');
@@ -762,17 +749,6 @@ describe('§4 the arithmetic, run rather than read', () => {
     expect(run(scriptOf(built, C.editProject, 'EditprojecGuard'), { projectId: '', name: 'X' }).signals).toEqual([]);
   });
 
-  it('R2.4-7 — a money event is a cost, money in or a marker whichever sign was typed, and the old spellings still read', () => {
-    const add = scriptOf(built, C.addCashEvent, 'AddcasheveGuard');
-    const base = { date: '2026-10-05', label: 'Accountant', monthly: false };
-    expect(run(add, { ...base, amount: 300, kind: 'cost' }).outputs).toMatchObject({ amount: -300, kind: 'cost', recurring: '' });
-    expect(run(add, { ...base, amount: -900, kind: 'income', monthly: true }).outputs).toMatchObject({ amount: 900, recurring: 'monthly' });
-    expect(run(add, { ...base, amount: 1500, kind: 'in' }).outputs.kind).toBe('income');
-    const edit = scriptOf(built, C.editCashEvent, 'EditcashevGuard');
-    expect(run(edit, { ...base, cashId: 'c1', amount: 4600, kind: 'cost' }).outputs).toMatchObject({ amount: -4600 });
-    expect(run(edit, { ...base, cashId: '', amount: 1, kind: 'cost' }).signals).toEqual([]);
-  });
-
   /**
    * The phone (Richard, 2026-09-21): **one day column and a day picker**. Six columns are
    * always built; exactly one carries `planner-day-picked`, and the stylesheet under the
@@ -835,6 +811,289 @@ describe('§4 the arithmetic, run rather than read', () => {
   });
 });
 
+// ── §6 ─────────────────────────────────────────────────────────────────────
+
+/**
+ * TPL-010-M — the money, run with the clock held at Fri 25 Sep 2026 (§7's acceptance table). The
+ * fixture is §5.9's seed with the dates written out; every figure asserted is one the spec or the
+ * approved mockup states.
+ */
+describe('§6 the money, run rather than read (TPL-010-M)', () => {
+  beforeAll(() => {
+    jest.useFakeTimers({ doNotFake: ['performance'] }).setSystemTime(new Date(2026, 8, 25, 9, 0, 0));
+  });
+  afterAll(() => jest.useRealTimers());
+
+  const MPROJECTS = [
+    { id: 'bramble', name: 'Bramble & Co', kind: 'earning', billing: 'fixed', termsDays: 7, agreedHours: 14, rate: 80, move: 'Offer the add-on' },
+    { id: 'northline', name: 'Northline Languages', kind: 'earning', billing: 'fixed', termsDays: 14 },
+    { id: 'salon', name: 'Salon Collective', kind: 'earning', billing: 'hourly', rate: 18, termsDays: 7 },
+    { id: 'coaching', name: 'Coaching offer', kind: 'building', move: 'Send the email to the 500-person list' },
+    { id: 'jazz', name: 'The Jazz Room', kind: 'hobby', move: 'Ask if the fundraiser is happening' }
+  ];
+  const ITEMS = [
+    { id: 'partner', label: 'Partner’s contract', amount: 1500, repeat: 'monthly', date: '2026-07-28', likelihood: 100 },
+    { id: 'house', label: 'Household costs', amount: -4500, repeat: 'monthly', date: '2026-08-01', likelihood: 100 },
+    { id: 'tax', label: 'Income tax', amount: -2400, repeat: 'yearly', date: '2026-11-30', likelihood: 100 },
+    { id: 'cowork', label: 'Co-working day', amount: -25, repeat: 'weekly', date: '2026-09-05', likelihood: 100 },
+    { id: 'bramble', label: 'Bramble & Co', amount: 1120, repeat: 'monthly', date: '2026-08-07', until: '2027-04-07', projectId: 'bramble', billLeadDays: 7, likelihood: 100 },
+    { id: 'salon1', label: 'Salon Collective · August', amount: 640, repeat: 'once', date: '2026-09-16', projectId: 'salon', billDate: '2026-09-09', likelihood: 100 },
+    { id: 'salon2', label: 'Salon Collective · September', amount: 0, fromHours: true, repeat: 'once', date: '2026-10-07', projectId: 'salon', billDate: '2026-09-30', likelihood: 100 },
+    { id: 'north1', label: 'Northline · AI workshop', amount: 1120, repeat: 'once', date: '2026-10-08', projectId: 'northline', billDate: '2026-09-24', likelihood: 100 },
+    { id: 'coach', label: 'Coaching, three clients', amount: 1800, repeat: 'monthly', date: '2026-10-29', projectId: 'coaching', likelihood: 40 },
+    { id: 'jazz', label: 'The Jazz Room retainer', amount: 2000, repeat: 'monthly', date: '2026-12-01', projectId: 'jazz', likelihood: 30 }
+  ];
+  const pay = (itemId: string, occurs: string, extra: Record<string, unknown>) => ({ id: `m-${itemId}-${occurs}`, itemId, occurs, ...extra });
+  const paidOn = (itemId: string, occurs: string, amount: number, day = occurs) => pay(itemId, occurs, { payments: [{ day, amount }] });
+  const MARKS = [
+    paidOn('partner', '2026-07-28', 1500), paidOn('partner', '2026-08-28', 1500), pay('partner', '2026-10-28', { amount: 1380 }),
+    paidOn('house', '2026-08-01', -4500), paidOn('house', '2026-09-01', -4500),
+    paidOn('cowork', '2026-09-05', -25), paidOn('cowork', '2026-09-12', -25), paidOn('cowork', '2026-09-19', -25),
+    pay('bramble', '2026-08-07', { sentOn: '2026-07-31', payments: [{ day: '2026-08-12', amount: 1120 }] }),
+    pay('bramble', '2026-09-07', { sentOn: '2026-08-31', payments: [{ day: '2026-09-05', amount: 1120 }] }),
+    pay('salon1', '2026-09-16', { sentOn: '2026-09-09' })
+  ];
+  const BLOCKS = [
+    { id: 's1', projectId: 'salon', date: '2026-09-12', planned: 18, done: true, actual: '' },
+    { id: 's2', projectId: 'salon', date: '2026-09-21', planned: 1, done: true, actual: '' },
+    { id: 's3', projectId: 'salon', date: '2026-09-22', planned: 1.5, done: true, actual: '' },
+    { id: 's4', projectId: 'salon', date: '2026-09-23', planned: 1.5, done: true, actual: '' },
+    { id: 's5', projectId: 'salon', date: '2026-09-28', planned: 2, done: false, actual: '' },
+    { id: 'b1', projectId: 'bramble', date: '2026-09-12', planned: 5, done: true, actual: '' },
+    { id: 'b2', projectId: 'bramble', date: '2026-09-21', planned: 2, done: true, actual: 2.5 },
+    { id: 'b3', projectId: 'bramble', date: '2026-09-22', planned: 2, done: true, actual: '' },
+    { id: 'b4', projectId: 'bramble', date: '2026-09-23', planned: 2, done: true, actual: '' }
+  ];
+  const SETTINGS = [{ id: 's', rate: 50, focusHours: 6, savingsTarget: 500, lowWaterMark: 0 }];
+  const READINGS = [{ id: 'r1', date: '2026-09-21', amount: 3200 }];
+  const DATA = { items: ITEMS, marks: MARKS, readings: READINGS, projects: MPROJECTS, blocks: BLOCKS, settings: SETTINGS, since: '2025-08-01' };
+
+  const MONEY = () => scriptOf(built, C.money, 'moWork');
+  const PANE = () => scriptOf(built, C.moneyView, 'mvpWork');
+  const MARK = () => scriptOf(built, C.mark, 'mkWork');
+  const money = (over: Record<string, unknown> = {}) => run(MONEY(), { ...DATA, filter: 'up', horizon: 0, sel: '', ...over }).outputs;
+  const pane = (over: Record<string, unknown> = {}) => run(PANE(), { ...DATA, open: true, sel: '', mode: '', itemId: '', cardProject: '', ...over }).outputs;
+  const rows = (out: Record<string, unknown>): Array<Record<string, string>> =>
+    (out.groups as Array<{ name: string; rows: Array<Record<string, string>> }>).flatMap((g) => g.rows.map((r) => ({ ...r, group: g.name })));
+  /** Apply what Logic/Mark wrote to the fixture's marks, the way the backend would. */
+  const applyMark = (marks: Array<Record<string, unknown>>, out: Record<string, unknown>) => {
+    const fields = ['itemId', 'occurs', 'amount', 'date', 'skip', 'payments', 'doneOn', 'doneAmount', 'lostOn', 'sentOn', 'note'];
+    const next = Object.fromEntries(fields.map((f) => [f, out[f]]));
+    const at = marks.findIndex((m) => m.itemId === out.itemId && m.occurs === out.occurs);
+    return at < 0 ? [...marks, { id: 'new', ...next }] : marks.map((m, i) => (i === at ? { ...m, ...next } : m));
+  };
+  const markRun = (inputs: Record<string, unknown>) => run(MARK(), { ...DATA, ...inputs });
+  // eslint-disable-next-line no-new-func
+  const fns = (expr: string) => new Function(`${PLANNER_FNS}${MONEY_FNS}\nreturn ${expr};`)();
+
+  it('M-2 — break-even €3,308.33, target €3,808.33, 46 billable hours; a €3,600 tax makes it €3,408.33, €3,908.33 and 48', () => {
+    const out = money();
+    expect(out.targetHours).toBe(46);
+    expect(out.targetLine).toContain('Break-even €3,308.33');
+    expect(out.targetLine).toContain('€3,808.33');
+    const lines = pane().sumLines as Array<{ label: string; value: string }>;
+    expect(lines.find((l) => l.label === 'Billable this month')?.value).toBe('46 h');
+    const taxed = money({ items: ITEMS.map((i) => (i.id === 'tax' ? { ...i, amount: -3600 } : i)) });
+    expect(taxed.targetHours).toBe(48);
+    expect(taxed.targetLine).toContain('Break-even €3,408.33');
+    expect(taxed.targetLine).toContain('€3,908.33');
+  });
+
+  it('M-3 — the schedules land where §5.3 says: the 31st, the last day, quarterly, weekly, until', () => {
+    expect(fns("repeatsOf({ date: '2026-08-31', repeat: 'monthly' }, '2027-02-28')")).toEqual(['2026-08-31', '2026-09-30', '2026-10-31', '2026-11-30', '2026-12-31', '2027-01-31', '2027-02-28']);
+    expect(fns("repeatsOf({ date: '2026-01-10', repeat: 'monthly', monthEnd: true }, '2026-04-30')")).toEqual(['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
+    expect(fns("repeatsOf({ date: '2026-01-15', repeat: 'quarterly' }, '2026-12-31')")).toEqual(['2026-01-15', '2026-04-15', '2026-07-15', '2026-10-15']);
+    expect(fns("repeatsOf({ date: '2026-09-26', repeat: 'weekly' }, '2026-11-06')").length).toBe(6);
+    expect(fns("repeatsOf({ date: '2028-02-29', repeat: 'yearly' }, '2030-12-31')")).toEqual(['2028-02-29', '2029-02-28', '2030-02-28']);
+    expect(fns("repeatsOf({ date: '2026-09-05', repeat: 'weekly', until: '2026-09-19' }, '2026-12-31')")).toEqual(['2026-09-05', '2026-09-12', '2026-09-19']);
+  });
+
+  it('M-4 — October’s €1,380 reads “usually €1,500”; the item going to €1,600 moves September and November and leaves October', () => {
+    const oct = pane({ sel: 'partner|2026-10-28|pay' });
+    expect(oct.rpAmountText).toBe('+€1,380  · usually €1,500');
+    const raised = ITEMS.map((i) => (i.id === 'partner' ? { ...i, amount: 1600 } : i));
+    const amounts = rows(money({ items: raised })).filter((r) => r.key.startsWith('partner|')).map((r) => `${r.key} ${r.amountText}`);
+    expect(amounts).toEqual(['partner|2026-09-28 +€1,600', 'partner|2026-10-28 +€1,380', 'partner|2026-11-28 +€1,600', 'partner|2026-12-28 +€1,600']);
+  });
+
+  it('M-5 — End it keeps what was ticked and shows nothing after the day picked; nothing is deleted', () => {
+    const end = pane({ mode: 'end', itemId: 'cowork' });
+    expect(end.endShown).toBe(true);
+    expect(end.endAt).toBe('2026-09-19');
+    expect(end.endText).toContain('The 3 ticked repeats stay in Past');
+    const ended = ITEMS.map((i) => (i.id === 'cowork' ? { ...i, until: '2026-09-19' } : i));
+    expect(rows(money({ items: ended })).filter((r) => r.key.startsWith('cowork|'))).toEqual([]);
+    expect(rows(money({ items: ended, filter: 'past' })).filter((r) => r.key.startsWith('cowork|')).length).toBe(3);
+    const guard = scriptOf(built, C.endMoneyItem, 'EndmoneyitGuard');
+    expect(run(guard, { itemId: 'cowork', until: '2026-09-19' }).outputs).toEqual({ until: '2026-09-19' });
+  });
+
+  it('M-6 — the unticked Salon bill is late: first in Upcoming, first box, the evening’s concern; ticked, it is Past, 9 days late', () => {
+    const out = money();
+    const first = rows(out)[0];
+    expect([first.group, first.key, first.amountText]).toEqual(['Late', 'salon1|2026-09-16', '+€640']);
+    expect(first.sub).toContain('due 9 days ago');
+    const box = (out.stripRows as Array<Record<string, string>>)[0];
+    expect([box.key, box.when]).toEqual(['salon1|2026-09-16', 'Due Wed 16 · late']);
+    expect(out.lateConcern).toBe('One thing: Salon Collective’s €640 was due on Wed 16 Sep and is not ticked. Chase it, or tick it.');
+    expect([out.lateCount, out.hasLate]).toEqual(['1', true]);
+
+    const tick = markRun({ key: 'salon1|2026-09-16|pay', action: 'tick', tickOn: '2026-09-25', tickAmount: '640', tickRest: 'owed' });
+    expect(tick.signals).toEqual(['edit']);
+    expect(tick.outputs.payments).toEqual([{ day: '2026-09-25', amount: 640 }]);
+    const marks = applyMark(MARKS as Array<Record<string, unknown>>, tick.outputs);
+    expect(rows(money({ marks })).some((r) => r.key === 'salon1|2026-09-16')).toBe(false);
+    const past = rows(money({ marks, filter: 'past' })).find((r) => r.key === 'salon1|2026-09-16' && r.kind === 'pay');
+    expect(past?.sub).toContain('paid Fri 25 · 9 days late');
+    expect(money({ marks }).lateConcern).toBe('');
+  });
+
+  it('M-7 — + Add a bill pre-fills the project and a due date its payment terms after the bill; the terms changing changes no bill', () => {
+    const bill = pane({ mode: 'newBill', itemId: 'bramble' });
+    expect([bill.edShown, bill.edProjectId, bill.edBillDate, bill.edDate, bill.edRepeat]).toEqual([true, 'bramble', '2026-09-25', '2026-10-02', 'once']);
+    // The editor's own Function re-fills the due date when the bill date or project changes.
+    const shape = scriptOf(built, C.moneyEditor, 'edShape');
+    const self = {};
+    const signals: string[] = [];
+    const outs: Record<string, unknown> = {};
+    const proxy = new Proxy(outs, { get: (t, k: string) => (k in t ? t[k] : () => signals.push(k)) });
+    const terms = [{ id: 'bramble', name: 'Bramble & Co', billing: 'fixed', terms: 14 }];
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('Inputs', 'Outputs', shape);
+    fn.call(self, { repeat: 'once', projectId: 'bramble', dir: 'in', projectTerms: terms, billDate: '2026-09-25' }, proxy);
+    expect(outs.due).toBeUndefined();
+    fn.call(self, { repeat: 'once', projectId: 'bramble', dir: 'in', projectTerms: terms, billDate: '2026-09-30' }, proxy);
+    expect(outs.due).toBe('2026-10-14');
+    expect(outs.dueHint).toBe('Due 14 days after the bill: Bramble & Co’s payment terms.');
+  });
+
+  it('M-8 — hoped money is dashed and in no balance; the week reads “Might earn €1,320 more, weighted (€3,800 if all come through)”', () => {
+    const out = money();
+    expect(out.mightLead).toBe('€1,320 more, weighted (€3,800 if all come through):');
+    expect((out.mightRows as Array<Record<string, string>>).map((r) => `${r.projectId} ${r.odds}`)).toEqual(['coaching 40%', 'jazz 30%']);
+    const hoped = rows(out).find((r) => r.key === 'coach|2026-10-29') as Record<string, string>;
+    expect([hoped.rowEdgeStyle, hoped.afterText]).toEqual(['dashed', '≈ €720 weighted']);
+  });
+
+  it('M-9 — Record balance lists exactly what is unticked and due; €2,900 with Salon not yet starts at €2,900 with its €640 counted today', () => {
+    const bal = pane({ mode: 'balance' });
+    expect((bal.balRows as Array<Record<string, string>>).map((r) => r.key)).toEqual(['salon1|2026-09-16']);
+    const guard = scriptOf(built, C.recordBalance, 'RecordbalaGuard');
+    const rec = run(guard, { date: '2026-09-25', amount: '2900' });
+    expect(rec.outputs).toEqual({ date: '2026-09-25', amount: 2900, note: '' });
+    const out = money({ readings: [...READINGS, { id: 'r2', date: '2026-09-25', amount: 2900 }] });
+    const late = rows(out)[0];
+    expect([late.key, late.afterText]).toEqual(['salon1|2026-09-16', '€3,540']);
+    expect(out.stripBalance).toBe('Balance €2,900 · read Fri 25 Sep');
+  });
+
+  it('M-10 — the three lines, and red only under the low-water mark', () => {
+    const out = money();
+    expect(out.monthText).toBe('Break-even €3,308 · target €3,808. Billed €640 so far, €3,276 with the bills still to go out this month · €532 to target, about 11 h.');
+    expect(out.lowText).toBe('Lowest in six weeks: €206 on Sun 1 Nov.');
+    expect(out.lowColor).toBe('var(--foreground)');
+    // Household costs on Thu 1 Oct leave €815: under a €1,000 line, that box is outlined red and nothing else is.
+    const tight = money({ settings: [{ ...SETTINGS[0], lowWaterMark: 1000 }] });
+    expect(tight.lowColor).toBe('var(--destructive)');
+    expect(tight.lowText).toBe('Lowest in six weeks: €206 on Sun 1 Nov, under your €1,000 line.');
+    expect((tight.stripRows as Array<Record<string, string>>).filter((r) => r.edge === 'var(--destructive)').map((r) => r.key)).toEqual(['house|2026-10-01']);
+  });
+
+  it('M-11 / M-17 — Bramble’s card: fixed, the next bill, this period’s hours and €/h, and the past with days early or late', () => {
+    const card = pane({ cardProject: 'bramble' });
+    expect(card.billingTerms).toBe('Fixed price · payment terms 7 days · agreed 14 h a month');
+    const lines = Object.fromEntries((card.billingRows as Array<{ key: string; text: string }>).map((r) => [r.key, r.text]));
+    expect(lines.Next).toBe('goes out Wed 30 Sep · €1,120 · due Wed 7 Oct');
+    expect(lines['This period']).toBe('11.5 h logged of 14 agreed · the bill is €1,120 whatever the hours · €97 an hour so far');
+    expect(lines.Past).toBe('Sep €1,120, due Mon 7, paid Sat 5, 2 days early\nAug €1,120, due Fri 7, paid Wed 12, 5 days late');
+    const salon = pane({ cardProject: 'salon' });
+    expect((salon.billingRows as Array<{ key: string; text: string }>).find((r) => r.key === 'This period')?.text).toBe(
+      '22 h × €18 = €396 · with what’s planned 24 h, €432 · the next bill fills from these'
+    );
+  });
+
+  it('M-15 — €400 of €640 with the rest still owed stays late for €240; €240 more closes it; lost takes a repeat out of every balance', () => {
+    const part = markRun({ key: 'salon1|2026-09-16|pay', action: 'tick', tickOn: '2026-09-25', tickAmount: '400', tickRest: 'owed' });
+    let marks = applyMark(MARKS as Array<Record<string, unknown>>, part.outputs);
+    expect(part.outputs.amount).toBe(640);
+    const open = rows(money({ marks }))[0];
+    expect([open.key, open.amountText]).toEqual(['salon1|2026-09-16', '+€240']);
+    expect(open.sub).toContain('€400 of €640 paid');
+    const rest = run(MARK(), { ...DATA, marks, key: 'salon1|2026-09-16|pay', action: 'tick', tickOn: '2026-09-26', tickAmount: '240', tickRest: 'owed' });
+    marks = applyMark(marks, rest.outputs);
+    expect(rest.outputs.doneAmount).toBe(640);
+    expect(rows(money({ marks })).some((r) => r.key === 'salon1|2026-09-16')).toBe(false);
+
+    const lost = markRun({ key: 'bramble|2026-10-07|pay', action: 'lost' });
+    expect(lost.signals).toEqual(['add']);
+    const withLost = applyMark(MARKS as Array<Record<string, unknown>>, lost.outputs);
+    expect(rows(money({ marks: withLost })).some((r) => r.key === 'bramble|2026-10-07')).toBe(false);
+    expect(rows(money({ marks: withLost, filter: 'past' })).find((r) => r.key === 'bramble|2026-10-07')?.sub).toContain('€1,120 lost');
+
+    // Short, and the rest is lost: the repeat closes with what came in.
+    const short = markRun({ key: 'salon1|2026-09-16|pay', action: 'tick', tickOn: '2026-09-25', tickAmount: '400', tickRest: 'lost' });
+    expect([short.outputs.lostOn, short.outputs.doneAmount]).toEqual(['2026-09-25', 400]);
+  });
+
+  it('M-16 — fixed bills are counted first: Bramble hourly makes it 54 h; hours on a fixed project move no €; hours on Salon move its bill', () => {
+    const hourly = MPROJECTS.map((p) => (p.id === 'bramble' ? { ...p, billing: 'hourly' } : p));
+    expect(money({ projects: hourly }).targetHours).toBe(54);
+    const more = (projectId: string) => [...BLOCKS, { id: 'x', projectId, date: '2026-09-24', planned: 2, done: true, actual: '' }];
+    const base = money();
+    const bramble = money({ blocks: more('bramble') });
+    expect([bramble.targetHours, bramble.monthText]).toEqual([base.targetHours, base.monthText]);
+    const salonRow = (out: Record<string, unknown>) => rows(out).find((r) => r.key === 'salon2|2026-10-07' && r.kind === 'pay')?.amountText;
+    expect([salonRow(base), salonRow(money({ blocks: more('salon') }))]).toEqual(['+€396', '+€432']);
+    // Marked sent, the bill keeps its amount whatever is logged after.
+    const sent = markRun({ key: 'salon2|2026-10-07|bill', action: 'sent', sentOn: '2026-09-30', sentAmount: '396' });
+    expect([sent.outputs.sentOn, sent.outputs.amount]).toEqual(['2026-09-30', 396]);
+    const marks = applyMark(MARKS as Array<Record<string, unknown>>, sent.outputs);
+    expect(salonRow(money({ marks, blocks: more('salon') }))).toBe('+€396');
+  });
+
+  it('the money item and mark guards: M9’s three fields, the sign from in or out, and nothing half-written', () => {
+    const add = scriptOf(built, C.addMoneyItem, 'AddmoneyitGuard');
+    const ok = { label: ' Accountant ', dir: 'out', amount: '300', repeat: 'quarterly', date: '2026-10-05', until: '', monthEnd: true, projectId: 'none', billDate: '', billLeadDays: '', fromHours: false, likelihood: '', note: '' };
+    const good = run(add, ok);
+    expect(good.signals).toEqual(['go']);
+    expect(good.outputs).toMatchObject({ label: 'Accountant', amount: -300, repeat: 'quarterly', projectId: '', monthEnd: true, likelihood: 100, billDate: '', billLeadDays: '' });
+    for (const bad of [{ label: '  ' }, { date: 'Tuesday' }, { amount: '0' }, { amount: 'lots' }]) expect(run(add, { ...ok, ...bad }).signals).toEqual([]);
+    // An hourly client's bill may leave its amount to the hours; nobody else's may.
+    const hours = run(add, { ...ok, dir: 'in', amount: '', repeat: 'once', projectId: 'salon', billDate: '2026-09-30', fromHours: true });
+    expect(hours.outputs).toMatchObject({ amount: 0, fromHours: true, billDate: '2026-09-30' });
+    expect(run(add, { ...ok, amount: '', fromHours: true }).signals).toEqual([]);
+    const mark = scriptOf(built, C.editMark, 'EditmarkGuard');
+    expect(run(mark, { markId: '', itemId: 'x', occurs: '2026-09-16' }).signals).toEqual([]);
+    expect(run(mark, { markId: 'm1', itemId: 'x', occurs: 'soon' }).signals).toEqual([]);
+    expect(run(mark, { markId: 'm1', itemId: 'x', occurs: '2026-09-16', payments: [{ day: '2026-09-25', amount: 640 }] }).outputs.payments).toEqual([{ day: '2026-09-25', amount: 640 }]);
+  });
+
+  it('M15 — late client money is the drawer’s first concern, before the building move', () => {
+    const shutdown = scriptOf(built, C.shutdown, 'suWork');
+    const base = {
+      projects: PROJECTS, blocks: [], todayKey: '2026-09-25', tomorrowKey: '2026-09-26', todayLong: 'Friday 25', tomorrowLong: 'Saturday',
+      target: 46, billableUsed: 40, billableLeft: 6, perDay: 1.25, buildingLeft: 20, daysLeft: 5, focusHours: 6, unplacedDormant: 'Founder A'
+    };
+    const late = run(shutdown, { ...base, lateConcern: 'One thing: Salon Collective’s €640 was due on Wed 16 Sep and is not ticked. Chase it, or tick it.' }).outputs;
+    expect([late.concern, late.chaseShown]).toEqual(['One thing: Salon Collective’s €640 was due on Wed 16 Sep and is not ticked. Chase it, or tick it.', true]);
+    const none = run(shutdown, { ...base, lateConcern: '' }).outputs;
+    expect([none.chaseShown, String(none.concern)]).toEqual([false, expect.stringContaining('Founder A')]);
+  });
+
+  it('🔴 every press that changes a repeat reaches Logic/Mark with its action, and every Logic/Mark reaches both mark commands', () => {
+    const wires = connectionsOf(built, C.pageWeek);
+    for (const mk of ['twMarkPane', 'twMarkBal']) {
+      expect(wires.filter((w) => w.fromId === mk && (w.fromProperty === 'add' || w.fromProperty === 'edit')).map((w) => `${w.fromProperty}>${w.toId}.${w.toProperty}`).sort()).toEqual([
+        'add>cmdAddMark.do', 'edit>cmdEditMark.do'
+      ]);
+    }
+    const actions = wires.filter((w) => w.toProperty === 'action').map((w) => `${w.fromId}>${w.toId}`);
+    expect(actions.length).toBe(10);
+    expect(wires.filter((w) => w.toId === 'twMarkPane' && w.toProperty === 'go').length).toBe(8);
+    expect(wires.filter((w) => w.toId === 'twMarkBal' && w.toProperty === 'go').length).toBe(2);
+  });
+});
+
 // ── §5 ─────────────────────────────────────────────────────────────────────
 
 describe('§5 the demo is the template with the backend taken out', () => {
@@ -891,7 +1150,7 @@ describe('§5 the demo is the template with the backend taken out', () => {
     const outputs = new Proxy({} as Record<string, unknown>, {
       get: (t, k: string) => (k in t ? t[k] : () => signals.push(k))
     });
-    read.call({}, { from: '2026-09-01', to: '2026-09-30', month: '2026-09' }, outputs, win);
+    read.call({}, { from: '2026-09-01', to: '2026-09-30', month: '2026-09', moveSince: '2026-08-01', marksSince: '2025-08-01' }, outputs, win);
 
     expect(signals).toContain('loaded');
     expect(store[DEMO_STORAGE_KEY]).toBeTruthy();
@@ -899,6 +1158,11 @@ describe('§5 the demo is the template with the backend taken out', () => {
     expect(Object.keys(seeded).sort()).toEqual([...COLLECTIONS].sort());
     expect((outputs as Record<string, unknown[]>).projects.length).toBe(seeded.Project.length);
     expect((outputs as Record<string, unknown[]>).settings.length).toBe(1);
+    // TPL-010-M — the example money is there: items, their marks, and the reading.
+    expect((outputs as Record<string, unknown[]>).moneyItems.length).toBe(seeded.MoneyItem.length);
+    expect(seeded.MoneyItem.length).toBeGreaterThanOrEqual(9);
+    expect((outputs as Record<string, unknown[]>).moneyMarks.length).toBeGreaterThan(0);
+    expect((outputs as Record<string, unknown[]>).balanceReadings.length).toBe(1);
 
     // The window is honoured: nothing outside the dates it was given comes back.
     const blocks = (outputs as Record<string, Array<Record<string, string>>>).blocks;

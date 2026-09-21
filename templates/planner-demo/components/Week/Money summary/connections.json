@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e21142d0-07f0-5e1b-8743-144a997479ec",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "msmIn",
+      "fromProperty": "shown",
+      "toId": "msmRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msmIn",
+      "fromProperty": "lines",
+      "toId": "msmEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msmIn",
+      "fromProperty": "note",
+      "toId": "msmNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "msmIn",
+      "fromProperty": "balanceLines",
+      "toId": "msmBalEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msmRecord",
+      "fromProperty": "onClick",
+      "toId": "msmOut",
+      "toProperty": "recordBalance"
+    },
+    {
+      "fromId": "msmBack",
+      "fromProperty": "onClick",
+      "toId": "msmOut",
+      "toProperty": "back"
+    }
+  ]
+}

@@ -1,0 +1,313 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cee1fdaa-06cc-5407-8ab1-a040ab609612",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "EditmarkIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "markId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "itemId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "occurs",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skip",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "payments",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "doneOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneAmount",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lostOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sentOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "EditmarkOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "EditmarkGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "if (String(Inputs.markId || '') === '') return;\nvar id = String(Inputs.itemId || '');\nif (id === '' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(Inputs.occurs || ''))) return;\nvar list = Inputs.payments || [];\nvar pays = [];\nfor (var i = 0; i < list.length; i++) if (list[i] && isFinite(Number(list[i].amount))) pays.push({ day: String(list[i].day || ''), amount: Number(list[i].amount) });\nOutputs.itemId = id;\nOutputs.occurs = String(Inputs.occurs);\nOutputs.amount = Inputs.amount === undefined || Inputs.amount === null ? '' : Inputs.amount;\nOutputs.date = String(Inputs.date || '');\nOutputs.skip = Inputs.skip === true;\nOutputs.payments = pays;\nOutputs.doneOn = String(Inputs.doneOn || '');\nOutputs.doneAmount = Inputs.doneAmount === undefined || Inputs.doneAmount === null ? '' : Inputs.doneAmount;\nOutputs.lostOn = String(Inputs.lostOn || '');\nOutputs.sentOn = String(Inputs.sentOn || '');\nOutputs.note = String(Inputs.note || '');\nOutputs.go();",
+        "runOnChange-in-markId": false,
+        "runOnChange-in-itemId": false,
+        "runOnChange-in-occurs": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-skip": false,
+        "runOnChange-in-payments": false,
+        "runOnChange-in-doneOn": false,
+        "runOnChange-in-doneAmount": false,
+        "runOnChange-in-lostOn": false,
+        "runOnChange-in-sentOn": false,
+        "runOnChange-in-note": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-markId",
+          "displayName": "markId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-itemId",
+          "displayName": "itemId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-occurs",
+          "displayName": "occurs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-payments",
+          "displayName": "payments",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-skip",
+          "displayName": "skip",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doneOn",
+          "displayName": "doneOn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doneAmount",
+          "displayName": "doneAmount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lostOn",
+          "displayName": "lostOn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sentOn",
+          "displayName": "sentOn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "displayName": "note",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itemId",
+          "displayName": "itemId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-occurs",
+          "displayName": "occurs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-amount",
+          "displayName": "amount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-date",
+          "displayName": "date",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skip",
+          "displayName": "skip",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-payments",
+          "displayName": "payments",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doneOn",
+          "displayName": "doneOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doneAmount",
+          "displayName": "doneAmount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lostOn",
+          "displayName": "lostOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sentOn",
+          "displayName": "sentOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-note",
+          "displayName": "note",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "EditmarkWrite",
+      "type": "SetDbModelProperties",
+      "label": "Change the mark",
+      "parameters": {
+        "collectionName": "MoneyMark",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "EditmarkProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "plannerProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

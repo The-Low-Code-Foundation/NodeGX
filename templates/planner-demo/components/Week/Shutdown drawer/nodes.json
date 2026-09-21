@@ -59,6 +59,11 @@
           "type": "string"
         },
         {
+          "name": "chaseShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
           "name": "shown",
           "plug": "output",
           "type": "boolean"
@@ -91,10 +96,15 @@
           "name": "close",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "chase",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 530,
-      "y": 1360
+      "y": 1120
     },
     {
       "id": "sdScrim",
@@ -254,7 +264,8 @@
       "children": [
         "sdDay",
         "sdMonth",
-        "sdConcern"
+        "sdConcern",
+        "sdChase"
       ],
       "x": 160,
       "y": 640
@@ -315,6 +326,30 @@
       "y": 1000
     },
     {
+      "id": "sdChase",
+      "type": "net.noodl.controls.button",
+      "label": "Open it in Money",
+      "parent": "sdCoach",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Open it in Money"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
       "id": "sdCarrySection",
       "type": "Group",
       "label": "Not done today",
@@ -334,7 +369,7 @@
         "sdAllDone"
       ],
       "x": 160,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "sdCarryLabel",
@@ -361,7 +396,7 @@
         }
       },
       "x": 220,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "sdEach",
@@ -373,7 +408,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "sdAllDone",
@@ -391,7 +426,7 @@
         }
       },
       "x": 220,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "sdTomorrow",
@@ -413,7 +448,7 @@
         "sdFocusRow"
       ],
       "x": 160,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "sdTomorrowLabel",
@@ -440,7 +475,7 @@
         }
       },
       "x": 220,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "sdTomorrowList",
@@ -458,7 +493,7 @@
         }
       },
       "x": 220,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "sdFocusRow",
@@ -481,7 +516,7 @@
         "sdFocus"
       ],
       "x": 220,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "sdFocusLabel",
@@ -495,7 +530,7 @@
         "sizeMode": "contentSize"
       },
       "x": 280,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "sdFocus",
@@ -512,7 +547,7 @@
         "fontWeight": "var(--font-semibold)"
       },
       "x": 280,
-      "y": 2200
+      "y": 2320
     }
   ],
   "visualRoots": [

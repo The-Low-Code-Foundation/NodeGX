@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3e6d43d9-53c2-5108-82c3-aa3d6023cad5",
+  "name": "Money end",
+  "path": "/Week/Money end",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ending a money item: pick the last repeat that happens. Nothing is deleted, and the ones already ticked stay in Past."
+}

@@ -35,6 +35,18 @@
     },
     {
       "fromId": "sdIn",
+      "fromProperty": "chaseShown",
+      "toId": "sdChase",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sdChase",
+      "fromProperty": "onClick",
+      "toId": "sdOut",
+      "toProperty": "chase"
+    },
+    {
+      "fromId": "sdIn",
       "fromProperty": "carryRows",
       "toId": "sdEach",
       "toProperty": "items"

@@ -35,30 +35,6 @@
     },
     {
       "fromId": "stIn",
-      "fromProperty": "householdNeed",
-      "toId": "stNeed",
-      "toProperty": "startValue"
-    },
-    {
-      "fromId": "stNeed",
-      "fromProperty": "onTextChanged",
-      "toId": "stOut",
-      "toProperty": "householdNeed"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "partnerIncome",
-      "toId": "stPartner",
-      "toProperty": "startValue"
-    },
-    {
-      "fromId": "stPartner",
-      "fromProperty": "onTextChanged",
-      "toId": "stOut",
-      "toProperty": "partnerIncome"
-    },
-    {
-      "fromId": "stIn",
       "fromProperty": "focusHours",
       "toId": "stFocus",
       "toProperty": "startValue"
@@ -71,51 +47,27 @@
     },
     {
       "fromId": "stIn",
-      "fromProperty": "partnerDay",
-      "toId": "stPartnerDay",
+      "fromProperty": "savingsTarget",
+      "toId": "stSavings",
       "toProperty": "startValue"
     },
     {
-      "fromId": "stPartnerDay",
+      "fromId": "stSavings",
       "fromProperty": "onTextChanged",
       "toId": "stOut",
-      "toProperty": "partnerDay"
+      "toProperty": "savingsTarget"
     },
     {
       "fromId": "stIn",
-      "fromProperty": "costsDay",
-      "toId": "stCostsDay",
+      "fromProperty": "lowWaterMark",
+      "toId": "stLow",
       "toProperty": "startValue"
     },
     {
-      "fromId": "stCostsDay",
+      "fromId": "stLow",
       "fromProperty": "onTextChanged",
       "toId": "stOut",
-      "toProperty": "costsDay"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "invoiceDay",
-      "toId": "stInvoiceDay",
-      "toProperty": "startValue"
-    },
-    {
-      "fromId": "stInvoiceDay",
-      "fromProperty": "onTextChanged",
-      "toId": "stOut",
-      "toProperty": "invoiceDay"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "paymentTermsDays",
-      "toId": "stTerms",
-      "toProperty": "startValue"
-    },
-    {
-      "fromId": "stTerms",
-      "fromProperty": "onTextChanged",
-      "toId": "stOut",
-      "toProperty": "paymentTermsDays"
+      "toProperty": "lowWaterMark"
     },
     {
       "fromId": "stSave",
@@ -130,118 +82,10 @@
       "toProperty": "planMonth"
     },
     {
-      "fromId": "stIn",
-      "fromProperty": "cashRows",
-      "toId": "stCash",
-      "toProperty": "rows"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashFormShown",
-      "toId": "stCash",
-      "toProperty": "formShown"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashFormTitle",
-      "toId": "stCash",
-      "toProperty": "formTitle"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashKinds",
-      "toId": "stCash",
-      "toProperty": "kinds"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashDate",
-      "toId": "stCash",
-      "toProperty": "date"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashAmount",
-      "toId": "stCash",
-      "toProperty": "amount"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashLabel",
-      "toId": "stCash",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashKind",
-      "toId": "stCash",
-      "toProperty": "kind"
-    },
-    {
-      "fromId": "stIn",
-      "fromProperty": "cashMonthly",
-      "toId": "stCash",
-      "toProperty": "monthly"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "pick",
+      "fromId": "stToMoney",
+      "fromProperty": "onClick",
       "toId": "stOut",
-      "toProperty": "cashPick"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "pickId",
-      "toId": "stOut",
-      "toProperty": "cashPickId"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "add",
-      "toId": "stOut",
-      "toProperty": "cashAdd"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "date",
-      "toId": "stOut",
-      "toProperty": "cashDate"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "amount",
-      "toId": "stOut",
-      "toProperty": "cashAmount"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "label",
-      "toId": "stOut",
-      "toProperty": "cashLabel"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "kind",
-      "toId": "stOut",
-      "toProperty": "cashKind"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "monthly",
-      "toId": "stOut",
-      "toProperty": "cashMonthly"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "save",
-      "toId": "stOut",
-      "toProperty": "cashSave"
-    },
-    {
-      "fromId": "stCash",
-      "fromProperty": "cancel",
-      "toId": "stOut",
-      "toProperty": "cashCancel"
+      "toProperty": "openMoney"
     },
     {
       "fromId": "stClose",

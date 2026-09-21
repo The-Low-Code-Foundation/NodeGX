@@ -1,0 +1,265 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3e6d43d9-53c2-5108-82c3-aa3d6023cad5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "meIn",
+      "type": "Component Inputs",
+      "label": "The item",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "choices",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "at",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "meOut",
+      "type": "Component Outputs",
+      "label": "Ended",
+      "ports": [
+        {
+          "name": "at",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "go",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "meRoot",
+      "type": "Group",
+      "label": "End an item",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "meBack",
+        "meTitle",
+        "meAt",
+        "meText",
+        "meButtons"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "meBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the list",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "‹ Money",
+        "cssClassName": "planner-phone-only"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "meTitle",
+      "type": "Text",
+      "label": "Which item",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h3"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "meAt",
+      "type": "net.noodl.controls.options",
+      "label": "The last one that happens",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick one",
+        "useLabel": true,
+        "label": "The last one that happens",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "meText",
+      "type": "Text",
+      "label": "What ending it does",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "meButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "meRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "meGo",
+        "meCancel"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "meGo",
+      "type": "net.noodl.controls.button",
+      "label": "End it",
+      "parent": "meButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "End it"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "meCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Do not end it",
+      "parent": "meButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "meRoot"
+  ]
+}

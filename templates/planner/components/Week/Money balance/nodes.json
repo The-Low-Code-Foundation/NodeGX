@@ -1,0 +1,494 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1f44993f-48fe-5a19-811d-7b0aabcada79",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mbIn",
+      "type": "Component Inputs",
+      "label": "The reading",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "on",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "mbOut",
+      "type": "Component Outputs",
+      "label": "Recorded",
+      "ports": [
+        {
+          "name": "on",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "happened",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "lost",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "part",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "mbRoot",
+      "type": "Group",
+      "label": "Record balance",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "mbBack",
+        "mbTitle",
+        "mbLead",
+        "mbRow",
+        "mbHint",
+        "mbLate",
+        "mbNote",
+        "mbButtons"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mbBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the list",
+      "parent": "mbRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "‹ Money",
+        "cssClassName": "planner-phone-only"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mbTitle",
+      "type": "Text",
+      "label": "Title",
+      "parent": "mbRoot",
+      "parameters": {
+        "text": "Record balance",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h3"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mbLead",
+      "type": "Text",
+      "label": "What it is for",
+      "parent": "mbRoot",
+      "parameters": {
+        "text": "What your bank says. Every projection starts from the latest one.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mbRow",
+      "type": "Group",
+      "label": "The day and the balance",
+      "parent": "mbRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "mbOnBox",
+        "mbAmountBox"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mbOnBox",
+      "type": "Group",
+      "label": "The day",
+      "parent": "mbRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 55,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "mbOn"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "mbOn",
+      "type": "/Week/Date picker",
+      "label": "The day",
+      "parent": "mbOnBox",
+      "parameters": {
+        "Label": "On",
+        "Show Label": true
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "mbAmountBox",
+      "type": "Group",
+      "label": "The balance",
+      "parent": "mbRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "mbAmount"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "mbAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "The balance",
+      "parent": "mbAmountBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Balance, €",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "mbHint",
+      "type": "Text",
+      "label": "What the app thinks it is",
+      "parent": "mbRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "mbLate",
+      "type": "Group",
+      "label": "Not ticked yet",
+      "parent": "mbRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "mbLateLabel",
+        "mbEach"
+      ],
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "mbLateLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "mbLate",
+      "parameters": {
+        "text": "Not ticked yet, dated on or before today",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "mbEach",
+      "type": "For Each",
+      "label": "One question per thing",
+      "parent": "mbLate",
+      "parameters": {
+        "template": "/Week/Balance row",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "mbNote",
+      "type": "Text",
+      "label": "What not yet means",
+      "parent": "mbRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "mbButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "mbRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "mbSave",
+        "mbCancel"
+      ],
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "mbSave",
+      "type": "net.noodl.controls.button",
+      "label": "Record it",
+      "parent": "mbButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Record it"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "mbCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Do not record it",
+      "parent": "mbButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "mbClosing",
+      "type": "JavaScriptFunction",
+      "label": "Clear the box when it closes",
+      "parameters": {
+        "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\n\nthis.wasShown = shown;"
+      },
+      "x": 470,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-shown",
+          "displayName": "shown",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-closed",
+          "displayName": "closed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "mbRoot"
+  ]
+}

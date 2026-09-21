@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8a91291c-ce2c-52b0-85cb-865fee3e13fa",
+  "name": "Money repeat",
+  "path": "/Week/Money repeat",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing that happens to the money, on its own: tick it with the day and the amount, change or skip this one, mark it lost or sent, and change or end the item it comes from."
+}

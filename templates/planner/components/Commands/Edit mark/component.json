@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cee1fdaa-06cc-5407-8ab1-a040ab609612",
+  "name": "Edit mark",
+  "path": "/Commands/Edit mark",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Changes the mark on one repeat of a money item: another tick, a change, a skip, lost, sent, or undoing one of them."
+}

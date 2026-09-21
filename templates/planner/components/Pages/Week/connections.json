@@ -66,7 +66,19 @@
     {
       "fromId": "twKeys",
       "fromProperty": "out-escape",
-      "toId": "twCashOff",
+      "toId": "twMoneyOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twKeys",
+      "fromProperty": "out-escape",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twKeys",
+      "fromProperty": "out-escape",
+      "toId": "twPaneNone",
       "toProperty": "do"
     },
     {
@@ -209,27 +221,183 @@
     },
     {
       "fromId": "twData",
-      "fromProperty": "cashEvents",
-      "toId": "twCashLogic",
-      "toProperty": "cashEvents"
-    },
-    {
-      "fromId": "twData",
-      "fromProperty": "settings",
-      "toId": "twCashLogic",
-      "toProperty": "settings"
-    },
-    {
-      "fromId": "twData",
       "fromProperty": "settings",
       "toId": "twSettings",
       "toProperty": "in-settings"
     },
     {
-      "fromId": "twEnv",
-      "fromProperty": "invoicedText",
-      "toId": "twCashLogic",
-      "toProperty": "invoicedText"
+      "fromId": "twData",
+      "fromProperty": "moneyItems",
+      "toId": "twMoneyLogic",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyMarks",
+      "toId": "twMoneyLogic",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "balanceReadings",
+      "toId": "twMoneyLogic",
+      "toProperty": "readings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twMoneyLogic",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moveBlocks",
+      "toId": "twMoneyLogic",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twMoneyLogic",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "marksSince",
+      "toId": "twMoneyLogic",
+      "toProperty": "since"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyItems",
+      "toId": "twMoneyView",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyMarks",
+      "toId": "twMoneyView",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "balanceReadings",
+      "toId": "twMoneyView",
+      "toProperty": "readings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twMoneyView",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moveBlocks",
+      "toId": "twMoneyView",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twMoneyView",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "marksSince",
+      "toId": "twMoneyView",
+      "toProperty": "since"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyItems",
+      "toId": "twMarkPane",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyMarks",
+      "toId": "twMarkPane",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "balanceReadings",
+      "toId": "twMarkPane",
+      "toProperty": "readings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twMarkPane",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moveBlocks",
+      "toId": "twMarkPane",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twMarkPane",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "marksSince",
+      "toId": "twMarkPane",
+      "toProperty": "since"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyItems",
+      "toId": "twMarkBal",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moneyMarks",
+      "toId": "twMarkBal",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "balanceReadings",
+      "toId": "twMarkBal",
+      "toProperty": "readings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "projects",
+      "toId": "twMarkBal",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "moveBlocks",
+      "toId": "twMarkBal",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "settings",
+      "toId": "twMarkBal",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "twData",
+      "fromProperty": "marksSince",
+      "toId": "twMarkBal",
+      "toProperty": "since"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "targetHours",
+      "toId": "twEnv",
+      "toProperty": "targetHours"
     },
     {
       "fromId": "twEnv",
@@ -262,28 +430,76 @@
       "toProperty": "items"
     },
     {
-      "fromId": "twCashLogic",
-      "fromProperty": "rows",
+      "fromId": "twMoneyLogic",
+      "fromProperty": "stripRows",
       "toId": "twCash",
       "toProperty": "rows"
     },
     {
-      "fromId": "twCashLogic",
-      "fromProperty": "balanceText",
+      "fromId": "twMoneyLogic",
+      "fromProperty": "stripBalance",
       "toId": "twCash",
       "toProperty": "balanceText"
     },
     {
-      "fromId": "twCashLogic",
-      "fromProperty": "termsText",
+      "fromId": "twMoneyLogic",
+      "fromProperty": "monthName",
       "toId": "twCash",
-      "toProperty": "termsText"
+      "toProperty": "monthName"
     },
     {
-      "fromId": "twEnv",
-      "fromProperty": "invoicedText",
+      "fromId": "twMoneyLogic",
+      "fromProperty": "monthText",
       "toId": "twCash",
-      "toProperty": "invoicedText"
+      "toProperty": "monthText"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "mightShown",
+      "toId": "twCash",
+      "toProperty": "mightShown"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "mightLead",
+      "toId": "twCash",
+      "toProperty": "mightLead"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "mightRows",
+      "toId": "twCash",
+      "toProperty": "mightRows"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "lowText",
+      "toId": "twCash",
+      "toProperty": "lowText"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "lowColor",
+      "toId": "twCash",
+      "toProperty": "lowColor"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "footText",
+      "toId": "twCash",
+      "toProperty": "footText"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "lateCount",
+      "toId": "twBar",
+      "toProperty": "lateCount"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "hasLate",
+      "toId": "twBar",
+      "toProperty": "hasLate"
     },
     {
       "fromId": "twDayEach",
@@ -659,6 +875,12 @@
     },
     {
       "fromId": "twEditRow",
+      "fromProperty": "out-billings",
+      "toId": "twCard",
+      "toProperty": "edBillings"
+    },
+    {
+      "fromId": "twEditRow",
       "fromProperty": "out-name",
       "toId": "twCard",
       "toProperty": "edName"
@@ -728,6 +950,24 @@
       "fromProperty": "out-say",
       "toId": "twCard",
       "toProperty": "edSay"
+    },
+    {
+      "fromId": "twEditRow",
+      "fromProperty": "out-billing",
+      "toId": "twCard",
+      "toProperty": "edBilling"
+    },
+    {
+      "fromId": "twEditRow",
+      "fromProperty": "out-termsDays",
+      "toId": "twCard",
+      "toProperty": "edTermsDays"
+    },
+    {
+      "fromId": "twEditRow",
+      "fromProperty": "out-agreedHours",
+      "toId": "twCard",
+      "toProperty": "edAgreedHours"
     },
     {
       "fromId": "twEditRow",
@@ -904,6 +1144,42 @@
       "toProperty": "say"
     },
     {
+      "fromId": "twCard",
+      "fromProperty": "edBilling",
+      "toId": "cmdAddProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "edBilling",
+      "toId": "cmdEditProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "edTermsDays",
+      "toId": "cmdAddProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "edTermsDays",
+      "toId": "cmdEditProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "edAgreedHours",
+      "toId": "cmdAddProject",
+      "toProperty": "agreedHours"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "edAgreedHours",
+      "toId": "cmdEditProject",
+      "toProperty": "agreedHours"
+    },
+    {
       "fromId": "cmdAddProject",
       "fromProperty": "projectId",
       "toId": "twCardNew",
@@ -1066,6 +1342,12 @@
       "toProperty": "unplacedDormant"
     },
     {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "lateConcern",
+      "toId": "twShutLogic",
+      "toProperty": "lateConcern"
+    },
+    {
       "fromId": "twEnv",
       "fromProperty": "target",
       "toId": "twShutLogic",
@@ -1130,6 +1412,12 @@
       "fromProperty": "concern",
       "toId": "twDrawer",
       "toProperty": "concern"
+    },
+    {
+      "fromId": "twShutLogic",
+      "fromProperty": "chaseShown",
+      "toId": "twDrawer",
+      "toProperty": "chaseShown"
     },
     {
       "fromId": "twShutLogic",
@@ -1552,208 +1840,34 @@
       "toProperty": "do"
     },
     {
-      "fromId": "twSheet",
-      "fromProperty": "close",
-      "toId": "twCashOff",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashPickId",
-      "toId": "twSetCash",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashPick",
-      "toId": "twSetCash",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashAdd",
-      "toId": "twCashNew",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashCancel",
-      "toId": "twCashOff",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twVarCash",
-      "fromProperty": "value",
-      "toId": "twCashForm",
-      "toProperty": "in-mode"
-    },
-    {
-      "fromId": "twData",
-      "fromProperty": "cashEvents",
-      "toId": "twCashForm",
-      "toProperty": "in-cashEvents"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-rows",
-      "toId": "twSheet",
-      "toProperty": "cashRows"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-formShown",
-      "toId": "twSheet",
-      "toProperty": "cashFormShown"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-formTitle",
-      "toId": "twSheet",
-      "toProperty": "cashFormTitle"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-kinds",
-      "toId": "twSheet",
-      "toProperty": "cashKinds"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-date",
-      "toId": "twSheet",
-      "toProperty": "cashDate"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-amount",
-      "toId": "twSheet",
-      "toProperty": "cashAmount"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-label",
-      "toId": "twSheet",
-      "toProperty": "cashLabel"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-kind",
-      "toId": "twSheet",
-      "toProperty": "cashKind"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-monthly",
-      "toId": "twSheet",
-      "toProperty": "cashMonthly"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-isNew",
-      "toId": "twIsNewCash",
-      "toProperty": "condition"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashSave",
-      "toId": "twIsNewCash",
-      "toProperty": "eval"
-    },
-    {
-      "fromId": "twIsNewCash",
-      "fromProperty": "ontrue",
-      "toId": "cmdCashEvent",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twIsNewCash",
-      "fromProperty": "onfalse",
-      "toId": "cmdEditCash",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twCashForm",
-      "fromProperty": "out-id",
-      "toId": "cmdEditCash",
-      "toProperty": "cashId"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashDate",
-      "toId": "cmdCashEvent",
-      "toProperty": "date"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashDate",
-      "toId": "cmdEditCash",
-      "toProperty": "date"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashAmount",
-      "toId": "cmdCashEvent",
-      "toProperty": "amount"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashAmount",
-      "toId": "cmdEditCash",
-      "toProperty": "amount"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashLabel",
-      "toId": "cmdCashEvent",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashLabel",
-      "toId": "cmdEditCash",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashKind",
-      "toId": "cmdCashEvent",
-      "toProperty": "kind"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashKind",
-      "toId": "cmdEditCash",
-      "toProperty": "kind"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashMonthly",
-      "toId": "cmdCashEvent",
-      "toProperty": "monthly"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "cashMonthly",
-      "toId": "cmdEditCash",
-      "toProperty": "monthly"
-    },
-    {
-      "fromId": "cmdCashEvent",
-      "fromProperty": "done",
-      "toId": "twCashOff",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "cmdEditCash",
-      "fromProperty": "done",
-      "toId": "twCashOff",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "twEnv",
+      "fromId": "twMoneyLogic",
       "fromProperty": "targetLine",
       "toId": "twSheet",
       "toProperty": "targetLine"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "openMoney",
+      "toId": "twCloseSheet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "openMoney",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "openMoney",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "openMoney",
+      "toId": "twPaneNone",
+      "toProperty": "do"
     },
     {
       "fromId": "twEnv",
@@ -1775,30 +1889,6 @@
     },
     {
       "fromId": "twSettings",
-      "fromProperty": "out-householdNeed",
-      "toId": "twSheet",
-      "toProperty": "householdNeed"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "householdNeed",
-      "toId": "cmdSettings",
-      "toProperty": "householdNeed"
-    },
-    {
-      "fromId": "twSettings",
-      "fromProperty": "out-partnerIncome",
-      "toId": "twSheet",
-      "toProperty": "partnerIncome"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "partnerIncome",
-      "toId": "cmdSettings",
-      "toProperty": "partnerIncome"
-    },
-    {
-      "fromId": "twSettings",
       "fromProperty": "out-focusHours",
       "toId": "twSheet",
       "toProperty": "focusHours"
@@ -1811,51 +1901,27 @@
     },
     {
       "fromId": "twSettings",
-      "fromProperty": "out-partnerDay",
+      "fromProperty": "out-savingsTarget",
       "toId": "twSheet",
-      "toProperty": "partnerDay"
+      "toProperty": "savingsTarget"
     },
     {
       "fromId": "twSheet",
-      "fromProperty": "partnerDay",
+      "fromProperty": "savingsTarget",
       "toId": "cmdSettings",
-      "toProperty": "partnerDay"
+      "toProperty": "savingsTarget"
     },
     {
       "fromId": "twSettings",
-      "fromProperty": "out-costsDay",
+      "fromProperty": "out-lowWaterMark",
       "toId": "twSheet",
-      "toProperty": "costsDay"
+      "toProperty": "lowWaterMark"
     },
     {
       "fromId": "twSheet",
-      "fromProperty": "costsDay",
+      "fromProperty": "lowWaterMark",
       "toId": "cmdSettings",
-      "toProperty": "costsDay"
-    },
-    {
-      "fromId": "twSettings",
-      "fromProperty": "out-invoiceDay",
-      "toId": "twSheet",
-      "toProperty": "invoiceDay"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "invoiceDay",
-      "toId": "cmdSettings",
-      "toProperty": "invoiceDay"
-    },
-    {
-      "fromId": "twSettings",
-      "fromProperty": "out-paymentTermsDays",
-      "toId": "twSheet",
-      "toProperty": "paymentTermsDays"
-    },
-    {
-      "fromId": "twSheet",
-      "fromProperty": "paymentTermsDays",
-      "toId": "cmdSettings",
-      "toProperty": "paymentTermsDays"
+      "toProperty": "lowWaterMark"
     },
     {
       "fromId": "twSettings",
@@ -1894,12 +1960,6 @@
       "toProperty": "workingDays"
     },
     {
-      "fromId": "twSettings",
-      "fromProperty": "out-openingBalance",
-      "toId": "cmdMonthPlan",
-      "toProperty": "openingBalance"
-    },
-    {
       "fromId": "twSheet",
       "fromProperty": "planMonth",
       "toId": "cmdMonthPlan",
@@ -1922,6 +1982,1944 @@
       "fromProperty": "out-shown",
       "toId": "twProblem",
       "toProperty": "mounted"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "openMoney",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "openMoney",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "openMoney",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twBar",
+      "fromProperty": "openMoney",
+      "toId": "twHorizon",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "open",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "open",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "open",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "open",
+      "toId": "twHorizon",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "key",
+      "toId": "twStripRoute",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "pick",
+      "toId": "twStripRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twStripRoute",
+      "fromProperty": "out-sel",
+      "toId": "twSelFromStrip",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twStripRoute",
+      "fromProperty": "out-go",
+      "toId": "twSelFromStrip",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twStripRoute",
+      "fromProperty": "out-go",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twStripRoute",
+      "fromProperty": "out-go",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "projectId",
+      "toId": "twCardFromMight",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twCash",
+      "fromProperty": "openProject",
+      "toId": "twCardFromMight",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "lateKey",
+      "toId": "twChaseRoute",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "twDrawer",
+      "fromProperty": "chase",
+      "toId": "twChaseRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twChaseRoute",
+      "fromProperty": "out-sel",
+      "toId": "twSelFromChase",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twChaseRoute",
+      "fromProperty": "out-go",
+      "toId": "twSelFromChase",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twChaseRoute",
+      "fromProperty": "out-go",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twChaseRoute",
+      "fromProperty": "out-go",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twChaseRoute",
+      "fromProperty": "out-go",
+      "toId": "twCloseDrawer",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "resolvedId",
+      "toId": "twItemFromCard",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addBill",
+      "toId": "twItemFromCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addBill",
+      "toId": "twPaneNewBill",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addBill",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addBill",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addBill",
+      "toId": "twClearCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addBill",
+      "toId": "twEditOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addHope",
+      "toId": "twItemFromCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addHope",
+      "toId": "twPaneNewHope",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addHope",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addHope",
+      "toId": "twMoneyOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addHope",
+      "toId": "twClearCard",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCard",
+      "fromProperty": "addHope",
+      "toId": "twEditOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twCardRows",
+      "fromProperty": "resolvedId",
+      "toId": "twMoneyView",
+      "toProperty": "cardProject"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "billingShown",
+      "toId": "twCard",
+      "toProperty": "billingShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "billingTerms",
+      "toId": "twCard",
+      "toProperty": "billingTerms"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "billingRows",
+      "toId": "twCard",
+      "toProperty": "billingRows"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "hopeShown",
+      "toId": "twCard",
+      "toProperty": "hopeShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "hopedText",
+      "toId": "twCard",
+      "toProperty": "hopedText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "hasHoped",
+      "toId": "twCard",
+      "toProperty": "hasHoped"
+    },
+    {
+      "fromId": "twVarMoney",
+      "fromProperty": "value",
+      "toId": "twMoneyShown",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "twMoneyShown",
+      "fromProperty": "out-shown",
+      "toId": "twMoney",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "twMoneyShown",
+      "fromProperty": "out-shown",
+      "toId": "twMoneyView",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "twVarFilter",
+      "fromProperty": "value",
+      "toId": "twMoneyLogic",
+      "toProperty": "filter"
+    },
+    {
+      "fromId": "twHorizon",
+      "fromProperty": "currentCount",
+      "toId": "twMoneyLogic",
+      "toProperty": "horizon"
+    },
+    {
+      "fromId": "twVarSel",
+      "fromProperty": "value",
+      "toId": "twMoneyLogic",
+      "toProperty": "sel"
+    },
+    {
+      "fromId": "twVarSel",
+      "fromProperty": "value",
+      "toId": "twMoneyView",
+      "toProperty": "sel"
+    },
+    {
+      "fromId": "twVarMoneyMode",
+      "fromProperty": "value",
+      "toId": "twMoneyView",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "twVarMoneyItem",
+      "fromProperty": "value",
+      "toId": "twMoneyView",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "groups",
+      "toId": "twMoney",
+      "toProperty": "groups"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "empty",
+      "toId": "twMoney",
+      "toProperty": "empty"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "emptyText",
+      "toId": "twMoney",
+      "toProperty": "emptyText"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "moreShown",
+      "toId": "twMoney",
+      "toProperty": "moreShown"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "upFill",
+      "toId": "twMoney",
+      "toProperty": "upFill"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "upInk",
+      "toId": "twMoney",
+      "toProperty": "upInk"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "pastFill",
+      "toId": "twMoney",
+      "toProperty": "pastFill"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "pastInk",
+      "toId": "twMoney",
+      "toProperty": "pastInk"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "recFill",
+      "toId": "twMoney",
+      "toProperty": "recFill"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "recInk",
+      "toId": "twMoney",
+      "toProperty": "recInk"
+    },
+    {
+      "fromId": "twMoneyLogic",
+      "fromProperty": "modalBalance",
+      "toId": "twMoney",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "cardClass",
+      "toId": "twMoney",
+      "toProperty": "cardClass"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "sumShown",
+      "toId": "twMoney",
+      "toProperty": "sumShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "sumLines",
+      "toId": "twMoney",
+      "toProperty": "sumLines"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "sumNote",
+      "toId": "twMoney",
+      "toProperty": "sumNote"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "sumBalanceLines",
+      "toId": "twMoney",
+      "toProperty": "sumBalanceLines"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpShown",
+      "toId": "twMoney",
+      "toProperty": "rpShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpKey",
+      "toId": "twMoney",
+      "toProperty": "rpKey"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpTitle",
+      "toId": "twMoney",
+      "toProperty": "rpTitle"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSub",
+      "toId": "twMoney",
+      "toProperty": "rpSub"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSubColor",
+      "toId": "twMoney",
+      "toProperty": "rpSubColor"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpAmountText",
+      "toId": "twMoney",
+      "toProperty": "rpAmountText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpAmountColor",
+      "toId": "twMoney",
+      "toProperty": "rpAmountColor"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpDetail",
+      "toId": "twMoney",
+      "toProperty": "rpDetail"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpTickShown",
+      "toId": "twMoney",
+      "toProperty": "rpTickShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpTickHead",
+      "toId": "twMoney",
+      "toProperty": "rpTickHead"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpTickOn",
+      "toId": "twMoney",
+      "toProperty": "rpTickOn"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpTickAmount",
+      "toId": "twMoney",
+      "toProperty": "rpTickAmount"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpRemaining",
+      "toId": "twMoney",
+      "toProperty": "rpRemaining"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpRests",
+      "toId": "twMoney",
+      "toProperty": "rpRests"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpRestDefault",
+      "toId": "twMoney",
+      "toProperty": "rpRestDefault"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpChangeLabel",
+      "toId": "twMoney",
+      "toProperty": "rpChangeLabel"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSkipShown",
+      "toId": "twMoney",
+      "toProperty": "rpSkipShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpLostShown",
+      "toId": "twMoney",
+      "toProperty": "rpLostShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpChangeShown",
+      "toId": "twMoney",
+      "toProperty": "rpChangeShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpChDate",
+      "toId": "twMoney",
+      "toProperty": "rpChDate"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpChAmount",
+      "toId": "twMoney",
+      "toProperty": "rpChAmount"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpChNote",
+      "toId": "twMoney",
+      "toProperty": "rpChNote"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpChHint",
+      "toId": "twMoney",
+      "toProperty": "rpChHint"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpResetShown",
+      "toId": "twMoney",
+      "toProperty": "rpResetShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpClosedShown",
+      "toId": "twMoney",
+      "toProperty": "rpClosedShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpClosedText",
+      "toId": "twMoney",
+      "toProperty": "rpClosedText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpHopedShown",
+      "toId": "twMoney",
+      "toProperty": "rpHopedShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpHopedText",
+      "toId": "twMoney",
+      "toProperty": "rpHopedText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpBillShown",
+      "toId": "twMoney",
+      "toProperty": "rpBillShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpBillText",
+      "toId": "twMoney",
+      "toProperty": "rpBillText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSendShown",
+      "toId": "twMoney",
+      "toProperty": "rpSendShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSentOn",
+      "toId": "twMoney",
+      "toProperty": "rpSentOn"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSentAmount",
+      "toId": "twMoney",
+      "toProperty": "rpSentAmount"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpSentAmountShown",
+      "toId": "twMoney",
+      "toProperty": "rpSentAmountShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpUnsendShown",
+      "toId": "twMoney",
+      "toProperty": "rpUnsendShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpFromShown",
+      "toId": "twMoney",
+      "toProperty": "rpFromShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpFromText",
+      "toId": "twMoney",
+      "toProperty": "rpFromText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpItemLabel",
+      "toId": "twMoney",
+      "toProperty": "rpItemLabel"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "rpEndShown",
+      "toId": "twMoney",
+      "toProperty": "rpEndShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "endShown",
+      "toId": "twMoney",
+      "toProperty": "endShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "endTitle",
+      "toId": "twMoney",
+      "toProperty": "endTitle"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "endText",
+      "toId": "twMoney",
+      "toProperty": "endText"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "endChoices",
+      "toId": "twMoney",
+      "toProperty": "endChoices"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "endAt",
+      "toId": "twMoney",
+      "toProperty": "endAt"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "balShown",
+      "toId": "twMoney",
+      "toProperty": "balShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "balOn",
+      "toId": "twMoney",
+      "toProperty": "balOn"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "balHint",
+      "toId": "twMoney",
+      "toProperty": "balHint"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "balRows",
+      "toId": "twMoney",
+      "toProperty": "balRows"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "balHasRows",
+      "toId": "twMoney",
+      "toProperty": "balHasRows"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "balNote",
+      "toId": "twMoney",
+      "toProperty": "balNote"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edShown",
+      "toId": "twMoney",
+      "toProperty": "edShown"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edKey",
+      "toId": "twMoney",
+      "toProperty": "edKey"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edTitle",
+      "toId": "twMoney",
+      "toProperty": "edTitle"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edSub",
+      "toId": "twMoney",
+      "toProperty": "edSub"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edDirs",
+      "toId": "twMoney",
+      "toProperty": "edDirs"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edRepeats",
+      "toId": "twMoney",
+      "toProperty": "edRepeats"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edProjects",
+      "toId": "twMoney",
+      "toProperty": "edProjects"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edProjectTerms",
+      "toId": "twMoney",
+      "toProperty": "edProjectTerms"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edSaveLabel",
+      "toId": "twMoney",
+      "toProperty": "edSaveLabel"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edLabel",
+      "toId": "twMoney",
+      "toProperty": "edLabel"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edDir",
+      "toId": "twMoney",
+      "toProperty": "edDir"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edAmount",
+      "toId": "twMoney",
+      "toProperty": "edAmount"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edRepeat",
+      "toId": "twMoney",
+      "toProperty": "edRepeat"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edDate",
+      "toId": "twMoney",
+      "toProperty": "edDate"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edUntil",
+      "toId": "twMoney",
+      "toProperty": "edUntil"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edMonthEnd",
+      "toId": "twMoney",
+      "toProperty": "edMonthEnd"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edProjectId",
+      "toId": "twMoney",
+      "toProperty": "edProjectId"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edBillDate",
+      "toId": "twMoney",
+      "toProperty": "edBillDate"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edBillLeadDays",
+      "toId": "twMoney",
+      "toProperty": "edBillLeadDays"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edFromHours",
+      "toId": "twMoney",
+      "toProperty": "edFromHours"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edLikelihood",
+      "toId": "twMoney",
+      "toProperty": "edLikelihood"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "edNote",
+      "toId": "twMoney",
+      "toProperty": "edNote"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "close",
+      "toId": "twMoneyOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "close",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "close",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "showUp",
+      "toId": "twFilterUp",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "showPast",
+      "toId": "twFilterPast",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "showRec",
+      "toId": "twFilterRec",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "more",
+      "toId": "twHorizon",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "add",
+      "toId": "twPaneNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "add",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "record",
+      "toId": "twPaneBalance",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "record",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "sumRecordBalance",
+      "toId": "twPaneBalance",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "sumRecordBalance",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "key",
+      "toId": "twPickRoute",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "kind",
+      "toId": "twPickRoute",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "pick",
+      "toId": "twPickRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-sel",
+      "toId": "twSelFromList",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-toRepeat",
+      "toId": "twSelFromList",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-toRepeat",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-item",
+      "toId": "twItemFromList",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-toItem",
+      "toId": "twItemFromList",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-toItem",
+      "toId": "twPaneEdit",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twPickRoute",
+      "fromProperty": "out-toItem",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "sumBack",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "sumBack",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpBack",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpBack",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "endBack",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "endBack",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balBack",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balBack",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edBack",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edBack",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpChangeOne",
+      "toId": "twPaneChange",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "pickedItemId",
+      "toId": "twItemFromPane",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpChangeItem",
+      "toId": "twItemFromPane",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpChangeItem",
+      "toId": "twPaneEdit",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpEndItem",
+      "toId": "twItemFromPane",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpEndItem",
+      "toId": "twPaneEnd",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "agreeItemId",
+      "toId": "cmdAgreeItem",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpAgreed",
+      "toId": "cmdAgreeItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpSaveOne",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpResetOne",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpTick",
+      "toId": "twActTick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActTick",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActTick",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpSaveOne",
+      "toId": "twActChange",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActChange",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActChange",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpResetOne",
+      "toId": "twActReset",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActReset",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActReset",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpSkip",
+      "toId": "twActSkip",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActSkip",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActSkip",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpLost",
+      "toId": "twActLost",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActLost",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActLost",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpUntick",
+      "toId": "twActUntick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActUntick",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActUntick",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpMarkSent",
+      "toId": "twActSent",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActSent",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActSent",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpUnsend",
+      "toId": "twActUnsend",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActUnsend",
+      "fromProperty": "out-action",
+      "toId": "twMarkPane",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActUnsend",
+      "fromProperty": "out-go",
+      "toId": "twMarkPane",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balHappened",
+      "toId": "twActHappened",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActHappened",
+      "fromProperty": "out-action",
+      "toId": "twMarkBal",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActHappened",
+      "fromProperty": "out-go",
+      "toId": "twMarkBal",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balLost",
+      "toId": "twActBalLost",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twActBalLost",
+      "fromProperty": "out-action",
+      "toId": "twMarkBal",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "twActBalLost",
+      "fromProperty": "out-go",
+      "toId": "twMarkBal",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "twVarSel",
+      "fromProperty": "value",
+      "toId": "twMarkPane",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpTickOn",
+      "toId": "twMarkPane",
+      "toProperty": "tickOn"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpTickAmount",
+      "toId": "twMarkPane",
+      "toProperty": "tickAmount"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpTickRest",
+      "toId": "twMarkPane",
+      "toProperty": "tickRest"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpChDate",
+      "toId": "twMarkPane",
+      "toProperty": "chDate"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpChAmount",
+      "toId": "twMarkPane",
+      "toProperty": "chAmount"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpChNote",
+      "toId": "twMarkPane",
+      "toProperty": "chNote"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpSentOn",
+      "toId": "twMarkPane",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "rpSentAmount",
+      "toId": "twMarkPane",
+      "toProperty": "sentAmount"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balKey",
+      "toId": "twMarkBal",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "itemId",
+      "toId": "cmdAddMark",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "itemId",
+      "toId": "cmdEditMark",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "occurs",
+      "toId": "cmdAddMark",
+      "toProperty": "occurs"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "occurs",
+      "toId": "cmdEditMark",
+      "toProperty": "occurs"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "amount",
+      "toId": "cmdAddMark",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "amount",
+      "toId": "cmdEditMark",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "date",
+      "toId": "cmdAddMark",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "date",
+      "toId": "cmdEditMark",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "skip",
+      "toId": "cmdAddMark",
+      "toProperty": "skip"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "skip",
+      "toId": "cmdEditMark",
+      "toProperty": "skip"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "payments",
+      "toId": "cmdAddMark",
+      "toProperty": "payments"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "payments",
+      "toId": "cmdEditMark",
+      "toProperty": "payments"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "doneOn",
+      "toId": "cmdAddMark",
+      "toProperty": "doneOn"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "doneOn",
+      "toId": "cmdEditMark",
+      "toProperty": "doneOn"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "doneAmount",
+      "toId": "cmdAddMark",
+      "toProperty": "doneAmount"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "doneAmount",
+      "toId": "cmdEditMark",
+      "toProperty": "doneAmount"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "lostOn",
+      "toId": "cmdAddMark",
+      "toProperty": "lostOn"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "lostOn",
+      "toId": "cmdEditMark",
+      "toProperty": "lostOn"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "sentOn",
+      "toId": "cmdAddMark",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "sentOn",
+      "toId": "cmdEditMark",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "note",
+      "toId": "cmdAddMark",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "note",
+      "toId": "cmdEditMark",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "markId",
+      "toId": "cmdEditMark",
+      "toProperty": "markId"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "add",
+      "toId": "cmdAddMark",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMarkPane",
+      "fromProperty": "edit",
+      "toId": "cmdEditMark",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "itemId",
+      "toId": "cmdAddMark",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "itemId",
+      "toId": "cmdEditMark",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "occurs",
+      "toId": "cmdAddMark",
+      "toProperty": "occurs"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "occurs",
+      "toId": "cmdEditMark",
+      "toProperty": "occurs"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "amount",
+      "toId": "cmdAddMark",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "amount",
+      "toId": "cmdEditMark",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "date",
+      "toId": "cmdAddMark",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "date",
+      "toId": "cmdEditMark",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "skip",
+      "toId": "cmdAddMark",
+      "toProperty": "skip"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "skip",
+      "toId": "cmdEditMark",
+      "toProperty": "skip"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "payments",
+      "toId": "cmdAddMark",
+      "toProperty": "payments"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "payments",
+      "toId": "cmdEditMark",
+      "toProperty": "payments"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "doneOn",
+      "toId": "cmdAddMark",
+      "toProperty": "doneOn"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "doneOn",
+      "toId": "cmdEditMark",
+      "toProperty": "doneOn"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "doneAmount",
+      "toId": "cmdAddMark",
+      "toProperty": "doneAmount"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "doneAmount",
+      "toId": "cmdEditMark",
+      "toProperty": "doneAmount"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "lostOn",
+      "toId": "cmdAddMark",
+      "toProperty": "lostOn"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "lostOn",
+      "toId": "cmdEditMark",
+      "toProperty": "lostOn"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "sentOn",
+      "toId": "cmdAddMark",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "sentOn",
+      "toId": "cmdEditMark",
+      "toProperty": "sentOn"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "note",
+      "toId": "cmdAddMark",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "note",
+      "toId": "cmdEditMark",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "markId",
+      "toId": "cmdEditMark",
+      "toProperty": "markId"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "add",
+      "toId": "cmdAddMark",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMarkBal",
+      "fromProperty": "edit",
+      "toId": "cmdEditMark",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "endItemId",
+      "toId": "cmdEndItem",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "endAt",
+      "toId": "cmdEndItem",
+      "toProperty": "until"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "endGo",
+      "toId": "cmdEndItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdEndItem",
+      "fromProperty": "done",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdEndItem",
+      "fromProperty": "done",
+      "toId": "twSelClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "endCancel",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "isNewItem",
+      "toId": "twIsNewItem",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edSave",
+      "toId": "twIsNewItem",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "twIsNewItem",
+      "fromProperty": "ontrue",
+      "toId": "cmdAddItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twIsNewItem",
+      "fromProperty": "onfalse",
+      "toId": "cmdEditItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoneyView",
+      "fromProperty": "editItemId",
+      "toId": "cmdEditItem",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edLabel",
+      "toId": "cmdAddItem",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edLabel",
+      "toId": "cmdEditItem",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edDir",
+      "toId": "cmdAddItem",
+      "toProperty": "dir"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edDir",
+      "toId": "cmdEditItem",
+      "toProperty": "dir"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edAmount",
+      "toId": "cmdAddItem",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edAmount",
+      "toId": "cmdEditItem",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edRepeat",
+      "toId": "cmdAddItem",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edRepeat",
+      "toId": "cmdEditItem",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edDate",
+      "toId": "cmdAddItem",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edDate",
+      "toId": "cmdEditItem",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edUntil",
+      "toId": "cmdAddItem",
+      "toProperty": "until"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edUntil",
+      "toId": "cmdEditItem",
+      "toProperty": "until"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edMonthEnd",
+      "toId": "cmdAddItem",
+      "toProperty": "monthEnd"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edMonthEnd",
+      "toId": "cmdEditItem",
+      "toProperty": "monthEnd"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edProjectId",
+      "toId": "cmdAddItem",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edProjectId",
+      "toId": "cmdEditItem",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edBillDate",
+      "toId": "cmdAddItem",
+      "toProperty": "billDate"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edBillDate",
+      "toId": "cmdEditItem",
+      "toProperty": "billDate"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edBillLeadDays",
+      "toId": "cmdAddItem",
+      "toProperty": "billLeadDays"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edBillLeadDays",
+      "toId": "cmdEditItem",
+      "toProperty": "billLeadDays"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edFromHours",
+      "toId": "cmdAddItem",
+      "toProperty": "fromHours"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edFromHours",
+      "toId": "cmdEditItem",
+      "toProperty": "fromHours"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edLikelihood",
+      "toId": "cmdAddItem",
+      "toProperty": "likelihood"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edLikelihood",
+      "toId": "cmdEditItem",
+      "toProperty": "likelihood"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edNote",
+      "toId": "cmdAddItem",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edNote",
+      "toId": "cmdEditItem",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "cmdAddItem",
+      "fromProperty": "done",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdEditItem",
+      "fromProperty": "done",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "edCancel",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balOn",
+      "toId": "cmdRecordBalance",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balAmount",
+      "toId": "cmdRecordBalance",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balSave",
+      "toId": "cmdRecordBalance",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdRecordBalance",
+      "fromProperty": "done",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balCancel",
+      "toId": "twPaneNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balKey",
+      "toId": "twPartRoute",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "twMoney",
+      "fromProperty": "balPart",
+      "toId": "twPartRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twPartRoute",
+      "fromProperty": "out-sel",
+      "toId": "twSelFromPart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "twPartRoute",
+      "fromProperty": "out-go",
+      "toId": "twSelFromPart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twPartRoute",
+      "fromProperty": "out-go",
+      "toId": "twPaneNone",
+      "toProperty": "do"
     },
     {
       "fromId": "cmdAddBlock",
@@ -1996,19 +3994,49 @@
       "toProperty": "refresh"
     },
     {
-      "fromId": "cmdCashEvent",
-      "fromProperty": "done",
-      "toId": "twData",
-      "toProperty": "refresh"
-    },
-    {
-      "fromId": "cmdEditCash",
-      "fromProperty": "done",
-      "toId": "twData",
-      "toProperty": "refresh"
-    },
-    {
       "fromId": "cmdSettings",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddItem",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdEditItem",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdEndItem",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAgreeItem",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddMark",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdEditMark",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRecordBalance",
       "fromProperty": "done",
       "toId": "twData",
       "toProperty": "refresh"

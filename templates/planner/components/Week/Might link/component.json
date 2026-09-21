@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a4547d09-df3c-5e47-8f3b-fe2e5a2a7947",
+  "name": "Might link",
+  "path": "/Week/Might link",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One project you might earn from: its name, which opens its card, how likely it is, and the move that makes it real."
+}

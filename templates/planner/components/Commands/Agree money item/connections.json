@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "36b01d96-b41e-501b-8725-bb1ec82fca32",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AgreemoneyIn",
+      "fromProperty": "itemId",
+      "toId": "AgreemoneyGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "AgreemoneyIn",
+      "fromProperty": "do",
+      "toId": "AgreemoneyGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AgreemoneyGuard",
+      "fromProperty": "out-likelihood",
+      "toId": "AgreemoneyWrite",
+      "toProperty": "prop-likelihood"
+    },
+    {
+      "fromId": "AgreemoneyIn",
+      "fromProperty": "itemId",
+      "toId": "AgreemoneyWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "AgreemoneyGuard",
+      "fromProperty": "out-go",
+      "toId": "AgreemoneyWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AgreemoneyWrite",
+      "fromProperty": "done",
+      "toId": "AgreemoneyOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AgreemoneyWrite",
+      "fromProperty": "failure",
+      "toId": "AgreemoneyProblem",
+      "toProperty": "do"
+    }
+  ]
+}

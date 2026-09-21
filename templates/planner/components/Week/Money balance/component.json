@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1f44993f-48fe-5a19-811d-7b0aabcada79",
+  "name": "Money balance",
+  "path": "/Week/Money balance",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Record what the bank says, and answer for everything that should have happened by now and is not ticked: it happened, part of it did, it is lost, or not yet."
+}

@@ -147,6 +147,36 @@
           "name": "lastLabel",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "billingShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "billingTerms",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hopeShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hopedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHoped",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 530,
@@ -191,6 +221,16 @@
           "name": "planHours",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "addBill",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addHope",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 530,
@@ -216,6 +256,7 @@
       "children": [
         "pdTop",
         "pdMove",
+        "pdBilling",
         "pdWeek",
         "pdTwo",
         "pdSayBox"
@@ -408,7 +449,9 @@
         "pdPlaced",
         "pdLast",
         "pdPlan",
-        "pdActs"
+        "pdActs",
+        "pdHope",
+        "pdHoped"
       ],
       "x": 100,
       "y": 1000
@@ -778,6 +821,150 @@
       "y": 2920
     },
     {
+      "id": "pdHope",
+      "type": "net.noodl.controls.button",
+      "label": "Add the move as hoped money",
+      "parent": "pdMove",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Add as hoped money"
+      },
+      "x": 160,
+      "y": 3040
+    },
+    {
+      "id": "pdHoped",
+      "type": "Text",
+      "label": "The hoped money it already has",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3160
+    },
+    {
+      "id": "pdBilling",
+      "type": "Group",
+      "label": "Billing",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1-5)"
+      },
+      "children": [
+        "pdBillingLabel",
+        "pdBillingTerms",
+        "pdBillingEach",
+        "pdAddBill"
+      ],
+      "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "pdBillingLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "pdBilling",
+      "parameters": {
+        "text": "Billing",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "pdBillingTerms",
+      "type": "Text",
+      "label": "Hourly or fixed, and the terms",
+      "parent": "pdBilling",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3520
+    },
+    {
+      "id": "pdBillingEach",
+      "type": "For Each",
+      "label": "The bills, the next one, this period, the past",
+      "parent": "pdBilling",
+      "parameters": {
+        "template": "/Week/Key line",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 3640
+    },
+    {
+      "id": "pdAddBill",
+      "type": "net.noodl.controls.button",
+      "label": "Add a bill for this project",
+      "parent": "pdBilling",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "+ Add a bill"
+      },
+      "x": 160,
+      "y": 3760
+    },
+    {
       "id": "pdWeek",
       "type": "Group",
       "label": "This week",
@@ -796,7 +983,7 @@
         "pdBoxes"
       ],
       "x": 100,
-      "y": 3040
+      "y": 3880
     },
     {
       "id": "pdWeekLabel",
@@ -823,7 +1010,7 @@
         }
       },
       "x": 160,
-      "y": 3160
+      "y": 4000
     },
     {
       "id": "pdBoxes",
@@ -831,7 +1018,7 @@
       "label": "The six days",
       "parent": "pdWeek",
       "x": 160,
-      "y": 3280
+      "y": 4120
     },
     {
       "id": "pdTwo",
@@ -853,7 +1040,7 @@
         "pdFacts"
       ],
       "x": 100,
-      "y": 3400
+      "y": 4240
     },
     {
       "id": "pdHistory",
@@ -874,7 +1061,7 @@
         "pdSpark"
       ],
       "x": 160,
-      "y": 3520
+      "y": 4360
     },
     {
       "id": "pdSparkTitle",
@@ -901,7 +1088,7 @@
         }
       },
       "x": 220,
-      "y": 3640
+      "y": 4480
     },
     {
       "id": "pdSpark",
@@ -909,7 +1096,7 @@
       "label": "The bars",
       "parent": "pdHistory",
       "x": 220,
-      "y": 3760
+      "y": 4600
     },
     {
       "id": "pdFacts",
@@ -930,7 +1117,7 @@
         "pdFactEach"
       ],
       "x": 160,
-      "y": 3880
+      "y": 4720
     },
     {
       "id": "pdFactsLabel",
@@ -957,7 +1144,7 @@
         }
       },
       "x": 220,
-      "y": 4000
+      "y": 4840
     },
     {
       "id": "pdFactEach",
@@ -969,7 +1156,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 4120
+      "y": 4960
     },
     {
       "id": "pdSayBox",
@@ -995,7 +1182,7 @@
         "pdSay"
       ],
       "x": 100,
-      "y": 4240
+      "y": 5080
     },
     {
       "id": "pdSay",
@@ -1013,7 +1200,7 @@
         }
       },
       "x": 160,
-      "y": 4360
+      "y": 5200
     }
   ],
   "visualRoots": [

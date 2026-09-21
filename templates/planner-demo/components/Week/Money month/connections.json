@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "96ec68ac-aacf-52b5-8c7b-83a5f2bcc583",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mmIn",
+      "fromProperty": "name",
+      "toId": "mmName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mmIn",
+      "fromProperty": "nameColor",
+      "toId": "mmName",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mmIn",
+      "fromProperty": "summary",
+      "toId": "mmSummary",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mmIn",
+      "fromProperty": "rows",
+      "toId": "mmEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mmEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "mmOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "mmEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "mmOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "mmEach",
+      "fromProperty": "itemOutput-kind",
+      "toId": "mmOut",
+      "toProperty": "kind"
+    }
+  ]
+}

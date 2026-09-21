@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "88120453-67b8-5e7a-880b-3c75f16cc537",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "itemId",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "occurs",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-occurs"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "amount",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "date",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "skip",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-skip"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "payments",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-payments"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "doneOn",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-doneOn"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "doneAmount",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-doneAmount"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "lostOn",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-lostOn"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "sentOn",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-sentOn"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "note",
+      "toId": "AddmarkGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "AddmarkIn",
+      "fromProperty": "do",
+      "toId": "AddmarkGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-itemId",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-itemId"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-occurs",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-occurs"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-amount",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-amount"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-date",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-skip",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-skip"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-payments",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-payments"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-doneOn",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-doneOn"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-doneAmount",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-doneAmount"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-lostOn",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-lostOn"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-sentOn",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-sentOn"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-note",
+      "toId": "AddmarkWrite",
+      "toProperty": "prop-note"
+    },
+    {
+      "fromId": "AddmarkGuard",
+      "fromProperty": "out-go",
+      "toId": "AddmarkWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddmarkWrite",
+      "fromProperty": "done",
+      "toId": "AddmarkOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddmarkWrite",
+      "fromProperty": "failure",
+      "toId": "AddmarkProblem",
+      "toProperty": "do"
+    }
+  ]
+}

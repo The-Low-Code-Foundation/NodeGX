@@ -40,10 +40,11 @@ import { C, LOAD_PROBLEM_TEXT, PROBLEM_TEXT, signalOnly, TPL010_COMPONENTS, Tpl0
 import { composition } from './tpl010Theme';
 
 /**
- * v2 since R2.4: blocks carry the time logged on them (R22). A browser holding the v1 week reads
- * fine but would never show a block half done, so the key moves and the new week is seeded.
+ * v2 since R2.4: blocks carry the time logged on them (R22). v3 since TPL-010-M: the money is
+ * money items, marks and a balance reading, and a browser holding v2's cash events would open on
+ * an empty Money modal — so the key moves and the new week is seeded.
  */
-export const DEMO_STORAGE_KEY = 'nodegx-planner-demo-v2';
+export const DEMO_STORAGE_KEY = 'nodegx-planner-demo-v3';
 export const DEMO_PROBLEM_TEXT = 'That change did not save in this browser. Try again, or reset the demo.';
 export const DEMO_LOAD_PROBLEM_TEXT = 'The example week could not be read from this browser. Reset the demo to start again.';
 export const DEMO_NOTICE =
@@ -338,10 +339,16 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
   var stamp = new Date(monday.getTime()).toISOString();
 
   var pos = 0;
+  // TPL-010-M M21 — how each earning project bills: hourly at its rate, or fixed for the agreed work.
+  var BILLING = {
+    bramble: ['fixed', 7, 14], northline: ['fixed', 14, 0], salon: ['hourly', 7, 0], uplift: ['hourly', 14, 0]
+  };
   function project(id, name, sub, kind, rate, move, worth, when, dueDays, stop, facts, history, say) {
     pos++;
+    var bill = BILLING[id] || ['hourly', 14, 0];
     return {
       id: 'seed-' + id, name: name, sub: sub, kind: kind, rate: rate, slot: '', rung: '',
+      billing: bill[0], termsDays: bill[1], agreedHours: bill[2],
       move: move, moveWorth: worth, moveWhen: when, moveDue: dueDays === null ? '' : due(dueDays),
       moveStop: stop, facts: facts, history: history, say: say, position: pos,
       createdAt: stamp, updatedAt: stamp
@@ -358,7 +365,7 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
       [1120, 0, 560, 0, 560, 1120], 'The best-proven avenue. Every extra broker like this one is another slot.'),
     project('salon', 'Salon Collective', 'Hourly, at a cheap rate', 'earning', 18,
       'Propose a fixed €800 a month for maintenance and small features', '+€400 / mo', 'With the month-end invoice', 9, false,
-      [['Slot', '2 of 3, half'], ['Rate against yours', '28%'], ['Hours this month', '22'], ['Decision', 'slow burner, review in December']],
+      [['Slot', '2 of 3, half'], ['Rate against yours', '36%'], ['Hours this month', '22'], ['Decision', 'slow burner, review in December']],
       [400, 600, 500, 400, 400, 400], 'Kept on purpose. Flag it if it passes 25 hours in a month.'),
     project('uplift', 'Uplift', 'One-off consulting', 'earning', 65,
       'Ask whether the launch needs a testing pass', '€500 one-off', 'Wednesday, on the call', 2, false,
@@ -423,6 +430,16 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     ['admin', 'admin', 'Email and invoices', 0.5],
     ['jazz', 'hobby', 'Gig listings', 2]
   ];
+  // TPL-010-M M23 — Salon Collective bills by the hour, and its next bill is the hours since its last one
+  // went out (two weeks before the visit). So its sittings since then are written first, and come out of
+  // the month's billable quota so the envelope is the same size either way.
+  var salonFrom = plus(today, -13);
+  var monthStart = new Date(monday.getFullYear(), monday.getMonth(), 1);
+  for (var sd = salonFrom; sd.getTime() < monday.getTime(); sd = plus(sd, 1)) {
+    if (sd.getDay() === 0) continue;
+    block('salon', key(sd), 'Booking and profile fixes', 1.5, true, null, false);
+    if (sd.getTime() >= monthStart.getTime()) quota.billable -= 1.5;
+  }
   var cursor = new Date(monday.getFullYear(), monday.getMonth(), 1);
   while (cursor.getTime() < monday.getTime()) {
     if (cursor.getDay() !== 0) {
@@ -485,31 +502,105 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     }
   }
 
-  var eom = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);
+  // Q3 — the month is planned. 46 h is M22's target for the example money below: €3,808.33 less the two
+  // fixed bills going out this month, at €50 an hour, plus Bramble & Co's 14 agreed hours.
   var plan = {
     id: 'seed-plan', month: monday.getFullYear() + '-' + pad2(monday.getMonth() + 1),
-    billable: 55, building: 16.25, admin: 12, hobby: 0, workingDays: 25, openingBalance: 3200,
+    billable: 46, building: 16.25, admin: 12, hobby: 0, workingDays: 25,
     createdAt: stamp, updatedAt: stamp
   };
 
-  function cash(id, date, amount, label, kind, recurring) {
-    return { id: 'seed-cash-' + id, date: date, amount: amount, label: label, kind: kind, recurring: recurring, createdAt: stamp, updatedAt: stamp };
+  // TPL-010-M §5.9 — the money, invented, and dated from the visit like the week is. Every repeat before
+  // today is ticked on its day, except the one late bill the story needs (Salon Collective's).
+  var items = [], marks = [];
+  function item(id, label, amount, repeat, date, extra) {
+    var it = {
+      id: 'seed-money-' + id, label: label, amount: amount, repeat: repeat, date: date, until: '', monthEnd: false,
+      projectId: '', billDate: '', billLeadDays: '', fromHours: false, likelihood: 100, note: '', position: items.length + 1,
+      createdAt: stamp, updatedAt: stamp
+    };
+    for (var k in extra) it[k] = extra[k];
+    items.push(it);
+    return it;
   }
-  var cashEvents = [
-    // The kinds the money-event editor writes (R2.4): the seed said 'in' and 'note' before it existed.
-    cash('partner', key(new Date(monday.getFullYear(), monday.getMonth(), 28)), 1500, 'Partner’s contract', 'income', 'monthly'),
-    cash('invoices', key(eom), 0, 'Invoices go out', 'invoice-out', ''),
-    cash('household', key(new Date(monday.getFullYear(), monday.getMonth() + 1, 1)), -4500, 'Household costs', 'cost', 'monthly'),
-    cash('due', key(new Date(monday.getFullYear(), monday.getMonth() + 1, 7)), 3400, 'Last month’s invoices due', 'invoice-due', '')
-  ];
+  function mark(it, occurs, extra) {
+    var m = {
+      id: 'seed-mark-' + marks.length, itemId: it.id, occurs: occurs, amount: '', date: '', skip: false, payments: [],
+      doneOn: '', doneAmount: '', lostOn: '', sentOn: '', note: '', createdAt: stamp, updatedAt: stamp
+    };
+    for (var k in extra) m[k] = extra[k];
+    if (m.payments.length) {
+      var total = 0, last = '';
+      for (var p = 0; p < m.payments.length; p++) { total += m.payments[p].amount; if (m.payments[p].day > last) last = m.payments[p].day; }
+      m.doneOn = last;
+      m.doneAmount = total;
+    }
+    marks.push(m);
+  }
+  function paid(it, occurs, day, amount) { mark(it, occurs, { payments: [{ day: day, amount: amount }] }); }
+  function onDay(y, m0, d) { return new Date(y, m0, d); }
+  var Y = today.getFullYear(), M = today.getMonth(), todayKey = key(today);
+
+  var partner = item('partner', 'Partner’s contract', 1500, 'monthly', key(onDay(Y, M - 2, 28)));
+  for (var a = -2; a <= 0; a++) { var pd = onDay(Y, M + a, 28); if (pd.getTime() < today.getTime()) paid(partner, key(pd), key(pd), 1500); }
+  // M4 — one repeat changed by hand: next month's is €1,380.
+  mark(partner, key(onDay(Y, M + 1, 28)), { amount: 1380, note: 'Fewer hours that month' });
+
+  var house = item('household', 'Household costs', -4500, 'monthly', key(onDay(Y, M - 1, 1)), { note: 'Rent, bills, food, the car' });
+  for (var h = -1; h <= 0; h++) { var hd = onDay(Y, M + h, 1); if (hd.getTime() < today.getTime()) paid(house, key(hd), key(hd), -4500); }
+
+  var taxDay = onDay(Y, 10, 30);
+  if (taxDay.getTime() < today.getTime()) taxDay = onDay(Y + 1, 10, 30);
+  item('tax', 'Income tax', -2400, 'yearly', key(taxDay));
+
+  var saturday = plus(monday, 5);
+  var cowork = item('cowork', 'Co-working day', -25, 'weekly', key(plus(saturday, -21)));
+  for (var c = -21; c < 0; c += 7) paid(cowork, key(plus(saturday, c)), key(plus(saturday, c)), -25);
+  if (saturday.getTime() < today.getTime()) paid(cowork, key(saturday), key(saturday), -25);
+
+  // A fixed retainer, due on the 7th, the bill out seven days before (M5). The first was paid five days late.
+  var bramble = item('bramble', 'Bramble & Co', 1120, 'monthly', key(onDay(Y, M - 1, 7)), {
+    until: key(onDay(Y, M + 6, 7)), projectId: 'seed-bramble', billLeadDays: 7, note: 'Retainer, 14 h a month'
+  });
+  for (var b = -1; b <= 0; b++) {
+    var due = onDay(Y, M + b, 7);
+    if (due.getTime() >= today.getTime()) continue;
+    var payDay = plus(due, b === -1 ? 5 : -2);
+    if (payDay.getTime() > today.getTime()) payDay = due;
+    mark(bramble, key(due), { sentOn: key(plus(due, -7)), payments: [{ day: key(payDay), amount: 1120 }] });
+  }
+  // M6 — the late one: billed two weeks ago, due a week ago, not ticked.
+  var salonLate = item('salon-last', 'Salon Collective · last month', 640, 'once', key(plus(today, -7)), {
+    projectId: 'seed-salon', billDate: key(plus(today, -14))
+  });
+  mark(salonLate, key(plus(today, -7)), { sentOn: key(plus(today, -14)) });
+  // M23 — this month's Salon bill is its hours at €18, until it is sent at the end of the month.
+  var eom = new Date(Y, M + 1, 0);
+  item('salon-this', 'Salon Collective · this month', 0, 'once', key(plus(eom, 7)), {
+    projectId: 'seed-salon', billDate: key(eom), fromHours: true
+  });
+  // The Northline workshop is tomorrow's column; its bill goes out the day after, due 14 days later.
+  item('northline', 'Northline · AI workshop', 1120, 'once', key(plus(today, 16)), {
+    projectId: 'seed-northline', billDate: key(plus(today, 2))
+  });
+  // M7 — hoped money, with the odds.
+  item('coaching', 'Coaching, three clients', 1800, 'monthly', key(plus(today, 36)), { projectId: 'seed-coaching', likelihood: 40 });
+  item('jazz', 'The Jazz Room retainer', 2000, 'monthly', key(onDay(Y, M + 2, 1)), { projectId: 'seed-jazz', likelihood: 30, note: 'Only if the fundraiser happens' });
+
+  // M11 — the balance as read on the Monday of this week.
+  var readings = [{ id: 'seed-reading', date: key(monday), amount: 3200, note: '', createdAt: stamp, updatedAt: stamp }];
+  // Payments dated after the reading would count twice: the story's reading was taken after them.
+  for (var r = 0; r < marks.length; r++) {
+    var pays = marks[r].payments;
+    for (var q = 0; q < pays.length; q++) if (pays[q].day > readings[0].date && pays[q].day <= todayKey) readings[0].amount -= pays[q].amount;
+  }
 
   var settings = {
-    id: 'seed-settings', rate: 70, householdNeed: 5000, partnerIncome: 1200, focusHours: 6,
-    partnerDay: 28, costsDay: 1, invoiceDay: 28, paymentTermsDays: 7, openingBalance: 3200,
+    id: 'seed-settings', rate: 50, focusHours: 6, savingsTarget: 500, lowWaterMark: 0,
     createdAt: stamp, updatedAt: stamp
   };
 
-  return { Project: projects, Block: blocks, MonthPlan: [plan], CashEvent: cashEvents, Settings: [settings] };
+  return { Project: projects, Block: blocks, MonthPlan: [plan], MoneyItem: items, MoneyMark: marks, BalanceReading: readings, Settings: [settings] };
 }
 `;
 

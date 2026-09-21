@@ -1,0 +1,136 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c45b6cf0-e041-5afe-8aad-b02924ed230d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mlIn",
+      "type": "Component Inputs",
+      "label": "The hoped project",
+      "ports": [
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "odds",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "mlOut",
+      "type": "Component Outputs",
+      "label": "Opened",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "mlRoot",
+      "type": "Group",
+      "label": "One hoped project",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)"
+      },
+      "children": [
+        "mlName",
+        "mlOdds",
+        "mlMove"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mlName",
+      "type": "net.noodl.controls.button",
+      "label": "Open its card",
+      "parent": "mlRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "styleCss": "text-decoration: underline; text-underline-offset: 3px;"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mlOdds",
+      "type": "Text",
+      "label": "How likely",
+      "parent": "mlRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mlMove",
+      "type": "Text",
+      "label": "The move that makes it real",
+      "parent": "mlRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "mlRoot"
+  ]
+}

@@ -14,37 +14,17 @@
           "type": "string"
         },
         {
-          "name": "householdNeed",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "partnerIncome",
-          "plug": "output",
-          "type": "string"
-        },
-        {
           "name": "focusHours",
           "plug": "output",
           "type": "string"
         },
         {
-          "name": "partnerDay",
+          "name": "savingsTarget",
           "plug": "output",
           "type": "string"
         },
         {
-          "name": "costsDay",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "invoiceDay",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "paymentTermsDays",
+          "name": "lowWaterMark",
           "plug": "output",
           "type": "string"
         },
@@ -60,51 +40,6 @@
         },
         {
           "name": "shown",
-          "plug": "output",
-          "type": "boolean"
-        },
-        {
-          "name": "cashRows",
-          "plug": "output",
-          "type": "array"
-        },
-        {
-          "name": "cashFormShown",
-          "plug": "output",
-          "type": "boolean"
-        },
-        {
-          "name": "cashFormTitle",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "cashKinds",
-          "plug": "output",
-          "type": "*"
-        },
-        {
-          "name": "cashDate",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "cashAmount",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "cashLabel",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "cashKind",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "cashMonthly",
           "plug": "output",
           "type": "boolean"
         }
@@ -123,37 +58,17 @@
           "type": "string"
         },
         {
-          "name": "householdNeed",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "partnerIncome",
-          "plug": "input",
-          "type": "string"
-        },
-        {
           "name": "focusHours",
           "plug": "input",
           "type": "string"
         },
         {
-          "name": "partnerDay",
+          "name": "savingsTarget",
           "plug": "input",
           "type": "string"
         },
         {
-          "name": "costsDay",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "invoiceDay",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "paymentTermsDays",
+          "name": "lowWaterMark",
           "plug": "input",
           "type": "string"
         },
@@ -173,58 +88,13 @@
           "type": "signal"
         },
         {
-          "name": "cashPick",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "cashPickId",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "cashAdd",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "cashDate",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "cashAmount",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "cashLabel",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "cashKind",
-          "plug": "input",
-          "type": "string"
-        },
-        {
-          "name": "cashMonthly",
-          "plug": "input",
-          "type": "boolean"
-        },
-        {
-          "name": "cashSave",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "cashCancel",
+          "name": "openMoney",
           "plug": "input",
           "type": "signal"
         }
       ],
       "x": 470,
-      "y": 760
+      "y": 1120
     },
     {
       "id": "stScrim",
@@ -274,7 +144,7 @@
         },
         "rowGap": "var(--space-3)",
         "maxWidth": {
-          "value": 520,
+          "value": 480,
           "unit": "px"
         },
         "maxHeight": {
@@ -289,18 +159,14 @@
       },
       "children": [
         "stHead",
+        "stMoneyRow",
         "stTarget",
         "stRate",
-        "stNeed",
-        "stPartner",
         "stFocus",
-        "stPartnerDay",
-        "stCostsDay",
-        "stInvoiceDay",
-        "stTerms",
+        "stSavings",
+        "stLow",
         "stPlanLine",
-        "stButtons",
-        "stCash"
+        "stButtons"
       ],
       "x": 100,
       "y": 160
@@ -376,6 +242,70 @@
       "y": 520
     },
     {
+      "id": "stMoneyRow",
+      "type": "Group",
+      "label": "Where the money went",
+      "parent": "stCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "stMoneyWords",
+        "stToMoney"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "stMoneyWords",
+      "type": "Text",
+      "label": "Where the money is now",
+      "parent": "stMoneyRow",
+      "parameters": {
+        "text": "What comes in and goes out lives in Money now.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "stToMoney",
+      "type": "net.noodl.controls.button",
+      "label": "Open Money",
+      "parent": "stMoneyRow",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Open Money (€)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
       "id": "stTarget",
       "type": "Text",
       "label": "What these come to",
@@ -391,12 +321,12 @@
         }
       },
       "x": 160,
-      "y": 640
+      "y": 1000
     },
     {
       "id": "stRate",
       "type": "net.noodl.controls.textinput",
-      "label": "Your rate, per hour",
+      "label": "Your usual hourly rate, €",
       "parent": "stCard",
       "parameters": {
         "sizeMode": "contentHeight",
@@ -417,77 +347,13 @@
         "paddingLeft": "var(--space-3)",
         "paddingRight": "var(--space-3)",
         "useLabel": true,
-        "label": "Your rate, per hour",
+        "label": "Your usual hourly rate, €",
         "labelSpacing": 6,
         "labelfontSize": "var(--text-sm)",
         "labelcolor": "var(--foreground)"
       },
       "x": 160,
-      "y": 760
-    },
-    {
-      "id": "stNeed",
-      "type": "net.noodl.controls.textinput",
-      "label": "What the household needs a month",
-      "parent": "stCard",
-      "parameters": {
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "type": "number",
-        "backgroundColor": "var(--background)",
-        "color": "var(--foreground)",
-        "fontSize": "var(--text-base)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "useLabel": true,
-        "label": "What the household needs a month",
-        "labelSpacing": 6,
-        "labelfontSize": "var(--text-sm)",
-        "labelcolor": "var(--foreground)"
-      },
-      "x": 160,
-      "y": 880
-    },
-    {
-      "id": "stPartner",
-      "type": "net.noodl.controls.textinput",
-      "label": "What your partner brings a month",
-      "parent": "stCard",
-      "parameters": {
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "type": "number",
-        "backgroundColor": "var(--background)",
-        "color": "var(--foreground)",
-        "fontSize": "var(--text-base)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "useLabel": true,
-        "label": "What your partner brings a month",
-        "labelSpacing": 6,
-        "labelfontSize": "var(--text-sm)",
-        "labelcolor": "var(--foreground)"
-      },
-      "x": 160,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "stFocus",
@@ -519,44 +385,12 @@
         "labelcolor": "var(--foreground)"
       },
       "x": 160,
-      "y": 1120
-    },
-    {
-      "id": "stPartnerDay",
-      "type": "net.noodl.controls.textinput",
-      "label": "Day their contract pays",
-      "parent": "stCard",
-      "parameters": {
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "type": "number",
-        "backgroundColor": "var(--background)",
-        "color": "var(--foreground)",
-        "fontSize": "var(--text-base)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "useLabel": true,
-        "label": "Day their contract pays",
-        "labelSpacing": 6,
-        "labelfontSize": "var(--text-sm)",
-        "labelcolor": "var(--foreground)"
-      },
-      "x": 160,
       "y": 1240
     },
     {
-      "id": "stCostsDay",
+      "id": "stSavings",
       "type": "net.noodl.controls.textinput",
-      "label": "Day the household costs go out",
+      "label": "Savings target, € a month",
       "parent": "stCard",
       "parameters": {
         "sizeMode": "contentHeight",
@@ -577,7 +411,7 @@
         "paddingLeft": "var(--space-3)",
         "paddingRight": "var(--space-3)",
         "useLabel": true,
-        "label": "Day the household costs go out",
+        "label": "Savings target, € a month",
         "labelSpacing": 6,
         "labelfontSize": "var(--text-sm)",
         "labelcolor": "var(--foreground)"
@@ -586,9 +420,9 @@
       "y": 1360
     },
     {
-      "id": "stInvoiceDay",
+      "id": "stLow",
       "type": "net.noodl.controls.textinput",
-      "label": "Day you invoice",
+      "label": "Lowest balance before red, €",
       "parent": "stCard",
       "parameters": {
         "sizeMode": "contentHeight",
@@ -609,45 +443,13 @@
         "paddingLeft": "var(--space-3)",
         "paddingRight": "var(--space-3)",
         "useLabel": true,
-        "label": "Day you invoice",
+        "label": "Lowest balance before red, €",
         "labelSpacing": 6,
         "labelfontSize": "var(--text-sm)",
         "labelcolor": "var(--foreground)"
       },
       "x": 160,
       "y": 1480
-    },
-    {
-      "id": "stTerms",
-      "type": "net.noodl.controls.textinput",
-      "label": "Days you give them to pay",
-      "parent": "stCard",
-      "parameters": {
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "type": "number",
-        "backgroundColor": "var(--background)",
-        "color": "var(--foreground)",
-        "fontSize": "var(--text-base)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "useLabel": true,
-        "label": "Days you give them to pay",
-        "labelSpacing": 6,
-        "labelfontSize": "var(--text-sm)",
-        "labelcolor": "var(--foreground)"
-      },
-      "x": 160,
-      "y": 1600
     },
     {
       "id": "stPlanLine",
@@ -665,7 +467,7 @@
         }
       },
       "x": 160,
-      "y": 1720
+      "y": 1600
     },
     {
       "id": "stButtons",
@@ -688,7 +490,7 @@
         "stPlan"
       ],
       "x": 160,
-      "y": 1840
+      "y": 1720
     },
     {
       "id": "stSave",
@@ -710,7 +512,7 @@
         "label": "Save"
       },
       "x": 220,
-      "y": 1960
+      "y": 1840
     },
     {
       "id": "stPlan",
@@ -734,15 +536,7 @@
         "label": "Plan this month"
       },
       "x": 220,
-      "y": 2080
-    },
-    {
-      "id": "stCash",
-      "type": "/Week/Cash editor",
-      "label": "The money events",
-      "parent": "stCard",
-      "x": 160,
-      "y": 2200
+      "y": 1960
     }
   ],
   "visualRoots": [

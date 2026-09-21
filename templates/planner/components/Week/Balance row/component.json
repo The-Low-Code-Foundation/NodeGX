@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "01a3fce1-6aba-5d1d-8357-fcb14f972fb6",
+  "name": "Balance row",
+  "path": "/Week/Balance row",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing that should have happened by now and is not ticked, with the answers: it happened, part of it did, or it is lost."
+}
