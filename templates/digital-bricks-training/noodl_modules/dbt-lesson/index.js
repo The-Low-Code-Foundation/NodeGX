@@ -1527,6 +1527,51 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     messageUnread: 'New'
   };
 
+  /*
+   * ── WHAT THEY MUST PRODUCE: THE DOSSIER'S WORDS (TASK-L166 §4) ──────────────
+   * From the product's src/i18n/en/course.json `dossier` namespace, with its
+   * i18next placeholders rewritten to this kit's single-brace `fill`
+   * (`{{count}}` -> `{n}`, `{{deliverable}}` -> `{label}`).
+   *
+   * WRITTEN HERE, not in the graph's half of the table, because the one thing
+   * that draws the reveal is a KIT node (L167's DossierReveal, decision 1) and a
+   * kit node ships its own English for a graph that places it bare. build.mjs
+   * emits this as the `dossier` namespace, so Logic/Dossier and the kit read ONE
+   * set of words and cannot start out disagreeing (L160 §2).
+   *
+   * NO COACH WORDINGS FOR THESE, and that corrects L166 §4 as written: it asked
+   * for coach overrides of `nothingYet` and `workForThis`, but L168's DO NOT
+   * keeps the meter and the reveal OFF the coach's surface — so they would be
+   * sentences no coach ever renders (L163's rung, as copy). The coach's own
+   * words are the graph's `dossierCoach` namespace.
+   *
+   * `deliverable.*` are the LangueXpert pack's six labels, looked up by
+   * `labelKey`. An authored objective's `title` is never looked up here: it is
+   * DATA a trainer typed, and inventing a key for it would invite somebody to
+   * translate one learner's objective (L27/L112).
+   */
+  var DOSSIER_COPY = {
+    title: 'Your dossier',
+    factsCaptured_one: '{n} fact captured',
+    factsCaptured_other: '{n} facts captured',
+    openAria: 'Open {label} — see and copy what you’ve captured',
+    openEmptyAria: 'Open {label} — see what it asks for',
+    modalCopy: 'Copy as markdown',
+    modalCopied: 'Copied \u2713',
+    modalClose: 'Close',
+    asksFor: 'What this asks for',
+    nothingYet: 'Nothing here yet. It fills in as you go — there is no order to do it in and nothing is late.',
+    workForThis: 'Work you sent in for this',
+    deliverable: {
+      needsAnalysis: 'Needs Analysis',
+      lessonSequence: 'Lesson Sequence',
+      assessmentFeedback: 'Assessment & Feedback',
+      aiToolEvaluation: 'AI Tool Evaluation',
+      ethicalUse: 'Ethical Use',
+      learnerProgressReport: 'Learner Progress Report'
+    }
+  };
+
   /**
    * ── THE COPY OBJECT (TASK-L160, sprint 46) ──────────────────────────────────
    *

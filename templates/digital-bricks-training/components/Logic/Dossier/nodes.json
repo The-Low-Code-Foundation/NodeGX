@@ -1,0 +1,182 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7da347be-a8eb-47da-91a9-8ada61c99821",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "do_in",
+      "type": "Component Inputs",
+      "label": "The learner's objectives and facts",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "deliverables",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "submissions",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "concepts",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "onboardingFacts",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "audience",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "do_fn",
+      "type": "JavaScriptFunction",
+      "label": "What each objective holds",
+      "x": 40,
+      "y": 300,
+      "parameters": {
+        "functionScript": "/*\n * WHAT THEY MUST PRODUCE, AND WHAT EACH OBJECTIVE HOLDS (TASK-L166 §2).\n *\n * PORTED, NEVER RE-DERIVED. Sources, in the product's repo:\n *   dossierProgress                  -> src/lib/server/delivery/dossier-map.ts\n *   humaniseFactName, toMarkdown     -> src/lib/components/course/dossier-format.ts\n *   archived off the learner's meter -> src/lib/server/deliverables/resolve.ts\n *                                       (getEffectiveDeliverables)\n *   label, fillPct, the aria + caption,\n *     submissions under an objective -> src/lib/components/course/DossierMeter.tsx\n *   \"What they have told us\"         -> src/lib/components/staff/ObjectivesPanel.tsx\n *                                       + server/coach/dossier-service.ts (the split)\n * `tools/check-dossier.mjs` runs THIS script and the product's own\n * `dossierProgress` over the same inputs and compares every field.\n *\n * ONE OWNER FOR BOTH SURFACES. The learner's meter (L167) and the coach's\n * \"What they must produce\" (L168) both read these segments. If each derived\n * them, a learner and their coach could disagree about what was captured under\n * which objective — L86, one layer up.\n *\n * THE ONE ASYMMETRY IS DECIDED HERE AND NOWHERE ELSE. An ARCHIVED objective is\n * off the learner's meter and still on the coach's list; its facts stay for\n * both. The product decides it in a query; the template has no query, so the\n * fixture carries every row and this filter is the rule.\n *\n * NOTHING HERE SAYS WHETHER AN OBJECTIVE IS COMPLETE. No `done`, no\n * `complete`, no `remaining`, no `missing` — L114's guard (\"nothing anywhere\n * computes whether a deliverable is complete\"), upstream of gating, counting and\n * ranking all three. `fillPct` is a bar WIDTH and is never rendered as a number.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\n/* NOT ARRIVED YET IS NOT THE SAME AS WIRED WRONG (L164). An absent copy waits —\n   this node runs again the moment it lands — and a copy that ARRIVES without a\n   `dossier` namespace is a named failure. No fallback words here: this\n   component only ever sits beside Data/Strings, and a second copy of the words\n   is the drift the string table exists to stop. */\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst COPY = (plain(Inputs.copy) || {}).dossier;\nif (!COPY || !COPY.asksFor || !COPY.factsCaptured_other) {\n  throw new Error('Logic/Dossier: no `dossier` copy. Wire Data/Strings.copy into Copy (TASK-L166).');\n}\n\n/* WHO IS READING, from Data/Strings' validated output. No default (L163 §3). */\nconst audience = String(Inputs.audience || '').trim();\nif (audience !== 'learner' && audience !== 'coach') {\n  throw new Error('Logic/Dossier: Audience must be \"learner\" or \"coach\", not \"' + audience + '\" (TASK-L166).');\n}\n\nfunction fill(template, values) {\n  return String(template).replace(/\\{(\\w+)\\}/g, (m, k) => (values[k] === undefined ? m : String(values[k])));\n}\nfunction plural(one, other, n) {\n  return fill(n === 1 ? one : other, { n: n });\n}\n\n/* ── dossier-map.ts: dossierProgress, VERBATIM ─────────────────────────────\n   A fact under a deliverable's prefix but not in its expectedCoreFields still\n   counts toward `totalCaptured`: the learner is never penalised for this map\n   being incomplete. A key with no dot, or whose prefix is not a slug in the set\n   it was GIVEN, is ignored — which is exactly how an archived objective stops\n   being counted while its facts stay where they are. */\nfunction dossierProgress(facts, deliverables) {\n  const bySlug = new Map(deliverables.map((d) => [d.slug, d]));\n  const buckets = new Map();\n  for (const deliverable of deliverables) {\n    buckets.set(deliverable.slug, []);\n  }\n\n  for (const [field, value] of Object.entries(facts)) {\n    const dotIndex = field.indexOf('.');\n    if (dotIndex === -1) continue;\n\n    const prefix = field.slice(0, dotIndex);\n    const factName = field.slice(dotIndex + 1);\n    if (!bySlug.has(prefix)) continue;\n\n    buckets.get(prefix).push({ field, factName, value });\n  }\n\n  return deliverables.map((deliverable) => {\n    const expectedCoreFields = deliverable.expectedCoreFields;\n    const captured = buckets.get(deliverable.slug);\n    // Expected core fields lead (in deliverable order), extras keep encounter\n    // order — a stable sort by expected-rank does both.\n    const rank = (factName) => {\n      const i = expectedCoreFields.indexOf(factName);\n      return i === -1 ? expectedCoreFields.length : i;\n    };\n    const ordered = captured\n      .map((fact, i) => ({ fact, i }))\n      .sort((a, b) => rank(a.fact.factName) - rank(b.fact.factName) || a.i - b.i)\n      .map(({ fact }) => fact);\n\n    return {\n      slug: deliverable.slug,\n      labelKey: deliverable.labelKey,\n      ...(deliverable.title ? { title: deliverable.title } : {}),\n      ...(deliverable.id ? { deliverableId: deliverable.id } : {}),\n      expectedTotal: expectedCoreFields.length,\n      expectedFields: [...expectedCoreFields],\n      capturedExpected: captured.filter((f) => expectedCoreFields.includes(f.factName)).length,\n      totalCaptured: captured.length,\n      captured: ordered,\n    };\n  });\n}\n\n/* ── dossier-format.ts: humaniseFactName and toMarkdown, VERBATIM ──────────\n   `humaniseFactName` does NOT split a namespace — \"a.bC\" becomes \"A.b c\". That\n   is ported as it is; the coach's labels below route around it rather than\n   carrying the product's defect (§3). */\nfunction humaniseFactName(factName) {\n  const spaced = factName\n    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')\n    .replace(/[_-]+/g, ' ')\n    .trim()\n    .toLowerCase();\n  return spaced.charAt(0).toUpperCase() + spaced.slice(1);\n}\n\nfunction toMarkdown(label, captured) {\n  const body = captured\n    .map((f) => `**${humaniseFactName(f.factName)}**\\n${f.value}`)\n    .join('\\n\\n');\n  return `## ${label}\\n\\n${body}\\n`;\n}\n\nconst all = plain(Inputs.deliverables) || [];\nconst facts = plain(Inputs.facts) || {};\nconst submissions = plain(Inputs.submissions) || [];\nconst onboardingFacts = plain(Inputs.onboardingFacts) || [];\n\n/* Concept id -> the title on their path (DossierMeter's `stepTitleByConceptId`).\n   A concept with no title renders its SLUG, as the product's `?? id` does,\n   rather than vanishing from the list of what an objective needs. */\nconst titles = new Map((plain(Inputs.concepts) || []).map((c) => [c.id, c.title]));\nconst titleOf = (id) => (titles.has(id) ? titles.get(id) : id);\n\n/* The trainer's own title wins; otherwise the pack's label by `labelKey`. An\n   authored title is DATA and is never looked up in the table (L27/L112). A\n   `labelKey` the table does not have renders the key rather than nothing — the\n   product's i18next would show `dossier.deliverable.<key>`, which is the same\n   failure dressed as a path. */\nfunction labelOf(d) {\n  if (d.title) return d.title;\n  const pack = COPY.deliverable || {};\n  return pack[d.labelKey] !== undefined ? pack[d.labelKey] : d.labelKey;\n}\n\n/* getEffectiveDeliverables excludes archived rows for the LEARNER. The coach's\n   list (DeliverablesTab) shows every row, archived ones marked. */\nconst shown = audience === 'learner' ? all.filter((d) => !d.archivedAt) : all;\nconst bySlug = new Map(all.map((d) => [d.slug, d]));\n\nconst segments = dossierProgress(facts, shown).map((seg, i) => {\n  const d = shown[i];\n  const label = labelOf(d);\n  const hasFacts = seg.totalCaptured > 0;\n  const out = Object.assign({}, seg, {\n    label: label,\n    /* What it asks for, in the objective's own order — the NAMES, never a count\n       of them (L144 §2: an empty objective opens to what it is for). */\n    asksFor: seg.expectedFields.map(humaniseFactName),\n    captured: seg.captured.map((f) => Object.assign({}, f, { name: humaniseFactName(f.factName) })),\n    hasFacts: hasFacts,\n    /* DossierMeter's own arithmetic. A bar width, never printed. */\n    fillPct:\n      seg.expectedTotal > 0\n        ? Math.min(100, Math.round((seg.capturedExpected / seg.expectedTotal) * 100))\n        : 0,\n    /* \"3 facts captured\" is additive — what IS there, never what is not. An\n       empty objective carries no caption at all, not \"0 facts\". */\n    caption: hasFacts ? plural(COPY.factsCaptured_one, COPY.factsCaptured_other, seg.totalCaptured) : '',\n    ariaLabel: fill(hasFacts ? COPY.openAria : COPY.openEmptyAria, { label: label }),\n    /* Work filed against THIS objective (L114 §4). Compared as the product\n       compares it, `deliverableId === deliverableId`: an unfiled submission\n       (null) appears under no objective. */\n    submissions: submissions\n      .filter((sub) => sub.deliverableId === seg.deliverableId)\n      .map((sub) => ({ conceptId: sub.conceptId, title: titleOf(sub.conceptId), submittedAt: sub.submittedAt })),\n    markdown: toMarkdown(label, seg.captured)\n  });\n  if (audience === 'coach') {\n    out.description = d.description || '';\n    out.archived = !!d.archivedAt;\n    out.position = d.position;\n    out.requires = (d.conceptIds || []).map((id) => ({ id: id, title: titleOf(id) }));\n  }\n  return out;\n});\n\n/* ── WHAT THEY HAVE TOLD US (coach only), and the defect NOT carried (§3) ───\n   The product splits the facts into the pack's onboarding facts (authored\n   labels) and everything else, each in capture order, and labels the rest with\n   `humaniseFactName(key)` on the WHOLE key — so a coach reads\n   `Observation log.what you saw`. Recorded three times in the product's\n   CLAUDE.md as inherited LX14-era state. The template does not port it (L163's\n   precedent): a namespaced key reads `<objective> · <fact>`, from the coach's\n   full list so an ARCHIVED objective's answers are still named. */\nconst onboardingLabel = new Map(onboardingFacts.map((f) => [f.key, f.label]));\nfunction toldLabel(key) {\n  if (onboardingLabel.has(key)) return onboardingLabel.get(key);\n  const dot = key.indexOf('.');\n  if (dot === -1) return humaniseFactName(key);\n  const prefix = key.slice(0, dot);\n  const owner = bySlug.get(prefix);\n  const head = owner ? labelOf(owner) : humaniseFactName(prefix);\n  return head + ' · ' + humaniseFactName(key.slice(dot + 1));\n}\nconst keys = Object.keys(facts);\nconst ordered = keys.filter((k) => onboardingLabel.has(k)).concat(keys.filter((k) => !onboardingLabel.has(k)));\nconst toldUs = audience === 'coach' ? ordered.map((k) => ({ id: k, label: toldLabel(k), value: String(facts[k]) })) : [];\n\nOutputs.segments = segments;\nOutputs.hasSegments = segments.length > 0;\nOutputs.toldUs = toldUs;\nOutputs.hasToldUs = toldUs.length > 0;\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-deliverables",
+          "plug": "input",
+          "type": "*",
+          "displayName": "deliverables",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-facts",
+          "plug": "input",
+          "type": "*",
+          "displayName": "facts",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-submissions",
+          "plug": "input",
+          "type": "*",
+          "displayName": "submissions",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-concepts",
+          "plug": "input",
+          "type": "*",
+          "displayName": "concepts",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-onboardingFacts",
+          "plug": "input",
+          "type": "*",
+          "displayName": "onboardingFacts",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-audience",
+          "plug": "input",
+          "type": "*",
+          "displayName": "audience",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-copy",
+          "plug": "input",
+          "type": "*",
+          "displayName": "copy",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-segments",
+          "plug": "output",
+          "type": "*",
+          "displayName": "segments",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasSegments",
+          "plug": "output",
+          "type": "*",
+          "displayName": "hasSegments",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toldUs",
+          "plug": "output",
+          "type": "*",
+          "displayName": "toldUs",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasToldUs",
+          "plug": "output",
+          "type": "*",
+          "displayName": "hasToldUs",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "PORTED, never re-derived: dossierProgress, humaniseFactName and toMarkdown verbatim, plus DossierMeter's label/fillPct/caption and ObjectivesPanel's told-us list. tools/check-dossier.mjs runs this script against the product's own dossierProgress."
+      }
+    },
+    {
+      "id": "do_out",
+      "type": "Component Outputs",
+      "label": "What the meter and the coach's list read",
+      "x": 40,
+      "y": 620,
+      "ports": [
+        {
+          "name": "segments",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasSegments",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "toldUs",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasToldUs",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    }
+  ]
+}

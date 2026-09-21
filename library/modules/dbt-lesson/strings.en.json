@@ -94,5 +94,26 @@
     "messageFromLearner": "You wrote",
     "messageFromCoach": "Your coach wrote",
     "messageUnread": "New"
+  },
+  "dossier": {
+    "title": "Your dossier",
+    "factsCaptured_one": "{n} fact captured",
+    "factsCaptured_other": "{n} facts captured",
+    "openAria": "Open {label} — see and copy what you’ve captured",
+    "openEmptyAria": "Open {label} — see what it asks for",
+    "modalCopy": "Copy as markdown",
+    "modalCopied": "Copied ✓",
+    "modalClose": "Close",
+    "asksFor": "What this asks for",
+    "nothingYet": "Nothing here yet. It fills in as you go — there is no order to do it in and nothing is late.",
+    "workForThis": "Work you sent in for this",
+    "deliverable": {
+      "needsAnalysis": "Needs Analysis",
+      "lessonSequence": "Lesson Sequence",
+      "assessmentFeedback": "Assessment & Feedback",
+      "aiToolEvaluation": "AI Tool Evaluation",
+      "ethicalUse": "Ethical Use",
+      "learnerProgressReport": "Learner Progress Report"
+    }
   }
 }

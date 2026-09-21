@@ -40,7 +40,10 @@ SECOND_PERSON = re.compile(r"\b(you|your|yours|you['’](?:ve|re|ll|d))\b", re.I
 # front of a coach; a coach page's own copy joins this list when it exists,
 # which is a deliberate one-line act rather than a default.
 # `people` joined with TASK-L164: the roster is the first page only a coach opens.
-COACH_NAMESPACES = ('timeline', 'standing', 'people')
+# `dossierCoach` joined with TASK-L166: the coach's "What they must produce" (L168).
+# `dossier` did NOT: the learner's meter and reveal are kept off every coach
+# surface (L168's DO NOT), so its second person is addressed to its only reader.
+COACH_NAMESPACES = ('timeline', 'standing', 'people', 'dossierCoach')
 
 # ── WHERE THE SECOND PERSON IS THE COACH, NOT THE LEARNER ───────────────────
 # The failure this file exists to catch is a coach reading a sentence written TO

@@ -56,6 +56,36 @@
       "fromProperty": "out-history",
       "toId": "fp_out",
       "toProperty": "history"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-deliverables",
+      "toId": "fp_out",
+      "toProperty": "deliverables"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-facts",
+      "toId": "fp_out",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-submissions",
+      "toId": "fp_out",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-onboardingFacts",
+      "toId": "fp_out",
+      "toProperty": "onboardingFacts"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-concepts",
+      "toId": "fp_out",
+      "toProperty": "concepts"
     }
   ]
 }

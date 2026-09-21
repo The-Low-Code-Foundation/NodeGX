@@ -261,7 +261,40 @@ Two mechanics worth knowing before you edit this page:
 
 **Nothing on this page writes.** The product's version is mostly composers — schedule a session,
 change the path, set up a programme, write a review, reply — and every one would be a control that
-cannot save. *What they must produce* (the dossier) is not built on either side yet.
+cannot save. *What they must produce* (the dossier) is not drawn on either side yet — its data is
+(next section).
+
+## What they must produce — the data, before anything draws it
+
+**`Logic/Dossier`** is the one place that decides what each objective holds, for the learner's
+meter and for the coach's list alike. It is the product's `dossierProgress`, `humaniseFactName` and
+`toMarkdown` **ported verbatim**, and `tools/check-dossier.mjs` bundles those three functions from the
+product's own source and compares every field — over this fixture and three probes (LangueXpert's
+six deliverables by `labelKey`, an empty set, a fact under a prefix nobody owns). It needs the
+product checked out beside OpenNoodl, or `DBT_REPO` pointing at it, and **fails** rather than
+comparing nothing.
+
+Things worth knowing before you change it:
+
+- **An archived objective is off the learner's meter and on the coach's list.** The fixture carries
+  it deliberately (the product filters it in a query, and a fixture that pre-filtered would make the
+  rule untestable); `Audience` decides who sees it, here and nowhere else. Its answers stay for both.
+- **Nothing says whether an objective is complete** — no `done`, `complete`, `remaining`, `missing`.
+  `fillPct` is a bar width and is never printed. An empty objective carries what it **asks for**
+  and no count. The check fails on any of these keys.
+- **An objective's title is the trainer's words and is never looked up in the string table.** Only a
+  pack's `labelKey` is (`dossier.deliverable.*`).
+- **The coach's "What they have told us" labels a namespaced answer `<objective> · <fact>`.** The
+  product prints the raw key (`Observation log.what you saw`); that defect is deliberately not ported.
+- **A concept that is not on the learner's path renders as its slug**, as the product does, rather
+  than vanishing from what an objective needs.
+- The fixture's second submission is filed under no objective and has **no timeline entry** — it
+  appears on no dossier surface by design, and adding it would have changed `/course`.
+
+The words are `dossier` (generated from the kit, because the reveal will be a kit node) and
+`dossierCoach` (the coach's own labels, in the graph's half). There are **no coach wordings for
+`dossier`**: the meter and the reveal never reach a coach's page, so they would be sentences nobody
+renders.
 
 ## What is a placeholder, and why
 
@@ -273,8 +306,8 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in and the staff gate, every coach composer, the dossier, the
-assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
+The backend and every write, sign-in and the staff gate, every coach composer, the dossier's meter and
+the coach's objectives surface (the data is here — see above), the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 
 ## Licences

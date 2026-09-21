@@ -150,7 +150,8 @@ const strings = {
   _generated: 'by library/modules/dbt-lesson/build.mjs from src/kit.js — do not hand-edit (TASK-L160 §2)',
   common: copyMap('COMMON'),
   lesson: copyMap('COPY'),
-  timeline: copyMap('TL_COPY')
+  timeline: copyMap('TL_COPY'),
+  dossier: copyMap('DOSSIER_COPY')
 };
 writeFileSync(join(here, 'strings.en.json'), JSON.stringify(strings, null, 2) + '\n');
 
@@ -204,5 +205,5 @@ writeFileSync(
     2
   ) + '\n'
 );
-console.log(`wrote ${here}/strings.en.json (${Object.keys(strings.lesson).length} lesson + ${Object.keys(strings.timeline).length} timeline + ${Object.keys(strings.common).length} common keys)`);
+console.log(`wrote ${here}/strings.en.json (${Object.keys(strings.lesson).length} lesson + ${Object.keys(strings.timeline).length} timeline + ${Object.keys(strings.common).length} common + ${Object.keys(strings.dossier).length} dossier keys)`);
 console.log(`wrote ${out}/index.js (${(libs.length / 1024).toFixed(0)} KB libraries + ${(kit.length / 1024).toFixed(0)} KB kit)`);
