@@ -50,6 +50,12 @@ the old form**; anything pressing a row inside the property panel's scroller sho
 PASS for everything it could still load. Defer the `require` to call time, the way `Ports.ts`
 documents. Run the *sibling* suites after adding any import to a property-editor module.
 
+⚠️ **s8 shipped one surface ungraded and says so: the font-family half.** The font picker now
+offers `--font-sans`/`--font-serif`/`--font-mono`, typechecked, reading the same one table — but the
+drive presses the numeric rows and the box, and `fontItems.ts` imports `ProjectModel` at module
+scope so no plain-Node runner can load it. **The next drive through a Text node owes one arm:** open
+Font Family's picker and count the rows under *Design tokens*. Expect 3.
+
 ## Tools s8 leaves you
 
 - **`models/StyleTokensModel/TokensForPicking.ts`** (was `ColourTokensForPicking.ts`) — the ONE

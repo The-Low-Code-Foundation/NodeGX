@@ -167,7 +167,23 @@ worse than a red one.
 
 ---
 
-## 7. Left open
+## 7. ⚠️ One surface shipped UNGRADED, and saying so is the point
+
+**The font-family half is typechecked and shipped but neither driven nor specced.**
+`designTokenFontItems()` adds a *Design tokens* folder to the font picker and reads the same
+`tokenCategoriesForPort('fontFamily')` the rest of the task reads — but the drive presses the
+numeric rows and the box widget, and `fontItems.ts` imports `ProjectModel` at module scope so the
+plain-Node runner cannot load it. What IS graded is the table behind it: `fontFamily` →
+`['typography-family']` → 3 tokens, in `portTokenRules.test.ts`. What is **not** graded is that the
+picker draws them.
+
+🔴 It is five lines and it closes the §6 landmine that asking for a token on Font Size and typing it
+on Font Family *teaches a rule that is false* — so it ships. But a write nobody grades is a write
+nobody grades ([[a-write-nobody-reads-is-a-write-nobody-grades]]), and the next drive through this
+surface owes it one arm: open a Text node's Font Family picker and count the rows under *Design
+tokens*. Expect **3** (`--font-sans`, `--font-serif`, `--font-mono`).
+
+## 8. Left open
 
 📋 **AC5 — Richard's WORTHY on the four frames in `shots/`.** The one criterion this session cannot
 close. Two things worth his eye specifically:
