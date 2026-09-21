@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2e89e413-5201-4626-aaf6-ac66ed3f0282",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fr_data",
+      "fromProperty": "items",
+      "toId": "fr_order",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "fr_order",
+      "fromProperty": "out-people",
+      "toId": "fr_out",
+      "toProperty": "people"
+    },
+    {
+      "fromId": "fr_order",
+      "fromProperty": "out-count",
+      "toId": "fr_out",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "fr_order",
+      "fromProperty": "out-loaded",
+      "toId": "fr_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

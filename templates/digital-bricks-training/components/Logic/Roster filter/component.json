@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e94ac2a0-2dc5-4cdc-8d33-ad82c1ee6aa4",
+  "name": "Roster filter",
+  "path": "/Logic/Roster filter",
+  "type": "logic",
+  "created": "2026-09-21T09:33:19.146Z",
+  "modified": "2026-09-21T09:45:00.038Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The roster's filter pipeline — programme, then cohort, then search — as one pure reduction over rows already in memory, plus every sentence a row shows, worded from Data/Strings."
+}

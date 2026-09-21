@@ -1,0 +1,45 @@
+✓ the editor on 9222 can be accounted for — listener 8792, ancestry 8792<8791<8736<1973<1855<1743<1646<1386<1354<1330<1300
+✓ rAF fires — the page is live enough to trust a red — raf
+opening /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-005 Comment Drive (editor had NONE)
+✓ the driven project is the COPY this run was pointed at — /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-005 Comment Drive
+✓ the renderer carries no control left over from an earlier run — never armed
+✓ a node in the copy carries a single line longer than any docked panel — {"component":"/App","nodeId":"f7c4f300-b263-4abf-9d1c-160d25a11c71","typename":"Router","chars":264}
+✓ the commented node is the selected one — {"selected":true}
+✓ the dark theme is the one on screen — data-theme=dark
+✓ 🔴 REACH (dark, min 240px) — the comment field is on screen and touchable — clicked; left=property-comment-input centre=property-comment-input
+✓ the panel really is at its min width (240px asked for) — scrollport clientWidth 224
+  dark/min: bar 224 in port 224 (scrollWidth 224), maxScrollLeft 0, flex 1 1 0%
+✓ 🔴 AC1 (dark, min) — the bar is inside its scrollport — 224px in 224px
+✓ 🔴 AC1 (dark, min) — the panel cannot be scrolled sideways — maxScrollLeft 0, scrollWidth 224 vs clientWidth 224
+✓ AC1 (dark, min) — the MIDDLE of the field is inside the panel, not over the canvas — left=property-comment-input centre=property-comment-input
+  shot hlt005-fixed-dark-min.png
+✓ 🔴 REACH (dark, max 996px) — the comment field is on screen and touchable — already; left=property-comment-input centre=property-comment-input
+✓ the panel really is at its max width (996px asked for) — scrollport clientWidth 980
+  dark/max: bar 980 in port 980 (scrollWidth 980), maxScrollLeft 0, flex 1 1 0%
+✓ 🔴 AC1 (dark, max) — the bar is inside its scrollport — 980px in 980px
+✓ 🔴 AC1 (dark, max) — the panel cannot be scrolled sideways — maxScrollLeft 0, scrollWidth 980 vs clientWidth 980
+✓ AC1 (dark, max) — the MIDDLE of the field is inside the panel, not over the canvas — left=property-comment-input centre=property-comment-input
+  shot hlt005-fixed-dark-max.png
+✓ the light theme is the one on screen — data-theme=light
+✓ 🔴 REACH (light, min 240px) — the comment field is on screen and touchable — already; left=property-comment-input centre=property-comment-input
+✓ the panel really is at its min width (240px asked for) — scrollport clientWidth 224
+  light/min: bar 224 in port 224 (scrollWidth 224), maxScrollLeft 0, flex 1 1 0%
+✓ 🔴 AC1 (light, min) — the bar is inside its scrollport — 224px in 224px
+✓ 🔴 AC1 (light, min) — the panel cannot be scrolled sideways — maxScrollLeft 0, scrollWidth 224 vs clientWidth 224
+✓ AC1 (light, min) — the MIDDLE of the field is inside the panel, not over the canvas — left=property-comment-input centre=property-comment-input
+  shot hlt005-fixed-light-min.png
+✓ 🔴 REACH (light, max 996px) — the comment field is on screen and touchable — already; left=property-comment-input centre=property-comment-input
+✓ the panel really is at its max width (996px asked for) — scrollport clientWidth 980
+  light/max: bar 980 in port 980 (scrollWidth 980), maxScrollLeft 0, flex 1 1 0%
+✓ 🔴 AC1 (light, max) — the bar is inside its scrollport — 980px in 980px
+✓ 🔴 AC1 (light, max) — the panel cannot be scrolled sideways — maxScrollLeft 0, scrollWidth 980 vs clientWidth 980
+✓ AC1 (light, max) — the MIDDLE of the field is inside the panel, not over the canvas — left=property-comment-input centre=property-comment-input
+  shot hlt005-fixed-light-max.png
+✓ 🔴 AC3 — vertical growth still HAPPENS: thirty lines is taller than two — two lines 48px → thirty lines 184px
+✓ 🔴 AC3 — and it still STOPS at 184px — thirty lines gives 184px
+✓ AC3 — the textarea still matches the mirror it is positioned over — input 184px vs sizer 184px
+✓ 🔴 TRADE — a 200-character word with no spaces still does not widen the panel — bar 224 in 224, maxScrollLeft 0, min-width 0px
+✓ all 4 cells produced a reading — a zero from a blank panel is not a zero — 4 cells: dark-min=0 dark-max=0 light-min=0 light-max=0
+✓ THE NUMBER — reachable horizontal scroll on a driven session — dark-min=0 dark-max=0 light-min=0 light-max=0
+
+34/34 graded arms passed

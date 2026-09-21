@@ -38,6 +38,18 @@
       "fromProperty": "Translation",
       "toId": "seo_hm_page",
       "toProperty": "in-title"
+    },
+    {
+      "fromId": "hm_coach",
+      "fromProperty": "onClick",
+      "toId": "hm_go_people",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_hm_coach",
+      "fromProperty": "Translation",
+      "toId": "hm_coach",
+      "toProperty": "label"
     }
   ]
 }

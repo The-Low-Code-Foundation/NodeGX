@@ -1,0 +1,521 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a2ce2fc7-011d-4d63-8377-4f467fcb7abc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pp_page",
+      "type": "Page",
+      "label": "People",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "pp_band"
+      ],
+      "parameters": {
+        "urlPath": "people",
+        "title": "People"
+      }
+    },
+    {
+      "id": "pp_band",
+      "type": "Group",
+      "label": "Page band",
+      "x": 40,
+      "y": 140,
+      "parent": "pp_page",
+      "children": [
+        "pp_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "pp_shell",
+      "type": "Group",
+      "label": "Column",
+      "x": 40,
+      "y": 240,
+      "parent": "pp_band",
+      "children": [
+        "pp_eyebrow",
+        "pp_title",
+        "pp_lede",
+        "pp_filters",
+        "pp_empty",
+        "pp_list"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "pp_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 40,
+      "y": 340,
+      "parent": "pp_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "pp_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 40,
+      "y": 440,
+      "parent": "pp_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pp_lede",
+      "type": "Text",
+      "label": "What this list is",
+      "x": 40,
+      "y": 540,
+      "parent": "pp_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 600,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "pp_filters",
+      "type": "Group",
+      "label": "Search and filters",
+      "x": 40,
+      "y": 640,
+      "parent": "pp_shell",
+      "children": [
+        "pp_search_label",
+        "pp_search",
+        "pp_cohort",
+        "pp_prog"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "pp_search_label",
+      "type": "Text",
+      "label": "Search label",
+      "x": 100,
+      "y": 740,
+      "parent": "pp_filters",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "pp_search",
+      "type": "net.noodl.controls.textinput",
+      "label": "Search",
+      "x": 100,
+      "y": 840,
+      "parent": "pp_filters",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "pp_cohort",
+      "type": "Group",
+      "label": "Cohort filter — absent when nobody is in one",
+      "x": 100,
+      "y": 940,
+      "parent": "pp_filters",
+      "children": [
+        "pp_cohort_label",
+        "pp_cohort_select"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-2)"
+      },
+      "metadata": {
+        "comment": "STRUCTURALLY ABSENT, NEVER DISABLED (L164 §4): mounted only when the rows yield a cohort. A select that can only ever say 'Everyone' is a control that does nothing."
+      }
+    },
+    {
+      "id": "pp_cohort_label",
+      "type": "Text",
+      "label": "Cohort label",
+      "x": 160,
+      "y": 1040,
+      "parent": "pp_cohort",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "pp_cohort_select",
+      "type": "net.noodl.controls.options",
+      "label": "Cohort",
+      "x": 160,
+      "y": 1140,
+      "parent": "pp_cohort",
+      "parameters": {
+        "value": "all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 360,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "pp_prog",
+      "type": "Group",
+      "label": "Programme filter — absent until somebody has one",
+      "x": 100,
+      "y": 1240,
+      "parent": "pp_filters",
+      "children": [
+        "pp_prog_label",
+        "pp_prog_select"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-2)"
+      },
+      "metadata": {
+        "comment": "Structurally absent until at least one row has a programme — the commerce: null posture. Defaults to 'Currently on a programme', which hides a person ONLY when every programme they have is finished, never because they have none (L124)."
+      }
+    },
+    {
+      "id": "pp_prog_label",
+      "type": "Text",
+      "label": "Programme label",
+      "x": 160,
+      "y": 1340,
+      "parent": "pp_prog",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "pp_prog_select",
+      "type": "net.noodl.controls.options",
+      "label": "Programme",
+      "x": 160,
+      "y": 1440,
+      "parent": "pp_prog",
+      "parameters": {
+        "value": "active",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 360,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "pp_empty",
+      "type": "Text",
+      "label": "Empty state — one of two sentences",
+      "x": 40,
+      "y": 1540,
+      "parent": "pp_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "pp_list",
+      "type": "Group",
+      "label": "The people",
+      "x": 40,
+      "y": 1640,
+      "parent": "pp_shell",
+      "children": [
+        "pp_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "pp_rows",
+      "type": "For Each",
+      "label": "One row per person",
+      "x": 100,
+      "y": 1740,
+      "parent": "pp_list",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Roster row"
+      }
+    },
+    {
+      "id": "pp_roster",
+      "type": "/Data/Fixture roster",
+      "label": "The coach's people",
+      "x": 1000,
+      "y": 40
+    },
+    {
+      "id": "pp_filter",
+      "type": "/Logic/Roster filter",
+      "label": "Programme → cohort → search",
+      "x": 1000,
+      "y": 240
+    },
+    {
+      "id": "pp_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen, in the coach's voice",
+      "x": 1400,
+      "y": 40,
+      "parameters": {
+        "audience": "coach"
+      },
+      "metadata": {
+        "comment": "This page is only ever read by a coach, so it says so here — the one place on the page it is decided (TASK-L163 §3)."
+      }
+    },
+    {
+      "id": "pp_lang_var",
+      "type": "Variable",
+      "label": "language — from the one owner in App",
+      "x": 1760,
+      "y": 40,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, never a second decision (TASK-L162 §2)."
+      }
+    },
+    {
+      "id": "t_pp_eyebrow",
+      "type": "Translation",
+      "label": "people:eyebrow",
+      "x": 1000,
+      "y": 540,
+      "parameters": {
+        "Key": "eyebrow",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_title",
+      "type": "Translation",
+      "label": "people:title",
+      "x": 1000,
+      "y": 640,
+      "parameters": {
+        "Key": "title",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_lede",
+      "type": "Translation",
+      "label": "people:lede",
+      "x": 1000,
+      "y": 740,
+      "parameters": {
+        "Key": "lede",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_search_label",
+      "type": "Translation",
+      "label": "people:search.label",
+      "x": 1000,
+      "y": 840,
+      "parameters": {
+        "Key": "search.label",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_search_ph",
+      "type": "Translation",
+      "label": "people:search.placeholder",
+      "x": 1000,
+      "y": 940,
+      "parameters": {
+        "Key": "search.placeholder",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_cohort_label",
+      "type": "Translation",
+      "label": "people:cohort.label",
+      "x": 1000,
+      "y": 1040,
+      "parameters": {
+        "Key": "cohort.label",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_prog_label",
+      "type": "Translation",
+      "label": "people:programme.label",
+      "x": 1000,
+      "y": 1140,
+      "parameters": {
+        "Key": "programme.label",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_pp_page_title",
+      "type": "Translation",
+      "label": "people:pageTitle",
+      "x": 1000,
+      "y": 1240,
+      "parameters": {
+        "Key": "pageTitle",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "seo_pp_page",
+      "type": "JavaScriptFunction",
+      "label": "Tab title",
+      "x": 1400,
+      "y": 1240,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB. `Page.title` is read off the node's PARAMETERS at\n// export time into the router index, and a connection to that port is silently ignored\n// (TASK-L161 §1). So the parameter stays as the build-time fallback and the translated\n// value overrides it here — the same node every page carries.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "displayName": "title",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "pp_page"
+  ]
+}

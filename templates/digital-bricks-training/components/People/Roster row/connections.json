@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "21c67f6c-4a8a-4a75-ab6b-d4ca12d9cf96",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rr_in",
+      "fromProperty": "name",
+      "toId": "rr_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "email",
+      "toId": "rr_email",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "hasEmail",
+      "toId": "rr_email",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "meta",
+      "toId": "rr_meta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "cohorts",
+      "toId": "rr_cohort_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "hasCohorts",
+      "toId": "rr_cohorts",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "replanLine",
+      "toId": "rr_replan",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "hasReplanLine",
+      "toId": "rr_replan",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "awaitingLine",
+      "toId": "rr_awaiting",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "hasAwaitingLine",
+      "toId": "rr_awaiting",
+      "toProperty": "mounted"
+    }
+  ]
+}

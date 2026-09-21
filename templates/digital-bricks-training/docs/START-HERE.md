@@ -3,10 +3,19 @@
 A learning platform with no course catalogue: the learner's own project is the spine of their
 curriculum, and every lesson is written for it. This template is the **front-end half**, built
 entirely out of NodeGX nodes — the sticker-book design system, a lesson kit of section renderers,
-and the learner's three pages — reading one fixture lesson until a backend is connected.
+the learner's three pages, and the first of the coach's — reading fixtures until a backend is
+connected.
 
 Press **Run**. Home → *Open your course* → *Open the lesson*. Every step is a live chip; nothing is
-locked, numbered or scored.
+locked, numbered or scored. Home → *See it as their coach* opens **People**, the coach's roster.
+
+> **Known defect, not this template's: moving between pages crashes today.** Pressing either Home
+> button blanks the page with `Cannot read properties of undefined (reading 'call')`, thrown from
+> `noodl_modules/i18next-noodl` as the old page unmounts. The runtime's `nodedefinition.ts` stopped
+> mutating a node's `methods` into descriptors (NDA-017), and the old SDK shim bundled into that
+> module still reads `methods.onNodeDeleted.value`. It arrived with the first `Translation` node
+> (TASK-L161) and is recorded in TASK-L164. Until it is fixed, open a page by its URL
+> (`/course`, `/lesson`, `/people`).
 
 ## The first thing to change
 
@@ -85,6 +94,8 @@ Nothing in this template fetches. The seam is two places:
   (`title`, `hook`, `landing`, `steps`, `sections`) do not change.
 - **Data/Fixture programme** — the same, for the learner's timeline: its outputs (`projectName`,
   `problemStatement`, `endsOn`, `entries`, `dimensions`) do not change either.
+- **Data/Fixture roster** — the coach's people, as `getRoster()` would return them: every account,
+  nullable derived fields, in the server's order. Its outputs (`people`, `count`) do not change.
 - **Lesson/Section row** — the kit's `Section` node emits `Acted`, `Saved` (+ `Field`, `Value`),
   `Submitted` (+ `Content`), `Write requested`, `Listen requested` and the rest. They are wired to
   the row's outputs and nowhere else yet. Wire them to Cloud Functions when they exist.
@@ -179,6 +190,36 @@ does it, which is the projection's own layer), and a learner's row does not draw
 conversation belongs to the thread — `TimelineRow` does it, which is the renderer's layer). Nothing
 else differs, and the entries are loaded once for both on purpose.
 
+## The coach's roster
+
+**`Pages/People`** answers *"who am I responsible for"* — not *"who has done the work"*, because
+the people it must not hide are the ones who most need a coach. It lists every account, including
+somebody who signed up and never finished setting up.
+
+- **`Logic/Roster filter`** is the whole of it: programme, then cohort, then a search, as a pure
+  reduction over rows already in memory. It never fetches and never reorders. Its second Function
+  computes what the two selects offer from the people alone — **a Dropdown handed a new `items`
+  array resets itself to its default**, so options recomputed on every filter change snap the
+  select straight back to "Everyone".
+- **The programme filter's default hides a person only when EVERY programme they have is
+  finished — never because they have none.** Getting that backwards hides every learner who has
+  not been enrolled yet. `tools/check-roster.mjs` runs the graph's own scripts against the fixture
+  and fails by name if it happens.
+- A select appears **only when it can change the list**. It is never disabled.
+- Nothing on a row is a verdict: a count of steps (never `0 of 0`, never a percentage),
+  *"No activity yet"* rather than *"never"*, and a waiting-for-a-reply line that is **a date, not a
+  count**. No pace, rating or ranking column, ever — comparing learners is the one thing a roster
+  would do most naturally and must not do.
+- **A name is not a link yet.** It opens the learner's page, and that page does not exist yet
+  (TASK-L165). A control that goes nowhere is worse than a name.
+
+**The gate is not here.** In the product the roster is behind the staff check, and a learner can
+never reach it. This template has no sign-in, so the Home button is how you see the coach's side —
+in a real deployment that is the backend's job, never a button. And because a template's fixtures
+are project data, **the trainer's private labels (`coachLabel`) are in the page source of every
+page**, though they render on the roster alone. With a backend, the roster arrives from a gated
+query and they are nowhere else.
+
 ## What is a placeholder, and why
 
 Four renders carry their data in a dashed box instead of drawing it: **Mermaid** diagrams (the
@@ -189,8 +230,8 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in, **the coach's PAGES** — the words and the projection are
-here and `Pages/People` and `Pages/Learner` are not, so nothing renders a coach's view yet — the
+The backend and every write, sign-in and the staff gate, **the coach's page about one learner**
+(`Pages/Learner` — the roster is here, the page it opens is not yet), the
 assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 

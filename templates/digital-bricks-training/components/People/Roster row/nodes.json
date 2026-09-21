@@ -1,0 +1,219 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "21c67f6c-4a8a-4a75-ab6b-d4ca12d9cf96",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rr_in",
+      "type": "Component Inputs",
+      "label": "One person, already worded",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasEmail",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cohorts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasCohorts",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "replanLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasReplanLine",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "awaitingLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasAwaitingLine",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "rr_row",
+      "type": "Group",
+      "label": "The row",
+      "x": 300,
+      "y": 40,
+      "children": [
+        "rr_name",
+        "rr_email",
+        "rr_meta",
+        "rr_cohorts",
+        "rr_replan",
+        "rr_awaiting"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomColor": "var(--border-subtle)"
+      }
+    },
+    {
+      "id": "rr_name",
+      "type": "Text",
+      "label": "Display name",
+      "x": 360,
+      "y": 160,
+      "parent": "rr_row",
+      "parameters": {
+        "as": "h3",
+        "fontFamily": "var(--font-display)",
+        "fontWeight": 800,
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "Not a control yet: the page it opens is L165's, and a link to a page that does not exist is a control that goes nowhere (L81). The display-name chain is coachLabel, projectName, email, learnerId — so there is always something here."
+      }
+    },
+    {
+      "id": "rr_email",
+      "type": "Text",
+      "label": "Email",
+      "x": 360,
+      "y": 260,
+      "parent": "rr_row",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "rr_meta",
+      "type": "Text",
+      "label": "Project, steps, last seen",
+      "x": 360,
+      "y": 360,
+      "parent": "rr_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "rr_cohorts",
+      "type": "Group",
+      "label": "Cohorts",
+      "x": 360,
+      "y": 460,
+      "parent": "rr_row",
+      "children": [
+        "rr_cohort_each"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "Wraps ON PURPOSE, and the validator's uncollapsible-multi-column warning does not apply: these are content-sized pills, not a grid of cards, and a pill that wraps to the next line is exactly right at 390px (measured: no overflow). A Columns node would give each cohort name a column. Same call as Pages/Lesson's stepper."
+      }
+    },
+    {
+      "id": "rr_cohort_each",
+      "type": "For Each",
+      "label": "One pill per cohort",
+      "x": 420,
+      "y": 560,
+      "parent": "rr_cohorts",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Cohort pill"
+      }
+    },
+    {
+      "id": "rr_replan",
+      "type": "Text",
+      "label": "Re-plan refused",
+      "x": 360,
+      "y": 660,
+      "parent": "rr_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "A state of the PLAN, not of the person: plain ink, never red, never --warm, never a pill (L113 §5.2)."
+      }
+    },
+    {
+      "id": "rr_awaiting",
+      "type": "Text",
+      "label": "Waiting on a reply",
+      "x": 360,
+      "y": 760,
+      "parent": "rr_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "A DATE, never a count (L119 §5): three unanswered messages give one date."
+      }
+    }
+  ],
+  "visualRoots": [
+    "rr_row"
+  ]
+}

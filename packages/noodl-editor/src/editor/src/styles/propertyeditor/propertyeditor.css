@@ -632,12 +632,39 @@
    ============================================================================= */
 
 /* CHR-009 R7: the row is the Comment tab's content now — no hairline against a strip it no longer
-   sits under. */
+   sits under.
+
+   🔴 HLT-005 — the two declarations below are what keep the field INSIDE the panel, and they are
+   stated here rather than inline because the inline `flex: '0 0 auto'` they replace is why no
+   stylesheet could govern this element and why six "Left" lists could name the defect without
+   anyone being able to fix it in the file that describes the row.
+
+   This bar is the sole child of a `ScrollArea`, whose `.Container` is a ROW flex container. As a
+   flex item with `flex-shrink: 0` it was sized to its own max-content width — the full unwrapped
+   longest line of the hidden `.property-comment-sizer` below, which is `pre-wrap` with no
+   `max-width` — and forbidden to come back to the scrollport. Measured on a driven editor,
+   2026-09-21, on a 264-character single-line comment: the bar rendered **1,489px inside a 224px
+   scrollport** at the panel's minimum docked width and inside a 980px one at its maximum, with
+   **1,253px** and **497px** of reachable `scrollLeft` — a horizontal scrollbar in a component
+   that declares vertical scrolling only, and the middle of the field out over the canvas.
+
+   `flex: 1` is the Properties tab's own declaration (`propertyeditor/index.tsx`), which is the
+   control that never overflowed: basis 0 means the bar's width cannot be a function of its
+   content at all.
+
+   ⚠️ `min-width: 0` is NOT redundant beside it, and not a second copy of `ScrollArea`'s
+   `> * { min-width: 0 }` doing the same job by accident. With basis 0 the used minimum is still
+   the automatic one — the bar's min-content width, i.e. its longest WORD, because
+   `overflow-wrap: break-word` does not reduce intrinsic size. An element that must never widen
+   its own scrollport says so itself rather than inheriting it from a container in another
+   package. Graded: a 200-character run with no spaces, which overflowed by 1,069px before. */
 .property-comment-bar {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 6px 14px 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 /* The tooltip wraps its child in a trigger div; hug the label so hovering the

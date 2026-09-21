@@ -142,7 +142,7 @@ export function NodeComment({ model }: NodeCommentProps) {
   }
 
   return (
-    <div className="property-comment-bar" style={{ flex: '0 0 auto' }}>
+    <div className="property-comment-bar">
       <Tooltip
         content="Why this node is the way it is — the rule or decision the graph cannot state. Shown when you hover the node on the canvas."
         fineType="⌘/Ctrl + Enter to save · Esc to cancel"

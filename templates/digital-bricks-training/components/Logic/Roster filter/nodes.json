@@ -1,0 +1,243 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e94ac2a0-2dc5-4cdc-8d33-ad82c1ee6aa4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rf_in",
+      "type": "Component Inputs",
+      "label": "People and the three filters",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "people",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "query",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cohortFilter",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "programmeFilter",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "rf_fn",
+      "type": "JavaScriptFunction",
+      "label": "Filter and compose",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * THE ROSTER'S FILTER PIPELINE (TASK-L164 §3), ported from\n * src/lib/components/staff/Roster.tsx — search, cohort and programme, in that\n * file's order, as ONE pure reduction over rows already in memory. There is no\n * fetch in the product and there is none here: this is a coaching practice, not\n * a directory of thousands.\n *\n *   finished, the three steps, displayName, lastSeen -> staff/Roster.tsx\n *   the stable date format                           -> Logic/Standing (FORMAT)\n *\n * THE SELECTS' OPTIONS ARE NOT HERE: rf_opts computes them from the people and\n * the words alone, because a Dropdown handed new items snaps back to its default.\n *\n * ORDER IS NOT DECIDED HERE. The rows arrive in the server's order\n * (Data/Fixture roster) and a filter only ever removes.\n *\n * WHAT THE COACH READS IS COMPOSED HERE AND WORDED IN Data/Strings (`people`).\n * This node holds no English of its own and throws without its copy, the same\n * contract as Logic/Standing: a fallback sentence here would be a second owner.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\n/* NOT ARRIVED YET IS NOT THE SAME AS WIRED WRONG. A Function runs on every\n   input that lands, and the people can land before the words do — measured: the\n   first render threw here, once, before Data/Strings had emitted. So an absent\n   copy waits (this node runs again the moment it arrives), and a copy that\n   ARRIVES without a `people` namespace is still a named failure. */\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst COPY = (plain(Inputs.copy) || {}).people;\nif (!COPY || !COPY.lastSeen) {\n  throw new Error('Logic/Roster filter: no `people` copy. Wire Data/Strings.copy into Copy (TASK-L164).');\n}\n\nfunction fill(template, values) {\n  return String(template).replace(/\\{(\\w+)\\}/g, (m, k) => (values[k] === undefined ? m : String(values[k])));\n}\n\n/* ── THE FILTER STATES ─────────────────────────────────────────────────────\n * Each is a readable string, and none can collide with a cohort id. They are\n * non-empty on purpose: a Dropdown option whose Value is \"\" is an option the\n * control cannot select back, so the product's \"\" sentinels become words here.\n * The meaning is unchanged. */\nconst ALL = 'all';\nconst UNFILED = 'unfiled';\nconst ACTIVE_PROGRAMME = 'active';\nconst ANY_PROGRAMME = 'any';\nconst FINISHED_PROGRAMME = 'finished';\n\n/* A BUTTON, NEVER A DATE (L123 §5.1). A programme past its agreed end that\n * nobody closed is still running, which is why this needs no clock. */\nfunction finished(p) {\n  return p.archivedAt !== null && p.archivedAt !== undefined ? true : p.status === 'closed';\n}\n\n/* A person always has a name to click, however little is known about them. The\n * trainer's own label wins, because that is what a coach recognises. This is\n * NOT the chain for audience copy — that one skips projectName (L128, L165). */\nfunction displayName(p) {\n  return p.coachLabel || p.projectName || p.email || p.learnerId;\n}\n\n/* A DURATION, not a calendar date — so it reads Date.now() and never the\n * reader's timezone, and it does not go through the date formatter (L100's\n * Roster.lastSeen note). Null is \"No activity yet\", never \"never\". */\nfunction lastSeen(iso) {\n  if (!iso) return COPY.lastSeen.none;\n  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);\n  if (days <= 0) return COPY.lastSeen.today;\n  if (days === 1) return COPY.lastSeen.yesterday;\n  return fill(COPY.lastSeen.days, { days: days });\n}\n\n/* The one calendar date on this page, pinned to UTC so a server and a browser\n * in different zones print the same day (L93). Same formatter as Logic/Standing. */\nconst FORMAT = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });\nconst fmtDate = (iso) => (iso ? FORMAT.format(new Date(iso)) : '');\n\nconst people = plain(Inputs.people) || [];\nconst query = String(Inputs.query || '').trim();\nconst q = query.toLowerCase();\nconst cohortFilter = String(Inputs.cohortFilter || ALL);\nconst programmeFilter = String(Inputs.programmeFilter || ACTIVE_PROGRAMME);\n\nconst shown = people.filter((p) => {\n  const programmes = p.programmes || [];\n  const theirCohorts = p.cohorts || [];\n  /* §3.1 — hides somebody ONLY when EVERY programme they have is finished. A\n     learner with none is filtered out by neither branch: that is L89's reason\n     for existing, and the half that is easy to get backwards. */\n  if (programmeFilter === ACTIVE_PROGRAMME) {\n    if (programmes.length > 0 && programmes.every(finished)) return false;\n  } else if (programmeFilter === FINISHED_PROGRAMME) {\n    if (!programmes.some(finished)) return false;\n  }\n  /* §3.2 — MEMBERSHIP, never equality: a learner is in many cohorts (L104). */\n  if (cohortFilter === UNFILED) {\n    if (theirCohorts.length > 0) return false;\n  } else if (cohortFilter !== ALL) {\n    if (!theirCohorts.some((c) => c.id === cohortFilter)) return false;\n  }\n  if (!q) return true;\n  return [p.coachLabel, p.projectName, p.email].concat(theirCohorts.map((c) => c.name)).some(\n    (f) => typeof f === 'string' && f.toLowerCase().indexOf(q) !== -1\n  );\n});\n\nOutputs.rows = shown.map((p) => {\n  /* A COUNT, presented as a count — never a percentage, a bar or a grade — and\n     only when there is a path to count against. `0 of 0` is not information. */\n  const setUp = p.contextVersion !== null && p.contextVersion !== undefined;\n  const parts = [];\n  if (!setUp) parts.push(COPY.notSetUp);\n  else {\n    parts.push(p.projectName || COPY.noProject);\n    if (p.stepsTotal > 0) parts.push(fill(COPY.steps, { done: p.stepsComplete, total: p.stepsTotal }));\n  }\n  parts.push(lastSeen(p.lastActivity));\n  const theirCohorts = p.cohorts || [];\n  return {\n    learnerId: p.learnerId,\n    name: displayName(p),\n    /* On every row, not only as a fallback: the one identifier that stays true\n       when a label and a project name both change. Staff-only surface. */\n    email: p.email || '',\n    hasEmail: Boolean(p.email),\n    meta: parts.join(' · '),\n    /* Nothing at all for somebody nobody has filed — never the word \"none\". */\n    cohorts: theirCohorts.map((c) => ({ id: p.learnerId + ':' + c.id, name: c.name })),\n    hasCohorts: theirCohorts.length > 0,\n    /* A state of the PLAN, in the row's own ink: no red, no --warm, no pill. */\n    replanLine: p.replanBlockedAt ? COPY.replanBlocked : '',\n    hasReplanLine: Boolean(p.replanBlockedAt),\n    /* A DATE, never a count: three unanswered messages give one date. */\n    awaitingLine: p.awaitingReplySince ? fill(COPY.awaiting, { when: fmtDate(p.awaitingReplySince) }) : '',\n    hasAwaitingLine: Boolean(p.awaitingReplySince),\n  };\n});\n\n/* TWO EMPTY STATES, AND THEY STAY DIFFERENT (§4). One is a fact about the\n   platform; the other is a fact about what the coach just chose. The product\n   prints `Nobody matches “”` when a FILTER emptied the list with no query typed;\n   that third sentence is new here and recorded as a deviation. */\nOutputs.hasRows = shown.length > 0;\nOutputs.hasEmpty = shown.length === 0;\nOutputs.emptyText =\n  people.length === 0\n    ? COPY.empty.nobody\n    : shown.length > 0\n      ? ''\n      : query\n        ? fill(COPY.empty.noMatch, { query: query })\n        : COPY.empty.noMatchFilter;\nOutputs.shownCount = shown.length;\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "in-people",
+          "displayName": "people",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-query",
+          "displayName": "query",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cohortFilter",
+          "displayName": "cohortFilter",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-programmeFilter",
+          "displayName": "programmeFilter",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-loaded",
+          "displayName": "loaded",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasRows",
+          "displayName": "hasRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasEmpty",
+          "displayName": "hasEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shownCount",
+          "displayName": "shownCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rf_out",
+      "type": "Component Outputs",
+      "label": "What the page draws",
+      "x": 600,
+      "y": 40,
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasCohortSelect",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "cohortOptions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasProgrammeSelect",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "programmeOptions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasRows",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasEmpty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "emptyText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "shownCount",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "rf_opts",
+      "type": "JavaScriptFunction",
+      "label": "What the selects offer",
+      "x": 300,
+      "y": 300,
+      "parameters": {
+        "functionScript": "/*\n * WHAT THE TWO SELECTS OFFER (TASK-L164 §4) — deliberately a SEPARATE Function\n * from the filter, and it reads neither filter.\n *\n * Measured, not assumed: with the options computed inside the filter, choosing\n * a cohort re-ran the filter, which re-emitted a NEW options array, and a\n * Dropdown that receives new `items` resets itself to its `value` parameter —\n * so every choice snapped straight back to \"Everyone\" in the same tick and the\n * select looked broken. Depending only on the people and the words is what\n * keeps these arrays stable while a coach is using them.\n *\n * STRUCTURALLY ABSENT, NEVER DISABLED: each select renders only when it can\n * change what is listed — the cohort select when somebody is in a cohort, the\n * programme select when somebody has a programme (the commerce: null posture).\n * The Values are the filter's sentinels; see Logic/Roster filter's rf_fn.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\n/* NOT ARRIVED YET IS NOT THE SAME AS WIRED WRONG. A Function runs on every\n   input that lands, and the people can land before the words do — measured: the\n   first render threw here, once, before Data/Strings had emitted. So an absent\n   copy waits (this node runs again the moment it arrives), and a copy that\n   ARRIVES without a `people` namespace is still a named failure. */\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst COPY = (plain(Inputs.copy) || {}).people;\nif (!COPY || !COPY.cohort) {\n  throw new Error('Logic/Roster filter: no `people` copy for the selects (TASK-L164).');\n}\nconst people = plain(Inputs.people) || [];\n\n/* Every trainer-assigned cohort anybody here is in, once each, by id. Derived\n * from the rows: an empty group in the list would be a control that always\n * yields nothing. The lounge is never in `cohorts` (L104). */\nconst byId = {};\nfor (const p of people) for (const c of p.cohorts || []) byId[c.id] = c;\nconst cohorts = Object.keys(byId).map((k) => byId[k]).sort((a, b) => a.name.localeCompare(b.name));\n\nOutputs.hasCohortSelect = cohorts.length > 0;\nOutputs.cohortOptions = [{ Label: COPY.cohort.all, Value: 'all' }]\n  .concat(cohorts.map((c) => ({ Label: c.name, Value: c.id })))\n  .concat([{ Label: COPY.cohort.unfiled, Value: 'unfiled' }]);\nOutputs.hasProgrammeSelect = people.some((p) => (p.programmes || []).length > 0);\nOutputs.programmeOptions = [\n  { Label: COPY.programme.active, Value: 'active' },\n  { Label: COPY.programme.finished, Value: 'finished' },\n  { Label: COPY.programme.any, Value: 'any' },\n];\n"
+      },
+      "ports": [
+        {
+          "name": "in-people",
+          "displayName": "people",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasCohortSelect",
+          "displayName": "hasCohortSelect",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cohortOptions",
+          "displayName": "cohortOptions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasProgrammeSelect",
+          "displayName": "hasProgrammeSelect",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-programmeOptions",
+          "displayName": "programmeOptions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

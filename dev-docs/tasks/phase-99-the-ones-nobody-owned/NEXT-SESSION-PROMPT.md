@@ -1,8 +1,10 @@
 # P99 — next session
 
-**Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-006 ✅ (s4, AC5 ruled
-WORTHY by Richard 2026-09-21).**
-Open: **HLT-005, 007, 008, 009, 011, 012, 013**, then **HLT-010 last**.
+**Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
+HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21).**
+Open: **HLT-007, 008, 009, 011, 012, 013**, then **HLT-010 last**.
+⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** — check the board and the file mtimes
+before taking it ([[a-peer-may-be-doing-your-exact-task]]).
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
 **before claiming a row** — peers have been building this phase in parallel.
@@ -12,20 +14,27 @@ Read [README.md](./README.md) §5 for the board and §7 for the rules every task
 **Nothing is waiting on Richard.** HLT-006's AC5 was his last open criterion and he ruled it:
 *"I'm happy with the colour pallet fix from HLT 006."* Pick a row and build it.
 
-**Suggested: HLT-005.** It is a genuinely one-line fix with a named file and line
-(`NodeComment.tsx:145`, `flex: '0 0 auto'` in a row flex container) and a control sitting beside it
-(the Properties tab, which uses `flex: 1`). ⚠️ Measure §2 first anyway — see below.
+**Suggested: HLT-011 or HLT-012** — both were opened from a measurement rather than from a guess,
+so their §2 is the one kind that has not yet been wrong here. HLT-011 (`getProjectEntryWithId`
+returns the **first** match, so a click on either colliding launcher card opens the *other*
+project) is the sharper person sentence. ⚠️ **HLT-009's template is another stream's** — it
+committed to it again on 2026-09-21 (`60f811920`); ask before touching a file.
 
-## 🔴 The pattern this phase has established, FIVE times out of five
+## 🔴 The pattern this phase established, five times out of five — and the sixth that broke it
 
-**Every task file so far has been materially wrong, and the correction was the work each time.**
-HLT-001's census (78 sites, not 19). HLT-002's "detached" webview (hidden, not detached).
-HLT-003's three wrong claims. HLT-006's §2 (right about enumeration, blind to the echo).
-**HLT-004's §2 assumed three responses were mishandled; all three were already handled.**
+**HLT-001** census (78 sites, not 19). **HLT-002** "detached" webview (hidden, not detached).
+**HLT-003** three wrong claims. **HLT-006** §2 (right about enumeration, blind to the echo).
+**HLT-004** §2 assumed three responses were mishandled; all three were already handled.
+
+✅ **HLT-005's §2 measured TRUE** — every claim in it held, down to the line number. So the rule is
+not "task files are wrong"; it is **measure before you build**, and sometimes the measurement
+agrees. ⚠️ What HLT-005 found instead was that its §2's one *dismissal* — "`min-width: 0` cannot
+help" — was right about the broken build and wrong as a conclusion about the fix: once the shrink
+is restored, `min-width: 0` is the half that stops an unbreakable word.
 
 ⇒ **Measure your row's §2 before writing a line.** See
 [[measure-the-artefact-before-believing-the-task-file]]. Budget a first hour for it; it has paid
-for itself every single time, without exception.
+for itself every single time, including the time it came back clean.
 
 ## 🔴 What s5 changed for every row after it, and for HLT-010 especially
 
@@ -44,6 +53,20 @@ line — only not making the request will. The distinction is mechanically avail
 ⚠️ **And `dev-debug.js:120` mirrors BOTH into one file under one `[renderer:error]` tag**, which is
 exactly why 264 events looked like 264 application faults.
 
+## Tools s6 leaves you
+
+- **`scripts/devtools/drive-hlt005-comment.js`** — a worked **panel** drive: it drags the side
+  panel to its real minimum and maximum through the divider's own gesture (so the clamps in
+  `useSidePanelLayout.tsx` are exercised, not bypassed), flips both themes, and takes two
+  independent readings of every cell — the element's rect **and** the scrollport's reachable
+  `scrollLeft`. Its control is a `<style>` rule rather than a patched module, because **the panel
+  remounts between widths** and anything written onto the element is gone by the second reading.
+- **`tests-unit/hlt-005/commentBarWidth.test.ts`** — the shape to copy when the consequence is a
+  rendered box: jsdom has no layout engine, so the spec grades the algorithm's deciding branch as
+  arithmetic over declarations read from the real files, calibrated by a `describe` that requires
+  the **broken** declaration to report the defect, and anchored by one that throws *"this spec is
+  blind; fix it"* if the containing block it reasons about ever moves.
+
 ## Tools s5 leaves you
 
 - **`scripts/devtools/drive-hlt004-requests.js`** — a worked launcher drive. Two independent
@@ -55,6 +78,28 @@ exactly why 264 events looked like 264 application faults.
   answered without a token and no caller will request it without one. ⚠️ **Only mark routes you
   have MEASURED.** Two are marked; the rest were not measured and guessing turns a read that works
   signed out into one that silently stops.
+
+## 🔴 Three traps s6 paid for — all three printed a verdict first
+
+**Six instrument faults in this phase now.** See [[an-instrument-must-be-armed-before-it-measures]].
+
+1. **`root.querySelector` finds the WRONG `FrameDivider`.** One renders its own `Divider` *after*
+   `Container2`, and `Container2` holds the nested one — so the nested divider is first in document
+   order. The drive dragged the canvas/preview split while printing the panel's "min" and "max",
+   and all four readings came back at the same width. Take the **direct child**.
+2. **A fixture that FITS proves nothing in either direction.** A 139-character comment renders
+   796px, which fits the 980px scrollport the panel has at its maximum — so the control arm there
+   read "no overflow" and was scored a *failure to fire*. A criterion that says min **and** max
+   needs a fixture that beats the max.
+3. **A missing measurement reads exactly like a clean one.** `Math.max(a, undefined || 0)` is `0`,
+   so a run whose panel was blank in every cell printed *"✓ THE NUMBER ... dark-min=undefined"*.
+   Assert the **count of cells that produced a reading** before you are allowed to report a zero.
+
+⚠️ **And editing editor `src/` while a drive holds the property panel open crashes it** — HMR
+remounts `PropertyEditor` into `Cannot read properties of undefined (reading 'type')` and the error
+boundary takes the whole side panel. A hot-reload artefact (a clean reload of the same build drives
+34/34), but a drive taken straight after a source edit reads a renderer matching neither build.
+**Reload, then drive.**
 
 ## 🔴 Three traps s5 paid for — do not re-derive them
 
@@ -87,7 +132,7 @@ exactly why 264 events looked like 264 application faults.
 
 ```
 npm run typecheck:editor && npm run typecheck:editor-tests
-cd packages/noodl-editor && npm run test:main      # 528/528, 8439/8439 after HLT-004
+cd packages/noodl-editor && npm run test:main      # 529/529, 8450/8450 after HLT-005
 cd packages/noodl-editor && npm run test:ci        # floor: 8 BY NAME — 3 SUB-006, 3 SUB-011, 2 NDA-017
 npm run lint:ci                                    # ratchet, 876 vs 3916 baseline
 ```

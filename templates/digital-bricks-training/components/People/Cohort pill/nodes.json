@@ -1,0 +1,62 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8cb4121c-0b24-43d6-a656-547818664fac",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cp_in",
+      "type": "Component Inputs",
+      "label": "One cohort",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "cp_pill",
+      "type": "Group",
+      "label": "The pill",
+      "x": 300,
+      "y": 40,
+      "children": [
+        "cp_name"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "backgroundColor": "var(--thread-tint)",
+        "borderRadius": "var(--radius-sm)"
+      }
+    },
+    {
+      "id": "cp_name",
+      "type": "Text",
+      "label": "Cohort name",
+      "x": 360,
+      "y": 160,
+      "parent": "cp_pill",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--thread-deep)"
+      }
+    }
+  ],
+  "visualRoots": [
+    "cp_pill"
+  ]
+}

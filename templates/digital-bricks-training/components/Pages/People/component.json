@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a2ce2fc7-011d-4d63-8377-4f467fcb7abc",
+  "name": "People",
+  "path": "/Pages/People",
+  "type": "page",
+  "created": "2026-09-21T09:35:02.339Z",
+  "modified": "2026-09-21T09:35:02.339Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's roster: everyone with an account, whether or not they have started, filtered by programme, cohort and a search, all in memory."
+}

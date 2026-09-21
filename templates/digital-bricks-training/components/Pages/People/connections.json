@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a2ce2fc7-011d-4d63-8377-4f467fcb7abc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pp_lang_var",
+      "fromProperty": "value",
+      "toId": "pp_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "pp_strings",
+      "fromProperty": "copy",
+      "toId": "pp_filter",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "pp_roster",
+      "fromProperty": "people",
+      "toId": "pp_filter",
+      "toProperty": "people"
+    },
+    {
+      "fromId": "pp_search",
+      "fromProperty": "onTextChanged",
+      "toId": "pp_filter",
+      "toProperty": "query"
+    },
+    {
+      "fromId": "pp_cohort_select",
+      "fromProperty": "value",
+      "toId": "pp_filter",
+      "toProperty": "cohortFilter"
+    },
+    {
+      "fromId": "pp_prog_select",
+      "fromProperty": "value",
+      "toId": "pp_filter",
+      "toProperty": "programmeFilter"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "cohortOptions",
+      "toId": "pp_cohort_select",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "hasCohortSelect",
+      "toId": "pp_cohort",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "programmeOptions",
+      "toId": "pp_prog_select",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "hasProgrammeSelect",
+      "toId": "pp_prog",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "rows",
+      "toId": "pp_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "hasRows",
+      "toId": "pp_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "hasEmpty",
+      "toId": "pp_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pp_filter",
+      "fromProperty": "emptyText",
+      "toId": "pp_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "pp_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_title",
+      "fromProperty": "Translation",
+      "toId": "pp_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_lede",
+      "fromProperty": "Translation",
+      "toId": "pp_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_search_label",
+      "fromProperty": "Translation",
+      "toId": "pp_search_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_search_ph",
+      "fromProperty": "Translation",
+      "toId": "pp_search",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "t_pp_cohort_label",
+      "fromProperty": "Translation",
+      "toId": "pp_cohort_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_prog_label",
+      "fromProperty": "Translation",
+      "toId": "pp_prog_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pp_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_pp_page",
+      "toProperty": "in-title"
+    }
+  ]
+}

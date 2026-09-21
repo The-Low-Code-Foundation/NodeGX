@@ -132,7 +132,8 @@
       "y": 700,
       "parent": "hm_shell",
       "children": [
-        "hm_cta"
+        "hm_cta",
+        "hm_coach"
       ],
       "parameters": {
         "sizeMode": "contentSize",
@@ -256,6 +257,45 @@
       ],
       "metadata": {
         "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
+      }
+    },
+    {
+      "id": "hm_coach",
+      "type": "net.noodl.controls.button",
+      "label": "Coach's view",
+      "x": 480,
+      "y": 640,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "TASK-L164. The template shows BOTH sides of the one assembly, so the front door offers the coach's. In a real product this is not a button on a public page: it is the staff gate, and that is the backend's job, not the template's (START-HERE)."
+      }
+    },
+    {
+      "id": "hm_go_people",
+      "type": "RouterNavigate",
+      "label": "→ People",
+      "x": 900,
+      "y": 640,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/People"
+      }
+    },
+    {
+      "id": "t_hm_coach",
+      "type": "Translation",
+      "label": "home:coachView",
+      "x": 1200,
+      "y": 640,
+      "parameters": {
+        "Key": "coachView",
+        "Namespace": "home"
       }
     }
   ],

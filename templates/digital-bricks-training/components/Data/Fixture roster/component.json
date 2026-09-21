@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2e89e413-5201-4626-aaf6-ac66ed3f0282",
+  "name": "Fixture roster",
+  "path": "/Data/Fixture roster",
+  "type": "logic",
+  "created": "2026-09-21T09:32:09.920Z",
+  "modified": "2026-09-21T09:32:09.920Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's people, as the roster query would return them: every account, nullable derived fields, in the server's order."
+}

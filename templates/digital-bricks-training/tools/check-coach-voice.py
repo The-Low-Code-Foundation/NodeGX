@@ -39,7 +39,8 @@ SECOND_PERSON = re.compile(r"\b(you|your|yours|you['’](?:ve|re|ll|d))\b", re.I
 # the timeline and the standing panels, which are what L164 and L165 put in
 # front of a coach; a coach page's own copy joins this list when it exists,
 # which is a deliberate one-line act rather than a default.
-COACH_NAMESPACES = ('timeline', 'standing')
+# `people` joined with TASK-L164: the roster is the first page only a coach opens.
+COACH_NAMESPACES = ('timeline', 'standing', 'people')
 
 # ── WHERE THE SECOND PERSON IS THE COACH, NOT THE LEARNER ───────────────────
 # The failure this file exists to catch is a coach reading a sentence written TO

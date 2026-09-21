@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e94ac2a0-2dc5-4cdc-8d33-ad82c1ee6aa4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rf_in",
+      "fromProperty": "people",
+      "toId": "rf_fn",
+      "toProperty": "in-people"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "copy",
+      "toId": "rf_fn",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "query",
+      "toId": "rf_fn",
+      "toProperty": "in-query"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "cohortFilter",
+      "toId": "rf_fn",
+      "toProperty": "in-cohortFilter"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "programmeFilter",
+      "toId": "rf_fn",
+      "toProperty": "in-programmeFilter"
+    },
+    {
+      "fromId": "rf_fn",
+      "fromProperty": "out-rows",
+      "toId": "rf_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "rf_fn",
+      "fromProperty": "out-hasRows",
+      "toId": "rf_out",
+      "toProperty": "hasRows"
+    },
+    {
+      "fromId": "rf_fn",
+      "fromProperty": "out-hasEmpty",
+      "toId": "rf_out",
+      "toProperty": "hasEmpty"
+    },
+    {
+      "fromId": "rf_fn",
+      "fromProperty": "out-emptyText",
+      "toId": "rf_out",
+      "toProperty": "emptyText"
+    },
+    {
+      "fromId": "rf_fn",
+      "fromProperty": "out-shownCount",
+      "toId": "rf_out",
+      "toProperty": "shownCount"
+    },
+    {
+      "fromId": "rf_fn",
+      "fromProperty": "out-loaded",
+      "toId": "rf_out",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "people",
+      "toId": "rf_opts",
+      "toProperty": "in-people"
+    },
+    {
+      "fromId": "rf_in",
+      "fromProperty": "copy",
+      "toId": "rf_opts",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "rf_opts",
+      "fromProperty": "out-hasCohortSelect",
+      "toId": "rf_out",
+      "toProperty": "hasCohortSelect"
+    },
+    {
+      "fromId": "rf_opts",
+      "fromProperty": "out-cohortOptions",
+      "toId": "rf_out",
+      "toProperty": "cohortOptions"
+    },
+    {
+      "fromId": "rf_opts",
+      "fromProperty": "out-hasProgrammeSelect",
+      "toId": "rf_out",
+      "toProperty": "hasProgrammeSelect"
+    },
+    {
+      "fromId": "rf_opts",
+      "fromProperty": "out-programmeOptions",
+      "toId": "rf_out",
+      "toProperty": "programmeOptions"
+    }
+  ]
+}

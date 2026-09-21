@@ -39,13 +39,14 @@
       "parameters": {
         "name": "Main",
         "pages": {
+          "startPage": "/Pages/Home",
           "routes": [
             "/Pages/Home",
             "/Pages/Lesson",
             "/Pages/Course",
-            "/Pages/Palette"
-          ],
-          "startPage": "/Pages/Home"
+            "/Pages/Palette",
+            "/Pages/People"
+          ]
         }
       }
     },
@@ -126,6 +127,16 @@
       "y": 520,
       "parameters": {
         "Namespace": "palette"
+      }
+    },
+    {
+      "id": "app_ns_people",
+      "type": "Language Bundle",
+      "label": "people → i18next",
+      "x": 1060,
+      "y": 620,
+      "parameters": {
+        "Namespace": "people"
       }
     },
     {
