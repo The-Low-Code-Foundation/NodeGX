@@ -2,6 +2,8 @@ import { useProjectDesignTokenContext } from '@noodl-contexts/ProjectDesignToken
 import React, { useMemo, useState } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
+// The leaf module, not the barrel — see TokenCategorySection's note on the `Tests: 0` it causes.
+import { allColourTokens } from '@noodl-models/StyleTokensModel/ColourTokensForPicking';
 import { StylesModel } from '@noodl-models/StylesModel';
 import { escapeHtml } from '@noodl-utils/escapeHtml';
 
@@ -60,10 +62,9 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
   const countFor = (name: string) =>
     (wearers[name]?.nodes.length ?? 0) + (wearers[name]?.variants.length ?? 0);
 
-  const colourTokens = useMemo(
-    () => designTokens.filter((t) => t.category === 'color-semantic' || t.category === 'color-palette'),
-    [designTokens]
-  );
+  // HLT-006 — through the shared enumeration, not a local predicate. The picker offers the same
+  // population and a second copy of "which category counts as a colour" is how HLT-007(b) happened.
+  const colourTokens = useMemo(() => allColourTokens(designTokens), [designTokens]);
 
   function onCreate(name: string) {
     setIsCreating(false);

@@ -1,0 +1,105 @@
+{
+  "expect": "fixed",
+  "arms": [
+    {
+      "name": "the editor on 9222 can be accounted for",
+      "ok": true,
+      "detail": "listener 46176, ancestry 46176<46175<46066<43787<43651<43558<43475<43272<43240<43220<43195<43193"
+    },
+    {
+      "name": "rAF fires — the page is live enough to trust a red",
+      "ok": true,
+      "detail": "raf"
+    },
+    {
+      "name": "the driven project is the COPY this run was pointed at",
+      "ok": true,
+      "detail": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/65ff3004-ec20-46f2-b956-57fc641b4e7d/scratchpad/hlt006-drive-copy"
+    },
+    {
+      "name": "🔴 the driven project has the REAL shape — no legacy style layer, and design tokens present",
+      "ok": true,
+      "detail": "metadata.styles=absent, customTokens=28"
+    },
+    {
+      "name": "the renderer carries no control left over from an earlier run",
+      "ok": true,
+      "detail": "never armed"
+    },
+    {
+      "name": "the project holds a node with a colour port, and this drive selected it",
+      "ok": true,
+      "detail": "{\"component\":\"App\",\"nodeId\":\"e6afaa6b-f2bf-4da2-91b9-3e920c436c02\",\"typename\":\"Router\",\"colorPorts\":[\"backgroundColor\"]}"
+    },
+    {
+      "name": "the dark theme is the one on screen",
+      "ok": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "the colour style picker is mounted (dark)",
+      "ok": true,
+      "detail": "opened"
+    },
+    {
+      "name": "🔴 REACH (dark) — the picker is the element a person touches at its own centre",
+      "ok": true,
+      "detail": "{\"found\":true,\"hit\":true,\"why\":\"variant-item-name\",\"rect\":{\"x\":1128,\"y\":92,\"w\":230,\"h\":600}}"
+    },
+    {
+      "name": "🔴 AC1 — the picker OFFERS the project design tokens, named",
+      "ok": true,
+      "detail": "25 rows, e.g. --primary, --primary-hover, --primary-foreground"
+    },
+    {
+      "name": "🔴 AC4′ — the ramp is CLOSED on open, so the list is the project's palette not a dump",
+      "ok": true,
+      "detail": "\"Palette\" count=61, rows drawn=0"
+    },
+    {
+      "name": "AC4′ — and the open list is a readable length, not ninety-one",
+      "ok": true,
+      "detail": "30 rows drawn in total"
+    },
+    {
+      "name": "🔴 AC4b — no token appears twice: the echo does not duplicate the enumeration",
+      "ok": true,
+      "detail": "no duplicate row names"
+    },
+    {
+      "name": "🔴 the token swatches PAINT — P94 STY-007 is not regressed by the new rows",
+      "ok": true,
+      "detail": "25/25 painted"
+    },
+    {
+      "name": "each token row states its resolved value — Richard's \"find out what that colour is\"",
+      "ok": true,
+      "detail": "25/25 carry a value, e.g. #18181b"
+    },
+    {
+      "name": "🔴 picking a token stores the TOKEN REFERENCE, not a resolved hex",
+      "ok": true,
+      "detail": "onItemSelected received var(--primary)"
+    },
+    {
+      "name": "the light theme is the one on screen",
+      "ok": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "the colour style picker is mounted (light)",
+      "ok": true,
+      "detail": "opened"
+    },
+    {
+      "name": "🔴 REACH (light) — the picker is the element a person touches at its own centre",
+      "ok": true,
+      "detail": "{\"found\":true,\"hit\":true,\"why\":\"variant-item-name\",\"rect\":{\"x\":1128,\"y\":92,\"w\":230,\"h\":600}}"
+    },
+    {
+      "name": "THE NUMBER — token rows offered on a driven session",
+      "ok": true,
+      "detail": "25"
+    }
+  ]
+}

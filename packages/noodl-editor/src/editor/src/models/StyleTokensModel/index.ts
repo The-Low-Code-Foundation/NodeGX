@@ -23,6 +23,14 @@ export type {
   VocabToken,
   VocabTokenCategory
 } from './StyleVocabulary';
+export {
+  allColourTokens,
+  colourTokensForPicking,
+  PALETTE_COLOUR_CATEGORY,
+  SEMANTIC_COLOUR_CATEGORY,
+  tokenReferenceStrings
+} from './ColourTokensForPicking';
+export type { ColourTokensForPicking } from './ColourTokensForPicking';
 export { STYLE_COMPOSITIONS, formatCompositionValue } from './StyleCompositions';
 export type { VocabComposition, VocabCompositionGroup, VocabParamValue } from './StyleCompositions';
 export type {

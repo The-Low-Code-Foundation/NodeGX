@@ -451,3 +451,43 @@
   border-color: var(--theme-color-danger);
   color: var(--theme-color-fg-danger);
 }
+
+/* HLT-006 — the design-token rows in the colour style picker.
+   Every colour here is a theme variable: the P92 hex ratchet reads this file. */
+.variants-header.is-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.variants-header.is-toggle:hover {
+  color: var(--theme-color-fg-highlight);
+}
+
+.variants-header .variants-header-count {
+  margin-left: auto;
+  margin-right: 8px;
+  font-weight: var(--font-weight-regular);
+  color: var(--theme-color-fg-default-shy);
+}
+
+/* The resolved value beside a token row, so "what colour IS --primary" is answered in the
+   picker rather than by going to look it up. Shy, monospaced, and it never takes room from
+   the name — the name keeps flex-grow and this shrinks away first. */
+.token-item-value {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* A long name runs right up to its value without this — `--primary-foreground#ffffff` was the
+     first frame shot of this row. The gutter is on the VALUE so the name keeps every pixel it can. */
+  padding-left: 8px;
+  padding-right: 6px;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-code);
+  color: var(--theme-color-fg-default-shy);
+}
+
+.variants-pick-variant-item:hover .token-item-value {
+  color: var(--theme-color-fg-default);
+}
