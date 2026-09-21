@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ae95df09-02e6-4b10-804e-dcd240712aa1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ds_in",
+      "type": "Component Inputs",
+      "x": 400,
+      "y": 0,
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ariaLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasFacts",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "fillPct",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "caption",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "The row's own fields, by name — a For Each over Logic/Dossier's segments sets them. No copy input: every word here is already resolved by Logic/Dossier, the one owner of what an objective holds (L166)."
+      }
+    },
+    {
+      "id": "ds_seg",
+      "type": "dbt-lesson.DossierSegment",
+      "label": "The objective, as a button",
+      "x": 0,
+      "y": 0,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      }
+    },
+    {
+      "id": "ds_out",
+      "type": "Component Outputs",
+      "x": 400,
+      "y": 200,
+      "ports": [
+        {
+          "name": "opened",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "ds_seg"
+  ]
+}

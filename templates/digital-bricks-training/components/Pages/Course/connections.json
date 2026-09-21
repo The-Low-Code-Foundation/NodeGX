@@ -254,6 +254,132 @@
       "fromProperty": "copy",
       "toId": "cs_standing",
       "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "deliverables",
+      "toId": "cs_dossier",
+      "toProperty": "deliverables"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "facts",
+      "toId": "cs_dossier",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "submissions",
+      "toId": "cs_dossier",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "concepts",
+      "toId": "cs_dossier",
+      "toProperty": "concepts"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "onboardingFacts",
+      "toId": "cs_dossier",
+      "toProperty": "onboardingFacts"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_dossier",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "audience",
+      "toId": "cs_dossier",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "cs_dossier",
+      "fromProperty": "hasSegments",
+      "toId": "cs_dos_wrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_dossier",
+      "fromProperty": "segments",
+      "toId": "cs_dos_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_dossier",
+      "fromProperty": "segments",
+      "toId": "cs_dos_pick",
+      "toProperty": "in-segments"
+    },
+    {
+      "fromId": "cs_dos_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "cs_dos_open",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cs_dos_each",
+      "fromProperty": "itemOutputSignal-opened",
+      "toId": "cs_dos_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_dos_var",
+      "fromProperty": "value",
+      "toId": "cs_dos_pick",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "cs_dos_pick",
+      "fromProperty": "out-open",
+      "toId": "cs_dos_reveal",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "cs_dos_pick",
+      "fromProperty": "out-segment",
+      "toId": "cs_dos_reveal",
+      "toProperty": "segment"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_dos_reveal",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_fixture",
+      "fromProperty": "conceptId",
+      "toId": "cs_dos_reveal",
+      "toProperty": "lessonConceptId"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onClosed",
+      "toId": "cs_dos_close",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onLessonOpened",
+      "toId": "cs_dos_close",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onLessonOpened",
+      "toId": "cs_dos_lesson",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_cs_dos_title",
+      "fromProperty": "Translation",
+      "toId": "cs_dos_title",
+      "toProperty": "text"
     }
   ]
 }

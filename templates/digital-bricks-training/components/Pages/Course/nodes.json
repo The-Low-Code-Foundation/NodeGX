@@ -56,6 +56,7 @@
         "cs_card",
         "cs_pace_wrap",
         "cs_traj",
+        "cs_dos_wrap",
         "cs_programme"
       ],
       "parameters": {
@@ -713,6 +714,203 @@
       },
       "metadata": {
         "comment": "A TRANSPORT, NEVER A SECOND DECISION — the same node Pages/Lesson carries. The one OWNER is the `i18next` node in App; this only carries its answer, and check-language-owner.py fails the build on any /Data/Strings instance that is not told (TASK-L162 §2)."
+      }
+    },
+    {
+      "id": "cs_dos_wrap",
+      "type": "Group",
+      "label": "Your dossier",
+      "parent": "cs_shell",
+      "parameters": {
+        "as": "section",
+        "cssClassName": "dossier-meter",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "Where CourseHome puts the meter: after How it is going, before the programme. Mounted only when there are segments — the product's `return null` on an empty set, which is every Digital Bricks learner whose coach has set no objective (the pack ships deliverables: [])."
+      },
+      "children": [
+        "cs_dos_title",
+        "cs_dos_grid",
+        "cs_dos_reveal"
+      ],
+      "x": 220,
+      "y": 2060
+    },
+    {
+      "id": "cs_dos_title",
+      "type": "Text",
+      "parent": "cs_dos_wrap",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-3)"
+      },
+      "x": 280,
+      "y": 2180
+    },
+    {
+      "id": "cs_dos_grid",
+      "type": "Group",
+      "parent": "cs_dos_wrap",
+      "parameters": {
+        "cssClassName": "dossier-segments",
+        "styleCss": "display: grid;",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "metadata": {
+        "comment": "The lifted .dossier-segments is an auto-fit CSS grid. The runtime writes display:flex inline on a Group, so styleCss restates grid to win (the /lesson layout's precedent). The For Each places each segment as a DIRECT child, so each is a grid cell."
+      },
+      "children": [
+        "cs_dos_each"
+      ],
+      "x": 280,
+      "y": 2300
+    },
+    {
+      "id": "cs_dos_each",
+      "type": "For Each",
+      "parent": "cs_dos_grid",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Course/Dossier segment"
+      },
+      "x": 340,
+      "y": 2420
+    },
+    {
+      "id": "cs_dos_reveal",
+      "type": "dbt-lesson.DossierReveal",
+      "label": "What an objective holds",
+      "parent": "cs_dos_wrap",
+      "metadata": {
+        "comment": "Sprint 48 decision 1: a KIT node, not Show Popup — the runtime popup has no dialog semantics, Escape or focus handling, so a graph-native reveal would regress all six of the product's accessibility properties. OpenNoodl HLT-014 makes the popup a dialog; when it lands this is a candidate for replacement, not a commitment. Its root takes no space (display: contents); the dialog portals to <body>."
+      },
+      "x": 280,
+      "y": 2540
+    },
+    {
+      "id": "cs_dossier",
+      "type": "/Logic/Dossier",
+      "label": "What each objective holds",
+      "x": 2200,
+      "y": 1600
+    },
+    {
+      "id": "cs_dos_var",
+      "type": "Variable2",
+      "label": "Which objective is open",
+      "x": 2200,
+      "y": 1800,
+      "parameters": {
+        "name": "dbtDossierOpen"
+      }
+    },
+    {
+      "id": "cs_dos_open",
+      "type": "JavaScriptFunction",
+      "label": "Open this objective",
+      "x": 2600,
+      "y": 1700,
+      "parameters": {
+        "functionScript": "/* A segment was pressed. The repeater hands back the ROW's id, which\n   Logic/Dossier keys by the objective's slug. */\nconst id = String(Inputs.id || '');\nif (!id) return;\nNoodl.Variables.dbtDossierOpen = id;\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY (L165): with runOnChange-in-id ticked it would also run whenever a row's id arrived, opening an objective nobody pressed."
+      }
+    },
+    {
+      "id": "cs_dos_close",
+      "type": "JavaScriptFunction",
+      "label": "Close it",
+      "x": 2600,
+      "y": 1900,
+      "parameters": {
+        "functionScript": "/* Escape, the overlay, Close — or the learner followed the one link out to\n   the lesson. Cleared either way: the Variable outlives the page, and a\n   reveal left set would reopen on the way back. */\nNoodl.Variables.dbtDossierOpen = '';\n"
+      }
+    },
+    {
+      "id": "cs_dos_pick",
+      "type": "JavaScriptFunction",
+      "label": "The open objective",
+      "x": 2600,
+      "y": 2100,
+      "parameters": {
+        "functionScript": "/* Which segment the reveal shows. Derived, never stored: the segment itself\n   comes from Logic/Dossier every time, so the reveal cannot show a stale copy\n   of an objective the meter has since redrawn. */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst slug = String(Inputs.open || '');\nconst seg = slug ? (plain(Inputs.segments) || []).find((s) => s.slug === slug) : null;\nOutputs.segment = seg || null;\nOutputs.open = !!seg;\n"
+      },
+      "ports": [
+        {
+          "name": "in-open",
+          "plug": "input",
+          "type": "*",
+          "displayName": "open",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-segments",
+          "plug": "input",
+          "type": "*",
+          "displayName": "segments",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "*",
+          "displayName": "open",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-segment",
+          "plug": "output",
+          "type": "*",
+          "displayName": "segment",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cs_dos_lesson",
+      "type": "RouterNavigate",
+      "label": "To the lesson",
+      "x": 2600,
+      "y": 2300,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Lesson"
+      }
+    },
+    {
+      "id": "t_cs_dos_title",
+      "type": "Translation",
+      "x": 2200,
+      "y": 2000,
+      "parameters": {
+        "Key": "title",
+        "Namespace": "dossier"
       }
     }
   ],

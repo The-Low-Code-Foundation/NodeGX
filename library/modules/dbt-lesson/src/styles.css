@@ -2447,3 +2447,276 @@
 .dbt-timeline-row {
   width: 100%;
 }
+
+/* ── WHAT THEY MUST PRODUCE: THE METER AND ITS REVEAL (TASK-L167) ────────────
+   LIFTED BY LINE RANGE from the product's globals.css (1257-1457 and
+   8214-8237), sprint 44's method: the class names are the contract the kit's
+   DossierSegment and DossierReveal emit, so the rules are the product's own.
+   Below them, the three rules the port needed and the product did not. */
+
+/* ── Dossier assembly meter (TASK-LX17) ──────────────────────────────────────── */
+/* Non-punitive by construction: no percentages/fractions in copy, empty
+   segments are quiet (label only, --ink-soft) — see DossierMeter.tsx. */
+
+.dossier-meter {
+  margin: 0 0 32px;
+  padding: 20px 22px;
+  background: var(--paper-raised);
+  border: var(--edge);
+  box-shadow: var(--shadow-lifted);
+  border-radius: var(--radius);
+}
+
+.dossier-meter-title {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.dossier-segments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px 20px;
+}
+
+.dossier-segment {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dossier-segment-label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.dossier-segment.has-facts .dossier-segment-label {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.dossier-segment-bar {
+  height: 5px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  border: var(--edge-thin);
+  overflow: hidden;
+}
+
+.dossier-segment-fill {
+  height: 100%;
+  background: var(--thread);
+  border-radius: var(--radius-sm);
+}
+
+.dossier-segment-caption {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+/* ── Fact reveal (LX27) — has-facts segments open a modal ─────────────────── */
+
+/* A has-facts segment is a button that opens the reveal modal. It resets native
+   button chrome to look exactly like the LX17 segment (label + bar + caption
+   stacked). Empty segments stay plain divs (non-punitive invariant, LX17). */
+.dossier-segment-trigger {
+  width: 100%;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.dossier-segment-trigger:hover {
+  background: var(--thread-tint);
+}
+
+/* Shared fact-row styling — used inside the modal body. */
+.dossier-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dossier-fact-name {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.dossier-fact-value {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+/* ── Fact reveal modal (LX27) ─────────────────────────────────────────────── */
+
+.dossier-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--scrim);
+}
+
+.dossier-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(80vh, 640px);
+  background: var(--paper-raised);
+  border: var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lifted);
+  outline: none;
+}
+
+.dossier-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dossier-modal-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.dossier-modal-close {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.dossier-modal-close:hover {
+  background: var(--thread-tint);
+  color: var(--ink);
+}
+
+.dossier-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 22px;
+  overflow-y: auto;
+}
+
+.dossier-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 22px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.dossier-modal-copy-btn {
+  padding: 11px 18px;
+  background: var(--thread);
+  border: var(--edge);
+  box-shadow: var(--shadow-lifted);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.dossier-modal-copy-btn:hover {
+  filter: brightness(0.94);
+}
+
+
+/* WHAT AN OBJECTIVE ASKS FOR (TASK-L144 SS2). Item 9: the meter was inert when
+   every segment was empty, because LX17 made a segment a button only when it
+   had captured facts. It opens now - to what the deliverable IS, never to a
+   count of what is missing. A list of names in plain ink: no tick, no cross,
+   no number, nothing that reads as a checklist. */
+.dossier-asks-item {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  padding: 1px 0;
+}
+
+.dossier-empty-note {
+  font-family: var(--font-prose);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-mute);
+  max-width: 56ch;
+  margin: 10px 0 0;
+}
+
+/* THE LEARNER'S OWN SCOPE, ON THEIR OWN PAGE (TASK-L144 SS2). It has existed
+   since L59 and rendered only inside a lesson, so the project had a NAME here
+
+/* The kit roots. A segment fills its grid cell; the reveal's root takes no
+   space at all — the dialog itself is portalled to <body>, and an empty box in
+   the page's column would still cost a row gap. */
+.dbt-dossier-segment {
+  display: block;
+  width: 100%;
+}
+
+.dbt-dossier-reveal {
+  display: contents;
+}
+
+/* THE ONE SUBMISSION THAT GOES SOMEWHERE. The product renders an <a> to the
+   lesson; here it is a button (it navigates through the graph's router), so it
+   needs the link's look without the native button chrome. The rest are plain
+   text in the same ink, because they have nowhere to go in this app. */
+.dossier-submission-link,
+.dossier-submission-text {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: 1px 0;
+}
+
+.dossier-submission-link {
+  background: none;
+  border: none;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--thread-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dossier-submission-text {
+  color: var(--ink-soft);
+}

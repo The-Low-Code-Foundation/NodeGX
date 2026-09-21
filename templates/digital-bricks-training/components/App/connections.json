@@ -98,6 +98,18 @@
       "fromProperty": "jsonPeople",
       "toId": "app_ns_people",
       "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_dossier",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonDossier",
+      "toId": "app_ns_dossier",
+      "toProperty": "Bundle"
     }
   ]
 }

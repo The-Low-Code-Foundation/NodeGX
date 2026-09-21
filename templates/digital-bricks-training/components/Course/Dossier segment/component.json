@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ae95df09-02e6-4b10-804e-dcd240712aa1",
+  "name": "Dossier segment",
+  "path": "/Course/Dossier segment",
+  "type": "visual",
+  "created": "2026-09-21T16:31:41.896Z",
+  "modified": "2026-09-21T16:31:41.896Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One objective on the learner's dossier meter: the kit's DossierSegment button, fed the words Logic/Dossier already resolved. Pressing it raises `opened`; the page decides what opens."
+}

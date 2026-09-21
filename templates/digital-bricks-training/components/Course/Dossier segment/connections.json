@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ae95df09-02e6-4b10-804e-dcd240712aa1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ds_in",
+      "fromProperty": "label",
+      "toId": "ds_seg",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ds_in",
+      "fromProperty": "ariaLabel",
+      "toId": "ds_seg",
+      "toProperty": "ariaLabel"
+    },
+    {
+      "fromId": "ds_in",
+      "fromProperty": "hasFacts",
+      "toId": "ds_seg",
+      "toProperty": "hasFacts"
+    },
+    {
+      "fromId": "ds_in",
+      "fromProperty": "fillPct",
+      "toId": "ds_seg",
+      "toProperty": "fillPct"
+    },
+    {
+      "fromId": "ds_in",
+      "fromProperty": "caption",
+      "toId": "ds_seg",
+      "toProperty": "caption"
+    },
+    {
+      "fromId": "ds_seg",
+      "fromProperty": "onOpened",
+      "toId": "ds_out",
+      "toProperty": "opened"
+    }
+  ]
+}

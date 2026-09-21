@@ -261,10 +261,10 @@ Two mechanics worth knowing before you edit this page:
 
 **Nothing on this page writes.** The product's version is mostly composers — schedule a session,
 change the path, set up a programme, write a review, reply — and every one would be a control that
-cannot save. *What they must produce* (the dossier) is not drawn on either side yet — its data is
-(next section).
+cannot save. *What they must produce* is drawn on the learner's side (next section) and not yet on
+this page.
 
-## What they must produce — the data, before anything draws it
+## What they must produce
 
 **`Logic/Dossier`** is the one place that decides what each objective holds, for the learner's
 meter and for the coach's list alike. It is the product's `dossierProgress`, `humaniseFactName` and
@@ -291,7 +291,44 @@ Things worth knowing before you change it:
 - The fixture's second submission is filed under no objective and has **no timeline entry** — it
   appears on no dossier surface by design, and adding it would have changed `/course`.
 
-The words are `dossier` (generated from the kit, because the reveal will be a kit node) and
+- **The fixture's third submission is filed on the lesson page's own concept** (`what-is-a-backend`),
+  which is not on this programme — the lesson fixture and the programme fixture are two different
+  projects. So it renders as its slug, and it is the one piece of work on `/course` that links
+  anywhere (below).
+
+### The meter and its reveal, on `/course`
+
+Between *How it is going* and *Your programme*: **Your dossier**, one button per objective, and one
+dialog. Pressing a segment opens what the objective asks for, what they have captured under it, the
+work they sent in for it, and **Copy as markdown**.
+
+- **Every segment is a button, including an empty one.** An empty objective is its label and nothing
+  else — no bar, no caption, no `0` — and it opens to what it asks for. The product's LX17 made an
+  empty segment inert, and when every segment was empty the whole block was: that was a real bug.
+- **The dialog is the kit's `DossierReveal`, not `Show Popup`.** The runtime's popup is a plain
+  Group: no dialog role, no Escape, no focus handling, and its `Dismissed` means *replaced* rather
+  than *closed*. The kit node is a real dialog — Escape, the overlay and Close all close it, focus
+  goes in and comes back to the segment that opened it, Tab stays inside, the page does not scroll
+  behind it, and the page's own `overflow` comes back as it was. OpenNoodl's `HLT-014` makes the
+  popup a dialog for every app; when it lands this is a candidate for replacement, not a promise.
+- **What they typed is shown as text.** A captured answer never goes through markdown or HTML — an
+  answer is not a lesson. The fixture carries one holding `<img onerror>`, `<b>` and `**bold**` to
+  prove it; all three render as the characters they are.
+- **Only work on this app's one lesson is a link.** The product links every piece of work to its
+  lesson; here there is one lesson page, and a link to a lesson that does not exist is a control
+  that goes nowhere. Everything else is plain text.
+- **Which objective is open is the `dbtDossierOpen` Variable**, set by the segment's signal and
+  cleared on close — and cleared when the one link is followed, because a Variable outlives the page
+  and the dialog would otherwise reopen on the way back.
+- **The meter is absent when there are no objectives** — which is every Digital Bricks learner whose
+  coach has set none (the pack ships no deliverables of its own).
+- **The dossier's eyebrow needed its own `Language Bundle` in App.** A `Translation` on a namespace
+  nothing registers resolves to nothing, and its Text quietly shows the editor default — it read
+  `TEXT`, with every other tool green. `tools/check-language-owner.py` now fails on it.
+- `Pages/Course` is 55 nodes against the validator's ~40 advisory. Factoring the meter into a
+  component of its own is the obvious reduction; it was not done here.
+
+The words are `dossier` (generated from the kit, because the reveal is a kit node) and
 `dossierCoach` (the coach's own labels, in the graph's half). There are **no coach wordings for
 `dossier`**: the meter and the reveal never reach a coach's page, so they would be sentences nobody
 renders.
@@ -306,8 +343,8 @@ image. The kit README says which and why.
 
 ## What is not here yet
 
-The backend and every write, sign-in and the staff gate, every coach composer, the dossier's meter and
-the coach's objectives surface (the data is here — see above), the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
+The backend and every write, sign-in and the staff gate, every coach composer, the coach's objectives
+surface (the data and the learner's meter are here — see above), the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
 exactly which strings the table owns today and which are still English in place.
 
 ## Licences

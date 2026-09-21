@@ -5,7 +5,7 @@
   "path": "/Pages/Course",
   "type": "page",
   "created": "2026-09-19T21:11:24.266Z",
-  "modified": "2026-09-20T12:49:19.554Z",
+  "modified": "2026-09-21T16:32:25.115Z",
   "modifiedBy": "noodl-mcp",
   "description": "The learner's course: the lesson's title, where it lands them, its steps as a list, and one button into the lesson. Reads the fixture; nothing fetches."
 }

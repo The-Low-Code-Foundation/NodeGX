@@ -195,8 +195,16 @@ for (const sub of fx.submissions) {
   check(under.length === (sub.deliverableId ? 1 : 0),
     `AC4: the submission on ${sub.conceptId} (${sub.deliverableId ?? 'unfiled'}) is under ${under.length} objective(s)`);
 }
-check(coach.segments.flatMap((s) => s.submissions).every((x) => x.title && x.title !== x.conceptId),
-  'AC4: a filed submission is not named by its lesson title');
+/* A filed submission is named by the title on their path — and one on a
+   concept that is NOT on their path renders its slug, the product's `?? id`
+   (DossierMeter's stepTitleByConceptId). L167 filed one on the lesson page's own
+   concept, which is off this programme, so both branches are reached. */
+const onPath = new Set(fx.concepts.map((c) => c.id));
+const filed = coach.segments.flatMap((s) => s.submissions);
+check(filed.filter((x) => onPath.has(x.conceptId)).length > 0 && filed.filter((x) => !onPath.has(x.conceptId)).length > 0,
+  'AC4: the fixture needs a filed submission both on and off the path');
+check(filed.every((x) => (onPath.has(x.conceptId) ? x.title && x.title !== x.conceptId : x.title === x.conceptId)),
+  'AC4: a filed submission is not named by its lesson title, or an off-path one lost its slug');
 
 // ── AC5: NOTHING SAYS WHETHER AN OBJECTIVE IS COMPLETE (L114) ───────────────
 const VERDICT = /complete|done|remaining|missing|outstanding|score/i;
@@ -250,6 +258,60 @@ for (const k of ['heading', 'archived', 'filedUnder', 'expecting', 'needs', 'not
 const conns = JSON.parse(readFileSync(join(ROOT, 'Logic/Dossier', 'connections.json'), 'utf8')).connections;
 check(!conns.some((k) => k.toId === 'do_fn' && k.toProperty === 'run'),
   'Logic/Dossier is now run-driven — untick runOnChange-in-* on every input (L165) and update this check');
+
+// ── L167: THE METER, RENDERED BY THE KIT ITSELF ──────────────────────────────
+/* The kit's own DossierSegment, server-rendered over the learner's real
+   segments with the product's React — so this proves what the NODE draws from
+   what Logic/Dossier gives it, not a transcription of either. The dialog's
+   behaviour (Escape, focus, the Tab trap) is a browser's to prove, and is. */
+const { createRequire } = await import('node:module');
+const req = createRequire(join(DBT_REPO, 'package.json'));
+globalThis.React = req('react');
+globalThis.ReactDOM = req('react-dom/server');
+let kitModule;
+globalThis.Noodl = { defineModule: (k) => { kitModule = k; } };
+new Function(readFileSync(join(here, '..', 'noodl_modules', 'dbt-lesson', 'index.js'), 'utf8'))();
+const kitNode = (name) => kitModule.reactNodes.find((n) => n.name === 'dbt-lesson.' + name).getReactComponent();
+const SSR = req('react-dom/server');
+const html = learner.segments.map((s) =>
+  SSR.renderToString(React.createElement(kitNode('DossierSegment'), {
+    label: s.label, ariaLabel: s.ariaLabel, hasFacts: s.hasFacts, fillPct: s.fillPct, caption: s.caption
+  })));
+check(html.length === 3 && html.every((x) => /<button[^>]*class="dossier-segment/.test(x)), 'L167 AC1: not three segments, each a button');
+check(html.filter((x) => x.includes('dossier-segment-bar')).length === 2, 'L167 AC1: not exactly two segments carry a bar');
+const emptyHtml = html[learner.segments.indexOf(empty)];
+check(emptyHtml && !/dossier-segment-(bar|caption)/.test(emptyHtml), 'L167 AC1: the empty objective carries a bar or a caption');
+const visible = (x) => x.replace(/<[^>]*>/g, ' ');
+check(html.every((x) => !/\d\s*%|\d+\s*(\/|of)\s*\d+|✗/.test(visible(x) + ' ' + (x.match(/aria-label="([^"]*)"/) || [])[1])),
+  'L167: a segment prints a percentage, a fraction or a cross in its text or its accessible name');
+// Closed is nothing, and so is OPEN under a server render (no document, no portal).
+const rev = (props) => SSR.renderToString(React.createElement(kitNode('DossierReveal'), props));
+check(rev({ open: false, segment: learner.segments[0] }) === '<div class="dbt-dossier-reveal"></div>', 'L167: a closed reveal renders something');
+check(rev({ open: true, segment: learner.segments[0] }) === '<div class="dbt-dossier-reveal"></div>', 'L167: an open reveal rendered during a server render');
+// The fixture reaches L167 AC6: one filed submission on the lesson page's concept.
+const lessonConcept = JSON.parse(nodeIn('Data/Fixture lesson', 'fx_data').parameters.json)[0].conceptId;
+check(learner.segments.some((s) => s.submissions.some((x) => x.conceptId === lessonConcept)) &&
+  learner.segments.some((s) => s.submissions.some((x) => x.conceptId !== lessonConcept)),
+  'L167 AC6: the meter needs work filed on the lesson page and work filed elsewhere');
+check(learner.segments.every((s) => s.id === s.slug), 'L167: a segment row is not keyed by its slug');
+
+/* DECISION 1, AS A GUARD: the reveal is the kit's, never Show Popup, and a
+   captured value never takes the markdown path. */
+const courseNodes = JSON.parse(readFileSync(join(ROOT, 'Pages/Course', 'nodes.json'), 'utf8')).nodes;
+check(!courseNodes.some((n) => /popup/i.test(n.type)), 'L167 decision 1: /course uses a popup node — the reveal is the kit’s DossierReveal until HLT-014');
+check(courseNodes.filter((n) => n.type === 'dbt-lesson.DossierReveal').length === 1, 'L167: /course needs exactly one DossierReveal');
+const kitSrc = readFileSync(join(here, '..', '..', '..', 'library', 'modules', 'dbt-lesson', 'src', 'kit.js'), 'utf8');
+const dialogSrc = kitSrc.slice(kitSrc.indexOf('function DossierDialog('), kitSrc.indexOf('function DossierRevealView('));
+check(dialogSrc.length > 0 && !/\bmd\(/.test(dialogSrc) && !/dangerouslySetInnerHTML/.test(dialogSrc),
+  'L167: the reveal renders a learner’s value through markdown or raw HTML');
+// Every run-driven Function on /course unticks runOnChange on each input (L165).
+const courseConns = JSON.parse(readFileSync(join(ROOT, 'Pages/Course', 'connections.json'), 'utf8')).connections;
+for (const n of courseNodes.filter((x) => x.type === 'JavaScriptFunction')) {
+  if (!courseConns.some((k) => k.toId === n.id && k.toProperty === 'run')) continue;
+  for (const port of (n.ports || []).filter((q) => q.plug === 'input' && q.name.startsWith('in-'))) {
+    check(n.parameters[`runOnChange-${port.name}`] === false, `L165: ${n.id} is run-driven and still runs when ${port.name} changes`);
+  }
+}
 
 if (failures.length) {
   console.error(`check-dossier: ${failures.length} failure(s)`);

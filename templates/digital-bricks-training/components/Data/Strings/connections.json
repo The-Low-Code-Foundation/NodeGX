@@ -134,6 +134,12 @@
       "fromProperty": "out-jsonPeople",
       "toId": "str_out",
       "toProperty": "jsonPeople"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonDossier",
+      "toId": "str_out",
+      "toProperty": "jsonDossier"
     }
   ]
 }

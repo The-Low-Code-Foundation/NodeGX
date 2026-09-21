@@ -1205,7 +1205,7 @@
    */
   var COPY_PORT = obj('Copy', {
     description:
-      'The resolved string bundle, { common, lesson, timeline }. Wire Data/Strings. ' +
+      'The resolved string bundle, { common, lesson, timeline, dossier }. Wire Data/Strings. ' +
       'Unwired, or missing a key, the node renders its built-in English — never a raw key and never blank.'
   });
 
@@ -2398,6 +2398,331 @@
     outputProps: {}
   };
 
+  // ── WHAT THEY MUST PRODUCE: THE METER AND ITS REVEAL (TASK-L167, sprint 48) ──
+  //
+  // Sources, in the product's repo:
+  //   DossierSegment -> the two <button> branches of DossierMeter.tsx
+  //   DossierReveal  -> DossierFactsModal.tsx, with every accessibility
+  //                     property it has: role="dialog" + aria-modal, Escape +
+  //                     overlay + Close, focus in and back to the trigger, a Tab
+  //                     trap, the body's scroll locked and RESTORED, and a
+  //                     portal to document.body.
+  //
+  // WHY A KIT NODE AND NOT `Show Popup` (sprint 48 decision 1). The runtime's
+  // popup is a plain Group: no dialog semantics, no Escape, no focus handling,
+  // and `Dismissed` means "replaced", never "closed by the user". A graph-native
+  // port would regress all six properties above. OpenNoodl HLT-014 makes the
+  // popup a real dialog for every app; when it lands this node is a CANDIDATE
+  // for replacement, not a commitment.
+  //
+  // BOTH NODES COMPUTE NOTHING. Logic/Dossier is the one owner of what each
+  // objective holds — its label, its aria-label, its caption, its bar width, what
+  // it asks for, its markdown. A second derivation here would let the meter and
+  // the coach's list disagree (L166 §2).
+
+  function dossierCopy(p) { return copyNs(p, 'dossier', DOSSIER_COPY); }
+
+  function DossierSegmentView(p) {
+    var hasFacts = !!p.hasFacts;
+    var label = str(p.label);
+    /*
+     * AN EMPTY OBJECTIVE IS REACHABLE AND QUIET (L144 §2). A button with its
+     * label and NOTHING ELSE: no bar, no caption, no "0 facts". LX17 made an
+     * empty segment inert; when every segment was empty the whole block was, and
+     * that was the bug. It opens to what it asks for, never to what is missing.
+     */
+    var children = [h('span', { key: 'l', className: 'dossier-segment-label' }, label)];
+    if (hasFacts) {
+      var w = Math.max(0, Math.min(100, Number(p.fillPct) || 0));
+      children.push(
+        // A WIDTH, never a number: the bar is aria-hidden and its value is never
+        // written as text or into the accessible name.
+        h('div', { key: 'b', className: 'dossier-segment-bar', 'aria-hidden': 'true' },
+          h('div', { className: 'dossier-segment-fill', style: { width: w + '%' } })),
+        h('span', { key: 'c', className: 'dossier-segment-caption' }, str(p.caption))
+      );
+    }
+    return h(
+      'button',
+      {
+        type: 'button',
+        className: hasFacts ? 'dossier-segment has-facts dossier-segment-trigger' : 'dossier-segment dossier-segment-trigger',
+        'aria-label': str(p.ariaLabel) || undefined,
+        onClick: function () {
+          emit(p, 'onOpened');
+        }
+      },
+      children
+    );
+  }
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var DossierSegment = {
+    name: KIT + '.DossierSegment',
+    displayNodeName: 'Course: Dossier segment',
+    docs:
+      'One objective on the learner’s dossier meter, as a button that opens it. With something captured: its label, a bar and “N facts captured”. Empty: its label and nothing else — never a bar, a caption or a 0 — and still a button, because an empty objective opens to what it asks for. Every word arrives resolved from Logic/Dossier; this node computes nothing.',
+    noodlNodeAsProp: true,
+    usePortAsLabel: 'label',
+    getReactComponent: function () {
+      return function DossierSegmentNode(props) {
+        var el = useRoot(props);
+        return h('div', { ref: el, className: 'dbt-dossier-segment', style: props.style }, h(DossierSegmentView, props));
+      };
+    },
+    inputProps: {
+      label: text('Label', { description: 'The objective’s name — the trainer’s own title, or the pack label. Logic/Dossier resolves it.' }),
+      ariaLabel: text('Accessible name', { description: 'What pressing it opens, in words. Logic/Dossier resolves it.' }),
+      hasFacts: port('boolean', 'Has facts', { default: false, description: 'Whether anything is captured under it. False draws the label alone.' }),
+      fillPct: num('Bar width', { default: 0, description: 'The bar’s width, 0–100. A width only: it is never written as a number anywhere the learner reads.' }),
+      caption: text('Caption', { description: '“N facts captured” — what IS there. Empty when nothing is.' })
+    },
+    outputProps: {
+      onOpened: sig('Opened', 'The learner pressed this objective.')
+    }
+  };
+
+  /** Clipboard write with the product's legacy execCommand fallback, so it never silently no-ops. */
+  function copyText(text) {
+    function legacy() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) {
+        return false;
+      }
+    }
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(
+          function () { return true; },
+          function () { return legacy(); }
+        );
+      }
+    } catch (e) {
+      /* fall through */
+    }
+    return Promise.resolve(legacy());
+  }
+
+  var DOSSIER_TITLE_ID = 'dossier-modal-title';
+
+  function DossierDialog(p) {
+    var C = dossierCopy(p);
+    var seg = data(p.segment, {}) || {};
+    var dialogRef = R.useRef(null);
+    var copiedState = R.useState(false);
+    var copied = copiedState[0];
+    var setCopied = copiedState[1];
+    var resetRef = R.useRef(null);
+    // The latest props, read by the one effect below without re-running it.
+    var live = R.useRef(p);
+    live.current = p;
+
+    function close() {
+      emit(live.current, 'onClosed');
+    }
+
+    /*
+     * THE PRODUCT'S EFFECT, PROPERTY FOR PROPERTY. It runs ONCE per opening:
+     * the trigger and the body's previous overflow are captured at open, which
+     * is exactly why the dialog is a component that MOUNTS on open rather than a
+     * permanent one toggled by a class — a capture on first render would record
+     * whatever had focus when the page loaded.
+     */
+    R.useEffect(function () {
+      var trigger = document.activeElement;
+      var prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      if (dialogRef.current) dialogRef.current.focus();
+
+      function onKeyDown(e) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          close();
+          return;
+        }
+        if (e.key !== 'Tab') return;
+        var focusable = dialogRef.current
+          ? dialogRef.current.querySelectorAll('button, [href], input, textarea, [tabindex]:not([tabindex="-1"])')
+          : null;
+        if (!focusable || focusable.length === 0) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        // Focus on the dialog box itself (where it lands on open) is inside
+        // too: a Shift+Tab from there must not walk out to the page.
+        var at = document.activeElement;
+        if (e.shiftKey && (at === first || at === dialogRef.current)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && at === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+
+      document.addEventListener('keydown', onKeyDown);
+      return function () {
+        document.removeEventListener('keydown', onKeyDown);
+        // RESTORED to what it was, never to "" — a page that had its own
+        // overflow must get it back.
+        document.body.style.overflow = prevOverflow;
+        if (resetRef.current) clearTimeout(resetRef.current);
+        if (trigger && typeof trigger.focus === 'function') trigger.focus();
+      };
+    }, []);
+
+    function handleCopy() {
+      var md = str(seg.markdown);
+      copyText(md).then(function (ok) {
+        if (!ok) return;
+        setCopied(true);
+        emit(live.current, 'onCopied');
+        if (resetRef.current) clearTimeout(resetRef.current);
+        resetRef.current = setTimeout(function () { setCopied(false); }, 2000);
+      });
+    }
+
+    var asksFor = data(seg.asksFor, []) || [];
+    var captured = data(seg.captured, []) || [];
+    var submissions = data(seg.submissions, []) || [];
+    var lessonId = str(p.lessonConceptId);
+
+    var body = [];
+    /*
+     * WHAT IT ASKS FOR, FIRST — it is what the objective IS, and for an empty
+     * one it is the only thing there is to read. A plain list in the same ink:
+     * no tick, no cross, no count, no "still to do".
+     */
+    if (asksFor.length > 0) {
+      body.push(
+        h('div', { key: 'asks', className: 'dossier-fact' },
+          h('span', { className: 'dossier-fact-name' }, C.asksFor),
+          h('span', { className: 'dossier-fact-value' },
+            asksFor.map(function (f, i) {
+              return h('span', { key: i, className: 'dossier-asks-item' }, str(f));
+            })))
+      );
+    }
+    if (captured.length === 0) {
+      body.push(h('p', { key: 'empty', className: 'dossier-empty-note' }, C.nothingYet));
+    }
+    captured.forEach(function (fact) {
+      body.push(
+        h('div', { key: 'f-' + str(fact.field), className: 'dossier-fact' },
+          h('span', { className: 'dossier-fact-name' }, str(fact.name)),
+          // THE LEARNER'S WORDS ARE TEXT. Never the markdown path: an answer is
+          // not a lesson, and React's escaping is the whole boundary here.
+          h('span', { className: 'dossier-fact-value' }, str(fact.value)))
+      );
+    });
+    if (submissions.length > 0) {
+      body.push(
+        h('div', { key: 'work', className: 'dossier-fact' },
+          h('span', { className: 'dossier-fact-name' }, C.workForThis),
+          h('span', { className: 'dossier-fact-value' },
+            submissions.map(function (sub) {
+              var key = str(sub.conceptId) + '-' + str(sub.submittedAt);
+              /*
+               * ONE LINK, AND IT GOES SOMEWHERE. The product links every
+               * submission to its lesson; this template has ONE lesson page, and
+               * a link to a lesson that does not exist here is a control that
+               * goes nowhere (L165's one-name-links precedent). So the work on
+               * THAT lesson is a button and the rest are plain text.
+               */
+              if (lessonId && str(sub.conceptId) === lessonId) {
+                return h(
+                  'button',
+                  {
+                    key: key,
+                    type: 'button',
+                    className: 'dossier-submission-link',
+                    onClick: function () {
+                      emit(live.current, 'onLessonOpened');
+                    }
+                  },
+                  str(sub.title)
+                );
+              }
+              return h('span', { key: key, className: 'dossier-submission-text' }, str(sub.title));
+            })))
+      );
+    }
+
+    return h(
+      'div',
+      { className: 'dossier-modal-overlay', role: 'presentation', onClick: close },
+      h(
+        'div',
+        {
+          ref: dialogRef,
+          className: 'dossier-modal',
+          role: 'dialog',
+          'aria-modal': 'true',
+          'aria-labelledby': DOSSIER_TITLE_ID,
+          tabIndex: -1,
+          onClick: function (e) {
+            e.stopPropagation();
+          }
+        },
+        h('div', { className: 'dossier-modal-header' },
+          h('h3', { id: DOSSIER_TITLE_ID, className: 'dossier-modal-title' }, str(seg.label)),
+          h('button', { type: 'button', className: 'dossier-modal-close', onClick: close, 'aria-label': C.modalClose }, '✕')),
+        h('div', { className: 'dossier-modal-body' }, body),
+        h('div', { className: 'dossier-modal-footer' },
+          h('button', { type: 'button', className: 'dossier-modal-copy-btn', onClick: handleCopy }, copied ? C.modalCopied : C.modalCopy))
+      )
+    );
+  }
+
+  function DossierRevealView(p) {
+    var seg = data(p.segment, null);
+    /*
+     * CLOSED RENDERS NOTHING, and that is a server-render requirement rather
+     * than tidiness: a kit's script runs in the page's SSR too (sprint 44),
+     * where there is no `document` and the ReactDOM global is ReactDOMServer,
+     * which has no createPortal. Only an OPEN reveal touches either, and
+     * nothing opens during a server render.
+     */
+    if (!p.open || !seg || typeof seg !== 'object') return null;
+    if (typeof document === 'undefined' || typeof ReactDOM === 'undefined' || !ReactDOM.createPortal) return null;
+    return ReactDOM.createPortal(h(DossierDialog, p), document.body);
+  }
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var DossierReveal = {
+    name: KIT + '.DossierReveal',
+    displayNodeName: 'Course: Dossier reveal',
+    docs:
+      'The dialog one objective opens to: what it asks for, what the learner has captured under it (as text, never markdown), the work they sent in for it, and Copy as markdown. A REAL dialog — role and aria-modal, Escape, the overlay and Close all close it, focus goes in and comes back to the button that opened it, Tab stays inside, and the page does not scroll behind it. Renders nothing while closed. One per page; wire Segment from Logic/Dossier.',
+    noodlNodeAsProp: true,
+    getReactComponent: function () {
+      return function DossierRevealNode(props) {
+        var el = useRoot(props);
+        return h('div', { ref: el, className: 'dbt-dossier-reveal', style: props.style }, h(DossierRevealView, props));
+      };
+    },
+    inputProps: {
+      open: port('boolean', 'Open', { default: false, description: 'Whether the dialog is showing. The graph owns it: Opened on a segment sets it, Closed here clears it.' }),
+      segment: obj('Segment', { description: 'The objective to show — one of Logic/Dossier’s segments: { label, asksFor[], captured[{field,name,value}], submissions[{conceptId,title,submittedAt}], markdown }.' }),
+      lessonConceptId: text('Lesson concept', { description: 'The concept the one lesson page in this app renders. Work on it is a button; work on any other lesson is plain text, because there is nowhere for it to go.' }),
+      copy: COPY_PORT
+    },
+    outputProps: {
+      onClosed: sig('Closed', 'Escape, the overlay or Close. Clear Open.'),
+      onCopied: sig('Copied', 'The objective’s markdown is on the clipboard.'),
+      onLessonOpened: sig('Lesson opened', 'The learner pressed the work they sent in on this app’s lesson. Navigate to it.')
+    }
+  };
+
+
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     reactNodes: h
@@ -2424,7 +2749,9 @@
           Section,
           TimelineRow,
           PaceTracker,
-          RatingGauge
+          RatingGauge,
+          DossierSegment,
+          DossierReveal
         ]
       : []
   };

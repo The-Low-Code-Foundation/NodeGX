@@ -13,7 +13,12 @@ So what is asserted here is:
   2. nothing else DECIDES a language: no other node carries a Language/locale
      parameter, and the bundles take theirs from the owner by wire;
   3. every `/Data/Strings` instance is told the language, because an instance
-     that is not told silently serves English while the rest of the page moves.
+     that is not told silently serves English while the rest of the page moves;
+  4. every `Translation` node names a namespace some `Language Bundle` actually
+     registers, with its Bundle wired. A Translation on an unregistered
+     namespace resolves to nothing and the Text it feeds keeps its editor
+     default -- measured: L167's dossier eyebrow read "TEXT" on /course, with
+     every other tool green (TASK-L167).
 
 Run: python3 tools/check-language-owner.py
 """
@@ -21,7 +26,8 @@ import json, os, sys, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANGY = ('language', 'locale', 'lang')
-problems, checked = [], {'components': 0, 'nodes': 0, 'i18next': 0, 'strings_instances': 0}
+problems, checked = [], {'components': 0, 'nodes': 0, 'i18next': 0, 'strings_instances': 0, 'translations': 0, 'bundles': 0}
+translations, registered = [], set()
 
 
 def components():
@@ -58,6 +64,12 @@ for name, nodes, conns in components():
                     problems.append(f'{name}/{nid} ({t}): parameter "{k}" names a language. '
                                     'Only the i18next node in App decides that.')
 
+        # 4. collected here, asserted after the walk.
+        if t == 'Translation':
+            translations.append((name, nid, params.get('Namespace')))
+        if t == 'Language Bundle' and [c for c in conns if c['toId'] == nid and c['toProperty'] == 'Bundle']:
+            registered.add(params.get('Namespace'))
+
         # 3. a string table that is never told the language serves English in silence.
         if t == '/Data/Strings':
             checked['strings_instances'] += 1
@@ -66,11 +78,19 @@ for name, nodes, conns in components():
                     f'{name}/{nid}: this /Data/Strings instance has no `language` input wired, so it '
                     'resolves to English whatever the owner says, and its kit copy will not switch.')
 
+checked['translations'], checked['bundles'] = len(translations), len(registered)
+for name, nid, ns in translations:
+    if ns not in registered:
+        problems.append(f'{name}/{nid}: a Translation reads namespace "{ns}", which no wired Language Bundle '
+                        'registers, so it resolves to nothing and its Text shows the editor default. Add a '
+                        'Language Bundle for it in App, fed from Data/Strings (TASK-L167).')
+
 if checked['i18next'] != 1:
     problems.append(f'expected exactly ONE i18next node in the project, found {checked["i18next"]}.')
 
 # guard-the-guard: a walk that finds nothing makes every assertion pass by testing nothing.
-if checked['components'] < 10 or checked['nodes'] < 100 or checked['strings_instances'] < 1:
+if checked['components'] < 10 or checked['nodes'] < 100 or checked['strings_instances'] < 1 \
+        or checked['translations'] < 10 or checked['bundles'] < 5:
     problems.append(f'the walk itself looks wrong: {checked} -- refusing to report a pass.')
 
 print(f'checked {checked}')

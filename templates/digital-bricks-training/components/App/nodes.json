@@ -175,6 +175,19 @@
       "metadata": {
         "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
       }
+    },
+    {
+      "id": "app_ns_dossier",
+      "type": "Language Bundle",
+      "label": "dossier → i18next",
+      "x": 1060,
+      "y": 740,
+      "parameters": {
+        "Namespace": "dossier"
+      },
+      "metadata": {
+        "comment": "The dossier's eyebrow on /course is a graph Translation (TASK-L167). Without this bundle it resolved to nothing and the Text showed its editor default, TEXT — which is why tools/check-language-owner.py now asserts every Translation's namespace is registered here."
+      }
     }
   ],
   "visualRoots": [

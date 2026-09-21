@@ -1,11 +1,14 @@
 # Digital Bricks lesson kit (`dbt-lesson`)
 
-Twenty-three NodeGX nodes. Twenty of them are the LESSON: one per member of Digital Bricks
+Twenty-five NodeGX nodes. Twenty of them are the LESSON: one per member of Digital Bricks
 Training's closed section palette (the 19 kinds its `section.schema.ts` enumerates) and a `Section`
 dispatcher that renders any section object by its `kind` — the node a `For Each` over a lesson's
 `sections` array places.
 
-The other three are the learner's PROGRAMME. `TimelineRow` draws one entry of it, folded or open.
+Three are the learner's PROGRAMME and two are their DOSSIER: `DossierSegment` is one objective on
+the meter, as a button, and `DossierReveal` is the dialog it opens.
+
+Of the programme's three: `TimelineRow` draws one entry of it, folded or open.
 `PaceTracker` and `RatingGauge` draw **where they are**: their own line against the pace their own
 programme needs, and how far each agreed objective is from its goal. **Neither computes anything** —
 every number arrives as a fraction the graph has already worked out (`Logic/Standing` in the
@@ -51,6 +54,8 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 | `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
 | `PaceTracker` | `view` (object), `par` (array), `headline`, `legendActual`, `legendPar` | — |
 | `RatingGauge` | `gauge` (object) | — |
+| `DossierSegment` | `label`, `ariaLabel`, `hasFacts`, `fillPct`, `caption` | Opened |
+| `DossierReveal` | `open`, `segment` (object), `lessonConceptId`, `copy` | Closed, Copied, Lesson opened |
 | `Reading` | `markdown`, `detail` | — |
 | `Callout` | `tone` (jargon / tip / warning / reassurance), `markdown` | — |
 | `AnswerCapsule` | `text` | — |
@@ -143,6 +148,32 @@ line cannot be Groups, and a gauge's four marks are absolutely positioned agains
   so a `width` parameter on a kit-node instance is silently discarded — and the validator cannot
   say so, because a module node is not in the catalogue and its parameter check is skipped rather
   than run. The stylesheet declares `width: 100%` on all three programme roots instead.
+
+## `DossierSegment` and `DossierReveal` — a real dialog, until the runtime has one
+
+The product's `DossierMeter` and `DossierFactsModal`, with every word already resolved by the
+graph's `Logic/Dossier` — label, accessible name, caption, bar width, what it asks for, the
+markdown. Neither node derives any of it.
+
+- **Why the reveal is a kit node.** NodeGX's `Show Popup` is a plain Group: no `role="dialog"`, no
+  Escape, no focus handling, and its `Dismissed` means *replaced by another popup*, never *closed by
+  the user*. A graph-native reveal would regress all six of the product's accessibility properties.
+  OpenNoodl `HLT-014` makes the popup a dialog for every app; when it lands this node is a
+  candidate for replacement.
+- **The six properties**: `role="dialog"` + `aria-modal` + `aria-labelledby`; Escape, the overlay and
+  Close all emit `Closed` and a click inside does not; focus moves in on open and back to the
+  element that had it (captured at open, so the dialog MOUNTS on open rather than toggling); Tab and
+  Shift+Tab stay inside; `body.style.overflow` is `hidden` while open and restored to its previous
+  value, never to `""`; and it portals to `<body>`.
+- **Closed renders nothing, and so does open during a server render.** A kit's script runs in the
+  page's SSR, where there is no `document` and the `ReactDOM` global is `ReactDOMServer`, which has
+  no `createPortal`.
+- **A captured value is text.** Never the markdown path and never raw HTML: an answer is not a
+  lesson.
+- **An empty segment is still a button** — its label and nothing else, no bar, no caption, no `0`.
+  The bar's width is never written as a number, in text or in an accessible name.
+- **One submission link, at most.** Work on `lessonConceptId` is a button emitting `Lesson opened`;
+  work on any other concept is plain text, because the app has nowhere to send it.
 
 ## Four renders are placeholders, and why
 
