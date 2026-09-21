@@ -75,3 +75,42 @@ paint bug in P94's §3.2 unless it is the same seam — and if it is, that is a 
   managing, or P94's ruling is lost rather than superseded.
 - ⚠️ **`metadata.styles: null` is the normal case, not an edge case.** Any fixture that populates it
   is testing a project nobody has.
+
+---
+
+## ✅ UNBLOCKED — 2026-09-21. R1 ruled YES, and no ruling was ever required.
+
+**Richard, 2026-09-21:** *"The picker is for picking sure, so why wouldn't I be allowed to pick a
+design token?"*
+
+🔴 **This task was blocked on a misreading, and the misreading is instructive.** P94's R1 is quoted
+in full in that phase's README:
+
+> **Q:** Does the panel **replace** the in-node pickers, or sit beside them?
+> **A:** 🟢 BESIDE. The picker stays for *picking* on a selected node; the panel is for *managing* —
+> create, rename, delete, see what uses it
+
+That answers *whether the panel supersedes the picker*. It **preserves** the picker as the picking
+surface and keeps **management** out of it. It says nothing about which values may be picked — and
+"the picker stays for picking" is, if anything, an argument that picking has to work.
+
+🔴 **P94 did not merely permit tokens in the picker; it repaired them.** `STY-007`, the task that
+**closed the phase**, fixed *"every `var(--…)` swatch in the colour picker painted nothing"* — a
+defect **Richard found himself** in the after-picture. And `STY-001` §5 set out to measure
+*"Does a `designTokens` colour appear in the colour picker's list?"* as an open question. A phase
+that fixes token swatches inside a surface has not ruled that surface out of scope.
+
+⚠️ **THEREFORE §2's PREMISE IS SUSPECT AND MUST BE RE-MEASURED FIRST.** §2 says *no* property-editor
+picker enumerates design tokens *at all*. That cannot be true unchanged of the **colour** picker,
+whose `var(--…)` rows P94 fixed — token rows reach it by some path. The most likely shape is **two
+pickers with two different sources**: the colour picker receiving tokens via element configs or the
+suggestion host, and `colorstylepicker.jsx:81` / `TextStylePicker.jsx:29`'s own lists reading the
+legacy `metadata.styles` layer that is `null` in real projects. **Measure which before writing a
+line** — this phase's task files have now been materially wrong three times out of three
+([[measure-the-artefact-before-believing-the-task-file]]).
+
+**The reusable lesson, which is bigger than this row:** a ruling is an answer to a *specific
+question*, and this phase recorded the answer without the question. "BESIDE" became "the picker is
+out of scope" became "building it reverses Richard's ruling" — three paraphrases, each defensible,
+ending in a false prohibition that blocked a row for a session and was only broken by Richard asking
+the obvious question. **Carry the question with the ruling, or quote it verbatim.**

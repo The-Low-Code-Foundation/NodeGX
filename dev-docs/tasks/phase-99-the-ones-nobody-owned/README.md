@@ -73,9 +73,18 @@ A task that fixes its error must re-measure on **its own** driven session, not s
 - **P94 is CLOSED**, all seven STY tasks ruled WORTHY at s10. ⚠️ Its `README.md` status header is
   **stale** and still reads as open; its own task table and `NEXT-SESSION-PROMPT.md:1` say closed.
   Do not read P94's README as an open phase. Fixing that header is HLT-010's smallest job.
-- **P94 ruled the colour picker OUT of scope on purpose** (its R1: *"BESIDE. The picker stays for
-  *picking* on a selected node; the panel is for *managing*"*). HLT-006 therefore **needs a ruling
-  before it is built**, not a fix — see §6.
+- 🔴 **CORRECTED 2026-09-21 (Richard). P94 did NOT rule the colour picker out of scope, and this
+  bullet previously said it did.** Read P94's R1 as *asked and answered*: the question was **"does
+  the panel REPLACE the in-node pickers, or sit beside them?"** and the answer was **"BESIDE. The
+  picker stays for *picking* on a selected node; the panel is for *managing* — create, rename,
+  delete, see what uses it"**. That ruling **preserves** the picker as the picking surface and keeps
+  *management* out of it. It says nothing about which values the picker may offer. Richard,
+  2026-09-21: *"The picker is for picking sure, so why wouldn't I be allowed to pick a design
+  token?"* And P94 went further than permitting it: **STY-007, the task that CLOSED the phase,
+  fixed "every `var(--…)` swatch in the colour picker painted nothing" — a defect Richard found
+  himself.** P94 treated tokens in the picker as belonging there and repaired them. **HLT-006 needs
+  no ruling and never did** — this bullet was a paraphrase of a paraphrase
+  ([[a-relayed-conclusion-decays-faster-than-a-relayed-measurement]]).
 - **The Styles panel's two-level nesting is the ruled design**, not a defect: P94 `STY-005` AC2 and
   AC8, closed on Richard's look. HLT-007 takes only the half nobody ruled on.
 - P93's `TVW-008 §11.4` files four of these with *suggested* destinations. Those were suggestions,
@@ -102,7 +111,7 @@ that ships red and gets switched off ([[a-gate-can-have-a-hole-shaped-like-the-d
 | id | task | depends on |
 |---|---|---|
 | [HLT-005](./HLT-005-THE-COMMENT-THAT-OVERFLOWS.md) | The node comment input grows horizontally and overflows right. **One line**: `NodeComment.tsx:145` `flex: '0 0 auto'` inside a **row** flex container (`ScrollArea.module.scss:39`), so it sizes to the max-content width of a `pre-wrap` mirror with no `max-width`. Vertical growth **is** capped at 184px; horizontal has no equivalent. The control is the Properties tab beside it, which uses `flex: 1`. ⚠️ Filed six times in P92 CHR-009's "Left" lists, never once as an acceptance criterion — then CHR-009 closed | — |
-| [HLT-006](./HLT-006-THE-PICKER-CANNOT-SEE-A-TOKEN.md) | 🔴 **NEEDS A RULING FIRST (§6 R1).** No property-editor picker enumerates design tokens at all: `colorstylepicker.jsx:81` and `TextStylePicker.jsx:29` read the legacy `project.metadata.styles` layer via `StylesModel.getStyles()`, which is `null` in real projects, plus a scan restricted to ports of `type === 'color'`. Named as FIX-015 gap I in **closed** P66, green-lit into its own phase, and that phase (P94) ruled the picker out of scope and closed | R1 |
+| [HLT-006](./HLT-006-THE-PICKER-CANNOT-SEE-A-TOKEN.md) | ✅ **UNBLOCKED 2026-09-21 — R1 ruled YES by Richard, and it turned out no ruling was ever needed** (see §4 and §6: P94's R1 answered *"does the panel replace the picker?"*, not *"may the picker offer tokens?"*). Richard: *"The picker is for picking sure, so why wouldn't I be allowed to pick a design token?"* ⚠️ **And §2's premise must be RE-MEASURED before it is built.** It says *no* picker enumerates tokens *at all*, but P94's STY-007 fixed `var(--…)` swatches **painting nothing in the colour picker** — so token rows evidently reach that picker by some path, and "enumerates none" cannot be true of it unchanged. Likely two different pickers with two different sources; measure which, per this phase's 3-for-3 record of task files being wrong. `colorstylepicker.jsx:81` / `TextStylePicker.jsx:29` read the legacy `metadata.styles` layer (`null` in real projects) | — |
 | [HLT-007](./HLT-007-THE-TWO-THINGS-P94-DID-NOT-RULE-ON.md) | Two halves nobody ruled on. **(a)** `TextStylesSection.tsx:28` reads `getStyles('text')` — the legacy layer — so the section a person looks in first is empty in every real project, while the token is filed under *Other tokens → Typography*. **(b)** 🔴 `getGroupForToken` (`TokensSection.tsx:144-152`) is a **second copy** of the category→group table returning `null` for unmapped categories, **silently dropping them from the panel** — its own docblock records this happening to `gradient` ([[a-second-copy-of-a-palette-drifts-silently]]) | — |
 
 ### Track C — the board, moved here from P93
@@ -136,7 +145,7 @@ reason that was caught.
 
 | # | question, in plain words | why it cannot be assumed |
 |---|---|---|
-| **R1** | **Should the colour/text picker on a node offer the project's design tokens?** Today it offers only the old style system, which is empty in every real project — so the picker is effectively blank while the Styles panel has 88 tokens. P94 deliberately decided the picker is for *picking* and the panel is for *managing*, and closed on that. Reversing it is a design change, not a bug fix | Building it without asking overturns a ruling Richard already gave, on a phase he already closed on his own look |
+| **R1** | ~~Should the colour/text picker on a node offer the project's design tokens?~~ ✅ **RULED 2026-09-21 — YES, and no ruling was ever required.** Richard: *"The picker is for picking sure, so why wouldn't I be allowed to pick a design token?"* The blocker was this phase misreading P94's R1, which answered *"does the panel REPLACE the picker?"* (→ beside) and not *"may the picker offer tokens?"*. P94 also shipped a token fix **inside** the colour picker (STY-007, the task that closed the phase). | **The lesson, not the ruling:** a row sat blocked because a phase README paraphrased another phase's ruling instead of carrying the QUESTION it answered. An answer without its question drifts into a general prohibition |
 
 Everything else in §5 is a defect with a measured count and needs no ruling.
 
