@@ -177,7 +177,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+      # 🔴 The runner's `chrome-sandbox` is not root-owned 4755, so a sandboxed Electron aborts with
+      # SIGTRAP before a window exists. That is how this job's first two runs died (2026-09-22; the
+      # uploaded log says `setuid_sandbox_host.cc:166`). `Test (editor)` avoids it the same way —
+      # see `run-electron-tests.js:132`. CI only; the editor that ships keeps its sandbox.
       - name: Drive the editor and grade its log
+        env:
+          ELECTRON_DISABLE_SANDBOX: '1'
         run: xvfb-run --auto-servernum -s "-screen 0 1280x1024x24" npm run renderer-errors
       # The gate keeps its log on any non-zero exit. Without this the first Linux run (2026-09-22)
       # died before React mounted and took the only record of why with the runner.
