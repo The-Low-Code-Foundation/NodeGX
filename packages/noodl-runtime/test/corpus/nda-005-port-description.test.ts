@@ -170,7 +170,8 @@ describe('NDA-005 C1: every static port of the Record family is described', () =
     {
       typeName: 'SetDbModelProperties',
       module: '../../src/nodes/std-library/data/setdbmodelpropertiesnode',
-      staticPorts: 12
+      // 12 → 13: P99 HLT-016 added `onlyIfUnchanged` (described; see the port's own `description`).
+      staticPorts: 13
     },
     {
       typeName: 'DeleteDbModelProperties',

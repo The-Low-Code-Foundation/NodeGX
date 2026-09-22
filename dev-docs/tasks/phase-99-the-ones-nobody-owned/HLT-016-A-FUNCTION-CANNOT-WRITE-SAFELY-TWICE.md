@@ -5,6 +5,15 @@ request.** Offered the choice between designing the template around the gap and 
 primitive first, he chose the primitive: *"Core primitive first."* **Specced, not built** — the
 template's first writes (its sprint 50) wait on it. Measured by reading the source.
 
+## ✅ (a) BUILT 2026-09-22 (P99 s16) — AC1–AC5 ✅ on SQLite AND PostgreSQL. AC6 is the DBT stream's. [Verdict](./verdicts/HLT-016/2026-09-22/VERDICT.md)
+
+`X-NodeGX-If: {"version":3}` on `PUT /classes/:c/:id`, in the same UPDATE as the ACL; **409**
+`reason: "precondition-failed"` when the row changed since it was read; `Noodl.Records.save(…,
+{ ifMatch })`; Update Record's **Only If Unchanged**. The race was reproduced first (both callers
+told 200, one fact lost), then guarded (one 409; the loser re-reads, retries, nothing lost).
+⚠️ §2 missed that a zero-row UPDATE **without an ACL** answered 200. 📋 Not built: the index half
+(`unique.where`, `check`), which is **ruled in and next**, needs its own ACs first, and its traps are listed in the verdict. Also not built: (b).
+
 ## 1. The person sentence
 
 > **Someone building on the NodeGX backend can write "change this row only if nobody else has
@@ -34,6 +43,12 @@ template's first writes (its sprint 50) wait on it. Measured by reading the sour
   unscoped gap"*.
 
 ## 3. The shape — two candidates, and a recommendation to be ruled on before building
+
+> ✅ **RULED 2026-09-22 (P99 s16), Richard: build (a) first — "'Only if unchanged' updates".**
+> He was offered (a) alone, (b) alone, or both with (a) first, and chose (a) alone. That covers the
+> compare-and-swap on `PUT` **and** the `unique.where`/`check` index declarations below. (b) is not
+> ruled out. It waits, as this section already says, on whether (a) plus upsert-on-unique can
+> express the invite claim.
 
 **(a) Compare-and-swap on update — recommended as the first half.** `PUT /classes/:c/:id` accepts an
 expected-values clause (header `X-NodeGX-If: {"version": 3}` or a body key the wire can reserve —

@@ -933,6 +933,116 @@ export function uniqueConstraintProblem(message: string): { collection: string; 
 }
 
 /**
+ * HLT-016 — "change this row only if nobody has changed it since I read it".
+ *
+ * Field → the value it must still hold for the update to apply. Scalars only, and deliberately:
+ * an object or array here would reach `node:sqlite` as a bound value, where a leading bare object
+ * is read as a named-parameter map and every `?` after it shifts by one (HLT-018). And SQLite
+ * compares TEXT byte-wise while PostgreSQL compares JSONB by meaning, so the two engines would
+ * disagree on whether `{a:1,b:2}` "still holds". `null` means the field must still be empty.
+ */
+export type ExpectedValues = Record<string, string | number | boolean | null>;
+
+/** At most this many fields per precondition: a version column is one, a small key is two. */
+export const MAX_EXPECTED_FIELDS = 8;
+
+/**
+ * The adapter's refusal when the row exists and the caller may write it, but it no longer holds
+ * the expected values. The HTTP layer answers it 409 via {@link preconditionProblem}.
+ */
+export const PRECONDITION_FAILED = 'Precondition failed: the record has changed since it was read';
+
+const EXPECTED_FIELD_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+/** Why `expect` cannot be used as a precondition, or `null` when it can. */
+export function expectedValuesProblem(expect: unknown): string | null {
+  if (!expect || typeof expect !== 'object' || Array.isArray(expect)) {
+    return 'must be an object of field names to the values they must still hold';
+  }
+  const keys = Object.keys(expect);
+  if (keys.length === 0) return 'names no field';
+  if (keys.length > MAX_EXPECTED_FIELDS) return `names ${keys.length} fields; at most ${MAX_EXPECTED_FIELDS}`;
+  for (const key of keys) {
+    if (!EXPECTED_FIELD_NAME.test(key)) return `"${key}" is not a field name`;
+    const value = (expect as Record<string, unknown>)[key];
+    const scalar =
+      value === null ||
+      typeof value === 'string' ||
+      typeof value === 'boolean' ||
+      (typeof value === 'number' && Number.isFinite(value));
+    if (!scalar) return `"${key}" must be a string, number, boolean or null — an object or list cannot be compared the same way on every database`;
+  }
+  return null;
+}
+
+/** `T."version" = ? AND T."owner" IS NULL`, pushing one param per `=` in text order. */
+function buildExpectClause(tableName: string, expect: ExpectedValues, params: unknown[]): string {
+  const table = escapeTable(tableName);
+  return Object.keys(expect)
+    .map((key) => {
+      const column = `${table}.${escapeColumn(key)}`;
+      const value = expect[key];
+      // `= NULL` never matches anything, on either engine.
+      if (value === null) return `${column} IS NULL`;
+      params.push(serializeValue(value));
+      return `${column} = ?`;
+    })
+    .join(' AND ');
+}
+
+/**
+ * `SELECT 1` for "does this row exist AND may this caller write it" — the question asked only
+ * after a precondition matched 0 rows, to tell "changed since read" (409) from "not found or
+ * forbidden" (404). The ACL is in it, so a row the caller cannot write still reads as missing:
+ * a failed precondition is never an existence oracle.
+ */
+export function buildRowExists(
+  collection: string,
+  objectId: string,
+  acl: AclContext | undefined,
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
+  const params: unknown[] = [objectId];
+  let sql = `SELECT 1 AS "one" FROM ${escapeTable(collection)} WHERE "objectId" = ?`;
+  const aclClause = buildAclPredicate(collection, acl, params, dialect);
+  if (aclClause) sql += ` AND ${aclClause}`;
+  return { sql, params };
+}
+
+/**
+ * The expected field the engine said does not exist, or `null`. SQLite: `no such column:
+ * Item.version`. PostgreSQL (42703): `column Item.version does not exist`. Only a field the
+ * precondition named counts: any other missing column is some other fault.
+ */
+export function missingExpectedField(message: string, expect: ExpectedValues | undefined): string | null {
+  if (!expect) return null;
+  const text = String(message || '');
+  const m =
+    /no such column: (?:"?[A-Za-z0-9_]+"?\.)?"?([A-Za-z0-9_]+)"?/.exec(text) ||
+    /column (?:"?[A-Za-z0-9_]+"?\.)?"?([A-Za-z0-9_]+)"? does not exist/.exec(text);
+  if (!m || !Object.prototype.hasOwnProperty.call(expect, m[1])) return null;
+  return m[1];
+}
+
+/** The refusal for a precondition that names a field the collection does not have. */
+export function preconditionFieldMessage(collection: string, field: string): string {
+  return `Precondition names "${field}", which "${collection}" does not have`;
+}
+
+/**
+ * Which precondition refusal an adapter message is, for the HTTP layer. `changed` is a 409, and
+ * `unknown-field` is the caller's mistake (400). Not a 409, because a misspelt field would
+ * otherwise read as a conflict forever and a retry loop would never end.
+ */
+export function preconditionProblem(message: string): { kind: 'changed' } | { kind: 'unknown-field'; field: string } | null {
+  const text = String(message || '');
+  if (text === PRECONDITION_FAILED) return { kind: 'changed' };
+  const m = /^Precondition names "([^"]+)", which "[^"]*" does not have$/.exec(text);
+  if (m) return { kind: 'unknown-field', field: m[1] };
+  return null;
+}
+
+/**
  * Build an INSERT query
  */
 export function buildInsert(options: { collection: string; data: Record<string, unknown> }, id: string): BuiltQuery {
@@ -981,6 +1091,8 @@ export function buildUpdate(
     objectId?: string;
     data: Record<string, unknown>;
     acl?: AclContext;
+    /** HLT-016 — "only if unchanged". See {@link ExpectedValues}. */
+    expect?: ExpectedValues;
   },
   dialect: SqlDialect = 'sqlite'
 ): BuiltQuery {
@@ -1010,6 +1122,13 @@ export function buildUpdate(
   params.push(recordId);
 
   let sql = `UPDATE ${table} SET ${setClause.join(', ')} WHERE "objectId" = ?`;
+
+  // HLT-016: the expected values go in the SAME statement, after the id and before the ACL, so
+  // their params land where their markers are. A version check done as a read before this
+  // UPDATE would be the race it exists to prevent.
+  if (options.expect) {
+    sql += ` AND ${buildExpectClause(options.collection, options.expect, params)}`;
+  }
 
   // Row-level write check compiled into the statement itself: 0 rows changed
   // means not-found OR forbidden, indistinguishably (no read-then-write race,

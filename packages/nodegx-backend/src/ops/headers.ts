@@ -45,7 +45,11 @@ const ALLOW_HEADERS =
   // the node reported a network failure, while the same upload without Private succeeded. The
   // SBR-007 finding above, one header over: same-origin previews never preflight, which is why
   // nothing had noticed. Found by an exported app driving a live backend.
-  'X-NodeGX-File-Private';
+  'X-NodeGX-File-Private, ' +
+  // P99 HLT-016 (2026-09-22): `X-NodeGX-If` is new. `X-NodeGX-Upsert` (FED-002) had been missing
+  // since it shipped, so a cross-origin upsert failed its preflight: the same defect as the two
+  // comments above, a third time.
+  'X-NodeGX-Upsert, X-NodeGX-If';
 
 /**
  * Which `Access-Control-Allow-Origin` to send, or null for none.

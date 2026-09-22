@@ -117,6 +117,8 @@ interface SaveOptions {
   objectId?: string;
   data: Record<string, unknown>;
   acl?: AclContext;
+  /** HLT-016 — apply only if the row still holds these values. */
+  expect?: QueryBuilder.ExpectedValues;
   success(record: AdapterRecord): void;
   error: ErrorCallback;
 }
@@ -458,6 +460,7 @@ export class PostgresAdapter {
       const quiet =
         QueryBuilder.clientObjectIdProblem(err.message) !== null ||
         QueryBuilder.uniqueConstraintProblem(err.message) !== null ||
+        QueryBuilder.preconditionProblem(err.message) !== null ||
         /^Object not found$/.test(err.message);
       if (!quiet) console.error(`PostgresAdapter.${name} error:`, err);
       options.error(err.message);
@@ -592,6 +595,13 @@ export class PostgresAdapter {
   }
 
   save(options: SaveOptions): void {
+    if (options.expect !== undefined) {
+      const problem = QueryBuilder.expectedValuesProblem(options.expect);
+      if (problem) {
+        options.error(`Precondition ${problem}`);
+        return;
+      }
+    }
     this._run('save', options, async () => {
       await this._ready(options.collection);
       this._autoColumns(options.collection, options.data);
@@ -599,7 +609,23 @@ export class PostgresAdapter {
 
       const recordId = options.id || options.objectId;
       const { sql, params } = QueryBuilder.buildUpdate(options, 'postgres');
-      const changed = await this._pool().run(sql, params);
+      let changed: number;
+      try {
+        changed = await this._pool().run(sql, params);
+      } catch (e) {
+        const missing = QueryBuilder.missingExpectedField(e instanceof Error ? e.message : String(e), options.expect);
+        if (missing) throw new Error(QueryBuilder.preconditionFieldMessage(options.collection, missing));
+        throw e;
+      }
+
+      // HLT-016 — see LocalSQLAdapter.save: the probe carries the ACL, so a forbidden row still
+      // answers "not found", and a precondition failure is never an existence oracle.
+      if (options.expect && changed === 0) {
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'postgres');
+        const exists = await this._pool().queryOne(probe.sql, probe.params);
+        options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
+        return;
+      }
 
       // With an ACL context, 0 rows changed means not-found or forbidden —
       // deliberately indistinguishable (the write predicate is compiled into

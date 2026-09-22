@@ -1,0 +1,91 @@
+{
+  "createTable": 200,
+  "captureControl": {
+    "status": 200,
+    "result": {
+      "outcome": "saved",
+      "localVersion": 1,
+      "readVersion": 0
+    },
+    "row": {
+      "objectId": "1d2a2991-cb19-49d5-85da-de63cde02414",
+      "createdAt": "2026-09-22T10:14:22.427Z",
+      "updatedAt": "2026-09-22T10:14:22.465Z",
+      "ACL": null,
+      "facts": {
+        "fromFunction": true
+      },
+      "version": 1
+    }
+  },
+  "captureRaced": {
+    "status": 200,
+    "result": {
+      "outcome": "refused",
+      "code": "precondition-failed",
+      "message": "The record has changed since it was read, so this update was not applied. Read it again and retry.",
+      "localVersion": 0,
+      "readVersion": 0
+    },
+    "personStatus": 200,
+    "row": {
+      "objectId": "6abce3c0-11ba-4b1e-be4a-d683f1be8322",
+      "createdAt": "2026-09-22T10:14:22.489Z",
+      "updatedAt": "2026-09-22T10:14:22.917Z",
+      "ACL": null,
+      "facts": {
+        "fromPerson": true
+      },
+      "version": 5
+    }
+  },
+  "bumpControl": {
+    "status": 200,
+    "result": {
+      "outcome": "done"
+    },
+    "row": {
+      "objectId": "45e527c0-ecba-400a-bc62-349e77faf476",
+      "createdAt": "2026-09-22T10:14:24.058Z",
+      "updatedAt": "2026-09-22T10:14:24.083Z",
+      "ACL": null,
+      "facts": {},
+      "version": 1
+    }
+  },
+  "bumpRaced": {
+    "status": 200,
+    "result": {
+      "outcome": "failure",
+      "error": "Someone else changed this record after it was read, so this update was not applied. Fetch the record again, then retry."
+    },
+    "personStatus": 200,
+    "row": {
+      "objectId": "b19c5ef0-590e-4259-b58f-ed5f7c788f5b",
+      "createdAt": "2026-09-22T10:14:24.107Z",
+      "updatedAt": "2026-09-22T10:14:24.535Z",
+      "ACL": null,
+      "facts": {
+        "fromPerson": true
+      },
+      "version": 5
+    }
+  },
+  "bumpPlainRaced": {
+    "status": 200,
+    "result": {
+      "outcome": "done"
+    },
+    "personStatus": 200,
+    "row": {
+      "objectId": "517ff816-aace-4388-b79c-6cceeb19f493",
+      "createdAt": "2026-09-22T10:14:25.714Z",
+      "updatedAt": "2026-09-22T10:14:27.237Z",
+      "ACL": null,
+      "facts": {
+        "fromPerson": true
+      },
+      "version": 1
+    }
+  }
+}

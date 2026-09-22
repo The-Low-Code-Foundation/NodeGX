@@ -157,6 +157,43 @@ export const recordCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'records/a-save-with-a-precondition-applies-only-if-unchanged',
+    area: 'records',
+    pins: 'a save carrying `expect` applies only while the row still holds those values; a stale one is refused and writes nothing',
+    async run(ctx) {
+      // P99 HLT-016 — DBT's L62: two captures read version n and both write n+1, and the second
+      // replaces the first's whole map. With `expect`, the second must be refused.
+      const c = ctx.collection('Pre');
+      ctx.createTable(c, [
+        { name: 'facts', type: 'Object' },
+        { name: 'version', type: 'Number' },
+        { name: 'note', type: 'String' }
+      ]);
+      const row = await ctx.create(c, { facts: { a: true }, version: 0 });
+      const id = String(row.objectId);
+
+      // The known-firing half: a precondition that holds applies.
+      await ctx.save(c, id, { facts: { a: true, b: true }, version: 1 }, undefined, { version: 0 });
+      eq((await ctx.fetch(c, id)).version, 1, 'a save whose precondition held was not applied');
+
+      // The stale writer read version 0 too. It must be refused, and must write nothing.
+      const why = await ctx.refused(() =>
+        ctx.save(c, id, { facts: { a: true, stale: true }, version: 1 }, undefined, { version: 0 })
+      );
+      ok(/^Precondition failed/.test(why), `a stale save was refused for the wrong reason: ${why}`);
+      deepEq((await ctx.fetch(c, id)).facts, { a: true, b: true }, 'a refused save still replaced the map');
+
+      // `null` means "still empty", never `= NULL` (which matches nothing on either engine).
+      await ctx.save(c, id, { note: 'first' }, undefined, { note: null });
+      eq((await ctx.fetch(c, id)).note, 'first', 'a null expectation on an empty field did not hold');
+
+      // A missing row is still "not found", not a precondition failure.
+      const missing = await ctx.refused(() => ctx.save(c, 'noSuchRowHere', { version: 9 }, undefined, { version: 0 }));
+      ok(!/^Precondition failed/.test(missing), 'a missing row was reported as changed-since-read');
+    }
+  },
+
+  {
     id: 'records/delete-removes-the-row',
     area: 'records',
     pins: 'delete() removes the row and the count follows',

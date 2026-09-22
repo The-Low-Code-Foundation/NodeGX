@@ -29,7 +29,8 @@ export type MutationKind =
   | 'count-returns-page-length'
   | 'ignore-unique'
   | 'relation-inverse-ignores-target'
-  | 'aggregate-ignores-acl';
+  | 'aggregate-ignores-acl'
+  | 'drop-precondition-on-save';
 
 export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'drop-acl-on-reads',
@@ -37,7 +38,8 @@ export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'count-returns-page-length',
   'ignore-unique',
   'relation-inverse-ignores-target',
-  'aggregate-ignores-acl'
+  'aggregate-ignores-acl',
+  'drop-precondition-on-save'
 ]);
 
 /** What each mutation models, for the record AC3 asks for. */
@@ -53,7 +55,9 @@ export const MUTATION_DESCRIPTIONS: Readonly<Record<MutationKind, string>> = Obj
   'relation-inverse-ignores-target':
     'getRelationOwners ignores its relatedId and returns every owner — reads as "everyone has this role"',
   'aggregate-ignores-acl':
-    'aggregate computes over rows the caller cannot read — private values leak as arithmetic'
+    'aggregate computes over rows the caller cannot read — private values leak as arithmetic',
+  'drop-precondition-on-save':
+    'save ignores `expect` (HLT-016) and writes unconditionally — the lost update DBT L62 shipped, reported as success'
 });
 
 /**
@@ -154,6 +158,12 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
     save(options) {
       if (kind === 'drop-acl-on-writes') {
         adapter.save(stripAcl(options));
+        return;
+      }
+      if (kind === 'drop-precondition-on-save') {
+        const unguarded = { ...options };
+        delete unguarded.expect;
+        adapter.save(unguarded);
         return;
       }
       adapter.save(options);

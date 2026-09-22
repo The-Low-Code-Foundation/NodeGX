@@ -1087,6 +1087,16 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
     const profile = this.begin(handle, 'data.save', options.error);
     if (!profile) return;
 
+    // HLT-016: refused, not ignored, for FED-002's reason. A precondition that quietly became an
+    // unconditional write is the lost update it exists to prevent.
+    if (options.ifMatch) {
+      options.error(
+        `"Only if unchanged" is not supported on ${handle.type}: it needs a NodeGX backend. ` +
+          "Remove it, or use the backend's own version check."
+      );
+      return;
+    }
+
     const target = this.recordTarget(profile, options.collection, options.objectId);
     const body = stripServerOwned(profile, this.serializeObject(options.data, options.collection, handle));
 

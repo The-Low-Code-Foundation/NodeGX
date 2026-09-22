@@ -11,7 +11,8 @@
     "idSource": "Edit-only choice: 'Specify explicitly' uses `modelId`; 'From repeater' targets the record driving the nearest enclosing For Each item.",
     "storeProperties": "Edit-only choice ('Only specified' / 'All'): whether to send just the supplied property inputs or the record's whole data. Shown while `storeType` is cloud.",
     "storeType": "Edit-only choice ('Cloud and local' / 'Local only'): whether the save reaches the server or only the in-memory record.",
-    "accessControl": "Edit-only list of access rules applied with the save; each rule expands into its own Target/Read/Write inputs."
+    "accessControl": "Edit-only list of access rules applied with the save; each rule expands into its own Target/Read/Write inputs.",
+    "onlyIfUnchanged": "Edit-only text (displayed as Only If Unchanged): property names, comma-separated, usually `version`. The update applies only if those properties still hold the values the record had when it was read (taken before this node's inputs are applied), checked by the backend inside the UPDATE itself. If someone else wrote the record in between, nothing is written, `failure` fires, `error` says so, and the local record goes back to what it held (the backend answered 409 with reason `precondition-failed`). To retry, FETCH the record again first: retrying with the same values fails the same way. NodeGX backends only; other backends refuse it. Empty: always write."
   },
   "runtimeBehavior": "Ports are runtime-determined: `collectionName` (Class) is registered as an edit-only enum of the project's classes plus _User/_Role, and each schema property of the chosen class becomes a value input `prop-<name>` typed from the schema. Access Control rules spawn `acl-<ruleId>-*` inputs like on Create Record. An authoring tool should set `collectionName` in parameters and drive the `prop-<name>` inputs it intends to change.",
   "examples": [
@@ -20,10 +21,12 @@
   ],
   "patterns": [
     "DbModel2 `prop-<name>` → Text Input `startValue`, edited `text` → `prop-<name>`, Button `onClick` → `store`: prefill, edit, save.",
-    "'From repeater' `idSource` inside a list row: one node updates whichever record the row represents."
+    "'From repeater' `idSource` inside a list row: one node updates whichever record the row represents.",
+    "Two people editing one record: bump a `version` property on every save and set `onlyIfUnchanged` to `version`. The second save to land gets `failure` instead of silently replacing the first; on `failure`, fetch the record again (DbModel2) and let the person re-apply their change."
   ],
   "antiPatterns": [
-    "Setting `storeProperties` to 'All' to 'be safe' — it uploads the record's entire local data and can overwrite fields other users changed; send only what the form edits."
+    "Setting `storeProperties` to 'All' to 'be safe' — it uploads the record's entire local data and can overwrite fields other users changed; send only what the form edits.",
+    "Retrying a `failure` from `onlyIfUnchanged` by pressing Do again without fetching the record first: the precondition is taken from the record as it was read, so the retry fails the same way until the record is re-read."
   ],
   "relatedNodes": [
     "DbModel2",

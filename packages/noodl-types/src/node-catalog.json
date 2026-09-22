@@ -26766,6 +26766,17 @@
           "description": "Id of the record this node acts on; a record itself is accepted here as well as its Id"
         },
         {
+          "name": "onlyIfUnchanged",
+          "displayName": "Only If Unchanged",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write."
+        },
+        {
           "name": "repeaterComponent",
           "displayName": "Repeater Component",
           "group": "General",

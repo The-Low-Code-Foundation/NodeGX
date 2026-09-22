@@ -27,12 +27,16 @@
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
+// The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
 import {
   cappedHeaders,
   createErrorToHttp,
   HttpError,
   readJSONBody,
   sendJSON,
+  preconditionToHttp,
   splitCapped,
   uniqueViolationToHttp
 } from './http-util';
@@ -47,11 +51,37 @@ import {
  */
 const UPSERT_HEADER = 'x-nodegx-upsert';
 
+/**
+ * HLT-016 — the precondition header: `X-NodeGX-If: {"version":3}` on a `PUT`. The update applies
+ * only if the row still holds those values, checked inside the same UPDATE statement as the ACL.
+ * A header for FED-002's reason: it is about the request, and every body key is a field.
+ */
+const IF_HEADER = 'x-nodegx-if';
+
 /** One request header, trimmed, or '' — Node lower-cases the names it parses. */
 function headerValue(ctx: RequestContext, name: string): string {
   const raw = ctx.req.headers[name];
   const value = Array.isArray(raw) ? raw[0] : raw;
   return typeof value === 'string' ? value.trim() : '';
+}
+
+/**
+ * The `X-NodeGX-If` precondition, or `undefined` when none was sent. A header that is present
+ * but unusable is a 400 naming why, never silently ignored: an ignored precondition is an
+ * unconditional write, which is the race this header exists to stop.
+ */
+function readPrecondition(ctx: RequestContext): Record<string, string | number | boolean | null> | undefined {
+  const raw = headerValue(ctx, IF_HEADER);
+  if (!raw) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new HttpError(400, 'X-NodeGX-If must be a JSON object, e.g. {"version":3}.');
+  }
+  const problem = QueryBuilder.expectedValuesProblem(parsed);
+  if (problem) throw new HttpError(400, `X-NodeGX-If ${problem}.`);
+  return parsed as Record<string, string | number | boolean | null>;
 }
 
 function parseJSONParam(value: string | undefined, name: string): Record<string, unknown> | undefined {
@@ -466,6 +496,24 @@ export class ParseWireRoutes {
     const acl = ctx.acl('write');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);
 
+    // HLT-016: parse and refuse a precondition up front, before anything is written.
+    const expect = readPrecondition(ctx);
+    if (expect) {
+      // `plain` and the increments are two UPDATE statements, and relations are a third write.
+      // A precondition on the first would not cover the others, so the combination is refused
+      // rather than half-honoured.
+      if (Object.keys(increments).length > 0 || addRelations.length > 0 || removeRelations.length > 0) {
+        throw new HttpError(
+          400,
+          'X-NodeGX-If cannot be combined with __op (Increment, AddRelation, RemoveRelation) in one request: ' +
+            'those are separate writes the precondition would not cover. Send the plain fields on their own.'
+        );
+      }
+      if (Object.keys(plain).length === 0) {
+        throw new HttpError(400, 'X-NodeGX-If was sent with nothing to write.');
+      }
+    }
+
     // Relation-only updates never touch the row itself, so the write predicate
     // wouldn't run — assert writability explicitly before mutating junctions.
     if ((addRelations.length > 0 || removeRelations.length > 0) && acl) {
@@ -479,7 +527,7 @@ export class ParseWireRoutes {
     let updated: Record<string, unknown> | null = null;
     try {
       if (Object.keys(plain).length > 0) {
-        updated = await this.facade.rawSave(collection, objectId, plain, acl);
+        updated = await this.facade.rawSave(collection, objectId, plain, acl, expect);
       }
       if (Object.keys(increments).length > 0) {
         updated = await this.facade.rawIncrement(collection, objectId, increments, acl);
@@ -488,8 +536,13 @@ export class ParseWireRoutes {
       // FED-002: an update refused by a unique index is a conflict, not a
       // missing row. Answering 404 here would tell a person their record had
       // vanished when what actually happened is that another one has the value.
-      const conflict = uniqueViolationToHttp(e instanceof Error ? e.message : String(e), plain);
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, plain);
       if (conflict) throw conflict;
+      if (expect) {
+        const refused = preconditionToHttp(message, expect);
+        if (refused) throw refused;
+      }
       throw new HttpError(404, 'Object not found.', 101);
     }
     for (const rel of addRelations) {

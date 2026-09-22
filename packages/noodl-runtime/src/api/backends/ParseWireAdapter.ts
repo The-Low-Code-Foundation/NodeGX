@@ -549,6 +549,8 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
         _removeProtectedFields(this.serializeObject(_data, options.collection), options.collection),
         { ACL: options.acl }
       ),
+      // HLT-016: the precondition travels as a header, as FED-002's upsert does.
+      headers: options.ifMatch ? { 'X-NodeGX-If': JSON.stringify(options.ifMatch) } : undefined,
       success: (response) => {
         options.success(this.normalize(response));
         this.emitAdapterEvent({
@@ -559,7 +561,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
         });
       },
       error: function (res) {
-        options.error(res.error);
+        // The body rides along so a caller can tell a precondition failure (`reason`) from any
+        // other refusal without reading the sentence.
+        options.error(res.error, res);
       }
     });
   }

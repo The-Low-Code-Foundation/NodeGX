@@ -272,9 +272,12 @@ export class AdapterFacade implements IStorageFacade {
     collection: string,
     objectId: string,
     data: Record<string, unknown>,
-    acl?: AclOption
+    acl?: AclOption,
+    expect?: Record<string, string | number | boolean | null>
   ): Promise<Record<string, unknown>> {
-    return this.call('save', { collection, objectId, data, acl });
+    // HLT-016: `expect` is only sent when there is one, so a save without a precondition
+    // reaches the adapter with exactly the options it always did.
+    return this.call('save', expect ? { collection, objectId, data, acl, expect } : { collection, objectId, data, acl });
   }
 
   rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {

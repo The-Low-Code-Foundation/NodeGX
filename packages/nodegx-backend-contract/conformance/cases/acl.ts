@@ -231,6 +231,27 @@ export const aclCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'acl/a-failed-precondition-on-a-row-you-cannot-write-reads-as-not-found',
+    area: 'acl',
+    pins: 'a precondition never tells a caller that a row they cannot write exists',
+    async run(ctx) {
+      // P99 HLT-016. After a precondition matches 0 rows, the adapter asks whether the row exists,
+      // to tell "changed since read" from "not found". That probe must carry the ACL, or a
+      // non-owner learns a private row exists by getting "changed" instead of "not found".
+      const { c, ids } = await seed(ctx);
+      const asAlice = await ctx.refused(() =>
+        ctx.save(c, ids.bobPriv, { title: 'defaced' }, write(ALICE), { title: 'nope' })
+      );
+      ok(!/^Precondition failed/.test(asAlice), "a failed precondition revealed bob's private row to alice");
+      eq((await ctx.fetch(c, ids.bobPriv)).title, 'bob private', "a non-owner's guarded save modified the row");
+
+      // The control: the owner, with the same stale precondition, IS told it changed.
+      const asBob = await ctx.refused(() => ctx.save(c, ids.bobPriv, { title: 'x' }, write(BOB), { title: 'nope' }));
+      ok(/^Precondition failed/.test(asBob), `the owner's stale save was refused for the wrong reason: ${asBob}`);
+    }
+  },
+
+  {
     id: 'acl/a-non-owner-cannot-delete',
     area: 'acl',
     pins: 'a delete of a row the caller cannot write leaves it in place',

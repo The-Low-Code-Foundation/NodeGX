@@ -473,6 +473,12 @@ export interface StorageCreateCall {
   error: StorageErrorCallback;
 }
 
+/**
+ * HLT-016 — "only if unchanged": field → the value it must still hold for a save to apply.
+ * Scalars only (`QueryBuilder.ExpectedValues`, which says why). `null` means "still empty".
+ */
+export type StorageExpectedValues = Record<string, string | number | boolean | null>;
+
 /** `LocalSQLAdapter.ts:103-111`. */
 export interface StorageSaveCall {
   collection: string;
@@ -480,6 +486,12 @@ export interface StorageSaveCall {
   objectId?: string;
   data: Record<string, unknown>;
   acl?: StorageAclOption;
+  /**
+   * HLT-016 — compiled into the UPDATE itself. A row that exists and is writable but no longer
+   * holds these values fails with `Precondition failed: …` (the HTTP layer's 409). A missing or
+   * forbidden row still fails `Object not found`.
+   */
+  expect?: StorageExpectedValues;
   success(record: Record<string, unknown>): void;
   error: StorageErrorCallback;
 }
@@ -689,7 +701,9 @@ export interface IStorageFacade {
     collection: string,
     objectId: string,
     data: Record<string, unknown>,
-    acl?: StorageAclOption
+    acl?: StorageAclOption,
+    /** HLT-016 — see {@link StorageSaveCall.expect}. */
+    expect?: StorageExpectedValues
   ): Promise<Record<string, unknown>>;
   /** `AdapterFacade.ts:150`. */
   rawDelete(collection: string, objectId: string, acl?: StorageAclOption): Promise<void>;

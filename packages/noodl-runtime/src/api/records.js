@@ -160,8 +160,13 @@ function createRecordsAPI(modelScope) {
       const className = (options ? options.className : undefined) || (modelScope || Model).get(objectOrId)._class;
 
       const model = (modelScope || Model).get(objectOrId);
+      const ifMatch = options ? options.ifMatch : undefined;
+      // HLT-016: what the model held before this save, so a refused precondition can put it back.
+      // Without that, the local record would show values the backend just refused.
+      const before = {};
       if (properties) {
         Object.keys(properties).forEach((p) => {
+          before[p] = model.get(p);
           model.set(p, properties[p]);
         });
       }
@@ -174,12 +179,20 @@ function createRecordsAPI(modelScope) {
           objectId: objectOrId,
           data: properties || model.data,
           acl: options ? options.acl : undefined,
+          ifMatch,
           success: (response) => {
             cloudstore()._fromJSON(Object.assign({ objectId: objectOrId }, response), className); // Assign updated at
             resolve();
           },
-          error: (err) => {
-            reject(Error(err || 'Failed to save.'));
+          error: (err, detail) => {
+            const error = Error(err || 'Failed to save.');
+            if (detail && detail.reason === 'precondition-failed') {
+              // Someone else wrote the record after it was read. Re-read it, then decide again.
+              error.code = 'precondition-failed';
+              error.expected = detail.expected;
+              Object.keys(before).forEach((p) => model.set(p, before[p]));
+            }
+            reject(error);
           }
         });
       });

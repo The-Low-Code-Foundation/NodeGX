@@ -242,6 +242,38 @@ export function uniqueViolationToHttp(message: string, values?: Record<string, u
 }
 
 /**
+ * HLT-016: a save whose `X-NodeGX-If` precondition failed.
+ *
+ * `changed`: the row exists, this caller may write it, and it no longer holds the expected
+ * values, because someone else wrote it after it was read. **409** with `reason:
+ * 'precondition-failed'`, the stable value a graph branches on (no Parse code fits: 137 is
+ * "duplicate value"), plus the `expected` values that failed. A retry must RE-READ the row
+ * first, or it fails the same way.
+ *
+ * `unknown-field`: the precondition names a field the collection does not have. **400**, the
+ * caller's mistake. Not a 409, which would read as a conflict forever.
+ */
+export function preconditionToHttp(message: string, expect: Record<string, unknown>): HttpError | null {
+  const problem = QueryBuilder.preconditionProblem(message) as
+    | { kind: 'changed' }
+    | { kind: 'unknown-field'; field: string }
+    | null;
+  if (!problem) return null;
+  if (problem.kind === 'unknown-field') {
+    return new HttpError(400, `${message}. X-NodeGX-If can only name fields the collection has.`, undefined, {
+      reason: 'precondition-unknown-field',
+      field: problem.field
+    });
+  }
+  return new HttpError(
+    409,
+    'The record has changed since it was read, so this update was not applied. Read it again and retry.',
+    undefined,
+    { reason: 'precondition-failed', expected: expect }
+  );
+}
+
+/**
  * Send an error in the `{ code?, error }` shape all four runtime clients read.
  *
  * BAK-009 adds `requestId` when the dispatcher assigned one: an error a user

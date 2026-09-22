@@ -203,6 +203,16 @@ export interface SaveOptions extends Callbacks<(record: AdapterRecord) => void> 
    */
   data: Record<string, unknown>;
   acl?: Acl;
+  /**
+   * HLT-016 — apply only if the record still holds these values (field → value; scalars only),
+   * checked by the backend inside the UPDATE. If someone changed the record after it was read, the
+   * save is refused and `error` gets `detail.reason === 'precondition-failed'`; a retry must
+   * re-read first. `unsupported` off the Parse family, and REFUSED there for `upsertOn`'s reason:
+   * an ignored precondition is an unconditional write, the lost update it exists to prevent.
+   */
+  ifMatch?: Record<string, string | number | boolean | null>;
+  /** `detail` is the backend's error body when there is one (`reason`, `expected`, …). */
+  error: (err?: string, detail?: Record<string, unknown>) => void;
 }
 
 /**

@@ -114,6 +114,8 @@ interface SaveOptions {
   objectId?: string;
   data: Record<string, unknown>;
   acl?: AclContext;
+  /** HLT-016 — apply only if the row still holds these values. */
+  expect?: QueryBuilder.ExpectedValues;
   success(record: AdapterRecord): void;
   error: AdapterErrorCallback;
 }
@@ -1058,6 +1060,13 @@ class LocalSQLAdapter {
    */
   save(options: SaveOptions): void {
     try {
+      if (options.expect !== undefined) {
+        const problem = QueryBuilder.expectedValuesProblem(options.expect);
+        if (problem) {
+          options.error(`Precondition ${problem}`);
+          return;
+        }
+      }
       this._ensureTable(options.collection);
 
       // Auto-add columns for new fields
@@ -1080,6 +1089,16 @@ class LocalSQLAdapter {
       const recordId = options.id || options.objectId;
       const { sql, params } = QueryBuilder.buildUpdate(options);
       const result = this.db.prepare(sql).run(...params);
+
+      // HLT-016: a precondition that matched nothing is "changed since read" only if the row is
+      // there and this caller may write it. The probe carries the ACL, so a forbidden row still
+      // answers "not found". Asked AFTER the write, which already did not happen, so it cannot race.
+      if (options.expect && (!result || result.changes === 0)) {
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl);
+        const exists = this.db.prepare(probe.sql).get(...probe.params);
+        options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
+        return;
+      }
 
       // With an ACL context, 0 rows changed means not-found or forbidden —
       // deliberately indistinguishable (the write predicate is compiled into
@@ -1105,6 +1124,11 @@ class LocalSQLAdapter {
         collection: options.collection
       });
     } catch (e) {
+      const missing = QueryBuilder.missingExpectedField(e.message, options.expect);
+      if (missing) {
+        options.error(QueryBuilder.preconditionFieldMessage(options.collection, missing));
+        return;
+      }
       if (!QueryBuilder.uniqueConstraintProblem(e.message)) console.error('LocalSQLAdapter.save error:', e);
       options.error(e.message);
     }

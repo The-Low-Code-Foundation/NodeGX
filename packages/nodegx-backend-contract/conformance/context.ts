@@ -24,6 +24,7 @@ import type {
   IStorageSchema,
   StorageAclOption,
   StorageColumn,
+  StorageExpectedValues,
   StorageQueryOptions,
   StorageSearchOptions
 } from '../src/storage';
@@ -141,7 +142,8 @@ export interface ConformanceContext {
 
   create(collection: string, data: Row): Promise<Row>;
   fetch(collection: string, objectId: string, acl?: StorageAclOption): Promise<Row>;
-  save(collection: string, objectId: string, data: Row, acl?: StorageAclOption): Promise<Row>;
+  /** `expect` (HLT-016): apply only if the row still holds these values. */
+  save(collection: string, objectId: string, data: Row, acl?: StorageAclOption, expect?: StorageExpectedValues): Promise<Row>;
   remove(collection: string, objectId: string, acl?: StorageAclOption): Promise<void>;
   query(collection: string, options?: StorageQueryOptions): Promise<ReadResult>;
   search(collection: string, options: StorageSearchOptions): Promise<ReadResult>;
@@ -196,7 +198,8 @@ export function makeContext(adapter: IStorageAdapter, runId: string): Conformanc
 
     fetch: (collection, objectId, acl) => one('fetch', { collection, objectId, acl }),
 
-    save: (collection, objectId, data, acl) => one('save', { collection, objectId, data, acl }),
+    save: (collection, objectId, data, acl, expect) =>
+      one('save', expect ? { collection, objectId, data, acl, expect } : { collection, objectId, data, acl }),
 
     async remove(collection, objectId, acl): Promise<void> {
       await invoke(adapter, 'delete', { collection, objectId, acl });
