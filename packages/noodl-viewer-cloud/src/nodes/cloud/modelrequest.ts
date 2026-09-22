@@ -36,7 +36,7 @@
  *    by accident, and neither can a future field someone adds without reading this.
  *  - **The execution record is counts only.** The step's `inputData` carries the secret's NAME,
  *    the model and the shape of the request — never the key, never the prompt, never the answer.
- *    The cost channel (`recordModelCall`) carries four numbers and a model id. See
+ *    The cost channel (`recordModelCall`) carries five numbers and a model id. See
  *    `runcontext.ts`'s `RuntimeModelCall`.
  *  - **Nothing here logs.** Not on failure either; the messages below are built from the name and
  *    the status, which is all an operator needs and all they are owed.
@@ -110,9 +110,12 @@ interface ModelUsage {
   inputTokens: number;
   outputTokens: number;
   cacheReadTokens: number;
+  /** Tokens written to the prompt cache by this call — the only way to tell "cached, read next
+   *  time" apart from "nothing cached", and a write on every call is the sign the prefix varies. */
+  cacheWriteTokens: number;
 }
 
-const EMPTY_USAGE: ModelUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0 };
+const EMPTY_USAGE: ModelUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -141,7 +144,8 @@ function usageOf(usage: any): ModelUsage {
   return {
     inputTokens: n(usage.input_tokens),
     outputTokens: n(usage.output_tokens),
-    cacheReadTokens: n(usage.cache_read_input_tokens)
+    cacheReadTokens: n(usage.cache_read_input_tokens),
+    cacheWriteTokens: n(usage.cache_creation_input_tokens)
   };
 }
 
@@ -258,9 +262,27 @@ export const node = {
       group: 'Request',
       displayName: 'Instructions',
       type: { name: 'string', codeeditor: 'text' },
-      description: 'The system prompt — who the model is being asked to be, and the rules of the task',
+      description:
+        'The system prompt — who the model is being asked to be, and the rules of the task. Cached: ' +
+        'the first call writes it to the provider\'s prompt cache and calls in the next 5 minutes read ' +
+        'it at a tenth of the price. Keep it the same on every call; anything that changes per call ' +
+        '(a name, today\'s date) belongs in Per-Call Instructions or Input, or nothing is ever read back. ' +
+        'Instructions shorter than the model\'s minimum (512 tokens on Claude Opus 5, up to 4,096 on ' +
+        'some older models) are not cached at all: the call works, and Usage shows 0 written',
       set: function (this: any, value: string) {
         this._internal.instructions = value;
+      }
+    },
+    callInstructions: {
+      group: 'Request',
+      displayName: 'Per-Call Instructions',
+      type: { name: 'string', codeeditor: 'text' },
+      description:
+        'More instructions that change from call to call — who this learner is, what happened last ' +
+        'time. Sent after Instructions and never cached, so changing them does not throw the cached ' +
+        'Instructions away',
+      set: function (this: any, value: string) {
+        this._internal.callInstructions = value;
       }
     },
     input: {
@@ -392,8 +414,9 @@ export const node = {
       displayName: 'Usage',
       type: 'object',
       description:
-        'What the call cost, as { inputTokens, outputTokens, cacheReadTokens }. The same numbers ' +
-        'land on the run\'s execution record, where they are summed per run',
+        'What the call cost, as { inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens }. ' +
+        'A write on every call and reads of 0 means Instructions differ between calls. The same ' +
+        'numbers land on the run\'s execution record, where they are summed per run',
       getter: function (this: any) {
         return this._internal.usage;
       }
@@ -563,7 +586,8 @@ export const node = {
         max_tokens: this._internal.maxTokens || DEFAULTS.maxTokens,
         messages
       };
-      if (this._internal.instructions) body.system = this._internal.instructions;
+      const system = this.buildSystem();
+      if (system !== undefined) body.system = system;
 
       // `effort` and `format` are both inside `output_config` — taken from the API docs at build
       // time (2026-09-19), where the older top-level `output_format` is the deprecated spelling.
@@ -577,6 +601,32 @@ export const node = {
       // adaptively by default and reject a token budget outright.
       return body;
     },
+    /**
+     * `system`, split at the one boundary the node knows is stable (HLT-019, ruled 2026-09-22).
+     *
+     * `Instructions` is one text block marked `cache_control` (5-minute TTL); `Per-Call
+     * Instructions` follows it unmarked, so the cached prefix ends before the part that varies.
+     *
+     * ⚠️ **Never the API's top-level automatic `cache_control`.** It marks the LAST block, which
+     * here is per-call text: every call would write an entry no other call begins with, paying
+     * 1.25× and never reading ([HLT-019 worked example](dev-docs/tasks/phase-99-the-ones-nobody-owned/HLT-019-WORKED-EXAMPLE.md),
+     * case C). Instructions under the model's minimum (512 tokens on Opus 5) are simply not
+     * cached — no error, no charge.
+     *
+     * With only Per-Call Instructions it stays the plain string it always was: there is nothing
+     * stable to cache. Empty blocks are never sent; the API refuses an empty text block.
+     */
+    buildSystem: function (this: any): string | Array<Record<string, unknown>> | undefined {
+      const fixed = this._internal.instructions ? String(this._internal.instructions) : '';
+      const perCall = this._internal.callInstructions ? String(this._internal.callInstructions) : '';
+      if (!fixed) return perCall || undefined;
+
+      const blocks: Array<Record<string, unknown>> = [
+        { type: 'text', text: fixed, cache_control: { type: 'ephemeral' } }
+      ];
+      if (perCall) blocks.push({ type: 'text', text: perCall });
+      return blocks;
+    },
     /** Hand the cost to the run that paid it (FED-003 §3.4). Absent host, no-op, no branch. */
     recordCall: function (this: any, usage: ModelUsage, durationMs: number) {
       const scope = this.nodeScope as { runContext?: NodeRunContext } | undefined;
@@ -587,6 +637,7 @@ export const node = {
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
         cacheReadTokens: usage.cacheReadTokens,
+        cacheWriteTokens: usage.cacheWriteTokens,
         durationMs
       });
     },

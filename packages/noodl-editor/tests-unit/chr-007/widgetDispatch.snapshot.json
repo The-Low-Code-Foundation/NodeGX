@@ -1070,6 +1070,7 @@
       "accessControl": "PropListType",
       "idSource": "EnumType",
       "modelId": "IdentifierType",
+      "onlyIfUnchanged": "BasicType",
       "repeaterComponent": "ComponentType",
       "store": null,
       "storeProperties": "EnumType",
@@ -2367,6 +2368,7 @@
     "noodl.cloud.modelrequest": {
       "apiKeySecret": "BasicType",
       "baseUrl": "BasicType",
+      "callInstructions": "CodeEditorType",
       "effort": "EnumType",
       "input": "CodeEditorType",
       "instructions": "CodeEditorType",

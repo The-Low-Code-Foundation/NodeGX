@@ -25,6 +25,7 @@ interface RecordedModelCall {
   inputTokens?: unknown;
   outputTokens?: unknown;
   cacheReadTokens?: unknown;
+  cacheWriteTokens?: unknown;
   durationMs?: unknown;
 }
 
@@ -34,6 +35,12 @@ export interface ModelCostSummary {
   inputTokens: number;
   outputTokens: number;
   cacheReadTokens: number;
+  /**
+   * Tokens written to the prompt cache (HLT-019). ⚠️ Not in {@link line}: the sentence's shape was
+   * ruled on 2026-09-19 and nobody has ruled on a clause for writes. A record from before HLT-019
+   * has no such field and sums to 0.
+   */
+  cacheWriteTokens: number;
   /** Time spent waiting on models, which is not the same as the run's duration. */
   durationMs: number;
   /** Each distinct model this run called, in first-seen order. */
@@ -107,6 +114,7 @@ export function summariseModelCalls(metadata: unknown): ModelCostSummary | undef
     inputTokens: 0,
     outputTokens: 0,
     cacheReadTokens: 0,
+    cacheWriteTokens: 0,
     durationMs: 0,
     models: []
   };
@@ -116,6 +124,7 @@ export function summariseModelCalls(metadata: unknown): ModelCostSummary | undef
     summary.inputTokens += num(raw.inputTokens);
     summary.outputTokens += num(raw.outputTokens);
     summary.cacheReadTokens += num(raw.cacheReadTokens);
+    summary.cacheWriteTokens += num(raw.cacheWriteTokens);
     summary.durationMs += num(raw.durationMs);
     const model = typeof raw.model === 'string' ? raw.model : '';
     if (model && summary.models.indexOf(model) === -1) summary.models.push(model);

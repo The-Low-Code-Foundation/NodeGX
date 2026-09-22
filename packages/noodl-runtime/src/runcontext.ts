@@ -93,7 +93,7 @@ export interface RuntimeStepEnd {
  * ⚠️ **Every field here is a COUNT or an IDENTIFIER, and that is the whole design.** The phase's
  * rule 3 says a model key never reaches a log line or an execution record; the prompt is the
  * author's own data and the response is the model's, and neither is something this channel is
- * entitled to persist. What a person needs after the fact is what the run COST — which is four
+ * entitled to persist. What a person needs after the fact is what the run COST — which is five
  * numbers and a model id — and that is exactly what this carries.
  */
 export interface RuntimeModelCall {
@@ -103,6 +103,8 @@ export interface RuntimeModelCall {
   outputTokens: number;
   /** Tokens served from the prompt cache, which are billed at a fraction of the rest. */
   cacheReadTokens: number;
+  /** Tokens written to the prompt cache, billed at a premium over the rest (HLT-019). */
+  cacheWriteTokens: number;
   /** Wall-clock for the call, retries included — what the graph actually waited. */
   durationMs: number;
 }

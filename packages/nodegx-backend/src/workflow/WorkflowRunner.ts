@@ -481,7 +481,7 @@ export class WorkflowRunner {
        * path that is never reached would show zero. `completeExecution` does not touch metadata,
        * so a stamp made now survives the run ending either way.
        *
-       * ⚠️ Nothing here is scrubbed, because nothing here is free text: the node hands over four
+       * ⚠️ Nothing here is scrubbed, because nothing here is free text: the node hands over five
        * counts and a model id, and `RuntimeModelCall` exists to make that the only thing it can
        * hand over.
        */

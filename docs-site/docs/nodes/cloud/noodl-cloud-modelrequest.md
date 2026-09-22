@@ -27,9 +27,10 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 |---|---|---|---|
 | `apiKeySecret` | String | `MODEL_KEY` | The NAME of a secret in the project's functions namespace — never the key itself. It is read server-side at the moment of the call, exactly as the Secret node reads one, used in one header and dropped. There is deliberately no port that could hold the value |
 | `baseUrl` | String | `https://api.anthropic.com` | Where the request goes. Change it for a proxy, a gateway, or a test double |
+| `callInstructions` | String | — | More instructions that change from call to call — who this learner is, what happened last time. Sent after Instructions and never cached, so changing them does not throw the cached Instructions away |
 | `effort` | Enum (`low`, `medium`, `high`, `xhigh`, `max`) | `high` | How hard the model works before answering — the first lever to reach for on both cost and quality. Low for tagging and classifying, high for anything that has to be right |
 | `input` | String | — | The one thing being asked, as a single user turn. Ignored when Messages is wired — a graph holding a conversation sends the whole conversation |
-| `instructions` | String | — | The system prompt — who the model is being asked to be, and the rules of the task |
+| `instructions` | String | — | The system prompt — who the model is being asked to be, and the rules of the task. Cached: the first call writes it to the provider's prompt cache and calls in the next 5 minutes read it at a tenth of the price. Keep it the same on every call; anything that changes per call (a name, today's date) belongs in Per-Call Instructions or Input, or nothing is ever read back. Instructions shorter than the model's minimum (512 tokens on Claude Opus 5, up to 4,096 on some older models) are not cached at all: the call works, and Usage shows 0 written |
 | `maxTokens` | Number | `16000` | The ceiling on the answer. Hitting it is not an error: Done fires with Stop Reason set to max_tokens and a truncated Text, so the graph can decide what that means |
 | `messages` | Array | — | A whole conversation as [{ role, content }], for a graph that is holding one. When this is wired and non-empty it replaces Input entirely |
 | `model` | String | `claude-opus-5` | The model id, sent verbatim. Free text on purpose: a model released after this backend was built needs no release of NodeGX to be usable |
@@ -53,7 +54,7 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 | `json` | Object | — | The answer parsed, when Output Schema asked for one. Untouched when no schema was set — a graph that wants an object has to say what shape it is |
 | `stopReason` | String | — | Why the model stopped: end_turn when it finished, max_tokens when it ran out of room, tool_use when it wants a tool. A refusal never arrives here — it fires Failure |
 | `text` | String | — | The model's answer. When Output Schema is set this is the raw JSON of it |
-| `usage` | Object | — | What the call cost, as { inputTokens, outputTokens, cacheReadTokens }. The same numbers land on the run's execution record, where they are summed per run |
+| `usage` | Object | — | What the call cost, as { inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens }. A write on every call and reads of 0 means Instructions differ between calls. The same numbers land on the run's execution record, where they are summed per run |
 
 ### Signals
 

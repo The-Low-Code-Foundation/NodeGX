@@ -63,7 +63,7 @@ function askFunction() {
         type: 'noodl.cloud.request',
         x: 0,
         y: 0,
-        parameters: { allowNoAuth: true, params: 'base,schema,instructions,input' },
+        parameters: { allowNoAuth: true, params: 'base,schema,instructions,callInstructions,input' },
         ports: [],
         children: []
       },
@@ -109,6 +109,7 @@ function askFunction() {
       { sourceId: 'req', sourcePort: 'pm-base', targetId: 'model', targetPort: 'baseUrl' },
       { sourceId: 'req', sourcePort: 'pm-schema', targetId: 'model', targetPort: 'outputSchema' },
       { sourceId: 'req', sourcePort: 'pm-instructions', targetId: 'model', targetPort: 'instructions' },
+      { sourceId: 'req', sourcePort: 'pm-callInstructions', targetId: 'model', targetPort: 'callInstructions' },
       { sourceId: 'req', sourcePort: 'pm-input', targetId: 'model', targetPort: 'input' },
       { sourceId: 'req', sourcePort: 'receive', targetId: 'model', targetPort: 'send' },
       { sourceId: 'model', sourcePort: 'text', targetId: 'res', targetPort: 'pm-text' },
@@ -265,7 +266,7 @@ function refusedFunction(name: string, parameters: Record<string, unknown>) {
 interface Answer {
   text?: string;
   json?: Record<string, unknown>;
-  usage?: { inputTokens: number; outputTokens: number; cacheReadTokens: number };
+  usage?: { inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheWriteTokens: number };
   stopReason?: string;
   attempts?: number;
   error?: string;
@@ -314,7 +315,7 @@ describe('a cloud function calls a model (FED-003)', () => {
       { type: 'text', text }
     ],
     stop_reason: 'end_turn',
-    usage: { input_tokens: 41, output_tokens: 7, cache_read_input_tokens: 12 }
+    usage: { input_tokens: 41, output_tokens: 7, cache_read_input_tokens: 12, cache_creation_input_tokens: 30 }
   });
 
   beforeAll(async () => {
@@ -430,7 +431,12 @@ describe('a cloud function calls a model (FED-003)', () => {
       expect(res.status).toBe(200);
       expect(res.json.result.text).toBe('Two rockets, one bench.');
       expect(res.json.result.stopReason).toBe('end_turn');
-      expect(res.json.result.usage).toEqual({ inputTokens: 41, outputTokens: 7, cacheReadTokens: 12 });
+      expect(res.json.result.usage).toEqual({
+        inputTokens: 41,
+        outputTokens: 7,
+        cacheReadTokens: 12,
+        cacheWriteTokens: 30
+      });
       expect(res.json.result.attempts).toBe(1);
     });
 
@@ -445,7 +451,13 @@ describe('a cloud function calls a model (FED-003)', () => {
     it('builds the body of §3.2 — system, one user turn, effort inside output_config', () => {
       expect(sent.body.model).toBe('claude-opus-5');
       expect(sent.body.max_tokens).toBe(512);
-      expect(sent.body.system).toBe('You tag feed items.');
+      // HLT-019: Instructions go as ONE block marked for the prompt cache, 5-minute TTL.
+      expect(sent.body.system).toEqual([
+        { type: 'text', text: 'You tag feed items.', cache_control: { type: 'ephemeral' } }
+      ]);
+      // Never the API's top-level automatic caching, which marks the LAST block — per-call text
+      // here — and so writes on every call and never reads (HLT-019 worked example, case C).
+      expect(sent.body).not.toHaveProperty('cache_control');
       expect(sent.body.messages).toEqual([{ role: 'user', content: 'Tag this post.' }]);
       expect(sent.body.output_config).toEqual({ effort: 'low' });
       // Current models think adaptively and REJECT a token budget outright, so the node sends
@@ -454,6 +466,37 @@ describe('a cloud function calls a model (FED-003)', () => {
       expect(sent.body).not.toHaveProperty('budget_tokens');
       // The deprecated spelling. `output_config.format` is the current one (§3.2).
       expect(sent.body).not.toHaveProperty('output_format');
+    });
+  });
+
+  describe('HLT-019 — fixed instructions are cached, per-call instructions are not', () => {
+    const lastSent = () => seen.filter((s) => s.route === '/ok').slice(-1)[0];
+
+    it('sends Per-Call Instructions as an unmarked block AFTER the cached one', async () => {
+      const res = await ask('/ok', {
+        instructions: 'You write lessons.',
+        callInstructions: 'This learner is Ada. Last time: fractions.',
+        input: 'Today’s lesson.'
+      });
+      expect(res.status).toBe(200);
+      // The marker ends the cached prefix BEFORE the text that changes, so a second learner's
+      // call begins with the same bytes up to it and reads them back.
+      expect(lastSent().body.system).toEqual([
+        { type: 'text', text: 'You write lessons.', cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: 'This learner is Ada. Last time: fractions.' }
+      ]);
+      expect(lastSent().body.messages).toEqual([{ role: 'user', content: 'Today’s lesson.' }]);
+    });
+
+    it('with only Per-Call Instructions, system is the plain string it always was', async () => {
+      // Nothing in it is stable, so marking it would buy a write on every call and no read.
+      await ask('/ok', { callInstructions: 'Only this, and it changes.', input: 'Go.' });
+      expect(lastSent().body.system).toBe('Only this, and it changes.');
+    });
+
+    it('with neither, sends no system at all — today’s body', async () => {
+      await ask('/ok', { input: 'Bare.' });
+      expect(lastSent().body).not.toHaveProperty('system');
     });
   });
 
@@ -600,7 +643,7 @@ describe('a cloud function calls a model (FED-003)', () => {
   });
 
   describe('AC9 — what the run cost is on the execution record', () => {
-    it('carries one modelCalls entry per call, with the five fields of §3.4', async () => {
+    it('carries one modelCalls entry per call, with the fields of §3.4 and HLT-019’s cache writes', async () => {
       await ask('/ok', { input: 'Cost me.' });
 
       const executions = await client.request<ExecutionRow[]>('GET', '/executions?workflowId=ask&limit=50', {
@@ -614,12 +657,13 @@ describe('a cloud function calls a model (FED-003)', () => {
       const calls = costed[0].metadata!.modelCalls as Record<string, unknown>[];
       expect(calls.length).toBeGreaterThanOrEqual(1);
       expect(Object.keys(calls[0]).sort()).toEqual(
-        ['cacheReadTokens', 'durationMs', 'inputTokens', 'model', 'outputTokens'].sort()
+        ['cacheReadTokens', 'cacheWriteTokens', 'durationMs', 'inputTokens', 'model', 'outputTokens'].sort()
       );
       expect(calls[0].model).toBe('claude-opus-5');
       expect(calls[0].inputTokens).toBe(41);
       expect(calls[0].outputTokens).toBe(7);
       expect(calls[0].cacheReadTokens).toBe(12);
+      expect(calls[0].cacheWriteTokens).toBe(30);
       expect(typeof calls[0].durationMs).toBe('number');
     });
 
@@ -649,6 +693,7 @@ describe('a cloud function calls a model (FED-003)', () => {
         inputTokens: 82, // 41 × 2
         outputTokens: 14, // 7 × 2
         cacheReadTokens: 24, // 12 × 2
+        cacheWriteTokens: 60, // 30 × 2
         durationMs: expect.any(Number),
         models: ['claude-opus-5'], // distinct, not repeated
         line: expect.any(String)
