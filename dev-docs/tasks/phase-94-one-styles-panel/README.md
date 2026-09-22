@@ -2,7 +2,12 @@
 
 **Scoped:** 2026-09-18, from Richard's ruling at the close of P92 CHR-010, and a code audit taken
 the same hour at `cline-dev` HEAD `884881cff`.
-**Status: 🟡 BUILT AND DRIVEN — waiting on Richard, now on TWO surfaces.** 🔴 **s8 built and drove
+**Status: 🟢 CLOSED at s10 (2026-09-19/20) — all seven STY tasks ruled WORTHY by Richard.** See
+[NEXT-SESSION-PROMPT.md](./NEXT-SESSION-PROMPT.md) and the task table. *(Header corrected 2026-09-22
+by P99 HLT-010 §6: it still read as open, and it cost P99's scoping sweep a detour. Everything below
+is the history of how it got there.)*
+
+**Status at s8:** 🟡 BUILT AND DRIVEN — waiting on Richard, now on TWO surfaces. 🔴 **s8 built and drove
 STY-005, the task the phase is named after**: the Styles panel is in the rail under Components, with
 colours, text styles, Looks and the tokens in one place, 25/25 driven arms in both themes. **Richard
 now owes two looks, and neither closes on a test** — STY-003 AC8 (`shots/sty003-gutter-{dark,light}.png`,

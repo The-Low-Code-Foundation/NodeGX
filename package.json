@@ -30,6 +30,7 @@
     "tsfixme:report": "node scripts/tsfixme-ratchet.js --report",
     "colors": "node scripts/hex-color-ratchet.js",
     "vocabulary": "node scripts/vocabulary-ratchet.js",
+    "renderer-errors": "node scripts/renderer-errors/run.js",
     "vocabulary:verbose": "node scripts/vocabulary-ratchet.js --verbose",
     "colors:baseline": "node scripts/hex-color-ratchet.js --update",
     "colors:report": "node scripts/hex-color-ratchet.js --report",

@@ -2,6 +2,12 @@
 
 **The structural fix, and the reason this phase is not just nine bug fixes.**
 
+> ✅ **BUILT 2026-09-22 (s13).** `npm run renderer-errors` (`scripts/renderer-errors/`), CI job
+> `renderer-errors`. Fixed build exit 0, AC3 mutant exit 1 naming `react/sync-unmount` (2,978 / 0),
+> restored exit 0. ⚠️ Not yet seen on a Linux runner. Its first runs found and fixed
+> `PropertyPanelCheckbox`'s `value={null}` and a `NOODLPORT=0` startup crash, and left one
+> unowned: `NOODLPORT=0` in the renderer. [Verdict](./verdicts/HLT-010/2026-09-22/VERDICT.md).
+
 ## 1. The person sentence
 
 > **A change that makes the editor throw a new error in ordinary use fails a gate that same day,

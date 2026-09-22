@@ -3,8 +3,8 @@
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
 HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
 HLT-008 ✅ (s10 — P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left),
-HLT-015 ✅ (s12 — AC7 is the DBT stream's).**
-Open: **HLT-007, 009, 016, 017**, then **HLT-010 last**. HLT-016 and HLT-017 both have shapes
+HLT-015 ✅ (s12 — AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; not yet seen on a Linux runner).**
+Open: **HLT-007, 009, 016, 017**. HLT-016 and HLT-017 both have shapes
 *"to be ruled"*. Ask Richard before building either. HLT-017 (a drop target) was opened by the
 planner stream at 22:33 on 2026-09-21, and its README row was still uncommitted at s12's close.
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
@@ -31,6 +31,28 @@ product's. See HLT-011 AC4.
 HLT-010 now inherits three runtime error classes from s11 (its §2b), one of which (`Layout is
 "node"` on every popup) needs a layout decision before it can budget at 0. ⚠️ **HLT-009's template is another stream's** — it committed to it again on
 2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+
+## 🔴 What s13 leaves you — HLT-010, the gate exists
+
+**`npm run renderer-errors`: fixed build exit 0 · HLT-001 reverted → exit 1 naming
+`react/sync-unmount` 2,978 / 0 · restored exit 0.** [Verdict](./verdicts/HLT-010/2026-09-22/VERDICT.md).
+
+- 🔴 **First thing to check: the `renderer-errors` job's first run on GitHub.** It has only run on
+  macOS. If it fails on Linux, read which ARM missed (exit 2) before touching the budget.
+- 🔴 **Run it before you close any editor task:** ~2 min compile + ~3 min drive. It refuses to start
+  while any dev stack is up, because `start.ts` would reap it. `--log .logs/dev.log` grades a session
+  you already have.
+- 🔴 **A red reading names the step** (`during "components and node selection"`). To find which
+  component, `--inject <file.js>` runs a probe in the renderer after the project opens. s13's probe
+  found `PropertyPanelCheckbox` by walking `<input>` React props for `value === null` a tick
+  after the warning.
+- 🔴 **React's null-`value` warning fires ONCE per session.** Fixing the one a drive names can unmask
+  the next; HLT-003 read 0 with this one behind it. Re-run after the fix, always.
+- 📋 **Unowned: `NOODLPORT=0` in the renderer** (5 sites read the requested port, not the bound one).
+  The gate avoids it with a concrete free port pair.
+- 📋 **For Richard:** publishing `{"items":[]}` at `nodegx-content/static/whats-new/feed.json` takes
+  the one non-zero budget (`feed.json` 404, ≤ 2) to 0.
+- ⚠️ The green reading was taken on a working tree that carries peers' uncommitted P93 edits.
 
 ## 🔴 What s12 leaves you — HLT-015, the scanner no longer spends the link
 

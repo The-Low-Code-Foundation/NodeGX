@@ -1,0 +1,37 @@
+workspace /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-m6l30N
+CDP port  52241
+fixture   templates/landing-pages
+
+ok    the editor launched and React mounted — 
+ok    requestAnimationFrame fires in the driven window
+ok    REACH the launcher drew the seeded project card — 1 cards
+ok    REACH the launcher’s community layer ran (`/api/v1/me` requested) — 3 requests
+ok    REACH the fixture opened from its launcher card — /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-m6l30N/Renderer Error Gate
+ok    REACH components visited and nodes selected — 10 components, 52 selections
+MISS  REACH the board mounted and drew frames — 0 frames
+MISS  the drive ran to the end — no element matching [data-test="preview-scope-bench"]
+
+drive + teardown took 125 s
+ok    the log exists and CDP attached to the editor — 2914 lines
+ok    sentinel sentinel/console came back as exactly one event — 1 events on 1 lines
+ok    sentinel sentinel/uncaught came back as exactly one event — 1 events on 2 lines
+ok    sentinel sentinel/browser came back as exactly one event — 1 events on 1 lines
+
+── classes seen ─────────────────────────────────────────────
+  OVER      67 / 0  thumbnail/guest-view-manager-call
+            line 2321 [console renderer_init:2] Uncaught (in promise) Error: Error invoking remote method 'GUEST_VIEW_MANAGER_CALL': Error: Script failed to execute, this normally means an error was thrown. Check the renderer console for the error.
+            line 2322 [exception] Uncaught (in promise) Error: Error invoking remote method 'GUEST_VIEW_MANAGER_CALL': Error: Script failed to execute, this normally means an error was thrown. Check the renderer console for the error.
+  UNKNOWN   28 / -  unknown:WebSocket connection to 'ws://localhost:N/' failed: Error in connection establishment: net
+            line 2293 [browser] WebSocket connection to 'ws://localhost:0/' failed: Error in connection establishment: net::ERR_UNSAFE_PORT (ViewerConnection.ts)
+            line 2304 [browser] WebSocket connection to 'ws://localhost:0/' failed: Error in connection establishment: net::ERR_UNSAFE_PORT (ViewerConnection.ts)
+  ok         1 / 2  network/whats-new-feed-404
+  UNKNOWN    1 / -  unknown:crash:process gone: killed (exitCode N)
+            line 2911 [crash] process gone: killed (exitCode 15)
+
+── the allowlist (every class with a budget above 0, and why) ──
+  network/whats-new-feed-404 ≤ 2 — Chromium's network log, not an app error: whats-new.ts asks for /whats-new/feed.json on every project open, the feed has never existed, and the client resolves to null without throwing (HLT-013 verdict, 'knowingly unserved'). Only NOT asking removes the line. The gate opens a project twice, so 2. Goes to 0 when the feed is published or the request is dropped.
+
+COULD NOT MEASURE — 2 precondition(s) missed; a quiet log here proves nothing.
+
+log kept: /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-m6l30N/dev.log
+exit=2

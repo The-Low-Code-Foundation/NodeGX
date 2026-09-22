@@ -16,6 +16,8 @@
  *
  * Env:
  *   NOODL_REMOTE_DEBUG_PORT   renderer CDP port, defaults to 9222
+ *   NOODL_DEV_LOG_FILE        write the log here instead of .logs/dev.log — the renderer-error
+ *                             gate (HLT-010) uses it so a gate run never truncates a session's log
  *   NOODL_MAIN_INSPECT_PORT   main-process inspector port; --inspect-main sets 9229
  */
 const { spawn } = require('child_process');
@@ -24,8 +26,10 @@ const http = require('http');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const LOG_DIR = path.join(ROOT, '.logs');
-const LOG_FILE = path.join(LOG_DIR, 'dev.log');
+const LOG_FILE = process.env.NOODL_DEV_LOG_FILE
+  ? path.resolve(process.env.NOODL_DEV_LOG_FILE)
+  : path.join(ROOT, '.logs', 'dev.log');
+const LOG_DIR = path.dirname(LOG_FILE);
 const PORT = process.env.NOODL_REMOTE_DEBUG_PORT || '9222';
 const quiet = process.argv.includes('--quiet');
 const inspectMain = process.argv.includes('--inspect-main');

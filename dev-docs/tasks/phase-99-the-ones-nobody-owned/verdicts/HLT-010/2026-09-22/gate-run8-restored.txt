@@ -1,0 +1,30 @@
+workspace /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-HREpMD
+CDP port  53405
+fixture   templates/landing-pages
+
+ok    the editor launched and React mounted — 
+ok    requestAnimationFrame fires in the driven window
+ok    REACH the launcher drew the seeded project card — 1 cards
+ok    REACH the launcher’s community layer ran (`/api/v1/me` requested) — 3 requests
+ok    REACH the fixture opened from its launcher card — /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-HREpMD/Renderer Error Gate
+ok    REACH components visited and nodes selected — 10 components, 52 selections
+ok    REACH the board mounted and drew frames — 3 frames
+ok    REACH a component was put on the Workbench
+ok    REACH the app preview ran a thumbnail tick — 1 webviews, 25 s
+ok    REACH back to the launcher
+ok    REACH the fixture reopened from its card
+
+drive + teardown took 175 s
+ok    the log exists and CDP attached to the editor — 2351 lines
+ok    sentinel sentinel/console came back as exactly one event — 1 events on 1 lines
+ok    sentinel sentinel/uncaught came back as exactly one event — 1 events on 2 lines
+ok    sentinel sentinel/browser came back as exactly one event — 1 events on 1 lines
+
+── classes seen ─────────────────────────────────────────────
+  ok         2 / 2  network/whats-new-feed-404
+
+── the allowlist (every class with a budget above 0, and why) ──
+  network/whats-new-feed-404 ≤ 2 — Chromium's network log, not an app error: whats-new.ts asks for /whats-new/feed.json on every project open, the feed has never existed, and the client resolves to null without throwing (HLT-013 verdict, 'knowingly unserved'). Only NOT asking removes the line. The gate opens a project twice, so 2. Goes to 0 when the feed is published or the request is dropped.
+
+PASSED — every error class within budget, no unknown class.
+exit=0

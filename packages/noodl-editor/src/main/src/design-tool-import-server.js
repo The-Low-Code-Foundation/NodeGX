@@ -22,7 +22,12 @@ function sendProjectName(ws, name) {
 }
 
 function start(projectGetInfo) {
-  const port = Number(process.env.NOODLPORT || 8574) + 1; //use standard Noodl port + 1
+  // Standard Noodl port + 1. 🔴 Except `NOODLPORT=0`, which asks the OS for any free port — a
+  // harness and a second editor both launch that way (web-server.js). This runs before the web
+  // server's `listening` handler writes the real port back, so `0 + 1` was port 1: EACCES, and the
+  // editor quit at startup (HLT-010, 2026-09-22). Any free port for this one too.
+  const requested = Number(process.env.NOODLPORT || 8574);
+  const port = requested === 0 ? 0 : requested + 1;
 
   /**
    * 🔴 HLS-006 — loopback, and unlike the preview server there is no way to share this one.

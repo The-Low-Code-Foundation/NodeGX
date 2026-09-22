@@ -162,6 +162,24 @@ jobs:
           NOODL_TEST_TIMEOUT_MINUTES: 30
         run: xvfb-run --auto-servernum -s "-screen 0 1280x1024x24" npm run test:ci
 
+  renderer-errors:
+    # HLT-010. P99 measured 264 renderer error events in 42 minutes of ordinary use while every
+    # suite here was green — nothing read the editor's log. This launches the dev stack against a
+    # throwaway profile and a copy of templates/landing-pages, drives the surfaces that session
+    # reached, and fails on any error class over its budget (scripts/renderer-errors/budget.json)
+    # or any class the budget does not name. Exit 2 = could not measure (a surface or a sentinel
+    # was missed) — that is a failure too, never a pass.
+    #
+    # ⚠️ The dev stack, not a production build: React's correctness warnings (HLT-001, HLT-003)
+    # are development-only, so a production editor would read 0 of them however broken it was.
+    name: Renderer errors (HLT-010)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Drive the editor and grade its log
+        run: xvfb-run --auto-servernum -s "-screen 0 1280x1024x24" npm run renderer-errors
+
   test-platform:
     name: Test (platform-node)
     runs-on: ubuntu-latest
