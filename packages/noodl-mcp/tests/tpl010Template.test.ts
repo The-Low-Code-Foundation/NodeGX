@@ -17,7 +17,16 @@ import { validateSecurityConfig } from '../../nodegx-backend/src/security/model'
 
 import { C, COLLECTIONS, PLANNER_FNS, TPL010_COMPONENTS } from './tpl010Components';
 import { MONEY_FNS } from './tpl010Money';
-import { BACKEND_NODE_TYPES, DEMO_CHANGED, DEMO_READ_SCRIPT, DEMO_STORAGE_KEY, TPL010_DEMO_COMPONENTS } from './tpl010Demo';
+import {
+  BACKEND_NODE_TYPES,
+  DEMO_CHANGED,
+  DEMO_EMPTY_ARMED,
+  DEMO_EMPTY_LABEL,
+  DEMO_EMPTY_SCRIPT,
+  DEMO_READ_SCRIPT,
+  DEMO_STORAGE_KEY,
+  TPL010_DEMO_COMPONENTS
+} from './tpl010Demo';
 import {
   AuthoredTemplate,
   buildPlannerTemplateProject,
@@ -962,6 +971,56 @@ describe('§4 the arithmetic, run rather than read', () => {
    * and the schema note in START-HERE — which is the only description of this database a person
    * who inherits the app will read.
    */
+  /**
+   * 🔴 **The first day, and the defect R2.7 found.** `Settings` was only ever *updated*: on a
+   * database with no settings row — a fresh install from the shelf, the hosted app on its first
+   * morning, a demo somebody has emptied — the sheet opened, took every number a person typed, and
+   * wrote none of them, because the guard refuses an empty id and says nothing. Save now writes the
+   * row when there is none, and the page routes on a boolean rather than on a falsy id.
+   */
+  it('🔴 a planner with no settings row writes one the first time Save is pressed', () => {
+    const unpack = scriptOf(built, C.pageWeek, 'twSettings');
+    const fresh = run(unpack, { settings: [], recBuilding: 60, recAdmin: 12, recHobby: 0 }).outputs;
+    expect([fresh.id, fresh.isNew]).toEqual(['', true]);
+    const existing = run(unpack, { settings: [{ id: 's-1', rate: 70 }], recBuilding: 60, recAdmin: 12, recHobby: 0 }).outputs;
+    expect([existing.id, existing.isNew]).toEqual(['s-1', false]);
+
+    // Add settings writes without an id and refuses nothing a person can type.
+    const add = run(scriptOf(built, C.addSettings, 'AddsettingGuard'), {
+      rate: 50, focusHours: 6, savingsTarget: 500, lowWaterMark: 0, workingDays: [1, 2, 3, 4, 5],
+      buildingHours: '', adminHours: '', hobbyHours: '', hobbyWeekCeiling: 3, buildingWeekCeiling: 12,
+      billableFloorPct: 50, todoUrl: ''
+    });
+    expect(add.signals).toEqual(['go']);
+    expect(add.outputs.workingDays).toEqual([1, 2, 3, 4, 5]);
+    // A blank split stays blank: it means "use the recommendation", and 0 would mean "no hours".
+    expect([add.outputs.buildingHours, add.outputs.adminHours, add.outputs.hobbyHours]).toEqual(['', '', '']);
+
+    // The two writers agree field for field, so which one runs cannot change what is stored.
+    const props = (name: string, node: string) =>
+      connectionsOf(built, name)
+        .filter((w) => w.toId === node && w.toProperty.startsWith('prop-'))
+        .map((w) => w.toProperty.slice(5))
+        .sort();
+    expect(props(C.addSettings, 'AddsettingWrite')).toEqual(props(C.editSettings, 'EditsettinWrite'));
+    expect(nodesOf(component(built, C.addSettings)).some((n) => n.type === 'NewDbModelProperties')).toBe(true);
+
+    // And the page presses exactly one of them, on the Condition that asks whether a row exists.
+    const wires = connectionsOf(built, C.pageWeek);
+    expect(wires.some((w) => w.fromId === 'twSettings' && w.fromProperty === 'out-isNew' && w.toId === 'twIsNewSettings')).toBe(true);
+    for (const [signal, target] of [['ontrue', 'cmdAddSettings'], ['onfalse', 'cmdSettings']]) {
+      expect(wires.some((w) => w.fromId === 'twIsNewSettings' && w.fromProperty === signal && w.toId === target && w.toProperty === 'do')).toBe(true);
+    }
+    // Nothing else may press either writer, or a save could take a path that skips the question.
+    for (const cmd of ['cmdSettings', 'cmdAddSettings']) {
+      const pressers = wires.filter((w) => w.toId === cmd && w.toProperty === 'do').map((w) => w.fromId);
+      expect(pressers).toEqual(['twIsNewSettings']);
+    }
+    // Both ways of saving — the button and the recommendation — go through it.
+    const asks = wires.filter((w) => w.toId === 'twIsNewSettings' && w.toProperty === 'eval').map((w) => `${w.fromId}.${w.fromProperty}`);
+    expect(asks.sort()).toEqual(['twSheet.save', 'twUseRec.out-go']);
+  });
+
   it('R2.5-4 — every box on the settings sheet is written by Edit settings and named in START-HERE', () => {
     const sheet = component(built, C.settingsSheet);
     const sheetWires = connectionsOf(built, C.settingsSheet);
@@ -1292,6 +1351,77 @@ describe('§6 the money, run rather than read (TPL-010-M)', () => {
 // ── §5 ─────────────────────────────────────────────────────────────────────
 
 describe('§5 the demo is the template with the backend taken out', () => {
+
+  /**
+   * R2.7 — **the way out of the invented week.** Richard asked for a button that clears the dummy
+   * data so the demo can be used for real. Two presses, because the only way back is somebody
+   * else's invented month; and the emptied store keeps every collection as a key, or the reader
+   * would decide the store was broken and seed the example back on the next read.
+   */
+  it('🔴 R2.7 — Empty it arms on the first press and clears on the second, and the emptied store keeps its shape', () => {
+    const page = component(demo, C.pageWeek);
+    const nodes = nodesOf(page);
+    const button = nodes.find((n) => n.id === 'twDemoEmptyBtn');
+    expect((button?.parameters as { label?: string })?.label).toBe(DEMO_EMPTY_LABEL);
+    const row = nodes.find((n) => n.id === 'twDemoNoticeRow');
+    expect((row?.children ?? []).map((c) => c.id)).toEqual(['twDemoNotice', 'twDemoEmptyBtn']);
+    const wires = connectionsOf(demo, C.pageWeek);
+    for (const [from, fromProp, to, toProp] of [
+      ['twDemoEmptyBtn', 'onClick', 'twDemoEmpty', 'run'],
+      ['twDemoEmpty', 'out-label', 'twDemoEmptyBtn', 'label'],
+      ['twDemoEmpty', 'out-done', 'twData', 'refresh']
+    ]) {
+      expect(wires.some((w) => w.fromId === from && w.fromProperty === fromProp && w.toId === to && w.toProperty === toProp)).toBe(true);
+    }
+    // The template has no such button: its database is somebody's income, and nothing there deletes.
+    expect(nodesOf(component(built, C.pageWeek)).some((n) => n.id === 'twDemoEmptyBtn')).toBe(false);
+
+    // Run the script the artefact ships, twice, with one `this` — the arming lives in that scope.
+    const script = scriptOf(demo, C.pageWeek, 'twDemoEmpty');
+    const store: Record<string, string> = { [DEMO_STORAGE_KEY]: JSON.stringify({ Project: [{ id: 'p' }] }) };
+    const win = {
+      localStorage: {
+        getItem: (k: string) => (k in store ? store[k] : null),
+        setItem: (k: string, v: string) => {
+          store[k] = v;
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        }
+      }
+    };
+    const scope = {};
+    const press = () => {
+      const signals: string[] = [];
+      const outputs = new Proxy({} as Record<string, unknown>, {
+        get(target, key: string) {
+          if (key in target) return target[key];
+          return () => signals.push(key);
+        }
+      });
+      // eslint-disable-next-line no-new-func
+      new Function('Inputs', 'Outputs', 'window', script).call(scope, {}, outputs, win);
+      return { outputs: { ...outputs }, signals };
+    };
+
+    const first = press();
+    expect(first.outputs.label).toBe(DEMO_EMPTY_ARMED);
+    expect(first.signals).toEqual([]);
+    expect(JSON.parse(store[DEMO_STORAGE_KEY]).Project).toHaveLength(1);
+
+    const second = press();
+    expect(second.outputs.label).toBe(DEMO_EMPTY_LABEL);
+    expect(second.signals).toEqual(['done']);
+    const emptied = JSON.parse(store[DEMO_STORAGE_KEY]);
+    expect(Object.keys(emptied).sort()).toEqual([...COLLECTIONS].sort());
+    for (const name of COLLECTIONS) expect(emptied[name]).toEqual([]);
+
+    // 🔴 An emptied store must not read as a broken one: the reader seeds the example week back
+    // when a collection is MISSING, and every one of them is here, holding nothing.
+    expect(DEMO_READ_SCRIPT).toContain('if (!store || !store.Project) whole = false;');
+    // A third press arms again rather than clearing twice in a row.
+    expect(press().outputs.label).toBe(DEMO_EMPTY_ARMED);
+  });
   it('holds no backend node of any kind, and no sign-in page', () => {
     const backend = allNodes(demo).filter((n) => (BACKEND_NODE_TYPES as readonly string[]).includes(n.node.type));
     expect(backend.map((n) => `${n.component} ${n.node.type}`)).toEqual([]);

@@ -1894,6 +1894,12 @@
       "toProperty": "rate"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "rate",
+      "toId": "cmdAddSettings",
+      "toProperty": "rate"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-focusHours",
       "toId": "twSheet",
@@ -1903,6 +1909,12 @@
       "fromId": "twSheet",
       "fromProperty": "focusHours",
       "toId": "cmdSettings",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "focusHours",
+      "toId": "cmdAddSettings",
       "toProperty": "focusHours"
     },
     {
@@ -1918,6 +1930,12 @@
       "toProperty": "savingsTarget"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "savingsTarget",
+      "toId": "cmdAddSettings",
+      "toProperty": "savingsTarget"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-lowWaterMark",
       "toId": "twSheet",
@@ -1927,6 +1945,12 @@
       "fromId": "twSheet",
       "fromProperty": "lowWaterMark",
       "toId": "cmdSettings",
+      "toProperty": "lowWaterMark"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "lowWaterMark",
+      "toId": "cmdAddSettings",
       "toProperty": "lowWaterMark"
     },
     {
@@ -1942,6 +1966,12 @@
       "toProperty": "buildingHours"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "buildingHours",
+      "toId": "cmdAddSettings",
+      "toProperty": "buildingHours"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-adminHours",
       "toId": "twSheet",
@@ -1951,6 +1981,12 @@
       "fromId": "twSheet",
       "fromProperty": "adminHours",
       "toId": "cmdSettings",
+      "toProperty": "adminHours"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "adminHours",
+      "toId": "cmdAddSettings",
       "toProperty": "adminHours"
     },
     {
@@ -1966,6 +2002,12 @@
       "toProperty": "hobbyHours"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "hobbyHours",
+      "toId": "cmdAddSettings",
+      "toProperty": "hobbyHours"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-hobbyWeekCeiling",
       "toId": "twSheet",
@@ -1975,6 +2017,12 @@
       "fromId": "twSheet",
       "fromProperty": "hobbyWeekCeiling",
       "toId": "cmdSettings",
+      "toProperty": "hobbyWeekCeiling"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "hobbyWeekCeiling",
+      "toId": "cmdAddSettings",
       "toProperty": "hobbyWeekCeiling"
     },
     {
@@ -1990,6 +2038,12 @@
       "toProperty": "buildingWeekCeiling"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "buildingWeekCeiling",
+      "toId": "cmdAddSettings",
+      "toProperty": "buildingWeekCeiling"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-billableFloorPct",
       "toId": "twSheet",
@@ -2002,6 +2056,12 @@
       "toProperty": "billableFloorPct"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "billableFloorPct",
+      "toId": "cmdAddSettings",
+      "toProperty": "billableFloorPct"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-todoUrl",
       "toId": "twSheet",
@@ -2011,6 +2071,12 @@
       "fromId": "twSheet",
       "fromProperty": "todoUrl",
       "toId": "cmdSettings",
+      "toProperty": "todoUrl"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "todoUrl",
+      "toId": "cmdAddSettings",
       "toProperty": "todoUrl"
     },
     {
@@ -2062,14 +2128,38 @@
       "toProperty": "workingDays"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "workingDays",
+      "toId": "cmdAddSettings",
+      "toProperty": "workingDays"
+    },
+    {
       "fromId": "twSettings",
       "fromProperty": "out-id",
       "toId": "cmdSettings",
       "toProperty": "settingsId"
     },
     {
+      "fromId": "twSettings",
+      "fromProperty": "out-isNew",
+      "toId": "twIsNewSettings",
+      "toProperty": "condition"
+    },
+    {
       "fromId": "twSheet",
       "fromProperty": "save",
+      "toId": "twIsNewSettings",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "twIsNewSettings",
+      "fromProperty": "ontrue",
+      "toId": "cmdAddSettings",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twIsNewSettings",
+      "fromProperty": "onfalse",
       "toId": "cmdSettings",
       "toProperty": "do"
     },
@@ -2147,8 +2237,20 @@
     },
     {
       "fromId": "twUseRec",
+      "fromProperty": "out-buildingHours",
+      "toId": "cmdAddSettings",
+      "toProperty": "buildingHours"
+    },
+    {
+      "fromId": "twUseRec",
       "fromProperty": "out-adminHours",
       "toId": "cmdSettings",
+      "toProperty": "adminHours"
+    },
+    {
+      "fromId": "twUseRec",
+      "fromProperty": "out-adminHours",
+      "toId": "cmdAddSettings",
       "toProperty": "adminHours"
     },
     {
@@ -2159,9 +2261,15 @@
     },
     {
       "fromId": "twUseRec",
+      "fromProperty": "out-hobbyHours",
+      "toId": "cmdAddSettings",
+      "toProperty": "hobbyHours"
+    },
+    {
+      "fromId": "twUseRec",
       "fromProperty": "out-go",
-      "toId": "cmdSettings",
-      "toProperty": "do"
+      "toId": "twIsNewSettings",
+      "toProperty": "eval"
     },
     {
       "fromId": "twSettings",
@@ -4241,6 +4349,12 @@
     },
     {
       "fromId": "cmdSettings",
+      "fromProperty": "done",
+      "toId": "twData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddSettings",
       "fromProperty": "done",
       "toId": "twData",
       "toProperty": "refresh"

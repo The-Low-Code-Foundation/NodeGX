@@ -394,6 +394,62 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   const withLink = await until(text, (s) => s.includes('Todo ↗'), 8000);
   check('L6 — the bar offers Todo ↗ once the address is set', withLink.includes('Todo ↗'), withLink.slice(0, 300));
 
+  // ── R2.7: empty the demo, then start a week of your own ──
+  const before7 = await store();
+  check('R2.7 — the demo arrives with the invented week in it', before7.Project.length > 3 && before7.Block.length > 10, `${before7.Project.length} projects, ${before7.Block.length} blocks`);
+  check('R2.7 — the button is on the first line, under the bar', await js(`(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === 'Empty it and start my own'); if (!b) return false; const r = b.getBoundingClientRect(); return r.top < 140; })()`), 'no button near the top');
+  await clickButton('Empty it and start my own');
+  const armedStore = await store();
+  check('R2.7 — the first press only asks again, and writes nothing', (await js(`[...document.querySelectorAll('button')].some((b) => b.textContent.trim() === 'Press again to clear everything')`)) === true && armedStore.Project.length === before7.Project.length, `${armedStore.Project.length} projects still`);
+  await shot('5-armed');
+  await clickButton('Press again to clear everything');
+  const emptied = await until(store, (s) => s.Project.length === 0);
+  check('R2.7 — the second press clears every collection and keeps their shape', ['Project', 'Block', 'MonthPlan', 'MoneyItem', 'MoneyMark', 'BalanceReading', 'Settings'].every((k) => Array.isArray(emptied[k]) && emptied[k].length === 0), JSON.stringify(Object.keys(emptied).map((k) => `${k}:${(emptied[k] || []).length}`)));
+  const emptyWeek = await until(text, (s) => !s.includes('Bramble & Co'));
+  check('R2.7 — and the week on screen is empty, with the envelopes still drawn', !emptyWeek.includes('Bramble & Co') && !emptyWeek.includes('The Jazz Room') && emptyWeek.includes('Billable') && emptyWeek.includes('Hobby'), emptyWeek.slice(0, 400));
+  check('R2.7 — the bar drops Todo ↗ with the settings that carried it', !emptyWeek.includes('Todo ↗'), emptyWeek.slice(0, 200));
+  check('R2.7 — the button offers itself again rather than staying armed', await js(`[...document.querySelectorAll('button')].some((b) => b.textContent.trim() === 'Empty it and start my own')`), 'still armed');
+  await shot('6-emptied');
+
+  // 🔴 The defect R2.7 found: Settings was only ever UPDATED, so on an empty planner — a fresh
+  // install, or this — Save took every number and wrote none of them.
+  await openSettings();
+  await fill('Your usual hourly rate, €', '90');
+  await fill('Focused hours a day', '5');
+  await clickButton('Save');
+  const firstSettings = await until(settingsRow, (r) => Number(r.rate) === 90);
+  check('🔴 R2.7 — Save on a planner with no settings row WRITES one', Number(firstSettings.rate) === 90 && Number(firstSettings.focusHours) === 5 && !!firstSettings.id, JSON.stringify(firstSettings));
+  const afterFirst = await store();
+  check('R2.7 — exactly one settings row, not one per press', afterFirst.Settings.length === 1, `${afterFirst.Settings.length} rows`);
+  await clickButton('Save');
+  const afterSecond = await until(store, (s) => s.Settings.length >= 1);
+  check('R2.7 — and the second Save changes that row instead of adding another', afterSecond.Settings.length === 1 && afterSecond.Settings[0].id === firstSettings.id, `${afterSecond.Settings.length} rows`);
+  await key('Escape');
+
+  // A project, on the week that was emptied: the thing the button exists for.
+  await clickButton('Projects');
+  await until(text, (s) => s.includes('+ New project'));
+  await clickButton('+ New project');
+  await until(text, (s) => s.includes('Name'));
+  await fill('Name', 'My first client');
+  await clickButton('Save');
+  const mine = await until(store, (s) => s.Project.length === 1);
+  check('R2.7 — and a project of your own goes into the empty week', mine.Project[0].name === 'My first client', JSON.stringify(mine.Project[0]));
+  await key('Escape');
+  await shot('7-own-project');
+
+  // Reset demo still puts the invented week back.
+  await clickButton('Reset demo');
+  const back = await until(store, (s) => s.Project.length > 3);
+  const backText = await until(text, (s) => s.includes('Bramble & Co'));
+  // The seed, not what this drive had made of it: the counts before were this session's own
+  // additions on top of the example week.
+  check(
+    'R2.7 — Reset demo puts the example week back over it',
+    backText.includes('Bramble & Co') && !backText.includes('My first client') && back.Settings.length === 1 && Number(back.Settings[0].rate) === 50,
+    `${back.Project.length} projects, ${back.Block.length} blocks, rate ${back.Settings[0] && back.Settings[0].rate}`
+  );
+
   // ── The look, at his window and at 1280 ──
   const sw = await js('document.documentElement.scrollWidth');
   check('nothing scrolls sideways at 1280', sw <= 1280, String(sw));

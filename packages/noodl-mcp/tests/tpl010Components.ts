@@ -126,6 +126,7 @@ export const C = {
   recordBalance: '/Commands/Record balance',
   agreeMoneyItem: '/Commands/Agree money item',
   editSettings: '/Commands/Edit settings',
+  addSettings: '/Commands/Add settings',
 
   pageWeek: '/Pages/Week',
   pageSignIn: '/Pages/Sign in'
@@ -183,7 +184,7 @@ const FOR_EACH = 'For Each';
 const VARIABLE = 'Variable2';
 const SET_VARIABLE = 'Set Variable';
 const CONDITION = 'Condition';
-const BUTTON = 'net.noodl.controls.button';
+export const BUTTON = 'net.noodl.controls.button';
 const TEXT_INPUT = 'net.noodl.controls.textinput';
 const QUERY = 'DbCollection2';
 const CREATE = 'NewDbModelProperties';
@@ -294,7 +295,7 @@ const BUTTON_SHAPE = {
 };
 const BTN_PRIMARY = { ...composition('primaryButton'), ...BUTTON_SHAPE };
 const BTN_OUTLINE = { ...composition('outlineButton'), ...BUTTON_SHAPE };
-const BTN_GHOST = {
+export const BTN_GHOST = {
   ...BUTTON_SHAPE,
   backgroundColor: 'transparent',
   color: 'var(--muted-foreground)',
@@ -5837,13 +5838,11 @@ const SETTINGS_WRITTEN: Array<[string, string]> = [
   ['todoUrl', 'string']
 ];
 
-const EDIT_SETTINGS = command({
-  path: 'Commands/Edit settings',
-  description: 'Saves the numbers the week is worked out from: what you can work and on which days, the money a money item cannot say, how the month’s hours divide, and the lines that earn a sentence.',
-  ins: SETTINGS_WRITTEN,
-  guard: `${PLANNER_FNS}var id = String(Inputs.settingsId || '');
-if (id === '') return;
-Outputs.rate = Math.max(0, num(Inputs.rate, 0));
+/**
+ * Everything `Settings` holds, sanitised once — the same rules whether the row is being made or
+ * changed, because a first day and a thousandth day are the same numbers.
+ */
+const SETTINGS_GUARD = `Outputs.rate = Math.max(0, num(Inputs.rate, 0));
 // R3 — the ceiling is what makes the plan honest, so it cannot be set to nothing.
 Outputs.focusHours = Math.min(16, Math.max(1, num(Inputs.focusHours, 6)));
 Outputs.savingsTarget = Math.max(0, num(Inputs.savingsTarget, 0));
@@ -5867,14 +5866,48 @@ Outputs.buildingWeekCeiling = keep(Inputs.buildingWeekCeiling);
 var floor = Number(Inputs.billableFloorPct);
 Outputs.billableFloorPct = isFinite(floor) ? Math.min(100, Math.max(0, floor)) : '';
 Outputs.todoUrl = String(Inputs.todoUrl === undefined || Inputs.todoUrl === null ? '' : Inputs.todoUrl).trim();
-Outputs.go();`,
+Outputs.go();`;
+
+const SETTINGS_PROPS = SETTINGS_WRITTEN.filter(([n]) => n !== 'settingsId').map(([n]) => [n, n] as [string, string]);
+
+const EDIT_SETTINGS = command({
+  path: 'Commands/Edit settings',
+  description: 'Saves the numbers the week is worked out from: what you can work and on which days, the money a money item cannot say, how the month’s hours divide, and the lines that earn a sentence.',
+  ins: SETTINGS_WRITTEN,
+  guard: `${PLANNER_FNS}var id = String(Inputs.settingsId || '');
+if (id === '') return;
+${SETTINGS_GUARD}`,
   guardIns: SETTINGS_WRITTEN.map(([n]) => n),
   write: {
     kind: 'update',
     collection: 'Settings',
     label: 'Save the settings',
-    props: SETTINGS_WRITTEN.filter(([n]) => n !== 'settingsId').map(([n]) => [n, n] as [string, string]),
+    props: SETTINGS_PROPS,
     idFromInput: 'settingsId'
+  }
+});
+
+/**
+ * 🔴 **The first day.** `Settings` was only ever updated, so a planner opened on an empty database —
+ * which is what a person who installs this template has, and what the hosted app started as — could
+ * show the settings sheet and never save a word of it: the guard above refuses an empty id, silently,
+ * because there was no row to change. Pressing Save on a planner with no settings row writes one.
+ *
+ * The page decides which of the two runs, from whether a row came back with the week. Every other
+ * command in here writes one thing; this pair writes the same thing twice because *"make it"* and
+ * *"change it"* are two record nodes in this product, not one.
+ */
+const ADD_SETTINGS = command({
+  path: 'Commands/Add settings',
+  description: 'Writes your settings for the first time, on a planner that has none yet.',
+  ins: SETTINGS_WRITTEN.filter(([n]) => n !== 'settingsId'),
+  guard: `${PLANNER_FNS}${SETTINGS_GUARD}`,
+  guardIns: SETTINGS_WRITTEN.filter(([n]) => n !== 'settingsId').map(([n]) => n),
+  write: {
+    kind: 'create',
+    collection: 'Settings',
+    label: 'Write the settings',
+    props: SETTINGS_PROPS
   }
 });
 
@@ -6158,7 +6191,7 @@ const PAGE_WEEK: Tpl010Component = {
     C.blockSheet, C.dayPicker, C.moneySheet,
     C.plannerData, C.envelopes, C.dayColumns, C.moves, C.money, C.moneyView, C.mark, C.shutdown, '/Logic/Card rows',
     C.addBlock, C.saveBlock, C.addTime, C.carryBlock, C.dropBlock, C.placeMove, C.moveBlock,
-    C.addProject, C.editProject, C.setMonthPlan, C.editSettings,
+    C.addProject, C.editProject, C.setMonthPlan, C.editSettings, C.addSettings,
     C.addMoneyItem, C.editMoneyItem, C.endMoneyItem, C.agreeMoneyItem, C.addMark, C.editMark, C.recordBalance
   ],
   repeats: { source: 'array', rowFields: ENVELOPE_TILE_FIELDS.map(([n]) => n) },
@@ -6521,6 +6554,7 @@ document.addEventListener('keydown', fire);`,
     logic('twIsNewBlock', CONDITION, 'Is the sheet making a new block?', signalOnly('condition')),
     logic('twIsNewProject', CONDITION, 'Is the editor making a new project?', signalOnly('condition')),
     logic('twIsNewCash', CONDITION, 'Is it a new money event?', signalOnly('condition')),
+    logic('twIsNewSettings', CONDITION, 'Is this the first time the settings are saved?', signalOnly('condition')),
 
     /** The settings row, unpacked once for the sheet and for the commands that write it. */
     derive(
@@ -6528,6 +6562,10 @@ document.addEventListener('keydown', fire);`,
       'Your settings, unpacked',
       `${PLANNER_FNS}var s = (Inputs.settings || [])[0] || {};
 Outputs.id = s.id || '';
+// 🔴 A planner with no settings row yet — a fresh install, or a demo somebody has emptied. Save
+// has to MAKE the row then, and the page routes on this rather than on the id being falsy, which
+// a Condition cannot ask.
+Outputs.isNew = !s.id;
 Outputs.rate = String(num(s.rate, 0));
 Outputs.focusHours = String(num(s.focusHours, 6));
 Outputs.savingsTarget = String(num(s.savingsTarget, 0));
@@ -6589,6 +6627,7 @@ Outputs.go();`,
     logic('cmdEditProject', C.editProject, 'Change a project'),
     logic('cmdMonthPlan', C.setMonthPlan, 'Plan this month'),
     logic('cmdSettings', C.editSettings, 'Save the settings'),
+    logic('cmdAddSettings', C.addSettings, 'Write the settings for the first time'),
     logic('cmdAddItem', C.addMoneyItem, 'Add a money item'),
     logic('cmdEditItem', C.editMoneyItem, 'Change a money item'),
     logic('cmdEndItem', C.endMoneyItem, 'End a money item'),
@@ -6807,12 +6846,19 @@ Outputs.go();`,
     // that writes it. One list, so a field cannot be shown and not saved (R2.5-4).
     ...SETTINGS_VALUES.flatMap(([n]) => [
       wire('twSettings', `out-${n}`, 'twSheet', n),
-      wire('twSheet', n, 'cmdSettings', n)
+      // Both writers are handed every value; the Condition below decides which one is pressed.
+      wire('twSheet', n, 'cmdSettings', n),
+      wire('twSheet', n, 'cmdAddSettings', n)
     ]),
     ...WORK_DAYS.map(([n]) => wire('twSettings', `out-day${n}`, 'twSheet', `day${n}`)),
     wire('twSheet', 'workingDays', 'cmdSettings', 'workingDays'),
+    wire('twSheet', 'workingDays', 'cmdAddSettings', 'workingDays'),
     wire('twSettings', 'out-id', 'cmdSettings', 'settingsId'),
-    wire('twSheet', 'save', 'cmdSettings', 'do'),
+    // R2.5 / the first day: no row yet means Save writes one, and every way of saving goes through here.
+    wire('twSettings', 'out-isNew', 'twIsNewSettings', 'condition'),
+    wire('twSheet', 'save', 'twIsNewSettings', 'eval'),
+    wire('twIsNewSettings', 'ontrue', 'cmdAddSettings', 'do'),
+    wire('twIsNewSettings', 'onfalse', 'cmdSettings', 'do'),
     // R25 — the recommendations: printed beside the fields, and written by the button.
     ...(['recBuildingLine', 'recAdminLine', 'recHobbyLine', 'recLabel'] as const).map((n) => wire('twEnv', n, 'twSheet', n)),
     ...(['recBuilding', 'recAdmin', 'recHobby'] as const).flatMap((n) => [
@@ -6820,8 +6866,11 @@ Outputs.go();`,
       wire('twEnv', n, 'twUseRec', `in-${n}`)
     ]),
     wire('twSheet', 'useRecommendation', 'twUseRec', 'run'),
-    ...(['buildingHours', 'adminHours', 'hobbyHours'] as const).map((n) => wire('twUseRec', `out-${n}`, 'cmdSettings', n)),
-    wire('twUseRec', 'out-go', 'cmdSettings', 'do'),
+    ...(['buildingHours', 'adminHours', 'hobbyHours'] as const).flatMap((n) => [
+      wire('twUseRec', `out-${n}`, 'cmdSettings', n),
+      wire('twUseRec', `out-${n}`, 'cmdAddSettings', n)
+    ]),
+    wire('twUseRec', 'out-go', 'twIsNewSettings', 'eval'),
     // L6 — the bar's link, from the same record.
     wire('twSettings', 'out-todoUrl', 'twBar', 'todoUrl'),
 
@@ -6843,7 +6892,7 @@ Outputs.go();`,
     ...MONEY_WIRES,
 
     // After any change, load the week again.
-    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdPlaceDay', 'cmdMoveBlock', 'cmdTakeOut', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdSettings',
+    ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdPlaceDay', 'cmdMoveBlock', 'cmdTakeOut', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdSettings', 'cmdAddSettings',
       'cmdAddItem', 'cmdEditItem', 'cmdEndItem', 'cmdAgreeItem', 'cmdAddMark', 'cmdEditMark', 'cmdRecordBalance'].map(
       (id) => wire(id, 'done', 'twData', 'refresh')
     )
@@ -6974,6 +7023,7 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   EDIT_PROJECT,
   SET_MONTH_PLAN,
   EDIT_SETTINGS,
+  ADD_SETTINGS,
   ADD_MONEY_ITEM,
   EDIT_MONEY_ITEM,
   END_MONEY_ITEM,

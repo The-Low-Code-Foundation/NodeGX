@@ -99,6 +99,14 @@
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
+    "Commands/Add settings": {
+      "path": "Commands/Add settings",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 28,
+      "modified": "2026-09-20T00:00:00.000Z",
+      "created": "2026-09-20T00:00:00.000Z"
+    },
     "Commands/Add money item": {
       "path": "Commands/Add money item",
       "type": "visual",
@@ -542,8 +550,8 @@
     "Pages/Week": {
       "path": "Pages/Week",
       "type": "page",
-      "nodeCount": 137,
-      "connectionCount": 714,
+      "nodeCount": 139,
+      "connectionCount": 733,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -557,8 +565,8 @@
     }
   },
   "stats": {
-    "totalComponents": 69,
-    "totalNodes": 875,
-    "totalConnections": 2266
+    "totalComponents": 70,
+    "totalNodes": 882,
+    "totalConnections": 2313
   }
 }

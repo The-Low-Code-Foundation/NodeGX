@@ -36,7 +36,7 @@
  *
  * @module noodl-mcp/tests/tpl010Demo
  */
-import { C, LOAD_PROBLEM_TEXT, PROBLEM_TEXT, signalOnly, TPL010_COMPONENTS, Tpl010Component } from './tpl010Components';
+import { BTN_GHOST, BUTTON, C, LOAD_PROBLEM_TEXT, PROBLEM_TEXT, signalOnly, TPL010_COMPONENTS, Tpl010Component } from './tpl010Components';
 import { composition } from './tpl010Theme';
 
 /**
@@ -48,9 +48,11 @@ export const DEMO_STORAGE_KEY = 'nodegx-planner-demo-v3';
 export const DEMO_PROBLEM_TEXT = 'That change did not save in this browser. Try again, or reset the demo.';
 export const DEMO_LOAD_PROBLEM_TEXT = 'The example week could not be read from this browser. Reset the demo to start again.';
 export const DEMO_NOTICE =
-  'This is a demo with an invented week in it. Nothing you change leaves this browser, and Reset demo puts the example week back.';
+  'This is a demo with an invented week in it. Nothing you change leaves this browser: empty it and the week is yours to fill, and Reset demo puts the example back.';
 export const DEMO_RESET_LABEL = 'Reset demo';
-
+/** The two faces of the one button: the offer, and the second press that means it (R2.7). */
+export const DEMO_EMPTY_LABEL = 'Empty it and start my own';
+export const DEMO_EMPTY_ARMED = 'Press again to clear everything';
 const FUNCTION = 'JavaScriptFunction';
 const CREATE = 'NewDbModelProperties';
 const UPDATE = 'SetDbModelProperties';
@@ -134,6 +136,25 @@ function demoSave(store) {
 `;
 
 /** One record write, as a Function. `fields` are the record fields wired into it, in wire order. */
+/**
+ * 🔴 **Two presses, and the arming lives in the node's own scope.** Clearing the week is the one
+ * thing here a person cannot undo except by resetting to somebody else's invented month, so the
+ * first press only changes the label. A Function's `this` survives its runs — the same mechanism
+ * the week arrows use to know they have moved — which is cheaper than a Variable nobody else reads.
+ */
+export const DEMO_EMPTY_SCRIPT = `${DEMO_STORE_FNS}if (!this.armed) {
+  this.armed = true;
+  Outputs.label = ${JSON.stringify(DEMO_EMPTY_ARMED)};
+  return;
+}
+this.armed = false;
+Outputs.label = ${JSON.stringify(DEMO_EMPTY_LABEL)};
+// Every collection is still a key, with nothing in it: the reader seeds an empty store back to the
+// example week if a collection is MISSING, so an emptied demo has to keep its shape.
+demoSave(demoEmpty());
+// Last line: the label above is delivered before the week is told to read again.
+Outputs.done();`;
+
 export function demoWriteScript(kind: 'create' | 'update' | 'delete', collection: string, fields: string[]): string {
   for (const f of fields) if (!FIELD_NAME.test(f)) throw new Error(`tpl010Demo: "${f}" cannot be a Function input name`);
   const assign = fields.map((f) => `record.${f} = Inputs.${f};`).join('\n');
@@ -778,19 +799,68 @@ function demoPage(): Tpl010Component {
     throw new Error(`tpl010Demo: Pages/Week has ${dropped.length} sign-in wires, expected ${PAGE_AUTH_WIRES}: ${JSON.stringify(dropped)}`);
   }
 
-  const notice: Node = {
-    id: 'twDemoNotice',
-    type: 'Text',
-    label: 'It is a demo',
-    parent: 'twRoot',
-    parameters: { text: DEMO_NOTICE, ...composition('meta'), sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }
-  };
+  /**
+   * R2.7 — **the way out of the invented week.** Richard: *"add a button somewhere at the beginning
+   * of the template that's like 'delete dummy data' so you can actually clear the data and start
+   * fresh and add your own shit."* It is the first line of the page, beside the sentence that says
+   * what the demo is, because that is where somebody is when they decide they want it for real.
+   *
+   * It is the demo's alone: the app's own database is somebody's income, and `delete` is `nobody`
+   * on every collection but `Block` (R10). What the template does for a person starting from
+   * nothing is `Commands/Add settings` — a planner with no settings row writes one on Save.
+   */
+  const notice: Node[] = [
+    {
+      id: 'twDemoNoticeRow',
+      type: 'Group',
+      label: 'It is a demo',
+      parent: 'twRoot',
+      parameters: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        columnGap: 'var(--space-3)',
+        rowGap: 'var(--space-2)',
+        sizeMode: 'contentHeight',
+        width: { value: 100, unit: '%' }
+      }
+    },
+    {
+      id: 'twDemoNotice',
+      type: 'Text',
+      label: 'What this demo is',
+      parent: 'twDemoNoticeRow',
+      // 🔴 A Text sized to its content NEVER wraps: as `contentSize` this sentence measured 1,034px
+      // inside a 358px box on a phone and was clipped. `contentHeight` takes its width from the
+      // parent, and the flex basis is what lets it share the line with the button on a wide screen
+      // and take the whole line on a narrow one.
+      parameters: {
+        text: DEMO_NOTICE,
+        ...composition('meta'),
+        sizeMode: 'contentHeight',
+        styleCss: 'flex: 1 1 340px; min-width: 0;'
+      }
+    },
+    {
+      id: 'twDemoEmptyBtn',
+      type: BUTTON,
+      label: 'Empty the demo',
+      parent: 'twDemoNoticeRow',
+      parameters: { ...BTN_GHOST, label: DEMO_EMPTY_LABEL }
+    },
+    {
+      id: 'twDemoEmpty',
+      type: FUNCTION,
+      label: 'Clear this browser’s week',
+      parameters: { functionScript: DEMO_EMPTY_SCRIPT }
+    }
+  ];
   const kept = nodes
     .filter((n) => !PAGE_AUTH_NODES.includes(n.id))
     .map((n) => (n.id === 'twData' ? { ...n, label: 'Your week, kept in this browser' } : n));
   const barAt = kept.findIndex((n) => n.id === 'twBar');
   if (barAt < 0) throw new Error('tpl010Demo: Pages/Week has no twBar to put the notice under');
-  kept.splice(barAt + 1, 0, notice);
+  kept.splice(barAt + 1, 0, ...notice);
 
   return {
     ...src,
@@ -803,7 +873,13 @@ function demoPage(): Tpl010Component {
       { fromId: 'twPage', fromProperty: 'didMount', toId: 'twData', toProperty: 'thisWeek' },
       ...wires.filter((w) => !auth(w)),
       { fromId: 'twBar', fromProperty: 'reset', toId: 'twData', toProperty: 'reset' },
-      { fromId: 'twBar', fromProperty: 'reset', toId: 'twClearCard', toProperty: 'do' }
+      { fromId: 'twBar', fromProperty: 'reset', toId: 'twClearCard', toProperty: 'do' },
+      // R2.7 — the first press arms the button and writes nothing; the second empties the store and
+      // the week reads itself again, which is the same path every command takes after it writes.
+      { fromId: 'twDemoEmptyBtn', fromProperty: 'onClick', toId: 'twDemoEmpty', toProperty: 'run' },
+      { fromId: 'twDemoEmpty', fromProperty: 'out-label', toId: 'twDemoEmptyBtn', toProperty: 'label' },
+      { fromId: 'twDemoEmpty', fromProperty: 'out-done', toId: 'twData', toProperty: 'refresh' },
+      { fromId: 'twDemoEmpty', fromProperty: 'out-done', toId: 'twClearCard', toProperty: 'do' }
     ]
   };
 }

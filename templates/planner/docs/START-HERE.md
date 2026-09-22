@@ -47,7 +47,7 @@ rule above.
 
 ## How it is built
 
-- **`Commands/`** — one component for each thing a person can do: Add block, Save block, Add time, Carry block, Drop block, Place move, Move block, Add project, Edit project, Set month plan, Edit settings, Add money item, Edit money item, End money item, Agree money item, Add mark, Edit mark, Record balance.
+- **`Commands/`** — one component for each thing a person can do: Add block, Save block, Add time, Carry block, Drop block, Place move, Move block, Add project, Edit project, Set month plan, Edit settings, Add settings, Add money item, Edit money item, End money item, Agree money item, Add mark, Edit mark, Record balance.
   Each one is a guard that decides whether there is anything to write, one record write, and one
   sentence when it fails. Read one and you have read the pattern.
 - **`Logic/`** — the only places a number or a sentence is decided. `Planner data` is the only

@@ -621,3 +621,47 @@ mockup's (faded, move struck through) with *✓ Thu* where the ✓ was; in the c
 recovery if wanted: drop the **+** on a placed chip (the chip itself still opens the card), about 20 px per placed chip — not done,
 because the + is the chip's only button for a keyboard. The placed chip's 0.55 opacity is the mockup's and below the contrast
 floor by design; the AC10 gate does not see opacity. R2.1-6, R2.6-2, R2.6-5 unchanged.
+
+---
+
+## R2.7 — The dummy data is in the way — ✅ **built, gated and driven 2026-09-22 (s6)**
+
+**Richard:** *"Can we add a button somewhere at the beginning of the template that's like 'delete dummy data' so
+you can actually clear the data and start fresh and add your own shit?"*
+
+### What it is
+
+**On the demo, a button on the first line of the page**, beside the sentence that says what the demo is —
+*Empty it and start my own*. The first press changes its own label to *Press again to clear everything* and
+writes nothing; the second empties every collection and the week reads itself again. *Reset demo* still puts the
+invented week back, so nothing is one press from unrecoverable.
+
+The emptied store keeps **every collection as a key, holding nothing**. The reader seeds the example week back
+when a collection is *missing*, so an empty store has to keep its shape or the demo would re-seed on the next read.
+
+**Not in the template.** The app's database is somebody's income and `delete` is `nobody` on every collection but
+`Block` (R10). What a person starting from nothing needs there is not a delete button — it is a first save that
+works, which is the defect below.
+
+### 🔴 The defect this found: the first day never worked
+
+`Settings` was only ever **updated** (`Commands/Edit settings`, `idSource: explicit`), and its guard refuses an
+empty id. So on any planner with no settings row — **a fresh install from the shelf, the hosted app on its first
+morning, a demo somebody has just emptied** — the sheet opened, took every number typed into it, and wrote none
+of them, silently. `planning.digitalbricks.io` would have hit this on day one.
+
+`Commands/Add settings` writes the row when there is none. `Pages/Week` routes both ways of saving — the Save
+button and *Use the recommendation* — through one `Condition` on whether a row came back with the week, and the
+two writers are gated field-for-field so which one runs cannot change what is stored.
+
+### Acceptance
+
+| AC | Criterion | Result |
+|---|---|---|
+| R2.7-1 | The button is on the first line of the demo; one press arms it, a second clears every collection, and the week on screen empties | ✅ gate + drive |
+| R2.7-2 | The emptied store keeps all seven collections as empty arrays, so a reload does not seed the example back | ✅ gate + drive |
+| R2.7-3 | On the emptied demo, Save in Settings **writes** a settings row — one, and the next Save changes it rather than adding another | ✅ gate + drive |
+| R2.7-4 | A project of your own can be added to the emptied week, and *Reset demo* puts the example back over it | ✅ drive |
+| R2.7-5 | 390×844: the notice wraps and nothing is clipped | ✅ measured — 0 errors, and the `contentSize` text that measured 1,034px in a 358px box was the first thing this found |
+
+Gates **67/67**, `drive-tpl010-r25.js` **37/37**, money 40/40, R2.3 19/19, R2.4 22/22.
