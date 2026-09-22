@@ -1,45 +1,55 @@
 # P99 — next session
 
-**Status: 📋 building. HLT-001–008 ✅, HLT-010–015 ✅, HLT-017 ✅, HLT-018 ✅, HLT-016 (a) ✅ and its
-index half ✅ (s17), and **HLT-019 ✅ built in s18, except AC2 (the live-key proof).****
-Open: **HLT-019 AC2 (needs a real key), HLT-009 (another stream's template), HLT-016 (b) (waits on
-the invite-claim question) and HLT-016 AC6 (the DBT stream's).** Nothing else in P99 is buildable
-right now. See "Start here".
+**Status: 📋 building, and nothing in it is buildable right now.** Done: HLT-001–018 ✅, and
+**HLT-009 ✅ built in s20**, so the original ten are all done. HLT-019 is ✅ except AC2.
+Open: **HLT-019 AC2 (needs a real key), HLT-016 (b) (waits on the invite-claim question) and
+HLT-016 AC6 (the DBT stream's).** See "Start here".
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits, and read
 it **before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
-still carries **the DBT stream's uncommitted status-line edit** (line 4). s17 and s18 committed
-their rows through a temporary index built from `HEAD`'s copy. Never `git add` the file. The
-**HLT-019 task file is the DBT stream's and still untracked**, and it still describes the
-`Cache Instructions` boolean that the ruling replaced. Don't edit it. The verdict supersedes it.
+still carries **the DBT stream's uncommitted status-line edit** (line 4). s17–s20 committed their
+rows through a temporary index built from `HEAD`'s copy, and applied the same edit to the tree copy
+so the peer's edit survives. Never `git add` the file. The **HLT-019 task file is the DBT stream's
+and still untracked**, and it still describes the `Cache Instructions` boolean that the ruling
+replaced. Don't edit it. The verdict supersedes it.
 
 ## Start here
 
-1. **HLT-019 AC2 needs a real key.** There is no `ANTHROPIC_API_KEY` and no `ant` on this machine
-   (checked 2026-09-22). Ask Richard for one, or ask him to run it. It needs a deployed function
-   with Instructions over 512 tokens (s19 re-checked: still no key in the env; Richard hasn't
-   supplied one), called twice within 5 minutes: the first `usage` shows
-   `cacheWriteTokens > 0`, the second shows `cacheReadTokens > 0`. It costs well under a cent. Copy
-   the recording-provider drive in `nodegx-backend/tests/fed-003-model-request.test.ts` and point
-   `baseUrl` at the real API.
-2. **Watch for a reply from `digital-bricks-training-57`.** s18 told it that HLT-019 is built (with
-   the two-field shape) and that `where`/`checks` exist (the handoff's old step 2). Nothing further
-   is owed unless it answers.
-3. **HLT-009 — asked, awaiting the owner's answer (s19, 2026-09-22).** `npm run validate:project --
-   templates/digital-bricks-training` at `fafb23793`: **8 `unknown-parameter` warnings**,
-   `width`+`sizeMode` on four `dbt-lesson` kit nodes: `DossierSegment` `ds_seg` (**new since the
-   task file's 2026-09-20 count of 6**, so the stream keeps adding the pattern), `TimelineRow`
-   `tr_row`, `RatingGauge` `tj_gauge` and `PaceTracker` `cs_pace`. s19 sent `digital-bricks-training-57`
-   one message: fix it yourself, or say "P99 take it" and name the fix (declare the ports on the kit,
-   or drop the params). **Touch neither `templates/digital-bricks-training` nor
-   `library/modules/dbt-lesson` until it answers "P99 take it".** Don't send a second message.
-   Re-run the validator before acting, because the count moves.
-4. If none of those moves, P99 has no buildable row. Say so rather than inventing one.
+1. **HLT-019 AC2 needs a real key.** s20 re-checked on 2026-09-22: there is still no
+   `ANTHROPIC_API_KEY` in the environment. Ask Richard for one, or ask him to run it. It needs a
+   deployed function with Instructions over 512 tokens, called twice within 5 minutes: the first
+   `usage` shows `cacheWriteTokens > 0` and the second shows `cacheReadTokens > 0`. It costs well
+   under a cent. Copy the recording-provider drive in
+   `nodegx-backend/tests/fed-003-model-request.test.ts` and point `baseUrl` at the real API.
+2. **If a peer replies after you write the handoff, the next session won't see it.** s19's handoff
+   said "awaiting reply", but the reply had already reached s19's conversation. s20 found it by
+   grepping the previous transcript
+   (`~/.claude/projects/-Users-richardosborne-vscode-projects-OpenNoodl/*.jsonl`) for
+   `cross-session-message`. **Do that grep first whenever a handoff says "awaiting a peer".**
+3. Otherwise P99 has no buildable row. Say so rather than inventing one.
 
 **Still waiting on Richard from earlier sessions:** HLT-012 AC5 (four frames in `shots/hlt012-*`),
 P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one identity (HLT-011 AC4).
-**New, for him to rule if he wants:** the run's cost sentence (`modelCost.line`, ruled 2026-09-19)
+**For him to rule if he wants:** the run's cost sentence (`modelCost.line`, ruled 2026-09-19)
 does not mention cache writes. The numbers are on the summary object; the sentence was left alone.
+
+## ✅ What s20 leaves you: HLT-009, on the owner's word
+
+**Every reading was taken 2026-09-22, tree `0322be23d` plus this change.**
+[Verdict](./verdicts/HLT-009/2026-09-22/VERDICT.md).
+
+- **The owner answered** (`digital-bricks-training-57`): *"P99 take it: drop width+sizeMode from
+  the four instances … do not declare the ports on the kit."* s20 checked this before acting.
+  `dbt-lesson/src/styles.css:2425` records that `props.style` is empty on every kit node, so the
+  parameters were discarded, and the width comes from a CSS rule.
+- **Built:** 8 params removed from 4 nodes (`ds_seg`, `tr_row`, `tj_gauge`, `cs_pace`). The
+  script asserted a byte-exact JSON round-trip first. Diff: 4 files, +4/−28.
+- **Gates:** validator **8 → 0 warnings** on the template. All ten templates at 0 errors
+  (`members-area`'s 2 warnings are the known out-of-scope pair). Course render desktop+phone
+  **byte-identical** before/after. On 5 frames of Learner/Lesson/Palette, two renders of the
+  *unchanged* copy differ from each other, so byte compares can't grade those pages. Their
+  height, element and overflow counts were identical across all three runs. No test references
+  these nodes. `test:main` was not run: only template JSON changed.
 
 ## ✅ What s18 leaves you: HLT-019, on a ruling that was neither option
 

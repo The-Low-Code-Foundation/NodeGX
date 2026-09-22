@@ -45,13 +45,7 @@
       "label": "The objective, as a button",
       "x": 0,
       "y": 0,
-      "parameters": {
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "sizeMode": "contentHeight"
-      }
+      "parameters": {}
     },
     {
       "id": "ds_out",

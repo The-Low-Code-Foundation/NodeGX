@@ -81,13 +81,7 @@
       "x": 700,
       "y": 200,
       "parent": "tj_root",
-      "parameters": {
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "sizeMode": "contentHeight"
-      },
+      "parameters": {},
       "metadata": {
         "comment": "The kit draws; Logic/Standing measured. Every position arrives as a fraction of the same 1-10 track, so two dimensions with different targets are read against ONE ruler — two tracks scaled to their own targets would make a 4-against-5 and a 9-against-10 look identical, which is the thing a gauge exists to stop."
       }

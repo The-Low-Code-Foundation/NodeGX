@@ -117,13 +117,7 @@
       "x": 420,
       "y": 360,
       "parent": "tr_root",
-      "parameters": {
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "sizeMode": "contentHeight"
-      },
+      "parameters": {},
       "metadata": {
         "comment": "The kit draws the row; the graph decided what it is and where it goes. The fold, the six glyphs, the two-voice wash and the one markdown path are rendering facts the catalogue cannot express — 180 node types, no SVG, no <details> (measured 2026-09-20). A kind with no glyph or card rule throws by name rather than drawing nothing (L126)."
       }

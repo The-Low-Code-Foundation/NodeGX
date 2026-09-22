@@ -1,0 +1,10 @@
+
+> @thelowcodefoundation/repo@1.1.0 validate:project
+> ts-node -P ./scripts/tsconfig.json ./scripts/validate-project.ts templates/digital-bricks-training
+
+# templates/digital-bricks-training
+INFO [oversized-page] /Pages/Course › node cs_page "Course" (Page): This page's own graph is 50 nodes. Above about 40 a page has usually inlined sections that wanted to be components of their own — a page reads best as a handful of section instances. A component instance counts as one node here, so factoring a section out is a real reduction, not a rename.
+INFO [oversized-page] /Pages/Learner › node lr_page "Learner" (Page): This page's own graph is 58 nodes. Above about 40 a page has usually inlined sections that wanted to be components of their own — a page reads best as a handful of section instances. A component instance counts as one node here, so factoring a section out is a real reduction, not a rename.
+
+0 error(s), 0 warning(s), 2 info — 372 nodes, 854 endpoints checked
+

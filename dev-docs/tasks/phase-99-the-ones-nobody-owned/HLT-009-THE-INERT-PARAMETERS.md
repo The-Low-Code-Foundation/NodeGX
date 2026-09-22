@@ -1,5 +1,10 @@
 # HLT-009 — The inert parameters in the training template
 
+**Status: ✅ built 2026-09-22 (s20).** The owner said *"P99 take it: drop width+sizeMode from the
+four instances … do not declare the ports on the kit"*. The count had grown to **8** on 4 nodes
+(`ds_seg` added in L167). All removed. The validator reads 0 warnings, and the Course render is
+byte-identical. [Verdict](./verdicts/HLT-009/2026-09-22/VERDICT.md).
+
 **Six parameters that are read by nothing, in the template being written right now — and the first
 job is not a fix, it is a message to the stream that owns it.**
 
@@ -58,14 +63,14 @@ or the template should stop setting them.
 
 ## 5. Acceptance criteria
 
-1. **The owning stream has been asked**, and its answer is recorded here by date. If it is already
+1. ✅ **The owning stream has been asked**, and its answer is recorded here by date. If it is already
    doing this, **this task closes as disproved** and says so.
-2. `npm run validate:project templates/digital-bricks-training` reports **0 warnings** — measured on
+2. ✅ `npm run validate:project templates/digital-bricks-training` reports **0 warnings** — measured on
    the artefact, output committed to `verdicts/HLT-009/<date>/`.
-3. **Whichever way it is fixed, the rendered result is unchanged or better** — a screenshot pair
+3. ✅ **Whichever way it is fixed, the rendered result is unchanged or better** — a screenshot pair
    before and after. Deleting a parameter that turns out to be read by a later kit version would be
    a silent regression.
-4. ⚠️ **The other six templates stay at 0 errors** — re-run the validator over all of them, because
+4. ✅ **The other six templates stay at 0 errors** — re-run the validator over all of them, because
    the fix may touch shared kit code.
 
 ## 6. Landmines

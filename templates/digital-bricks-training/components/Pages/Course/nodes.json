@@ -409,13 +409,7 @@
       "metadata": {
         "comment": "A kit node because the catalogue has no SVG node (measured 2026-09-20: 180 types). It DRAWS the view Logic/Standing computed and works none of it out — par included, which pace.ts exports so a renderer cannot become a second owner of the par rule."
       },
-      "parameters": {
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "sizeMode": "contentHeight"
-      }
+      "parameters": {}
     },
     {
       "id": "cs_traj",
