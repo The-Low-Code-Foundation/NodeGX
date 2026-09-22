@@ -43,7 +43,7 @@ const path = require('path');
 const net = require('net');
 const { spawn } = require('child_process');
 
-const { parseLog, countEvents, grade, validateBudget } = require('./lib/classify');
+const { parseLog, countEvents, grade, validateBudget, DEAD, deathReason } = require('./lib/classify');
 
 const ROOT = path.join(__dirname, '..', '..');
 const BUDGET = require('./budget.json');
@@ -251,12 +251,10 @@ async function drive(ws, cdp) {
   let editor = null;
   // Electron dying does not take the webpack servers with it, so the stack stays "up" with no
   // editor in it. Read the log for that, or the first run waits the whole timeout for nothing.
-  const DEAD = /Lifecycle script `start:_dev` failed|process gone:/;
   while (Date.now() < deadline) {
     const sofar = fs.existsSync(ws.log) ? fs.readFileSync(ws.log, 'utf8') : '';
     if (DEAD.test(sofar) || (ws.child && ws.child.exitCode !== null)) {
-      const why = sofar.split('\n').filter((l) => /Error|EACCES|failed/.test(l)).slice(0, 3).join(' | ');
-      arm('the editor launched and React mounted', false, `the editor process died: ${why.slice(0, 300)}`);
+      arm('the editor launched and React mounted', false, `the editor process died: ${deathReason(sofar)}`);
       return;
     }
     try {

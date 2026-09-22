@@ -175,4 +175,22 @@ function validateBudget(budget) {
   return problems;
 }
 
-module.exports = { parseLine, parseLog, classOf, signature, countEvents, grade, validateBudget };
+/** The log's sign that the editor died. Electron dying does not take the webpack servers with it,
+ * so the stack stays "up" with no editor in it — `run.js` watches the log for this instead. */
+const DEAD = /Lifecycle script `start:_dev` failed|process gone:/;
+
+/**
+ * Why the editor died, from the log. 🔴 Not "the first lines saying Error": webpack's compile output
+ * names every module it builds, and `ErrorBoundary.module.scss` matched first — so the first run on
+ * a Linux runner (2026-09-22) reported a stylesheet's filename as the cause of death. The death is
+ * the line matching DEAD (or, if the process just exited, the end of the log); the cause is in the
+ * few lines before it, once webpack's module chatter is dropped.
+ */
+function deathReason(log) {
+  const lines = log.split('\n').filter((l) => l.trim() && !/LOG from |sass-loader|css-loader|<[ew]> |^\s*\|/.test(l));
+  let end = lines.findIndex((l) => DEAD.test(l));
+  end = end === -1 ? lines.length : end + 1;
+  return lines.slice(Math.max(0, end - 6), end).map((l) => l.trim().slice(0, 200)).join(' | ') || '(the log says nothing)';
+}
+
+module.exports = { parseLine, parseLog, classOf, signature, countEvents, grade, validateBudget, DEAD, deathReason };

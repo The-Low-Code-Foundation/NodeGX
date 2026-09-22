@@ -179,6 +179,15 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Drive the editor and grade its log
         run: xvfb-run --auto-servernum -s "-screen 0 1280x1024x24" npm run renderer-errors
+      # The gate keeps its log on any non-zero exit. Without this the first Linux run (2026-09-22)
+      # died before React mounted and took the only record of why with the runner.
+      - name: Keep the log it graded
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: renderer-errors-log
+          path: /tmp/hlt010-*/dev.log
+          if-no-files-found: warn
 
   test-platform:
     name: Test (platform-node)

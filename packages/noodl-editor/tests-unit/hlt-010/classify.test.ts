@@ -14,7 +14,7 @@
 import * as path from 'path';
 
 const LIB = path.join(__dirname, '../../../../scripts/renderer-errors');
-const { parseLine, parseLog, countEvents, grade, validateBudget } = require(path.join(LIB, 'lib/classify.js'));
+const { parseLine, parseLog, countEvents, grade, validateBudget, deathReason } = require(path.join(LIB, 'lib/classify.js'));
 const BUDGET = require(path.join(LIB, 'budget.json'));
 
 const ESC = '\u001b';
@@ -128,5 +128,40 @@ describe('HLT-010 AC7 — the budget file', () => {
     const phase = BUDGET.classes.filter((c: { owner: string }) => /^HLT-00[1-4]$/.test(c.owner));
     expect(phase.length).toBeGreaterThanOrEqual(7);
     for (const c of phase) expect({ id: c.id, budget: c.budget }).toEqual({ id: c.id, budget: 0 });
+  });
+});
+
+describe('HLT-010 — when the editor dies, the gate says why', () => {
+  // The exact line the first Linux run (2026-09-22, run 35710097343) printed as the cause of death.
+  const WEBPACK = `${ESC}[36mEditor${ESC}[0m: ${ESC}[1mLOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/common/ErrorBoundary/ErrorBoundary.module.scss${ESC}[39m${ESC}[22m`;
+  const log = [
+    WEBPACK,
+    `${ESC}[36mEditor${ESC}[0m: <w> [webpack-dev-middleware] something about Errors`,
+    `${ESC}[36mEditor${ESC}[0m: [main] the real cause: libfoo.so: cannot open shared object file`,
+    `${ESC}[36mEditor${ESC}[0m: [renderer] process gone: crashed (exitCode 133)`,
+    `${ESC}[36mEditor${ESC}[0m: after the death, irrelevant`
+  ].join('\n');
+
+  it('control: the old filter (first lines matching Error) named a stylesheet', () => {
+    const old = log.split('\n').filter((l) => /Error|EACCES|failed/.test(l)).slice(0, 3).join(' | ');
+    expect(old).toContain('ErrorBoundary.module.scss');
+    expect(old).not.toContain('cannot open shared object file');
+  });
+
+  it('quotes the death line and what came just before it, and no webpack module chatter', () => {
+    const why = deathReason(log);
+    expect(why).toContain('cannot open shared object file');
+    expect(why).toContain('process gone: crashed');
+    expect(why).not.toContain('ErrorBoundary');
+    expect(why).not.toContain('webpack-dev-middleware');
+    expect(why).not.toContain('after the death');
+  });
+
+  it('with no death line (the process simply exited), quotes the end of the log', () => {
+    expect(deathReason(`${WEBPACK}\nfirst\nlast words`)).toMatch(/last words$/);
+  });
+
+  it('an empty log says so rather than printing nothing', () => {
+    expect(deathReason('')).toBe('(the log says nothing)');
   });
 });
