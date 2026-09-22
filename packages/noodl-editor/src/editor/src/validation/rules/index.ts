@@ -37,6 +37,7 @@ import { failureReachesNothing } from './failureReachesNothing';
 import { completedCommitsUnchecked } from './completedCommitsUnchecked';
 import { repeatedSiblingSubtree } from './repeatedSiblingSubtree';
 import { labelNotAClickTarget } from './labelNotAClickTarget';
+import { dialogWithoutName } from './dialogWithoutName';
 import { oversizedPage } from './oversizedPage';
 import { unlabelledNode } from './unlabelledNode';
 
@@ -87,6 +88,13 @@ export const ALL_RULES: Rule[] = [
   // should have been one component, this one whether the Text sibling of a
   // toggle control was meant to be the control's own label.
   labelNotAClickTarget,
+  // P99 HLT-014 §3.1 — beside `labelNotAClickTarget` because they are the same
+  // question at two scales: that one asks whether a control's words can be
+  // tapped, this one whether a whole dialog can be named out loud. Both are
+  // warnings on graphs that are otherwise correct, and both were calibrated
+  // against the shipped corpus before they were written — this one is 0 hits
+  // on all ten templates.
+  dialogWithoutName,
   oversizedPage,
   // LEG-002 — last, and deliberately: it is the only rule in the set that
   // reports a matter of legibility rather than of correctness, and a reader

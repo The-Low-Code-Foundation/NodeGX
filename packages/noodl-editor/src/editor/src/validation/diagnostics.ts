@@ -216,6 +216,34 @@ export enum DiagnosticCode {
    */
   LabelNotAClickTarget = 'label-not-a-click-target',
   /**
+   * P99 **HLT-014 §3.1** — a Show Popup whose dialog has no accessible name.
+   *
+   * HLT-014 made every open popup a real modal dialog — `role="dialog"`,
+   * `aria-modal="true"`, the page behind it `inert`, focus returned to the
+   * opener. A dialog with no *name* passes all of that and is still announced
+   * as the bare word **"dialog"**: something opened, and nothing about what.
+   *
+   * The runtime names it from Show Popup's `Accessible Name`, or failing that
+   * from the popup's first `h1`–`h3` (`popup-dialog.ts:109-114`, `:254-257`).
+   * This code fires when neither is available.
+   *
+   * 🔴 **Two things the predicate must not assume.** A `Text` is a heading
+   * only when its `as` parameter says so — the default is `div` — and the
+   * runtime's `querySelector` searches nested component instances, so the check
+   * recurses. Measured across 238 projects: **756** Show Popups, **0** with an
+   * Accessible Name, **5** whose target carries a heading. A version that
+   * accepted any `Text` would pass 728 popups that are all still announced as
+   * "dialog".
+   *
+   * A **warning**, never an error: the graph is correct and it renders.
+   * ✅ **0 hits on the ten shipped templates** — they contain exactly one Show
+   * Popup and its target already has a heading — so this cannot turn
+   * `validate:project` red on the product's own corpus. On a legacy project it
+   * is loud, and that is the truth about those popups rather than a reason to
+   * soften it.
+   */
+  DialogWithoutName = 'dialog-without-name',
+  /**
    * LAS-003/F7 — a `position: absolute` box with neither `width` nor `height`,
    * carrying decoration (background, border, radius, shadow).
    *

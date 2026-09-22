@@ -1,7 +1,12 @@
 # HLT-014 — The popup is not a dialog
 
-> ✅ **BUILT 2026-09-21 (P99 s11) — AC1–AC8 met; §3.1's validator warning is the row's one remaining
-> slice.** Driven: HEAD 7/7 fired · fixed 25/25 (both layouts) · export 14/14, mutant 11/14 ·
+> ✅ **BUILT 2026-09-21 (P99 s11) — AC1–AC8 met. ✅ §3.1's validator warning BUILT 2026-09-22
+> (P99 s21): `dialog-without-name`, a default-enabled warning, 22/22 specs, two mutants caught by
+> name, **0 hits on all ten shipped templates**. [verdict](./verdicts/HLT-014/2026-09-22-validator/VERDICT.md).
+> 🔴 The predicate is NOT what §3 described — a `Text` is a heading only when its `as` says so
+> (default `div`), and the walk must recurse into component instances because the runtime's
+> `querySelector` does. **This row is now closed.** 📋 `test:ci` is owed and not run: a dev stack was
+> up for Richard's AC7 hand-test.** Driven: HEAD 7/7 fired · fixed 25/25 (both layouts) · export 14/14, mutant 11/14 ·
 > templates 18/18 (HEAD 9/18). 🔴 AC7 found a regression §3's shape would have shipped — the toast
 > prefab opens its toast through Show Popup, and a modal toast froze the page for three seconds — so
 > Show Popup also gained **`Modal`** (default on), which the toast sets off.
@@ -11,6 +16,52 @@
 request** — *"let's maybe plan a task for this issue in phase 99 of NodeGX to tackle the problem
 for future projects? You decide what the best long term solution is."* Measured by reading the
 source, not yet by a driven session; §4's first criterion is the drive that confirms it.
+
+## 3.1 — MEASURED 2026-09-22 (P99 s21), before a line was written
+
+**The remaining slice is the project validator warning: a Show Popup whose target has neither an
+`Accessible Name` nor an `h1`–`h3` inside it.** Scanned **238 projects**, both on-disk formats.
+
+| | |
+|---:|---|
+| **871** | raw `"NavigationShowPopup"` occurrences (the CONTROL — see below) |
+| **756** | Show Popup nodes reached by the component walk |
+| **0** | that carry an `Accessible Name` today |
+| **5** | whose target contains a heading |
+| **728** | that the warning would fire on |
+| 11 / 12 | no target set / target does not resolve (owned by other codes) |
+
+🔴 **So on the corpus at large the warning fires on 96% of every Show Popup.** That is not a
+reason to soften it — those really are dialogs a screen reader announces as *"dialog"* and nothing
+else — but it is a number anyone shipping this rule has to have seen first.
+
+✅ **And on what NodeGX SHIPS it fires zero times.** The ten shipped templates contain **exactly one**
+Show Popup, and its target already has a heading. So the rule can ship `warning`, default-enabled,
+without turning `validate:project` red on the product's own corpus. **Recommended: ship it that
+way.** The 728 are Richard's own drives, fixtures and legacy Noodl projects.
+
+### 🔴 The predicate has a trap, and the corpus says it is not currently reachable
+
+The runtime names a popup from `Accessible Name`, else from `el.querySelector('h1, h2, h3')` on the
+**live** subtree (`popup-dialog.ts:254`). Two things follow that a static rule must not assume:
+
+1. **A `Text` is an `h1`–`h3` only when its `as` parameter says so** (`nodes/visual/text.ts:47-68`);
+   the default is `div`. "There is a Text at the top" is not a heading.
+2. **`querySelector` sees NESTED component instances**, so a check that walks only the target
+   component's own nodes would false-warn whenever the heading lives one component down. Measured:
+   **0 cases today** — but that is a fact about this corpus, not about the rule
+   ([[a-reading-that-fits-is-not-one-that-excludes]]). The walk must recurse anyway, because the
+   day it does not is a silent false warning, and a warning nobody trusts is a warning nobody reads.
+
+### ⚠️ The control that caught a wrong key, recorded because it nearly shipped as a finding
+
+The first version of this scan reported **0 Show Popup nodes** — while `grep` found 567. Legacy
+components nest their tree under `component.graph.roots`; v2 keeps a **flat** `nodes` array in
+`components/<path>/nodes.json` with the name in a sibling `component.json`. Reading one shape found
+nothing and looked like a clean answer ([[a-project-scan-must-read-both-project-formats]]). The
+scan now prints the raw occurrence count beside the walked count **every time**, so a zero can
+never again be read as a measurement. The two still differ (871 vs 756): the remainder is inside
+prefab and `noodl_modules` JSON that carries no component wrapper.
 
 ## 1. The person sentence
 
