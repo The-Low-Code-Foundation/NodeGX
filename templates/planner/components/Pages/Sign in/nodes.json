@@ -118,7 +118,7 @@
       "label": "App name",
       "parent": "siCard",
       "parameters": {
-        "text": "Envelopes",
+        "text": "Planner",
         "fontSize": "var(--text-xl)",
         "fontWeight": "var(--font-extrabold)",
         "lineHeight": "var(--leading-snug)",

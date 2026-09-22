@@ -180,7 +180,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.navigate(BASE);
 
   // ── Arrival (work item 8) ────────────────────────────────────────────────
-  const boot = await until(text, (s) => s.includes('Envelopes') && s.includes('of 2 h'));
+  const boot = await until(text, (s) => s.includes('Planner') && s.includes('of 2 h'));
   check('arrives with two blocks half logged: “1.75 of 2 h” and “1 of 1.5 h”', boot.includes('1.75 of 2 h') && boot.includes('1 of 1.5 h'), boot.slice(0, 400));
   await shot('0-arrival');
 

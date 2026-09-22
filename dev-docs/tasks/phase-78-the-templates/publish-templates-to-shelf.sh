@@ -21,6 +21,15 @@
 # not the one measured at commit `3206e12e5` — a count that moved means somebody opened or regenerated it,
 # and the right response is to look, not to publish.
 #
+# ✅ PLANNER JOINED ON 2026-09-22 at 211 files (TPL-010 through R2.5), published the same day as its
+# demo went on nodegx.io. Like the todo list it needs a backend, and 0.2.4's community route does not
+# carry `needsBackend`, so its START-HERE says how to make one.
+#
+# 🔴 TWO COUNTS HAVE MOVED AND ARE NOT UPDATED HERE, ON PURPOSE: `todo-list` is 121 files (was 112)
+# and `story-engine` is 35 (was 30). Both are refusals waiting to happen, and both are real work the
+# shelf has not been given — the todo list's icons, date picker and reminders among them. Look at
+# what moved, then update the count and republish in the same commit.
+#
 # ✅ ROCKET SCHOOL IS 285 SINCE `5ca1192ae` (P95, 2026-09-18), AND THE MOVE WAS LOOKED AT: the eleven
 # are `Hangar/Confirm`, `Hangar/Sum row` and `Logic/Roll face` (three files each) plus the Nunito faces
 # moving out of `rocket-school-fonts` into a shared `preset-font-nunito` module. `npm run template:rocket`
@@ -40,6 +49,7 @@ COMMUNITY="${NODEGX_COMMUNITY_DIR:-$HOME/vscode_projects/nodegx-community}"
 
 # slug | directory under templates/ | category | expected files | title | summary
 TEMPLATES=(
+  "planner|planner|data-app|211|Planner|A week for people who bill by the hour: hour budgets for billable, building, admin and hobby work, a strip of next moves, money that is ticked when it happens, and one sentence a night about what to do tomorrow. Needs a NodeGX backend."
   "rocket-school|rocket-school|game|285|Rocket School|Maths and typing practice for ages 8 to 12, in English and French: four games, 62 skills from CE2 to 6e, and progress kept in the browser."
   "pixel-dungeon|pixel-game|game|34|Pixel dungeon|A turn-based dungeon played with the arrow keys. The five rooms are one list in one node, so a sixth room is one more entry."
   "story-engine|story-engine|game|30|Story engine|A branching story where choices hand you things and some only appear once you carry them. The whole story is one list you can rewrite."

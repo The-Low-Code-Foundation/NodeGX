@@ -225,7 +225,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.navigate(BASE);
 
   // ── Arrival: the bar has no Todo link while the address is empty (L6) ──
-  const boot = await until(text, (s) => s.includes('Envelopes') && s.includes('Billable'));
+  const boot = await until(text, (s) => s.includes('Planner') && s.includes('Billable'));
   check('L6 — no Todo link in the bar while Settings.todoUrl is empty', !boot.includes('Todo ↗'), boot.slice(0, 300));
   const billableBefore = await tileSay('Billable');
 
@@ -269,7 +269,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
 
   // ── R2.5-4, half of it: the ticks come back as they were saved ──
   await page.navigate(BASE);
-  await until(text, (s) => s.includes('Envelopes'));
+  await until(text, (s) => s.includes('Planner'));
   const reopened = await openSettings();
   check('R2.5-4 — the ticks survive a reload', (await checked('Sat')) === false && (await checked('Fri')) === true && reopened.includes('5 days a week'), reopened.slice(0, 700));
 
@@ -381,7 +381,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   );
   await key('Escape');
   await page.navigate(BASE);
-  await until(text, (s) => s.includes('Envelopes'));
+  await until(text, (s) => s.includes('Planner'));
   await openSettings();
   const read = [];
   for (const [label, value] of typed) read.push([label, await valueOf(label), value]);

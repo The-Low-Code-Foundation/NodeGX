@@ -5911,7 +5911,10 @@ const APP_BAR: Tpl010Component = {
       justifyContent: 'space-between',
       cssClassName: 'planner-appbar'
     }),
-    text('abTitle', 'App name', 'abRoot', 'Envelopes', { ...T_TITLE, sizeMode: 'contentSize', as: 'h1' }),
+    // Richard ruled the name on 2026-09-21: **"Planner is perfect"** — the companion to Todo. The
+    // hour budgets are still called envelopes inside the graph, and he has said that word is a bad
+    // one for them; a replacement is his to give, and renaming the tiles is not this task's.
+    text('abTitle', 'App name', 'abRoot', 'Planner', { ...T_TITLE, sizeMode: 'contentSize', as: 'h1' }),
     group('abNav', 'Which week', 'abRoot', ROW_TIGHT('var(--space-1)')),
     place('abPrev', BUTTON, 'The week before', 'abNav', BTN_ICON('icon-chevron-left', 'Previous week')),
     text('abWeekLabel', 'The week on screen', 'abNav', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)' }),
@@ -6160,7 +6163,7 @@ const PAGE_WEEK: Tpl010Component = {
   ],
   repeats: { source: 'array', rowFields: ENVELOPE_TILE_FIELDS.map(([n]) => n) },
   nodes: [
-    { id: 'twPage', type: 'Page', label: 'Week', parameters: { title: 'Envelopes', urlPath: '' } },
+    { id: 'twPage', type: 'Page', label: 'Week', parameters: { title: 'Planner', urlPath: '' } },
     group('twRoot', 'Page', 'twPage', {
       ...COLUMN('var(--space-2-5)'),
       ...pinnedAs('planner-page'),
@@ -6873,7 +6876,7 @@ const PAGE_SIGN_IN: Tpl010Component = {
       paddingTop: 'var(--space-6)',
       paddingBottom: 'var(--space-6)'
     }),
-    text('siTitle', 'App name', 'siCard', 'Envelopes', { ...wide(T_TITLE), as: 'h1' }),
+    text('siTitle', 'App name', 'siCard', 'Planner', { ...wide(T_TITLE), as: 'h1' }),
     text('siLead', 'What this is', 'siCard', 'Sign in, or create an account. Your week is kept on your server, so every device you sign in on sees the same one.', wide(T_META)),
     place('siEmail', TEXT_INPUT, 'Email', 'siCard', {
       ...FIELD, type: 'email', useLabel: true, label: 'Email', labelSpacing: 6, labelfontSize: 'var(--text-sm)', labelcolor: 'var(--foreground)'

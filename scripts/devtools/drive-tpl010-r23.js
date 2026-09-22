@@ -193,7 +193,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.navigate(BASE);
   await js(`localStorage.removeItem(${JSON.stringify(STORAGE_KEY)})`);
   await page.navigate(BASE);
-  await until(text, (s) => s.includes('Envelopes') && s.includes('of 2 h'));
+  await until(text, (s) => s.includes('Planner') && s.includes('of 2 h'));
   const seeded = await store();
 
   // ── R7d on arrival: the seed's two live move blocks are placed chips; the rest are not ──
