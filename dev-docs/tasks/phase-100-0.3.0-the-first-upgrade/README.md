@@ -1,7 +1,7 @@
 # Phase 100 — 0.3.0: the first one people upgrade into
 
 **Scoped:** 2026-09-22, at Richard's request, against `cline-dev` HEAD `7043fb6e6`.
-**Status: 📋 SCOPED — nothing built. UPG-001 started (the census; two rows measured, the rest named).**
+**Status: 📋 SCOPED — nothing built. UPG-001 started (the census; 4 rows measured, 5 classes named `⬜ never measured`).**
 **Prefix: `UPG`.** **Rulings outstanding: R1–R5 (§6).**
 
 > "We should probably celebrate phase 100 by making it the prep for the release of 0.3.0, if that's
@@ -96,10 +96,18 @@ commit message is the measurement:
 > brings them in. **The editor no longer lists, renames or deletes them.** Converting them to Looks
 > was raised as a compromise and is **not built**."*
 
-The ruling stands and this phase does not reopen it. What this phase owns is the **upgrade**
-consequence, which was never in front of Richard when he ruled: someone on 0.2.4 with text styles
-installs 0.3.0, and the styles are still in their app, still applied, and no longer editable
-anywhere in the product. That is UPG-003, and it needs R3.
+🔴 **And the upgrade consequence WAS in front of Richard when he ruled — do not re-ask it.**
+`HLT-007-THE-TWO-THINGS-P94-DID-NOT-RULE-ON.md:17-24` records all three askings: the third *"gave
+the 17-of-19 figure and named his two projects"*. His answer, verbatim:
+
+> *"Remove it anyway. I don't feel like it's going to cause a massive backlash. **You could argue
+> that we could convert the existing text styles into Looks in the new styles system, as a
+> compromise.** Most of them will just be using the default text styles that come baked into the
+> old editor."*
+
+So the removal is ruled **on the numbers**, and it is not reopened. What is genuinely open is the
+**compromise Richard himself raised and P99 recorded as `📋 Not built`**: converting existing text
+styles into Looks. That is UPG-003, and R3 asks only whether it happens for 0.3.0.
 
 ### 4.2 The break class that is **clean**, so nobody re-measures it
 
@@ -117,8 +125,10 @@ release and is not this phase's to pay.
 
 The candidate classes, from the phases that shipped into this window — the Look model (P94), the
 Styles panel (P94/P99), the backend storage plane (P97), the exporter (P94 STY-004, P83), the
-validator (P99 HLT-014, which now **fails** a popup with no accessible name). UPG-001 owns turning
-that list into a table with a decision per row.
+validator (P99 HLT-014 — whose commit subject says a popup with no accessible name *"fails the
+project validator"*, and which UPG-001 §3.3 measured as `severity: 'warning'`. 🔴 **That gap is why
+this phase censuses the artefacts and not the 427 subjects.**). UPG-001 owns turning that list into
+a table with a decision per row.
 
 ## 5. The tasks
 
@@ -126,7 +136,7 @@ that list into a table with a decision per row.
 |---|---|---|---|
 | **UPG-001** | [The break census — what a 0.2.4 project loses in 0.3.0](UPG-001-THE-BREAK-CENSUS.md) | — | the number, the notes and the migrations all read from it. **Started; §4.1 and §4.2 are its first two rows** |
 | **UPG-002** | The compatibility policy's ground has moved | **R2** | amend [`COMPATIBILITY-POLICY.md`](../../reference/COMPATIBILITY-POLICY.md) with a dated amendment saying what a break owes now that the clause has fired. It is *binding on every task in every phase* and currently states a falsehood as its premise |
-| **UPG-003** | The text styles nobody can edit | **R3** | §4.1. Convert to Looks on load with a visible report, or ship a release note and a sentence in the panel — but not silence |
+| **UPG-003** | The text styles nobody can edit | **R3** | §4.1. The conversion-to-Looks compromise **Richard raised himself** and P99 left `📋 Not built`. Build it for 0.3.0, or ship a release note — but not silence |
 | **UPG-004** | The version bump, and the literals that are not the version | — | `0.2.4` → `0.3.0` in **one** file. The prefab `library.json` files and `package-lock.json` are **traps**, both already measured in [`PUBLISH-0.2.2.md` §2](../release-0.2.2/PUBLISH-0.2.2.md). Plus the first-two-segment consumer in §5.1 below |
 | **UPG-005** | What ships and what waits | **R4** | **P83 and P84 both carry `Release: ⬜ NOT RULED` on their boards today.** A release cannot be cut with two phases explicitly waiting on a release ruling that was never given |
 | **UPG-006** | The release notes, the changelog, and the what's-new post | **R5** | 427 commits, written from the person's side. And see §5.2 — the in-app feed the editor already asks for on every project open |
@@ -162,14 +172,15 @@ the post; the push is still Richard's.
 |---|---|---|
 | **R1** | Is the number **0.3.0**? | **Yes** — §3. Answer this one and §3 stops being a proposal |
 | **R2** | Now that the forward-compat clause has fired, what does a break owe? A migration that runs on load, a loud report at load, or a release note and nothing else? | **A visible report at load, migration where the data is recoverable.** The policy already forbids the third option for anything that would silently write a wrong project back |
-| **R3** | Text styles: convert to Looks on load, or release note + a sentence in the panel? | **Ruling needed.** Your "remove it anyway" was about the panel. This is about the 17 projects |
+| **R3** | You raised converting existing text styles into Looks *"as a compromise"* and it was never built. Does 0.3.0 carry it, or a release note? | **Release note for 0.3.0, conversion as its own row.** You also said *"most of them will just be using the default text styles baked into the old editor"* — if that holds, the conversion mostly recreates defaults, and the census's §4.1 drive is what would show it either way |
 | **R4** | P83 and P84 say `Release: ⬜ NOT RULED`. What waits for 0.3.1? | **Rule the boards, not the tasks** — a per-task triage of 17 + 15 rows will eat the phase |
 | **R5** | Does 0.3.0 wait for the what's-new push (§5.2), which only you can make? | **No — it ships either way**, but the post is worth more than the empty feed |
 
 ## 7. Out of scope
 
-- **Re-litigating the Text styles removal.** Ruled 2026-09-22 with the facts corrected three times.
-  UPG-003 is about the upgrade, not the decision.
+- **Re-litigating the Text styles removal.** Ruled 2026-09-22 **on the 17-of-19 figure, with his
+  own two projects named** — the facts were corrected three times and he ruled on the corrected
+  set. UPG-003 owns the conversion he raised, not the removal he ruled.
 - **The P86 port-rename debt** (§4.2). Real, unowned, and older than this release.
 - **1.0.0 and a compatibility contract.** §3. A later phase, and a large one.
 - **Building anything new.** 🔴 A release phase that grows features grows its own blockers. Every

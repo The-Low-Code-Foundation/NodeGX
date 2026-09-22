@@ -30,7 +30,7 @@ artefact — the diff, the rule, the model file — and says what was read.
 
 | # | class | verdict | decision |
 |---|---|---|---|
-| 3.1 | Text styles are no longer editable | 🔴 **BREAK — real, user-visible, ruled** | UPG-003, needs **R3** |
+| 3.1 | Text styles are no longer editable | 🔴 **BREAK — real, ruled on the numbers** | the *conversion* is open: UPG-003, **R3** |
 | 3.2 | Built-in port renames | ✅ **CLEAN this release** | none. Do not re-measure |
 | 3.3 | New validator rule on existing work | 🟡 **NOISE, not a break** | one line in the notes |
 | 3.4 | Shipped looks becoming project-owned Looks | 🟡 **NOT on the load path** | needs the drive in §4.1 before it is closed |
@@ -45,10 +45,16 @@ ones do, including **16 shipped library prefabs**. After 0.3.0 they still load, 
 runtime, and a Text node can still pick one — **and the editor will not list, rename or delete
 them.** Converting them to Looks was considered and not built.
 
-The removal is **ruled and not reopened** (Richard, 2026-09-22, *"Remove it anyway"*, after the
-facts were corrected three times). What is unruled is the upgrade: that ruling was taken about a
-panel section, not about the 17 projects that will silently lose their handle on their own styles.
-**R3.**
+🔴 **The removal is ruled ON THESE NUMBERS and is not reopened.** `HLT-007…md:17-24` records all
+three askings, and the third *"gave the 17-of-19 figure and named his two projects"*. Richard:
+*"Remove it anyway. I don't feel like it's going to cause a massive backlash. **You could argue that
+we could convert the existing text styles into Looks in the new styles system, as a compromise.**
+Most of them will just be using the default text styles that come baked into the old editor."*
+
+**So do not carry this row to Richard as "the upgrade was never considered" — it was.** The open
+question is the compromise **he** raised and P99 left `📋 Not built`: convert them to Looks, or ship
+a release note. **R3.** [[ask-richard-a-ruling-in-plain-words]] — an answer carried without its
+question drifts into a prohibition, and this row was drafted that way once already.
 
 ### 3.2 ✅ Built-in port renames — CLEAN, and this row exists so nobody measures it twice
 
@@ -94,9 +100,10 @@ migration. 🔴 **But it is a class, not a row** — any rule added in this wind
 `0ef525aeb` (P94 / STY-002) turns phase 9's `ElementConfig` variants — stamped into a node's
 parameters and forgotten — into ordinary Looks the project owns.
 
-**Measured:** `models/Looks/looks.ts` has exactly three non-test callers —
+**Measured:** `models/Looks/looks.ts` has exactly **two** non-test callers —
 `StyleTokensModel/StyleVocabulary.ts:53` and
-`propertyeditor/components/VariantStates/PickVariantPopup.tsx:26`. Both are **authoring-time**: the
+`propertyeditor/components/VariantStates/PickVariantPopup.tsx:26` (the third hit is
+`tests-unit/sty-002/looks.test.ts`). Both are **authoring-time**: the
 vocabulary a picker reads, and the picker itself. **Nothing calls it from a project load path**, so
 opening a 0.2.4 project does not rewrite its parameters, and a node still wearing `_variant` /
 `_size` markers keeps them.
