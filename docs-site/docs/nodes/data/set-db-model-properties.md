@@ -28,6 +28,7 @@ The save half of every edit form, and the way to flip a single field ('mark done
 | `accessControl` | Proplist | — | Read and write rules stored on the record as it is written, each rule adding its own Target, Read and Write ports; the NodeGX backend enforces them on every query and every realtime event, and backends with no per-record access control ignore them |
 | `idSource` | Enum (`explicit`, `foreach`) | `explicit` | Whether the record comes from the Id input or from the record the surrounding Repeater is on |
 | `modelId` | String (ModelName id) | — | Id of the record this node acts on; a record itself is accepted here as well as its Id |
+| `onlyIfUnchanged` | String | — | Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write. |
 | `repeaterComponent` | Component | — | Names which Repeater supplies the current record when Id Source is From repeater; leave blank to use the nearest enclosing one |
 | `storeProperties` | Enum (`specified`, `all`) | `specified` | Whether to send only the properties wired on this node or every property the record holds; not offered when Store to is Local only |
 | `storeType` | Enum (`cloud`, `local`) | `cloud` | Whether the change is sent to the backend as well as applied to the in-memory record, or only held locally |
@@ -80,10 +81,12 @@ Ports are runtime-determined: `collectionName` (Class) is registered as an edit-
 
 - DbModel2 `prop-<name>` → Text Input `startValue`, edited `text` → `prop-<name>`, Button `onClick` → `store`: prefill, edit, save.
 - 'From repeater' `idSource` inside a list row: one node updates whichever record the row represents.
+- Two people editing one record: bump a `version` property on every save and set `onlyIfUnchanged` to `version`. The second save to land gets `failure` instead of silently replacing the first; on `failure`, fetch the record again (DbModel2) and let the person re-apply their change.
 
 ## Watch out for
 
 - Setting `storeProperties` to 'All' to 'be safe' — it uploads the record's entire local data and can overwrite fields other users changed; send only what the form edits.
+- Retrying a `failure` from `onlyIfUnchanged` by pressing Do again without fetching the record first: the precondition is taken from the record as it was read, so the retry fails the same way until the record is re-read.
 
 ## Examples
 
