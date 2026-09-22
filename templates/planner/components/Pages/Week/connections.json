@@ -1349,6 +1349,12 @@
     },
     {
       "fromId": "twEnv",
+      "fromProperty": "guardConcern",
+      "toId": "twShutLogic",
+      "toProperty": "guardConcern"
+    },
+    {
+      "fromId": "twEnv",
       "fromProperty": "target",
       "toId": "twShutLogic",
       "toProperty": "target"
@@ -1925,6 +1931,138 @@
     },
     {
       "fromId": "twSettings",
+      "fromProperty": "out-buildingHours",
+      "toId": "twSheet",
+      "toProperty": "buildingHours"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "buildingHours",
+      "toId": "cmdSettings",
+      "toProperty": "buildingHours"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-adminHours",
+      "toId": "twSheet",
+      "toProperty": "adminHours"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "adminHours",
+      "toId": "cmdSettings",
+      "toProperty": "adminHours"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-hobbyHours",
+      "toId": "twSheet",
+      "toProperty": "hobbyHours"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "hobbyHours",
+      "toId": "cmdSettings",
+      "toProperty": "hobbyHours"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-hobbyWeekCeiling",
+      "toId": "twSheet",
+      "toProperty": "hobbyWeekCeiling"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "hobbyWeekCeiling",
+      "toId": "cmdSettings",
+      "toProperty": "hobbyWeekCeiling"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-buildingWeekCeiling",
+      "toId": "twSheet",
+      "toProperty": "buildingWeekCeiling"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "buildingWeekCeiling",
+      "toId": "cmdSettings",
+      "toProperty": "buildingWeekCeiling"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-billableFloorPct",
+      "toId": "twSheet",
+      "toProperty": "billableFloorPct"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "billableFloorPct",
+      "toId": "cmdSettings",
+      "toProperty": "billableFloorPct"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-todoUrl",
+      "toId": "twSheet",
+      "toProperty": "todoUrl"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "todoUrl",
+      "toId": "cmdSettings",
+      "toProperty": "todoUrl"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day1",
+      "toId": "twSheet",
+      "toProperty": "day1"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day2",
+      "toId": "twSheet",
+      "toProperty": "day2"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day3",
+      "toId": "twSheet",
+      "toProperty": "day3"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day4",
+      "toId": "twSheet",
+      "toProperty": "day4"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day5",
+      "toId": "twSheet",
+      "toProperty": "day5"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day6",
+      "toId": "twSheet",
+      "toProperty": "day6"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-day0",
+      "toId": "twSheet",
+      "toProperty": "day0"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "workingDays",
+      "toId": "cmdSettings",
+      "toProperty": "workingDays"
+    },
+    {
+      "fromId": "twSettings",
       "fromProperty": "out-id",
       "toId": "cmdSettings",
       "toProperty": "settingsId"
@@ -1934,6 +2072,102 @@
       "fromProperty": "save",
       "toId": "cmdSettings",
       "toProperty": "do"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recBuildingLine",
+      "toId": "twSheet",
+      "toProperty": "recBuildingLine"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recAdminLine",
+      "toId": "twSheet",
+      "toProperty": "recAdminLine"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recHobbyLine",
+      "toId": "twSheet",
+      "toProperty": "recHobbyLine"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recLabel",
+      "toId": "twSheet",
+      "toProperty": "recLabel"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recBuilding",
+      "toId": "twSettings",
+      "toProperty": "in-recBuilding"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recBuilding",
+      "toId": "twUseRec",
+      "toProperty": "in-recBuilding"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recAdmin",
+      "toId": "twSettings",
+      "toProperty": "in-recAdmin"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recAdmin",
+      "toId": "twUseRec",
+      "toProperty": "in-recAdmin"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recHobby",
+      "toId": "twSettings",
+      "toProperty": "in-recHobby"
+    },
+    {
+      "fromId": "twEnv",
+      "fromProperty": "recHobby",
+      "toId": "twUseRec",
+      "toProperty": "in-recHobby"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "useRecommendation",
+      "toId": "twUseRec",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "twUseRec",
+      "fromProperty": "out-buildingHours",
+      "toId": "cmdSettings",
+      "toProperty": "buildingHours"
+    },
+    {
+      "fromId": "twUseRec",
+      "fromProperty": "out-adminHours",
+      "toId": "cmdSettings",
+      "toProperty": "adminHours"
+    },
+    {
+      "fromId": "twUseRec",
+      "fromProperty": "out-hobbyHours",
+      "toId": "cmdSettings",
+      "toProperty": "hobbyHours"
+    },
+    {
+      "fromId": "twUseRec",
+      "fromProperty": "out-go",
+      "toId": "cmdSettings",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "twSettings",
+      "fromProperty": "out-todoUrl",
+      "toId": "twBar",
+      "toProperty": "todoUrl"
     },
     {
       "fromId": "twData",
@@ -1948,14 +2182,26 @@
       "toProperty": "billable"
     },
     {
-      "fromId": "twEnv",
-      "fromProperty": "buildingLeft",
+      "fromId": "twSheet",
+      "fromProperty": "buildingHours",
       "toId": "cmdMonthPlan",
       "toProperty": "building"
     },
     {
+      "fromId": "twSheet",
+      "fromProperty": "adminHours",
+      "toId": "cmdMonthPlan",
+      "toProperty": "admin"
+    },
+    {
+      "fromId": "twSheet",
+      "fromProperty": "hobbyHours",
+      "toId": "cmdMonthPlan",
+      "toProperty": "hobby"
+    },
+    {
       "fromId": "twEnv",
-      "fromProperty": "daysLeft",
+      "fromProperty": "workingDaysInMonth",
       "toId": "cmdMonthPlan",
       "toProperty": "workingDays"
     },

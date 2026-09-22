@@ -22,6 +22,11 @@
           "name": "hasLate",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "todoUrl",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 530,
@@ -222,6 +227,7 @@
       },
       "children": [
         "abProjects",
+        "abTodo",
         "abMoneyBox",
         "abSettings",
         "abTheme",
@@ -255,6 +261,75 @@
       "y": 880
     },
     {
+      "id": "abTodo",
+      "type": "net.noodl.controls.button",
+      "label": "Open the todo list",
+      "parent": "abRight",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Todo ↗"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "abHasTodo",
+      "type": "JavaScriptFunction",
+      "label": "Is there a todo list to link to?",
+      "parameters": {
+        "functionScript": "Outputs.shown = String(Inputs.url || '').trim() !== '';"
+      },
+      "x": 530,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-url",
+          "displayName": "url",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "abOpenTodo",
+      "type": "JavaScriptFunction",
+      "label": "Open the todo list in a new tab",
+      "parameters": {
+        "functionScript": "var u = String(Inputs.url || '').trim();\nif (u) window.open(u, '_blank', 'noopener');",
+        "runOnChange-in-url": false
+      },
+      "x": 530,
+      "y": 1120,
+      "ports": [
+        {
+          "name": "in-url",
+          "displayName": "url",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
       "id": "abMoneyBox",
       "type": "Group",
       "label": "Money",
@@ -270,7 +345,7 @@
         "abLateBox"
       ],
       "x": 160,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "abMoney",
@@ -299,7 +374,7 @@
         "fontWeight": "var(--font-bold)"
       },
       "x": 220,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "abLateBox",
@@ -320,7 +395,7 @@
         "abLate"
       ],
       "x": 220,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "abLate",
@@ -340,7 +415,7 @@
         "fontWeight": "var(--font-bold)"
       },
       "x": 280,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "abSettings",
@@ -368,7 +443,7 @@
         "paddingRight": "var(--space-2)"
       },
       "x": 160,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "abTheme",
@@ -376,7 +451,7 @@
       "label": "Light or dark",
       "parent": "abRight",
       "x": 160,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "abShut",
@@ -398,7 +473,7 @@
         "label": "Shut down"
       },
       "x": 160,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "abSignOut",
@@ -421,7 +496,7 @@
         "label": "Sign out"
       },
       "x": 160,
-      "y": 1840
+      "y": 1960
     }
   ],
   "visualRoots": [

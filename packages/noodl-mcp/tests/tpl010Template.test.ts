@@ -809,6 +809,201 @@ describe('§4 the arithmetic, run rather than read', () => {
     const quiet = run(shutdown, { ...base, blocks: [], unplacedDormant: '' });
     expect(quiet.outputs.concern).toBe('No concerns tonight.');
   });
+
+  /**
+   * R2.5-1 — **the days a person works are theirs to choose** (R24). Q4 left Saturday optional and
+   * the build counted it anyway, because there was nowhere to say otherwise; these are the four
+   * readings that matter, including the two defaults that keep an existing row's month the shape
+   * it was: no column at all still means Monday to Saturday, and the coach may write the column
+   * as text.
+   */
+  it('R2.5-1 — unticking Saturday takes it out of the days left, and the Billable tile says so', () => {
+    const blocks = [block('2026-09-02', 'p-earn', 20, true), block('2026-09-09', 'p-earn', 21, true)];
+    const base = { projects: PROJECTS, blocks, monthPlans: [], weekStart: MONDAY, targetHours: 55 };
+    const say = (o: Record<string, unknown>) => (o.rows as Array<Record<string, string>>)[0].say;
+
+    const monSat = run(ENVELOPES(), { ...base, settings: [{ ...settings[0], workingDays: [1, 2, 3, 4, 5, 6] }] }).outputs;
+    expect([monSat.daysLeft, monSat.perDay]).toEqual([5, 2.75]);
+    expect(say(monSat)).toBe('2.75 h a day for the 5 days left');
+
+    const monFri = run(ENVELOPES(), { ...base, settings: [{ ...settings[0], workingDays: [1, 2, 3, 4, 5] }] }).outputs;
+    expect([monFri.daysLeft, monFri.perDay]).toEqual([4, 3.5]);
+    expect(say(monFri)).toBe('3.5 h a day for the 4 days left');
+
+    // A row written before this sheet existed has no column, and its month must not change shape.
+    expect(run(ENVELOPES(), { ...base, settings }).outputs.daysLeft).toBe(5);
+    // Nor when the column is text — which is how the coach is likeliest to write it (TPL-010-MCP).
+    expect(run(ENVELOPES(), { ...base, settings: [{ ...settings[0], workingDays: '1,2,3,4,5' }] }).outputs.daysLeft).toBe(4);
+    // Nobody works no days: an empty list is read as the default rather than as a month with no
+    // days in it, which would divide by nothing.
+    expect(run(ENVELOPES(), { ...base, settings: [{ ...settings[0], workingDays: [] }] }).outputs.daysLeft).toBe(5);
+  });
+
+  /**
+   * R2.5-2 / R25 — **the recommendations are rules, printed where they can be disagreed with.**
+   * September 2026 has 22 Monday-to-Friday days; at the 6 h ceiling that is 132 h of capacity.
+   *
+   * 🔴 **The figures are 13.25 and 63.75, not the AC's 13 and 64.** A tenth of 132 h is 13.2 h, and
+   * R24 rounds a recommendation *to the quarter hour* — the unit everything else in this app is
+   * counted in. The AC's arithmetic was done in whole hours; the ruling wins, and the sum still
+   * closes: 55 + 13.25 + 63.75 = 132.
+   */
+  it('R2.5-2 — 22 working days at 6 h is 132 h: admin 13.25, building 63.75, hobby 0, and Plan this month writes them', () => {
+    const monFri = [{ ...settings[0], workingDays: [1, 2, 3, 4, 5] }];
+    const { outputs } = run(ENVELOPES(), {
+      projects: PROJECTS, blocks: [], monthPlans: [], settings: monFri, weekStart: MONDAY, targetHours: 55
+    });
+    expect([outputs.workingDaysInMonth, outputs.capacityHours]).toEqual([22, 132]);
+    expect([outputs.recBuilding, outputs.recAdmin, outputs.recHobby]).toEqual([63.75, 13.25, 0]);
+    expect(outputs.recBuildingLine).toBe('Recommended 63.75 h — 132 h of capacity, less 55 h billable and 13.25 h admin.');
+    expect(outputs.recAdminLine).toBe('Recommended 13.25 h — a tenth of capacity, for invoices and asks.');
+    expect(outputs.recLabel).toBe('Use 63.75 / 13.25 / 0 h');
+
+    // With no plan and nothing typed: building keeps R3's figure — what the ceiling has left over
+    // once the billable day is paid for, which with 55 h over 4 days is nothing — and admin falls
+    // back to the recommendation rather than to a nought nobody chose.
+    const rows = outputs.rows as Array<Record<string, string>>;
+    expect([rows[1].budgetText, rows[2].budgetText, rows[3].budgetText]).toEqual(['0', '13.25', '0']);
+    // A split that IS typed is the one the envelopes spend, plan or no plan.
+    const typed = run(ENVELOPES(), {
+      projects: PROJECTS, blocks: [], monthPlans: [], weekStart: MONDAY, targetHours: 55,
+      settings: [{ ...monFri[0], buildingHours: 40, adminHours: 8, hobbyHours: 2 }]
+    }).outputs;
+    const typedRows = typed.rows as Array<Record<string, string>>;
+    expect([typedRows[1].budgetText, typedRows[2].budgetText, typedRows[3].budgetText]).toEqual(['40', '8', '2']);
+
+    // *Use the recommendation* hands those three figures to Edit settings — values first, the
+    // write last, which is the only ordering this product guarantees.
+    const use = run(scriptOf(built, C.pageWeek, 'twUseRec'), { recBuilding: 63.75, recAdmin: 13.25, recHobby: 0 });
+    expect(use.outputs).toEqual({ buildingHours: 63.75, adminHours: 13.25, hobbyHours: 0 });
+    expect(use.signals).toEqual(['go']);
+
+    // And the boxes show what is stored, falling back to the recommendation while nothing is.
+    const unpack = scriptOf(built, C.pageWeek, 'twSettings');
+    const blank = run(unpack, { settings: [{ id: 's', focusHours: 6 }], recBuilding: 63.75, recAdmin: 13.25, recHobby: 0 }).outputs;
+    expect([blank.buildingHours, blank.adminHours, blank.hobbyHours]).toEqual(['63.75', '13.25', '0']);
+    const stored = run(unpack, { settings: [{ id: 's', buildingHours: 40, adminHours: 8, hobbyHours: 2 }], recBuilding: 63.75, recAdmin: 13.25, recHobby: 0 }).outputs;
+    expect([stored.buildingHours, stored.adminHours, stored.hobbyHours]).toEqual(['40', '8', '2']);
+
+    // Plan this month writes what the sheet says, and the month's working days with it — never
+    // the days that happen to be left.
+    const plan = run(scriptOf(built, C.setMonthPlan, 'SetmonthplGuard'), {
+      month: '2026-09', billable: 55, building: '63.75', admin: '13.25', hobby: '0', workingDays: 22
+    });
+    expect(plan.outputs).toEqual({ month: '2026-09', billable: 55, building: 63.75, admin: 13.25, hobby: 0, workingDays: 22 });
+    expect(plan.signals).toEqual(['go']);
+  });
+
+  /**
+   * R2.5-3 — **a guardrail is a sentence, not an alarm** (R1, R4). Five hours of hobby against a
+   * three-hour line says so on the Hobby tile, and in the evening once nothing more pressing is
+   * owed. Nothing turns red, and the bar is simply full: R4 is *"not budgeted, not counted, not a
+   * problem"*, and a line the person themselves drew is the one exception to the silence.
+   */
+  it('R2.5-3 — 5 h of hobby against a 3 h line is one sentence on the tile and in the evening, and nothing is red', () => {
+    const projects = [...PROJECTS, { id: 'p-hobby', name: 'The Jazz Room', kind: 'hobby' }];
+    const guarded = [{ ...settings[0], workingDays: [1, 2, 3, 4, 5, 6], hobbyWeekCeiling: 3, buildingWeekCeiling: 12, billableFloorPct: 0 }];
+    const base = { projects, monthPlans: [], settings: guarded, weekStart: MONDAY, targetHours: 55 };
+    const hobbySentence = 'Hobby is at 5 h this week against your 3 h line. Fine if it was a Saturday.';
+
+    const over = run(ENVELOPES(), { ...base, blocks: [block('2026-09-22', 'p-hobby', 5, true)] }).outputs;
+    const rows = over.rows as Array<Record<string, string>>;
+    expect(rows[3].say).toBe(hobbySentence);
+    expect(rows[3].fillColor).not.toBe('var(--destructive)');
+    expect(over.guardConcern).toBe(hobbySentence);
+
+    // Inside the line, the tile says R4's words and the evening has nothing to raise.
+    const under = run(ENVELOPES(), { ...base, blocks: [block('2026-09-22', 'p-hobby', 2, true)] }).outputs;
+    expect((under.rows as Array<Record<string, string>>)[3].say).toBe('Not budgeted, not counted, not a problem');
+    expect(under.guardConcern).toBe('');
+
+    // Building has a line of its own, and it comes second.
+    const building = run(ENVELOPES(), {
+      ...base,
+      blocks: [block('2026-09-22', 'p-hobby', 5, true), block('2026-09-23', 'p-build', 14, true)]
+    }).outputs;
+    expect((building.rows as Array<Record<string, string>>)[1].say).toBe(
+      'Building is at 14 h this week against your 12 h line. Worth knowing before the next one goes in.'
+    );
+    expect(building.guardConcern).toBe(hobbySentence);
+
+    // R24's floor, read against the hours the week could have held SO FAR — never the whole week,
+    // or a Monday morning would always be behind (R1).
+    const floor = run(ENVELOPES(), {
+      ...base,
+      settings: [{ ...guarded[0], hobbyWeekCeiling: 0, billableFloorPct: 50 }],
+      blocks: [block('2026-09-21', 'p-earn', 3, true)]
+    }).outputs;
+    expect(String(floor.guardConcern)).toContain('under your 50% line');
+    expect(String(floor.guardConcern)).toContain('30 h this week could have held');
+
+    // The evening: after the building move that is not done, before the dormant project.
+    const shutdown = scriptOf(built, C.shutdown, 'suWork');
+    const evening = {
+      projects, todayKey: '2026-09-25', tomorrowKey: '2026-09-26', todayLong: 'Friday 25', tomorrowLong: 'Saturday',
+      target: 55, billableUsed: 41, billableLeft: 14, perDay: 2.75, buildingLeft: 16.25, daysLeft: 5, focusHours: 6
+    };
+    const raised = run(shutdown, { ...evening, blocks: [], unplacedDormant: 'Founder A', guardConcern: hobbySentence });
+    expect(raised.outputs.concern).toBe('One thing: ' + hobbySentence);
+    const behindTheMove = run(shutdown, {
+      ...evening,
+      blocks: [block('2026-09-25', 'p-build', 1, false)],
+      unplacedDormant: '',
+      guardConcern: hobbySentence
+    });
+    expect(String(behindTheMove.outputs.concern)).toContain('Coaching offer');
+    const noGuard = run(shutdown, { ...evening, blocks: [], unplacedDormant: 'Founder A', guardConcern: '' });
+    expect(String(noGuard.outputs.concern)).toContain('Founder A');
+  });
+
+  /**
+   * R2.5-4 — **every field on the sheet is a column, and nothing is shown that cannot be saved.**
+   * The three lists that have to agree are the sheet's boxes, the ports `Edit settings` writes,
+   * and the schema note in START-HERE — which is the only description of this database a person
+   * who inherits the app will read.
+   */
+  it('R2.5-4 — every box on the settings sheet is written by Edit settings and named in START-HERE', () => {
+    const sheet = component(built, C.settingsSheet);
+    const sheetWires = connectionsOf(built, C.settingsSheet);
+    const boxes = nodesOf(sheet).filter((n) => n.type === 'net.noodl.controls.textinput');
+    expect(boxes.length).toBe(11);
+
+    // Every box: filled from the record, read back out of the component, and forgotten on close.
+    for (const b of boxes) {
+      const out = sheetWires.find((w) => w.fromId === b.id && w.fromProperty === 'onTextChanged');
+      expect(out?.toId).toBe('stOut');
+      expect(sheetWires.some((w) => w.toId === b.id && w.toProperty === 'startValue' && w.fromId === 'stIn')).toBe(true);
+      expect(sheetWires.some((w) => w.toId === b.id && w.toProperty === 'clear' && w.fromProperty === 'out-closed')).toBe(true);
+    }
+    const fields = boxes.map((b) => sheetWires.find((w) => w.fromId === b.id && w.fromProperty === 'onTextChanged')!.toProperty);
+
+    // The seven ticks, read back as one array.
+    const ticks = nodesOf(sheet).filter((n) => n.type === 'net.noodl.controls.checkbox');
+    expect(ticks.length).toBe(7);
+    for (const t of ticks) {
+      expect(sheetWires.some((w) => w.fromId === t.id && w.fromProperty === 'checked' && w.toId === 'stDays')).toBe(true);
+      expect(sheetWires.some((w) => w.toId === t.id && w.toProperty === 'check')).toBe(true);
+      expect(sheetWires.some((w) => w.toId === t.id && w.toProperty === 'uncheck')).toBe(true);
+    }
+    expect(sheetWires.some((w) => w.fromId === 'stDays' && w.fromProperty === 'out-workingDays' && w.toId === 'stOut')).toBe(true);
+
+    // Every one of them reaches the one command that writes Settings, and is a prop it writes.
+    const pageWires = connectionsOf(built, C.pageWeek);
+    // A record write takes its fields as wires, not as parameters: `prop-<field>` into the node.
+    const props = connectionsOf(built, C.editSettings)
+      .filter((w) => w.toId === 'EditsettinWrite' && w.toProperty.startsWith('prop-'))
+      .map((w) => w.toProperty.slice(5));
+    for (const field of [...fields, 'workingDays']) {
+      expect(props).toContain(field);
+      expect(pageWires.some((w) => w.fromId === 'twSheet' && w.fromProperty === field && w.toId === 'cmdSettings')).toBe(true);
+    }
+    expect(props.sort()).toEqual([...fields, 'workingDays'].sort());
+
+    // And the note a person inherits the database with names every column.
+    const note = fs.readFileSync(path.join(ARTEFACT, 'docs', 'START-HERE.md'), 'utf8');
+    const row = note.split('\n').find((l) => l.startsWith('| `Settings` |')) ?? '';
+    for (const field of [...fields, 'workingDays']) expect(row).toContain(`\`${field}\``);
+  });
 });
 
 // ── §6 ─────────────────────────────────────────────────────────────────────

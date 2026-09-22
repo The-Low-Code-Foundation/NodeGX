@@ -23,15 +23,27 @@
     },
     {
       "fromId": "stIn",
-      "fromProperty": "rate",
-      "toId": "stRate",
-      "toProperty": "startValue"
+      "fromProperty": "recBuildingLine",
+      "toId": "stRecBuilding",
+      "toProperty": "text"
     },
     {
-      "fromId": "stRate",
-      "fromProperty": "onTextChanged",
-      "toId": "stOut",
-      "toProperty": "rate"
+      "fromId": "stIn",
+      "fromProperty": "recAdminLine",
+      "toId": "stRecAdmin",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "recHobbyLine",
+      "toId": "stRecHobby",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "recLabel",
+      "toId": "stUseRec",
+      "toProperty": "label"
     },
     {
       "fromId": "stIn",
@@ -44,6 +56,18 @@
       "fromProperty": "onTextChanged",
       "toId": "stOut",
       "toProperty": "focusHours"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "rate",
+      "toId": "stRate",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stRate",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "rate"
     },
     {
       "fromId": "stIn",
@@ -70,6 +94,348 @@
       "toProperty": "lowWaterMark"
     },
     {
+      "fromId": "stIn",
+      "fromProperty": "buildingHours",
+      "toId": "stBuilding",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stBuilding",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "buildingHours"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "adminHours",
+      "toId": "stAdmin",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stAdmin",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "adminHours"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "hobbyHours",
+      "toId": "stHobby",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stHobby",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "hobbyHours"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "hobbyWeekCeiling",
+      "toId": "stHobbyCeil",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stHobbyCeil",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "hobbyWeekCeiling"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "buildingWeekCeiling",
+      "toId": "stBuildCeil",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stBuildCeil",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "buildingWeekCeiling"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "billableFloorPct",
+      "toId": "stFloor",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stFloor",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "billableFloorPct"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "todoUrl",
+      "toId": "stTodo",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "stTodo",
+      "fromProperty": "onTextChanged",
+      "toId": "stOut",
+      "toProperty": "todoUrl"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "shown",
+      "toId": "stOpened",
+      "toProperty": "in-shown"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day1",
+      "toId": "stOpened",
+      "toProperty": "in-day1"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day1On",
+      "toId": "stDay1",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day1Off",
+      "toId": "stDay1",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay1",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day1"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day2",
+      "toId": "stOpened",
+      "toProperty": "in-day2"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day2On",
+      "toId": "stDay2",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day2Off",
+      "toId": "stDay2",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay2",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day2"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day3",
+      "toId": "stOpened",
+      "toProperty": "in-day3"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day3On",
+      "toId": "stDay3",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day3Off",
+      "toId": "stDay3",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay3",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day3"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day4",
+      "toId": "stOpened",
+      "toProperty": "in-day4"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day4On",
+      "toId": "stDay4",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day4Off",
+      "toId": "stDay4",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay4",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day4"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day5",
+      "toId": "stOpened",
+      "toProperty": "in-day5"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day5On",
+      "toId": "stDay5",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day5Off",
+      "toId": "stDay5",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay5",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day5"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day6",
+      "toId": "stOpened",
+      "toProperty": "in-day6"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day6On",
+      "toId": "stDay6",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day6Off",
+      "toId": "stDay6",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay6",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day6"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "day0",
+      "toId": "stOpened",
+      "toProperty": "in-day0"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day0On",
+      "toId": "stDay0",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-day0Off",
+      "toId": "stDay0",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "stDay0",
+      "fromProperty": "checked",
+      "toId": "stDays",
+      "toProperty": "in-day0"
+    },
+    {
+      "fromId": "stFocus",
+      "fromProperty": "onTextChanged",
+      "toId": "stDays",
+      "toProperty": "in-focus"
+    },
+    {
+      "fromId": "stDays",
+      "fromProperty": "out-workingDays",
+      "toId": "stOut",
+      "toProperty": "workingDays"
+    },
+    {
+      "fromId": "stDays",
+      "fromProperty": "out-weekLine",
+      "toId": "stWeekLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stFocus",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stRate",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stSavings",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stLow",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stBuilding",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stAdmin",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stHobby",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stHobbyCeil",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stBuildCeil",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stFloor",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "stOpened",
+      "fromProperty": "out-closed",
+      "toId": "stTodo",
+      "toProperty": "clear"
+    },
+    {
       "fromId": "stSave",
       "fromProperty": "onClick",
       "toId": "stOut",
@@ -80,6 +446,12 @@
       "fromProperty": "onClick",
       "toId": "stOut",
       "toProperty": "planMonth"
+    },
+    {
+      "fromId": "stUseRec",
+      "fromProperty": "onClick",
+      "toId": "stOut",
+      "toProperty": "useRecommendation"
     },
     {
       "fromId": "stToMoney",

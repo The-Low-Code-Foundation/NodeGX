@@ -95,7 +95,7 @@
       "path": "Commands/Edit settings",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 14,
+      "connectionCount": 30,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -167,7 +167,7 @@
       "path": "Logic/Envelopes",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 16,
+      "connectionCount": 26,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -215,7 +215,7 @@
       "path": "Logic/Shutdown",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 26,
+      "connectionCount": 27,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -238,8 +238,8 @@
     "Week/App bar": {
       "path": "Week/App bar",
       "type": "visual",
-      "nodeCount": 18,
-      "connectionCount": 10,
+      "nodeCount": 21,
+      "connectionCount": 14,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -462,8 +462,8 @@
     "Week/Settings sheet": {
       "path": "Week/Settings sheet",
       "type": "visual",
-      "nodeCount": 19,
-      "connectionCount": 16,
+      "nodeCount": 55,
+      "connectionCount": 78,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -542,15 +542,15 @@
     "Pages/Week": {
       "path": "Pages/Week",
       "type": "page",
-      "nodeCount": 133,
-      "connectionCount": 670,
+      "nodeCount": 134,
+      "connectionCount": 711,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     }
   },
   "stats": {
     "totalComponents": 68,
-    "totalNodes": 804,
-    "totalConnections": 2103
+    "totalNodes": 844,
+    "totalConnections": 2237
   }
 }

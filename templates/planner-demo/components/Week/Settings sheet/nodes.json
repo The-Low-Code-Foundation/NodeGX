@@ -29,6 +29,76 @@
           "type": "string"
         },
         {
+          "name": "buildingHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "adminHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hobbyHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hobbyWeekCeiling",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "buildingWeekCeiling",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billableFloorPct",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "todoUrl",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "day1",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "day2",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "day3",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "day4",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "day5",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "day6",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "day0",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
           "name": "targetLine",
           "plug": "output",
           "type": "string"
@@ -39,12 +109,32 @@
           "type": "string"
         },
         {
+          "name": "recBuildingLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "recAdminLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "recHobbyLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "recLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "shown",
           "plug": "output",
           "type": "boolean"
         }
       ],
-      "x": 470,
+      "x": 530,
       "y": 40
     },
     {
@@ -73,12 +163,57 @@
           "type": "string"
         },
         {
+          "name": "buildingHours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "adminHours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hobbyHours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hobbyWeekCeiling",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "buildingWeekCeiling",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billableFloorPct",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "todoUrl",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "workingDays",
+          "plug": "input",
+          "type": "array"
+        },
+        {
           "name": "save",
           "plug": "input",
           "type": "signal"
         },
         {
           "name": "planMonth",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "useRecommendation",
           "plug": "input",
           "type": "signal"
         },
@@ -93,8 +228,8 @@
           "type": "signal"
         }
       ],
-      "x": 470,
-      "y": 1120
+      "x": 530,
+      "y": 880
     },
     {
       "id": "stScrim",
@@ -159,13 +294,11 @@
       },
       "children": [
         "stHead",
-        "stMoneyRow",
-        "stTarget",
-        "stRate",
-        "stFocus",
-        "stSavings",
-        "stLow",
-        "stPlanLine",
+        "stCap",
+        "stMoney",
+        "stSplit",
+        "stGuard",
+        "stLinks",
         "stButtons"
       ],
       "x": 100,
@@ -242,37 +375,47 @@
       "y": 520
     },
     {
-      "id": "stMoneyRow",
+      "id": "stCap",
       "type": "Group",
-      "label": "Where the money went",
+      "label": "Capacity",
       "parent": "stCard",
       "parameters": {
-        "flexDirection": "row",
-        "alignItems": "center",
+        "flexDirection": "column",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
           "unit": "%"
         },
-        "columnGap": "var(--space-2)",
-        "flexWrap": "wrap"
+        "rowGap": "var(--space-2)"
       },
       "children": [
-        "stMoneyWords",
-        "stToMoney"
+        "stCapTitle",
+        "stFocus",
+        "stDaysLabel",
+        "stDaysRow",
+        "stWeekLine"
       ],
       "x": 160,
       "y": 640
     },
     {
-      "id": "stMoneyWords",
+      "id": "stCapTitle",
       "type": "Text",
-      "label": "Where the money is now",
-      "parent": "stMoneyRow",
+      "label": "Capacity",
+      "parent": "stCap",
       "parameters": {
-        "text": "What comes in and goes out lives in Money now.",
-        "fontSize": "var(--text-xs)",
+        "text": "Capacity",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
         "sizeMode": "contentHeight",
         "width": {
           "value": 100,
@@ -283,83 +426,10 @@
       "y": 760
     },
     {
-      "id": "stToMoney",
-      "type": "net.noodl.controls.button",
-      "label": "Open Money",
-      "parent": "stMoneyRow",
-      "parameters": {
-        "sizeMode": "contentSize",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "borderRadius": "var(--radius-md)",
-        "backgroundColor": "transparent",
-        "color": "var(--muted-foreground)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border)",
-        "fontSize": "var(--text-sm)",
-        "label": "Open Money (€)"
-      },
-      "x": 220,
-      "y": 880
-    },
-    {
-      "id": "stTarget",
-      "type": "Text",
-      "label": "What these come to",
-      "parent": "stCard",
-      "parameters": {
-        "text": "",
-        "fontSize": "var(--text-xs)",
-        "color": "var(--muted-foreground)",
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        }
-      },
-      "x": 160,
-      "y": 1000
-    },
-    {
-      "id": "stRate",
-      "type": "net.noodl.controls.textinput",
-      "label": "Your usual hourly rate, €",
-      "parent": "stCard",
-      "parameters": {
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "type": "number",
-        "backgroundColor": "var(--background)",
-        "color": "var(--foreground)",
-        "fontSize": "var(--text-base)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "useLabel": true,
-        "label": "Your usual hourly rate, €",
-        "labelSpacing": 6,
-        "labelfontSize": "var(--text-sm)",
-        "labelcolor": "var(--foreground)"
-      },
-      "x": 160,
-      "y": 1120
-    },
-    {
       "id": "stFocus",
       "type": "net.noodl.controls.textinput",
       "label": "Focused hours a day",
-      "parent": "stCard",
+      "parent": "stCap",
       "parameters": {
         "sizeMode": "contentHeight",
         "width": {
@@ -384,14 +454,442 @@
         "labelfontSize": "var(--text-sm)",
         "labelcolor": "var(--foreground)"
       },
-      "x": 160,
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "stDaysLabel",
+      "type": "Text",
+      "label": "The days you work",
+      "parent": "stCap",
+      "parameters": {
+        "text": "The days you work",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "stDaysRow",
+      "type": "Group",
+      "label": "The seven days",
+      "parent": "stCap",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "stDay1",
+        "stDay2",
+        "stDay3",
+        "stDay4",
+        "stDay5",
+        "stDay6",
+        "stDay0"
+      ],
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "stDay1",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Mon",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Mon",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
       "y": 1240
+    },
+    {
+      "id": "stDay2",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Tue",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Tue",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "stDay3",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Wed",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Wed",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "stDay4",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Thu",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Thu",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "stDay5",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Fri",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Fri",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "stDay6",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Sat",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Sat",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "stDay0",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Sun",
+      "parent": "stDaysRow",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Sun",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "stWeekLine",
+      "type": "Text",
+      "label": "What that is a week",
+      "parent": "stCap",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "stMoney",
+      "type": "Group",
+      "label": "Money",
+      "parent": "stCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "stMoneyTitle",
+        "stMoneyRow",
+        "stRate",
+        "stSavings",
+        "stLow"
+      ],
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "stMoneyTitle",
+      "type": "Text",
+      "label": "Money",
+      "parent": "stMoney",
+      "parameters": {
+        "text": "Money",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "stMoneyRow",
+      "type": "Group",
+      "label": "Where the money went",
+      "parent": "stMoney",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "stMoneyWords",
+        "stToMoney"
+      ],
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "stMoneyWords",
+      "type": "Text",
+      "label": "Where the money is now",
+      "parent": "stMoneyRow",
+      "parameters": {
+        "text": "What comes in and goes out lives in Money now.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "stToMoney",
+      "type": "net.noodl.controls.button",
+      "label": "Open Money",
+      "parent": "stMoneyRow",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Open Money (€)"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "stRate",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your usual hourly rate, €",
+      "parent": "stMoney",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Your usual hourly rate, €",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 2800
     },
     {
       "id": "stSavings",
       "type": "net.noodl.controls.textinput",
       "label": "Savings target, € a month",
-      "parent": "stCard",
+      "parent": "stMoney",
       "parameters": {
         "sizeMode": "contentHeight",
         "width": {
@@ -416,14 +914,14 @@
         "labelfontSize": "var(--text-sm)",
         "labelcolor": "var(--foreground)"
       },
-      "x": 160,
-      "y": 1360
+      "x": 220,
+      "y": 2920
     },
     {
       "id": "stLow",
       "type": "net.noodl.controls.textinput",
       "label": "Lowest balance before red, €",
-      "parent": "stCard",
+      "parent": "stMoney",
       "parameters": {
         "sizeMode": "contentHeight",
         "width": {
@@ -448,14 +946,74 @@
         "labelfontSize": "var(--text-sm)",
         "labelcolor": "var(--foreground)"
       },
-      "x": 160,
-      "y": 1480
+      "x": 220,
+      "y": 3040
     },
     {
-      "id": "stPlanLine",
-      "type": "Text",
-      "label": "Whether this month is planned",
+      "id": "stSplit",
+      "type": "Group",
+      "label": "The split",
       "parent": "stCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "stSplitTitle",
+        "stTarget",
+        "stBuilding",
+        "stRecBuilding",
+        "stAdmin",
+        "stRecAdmin",
+        "stHobby",
+        "stRecHobby",
+        "stPlanLine",
+        "stSplitButtons"
+      ],
+      "x": 160,
+      "y": 3160
+    },
+    {
+      "id": "stSplitTitle",
+      "type": "Text",
+      "label": "The split",
+      "parent": "stSplit",
+      "parameters": {
+        "text": "The split",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 3280
+    },
+    {
+      "id": "stTarget",
+      "type": "Text",
+      "label": "What these come to",
+      "parent": "stSplit",
       "parameters": {
         "text": "",
         "fontSize": "var(--text-xs)",
@@ -466,8 +1024,774 @@
           "unit": "%"
         }
       },
+      "x": 220,
+      "y": 3400
+    },
+    {
+      "id": "stBuilding",
+      "type": "net.noodl.controls.textinput",
+      "label": "Building, hours this month",
+      "parent": "stSplit",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Building, hours this month",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 3520
+    },
+    {
+      "id": "stRecBuilding",
+      "type": "Text",
+      "label": "What building is recommended",
+      "parent": "stSplit",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 3640
+    },
+    {
+      "id": "stAdmin",
+      "type": "net.noodl.controls.textinput",
+      "label": "Admin and asks, hours this month",
+      "parent": "stSplit",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Admin and asks, hours this month",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 3760
+    },
+    {
+      "id": "stRecAdmin",
+      "type": "Text",
+      "label": "What admin is recommended",
+      "parent": "stSplit",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 3880
+    },
+    {
+      "id": "stHobby",
+      "type": "net.noodl.controls.textinput",
+      "label": "Hobby, hours this month",
+      "parent": "stSplit",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Hobby, hours this month",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 4000
+    },
+    {
+      "id": "stRecHobby",
+      "type": "Text",
+      "label": "What hobby is recommended",
+      "parent": "stSplit",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 4120
+    },
+    {
+      "id": "stPlanLine",
+      "type": "Text",
+      "label": "Whether this month is planned",
+      "parent": "stSplit",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 4240
+    },
+    {
+      "id": "stSplitButtons",
+      "type": "Group",
+      "label": "The split’s buttons",
+      "parent": "stSplit",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "stUseRec",
+        "stPlan"
+      ],
+      "x": 220,
+      "y": 4360
+    },
+    {
+      "id": "stUseRec",
+      "type": "net.noodl.controls.button",
+      "label": "Use the recommendation",
+      "parent": "stSplitButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Use the recommendation"
+      },
+      "x": 280,
+      "y": 4480
+    },
+    {
+      "id": "stPlan",
+      "type": "net.noodl.controls.button",
+      "label": "Plan this month",
+      "parent": "stSplitButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Plan this month"
+      },
+      "x": 280,
+      "y": 4600
+    },
+    {
+      "id": "stGuard",
+      "type": "Group",
+      "label": "Guardrails",
+      "parent": "stCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "stGuardTitle",
+        "stGuardWords",
+        "stHobbyCeil",
+        "stBuildCeil",
+        "stFloor"
+      ],
       "x": 160,
-      "y": 1600
+      "y": 4720
+    },
+    {
+      "id": "stGuardTitle",
+      "type": "Text",
+      "label": "Guardrails",
+      "parent": "stGuard",
+      "parameters": {
+        "text": "Guardrails",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 4840
+    },
+    {
+      "id": "stGuardWords",
+      "type": "Text",
+      "label": "What a guardrail does",
+      "parent": "stGuard",
+      "parameters": {
+        "text": "A line crossed is one sentence, on the tile and in the evening. Never a colour, never twice.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 4960
+    },
+    {
+      "id": "stHobbyCeil",
+      "type": "net.noodl.controls.textinput",
+      "label": "Hobby: hours a week before it is mentioned",
+      "parent": "stGuard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Hobby: hours a week before it is mentioned",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 5080
+    },
+    {
+      "id": "stBuildCeil",
+      "type": "net.noodl.controls.textinput",
+      "label": "Building: hours a week before it is mentioned",
+      "parent": "stGuard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Building: hours a week before it is mentioned",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 5200
+    },
+    {
+      "id": "stFloor",
+      "type": "net.noodl.controls.textinput",
+      "label": "Billable: the least % of the week it should be",
+      "parent": "stGuard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Billable: the least % of the week it should be",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 5320
+    },
+    {
+      "id": "stLinks",
+      "type": "Group",
+      "label": "Links",
+      "parent": "stCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "paddingTop": "var(--space-3)"
+      },
+      "children": [
+        "stLinksTitle",
+        "stTodo",
+        "stLinksWords"
+      ],
+      "x": 160,
+      "y": 5440
+    },
+    {
+      "id": "stLinksTitle",
+      "type": "Text",
+      "label": "Links",
+      "parent": "stLinks",
+      "parameters": {
+        "text": "Links",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 5560
+    },
+    {
+      "id": "stTodo",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your todo list’s address",
+      "parent": "stLinks",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Your todo list’s address",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 5680
+    },
+    {
+      "id": "stLinksWords",
+      "type": "Text",
+      "label": "What the address does",
+      "parent": "stLinks",
+      "parameters": {
+        "text": "Fill this in and Todo ↗ appears in the bar. Leave it empty and it does not.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 5800
+    },
+    {
+      "id": "stDays",
+      "type": "JavaScriptFunction",
+      "label": "Which days are ticked, and what that is a week",
+      "parameters": {
+        "functionScript": "var days = [];\nif (Inputs.day1 === true) days.push(1);\nif (Inputs.day2 === true) days.push(2);\nif (Inputs.day3 === true) days.push(3);\nif (Inputs.day4 === true) days.push(4);\nif (Inputs.day5 === true) days.push(5);\nif (Inputs.day6 === true) days.push(6);\nif (Inputs.day0 === true) days.push(0);\n// Monday first, Sunday last — not `getDay()` order, which starts the week on a Sunday.\ndays.sort(function (a, b) { return (a === 0 ? 7 : a) - (b === 0 ? 7 : b); });\nOutputs.workingDays = days;\nvar focus = Number(Inputs.focus);\nif (!isFinite(focus) || focus <= 0) focus = 6;\nvar week = Math.round(days.length * focus * 100) / 100;\nOutputs.weekLine = days.length === 0\n  ? 'No days ticked. Tick the ones you work, or the week has nowhere to put the hours.'\n  : days.length + (days.length === 1 ? ' day' : ' days') + ' a week at ' + focus + ' h is ' + week + ' h.';"
+      },
+      "x": 530,
+      "y": 2080,
+      "ports": [
+        {
+          "name": "in-day1",
+          "displayName": "day1",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day2",
+          "displayName": "day2",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day3",
+          "displayName": "day3",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day4",
+          "displayName": "day4",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day5",
+          "displayName": "day5",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day6",
+          "displayName": "day6",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day0",
+          "displayName": "day0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-focus",
+          "displayName": "focus",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-workingDays",
+          "displayName": "workingDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-weekLine",
+          "displayName": "weekLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "stOpened",
+      "type": "JavaScriptFunction",
+      "label": "Clear the boxes on close; tick the days to match",
+      "parameters": {
+        "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\nvar day1Want = shown ? Inputs.day1 === true : null;\nif (day1Want !== null && (!this.wasShown || this.day1Last !== day1Want)) { if (day1Want) Outputs.day1On(); else Outputs.day1Off(); }\nthis.day1Last = day1Want;\nvar day2Want = shown ? Inputs.day2 === true : null;\nif (day2Want !== null && (!this.wasShown || this.day2Last !== day2Want)) { if (day2Want) Outputs.day2On(); else Outputs.day2Off(); }\nthis.day2Last = day2Want;\nvar day3Want = shown ? Inputs.day3 === true : null;\nif (day3Want !== null && (!this.wasShown || this.day3Last !== day3Want)) { if (day3Want) Outputs.day3On(); else Outputs.day3Off(); }\nthis.day3Last = day3Want;\nvar day4Want = shown ? Inputs.day4 === true : null;\nif (day4Want !== null && (!this.wasShown || this.day4Last !== day4Want)) { if (day4Want) Outputs.day4On(); else Outputs.day4Off(); }\nthis.day4Last = day4Want;\nvar day5Want = shown ? Inputs.day5 === true : null;\nif (day5Want !== null && (!this.wasShown || this.day5Last !== day5Want)) { if (day5Want) Outputs.day5On(); else Outputs.day5Off(); }\nthis.day5Last = day5Want;\nvar day6Want = shown ? Inputs.day6 === true : null;\nif (day6Want !== null && (!this.wasShown || this.day6Last !== day6Want)) { if (day6Want) Outputs.day6On(); else Outputs.day6Off(); }\nthis.day6Last = day6Want;\nvar day0Want = shown ? Inputs.day0 === true : null;\nif (day0Want !== null && (!this.wasShown || this.day0Last !== day0Want)) { if (day0Want) Outputs.day0On(); else Outputs.day0Off(); }\nthis.day0Last = day0Want;\nthis.wasShown = shown;"
+      },
+      "x": 530,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "in-shown",
+          "displayName": "shown",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day1",
+          "displayName": "day1",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day2",
+          "displayName": "day2",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day3",
+          "displayName": "day3",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day4",
+          "displayName": "day4",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day5",
+          "displayName": "day5",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day6",
+          "displayName": "day6",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day0",
+          "displayName": "day0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-closed",
+          "displayName": "closed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day1On",
+          "displayName": "day1On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day1Off",
+          "displayName": "day1Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day2On",
+          "displayName": "day2On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day2Off",
+          "displayName": "day2Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day3On",
+          "displayName": "day3On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day3Off",
+          "displayName": "day3Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day4On",
+          "displayName": "day4On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day4Off",
+          "displayName": "day4Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day5On",
+          "displayName": "day5On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day5Off",
+          "displayName": "day5Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day6On",
+          "displayName": "day6On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day6Off",
+          "displayName": "day6Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day0On",
+          "displayName": "day0On",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day0Off",
+          "displayName": "day0Off",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
     },
     {
       "id": "stButtons",
@@ -486,11 +1810,10 @@
         "flexWrap": "wrap"
       },
       "children": [
-        "stSave",
-        "stPlan"
+        "stSave"
       ],
       "x": 160,
-      "y": 1720
+      "y": 5920
     },
     {
       "id": "stSave",
@@ -512,31 +1835,7 @@
         "label": "Save"
       },
       "x": 220,
-      "y": 1840
-    },
-    {
-      "id": "stPlan",
-      "type": "net.noodl.controls.button",
-      "label": "Plan this month",
-      "parent": "stButtons",
-      "parameters": {
-        "backgroundColor": "transparent",
-        "color": "var(--foreground)",
-        "borderRadius": "var(--radius-md)",
-        "borderStyle": "solid",
-        "borderWidth": "var(--border-1)",
-        "borderColor": "var(--border-control)",
-        "paddingLeft": "var(--space-3)",
-        "paddingRight": "var(--space-3)",
-        "paddingTop": "var(--space-2)",
-        "paddingBottom": "var(--space-2)",
-        "fontSize": "var(--text-sm)",
-        "fontWeight": "var(--font-semibold)",
-        "sizeMode": "contentSize",
-        "label": "Plan this month"
-      },
-      "x": 220,
-      "y": 1960
+      "y": 6040
     }
   ],
   "visualRoots": [

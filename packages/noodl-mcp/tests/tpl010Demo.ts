@@ -595,8 +595,15 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     for (var q = 0; q < pays.length; q++) if (pays[q].day > readings[0].date && pays[q].day <= todayKey) readings[0].amount -= pays[q].amount;
   }
 
+  // R2.5 — the demo works Monday to Saturday, has never typed a split (so the sheet shows the
+  // recommendation), and keeps invented guardrails: three hours of hobby a week, twelve of
+  // building, and half the week billable. The todo address is empty on purpose — the bar's
+  // Todo link must not appear on a stranger's demo (L6).
   var settings = {
     id: 'seed-settings', rate: 50, focusHours: 6, savingsTarget: 500, lowWaterMark: 0,
+    workingDays: [1, 2, 3, 4, 5, 6],
+    buildingHours: '', adminHours: '', hobbyHours: '',
+    hobbyWeekCeiling: 3, buildingWeekCeiling: 12, billableFloorPct: 50, todoUrl: '',
     createdAt: stamp, updatedAt: stamp
   };
 

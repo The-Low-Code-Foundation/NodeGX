@@ -2,7 +2,7 @@
 
 **Opened 2026-09-21**, from Richard's first session with `templates/planner-demo/` in a browser, with the approved mockup
 open beside it. Six pieces of feedback, each researched against the build below and written as a task with its own
-acceptance criteria. **Status: R2.6 ✅, R2.1 ✅ (waiting on R2.1-6), R2.4 ✅ built and driven (s2); R2.3 ✅ built and driven (s4); R2.5 ⬜; R2.2 folded into [TPL-010-M](TPL-010-MONEY.md) (2026-09-21). Every ruling
+acceptance criteria. **Status: R2.6 ✅, R2.1 ✅ (waiting on R2.1-6), R2.4 ✅ built and driven (s2); R2.3 ✅ built and driven (s4); R2.5 ✅ built, gated and driven (s5, 2026-09-22); R2.2 folded into [TPL-010-M](TPL-010-MONEY.md) (2026-09-21). Every ruling
 approved 2026-09-21.** Prerequisite: TPL-010 as it stands (gates 30/30).
 
 The seventh ask from the same message — Claude Code as the coach, with every row and every setting open to it over MCP —
@@ -323,7 +323,7 @@ can't send that kind of detail to a client as proof of what I did when I'm billi
 
 ---
 
-## R2.5 — Where the numbers come from is not configurable enough
+## R2.5 — Where the numbers come from is not configurable enough — ✅ **built, gated and driven 2026-09-22 (s5)**
 
 > **Amended 2026-09-21 by [TPL-010-M](TPL-010-MONEY.md) §4.3:** R24's *Money* section is replaced by three fields (rate,
 > savings target, lowest balance before red); every other money number becomes a money item. Capacity, the split and the
@@ -377,10 +377,47 @@ building vs admin, recommendations for those, making sure I'm not doing too many
 
 | AC | Criterion |
 |---|---|
-| R2.5-1 | Unticking Saturday removes it from `daysLeft`; the Billable tile's per-day sentence changes accordingly (gate, clock held) |
-| R2.5-2 | With focus 6, 22 working days, target 55: the recommendations read building 64, admin 13, hobby 0; *Use the recommendation* fills each field; *Plan this month* writes them to `MonthPlan` and the tiles show them |
-| R2.5-3 | Logging 5 h of hobby in a week with a 3 h ceiling puts the guardrail sentence on the Hobby tile and in the drawer as the concern when no building move is unsent; nothing is red |
-| R2.5-4 | Every field on the sheet round-trips: save, reload, the same values — and every one is a column in `Settings` (gate walks the sheet's fields against the schema note) |
+| R2.5-1 | Unticking Saturday removes it from `daysLeft`; the Billable tile's per-day sentence changes accordingly (gate, clock held) | ✅ gate + drive |
+| R2.5-2 | With focus 6, 22 working days, target 55: the recommendations read building 64, admin 13, hobby 0; *Use the recommendation* fills each field; *Plan this month* writes them to `MonthPlan` and the tiles show them | ✅ **with two figures corrected — 63.75 and 13.25** |
+| R2.5-3 | Logging 5 h of hobby in a week with a 3 h ceiling puts the guardrail sentence on the Hobby tile and in the drawer as the concern when no building move is unsent; nothing is red | ✅ gate + drive |
+| R2.5-4 | Every field on the sheet round-trips: save, reload, the same values — and every one is a column in `Settings` (gate walks the sheet's fields against the schema note) | ✅ gate + drive |
+
+🔴 **R2.5-2's own figures are wrong, and the build follows the ruling instead.** R24 says admin is *"10% of
+capacity rounded to the quarter hour"*. A tenth of 132 h is 13.2 h, which to the quarter hour is **13.25**,
+not 13 — and building is then **63.75**, not 64. The AC's arithmetic was done in whole hours; the quarter
+hour is the unit every other figure in this app is counted in, so the ruling wins and the sum still closes
+(55 + 13.25 + 63.75 = 132). Say the word and it rounds to whole hours instead; it is one line.
+
+🔴 **The default working week is Monday to Saturday, not R24's Monday to Friday.** A `Settings` row written
+before this sheet existed has no `workingDays` column, and Mon–Fri as the default would quietly take four
+days out of the month it is read in — the hosted app's month included. Mon–Sat is what the planner counted
+before the ticks existed, so nothing changes shape by upgrading, and Saturday is one click from off. (Q4's
+*"Saturday optional"* is satisfied by the tick, not by the default.)
+
+### What s5 built
+
+- `Settings` gained eight columns: `workingDays` (an array, `[1…6, 0]`), `buildingHours`, `adminHours`,
+  `hobbyHours` (blank means *use the recommendation*), `hobbyWeekCeiling`, `buildingWeekCeiling`,
+  `billableFloorPct`, `todoUrl`. `Edit settings` writes every one; nothing is derived on the way in.
+- `Week/Settings sheet` is four sections and a Links line: **Capacity** (the ceiling, seven day ticks, and
+  what they come to a week, live as they are pressed), **Money** (the three a money item cannot say),
+  **The split** (each field with its rule printed beside it and one button that takes all three), and
+  **Guardrails**.
+- `Logic/Envelopes` counts `daysLeft` over the ticked days, works out the month's capacity and R25's three
+  recommendations, and raises one guardrail sentence — hobby over its weekly line, then building, then
+  billable under its floor, read against the hours the week could have held **so far** so that a Monday
+  morning is never "behind" (R1).
+- `Logic/Shutdown` takes a crossed guardrail as its concern **after** the unsent building move and
+  **before** the dormant ones.
+- **L6 arrived with its column**: the bar shows *Todo ↗* only when `Settings.todoUrl` is set, so the demo
+  on nodegx.io shows no dead link. What goes *through* it is still TPL-010-L.
+- 🔴 **A saved split is not replaced by a moving recommendation.** The boxes hold the recommendation while
+  nothing is stored; once Save has been pressed, the stored figure stands and the line beside it moves on.
+  *Use the recommendation* is how the advice is taken, and it writes through `Edit settings` rather than
+  pushing values at a Text Input, which is the race `SHEET_SCRIPT` exists to avoid.
+- Gates **65/65** (`tpl010Template.test.ts`, four new), `drive-tpl010-r25.js` **25/25** on the deployed
+  demo; money 40/40, R2.3 19/19, R2.4 22/22 unchanged; 1280×900, 1423×680 and 390×844 unchanged at
+  `scrollWidth` = viewport, 0 console errors.
 
 ---
 

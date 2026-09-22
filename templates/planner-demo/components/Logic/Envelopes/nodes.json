@@ -96,6 +96,56 @@
           "name": "planLine",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "workingDaysInMonth",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "capacityHours",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "recBuilding",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "recAdmin",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "recHobby",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "recBuildingLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "recAdminLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "recHobbyLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "recLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "guardConcern",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 40,
@@ -106,7 +156,7 @@
       "type": "JavaScriptFunction",
       "label": "Work out every envelope",
       "parameters": {
-        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar ENV_KEYS = [\"billable\",\"building\",\"admin\",\"hobby\",\"dormant\"];\nvar ENV_NAMES = {\"billable\":\"Billable\",\"building\":\"Building\",\"admin\":\"Admin and asks\",\"hobby\":\"Hobby\",\"dormant\":\"Dormant, worth a nudge\"};\nfunction envMark(k) { return 'var(--env-' + k + ')'; }\nfunction envInk(k) { return 'var(--env-' + k + '-ink)'; }\nfunction envSoft(k) { return 'var(--env-' + k + '-soft)'; }\n\nvar projects = Inputs.projects || [];\nvar blocks = Inputs.blocks || [];\nvar plans = Inputs.monthPlans || [];\nvar settings = (Inputs.settings || [])[0] || {};\nvar monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());\nvar month = monday.getFullYear() + '-' + pad(monday.getMonth() + 1);\nvar plan = null;\nfor (var i = 0; i < plans.length; i++) if (plans[i] && plans[i].month === month) plan = plans[i];\n\nvar focus = num(settings.focusHours, 6);\n// R2 — the month's target is hours, never a project price. M22 — worked out from the money, in Logic/Money.\nvar target = Math.max(0, Math.round(num(Inputs.targetHours, 0)));\n\nvar byId = {};\nfor (var p = 0; p < projects.length; p++) if (projects[p]) byId[projects[p].id] = projects[p];\n\n// Spent this month, per envelope: a done block, and the entries logged on an open one (R22).\nvar used = { billable: 0, building: 0, admin: 0, hobby: 0 };\nfor (var b = 0; b < blocks.length; b++) {\n  var blk = blocks[b];\n  if (!blk) continue;\n  var d = parseDay(blk.date);\n  if (!d || d.getFullYear() + '-' + pad(d.getMonth() + 1) !== month) continue;\n  var env = envelopeOf(byId[blk.projectId]);\n  used[env] = used[env] + spentOf(blk);\n}\n\n// R3 — working days left in the month, counted from today, Mon–Sat, Saturday included (Q4).\nvar today = startOfToday();\nvar monthStart = new Date(monday.getFullYear(), monday.getMonth(), 1);\nvar monthEnd = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);\n// Today counts as a day you can still work. Looking at a week that is not this\n// month's, the whole month is still ahead of you.\nvar cursor = today.getTime() >= monthStart.getTime() && today.getTime() <= monthEnd.getTime() ? new Date(today.getTime()) : monthStart;\nvar daysLeft = 0;\nwhile (cursor.getTime() <= monthEnd.getTime()) {\n  if (cursor.getDay() !== 0) daysLeft++;\n  cursor = addDays(cursor, 1);\n}\n\nvar billableLeft = Math.max(0, target - used.billable);\nvar perDay = daysLeft > 0 ? q(billableLeft / daysLeft) : 0;\n// R3 — what the ceiling leaves over once the billable day is paid for IS the building budget.\nvar buildingLeft = q(Math.max(0, focus - perDay) * daysLeft);\n\nvar budgets = {\n  billable: plan ? num(plan.billable, target) : target,\n  building: plan ? num(plan.building, buildingLeft) : buildingLeft,\n  admin: plan ? num(plan.admin, 12) : 12,\n  hobby: plan ? num(plan.hobby, 0) : 0\n};\n\nfunction say(k) {\n  var left = budgets[k] - used[k];\n  if (k === 'billable') {\n    if (billableLeft <= 0) return 'Month covered. Everything else is yours.';\n    return hText(perDay) + ' h a day for the ' + daysLeft + ' ' + (daysLeft === 1 ? 'day' : 'days') + ' left';\n  }\n  if (k === 'building') {\n    if (buildingLeft <= 0) return 'Nothing spare this month once the billable hours are in.';\n    return hText(buildingLeft) + ' h left to spend on rungs';\n  }\n  if (k === 'admin') return hText(Math.max(0, left)) + ' h left. Invoices and asks count here';\n  // R4, word for word.\n  return 'Not budgeted, not counted, not a problem';\n}\n\nvar rows = [];\nvar four = ['billable', 'building', 'admin', 'hobby'];\nfor (var f = 0; f < four.length; f++) {\n  var k = four[f];\n  var u = used[k];\n  var budget = budgets[k];\n  var left = k === 'building' ? buildingLeft : Math.max(0, budget - u);\n  var over = budget > 0 && u > budget;\n  var pctFull = budget > 0 ? Math.min(100, (u / budget) * 100) : (u > 0 ? 100 : 0);\n  rows.push({\n    name: ENV_NAMES[k],\n    leftText: hText(left) + ' h left',\n    usedText: hText(u),\n    budgetText: hText(budget),\n    say: say(k),\n    fillWidth: { value: Math.round(pctFull), unit: '%' },\n    restWidth: { value: 100 - Math.round(pctFull), unit: '%' },\n    // R4 and R13 — going over Billable is red; going over Hobby is simply the bar full.\n    fillColor: over && k !== 'hobby' ? 'var(--destructive)' : envMark(k),\n    mark: envMark(k)\n  });\n}\n\nOutputs.rows = rows;\nOutputs.target = target;\nOutputs.billableUsed = used.billable;\nOutputs.billableLeft = billableLeft;\nOutputs.perDay = perDay;\nOutputs.buildingLeft = buildingLeft;\nOutputs.daysLeft = daysLeft;\nOutputs.focusHours = focus;\nOutputs.hasPlan = !!plan;\nOutputs.planLine = plan\n  ? 'This month is planned: ' + hText(budgets.billable) + ' h billable, ' + hText(budgets.building) + ' h building.'\n  : 'This month has no plan yet. Press Plan this month and the envelopes start from your settings.';"
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\n/**\n * R24 — the days a person says they work, as a lookup keyed the way getDay() counts.\n * Accepts the array Settings.workingDays holds and the comma-separated string somebody\n * (or the coach) might type instead. **Empty or unreadable means Monday to Saturday**, which\n * is what the planner counted before the ticks existed.\n */\nfunction workDaySet(value) {\n  var list = value;\n  if (typeof list === 'string') list = list.split(',');\n  var set = {}, any = false;\n  if (list && typeof list.length === 'number') {\n    for (var i = 0; i < list.length; i++) {\n      var d = Number(list[i]);\n      if (isFinite(d) && d >= 0 && d <= 6) { set[d] = true; any = true; }\n    }\n  }\n  if (!any) return { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true };\n  return set;\n}\nfunction workDayList(value) {\n  var set = workDaySet(value), out = [];\n  var order = [1, 2, 3, 4, 5, 6, 0];\n  for (var i = 0; i < order.length; i++) if (set[order[i]]) out.push(order[i]);\n  return out;\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar ENV_KEYS = [\"billable\",\"building\",\"admin\",\"hobby\",\"dormant\"];\nvar ENV_NAMES = {\"billable\":\"Billable\",\"building\":\"Building\",\"admin\":\"Admin and asks\",\"hobby\":\"Hobby\",\"dormant\":\"Dormant, worth a nudge\"};\nfunction envMark(k) { return 'var(--env-' + k + ')'; }\nfunction envInk(k) { return 'var(--env-' + k + '-ink)'; }\nfunction envSoft(k) { return 'var(--env-' + k + '-soft)'; }\n\nvar projects = Inputs.projects || [];\nvar blocks = Inputs.blocks || [];\nvar plans = Inputs.monthPlans || [];\nvar settings = (Inputs.settings || [])[0] || {};\nvar monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());\nvar month = monday.getFullYear() + '-' + pad(monday.getMonth() + 1);\nvar plan = null;\nfor (var i = 0; i < plans.length; i++) if (plans[i] && plans[i].month === month) plan = plans[i];\n\nvar focus = num(settings.focusHours, 6);\n// R2 — the month's target is hours, never a project price. M22 — worked out from the money, in Logic/Money.\nvar target = Math.max(0, Math.round(num(Inputs.targetHours, 0)));\n\nvar byId = {};\nfor (var p = 0; p < projects.length; p++) if (projects[p]) byId[projects[p].id] = projects[p];\n\n// Spent this month, per envelope: a done block, and the entries logged on an open one (R22).\nvar used = { billable: 0, building: 0, admin: 0, hobby: 0 };\nfor (var b = 0; b < blocks.length; b++) {\n  var blk = blocks[b];\n  if (!blk) continue;\n  var d = parseDay(blk.date);\n  if (!d || d.getFullYear() + '-' + pad(d.getMonth() + 1) !== month) continue;\n  var env = envelopeOf(byId[blk.projectId]);\n  used[env] = used[env] + spentOf(blk);\n}\n\n// R3 and R24 — working days left in the month, counted from today, over the days the person\n// says they work. A row with nothing in the column still means Monday to Saturday, which is\n// what this counted before the ticks existed: nobody's month loses four days by upgrading.\nvar work = workDaySet(settings.workingDays);\nvar today = startOfToday();\nvar monthStart = new Date(monday.getFullYear(), monday.getMonth(), 1);\nvar monthEnd = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);\n// Today counts as a day you can still work. Looking at a week that is not this\n// month's, the whole month is still ahead of you.\nvar cursor = today.getTime() >= monthStart.getTime() && today.getTime() <= monthEnd.getTime() ? new Date(today.getTime()) : monthStart;\nvar daysLeft = 0;\nwhile (cursor.getTime() <= monthEnd.getTime()) {\n  if (work[cursor.getDay()]) daysLeft++;\n  cursor = addDays(cursor, 1);\n}\n// R2.5-2 — capacity is the whole month's working days, not the ones left: it is what the\n// recommendations divide up, and it must not shrink as the month goes by.\nvar monthCursor = new Date(monthStart.getTime());\nvar workingDaysInMonth = 0;\nwhile (monthCursor.getTime() <= monthEnd.getTime()) {\n  if (work[monthCursor.getDay()]) workingDaysInMonth++;\n  monthCursor = addDays(monthCursor, 1);\n}\n\nvar billableLeft = Math.max(0, target - used.billable);\nvar perDay = daysLeft > 0 ? q(billableLeft / daysLeft) : 0;\n// R3 — what the ceiling leaves over once the billable day is paid for IS the building budget.\nvar buildingLeft = q(Math.max(0, focus - perDay) * daysLeft);\n\n// R25 — the three recommendations, as rules a person can read and disagree with. Capacity is\n// the focus ceiling over every working day of the month; admin is a tenth of it; building is\n// what is left once billable and admin are paid for; hobby is nothing.\nvar capacity = q(focus * workingDaysInMonth);\nvar recAdmin = q(capacity * 0.1);\nvar recBuilding = q(Math.max(0, capacity - target - recAdmin));\nvar recHobby = 0;\n\n// R2.5 — the plan decides the budgets. Without one, what the sheet says does; without that,\n// the recommendation. So a person who never typed a split still sees an honest one.\nfunction typed(v, fallback) {\n  if (v === undefined || v === null || v === '') return fallback;\n  var n = Number(v);\n  return isFinite(n) ? n : fallback;\n}\nvar budgets = {\n  billable: plan ? num(plan.billable, target) : target,\n  building: plan ? num(plan.building, buildingLeft) : typed(settings.buildingHours, buildingLeft),\n  admin: plan ? num(plan.admin, recAdmin) : typed(settings.adminHours, recAdmin),\n  hobby: plan ? num(plan.hobby, 0) : typed(settings.hobbyHours, 0)\n};\n\n/**\n * R24's guardrails, and the only place they are worked out. Weekly, because that is the span a\n * person can still do something about, and **never a colour** (R1, R4): a line crossed is one\n * sentence on its own tile, and the first of them is the evening's candidate concern.\n */\nvar weekUsed = { billable: 0, building: 0, admin: 0, hobby: 0 };\nvar weekEnd = addDays(monday, 6);\nfor (var wb = 0; wb < blocks.length; wb++) {\n  var wblk = blocks[wb];\n  if (!wblk) continue;\n  var wd = parseDay(wblk.date);\n  if (!wd || wd.getTime() < monday.getTime() || wd.getTime() >= weekEnd.getTime()) continue;\n  var wenv = envelopeOf(byId[wblk.projectId]);\n  weekUsed[wenv] = weekUsed[wenv] + spentOf(wblk);\n}\nvar guards = { billable: '', building: '', admin: '', hobby: '' };\nvar hobbyCeiling = num(settings.hobbyWeekCeiling, 0);\nvar buildingCeiling = num(settings.buildingWeekCeiling, 0);\nvar floorPct = num(settings.billableFloorPct, 0);\nif (hobbyCeiling > 0 && weekUsed.hobby > hobbyCeiling) {\n  guards.hobby = 'Hobby is at ' + hText(weekUsed.hobby) + ' h this week against your ' + hText(hobbyCeiling) +\n    ' h line. Fine if it was a Saturday.';\n}\nif (buildingCeiling > 0 && weekUsed.building > buildingCeiling) {\n  guards.building = 'Building is at ' + hText(weekUsed.building) + ' h this week against your ' + hText(buildingCeiling) +\n    ' h line. Worth knowing before the next one goes in.';\n}\n// The floor is read against the hours the week could have held SO FAR — the working days from\n// Monday up to today — so a Monday morning is never \"behind\", which is R1 in arithmetic.\nvar soFar = 0;\nvar fc = new Date(monday.getTime());\nwhile (fc.getTime() < weekEnd.getTime() && fc.getTime() <= today.getTime()) {\n  if (work[fc.getDay()]) soFar++;\n  fc = addDays(fc, 1);\n}\nvar couldHave = q(soFar * focus);\nif (floorPct > 0 && couldHave > 0) {\n  var share = (weekUsed.billable / couldHave) * 100;\n  if (share < floorPct) {\n    guards.billable = 'Billable is ' + Math.round(share) + '% of the ' + hText(couldHave) + ' h this week could have held, under your ' +\n      Math.round(floorPct) + '% line. ' + hText(perDay) + ' h a day from here puts the month right.';\n  }\n}\n// One sentence for the evening, in R24's order: hobby, then building, then the floor.\nOutputs.guardConcern = guards.hobby || guards.building || guards.billable;\n\nfunction say(k) {\n  var left = budgets[k] - used[k];\n  if (k === 'billable') {\n    if (billableLeft <= 0) return 'Month covered. Everything else is yours.';\n    return hText(perDay) + ' h a day for the ' + daysLeft + ' ' + (daysLeft === 1 ? 'day' : 'days') + ' left';\n  }\n  if (k === 'building') {\n    if (buildingLeft <= 0) return 'Nothing spare this month once the billable hours are in.';\n    return hText(buildingLeft) + ' h left to spend on rungs';\n  }\n  if (k === 'admin') return hText(Math.max(0, left)) + ' h left. Invoices and asks count here';\n  // R4, word for word.\n  return 'Not budgeted, not counted, not a problem';\n}\n\nvar rows = [];\nvar four = ['billable', 'building', 'admin', 'hobby'];\nfor (var f = 0; f < four.length; f++) {\n  var k = four[f];\n  var u = used[k];\n  var budget = budgets[k];\n  var left = k === 'building' ? buildingLeft : Math.max(0, budget - u);\n  var over = budget > 0 && u > budget;\n  var pctFull = budget > 0 ? Math.min(100, (u / budget) * 100) : (u > 0 ? 100 : 0);\n  rows.push({\n    name: ENV_NAMES[k],\n    leftText: hText(left) + ' h left',\n    usedText: hText(u),\n    budgetText: hText(budget),\n    // R24 — a crossed line is the sentence worth reading, so it takes the tile's one line\n    // rather than adding a second one (R5: the week never grows).\n    say: guards[k] || say(k),\n    fillWidth: { value: Math.round(pctFull), unit: '%' },\n    restWidth: { value: 100 - Math.round(pctFull), unit: '%' },\n    // R4 and R13 — going over Billable is red; going over Hobby is simply the bar full.\n    fillColor: over && k !== 'hobby' ? 'var(--destructive)' : envMark(k),\n    mark: envMark(k)\n  });\n}\n\nOutputs.rows = rows;\nOutputs.target = target;\nOutputs.billableUsed = used.billable;\nOutputs.billableLeft = billableLeft;\nOutputs.perDay = perDay;\nOutputs.buildingLeft = buildingLeft;\nOutputs.daysLeft = daysLeft;\nOutputs.focusHours = focus;\nOutputs.workingDaysInMonth = workingDaysInMonth;\nOutputs.capacityHours = capacity;\nOutputs.recBuilding = recBuilding;\nOutputs.recAdmin = recAdmin;\nOutputs.recHobby = recHobby;\nOutputs.recBuildingLine = 'Recommended ' + hText(recBuilding) + ' h — ' + hText(capacity) + ' h of capacity, less ' +\n  hText(target) + ' h billable and ' + hText(recAdmin) + ' h admin.';\nOutputs.recAdminLine = 'Recommended ' + hText(recAdmin) + ' h — a tenth of capacity, for invoices and asks.';\nOutputs.recHobbyLine = 'Recommended 0 h — hobby is not budgeted. The guardrail below is what mentions it.';\nOutputs.recLabel = 'Use ' + hText(recBuilding) + ' / ' + hText(recAdmin) + ' / ' + hText(recHobby) + ' h';\nOutputs.hasPlan = !!plan;\nOutputs.planLine = plan\n  ? 'This month is planned: ' + hText(budgets.billable) + ' h billable, ' + hText(budgets.building) + ' h building.'\n  : 'This month has no plan yet. Press Plan this month and the envelopes start from your settings.';"
       },
       "x": 40,
       "y": 280,
@@ -152,6 +202,13 @@
           "plug": "input",
           "type": "*",
           "group": "Inputs"
+        },
+        {
+          "name": "out-guardConcern",
+          "displayName": "guardConcern",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
         },
         {
           "name": "out-rows",
@@ -205,6 +262,69 @@
         {
           "name": "out-focusHours",
           "displayName": "focusHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-workingDaysInMonth",
+          "displayName": "workingDaysInMonth",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-capacityHours",
+          "displayName": "capacityHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recBuilding",
+          "displayName": "recBuilding",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recAdmin",
+          "displayName": "recAdmin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recHobby",
+          "displayName": "recHobby",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recBuildingLine",
+          "displayName": "recBuildingLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recAdminLine",
+          "displayName": "recAdminLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recHobbyLine",
+          "displayName": "recHobbyLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recLabel",
+          "displayName": "recLabel",
           "plug": "output",
           "type": "*",
           "group": "Outputs"

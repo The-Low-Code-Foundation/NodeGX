@@ -492,6 +492,31 @@ function envelopeOf(p) {
   if (k === 'hobby') return 'hobby';
   return 'admin';
 }
+/**
+ * R24 — the days a person says they work, as a lookup keyed the way getDay() counts.
+ * Accepts the array Settings.workingDays holds and the comma-separated string somebody
+ * (or the coach) might type instead. **Empty or unreadable means Monday to Saturday**, which
+ * is what the planner counted before the ticks existed.
+ */
+function workDaySet(value) {
+  var list = value;
+  if (typeof list === 'string') list = list.split(',');
+  var set = {}, any = false;
+  if (list && typeof list.length === 'number') {
+    for (var i = 0; i < list.length; i++) {
+      var d = Number(list[i]);
+      if (isFinite(d) && d >= 0 && d <= 6) { set[d] = true; any = true; }
+    }
+  }
+  if (!any) return { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true };
+  return set;
+}
+function workDayList(value) {
+  var set = workDaySet(value), out = [];
+  var order = [1, 2, 3, 4, 5, 6, 0];
+  for (var i = 0; i < order.length; i++) if (set[order[i]]) out.push(order[i]);
+  return out;
+}
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function parseDay(s) {
@@ -3237,36 +3262,108 @@ const SHUTDOWN_DRAWER: Tpl010Component = {
   ]
 };
 
+/** Every value on this sheet: a `Settings` column, a box, and a port on `Edit settings` (R2.5-4). */
+const SETTINGS_VALUES: Array<[string, string]> = [
+  ['rate', 'string'], ['focusHours', 'string'], ['savingsTarget', 'string'], ['lowWaterMark', 'string'],
+  ['buildingHours', 'string'], ['adminHours', 'string'], ['hobbyHours', 'string'],
+  ['hobbyWeekCeiling', 'string'], ['buildingWeekCeiling', 'string'], ['billableFloorPct', 'string'],
+  ['todoUrl', 'string']
+];
+
 /**
- * The numbers the week is worked out from, and no money list (M1, M2: money has its own modal
- * now). §4.3: Settings keeps the focus ceiling and three money numbers a money item cannot say —
- * **your usual hourly rate** (what the money still to earn by the hour is divided by, and where a
- * new hourly project starts — M22), the **savings target** added to break-even to make the target
- * (M13), and the **lowest balance before red** (M14). The household need, the partner's money and
- * the four days money moves are money items now.
+ * `[the number JavaScript calls the day, the word on the tick, the node]`, **Monday first** —
+ * `getDay()` puts Sunday at 0 and a week that starts on Sunday is not a working week.
+ *
+ * Q4 made Saturday optional and the build counted it anyway, because there was nowhere to say
+ * otherwise. These seven ticks are that somewhere. **A `Settings` row with no `workingDays`
+ * still means Monday to Saturday**, so nobody's month silently loses four days the first time
+ * they open this sheet (`Logic/Envelopes`, and the same default in `Edit settings`).
+ */
+const WORK_DAYS: Array<[number, string, string]> = [
+  [1, 'Mon', 'stDay1'], [2, 'Tue', 'stDay2'], [3, 'Wed', 'stDay3'], [4, 'Thu', 'stDay4'],
+  [5, 'Fri', 'stDay5'], [6, 'Sat', 'stDay6'], [0, 'Sun', 'stDay0']
+];
+const DAY_FIELDS: Array<[string, string]> = WORK_DAYS.map(([n]) => [`day${n}`, 'boolean'] as [string, string]);
+
+const SETTINGS_FIELDS: Array<[string, string]> = [
+  ...SETTINGS_VALUES,
+  ...DAY_FIELDS,
+  ['targetLine', 'string'], ['planLine', 'string'],
+  ['recBuildingLine', 'string'], ['recAdminLine', 'string'], ['recHobbyLine', 'string'], ['recLabel', 'string'],
+  ['shown', 'boolean']
+];
+const SETTINGS_OUTS: Array<[string, string]> = [
+  ...SETTINGS_VALUES,
+  ['workingDays', 'array'],
+  ['save', 'signal'], ['planMonth', 'signal'], ['useRecommendation', 'signal'], ['close', 'signal'], ['openMoney', 'signal']
+];
+
+/** `[field, label, node, box type, the section it sits in]` — one row per typed number. */
+const SETTINGS_BOXES: Array<[string, string, string, 'text' | 'number', string]> = [
+  ['focusHours', 'Focused hours a day', 'stFocus', 'number', 'stCap'],
+  ['rate', 'Your usual hourly rate, €', 'stRate', 'number', 'stMoney'],
+  ['savingsTarget', 'Savings target, € a month', 'stSavings', 'number', 'stMoney'],
+  ['lowWaterMark', 'Lowest balance before red, €', 'stLow', 'number', 'stMoney'],
+  ['buildingHours', 'Building, hours this month', 'stBuilding', 'number', 'stSplit'],
+  ['adminHours', 'Admin and asks, hours this month', 'stAdmin', 'number', 'stSplit'],
+  ['hobbyHours', 'Hobby, hours this month', 'stHobby', 'number', 'stSplit'],
+  ['hobbyWeekCeiling', 'Hobby: hours a week before it is mentioned', 'stHobbyCeil', 'number', 'stGuard'],
+  ['buildingWeekCeiling', 'Building: hours a week before it is mentioned', 'stBuildCeil', 'number', 'stGuard'],
+  ['billableFloorPct', 'Billable: the least % of the week it should be', 'stFloor', 'number', 'stGuard'],
+  ['todoUrl', 'Your todo list’s address', 'stTodo', 'text', 'stLinks']
+];
+const stBox = (field: string) => {
+  const found = SETTINGS_BOXES.find(([f]) => f === field);
+  if (!found) throw new Error(`no settings box for ${field}`);
+  const [, label, id, type, parent] = found;
+  return place(id, TEXT_INPUT, label, parent, BOX(label, type));
+};
+
+/** One titled section of the sheet, ruled off from the one above it. */
+const SETTINGS_SECTION = (id: string, title: string, first = false): unknown[] => [
+  group(id, title, 'stCard', {
+    ...COLUMN('var(--space-2)'),
+    ...(first
+      ? {}
+      : {
+          borderTopStyle: 'solid',
+          borderTopWidth: 'var(--border-1)',
+          borderTopColor: 'var(--border)',
+          paddingTop: 'var(--space-3)'
+        })
+  }),
+  text(`${id}Title`, title, id, title, wide(T_LABEL))
+];
+
+/**
+ * **R24 — four sections, and every field a `Settings` column**, so the coach can reach each one
+ * (TPL-010-MCP). Capacity, money, the split, guardrails — the order a person asks the questions
+ * in: how much can I work, what has to come in, how do the hours divide, and when should I be
+ * told the division has drifted. Richard's ask, verbatim: *"Where do I set my config? Like the
+ * number of productive hours I work in a day, the ratio of billable vs building vs admin,
+ * recommendations for those, making sure I'm not doing too many hobby or building hours."*
+ *
+ * **R25 — the recommendations are rules over the settings, not a model**, and they are printed
+ * beside the fields so a person can disagree with them: admin is a tenth of capacity, building
+ * is what is left once billable and admin are paid for, hobby is nothing. `Logic/Envelopes`
+ * works them out, because that is where every other number on the week comes from.
+ *
+ * 🔴 **Use the recommendation goes through the command, not the box.** A Text Input compares an
+ * arriving `startValue` with the last one it was SENT, so pushing a recommendation straight at a
+ * box somebody has typed in is exactly the race `SHEET_SCRIPT` exists to avoid. The press writes
+ * the three numbers with `Edit settings`; the week reloads, the page pushes the stored values,
+ * and the boxes show what was actually saved.
+ *
+ * Money itself is not here (M1, M2: it has its own modal). §4.3 keeps the three numbers a money
+ * item cannot say — the usual hourly rate, the savings target, and the lowest balance before red.
  *
  * Q3 rules that the month plan is **not** written automatically on the 1st — *Plan this month*
  * writes it, and the week asks for it until it exists.
  */
-const SETTINGS_FIELDS: Array<[string, string]> = [
-  ['rate', 'string'], ['focusHours', 'string'], ['savingsTarget', 'string'], ['lowWaterMark', 'string'],
-  ['targetLine', 'string'], ['planLine', 'string'], ['shown', 'boolean']
-];
-const SETTINGS_OUTS: Array<[string, string]> = [
-  ['rate', 'string'], ['focusHours', 'string'], ['savingsTarget', 'string'], ['lowWaterMark', 'string'],
-  ['save', 'signal'], ['planMonth', 'signal'], ['close', 'signal'], ['openMoney', 'signal']
-];
-
-const SETTINGS_NUMBERS: Array<[string, string, string]> = [
-  ['rate', 'Your usual hourly rate, €', 'stRate'],
-  ['focusHours', 'Focused hours a day', 'stFocus'],
-  ['savingsTarget', 'Savings target, € a month', 'stSavings'],
-  ['lowWaterMark', 'Lowest balance before red, €', 'stLow']
-];
-
 const SETTINGS_SHEET: Tpl010Component = {
   path: 'Week/Settings sheet',
-  description: 'The numbers the week is worked out from: your usual hourly rate, your focus ceiling, what you want to save a month, and how low the balance may go before it turns red. Money itself is in the Money modal.',
+  description:
+    'The numbers the week is worked out from, in four parts: what you can work, the money a money item cannot say, how the month’s hours divide, and the lines that earn a sentence when they are crossed.',
   ...iface(SETTINGS_FIELDS, SETTINGS_OUTS),
   nodes: [
     inputs('stIn', 'What they are now', SETTINGS_FIELDS),
@@ -3299,24 +3396,108 @@ const SETTINGS_SHEET: Tpl010Component = {
     group('stHead', 'Title and close', 'stCard', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
     text('stTitle', 'Settings', 'stHead', 'Settings', { ...T_TITLE, sizeMode: 'contentSize', as: 'h2' }),
     place('stClose', BUTTON, 'Close the sheet', 'stHead', BTN_ICON('icon-x', 'Close')),
-    group('stMoneyRow', 'Where the money went', 'stCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+
+    // ── 1. Capacity ──
+    ...SETTINGS_SECTION('stCap', 'Capacity', true),
+    stBox('focusHours'),
+    text('stDaysLabel', 'The days you work', 'stCap', 'The days you work', wide(T_LABEL)),
+    group('stDaysRow', 'The seven days', 'stCap', { ...ROW('var(--space-3)'), flexWrap: 'wrap', rowGap: 'var(--space-2)' }),
+    ...WORK_DAYS.map(([, label, id]) => place(id, 'net.noodl.controls.checkbox', label, 'stDaysRow', TICK_BOX(label))),
+    text('stWeekLine', 'What that is a week', 'stCap', '', wide(T_META)),
+
+    // ── 2. Money ──
+    ...SETTINGS_SECTION('stMoney', 'Money'),
+    group('stMoneyRow', 'Where the money went', 'stMoney', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
     text('stMoneyWords', 'Where the money is now', 'stMoneyRow', 'What comes in and goes out lives in Money now.', wide(T_META)),
     place('stToMoney', BUTTON, 'Open Money', 'stMoneyRow', { ...BTN_GHOST, label: 'Open Money (€)' }),
-    text('stTarget', 'What these come to', 'stCard', '', wide(T_META)),
-    ...SETTINGS_NUMBERS.map(([, label, id]) => place(id, TEXT_INPUT, label, 'stCard', BOX(label, 'number'))),
-    text('stPlanLine', 'Whether this month is planned', 'stCard', '', wide(T_META)),
+    stBox('rate'),
+    stBox('savingsTarget'),
+    stBox('lowWaterMark'),
+
+    // ── 3. The split ──
+    ...SETTINGS_SECTION('stSplit', 'The split'),
+    text('stTarget', 'What these come to', 'stSplit', '', wide(T_META)),
+    stBox('buildingHours'),
+    text('stRecBuilding', 'What building is recommended', 'stSplit', '', wide(T_META)),
+    stBox('adminHours'),
+    text('stRecAdmin', 'What admin is recommended', 'stSplit', '', wide(T_META)),
+    stBox('hobbyHours'),
+    text('stRecHobby', 'What hobby is recommended', 'stSplit', '', wide(T_META)),
+    text('stPlanLine', 'Whether this month is planned', 'stSplit', '', wide(T_META)),
+    group('stSplitButtons', 'The split’s buttons', 'stSplit', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('stUseRec', BUTTON, 'Use the recommendation', 'stSplitButtons', { ...BTN_OUTLINE, label: 'Use the recommendation' }),
+    place('stPlan', BUTTON, 'Plan this month', 'stSplitButtons', { ...BTN_OUTLINE, label: 'Plan this month' }),
+
+    // ── 4. Guardrails ──
+    ...SETTINGS_SECTION('stGuard', 'Guardrails'),
+    text(
+      'stGuardWords',
+      'What a guardrail does',
+      'stGuard',
+      'A line crossed is one sentence, on the tile and in the evening. Never a colour, never twice.',
+      wide(T_META)
+    ),
+    stBox('hobbyWeekCeiling'),
+    stBox('buildingWeekCeiling'),
+    stBox('billableFloorPct'),
+
+    // ── Links (L6, so the column exists before TPL-010-L rather than in a migration after it) ──
+    ...SETTINGS_SECTION('stLinks', 'Links'),
+    stBox('todoUrl'),
+    text('stLinksWords', 'What the address does', 'stLinks', 'Fill this in and Todo ↗ appears in the bar. Leave it empty and it does not.', wide(T_META)),
+
+    /**
+     * The ticks, read back as the array `Settings.workingDays` holds — and the hours a week they
+     * come to, live, so the answer to *"what does six hours a day actually buy me?"* is on the
+     * sheet rather than worked out afterwards.
+     */
+    derive(
+      'stDays',
+      'Which days are ticked, and what that is a week',
+      `var days = [];
+${WORK_DAYS.map(([n]) => `if (Inputs.day${n} === true) days.push(${n});`).join('\n')}
+// Monday first, Sunday last — not \`getDay()\` order, which starts the week on a Sunday.
+days.sort(function (a, b) { return (a === 0 ? 7 : a) - (b === 0 ? 7 : b); });
+Outputs.workingDays = days;
+var focus = Number(Inputs.focus);
+if (!isFinite(focus) || focus <= 0) focus = 6;
+var week = Math.round(days.length * focus * 100) / 100;
+Outputs.weekLine = days.length === 0
+  ? 'No days ticked. Tick the ones you work, or the week has nowhere to put the hours.'
+  : days.length + (days.length === 1 ? ' day' : ' days') + ' a week at ' + focus + ' h is ' + week + ' h.';`
+    ),
+    derive('stOpened', 'Clear the boxes on close; tick the days to match', SHEET_SCRIPT(DAY_FIELDS.map(([n]) => n))),
+
     group('stButtons', 'Buttons', 'stCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
-    place('stSave', BUTTON, 'Save', 'stButtons', { ...BTN_PRIMARY, label: 'Save' }),
-    place('stPlan', BUTTON, 'Plan this month', 'stButtons', { ...BTN_OUTLINE, label: 'Plan this month' })
+    place('stSave', BUTTON, 'Save', 'stButtons', { ...BTN_PRIMARY, label: 'Save' })
   ],
   connections: [
     wire('stIn', 'shown', 'stScrim', 'mounted'),
     wire('stIn', 'targetLine', 'stTarget', 'text'),
     wire('stIn', 'planLine', 'stPlanLine', 'text'),
+    wire('stIn', 'recBuildingLine', 'stRecBuilding', 'text'),
+    wire('stIn', 'recAdminLine', 'stRecAdmin', 'text'),
+    wire('stIn', 'recHobbyLine', 'stRecHobby', 'text'),
+    wire('stIn', 'recLabel', 'stUseRec', 'label'),
     // 🔴 `text` is the box's OUTPUT. Putting a value INTO it is `startValue`.
-    ...SETTINGS_NUMBERS.flatMap(([name, , id]) => [wire('stIn', name, id, 'startValue'), wire(id, 'onTextChanged', 'stOut', name)]),
+    ...SETTINGS_BOXES.flatMap(([name, , id]) => [wire('stIn', name, id, 'startValue'), wire(id, 'onTextChanged', 'stOut', name)]),
+    // The ticks: set from the record as the sheet opens, read back as an array.
+    wire('stIn', 'shown', 'stOpened', 'in-shown'),
+    ...WORK_DAYS.flatMap(([n, , id]) => [
+      wire('stIn', `day${n}`, 'stOpened', `in-day${n}`),
+      wire('stOpened', `out-day${n}On`, id, 'check'),
+      wire('stOpened', `out-day${n}Off`, id, 'uncheck'),
+      wire(id, 'checked', 'stDays', `in-day${n}`)
+    ]),
+    wire('stFocus', 'onTextChanged', 'stDays', 'in-focus'),
+    wire('stDays', 'out-workingDays', 'stOut', 'workingDays'),
+    wire('stDays', 'out-weekLine', 'stWeekLine', 'text'),
+    // Every box forgets what it was last sent as the sheet closes, so an unsaved number cannot
+    // be there the next time it opens.
+    ...SETTINGS_BOXES.map(([, , id]) => wire('stOpened', 'out-closed', id, 'clear')),
     wire('stSave', 'onClick', 'stOut', 'save'),
     wire('stPlan', 'onClick', 'stOut', 'planMonth'),
+    wire('stUseRec', 'onClick', 'stOut', 'useRecommendation'),
     wire('stToMoney', 'onClick', 'stOut', 'openMoney'),
     wire('stClose', 'onClick', 'stOut', 'close'),
     wire('stScrim', 'onClick', 'stOut', 'close')
@@ -3545,7 +3726,13 @@ const ENVELOPES_INS: Array<[string, string]> = [
 const ENVELOPES_OUTS: Array<[string, string]> = [
   ['rows', 'array'], ['target', 'number'], ['billableUsed', 'number'], ['billableLeft', 'number'],
   ['perDay', 'number'], ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number'],
-  ['hasPlan', 'boolean'], ['planLine', 'string']
+  ['hasPlan', 'boolean'], ['planLine', 'string'],
+  // R2.5 — the days that count, the capacity they come to, and R25's three recommendations.
+  ['workingDaysInMonth', 'number'], ['capacityHours', 'number'],
+  ['recBuilding', 'number'], ['recAdmin', 'number'], ['recHobby', 'number'],
+  ['recBuildingLine', 'string'], ['recAdminLine', 'string'], ['recHobbyLine', 'string'], ['recLabel', 'string'],
+  // R24 — the one guardrail sentence, for the drawer. The tiles carry their own.
+  ['guardConcern', 'string']
 ];
 
 /**
@@ -3608,7 +3795,10 @@ for (var b = 0; b < blocks.length; b++) {
   used[env] = used[env] + spentOf(blk);
 }
 
-// R3 — working days left in the month, counted from today, Mon–Sat, Saturday included (Q4).
+// R3 and R24 — working days left in the month, counted from today, over the days the person
+// says they work. A row with nothing in the column still means Monday to Saturday, which is
+// what this counted before the ticks existed: nobody's month loses four days by upgrading.
+var work = workDaySet(settings.workingDays);
 var today = startOfToday();
 var monthStart = new Date(monday.getFullYear(), monday.getMonth(), 1);
 var monthEnd = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);
@@ -3617,8 +3807,16 @@ var monthEnd = new Date(monday.getFullYear(), monday.getMonth() + 1, 0);
 var cursor = today.getTime() >= monthStart.getTime() && today.getTime() <= monthEnd.getTime() ? new Date(today.getTime()) : monthStart;
 var daysLeft = 0;
 while (cursor.getTime() <= monthEnd.getTime()) {
-  if (cursor.getDay() !== 0) daysLeft++;
+  if (work[cursor.getDay()]) daysLeft++;
   cursor = addDays(cursor, 1);
+}
+// R2.5-2 — capacity is the whole month's working days, not the ones left: it is what the
+// recommendations divide up, and it must not shrink as the month goes by.
+var monthCursor = new Date(monthStart.getTime());
+var workingDaysInMonth = 0;
+while (monthCursor.getTime() <= monthEnd.getTime()) {
+  if (work[monthCursor.getDay()]) workingDaysInMonth++;
+  monthCursor = addDays(monthCursor, 1);
 }
 
 var billableLeft = Math.max(0, target - used.billable);
@@ -3626,12 +3824,73 @@ var perDay = daysLeft > 0 ? q(billableLeft / daysLeft) : 0;
 // R3 — what the ceiling leaves over once the billable day is paid for IS the building budget.
 var buildingLeft = q(Math.max(0, focus - perDay) * daysLeft);
 
+// R25 — the three recommendations, as rules a person can read and disagree with. Capacity is
+// the focus ceiling over every working day of the month; admin is a tenth of it; building is
+// what is left once billable and admin are paid for; hobby is nothing.
+var capacity = q(focus * workingDaysInMonth);
+var recAdmin = q(capacity * 0.1);
+var recBuilding = q(Math.max(0, capacity - target - recAdmin));
+var recHobby = 0;
+
+// R2.5 — the plan decides the budgets. Without one, what the sheet says does; without that,
+// the recommendation. So a person who never typed a split still sees an honest one.
+function typed(v, fallback) {
+  if (v === undefined || v === null || v === '') return fallback;
+  var n = Number(v);
+  return isFinite(n) ? n : fallback;
+}
 var budgets = {
   billable: plan ? num(plan.billable, target) : target,
-  building: plan ? num(plan.building, buildingLeft) : buildingLeft,
-  admin: plan ? num(plan.admin, 12) : 12,
-  hobby: plan ? num(plan.hobby, 0) : 0
+  building: plan ? num(plan.building, buildingLeft) : typed(settings.buildingHours, buildingLeft),
+  admin: plan ? num(plan.admin, recAdmin) : typed(settings.adminHours, recAdmin),
+  hobby: plan ? num(plan.hobby, 0) : typed(settings.hobbyHours, 0)
 };
+
+/**
+ * R24's guardrails, and the only place they are worked out. Weekly, because that is the span a
+ * person can still do something about, and **never a colour** (R1, R4): a line crossed is one
+ * sentence on its own tile, and the first of them is the evening's candidate concern.
+ */
+var weekUsed = { billable: 0, building: 0, admin: 0, hobby: 0 };
+var weekEnd = addDays(monday, 6);
+for (var wb = 0; wb < blocks.length; wb++) {
+  var wblk = blocks[wb];
+  if (!wblk) continue;
+  var wd = parseDay(wblk.date);
+  if (!wd || wd.getTime() < monday.getTime() || wd.getTime() >= weekEnd.getTime()) continue;
+  var wenv = envelopeOf(byId[wblk.projectId]);
+  weekUsed[wenv] = weekUsed[wenv] + spentOf(wblk);
+}
+var guards = { billable: '', building: '', admin: '', hobby: '' };
+var hobbyCeiling = num(settings.hobbyWeekCeiling, 0);
+var buildingCeiling = num(settings.buildingWeekCeiling, 0);
+var floorPct = num(settings.billableFloorPct, 0);
+if (hobbyCeiling > 0 && weekUsed.hobby > hobbyCeiling) {
+  guards.hobby = 'Hobby is at ' + hText(weekUsed.hobby) + ' h this week against your ' + hText(hobbyCeiling) +
+    ' h line. Fine if it was a Saturday.';
+}
+if (buildingCeiling > 0 && weekUsed.building > buildingCeiling) {
+  guards.building = 'Building is at ' + hText(weekUsed.building) + ' h this week against your ' + hText(buildingCeiling) +
+    ' h line. Worth knowing before the next one goes in.';
+}
+// The floor is read against the hours the week could have held SO FAR — the working days from
+// Monday up to today — so a Monday morning is never "behind", which is R1 in arithmetic.
+var soFar = 0;
+var fc = new Date(monday.getTime());
+while (fc.getTime() < weekEnd.getTime() && fc.getTime() <= today.getTime()) {
+  if (work[fc.getDay()]) soFar++;
+  fc = addDays(fc, 1);
+}
+var couldHave = q(soFar * focus);
+if (floorPct > 0 && couldHave > 0) {
+  var share = (weekUsed.billable / couldHave) * 100;
+  if (share < floorPct) {
+    guards.billable = 'Billable is ' + Math.round(share) + '% of the ' + hText(couldHave) + ' h this week could have held, under your ' +
+      Math.round(floorPct) + '% line. ' + hText(perDay) + ' h a day from here puts the month right.';
+  }
+}
+// One sentence for the evening, in R24's order: hobby, then building, then the floor.
+Outputs.guardConcern = guards.hobby || guards.building || guards.billable;
 
 function say(k) {
   var left = budgets[k] - used[k];
@@ -3662,7 +3921,9 @@ for (var f = 0; f < four.length; f++) {
     leftText: hText(left) + ' h left',
     usedText: hText(u),
     budgetText: hText(budget),
-    say: say(k),
+    // R24 — a crossed line is the sentence worth reading, so it takes the tile's one line
+    // rather than adding a second one (R5: the week never grows).
+    say: guards[k] || say(k),
     fillWidth: { value: Math.round(pctFull), unit: '%' },
     restWidth: { value: 100 - Math.round(pctFull), unit: '%' },
     // R4 and R13 — going over Billable is red; going over Hobby is simply the bar full.
@@ -3679,6 +3940,16 @@ Outputs.perDay = perDay;
 Outputs.buildingLeft = buildingLeft;
 Outputs.daysLeft = daysLeft;
 Outputs.focusHours = focus;
+Outputs.workingDaysInMonth = workingDaysInMonth;
+Outputs.capacityHours = capacity;
+Outputs.recBuilding = recBuilding;
+Outputs.recAdmin = recAdmin;
+Outputs.recHobby = recHobby;
+Outputs.recBuildingLine = 'Recommended ' + hText(recBuilding) + ' h — ' + hText(capacity) + ' h of capacity, less ' +
+  hText(target) + ' h billable and ' + hText(recAdmin) + ' h admin.';
+Outputs.recAdminLine = 'Recommended ' + hText(recAdmin) + ' h — a tenth of capacity, for invoices and asks.';
+Outputs.recHobbyLine = 'Recommended 0 h — hobby is not budgeted. The guardrail below is what mentions it.';
+Outputs.recLabel = 'Use ' + hText(recBuilding) + ' / ' + hText(recAdmin) + ' / ' + hText(recHobby) + ' h';
 Outputs.hasPlan = !!plan;
 Outputs.planLine = plan
   ? 'This month is planned: ' + hText(budgets.billable) + ' h billable, ' + hText(budgets.building) + ' h building.'
@@ -4656,7 +4927,9 @@ const SHUTDOWN_INS: Array<[string, string]> = [
   ['projects', 'array'], ['blocks', 'array'], ['todayKey', 'string'], ['tomorrowKey', 'string'],
   ['todayLong', 'string'], ['tomorrowLong', 'string'], ['unplacedDormant', 'string'],
   ['target', 'number'], ['billableUsed', 'number'], ['billableLeft', 'number'], ['perDay', 'number'],
-  ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number'], ['lateConcern', 'string']
+  ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number'], ['lateConcern', 'string'],
+  // R24 — a guardrail the week has crossed, worked out by Logic/Envelopes.
+  ['guardConcern', 'string']
 ];
 const SHUTDOWN_OUTS: Array<[string, string]> = [
   ['title', 'string'], ['dayLine', 'string'], ['monthLine', 'string'], ['concern', 'string'], ['chaseShown', 'boolean'],
@@ -4674,9 +4947,11 @@ const SHUTDOWN_OUTS: Array<[string, string]> = [
  *    not a concern: it is almost always paid and not ticked, and it waits in Money.
  * 1. **A building move planned for today and not logged.** First because it is the rung next
  *    month's money depends on, and it is the hour that quietly gets eaten by billable work.
- * 2. **A dormant project with no time in the week** (R8) — the easiest money on the board is
+ * 2. **A guardrail the week has crossed** (R24) — hobby or building over its weekly line, or
+ *    billable under its floor. One sentence, never a colour, and never twice (R1).
+ * 3. **A dormant project with no time in the week** (R8) — the easiest money on the board is
  *    usually somebody who already said yes once.
- * 3. *"No concerns tonight."*
+ * 4. *"No concerns tonight."*
  *
  * **One.** Not a list. The rule Richard set is that a concern is raised once, and an override
  * is logged with a review date and never argued again — so a drawer that reprints five
@@ -4747,6 +5022,7 @@ for (var u = 0; u < notDone.length; u++) {
 }
 var dormant = String(Inputs.unplacedDormant || '');
 var lateMoney = String(Inputs.lateConcern || '');
+var guard = String(Inputs.guardConcern || '');
 Outputs.chaseShown = lateMoney !== '';
 if (lateMoney) {
   Outputs.concern = lateMoney;
@@ -4754,6 +5030,10 @@ if (lateMoney) {
   var who = (byId[unloggedBuilding.projectId] || {}).name || 'That building block';
   Outputs.concern = 'One thing: ' + who + ' — "' + (unloggedBuilding.what || '') + '" — is still not done. ' +
     hText(num(unloggedBuilding.planned, 0)) + ' h, and it is the rung next month leans on. Carry it to ' + tomorrowLong + ', or tell me why not.';
+} else if (guard) {
+  // R24 — after the building move, before the dormant ones: a line crossed is worth a sentence,
+  // and it is still not worth more than the rung next month leans on.
+  Outputs.concern = 'One thing: ' + guard;
 } else if (dormant) {
   Outputs.concern = 'One thing: ' + dormant + ' is on the strip with no time in the week. One email, and it is a yes or a no.';
 } else {
@@ -5548,10 +5828,19 @@ Outputs.go();`,
  * rate, the focus ceiling, the savings target and the lowest balance before red. The template
  * ships invented numbers and the hosted app is the only place the real ones exist.
  */
+const SETTINGS_WRITTEN: Array<[string, string]> = [
+  ['settingsId', 'string'], ['rate', 'number'], ['focusHours', 'number'], ['savingsTarget', 'number'], ['lowWaterMark', 'number'],
+  // R24 — capacity, the split and the guardrails. Every one a column, so the coach can reach it.
+  ['workingDays', 'array'], ['buildingHours', 'number'], ['adminHours', 'number'], ['hobbyHours', 'number'],
+  ['hobbyWeekCeiling', 'number'], ['buildingWeekCeiling', 'number'], ['billableFloorPct', 'number'],
+  // L6 — the address the bar's Todo link goes to, empty in the template and in the demo.
+  ['todoUrl', 'string']
+];
+
 const EDIT_SETTINGS = command({
   path: 'Commands/Edit settings',
-  description: 'Saves the numbers the week is worked out from: your usual hourly rate, your focus ceiling, your savings target, and the lowest balance before red.',
-  ins: [['settingsId', 'string'], ['rate', 'number'], ['focusHours', 'number'], ['savingsTarget', 'number'], ['lowWaterMark', 'number']],
+  description: 'Saves the numbers the week is worked out from: what you can work and on which days, the money a money item cannot say, how the month’s hours divide, and the lines that earn a sentence.',
+  ins: SETTINGS_WRITTEN,
   guard: `${PLANNER_FNS}var id = String(Inputs.settingsId || '');
 if (id === '') return;
 Outputs.rate = Math.max(0, num(Inputs.rate, 0));
@@ -5559,13 +5848,32 @@ Outputs.rate = Math.max(0, num(Inputs.rate, 0));
 Outputs.focusHours = Math.min(16, Math.max(1, num(Inputs.focusHours, 6)));
 Outputs.savingsTarget = Math.max(0, num(Inputs.savingsTarget, 0));
 Outputs.lowWaterMark = num(Inputs.lowWaterMark, 0);
+// R24 — the ticks, normalised: Monday first, Sunday last, nothing twice. Nobody works no days,
+// so an empty tick list is stored as Monday to Saturday rather than written as nothing.
+Outputs.workingDays = workDayList(Inputs.workingDays);
+// A blank box is a blank column, not a nought: an empty split means "use the recommendation",
+// and writing 0 would mean "no building hours this month", which is a different thing.
+function keep(v) {
+  if (v === undefined || v === null || v === '') return '';
+  var n = Number(v);
+  return isFinite(n) ? Math.max(0, n) : '';
+}
+Outputs.buildingHours = keep(Inputs.buildingHours);
+Outputs.adminHours = keep(Inputs.adminHours);
+Outputs.hobbyHours = keep(Inputs.hobbyHours);
+Outputs.hobbyWeekCeiling = keep(Inputs.hobbyWeekCeiling);
+Outputs.buildingWeekCeiling = keep(Inputs.buildingWeekCeiling);
+// A percentage is a percentage: 0 turns the floor off, and over 100 is somebody's typo.
+var floor = Number(Inputs.billableFloorPct);
+Outputs.billableFloorPct = isFinite(floor) ? Math.min(100, Math.max(0, floor)) : '';
+Outputs.todoUrl = String(Inputs.todoUrl === undefined || Inputs.todoUrl === null ? '' : Inputs.todoUrl).trim();
 Outputs.go();`,
-  guardIns: ['settingsId', 'rate', 'focusHours', 'savingsTarget', 'lowWaterMark'],
+  guardIns: SETTINGS_WRITTEN.map(([n]) => n),
   write: {
     kind: 'update',
     collection: 'Settings',
     label: 'Save the settings',
-    props: [['rate', 'rate'], ['focusHours', 'focusHours'], ['savingsTarget', 'savingsTarget'], ['lowWaterMark', 'lowWaterMark']],
+    props: SETTINGS_WRITTEN.filter(([n]) => n !== 'settingsId').map(([n]) => [n, n] as [string, string]),
     idFromInput: 'settingsId'
   }
 });
@@ -5575,7 +5883,7 @@ Outputs.go();`,
 // ════════════════════════════════════════════════════════════════════════════
 
 
-const APP_BAR_FIELDS: Array<[string, string]> = [['weekLabel', 'string'], ['lateCount', 'string'], ['hasLate', 'boolean']];
+const APP_BAR_FIELDS: Array<[string, string]> = [['weekLabel', 'string'], ['lateCount', 'string'], ['hasLate', 'boolean'], ['todoUrl', 'string']];
 
 /**
  * The top line: what this is, which week, and the four things you can press.
@@ -5611,6 +5919,23 @@ const APP_BAR: Tpl010Component = {
     // A group as wide as its buttons may still not fit a phone: it wraps rather than running off the edge.
     group('abRight', 'Buttons', 'abRoot', { ...ROW_TIGHT('var(--space-2)'), flexWrap: 'wrap', rowGap: 'var(--space-2)', cssClassName: 'planner-shrink-wrap' }),
     place('abProjects', BUTTON, 'Open the projects', 'abRight', { ...BTN_GHOST, label: 'Projects' }),
+    /**
+     * L6 — the one link out, and it is a **setting**: the template and the demo ship with
+     * `Settings.todoUrl` empty and the bar hides the button, so nothing on nodegx.io points at a
+     * todo list that is not the visitor's. TPL-010-L is what puts tasks through it; this is the
+     * door, built with the column rather than after it.
+     */
+    place('abTodo', BUTTON, 'Open the todo list', 'abRight', { ...BTN_GHOST, label: 'Todo ↗' }),
+    derive('abHasTodo', 'Is there a todo list to link to?', "Outputs.shown = String(Inputs.url || '').trim() !== '';"),
+    // 🔴 There is no link node in this product, and a Navigate node goes to this app's own pages.
+    // A new tab is a Function, which is also how TPL-010-L will open one task.
+    script(
+      'abOpenTodo',
+      'Open the todo list in a new tab',
+      `var u = String(Inputs.url || '').trim();
+if (u) window.open(u, '_blank', 'noopener');`,
+      ['url']
+    ),
     // M1 — Money, same size as the settings button, with how many things are late beside it (M6).
     group('abMoneyBox', 'Money', 'abRight', ROW_TIGHT('var(--space-0-5)')),
     place('abMoney', BUTTON, 'Open Money', 'abMoneyBox', { ...BTN_ICON('icon-euro', 'Money'), color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
@@ -5632,6 +5957,10 @@ const APP_BAR: Tpl010Component = {
     wire('abPrev', 'onClick', 'abOut', 'previousWeek'),
     wire('abNext', 'onClick', 'abOut', 'nextWeek'),
     wire('abProjects', 'onClick', 'abOut', 'openProjects'),
+    wire('abIn', 'todoUrl', 'abHasTodo', 'in-url'),
+    wire('abHasTodo', 'out-shown', 'abTodo', 'mounted'),
+    wire('abIn', 'todoUrl', 'abOpenTodo', 'in-url'),
+    wire('abTodo', 'onClick', 'abOpenTodo', 'run'),
     wire('abMoney', 'onClick', 'abOut', 'openMoney'),
     wire('abIn', 'lateCount', 'abLate', 'text'),
     wire('abIn', 'hasLate', 'abLateBox', 'mounted'),
@@ -6199,7 +6528,46 @@ Outputs.id = s.id || '';
 Outputs.rate = String(num(s.rate, 0));
 Outputs.focusHours = String(num(s.focusHours, 6));
 Outputs.savingsTarget = String(num(s.savingsTarget, 0));
-Outputs.lowWaterMark = String(num(s.lowWaterMark, 0));`
+Outputs.lowWaterMark = String(num(s.lowWaterMark, 0));
+// R2.5 — a blank split shows the recommendation, so a sheet nobody has filled in yet is
+// already honest rather than three noughts. A figure that IS stored is shown as it is.
+function box(v, fallback) {
+  if (v === undefined || v === null || v === '') return String(fallback);
+  var n = Number(v);
+  return isFinite(n) ? String(n) : String(fallback);
+}
+Outputs.buildingHours = box(s.buildingHours, num(Inputs.recBuilding, 0));
+Outputs.adminHours = box(s.adminHours, num(Inputs.recAdmin, 0));
+Outputs.hobbyHours = box(s.hobbyHours, num(Inputs.recHobby, 0));
+Outputs.hobbyWeekCeiling = box(s.hobbyWeekCeiling, 0);
+Outputs.buildingWeekCeiling = box(s.buildingWeekCeiling, 0);
+Outputs.billableFloorPct = box(s.billableFloorPct, 0);
+Outputs.todoUrl = String(s.todoUrl === undefined || s.todoUrl === null ? '' : s.todoUrl);
+// The ticks, from the same default the arithmetic uses: no column means Monday to Saturday.
+var work = workDaySet(s.workingDays);
+Outputs.day0 = work[0] === true;
+Outputs.day1 = work[1] === true;
+Outputs.day2 = work[2] === true;
+Outputs.day3 = work[3] === true;
+Outputs.day4 = work[4] === true;
+Outputs.day5 = work[5] === true;
+Outputs.day6 = work[6] === true;`
+    ),
+
+    /**
+     * R25 — *Use the recommendation*. The three numbers are delivered and THEN the write is
+     * pulsed, from one script, which is the only ordering this product guarantees: pushing them
+     * at the boxes instead would race the Text Input's memory of what it was last sent.
+     */
+    script(
+      'twUseRec',
+      'Use the recommended split',
+      `Outputs.buildingHours = Number(Inputs.recBuilding) || 0;
+Outputs.adminHours = Number(Inputs.recAdmin) || 0;
+Outputs.hobbyHours = Number(Inputs.recHobby) || 0;
+// Last line on purpose: the values above are delivered before the pulse that writes them.
+Outputs.go();`,
+      ['recBuilding', 'recAdmin', 'recHobby']
     ),
 
     // ── The commands ──
@@ -6365,6 +6733,7 @@ Outputs.lowWaterMark = String(num(s.lowWaterMark, 0));`
     ...(['todayKey', 'tomorrowKey', 'todayLong', 'tomorrowLong'] as const).map((n) => wire('twDays', n, 'twShutLogic', n)),
     wire('twMovesLogic', 'unplacedDormant', 'twShutLogic', 'unplacedDormant'),
     wire('twMoneyLogic', 'lateConcern', 'twShutLogic', 'lateConcern'),
+    wire('twEnv', 'guardConcern', 'twShutLogic', 'guardConcern'),
     ...(['target', 'billableUsed', 'billableLeft', 'perDay', 'buildingLeft', 'daysLeft', 'focusHours'] as const).map((n) =>
       wire('twEnv', n, 'twShutLogic', n)
     ),
@@ -6431,18 +6800,36 @@ Outputs.lowWaterMark = String(num(s.lowWaterMark, 0));`
     wire('twSheet', 'openMoney', 'twSelClear', 'do'),
     wire('twSheet', 'openMoney', 'twPaneNone', 'do'),
     wire('twEnv', 'planLine', 'twSheet', 'planLine'),
-    ...(['rate', 'focusHours', 'savingsTarget', 'lowWaterMark'] as const).flatMap((n) => [
+    // Every value on the sheet: out of the record, into the box, and back into the one command
+    // that writes it. One list, so a field cannot be shown and not saved (R2.5-4).
+    ...SETTINGS_VALUES.flatMap(([n]) => [
       wire('twSettings', `out-${n}`, 'twSheet', n),
       wire('twSheet', n, 'cmdSettings', n)
     ]),
+    ...WORK_DAYS.map(([n]) => wire('twSettings', `out-day${n}`, 'twSheet', `day${n}`)),
+    wire('twSheet', 'workingDays', 'cmdSettings', 'workingDays'),
     wire('twSettings', 'out-id', 'cmdSettings', 'settingsId'),
     wire('twSheet', 'save', 'cmdSettings', 'do'),
+    // R25 — the recommendations: printed beside the fields, and written by the button.
+    ...(['recBuildingLine', 'recAdminLine', 'recHobbyLine', 'recLabel'] as const).map((n) => wire('twEnv', n, 'twSheet', n)),
+    ...(['recBuilding', 'recAdmin', 'recHobby'] as const).flatMap((n) => [
+      wire('twEnv', n, 'twSettings', `in-${n}`),
+      wire('twEnv', n, 'twUseRec', `in-${n}`)
+    ]),
+    wire('twSheet', 'useRecommendation', 'twUseRec', 'run'),
+    ...(['buildingHours', 'adminHours', 'hobbyHours'] as const).map((n) => wire('twUseRec', `out-${n}`, 'cmdSettings', n)),
+    wire('twUseRec', 'out-go', 'cmdSettings', 'do'),
+    // L6 — the bar's link, from the same record.
+    wire('twSettings', 'out-todoUrl', 'twBar', 'todoUrl'),
 
-    // Plan this month (Q3), from what the settings come to.
+    // Plan this month (Q3), from what the sheet says the split is.
     wire('twData', 'month', 'cmdMonthPlan', 'month'),
     wire('twEnv', 'target', 'cmdMonthPlan', 'billable'),
-    wire('twEnv', 'buildingLeft', 'cmdMonthPlan', 'building'),
-    wire('twEnv', 'daysLeft', 'cmdMonthPlan', 'workingDays'),
+    wire('twSheet', 'buildingHours', 'cmdMonthPlan', 'building'),
+    wire('twSheet', 'adminHours', 'cmdMonthPlan', 'admin'),
+    wire('twSheet', 'hobbyHours', 'cmdMonthPlan', 'hobby'),
+    // R2.5-2 — the month's working days, not the ones left: the plan records what the month held.
+    wire('twEnv', 'workingDaysInMonth', 'cmdMonthPlan', 'workingDays'),
     wire('twSheet', 'planMonth', 'cmdMonthPlan', 'do'),
 
     // The one sentence a failed write shows.

@@ -94,6 +94,12 @@
       "toProperty": "in-lateConcern"
     },
     {
+      "fromId": "suIn",
+      "fromProperty": "guardConcern",
+      "toId": "suWork",
+      "toProperty": "in-guardConcern"
+    },
+    {
       "fromId": "suWork",
       "fromProperty": "out-title",
       "toId": "suOut",

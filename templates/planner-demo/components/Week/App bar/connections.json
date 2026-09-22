@@ -28,6 +28,30 @@
       "toProperty": "openProjects"
     },
     {
+      "fromId": "abIn",
+      "fromProperty": "todoUrl",
+      "toId": "abHasTodo",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "abHasTodo",
+      "fromProperty": "out-shown",
+      "toId": "abTodo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "todoUrl",
+      "toId": "abOpenTodo",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "abTodo",
+      "fromProperty": "onClick",
+      "toId": "abOpenTodo",
+      "toProperty": "run"
+    },
+    {
       "fromId": "abMoney",
       "fromProperty": "onClick",
       "toId": "abOut",

@@ -98,6 +98,66 @@
       "fromProperty": "out-planLine",
       "toId": "enOut",
       "toProperty": "planLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-workingDaysInMonth",
+      "toId": "enOut",
+      "toProperty": "workingDaysInMonth"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-capacityHours",
+      "toId": "enOut",
+      "toProperty": "capacityHours"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recBuilding",
+      "toId": "enOut",
+      "toProperty": "recBuilding"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recAdmin",
+      "toId": "enOut",
+      "toProperty": "recAdmin"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recHobby",
+      "toId": "enOut",
+      "toProperty": "recHobby"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recBuildingLine",
+      "toId": "enOut",
+      "toProperty": "recBuildingLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recAdminLine",
+      "toId": "enOut",
+      "toProperty": "recAdminLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recHobbyLine",
+      "toId": "enOut",
+      "toProperty": "recHobbyLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recLabel",
+      "toId": "enOut",
+      "toProperty": "recLabel"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-guardConcern",
+      "toId": "enOut",
+      "toProperty": "guardConcern"
     }
   ]
 }

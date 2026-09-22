@@ -34,6 +34,46 @@
           "type": "number"
         },
         {
+          "name": "workingDays",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "buildingHours",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "adminHours",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "hobbyHours",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "hobbyWeekCeiling",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "buildingWeekCeiling",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "billableFloorPct",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "todoUrl",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "do",
           "plug": "output",
           "type": "signal"
@@ -61,12 +101,20 @@
       "type": "JavaScriptFunction",
       "label": "Is there anything to write?",
       "parameters": {
-        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar id = String(Inputs.settingsId || '');\nif (id === '') return;\nOutputs.rate = Math.max(0, num(Inputs.rate, 0));\n// R3 — the ceiling is what makes the plan honest, so it cannot be set to nothing.\nOutputs.focusHours = Math.min(16, Math.max(1, num(Inputs.focusHours, 6)));\nOutputs.savingsTarget = Math.max(0, num(Inputs.savingsTarget, 0));\nOutputs.lowWaterMark = num(Inputs.lowWaterMark, 0);\nOutputs.go();",
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\n/**\n * R24 — the days a person says they work, as a lookup keyed the way getDay() counts.\n * Accepts the array Settings.workingDays holds and the comma-separated string somebody\n * (or the coach) might type instead. **Empty or unreadable means Monday to Saturday**, which\n * is what the planner counted before the ticks existed.\n */\nfunction workDaySet(value) {\n  var list = value;\n  if (typeof list === 'string') list = list.split(',');\n  var set = {}, any = false;\n  if (list && typeof list.length === 'number') {\n    for (var i = 0; i < list.length; i++) {\n      var d = Number(list[i]);\n      if (isFinite(d) && d >= 0 && d <= 6) { set[d] = true; any = true; }\n    }\n  }\n  if (!any) return { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true };\n  return set;\n}\nfunction workDayList(value) {\n  var set = workDaySet(value), out = [];\n  var order = [1, 2, 3, 4, 5, 6, 0];\n  for (var i = 0; i < order.length; i++) if (set[order[i]]) out.push(order[i]);\n  return out;\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar id = String(Inputs.settingsId || '');\nif (id === '') return;\nOutputs.rate = Math.max(0, num(Inputs.rate, 0));\n// R3 — the ceiling is what makes the plan honest, so it cannot be set to nothing.\nOutputs.focusHours = Math.min(16, Math.max(1, num(Inputs.focusHours, 6)));\nOutputs.savingsTarget = Math.max(0, num(Inputs.savingsTarget, 0));\nOutputs.lowWaterMark = num(Inputs.lowWaterMark, 0);\n// R24 — the ticks, normalised: Monday first, Sunday last, nothing twice. Nobody works no days,\n// so an empty tick list is stored as Monday to Saturday rather than written as nothing.\nOutputs.workingDays = workDayList(Inputs.workingDays);\n// A blank box is a blank column, not a nought: an empty split means \"use the recommendation\",\n// and writing 0 would mean \"no building hours this month\", which is a different thing.\nfunction keep(v) {\n  if (v === undefined || v === null || v === '') return '';\n  var n = Number(v);\n  return isFinite(n) ? Math.max(0, n) : '';\n}\nOutputs.buildingHours = keep(Inputs.buildingHours);\nOutputs.adminHours = keep(Inputs.adminHours);\nOutputs.hobbyHours = keep(Inputs.hobbyHours);\nOutputs.hobbyWeekCeiling = keep(Inputs.hobbyWeekCeiling);\nOutputs.buildingWeekCeiling = keep(Inputs.buildingWeekCeiling);\n// A percentage is a percentage: 0 turns the floor off, and over 100 is somebody's typo.\nvar floor = Number(Inputs.billableFloorPct);\nOutputs.billableFloorPct = isFinite(floor) ? Math.min(100, Math.max(0, floor)) : '';\nOutputs.todoUrl = String(Inputs.todoUrl === undefined || Inputs.todoUrl === null ? '' : Inputs.todoUrl).trim();\nOutputs.go();",
         "runOnChange-in-settingsId": false,
         "runOnChange-in-rate": false,
         "runOnChange-in-focusHours": false,
         "runOnChange-in-savingsTarget": false,
-        "runOnChange-in-lowWaterMark": false
+        "runOnChange-in-lowWaterMark": false,
+        "runOnChange-in-workingDays": false,
+        "runOnChange-in-buildingHours": false,
+        "runOnChange-in-adminHours": false,
+        "runOnChange-in-hobbyHours": false,
+        "runOnChange-in-hobbyWeekCeiling": false,
+        "runOnChange-in-buildingWeekCeiling": false,
+        "runOnChange-in-billableFloorPct": false,
+        "runOnChange-in-todoUrl": false
       },
       "x": 40,
       "y": 280,
@@ -107,6 +155,62 @@
           "group": "Inputs"
         },
         {
+          "name": "in-workingDays",
+          "displayName": "workingDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-buildingHours",
+          "displayName": "buildingHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-adminHours",
+          "displayName": "adminHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hobbyHours",
+          "displayName": "hobbyHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hobbyWeekCeiling",
+          "displayName": "hobbyWeekCeiling",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-buildingWeekCeiling",
+          "displayName": "buildingWeekCeiling",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billableFloorPct",
+          "displayName": "billableFloorPct",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-todoUrl",
+          "displayName": "todoUrl",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
           "name": "out-go",
           "displayName": "go",
           "plug": "output",
@@ -137,6 +241,62 @@
         {
           "name": "out-lowWaterMark",
           "displayName": "lowWaterMark",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-workingDays",
+          "displayName": "workingDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buildingHours",
+          "displayName": "buildingHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-adminHours",
+          "displayName": "adminHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hobbyHours",
+          "displayName": "hobbyHours",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hobbyWeekCeiling",
+          "displayName": "hobbyWeekCeiling",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buildingWeekCeiling",
+          "displayName": "buildingWeekCeiling",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billableFloorPct",
+          "displayName": "billableFloorPct",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-todoUrl",
+          "displayName": "todoUrl",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
