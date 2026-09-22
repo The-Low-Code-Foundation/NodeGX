@@ -1,6 +1,25 @@
 # Phase 78 — next session
 
-> ### 🟩 2026-09-22 — THE PLANNER IS PUBLISHED, AND R2.5 CLOSED THE BUILD — START HERE
+> ### 🟩 2026-09-22 (s6) — R2.7: THE DEMO CAN BE EMPTIED, AND THE FIRST DAY NOW WORKS — START HERE
+>
+> Richard asked for a button that clears the dummy data so the demo can be used for real. It is on the
+> first line of the page: **Empty it and start my own** — one press arms it, a second empties every
+> collection, *Reset demo* still puts the invented week back. The emptied store keeps every collection as
+> a key holding nothing, or the reader would seed the example back on the next read.
+> - 🔴 **The defect it found, and the important part of this session:** `Settings` was only ever
+>   **updated**, and the guard refuses an empty id — so on a planner with no settings row (a fresh install
+>   from the shelf, **the hosted app on its first morning**, a just-emptied demo) the sheet took every
+>   number typed and wrote none of them, silently. `Commands/Add settings` writes the row when there is
+>   none; both ways of saving go through one `Condition`; the two writers are gated field-for-field.
+> - Also fixed: the notice was a `contentSize` Text — 1,034px of sentence in a 358px box at 390 wide.
+>   **A Text sized to its content never wraps.**
+> - ✅ Gates **67/67**, `drive-tpl010-r25.js` **37/37**, money 40/40, R2.3 19/19, R2.4 22/22; three
+>   viewports 0 errors. Live: **37/37 and 40/40 against `https://nodegx.io/templates/planner/`**.
+> - ✅ Republished: the demo, the homepage (**Planner is in the Templates section too now, four cards
+>   two-by-two**) and the shelf (**v3, 214 files** — R2.7's three new files moved the count).
+> - The R2.7 record is in [R2](TPL-010-R2-FIRST-USE.md) §R2.7.
+>
+> ### 🟩 2026-09-22 — THE PLANNER IS PUBLISHED, AND R2.5 CLOSED THE BUILD
 >
 > `https://nodegx.io/templates/planner/` is live, first card on the homepage, and on the community shelf as
 > `planner` (data-app, 211 files, v2). The app calls itself **Planner** now — the name Richard ruled on
@@ -17,7 +36,7 @@
 >   1280×900, 1423×680 and 390×844 unchanged. On the public URL: r25 25/25, money 40/40.
 >   ⚠️ money's first clause failed once on a cold first visit and passed on every run after — the seed is
 >   written on first read and that check looked too early. Give it a longer `until` if it recurs.
-> - 🟡 **TPL-010-H is one DNS record from done.** `planning-digitalbricks/merge-policy.js` is written and has
+> - 🟡 **TPL-010-H is STILL one DNS record from done** (checked again at the end of s6: no record). `planning-digitalbricks/merge-policy.js` is written and has
 >   been run against the live policy off the box (kept Task/Action/Event/PushSubscription, added the planner's
 >   seven); the hosted site builds with `planning.digitalbricks.io` baked in. **Nothing has been shipped.**
 >   Blocked on: **A record `planning` → `49.12.102.195` at Namecheap**. Then steps 1–4 of that task file.
