@@ -3,7 +3,44 @@
 **P94 ruled the Styles panel's shape and closed on Richard's look. These two were never in front of
 him.**
 
-## ✅ (b) BUILT 2026-09-22 (s15) — AC2, AC3, AC4 ✅. 📋 (a) waits on a ruling; AC1 and AC5 go with it.
+## ✅ (a) BUILT 2026-09-22 (s16) — Richard ruled *Text styles* REMOVED. ✅ (b) BUILT s15.
+
+### (a) — 🔴 the premise was false, and the ruling was taken three times
+
+§2 says *Text styles* reads a layer that is *"empty in every real project"*. **It is not.** The
+importer loads `textStyles` from `nodegx.styles.json` into exactly the layer the section reads
+(`ProjectImporter.ts:427`). Measured 2026-09-22: **17 of 19** current-format projects on this
+machine carry text styles, among them Richard's own *Puppy test* (`Label Small`) and *Landing page
+test V2*. In the legacy `project.json` format, 39 of 154 do, including **16 shipped library
+prefabs**. §2's *"measured: `null`"* was one project, and it was wrong as a generalisation.
+
+s16 asked Richard three times. The first question repeated §2's claim, and he ruled *remove*.
+The second corrected it to "empty only in projects built from scratch", which was still false,
+and he ruled *remove*. The third gave the 17-of-19 figure and named his two projects. He ruled:
+*"Remove it anyway. I don't feel like it's going to cause a massive backlash. You could argue
+that we could convert the existing text styles into Looks in the new styles system, as a
+compromise. Most of them will just be using the default text styles that come baked into the old
+editor."* ⇒ [[a-reading-that-fits-is-not-one-that-excludes]]: a scan that reads one file format
+is a scan of that format.
+
+**What was built:** `TextStylesSection` is deleted and the panel draws three sections (Colours,
+Looks, Other tokens). `summariseTextStyle` went with it, along with its spec block, because only
+that section printed it. The P94 drive (`drive-sty005-panel.js`) now expects three headings and
+has two new arms: a CONTROL that the project still holds text styles (`Body Small`,
+`Label Small`), and *no text style is drawn as a row*. **Still true:** text styles apply at
+runtime, a Text node can still pick one, and importing a prefab still brings them in. Nothing in
+the editor lists, renames or deletes them any more.
+
+📋 **Not built, raised by Richard as a compromise:** convert existing text styles into Looks.
+Unscoped. His premise that most are the old editor's baked-in defaults (`Label Small`,
+`Body Medium`, …) fits the names measured, but nobody has counted it.
+
+**Readings 2026-09-22:** `tests-unit/sty-005` + `hlt-007` 40/40; `typecheck:editor` and
+`-tests` exit 0; the drive against a copy of `STY-005 Panel Drive` all green, both themes,
+[dark](./shots/hlt007a-panel-dark.png) ·
+[light](./shots/hlt007a-panel-light.png). `test:ci`: see the P99 handoff.
+
+### (b) — AC2, AC3, AC4 ✅ (s15)
 
 **(b)** was built by a peer session on 2026-09-21 (11:50) and left uncommitted. s15 re-measured it,
 closed the gap it left, and committed it.
@@ -31,7 +68,7 @@ closed the gap it left, and committed it.
 - **Gates (2026-09-22):** `tests-unit/hlt-007` 8/8; `test:main` 536/536 suites, 8,545 specs;
   `typecheck:editor` + `typecheck:editor-tests` exit 0; eslint clean on the four files.
 
-**(a) is NOT built, and it is Richard's call.** AC1 names the fork itself: the *Text styles*
+**(a), as s15 left it — superseded by the ruling above.** AC1 names the fork itself: the *Text styles*
 section either **shows the project's typography tokens** or **says plainly the project has none**,
 depending on whether the legacy `metadata.styles.text` layer is dead. HLT-006's R1 did not rule on
 that. It ruled that a *picker* may offer tokens (*"why wouldn't I be allowed to pick a design
@@ -44,7 +81,7 @@ layout P94 closed on his look. AC5 (screenshots, `test:ci`) is taken once (a) is
 > whose category is new does not vanish from the panel because a second copy of a lookup table had
 > not heard of it.**
 
-## 2. (a) — "Text styles" reads a layer that is empty in every real project
+## 2. (a) — "Text styles" reads a layer that is empty in every real project — 🔴 FALSE, see the top (17 of 19 carry text styles)
 
 `TextStylesSection.tsx:28` → `getStyles('text')` → the legacy `project.metadata.styles.text`.
 Measured: `null` in a real project. So the section a person looks in first is **empty**, while the

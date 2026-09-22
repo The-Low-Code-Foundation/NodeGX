@@ -10,6 +10,14 @@
  * that both storage layers live in one panel, each row badged with which one it came from: *"a
  * person does not know we have two systems and should not have to."*
  *
+ * 🔴 **Three sections since P99 HLT-007 (a), 2026-09-22 — Richard's ruling, made knowing the
+ * section was NOT empty.** *Text styles* listed the old text-style layer (`metadata.styles.text`,
+ * loaded from the `textStyles` of `nodegx.styles.json`), while typography tokens sit under
+ * *Other tokens → Typography*. Measured before he ruled: 17 of 19 current-format projects and 16
+ * shipped library prefabs carry text styles. Those still apply at runtime and a Text node can
+ * still pick one, but this panel no longer lists, creates, renames or deletes them. Converting
+ * them to Looks was raised as a follow-up, not built.
+ *
  * 🔴 This panel is **beside** the in-node pickers, never instead of them (R1). Picking a colour on
  * a selected node still happens on that node. This is where you manage the set.
  */
@@ -21,7 +29,6 @@ import { BasePanel } from '@noodl-core-ui/components/sidebar/BasePanel';
 
 import { ColoursSection } from './components/ColoursSection/ColoursSection';
 import { LooksSection } from './components/LooksSection/LooksSection';
-import { TextStylesSection } from './components/TextStylesSection/TextStylesSection';
 import { TokensSection } from './components/TokensSection';
 import { useStylesModel } from './shared';
 import css from './StylesPanel.module.scss';
@@ -34,7 +41,7 @@ export function StylesPanel() {
   if (!ProjectModel.instance) {
     return (
       <BasePanel title="Styles" hasContentScroll>
-        <div className={css['NoProject']}>Open a project to manage its colours, text styles and Looks.</div>
+        <div className={css['NoProject']}>Open a project to manage its colours, Looks and tokens.</div>
       </BasePanel>
     );
   }
@@ -42,7 +49,6 @@ export function StylesPanel() {
   return (
     <BasePanel title="Styles" hasContentScroll>
       <ColoursSection stylesModel={stylesModel} revision={revision} />
-      <TextStylesSection stylesModel={stylesModel} revision={revision} />
       <LooksSection />
 
       {/*
@@ -52,7 +58,7 @@ export function StylesPanel() {
         confusion this panel exists to end, not a convenience.
 
         🔴 `title` is not decoration. Without it these groups rendered as PEERS of Colours, Text
-        styles and Looks, and a person had nothing to tell them that Spacing and Borders are a
+        styles (since removed) and Looks, and a person had nothing to tell them that Spacing and Borders are a
         different layer from the three above — the confusion R2's badges exist to prevent, one
         level up from where the badges are.
       */}

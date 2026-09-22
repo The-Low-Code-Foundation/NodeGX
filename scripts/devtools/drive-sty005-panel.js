@@ -344,15 +344,16 @@ async function main() {
   console.log(JSON.stringify(panel, null, 1));
 
   record(
-    'the four sections are drawn, in order, and NOTHING ELSE is a peer of them — AC2',
-    JSON.stringify(panel.headings) === JSON.stringify(['Colours', 'Text styles', 'Looks', 'Other tokens']),
+    // P99 HLT-007 (a), 2026-09-22: Richard ruled *Text styles* removed, so four became three.
+    'the three sections are drawn, in order, and NOTHING ELSE is a peer of them — AC2',
+    JSON.stringify(panel.headings) === JSON.stringify(['Colours', 'Looks', 'Other tokens']),
     panel.headings.join(' | ')
   );
   // 🔴 The token groups must be BELOW one of those four, never beside them. Read off the rendered
   // tree the first time, they were peers — `Colours | Text styles | Looks | Spacing | Borders |
   // Effects | Animation` — with nothing saying four of the seven were a different layer.
   record(
-    'the token groups are nested under a heading, not peers of the four',
+    'the token groups are nested under a heading, not peers of the sections',
     ['Spacing', 'Borders', 'Effects', 'Animation'].every((g) => !panel.headings.includes(g)),
     `sub-headings: ${panel.subHeadings.join(' | ')}`
   );
@@ -378,6 +379,15 @@ async function main() {
     'the project’s Look reached the panel',
     expected.looks.every((n) => panel.rows.some((r) => r.name === n && r.layer === 'Look')),
     `model looks: ${expected.looks.join(',') || 'none'}`
+  );
+  // P99 HLT-007 (a): the project STILL holds text styles — the removal hides them from this panel,
+  // it does not delete them. The first arm is the known-firing signal the second one needs: with
+  // no text styles in the model, "none drawn" would be true of the old panel too.
+  record('CONTROL the project still holds text styles (HLT-007 a)', expected.texts.length > 0, expected.texts.join(', '));
+  record(
+    'no text style is drawn as a row any more — HLT-007 (a)',
+    expected.texts.length > 0 && !panel.rows.some((r) => expected.texts.includes(r.name)),
+    panel.rows.filter((r) => expected.texts.includes(r.name)).map((r) => r.name).join(', ') || 'none drawn'
   );
 
   // R2: both layers in ONE list. A Style row and a Token row, both drawn.
