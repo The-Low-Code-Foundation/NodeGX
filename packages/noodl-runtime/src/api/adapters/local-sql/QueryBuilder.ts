@@ -1373,15 +1373,15 @@ export function serializeValue(value: unknown): unknown {
     if (tagged.__type === 'GeoPoint') {
       return JSON.stringify(value);
     }
-    // Arrays and objects - store as JSON
-    if (Array.isArray(value) || Object.keys(value).length > 0) {
-      return JSON.stringify(value);
+    // Date objects - before the JSON branch, because a Date has no own keys
+    if (value instanceof Date) {
+      return value.toISOString();
     }
-  }
-
-  // Handle Date objects
-  if (value instanceof Date) {
-    return value.toISOString();
+    // Arrays and objects - store as JSON, empty ones included.
+    // P99 HLT-018: this used to require `Object.keys(value).length > 0`, which
+    // was how a Date reached the branch above; `{}` then fell through as a bare
+    // object SQLite cannot bind (500 on POST /classes, a whole import rolled back).
+    return JSON.stringify(value);
   }
 
   // Handle booleans - SQLite uses 0/1

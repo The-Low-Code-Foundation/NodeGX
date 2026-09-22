@@ -507,6 +507,36 @@ describe('QueryBuilder', () => {
       expect(QueryBuilder.serializeValue([1, 2, 3])).toBe('[1,2,3]');
       expect(QueryBuilder.serializeValue({ foo: 'bar' })).toBe('{"foo":"bar"}');
     });
+
+    // P99 HLT-018 — `{}` fell through as a bare object SQLite cannot bind.
+    it('stores an empty object as JSON', () => {
+      expect(QueryBuilder.serializeValue({})).toBe('{}');
+      expect(QueryBuilder.serializeValue([])).toBe('[]');
+    });
+
+    // The property the fix rests on. `node:sqlite` reads a bare object passed as
+    // the FIRST argument of `run()` as its named-parameter map, so every `?`
+    // after it shifts by one: `UPDATE … SET "facts" = ?, … WHERE "objectId" = ?`
+    // with `{}` first matched 0 rows and threw nothing, and `PUT /classes` said
+    // 200 over a write that never happened. Anywhere else, the bind throws.
+    it('never hands the driver an object, whatever it is given', () => {
+      const values = [{}, [], { a: 1 }, new Date(0), { __type: 'Date', iso: 'x' }, { __type: 'Pointer' },
+        { __type: 'Pointer', objectId: 'p' }, { __type: 'File', url: 'u' }, { __type: 'GeoPoint' }, Object.create(null)];
+      for (const v of values) {
+        const out = QueryBuilder.serializeValue(v);
+        expect(out === null || typeof out !== 'object').toBe(true);
+      }
+    });
+
+    // The tempting wrong fix — deleting the key-count check without moving the
+    // Date test above it — sends a Date through JSON.stringify, which (via
+    // Date.toJSON) stores the ISO string wrapped in quote marks. Both shapes pinned.
+    it('still stores a Date and a Parse Date as bare ISO strings', () => {
+      expect(QueryBuilder.serializeValue(new Date('2024-01-01T00:00:00.000Z'))).toBe('2024-01-01T00:00:00.000Z');
+      expect(QueryBuilder.serializeValue({ __type: 'Date', iso: '2024-01-01T00:00:00.000Z' })).toBe(
+        '2024-01-01T00:00:00.000Z'
+      );
+    });
   });
 
   describe('deserializeValue', () => {

@@ -127,6 +127,36 @@ export const recordCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'records/an-empty-object-saves-and-reads-back-empty',
+    area: 'records',
+    pins: 'an Object field holding `{}` is stored, on create and on save, and reads back as `{}`',
+    async run(ctx) {
+      // P99 HLT-018. `serializeValue` stored an object as JSON only when it had
+      // keys — so that a `Date`, which has none, reached its own branch — and
+      // `{}` fell through as a bare object no SQLite binding accepts: a 500 on
+      // `POST /classes`, and a whole import rolled back. An empty map is the
+      // natural first value of any map field.
+      const c = ctx.collection('Obj');
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'facts', type: 'Object' }
+      ]);
+
+      const empty = await ctx.create(c, { title: 'new learner', facts: {} });
+      deepEq((await ctx.fetch(c, String(empty.objectId))).facts, {}, 'an empty object on create');
+
+      // The control: a keyed object must round-trip too, or the arm above
+      // passes on an adapter that answers `{}` for every Object column.
+      const keyed = await ctx.create(c, { title: 'known', facts: { a: 1 } });
+      deepEq((await ctx.fetch(c, String(keyed.objectId))).facts, { a: 1 }, 'the keyed control');
+
+      // And emptied by a save — `buildUpdate` is the second caller.
+      await ctx.save(c, String(keyed.objectId), { facts: {} });
+      deepEq((await ctx.fetch(c, String(keyed.objectId))).facts, {}, 'an object emptied by save');
+    }
+  },
+
+  {
     id: 'records/delete-removes-the-row',
     area: 'records',
     pins: 'delete() removes the row and the count follows',
