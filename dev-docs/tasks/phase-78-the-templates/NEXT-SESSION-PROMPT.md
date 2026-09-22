@@ -1,5 +1,37 @@
 # Phase 78 — next session
 
+> ### 🟩 2026-09-22 — THE PLANNER IS PUBLISHED, AND R2.5 CLOSED THE BUILD — START HERE
+>
+> `https://nodegx.io/templates/planner/` is live, first card on the homepage, and on the community shelf as
+> `planner` (data-app, 211 files, v2). The app calls itself **Planner** now — the name Richard ruled on
+> 2026-09-21 was never in the app bar. Built with the **production** viewer; driven **against the public URL**.
+> - ✅ **R2.5 built** ([R2](TPL-010-R2-FIRST-USE.md) §R2.5): Settings is four sections — Capacity (the ceiling,
+>   seven day ticks, and what they come to a week, live), Money, The split (each field with the rule it comes
+>   from beside it and one button that takes all three), Guardrails — plus L6's `todoUrl` and the bar's
+>   *Todo ↗*. Eight new `Settings` columns, all written by `Edit settings` so the coach can reach them.
+> - 🔴 **Two departures from the task file, both recorded in §R2.5:** the recommendation is **63.75 / 13.25**,
+>   not 64 / 13 (R24 rounds to the quarter hour, and a tenth of 132 h is 13.2 h), and **a row with no
+>   `workingDays` still means Mon–Sat**, so no existing month loses four days by upgrading. Richard's call on
+>   both, and each is one line to change.
+> - ✅ Gates **65/65**; drives on the deployed demo: r25 **25/25**, money **40/40**, r23 19/19, r24 22/22;
+>   1280×900, 1423×680 and 390×844 unchanged. On the public URL: r25 25/25, money 40/40.
+>   ⚠️ money's first clause failed once on a cold first visit and passed on every run after — the seed is
+>   written on first read and that check looked too early. Give it a longer `until` if it recurs.
+> - 🟡 **TPL-010-H is one DNS record from done.** `planning-digitalbricks/merge-policy.js` is written and has
+>   been run against the live policy off the box (kept Task/Action/Event/PushSubscription, added the planner's
+>   seven); the hosted site builds with `planning.digitalbricks.io` baked in. **Nothing has been shipped.**
+>   Blocked on: **A record `planning` → `49.12.102.195` at Namecheap**. Then steps 1–4 of that task file.
+> - 🔴 **The shelf has drifted for two older templates**: `todo-list` is 121 files where the publisher expects
+>   112, `story-engine` 35 where it expects 30. Both refuse until somebody looks at what moved (the todo
+>   list's icons, date picker and reminders among them) and updates the count in the same commit.
+> - ⚠️ **`signup` is still `public`** on the live todo backend; the todo README says to lock it once his
+>   account exists.
+> - ⚠️ **This checkout's viewers are now the PRODUCTION build** (`npm run build:editor:_viewer` overwrote
+>   `packages/noodl-editor/src/external/{deploy,viewer,ssr}`, which are gitignored). The editor's preview runs
+>   minified until `npm run dev` rebuilds them — worth knowing before reading a stack trace.
+> - **Next:** TPL-010-H the moment the record lands, then TPL-010-L (L6 is already built), then TPL-010-MCP.
+>   Still Richard's: M-14 and AC11 (his own month, his own week), R2.1-6, R2.6-5.
+
 > ### 🟩 2026-09-21 — TPL-010-M THE PLANNER'S MONEY: BUILT, GATED, DRIVEN — START HERE FOR THE PLANNER
 >
 > Read [TPL-010-M](TPL-010-MONEY.md) first. Richard wants money out of Settings and into its own modal (€ in the app bar):
