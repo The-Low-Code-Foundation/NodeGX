@@ -43,7 +43,7 @@ P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one i
 ## 🔴 What s16 leaves you — four rulings, three builds, CI measuring for the first time
 
 **Every reading below was taken 2026-09-22.** Commits: `dd0d69f7e`, `74463bfd4`, `1339a3b23`
-(HLT-010), `aa0cd5b13` (HLT-007 a), `e5a926d6e` (HLT-016 a). `cline-dev` was pushed (Richard's ruling).
+(HLT-010), `aa0cd5b13` (HLT-007 a), `e5a926d6e` + `c6c72aed6` (HLT-016 a), `260373908` (docs). `cline-dev` was pushed (Richard's ruling).
 
 - ✅ **Pushed, and HLT-010's CI job measured on Linux for the first time.** The first runs were
   `COULD NOT MEASURE` (exit 2), which is the gate refusing to pass a quiet log, as built. Three fixes
@@ -72,6 +72,10 @@ P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one i
 - ✅ **HLT-016 (a): only-if-unchanged.** See [the verdict](./verdicts/HLT-016/2026-09-22/VERDICT.md).
   ⚠️ §2 missed that a zero-row UPDATE **without an ACL** answers 200. That is the whole
   cloud-function path, and it is still open for saves without a precondition (unowned).
+- 🔴 **A new node port owes THREE regenerations, not one:** `catalog:generate` (→
+  `node-catalog.json`), `catalog:merge` (→ `node-catalog-enriched.json`), then `docs:nodes` (→ the
+  docs-site page). s16 did only the first, and CI's *Docs site builds (HLT-013)* went red
+  (`35715191192`); fixed in `c6c72aed6`. Run `docs:nodes:check` before pushing a port.
 - 🔴 **Fixture trap, cost one confused re-run:** the Record node's `Fetched` fires on BIND, before
   any read (P77 D25). Sequence a write after a read on **`Done`**.
 - **Tools:** `verdicts/HLT-016/2026-09-22/hlt016.drive.test.ts` drives one route on BOTH engines, with
