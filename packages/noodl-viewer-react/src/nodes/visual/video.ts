@@ -356,6 +356,8 @@ NodeSharedPortDefinitions.addAlignInputs(VideoNode);
 NodeSharedPortDefinitions.addPointerEventOutputs(VideoNode);
 // DEF-029 — file drop, off until the author switches it on.
 NodeSharedPortDefinitions.addFileDropPorts(VideoNode);
+// HLT-017 — drag a card, drop it on a column; off until the author switches either side on.
+NodeSharedPortDefinitions.addDragDropPorts(VideoNode);
 NodeSharedPortDefinitions.addBorderInputs(VideoNode);
 
 export default createNodeFromReactComponent(VideoNode);

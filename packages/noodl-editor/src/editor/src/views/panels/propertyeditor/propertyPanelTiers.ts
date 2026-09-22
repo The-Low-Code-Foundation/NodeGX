@@ -103,6 +103,11 @@ export const ADVANCED_CSS_GROUPS: Readonly<Record<string, string>> = {
   // because that is five nodes' basic tier taxed permanently for a port most screens never
   // set, which is the accumulation FB-017 exists to stop.
   'File Drop': 'plumbing: drag-and-drop DOM machinery, opt-in per element',
+  // HLT-017. The same judgement as `File Drop`, for the same five nodes, and the same one-line
+  // revert: a card is not draggable by nature and a column is not a drop zone by nature, so
+  // neither belongs on every Group's first screen.
+  'Drag Source': 'plumbing: pick-up-and-drop machinery, opt-in per element',
+  'Drop Zone': 'plumbing: pick-up-and-drop machinery, opt-in per element',
   Focus: 'plumbing: whether the element takes focus',
   Scroll: 'plumbing: scroll behaviour on a container that already scrolls',
   'Scroll To Element': 'plumbing: an imperative scroll action and its parameters',

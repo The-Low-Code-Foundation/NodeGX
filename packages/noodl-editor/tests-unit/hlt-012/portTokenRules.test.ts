@@ -161,10 +161,14 @@ describe('HLT-012 ORDER — the rules a naive rewrite gets wrong', () => {
 // ─── the population ───────────────────────────────────────────────────────────
 
 describe('HLT-012 — the population the table is answering about', () => {
-  it('🔴 the catalog has 166 numeric ports and only 86 of them reach a token-capable field', () => {
+  it('🔴 the catalog has 167 numeric ports and only 86 of them reach a token-capable field', () => {
     // If this spec ever reports 0 for either, it is reading the wrong file, not measuring a
     // product that lost its ports ([[tests-0-total-can-mean-the-wrong-directory]]).
-    expect(numericPorts().length).toBe(166);
+    //
+    // 166 → 167 is HLT-017's `holdTime` (seconds a press is held before it picks up). It has no
+    // units, so it never gets a field that could hold a token, and the 86 below does not move —
+    // which is the reading that says the table was not asked about it.
+    expect(numericPorts().length).toBe(167);
     expect(tokenCapablePorts().length).toBe(86);
   });
 

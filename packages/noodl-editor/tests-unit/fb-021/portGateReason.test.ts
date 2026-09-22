@@ -335,12 +335,17 @@ describe('FB-021 — over the shipped catalog, not a fixture', () => {
   //
   // 365 = those 364 plus §1 stage 3 — Circle's `svgSource`, gated `shape = svg`. One port, one
   // clause, explained, so the remainder is again untouched at 11.
-  it('finds all 365 conditionally-gated input ports', () => {
-    expect(all).toHaveLength(365);
+  //
+  // 400 = those 365 plus HLT-017's seven gated inputs — `dragValue`, `dragKind`, `holdToDrag`,
+  // `holdTime` behind `draggable = true`, and `acceptKind`, `makeRoom`, `dropZoneName` behind
+  // `acceptDrops = true` — on the same five visual nodes as DEF-029: 7 × 5 = 35. Both counts move
+  // by exactly 35, so every new gated port is explained and the remainder stays 11.
+  it('finds all 400 conditionally-gated input ports', () => {
+    expect(all).toHaveLength(400);
   });
 
-  it('explains 354 of them', () => {
-    expect(all.filter((row) => row.explained)).toHaveLength(354);
+  it('explains 389 of them', () => {
+    expect(all.filter((row) => row.explained)).toHaveLength(389);
   });
 
   /*

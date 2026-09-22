@@ -14,5 +14,7 @@ in roughly this order, before anything else in the docs:
 5. [Preview vs deployed](./preview-vs-deployed.md)
 6. [Data: arrays, objects, variables and records](./data.md)
 7. [What runs in the browser, and what runs on the backend](./frontend-vs-backend.md)
+8. [Drag Source — letting a person pick something up](./drag-source.md)
+9. [Drop Zone — somewhere to drop it](./drop-zone.md)
 
 Then go build something: [Getting started](../getting-started.md).

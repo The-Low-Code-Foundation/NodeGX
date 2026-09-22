@@ -226,8 +226,11 @@ describe('the ruling, swept over the real node catalog', () => {
     // 18 → 19 and 8 → 9 is DEF-029's `File Drop`, classified as plumbing beside `Pointer
     // Events`. The basic tier is deliberately unmoved at 10: the whole point of filing it in the
     // denylist is that the first screen of a Group is exactly what it was.
-    expect(groups.length).toBe(19);
-    expect(advanced.length).toBe(9);
+    //
+    // 19 → 21 and 9 → 11 is HLT-017's `Drag Source` and `Drop Zone`, filed the same way and for
+    // the same reason; basic is unmoved at 10 again.
+    expect(groups.length).toBe(21);
+    expect(advanced.length).toBe(11);
     expect(basic.length).toBe(10);
     expect(namesOf(basic)[0]).toBe('General');
   });

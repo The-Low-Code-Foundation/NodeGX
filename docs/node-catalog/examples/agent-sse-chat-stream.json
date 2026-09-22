@@ -50,7 +50,7 @@
         }
       ],
       "connections": [
-        { "fromId": "prompt_input", "fromProperty": "text", "toId": "prompt_body", "toProperty": "prompt" },
+        { "fromId": "prompt_input", "fromProperty": "onTextChanged", "toId": "prompt_body", "toProperty": "prompt" },
         { "fromId": "send_button", "fromProperty": "onClick", "toId": "prompt_body", "toProperty": "run" },
         { "fromId": "prompt_body", "fromProperty": "body", "toId": "chat_stream", "toProperty": "body" },
         { "fromId": "prompt_body", "fromProperty": "headers", "toId": "chat_stream", "toProperty": "headers" },

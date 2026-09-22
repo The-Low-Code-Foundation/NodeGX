@@ -25,7 +25,9 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `acceptDrops` | Boolean | `false` | Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop |
 | `acceptFileDrops` | Boolean | `false` | Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below |
+| `acceptKind` | String | — | Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up |
 | `acceptedFileTypes` | String | — | Comma-separated extensions or MIME types this element will take — ".png, .jpg" or "image/*"; leave blank to accept every file. A drop of nothing but rejected files fires Files Rejected instead of Files Dropped |
 | `alignContent` | Enum (`flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly`) | — | Where the wrapped lines sit as a group; only applies once Multi Line Wrap is on |
 | `alignItems` | Enum (`flex-start`, `flex-end`, `center`, `stretch`) | `flex-start` | Where children sit across the layout direction |
@@ -71,10 +73,17 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `clip` | Boolean | `false` | Hides any child that overflows the group instead of letting it spill out |
 | `columnGap` | Number | `0` | Space between children on the horizontal axis |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
+| `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
+| `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
+| `dropZoneName` | String | — | What a screen reader hears this zone called while a card is moved with the keyboard — "Thursday". Falls back to the element's accessible label |
 | `flexDirection` | Enum (`none`, `column`, `row`) | `column` | How children are stacked: None positions them absolutely, Vertical stacks them down, Horizontal across |
 | `flexWrap` | Enum (`nowrap`, `wrap`, `wrap-reverse`) | `nowrap` | Lets children wrap onto another line when they do not fit on one |
 | `height` | Dimension | `100` | Height of the element; how the value is read depends on Size Mode |
+| `holdTime` | Number | `0.5` | How long a held press takes to pick up, in seconds |
+| `holdToDrag` | Enum (`touch`, `always`, `never`) | `touch` | Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves |
 | `justifyContent` | Enum (`flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly`) | `flex-start` | Where children sit along the layout direction when they do not fill it |
+| `makeRoom` | Boolean | `true` | Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index |
 | `marginBottom` | Number | — | Space outside the element's bottom edge, between it and its neighbours |
 | `marginLeft` | Number | — | Space outside the element's left edge, between it and its neighbours |
 | `marginRight` | Number | — | Space outside the element's right edge, between it and its neighbours |
@@ -135,12 +144,16 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `boundingWidth` | Number | — | Width this element actually ended up with after layout, in pixels |
 | `childIndex` | Number | — | This element's position among its parent's children, counting from 0 |
 | `childrenCount` | Number | — | How many child elements are currently mounted inside this one |
+| `dropIndex` | Number | — | Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was |
 | `droppedFile` | * | — | The first accepted file, in the form an Upload File node takes |
 | `droppedFileName` | String | — | Name of the first accepted file, extension included |
 | `droppedFileSizeInBytes` | Number | — | Size of the first accepted file, in bytes |
 | `droppedFileType` | String | — | MIME type the browser reports for the first accepted file, blank for one it does not recognise |
 | `droppedFiles` | Array | — | Every accepted file in the drop, as an array — a drop can carry more than one |
+| `droppedValue` | * | — | The Drag Value of the element dropped here |
 | `isDragOver` | Boolean | — | True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts |
+| `isDropTarget` | Boolean | — | True while something this zone takes is held over it — wire it to a background or border so the zone lights up |
+| `isLifted` | Boolean | — | True while this element is being dragged |
 | `onScrollPositionChanged` | Number | — | How far the content is scrolled, in pixels from the start |
 | `screenPositionX` | Number | — | Distance in pixels from the left edge of the window to this element's left edge |
 | `screenPositionY` | Number | — | Distance in pixels from the top edge of the window to this element's top edge |
@@ -153,15 +166,19 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires once Focus, Scroll To Element or Scroll To Index has been carried out |
+| `dragCancelled` | Signal | — | Fires when a lifted element is let go over nothing that takes it, or Escape puts it back |
+| `dropped` | Signal | — | Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing |
 | `filesDropped` | Signal | — | Fires when one or more accepted files are dropped here, after every File Drop output is up to date |
 | `filesRejected` | Signal | — | Fires when a drop landed here but every file in it was excluded by Accepted file types |
 | `focusLost` | Signal | — | Fires when keyboard focus leaves this group |
 | `focused` | Signal | — | Fires when this group takes keyboard focus |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this element |
 | `hoverStart` | Signal | — | Fires when the pointer moves over this element or any of its children |
+| `landed` | Signal | — | Fires when this element is dropped on a zone that took it, after the zone's Dropped |
 | `onClick` | Signal | — | Fires when this element is clicked or tapped |
 | `onScrollEnd` | Signal | — | Fires when scrolling settles, including after a flick has coasted to a stop |
 | `onScrollStart` | Signal | — | Fires when the user starts scrolling |
+| `pickedUp` | Signal | — | Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard |
 | `pointerDown` | Signal | — | Fires when a mouse button is pressed or a finger touches this element |
 | `pointerEnter` | Signal | — | Fires when the pointer moves onto this element, not counting its children |
 | `pointerUp` | Signal | — | Fires when the mouse button is released or the finger lifts over this element |
@@ -193,6 +210,8 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | sizeMode = explicit OR sizeMode = contentWidth OR sizeMode NOT SET | `height` | — |
 | pointerEventsMode = explicit | `pointerEventsEnabled` | — |
 | acceptFileDrops = true | `acceptedFileTypes` | `filesDropped`, `filesRejected`, `droppedFile`, `droppedFiles`, `droppedFileName`, `droppedFileType`, `droppedFileSizeInBytes`, `isDragOver` |
+| draggable = true | `dragValue`, `dragKind`, `holdToDrag`, `holdTime` | `pickedUp`, `landed`, `dragCancelled`, `isLifted` |
+| acceptDrops = true | `acceptKind`, `makeRoom`, `dropZoneName` | `dropped`, `droppedValue`, `dropIndex`, `isDropTarget` |
 | borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderWidth`, `borderColor` | — |
 | borderLeftStyle = solid OR borderLeftStyle = dashed OR borderLeftStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderLeftWidth`, `borderLeftColor` | — |
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderTopWidth`, `borderTopColor` | — |
@@ -250,6 +269,10 @@ A list with nothing in it should say what it is and what to do, not render nothi
 **A wrapping row of content-width items, with no CSS**
 
 Items that keep their own width and flow onto the next line when they run out of room — the layout a chip row, a filter bar or a tag list wants, and one people reach for a `CSS Definition` node to get. It needs no CSS: the container is a **Group** with `Multi Line Wrap` on, `Layout` set to row, a `Column Gap` and a `Row Gap` (the two gap ports only appear once wrapping is on) and `Align Y` at top, and each item is a **Group** at `Content Size`. ⚠️ That last part is the half that is usually missed. An item at `Content Size` gets no width of its own, and the runtime gives every node `flex-shrink: 0` and only grants `flex-grow` to a percentage width — so `Content Size` already *is* `flex: 0 0 auto`, and an item left at `100%` instead becomes `flex-grow: 100` and swallows the whole line. 🔴 This is not masonry: rows are laid out independently and nothing balances columns or packs items upward by height.
+
+**Kanban board: drag a card to another column, or to another place in its own**
+
+Built from two checkboxes and one Function. Each card is a Group with `Draggable` on, carrying its id as `Drag Value`; each column's list is a Group with `Accept Drops` on. Pick a card up and a see-through copy follows the pointer while the card stays behind, faded. The list under the pointer turns `Drag Over` true (wired here through an Expression to its outline) and, with `Make Room` on, slides its cards apart to show where the drop will land. On touch, a press is held for half a second while a ring fills beside the finger, so a moving finger still scrolls. Letting go fires `Dropped` with `Dropped Value` and `Drop Index`, and the column's `Move card` Function does the move: it takes the card out of the Array it is in and puts it into this one at that index. The engine never moves data itself, so a drop on nothing, or Escape, leaves everything where it was. `Drop Index` counts the other cards only, so it is exactly the index to insert at once the card is out of its old place — that is why the same Function handles a reorder within a column. From the keyboard: Tab to a card, Space picks it up, the arrows move it (up and down within a column, left and right between columns), Enter drops it; each step is announced. The three Arrays are named `kanban-todo`, `kanban-doing` and `kanban-done`, and each card remembers which one it is in (`list`), so the Function needs nothing but the card's id. Each Column also publishes the drop — `Card Dropped`, `Card Id` and `Index` — so whatever owns the board can save the move to a backend; the Arrays are only what is on screen.
 
 ## Related nodes
 

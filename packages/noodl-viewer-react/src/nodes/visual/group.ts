@@ -503,6 +503,8 @@ NodeSharedPortDefinitions.addAlignInputs(GroupNode);
 NodeSharedPortDefinitions.addPointerEventOutputs(GroupNode);
 // DEF-029 — file drop, off until the author switches it on.
 NodeSharedPortDefinitions.addFileDropPorts(GroupNode);
+// HLT-017 — drag a card, drop it on a column; off until the author switches either side on.
+NodeSharedPortDefinitions.addDragDropPorts(GroupNode);
 NodeSharedPortDefinitions.addBorderInputs(GroupNode);
 NodeSharedPortDefinitions.addShadowInputs(GroupNode);
 // VIB-002 — gradients and picture grounds. Group only, deliberately: it is the

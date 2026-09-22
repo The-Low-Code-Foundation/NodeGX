@@ -2,17 +2,24 @@
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
 HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
-HLT-008 ✅ (s10 — P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left),
-HLT-015 ✅ (s12 — AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; not yet seen on a Linux runner).**
-Open: **HLT-007, 009, 016, 017**. HLT-016 and HLT-017 both have shapes
-*"to be ruled"*. Ask Richard before building either. HLT-017 (a drop target) was opened by the
-planner stream at 22:33 on 2026-09-21, and its README row was still uncommitted at s12's close.
+HLT-008 ✅ (s10 — P93 AC7 awaits Richard; ⚠️ see below, NEVER COMMITTED), HLT-014 ✅ (s11 — §3.1's validator warning left),
+HLT-015 ✅ (s12 — AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; not yet seen on a Linux runner),
+HLT-017 ✅ (s14 — drag and drop; AC9 is phase 78's).**
+Open: **HLT-007, 009, 016, 018, 019.** HLT-016 and HLT-019 have shapes *"to be ruled"*: ask Richard
+before building either. HLT-018 and HLT-019 were opened by the DBT stream on 2026-09-22, and at
+s14's close their README rows and task files were **its uncommitted edits**. Leave them to it.
 ⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
 tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
 `TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
 row ([[a-peer-may-be-doing-your-exact-task]], [[an-uncommitted-pile-can-be-live-in-production]]).
 ⚠️ That pile also means `test:main` reads **+1 suite / +5 specs** above what this phase's commits
 account for. Do not attribute the delta to your own work.
+🔴 **HLT-008 (s10) is marked BUILT and was never committed.** No commit names it. Its drive
+(`scripts/devtools/drive-hlt008-board.js`), spec (`tests-unit/hlt-008/`), verdict, ten `shots/hlt008-*`
+and the board edits (`ComponentBoard.tsx`, `boardSurface.ts`, `PreviewChrome.tsx`, `previewScope.ts`)
+are loose in the tree, last written 2026-09-21 ~19:50, beside P93 TVW-009's edits to some of the
+same files. Find out whose it is before anyone commits or reverts it
+([[a-row-whose-remaining-work-is-a-commit-is-invisible-on-a-board]]).
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
 **before claiming a row** — peers have been building this phase in parallel.
@@ -27,10 +34,47 @@ one stored identity, and one local backend ("Puppy test 3 backend", `backend_msj
 owned by both.** The editor now says so on the launcher; the repair is his call, not the
 product's. See HLT-011 AC4.
 
-**Suggested: HLT-010**, now that HLT-015 is done. But
-HLT-010 now inherits three runtime error classes from s11 (its §2b), one of which (`Layout is
-"node"` on every popup) needs a layout decision before it can budget at 0. ⚠️ **HLT-009's template is another stream's** — it committed to it again on
-2026-09-21 (`60f811920`, `8f0587d01`); ask before touching a file.
+**Suggested, in order:**
+1. **HLT-008's uncommitted pile** (above): find out whose it is. It is the one thing on this board
+   that reads done and is not.
+2. **HLT-018**, which is a defect with no ruling in its file (an empty `{}` Object field cannot be
+   saved). It was opened by the DBT stream, and at s14's close its file was that stream's
+   *uncommitted* edit, so message the stream before claiming it.
+3. **HLT-007**, if its peer's pile is stale. It was last written 2026-09-21 11:52. Re-measure it
+   before you inherit it.
+
+⚠️ **HLT-009's template is another stream's.** It committed to it again on 2026-09-21
+(`60f811920`, `8f0587d01`). Ask before touching a file.
+
+## 🔴 What s14 leaves you — HLT-017, somewhere to drop it
+
+**Built. The shipped kanban example, driven with real mouse, touch and keys: HEAD 5/5 (nothing lifts
+or moves), fixed 43/43, 0 console errors.** [Verdict](./verdicts/HLT-017/2026-09-22/VERDICT.md).
+
+- **Run it:** `node scripts/devtools/drive-hlt017-drop.js` (`--expect head` for the control,
+  `--shots <dir>`). It grades the viewer bundle, so rebuild the viewer after any edit to
+  `drag-drop.ts` (`cd packages/noodl-viewer-react && npx webpack --config webpack-configs/webpack.viewer.prod.js`).
+  The fixture IS `docs/node-catalog/examples/vis-kanban-drag-between-columns.json`. Change the
+  example and the drive grades the change.
+- 🔴 **§2's "V1 workaround" never existed.** `templates/planner` has 0 `Drag` nodes. AC9 (phase 78)
+  is therefore only this: arm the blocks and the Day lists, and wire `Dropped` to `Move block`.
+- 🔴 **Count what the frames show.** Two of the three real defects were layout (the gap pushed a card
+  out of its column; a gap at the card's own slot moved stacked columns under a finger). Every count
+  was green. The `inside` row now grades the first. Look at the pictures before believing a count.
+- 🔴 **`signal(node, 'name')` with a misspelt name is silence, not an error** (`hasOutput` guards it).
+  `tests/hlt017-drag-and-drop-ports.test.ts` reads every written name from the source and fails on an
+  undeclared one. Copy that pattern for any controller that names outputs as strings.
+- ⚠️ **`@noodl/mcp` is still 8 red, and not all the same 8:** `nodeDocBudget` is green now. It was red
+  on HEAD at 14,315/14,300, and this row added +1,246 (ratchet → 16,200, both attributed).
+  `CMP-001 AC2` is red on HEAD at **38** against a pinned 33 and is not this phase's literal.
+- ✅ **`catalog:examples` is 109/109.** On HEAD it was 107: two agent examples wired a Text Input
+  output named `text`, which does not exist. s14 repointed both to `onTextChanged`.
+- ⚠️ **`@noodl/mcp` `provision` + `projectOwnsBackend` flake together and pass apart**, with a
+  different spec red each time. They share backend runtime records under parallel workers. It is not
+  this phase's, and it is worth a row if CI shows it.
+- 📋 **For Richard:** two judgements a one-line revert undoes. Both groups fold into Advanced CSS
+  (DEF-029's precedent). The hold ring is `--primary`, because `--accent` is a near-background wash
+  in every shipped token set.
 
 ## 🔴 What s13 leaves you — HLT-010, the gate exists
 

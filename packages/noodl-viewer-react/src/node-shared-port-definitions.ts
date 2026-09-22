@@ -7,6 +7,7 @@ import type {
   ReactNodeDefinition,
   ReactOutputPropDefinition
 } from './react-component-node';
+import * as DragDrop from './drag-drop';
 import FontLoader from './fontloader';
 // VIB-002 — the background-image port needs the same empty-value handling the
 // Image node's `src` has: `null`/`undefined`/`''` must clear the layer rather
@@ -222,6 +223,21 @@ interface FileDropInstance {
   hasOutput(name: string): boolean;
   flagOutputDirty(name: string): void;
   sendSignalOnOutput(name: string): void;
+}
+
+/** HLT-017 — a visual node as the drag-and-drop ports see it. */
+type DragDropInstance = DragDrop.DragDropNode & {
+  addDeleteListener(listener: () => void): void;
+};
+
+/**
+ * A deleted node must leave both registries, or a card removed from the list mid-drag keeps a
+ * detached element in the hit-test and a stale zone keeps lighting up. Once per node.
+ */
+function armForgetOnDelete(node: DragDropInstance): void {
+  if (node._internal.dragDropForgetArmed) return;
+  node._internal.dragDropForgetArmed = true;
+  node.addDeleteListener(() => DragDrop.forget(node));
 }
 
 /**
@@ -1111,6 +1127,211 @@ export default {
     });
 
     addFileDropTooltips(definition);
+  },
+  /**
+   * HLT-017 — pick an element up and drop it on another one. See `drag-drop.ts` for the gesture
+   * and for Richard's three rulings that shaped it.
+   *
+   * DEF-029's precedent, deliberately: ports on every visual node, off by default, one checkbox
+   * per side revealing the rest. A node with both boxes off gets no listener, no attribute and no
+   * output — the document listeners are installed the first time anything arms either box.
+   *
+   * Two groups rather than one, because a card is usually one and a column the other, and an
+   * author looking at a column should not wade through `Drag Value` to find `Drop Index`.
+   */
+  addDragDropPorts(definition: ReactNodeDefinition) {
+    type Armed = DragDropInstance;
+
+    addInputs(definition, {
+      draggable: {
+        index: 360,
+        group: 'Drag Source',
+        displayName: 'Draggable',
+        type: 'boolean',
+        default: false,
+        description:
+          'Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it',
+        set(this: Armed, value: boolean) {
+          this._internal.draggable = !!value;
+          armForgetOnDelete(this);
+          DragDrop.setDraggable(this, !!value);
+        }
+      },
+      dragValue: {
+        index: 361,
+        group: 'Drag Source',
+        displayName: 'Drag Value',
+        type: '*',
+        description: 'What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value',
+        set(this: Armed, value: unknown) {
+          this._internal.dragValue = value;
+        }
+      },
+      dragKind: {
+        index: 362,
+        group: 'Drag Source',
+        displayName: 'Drag Kind',
+        type: 'string',
+        description:
+          'Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches',
+        set(this: Armed, value: string) {
+          this._internal.dragKind = value;
+        }
+      },
+      holdToDrag: {
+        index: 363,
+        group: 'Drag Source',
+        displayName: 'Hold To Drag',
+        type: {
+          name: 'enum',
+          enums: [
+            { value: 'touch', label: 'On touch' },
+            { value: 'always', label: 'Always' },
+            { value: 'never', label: 'Never' }
+          ]
+        },
+        default: 'touch',
+        description:
+          'Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves',
+        set(this: Armed, value: string) {
+          this._internal.holdToDrag = value as DragDrop.HoldMode;
+        }
+      },
+      holdTime: {
+        index: 364,
+        group: 'Drag Source',
+        displayName: 'Hold Time',
+        type: 'number',
+        default: 0.5,
+        description: 'How long a held press takes to pick up, in seconds',
+        set(this: Armed, value: number) {
+          this._internal.holdTime = value;
+        }
+      },
+      acceptDrops: {
+        index: 370,
+        group: 'Drop Zone',
+        displayName: 'Accept Drops',
+        type: 'boolean',
+        default: false,
+        description:
+          'Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop',
+        set(this: Armed, value: boolean) {
+          this._internal.acceptDrops = !!value;
+          armForgetOnDelete(this);
+          DragDrop.setAcceptsDrops(this, !!value);
+        }
+      },
+      acceptKind: {
+        index: 371,
+        group: 'Drop Zone',
+        displayName: 'Accept Kind',
+        type: 'string',
+        description:
+          'Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up',
+        set(this: Armed, value: string) {
+          this._internal.acceptKind = value;
+        }
+      },
+      makeRoom: {
+        index: 372,
+        group: 'Drop Zone',
+        displayName: 'Make Room',
+        type: 'boolean',
+        default: true,
+        description:
+          'Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index',
+        set(this: Armed, value: boolean) {
+          this._internal.makeRoom = !!value;
+        }
+      },
+      dropZoneName: {
+        index: 373,
+        group: 'Drop Zone',
+        displayName: 'Zone Name',
+        type: 'string',
+        description:
+          'What a screen reader hears this zone called while a card is moved with the keyboard — "Thursday". Falls back to the element\'s accessible label',
+        set(this: Armed, value: string) {
+          this._internal.dropZoneName = value;
+        }
+      }
+    });
+
+    addDynamicPorts(definition, 'draggable = true', {
+      inputs: ['dragValue', 'dragKind', 'holdToDrag', 'holdTime'],
+      outputs: ['pickedUp', 'landed', 'dragCancelled', 'isLifted']
+    });
+    addDynamicPorts(definition, 'acceptDrops = true', {
+      inputs: ['acceptKind', 'makeRoom', 'dropZoneName'],
+      outputs: ['dropped', 'droppedValue', 'dropIndex', 'isDropTarget']
+    });
+
+    addOutputs(definition, {
+      pickedUp: {
+        displayName: 'Picked Up',
+        description: 'Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard',
+        group: 'Drag Source',
+        type: 'signal'
+      },
+      landed: {
+        displayName: 'Landed',
+        description: 'Fires when this element is dropped on a zone that took it, after the zone\'s Dropped',
+        group: 'Drag Source',
+        type: 'signal'
+      },
+      dragCancelled: {
+        displayName: 'Cancelled',
+        description: 'Fires when a lifted element is let go over nothing that takes it, or Escape puts it back',
+        group: 'Drag Source',
+        type: 'signal'
+      },
+      isLifted: {
+        displayName: 'Is Lifted',
+        description: 'True while this element is being dragged',
+        group: 'Drag Source',
+        type: 'boolean',
+        get(this: Armed) {
+          return !!this._internal.isLifted;
+        }
+      },
+      dropped: {
+        displayName: 'Dropped',
+        description: 'Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing',
+        group: 'Drop Zone',
+        type: 'signal'
+      },
+      droppedValue: {
+        displayName: 'Dropped Value',
+        description: 'The Drag Value of the element dropped here',
+        group: 'Drop Zone',
+        type: '*',
+        get(this: Armed) {
+          return this._internal.droppedValue;
+        }
+      },
+      dropIndex: {
+        displayName: 'Drop Index',
+        description:
+          'Where among this zone\'s children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was',
+        group: 'Drop Zone',
+        type: 'number',
+        get(this: Armed) {
+          return this._internal.dropIndex;
+        }
+      },
+      isDropTarget: {
+        displayName: 'Drag Over',
+        description: 'True while something this zone takes is held over it — wire it to a background or border so the zone lights up',
+        group: 'Drop Zone',
+        type: 'boolean',
+        get(this: Armed) {
+          return !!this._internal.isDropTarget;
+        }
+      }
+    });
+
+    addDragDropTooltips(definition);
   },
   addDimensions(
     definition: ReactNodeDefinition,
@@ -2520,6 +2741,25 @@ function addPointerEventsTooltips(definition: ReactNodeDefinition): void {
     body: [
       '- Enabled: This element will receive mouse and touch events',
       '- Disabled: No mouse or touch events will be captured by this element and the element below will receive it instead'
+    ]
+  });
+}
+
+function addDragDropTooltips(definition: ReactNodeDefinition): void {
+  definition.inputs.draggable.tooltip = createTooltip({
+    title: 'Draggable',
+    body: [
+      'Lets a person pick this element up and drop it on an element with Accept Drops on',
+      'A see-through copy follows the pointer and the element stays where it is, faded, until the graph moves it — wire the zone\'s Dropped to the command that does the move',
+      'On touch, a press is held for Hold Time while a ring fills; with a mouse it picks up as soon as it moves. Space picks it up from the keyboard'
+    ]
+  });
+  definition.inputs.acceptDrops.tooltip = createTooltip({
+    title: 'Accept drops',
+    body: [
+      'Lets a Draggable element be dropped here',
+      'Drag Over is true while one is held over this zone; Dropped fires on the drop with Dropped Value and Drop Index',
+      'With Make Room on, the children slide apart to show where it will land'
     ]
   });
 }

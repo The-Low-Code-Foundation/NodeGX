@@ -3311,6 +3311,19 @@
       "useVariants": true,
       "inputs": [
         {
+          "name": "acceptDrops",
+          "displayName": "Accept Drops",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop",
+          "index": 370
+        },
+        {
           "name": "acceptFileDrops",
           "displayName": "Accept File Drops",
           "group": "File Drop",
@@ -3322,6 +3335,18 @@
           "default": false,
           "description": "Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below",
           "index": 350
+        },
+        {
+          "name": "acceptKind",
+          "displayName": "Accept Kind",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up",
+          "index": 371
         },
         {
           "name": "acceptedFileTypes",
@@ -3456,6 +3481,55 @@
           "index": 100010
         },
         {
+          "name": "dragKind",
+          "displayName": "Drag Kind",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Optional name for what this is — \"card\", \"task\". A zone with an Accept Kind only takes sources whose Drag Kind matches",
+          "index": 362
+        },
+        {
+          "name": "dragValue",
+          "displayName": "Drag Value",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value",
+          "index": 361
+        },
+        {
+          "name": "draggable",
+          "displayName": "Draggable",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it",
+          "index": 360
+        },
+        {
+          "name": "dropZoneName",
+          "displayName": "Zone Name",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What a screen reader hears this zone called while a card is moved with the keyboard — \"Thursday\". Falls back to the element's accessible label",
+          "index": 373
+        },
+        {
           "name": "endAngle",
           "displayName": "End Angle",
           "group": "Style",
@@ -3496,6 +3570,59 @@
           "description": "Draws the inside of the circle; turn it off for an outline only",
           "index": 20,
           "allowVisualStates": true
+        },
+        {
+          "name": "holdTime",
+          "displayName": "Hold Time",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0.5,
+          "description": "How long a held press takes to pick up, in seconds",
+          "index": 364
+        },
+        {
+          "name": "holdToDrag",
+          "displayName": "Hold To Drag",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "On touch",
+                "value": "touch"
+              },
+              {
+                "label": "Always",
+                "value": "always"
+              },
+              {
+                "label": "Never",
+                "value": "never"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "touch",
+          "description": "Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves",
+          "index": 363
+        },
+        {
+          "name": "makeRoom",
+          "displayName": "Make Room",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index",
+          "index": 372
         },
         {
           "name": "marginBottom",
@@ -4118,6 +4245,39 @@
           "description": "Fires once this element has been added to the page and can be measured"
         },
         {
+          "name": "dragCancelled",
+          "displayName": "Cancelled",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a lifted element is let go over nothing that takes it, or Escape puts it back"
+        },
+        {
+          "name": "dropIndex",
+          "displayName": "Drop Index",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was"
+        },
+        {
+          "name": "dropped",
+          "displayName": "Dropped",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing"
+        },
+        {
           "name": "droppedFile",
           "displayName": "File",
           "group": "File Drop",
@@ -4171,6 +4331,17 @@
           },
           "isSignal": false,
           "description": "Every accepted file in the drop, as an array — a drop can carry more than one"
+        },
+        {
+          "name": "droppedValue",
+          "displayName": "Dropped Value",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "The Drag Value of the element dropped here"
         },
         {
           "name": "filesDropped",
@@ -4228,6 +4399,39 @@
           "description": "True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts"
         },
         {
+          "name": "isDropTarget",
+          "displayName": "Drag Over",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while something this zone takes is held over it — wire it to a background or border so the zone lights up"
+        },
+        {
+          "name": "isLifted",
+          "displayName": "Is Lifted",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while this element is being dragged"
+        },
+        {
+          "name": "landed",
+          "displayName": "Landed",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is dropped on a zone that took it, after the zone's Dropped"
+        },
+        {
           "name": "onClick",
           "displayName": "Click",
           "group": "Events",
@@ -4237,6 +4441,17 @@
           },
           "isSignal": true,
           "description": "Fires when this element is clicked or tapped"
+        },
+        {
+          "name": "pickedUp",
+          "displayName": "Picked Up",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard"
         },
         {
           "name": "pointerDown",
@@ -4368,6 +4583,35 @@
               "droppedFileType",
               "droppedFileSizeInBytes",
               "isDragOver"
+            ]
+          },
+          {
+            "condition": "draggable = true",
+            "inputs": [
+              "dragValue",
+              "dragKind",
+              "holdToDrag",
+              "holdTime"
+            ],
+            "outputs": [
+              "pickedUp",
+              "landed",
+              "dragCancelled",
+              "isLifted"
+            ]
+          },
+          {
+            "condition": "acceptDrops = true",
+            "inputs": [
+              "acceptKind",
+              "makeRoom",
+              "dropZoneName"
+            ],
+            "outputs": [
+              "dropped",
+              "droppedValue",
+              "dropIndex",
+              "isDropTarget"
             ]
           }
         ]
@@ -8517,7 +8761,7 @@
         "typeName": "Drag",
         "summary": "Makes its child subtree draggable along X and/or Y, reporting position and drag signals, with animated snap-to-position.",
         "description": "Drag is a visual container: whatever you place inside it can be dragged with the pointer. `axis` restricts movement ('x' by default, 'y' or 'both'), `enabled` turns dragging on/off, and `useParentBounds` (Constrain to parent, default true) keeps the content inside its parent's box. While dragging, `positionX`/`positionY` (Drag X/Y) hold the current offset in pixels and `deltaX`/`deltaY` the per-move change; `onStart` (Drag Started), `onDrag` (Drag Moved) and `onStop` (Drag Ended) are signals bracketing the gesture. The position can also be driven from the graph: setting `inputPositionX`/`inputPositionY` (Start Drag X/Y) moves the content and updates the outputs, and the `snapToPositionX.do`/`snapToPositionY.do` signals animate to `snapToPositionX.value` over `snapToPositionX.duration` milliseconds (default 300).",
-        "whenToUse": "Sliders, swipeable cards, drawers, reorder handles — any direct-manipulation gesture where you need the live drag offset. For scrolling content use a Group with scrolling enabled instead; for purely programmatic motion use an Animation on a node's Pos X/Y rather than a Drag no one touches.",
+        "whenToUse": "Sliders, swipeable cards, drawers — any direct-manipulation gesture where you need the live drag offset. For scrolling content use a Group with scrolling enabled instead; for purely programmatic motion use an Animation on a node's Pos X/Y rather than a Drag no one touches.",
         "ports": {
           "axis": "Enum value: 'x' (default), 'y' or 'both' — which axes the pointer can move the content along.",
           "useParentBounds": "Boolean value (Constrain to parent, default true); keeps the dragged content within the parent element's bounds.",
@@ -8536,6 +8780,7 @@
           "Swipe threshold: `positionX` → Expression/Condition deciding on `onStop` whether to snap to the open or closed position."
         ],
         "antiPatterns": [
+          "Working out which list a card landed in from its drag offset (start + offset ÷ column width). It breaks as soon as two columns differ in width and does nothing on a phone where columns stack. To move a card between lists or reorder one, switch Draggable on the card and Accept Drops on each list instead: the list reports Dropped, Dropped Value and Drop Index (example vis-kanban-drag-between-columns).",
           "Rebuilding a scroll view out of Drag — a Group with scrolling enabled handles momentum, wheel and touch for free."
         ],
         "relatedNodes": [
@@ -11830,6 +12075,19 @@
       ],
       "inputs": [
         {
+          "name": "acceptDrops",
+          "displayName": "Accept Drops",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop",
+          "index": 370
+        },
+        {
           "name": "acceptFileDrops",
           "displayName": "Accept File Drops",
           "group": "File Drop",
@@ -11841,6 +12099,18 @@
           "default": false,
           "description": "Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below",
           "index": 350
+        },
+        {
+          "name": "acceptKind",
+          "displayName": "Accept Kind",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up",
+          "index": 371
         },
         {
           "name": "acceptedFileTypes",
@@ -12794,6 +13064,55 @@
           "index": 100010
         },
         {
+          "name": "dragKind",
+          "displayName": "Drag Kind",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Optional name for what this is — \"card\", \"task\". A zone with an Accept Kind only takes sources whose Drag Kind matches",
+          "index": 362
+        },
+        {
+          "name": "dragValue",
+          "displayName": "Drag Value",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value",
+          "index": 361
+        },
+        {
+          "name": "draggable",
+          "displayName": "Draggable",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it",
+          "index": 360
+        },
+        {
+          "name": "dropZoneName",
+          "displayName": "Zone Name",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What a screen reader hears this zone called while a card is moved with the keyboard — \"Thursday\". Falls back to the element's accessible label",
+          "index": 373
+        },
+        {
           "name": "flexDirection",
           "displayName": "Layout",
           "group": "Layout",
@@ -12881,6 +13200,46 @@
           "allowVisualStates": true
         },
         {
+          "name": "holdTime",
+          "displayName": "Hold Time",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0.5,
+          "description": "How long a held press takes to pick up, in seconds",
+          "index": 364
+        },
+        {
+          "name": "holdToDrag",
+          "displayName": "Hold To Drag",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "On touch",
+                "value": "touch"
+              },
+              {
+                "label": "Always",
+                "value": "always"
+              },
+              {
+                "label": "Never",
+                "value": "never"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "touch",
+          "description": "Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves",
+          "index": 363
+        },
+        {
           "name": "justifyContent",
           "displayName": "Justify Content",
           "group": "Align and justify content",
@@ -12919,6 +13278,19 @@
           "default": "flex-start",
           "description": "Where children sit along the layout direction when they do not fill it",
           "index": 14
+        },
+        {
+          "name": "makeRoom",
+          "displayName": "Make Room",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index",
+          "index": 372
         },
         {
           "name": "marginBottom",
@@ -13796,6 +14168,39 @@
           "description": "Fires once Focus, Scroll To Element or Scroll To Index has been carried out"
         },
         {
+          "name": "dragCancelled",
+          "displayName": "Cancelled",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a lifted element is let go over nothing that takes it, or Escape puts it back"
+        },
+        {
+          "name": "dropIndex",
+          "displayName": "Drop Index",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was"
+        },
+        {
+          "name": "dropped",
+          "displayName": "Dropped",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing"
+        },
+        {
           "name": "droppedFile",
           "displayName": "File",
           "group": "File Drop",
@@ -13849,6 +14254,17 @@
           },
           "isSignal": false,
           "description": "Every accepted file in the drop, as an array — a drop can carry more than one"
+        },
+        {
+          "name": "droppedValue",
+          "displayName": "Dropped Value",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "The Drag Value of the element dropped here"
         },
         {
           "name": "failure",
@@ -13939,6 +14355,39 @@
           "description": "True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts"
         },
         {
+          "name": "isDropTarget",
+          "displayName": "Drag Over",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while something this zone takes is held over it — wire it to a background or border so the zone lights up"
+        },
+        {
+          "name": "isLifted",
+          "displayName": "Is Lifted",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while this element is being dragged"
+        },
+        {
+          "name": "landed",
+          "displayName": "Landed",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is dropped on a zone that took it, after the zone's Dropped"
+        },
+        {
           "name": "onClick",
           "displayName": "Click",
           "group": "Events",
@@ -13981,6 +14430,17 @@
           },
           "isSignal": true,
           "description": "Fires when the user starts scrolling"
+        },
+        {
+          "name": "pickedUp",
+          "displayName": "Picked Up",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard"
         },
         {
           "name": "pointerDown",
@@ -14157,6 +14617,35 @@
             ]
           },
           {
+            "condition": "draggable = true",
+            "inputs": [
+              "dragValue",
+              "dragKind",
+              "holdToDrag",
+              "holdTime"
+            ],
+            "outputs": [
+              "pickedUp",
+              "landed",
+              "dragCancelled",
+              "isLifted"
+            ]
+          },
+          {
+            "condition": "acceptDrops = true",
+            "inputs": [
+              "acceptKind",
+              "makeRoom",
+              "dropZoneName"
+            ],
+            "outputs": [
+              "dropped",
+              "droppedValue",
+              "dropIndex",
+              "isDropTarget"
+            ]
+          },
+          {
             "condition": "borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted ",
             "inputs": [
               "borderWidth",
@@ -14233,7 +14722,8 @@
           "ui-icon-feature-strip",
           "ui-stat-tile-row",
           "ui-empty-state",
-          "layout-wrap-a-row-of-content-width-items"
+          "layout-wrap-a-row-of-content-width-items",
+          "vis-kanban-drag-between-columns"
         ],
         "patterns": [
           "Component root: a single Group at the top of every visual component, `flexDirection` column.",
@@ -14345,6 +14835,19 @@
       ],
       "inputs": [
         {
+          "name": "acceptDrops",
+          "displayName": "Accept Drops",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop",
+          "index": 370
+        },
+        {
           "name": "acceptFileDrops",
           "displayName": "Accept File Drops",
           "group": "File Drop",
@@ -14356,6 +14859,18 @@
           "default": false,
           "description": "Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below",
           "index": 350
+        },
+        {
+          "name": "acceptKind",
+          "displayName": "Accept Kind",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up",
+          "index": 371
         },
         {
           "name": "acceptedFileTypes",
@@ -15022,6 +15537,55 @@
           "index": 100010
         },
         {
+          "name": "dragKind",
+          "displayName": "Drag Kind",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Optional name for what this is — \"card\", \"task\". A zone with an Accept Kind only takes sources whose Drag Kind matches",
+          "index": 362
+        },
+        {
+          "name": "dragValue",
+          "displayName": "Drag Value",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value",
+          "index": 361
+        },
+        {
+          "name": "draggable",
+          "displayName": "Draggable",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it",
+          "index": 360
+        },
+        {
+          "name": "dropZoneName",
+          "displayName": "Zone Name",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What a screen reader hears this zone called while a card is moved with the keyboard — \"Thursday\". Falls back to the element's accessible label",
+          "index": 373
+        },
+        {
           "name": "height",
           "displayName": "Height",
           "group": "Dimensions",
@@ -15041,6 +15605,59 @@
           "description": "Height of the element; how the value is read depends on Size Mode",
           "index": 13,
           "allowVisualStates": true
+        },
+        {
+          "name": "holdTime",
+          "displayName": "Hold Time",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0.5,
+          "description": "How long a held press takes to pick up, in seconds",
+          "index": 364
+        },
+        {
+          "name": "holdToDrag",
+          "displayName": "Hold To Drag",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "On touch",
+                "value": "touch"
+              },
+              {
+                "label": "Always",
+                "value": "always"
+              },
+              {
+                "label": "Never",
+                "value": "never"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "touch",
+          "description": "Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves",
+          "index": 363
+        },
+        {
+          "name": "makeRoom",
+          "displayName": "Make Room",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index",
+          "index": 372
         },
         {
           "name": "marginBottom",
@@ -15696,6 +16313,39 @@
           "description": "Fires once this element has been added to the page and can be measured"
         },
         {
+          "name": "dragCancelled",
+          "displayName": "Cancelled",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a lifted element is let go over nothing that takes it, or Escape puts it back"
+        },
+        {
+          "name": "dropIndex",
+          "displayName": "Drop Index",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was"
+        },
+        {
+          "name": "dropped",
+          "displayName": "Dropped",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing"
+        },
+        {
           "name": "droppedFile",
           "displayName": "File",
           "group": "File Drop",
@@ -15749,6 +16399,17 @@
           },
           "isSignal": false,
           "description": "Every accepted file in the drop, as an array — a drop can carry more than one"
+        },
+        {
+          "name": "droppedValue",
+          "displayName": "Dropped Value",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "The Drag Value of the element dropped here"
         },
         {
           "name": "filesDropped",
@@ -15817,6 +16478,39 @@
           "description": "True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts"
         },
         {
+          "name": "isDropTarget",
+          "displayName": "Drag Over",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while something this zone takes is held over it — wire it to a background or border so the zone lights up"
+        },
+        {
+          "name": "isLifted",
+          "displayName": "Is Lifted",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while this element is being dragged"
+        },
+        {
+          "name": "landed",
+          "displayName": "Landed",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is dropped on a zone that took it, after the zone's Dropped"
+        },
+        {
           "name": "onClick",
           "displayName": "Click",
           "group": "Events",
@@ -15848,6 +16542,17 @@
           },
           "isSignal": true,
           "description": "Fires once the image has finished downloading and is on screen"
+        },
+        {
+          "name": "pickedUp",
+          "displayName": "Picked Up",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard"
         },
         {
           "name": "pointerDown",
@@ -15971,6 +16676,35 @@
               "droppedFileType",
               "droppedFileSizeInBytes",
               "isDragOver"
+            ]
+          },
+          {
+            "condition": "draggable = true",
+            "inputs": [
+              "dragValue",
+              "dragKind",
+              "holdToDrag",
+              "holdTime"
+            ],
+            "outputs": [
+              "pickedUp",
+              "landed",
+              "dragCancelled",
+              "isLifted"
+            ]
+          },
+          {
+            "condition": "acceptDrops = true",
+            "inputs": [
+              "acceptKind",
+              "makeRoom",
+              "dropZoneName"
+            ],
+            "outputs": [
+              "dropped",
+              "droppedValue",
+              "dropIndex",
+              "isDropTarget"
             ]
           },
           {
@@ -30357,6 +31091,19 @@
       ],
       "inputs": [
         {
+          "name": "acceptDrops",
+          "displayName": "Accept Drops",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop",
+          "index": 370
+        },
+        {
           "name": "acceptFileDrops",
           "displayName": "Accept File Drops",
           "group": "File Drop",
@@ -30368,6 +31115,18 @@
           "default": false,
           "description": "Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below",
           "index": 350
+        },
+        {
+          "name": "acceptKind",
+          "displayName": "Accept Kind",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up",
+          "index": 371
         },
         {
           "name": "acceptedFileTypes",
@@ -30554,6 +31313,55 @@
           "index": 100010
         },
         {
+          "name": "dragKind",
+          "displayName": "Drag Kind",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Optional name for what this is — \"card\", \"task\". A zone with an Accept Kind only takes sources whose Drag Kind matches",
+          "index": 362
+        },
+        {
+          "name": "dragValue",
+          "displayName": "Drag Value",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value",
+          "index": 361
+        },
+        {
+          "name": "draggable",
+          "displayName": "Draggable",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it",
+          "index": 360
+        },
+        {
+          "name": "dropZoneName",
+          "displayName": "Zone Name",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What a screen reader hears this zone called while a card is moved with the keyboard — \"Thursday\". Falls back to the element's accessible label",
+          "index": 373
+        },
+        {
           "name": "fontFamily",
           "displayName": "Font Family",
           "editorName": "Font Family",
@@ -30681,6 +31489,46 @@
           "allowVisualStates": true
         },
         {
+          "name": "holdTime",
+          "displayName": "Hold Time",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0.5,
+          "description": "How long a held press takes to pick up, in seconds",
+          "index": 364
+        },
+        {
+          "name": "holdToDrag",
+          "displayName": "Hold To Drag",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "On touch",
+                "value": "touch"
+              },
+              {
+                "label": "Always",
+                "value": "always"
+              },
+              {
+                "label": "Never",
+                "value": "never"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "touch",
+          "description": "Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves",
+          "index": 363
+        },
+        {
           "name": "letterSpacing",
           "displayName": "Letter Spacing",
           "editorName": "Letter Spacing",
@@ -30721,6 +31569,19 @@
           "description": "Vertical space each line of text occupies; leave as Auto to follow the font",
           "index": 24,
           "allowVisualStates": true
+        },
+        {
+          "name": "makeRoom",
+          "displayName": "Make Room",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index",
+          "index": 372
         },
         {
           "name": "marginBottom",
@@ -31496,6 +32357,39 @@
           "description": "Fires once this element has been added to the page and can be measured"
         },
         {
+          "name": "dragCancelled",
+          "displayName": "Cancelled",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a lifted element is let go over nothing that takes it, or Escape puts it back"
+        },
+        {
+          "name": "dropIndex",
+          "displayName": "Drop Index",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was"
+        },
+        {
+          "name": "dropped",
+          "displayName": "Dropped",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing"
+        },
+        {
           "name": "droppedFile",
           "displayName": "File",
           "group": "File Drop",
@@ -31549,6 +32443,17 @@
           },
           "isSignal": false,
           "description": "Every accepted file in the drop, as an array — a drop can carry more than one"
+        },
+        {
+          "name": "droppedValue",
+          "displayName": "Dropped Value",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "The Drag Value of the element dropped here"
         },
         {
           "name": "filesDropped",
@@ -31606,6 +32511,39 @@
           "description": "True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts"
         },
         {
+          "name": "isDropTarget",
+          "displayName": "Drag Over",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while something this zone takes is held over it — wire it to a background or border so the zone lights up"
+        },
+        {
+          "name": "isLifted",
+          "displayName": "Is Lifted",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while this element is being dragged"
+        },
+        {
+          "name": "landed",
+          "displayName": "Landed",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is dropped on a zone that took it, after the zone's Dropped"
+        },
+        {
           "name": "onClick",
           "displayName": "Click",
           "group": "Events",
@@ -31615,6 +32553,17 @@
           },
           "isSignal": true,
           "description": "Fires when this element is clicked or tapped"
+        },
+        {
+          "name": "pickedUp",
+          "displayName": "Picked Up",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard"
         },
         {
           "name": "pointerDown",
@@ -31732,6 +32681,35 @@
               "droppedFileType",
               "droppedFileSizeInBytes",
               "isDragOver"
+            ]
+          },
+          {
+            "condition": "draggable = true",
+            "inputs": [
+              "dragValue",
+              "dragKind",
+              "holdToDrag",
+              "holdTime"
+            ],
+            "outputs": [
+              "pickedUp",
+              "landed",
+              "dragCancelled",
+              "isLifted"
+            ]
+          },
+          {
+            "condition": "acceptDrops = true",
+            "inputs": [
+              "acceptKind",
+              "makeRoom",
+              "dropZoneName"
+            ],
+            "outputs": [
+              "dropped",
+              "droppedValue",
+              "dropIndex",
+              "isDropTarget"
             ]
           }
         ]
@@ -34198,6 +35176,19 @@
       "useVariants": true,
       "inputs": [
         {
+          "name": "acceptDrops",
+          "displayName": "Accept Drops",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop",
+          "index": 370
+        },
+        {
           "name": "acceptFileDrops",
           "displayName": "Accept File Drops",
           "group": "File Drop",
@@ -34209,6 +35200,18 @@
           "default": false,
           "description": "Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below",
           "index": 350
+        },
+        {
+          "name": "acceptKind",
+          "displayName": "Accept Kind",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up",
+          "index": 371
         },
         {
           "name": "acceptedFileTypes",
@@ -34770,6 +35773,55 @@
           "index": 100010
         },
         {
+          "name": "dragKind",
+          "displayName": "Drag Kind",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Optional name for what this is — \"card\", \"task\". A zone with an Accept Kind only takes sources whose Drag Kind matches",
+          "index": 362
+        },
+        {
+          "name": "dragValue",
+          "displayName": "Drag Value",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value",
+          "index": 361
+        },
+        {
+          "name": "draggable",
+          "displayName": "Draggable",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it",
+          "index": 360
+        },
+        {
+          "name": "dropZoneName",
+          "displayName": "Zone Name",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "What a screen reader hears this zone called while a card is moved with the keyboard — \"Thursday\". Falls back to the element's accessible label",
+          "index": 373
+        },
+        {
           "name": "endTime",
           "displayName": "End Time",
           "group": "Video",
@@ -34802,6 +35854,46 @@
           "allowVisualStates": true
         },
         {
+          "name": "holdTime",
+          "displayName": "Hold Time",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0.5,
+          "description": "How long a held press takes to pick up, in seconds",
+          "index": 364
+        },
+        {
+          "name": "holdToDrag",
+          "displayName": "Hold To Drag",
+          "group": "Drag Source",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "On touch",
+                "value": "touch"
+              },
+              {
+                "label": "Always",
+                "value": "always"
+              },
+              {
+                "label": "Never",
+                "value": "never"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "touch",
+          "description": "Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves",
+          "index": 363
+        },
+        {
           "name": "loop",
           "displayName": "Loop",
           "group": "Video",
@@ -34811,6 +35903,19 @@
           },
           "isSignal": false,
           "description": "Restarts the video automatically when it reaches the end"
+        },
+        {
+          "name": "makeRoom",
+          "displayName": "Make Room",
+          "group": "Drop Zone",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": true,
+          "description": "Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index",
+          "index": 372
         },
         {
           "name": "marginBottom",
@@ -35607,6 +36712,39 @@
           "description": "Fires once a Video Action has been carried out by the element"
         },
         {
+          "name": "dragCancelled",
+          "displayName": "Cancelled",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a lifted element is let go over nothing that takes it, or Escape puts it back"
+        },
+        {
+          "name": "dropIndex",
+          "displayName": "Drop Index",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "description": "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was"
+        },
+        {
+          "name": "dropped",
+          "displayName": "Dropped",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing"
+        },
+        {
           "name": "droppedFile",
           "displayName": "File",
           "group": "File Drop",
@@ -35660,6 +36798,17 @@
           },
           "isSignal": false,
           "description": "Every accepted file in the drop, as an array — a drop can carry more than one"
+        },
+        {
+          "name": "droppedValue",
+          "displayName": "Dropped Value",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "*"
+          },
+          "isSignal": false,
+          "description": "The Drag Value of the element dropped here"
         },
         {
           "name": "failure",
@@ -35726,6 +36875,39 @@
           },
           "isSignal": false,
           "description": "True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts"
+        },
+        {
+          "name": "isDropTarget",
+          "displayName": "Drag Over",
+          "group": "Drop Zone",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while something this zone takes is held over it — wire it to a background or border so the zone lights up"
+        },
+        {
+          "name": "isLifted",
+          "displayName": "Is Lifted",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "description": "True while this element is being dragged"
+        },
+        {
+          "name": "landed",
+          "displayName": "Landed",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is dropped on a zone that took it, after the zone's Dropped"
         },
         {
           "name": "onCanPlay",
@@ -35803,6 +36985,17 @@
           },
           "isSignal": false,
           "description": "The underlying video element, for a Group to scroll to or a script to reach"
+        },
+        {
+          "name": "pickedUp",
+          "displayName": "Picked Up",
+          "group": "Drag Source",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard"
         },
         {
           "name": "playbackError",
@@ -35953,6 +37146,35 @@
               "droppedFileType",
               "droppedFileSizeInBytes",
               "isDragOver"
+            ]
+          },
+          {
+            "condition": "draggable = true",
+            "inputs": [
+              "dragValue",
+              "dragKind",
+              "holdToDrag",
+              "holdTime"
+            ],
+            "outputs": [
+              "pickedUp",
+              "landed",
+              "dragCancelled",
+              "isLifted"
+            ]
+          },
+          {
+            "condition": "acceptDrops = true",
+            "inputs": [
+              "acceptKind",
+              "makeRoom",
+              "dropZoneName"
+            ],
+            "outputs": [
+              "dropped",
+              "droppedValue",
+              "dropIndex",
+              "isDropTarget"
             ]
           },
           {
@@ -64443,7 +65665,7 @@
           "connections": [
             {
               "fromId": "prompt_input",
-              "fromProperty": "text",
+              "fromProperty": "onTextChanged",
               "toId": "prompt_body",
               "toProperty": "prompt"
             },
@@ -64964,7 +66186,7 @@
           "connections": [
             {
               "fromId": "email_input",
-              "fromProperty": "text",
+              "fromProperty": "onTextChanged",
               "toId": "write_user",
               "toProperty": "value"
             },
@@ -86671,6 +87893,370 @@
               "fromId": "offset_caption",
               "fromProperty": "formatted",
               "toId": "offset_text",
+              "toProperty": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vis-kanban-drag-between-columns",
+      "title": "Kanban board: drag a card to another column, or to another place in its own",
+      "description": "Built from two checkboxes and one Function. Each card is a Group with `Draggable` on, carrying its id as `Drag Value`; each column's list is a Group with `Accept Drops` on. Pick a card up and a see-through copy follows the pointer while the card stays behind, faded. The list under the pointer turns `Drag Over` true (wired here through an Expression to its outline) and, with `Make Room` on, slides its cards apart to show where the drop will land. On touch, a press is held for half a second while a ring fills beside the finger, so a moving finger still scrolls. Letting go fires `Dropped` with `Dropped Value` and `Drop Index`, and the column's `Move card` Function does the move: it takes the card out of the Array it is in and puts it into this one at that index. The engine never moves data itself, so a drop on nothing, or Escape, leaves everything where it was. `Drop Index` counts the other cards only, so it is exactly the index to insert at once the card is out of its old place — that is why the same Function handles a reorder within a column. From the keyboard: Tab to a card, Space picks it up, the arrows move it (up and down within a column, left and right between columns), Enter drops it; each step is announced. The three Arrays are named `kanban-todo`, `kanban-doing` and `kanban-done`, and each card remembers which one it is in (`list`), so the Function needs nothing but the card's id. Each Column also publishes the drop — `Card Dropped`, `Card Id` and `Index` — so whatever owns the board can save the move to a backend; the Arrays are only what is on screen.",
+      "demonstrates": [
+        "Group",
+        "For Each",
+        "Collection2",
+        "JavaScriptFunction",
+        "Expression",
+        "Component Inputs",
+        "Text"
+      ],
+      "components": [
+        {
+          "name": "/Kanban",
+          "nodes": [
+            {
+              "id": "board",
+              "type": "Group",
+              "label": "Board",
+              "parameters": {
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "columnGap": "var(--space-4)",
+                "rowGap": "var(--space-4)",
+                "paddingTop": "var(--space-4)",
+                "paddingLeft": "var(--space-4)",
+                "paddingRight": "var(--space-4)",
+                "paddingBottom": "var(--space-4)",
+                "sizeMode": "contentHeight",
+                "alignItems": "flex-start"
+              },
+              "children": [
+                "col_todo",
+                "col_doing",
+                "col_done"
+              ]
+            },
+            {
+              "id": "col_todo",
+              "type": "/Kanban Column",
+              "parent": "board",
+              "parameters": {
+                "Title": "To do",
+                "List": "kanban-todo"
+              }
+            },
+            {
+              "id": "col_doing",
+              "type": "/Kanban Column",
+              "parent": "board",
+              "parameters": {
+                "Title": "Doing",
+                "List": "kanban-doing"
+              }
+            },
+            {
+              "id": "col_done",
+              "type": "/Kanban Column",
+              "parent": "board",
+              "parameters": {
+                "Title": "Done",
+                "List": "kanban-done"
+              }
+            },
+            {
+              "id": "seed",
+              "type": "JavaScriptFunction",
+              "label": "Starting cards",
+              "parameters": {
+                "functionScript": "// Runs once, when the board loads. Each card says which list it is in, so moving it needs only its id.\nvar cards = [\n  { id: 'card-brief', title: 'Write the brief', list: 'kanban-todo' },\n  { id: 'card-sketch', title: 'Sketch the screens', list: 'kanban-todo' },\n  { id: 'card-copy', title: 'Draft the copy', list: 'kanban-todo' },\n  { id: 'card-build', title: 'Build the page', list: 'kanban-doing' },\n  { id: 'card-review', title: 'Review with the team', list: 'kanban-doing' },\n  { id: 'card-fix', title: 'Fix what the review found', list: 'kanban-doing' },\n  { id: 'card-kickoff', title: 'Kick-off call', list: 'kanban-done' }\n];\n['kanban-todo', 'kanban-doing', 'kanban-done'].forEach(function (name) {\n  Noodl.Arrays[name] = cards\n    .filter(function (card) { return card.list === name; })\n    .map(function (card) { return Noodl.Object.create(card); });\n});\n"
+              }
+            }
+          ],
+          "connections": []
+        },
+        {
+          "name": "/Kanban Column",
+          "nodes": [
+            {
+              "id": "column_inputs",
+              "type": "Component Inputs",
+              "label": "Column in",
+              "ports": [
+                {
+                  "name": "Title",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "List",
+                  "plug": "output",
+                  "type": "*"
+                }
+              ]
+            },
+            {
+              "id": "column",
+              "type": "Group",
+              "label": "Column",
+              "parameters": {
+                "flexDirection": "column",
+                "rowGap": "var(--space-2)",
+                "sizeMode": "contentHeight",
+                "width": {
+                  "value": 260,
+                  "unit": "px"
+                },
+                "paddingTop": "var(--space-3)",
+                "paddingLeft": "var(--space-3)",
+                "paddingRight": "var(--space-3)",
+                "paddingBottom": "var(--space-3)",
+                "borderRadius": 12,
+                "backgroundColor": "var(--muted)"
+              },
+              "children": [
+                "column_title",
+                "list"
+              ]
+            },
+            {
+              "id": "column_title",
+              "type": "Text",
+              "label": "Title",
+              "parent": "column",
+              "parameters": {
+                "fontWeight": 600,
+                "color": "var(--foreground)"
+              }
+            },
+            {
+              "id": "list",
+              "type": "Group",
+              "label": "Cards (drop zone)",
+              "parent": "column",
+              "parameters": {
+                "acceptDrops": true,
+                "acceptKind": "card",
+                "makeRoom": true,
+                "flexDirection": "column",
+                "rowGap": "var(--space-2)",
+                "sizeMode": "contentHeight",
+                "minHeight": {
+                  "value": 160,
+                  "unit": "px"
+                },
+                "borderRadius": 8,
+                "paddingTop": "var(--space-1)",
+                "paddingBottom": "var(--space-1)",
+                "borderStyle": "solid",
+                "borderWidth": 2,
+                "borderColor": "transparent"
+              },
+              "children": [
+                "cards"
+              ]
+            },
+            {
+              "id": "cards",
+              "type": "For Each",
+              "label": "One card per item",
+              "parent": "list",
+              "parameters": {
+                "template": "/Kanban Card"
+              }
+            },
+            {
+              "id": "items",
+              "type": "Collection2",
+              "label": "This column's cards"
+            },
+            {
+              "id": "highlight",
+              "type": "Expression",
+              "label": "Outline while a card is over",
+              "parameters": {
+                "expression": "over ? 'var(--primary)' : 'transparent'"
+              }
+            },
+            {
+              "id": "move",
+              "type": "JavaScriptFunction",
+              "label": "Move card",
+              "parameters": {
+                "functionScript": "// Runs on Dropped only: the three inputs are set just before it fires, and must not run it on their own.\nvar card = Noodl.Objects[Inputs.id];\nvar to = Inputs.list;\nif (!card || !to) return;\nvar from = card.get('list');\nif (from) Noodl.Arrays[from].remove(card);\ncard.set('list', to);\nvar dest = Noodl.Arrays[to];\nvar index = Number(Inputs.index);\nif (!isFinite(index)) index = dest.length;\ndest.addAtIndex(card, Math.max(0, Math.min(index, dest.length)));\n",
+                "runOnChange-in-id": false,
+                "runOnChange-in-list": false,
+                "runOnChange-in-index": false
+              }
+            },
+            {
+              "id": "column_outputs",
+              "type": "Component Outputs",
+              "label": "Column out",
+              "ports": [
+                {
+                  "name": "Card Dropped",
+                  "plug": "input",
+                  "type": "*"
+                },
+                {
+                  "name": "Card Id",
+                  "plug": "input",
+                  "type": "*"
+                },
+                {
+                  "name": "Index",
+                  "plug": "input",
+                  "type": "*"
+                }
+              ]
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "column_inputs",
+              "fromProperty": "Title",
+              "toId": "column_title",
+              "toProperty": "text"
+            },
+            {
+              "fromId": "column_inputs",
+              "fromProperty": "Title",
+              "toId": "list",
+              "toProperty": "dropZoneName"
+            },
+            {
+              "fromId": "column_inputs",
+              "fromProperty": "List",
+              "toId": "items",
+              "toProperty": "collectionId"
+            },
+            {
+              "fromId": "items",
+              "fromProperty": "items",
+              "toId": "cards",
+              "toProperty": "items"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "isDropTarget",
+              "toId": "highlight",
+              "toProperty": "over"
+            },
+            {
+              "fromId": "highlight",
+              "fromProperty": "result",
+              "toId": "list",
+              "toProperty": "borderColor"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "droppedValue",
+              "toId": "move",
+              "toProperty": "in-id"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "dropIndex",
+              "toId": "move",
+              "toProperty": "in-index"
+            },
+            {
+              "fromId": "column_inputs",
+              "fromProperty": "List",
+              "toId": "move",
+              "toProperty": "in-list"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "dropped",
+              "toId": "move",
+              "toProperty": "run"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "dropped",
+              "toId": "column_outputs",
+              "toProperty": "Card Dropped"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "droppedValue",
+              "toId": "column_outputs",
+              "toProperty": "Card Id"
+            },
+            {
+              "fromId": "list",
+              "fromProperty": "dropIndex",
+              "toId": "column_outputs",
+              "toProperty": "Index"
+            }
+          ]
+        },
+        {
+          "name": "/Kanban Card",
+          "nodes": [
+            {
+              "id": "card_inputs",
+              "type": "Component Inputs",
+              "label": "Item in",
+              "ports": [
+                {
+                  "name": "id",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "title",
+                  "plug": "output",
+                  "type": "*"
+                }
+              ]
+            },
+            {
+              "id": "card",
+              "type": "Group",
+              "label": "Card",
+              "parameters": {
+                "draggable": true,
+                "dragKind": "card",
+                "sizeMode": "contentHeight",
+                "paddingTop": "var(--space-3)",
+                "paddingLeft": "var(--space-3)",
+                "paddingRight": "var(--space-3)",
+                "paddingBottom": "var(--space-3)",
+                "borderRadius": 8,
+                "borderStyle": "solid",
+                "borderWidth": 1,
+                "borderColor": "var(--border)",
+                "backgroundColor": "var(--card)"
+              },
+              "children": [
+                "card_title"
+              ]
+            },
+            {
+              "id": "card_title",
+              "type": "Text",
+              "label": "Title",
+              "parent": "card",
+              "parameters": {
+                "color": "var(--card-foreground)"
+              }
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "card_inputs",
+              "fromProperty": "id",
+              "toId": "card",
+              "toProperty": "dragValue"
+            },
+            {
+              "fromId": "card_inputs",
+              "fromProperty": "title",
+              "toId": "card_title",
               "toProperty": "text"
             }
           ]

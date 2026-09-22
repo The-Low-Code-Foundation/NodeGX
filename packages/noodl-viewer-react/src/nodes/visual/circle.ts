@@ -249,5 +249,7 @@ NodeSharedPortDefinitions.addAlignInputs(CircleNode);
 NodeSharedPortDefinitions.addPointerEventOutputs(CircleNode);
 // DEF-029 — file drop, off until the author switches it on.
 NodeSharedPortDefinitions.addFileDropPorts(CircleNode);
+// HLT-017 — drag a card, drop it on a column; off until the author switches either side on.
+NodeSharedPortDefinitions.addDragDropPorts(CircleNode);
 
 export default createNodeFromReactComponent(CircleNode);
