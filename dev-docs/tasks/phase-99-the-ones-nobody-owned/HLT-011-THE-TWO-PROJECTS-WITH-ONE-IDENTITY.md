@@ -14,6 +14,20 @@ fixture is a write to the user's machine, and it outlives the session that made 
 ⚠️ **AC4: the collision on Richard's machine is LEFT, deliberately and explicitly** — re-minting
 an id moves a datastore. The editor now *says* it; the repair is a person's call.
 
+✅ **RULED 2026-09-22 (P99 s21). Richard: *"I'll end up deleting these projects at one point,
+there's a million from all the phases and they're just taking up space. Do whatever."*** So AC4
+closes as **left, by decision, not by omission** — no re-mint, no datastore move. The detection
+ships; the two rows keep their shared `id` until he deletes them.
+
+🔴 **What that ruling does NOT retire.** The detection is the criterion, and it is built and
+driven. The collision on this machine was a *fixture* — P73 `TUT-001` cloned a store entry so a copy
+would inherit `backend_msjck0y2ukxwv` — and the reason it mattered was never the disk space. It was
+that the launcher addressed rows by a field two rows shared, and eight `.find(p => p.id === …)`
+reads answered honestly about the wrong project. That is fixed by addressing rows by their
+directory, and deleting the fixtures neither proves nor unproves it. ⚠️ **A later session must not
+read "Richard deleted the projects" as "the defect is gone"** — the next clone makes another one,
+and the warning is what catches it ([[a-post-drive-control-reads-the-state-the-drive-leaves]]).
+
 **Opened by HLT-003 on 2026-09-21, from a measurement rather than a suspicion. Two different
 projects on this machine carry the same project `id`, and the launcher addresses rows by it.**
 

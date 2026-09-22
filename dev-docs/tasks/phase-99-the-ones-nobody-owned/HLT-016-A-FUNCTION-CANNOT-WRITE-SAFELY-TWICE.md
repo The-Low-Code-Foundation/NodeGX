@@ -27,8 +27,8 @@ queued refusal was consumed by the push's own audit write. Fixed.
 enforces them with triggers, PostgreSQL with CHECK constraints, and both answer a broken rule 400
 / code 142 with the rule in words. HEAD silently dropped the `checks` key and wrote every
 rule-breaking row. 🔴 Found: `classPut` answered **404** for a refusal it did not recognise; a
-broken rule on an edit is now 400. **The index half is done.** Left on HLT-016: (b), and AC6
-(the DBT stream's).
+broken rule on an edit is now 400. **The index half is done.** ✅ **(b) is RULED OUT for now**
+(Richard, 2026-09-22, P99 s21 — see §3). Left on HLT-016: **AC6 only**, and it is the DBT stream's.
 
 ## 1. The person sentence
 
@@ -65,6 +65,21 @@ broken rule on an edit is now 400. **The index half is done.** Left on HLT-016: 
 > compare-and-swap on `PUT` **and** the `unique.where`/`check` index declarations below. (b) is not
 > ruled out. It waits, as this section already says, on whether (a) plus upsert-on-unique can
 > express the invite claim.
+>
+> ✅ **RULED OUT FOR NOW, 2026-09-22 (P99 s21), Richard: *"Ok rule out b for now"*.** Asked with the
+> recommendation that (b) is genuinely hard — `node:sqlite` is synchronous inside a transaction
+> while cloud JS is async, PostgreSQL needs a held pooled connection, and a function that `await`s
+> an HTTP call inside the scope holds a lock across the network — and that **no measured case needs
+> it**: the invite claim (L84) has not been written on (a) and found wanting, it has simply not been
+> written. 🔴 **So this is a ruling on the priority, not a measurement of the gap.** The sentence
+> that reopens it is a real case that (a) plus upsert-on-unique cannot express, measured — not
+> argued. Whoever meets one files a row and quotes this line.
+>
+> ⚠️ **What this closes and what it does not.** HLT-016 closes on (a) + `where` + `checks`, which are
+> built and driven on both engines. **AC6 stays open and is the DBT stream's** — it is the product
+> proving the primitive on its own writes, and it is the only thing that can turn "no measured case
+> needs (b)" from an absence into a measurement
+> ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
 
 **(a) Compare-and-swap on update — recommended as the first half.** `PUT /classes/:c/:id` accepts an
 expected-values clause (header `X-NodeGX-If: {"version": 3}` or a body key the wire can reserve —
