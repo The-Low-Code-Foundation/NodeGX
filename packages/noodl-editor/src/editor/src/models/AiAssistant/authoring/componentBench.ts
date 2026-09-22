@@ -98,6 +98,17 @@ import { WORKBENCH } from '../../../views/VisualCanvas/benchWords';
  * clamps a hand-edited value on the way in.
  */
 import { BENCH_FRAME_KEY, readBenchFrameDefault } from '../../../views/VisualCanvas/benchFrameDefault';
+
+/**
+ * P99 HLT-008 — the board harness's parameters, built by pure functions a `tests-unit` spec can
+ * grade against the node catalog. The previous inline literal set `layout: 'none'` on a Group,
+ * which has no `layout` port, and a spec that read the literal back passed on it.
+ */
+import {
+  ESTIMATED_CONTENT_FRAME_HEIGHT,
+  boardFrameParameters,
+  boardRootParameters
+} from '../../../views/VisualCanvas/boardSurface';
 import { BENCH_SCENARIOS_KEY, readBenchScenarios } from '../../../views/VisualCanvas/benchScenarios';
 import { DEFAULT_BENCH_WIDTH } from '../../../views/VisualCanvas/previewScope';
 
@@ -564,19 +575,8 @@ export const BOARD_ROOT_ID = 'board-root';
 export const boardFrameNodeId = (index: number) => `board-frame-${index}`;
 export const boardInstanceNodeId = (index: number) => `${BENCH_NODE_ID}-${index}`;
 
-/**
- * The height a content-sized frame is *assumed* to be while the board's extent
- * is computed, before anything has rendered.
- *
- * ⚠️ **An estimate, and named as one.** The root Group must be explicitly sized
- * — absolutely positioned children contribute nothing to a parent's content size
- * — so the extent has to be computed before the runtime has laid a single frame
- * out. The editor re-measures the real boxes for its captions, which is
- * `benchSizeLabel`'s standing rule: report the frame that was **measured**, not
- * the one that was asked for. Frames are absolutely positioned and unclipped, so
- * an under-estimate shows the whole frame anyway; it only costs scroll extent.
- */
-export const ESTIMATED_CONTENT_FRAME_HEIGHT = 768;
+/** The estimate a content-sized frame stands in at until measured. Lives in `boardSurface.ts` now. */
+export { ESTIMATED_CONTENT_FRAME_HEIGHT };
 
 /**
  * The board's extent, and the offset the runtime document is drawn at.
@@ -613,8 +613,6 @@ export function boardBounds(frames: BoardFrameMount[]): { minX: number; minY: nu
   return { minX, minY, width: Math.max(1, maxX - minX), height: Math.max(1, maxY - minY) };
 }
 
-/** A `dimension`/`number` port value. See the note on {@link boardHarness}. */
-const px = (value: number) => ({ value, unit: 'px' });
 
 /**
  * The board harness: one component, one root Group, one frame per picked
@@ -640,7 +638,8 @@ const px = (value: number) => ({ value, unit: 'px' });
  *   would read on screen as "the board is broken" and in the graph as correct.
  *   Verified against the corpus: every stored `width` in 129 projects is
  *   `{"value":N,"unit":"px"}`.
- * - **`layout: 'none'` on the root**, which is what makes the children
+ * - **`flexDirection: 'none'` on the root** (🔴 it said `layout`, a port Group
+ *   does not have, until P99 HLT-008 — see `boardRootParameters`), which is what makes the children
  *   absolutely positioned at all: `Layout.size` sets `position: 'absolute'` from
  *   `props.parentLayout === 'none'` (`layout.ts:56`), and `align` then defaults
  *   an absolute child to `left: 0; top: 0` (`layout.ts:120`). The offsets are
@@ -658,18 +657,7 @@ export function boardHarness(frames: BoardFrameMount[]): ComponentModel {
     type: 'Group',
     x: 0,
     y: 0,
-    parameters: {
-      // Named rather than defaulted, because this is BEN-001's warning exactly:
-      // the mode is what decides whether `height` is read at all.
-      sizeMode: frame.height === null ? 'contentHeight' : 'explicit',
-      width: px(frame.width),
-      // Omitted entirely when the content decides it. Sending a height that
-      // `contentHeight` ignores would put a number in the graph that nothing
-      // reads — the kind of parameter a reader later mistakes for the answer.
-      ...(frame.height === null ? {} : { height: px(frame.height) }),
-      marginLeft: px(frame.x - bounds.minX),
-      marginTop: px(frame.y - bounds.minY)
-    },
+    parameters: boardFrameParameters(frame, bounds, index),
     children: [
       {
         id: boardInstanceNodeId(index),
@@ -692,12 +680,7 @@ export function boardHarness(frames: BoardFrameMount[]): ComponentModel {
           type: 'Group',
           x: 0,
           y: 0,
-          parameters: {
-            layout: 'none',
-            sizeMode: 'explicit',
-            width: px(bounds.width),
-            height: px(bounds.height)
-          },
+          parameters: boardRootParameters(bounds),
           children
         }
       ],
@@ -819,7 +802,7 @@ export function buildBoardExport({
   json.metadata = { ...(json.metadata ?? {}) };
 
   const counted = mounts.length === 1 ? '1 component' : `${mounts.length} components`;
-  let summary = `${counted} on the ${WORKBENCH} board.`;
+  let summary = `${counted} on the board.`;
   if (missing.length > 0) {
     summary += ` Dropped ${missing.map((n) => `"${n}"`).join(', ')}: no longer in this project.`;
   }

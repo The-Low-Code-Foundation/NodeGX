@@ -120,13 +120,16 @@ describe('TVW-008 — the harness graph', () => {
     expect(harness.graph.roots[0].id).toBe(BOARD_ROOT_ID);
   });
 
-  it('gives the root `layout: none`, which is what makes the frames absolute at all', () => {
+  it('gives the root `flexDirection: none`, which is what makes the frames absolute at all', () => {
     // `Layout.size` sets `position: absolute` from `parentLayout === 'none'`
-    // (`layout.ts:56`); `align` then defaults such a child to left:0/top:0
-    // (`layout.ts:120`). Without this the frames stack in a column and every
-    // stored position is ignored.
+    // (`layout.ts:56`), and Group's port for that is `flexDirection`.
+    // 🔴 P99 HLT-008: this spec used to assert `parameters.layout === 'none'` — a
+    // port Group does not have — and passed while every frame stacked in a
+    // column, exactly as the comment above it warned. The port NAME is graded
+    // against the node catalog in `tests-unit/hlt-008`; this only pins the value.
     const harness = boardHarness([mount()]);
-    expect(harness.graph.roots[0].parameters.layout).toBe('none');
+    expect(harness.graph.roots[0].parameters.flexDirection).toBe('none');
+    expect('layout' in harness.graph.roots[0].parameters).toBe(false);
   });
 
   it('adds 2N nodes — a frame and an instance each — and not N²', () => {

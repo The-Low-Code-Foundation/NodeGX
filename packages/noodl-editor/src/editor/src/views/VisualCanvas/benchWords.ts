@@ -89,5 +89,21 @@ export function benchCaption(targetLabel: string): string {
  */
 export const BOARD = 'Board';
 
-/** The chooser row that switches to it, in the same voice as {@link OPEN_ON_WORKBENCH}. */
-export const OPEN_BOARD = `${WORKBENCH} ${BOARD.toLowerCase()}`;
+/**
+ * The chooser row that switches to it.
+ *
+ * 🔴 **It said "Workbench board" until P99 HLT-008 B1**, and Richard read it while standing on the
+ * board as *"this is the Workbench"*. The board is a surface of its own with its own name; a row
+ * that prefixes another surface's name to it is telling a person they are somewhere they are not.
+ */
+export const OPEN_BOARD = BOARD;
+
+/**
+ * The heading over a list of components when the board is what is showing.
+ *
+ * P99 HLT-008 B1 — on the board, a list headed `Workbench` read as *"you are on the Workbench"*.
+ * The board's own `+` picker adds to the **board**, so that heading was simply wrong there; the
+ * scope menu's list does open a component on the Workbench, and each row's hint and the chip
+ * switching to its name say so the moment one is picked. See `scopeChromeLabels`.
+ */
+export const COMPONENTS_HEADING = 'Components';

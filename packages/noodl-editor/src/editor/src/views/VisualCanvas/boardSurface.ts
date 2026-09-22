@@ -207,7 +207,15 @@ export interface BoardViewport {
  */
 export const MIN_BOARD_ZOOM = 0.1;
 export const MAX_BOARD_ZOOM = 4;
-export const DEFAULT_BOARD_VIEWPORT: BoardViewport = { x: BOARD_GUTTER, y: BOARD_GUTTER, zoom: 1 };
+/**
+ * How far below the surface's top edge the board's first row starts.
+ *
+ * P99 HLT-008 — at `BOARD_GUTTER` the first frame's caption (drawn *above* its frame) sat at 27px,
+ * under the `Add components` button pinned at 8px in the same corner: the first thing on the board
+ * was a caption half-covered by the board's own control. This clears the button and the caption.
+ */
+export const BOARD_TOP_INSET = BOARD_GUTTER + 40;
+export const DEFAULT_BOARD_VIEWPORT: BoardViewport = { x: BOARD_GUTTER, y: BOARD_TOP_INSET, zoom: 1 };
 
 /** Clamped, and a non-finite zoom reads as 1 rather than as a blank board. */
 export function clampBoardZoom(zoom: number): number {
@@ -302,4 +310,210 @@ export function boardExportSignature(
   origin: { minX: number; minY: number }
 ): string {
   return `${frames.map((frame) => frame.target).join(NAME_SEPARATOR)}@${origin.minX},${origin.minY}`;
+}
+
+// ── P99 HLT-008 — the frames as a person sees them ──────────────────────────────────────────────
+
+/**
+ * The height a content-sized frame is *assumed* to be before the board has measured it.
+ *
+ * ⚠️ **An estimate, and named as one**, and since HLT-008 only a fallback. It used to be the
+ * height every content-sized frame was *drawn* at: the board's one `<webview>` was sized to the
+ * estimate and painted white across its whole box, so a `Primary Button` with no saved size stood
+ * in a 768px white slab (Richard's B2). The editor now measures each frame's real box in the
+ * running client ({@link BOARD_MEASURE_EXPRESSION}) and this number only stands in until the first
+ * answer arrives. The root Group still needs it, because an absolutely positioned child contributes
+ * nothing to its parent's size and the extent has to exist before anything has rendered.
+ */
+export const ESTIMATED_CONTENT_FRAME_HEIGHT = 768;
+
+/** A `dimension` port value. `{ value, unit: 'px' }`, never a bare number — see `boardFrameParameters`. */
+const px = (value: number) => ({ value, unit: 'px' });
+
+/**
+ * The CSS class every frame Group carries, so the editor can find and measure it in the client.
+ *
+ * A class rather than a DOM walk from `#root`, because the runtime's wrapper depth is the
+ * runtime's business: a measurement that counted `div`s would break the first time the viewer
+ * gained a wrapper, and it would break by measuring the wrong box rather than by failing.
+ */
+export const BOARD_FRAME_CLASS = 'nodegx-board-frame';
+
+/** The per-frame class, carrying the frame's index in `boardFrameMounts` order. */
+export const boardFrameClass = (index: number) => `${BOARD_FRAME_CLASS}-${index}`;
+
+/**
+ * The board root Group's parameters.
+ *
+ * 🔴 **`flexDirection: 'none'`, and until HLT-008 this said `layout: 'none'` — a port Group does
+ * not have.** Group's layout input is named `flexDirection` (`group.ts`, *Layout* in the panel);
+ * `none` is what calls `setLayout('none')`, which is what makes `Layout.size` give each child
+ * `position: absolute`. `layout` was stored, exported and ignored, so every frame fell into the
+ * default column: frame *n* was drawn below the sum of the heights of the frames before it, while
+ * the editor drew its border and caption at the stored coordinate — content 46px under its own
+ * frame on the fixture, and further on every frame after. The spec that pinned this read the
+ * parameter back out of the harness (`parameters.layout === 'none'`) and passed on the defect; the
+ * spec that replaces it grades every key against the node catalog's declared inputs for `Group`
+ * ([[an-inert-parameter-in-a-corpus-example-teaches-a-lie]], arriving in the tool's own harness).
+ */
+export function boardRootParameters(extent: { width: number; height: number }): Record<string, unknown> {
+  return {
+    flexDirection: 'none',
+    sizeMode: 'explicit',
+    width: px(extent.width),
+    height: px(extent.height)
+  };
+}
+
+/**
+ * One frame Group's parameters.
+ *
+ * - **`sizeMode`** named rather than defaulted: it decides whether `height` is read at all
+ *   (`layout.ts`), which is BEN-001's warning about wrappers.
+ * - **`{ value, unit: 'px' }`**: `width`/`height` are `dimension` ports whose default unit is `%`,
+ *   so a bare `768` would be 768 percent.
+ * - **`marginLeft`/`marginTop`** are the offsets from the root's origin — there are no `left`/`top`
+ *   ports — normalised through the board's `minX`/`minY`.
+ * - **`cssClassName`** is how the editor finds the frame to measure it. See {@link BOARD_FRAME_CLASS}.
+ */
+export function boardFrameParameters(
+  frame: { x: number; y: number; width: number; height: number | null },
+  origin: { minX: number; minY: number },
+  index: number
+): Record<string, unknown> {
+  return {
+    sizeMode: frame.height === null ? 'contentHeight' : 'explicit',
+    width: px(frame.width),
+    // Omitted when the content decides it: a height `contentHeight` ignores is a number nothing reads.
+    ...(frame.height === null ? {} : { height: px(frame.height) }),
+    marginLeft: px(frame.x - origin.minX),
+    marginTop: px(frame.y - origin.minY),
+    cssClassName: `${BOARD_FRAME_CLASS} ${boardFrameClass(index)}`
+  };
+}
+
+/**
+ * What the editor runs inside the board's client to read every frame's real box.
+ *
+ * Returns `[index, width, height]` triples as JSON. Offsets, not `getBoundingClientRect`: the
+ * client document is never transformed (the editor scales the `<webview>` from outside), so layout
+ * pixels are board pixels.
+ */
+export const BOARD_MEASURE_EXPRESSION = `JSON.stringify(Array.from(document.querySelectorAll('.${BOARD_FRAME_CLASS}')).map(function (el) {
+  var m = /${BOARD_FRAME_CLASS}-(\\d+)/.exec(String(el.className));
+  return [m ? Number(m[1]) : -1, el.offsetWidth, el.offsetHeight];
+}))`;
+
+/** A frame's measured box, by index. */
+export type BoardMeasured = ReadonlyArray<{ width: number; height: number } | undefined>;
+
+/**
+ * Parse what {@link BOARD_MEASURE_EXPRESSION} answered. Anything unusable is simply not a
+ * measurement — the caller keeps its estimate — because a board that refused to draw over a
+ * malformed reply would be worse than one that drew the estimate.
+ */
+export function readBoardMeasure(raw: unknown, count: number): BoardMeasured {
+  const out: Array<{ width: number; height: number } | undefined> = new Array(Math.max(0, count)).fill(undefined);
+  let rows: unknown;
+  try {
+    rows = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch (error) {
+    return out;
+  }
+  if (!Array.isArray(rows)) return out;
+  for (const row of rows) {
+    if (!Array.isArray(row) || row.length < 3) continue;
+    const [index, width, height] = row;
+    if (!Number.isInteger(index) || index < 0 || index >= count) continue;
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) continue;
+    out[index] = { width, height };
+  }
+  return out;
+}
+
+/** Whether two measurements are the same picture — so a poll that changed nothing renders nothing. */
+export function sameBoardMeasure(a: BoardMeasured, b: BoardMeasured): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((box, i) => {
+    const other = b[i];
+    if (!box || !other) return box === other;
+    return Math.round(box.width) === Math.round(other.width) && Math.round(box.height) === Math.round(other.height);
+  });
+}
+
+/** One frame's box in the board document's own pixels (after the `minX`/`minY` shift). */
+export interface BoardFrameBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  /** False while the height is still {@link ESTIMATED_CONTENT_FRAME_HEIGHT}. */
+  measured: boolean;
+}
+
+/**
+ * Every frame's box as a person sees it: where it is (including mid-drag), and how tall it really is.
+ *
+ * 🔴 **One function feeds the border, the caption, the clip and the extent**, so the four cannot
+ * disagree — B5 was the white slab staying where the frame had been while the caption and content
+ * moved, i.e. two readers of a frame's position with two answers.
+ *
+ * - A stored height wins (the author said so); then the client's measurement; then the estimate.
+ * - `live` is the frame being dragged and where it is now, in document pixels.
+ */
+export function boardFrameBoxes(
+  mounts: ReadonlyArray<{ x: number; y: number; width: number; height: number | null }>,
+  origin: { minX: number; minY: number },
+  measured: BoardMeasured,
+  live?: { index: number; x: number; y: number } | null
+): BoardFrameBox[] {
+  return mounts.map((mount, index) => {
+    const seen = measured[index];
+    const height = mount.height ?? (seen ? seen.height : ESTIMATED_CONTENT_FRAME_HEIGHT);
+    const moving = live && live.index === index;
+    return {
+      x: moving ? live.x : mount.x - origin.minX,
+      y: moving ? live.y : mount.y - origin.minY,
+      width: mount.width,
+      height: Math.max(1, Math.round(height)),
+      measured: mount.height !== null || !!seen
+    };
+  });
+}
+
+/**
+ * The `clip-path` that cuts the board's one `<webview>` down to its frames.
+ *
+ * 🔴 **This is B3, B5 and half of B2 in one declaration, and it is a hit-test fix before it is a
+ * paint fix.** The board draws every frame inside ONE `<webview>` sized to the union of all of
+ * them. Painted, that box was a single white slab with the 48px gutters *inside* it — Richard's
+ * "flush, no gutter". And a guest view takes every pointer and wheel event over its whole box, so
+ * the board's own pan and zoom handlers saw nothing over any of it — "the slabs eat the canvas
+ * until it cannot be panned". Measured on the running board before this was written: a wheel over
+ * a gutter panned **nothing** without the clip and **panned** with it, while a wheel inside a frame
+ * still went to the client either way (it has to: design mode selects by clicking inside a frame).
+ *
+ * One subpath per frame, all the same winding, so overlapping frames union rather than cancel.
+ * Coordinates are the `<webview>`'s own, before the board's zoom transform, which is what makes the
+ * clip hold at every zoom.
+ */
+export function boardClipPath(boxes: readonly BoardFrameBox[]): string {
+  if (boxes.length === 0) return 'inset(100%)';
+  const r = (n: number) => Math.round(n);
+  const sub = boxes.map((b) => `M${r(b.x)} ${r(b.y)}H${r(b.x + b.width)}V${r(b.y + b.height)}H${r(b.x)}Z`);
+  return `path('${sub.join(' ')}')`;
+}
+
+/** The board document's size: every frame's box, measured, and never smaller than the export's extent. */
+export function boardDocumentExtent(
+  boxes: readonly BoardFrameBox[],
+  exportExtent: { width: number; height: number }
+): { width: number; height: number } {
+  let width = exportExtent.width;
+  let height = exportExtent.height;
+  for (const box of boxes) {
+    width = Math.max(width, box.x + box.width);
+    height = Math.max(height, box.y + box.height);
+  }
+  return { width: Math.max(1, Math.ceil(width)), height: Math.max(1, Math.ceil(height)) };
 }

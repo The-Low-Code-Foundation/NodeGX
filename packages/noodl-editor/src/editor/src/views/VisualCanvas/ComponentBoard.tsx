@@ -53,18 +53,26 @@ import { revealBenchTarget } from './benchRequest';
 import {
   BOARD_ADD,
   BOARD_ADD_ALL,
+  BOARD_MEASURE_EXPRESSION,
   BOARD_EMPTY_BODY,
   BOARD_EMPTY_TITLE,
   DEFAULT_BOARD_VIEWPORT,
   boardExportSignature,
   boardFrameCaption,
+  boardClipPath,
+  boardDocumentExtent,
+  boardFrameBoxes,
   boardFrameCaptionText,
   boardPickerRows,
+  isBoardDrag,
+  readBoardMeasure,
+  sameBoardMeasure,
+  type BoardMeasured,
   panBoard,
   zoomBoardAt,
   type BoardViewport
 } from './boardSurface';
-import { benchTargets, readMenuComponents, type PreviewScope } from './previewScope';
+import { BOARD_SCOPE, benchTargets, readMenuComponents, scopeChromeLabels, type PreviewScope } from './previewScope';
 import { useBenchBoard } from './useBenchBoard';
 import css from './ComponentBoard.module.scss';
 
@@ -83,6 +91,25 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
   const [dragging, setDragging] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const surfaceRef = useRef<HTMLDivElement>(null);
+  /**
+   * P99 HLT-008 — the frame being dragged and where it is now, in document pixels.
+   *
+   * 🔴 B5: the drag used to move the caption (react-rnd) and the content (a `parameterChanged` to
+   * the client) while the white box the frame occupied stayed where it was, because nothing else
+   * knew the frame was moving. Now the one live position feeds the chrome, the clip and the extent.
+   */
+  const [live, setLive] = useState<{ index: number; x: number; y: number } | null>(null);
+  /** Every frame's real box, as the client laid it out. See `BOARD_MEASURE_EXPRESSION`. */
+  const [measured, setMeasured] = useState<BoardMeasured>([]);
+  const webviewRef = useRef<Electron.WebviewTag | null>(null);
+  /**
+   * 🔴 B4 — a press on a caption's name that became a drag must not also open the component.
+   * The name sits inside the drag handle, the frame travels with the pointer, so the release lands
+   * on the same button and the browser calls that a click. Set by a drag that crossed the
+   * threshold, consumed by the click that follows it.
+   */
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const suppressOpenRef = useRef(false);
 
   /**
    * The project revision this surface last rebuilt against.
@@ -130,6 +157,61 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
 
   const viewer = useSandboxViewer({ json: result?.json, useSampleData: true, signedIn: true, designMode });
   const clientId = viewer.clientId;
+
+  const attachWebview = useCallback(
+    (element: Electron.WebviewTag | null) => {
+      webviewRef.current = element;
+      viewer.attachWebview(element);
+    },
+    [viewer.attachWebview]
+  );
+
+  /**
+   * Ask the client how big each frame really is.
+   *
+   * 🔴 **B2's defect was a guess drawn as a size.** A frame with no saved height is sized by its
+   * content, which only the client knows; the board used to draw the 768px estimate instead, so
+   * one button stood in a stage-height white slab. A poll rather than an event because the
+   * content changes for reasons the board does not see (an edit arriving on `modelUpdate`, a font
+   * loading), and one `executeJavaScript` every half second on a surface holding a handful of
+   * frames is nothing. A poll that changed nothing renders nothing (`sameBoardMeasure`).
+   *
+   * ⚠️ `executeJavaScript` **throws synchronously** on a `<webview>` that is not attached or not
+   * yet `dom-ready` — the defect that once unmounted this whole preview (`applyInspectScript`). So
+   * the call is inside a `try` as well as behind a `.catch`, and both mean "not yet".
+   */
+  const frameCount = mounts.length;
+  useEffect(() => {
+    if (!result?.json || frameCount === 0) return;
+    let cancelled = false;
+    const poll = () => {
+      const element = webviewRef.current;
+      if (!element) return;
+      let reply: Promise<unknown> | undefined;
+      try {
+        reply = element.executeJavaScript(BOARD_MEASURE_EXPRESSION);
+      } catch (error) {
+        return;
+      }
+      reply
+        ?.then((raw) => {
+          if (cancelled) return;
+          const next = readBoardMeasure(raw, frameCount);
+          setMeasured((current) => (sameBoardMeasure(current, next) ? current : next));
+        })
+        .catch(() => undefined);
+    };
+    poll();
+    const timer = window.setInterval(poll, 500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [result, frameCount]);
+
+  const boxes = useMemo(() => boardFrameBoxes(mounts, bounds, measured, live), [mounts, bounds, measured, live]);
+  const extent = useMemo(() => boardDocumentExtent(boxes, bounds), [boxes, bounds]);
+  const clipPath = useMemo(() => boardClipPath(boxes), [boxes]);
 
   /** Push a frame's position to the running client. Two parameters, no rebuild. */
   const sendPosition = useCallback(
@@ -187,6 +269,15 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
    */
   const onBackgroundMouseDown = useCallback((event: React.MouseEvent) => {
     if (event.button !== 0 && event.button !== 1) return;
+    /**
+     * 🔴 P99 HLT-008 B6 — a press on a frame's caption is a frame drag, not a pan. The caption is
+     * inside this surface, so its `mousedown` bubbled here too and BOTH ran: react-rnd moved the
+     * frame with the pointer while this moved the whole document the same way under it, which a
+     * person sees as the canvas sliding off in the opposite direction to their drag. Buttons are
+     * excluded for the same reason: a press on one is a press, not the start of a pan.
+     */
+    const target = event.target as Element | null;
+    if (target && typeof target.closest === 'function' && target.closest('[data-board-handle], button')) return;
     const start = { x: event.clientX, y: event.clientY };
     let last = start;
     setDragging('');
@@ -228,14 +319,19 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
           style={{
             transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
             transformOrigin: '0 0',
-            width: `${bounds.width}px`,
-            height: `${bounds.height}px`
+            width: `${extent.width}px`,
+            height: `${extent.height}px`
           }}
         >
           {result?.json ? (
             <webview
               className={css.Webview}
-              ref={viewer.attachWebview}
+              ref={attachWebview}
+              // 🔴 P99 HLT-008 — the one `<webview>` is cut down to its frames, so the gutters are
+              // the board's again: painted as the board, and answering the board's pan and zoom.
+              // See `boardClipPath` for the measurement that says this moves hit-testing too.
+              style={{ clipPath }}
+              data-test="board-webview"
               // eslint-disable-next-line react/no-unknown-property
               partition={SANDBOX_PARTITION}
               // eslint-disable-next-line react/no-unknown-property
@@ -250,26 +346,48 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
           {dragging !== null && <div className={css.DragShield} data-test="board-drag-shield" />}
 
           {mounts.map((mount, index) => {
-            const caption = boardFrameCaption({
+            const box = boxes[index];
+            const seen = measured[index];
+            const captionInput = {
               target: mount.target,
               instances: instanceCountOf(mount.target),
               width: mount.width,
               height: mount.height,
+              // Measured beats asked-for: `768 × 46`, not `768 × auto`.
+              measured: seen,
               scenario: mount.scenario
-            });
+            };
+            const caption = boardFrameCaption(captionInput);
 
             return (
               <Rnd
                 key={mount.target}
                 className={css.Frame}
                 scale={viewport.zoom}
-                position={{ x: mount.x - bounds.minX, y: mount.y - bounds.minY }}
-                size={{ width: mount.width, height: mount.height ?? 'auto' }}
+                position={{ x: box.x, y: box.y }}
+                // The border is the frame's REAL box. With `height: 'auto'` over absolutely
+                // positioned children it was 0px tall, so a content-sized frame had no border at
+                // all and the white slab was the only thing saying where it was.
+                size={{ width: box.width, height: box.height }}
                 enableResizing={false}
                 dragHandleClassName={css.Caption}
-                onDragStart={() => setDragging(mount.target)}
-                onDrag={(_event, data) => sendPosition(index, data.x, data.y)}
+                onDragStart={(_event, data) => {
+                  dragStartRef.current = { x: data.x, y: data.y };
+                  suppressOpenRef.current = false;
+                  setDragging(mount.target);
+                }}
+                onDrag={(_event, data) => {
+                  setLive({ index, x: data.x, y: data.y });
+                  sendPosition(index, data.x, data.y);
+                }}
                 onDragStop={(_event, data) => {
+                  const start = dragStartRef.current;
+                  dragStartRef.current = null;
+                  // Surface pixels, before the zoom divide — `BOARD_DRAG_THRESHOLD`'s own rule.
+                  if (start && isBoardDrag((data.x - start.x) * viewport.zoom, (data.y - start.y) * viewport.zoom)) {
+                    suppressOpenRef.current = true;
+                  }
+                  setLive(null);
                   setDragging(null);
                   // The only write. `moveBoardFrame` returns the same array for
                   // a no-op, so a click that wobbled does not dirty the project.
@@ -280,19 +398,21 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
                 <div className={css.FrameBorder} />
                 <div
                   className={css.Caption}
-                  title={boardFrameCaptionText({
-                    target: mount.target,
-                    instances: instanceCountOf(mount.target),
-                    width: mount.width,
-                    height: mount.height,
-                    scenario: mount.scenario
-                  })}
+                  title={boardFrameCaptionText(captionInput)}
+                  data-board-handle
                   data-test={`board-caption-${mount.target}`}
                 >
                   <button
                     type="button"
                     className={css.CaptionName}
-                    onClick={() => openOnBench(mount.target)}
+                    onClick={() => {
+                      // B4: the release of a drag is not a request to leave the board.
+                      if (suppressOpenRef.current) {
+                        suppressOpenRef.current = false;
+                        return;
+                      }
+                      openOnBench(mount.target);
+                    }}
                     title={`Open ${caption.label} on the ${WORKBENCH}`}
                     data-test={`board-open-${mount.target}`}
                   >
@@ -352,6 +472,7 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
 
       {pickerOpen && (
         <BoardPicker
+          heading={scopeChromeLabels(BOARD_SCOPE).boardPickerHeading ?? ''}
           rows={rows}
           onPick={board.add}
           onUnpick={board.remove}
@@ -365,6 +486,8 @@ export function ComponentBoard({ designMode, onScopeChange, onFrameCountChange }
 }
 
 interface BoardPickerProps {
+  /** P99 HLT-008 B1 — was a hardcoded `Workbench` on a list that adds to the board. */
+  heading: string;
   rows: ReturnType<typeof boardPickerRows>;
   onPick: (target: string) => void;
   onUnpick: (target: string) => void;
@@ -381,7 +504,7 @@ interface BoardPickerProps {
  * that dismissed itself would make putting three buttons side by side — the
  * sentence this whole task exists for — three round trips.
  */
-function BoardPicker({ rows, onPick, onUnpick, onAddAll, canAddAll, onClose }: BoardPickerProps) {
+function BoardPicker({ heading, rows, onPick, onUnpick, onAddAll, canAddAll, onClose }: BoardPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -402,7 +525,7 @@ function BoardPicker({ rows, onPick, onUnpick, onAddAll, canAddAll, onClose }: B
   return (
     <div className={css.Picker} ref={rootRef} role="listbox" aria-multiselectable data-test="board-picker">
       <div className={css.PickerHead}>
-        <span>{WORKBENCH}</span>
+        <span data-test="board-picker-heading">{heading}</span>
         {canAddAll && (
           <button type="button" className={css.PickerAddAll} onClick={onAddAll} data-test="board-add-all">
             {BOARD_ADD_ALL}

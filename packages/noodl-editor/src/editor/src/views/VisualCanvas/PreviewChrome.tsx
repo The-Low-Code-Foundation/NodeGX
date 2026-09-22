@@ -37,11 +37,11 @@ import {
   matchingPreset,
   readMenuComponents,
   scopeChipIconKind,
-  scopeChipLabel,
+  scopeChromeLabels,
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
-import { OPEN_BOARD, WORKBENCH } from './benchWords';
+import { WORKBENCH } from './benchWords';
 import css from './PreviewChrome.module.scss';
 
 export interface PreviewScopeControlProps {
@@ -122,6 +122,8 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
   } as const;
 
   const isBench = scope.mode === 'bench';
+  // P99 HLT-008 B1 — every word this control draws, per mode, from one graded place.
+  const labels = scopeChromeLabels(scope);
 
   return (
     <div className={css.ScopeRoot} ref={rootRef}>
@@ -134,7 +136,7 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
         data-test="preview-scope-chip"
       >
         <Icon icon={SCOPE_CHIP_ICONS[scopeChipIconKind(scope)]} size={IconSize.Small} />
-        <span className={css.ScopeLabel}>{scopeChipLabel(scope)}</span>
+        <span className={css.ScopeLabel}>{labels.chip}</span>
         <Icon icon={IconName.CaretDown} size={IconSize.Small} />
       </button>
 
@@ -158,7 +160,7 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
               data-test="preview-scope-app"
             >
               <Icon icon={IconName.Home} size={IconSize.Small} />
-              <span className={css.ScopeItemLabel}>App preview</span>
+              <span className={css.ScopeItemLabel}>{labels.appRow}</span>
               <span className={css.ScopeItemHint}>the whole project, as it ships</span>
             </button>
 
@@ -182,7 +184,7 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
               data-test="preview-scope-board"
             >
               <Icon icon={SCOPE_CHIP_ICONS.board} size={IconSize.Small} />
-              <span className={css.ScopeItemLabel}>{OPEN_BOARD}</span>
+              <span className={css.ScopeItemLabel}>{labels.boardRow}</span>
               <span className={css.ScopeItemHint}>components side by side, at their own sizes</span>
             </button>
 
@@ -197,7 +199,7 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
               heading is what makes "No component matches" legible as a failed
               search rather than an empty feature.
             */}
-            <div className={css.ScopeHeading}>{WORKBENCH}</div>
+            <div className={css.ScopeHeading}>{labels.listHeading}</div>
 
             {targets.length === 0 && (
               <div className={css.ScopeEmpty}>

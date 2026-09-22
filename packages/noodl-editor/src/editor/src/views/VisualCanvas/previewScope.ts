@@ -20,7 +20,7 @@
 
 import { CLOUD_SHEET } from '../panels/ComponentsPanelNew/types';
 
-import { BOARD } from './benchWords';
+import { BOARD, COMPONENTS_HEADING, OPEN_BOARD, WORKBENCH } from './benchWords';
 
 /**
  * The three modes of the one surface.
@@ -415,6 +415,45 @@ export function scopeChipIconKind(scope: PreviewScope): 'app' | 'component' | 'b
       return 'component';
     case 'board':
       return 'board';
+    default:
+      return assertNeverScope(scope);
+  }
+}
+
+/** Every label the preview chrome draws for one mode. See {@link scopeChromeLabels}. */
+export interface ScopeChromeLabels {
+  /** The chip — the trigger of the scope menu. */
+  chip: string;
+  /** The scope menu's `App preview` row. */
+  appRow: string;
+  /** The scope menu's row that switches to the board. */
+  boardRow: string;
+  /** The heading over the scope menu's list of components. */
+  listHeading: string;
+  /** The heading of the board's own `+` picker; `null` where there is no board to add to. */
+  boardPickerHeading: string | null;
+}
+
+/**
+ * Every word the preview chrome draws, per mode, from one place.
+ *
+ * 🔴 **P99 HLT-008 B1.** Richard stood on the board and read `Workbench` twice — as the heading of
+ * the board's own `+` picker (a hardcoded `<span>{WORKBENCH}</span>`) and in the chooser's
+ * *"Workbench board"* row under a bare `Workbench` heading — while the chip, the one control every
+ * spec graded, correctly said `Board`. A spec over the chip alone could not see either, so every
+ * label the chrome renders comes from here and the spec enumerates them all per mode.
+ *
+ * ⚠️ Derived from `scope.mode` through an exhaustive switch rather than from a hardcoded `'Board'`,
+ * which would be a second copy of the mode.
+ */
+export function scopeChromeLabels(scope: PreviewScope): ScopeChromeLabels {
+  const shared = { chip: scopeChipLabel(scope), appRow: 'App preview', boardRow: OPEN_BOARD };
+  switch (scope.mode) {
+    case 'app':
+    case 'bench':
+      return { ...shared, listHeading: WORKBENCH, boardPickerHeading: null };
+    case 'board':
+      return { ...shared, listHeading: COMPONENTS_HEADING, boardPickerHeading: COMPONENTS_HEADING };
     default:
       return assertNeverScope(scope);
   }
