@@ -3,6 +3,41 @@
 **P94 ruled the Styles panel's shape and closed on Richard's look. These two were never in front of
 him.**
 
+## ✅ (b) BUILT 2026-09-22 (s15) — AC2, AC3, AC4 ✅. 📋 (a) waits on a ruling; AC1 and AC5 go with it.
+
+**(b)** was built by a peer session on 2026-09-21 (11:50) and left uncommitted. s15 re-measured it,
+closed the gap it left, and committed it.
+
+- **What the peer did, and it held:** `getGroupForToken` reads `TOKEN_CATEGORIES`, the one table,
+  instead of restating it. The docblock's reason for keeping a copy (*"would close a circular
+  import"*) was false: the file already imported `TOKEN_CATEGORY_GROUPS` from the same line of the
+  same barrel. `TOKEN_CATEGORIES` is `Record<TokenCategory, …>`, so a contract category with no
+  entry is a **compile error** (TS2741, measured by the peer with a real contract mutant). That is
+  AC3's build-time check. `tests-unit/hlt-007` enumerates the **contract's** union from its source
+  text, so it is not asking the table about itself. `gradient` is asserted by name (AC4).
+- 🔴 **The gap s15 closed:** every one of the peer's arms graded the **table**, and none graded the
+  **panel**. Restore the hand-written copy in `TokensSection.tsx`, drop a category from it, and all
+  five stay green. The lookup is now one exported function, `groupForTokenCategory`
+  (`TokenCategories.ts`), and three arms grade it. It must agree with the table for every contract
+  category. An unknown category is `null`, and so is `toString`/`constructor`, through an
+  own-property check. The panel's `getGroupForToken` must call it and name no group literal.
+  Applied to HEAD's panel, that arm is red, with all six group names inline.
+- ⚠️ **A bare index answered an inherited name.** The peer's `TOKEN_CATEGORIES[token.category]` on
+  an on-disk category `toString` returned `Object.prototype.toString`. Its `.group` was `undefined`,
+  so the token was dropped *without* the warning meant to announce it.
+- ⚠️ **An unknown on-disk category is still dropped** (not rendered), now with one `console.warn`
+  per category. AC3's other option, a catch-all group that renders, would add a panel section. That
+  is P94 STY-005 AC2's territory and needs a ruling, so it was not built.
+- **Gates (2026-09-22):** `tests-unit/hlt-007` 8/8; `test:main` 536/536 suites, 8,545 specs;
+  `typecheck:editor` + `typecheck:editor-tests` exit 0; eslint clean on the four files.
+
+**(a) is NOT built, and it is Richard's call.** AC1 names the fork itself: the *Text styles*
+section either **shows the project's typography tokens** or **says plainly the project has none**,
+depending on whether the legacy `metadata.styles.text` layer is dead. HLT-006's R1 did not rule on
+that. It ruled that a *picker* may offer tokens (*"why wouldn't I be allowed to pick a design
+token?"*). Showing tokens under *Text styles* files typography in two places in a panel whose
+layout P94 closed on his look. AC5 (screenshots, `test:ci`) is taken once (a) is built.
+
 ## 1. The person sentence
 
 > **Someone looking for their project's text styles finds them under "Text styles", and a token

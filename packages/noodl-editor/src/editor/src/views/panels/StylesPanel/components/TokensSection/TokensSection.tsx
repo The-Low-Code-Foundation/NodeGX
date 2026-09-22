@@ -13,7 +13,12 @@
 import { useProjectDesignTokenContext } from '@noodl-contexts/ProjectDesignTokenContext';
 import React from 'react';
 
-import { StyleTokenRecord, TOKEN_CATEGORY_GROUPS, TokenCategoryGroup } from '@noodl-models/StyleTokensModel';
+import {
+  StyleTokenRecord,
+  TOKEN_CATEGORY_GROUPS,
+  TokenCategoryGroup,
+  groupForTokenCategory
+} from '@noodl-models/StyleTokensModel';
 
 import { CollapsableSection } from '@noodl-core-ui/components/sidebar/CollapsableSection';
 import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
@@ -54,8 +59,8 @@ export function TokensSection({ excludeGroups, title }: TokensSectionProps = {})
       map[group] = [];
     }
     for (const token of designTokens) {
-      // Find the group from TOKEN_CATEGORIES
-      // We rely on the model already having them grouped correctly
+      // Reads TOKEN_CATEGORIES (through `groupForTokenCategory`) — which is what the comment
+      // here always claimed and, until HLT-007, was not what the code did.
       const groupForToken = getGroupForToken(token);
       if (groupForToken && map[groupForToken]) {
         map[groupForToken].push(token);
@@ -127,27 +132,49 @@ export function TokensSection({ excludeGroups, title }: TokensSectionProps = {})
 }
 
 /**
- * Determine the display group from a token's category.
+ * Determine the display group from a token's category — by READING the table,
+ * not by restating it.
  *
- * 🔴 **This is a second copy of the mapping `TOKEN_CATEGORIES` already holds**,
- * and it fails closed in the worst possible way: an unmapped category returns
- * `null`, the token is dropped from `grouped`, and the panel renders as though it
- * does not exist — while `get_style_vocabulary` lists it to the authoring model
- * perfectly happily. VIB-002 hit exactly that adding the `gradient` category:
- * the tokens were live in the rendered page and invisible in the editor.
+ * 🔴 **This used to be a second copy of `TOKEN_CATEGORIES`** and it failed closed
+ * in the worst possible way: an unmapped category returned `null`, the token was
+ * dropped from `grouped`, and the panel rendered as though it did not exist —
+ * while `get_style_vocabulary` listed it to the authoring model perfectly happily.
+ * VIB-002 hit exactly that adding the `gradient` category: the tokens were live in
+ * the rendered page and invisible in the editor.
  *
- * It is kept as a copy only because the comment below it is true — importing the
- * table here would close a circular import — so the tripwire is the rule instead:
- * **a new `TokenCategory` must be added in BOTH places**, and the `default`
- * branch names the file to change.
+ * ⚠️ **The comment that kept the copy alive was false, and it sat four lines below
+ * the import that disproved it** (HLT-007, 2026-09-21). It claimed importing the
+ * table "would close a circular import". `TOKEN_CATEGORIES` and
+ * `TOKEN_CATEGORY_GROUPS` are exported from the SAME line of the SAME barrel
+ * (`StyleTokensModel/index.ts`), and this file already imported the second one —
+ * so the edge existed already and reading the table adds nothing to the graph.
+ * A justification is not evidence; check it against the file it is written in.
+ *
+ * ✅ **The drift is now impossible rather than discouraged.** `TOKEN_CATEGORIES` is
+ * `Record<TokenCategory, …>`, so a category added to the contract without a table
+ * entry is a **compile error**, which is the build-time check the old docblock's
+ * "remember to edit both places" rule was standing in for.
  */
 function getGroupForToken(token: StyleTokenRecord): TokenCategoryGroup | null {
-  const cat = token.category;
-  if (cat === 'color-semantic' || cat === 'color-palette') return 'Colors';
-  if (cat === 'spacing') return 'Spacing';
-  if (cat.startsWith('typography')) return 'Typography';
-  if (cat === 'border-radius' || cat === 'border-width') return 'Borders';
-  if (cat === 'shadow' || cat === 'gradient') return 'Effects';
-  if (cat.startsWith('animation')) return 'Animation';
+  const group = groupForTokenCategory(String(token.category));
+  if (group) return group;
+
+  // Not reachable from a well-typed category — but token records are read from a
+  // project file on disk, so the category CAN be a string no build ever saw. Drop
+  // it (no group can hold it without lying about what it is) and say so once, because
+  // a token vanishing from the panel in silence is the defect this function had.
+  warnUnknownCategory(String(token.category));
   return null;
+}
+
+/** One line per unknown category, not one per token per render. */
+const warnedCategories = new Set<string>();
+function warnUnknownCategory(category: string) {
+  if (warnedCategories.has(category)) return;
+  warnedCategories.add(category);
+  console.warn(
+    `[StylesPanel] design token category '${category}' has no entry in TOKEN_CATEGORIES, ` +
+      'so its tokens are not shown in the Styles panel. Add it to ' +
+      'models/StyleTokensModel/TokenCategories.ts.'
+  );
 }

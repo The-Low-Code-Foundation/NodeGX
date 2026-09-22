@@ -44,4 +44,4 @@ export type {
   TokenCategory,
   TokenCategoryGroup
 } from './TokenCategories';
-export { TOKEN_CATEGORIES, TOKEN_CATEGORY_GROUPS } from './TokenCategories';
+export { TOKEN_CATEGORIES, TOKEN_CATEGORY_GROUPS, groupForTokenCategory } from './TokenCategories';
