@@ -2,49 +2,73 @@
 
 **Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
 HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
-HLT-008 ✅ (s10 — P93 AC7 awaits Richard; ⚠️ see below, NEVER COMMITTED), HLT-014 ✅ (s11 — §3.1's validator warning left),
-HLT-015 ✅ (s12 — AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; not yet seen on a Linux runner),
-HLT-017 ✅ (s14 — drag and drop; AC9 is phase 78's).**
-Open: **HLT-007, 009, 016, 018, 019.** HLT-016 and HLT-019 have shapes *"to be ruled"*: ask Richard
-before building either. HLT-018 and HLT-019 were opened by the DBT stream on 2026-09-22, and at
-s14's close their README rows and task files were **its uncommitted edits**. Leave them to it.
-⚠️ **HLT-007 was claimed by a peer session on 2026-09-21** and its work is **uncommitted in the
-tree** — `packages/noodl-editor/tests-unit/hlt-007/token-groups.test.ts` and a modified
-`TokensSection.tsx`, both last written 11:52. Leave them alone and check mtimes before taking that
-row ([[a-peer-may-be-doing-your-exact-task]], [[an-uncommitted-pile-can-be-live-in-production]]).
-⚠️ That pile also means `test:main` reads **+1 suite / +5 specs** above what this phase's commits
-account for. Do not attribute the delta to your own work.
-🔴 **HLT-008 (s10) is marked BUILT and was never committed.** No commit names it. Its drive
-(`scripts/devtools/drive-hlt008-board.js`), spec (`tests-unit/hlt-008/`), verdict, ten `shots/hlt008-*`
-and the board edits (`ComponentBoard.tsx`, `boardSurface.ts`, `PreviewChrome.tsx`, `previewScope.ts`)
-are loose in the tree, last written 2026-09-21 ~19:50, beside P93 TVW-009's edits to some of the
-same files. Find out whose it is before anyone commits or reverts it
-([[a-row-whose-remaining-work-is-a-commit-is-invisible-on-a-board]]).
+HLT-008 ✅ (s10, **committed s15** `e3ef58a82`; P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left),
+HLT-015 ✅ (s12 — AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; never run on Linux, see below),
+HLT-017 ✅ (s14 — AC9 is phase 78's), HLT-018 ✅ (s15 `7ea3bd372` — AC5 is the DBT stream's),
+HLT-007 (b) ✅ (s15 `725a82eb4` — (a) awaits Richard).**
+Open: **HLT-007 (a), 009, 016, 019.** Every one of them waits on someone else. See "Start here".
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
-**before claiming a row** — peers have been building this phase in parallel.
+**before claiming a row**. Peers have been building this phase in parallel.
 
 ## Start here
 
-🔴 **One criterion is waiting on Richard: HLT-012's AC5** — his WORTHY on the four frames in
-`shots/hlt012-*`. See the s8 section below for the two decisions in them worth his eye.
-⚠️ And there is a second thing for him, opened by
-s7 and left deliberately: **two of his real projects — `tut001-drive` and `Puppy test 3` — share
-one stored identity, and one local backend ("Puppy test 3 backend", `backend_msjck0y2ukxwv`) is
-owned by both.** The editor now says so on the launcher; the repair is his call, not the
-product's. See HLT-011 AC4.
+🔴 **Nothing on this board can be built without a ruling or another stream's go-ahead.** Do not
+invent work to fill the session. The next session's first job is to get these answered:
 
-**Suggested, in order:**
-1. **HLT-008's uncommitted pile** (above): find out whose it is. It is the one thing on this board
-   that reads done and is not.
-2. **HLT-018**, which is a defect with no ruling in its file (an empty `{}` Object field cannot be
-   saved). It was opened by the DBT stream, and at s14's close its file was that stream's
-   *uncommitted* edit, so message the stream before claiming it.
-3. **HLT-007**, if its peer's pile is stale. It was last written 2026-09-21 11:52. Re-measure it
-   before you inherit it.
+**For Richard (plain words, in this order):**
+1. **HLT-007 (a):** the *Text styles* section of the Styles panel is empty in every real project,
+   because it reads the old style layer. Should it **show the project's typography tokens**, or
+   **say plainly the project has none**? Showing them files typography in two places in a panel
+   P94 closed on his look. The task file's top section has the detail.
+2. **HLT-016** (a cloud function cannot write safely twice) and **HLT-019** (Model Request cannot
+   cache its prompt): each has a *recommended shape, to be ruled* in its file.
+3. **Push `cline-dev`?** It is **361 commits ahead of `origin`**, so HLT-010's `renderer-errors` CI
+   job, and everything since, has never run on a Linux runner.
+4. Still waiting from earlier sessions: **HLT-012 AC5** (four frames in `shots/hlt012-*`), **P93
+   TVW-008 AC7** (`shots/hlt008-fixed-ac7-*`), and the **two projects sharing one identity**
+   (HLT-011 AC4).
 
-⚠️ **HLT-009's template is another stream's.** It committed to it again on 2026-09-21
-(`60f811920`, `8f0587d01`). Ask before touching a file.
+**For another stream:**
+- **HLT-009** is in a template another stream owns. Ask before touching a file.
+- **HLT-018 AC5 and HLT-019's files are the DBT stream's** (`digital-bricks-training-57`), and both
+  were told on 2026-09-22. Its HLT-019 row and the README status-line mention are **its
+  uncommitted edits** in the tree, so leave them.
+
+## 🔴 What s15 leaves you — three piles committed, one defect deeper than its file
+
+**s15 wrote no feature. It committed two uncommitted piles, built HLT-018, and closed the gap in
+HLT-007 (b).** Every reading was taken on 2026-09-22 against HEAD `d329cbe42`→`725a82eb4`.
+
+- ✅ **HLT-008's pile is committed** (`e3ef58a82`), unchanged, after re-grading it on today's
+  HEAD: `typecheck:editor` + `-tests` exit 0, `test:main` 536/536 · 8,542, `tests-unit/hlt-008`
+  22/22, `lint:ci` 873/3916. `test:ci` at 10:25 had the pile in the tree and failed exactly the
+  floor by name (3 SUB-006, 3 SUB-011, 2 NDA-017). It was s10's; no session had owned it since.
+- ✅ **P93 s29's record is committed too** (`e4fbd62d5`): Richard's own drive of the board (AC7
+  NOT WORTHY) and his **R-Z2 ruling, `hover-only`** (TVW-007 §8.5). Both rulings had been sitting
+  uncommitted since 2026-09-20.
+- ✅ **HLT-018** — [verdict](./verdicts/HLT-018/2026-09-22/VERDICT.md). 🔴 **The file
+  under-called it.** On HEAD, `PUT /classes` with `{facts:{}}` answered **200 and wrote nothing**.
+  `node:sqlite` takes a bare object passed as the *first* `run()` argument as its named-parameter
+  map, so every `?` after it shifts by one and the UPDATE matched 0 rows without throwing. Only
+  `buildInsert` threw the 500 the file predicted. ⚠️ And §2 was wrong that PostgreSQL was affected:
+  `pg` stringifies a bare object itself, and the new conformance case was green there on HEAD.
+- ⚠️ **Unowned, found by HLT-018:** without an ACL, `LocalSQLAdapter.save` reports success on 0
+  changed rows. Any UPDATE that matches nothing answers 200. Worth a row if anyone meets it.
+- ✅ **HLT-007 (b)** — a peer's uncommitted pile, re-measured and committed. 🔴 **Its spec graded
+  the table and never the panel**; restoring the hand-written copy kept every arm green. Now
+  `groupForTokenCategory` is the one lookup and three arms grade it, one of them red on HEAD's
+  panel.
+- 🔴 **A `git show HEAD:<path>` run from a package directory needs `./<path>`.** Once it failed,
+  `>` truncated the file it was swapping, and the control run graded an empty module and read
+  **`Tests: 0`**. The `cp` backup saved it. Always `test -s` the swapped-in file before running
+  the control.
+- **Tool:** `verdicts/HLT-018/2026-09-22/hlt018.drive.test.ts`, the HLT-015 harness shape, for any
+  backend row. It declares a table through `POST /admin/schema`, then drives `/classes` and
+  `/admin/import` on a real socket.
+- **Gates at close:** backend jest 166/168 (the 2 reds are `tpl008-*-drive`, *"no theme switch is
+  drawn"*, red on HEAD since s12); `noodl-runtime` adapters 295/295; conformance 5/5 suites with
+  SQLite + Postgres 58/58 each; `test:main` 536/536 · 8,545.
 
 ## 🔴 What s14 leaves you — HLT-017, somewhere to drop it
 
