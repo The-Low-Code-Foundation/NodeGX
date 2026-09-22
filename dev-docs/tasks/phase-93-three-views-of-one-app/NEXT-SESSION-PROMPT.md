@@ -19,7 +19,7 @@ MCP briefing. AC2, AC3 and AC4 closed.**
 | TVW-005 | Layers can move things | ✅ | **CLOSED — all 6 ACs** |
 | TVW-006 | The structure lane | ✅ | AC1–4, AC6 green. **AC5's 18 shots SENT s18 — Richard's verdict is all that is left** |
 | TVW-007 | An instance says what it is | ✅ | **AC1–AC4, AC6 green. ONLY AC5 (Richard's WORTHY) is left** |
-| TVW-008 | The board | ✅ slices 1–2 | **AC1–AC6, AC8 ✅. ONLY AC7 (Richard's WORTHY) is left — six shots, both themes real** |
+| TVW-008 | The board | ✅ slices 1–2 | 🔴 **AC7 NOT WORTHY (s29).** Six defects — slice 3 is **P99 `HLT-008`**; the ACs stay here and P93 waits on it |
 | TVW-009 | The words | ✅ **slice 1** | **AC2, AC3, AC4 ✅. Left: AC1 (a drive), AC5 (P73's step), AC6** |
 | TVW-010 | The disorientation test (needs all) | — | — |
 

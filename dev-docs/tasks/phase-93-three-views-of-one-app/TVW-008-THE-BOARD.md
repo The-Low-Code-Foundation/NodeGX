@@ -810,3 +810,109 @@ was right and the launch was wrong. `nohup npm run dev:debug &` leaves the stack
 
 **Still open on TVW-008:** AC7's verdict, and the two §9.6 items no AC names — selection through a
 frame, and the `Add all` bound *explained* in the picker rather than merely enforced.
+
+---
+
+## 11. 🔴 s29 — RICHARD DROVE IT HIMSELF. AC7 is **NOT WORTHY**, and the board reopens.
+
+**2026-09-20.** The editor was brought up on the dev stack and Richard tested the board by hand —
+the first time anyone other than the drive script has touched this surface. He found **nine**
+things; **six** are this task's and they are not cosmetic, they are the surface not working.
+
+🔴 **AC7's verdict is therefore recorded as NOT WORTHY.** TVW-008 is **not** one verdict away from
+closed. It needs a **slice 3**, and the six rows below are its scope.
+
+### 🔴 WHERE SLICE 3 LIVES — ruled by Richard, 2026-09-20
+
+**The building moved to [P99 `HLT-008`](../phase-99-the-ones-nobody-owned/HLT-008-THE-BOARD-SLICE-3.md)**
+(phase 99, *The ones nobody owned*). Richard ruled the six into that phase so every defect from his
+drive sits in one place.
+
+⚠️ **THE ACCEPTANCE CRITERIA DID NOT MOVE.** AC1, AC3 and AC7 are **P93's**, they are **reopened**,
+and they close **here**, from a re-drive run against this file. HLT-008 does the work; this task
+grades it. 🔴 **P93 cannot close until HLT-008 lands** — a board task whose work is elsewhere and
+whose criteria are knowingly unmet is not a closed task
+([[a-row-whose-remaining-work-is-a-commit-is-invisible-on-a-board]] is the near miss; this is the
+same shape with a phase boundary through it).
+
+### 11.1 The six that are this task's
+
+| # | what he hit | which AC it lands on |
+|---|---|---|
+| B1 | **`Workbench` is shown while the board is active — but ⚠️ NOT by the scope chip, which this row first blamed and which is CORRECT.** Measured: `PreviewChrome.tsx:137` → `scopeChipLabel(scope)` → `previewScope.ts:387-397` switches exhaustively and returns `'Board'`. The word comes from **two other controls in the same top-left corner**: (1) the board's own `+` popup, drawn at `top:36px; left:8px` (`ComponentBoard.module.scss:203-207`), whose heading is hardcoded `<span>{WORKBENCH}</span>` (`ComponentBoard.tsx:405`) — this is the dropdown he actually read; (2) the scope picker's **menu rows**, where the board row is `OPEN_BOARD` = `` `${WORKBENCH} ${BOARD.toLowerCase()}` `` → **"Workbench board"** (`benchWords.ts:93`, `PreviewChrome.tsx:185`) under a bare `{WORKBENCH}` heading (`:200`) | AC7; §11.3 |
+| B2 | **A frame with no saved size opens ~900px tall for one button.** `readBenchFrameDefault` treats an absent height as *fill the stage*, so a 768×auto `Primary Button` gets a stage-height white slab. The Workbench already solved exactly this with **Set as default size**; the board offers no such gesture and inherits the worst case | AC3 (`equals that component's bench.frame or the 768 default` — the default is the defect) |
+| B3 | **Two frames sit flush against each other with no gutter, and their white slabs then eat the canvas so you cannot scroll or pan any more.** Adding a couple of buttons made the board unnavigable | AC1 (*side by side, none overlapping*) and AC7 |
+| B4 | **Clicking a frame's caption navigates to that component on the Workbench** — good, and he said so — **but it fires on presses that were meant to start a drag**, throwing you off the board repeatedly | AC1, AC7 |
+| B5 | **Dragging a frame moves the caption and the component but not the white area it created**, so the content separates from its own slab and the caption disappears behind it | AC1 (*drag the middle one below the other two; release*) |
+| B6 | **Dragging a frame scrolls the board canvas in the opposite direction to the drag** | AC1, AC7 |
+
+### 11.2 🔴 What this says about the six ACs that are already green — the fourth repeat
+
+**AC1, AC3, AC4, AC5, AC6 and AC8 are all green and driven**, and the surface is unusable. Read the
+arms against B1–B6 and none of them could have failed:
+
+- AC1's drive asserted *three frames exist, none overlapping, the dragged one is where it was
+  dropped, it survives a scope switch and a reopen*. **Every one of those is true in B3/B5/B6.** It
+  never asserted that the canvas could still be panned afterwards, that the slab travelled with its
+  frame, or that the drag did not also scroll the stage.
+- AC3 asserted *every frame's measured box equals `bench.frame` or the 768 default*. B2 is that
+  criterion **passing**: the box does equal the default. The default is the bug.
+- AC5 asserted *a drag writes nothing until mouse-up*, by mtime. B4 is a **press** that navigates
+  away — no write, so the control is silent about it.
+
+🔴 This is [[correct-and-usable-were-never-the-same-criterion]] for the **fifth** time in this
+codebase, and the first four are already filed. The board's arms graded **mechanisms** — a count, a
+coordinate, a file mtime — and not one of them graded *what happens next to the person*. An arm that
+reads a number a component computed cannot see a surface you can no longer scroll.
+
+⚠️ **Slice 3's arms must be written from the consequence**: after a drag, the canvas still pans;
+after two frames, there is a gutter you can see; a press that moves more than the drag threshold
+does not navigate; the caption is on screen after the drop.
+
+### 11.3 ⚠️ B1 is a word this phase has already swept twice — check the gate, not just the string
+
+TVW-001 swept `bench`/`sandbox`/`isolated` → **Workbench** (R-G), and TVW-009 s28 built
+`scripts/vocabulary-ratchet.js` to hold the retired words at 0. **Neither would catch B1**: the
+string `Workbench` is the *correct* word for the Workbench, and the ratchet asks *is a retired word
+present*, never *is the right word in the right mode*. B1 is a *mode-label* defect wearing a
+vocabulary defect's clothes ([[a-vocabulary-gate-must-read-context-not-text]]).
+
+🔴 Whoever fixes it re-reads the trigger label's source before renaming anything — if the trigger
+derives its text from the bench's target rather than from `PreviewScope.mode`, the fix is the
+derivation, and a hard-coded `'Board'` would be a second copy of the mode.
+
+### 11.4 The three that are NOT this task's — filed, with owners, not fixed here
+
+Per [[build-the-tasks-do-not-farm-the-defects]] these do not block any P93 AC and must not be
+swept into slice 3:
+
+| # | what he hit | where it belongs |
+|---|---|---|
+| N1 | Placing a basic **Text** node complains the height is `auto` and "that's not a real height"; he could not reproduce it a second time, and suspects the `Heading 1` default look | ⚠️ **UNCONFIRMED — one sighting, no repro.** Recorded so the next sighting is the second, not the first. Do not fix from this row |
+| N2 | The **comment tab** input grows horizontally as well as vertically, overflowing right. ✅ **Confirmed with the mechanism**: the bar is the sole child of a **row** flex container (`ScrollArea.module.scss:39-49`) and opts out with `flex: '0 0 auto'` at **`NodeComment.tsx:145`** — shrink 0, so it sizes to the max-content width of the hidden `pre-wrap` mirror `.property-comment-sizer`, which has no `max-width` (`propertyeditor.css:681-703`). `min-width:0` cannot help an item that never shrinks. Vertical growth **is** capped (`max-height:184px`, `:696`); horizontal has no equivalent. The Properties tab is the control — `flex: 1` (`propertyeditor/index.tsx:206`), no overflow | P92 (the editor chrome) |
+| N3 | `var(--text-base)` absent from the style picker and the Style tab. ⚠️ **HALF of this does not reproduce, and the half that does is a different defect than it looks.** `--text-base` is **not a project token at all** — it is a shipped default (`nodegx-project-contract/tokens.ts:376`, category `typography-size`); the project's 28 `customTokens` are colour/radius/shadow/family only and its `metadata.styles` is **null**. **(a) The picker: confirmed absent, by construction.** Every property-editor picker reads the **legacy** style layer — `colorstylepicker.jsx:81` and `TextStylePicker.jsx:29` → `getStyles()` → `Object.keys(project.metadata.styles…)` (`StylesModel.ts:64-71`), empty here; the only other source is a scan restricted to ports of `type === 'color'` (`colorstylepicker.jsx:43-62`), which a typography-size token can never reach. **No picker enumerates design tokens at all.** **(b) The Style tab: NOT absent — buried.** `TokensSection.tsx:44` reads the full list and `getGroupForToken` files `typography-size` under *Typography*, so it renders — two collapsed levels down (`TokensSection.tsx:123` and `:106`) under *Other tokens*, while *Text styles*, where anyone would look first, reads the empty legacy layer (`TextStylesSection.tsx:28`) | P85 / P92 — same seam as [[an-editor-surface-cannot-paint-a-projects-design-token]] |
+| N4 | 🔴 **Found while measuring N3, nobody reported it:** `getGroupForToken` (`TokensSection.tsx:144-152`) is a **second copy** of the category→group table and returns `null` for any category the copy does not know, **silently dropping those tokens from the Styles panel**. Its own docblock records this already happening once, to `gradient`. A new token category ships invisible ([[a-second-copy-of-a-palette-drifts-silently]]) | P85 / P92 |
+
+---
+
+## 12. P99 HLT-008 built slice 3 — 2026-09-21. AC1, AC3 re-run GREEN; AC7 awaits Richard.
+
+The six were built in [P99 `HLT-008`](../phase-99-the-ones-nobody-owned/HLT-008-THE-BOARD-SLICE-3.md)
+([verdict](../phase-99-the-ones-nobody-owned/verdicts/HLT-008/2026-09-21/VERDICT.md)).
+`scripts/devtools/drive-hlt008-board.js`: **21/21 on the fixed build, 9/20 on HEAD**, each arm a
+gesture performed and then read off the surface — the gutter hit-tests to the board and a wheel,
+⌘+wheel and drag there pan and zoom it (AC1's consequence clause, never asserted before); the
+viewport is unchanged across a frame drag; the dropped frame's content is where its border is
+(client DOM vs chrome); a moving press on a caption does not navigate and a still one does; a
+one-button frame is 47px, not 768 (AC3 — **the default was the defect**); AC5's control re-run
+green.
+
+🔴 **What the reopening found that §11 did not:** the harness set `layout: 'none'` on its root
+Group, which has no such port (`flexDirection`). The frames were never absolute — each stacked
+under the last — and this file's own harness spec pinned the wrong name. Every harness key is now
+graded against the node catalog (`tests-unit/hlt-008`).
+
+**Still open here:** AC7 — Richard's WORTHY on
+`../phase-99-the-ones-nobody-owned/shots/hlt008-fixed-ac7-light.png` and `-ac7-dark.png` (three
+frames, one dragged below). Plus the two §9.6 items no AC names, unchanged.
+

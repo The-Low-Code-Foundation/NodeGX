@@ -187,6 +187,35 @@ components at 10–99, **two over 100**, max 140).
 3. Then the hover (AC2b) and the trail (AC3/AC4), which R-Z did not touch and which are independent
    of the placement.
 
+## 8.5 🔴 R-Z2 — RULED 2026-09-20: `hover-only`. The count never goes on the card.
+
+Richard was shown all four photographs (`verdicts/TVW-007/2026-09-19/`) with the measured cost of
+each beside it, and ruled **`hover-only`** — the placement that was already shipping.
+
+**What this settles:** the instance node carries no count in its titlebar. The path (and the count)
+arrive on hover, which AC2b built and drove. **Nothing on any existing canvas moves**: the corpus's
+9,634 instance nodes keep the titlebar geometry they have today (36–64px), and `own-row` /
+`reserve-width` — each of which moved every port on every instance card — are dead.
+
+**What it costs, recorded so it is not rediscovered as a surprise:** the canvas's eyebrow now says
+*instance* only under the pointer. README §3's number 2 (*surfaces on which a placed component is
+called an instance*) is carried by the **Layers row**, the **trail crumb** and the **hover**, and
+TVW-010 must count it on the artefact rather than assume the card.
+
+**What the next session does with this:**
+1. `hover-only` becomes a **constant**, not a switch. `eyebrowPlacement.ts` is **deleted** along
+   with the `own-row`, `reserve-width` and `inline-if-fits` branches in `instanceEyebrow.ts`, and
+   the specs that exercised the three losers go with them.
+   🔴 A switch that outlives its verdict is a second copy of a decision.
+2. ⚠️ **AC1's sentence names the card.** §4 AC1 reads *"The `Hero` node shows `· 1×` (R-Z)"* — that
+   is `inline-if-fits`' behaviour, not this ruling's, and **AC1 was closed at s25 against the
+   shipped build**. Re-read what the s25 drive actually asserted before deleting anything; if it
+   graded a count drawn on the card, the arm and the criterion both need rewriting to the hover,
+   and AC1 is **re-opened**, not quietly kept ([[an-assertion-written-from-the-intent-contradicts-the-decision]]).
+3. `titleAllowanceFor` / `eyebrowReserveWidth()` and the placement key in the label-height cache
+   exist only to serve the three dead branches. Whoever deletes them re-runs the label-height specs
+   — the s20 clipping defect lived in exactly that seam.
+
 ## 9. s21 — the trail (AC3 ✅ AC4 ✅), built while the placement is still with Richard
 
 `931f817a0f`. The placement verdict (§8) was still unanswered, so this session built the half of
