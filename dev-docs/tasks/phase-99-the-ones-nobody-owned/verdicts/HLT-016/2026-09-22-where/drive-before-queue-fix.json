@@ -1,0 +1,222 @@
+{
+  "sqlite": {
+    "adapter": "sqlite",
+    "W2": {
+      "push": {
+        "status": 200,
+        "created": [
+          "idx_Lesson_learner_concept_wda3fca01"
+        ]
+      },
+      "unpinned": [
+        201,
+        201
+      ],
+      "pinned": [
+        201,
+        409
+      ],
+      "secondPinnedBody": {
+        "error": "\"learner, concept\" is unique in \"Lesson\" and [\"L\",\"C\"] is already used. Send X-NodeGX-Upsert to update the existing record instead.",
+        "code": 137,
+        "field": "learner, concept",
+        "value": [
+          "L",
+          "C"
+        ],
+        "fields": [
+          "learner",
+          "concept"
+        ],
+        "collection": "Lesson",
+        "requestId": "9c9d8777-2d05-4fde-aec6-f8e9e0400055"
+      },
+      "rows": 3
+    },
+    "W2control": {
+      "unpinned": [
+        201,
+        409
+      ],
+      "rows": 1
+    },
+    "W4": {
+      "both": {
+        "status": 200,
+        "created": [
+          "idx_LessonFull_learner_concept_wda3fca01"
+        ],
+        "kept": [
+          "idx_LessonFull_learner_concept"
+        ]
+      },
+      "onlyPartial": {
+        "status": 200,
+        "dropped": [
+          "idx_LessonFull_learner_concept"
+        ],
+        "kept": [
+          "idx_LessonFull_learner_concept_wda3fca01"
+        ]
+      }
+    },
+    "W6": {
+      "partialOnly": {
+        "status": 400,
+        "error": "X-NodeGX-Upsert: \"guid\" is unique in \"Feed\" only on the rows a partial index covers, and outside them the same value may appear on several rows. An upsert needs a unique index with no \"where\": declare { \"fields\": [\"guid\"], \"unique\": true } and push the schema first."
+      },
+      "withFullToo": 201
+    },
+    "W5": {
+      "push": {
+        "status": 409,
+        "error": "Cannot make (learner, concept) unique on \"Dup\" where pinned = true: 1 value already appears more than once ([\"L\",\"C\"]). Nothing was changed and no row was deleted.",
+        "duplicates": 1
+      },
+      "nextDataCall": {
+        "status": 201
+      },
+      "rowsKept": 5,
+      "indexesAfter": []
+    },
+    "W3": {
+      "indexesAfterRestart": [
+        {
+          "name": "idx_Lesson_learner_concept_wda3fca01",
+          "fields": [
+            "learner",
+            "concept"
+          ],
+          "unique": true,
+          "order": "asc",
+          "where": {
+            "pinned": true
+          },
+          "built": true,
+          "declared": true
+        }
+      ],
+      "repush": {
+        "status": 200,
+        "created": [],
+        "dropped": [],
+        "kept": [
+          "idx_Lesson_learner_concept_wda3fca01"
+        ]
+      },
+      "stillEnforced": {
+        "pinned": 409,
+        "unpinned": 201
+      }
+    }
+  },
+  "postgres": {
+    "adapter": "postgres",
+    "W2": {
+      "push": {
+        "status": 200,
+        "created": [
+          "idx_Lesson_learner_concept_wda3fca01"
+        ]
+      },
+      "unpinned": [
+        201,
+        201
+      ],
+      "pinned": [
+        201,
+        409
+      ],
+      "secondPinnedBody": {
+        "error": "\"learner, concept\" is unique in \"Lesson\" and [\"L\",\"C\"] is already used. Send X-NodeGX-Upsert to update the existing record instead.",
+        "code": 137,
+        "field": "learner, concept",
+        "value": [
+          "L",
+          "C"
+        ],
+        "fields": [
+          "learner",
+          "concept"
+        ],
+        "collection": "Lesson",
+        "requestId": "67322a21-882e-4e4c-9a43-60f474bf7e4c"
+      },
+      "rows": 3
+    },
+    "W2control": {
+      "unpinned": [
+        201,
+        409
+      ],
+      "rows": 1
+    },
+    "W4": {
+      "both": {
+        "status": 200,
+        "created": [
+          "idx_LessonFull_learner_concept_wda3fca01"
+        ],
+        "kept": [
+          "idx_LessonFull_learner_concept"
+        ]
+      },
+      "onlyPartial": {
+        "status": 200,
+        "dropped": [
+          "idx_LessonFull_learner_concept"
+        ],
+        "kept": [
+          "idx_LessonFull_learner_concept_wda3fca01"
+        ]
+      }
+    },
+    "W6": {
+      "partialOnly": {
+        "status": 400,
+        "error": "X-NodeGX-Upsert: \"guid\" is unique in \"Feed\" only on the rows a partial index covers, and outside them the same value may appear on several rows. An upsert needs a unique index with no \"where\": declare { \"fields\": [\"guid\"], \"unique\": true } and push the schema first."
+      },
+      "withFullToo": 201
+    },
+    "W5": {
+      "push": {
+        "status": 200
+      },
+      "nextDataCall": {
+        "status": 201
+      },
+      "rowsKept": 5,
+      "indexesAfter": []
+    },
+    "W3": {
+      "indexesAfterRestart": [
+        {
+          "name": "idx_Lesson_learner_concept_wda3fca01",
+          "fields": [
+            "learner",
+            "concept"
+          ],
+          "unique": true,
+          "order": "asc",
+          "where": {
+            "pinned": true
+          },
+          "built": true,
+          "declared": true
+        }
+      ],
+      "repush": {
+        "status": 200,
+        "created": [],
+        "dropped": [],
+        "kept": [
+          "idx_Lesson_learner_concept_wda3fca01"
+        ]
+      },
+      "stillEnforced": {
+        "pinned": 409,
+        "unpinned": 201
+      }
+    }
+  }
+}

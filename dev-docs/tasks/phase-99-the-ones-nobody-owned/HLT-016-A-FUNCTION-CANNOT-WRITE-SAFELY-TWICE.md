@@ -14,6 +14,13 @@ told 200, one fact lost), then guarded (one 409; the loser re-reads, retries, no
 ⚠️ §2 missed that a zero-row UPDATE **without an ACL** answered 200. 📋 Not built: the index half
 (`unique.where`, `check`), which is **ruled in and next**, needs its own ACs first, and its traps are listed in the verdict. Also not built: (b).
 
+## ✅ Index half, `where`, BUILT 2026-09-22 (P99 s17): W1–W8 ✅ on SQLite AND PostgreSQL. [Verdict](./verdicts/HLT-016/2026-09-22-where/VERDICT.md)
+
+A unique index can hold only where a predicate does (`"where": { "pinned": true }`). Driven over
+HTTP with a restart on both engines; conformance 61/61 on PostgreSQL, new mutant caught by name.
+🔴 Found beside it, pre-existing: **on PostgreSQL a refused index push answered 200**, because the
+queued refusal was consumed by the push's own audit write. Fixed. 📋 `checks` (C1–C6) is next.
+
 ## 1. The person sentence
 
 > **Someone building on the NodeGX backend can write "change this row only if nobody else has
@@ -83,6 +90,87 @@ a filter, not a constraint.
 5. `Noodl.Records.save` and the Update Record node expose it; the node's docs page says what 409
    means and that retrying means **re-reading first**.
 6. The DBT template's sprint-50 capture write uses it, and the L62 race is driven there.
+
+## 4b. The index half — shape and acceptance criteria (written P99 s17, 2026-09-22, before any code)
+
+**Ruled in** with (a) on 2026-09-22. Measured first, on `cline-dev` `3c7264365`, against what the
+DBT product actually declares (`digital-bricks-training/drizzle/*.sql`):
+
+- **Its partial unique predicates are four shapes:** a boolean (`WHERE "pinned"`, `WHERE is_default`),
+  a list (`WHERE "kind" IN ('initial','mid','final','impact')`), not-null (`WHERE "session_id" IS
+  NOT NULL`), and null (the soft-removed `PathStep`, `removed_at IS NULL`).
+- **Its CHECKs are three shapes:** exactly one of N set (`(a IS NOT NULL) <> (b IS NOT NULL)`,
+  `num_nonnulls(a,b,c) = 1`: four of them), all-or-none (`(a IS NULL) = (b IS NULL)`), and a range
+  (`"target" BETWEEN 1 AND 10`: two). One compound (a resource's label/url/storage key) fits none.
+
+So the declaration is **a small structured vocabulary, never SQL text**: it has to mean the same on
+two engines, and a schema push is not a place to accept SQL from a file.
+
+```jsonc
+"indexes": [
+  { "fields": ["learnerId", "conceptId"], "unique": true, "where": { "pinned": true } },
+  { "fields": ["programmeId", "kind"], "unique": true, "where": { "kind": { "in": ["initial", "mid", "final", "impact"] } } },
+  { "fields": ["dimensionId", "sessionId"], "unique": true, "where": { "sessionId": { "exists": true } } }
+],
+"checks": [
+  { "exactlyOne": ["learnerId", "cohortId"] },
+  { "allOrNone": ["anchorKind", "anchorId"] },
+  { "field": "target", "min": 1, "max": 10 }
+]
+```
+
+Traps the survey measured, which the ACs below exist to close: PG `parseIndexDef` cannot parse
+`… WHERE …` (a partial index vanishes from the model on restart); index names derive from fields
+only (a partial and a full index on the same fields collide); `sameIndexSignature` and
+`schema-migrate.normalizeForDiff` drop `where`; SQLite's `duplicateValues` pre-check needs the same
+WHERE; SQLite cannot add a CHECK without a table rebuild; neither engine's CHECK error is decoded.
+🔴 **And one the survey missed:** `parse-wire.assertUpsertable` accepts *any* built single-field
+unique index as upsert cover. A partial one would pass, while rows outside its predicate may repeat
+the value: the silent data-loser that check was written to refuse.
+
+### `where` (a partial index)
+
+- **W1. The shape, refused loudly.** `where` is an AND of one to four conditions on the
+  collection's own properties: `true`/`false` (a Boolean property), a string (String), a number
+  (Number), `{ "exists": true|false }` (any property), `{ "in": [...] }` (1–20 values of the
+  property's type). Anything else (an unknown operator, a missing property, a type mismatch, an
+  empty `in`, `where: {}`) is refused **by name, before any DDL**, on both engines.
+- **W2. The guarantee, on a real socket, SQLite AND PostgreSQL.** The DBT `pinned` shape: a second
+  pinned row for one (learner, concept) answers **409**; any number of unpinned rows for it are 201.
+  **Control:** the same declaration *without* `where` refuses the second unpinned row, so the
+  predicate is what differs. **HEAD control:** the declaration is refused (`unknown key "where"`).
+- **W3. It survives a restart.** After a fresh manager reads the database (PG from `pg_indexes`,
+  SQLite from `PRAGMA`), `indexStatus` reports it `built: true, declared: true`, and pushing the same
+  declaration again reports it **kept**, not dropped and recreated.
+- **W4. A partial and a full index on the same fields are two indexes**, with two names; removing
+  one drops only that one.
+- **W5. A push the data already violates is refused** with the count, and nothing changes. On
+  SQLite the pre-check honours the predicate (rows outside it are not duplicates); on PostgreSQL the
+  database refuses it at the queue, atomically.
+- **W6. A partial unique index is not upsert cover.** `X-NodeGX-Upsert` on a field covered only by
+  a partial index answers 400 and says why.
+- **W7. It crosses.** The PostgreSQL/Supabase export emits the `WHERE`, and a schema diff
+  (`schema-migrate`) sees a changed `where` as a change.
+- **W8. Conformance:** a case per adapter, and a mutant that drops `where` in the reconcile,
+  caught by name.
+
+### `checks`
+
+- **C1. The shape, refused loudly.** `{ "exactlyOne": [2–4 properties] }`, `{ "allOrNone": [2–4] }`,
+  `{ "field", "min"?, "max"? }` on a Number property (at least one bound). A check's name is derived,
+  like an index's. Anything else is refused by name before any DDL.
+- **C2. The guarantee, on a real socket, both engines.** A create or update that breaks a check
+  answers **400** with Parse code 142 and a sentence naming the rule and the fields; the row is not
+  written / not changed. A write that satisfies it succeeds. A NULL in a range field passes, as SQL's
+  CHECK does. **HEAD control:** the violating row is written.
+- **C3. A push the data already violates is refused** with the count, and nothing changes.
+- **C4. It survives a restart and a re-push is idempotent;** removing a check removes enforcement.
+- **C5. It crosses:** the export emits it and `schema-migrate` diffs it.
+- **C6. Conformance** per adapter, and a mutant that skips the check, caught by name.
+
+**X1.** `docs/runtime/SCALING.md` §2 (the one place the declaration is documented) says both.
+
+Order: `where` first, committed on its own, then `checks`.
 
 ## 5. Owner and neighbours
 

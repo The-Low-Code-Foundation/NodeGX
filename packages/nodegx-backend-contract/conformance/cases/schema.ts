@@ -178,6 +178,41 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'schema/a-partial-unique-index-holds-only-where-it-says',
+    area: 'schema',
+    pins: 'HLT-016: `where` narrows a unique index to the rows it matches — enforced by the database, on both sides of it',
+    async run(ctx) {
+      // The DBT product's `lessons_one_pinned_per_learner_concept`: one pinned
+      // lesson per (learner, concept), any number unpinned. An adapter that
+      // drops the predicate builds a full unique index, which refuses the
+      // second UNPINNED row below — so both halves are asserted, not one.
+      if (!hasIndexSupport(ctx)) {
+        throw new Error('reconcileIndexes/indexStatus are absent — declare this case unsupported (§3.4)');
+      }
+      const c = ctx.collection('Sch');
+      ctx.createTable(c, [
+        { name: 'learner', type: 'String' },
+        { name: 'concept', type: 'String' },
+        { name: 'pinned', type: 'Boolean' }
+      ]);
+      ctx.schema.reconcileIndexes!(c, [{ fields: ['learner', 'concept'], unique: true, where: { pinned: true } }]);
+
+      await ctx.create(c, { learner: 'L', concept: 'C', pinned: false });
+      await ctx.create(c, { learner: 'L', concept: 'C', pinned: false });
+      eq(await ctx.count(c), 2, 'a partial unique index refused a row outside its predicate');
+
+      await ctx.create(c, { learner: 'L', concept: 'C', pinned: true });
+      await ctx.refused(() => ctx.create(c, { learner: 'L', concept: 'C', pinned: true }));
+      eq(await ctx.count(c), 3, 'a second row inside the predicate landed despite the partial unique index');
+
+      const found = ctx.schema.indexStatus!(c).find((s) => deepEqFields(s.fields, ['learner', 'concept']));
+      ok(found !== undefined, 'the partial index is absent from indexStatus');
+      ok(found.built && found.declared, 'the partial index is not reported as built and declared');
+      deepEq(found.where, { pinned: true }, 'indexStatus lost the predicate');
+    }
+  },
+
+  {
     id: 'schema/index-declaration-survives-a-reread',
     area: 'schema',
     pins: 'the declaration is stored, not merely applied — otherwise it cannot be exported',

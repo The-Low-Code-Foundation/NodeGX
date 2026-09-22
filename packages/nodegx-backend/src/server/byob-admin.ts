@@ -378,7 +378,7 @@ export class ByobAdminRoutes {
           name: table,
           columns: (body.columns as StorageColumn[] | undefined) || []
         });
-        const report = body.indexes === undefined ? null : this.applyIndexes(ctx, table, body.indexes);
+        const report = body.indexes === undefined ? null : await this.applyIndexes(ctx, table, body.indexes);
         sendJSON(res, 200, {
           success: true,
           action: 'createTable',
@@ -389,7 +389,7 @@ export class ByobAdminRoutes {
         return;
       }
       case 'setIndexes': {
-        const report = this.applyIndexes(ctx, table, body.indexes);
+        const report = await this.applyIndexes(ctx, table, body.indexes);
         sendJSON(res, 200, {
           success: true,
           action: 'setIndexes',
@@ -452,11 +452,11 @@ export class ByobAdminRoutes {
    *
    * @private
    */
-  private applyIndexes(
+  private async applyIndexes(
     ctx: RequestContext,
     table: string,
     indexes: unknown
-  ): { indexesCreated: string[]; indexesDropped: string[]; indexesKept: string[]; indexes: StorageIndexStatus[] } {
+  ): Promise<{ indexesCreated: string[]; indexesDropped: string[]; indexesKept: string[]; indexes: StorageIndexStatus[] }> {
     const sm = this.facade.schemaManager;
     if (!sm || typeof sm.reconcileIndexes !== 'function') {
       throw new HttpError(501, 'This adapter cannot declare indexes.');
@@ -478,6 +478,31 @@ export class ByobAdminRoutes {
         });
       }
       throw new HttpError(400, e instanceof Error ? e.message : String(e));
+    }
+
+    // P99 HLT-016 W5. On PostgreSQL the reconcile is QUEUED (BRG-005) and a
+    // refusal surfaces on "the next data-plane call" — which, after a push, was
+    // always the audit write for this very request. `AuditLog.record` never
+    // throws, so the refusal was logged there and dropped: the push answered
+    // 200, the person's next write succeeded, and the trail lost the entry.
+    // Wait for the queue here, so the refusal reaches the person who pushed.
+    const barrier = (sm as { barrier?: () => Promise<void> }).barrier;
+    if (typeof barrier === 'function') {
+      try {
+        await barrier.call(sm);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        if (/UNIQUE constraint failed/.test(message)) {
+          ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
+          throw new HttpError(
+            409,
+            `Cannot build the unique indexes declared for "${table}": rows already in it share a value ` +
+              `(${message.replace(/^.*UNIQUE constraint failed: /, '')}). Nothing was changed and no row was deleted.`,
+            137
+          );
+        }
+        throw new HttpError(500, message);
+      }
     }
 
     ctx.audit({ indexesCreated: report.created, indexesDropped: report.dropped });

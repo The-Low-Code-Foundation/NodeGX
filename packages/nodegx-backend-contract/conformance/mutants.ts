@@ -30,7 +30,8 @@ export type MutationKind =
   | 'ignore-unique'
   | 'relation-inverse-ignores-target'
   | 'aggregate-ignores-acl'
-  | 'drop-precondition-on-save';
+  | 'drop-precondition-on-save'
+  | 'drop-where-on-index';
 
 export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'drop-acl-on-reads',
@@ -39,7 +40,8 @@ export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'ignore-unique',
   'relation-inverse-ignores-target',
   'aggregate-ignores-acl',
-  'drop-precondition-on-save'
+  'drop-precondition-on-save',
+  'drop-where-on-index'
 ]);
 
 /** What each mutation models, for the record AC3 asks for. */
@@ -57,7 +59,9 @@ export const MUTATION_DESCRIPTIONS: Readonly<Record<MutationKind, string>> = Obj
   'aggregate-ignores-acl':
     'aggregate computes over rows the caller cannot read — private values leak as arithmetic',
   'drop-precondition-on-save':
-    'save ignores `expect` (HLT-016) and writes unconditionally — the lost update DBT L62 shipped, reported as success'
+    'save ignores `expect` (HLT-016) and writes unconditionally — the lost update DBT L62 shipped, reported as success',
+  'drop-where-on-index':
+    'a partial index is built as a full one (HLT-016) — the predicate a parser or an exporter drops, which refuses every row the declaration deliberately allowed'
 });
 
 /**
@@ -98,6 +102,18 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
             enumerable: true
           }
         })
+      : kind === 'drop-where-on-index'
+        ? Object.create(adapter.schemaManager, {
+            reconcileIndexes: {
+              value(table: string, indexes: unknown) {
+                const stripped = Array.isArray(indexes)
+                  ? (indexes as StorageIndexDecl[]).map(({ where: _dropped, ...rest }) => rest)
+                  : indexes;
+                return adapter.schemaManager.reconcileIndexes?.(table, stripped);
+              },
+              enumerable: true
+            }
+          })
       : kind === 'relation-inverse-ignores-target'
         ? Object.create(adapter.schemaManager, {
             getRelationOwners: {

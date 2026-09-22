@@ -441,10 +441,21 @@ export class ParseWireRoutes {
     if (!sm || typeof sm.indexStatus !== 'function') {
       throw new HttpError(501, 'This backend cannot upsert: its adapter does not declare indexes.');
     }
-    const covered = sm
+    const single = sm
       .indexStatus(collection)
-      .some((i) => i.unique && i.built && i.fields.length === 1 && i.fields[0] === field);
-    if (covered) return;
+      .filter((i) => i.unique && i.built && i.fields.length === 1 && i.fields[0] === field);
+    // HLT-016 W6: a PARTIAL unique index is not cover. It holds only for the
+    // rows its predicate matches, and outside them the value may repeat — so
+    // "the row that already has this value" is several rows again.
+    if (single.some((i) => !i.where)) return;
+    if (single.length > 0) {
+      throw new HttpError(
+        400,
+        `X-NodeGX-Upsert: "${field}" is unique in "${collection}" only on the rows a partial index covers, ` +
+          'and outside them the same value may appear on several rows. An upsert needs a unique index with no ' +
+          `"where": declare { "fields": ["${field}"], "unique": true } and push the schema first.`
+      );
+    }
 
     throw new HttpError(
       400,

@@ -64,6 +64,8 @@
 import { escapeColumn, escapeTable } from '../local-sql/QueryBuilder';
 import {
   builtInIndexNames,
+  checkWhereAgainstColumns,
+  declaredProperties,
   indexName,
   junctionTableName,
   normalizeIndexDecls,
@@ -76,6 +78,7 @@ import {
   type IndexDecl,
   type IndexReconcileReport,
   type IndexStatus,
+  type IndexWhere,
   type SchemaColumn,
   type TableSchema
 } from '../local-sql/schemaCommon';
@@ -155,9 +158,19 @@ const UPSERT_SCHEMA =
   'INSERT INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, NOW()) ' +
   'ON CONFLICT ("name") DO UPDATE SET "schema" = EXCLUDED."schema", "updatedAt" = NOW()';
 
-/** Parse one `pg_indexes.indexdef` into the shape `indexStatus` reports, or null for anything exotic. */
-export function parseIndexDef(indexdef: string): { name: string; unique: boolean; fields: string[]; order: 'asc' | 'desc' } | null {
-  const m = /^CREATE (UNIQUE )?INDEX (\S+) ON \S+ USING btree \((.*)\)$/.exec(indexdef);
+/**
+ * Parse one `pg_indexes.indexdef` into the shape `indexStatus` reports, or null for anything exotic.
+ *
+ * HLT-016 W3: a partial index's definition ends in ` WHERE (…)`, and before
+ * this read it the whole definition failed to match, so a partial index
+ * vanished from the model on the first restart and the next push recreated
+ * it. The predicate is not parsed back (PostgreSQL rewrites it: `IN` becomes
+ * `= ANY (ARRAY[…])`); the derived name carries its hash instead.
+ */
+export function parseIndexDef(
+  indexdef: string
+): { name: string; unique: boolean; fields: string[]; order: 'asc' | 'desc'; partial: boolean } | null {
+  const m = /^CREATE (UNIQUE )?INDEX (\S+) ON \S+ USING btree \((.*?)\)( WHERE .*)?$/.exec(indexdef);
   if (!m) return null;
   const name = m[2].replace(/^"|"$/g, '');
   const parts = m[3].split(',').map((p) => p.trim());
@@ -169,7 +182,7 @@ export function parseIndexDef(indexdef: string): { name: string; unique: boolean
     fields.push(fm[2]);
     if (i === 0 && fm[3] === 'DESC') order = 'desc';
   }
-  return { name, unique: Boolean(m[1]), fields, order };
+  return { name, unique: Boolean(m[1]), fields, order, partial: Boolean(m[4]) };
 }
 
 export class PgSchemaManager {
@@ -345,6 +358,11 @@ export class PgSchemaManager {
       }
     }
     const declared = normalizeIndexDecls(stored.indexes);
+    // HLT-016 W1: refused here, synchronously, like a MigrationRefusal above —
+    // a type mismatch in a predicate would otherwise fail at the queue.
+    const typeOf = (field: string): string | undefined =>
+      field === 'objectId' ? 'String' : declaredProperties(stored)?.[field]?.type;
+    for (const d of declared) if (d.where) checkWhereAgainstColumns(name, d.where, columns, typeOf);
 
     st.tables.add(name);
     st.columns.set(name, columns);
@@ -352,10 +370,11 @@ export class PgSchemaManager {
     st.built.set(
       name,
       declared.map((d) => ({
-        name: indexName(name, d.fields),
+        name: indexName(name, d.fields, d.where),
         fields: [...d.fields],
         unique: d.unique === true,
-        order: d.order === 'desc' ? 'desc' : 'asc'
+        order: d.order === 'desc' ? 'desc' : 'asc',
+        partial: d.where !== undefined
       }))
     );
     for (const j of junctions) this._junction(j);
@@ -670,8 +689,8 @@ export class PgSchemaManager {
     return builtInIndexNames(tableName);
   }
 
-  indexName(tableName: string, fields: string[]): string {
-    return indexName(tableName, fields);
+  indexName(tableName: string, fields: string[], where?: IndexWhere): string {
+    return indexName(tableName, fields, where);
   }
 
   declaredIndexes(tableName: string): IndexDecl[] {
@@ -688,13 +707,14 @@ export class PgSchemaManager {
     const out: IndexStatus[] = [];
 
     for (const decl of this.declaredIndexes(tableName)) {
-      const name = indexName(tableName, decl.fields);
+      const name = indexName(tableName, decl.fields, decl.where);
       const b = built.get(name);
       out.push({
         name,
         fields: [...decl.fields],
         unique: decl.unique === true,
         order: decl.order === 'desc' ? 'desc' : 'asc',
+        ...(decl.where ? { where: decl.where } : {}),
         built: Boolean(b && sameIndexSignature(b, decl)),
         declared: true
       });
@@ -717,9 +737,12 @@ export class PgSchemaManager {
     const columns = st.columns.get(tableName) || new Set<string>();
     const seen = new Set<string>();
 
+    const typeOf = (field: string): string | undefined =>
+      field === 'objectId' ? 'String' : declaredProperties(this.getTableSchema(tableName))?.[field]?.type;
+
     // ---- Checks. All of them, before anything is queued. -------------------
     for (const decl of desired) {
-      const name = indexName(tableName, decl.fields);
+      const name = indexName(tableName, decl.fields, decl.where);
       if (builtIn.has(name)) {
         throw new Error(
           `"${decl.fields.join(', ')}" is always indexed on "${tableName}" — createdAt and updatedAt ` +
@@ -748,6 +771,7 @@ export class PgSchemaManager {
           );
         }
       }
+      if (decl.where) checkWhereAgainstColumns(tableName, decl.where, columns, typeOf);
     }
 
     // ---- Apply to the model ----------------------------------------------
@@ -764,13 +788,14 @@ export class PgSchemaManager {
     }
     const after: BuiltIndex[] = [];
     for (const decl of desired) {
-      const name = indexName(tableName, decl.fields);
+      const name = indexName(tableName, decl.fields, decl.where);
       const already = built.get(name);
       const shape: BuiltIndex = {
         name,
         fields: [...decl.fields],
         unique: decl.unique === true,
-        order: decl.order === 'desc' ? 'desc' : 'asc'
+        order: decl.order === 'desc' ? 'desc' : 'asc',
+        partial: decl.where !== undefined
       };
       after.push(shape);
       if (already && sameIndexSignature(already, decl)) {

@@ -186,7 +186,14 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     cases: ['schema/table-schema-reports-its-columns', 'schema/unknown-table-reports-null-not-an-empty-schema']
   },
   listTables: { kind: 'cases', cases: ['schema/create-table-then-list-it'] },
-  reconcileIndexes: { kind: 'cases', cases: ['schema/declared-index-is-built', 'schema/unique-index-refuses-a-duplicate'] },
+  reconcileIndexes: {
+    kind: 'cases',
+    cases: [
+      'schema/declared-index-is-built',
+      'schema/unique-index-refuses-a-duplicate',
+      'schema/a-partial-unique-index-holds-only-where-it-says'
+    ]
+  },
   indexStatus: { kind: 'cases', cases: ['schema/declared-index-is-built'] },
   getRelatedIds: { kind: 'cases', cases: ['relations/add-then-read-back'] },
   getRelationOwners: { kind: 'cases', cases: ['relations/inverse-lookup-finds-the-owners'] },

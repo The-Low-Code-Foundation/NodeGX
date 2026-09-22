@@ -13,6 +13,9 @@ import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
 import {
   builtInIndexNames as sharedBuiltInIndexNames,
+  checkWhereAgainstColumns,
+  declaredProperties,
+  describeWhere,
   indexName as sharedIndexName,
   MigrationRefusal,
   normalizeIndexDecls,
@@ -25,8 +28,10 @@ import {
   type IndexDecl,
   type IndexReconcileReport,
   type IndexStatus,
+  type IndexWhere,
   type SchemaColumn,
-  type TableSchema
+  type TableSchema,
+  whereSQL
 } from './schemaCommon';
 import { columnToPostgres, relationJunctions, tableDDL } from '../postgres/ddl';
 
@@ -45,9 +50,11 @@ class IndexDuplicatesError extends Error {
   duplicates: number;
   samples: unknown[][];
 
-  constructor(table: string, fields: string[], duplicates: number, samples: unknown[][]) {
+  constructor(table: string, fields: string[], duplicates: number, samples: unknown[][], where?: IndexWhere) {
     super(
-      `Cannot make (${fields.join(', ')}) unique on "${table}": ${duplicates} ` +
+      `Cannot make (${fields.join(', ')}) unique on "${table}"` +
+        (where ? ` where ${describeWhere(where)}` : '') +
+        `: ${duplicates} ` +
         `value${duplicates === 1 ? '' : 's'} already appear${duplicates === 1 ? 's' : ''} more than once ` +
         `(${samples.map((s) => JSON.stringify(s.length === 1 ? s[0] : s)).join(', ')}). ` +
         'Nothing was changed and no row was deleted.'
@@ -1041,8 +1048,8 @@ class SchemaManager {
    * two declarations of the same fields are the same index however they were
    * spelled, and a declaration removed from `schema.json` has a name to drop.
    */
-  indexName(tableName: string, fields: string[]): string {
-    return sharedIndexName(tableName, fields);
+  indexName(tableName: string, fields: string[], where?: IndexWhere): string {
+    return sharedIndexName(tableName, fields, where);
   }
 
   /** The indexes a collection's `_Schema` row declares (normalized, never null). */
@@ -1062,7 +1069,7 @@ class SchemaManager {
    * wrong one.
    */
   builtIndexes(tableName: string): BuiltIndex[] {
-    let list: Array<{ name?: string; unique?: number; origin?: string }>;
+    let list: Array<{ name?: string; unique?: number; origin?: string; partial?: number }>;
     try {
       list = this.db.prepare(`PRAGMA index_list(${escapeTable(tableName)})`).all() as typeof list;
     } catch (e) {
@@ -1092,7 +1099,8 @@ class SchemaManager {
         name,
         fields: keyCols.map((c) => String(c.name)),
         unique: row.unique === 1,
-        order: keyCols.length > 0 && keyCols[0].desc === 1 ? 'desc' : 'asc'
+        order: keyCols.length > 0 && keyCols[0].desc === 1 ? 'desc' : 'asc',
+        partial: row.partial === 1
       });
     }
 
@@ -1109,13 +1117,14 @@ class SchemaManager {
     const out: IndexStatus[] = [];
 
     for (const decl of this.declaredIndexes(tableName)) {
-      const name = this.indexName(tableName, decl.fields);
+      const name = this.indexName(tableName, decl.fields, decl.where);
       const b = built.get(name);
       out.push({
         name,
         fields: [...decl.fields],
         unique: decl.unique === true,
         order: decl.order === 'desc' ? 'desc' : 'asc',
+        ...(decl.where ? { where: decl.where } : {}),
         built: Boolean(b && sameIndexSignature(b, decl)),
         declared: true
       });
@@ -1143,10 +1152,15 @@ class SchemaManager {
   duplicateValues(
     tableName: string,
     fields: string[],
-    sampleLimit = 3
+    sampleLimit = 3,
+    where?: IndexWhere
   ): { duplicates: number; samples: unknown[][] } {
     const cols = fields.map((f) => escapeColumn(f)).join(', ');
-    const notNull = fields.map((f) => `${escapeColumn(f)} IS NOT NULL`).join(' AND ');
+    // HLT-016 W5: a partial index only covers the rows its predicate holds
+    // for, so a duplicate outside it is not one the index would refuse.
+    const notNull =
+      fields.map((f) => `${escapeColumn(f)} IS NOT NULL`).join(' AND ') +
+      (where ? ` AND (${whereSQL(where, 'sqlite')})` : '');
     const table = escapeTable(tableName);
     const limit = Math.max(0, Math.floor(sampleLimit));
 
@@ -1196,8 +1210,11 @@ class SchemaManager {
     const columns = this.tableColumns(tableName);
     const seen = new Set<string>();
 
+    const typeOf = (field: string): string | undefined =>
+      field === 'objectId' ? 'String' : declaredProperties(this.getTableSchema(tableName))?.[field]?.type;
+
     for (const decl of desired) {
-      const name = this.indexName(tableName, decl.fields);
+      const name = this.indexName(tableName, decl.fields, decl.where);
       if (builtIn.has(name)) {
         throw new Error(
           `"${decl.fields.join(', ')}" is always indexed on "${tableName}" — createdAt and updatedAt ` +
@@ -1217,14 +1234,15 @@ class SchemaManager {
           );
         }
       }
+      if (decl.where) checkWhereAgainstColumns(tableName, decl.where, columns, typeOf);
 
       // Only a unique index that is not ALREADY built in this exact shape can
       // be refused by the data: one that is built has been enforcing itself.
       const already = built.get(name);
       if (decl.unique === true && !(already && sameIndexSignature(already, decl))) {
-        const report = this.duplicateValues(tableName, decl.fields);
+        const report = this.duplicateValues(tableName, decl.fields, 3, decl.where);
         if (report.duplicates > 0) {
-          throw new IndexDuplicatesError(tableName, decl.fields, report.duplicates, report.samples);
+          throw new IndexDuplicatesError(tableName, decl.fields, report.duplicates, report.samples, decl.where);
         }
       }
     }
@@ -1249,7 +1267,7 @@ class SchemaManager {
       }
 
       for (const decl of desired) {
-        const name = this.indexName(tableName, decl.fields);
+        const name = this.indexName(tableName, decl.fields, decl.where);
         const already = built.get(name);
         if (already && sameIndexSignature(already, decl)) {
           kept.push(name);
@@ -1263,7 +1281,8 @@ class SchemaManager {
         const cols = decl.fields.map((f) => `${escapeColumn(f)} ${order}`).join(', ');
         this.db.exec(
           `CREATE ${decl.unique === true ? 'UNIQUE ' : ''}INDEX IF NOT EXISTS ${escapeTable(name)} ` +
-            `ON ${escapeTable(tableName)} (${cols})`
+            `ON ${escapeTable(tableName)} (${cols})` +
+            (decl.where ? ` WHERE ${whereSQL(decl.where, 'sqlite')}` : '')
         );
         created.push(name);
       }

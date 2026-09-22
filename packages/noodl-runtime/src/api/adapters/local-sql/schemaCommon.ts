@@ -47,7 +47,20 @@ export interface IndexDecl {
   fields: string[];
   unique?: boolean;
   order?: 'asc' | 'desc';
+  /**
+   * HLT-016: a partial index — it covers only the rows this holds for. An AND
+   * of one to four conditions, keyed by property. Never SQL text: it has to
+   * mean the same on both engines, and a schema push is not a place to accept
+   * SQL from a file. See {@link normalizeWhere}.
+   */
+  where?: IndexWhere;
 }
+
+/** One condition of a partial index's `where`. */
+export type WhereCondition = boolean | string | number | { exists: boolean } | { in: Array<string | number> };
+
+/** A partial index's predicate: property → condition, all of which must hold. */
+export type IndexWhere = Record<string, WhereCondition>;
 
 /** An index the engine actually has, as it reports it. */
 export interface BuiltIndex {
@@ -55,6 +68,12 @@ export interface BuiltIndex {
   fields: string[];
   unique: boolean;
   order: 'asc' | 'desc';
+  /**
+   * HLT-016: the engine says it is a partial index. The predicate itself is
+   * not read back: the derived name carries a hash of it, so a different
+   * predicate is a different name, and only partial-or-not can differ under one.
+   */
+  partial?: boolean;
 }
 
 /** A declared index and whether it is built — plus drift, which is neither. */
@@ -62,6 +81,8 @@ export interface IndexStatus extends BuiltIndex {
   built: boolean;
   /** False for an index that exists but nothing declares (hand-made, or drift). */
   declared: boolean;
+  /** HLT-016: the declared predicate of a partial index. Absent on a full one, and on drift. */
+  where?: IndexWhere;
 }
 
 /** What a reconcile did, and what the audit record of a schema push names. */
@@ -153,8 +174,162 @@ export function builtInIndexNames(tableName: string): string[] {
  * two declarations of the same fields are the same index however they were
  * spelled, and a declaration removed from `schema.json` has a name to drop.
  */
-export function indexName(tableName: string, fields: string[]): string {
-  return `idx_${sanitizeIdent(tableName)}_${fields.map(sanitizeIdent).join('_')}`;
+export function indexName(tableName: string, fields: string[], where?: IndexWhere): string {
+  const base = `idx_${sanitizeIdent(tableName)}_${fields.map(sanitizeIdent).join('_')}`;
+  // HLT-016: a partial index and a full one on the same fields are two indexes,
+  // so the predicate is part of the name. A hash rather than the predicate
+  // spelled out, because PostgreSQL truncates identifiers at 63 characters.
+  return where ? `${base}_w${whereHash(where)}` : base;
+}
+
+/** FNV-1a over the normalized predicate: stable across processes and engines. */
+export function whereHash(where: IndexWhere): string {
+  const text = JSON.stringify(canonicalWhere(where));
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+/** The predicate with its keys sorted, so two spellings of one predicate hash alike. */
+function canonicalWhere(where: IndexWhere): Array<[string, WhereCondition]> {
+  return Object.keys(where)
+    .sort()
+    .map((k) => [k, where[k]]);
+}
+
+const MAX_WHERE_CONDITIONS = 4;
+const MAX_WHERE_IN = 20;
+
+/**
+ * Read a `where` declaration, or refuse it (HLT-016 W1). Only the SHAPE is
+ * checked here; whether each property exists and has the type the value
+ * implies needs the collection, and is {@link checkWhereAgainstColumns}.
+ *
+ * Normalized: keys sorted, and an `in` list deduplicated and sorted, so that
+ * the same predicate however spelled is the same index (its name hashes it).
+ */
+export function normalizeWhere(raw: unknown, at: string): IndexWhere {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error(`${at}.where must be an object like { "pinned": true }`);
+  }
+  const keys = Object.keys(raw as object).sort();
+  if (keys.length === 0 || keys.length > MAX_WHERE_CONDITIONS) {
+    throw new Error(`${at}.where must name one to ${MAX_WHERE_CONDITIONS} properties`);
+  }
+  const out: IndexWhere = {};
+  for (const key of keys) {
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+      throw new Error(`${at}.where: ${JSON.stringify(key)} is not a valid property name`);
+    }
+    const c = (raw as Record<string, unknown>)[key];
+    const where = `${at}.where.${key}`;
+    if (typeof c === 'boolean' || typeof c === 'string') {
+      out[key] = c;
+    } else if (typeof c === 'number') {
+      if (!Number.isFinite(c)) throw new Error(`${where} must be a finite number`);
+      out[key] = c;
+    } else if (c && typeof c === 'object' && !Array.isArray(c)) {
+      const ops = Object.keys(c);
+      if (ops.length !== 1 || (ops[0] !== 'exists' && ops[0] !== 'in')) {
+        throw new Error(
+          `${where}: expected true/false, a string, a number, { "exists": true|false } or { "in": [...] }` +
+            (ops.length ? `, not an object with ${ops.map((o) => `"${o}"`).join(', ')}` : '')
+        );
+      }
+      const v = (c as Record<string, unknown>)[ops[0]];
+      if (ops[0] === 'exists') {
+        if (typeof v !== 'boolean') throw new Error(`${where}.exists must be true or false`);
+        out[key] = { exists: v };
+      } else {
+        if (!Array.isArray(v) || v.length === 0 || v.length > MAX_WHERE_IN) {
+          throw new Error(`${where}.in must list one to ${MAX_WHERE_IN} values`);
+        }
+        const kind = typeof v[0];
+        if (
+          !v.every((x) => (typeof x === 'string' || (typeof x === 'number' && Number.isFinite(x))) && typeof x === kind)
+        ) {
+          throw new Error(`${where}.in must list strings, or numbers, and not a mix`);
+        }
+        const unique = [...new Set(v as Array<string | number>)];
+        unique.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+        out[key] = { in: unique };
+      }
+    } else {
+      throw new Error(`${where}: expected true/false, a string, a number, { "exists": true|false } or { "in": [...] }`);
+    }
+  }
+  return out;
+}
+
+/**
+ * Refuse a `where` whose properties the collection lacks, or whose values are
+ * the wrong type for them (HLT-016 W1). A comparison of a Boolean property with
+ * a string is not "no rows match": on SQLite it silently never matches (the
+ * column holds 0/1) and on PostgreSQL it is an error at the queue. Both are
+ * worse than a sentence now.
+ *
+ * @param typeOf - A property's declared Noodl type, or undefined when the
+ *   collection has the column but never declared its type.
+ */
+export function checkWhereAgainstColumns(
+  tableName: string,
+  where: IndexWhere,
+  columns: Set<string>,
+  typeOf: (field: string) => string | undefined
+): void {
+  for (const [field, c] of Object.entries(where)) {
+    if (!columns.has(field)) {
+      throw new Error(`Cannot filter the index on "${tableName}" by "${field}": the collection has no such property.`);
+    }
+    if (c !== null && typeof c === 'object' && 'exists' in c) continue;
+
+    const sample = c !== null && typeof c === 'object' && 'in' in c ? c.in[0] : c;
+    const wants = typeof sample === 'boolean' ? 'Boolean' : typeof sample === 'number' ? 'Number' : 'String';
+    const has = typeOf(field);
+    if (has !== wants) {
+      throw new Error(
+        `The index on "${tableName}" compares "${field}" with ${JSON.stringify(sample)}, a ${wants}, ` +
+          `but "${field}" is ${has ? `a ${has}` : 'a property with no declared type'}. ` +
+          'Only { "exists": true|false } applies to every type.'
+      );
+    }
+  }
+}
+
+/**
+ * The SQL of a partial index's predicate, for one engine. Values are written
+ * as literals, because an index definition cannot carry bound parameters —
+ * which is why {@link normalizeWhere} admits only finite numbers, booleans and
+ * strings, and a string goes through {@link quoteLiteral}.
+ */
+export function whereSQL(where: IndexWhere, engine: 'sqlite' | 'postgres'): string {
+  const lit = (v: string | number | boolean): string => {
+    if (typeof v === 'boolean') return engine === 'sqlite' ? (v ? '1' : '0') : v ? 'TRUE' : 'FALSE';
+    if (typeof v === 'number') return String(v);
+    return quoteLiteral(v);
+  };
+  return canonicalWhere(where)
+    .map(([field, c]) => {
+      const col = `"${sanitizeIdent(field)}"`;
+      if (c !== null && typeof c === 'object' && 'exists' in c) return `${col} IS ${c.exists ? 'NOT ' : ''}NULL`;
+      if (c !== null && typeof c === 'object' && 'in' in c) return `${col} IN (${c.in.map(lit).join(', ')})`;
+      return `${col} = ${lit(c as string | number | boolean)}`;
+    })
+    .join(' AND ');
+}
+
+/** A person's reading of a predicate, for sentences: `pinned = true, kind in (a, b)`. */
+export function describeWhere(where: IndexWhere): string {
+  return canonicalWhere(where)
+    .map(([field, c]) => {
+      if (c !== null && typeof c === 'object' && 'exists' in c) return `${field} ${c.exists ? 'is set' : 'is empty'}`;
+      if (c !== null && typeof c === 'object' && 'in' in c) return `${field} in (${c.in.join(', ')})`;
+      return `${field} = ${JSON.stringify(c)}`;
+    })
+    .join(' and ');
 }
 
 /**
@@ -173,8 +348,8 @@ export function normalizeIndexDecls(raw: unknown): IndexDecl[] {
     }
     const e = entry as Record<string, unknown>;
     for (const key of Object.keys(e)) {
-      if (key !== 'fields' && key !== 'unique' && key !== 'order') {
-        throw new Error(`indexes[${i}]: unknown key "${key}" (expected fields, unique, order)`);
+      if (key !== 'fields' && key !== 'unique' && key !== 'order' && key !== 'where') {
+        throw new Error(`indexes[${i}]: unknown key "${key}" (expected fields, unique, order, where)`);
       }
     }
     if (!Array.isArray(e.fields) || e.fields.length === 0 || e.fields.length > 4) {
@@ -199,6 +374,7 @@ export function normalizeIndexDecls(raw: unknown): IndexDecl[] {
     const decl: IndexDecl = { fields };
     if (e.unique === true) decl.unique = true;
     if (e.order === 'desc') decl.order = 'desc';
+    if (e.where !== undefined) decl.where = normalizeWhere(e.where, `indexes[${i}]`);
     return decl;
   });
 }
@@ -208,6 +384,9 @@ export function sameIndexSignature(built: BuiltIndex, decl: IndexDecl): boolean 
   return (
     built.unique === (decl.unique === true) &&
     built.order === (decl.order === 'desc' ? 'desc' : 'asc') &&
+    // HLT-016: the predicate itself is in the name; under one name, only
+    // "partial or not" can differ, and a full index is not the partial one.
+    (built.partial === true) === (decl.where !== undefined) &&
     built.fields.length === decl.fields.length &&
     built.fields.every((f, i) => f === decl.fields[i])
   );

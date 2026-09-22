@@ -95,16 +95,27 @@ function normalizeForDiff(indexes: StorageIndexDecl[] | undefined): StorageIndex
       const out: StorageIndexDecl = { fields: [...(i.fields || [])] };
       if (i.unique === true) out.unique = true;
       if (i.order === 'desc') out.order = 'desc';
+      // HLT-016 W7: a changed predicate is a changed index. Keys sorted, so
+      // two spellings of one predicate do not read as a change.
+      if (i.where && typeof i.where === 'object') {
+        out.where = Object.fromEntries(Object.keys(i.where).sort().map((k) => [k, i.where![k]]));
+      }
       return out;
     })
-    .sort((a, b) => a.fields.join(',').localeCompare(b.fields.join(',')));
+    .sort((a, b) =>
+      (a.fields.join(',') + JSON.stringify(a.where || '')).localeCompare(b.fields.join(',') + JSON.stringify(b.where || ''))
+    );
 }
 
 /** `(id unique), (published desc)` — what the promotion summary prints. */
 function describeIndexes(indexes: StorageIndexDecl[]): string {
   if (indexes.length === 0) return 'none';
   return indexes
-    .map((i) => `(${i.fields.join(', ')}${i.unique ? ' unique' : ''}${i.order === 'desc' ? ' desc' : ''})`)
+    .map(
+      (i) =>
+        `(${i.fields.join(', ')}${i.unique ? ' unique' : ''}${i.order === 'desc' ? ' desc' : ''}` +
+        `${i.where ? ` where ${JSON.stringify(i.where)}` : ''})`
+    )
     .join(', ');
 }
 

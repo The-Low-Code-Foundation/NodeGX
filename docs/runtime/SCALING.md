@@ -163,6 +163,27 @@ column that already holds duplicates is **refused** (`INDEX_DUPLICATES`) rather
 than silently skipped. Index the fields you filter and sort by, and check
 `nodegx_db_file_bytes` to know whether size is even plausible as the cause.
 
+An index can cover only some rows, with `where`. It is how you say "one
+*pinned* lesson per learner and concept, and any number unpinned", or "one
+evaluation per programme and kind, for these four kinds":
+
+```jsonc
+{ "indexes": [
+  { "fields": ["learnerId", "conceptId"], "unique": true, "where": { "pinned": true } },
+  { "fields": ["programmeId", "kind"], "unique": true, "where": { "kind": { "in": ["initial", "mid", "final", "impact"] } } },
+  { "fields": ["dimensionId", "sessionId"], "unique": true, "where": { "sessionId": { "exists": true } } }
+] }
+```
+
+`where` names one to four properties, and all of them must hold. Each is
+compared with `true`/`false` (a Boolean property), a string (String), a number
+(Number), `{ "exists": true|false }` (any type: set, or empty), or
+`{ "in": [...] }` (one to twenty values). A value of the wrong type for its
+property is refused when you push, not left to match nothing. A partial index
+and a full one on the same fields are two indexes. A partial unique index is
+**not** enough for `X-NodeGX-Upsert`, because outside its rows the value may
+repeat; the upsert asks for a unique index with no `where`.
+
 ### 2a. Set a limit anyway — the page cap is a floor under accidents, not a design
 
 **A query with no `limit` returns one page, not the collection.** The backend

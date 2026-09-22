@@ -29,8 +29,10 @@ import {
   quoteLiteral,
   sanitizeIdent,
   TYPE_MAP,
+  type IndexDecl,
   type SchemaColumn,
-  type TableSchema
+  type TableSchema,
+  whereSQL
 } from '../local-sql/schemaCommon';
 import { escapeColumn, escapeTable } from '../local-sql/QueryBuilder';
 
@@ -125,10 +127,14 @@ export function junctionDDL(junctionTable: string): string[] {
 }
 
 /** The `CREATE INDEX` for one declared index, under the derived name. */
-export function declaredIndexDDL(tableName: string, decl: { fields: string[]; unique?: boolean; order?: 'asc' | 'desc' }): string {
-  const name = indexName(tableName, decl.fields);
+export function declaredIndexDDL(tableName: string, decl: IndexDecl): string {
+  const name = indexName(tableName, decl.fields, decl.where);
   const cols = decl.fields.map((f) => `${escapeColumn(f)}${decl.order === 'desc' ? ' DESC' : ''}`).join(', ');
-  return `CREATE${decl.unique ? ' UNIQUE' : ''} INDEX IF NOT EXISTS "${name}" ON ${escapeTable(tableName)} (${cols});`;
+  // HLT-016 W7: a partial index crosses as a partial index. Dropping the WHERE
+  // here would arrive as a full unique index that refuses the rows the source
+  // deliberately allowed.
+  const where = decl.where ? ` WHERE ${whereSQL(decl.where, 'postgres')}` : '';
+  return `CREATE${decl.unique ? ' UNIQUE' : ''} INDEX IF NOT EXISTS "${name}" ON ${escapeTable(tableName)} (${cols})${where};`;
 }
 
 /**

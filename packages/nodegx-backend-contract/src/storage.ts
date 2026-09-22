@@ -211,6 +211,12 @@ export interface StorageIndexDecl {
   fields: string[];
   unique?: boolean;
   order?: 'asc' | 'desc';
+  /**
+   * HLT-016: a partial index, covering only the rows this holds for. Property →
+   * `true`/`false`, a string, a number, `{ exists: boolean }` or `{ in: [...] }`,
+   * all of which must hold. Never SQL text.
+   */
+  where?: Record<string, boolean | string | number | { exists: boolean } | { in: Array<string | number> }>;
 }
 
 /**
