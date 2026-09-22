@@ -1,7 +1,23 @@
 # TPL-010-H — planning.digitalbricks.io
 
 **Opened 2026-09-20.** Host the TPL-010 planner with its backend on nexus-1, beside the todo list, on the recipe in
-`phase-78-the-templates/todo-digitalbricks/README.md`. **Status: ⬜ never built.** Prerequisite: TPL-010 AC1.
+`phase-78-the-templates/todo-digitalbricks/README.md`.
+
+**Status, 2026-09-22: 🟡 everything but the DNS record is ready.** `merge-policy.js` is written and run against the LIVE
+policy pulled off the box (4 todo collections kept, the planner's 7 added, `defaults`/`files`/`functions`/`signup`
+untouched; it refuses a name collision — tested). The site builds with the endpoint baked in, on the production viewer.
+Nothing has been shipped and nothing on the box has been touched.
+
+🔴 **The one thing left is Richard's: an A record `planning` → `49.12.102.195` at Namecheap (H3).** Until it resolves,
+shipping is the wrong move — the drop-in would send Caddy after a certificate for a name that does not exist, and
+`provision.sh` restarts the live todo backend to load the merged policy. Both are worth doing once, together, with the
+name resolving.
+
+⚠️ **`signup` on the live backend is still `public`.** The todo README's last section says to lock it once his account
+exists; it has not been done, and the merged policy keeps the live value rather than quietly changing it. Adding the
+planner does not make this worse (a stranger who signed up would see their own empty week), but it is his server.
+
+Prerequisite: TPL-010 AC1 ✅.
 
 **The person sentence:** *Richard signs in at planning.digitalbricks.io on his phone with the account he already uses for the
 todo list, and his week is there.*
@@ -35,7 +51,9 @@ rm "$S/site/nodegx.security.json"
 rsync -a --delete -e "ssh -i ~/.ssh/nexus_hetzner" "$S/site/" root@49.12.102.195:/srv/planning/site/
 
 # 3. Extend the policy (additive; the script refuses on a name collision) and restart the one backend
-node planning-digitalbricks/merge-policy.js templates/planner.security.json /tmp/security.merged.json   # local
+ssh -i ~/.ssh/nexus_hetzner root@49.12.102.195 'cat /var/lib/todo/data/security.json' > /tmp/live-security.json
+node planning-digitalbricks/merge-policy.js /tmp/live-security.json templates/planner.security.json /tmp/security.merged.json
+ssh -i ~/.ssh/nexus_hetzner root@49.12.102.195 'mkdir -p /tmp/planning-provision'
 scp -i ~/.ssh/nexus_hetzner /tmp/security.merged.json root@49.12.102.195:/tmp/planning-provision/security.json
 ssh -i ~/.ssh/nexus_hetzner root@49.12.102.195 'bash -s' < planning-digitalbricks/provision.sh
 
@@ -44,8 +62,10 @@ curl -fsS -o /dev/null -w "%{http_code}\n" https://planning.digitalbricks.io/
 curl -fsS https://planning.digitalbricks.io/health
 ```
 
-`merge-policy.js` is a fifteen-line script to write with the task: read the live `security.json` (scp'd down), read the planner
-policy, add its `collections` entries, refuse if a key already exists, write the result. The `provision.sh` here installs the
+`merge-policy.js` is **written** (`planning-digitalbricks/merge-policy.js`) and run: it reads the live `security.json`, adds the
+planner's `collections`, refuses on a name collision or a missing `Task`, keeps the live file's `defaults`, `files`, `functions`
+and `signup`, and asserts the collection count. Its dry run on 2026-09-22 kept `Task, Action, Event, PushSubscription` and added
+`Project, Block, MonthPlan, MoneyItem, MoneyMark, BalanceReading, Settings`. The `provision.sh` here installs the
 merged policy only if the collections are absent, writes the Caddy drop-in, validates the whole Caddy config, restarts
 `todo-backend` so the policy loads, and reloads Caddy. It never touches `/var/lib/todo/data` beyond the policy file.
 
@@ -53,7 +73,7 @@ merged policy only if the collections are absent, writes the Caddy drop-in, vali
 
 | AC | Criterion | Result |
 |---|---|---|
-| AC1 | `dig +short A planning.digitalbricks.io` returns `49.12.102.195` | ⬜ |
+| AC1 | `dig +short A planning.digitalbricks.io` returns `49.12.102.195` | ⬜ **Richard — the only blocker.** Checked 2026-09-22: no record. |
 | AC2 | `https://planning.digitalbricks.io/` serves the planner over TLS with a verified certificate; `/health` returns the backend's health JSON; `/admin` returns 404 | ⬜ |
 | AC3 | The todo list at `https://todo.digitalbricks.io` is unchanged: the same tasks are there after the restart, and its Caddy site file is untouched (`caddy validate` on the whole config passed before the drop-in was kept) | ⬜ |
 | AC4 | Signing in with the todo account on the planner works; a `Project` row created there is invisible to a second account | ⬜ |
