@@ -50,6 +50,12 @@
       "fromProperty": "Translation",
       "toId": "hm_coach",
       "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_note",
+      "fromProperty": "Translation",
+      "toId": "hm_note",
+      "toProperty": "text"
     }
   ]
 }

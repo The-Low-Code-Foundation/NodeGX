@@ -52,7 +52,8 @@
         "hm_eyebrow",
         "hm_title",
         "hm_line",
-        "hm_actions"
+        "hm_actions",
+        "hm_note"
       ],
       "parameters": {
         "width": {
@@ -295,6 +296,38 @@
       "y": 640,
       "parameters": {
         "Key": "coachView",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "hm_note",
+      "type": "Text",
+      "label": "Nothing is saved",
+      "x": 220,
+      "y": 820,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "metadata": {
+        "comment": "A visitor pressing a button called \"log in\" is owed the truth about what happens next. Nothing in this template fetches or writes (L170/L171 are unbuilt), so the sentence is true by construction rather than by promise — and it must be re-read on the day a backend lands."
+      }
+    },
+    {
+      "id": "t_hm_note",
+      "type": "Translation",
+      "label": "home:demoNote",
+      "x": 1000,
+      "y": 1200,
+      "parameters": {
+        "Key": "demoNote",
         "Namespace": "home"
       }
     }

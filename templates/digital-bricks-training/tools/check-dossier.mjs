@@ -231,11 +231,30 @@ for (const [who, out] of [['learner', learner], ['coach', coach]]) {
 check(learner.toldUs.length === 0, 'AC6: the learner received the coach-only told-us list');
 check(coach.toldUs.length === Object.keys(fx.facts).length, `AC6: told-us has ${coach.toldUs.length} of ${Object.keys(fx.facts).length} facts`);
 const told = Object.fromEntries(coach.toldUs.map((t) => [t.id, t.label]));
-check(told.clubSize === 'Club size', `AC6: the legacy fact is labelled "${told.clubSize}", not humanised whole`);
+// A fact under no namespace and with no authored label. Found by SHAPE, not by
+// name: pinning the fixture's own spelling made this assertion expire the first
+// time the fixture was re-authored, while the rule it states had not changed.
+const authored = new Set(fx.onboardingFacts.map((f) => f.key));
+const legacyIds = Object.keys(fx.facts).filter((k) => !k.includes('.') && !authored.has(k));
+check(legacyIds.length > 0, 'the fixture needs one fact under no namespace and with no authored label');
+for (const id of legacyIds) {
+  check(told[id] === product.humaniseFactName(id), `AC6: the legacy fact ${id} is labelled "${told[id]}", not humanised whole`);
+}
 check(told.projectGoal === fx.onboardingFacts.find((f) => f.key === 'projectGoal').label, 'AC6: an onboarding fact lost its authored label');
 check(coach.toldUs[0].id === 'projectGoal', 'AC6: the onboarding facts do not lead, as the product orders them');
-check(told['bookingRules.whoCanBook'] === 'The booking rules, written down · Who can book',
-  `AC6: a namespaced fact is "${told['bookingRules.whoCanBook']}", not "<objective> · <fact>"`);
+// Same repair: every namespaced fact, by shape.
+const nsIds = Object.keys(fx.facts).filter((k) => k.includes('.'));
+check(nsIds.length > 0, 'the fixture needs at least one namespaced fact');
+for (const id of nsIds) {
+  const [slug, field] = [id.slice(0, id.indexOf('.')), id.slice(id.indexOf('.') + 1)];
+  const owner = fx.deliverables.find((d) => d.slug === slug);
+  check(Boolean(owner), `a namespaced fact names ${slug}, which is no objective's slug`);
+  if (!owner) continue;   // `check` collects, it does not throw: without this the
+                          // next line dies on undefined and the run reports a stack
+                          // trace instead of the failure it was built to name.
+  const want = `${owner.title} · ${product.humaniseFactName(field)}`;
+  check(told[id] === want, `AC6: a namespaced fact is "${told[id]}", not "${want}"`);
+}
 const archivedSlug = fx.deliverables.find((d) => d.archivedAt).slug;
 check(coach.toldUs.some((t) => t.id.startsWith(archivedSlug + '.') && t.label.startsWith(fx.deliverables.find((d) => d.archivedAt).title)),
   "AC6: the archived objective's fact is missing or unnamed");
@@ -244,8 +263,13 @@ const hostile = coach.toldUs.find((t) => t.value.includes('onerror'));
 check(hostile && hostile.value === fx.facts[hostile.id], 'AC6: the hostile fact was altered rather than carried verbatim as text');
 
 // The slug fallback for a concept that is not on the path.
-const storage = coach.segments.find((s) => s.slug === 'whereBookingsLive');
-check(storage && storage.requires.some((r) => r.id === r.title) && storage.requires.some((r) => r.id !== r.title),
+// The slug fallback for a concept that is not on the path. The property is that
+// SOME objective demonstrates both halves at once — which objective is the
+// fixture's business, not this guard's.
+const mixed = coach.segments.find(
+  (s) => s.requires.some((r) => r.id === r.title) && s.requires.some((r) => r.id !== r.title),
+);
+check(Boolean(mixed),
   'a required concept with no title should render its slug, beside one that has a title');
 
 // ── AC7: THE COPY GUARD, BOTH HALVES ────────────────────────────────────────

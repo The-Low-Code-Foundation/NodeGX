@@ -86,6 +86,10 @@ const CORPUS = [
 
 // ── The roster ────────────────────────────────────────────────────────────────
 const roster = staticJson('Data/Fixture roster');
+// WHOSE programme this template carries is the programme fixture's business,
+// not a name written here. Pinning it cost three silent wrong answers the
+// first time the fixture was re-authored around a different learner.
+const PROGRAMME_LEARNER = staticJson('Data/Fixture programme')[0].learnerId;
 const rosterIgnored = {
   stepsTotal: 'derived: count of live steps on the most recent path',
   stepsComplete: 'derived: count of complete ones',
@@ -119,8 +123,8 @@ for (const p of roster) {
 
   const projectName = t.take('projectName');
   const contextVersion = t.take('contextVersion');
-  if (projectName !== null && learnerId !== 'l-priya') {
-    // Priya's context is written from the programme fixture below; everybody
+  if (projectName !== null && learnerId !== PROGRAMME_LEARNER) {
+    // Their context is written from the programme fixture below; everybody
     // else's carries what the roster knows. `updatedAt` is when they last
     // touched it, which is what lastActivity reads (TASK-L169 §3b).
     add('ProjectContext', {
@@ -144,7 +148,7 @@ for (const p of roster) {
   }
 
   for (const prog of t.take('programmes') || []) {
-    if (learnerId === 'l-priya') continue; // Priya's two programmes come from the programme fixture's history
+    if (learnerId === PROGRAMME_LEARNER) continue; // their programmes come from the programme fixture's history
     add('Programme', {
       programmeId: prog.id,
       learnerId,
@@ -159,7 +163,7 @@ for (const p of roster) {
   }
 
   // A path of `stepsTotal` real concepts, the first `stepsComplete` complete.
-  if (learnerId !== 'l-priya' && p.stepsTotal > 0) {
+  if (learnerId !== PROGRAMME_LEARNER && p.stepsTotal > 0) {
     const pathId = `path-${learnerId}`;
     add('LearningPath', { pathId, learnerId, programmeId: null, replanBlockedAt: t.take('replanBlockedAt'), createdAt: p.createdAt });
     for (let i = 0; i < p.stepsTotal; i++) {
@@ -200,7 +204,7 @@ for (const p of roster) {
   t.done();
 }
 
-// ── Priya's programme ─────────────────────────────────────────────────────────
+// ── The learner's programme ─────────────────────────────────────────────────────────
 const [programme] = staticJson('Data/Fixture programme');
 const learnerId = programme.learnerId;
 const pt = tracker('programme', programme, {

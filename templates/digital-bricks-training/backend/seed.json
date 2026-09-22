@@ -27,9 +27,9 @@
     {
       "username": "sam.okafor@example.test",
       "email": "sam.okafor@example.test",
-      "firstName": null,
-      "lastName": null,
-      "createdAt": "2026-09-15T08:12:00.000Z"
+      "firstName": "Sam",
+      "lastName": "— first site, autumn",
+      "createdAt": "2026-07-08T09:00:00.000Z"
     },
     {
       "username": "j.hughes@example.test",
@@ -79,195 +79,208 @@
       "firstName": null,
       "lastName": null,
       "createdAt": "2026-08-28T10:00:00.000Z"
+    },
+    {
+      "username": "jo.whitfield@example.test",
+      "email": "jo.whitfield@example.test",
+      "firstName": null,
+      "lastName": null,
+      "createdAt": "2026-09-19T17:42:00.000Z"
     }
   ],
   "rows": {
     "ArtifactSubmission": [
       {
-        "submissionId": "artifact-1",
-        "learnerId": "l-priya",
+        "submissionId": "art-scope",
+        "learnerId": "l-sam",
         "attempt": 1,
-        "submittedAt": "2026-08-26T18:40:00.000Z",
+        "submittedAt": "2026-09-07T21:12:00.000Z",
         "evaluation": {
           "summary": "(seeded)"
         },
         "conceptId": "scoping-what-to-build",
         "sectionId": "artifact",
-        "deliverableId": "obj-fields"
+        "deliverableId": "obj-scope"
       },
       {
-        "submissionId": "artifact-2",
-        "learnerId": "l-priya",
+        "submissionId": "art-web",
+        "learnerId": "l-sam",
         "attempt": 1,
-        "submittedAt": "2026-09-03T19:00:00.000Z",
+        "submittedAt": "2026-09-06T19:20:00.000Z",
         "evaluation": null,
-        "conceptId": "what-an-api-is",
+        "conceptId": "what-the-web-is",
         "sectionId": "artifact",
         "deliverableId": null
       }
     ],
     "Assignment": [
       {
-        "assignmentId": "brief-fields",
-        "learnerId": "l-priya",
+        "assignmentId": "brief-scope",
+        "learnerId": "l-sam",
         "cohortId": null,
         "programmeId": "prog-autumn",
-        "title": "One page: every field your booking form asks for",
-        "brief": "List every field the form asks a parent for, and beside each one write why you need it. If you cannot say why, that is the interesting row.",
-        "dueAt": "2026-09-09T22:59:59.999Z",
+        "title": "One page: what version one is",
+        "brief": "Half a page, plain words. The one job of version one, what is on the page, what you have left for later, and the one assumption that would change everything if it turned out to be wrong.",
+        "dueAt": "2026-09-08T22:59:59.999Z",
         "submissionModes": [
-          "text"
+          "text",
+          "markdown"
         ],
         "criteria": [
-          "Every field has a reason beside it",
-          "At least one field you decided to drop"
+          "The one job is a single sentence about a real person doing a real thing",
+          "What is on the page stops at four things or fewer",
+          "A 'not yet' list with at least two things you genuinely wanted",
+          "Names one assumption that would change the approach if it were wrong"
         ],
-        "deliverableId": null,
+        "deliverableId": "obj-scope",
         "status": "issued"
       },
       {
-        "assignmentId": "brief-rules",
-        "learnerId": "l-priya",
+        "assignmentId": "brief-photos",
+        "learnerId": "l-sam",
         "cohortId": null,
         "programmeId": "prog-autumn",
-        "title": "A one-page plan for the booking rules",
-        "brief": "Write the rules a booking has to obey, in plain sentences: how far ahead, how late a cancellation, what happens when two parents ask for the same slot.",
-        "dueAt": "2026-09-25T22:59:59.999Z",
+        "title": "Six photos and one honest sentence",
+        "brief": "Six photographs of your own work — not stock, not tidy, yours — and one sentence saying what you do, written as you would say it to somebody at a bus stop.",
+        "dueAt": "2026-09-30T22:59:59.999Z",
         "submissionModes": [
           "text",
-          "link"
+          "upload"
         ],
         "criteria": [
-          "Each rule is one sentence",
-          "The double-booking case has an answer",
-          "A rule you are not sure about is marked as such"
+          "Six photographs, all your own work",
+          "One sentence, no more",
+          "The sentence says what you do, not what you value"
         ],
-        "deliverableId": null,
+        "deliverableId": "obj-words",
         "status": "issued"
-      }
-    ],
-    "AssignmentSubmission": [
-      {
-        "submissionId": "assignment-1",
-        "learnerId": "l-priya",
-        "attempt": 1,
-        "submittedAt": "2026-09-08T20:10:00.000Z",
-        "evaluation": null,
-        "assignmentId": "brief-fields"
       }
     ],
     "CoachNote": [
       {
-        "noteId": "note-spring",
-        "learnerId": "l-priya",
+        "noteId": "note-summer",
+        "learnerId": "l-sam",
         "authorEmail": "trainer@example.test",
-        "body": "She is ready to build. The autumn programme can start from the booking form itself.",
-        "sessionId": null,
+        "body": "Came in asking for an app. Left with a page and a clearer head. Worth remembering how quickly that landed once it was concrete.",
+        "sessionId": "sess-summer-2",
         "anchorKind": null,
         "anchorId": null,
         "visibility": "shared",
-        "createdAt": "2026-05-20T08:30:00.000Z",
+        "createdAt": "2026-07-22T19:10:00.000Z",
         "editedAt": null
       },
       {
-        "noteId": "note-api",
-        "learnerId": "l-priya",
+        "noteId": "note-scope",
+        "learnerId": "l-sam",
         "authorEmail": "trainer@example.test",
-        "body": "You said the API lesson was the first time the whole thing clicked. Worth remembering when the next unfamiliar word turns up — it was the example that did it, not the explanation.",
+        "body": "You cut the blog yourself before I could suggest it. That is the part most people cannot do, and it is worth knowing that you already can.",
+        "sessionId": "sess-scope",
+        "anchorKind": "lesson",
+        "anchorId": "lesson:scoping-what-to-build",
+        "visibility": "shared",
+        "createdAt": "2026-09-11T19:20:00.000Z",
+        "editedAt": null
+      },
+      {
+        "noteId": "note-plan",
+        "learnerId": "l-sam",
+        "authorEmail": "trainer@example.test",
+        "body": "You said Plan mode was the first time it stopped feeling like gambling. Hold onto that — it is the habit that carries the rest.",
         "sessionId": null,
         "anchorKind": "lesson",
-        "anchorId": "lesson:what-an-api-is",
+        "anchorId": "lesson:plan-then-act",
         "visibility": "shared",
-        "createdAt": "2026-09-02T15:02:00.000Z",
+        "createdAt": "2026-09-12T21:40:00.000Z",
         "editedAt": null
       },
       {
         "noteId": "note-pace",
-        "learnerId": "l-priya",
+        "learnerId": "l-sam",
         "authorEmail": "trainer@example.test",
-        "body": "Term has started and the evenings have gone. We agreed to keep the same end date and drop the third objective rather than rush all three.",
+        "body": "Going at about a lesson every three days alongside a full week of work. That is a good pace and there is no need to speed it up before the page is live.",
         "sessionId": null,
         "anchorKind": null,
         "anchorId": null,
         "visibility": "shared",
-        "createdAt": "2026-09-10T08:45:00.000Z",
-        "editedAt": null
-      },
-      {
-        "noteId": "note-orphan",
-        "learnerId": "l-priya",
-        "authorEmail": "trainer@example.test",
-        "body": "Anchored to something that is not on this page — it must still render as its own card rather than disappearing.",
-        "sessionId": null,
-        "anchorKind": "lesson",
-        "anchorId": "lesson:a-lesson-not-on-this-page",
-        "visibility": "shared",
-        "createdAt": "2026-09-12T09:00:00.000Z",
+        "createdAt": "2026-09-17T08:05:00.000Z",
         "editedAt": null
       }
     ],
     "CoachingSession": [
       {
-        "sessionId": "sess-spring",
-        "learnerId": "l-priya",
+        "sessionId": "sess-summer-1",
+        "learnerId": "l-sam",
         "cohortId": null,
-        "programmeId": "prog-spring",
-        "title": "What a booking has to know",
-        "startsAt": "2026-04-15T12:00:00.000Z",
+        "programmeId": "prog-summer",
+        "title": "Do you actually need a website?",
+        "startsAt": "2026-07-08T18:30:00.000Z",
         "durationMinutes": 30,
         "meetingLink": null,
-        "summary": "A booking needs a child, a day and a parent to reach. Everything else can wait.",
+        "summary": "You came in wanting an app. What you need is somewhere a stranger can find you and get hold of you, which is a page.",
         "cancelledAt": null,
         "createdByEmail": "trainer@example.test"
       },
       {
-        "sessionId": "sess-aug",
-        "learnerId": "l-priya",
+        "sessionId": "sess-summer-2",
+        "learnerId": "l-sam",
+        "cohortId": null,
+        "programmeId": "prog-summer",
+        "title": "What it would take",
+        "startsAt": "2026-07-22T18:30:00.000Z",
+        "durationMinutes": 30,
+        "meetingLink": null,
+        "summary": "We looked at what building it yourself involves and what it costs. You decided to do it rather than pay somebody, with the autumn programme to lean on.",
+        "cancelledAt": null,
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-start",
+        "learnerId": "l-sam",
         "cohortId": null,
         "programmeId": "prog-autumn",
-        "title": "Scope review — what v1 actually is",
-        "startsAt": "2026-08-21T13:00:00.000Z",
+        "title": "Where you're starting from",
+        "startsAt": "2026-09-01T10:00:00.000Z",
         "durationMinutes": 45,
         "meetingLink": null,
-        "summary": "We cut the reminder emails out of v1. You are building the booking form and nothing else until it takes a real booking.",
+        "summary": "You want strangers to be able to find you and get hold of you. We agreed that is the whole of version one, and that bookings and a shop are for later. You have never built anything and that is completely fine — the first fortnight is mostly deciding, not typing.",
         "cancelledAt": null,
         "createdByEmail": "trainer@example.test"
       },
       {
-        "sessionId": "sess-sep",
-        "learnerId": "l-priya",
+        "sessionId": "sess-scope",
+        "learnerId": "l-sam",
         "cohortId": null,
         "programmeId": "prog-autumn",
-        "title": "Fortnightly check-in",
-        "startsAt": "2026-09-04T13:00:00.000Z",
-        "durationMinutes": 30,
-        "meetingLink": null,
-        "summary": "You read the API lesson back to me in your own words and got it right, which is the thing we set out to be able to do. The end-to-end objective is the one we are not going to reach this term.",
-        "cancelledAt": null,
-        "createdByEmail": "trainer@example.test"
-      },
-      {
-        "sessionId": "sess-cancelled",
-        "learnerId": "l-priya",
-        "cohortId": null,
-        "programmeId": "prog-autumn",
-        "title": "Fortnightly check-in",
-        "startsAt": "2026-09-16T13:00:00.000Z",
-        "durationMinutes": 30,
-        "meetingLink": null,
-        "summary": null,
-        "cancelledAt": "2026-09-15T17:20:00.000Z",
-        "createdByEmail": "trainer@example.test"
-      },
-      {
-        "sessionId": "sess-oct",
-        "learnerId": "l-priya",
-        "cohortId": null,
-        "programmeId": "prog-autumn",
-        "title": "The booking rules, read out loud",
-        "startsAt": "2026-09-24T13:00:00.000Z",
+        "title": "Your scope note, read together",
+        "startsAt": "2026-09-11T18:30:00.000Z",
         "durationMinutes": 45,
-        "meetingLink": "https://meet.example.test/booking-rules",
+        "meetingLink": null,
+        "summary": "We read your scope note line by line. You had cut the blog yourself, which is the hard one. The 'not yet' list is doing its job. Next fortnight is the page itself — words and photos before anything clever.",
+        "cancelledAt": null,
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-moved",
+        "learnerId": "l-sam",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "Looking at the page together",
+        "startsAt": "2026-09-18T18:30:00.000Z",
+        "durationMinutes": 45,
+        "meetingLink": null,
+        "summary": "Moved to the 2nd — you had a van booked in. Nothing lost.",
+        "cancelledAt": "2026-09-16T08:12:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "sessionId": "sess-next",
+        "learnerId": "l-sam",
+        "cohortId": null,
+        "programmeId": "prog-autumn",
+        "title": "Looking at the page together",
+        "startsAt": "2026-10-02T18:30:00.000Z",
+        "durationMinutes": 45,
+        "meetingLink": "https://meet.example.test/dbt-sam-oct",
         "summary": null,
         "cancelledAt": null,
         "createdByEmail": "trainer@example.test"
@@ -330,40 +343,84 @@
     ],
     "Concept": [
       {
-        "conceptId": "what-a-form-is",
-        "title": "What a form is, and what it remembers"
-      },
-      {
-        "conceptId": "tables-and-rows",
-        "title": "Tables and rows, using your list of bookings"
-      },
-      {
-        "conceptId": "naming-what-you-want",
-        "title": "Naming what you want before you ask for it"
-      },
-      {
         "conceptId": "scoping-what-to-build",
-        "title": "Scoping the booking form down to one slice"
+        "title": "Scoping: the conversation before the first line of code"
       },
       {
-        "conceptId": "what-an-api-is",
-        "title": "What an API is, using your booking form"
+        "conceptId": "what-the-web-is",
+        "title": "What the web actually is"
       },
       {
         "conceptId": "frontend-and-backend",
-        "title": "Frontend and backend: who does what in your booking form"
+        "title": "Frontend and backend: who does what"
       },
       {
-        "conceptId": "where-your-data-lives",
-        "title": "Where your bookings actually live"
+        "conceptId": "plan-then-act",
+        "title": "Plan then Act: the core loop for building with AI"
+      },
+      {
+        "conceptId": "html-the-structure",
+        "title": "HTML: the structure of every page"
+      },
+      {
+        "conceptId": "css-making-it-look-right",
+        "title": "CSS: making it look right — and why you won't write much of it"
+      },
+      {
+        "conceptId": "javascript-making-it-do-things",
+        "title": "JavaScript: making pages interactive"
+      },
+      {
+        "conceptId": "reading-what-the-ai-did",
+        "title": "Reading what the AI did: the verification habit"
+      },
+      {
+        "conceptId": "when-it-breaks",
+        "title": "When it breaks: reading an error and asking a sharper second question"
       },
       {
         "conceptId": "when-to-leave-the-chat",
-        "title": "Whether to leave the chat at all"
+        "title": "When to leave the chat, and when to stay"
       },
       {
-        "conceptId": "documenting-as-you-go",
-        "title": "Writing down what the booking form decided"
+        "conceptId": "moving-to-your-own-machine",
+        "title": "Moving onto your own machine"
+      },
+      {
+        "conceptId": "git-tracking-your-work",
+        "title": "Git: tracking your work — and why it matters more with AI"
+      },
+      {
+        "conceptId": "directing-a-coding-agent",
+        "title": "Directing Claude Code without handing over the keys"
+      },
+      {
+        "conceptId": "what-is-a-backend",
+        "title": "What a backend is, and when you actually need one"
+      },
+      {
+        "conceptId": "what-an-api-is",
+        "title": "What an API is: borrowing another thing's superpower"
+      },
+      {
+        "conceptId": "endpoints-and-requests",
+        "title": "Endpoints and requests: the address and the envelope"
+      },
+      {
+        "conceptId": "how-do-you-know-it-works",
+        "title": "How do you know it works? Verification, not test frameworks"
+      },
+      {
+        "conceptId": "deploying-going-live",
+        "title": "Deploying: the difference between dev and production"
+      },
+      {
+        "conceptId": "environment-variables-and-secrets",
+        "title": "Environment variables and secrets: the one rule you cannot break"
+      },
+      {
+        "conceptId": "context-and-cost",
+        "title": "Context and cost: what you are actually paying for"
       }
     ],
     "Conversation": [
@@ -375,11 +432,11 @@
         "subject": "A question for my coach"
       },
       {
-        "conversationId": "conv-api",
-        "learnerId": "l-priya",
+        "conversationId": "conv-css",
+        "learnerId": "l-sam",
         "anchorKind": "lesson",
-        "anchorId": "lesson:what-an-api-is",
-        "subject": "Is the calendar the API or is my form?"
+        "anchorId": "lesson:css-making-it-look-right",
+        "subject": "Squashed on my phone"
       }
     ],
     "ConversationMessage": [
@@ -393,138 +450,160 @@
         "readAt": null
       },
       {
-        "messageId": "msg-1",
-        "conversationId": "conv-api",
+        "messageId": "msg-phone",
+        "conversationId": "conv-css",
+        "authorRole": "learner",
+        "authorUsername": "sam.okafor@example.test",
+        "body": "It looks fine on my laptop and squashed on my phone. Is that something I've done?",
+        "createdAt": "2026-09-21T20:14:00.000Z",
+        "readAt": "2026-09-21T20:14:00.000Z"
+      },
+      {
+        "messageId": "msg-phone-reply",
+        "conversationId": "conv-css",
         "authorRole": "coach",
         "authorUsername": "trainer@example.test",
-        "body": "Your form is the one asking. The calendar is the one being asked — so the calendar has the API, and your form is the caller.",
-        "createdAt": "2026-09-08T21:30:00.000Z",
-        "readAt": "2026-09-08T21:30:00.000Z"
+        "body": "Nothing you've done — a page has to be told how to behave on a narrow screen and by default it isn't. Ask for it in those words and check it on your own phone rather than by making the window small. That last part catches everyone.",
+        "createdAt": "2026-09-22T07:40:00.000Z",
+        "readAt": null
       }
     ],
     "DeliverableConcept": [
       {
-        "deliverableId": "obj-rules",
-        "conceptId": "naming-what-you-want"
-      },
-      {
-        "deliverableId": "obj-fields",
+        "deliverableId": "obj-scope",
         "conceptId": "scoping-what-to-build"
       },
       {
-        "deliverableId": "obj-fields",
-        "conceptId": "frontend-and-backend"
+        "deliverableId": "obj-words",
+        "conceptId": "html-the-structure"
       },
       {
-        "deliverableId": "obj-storage",
-        "conceptId": "where-your-data-lives"
+        "deliverableId": "obj-words",
+        "conceptId": "css-making-it-look-right"
       },
       {
-        "deliverableId": "obj-storage",
-        "conceptId": "backups-and-restores"
+        "deliverableId": "obj-live",
+        "conceptId": "deploying-going-live"
+      },
+      {
+        "deliverableId": "obj-live",
+        "conceptId": "picking-a-host"
       }
     ],
     "DimensionRating": [
       {
-        "ratingId": "rt-sess-aug-dim-question",
-        "dimensionId": "dim-question",
-        "sessionId": "sess-aug",
+        "ratingId": "rt-sess-start-dim-ask",
+        "dimensionId": "dim-ask",
+        "sessionId": "sess-start",
         "evaluationId": null,
-        "score": 5
+        "score": 3
       },
       {
-        "ratingId": "rt-sess-aug-dim-explain",
-        "dimensionId": "dim-explain",
-        "sessionId": "sess-aug",
+        "ratingId": "rt-sess-start-dim-jargon",
+        "dimensionId": "dim-jargon",
+        "sessionId": "sess-start",
+        "evaluationId": null,
+        "score": 3
+      },
+      {
+        "ratingId": "rt-sess-scope-dim-ask",
+        "dimensionId": "dim-ask",
+        "sessionId": "sess-scope",
         "evaluationId": null,
         "score": 6
       },
       {
-        "ratingId": "rt-eval-initial-dim-question",
-        "dimensionId": "dim-question",
-        "sessionId": null,
-        "evaluationId": "eval-initial",
+        "ratingId": "rt-sess-scope-dim-check",
+        "dimensionId": "dim-check",
+        "sessionId": "sess-scope",
+        "evaluationId": null,
         "score": 4
       },
       {
-        "ratingId": "rt-eval-initial-dim-explain",
-        "dimensionId": "dim-explain",
-        "sessionId": null,
-        "evaluationId": "eval-initial",
+        "ratingId": "rt-sess-scope-dim-alone",
+        "dimensionId": "dim-alone",
+        "sessionId": "sess-scope",
+        "evaluationId": null,
+        "score": 4
+      },
+      {
+        "ratingId": "rt-sess-scope-dim-jargon",
+        "dimensionId": "dim-jargon",
+        "sessionId": "sess-scope",
+        "evaluationId": null,
         "score": 5
       },
       {
-        "ratingId": "rt-eval-initial-dim-ship",
-        "dimensionId": "dim-ship",
+        "ratingId": "rt-eval-initial-dim-ask",
+        "dimensionId": "dim-ask",
         "sessionId": null,
         "evaluationId": "eval-initial",
         "score": 3
       },
       {
-        "ratingId": "rt-sess-sep-dim-question",
-        "dimensionId": "dim-question",
-        "sessionId": "sess-sep",
-        "evaluationId": null,
-        "score": 7
+        "ratingId": "rt-eval-initial-dim-check",
+        "dimensionId": "dim-check",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 2
       },
       {
-        "ratingId": "rt-sess-sep-dim-explain",
-        "dimensionId": "dim-explain",
-        "sessionId": "sess-sep",
-        "evaluationId": null,
-        "score": 7
+        "ratingId": "rt-eval-initial-dim-alone",
+        "dimensionId": "dim-alone",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 2
       }
     ],
     "LearnerDeliverable": [
       {
-        "deliverableId": "obj-rules",
-        "learnerId": "l-priya",
-        "slug": "bookingRules",
-        "title": "The booking rules, written down",
-        "description": "Who can book, how many places there are, and what happens when a session is full. One page, in plain words a parent would understand.",
+        "deliverableId": "obj-scope",
+        "learnerId": "l-sam",
+        "slug": "scopeNote",
+        "title": "The scope note",
+        "description": "What version one of your page is, what it is not, and the assumption underneath it. One page, plain words.",
         "expectedCoreFields": [
-          "whoCanBook",
-          "howManyPlaces",
-          "whatHappensWhenFull"
+          "oneJob",
+          "whatIsOnThePage",
+          "notYet"
         ],
         "position": 0,
         "archivedAt": null
       },
       {
-        "deliverableId": "obj-fields",
-        "learnerId": "l-priya",
-        "slug": "fieldList",
-        "title": "Every field the form asks for",
-        "description": "The list of things the form asks a parent, and why each one is there.",
+        "deliverableId": "obj-words",
+        "learnerId": "l-sam",
+        "slug": "ownWords",
+        "title": "Your work, in your own words",
+        "description": "One sentence about what you do, and six photographs of your own work.",
         "expectedCoreFields": [
-          "parentDetails",
-          "childDetails",
-          "sessionChoice"
+          "whatIDo",
+          "whoItIsFor"
         ],
         "position": 1,
         "archivedAt": null
       },
       {
-        "deliverableId": "obj-emails",
-        "learnerId": "l-priya",
-        "slug": "confirmationEmails",
-        "title": "The email a parent gets after booking",
-        "description": "Set aside in September: the club decided a text message is enough for now.",
+        "deliverableId": "obj-seo",
+        "learnerId": "l-sam",
+        "slug": "beFound",
+        "title": "Being findable on Google",
+        "description": "Parked at the scope review — worth doing once the page exists, and not before.",
         "expectedCoreFields": [
-          "confirmationText"
+          "searchedFor"
         ],
         "position": 2,
-        "archivedAt": "2026-09-10T08:45:00.000Z"
+        "archivedAt": "2026-09-11T19:00:00.000Z"
       },
       {
-        "deliverableId": "obj-storage",
-        "learnerId": "l-priya",
-        "slug": "whereBookingsLive",
-        "title": "Where the bookings are kept",
-        "description": "Which place holds the bookings, and who can see them.",
+        "deliverableId": "obj-live",
+        "learnerId": "l-sam",
+        "slug": "livePage",
+        "title": "The page, live on its own address",
+        "description": "A real address a stranger can type, serving your words and your photos, with a form that reaches your inbox.",
         "expectedCoreFields": [
-          "storageChoice",
-          "whoCanSeeThem"
+          "whereItIsHosted",
+          "howAMessageReachesYou"
         ],
         "position": 3,
         "archivedAt": null
@@ -536,6 +615,14 @@
         "label": "Marie Dubois",
         "claimedByLearnerId": "l-marie",
         "claimedAt": "2026-08-11T10:00:00.000Z",
+        "status": "claimed",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "inviteId": "inv-l-sam",
+        "label": "Sam — first site, autumn",
+        "claimedByLearnerId": "l-sam",
+        "claimedAt": "2026-07-08T09:00:00.000Z",
         "status": "claimed",
         "createdByEmail": "trainer@example.test"
       },
@@ -614,6 +701,11 @@
         "learnerId": "l-csv",
         "username": "dana.k@example.test",
         "coachEmail": null
+      },
+      {
+        "learnerId": "l-newstart",
+        "username": "jo.whitfield@example.test",
+        "coachEmail": null
       }
     ],
     "LearningPath": [
@@ -646,6 +738,13 @@
         "createdAt": "2026-08-25T10:00:00.000Z"
       },
       {
+        "pathId": "path-l-priya",
+        "learnerId": "l-priya",
+        "programmeId": null,
+        "replanBlockedAt": null,
+        "createdAt": "2026-05-02T10:00:00.000Z"
+      },
+      {
         "pathId": "path-l-choir",
         "learnerId": "l-choir",
         "programmeId": null,
@@ -667,361 +766,218 @@
         "createdAt": "2026-08-28T10:00:00.000Z"
       },
       {
-        "pathId": "path-l-priya-prog-spring",
-        "learnerId": "l-priya",
-        "programmeId": "prog-spring",
-        "replanBlockedAt": null,
-        "createdAt": "2026-03-02T09:00:00.000Z"
-      },
-      {
-        "pathId": "path-l-priya-prog-autumn",
-        "learnerId": "l-priya",
+        "pathId": "path-l-sam-prog-autumn",
+        "learnerId": "l-sam",
         "programmeId": "prog-autumn",
-        "replanBlockedAt": null,
-        "createdAt": "2026-08-10T09:00:00.000Z"
+        "replanBlockedAt": null
       }
     ],
     "Lesson": [
       {
         "learnerId": "l-csv",
-        "conceptId": "what-is-a-backend",
-        "title": "What a backend means for your Client-intake CSV sanitiser",
-        "hook": "Right now your sanitiser cleans intake.csv on your own machine, and it works. The moment you send it to a colleague, every rule you wrote stays behind on your laptop — the file opens, nothing validates, and it will look like it ran fine.",
-        "landing": "You can now say where a backend would sit in your sanitiser's flow, and why it isn't there yet.",
-        "conceptVersion": 4,
-        "projectContextVersion": 1,
-        "generationVersion": 4,
-        "generatedByTier": "senior_teacher",
+        "conceptId": "scoping-what-to-build",
+        "title": "Scoping your landing page before Claude Code writes a line",
+        "hook": "The most expensive hour of this project is the one where you ask Claude Code to “build me a website for my business” and it does. You will get a page. It will look plausible. And you will spend the next three weekends discovering that it takes bookings you do not want, has a blog you will never write, and still does not do the one thing you actually needed — get a message from a stranger into your inbox. The fix costs twenty minutes and no code at all.",
+        "landing": "You now have a written boundary for version one: one page, three things on it, one job it must do. Everything else has a name and a place to wait. That sentence is the first thing you will hand to Claude Code.",
         "steps": [
           {
             "id": "step-1",
-            "title": "Whether your sanitiser needs a backend at all",
-            "goal": "You can say, in one sentence, why intake.csv doesn't need a server yet.",
+            "title": "What this conversation actually is",
+            "goal": "You can say what scoping is, and why it comes before anything gets built.",
             "sectionIds": [
               "s-01",
               "s-02",
               "s-03",
-              "s-04",
-              "s-05"
+              "s-04"
             ],
-            "unlocks": "You can tell whether intake.csv needs a server, without guessing."
+            "unlocks": "You can tell the difference between a boundary and a wish list."
           },
           {
             "id": "step-2",
-            "title": "The two walls that force one",
-            "goal": "You can name the moment your project would cross into needing a backend.",
+            "title": "Why version one has to be small",
+            "goal": "You can decide what belongs in the first version of your page and what does not.",
             "sectionIds": [
+              "s-05",
+              "s-15",
               "s-06",
-              "s-06b",
-              "s-07",
-              "s-08",
-              "s-09",
-              "s-10"
+              "s-07"
             ],
-            "unlocks": "You can name the moment your sanitiser would cross the line."
+            "unlocks": "You can cut a good idea without feeling you have abandoned it."
           },
           {
             "id": "step-3",
-            "title": "Seeing it on your own project",
-            "goal": "You can point at where a backend would sit in your sanitiser's flow.",
+            "title": "Scoping with Claude Code, not at it",
+            "goal": "You can run the scoping conversation with an AI assistant and hold it to the answer.",
             "sectionIds": [
-              "s-11",
-              "s-11b",
-              "s-12",
-              "s-13",
-              "s-14",
-              "s-15"
+              "s-08",
+              "s-16",
+              "s-09",
+              "s-10"
             ],
-            "unlocks": "You can point at where a backend would sit in your own flow."
+            "unlocks": "You can open your first session with a boundary instead of a blank page."
           },
           {
             "id": "step-4",
-            "title": "Writing it down for your dossier",
-            "goal": "You have your own answer recorded, ready to hand to an assistant.",
+            "title": "What to watch for",
+            "goal": "You can spot the decisions that get expensive if you leave them, and name the one assumption underneath your page.",
             "sectionIds": [
-              "s-16",
+              "s-11",
+              "s-12",
               "s-17",
-              "s-18",
-              "s-19",
-              "s-20",
-              "s-21"
+              "s-13",
+              "s-14"
             ],
-            "unlocks": "You can describe your sanitiser's shape to an AI assistant."
+            "unlocks": "You know which decisions are cheap to change later and which are not."
           }
         ],
         "sections": [
           {
             "id": "s-01",
             "kind": "answer_capsule",
-            "text": "Your CSV sanitiser doesn't need a backend yet — it takes intake.csv, cleans it, and hands it back, all inside the browser. A backend becomes necessary the moment someone else needs to see the cleaned data too, or it has to persist after you close the tab."
+            "text": "Scoping is the short conversation you have before any code exists, where you decide what version one of your page is — and, just as importantly, what it is not. For you that is one page, three things on it, and one job: a message from a stranger reaching your inbox."
           },
           {
             "id": "s-02",
             "kind": "reading",
-            "markdown": "## Why your CSV sanitiser is currently browser-only\n\nRight now, `intake.csv` lives on your machine. You drop it in, the sanitiser validates each row, and you get a clean file back. That entire loop happens inside your browser tab — nothing touches a server.\n\nThat's the correct architecture for what you've described. Adding a backend before you need it would mean hosting a server, keeping it running, and paying for it — all for no benefit yet.\n\nThe question isn't \"should I have a backend?\" It's \"**when** will I hit the wall that forces me to add one?\""
+            "markdown": "Scoping means fixing the **boundary** before anything gets built. Not a plan, not a spec — a boundary. You write down what the first version contains, what it deliberately leaves out, and the one thing that would make you say “that worked”.\n\nIt takes about twenty minutes and it is the only part of this whole project you do entirely without a computer telling you anything.",
+            "detail": "The reason it comes first is not tidiness. An AI assistant will happily build whatever you describe, at speed, and it has no opinion about whether you needed it. That is a genuinely new problem: the old constraint on building the wrong thing was that building anything was slow and expensive, so you thought first. That constraint is gone. Scoping is what you put in its place — deliberately, because nothing else will do it for you."
           },
           {
             "id": "s-03",
-            "kind": "callout",
-            "tone": "jargon",
-            "markdown": "**Backend** — a program running on a computer you don't sit in front of (a data centre machine). For your CSV sanitiser, that would be a program that receives your intake.csv, processes it, and stores the result somewhere both you and a colleague could reach."
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 376\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"On the left, a dashed cloud labelled everything you could build, holding seven ideas. On the right, a small solid box labelled version one, holding three. An arrow between them is labelled twenty minutes of deciding.\">\n  <text x=\"152\" y=\"22\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">EVERYTHING YOU COULD BUILD</text>\n  <g transform=\"translate(0,36)\">\n    <g fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\">\n      <path d=\"M18 92 C18 46 66 30 104 44 C126 12 190 10 208 42 C258 26 300 52 296 92 C330 116 326 176 292 190 C300 236 248 268 208 250 C182 284 112 282 96 248 C46 258 10 220 26 180 C-2 156 -2 112 18 92 Z\" stroke-dasharray=\"9 8\"/>\n    </g>\n    <g font-size=\"15\" fill=\"currentColor\" opacity=\"0.72\">\n      <text x=\"60\" y=\"96\">a blog</text>\n      <text x=\"164\" y=\"84\">online booking</text>\n      <text x=\"52\" y=\"146\">a shop</text>\n      <text x=\"170\" y=\"150\">a newsletter</text>\n      <text x=\"70\" y=\"200\">reviews</text>\n      <text x=\"168\" y=\"216\">a photo gallery</text>\n      <text x=\"96\" y=\"248\">live chat</text>\n    </g>\n  </g>\n\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\">\n    <path d=\"M352 190 h56\" stroke-linecap=\"round\"/>\n    <path d=\"M396 178 l14 12 l-14 12\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n  </g>\n  <text x=\"380\" y=\"162\" text-anchor=\"middle\" font-size=\"12\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">20 MINUTES</text>\n  <text x=\"380\" y=\"226\" text-anchor=\"middle\" font-size=\"12\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">OF DECIDING</text>\n\n  <text x=\"596\" y=\"84\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\">VERSION ONE</text>\n  <rect x=\"462\" y=\"108\" width=\"280\" height=\"172\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"456\" y=\"102\" width=\"280\" height=\"172\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g font-size=\"16\" fill=\"currentColor\">\n    <text x=\"504\" y=\"146\">who I am, in my words</text>\n    <text x=\"504\" y=\"186\">six photos of my work</text>\n    <text x=\"504\" y=\"226\">a form that reaches my inbox</text>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\">\n    <path d=\"M476 140 l7 7 l12 -14\"/>\n    <path d=\"M476 180 l7 7 l12 -14\"/>\n    <path d=\"M476 220 l7 7 l12 -14\"/>\n  </g>\n  <text x=\"596\" y=\"312\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Everything on the left still exists. It is just waiting.</text>\n</svg>",
+            "caption": "Scoping is the line between the two shapes. Nothing is thrown away — the left-hand side is a list you keep."
           },
           {
             "id": "s-04",
             "kind": "callout",
-            "tone": "tip",
-            "markdown": "The two walls that force a backend: **sharing** (someone else must see the same data) and **permanence** (the work must survive closing the browser). Your sanitiser currently hits neither wall."
+            "tone": "jargon",
+            "markdown": "**Scope** is just “what is in and what is out”. When somebody says a project has “scope creep”, they mean things kept quietly getting added until nobody could finish. You will hear the word a lot. It means nothing more complicated than that."
           },
           {
             "id": "s-05",
-            "kind": "code_block",
-            "language": "typescript",
-            "code": "// Browser-only: intake.csv is read locally, cleaned in memory, downloaded.\n// No server involved.\nasync function sanitiseFile(file: File): Promise<Blob> {\n  const text = await file.text();\n  const rows = parseCSV(text);\n  const cleaned = rows.map(validateRow);\n  return new Blob([toCSV(cleaned)], { type: \"text/csv\" });\n}",
-            "explanation": "This is the shape of your current sanitiser — it reads the file, processes it, and produces a download. The whole thing runs in the browser. There is no `fetch` call, no server URL, no storage. That's fine, and correct, for what you're building now."
+            "kind": "reading",
+            "markdown": "Here is why this matters for **your** page specifically. You said the thing that hurts is that people can only find you by word of mouth. That means version one has exactly one job: somebody who has never met you lands on your page, believes you are real, and gets a message to you without picking up the phone.\n\nA booking system does not do that. A blog does not do that. A newsletter does not do that. They are all good ideas later, and every one of them is a week you are not live."
           },
           {
             "id": "s-06",
             "kind": "quiz",
-            "question": "Your manager asks you to let the whole intake team see the sanitised output without each person running their own copy. Which wall are you hitting?",
+            "question": "You have an afternoon. Which of these actually belongs in version one of your page?",
             "variant": {
               "type": "mcq",
               "options": [
                 {
-                  "text": "The permanence wall — the data needs to outlive a browser session.",
-                  "correct": false,
-                  "feedback": "Close, but permanence is about the data surviving time (e.g. it must still be there tomorrow). Sharing is the more immediate need here — multiple people accessing the same result."
-                },
-                {
-                  "text": "The sharing wall — more than one person needs to see the same data.",
+                  "text": "A photo of you and three of your work, with a sentence saying what you do",
                   "correct": true,
-                  "feedback": "Exactly. Once a second person needs to see the same cleaned output, it can't live only in your browser. That's the sharing wall, and it's when a backend earns its place."
+                  "feedback": "Yes. A stranger has to believe you are a real person who does this. Photos and one honest sentence do that faster than anything else on the page."
                 },
                 {
-                  "text": "Neither wall — email the CSV to your colleagues.",
+                  "text": "A contact form that sends the message to your inbox",
+                  "correct": true,
+                  "feedback": "Yes — this is the one job. If everything else on the page were missing and this worked, version one would still have paid for itself."
+                },
+                {
+                  "text": "A calendar where customers pick a slot and book themselves in",
                   "correct": false,
-                  "feedback": "Emailing is a workaround, not a wall. But if the requirement is that the team sees it in real time as intake arrives, emailing breaks down quickly. The sharing wall is real."
+                  "feedback": "Not yet, and it is the most tempting one. Booking means payments, cancellations, your real availability and somebody being let down when it goes wrong. A form that says “when suits you?” gets you the same customer this month."
+                },
+                {
+                  "text": "A blog so the page shows up on Google",
+                  "correct": false,
+                  "feedback": "Later, honestly. A blog only works if you write it every week for months. An empty blog with one post from last March actively makes a business look abandoned."
                 }
               ]
-            }
-          },
-          {
-            "id": "s-06b",
-            "kind": "quiz",
-            "question": "In one sentence: why doesn't your sanitiser need a backend yet?",
-            "variant": {
-              "type": "say_it_back",
-              "rubric": "Names either sharing (only one person needs the data) or permanence (the data doesn't need to survive closing the browser) as the reason."
             }
           },
           {
             "id": "s-07",
-            "kind": "activity",
-            "title": "Map your sanitiser's walls",
-            "steps": [
-              "Open intake.csv in a spreadsheet. Who else currently sees this data?",
-              "Ask: does this cleaned output need to exist tomorrow, or only during the current session?",
-              "Write one sentence answering: 'I will need a backend when ______.'"
-            ],
-            "capturesProjectFact": {
-              "field": "backendTrigger",
-              "prompt": "Finish the sentence: 'I will need a backend for this project when ______.' (Be specific about what event or requirement would trigger it.)"
-            }
+            "kind": "callout",
+            "tone": "reassurance",
+            "markdown": "Cutting something in this conversation is not giving up on it. It is giving it a date. “Not in version one” and “never” are completely different sentences, and the list you park today is the thing you build next month — on a site that is already earning its keep."
           },
           {
             "id": "s-08",
-            "kind": "mermaid",
-            "source": "graph LR\n  A[intake.csv] -->|drop in| B[Browser: sanitiser]\n  B -->|cleaned output| C[Download]\n  \n  style B fill:#1e3a5f,color:#fff\n  style A fill:#f8fafc\n  style C fill:#ecfdf5",
-            "caption": "Your current architecture: entirely browser-side. No server in the loop."
+            "kind": "reading",
+            "markdown": "Now the part that is specific to building with AI. You do not scope **at** Claude Code, you scope **with** it — and then you make it repeat the boundary back to you before it touches anything.\n\nThe move is simple: describe the business, describe the one job, and ask it to tell you what it thinks version one should contain. Then argue with the answer. It will suggest more than you need, every time, because more is what it has read the most of."
           },
           {
             "id": "s-09",
-            "kind": "svg_diagram",
-            "svg": "<svg viewBox=\"0 0 400 120\" xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"120\">\n  <rect x=\"10\" y=\"30\" width=\"100\" height=\"60\" rx=\"8\" fill=\"#f0f9ff\" stroke=\"#bae6fd\" stroke-width=\"2\"/>\n  <text x=\"60\" y=\"65\" text-anchor=\"middle\" font-size=\"13\" fill=\"#0369a1\">Browser</text>\n  <rect x=\"290\" y=\"30\" width=\"100\" height=\"60\" rx=\"8\" fill=\"#fef3c7\" stroke=\"#fde68a\" stroke-width=\"2\"/>\n  <text x=\"340\" y=\"65\" text-anchor=\"middle\" font-size=\"13\" fill=\"#92400e\">Backend</text>\n  <line x1=\"160\" y1=\"60\" x2=\"285\" y2=\"60\" stroke=\"#94a3b8\" stroke-width=\"1.5\" stroke-dasharray=\"6,4\"/>\n  <text x=\"220\" y=\"50\" text-anchor=\"middle\" font-size=\"11\" fill=\"#94a3b8\">sharing or</text>\n  <text x=\"220\" y=\"70\" text-anchor=\"middle\" font-size=\"11\" fill=\"#94a3b8\">permanence wall</text>\n</svg>",
-            "caption": "The wall you cross when sharing or permanence forces a backend."
+            "kind": "code_block",
+            "language": "text",
+            "code": "I run a small business on my own and I want a simple one-page website.\n\nThe one job of version one: somebody who has never met me lands on the\npage, believes I'm real, and sends me a message without phoning.\n\nI have: some photos of my work, and about a paragraph about what I do.\nI have never built anything before.\n\nBefore writing any code, tell me:\n  1. what you think version one should contain, and nothing more\n  2. what you'd deliberately leave out, and why\n  3. the one assumption you're making that, if it's wrong,\n     would change the whole approach\n\nDon't write any code yet. I want to agree the boundary first.",
+            "explanation": "Paste this, adjusted to your own business, as the very first thing you say. The three numbered questions are the whole technique: the first two give you a boundary, and the third is the one people skip. It is asking the assistant to name what it has quietly assumed — that you want the form to email you rather than store messages somewhere, say — while changing course is still free."
           },
           {
             "id": "s-10",
-            "kind": "chart",
-            "chartType": "bar",
-            "data": [
-              {
-                "phase": "Browser only",
-                "complexity": 1,
-                "cost": 0
-              },
-              {
-                "phase": "Add backend",
-                "complexity": 4,
-                "cost": 5
-              },
-              {
-                "phase": "Add DB",
-                "complexity": 6,
-                "cost": 8
-              }
+            "kind": "activity",
+            "title": "Write your boundary down, in one page of plain words",
+            "steps": [
+              "Open a plain note — paper is completely fine for this one.",
+              "Write the one job of version one as a single sentence, starting “Somebody who has never met me…”.",
+              "Under it, list what is on the page. Stop when you reach four things.",
+              "Under that, write “Not yet:” and list everything you just thought of and cut. Give the list a heading and keep it.",
+              "Read the one-job sentence out loud. If it contains the word “and” twice, you still have two projects."
             ],
-            "xKey": "phase",
-            "yKeys": [
-              "complexity",
-              "cost"
-            ],
-            "caption": "Rough complexity and running cost at each phase. Stay browser-only until a wall forces you over."
-          },
-          {
-            "id": "s-11",
-            "kind": "interactive_widget",
-            "widgetKey": "csv-sanitiser",
-            "params": {
-              "columns": [
-                {
-                  "name": "name",
-                  "rules": [
-                    "trim",
-                    "required"
-                  ]
-                },
-                {
-                  "name": "email",
-                  "rules": [
-                    "trim",
-                    "lowercase",
-                    "required",
-                    "email"
-                  ]
-                },
-                {
-                  "name": "date",
-                  "rules": [
-                    "trim",
-                    "required",
-                    "date"
-                  ]
-                }
-              ],
-              "sampleRow": "  John Smith , JOHN@EXAMPLE.COM , 2024-01-15"
-            },
-            "caption": "Paste one row from your intake.csv and watch each column get validated."
-          },
-          {
-            "id": "s-11b",
-            "kind": "interactive_widget",
-            "widgetKey": "prompt-upgrade",
-            "params": {
-              "scenario": "You want an AI assistant to help you write the validation rules section of your CSV sanitiser's documentation.",
-              "baselinePrompt": "Write documentation for my CSV sanitiser's validation rules.",
-              "baselineOutput": "## Validation Rules\n\nThe sanitiser validates each column according to configured rules such as trimming whitespace, checking required fields, and validating email format. Rows that fail validation are flagged for review.",
-              "baselineNote": "Passes — it's accurate and readable, but generic enough to describe almost any validator. Nothing here is specific to your intake.csv or its actual columns.",
-              "question": "Which upgrade moves this from passing to top-band?",
-              "candidates": [
-                {
-                  "prompt": "Write documentation for my CSV sanitiser's validation rules. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date).",
-                  "output": "## Validation Rules\n\n- **name**: trimmed, required\n- **email**: trimmed, lowercased, required, validated as an email address\n- **date**: trimmed, required, validated as a date\n\nRows failing any rule are flagged for review.",
-                  "band": "passing",
-                  "why": "Grounds the output in your real columns instead of a generic description — accurate, but still just a restatement of the rules with no guidance for the reader."
-                },
-                {
-                  "prompt": "Write documentation for my CSV sanitiser's validation rules. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date). Include one example of a row that fails each rule and why.",
-                  "output": "## Validation Rules\n\n- **name**: trimmed, required. Fails on: empty string.\n- **email**: trimmed, lowercased, required, validated as an email. Fails on: \"not-an-email\".\n- **date**: trimmed, required, validated as a date. Fails on: \"15/13/2024\" (invalid month).\n\nRows failing any rule are flagged for review with the specific failure reason.",
-                  "band": "stronger",
-                  "why": "Adds concrete failure examples, which is what makes documentation usable by someone debugging a rejected row — a real step up in usefulness, not just accuracy."
-                },
-                {
-                  "prompt": "Write documentation for my CSV sanitiser's validation rules, for a teammate who will maintain this code after me. Here are the actual columns and rules: name (trim, required), email (trim, lowercase, required, email), date (trim, required, date). For each rule: state what it checks, give one example of a row that fails it and why, and note anything a maintainer should know before changing that rule (e.g. what would break downstream). Ask me if you're missing context on any column before writing.",
-                  "output": "## Validation Rules — Maintainer Notes\n\n- **name**: trimmed, required. Fails on: empty string. *Before changing:* downstream reporting assumes name is never blank.\n- **email**: trimmed, lowercased, required, validated as an email. Fails on: \"not-an-email\". *Before changing:* lowercasing is load-bearing — the dedup step matches on exact string.\n- **date**: trimmed, required, validated as a date. Fails on: \"15/13/2024\". *Before changing:* confirm the expected date format with whoever owns intake.csv upstream.\n\nOne thing I'm not certain of: is there a maximum row count this needs to handle? Let me know and I'll add a note on performance if relevant.",
-                  "band": "top_band",
-                  "why": "Names the audience (a future maintainer) and asks for missing context rather than guessing — exactly what the jury rewards: the prompt directs the assistant to surface what it doesn't know instead of inventing it."
-                }
-              ]
-            },
-            "caption": "Try upgrading the baseline prompt yourself before checking the gradient."
-          },
-          {
-            "id": "s-12",
-            "kind": "annotated_screenshot",
-            "storageKey": "concepts/what-is-a-backend/browser-devtools.png",
-            "overlaySvg": "<svg viewBox=\"0 0 800 500\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect x=\"20\" y=\"20\" width=\"200\" height=\"40\" rx=\"4\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"3\"/>\n  <text x=\"230\" y=\"45\" font-size=\"14\" fill=\"#ef4444\" font-weight=\"bold\">No network calls here</text>\n</svg>",
-            "caption": "Browser DevTools Network tab for a browser-only sanitiser — no requests to any server."
-          },
-          {
-            "id": "s-13",
-            "kind": "curated_video",
-            "url": "https://www.youtube.com/watch?v=WXsD0ZgxjRw",
-            "startSeconds": 45,
-            "endSeconds": 180,
-            "whyItMatters": "This clip explains the client/server split in plain terms — the same mental model applies to your sanitiser sitting on the browser side of that line."
-          },
-          {
-            "id": "s-14",
-            "kind": "human_recording",
-            "storageKey": "recordings/richard/backend-decision-point.mp3",
-            "contextualIntro": "Richard explains the exact moment he adds a backend to a project like yours — what changes in the requirements, and what he asks himself first."
-          },
-          {
-            "id": "s-15",
-            "kind": "audio",
-            "source": {
-              "type": "tts",
-              "text": "Your CSV sanitiser doesn't need a backend yet. Stay browser-only until the sharing wall or the permanence wall forces your hand. When you hit one of those walls, the smallest backend that solves that specific problem is the right backend.",
-              "lang": "en"
+            "capturesProjectFact": {
+              "field": "versionOneBoundary",
+              "prompt": "What is the one job of version one, in one sentence?"
             }
           },
           {
+            "id": "s-11",
+            "kind": "callout",
+            "tone": "warning",
+            "markdown": "**The nasty surprise, and it is not a technical one.** The assistant will never tell you that you are building too much. It has no stake in you finishing. It will accept “actually, can it also do bookings?” with the same enthusiasm it accepted everything else, and three weekends later you will have a half-built booking system and no live website. Nobody will stop that except you, and the boundary you wrote today is how you do it."
+          },
+          {
+            "id": "s-12",
+            "kind": "reading",
+            "markdown": "One more thing to watch for, and it is the expensive kind because it is hard to undo later: **the assumption nobody says out loud.**\n\nFor your page the big one is what happens to a message when somebody presses Send. Email it to you and never store it? Keep every enquiry somewhere you can look back at? Those are different builds, and the second one is much bigger. Decide it now, in a sentence, while the answer is still free.",
+            "detail": "The general shape of this: some decisions are cheap to reverse and some are not. Changing a colour, moving a photo, rewording a heading — free, forever. Where your data lives, whether you need somewhere for it to live at all, what your page is actually called on the internet — those get more expensive every week you leave them.\n\nYou do not have to get the expensive ones right. You have to get them *decided*, on purpose, instead of discovering that the assistant decided for you in week one and you have been building on it since."
+          },
+          {
+            "id": "s-13",
+            "kind": "capture",
+            "prompt": "When somebody presses Send on your form, what should happen to that message?",
+            "field": "whatHappensToAMessage",
+            "hint": "In your own words. “It should just land in my email” is a complete and very good answer."
+          },
+          {
+            "id": "s-14",
+            "kind": "artifact_challenge",
+            "title": "One page that says what version one is",
+            "brief": "Write your scope note — half a page, plain words, no jargon and no code. It should say: the one job of version one; what is on the page; what you have deliberately left for later; and the one assumption that would change everything if it turned out to be wrong.\n\nWrite it as though you were handing it to somebody else to build. In a sense you are: this is the first thing you will give Claude Code, and it is what you will hold it to when it suggests something shiny in week two.",
+            "rubric": [
+              "States the one job of version one as a single sentence about a real person doing a real thing",
+              "Lists what is on the page, and the list stops at four things or fewer",
+              "Has a “not yet” list with at least two things on it that you genuinely wanted",
+              "Names at least one assumption that would change the approach if it were wrong",
+              "Contains no technical words that you could not explain to a friend"
+            ],
+            "acceptedFormats": [
+              "text",
+              "markdown"
+            ]
+          },
+          {
+            "id": "s-15",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 322\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Two timelines. Building everything first reaches week twelve without going live. Building version one first goes live in week two, and the other pieces still get added afterwards.\">\n  <text x=\"20\" y=\"30\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\" opacity=\"0.62\">IF YOU BUILD EVERYTHING FIRST</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\">\n    <rect x=\"20\" y=\"48\" width=\"132\" height=\"42\" rx=\"3\"/>\n    <rect x=\"156\" y=\"48\" width=\"132\" height=\"42\" rx=\"3\"/>\n    <rect x=\"292\" y=\"48\" width=\"132\" height=\"42\" rx=\"3\"/>\n    <rect x=\"428\" y=\"48\" width=\"132\" height=\"42\" rx=\"3\"/>\n    <rect x=\"564\" y=\"48\" width=\"132\" height=\"42\" rx=\"3\"/>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\" text-anchor=\"middle\">\n    <text x=\"86\" y=\"75\">the page</text>\n    <text x=\"222\" y=\"75\">booking</text>\n    <text x=\"358\" y=\"75\">the shop</text>\n    <text x=\"494\" y=\"75\">a gallery</text>\n    <text x=\"630\" y=\"75\">the blog</text>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" opacity=\"0.55\"><circle cx=\"716\" cy=\"69\" r=\"11\"/></g>\n  <text x=\"20\" y=\"116\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Week 12. Nobody outside your kitchen has seen any of it.</text>\n\n  <text x=\"20\" y=\"174\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\">IF YOU BUILD VERSION ONE FIRST</text>\n  <rect x=\"26\" y=\"198\" width=\"132\" height=\"42\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"20\" y=\"192\" width=\"132\" height=\"42\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"86\" y=\"219\" font-size=\"14\" fill=\"currentColor\" text-anchor=\"middle\">the page</text>\n  <circle cx=\"176\" cy=\"213\" r=\"11\" fill=\"currentColor\"/>\n  <text x=\"198\" y=\"218\" font-size=\"14\" font-weight=\"700\" fill=\"currentColor\">LIVE — WEEK 2</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-dasharray=\"8 7\" opacity=\"0.6\">\n    <rect x=\"356\" y=\"192\" width=\"122\" height=\"42\" rx=\"3\"/>\n    <rect x=\"490\" y=\"192\" width=\"122\" height=\"42\" rx=\"3\"/>\n    <rect x=\"624\" y=\"192\" width=\"112\" height=\"42\" rx=\"3\"/>\n  </g>\n  <g font-size=\"13\" fill=\"currentColor\" opacity=\"0.6\" text-anchor=\"middle\">\n    <text x=\"417\" y=\"218\">booking, wk 5</text>\n    <text x=\"551\" y=\"218\">gallery, wk 8</text>\n    <text x=\"680\" y=\"218\">the rest</text>\n  </g>\n  <text x=\"20\" y=\"266\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Week 2. A stranger can find you and send you a message.</text>\n  <text x=\"20\" y=\"302\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Nothing on the top row has been cancelled. It has just moved behind the thing that pays for it.</text>\n</svg>",
+            "caption": "The same seven ideas, in two different orders. Only one of them has a customer in it."
+          },
+          {
             "id": "s-16",
-            "kind": "voice_interaction",
-            "prompt": "In your own words: describe the moment when your CSV sanitiser would need a backend. What would change in your project that forces you to add one?",
-            "lang": "en",
-            "rubric": "Learner correctly identifies either sharing (multiple people accessing the same data) or permanence (data must survive closing the browser) as the trigger. Partial credit if they identify the general concept without naming the specific wall."
+            "kind": "curated_video",
+            "url": "https://www.youtube.com/watch?v=eDBYYLEsECU",
+            "startSeconds": 0,
+            "endSeconds": 420,
+            "whyItMatters": "DataCamp walking through a first session with Claude Code — what the screen looks like, what you type, what it does back. Worth seven minutes before you open it yourself, because the single most disorienting thing about the first session is not knowing what is supposed to happen. It is pitched at people who already write code, so it will move past you in places. Stop when you have the shape of it; you are not behind."
           },
           {
             "id": "s-17",
-            "kind": "capture",
-            "prompt": "In your own words, what is the trainee's stated goal for this needs analysis?",
-            "field": "needs_analysis.statedGoal",
-            "hint": "One sentence is enough — you'll refine it later."
-          },
-          {
-            "id": "s-18",
-            "kind": "capture",
-            "prompt": "What is the trainee's current comfort level with AI tools, in their own words?",
-            "field": "needs_analysis.currentSkillLevel",
-            "hint": "e.g. \"never used one\", \"uses it for email\"…"
-          },
-          {
-            "id": "s-19",
-            "kind": "capture",
-            "prompt": "What would success look like for this trainee, by the end of the course?",
-            "field": "needs_analysis.successCriteria"
-          },
-          {
-            "id": "s-20",
-            "kind": "prep_pack",
-            "title": "Your Needs Analysis prep pack",
-            "instructions": "Use ONLY the facts below to draft the first section of a Needs Analysis for this trainee. Do not invent anything missing — ask the trainer instead.",
-            "factFields": [
-              "needs_analysis.statedGoal",
-              "needs_analysis.currentSkillLevel",
-              "needs_analysis.successCriteria"
-            ]
-          },
-          {
-            "id": "s-21",
-            "kind": "handover_pack",
-            "title": "What your sanitiser's repo should already know",
-            "intro": "Your sanitiser has lived in a chat window so far. Before you open it with a coding agent on your own machine, it needs three documents that say what it is and how it gets worked on — otherwise the agent starts every session guessing.",
-            "files": [
-              {
-                "path": "CLAUDE.md",
-                "purpose": "How this project works, written to the agent that will edit it."
-              },
-              {
-                "path": "PROJECT.md",
-                "purpose": "What the sanitiser is for and what it deliberately does not do yet."
-              },
-              {
-                "path": "docs/TASK-001-validate-one-column.md",
-                "purpose": "The first slice: validate the email column and nothing else."
-              }
-            ]
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 300\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"A line running from cheap to change on the left to expensive the longer you leave it on the right. Colours, wording and photo order sit on the left. What the page is called, where messages go, and whether you need somewhere to keep them sit on the right.\">\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M40 168 h676\"/>\n    <path d=\"M700 156 l16 12 l-16 12\"/>\n  </g>\n  <text x=\"40\" y=\"34\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\" opacity=\"0.62\">CHEAP TO CHANGE, FOREVER</text>\n  <text x=\"716\" y=\"34\" text-anchor=\"end\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\">EXPENSIVE, AND MORE SO EVERY WEEK</text>\n\n  <g fill=\"currentColor\">\n    <circle cx=\"86\" cy=\"168\" r=\"5\" opacity=\"0.45\"/>\n    <circle cx=\"214\" cy=\"168\" r=\"6\" opacity=\"0.55\"/>\n    <circle cx=\"342\" cy=\"168\" r=\"7\" opacity=\"0.65\"/>\n    <circle cx=\"470\" cy=\"168\" r=\"9\" opacity=\"0.8\"/>\n    <circle cx=\"588\" cy=\"168\" r=\"11\" opacity=\"0.9\"/>\n    <circle cx=\"690\" cy=\"168\" r=\"13\"/>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.4\">\n    <path d=\"M86 128 v28\"/><path d=\"M342 128 v26\"/><path d=\"M588 128 v20\"/>\n    <path d=\"M214 180 v28\"/><path d=\"M470 180 v22\"/><path d=\"M690 180 v18\"/>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" text-anchor=\"middle\">\n    <text x=\"86\" y=\"120\" opacity=\"0.72\">the colours</text>\n    <text x=\"342\" y=\"120\" opacity=\"0.72\">which photos</text>\n    <text x=\"588\" y=\"120\">where a message goes</text>\n    <text x=\"214\" y=\"226\" opacity=\"0.72\">the wording</text>\n    <text x=\"470\" y=\"226\">what your page is called</text>\n    <text x=\"690\" y=\"226\">whether you need</text>\n    <text x=\"690\" y=\"244\">somewhere to keep them</text>\n  </g>\n  <text x=\"380\" y=\"288\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">You do not have to get the right-hand end right. You have to get it DECIDED, on purpose.</text>\n</svg>",
+            "caption": "Some decisions stay free. Others get more expensive every week you leave them unmade."
           }
         ]
       }
@@ -1404,6 +1360,62 @@
         "removedAt": null
       },
       {
+        "pathId": "path-l-priya",
+        "position": 0,
+        "conceptId": "what-the-web-is",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya",
+        "position": 2,
+        "conceptId": "css-making-it-look-right",
+        "status": "complete",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya",
+        "position": 3,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "available",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya",
+        "position": 4,
+        "conceptId": "frontend-and-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya",
+        "position": 5,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-priya",
+        "position": 6,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": null,
+        "removedAt": null
+      },
+      {
         "pathId": "path-l-choir",
         "position": 0,
         "conceptId": "what-the-web-is",
@@ -1668,75 +1680,163 @@
         "removedAt": null
       },
       {
-        "pathId": "path-l-priya-prog-spring",
+        "pathId": "path-l-sam-prog-autumn",
         "position": 0,
-        "conceptId": "what-a-form-is",
-        "status": "complete",
-        "rationale": "Every text you get is a form a parent filled in by hand, with none of the fields you need.",
-        "removedAt": null
-      },
-      {
-        "pathId": "path-l-priya-prog-spring",
-        "position": 1,
-        "conceptId": "tables-and-rows",
-        "status": "complete",
-        "rationale": "Your notebook of bookings is already a table: one row per child per day.",
-        "removedAt": null
-      },
-      {
-        "pathId": "path-l-priya-prog-autumn",
-        "position": 0,
-        "conceptId": "naming-what-you-want",
-        "status": "complete",
-        "rationale": "Your intake form keeps collecting the wrong dates, and every fix so far has been a guess at what the form should say.",
-        "removedAt": null
-      },
-      {
-        "pathId": "path-l-priya-prog-autumn",
-        "position": 1,
         "conceptId": "scoping-what-to-build",
         "status": "complete",
-        "rationale": "Booking, reminders and invoicing are three projects. This is the one that has to work by half term.",
+        "rationale": "Before Claude Code writes a single line, you and it need to agree what the first version of your page actually is: what a visitor sees, what the contact form asks for, and what is deliberately left until later.",
         "removedAt": null
       },
       {
-        "pathId": "path-l-priya-prog-autumn",
-        "position": 2,
-        "conceptId": "what-an-api-is",
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 1,
+        "conceptId": "what-the-web-is",
         "status": "complete",
-        "rationale": "Your form has to ask the calendar whether a slot is free. That question is the API.",
+        "rationale": "Your page will live on a computer somewhere else, and a visitor's browser will ask it for a copy. That request-and-response picture is what everything else here sits on.",
         "removedAt": null
       },
       {
-        "pathId": "path-l-priya-prog-autumn",
-        "position": 3,
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 2,
         "conceptId": "frontend-and-backend",
-        "status": "in_progress",
-        "rationale": "The form in the browser and the thing that remembers a booking are two different programs, and you are about to have to say which is which.",
+        "status": "complete",
+        "rationale": "Your photos and your words are the front half; getting a message into your inbox is the back half. Knowing which side owns which job stops you asking for the wrong thing when the form quietly does nothing.",
         "removedAt": null
       },
       {
-        "pathId": "path-l-priya-prog-autumn",
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 3,
+        "conceptId": "plan-then-act",
+        "status": "complete",
+        "rationale": "This is the loop you will use for every change to the page: Claude Code says what it intends to do, you read it, then it acts.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
         "position": 4,
-        "conceptId": "where-your-data-lives",
-        "status": "locked",
-        "rationale": "A booking has to still be there on Monday. That is a different question from whether the form works.",
+        "conceptId": "html-the-structure",
+        "status": "complete",
+        "rationale": "Your page is HTML underneath. You will not be writing it, but you will need to read it, because that is how you say the form is missing a field.",
         "removedAt": null
       },
       {
-        "pathId": "path-l-priya-prog-autumn",
+        "pathId": "path-l-sam-prog-autumn",
         "position": 5,
+        "conceptId": "css-making-it-look-right",
+        "status": "in_progress",
+        "rationale": "The colours, the spacing and whether your page still looks right on a phone are all CSS, and the model is better at it than most people are.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 6,
+        "conceptId": "javascript-making-it-do-things",
+        "status": "locked",
+        "rationale": "When somebody leaves the email box empty, your form should say so kindly rather than silently doing nothing.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 7,
+        "conceptId": "reading-what-the-ai-did",
+        "status": "locked",
+        "rationale": "Claude Code will change several files at once and tell you it is done. This is the habit of looking at what really changed before you agree.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 8,
+        "conceptId": "when-it-breaks",
+        "status": "locked",
+        "rationale": "At some point your page will come up blank and it will feel like you broke something you do not understand. You have not.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 9,
         "conceptId": "when-to-leave-the-chat",
         "status": "locked",
-        "rationale": "Your form may never need to leave the assistant you are building it in, and staying is a real answer.",
+        "rationale": "Six questions decide whether this needs to move onto your own computer. For a page that holds photos and keeps an email key secret, the answer is probably yes.",
         "removedAt": null
       },
       {
-        "pathId": "path-l-priya-prog-autumn",
-        "position": 6,
-        "conceptId": "documenting-as-you-go",
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 10,
+        "conceptId": "moving-to-your-own-machine",
         "status": "locked",
-        "rationale": "By half term you will not remember why cancellations close at 24 hours, and neither will the assistant.",
+        "rationale": "This is the afternoon nobody warns you about: installing the pieces so Claude Code has a real folder to work in.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 11,
+        "conceptId": "git-tracking-your-work",
+        "status": "locked",
+        "rationale": "Once Claude Code is changing several files at a time, you need save points you can go back to.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 12,
+        "conceptId": "directing-a-coding-agent",
+        "status": "locked",
+        "rationale": "Claude Code can read, write and run things in your project folder, which is what makes it useful and what makes it easy to lose track of.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 13,
+        "conceptId": "what-is-a-backend",
+        "status": "locked",
+        "rationale": "Your contact form is the moment your site stops being a page and needs something running elsewhere.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 14,
+        "conceptId": "what-an-api-is",
+        "status": "locked",
+        "rationale": "You are not going to build email sending yourself, and you are not going to build photo storage either.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 15,
+        "conceptId": "endpoints-and-requests",
+        "status": "locked",
+        "rationale": "When somebody presses Send, their browser posts what they typed to one particular address that does one job.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 16,
+        "conceptId": "how-do-you-know-it-works",
+        "status": "locked",
+        "rationale": "Before you tell anybody the site is up: does a message actually reach your inbox? Try it with the email box left empty.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 17,
+        "conceptId": "deploying-going-live",
+        "status": "locked",
+        "rationale": "This is where your page stops being on your laptop and starts being somewhere a customer can find it.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 18,
+        "conceptId": "environment-variables-and-secrets",
+        "status": "locked",
+        "rationale": "Now that the site is live it needs a key to send those emails, and that key must never end up in your code.",
+        "removedAt": null
+      },
+      {
+        "pathId": "path-l-sam-prog-autumn",
+        "position": 19,
+        "conceptId": "context-and-cost",
+        "status": "locked",
+        "rationale": "You are paying for what Claude Code reads and writes, and most of a bill like yours comes from sending the same things over and over.",
         "removedAt": null
       }
     ],
@@ -1786,6 +1886,28 @@
         "createdByEmail": "trainer@example.test"
       },
       {
+        "programmeId": "prog-autumn",
+        "learnerId": "l-priya",
+        "title": "Autumn programme",
+        "status": "active",
+        "startsOn": "2026-08-10",
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-08-10T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "prog-spring",
+        "learnerId": "l-priya",
+        "title": "Spring programme",
+        "status": "closed",
+        "startsOn": "2026-03-02",
+        "endsOn": "2026-07-31",
+        "archivedAt": "2026-08-01T09:00:00.000Z",
+        "createdAt": "2026-03-02T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
         "programmeId": "p-cyc-0",
         "learnerId": "l-cycling",
         "title": "Summer programme",
@@ -1809,92 +1931,89 @@
       },
       {
         "programmeId": "prog-autumn",
-        "learnerId": "l-priya",
-        "title": "Autumn programme",
+        "learnerId": "l-sam",
+        "title": "Getting your first site live",
         "status": "active",
-        "startsOn": "2026-08-10",
-        "endsOn": "2026-12-18",
+        "startsOn": null,
+        "endsOn": "2026-11-27",
         "archivedAt": null,
-        "createdAt": "2026-08-10T09:00:00.000Z",
         "createdByEmail": "trainer@example.test"
       },
       {
-        "programmeId": "prog-spring",
-        "learnerId": "l-priya",
-        "title": "Spring programme",
-        "status": "closed",
-        "startsOn": "2026-03-02",
+        "programmeId": "prog-summer",
+        "learnerId": "l-sam",
+        "title": "Finding your feet",
+        "status": "ended",
+        "startsOn": null,
         "endsOn": "2026-07-31",
         "archivedAt": "2026-08-01T09:00:00.000Z",
-        "createdAt": "2026-03-02T09:00:00.000Z",
         "createdByEmail": "trainer@example.test"
       }
     ],
     "ProgrammeDimension": [
       {
-        "dimensionId": "dim-question",
+        "dimensionId": "dim-ask",
         "programmeId": "prog-autumn",
-        "label": "Asking a better question",
+        "label": "Asking for what you want, precisely",
         "target": 8,
-        "deliverableId": null,
+        "deliverableId": "obj-scope",
         "position": 0,
         "archivedAt": null
       },
       {
-        "dimensionId": "dim-explain",
+        "dimensionId": "dim-check",
         "programmeId": "prog-autumn",
-        "label": "Explaining it back in your own words",
+        "label": "Checking what the AI did",
         "target": 7,
         "deliverableId": null,
         "position": 1,
         "archivedAt": null
       },
       {
-        "dimensionId": "dim-ship",
+        "dimensionId": "dim-alone",
         "programmeId": "prog-autumn",
-        "label": "Getting something working end to end",
-        "target": 10,
+        "label": "Doing it without me in the room",
+        "target": 8,
         "deliverableId": null,
         "position": 2,
-        "archivedAt": "2026-09-10T08:45:00.000Z"
+        "archivedAt": null
+      },
+      {
+        "dimensionId": "dim-jargon",
+        "programmeId": "prog-autumn",
+        "label": "Not being thrown by a new word",
+        "target": 6,
+        "deliverableId": null,
+        "position": 3,
+        "archivedAt": "2026-09-11T19:00:00.000Z"
       }
     ],
     "ProgrammeEvaluation": [
       {
-        "evaluationId": "eval-spring-initial",
-        "programmeId": "prog-spring",
+        "evaluationId": "eval-summer",
+        "programmeId": "prog-summer",
         "kind": "initial",
-        "dueOn": "2026-03-04",
-        "completedAt": "2026-03-04T10:00:00.000Z",
-        "summary": "You want parents to stop texting you for places. We agreed to spend the spring on what a form is before building one.",
+        "dueOn": "2026-07-08",
+        "completedAt": "2026-07-08T10:00:00.000Z",
+        "summary": "Four short sessions to work out whether a website was the right answer at all. It was — but not the one you came in asking for.",
         "criteria": [],
-        "nextStep": "Write down the three questions a parent asks you most often."
-      },
-      {
-        "evaluationId": "eval-spring-final",
-        "programmeId": "prog-spring",
-        "kind": "final",
-        "dueOn": "2026-07-24",
-        "completedAt": "2026-07-24T10:00:00.000Z",
-        "summary": "You can say what the form has to hold and why. The autumn is for building it.",
-        "criteria": [],
-        "nextStep": "Start the autumn programme with the booking form's field list."
+        "nextStep": "Come back in September and we build it."
       },
       {
         "evaluationId": "eval-initial",
         "programmeId": "prog-autumn",
         "kind": "initial",
-        "dueOn": "2026-08-12",
-        "completedAt": "2026-08-12T09:00:00.000Z",
-        "summary": "You arrive able to describe the problem clearly and with no experience of directing a tool to build any of it. That is the ordinary starting point and it is where we set the two objectives.",
+        "dueOn": "2026-09-01",
+        "completedAt": "2026-09-01T11:00:00.000Z",
+        "summary": "You arrive able to describe your business in one sentence and with no experience of directing a tool to build anything. That is the ordinary starting point. We set three objectives and agreed where each one needs to get to by the end of November.",
         "criteria": [],
-        "nextStep": "Bring the booking form's field list to the next session."
+        "nextStep": "Write the scope note before we next meet."
       },
       {
         "evaluationId": "eval-mid",
         "programmeId": "prog-autumn",
         "kind": "mid",
-        "dueOn": "2026-10-16",
+        "dueOn": "2026-10-20",
         "completedAt": null,
         "summary": null,
         "criteria": [],
@@ -1904,7 +2023,7 @@
         "evaluationId": "eval-final",
         "programmeId": "prog-autumn",
         "kind": "final",
-        "dueOn": "2026-12-11",
+        "dueOn": "2026-11-27",
         "completedAt": null,
         "summary": null,
         "criteria": [],
@@ -1914,7 +2033,7 @@
         "evaluationId": "eval-impact",
         "programmeId": "prog-autumn",
         "kind": "impact",
-        "dueOn": "2027-01-29",
+        "dueOn": "2027-01-22",
         "completedAt": null,
         "summary": null,
         "criteria": [],
@@ -1977,6 +2096,30 @@
         "reachedWowMoment": false,
         "completedAt": "2026-09-12T15:00:00.000Z",
         "updatedAt": "2026-09-12T15:00:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "what-the-web-is",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-09T22:05:00.000Z",
+        "updatedAt": "2026-09-09T22:05:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "html-the-structure",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-09T22:05:00.000Z",
+        "updatedAt": "2026-09-09T22:05:00.000Z"
+      },
+      {
+        "learnerId": "l-priya",
+        "conceptId": "css-making-it-look-right",
+        "confidence": null,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-09T22:05:00.000Z",
+        "updatedAt": "2026-09-09T22:05:00.000Z"
       },
       {
         "learnerId": "l-choir",
@@ -2115,52 +2258,52 @@
         "updatedAt": "2026-09-15T17:20:00.000Z"
       },
       {
-        "learnerId": "l-priya",
-        "conceptId": "what-a-form-is",
+        "learnerId": "l-sam",
+        "conceptId": "scoping-what-to-build",
         "confidence": 6,
         "reachedWowMoment": false,
-        "completedAt": "2026-03-11T19:30:00.000Z",
-        "updatedAt": "2026-03-11T19:30:00.000Z"
+        "completedAt": "2026-09-02T19:40:00.000Z",
+        "updatedAt": "2026-09-02T19:40:00.000Z"
       },
       {
-        "learnerId": "l-priya",
-        "conceptId": "tables-and-rows",
-        "confidence": 7,
-        "reachedWowMoment": true,
-        "completedAt": "2026-05-02T18:10:00.000Z",
-        "updatedAt": "2026-05-02T18:10:00.000Z"
-      },
-      {
-        "learnerId": "l-priya",
-        "conceptId": "naming-what-you-want",
+        "learnerId": "l-sam",
+        "conceptId": "what-the-web-is",
         "confidence": 7,
         "reachedWowMoment": false,
-        "completedAt": "2026-08-12T16:20:00.000Z",
-        "updatedAt": "2026-08-12T16:20:00.000Z"
+        "completedAt": "2026-09-05T20:10:00.000Z",
+        "updatedAt": "2026-09-05T20:10:00.000Z"
       },
       {
-        "learnerId": "l-priya",
-        "conceptId": "scoping-what-to-build",
+        "learnerId": "l-sam",
+        "conceptId": "frontend-and-backend",
+        "confidence": 6,
+        "reachedWowMoment": false,
+        "completedAt": "2026-09-09T19:05:00.000Z",
+        "updatedAt": "2026-09-09T19:05:00.000Z"
+      },
+      {
+        "learnerId": "l-sam",
+        "conceptId": "plan-then-act",
         "confidence": 8,
         "reachedWowMoment": true,
-        "completedAt": "2026-08-19T09:05:00.000Z",
-        "updatedAt": "2026-08-19T09:05:00.000Z"
+        "completedAt": "2026-09-12T21:15:00.000Z",
+        "updatedAt": "2026-09-12T21:15:00.000Z"
       },
       {
-        "learnerId": "l-priya",
-        "conceptId": "what-an-api-is",
-        "confidence": 6,
+        "learnerId": "l-sam",
+        "conceptId": "html-the-structure",
+        "confidence": 7,
         "reachedWowMoment": false,
-        "completedAt": "2026-09-02T11:15:00.000Z",
-        "updatedAt": "2026-09-02T11:15:00.000Z"
+        "completedAt": "2026-09-16T20:25:00.000Z",
+        "updatedAt": "2026-09-16T20:25:00.000Z"
       },
       {
-        "learnerId": "l-priya",
-        "conceptId": "frontend-and-backend",
+        "learnerId": "l-sam",
+        "conceptId": "css-making-it-look-right",
         "confidence": null,
         "reachedWowMoment": false,
         "completedAt": null,
-        "updatedAt": "2026-08-10T09:00:00.000Z"
+        "updatedAt": "2026-09-21T19:30:00.000Z"
       }
     ],
     "ProjectContext": [
@@ -2201,6 +2344,15 @@
         "updatedAt": "2026-09-12T15:00:00.000Z"
       },
       {
+        "learnerId": "l-priya",
+        "projectName": "After-school club booking form",
+        "problemStatement": null,
+        "facts": {},
+        "version": 5,
+        "createdAt": "2026-05-02T10:00:00.000Z",
+        "updatedAt": "2026-09-09T22:05:00.000Z"
+      },
+      {
         "learnerId": "l-choir",
         "projectName": "Choir rota",
         "problemStatement": null,
@@ -2237,28 +2389,35 @@
         "updatedAt": "2026-09-15T17:20:00.000Z"
       },
       {
-        "learnerId": "l-priya",
-        "projectName": "After-school club booking form",
-        "problemStatement": "Parents book places by text message and I lose half of them. I want one form that shows what is still free and remembers who booked.",
+        "learnerId": "l-sam",
+        "projectName": "My business landing page",
+        "problemStatement": "I run a small business on my own, and right now the only way people find me is word of mouth. I want a simple website of my own that says what I do, shows a few photos of my work, and lets someone send me a message without having to phone me.",
         "facts": {
-          "projectGoal": "A booking form for the after-school club that parents can use without texting me.",
-          "bookingRules.whoCanBook": "Any parent with a child in Year 3 or Year 4 at the school.",
-          "fieldList.parentDetails": "Name, phone number, and an email if they have one.",
-          "bookingRules.whatHappensWhenFull": "They go on a waiting list and I text them if a place comes up.",
-          "clubSize": "Twenty-four children, twice a week.",
-          "bookingRules.cancellationWindow": "Up to 24 hours before. <b>Not</b> after that, **really** <img src=x onerror=\"window.__pwned=1\">",
-          "bookingRules.howManyPlaces": "Twelve places each session.",
-          "confirmationEmails.confirmationText": "Thanks, your child has a place on Tuesday. Reply STOP to cancel."
+          "projectGoal": "A single page that explains what my business does, shows photos of my work, and has a contact form that sends the message to my inbox.",
+          "buildOrUnderstand": "Build it. I want the site to actually exist and be live, not just to understand how websites work.",
+          "currentSkillLevel": "I have never built anything. I have never written code and I do not really know what a website is made of underneath.",
+          "stackOrTools": "Claude Code. For hosting I have not chosen yet — somewhere cheap.",
+          "whoItIsFor": "People within about ten miles who need a bike fixed and currently only find me if a friend passes on my name.",
+          "whatTheyveTried": "Nothing yet. I looked at the website builders and they seemed either expensive every month or too limiting to look like mine.",
+          "worriedAbout": "Getting stuck on something technical with nobody to ask. Paying for things I do not need. And not knowing whether what I have built is actually any good, or safe.",
+          "versionOneBoundary": "Somebody who has never met me finds the page, believes I'm real, and sends me a message about their bike.",
+          "whatHappensToAMessage": "It should just land in my email. I don't need to keep a list of them anywhere.",
+          "coverageArea": "About ten miles around town. Further if the weather is good.",
+          "scopeNote.oneJob": "A stranger with a broken bike gets a message to me without phoning.",
+          "scopeNote.whatIsOnThePage": "What I do, where I cover, six photos, and the form.",
+          "scopeNote.notYet": "Online booking, prices, a blog. <b>Not</b> Google **yet** <img src=x onerror=\"alert(1)\">.",
+          "ownWords.whatIDo": "I fix bicycles at your house, usually the same week.",
+          "beFound.searchedFor": "\"bike repair near me\", probably. Richard says to leave this alone for now."
         },
-        "version": 5,
-        "createdAt": "2026-05-02T10:00:00.000Z",
-        "updatedAt": "2026-09-09T22:05:00.000Z"
+        "version": 3,
+        "createdAt": "2026-07-08T09:00:00.000Z",
+        "updatedAt": "2026-09-21T20:14:00.000Z"
       }
     ],
     "SessionPrep": [
       {
-        "prepId": "prep-sess-aug-0",
-        "sessionId": "sess-aug",
+        "prepId": "prep-sess-start-0",
+        "sessionId": "sess-start",
         "position": 0,
         "conceptId": "scoping-what-to-build",
         "assignmentId": null,
@@ -2267,63 +2426,93 @@
         "resourceStorageKey": null
       },
       {
-        "prepId": "prep-sess-oct-0",
-        "sessionId": "sess-oct",
+        "prepId": "prep-sess-scope-0",
+        "sessionId": "sess-scope",
         "position": 0,
         "conceptId": null,
-        "assignmentId": "brief-rules",
+        "assignmentId": "brief-scope",
         "resourceLabel": null,
         "resourceUrl": null,
         "resourceStorageKey": null
       },
       {
-        "prepId": "prep-sess-oct-1",
-        "sessionId": "sess-oct",
+        "prepId": "prep-sess-scope-1",
+        "sessionId": "sess-scope",
         "position": 1,
-        "conceptId": "frontend-and-backend",
+        "conceptId": "what-the-web-is",
         "assignmentId": null,
         "resourceLabel": null,
         "resourceUrl": null,
         "resourceStorageKey": null
       },
       {
-        "prepId": "res-1",
-        "sessionId": "sess-oct",
+        "prepId": "prep-sess-next-0",
+        "sessionId": "sess-next",
+        "position": 0,
+        "conceptId": "css-making-it-look-right",
+        "assignmentId": null,
+        "resourceLabel": null,
+        "resourceUrl": null,
+        "resourceStorageKey": null
+      },
+      {
+        "prepId": "prep-sess-next-1",
+        "sessionId": "sess-next",
+        "position": 1,
+        "conceptId": "html-the-structure",
+        "assignmentId": null,
+        "resourceLabel": null,
+        "resourceUrl": null,
+        "resourceStorageKey": null
+      },
+      {
+        "prepId": "prep-sess-next-2",
+        "sessionId": "sess-next",
         "position": 2,
         "conceptId": null,
+        "assignmentId": "brief-photos",
+        "resourceLabel": null,
+        "resourceUrl": null,
+        "resourceStorageKey": null
+      },
+      {
+        "prepId": "res-checklist",
+        "sessionId": "sess-next",
+        "position": 3,
+        "conceptId": null,
         "assignmentId": null,
-        "resourceLabel": "The double-booking problem, one page",
-        "resourceUrl": "https://example.test/double-booking",
+        "resourceLabel": "Before-we-meet checklist (PDF)",
+        "resourceUrl": null,
         "resourceStorageKey": null
       }
     ],
     "Signal": [
       {
-        "signalId": "sig-confused",
-        "learnerId": "l-priya",
-        "conceptId": "what-an-api-is",
-        "sectionId": "reading-what-an-api-is",
+        "signalId": "sig-css",
+        "learnerId": "l-sam",
+        "conceptId": "css-making-it-look-right",
+        "sectionId": "reading-css-gist",
         "kind": "explicit_confusion",
-        "utterance": "I still don't get which one is doing the asking.",
-        "createdAt": "2026-09-03T20:41:00.000Z"
+        "utterance": "It looks fine on my laptop and squashed on my phone and I can't tell which one is wrong.",
+        "createdAt": "2026-09-21T20:02:00.000Z"
       },
       {
-        "signalId": "sig-quiz",
-        "learnerId": "l-priya",
-        "conceptId": "frontend-and-backend",
-        "sectionId": "quiz-where-does-it-run",
-        "kind": "failed_quiz",
-        "utterance": null,
-        "createdAt": "2026-09-05T19:12:00.000Z"
-      },
-      {
-        "signalId": "sig-build",
-        "learnerId": "l-priya",
-        "conceptId": "file-permissions-and-why-a-folder-can-refuse-you",
+        "signalId": "sig-html",
+        "learnerId": "l-sam",
+        "conceptId": "html-the-structure",
         "sectionId": null,
-        "kind": "build_error",
-        "utterance": "It keeps saying permission denied when I try to save the file.",
-        "createdAt": "2026-09-09T22:05:00.000Z"
+        "kind": "got_stuck",
+        "utterance": "I can see the form in the code but I can't work out which bit is the button.",
+        "createdAt": "2026-09-16T20:44:00.000Z"
+      },
+      {
+        "signalId": "sig-web",
+        "learnerId": "l-sam",
+        "conceptId": "what-the-web-is",
+        "sectionId": "reading-request-response",
+        "kind": "explicit_confusion",
+        "utterance": "So is the copy on my computer or theirs?",
+        "createdAt": "2026-09-05T20:31:00.000Z"
       }
     ]
   }

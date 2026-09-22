@@ -89,8 +89,9 @@ Nothing in this template fetches **yet** — sprint 49 is putting a NodeGX backe
 fixtures below (the next section). The seam is these places:
 
 - **Data/Fixture lesson** — the lesson page's lesson. Replace its `Static Data` node with a query; the
-  component's outputs (`title`, `hook`, `landing`, `steps`, `sections`) do not change. It belongs to
-  the CSV-sanitiser learner (`l-csv`), **not** to Priya, and `/course` no longer places it (below).
+  component's outputs (`title`, `hook`, `landing`, `steps`, `sections`) do not change. It is Sam's
+  first lesson, *Scoping your landing page before Claude Code writes a line*, and `/course` does
+  not place it — the up-next card reads the path, never a cached lesson (below).
 - **Data/Fixture programme** — the same, for the learner's timeline: its outputs (`projectName`,
   `problemStatement`, `endsOn`, `entries`, `dimensions`, `learnerId`, `history`) do not change
   either. `history` becomes the gated query for a finished programme's entries.
@@ -131,16 +132,39 @@ node tools/check-seed.mjs    --backend http://127.0.0.1:8577 --token <admin cred
   and reads back as `null`, which every reader treats as `{}`.
 
 **The fixtures were made into one consistent world first**, because one database could not hold
-all three as they were. Each change, and what it changed on screen:
+all three as they were, and because the world has to be one person's.
 
-| change | why | on screen |
+**Who the learner is: `l-sam`** — somebody running a small business alone, who has never built
+anything, making a one-page site with a contact form. Their project, their 20-step path and every
+rationale on it were written by a real `training_set_project` / `training_propose_path` round trip
+through the connector on 2026-09-22; the coaching layer around it (sessions, notes, reviews,
+objectives, ratings) is authored here, because none of that has ever lived in a database. The
+programme fixture's `learnerId` is the ONLY thing that decides whose name links on `/people` —
+`Logic/Roster filter` derives `hasPage` from it, so moving the world to another learner needs no
+code change.
+
+**What the fixture carries on purpose, and must keep carrying.** These are not decoration; six of
+them are the only reason `tools/check-dossier.mjs` and `tools/check-roster.mjs` can prove anything,
+and a re-author that drops one fails those checks by name — which is exactly how they were found
+again:
+
+| the case | where | why it must exist |
 |---|---|---|
-| The CSV-sanitiser lesson belongs to a new learner, `l-csv` | it names a project that is not Priya's | `/people` gains one row |
-| `/course`'s lesson card reads Priya's next openable path step (title, why, Start/Continue) through `Logic/Standing`, not the lesson fixture | the product's up-next card never reads a cached lesson | the card shows *Frontend and backend…*, and its step list is gone |
-| Priya's artifact on `what-an-api-is` gets its timeline entry | the product puts every artifact submission on the timeline | `/course` and `/learner` gain one *What you sent in* row |
-| Her artifact on `what-is-a-backend` is gone from her submissions | it was the other learner's lesson | nothing visible |
-| Artifact 1's timeline entry files it under `obj-fields` | the submissions list already did, and exactly one objective names that concept | nothing visible |
-| `l-recipe` has a last activity | a learner with a project context has one, by the product's own rule | *No activity yet* becomes a date, and the row moves |
+| an objective with **no answers**, at index 3 | `deliverables` | an empty objective must be a button with no bar, no caption and no `0` — the L167 rule |
+| exactly **two** live objectives with answers | `deliverables` + `facts` | so "carries a bar" is a real distinction |
+| an **archived** objective that still holds an answer | `obj-seo` | off the learner's meter, on the coach's list, answers kept for both |
+| a fact under **no namespace and no authored label** | `coverageArea` | it must humanise whole, never split at a dot |
+| a fact carrying `<b>`, `**bold**` and an `<img onerror>` | `scopeNote.notYet` | a captured answer is shown as TEXT and must reach the screen as the characters it is |
+| a required concept **not on anybody's path** | `picking-a-host` on `obj-live` | it renders as its slug, beside one that resolves to a title |
+| a submission filed under **no** objective | `submissions[1]` | "filed" and "unfiled" are different rows |
+| somebody who **signed up and never onboarded** | `l-newstart` | the roster exists to surface exactly this person (L89) |
+| somebody with **no activity at all** | `l-newstart` | *No activity yet* is a rendering path, not a gap |
+| a **cancelled** session, and a session in the future | `entries` | a cancelled one keeps its place and is never called "missed" |
+| **two** programmes, one finished | `programmes` + `history` | the scope selector is absent below two |
+
+**`build-seed.mjs` reads whose programme it is from the fixture**, never from a name written in the
+tool. It was pinned to a learner id in three places and produced three silently wrong answers the
+first time the world moved.
 
 ## How it is built, in the graph
 
