@@ -32,6 +32,7 @@ import { validateAclShape } from '../security/model';
 const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
 import {
   cappedHeaders,
+  checkViolationToHttp,
   createErrorToHttp,
   HttpError,
   readJSONBody,
@@ -278,7 +279,7 @@ export class ParseWireRoutes {
     try {
       record = await this.facade.rawCreate(collection, body);
     } catch (e) {
-      throw createErrorToHttp(e, body);
+      throw createErrorToHttp(e, body, this.facade.schemaManager);
     }
     // Parse's create response: objectId + createdAt only. The client merges its
     // own data over this — returning wire-typed fields here would leak `__type`
@@ -349,7 +350,7 @@ export class ParseWireRoutes {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       const conflict = uniqueViolationToHttp(message, body);
-      if (!conflict) throw createErrorToHttp(e, body);
+      if (!conflict) throw createErrorToHttp(e, body, this.facade.schemaManager);
 
       // Lost the race. The row exists now; if it is one this caller may write,
       // the request is the update it asked for. If it is not, the 409 stands.
@@ -419,6 +420,8 @@ export class ParseWireRoutes {
       const message = e instanceof Error ? e.message : String(e);
       const conflict = uniqueViolationToHttp(message, data);
       if (conflict) throw conflict;
+      const broke = checkViolationToHttp(message, this.facade.schemaManager);
+      if (broke) throw broke;
       throw new HttpError(404, 'Object not found.', 101);
     }
 
@@ -550,6 +553,9 @@ export class ParseWireRoutes {
       const message = e instanceof Error ? e.message : String(e);
       const conflict = uniqueViolationToHttp(message, plain);
       if (conflict) throw conflict;
+      // HLT-016: a rule broken is not a missing row either.
+      const broke = checkViolationToHttp(message, this.facade.schemaManager);
+      if (broke) throw broke;
       if (expect) {
         const refused = preconditionToHttp(message, expect);
         if (refused) throw refused;

@@ -1043,6 +1043,18 @@ export function preconditionProblem(message: string): { kind: 'changed' } | { ki
 }
 
 /**
+ * HLT-016: a write refused by a declared check. Both engines speak this one
+ * sentence (`CHECK constraint failed: <collection>.<check name>`): SQLite's
+ * triggers raise it and `translatePgError` rewrites PostgreSQL's 23514 into it.
+ *
+ * @returns The collection and the check's derived name, or null.
+ */
+export function checkConstraintProblem(message: string): { collection: string; check: string } | null {
+  const m = /^CHECK constraint failed: ([A-Za-z0-9_]+)\.(chk_[A-Za-z0-9_]+)$/.exec(String(message || '').trim());
+  return m ? { collection: m[1], check: m[2] } : null;
+}
+
+/**
  * Build an INSERT query
  */
 export function buildInsert(options: { collection: string; data: Record<string, unknown> }, id: string): BuiltQuery {

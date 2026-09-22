@@ -24,6 +24,7 @@ interface PgErrorLike extends Error {
 
 /** SQLSTATE codes this module recognises. */
 export const PG_UNIQUE_VIOLATION = '23505';
+export const PG_CHECK_VIOLATION = '23514';
 export const PG_UNDEFINED_TABLE = '42P01';
 export const PG_UNDEFINED_COLUMN = '42703';
 
@@ -53,6 +54,18 @@ export function translatePgError(e: unknown): Error {
     const cols = uniqueViolationColumns(pe.detail) || (pe.constraint ? [pe.constraint] : ['?']);
     const table = pe.table || '?';
     const out = new Error(`UNIQUE constraint failed: ${cols.map((c) => `${table}.${c}`).join(', ')}`) as PgErrorLike & {
+      cause?: unknown;
+    };
+    out.code = pe.code;
+    out.cause = e;
+    return out;
+  }
+
+  if (pe.code === PG_CHECK_VIOLATION && pe.constraint) {
+    // HLT-016: `new row for relation "T" violates check constraint "chk_…"` (a
+    // write) and `check constraint "chk_…" of relation "T" is violated by some
+    // row` (adding it) both become the message SQLite's triggers raise.
+    const out = new Error(`CHECK constraint failed: ${pe.table || '?'}.${pe.constraint}`) as PgErrorLike & {
       cause?: unknown;
     };
     out.code = pe.code;

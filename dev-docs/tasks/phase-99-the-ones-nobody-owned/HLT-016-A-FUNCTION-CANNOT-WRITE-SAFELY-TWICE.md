@@ -19,7 +19,16 @@ told 200, one fact lost), then guarded (one 409; the loser re-reads, retries, no
 A unique index can hold only where a predicate does (`"where": { "pinned": true }`). Driven over
 HTTP with a restart on both engines; conformance 61/61 on PostgreSQL, new mutant caught by name.
 🔴 Found beside it, pre-existing: **on PostgreSQL a refused index push answered 200**, because the
-queued refusal was consumed by the push's own audit write. Fixed. 📋 `checks` (C1–C6) is next.
+queued refusal was consumed by the push's own audit write. Fixed.
+
+## ✅ Index half, `checks`, BUILT 2026-09-22 (P99 s17): C1–C6 ✅ on SQLite AND PostgreSQL. [Verdict](./verdicts/HLT-016/2026-09-22-checks/VERDICT.md)
+
+`"checks": [{ "exactlyOne": [...] }, { "allOrNone": [...] }, { "field", "min", "max" }]`: SQLite
+enforces them with triggers, PostgreSQL with CHECK constraints, and both answer a broken rule 400
+/ code 142 with the rule in words. HEAD silently dropped the `checks` key and wrote every
+rule-breaking row. 🔴 Found: `classPut` answered **404** for a refusal it did not recognise; a
+broken rule on an edit is now 400. **The index half is done.** Left on HLT-016: (b), and AC6
+(the DBT stream's).
 
 ## 1. The person sentence
 

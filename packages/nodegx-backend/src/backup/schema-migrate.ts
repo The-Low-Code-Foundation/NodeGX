@@ -24,7 +24,7 @@ import * as path from 'path';
 
 import { readArchive } from './archive';
 import type { BackupManager } from './BackupManager';
-import type { IStorageSchema, StorageIndexDecl } from '@noodl/backend-contract';
+import type { IStorageSchema, StorageCheckDecl, StorageIndexDecl } from '@noodl/backend-contract';
 
 export interface ColumnDef {
   name: string;
@@ -44,6 +44,8 @@ export interface TableDef {
    * but not their constraints would move a dedupe guarantee into a hope.
    */
   indexes?: StorageIndexDecl[];
+  /** HLT-016 — the rules every row must satisfy. Carried for the same reason as `indexes`. */
+  checks?: StorageCheckDecl[];
 }
 
 export interface SchemaSnapshot {
@@ -69,6 +71,8 @@ export interface TableChange {
    * of it is not a state the backend can be put into.
    */
   indexChange?: { from: StorageIndexDecl[]; to: StorageIndexDecl[] };
+  /** HLT-016 — the check declaration, when the two sides disagree. Whole-list, like `indexChange`. */
+  checkChange?: { from: StorageCheckDecl[]; to: StorageCheckDecl[] };
 }
 
 export interface SchemaDiff {
@@ -105,6 +109,11 @@ function normalizeForDiff(indexes: StorageIndexDecl[] | undefined): StorageIndex
     .sort((a, b) =>
       (a.fields.join(',') + JSON.stringify(a.where || '')).localeCompare(b.fields.join(',') + JSON.stringify(b.where || ''))
     );
+}
+
+/** A check declaration in a stable order, so a reordering does not read as a change. */
+function checksForDiff(checks: StorageCheckDecl[] | undefined): StorageCheckDecl[] {
+  return [...(checks || [])].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
 /** `(id unique), (published desc)` — what the promotion summary prints. */
@@ -157,7 +166,8 @@ export function tablesFromDbFile(dbPath: string): TableDef[] {
       return {
         name: r.name,
         columns: (parsed.columns || []) as ColumnDef[],
-        indexes: (parsed.indexes || []) as StorageIndexDecl[]
+        indexes: (parsed.indexes || []) as StorageIndexDecl[],
+        checks: (parsed.checks || []) as StorageCheckDecl[]
       };
     });
   } catch {
@@ -197,7 +207,7 @@ export function snapshotFromArchive(archivePath: string): SchemaSnapshot {
   if (schemaJson) {
     try {
       const arr = JSON.parse(schemaJson.data.toString('utf-8'));
-      if (Array.isArray(arr)) tables = arr.map((t) => ({ name: t.name, columns: t.columns || [], indexes: t.indexes || [] }));
+      if (Array.isArray(arr)) tables = arr.map((t) => ({ name: t.name, columns: t.columns || [], indexes: t.indexes || [], checks: t.checks || [] }));
     } catch {
       /* fall through */
     }
@@ -229,7 +239,8 @@ export function snapshotFromLiveDir(
     tables: schemaManager.exportSchemas().map((t) => ({
       name: t.name,
       columns: t.columns || [],
-      indexes: t.indexes || []
+      indexes: t.indexes || [],
+      checks: t.checks || []
     })),
     permissions: security,
     triggers: (triggersFile && (triggersFile.triggers as { id: string }[])) || [],
@@ -248,7 +259,8 @@ export function snapshotFromLive(
     tables: schemaManager.exportSchemas().map((t) => ({
       name: t.name,
       columns: t.columns || [],
-      indexes: (t as TableDef).indexes || []
+      indexes: (t as TableDef).indexes || [],
+      checks: (t as TableDef).checks || []
     })),
     permissions,
     triggers: triggers || [],
@@ -296,9 +308,12 @@ export function diffSchema(source: SchemaSnapshot, target: SchemaSnapshot): Sche
     const tgtIdx = normalizeForDiff(tt.indexes);
     const indexChange =
       JSON.stringify(srcIdx) === JSON.stringify(tgtIdx) ? undefined : { from: tgtIdx, to: srcIdx };
+    const srcChk = checksForDiff(st.checks);
+    const tgtChk = checksForDiff(tt.checks);
+    const checkChange = JSON.stringify(srcChk) === JSON.stringify(tgtChk) ? undefined : { from: tgtChk, to: srcChk };
 
-    if (addedColumns.length || removedColumns.length || typeChanges.length || indexChange) {
-      changed.push({ name, addedColumns, removedColumns, typeChanges, indexChange });
+    if (addedColumns.length || removedColumns.length || typeChanges.length || indexChange || checkChange) {
+      changed.push({ name, addedColumns, removedColumns, typeChanges, indexChange, checkChange });
     }
   }
   for (const [name] of tgtTables) if (!srcTables.has(name)) removed.push(name);
@@ -311,7 +326,9 @@ export function diffSchema(source: SchemaSnapshot, target: SchemaSnapshot): Sche
 
   const summary: string[] = [];
   for (const t of added) {
-    const withIndexes = (t.indexes || []).length > 0 ? `, ${(t.indexes || []).length} indexes` : '';
+    const withIndexes =
+      ((t.indexes || []).length > 0 ? `, ${(t.indexes || []).length} indexes` : '') +
+      ((t.checks || []).length > 0 ? `, ${(t.checks || []).length} checks` : '');
     summary.push(`+ table ${t.name} (${t.columns.length} columns${withIndexes})`);
   }
   for (const c of changed) {
@@ -319,6 +336,7 @@ export function diffSchema(source: SchemaSnapshot, target: SchemaSnapshot): Sche
     for (const col of c.removedColumns) summary.push(`- column ${c.name}.${col} [DESTRUCTIVE]`);
     for (const tc of c.typeChanges) summary.push(`~ column ${c.name}.${tc.name}: ${tc.from} -> ${tc.to} [DESTRUCTIVE, manual]`);
     if (c.indexChange) summary.push(`~ indexes ${c.name}: ${describeIndexes(c.indexChange.from)} -> ${describeIndexes(c.indexChange.to)}`);
+    if (c.checkChange) summary.push(`~ checks ${c.name}: ${JSON.stringify(c.checkChange.from)} -> ${JSON.stringify(c.checkChange.to)}`);
   }
   for (const t of removed) summary.push(`- table ${t} [DESTRUCTIVE]`);
   summary.push(...config.permissions, ...config.triggers, ...config.templates);
@@ -401,6 +419,9 @@ export interface ApplyResult {
   appliedIndexes: string[];
   /** FED-002 — and each one it dropped, because the source no longer declares it. */
   droppedIndexes: string[];
+  /** HLT-016 — `table.checkName` for every check a promotion created or dropped. */
+  appliedChecks: string[];
+  droppedChecks: string[];
   configApplied: string[];
   preApplyBackup: string | null;
   skipped: string[];
@@ -434,6 +455,35 @@ function applyIndexes(
   }
 }
 
+/**
+ * HLT-016 — reconcile one promoted table's checks. A refusal (rows in the
+ * target already break one) is a `skipped` line, like an index refusal.
+ *
+ * @param whole - The declaration replaces the target's even when empty (a
+ *   changed table whose source declares none). A NEW table with none has
+ *   nothing to do.
+ */
+function applyChecks(
+  sm: IStorageSchema,
+  table: string,
+  checks: StorageCheckDecl[] | undefined,
+  result: ApplyResult,
+  whole: boolean
+): void {
+  if (!whole && (!checks || checks.length === 0)) return;
+  if (typeof sm.reconcileChecks !== 'function') {
+    result.skipped.push(`checks on ${table} (this adapter cannot declare checks)`);
+    return;
+  }
+  try {
+    const report = sm.reconcileChecks(table, checks || []);
+    for (const name of report.created) result.appliedChecks.push(`${table}.${name}`);
+    for (const name of report.dropped) result.droppedChecks.push(`${table}.${name}`);
+  } catch (e) {
+    result.skipped.push(`checks on ${table} (${e instanceof Error ? e.message : String(e)})`);
+  }
+}
+
 export async function applySchema(
   target: ApplyTarget,
   source: SchemaSnapshot,
@@ -454,6 +504,8 @@ export async function applySchema(
     droppedColumns: [],
     appliedIndexes: [],
     droppedIndexes: [],
+    appliedChecks: [],
+    droppedChecks: [],
     configApplied: [],
     preApplyBackup: null,
     skipped: []
@@ -478,6 +530,7 @@ export async function applySchema(
     // has moved a guarantee into a hope. The table is one statement old, so no
     // unique declaration can be refused by data here.
     applyIndexes(sm, t.name, t.indexes, result);
+    applyChecks(sm, t.name, t.checks, result, false);
   }
   for (const c of diff.tables.changed) {
     for (const col of c.addedColumns) {
@@ -491,6 +544,7 @@ export async function applySchema(
     // rows refuse is SKIPPED with the reason — never applied halfway, and never
     // by deleting rows.
     if (c.indexChange) applyIndexes(sm, c.name, c.indexChange.to, result);
+    if (c.checkChange) applyChecks(sm, c.name, c.checkChange.to, result, true);
   }
 
   // Destructive: drops (only reached with allowDestructive).

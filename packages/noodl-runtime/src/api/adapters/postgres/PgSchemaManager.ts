@@ -64,7 +64,15 @@
 import { escapeColumn, escapeTable } from '../local-sql/QueryBuilder';
 import {
   builtInIndexNames,
+  checkChecksAgainstColumns,
+  checkName,
   checkWhereAgainstColumns,
+  describeCheck,
+  normalizeCheckDecls,
+  sameCheck,
+  type CheckDecl,
+  type CheckReconcileReport,
+  type CheckStatus,
   declaredProperties,
   indexName,
   junctionTableName,
@@ -82,7 +90,7 @@ import {
   type SchemaColumn,
   type TableSchema
 } from '../local-sql/schemaCommon';
-import { columnToPostgres, declaredIndexDDL, junctionDDL, tableDDL } from './ddl';
+import { checkConstraintDDL, columnToPostgres, declaredIndexDDL, junctionDDL, tableDDL } from './ddl';
 import { translatePgError, PG_UNIQUE_VIOLATION } from './errors';
 import type { PgConnectionPool } from './pool';
 
@@ -105,6 +113,8 @@ interface SchemaState {
   columns: Map<string, Set<string>>;
   /** Declared-shape indexes per table that this class manages (`idx_<t>_…`, not the built-in pair). */
   built: Map<string, BuiltIndex[]>;
+  /** HLT-016: the declared-shape checks (`chk_<t>_…`) each table has, by constraint name. */
+  checks: Map<string, Set<string>>;
   /** junction → owningId → relatedIds. */
   relations: Map<string, Map<string, Set<string>>>;
   /** junction → relatedId → owningIds (the inverse, for the authorization path). */
@@ -198,6 +208,7 @@ export class PgSchemaManager {
       schemas: new Map(),
       columns: new Map(),
       built: new Map(),
+      checks: new Map(),
       relations: new Map(),
       owners: new Map(),
       search: new Map(),
@@ -251,6 +262,17 @@ export class PgSchemaManager {
       if (!parsed) continue;
       if (!st.built.has(i.tablename)) st.built.set(i.tablename, []);
       st.built.get(i.tablename)!.push(parsed);
+    }
+
+    const cons = await this.pool.query<{ conname: string; relname: string }>(
+      `SELECT c.conname, t.relname FROM pg_constraint c ` +
+        `JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace ` +
+        `WHERE c.contype = 'c' AND n.nspname = current_schema() AND c.conname LIKE 'chk\\_%'`
+    );
+    for (const c of cons) {
+      if (!c.conname.startsWith(`chk_${sanitizeIdent(c.relname)}_`)) continue;
+      if (!st.checks.has(c.relname)) st.checks.set(c.relname, new Set());
+      st.checks.get(c.relname)!.add(c.conname);
     }
 
     for (const t of st.tables) {
@@ -363,8 +385,11 @@ export class PgSchemaManager {
     const typeOf = (field: string): string | undefined =>
       field === 'objectId' ? 'String' : declaredProperties(stored)?.[field]?.type;
     for (const d of declared) if (d.where) checkWhereAgainstColumns(name, d.where, columns, typeOf);
+    const checks = normalizeCheckDecls(stored.checks);
+    checkChecksAgainstColumns(name, checks, columns, typeOf);
 
     st.tables.add(name);
+    st.checks.set(name, new Set(checks.map((c) => checkName(name, c))));
     st.columns.set(name, columns);
     st.schemas.set(name, stored);
     st.built.set(
@@ -390,6 +415,7 @@ export class PgSchemaManager {
         st.columns.delete(name);
         st.schemas.delete(name);
         st.built.delete(name);
+        st.checks.delete(name);
         for (const j of junctions) {
           st.tables.delete(j);
           st.relations.delete(j);
@@ -444,6 +470,7 @@ export class PgSchemaManager {
       schema: st.schemas.get(tableName),
       columns: st.columns.get(tableName),
       built: st.built.get(tableName),
+      checks: st.checks.get(tableName),
       search: st.search.get(tableName),
       junctions: junctions.map((j) => ({ j, rel: st.relations.get(j), own: st.owners.get(j) }))
     };
@@ -451,6 +478,7 @@ export class PgSchemaManager {
     st.schemas.delete(tableName);
     st.columns.delete(tableName);
     st.built.delete(tableName);
+    st.checks.delete(tableName);
     st.search.delete(tableName);
     for (const j of junctions) {
       st.tables.delete(j);
@@ -473,6 +501,7 @@ export class PgSchemaManager {
         if (removed.schema) st.schemas.set(tableName, removed.schema);
         if (removed.columns) st.columns.set(tableName, removed.columns);
         if (removed.built) st.built.set(tableName, removed.built);
+        if (removed.checks) st.checks.set(tableName, removed.checks);
         if (removed.search) st.search.set(tableName, removed.search);
         for (const { j, rel, own } of removed.junctions) {
           st.tables.add(j);
@@ -833,6 +862,108 @@ export class PgSchemaManager {
     );
 
     return { created, dropped, kept, indexes: desired };
+  }
+
+  // ===========================================================================
+  // IStorageSchema — declared checks (HLT-016)
+  //
+  // A real CHECK constraint: PostgreSQL validates the rows already there when
+  // it is added, atomically, which is the refusal SQLite's manager has to
+  // pre-count. Like `reconcileIndexes`, the refusal arrives at the queue, and
+  // `byob-admin` waits for the queue so it reaches the person who pushed.
+  // ===========================================================================
+
+  declaredChecks(tableName: string): CheckDecl[] {
+    const schema = this.getTableSchema(tableName);
+    return normalizeCheckDecls(schema ? schema.checks : undefined);
+  }
+
+  checkStatus(tableName: string): CheckStatus[] {
+    const built = new Set(this.s.checks.get(tableName) || []);
+    const out: CheckStatus[] = [];
+    for (const rule of this.declaredChecks(tableName)) {
+      const name = checkName(tableName, rule);
+      out.push({ name, rule, description: describeCheck(rule), built: built.has(name), declared: true });
+      built.delete(name);
+    }
+    for (const name of built) {
+      out.push({ name, rule: { exactlyOne: [] }, description: 'not declared', built: true, declared: false });
+    }
+    return out;
+  }
+
+  reconcileChecks(tableName: string, checks: unknown): CheckReconcileReport {
+    const st = this.s;
+    if (!st.tables.has(tableName)) throw new Error(`Table "${tableName}" does not exist`);
+
+    const desired = normalizeCheckDecls(checks);
+    const typeOf = (field: string): string | undefined => declaredProperties(this.getTableSchema(tableName))?.[field]?.type;
+    checkChecksAgainstColumns(tableName, desired, st.columns.get(tableName) || new Set<string>(), typeOf);
+    for (const check of desired) {
+      const name = checkName(tableName, check);
+      if (name.length > PG_MAX_IDENTIFIER) {
+        throw new Error(
+          `The check "${describeCheck(check)}" on "${tableName}" would be named "${name}", ${name.length} ` +
+            `characters, and PostgreSQL truncates identifiers at ${PG_MAX_IDENTIFIER}. Shorten the names.`
+        );
+      }
+    }
+
+    const before = new Set(st.checks.get(tableName) || []);
+    const declared = new Map(this.declaredChecks(tableName).map((c) => [checkName(tableName, c), c]));
+    const unchanged = (check: CheckDecl): boolean => {
+      const name = checkName(tableName, check);
+      const was = declared.get(name);
+      return before.has(name) && was !== undefined && sameCheck(was, check);
+    };
+
+    const table = escapeTable(tableName);
+    const created: string[] = [];
+    const dropped: string[] = [];
+    const kept: string[] = [];
+    const statements: string[] = [];
+    const wanted = new Set(desired.map((c) => checkName(tableName, c)));
+
+    for (const name of before) {
+      if (wanted.has(name)) continue;
+      statements.push(`ALTER TABLE ${table} DROP CONSTRAINT IF EXISTS "${name}"`);
+      dropped.push(name);
+    }
+    for (const check of desired) {
+      const name = checkName(tableName, check);
+      if (unchanged(check)) {
+        kept.push(name);
+        continue;
+      }
+      statements.push(`ALTER TABLE ${table} DROP CONSTRAINT IF EXISTS "${name}"`);
+      statements.push(`ALTER TABLE ${table} ADD ${checkConstraintDDL(tableName, check)}`);
+      created.push(name);
+    }
+
+    const schema = st.schemas.get(tableName) || { name: tableName };
+    const previousDecl = schema.checks;
+    if (desired.length > 0) schema.checks = desired;
+    else delete schema.checks;
+    st.schemas.set(tableName, schema);
+    st.checks.set(tableName, wanted);
+    const snapshot = JSON.stringify(schema);
+
+    this.enqueue(
+      `reconcileChecks("${tableName}")`,
+      async () => {
+        await this.pool.transaction(async (tx) => {
+          for (const sql of statements) await tx.run(sql);
+          await tx.run(UPSERT_SCHEMA, [tableName, snapshot]);
+        });
+      },
+      () => {
+        st.checks.set(tableName, before);
+        if (previousDecl !== undefined) schema.checks = previousDecl;
+        else delete schema.checks;
+      }
+    );
+
+    return { created, dropped, kept, checks: desired };
   }
 
   // ===========================================================================

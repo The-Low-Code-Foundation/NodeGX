@@ -32,6 +32,8 @@ export interface TableSchema {
   columns?: SchemaColumn[];
   /** FED-002: the indexes this collection declares, beyond the built-in pair. */
   indexes?: IndexDecl[];
+  /** HLT-016: the rules every row of this collection must satisfy. */
+  checks?: CheckDecl[];
   [extra: string]: unknown;
 }
 
@@ -420,6 +422,205 @@ export class MigrationRefusal extends Error {
     this.table = table;
     this.detail = detail;
   }
+}
+
+// =============================================================================
+// Checks (HLT-016)
+//
+// A rule every row must satisfy, enforced by the database rather than by a
+// branch in the one function that happens to write the table today. Three
+// shapes, because they are the three the Digital Bricks Training product
+// declares (`digital-bricks-training/drizzle/*.sql`): exactly one of N set,
+// all-or-none, and a numeric range. Never SQL text, for the reason `where` is
+// not: it has to mean the same on two engines.
+// =============================================================================
+
+/** One declared check, as `schema.json` carries it. Exactly one shape per entry. */
+export type CheckDecl =
+  | { exactlyOne: string[] }
+  | { allOrNone: string[] }
+  | { field: string; min?: number; max?: number };
+
+/** A declared check and whether the database enforces it. */
+export interface CheckStatus {
+  name: string;
+  rule: CheckDecl;
+  /** A sentence for a person: `exactly one of learnerId, cohortId is set`. */
+  description: string;
+  built: boolean;
+  declared: boolean;
+}
+
+/** What a check reconcile did. */
+export interface CheckReconcileReport {
+  created: string[];
+  dropped: string[];
+  kept: string[];
+  checks: CheckDecl[];
+}
+
+/**
+ * The prefix of every check error, on both engines: `CHECK constraint failed:
+ * <collection>.<check name>`. SQLite's triggers raise exactly this, and
+ * `translatePgError` rewrites PostgreSQL's 23514 into it, so the HTTP layer
+ * reads one vocabulary, the way it does for `UNIQUE constraint failed`.
+ */
+export const CHECK_FAILED_PREFIX = 'CHECK constraint failed: ';
+
+const MIN_CHECK_FIELDS = 2;
+const MAX_CHECK_FIELDS = 4;
+const FIELD_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+/**
+ * Read a `checks` declaration, or refuse it (HLT-016 C1). Shape only; whether
+ * the properties exist and a range's is a Number needs the collection, and is
+ * {@link checkChecksAgainstColumns}.
+ */
+export function normalizeCheckDecls(raw: unknown): CheckDecl[] {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) throw new Error('"checks" must be an array of rules');
+
+  return raw.map((entry, i) => {
+    const at = `checks[${i}]`;
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error(`${at} must be an object like { "exactlyOne": ["learnerId", "cohortId"] }`);
+    }
+    const e = entry as Record<string, unknown>;
+    const keys = Object.keys(e);
+    const fieldList = (key: 'exactlyOne' | 'allOrNone'): string[] => {
+      if (keys.length !== 1) throw new Error(`${at}: "${key}" takes no other keys (found ${keys.join(', ')})`);
+      const v = e[key];
+      if (!Array.isArray(v) || v.length < MIN_CHECK_FIELDS || v.length > MAX_CHECK_FIELDS) {
+        throw new Error(`${at}.${key} must list ${MIN_CHECK_FIELDS} to ${MAX_CHECK_FIELDS} property names`);
+      }
+      for (const f of v) {
+        if (typeof f !== 'string' || !FIELD_NAME.test(f)) {
+          throw new Error(`${at}.${key}: ${JSON.stringify(f)} is not a valid property name`);
+        }
+      }
+      if (new Set(v).size !== v.length) throw new Error(`${at}.${key} names the same property twice`);
+      return [...(v as string[])];
+    };
+
+    if ('exactlyOne' in e) return { exactlyOne: fieldList('exactlyOne') };
+    if ('allOrNone' in e) return { allOrNone: fieldList('allOrNone') };
+    if ('field' in e) {
+      for (const k of keys) {
+        if (k !== 'field' && k !== 'min' && k !== 'max') {
+          throw new Error(`${at}: unknown key "${k}" (a range takes field, min, max)`);
+        }
+      }
+      if (typeof e.field !== 'string' || !FIELD_NAME.test(e.field)) {
+        throw new Error(`${at}.field: ${JSON.stringify(e.field)} is not a valid property name`);
+      }
+      const bound = (k: 'min' | 'max'): number | undefined => {
+        if (e[k] === undefined) return undefined;
+        if (typeof e[k] !== 'number' || !Number.isFinite(e[k] as number))
+          throw new Error(`${at}.${k} must be a finite number`);
+        return e[k] as number;
+      };
+      const min = bound('min');
+      const max = bound('max');
+      if (min === undefined && max === undefined) throw new Error(`${at}: a range needs "min", "max" or both`);
+      if (min !== undefined && max !== undefined && min > max) throw new Error(`${at}: min ${min} is above max ${max}`);
+      const out: { field: string; min?: number; max?: number } = { field: e.field };
+      if (min !== undefined) out.min = min;
+      if (max !== undefined) out.max = max;
+      return out;
+    }
+    throw new Error(
+      `${at}: expected { "exactlyOne": [...] }, { "allOrNone": [...] } or { "field", "min", "max" }` +
+        (keys.length ? `, not an object with ${keys.map((k) => `"${k}"`).join(', ')}` : '')
+    );
+  });
+}
+
+/** The properties a check reads. */
+export function checkFields(check: CheckDecl): string[] {
+  if ('exactlyOne' in check) return check.exactlyOne;
+  if ('allOrNone' in check) return check.allOrNone;
+  return [check.field];
+}
+
+/**
+ * The derived name of a check. Never written by a person, like an index's, so
+ * a check removed from `schema.json` has a name to drop. A range's bounds are
+ * not in the name: changing them is the same rule, rebuilt.
+ */
+export function checkName(tableName: string, check: CheckDecl): string {
+  const kind = 'exactlyOne' in check ? 'one' : 'allOrNone' in check ? 'all' : 'range';
+  return `chk_${sanitizeIdent(tableName)}_${kind}_${checkFields(check).map(sanitizeIdent).join('_')}`;
+}
+
+/** Whether two declarations are the same rule in every detail (a range's bounds included). */
+export function sameCheck(a: CheckDecl, b: CheckDecl): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/** Refuse a check naming a property the collection lacks, or a range on a non-Number. */
+export function checkChecksAgainstColumns(
+  tableName: string,
+  checks: CheckDecl[],
+  columns: Set<string>,
+  typeOf: (field: string) => string | undefined
+): void {
+  const seen = new Set<string>();
+  for (const check of checks) {
+    const name = checkName(tableName, check);
+    if (seen.has(name)) {
+      throw new Error(`"${tableName}" declares the check on (${checkFields(check).join(', ')}) twice.`);
+    }
+    seen.add(name);
+    for (const field of checkFields(check)) {
+      if (!columns.has(field)) {
+        throw new Error(`Cannot check "${field}" on "${tableName}": the collection has no such property.`);
+      }
+    }
+    if ('field' in check && typeOf(check.field) !== 'Number') {
+      const has = typeOf(check.field);
+      throw new Error(
+        `A range on "${tableName}" needs "${check.field}" to be a Number, and it is ` +
+          `${has ? `a ${has}` : 'a property with no declared type'}.`
+      );
+    }
+  }
+}
+
+/**
+ * The SQL a row must satisfy, for either engine: one form, portable on purpose
+ * (`CASE` rather than SQLite's boolean arithmetic or PostgreSQL's
+ * `num_nonnulls`), so the two cannot drift.
+ *
+ * A range over a NULL is NULL, which a CHECK treats as passing and a trigger's
+ * `WHEN NOT (…)` treats as not firing: the same answer on both engines, and the
+ * SQL standard's. `exactlyOne` and `allOrNone` never evaluate to NULL.
+ *
+ * @param prefix - `NEW.` inside a SQLite trigger; empty for a table-level CHECK
+ *   and for counting the rows that already break it.
+ */
+export function checkSQL(check: CheckDecl, prefix = ''): string {
+  const col = (f: string) => `${prefix}"${sanitizeIdent(f)}"`;
+  if ('exactlyOne' in check) {
+    return `(${check.exactlyOne.map((f) => `(CASE WHEN ${col(f)} IS NULL THEN 0 ELSE 1 END)`).join(' + ')}) = 1`;
+  }
+  if ('allOrNone' in check) {
+    const all = (op: string) => check.allOrNone.map((f) => `${col(f)} IS ${op}NULL`).join(' AND ');
+    return `((${all('')}) OR (${all('NOT ')}))`;
+  }
+  const parts: string[] = [];
+  if (check.min !== undefined) parts.push(`${col(check.field)} >= ${check.min}`);
+  if (check.max !== undefined) parts.push(`${col(check.field)} <= ${check.max}`);
+  return `(${parts.join(' AND ')})`;
+}
+
+/** A person's reading of a check. */
+export function describeCheck(check: CheckDecl): string {
+  if ('exactlyOne' in check) return `exactly one of ${check.exactlyOne.join(', ')} is set`;
+  if ('allOrNone' in check) return `${check.allOrNone.join(', ')} are all set or all empty`;
+  if (check.min !== undefined && check.max !== undefined)
+    return `${check.field} is between ${check.min} and ${check.max}`;
+  if (check.min !== undefined) return `${check.field} is at least ${check.min}`;
+  return `${check.field} is at most ${check.max}`;
 }
 
 /**

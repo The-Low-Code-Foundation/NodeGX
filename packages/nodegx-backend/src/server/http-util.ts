@@ -204,12 +204,42 @@ export class HttpError extends Error {
  * DUPLICATE_VALUE (137), a malformed one is 400. Any other error passes through
  * unchanged, to be answered as before.
  */
-export function createErrorToHttp(e: unknown, values?: Record<string, unknown>): unknown {
+export function createErrorToHttp(e: unknown, values?: Record<string, unknown>, schema?: CheckReader): unknown {
   const message = e instanceof Error ? e.message : String(e);
   const problem = QueryBuilder.clientObjectIdProblem(message);
   if (problem === 'taken') return new HttpError(409, message, 137);
   if (problem === 'invalid') return new HttpError(400, message);
-  return uniqueViolationToHttp(message, values) || e;
+  return uniqueViolationToHttp(message, values) || checkViolationToHttp(message, schema) || e;
+}
+
+/** The one schema reader {@link checkViolationToHttp} needs, declared structurally. */
+export interface CheckReader {
+  checkStatus?(table: string): Array<{ name: string; description: string; rule: unknown }>;
+}
+
+/**
+ * HLT-016: a write refused by a declared check. **400** with Parse's
+ * VALIDATION_ERROR (142) and the rule in words, looked up by the check's name,
+ * because `CHECK constraint failed: Assignment.chk_Assignment_one_learnerId_cohortId`
+ * is not a sentence a person can act on. `reason: 'check-failed'` is the stable
+ * value a graph branches on. Never a 404: the record is there; the write broke a rule.
+ */
+export function checkViolationToHttp(message: string, schema?: CheckReader): HttpError | null {
+  const problem = QueryBuilder.checkConstraintProblem(message) as { collection: string; check: string } | null;
+  if (!problem) return null;
+  let found: { description: string; rule: unknown } | undefined;
+  try {
+    found = schema?.checkStatus?.(problem.collection)?.find((c) => c.name === problem.check);
+  } catch {
+    /* the sentence falls back to the name; the refusal stands either way */
+  }
+  return new HttpError(
+    400,
+    `This write breaks a rule of "${problem.collection}": ${found ? found.description : problem.check}. ` +
+      'It was refused, and nothing was changed.',
+    142,
+    { reason: 'check-failed', check: problem.check, collection: problem.collection, ...(found ? { rule: found.rule } : {}) }
+  );
 }
 
 /**

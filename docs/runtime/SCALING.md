@@ -184,6 +184,21 @@ and a full one on the same fields are two indexes. A partial unique index is
 **not** enough for `X-NodeGX-Upsert`, because outside its rows the value may
 repeat; the upsert asks for a unique index with no `where`.
 
+A collection can also declare **checks**: rules every row must satisfy, which
+the database enforces on every create and update, whoever writes it:
+
+```jsonc
+{ "checks": [
+  { "exactlyOne": ["learnerId", "cohortId"] },   // one of these is set, never both, never neither
+  { "allOrNone": ["anchorKind", "anchorId"] },   // set together, or not at all
+  { "field": "target", "min": 1, "max": 10 }     // a Number property within bounds; an empty one passes
+] }
+```
+
+A write that breaks one is answered **400** with code 142 and the rule in
+words (`reason: "check-failed"`), and nothing is changed. A check the rows
+already break is refused when you push, and nothing is changed then either.
+
 ### 2a. Set a limit anyway — the page cap is a floor under accidents, not a design
 
 **A query with no `limit` returns one page, not the collection.** The backend

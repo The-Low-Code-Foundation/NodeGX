@@ -206,7 +206,7 @@ export function surveyForMigration(dataDir: string, target: string): CarryReport
 
   try {
     const tables = allTables(db);
-    const declared = new Map<string, { columns?: Array<{ name: string; type: string; targetClass?: string }>; indexes?: Array<{ fields: string[]; unique?: boolean; where?: Record<string, unknown> }> }>();
+    const declared = new Map<string, { columns?: Array<{ name: string; type: string; targetClass?: string }>; indexes?: Array<{ fields: string[]; unique?: boolean; where?: Record<string, unknown> }>; checks?: unknown[] }>();
     for (const r of db.prepare('SELECT "name", "schema" FROM "_Schema"').all() as Array<{ name: string; schema: string }>) {
       try {
         declared.set(r.name, JSON.parse(r.schema));
@@ -279,6 +279,10 @@ export function surveyForMigration(dataDir: string, target: string): CarryReport
             detail: col.targetClass ? { junction: `_Join_${col.name}_${table}` } : undefined
           });
         }
+      }
+
+      for (const check of (schema && schema.checks) || []) {
+        entries.push({ construct: 'check', name: `${table} ${JSON.stringify(check)}`, verdict: 'carries' });
       }
 
       for (const idx of (schema && schema.indexes) || []) {

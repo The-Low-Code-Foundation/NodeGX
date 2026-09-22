@@ -460,6 +460,7 @@ export class PostgresAdapter {
       const quiet =
         QueryBuilder.clientObjectIdProblem(err.message) !== null ||
         QueryBuilder.uniqueConstraintProblem(err.message) !== null ||
+        QueryBuilder.checkConstraintProblem(err.message) !== null ||
         QueryBuilder.preconditionProblem(err.message) !== null ||
         /^Object not found$/.test(err.message);
       if (!quiet) console.error(`PostgresAdapter.${name} error:`, err);

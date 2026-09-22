@@ -21,9 +21,12 @@
 
 import {
   builtInIndexNames,
+  checkName,
+  checkSQL,
   indexName,
   junctionTableName,
   MigrationRefusal,
+  normalizeCheckDecls,
   normalizeIndexDecls,
   POSTGRES_TYPE_MAP,
   quoteLiteral,
@@ -137,6 +140,11 @@ export function declaredIndexDDL(tableName: string, decl: IndexDecl): string {
   return `CREATE${decl.unique ? ' UNIQUE' : ''} INDEX IF NOT EXISTS "${name}" ON ${escapeTable(tableName)} (${cols})${where};`;
 }
 
+/** One declared check as a table constraint clause. */
+export function checkConstraintDDL(tableName: string, check: Parameters<typeof checkName>[1]): string {
+  return `CONSTRAINT "${checkName(tableName, check)}" CHECK (${checkSQL(check)})`;
+}
+
 /**
  * PostgreSQL DDL for one collection: columns, the two built-in indexes,
  * **every declared index including `unique`** (BRG-D2) and **every relation's
@@ -160,6 +168,11 @@ export function tableDDL(schema: TableSchema, options: { touchTrigger?: boolean 
   for (const col of schema.columns || []) {
     const def = columnToPostgres(schema, col);
     if (def) columnDefs.push(def);
+  }
+  // HLT-016 C5: a declared check crosses as a CHECK, under the name the live
+  // adapter derives, so a reconcile on the other side recognises it as built.
+  for (const check of normalizeCheckDecls(schema.checks)) {
+    columnDefs.push(checkConstraintDDL(schema.name, check));
   }
 
   out.push(`CREATE TABLE IF NOT EXISTS ${table} (`);

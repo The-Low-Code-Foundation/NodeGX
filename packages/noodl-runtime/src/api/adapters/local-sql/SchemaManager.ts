@@ -13,7 +13,17 @@ import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
 import {
   builtInIndexNames as sharedBuiltInIndexNames,
+  CHECK_FAILED_PREFIX,
+  checkChecksAgainstColumns,
+  checkName,
+  checkSQL,
   checkWhereAgainstColumns,
+  describeCheck,
+  normalizeCheckDecls,
+  sameCheck,
+  type CheckDecl,
+  type CheckReconcileReport,
+  type CheckStatus,
   declaredProperties,
   describeWhere,
   indexName as sharedIndexName,
@@ -68,6 +78,31 @@ class IndexDuplicatesError extends Error {
   }
 }
 
+/**
+ * A check refused by the rows already in the table (HLT-016 C3). The same
+ * shape as {@link IndexDuplicatesError}, for the same reason: the caller has to
+ * say "3 rows already break it" to a person.
+ */
+class CheckViolationsError extends Error {
+  code: string;
+  table: string;
+  check: string;
+  violations: number;
+
+  constructor(table: string, check: CheckDecl, violations: number) {
+    super(
+      `Cannot require "${describeCheck(check)}" on "${table}": ${violations} ` +
+        `row${violations === 1 ? '' : 's'} already break${violations === 1 ? 's' : ''} it. ` +
+        'Nothing was changed and no row was deleted.'
+    );
+    this.name = 'CheckViolationsError';
+    this.code = 'CHECK_VIOLATIONS';
+    this.table = table;
+    this.check = describeCheck(check);
+    this.violations = violations;
+  }
+}
+
 /** Options for the plain PostgreSQL export. */
 interface PostgresExportOptions {
   /**
@@ -108,6 +143,9 @@ class SchemaManager {
    * a sentence. `err.code === 'INDEX_DUPLICATES'` is the supported check.
    */
   static IndexDuplicatesError = IndexDuplicatesError;
+
+  /** HLT-016: `err.code === 'CHECK_VIOLATIONS'` is the supported check. */
+  static CheckViolationsError = CheckViolationsError;
 
   /** Same reason, same door: `err.code === 'CANNOT_CROSS'` is the supported check. */
   static MigrationRefusal = MigrationRefusal;
@@ -207,6 +245,9 @@ class SchemaManager {
     // statement old and therefore empty — no unique declaration can be refused
     // by data here. `createTable` is create-if-absent, so a push against a
     // table that already exists reconciles through `reconcileIndexes` instead.
+    if (schema.checks !== undefined) {
+      this.reconcileChecks(tableName, schema.checks);
+    }
     if (schema.indexes !== undefined) {
       this.reconcileIndexes(tableName, schema.indexes);
     }
@@ -1319,6 +1360,155 @@ class SchemaManager {
     const schema = this.getTableSchema(tableName) || { name: tableName };
     if (indexes.length > 0) schema.indexes = indexes;
     else delete schema.indexes;
+    this.db
+      .prepare(
+        `INSERT INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT("name") DO UPDATE SET "schema" = excluded."schema", "updatedAt" = CURRENT_TIMESTAMP`
+      )
+      .run(tableName, JSON.stringify(schema));
+    this._schemaCache.set(tableName, schema);
+  }
+
+  // ===========================================================================
+  // Declared checks (HLT-016)
+  //
+  // SQLite cannot add a CHECK to a table that exists without rebuilding it, and
+  // a rebuild is the twelve-step dance `changeColumnType` deliberately avoids.
+  // So a check is a pair of triggers — BEFORE INSERT and BEFORE UPDATE — that
+  // RAISE(ABORT) with the one message both engines use. They are dropped and
+  // created like indexes, named like indexes, and read back from
+  // `sqlite_master`, never from what `_Schema` last claimed.
+  // ===========================================================================
+
+  /** The checks a collection's `_Schema` row declares (normalized, never null). */
+  declaredChecks(tableName: string): CheckDecl[] {
+    const schema = this.getTableSchema(tableName);
+    return normalizeCheckDecls(schema ? schema.checks : undefined);
+  }
+
+  /** The checks SQLite enforces on this table: both triggers of a pair, or it is not built. */
+  builtChecks(tableName: string): Set<string> {
+    const prefix = `chk_${sanitizeIdent(tableName)}_`;
+    let rows: Array<{ name?: string }>;
+    try {
+      rows = this.db
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = ?")
+        .all(tableName) as typeof rows;
+    } catch (e) {
+      return new Set();
+    }
+    const names = new Set((Array.isArray(rows) ? rows : []).map((r) => String(r.name)));
+    const out = new Set<string>();
+    for (const n of names) {
+      if (!n.startsWith(prefix) || !n.endsWith('_ins')) continue;
+      const base = n.slice(0, -'_ins'.length);
+      if (names.has(`${base}_upd`)) out.add(base);
+    }
+    return out;
+  }
+
+  /** What a person is shown: every declared check and whether it is enforced, plus drift. */
+  checkStatus(tableName: string): CheckStatus[] {
+    const built = this.builtChecks(tableName);
+    const out: CheckStatus[] = [];
+    for (const rule of this.declaredChecks(tableName)) {
+      const name = checkName(tableName, rule);
+      out.push({ name, rule, description: describeCheck(rule), built: built.has(name), declared: true });
+      built.delete(name);
+    }
+    for (const name of built) {
+      out.push({ name, rule: { exactlyOne: [] }, description: 'not declared', built: true, declared: false });
+    }
+    return out;
+  }
+
+  /** How many rows already break a check. */
+  violatingRows(tableName: string, check: CheckDecl): number {
+    const row = this.db
+      .prepare(`SELECT COUNT(*) AS n FROM ${escapeTable(tableName)} WHERE NOT (${checkSQL(check)})`)
+      .get() as { n?: number } | undefined;
+    return row && typeof row.n === 'number' ? row.n : 0;
+  }
+
+  /**
+   * Make SQLite's enforced checks match the declaration (HLT-016 C1–C4).
+   *
+   * Every refusal runs before any DDL, as `reconcileIndexes` does: a check the
+   * rows already break refuses the push, and nothing else in it is applied.
+   *
+   * @param checks - The FULL declaration. A check gone from it is dropped.
+   * @throws CheckViolationsError when the rows already break a new check.
+   */
+  reconcileChecks(tableName: string, checks: unknown): CheckReconcileReport {
+    const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
+    if (!exists) throw new Error(`Table "${tableName}" does not exist`);
+
+    const desired = normalizeCheckDecls(checks);
+    const typeOf = (field: string): string | undefined => declaredProperties(this.getTableSchema(tableName))?.[field]?.type;
+    checkChecksAgainstColumns(tableName, desired, this.tableColumns(tableName), typeOf);
+
+    const built = this.builtChecks(tableName);
+    const declared = new Map(this.declaredChecks(tableName).map((c) => [checkName(tableName, c), c]));
+    const unchanged = (check: CheckDecl): boolean => {
+      const name = checkName(tableName, check);
+      const before = declared.get(name);
+      return built.has(name) && before !== undefined && sameCheck(before, check);
+    };
+
+    for (const check of desired) {
+      if (unchanged(check)) continue;
+      const violations = this.violatingRows(tableName, check);
+      if (violations > 0) throw new CheckViolationsError(tableName, check, violations);
+    }
+
+    const created: string[] = [];
+    const dropped: string[] = [];
+    const kept: string[] = [];
+    const wanted = new Set(desired.map((c) => checkName(tableName, c)));
+    const table = escapeTable(tableName);
+
+    this.db.exec('SAVEPOINT nodegx_reconcile_checks');
+    try {
+      for (const name of built) {
+        if (wanted.has(name)) continue;
+        this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}_ins`)}`);
+        this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}_upd`)}`);
+        dropped.push(name);
+      }
+      for (const check of desired) {
+        const name = checkName(tableName, check);
+        if (unchanged(check)) {
+          kept.push(name);
+          continue;
+        }
+        const raise = `SELECT RAISE(ABORT, ${quoteLiteral(`${CHECK_FAILED_PREFIX}${sanitizeIdent(tableName)}.${name}`)})`;
+        const when = `WHEN NOT (${checkSQL(check, 'NEW.')})`;
+        for (const [suffix, event] of [['_ins', 'INSERT'], ['_upd', 'UPDATE']] as const) {
+          this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}${suffix}`)}`);
+          this.db.exec(
+            `CREATE TRIGGER ${escapeTable(`${name}${suffix}`)} BEFORE ${event} ON ${table} ` +
+              `FOR EACH ROW ${when} BEGIN ${raise}; END`
+          );
+        }
+        created.push(name);
+      }
+      this.persistCheckDecls(tableName, desired);
+      this.db.exec('RELEASE nodegx_reconcile_checks');
+    } catch (e) {
+      this.db.exec('ROLLBACK TO nodegx_reconcile_checks');
+      this.db.exec('RELEASE nodegx_reconcile_checks');
+      throw e;
+    }
+
+    return { created, dropped, kept, checks: desired };
+  }
+
+  /** Write the check declaration into the `_Schema` row. Inside `reconcileChecks`'s savepoint. */
+  persistCheckDecls(tableName: string, checks: CheckDecl[]): void {
+    this.ensureSchemaTable();
+    const schema = this.getTableSchema(tableName) || { name: tableName };
+    if (checks.length > 0) schema.checks = checks;
+    else delete schema.checks;
     this.db
       .prepare(
         `INSERT INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)

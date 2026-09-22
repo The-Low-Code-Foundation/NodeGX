@@ -23,10 +23,16 @@ import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
-import type { StorageColumn, StorageIndexStatus, StorageSupabaseExportOptions } from '@noodl/backend-contract';
+import type {
+  StorageCheckStatus,
+  StorageColumn,
+  StorageIndexStatus,
+  StorageSupabaseExportOptions
+} from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { summariseModelCalls } from '../execution/modelCost';
 import {
+  checkViolationToHttp,
   createErrorToHttp,
   HttpError,
   readJSONBody,
@@ -81,6 +87,8 @@ export interface SchemaTable {
    * answer, which is a different fact from "this collection has no indexes".
    */
   indexes?: StorageIndexStatus[];
+  /** HLT-016 — every declared check and whether it is enforced. Absent on an adapter too old to answer. */
+  checks?: StorageCheckStatus[];
 }
 
 /** `GET /admin/schema` and `GET /api/_schema`. */
@@ -94,12 +102,14 @@ export interface TableSchemaResponse {
   columns: unknown[];
   /** FED-002 — see {@link SchemaTable.indexes}. */
   indexes?: StorageIndexStatus[];
+  /** HLT-016 — see {@link SchemaTable.checks}. */
+  checks?: StorageCheckStatus[];
 }
 
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
@@ -126,6 +136,12 @@ export interface SchemaMutationResponse {
   indexesKept?: string[];
   /** Every declared index on the collection afterwards, and whether it is built. */
   indexes?: StorageIndexStatus[];
+  // ── setChecks (HLT-016) ───────────────────────────────────────────────────
+  checksCreated?: string[];
+  checksDropped?: string[];
+  checksKept?: string[];
+  /** Every declared check on the collection afterwards, and whether it is enforced. */
+  checks?: StorageCheckStatus[];
 }
 
 /**
@@ -200,7 +216,7 @@ export class ByobAdminRoutes {
       // as well as the field. This is the door the Data Browser writes through,
       // and a 500 saying `UNIQUE constraint failed: Item.id` in a panel is not
       // something a person can act on.
-      throw createErrorToHttp(e, data);
+      throw createErrorToHttp(e, data, this.facade.schemaManager);
     }
     sendJSON(ctx.res, 201, record);
   }
@@ -214,8 +230,11 @@ export class ByobAdminRoutes {
     } catch (e) {
       // FED-002: an edit refused by a unique index is a conflict, not a missing
       // row — the same distinction `classPut` draws.
-      const conflict = uniqueViolationToHttp(e instanceof Error ? e.message : String(e), data);
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, data);
       if (conflict) throw conflict;
+      const broke = checkViolationToHttp(message, this.facade.schemaManager);
+      if (broke) throw broke;
       throw new HttpError(404, 'Record not found');
     }
   }
@@ -309,7 +328,8 @@ export class ByobAdminRoutes {
           name,
           columns: schema?.columns || [],
           createdAt: schema?.createdAt || null,
-          ...this.indexesOf(name)
+          ...this.indexesOf(name),
+          ...this.checksOf(name)
         };
       })
     } satisfies SchemaResponse);
@@ -323,7 +343,8 @@ export class ByobAdminRoutes {
     sendJSON(res, 200, {
       name: tableName,
       columns: schema.columns || [],
-      ...this.indexesOf(tableName)
+      ...this.indexesOf(tableName),
+      ...this.checksOf(tableName)
     } satisfies TableSchemaResponse);
   }
 
@@ -334,6 +355,16 @@ export class ByobAdminRoutes {
    * "this backend cannot tell you", which is what the dashboard has to render
    * differently.
    */
+  private checksOf(tableName: string): { checks?: StorageCheckStatus[] } {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.checkStatus !== 'function') return {};
+    try {
+      return { checks: sm.checkStatus(tableName) };
+    } catch {
+      return { checks: [] };
+    }
+  }
+
   private indexesOf(tableName: string): { indexes?: StorageIndexStatus[] } {
     const sm = this.facade.schemaManager;
     if (!sm || typeof sm.indexStatus !== 'function') return {};
@@ -378,14 +409,23 @@ export class ByobAdminRoutes {
           name: table,
           columns: (body.columns as StorageColumn[] | undefined) || []
         });
+        // HLT-016: `checks` rides along the same way, and is applied first: a
+        // push refused by its rows is refused before any index is built.
+        const checkReport = body.checks === undefined ? null : await this.applyChecks(ctx, table, body.checks);
         const report = body.indexes === undefined ? null : await this.applyIndexes(ctx, table, body.indexes);
         sendJSON(res, 200, {
           success: true,
           action: 'createTable',
           created,
           table,
+          ...(checkReport || {}),
           ...(report || {})
         } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setChecks': {
+        const report = await this.applyChecks(ctx, table, body.checks);
+        sendJSON(res, 200, { success: true, action: 'setChecks', table, ...report } satisfies SchemaMutationResponse);
         return;
       }
       case 'setIndexes': {
@@ -435,9 +475,93 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, changeColumnType, deleteTable, setIndexes.'
+            'renameColumn, changeColumnType, deleteTable, setIndexes, setChecks.'
         );
     }
+  }
+
+  /**
+   * P99 HLT-016 W5. On PostgreSQL a reconcile is QUEUED (BRG-005) and a refusal
+   * surfaces on "the next data-plane call" — which, after a push, was always
+   * the audit write for this very request. `AuditLog.record` never throws, so
+   * the refusal was logged there and dropped: the push answered 200, the
+   * person's next write succeeded, and the trail lost the entry. Waiting for
+   * the queue here is what makes the refusal reach the person who pushed.
+   *
+   * @private
+   */
+  private async awaitSchemaQueue(ctx: RequestContext, table: string, described?: Map<string, string>): Promise<void> {
+    const sm = this.facade.schemaManager;
+    const barrier = (sm as { barrier?: () => Promise<void> } | undefined)?.barrier;
+    if (typeof barrier !== 'function') return;
+    try {
+      await barrier.call(sm);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (/UNIQUE constraint failed/.test(message)) {
+        ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
+        throw new HttpError(
+          409,
+          `Cannot build the unique indexes declared for "${table}": rows already in it share a value ` +
+            `(${message.replace(/^.*UNIQUE constraint failed: /, '')}). Nothing was changed and no row was deleted.`,
+          137
+        );
+      }
+      // The queued error names the operation first: `reconcileChecks("T") failed
+      // on PostgreSQL: CHECK constraint failed: T.chk_…`.
+      const m = /CHECK constraint failed: [A-Za-z0-9_]+\.(chk_[A-Za-z0-9_]+)/.exec(message);
+      const check = m ? { check: m[1] } : null;
+      if (check) {
+        ctx.audit({ checksRefused: { table, engine: 'postgres', check: check.check } });
+        // Read from what was pushed: by now the model has rolled the declaration back.
+        const description = described?.get(check.check) ?? check.check;
+        throw new HttpError(
+          409,
+          `Cannot require "${description}" on "${table}": rows already in it break it. ` +
+            'Nothing was changed and no row was deleted.',
+          142
+        );
+      }
+      throw new HttpError(500, message);
+    }
+  }
+
+  /**
+   * HLT-016 — reconcile one collection's checks and report what happened. A
+   * mis-shaped declaration is 400; rows that already break a new check are
+   * 409 with the count (SQLite) or PostgreSQL's refusal (at the queue).
+   *
+   * @private
+   */
+  private async applyChecks(
+    ctx: RequestContext,
+    table: string,
+    checks: unknown
+  ): Promise<{ checksCreated: string[]; checksDropped: string[]; checksKept: string[]; checks: StorageCheckStatus[] }> {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.reconcileChecks !== 'function') {
+      throw new HttpError(501, 'This adapter cannot declare checks.');
+    }
+    let report;
+    try {
+      report = sm.reconcileChecks(table, checks);
+    } catch (e) {
+      const err = e as { code?: string; message?: string; violations?: number; check?: string };
+      if (err && err.code === 'CHECK_VIOLATIONS') {
+        ctx.audit({ checksRefused: { table, check: err.check, violations: err.violations } });
+        throw new HttpError(409, String(err.message), 142, { violations: err.violations, check: err.check });
+      }
+      throw new HttpError(400, e instanceof Error ? e.message : String(e));
+    }
+    const described = new Map((this.checksOf(table).checks || []).map((c) => [c.name, c.description]));
+    await this.awaitSchemaQueue(ctx, table, described);
+    ctx.audit({ checksCreated: report.created, checksDropped: report.dropped });
+    return {
+      checksCreated: report.created,
+      checksDropped: report.dropped,
+      checksKept: report.kept,
+      checks: this.checksOf(table).checks || []
+    };
   }
 
   /**
@@ -480,30 +604,7 @@ export class ByobAdminRoutes {
       throw new HttpError(400, e instanceof Error ? e.message : String(e));
     }
 
-    // P99 HLT-016 W5. On PostgreSQL the reconcile is QUEUED (BRG-005) and a
-    // refusal surfaces on "the next data-plane call" — which, after a push, was
-    // always the audit write for this very request. `AuditLog.record` never
-    // throws, so the refusal was logged there and dropped: the push answered
-    // 200, the person's next write succeeded, and the trail lost the entry.
-    // Wait for the queue here, so the refusal reaches the person who pushed.
-    const barrier = (sm as { barrier?: () => Promise<void> }).barrier;
-    if (typeof barrier === 'function') {
-      try {
-        await barrier.call(sm);
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        if (/UNIQUE constraint failed/.test(message)) {
-          ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
-          throw new HttpError(
-            409,
-            `Cannot build the unique indexes declared for "${table}": rows already in it share a value ` +
-              `(${message.replace(/^.*UNIQUE constraint failed: /, '')}). Nothing was changed and no row was deleted.`,
-            137
-          );
-        }
-        throw new HttpError(500, message);
-      }
-    }
+    await this.awaitSchemaQueue(ctx, table);
 
     ctx.audit({ indexesCreated: report.created, indexesDropped: report.dropped });
     return {

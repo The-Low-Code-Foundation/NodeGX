@@ -246,6 +246,33 @@ export interface StorageIndexReconcileReport {
 }
 
 /**
+ * HLT-016: one declared check — a rule every row must satisfy, enforced by the
+ * database. Exactly one shape per entry. Never SQL text.
+ */
+export type StorageCheckDecl =
+  | { exactlyOne: string[] }
+  | { allOrNone: string[] }
+  | { field: string; min?: number; max?: number };
+
+/** A declared check and whether the database enforces it. */
+export interface StorageCheckStatus {
+  name: string;
+  rule: StorageCheckDecl;
+  /** A sentence for a person: `exactly one of learnerId, cohortId is set`. */
+  description: string;
+  built: boolean;
+  declared: boolean;
+}
+
+/** What a check reconcile did. */
+export interface StorageCheckReconcileReport {
+  created: string[];
+  dropped: string[];
+  kept: string[];
+  checks: StorageCheckDecl[];
+}
+
+/**
  * A table's declared shape.
  *
  * Transcribed from `nodegx-backend/src/persistence/SchemaManagerLike.ts:41-47`.
@@ -256,6 +283,8 @@ export interface StorageTableSchema {
   createdAt?: string;
   /** FED-002 — the indexes this collection declares, beyond createdAt/updatedAt. */
   indexes?: StorageIndexDecl[];
+  /** HLT-016 — the rules every row must satisfy. */
+  checks?: StorageCheckDecl[];
 }
 
 /** Options for `IStorageSchema.generatePostgresSQL`. */
@@ -359,6 +388,13 @@ export interface IStorageSchema {
   reconcileIndexes?(table: string, indexes: unknown): StorageIndexReconcileReport;
   /** Every declared index and whether it is built, plus drift. `byob-admin.ts:446`. */
   indexStatus?(table: string): StorageIndexStatus[];
+
+  // --- declared checks (HLT-016) -------------------------------------------
+
+  /** Make the database's checks match this declaration. Throws `code: 'CHECK_VIOLATIONS'` (SQLite). `byob-admin.ts`. */
+  reconcileChecks?(table: string, checks: unknown): StorageCheckReconcileReport;
+  /** Every declared check and whether it is enforced, plus drift. */
+  checkStatus?(table: string): StorageCheckStatus[];
 
   // --- full-text search (BAK-008) ------------------------------------------
 

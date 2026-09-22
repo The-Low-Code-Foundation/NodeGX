@@ -31,7 +31,8 @@ export type MutationKind =
   | 'relation-inverse-ignores-target'
   | 'aggregate-ignores-acl'
   | 'drop-precondition-on-save'
-  | 'drop-where-on-index';
+  | 'drop-where-on-index'
+  | 'skip-checks';
 
 export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'drop-acl-on-reads',
@@ -41,7 +42,8 @@ export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'relation-inverse-ignores-target',
   'aggregate-ignores-acl',
   'drop-precondition-on-save',
-  'drop-where-on-index'
+  'drop-where-on-index',
+  'skip-checks'
 ]);
 
 /** What each mutation models, for the record AC3 asks for. */
@@ -61,7 +63,9 @@ export const MUTATION_DESCRIPTIONS: Readonly<Record<MutationKind, string>> = Obj
   'drop-precondition-on-save':
     'save ignores `expect` (HLT-016) and writes unconditionally — the lost update DBT L62 shipped, reported as success',
   'drop-where-on-index':
-    'a partial index is built as a full one (HLT-016) — the predicate a parser or an exporter drops, which refuses every row the declaration deliberately allowed'
+    'a partial index is built as a full one (HLT-016) — the predicate a parser or an exporter drops, which refuses every row the declaration deliberately allowed',
+  'skip-checks':
+    'a declared check is recorded but never enforced (HLT-016) — the rule reads as present in the schema while every row it forbids is written'
 });
 
 /**
@@ -107,9 +111,24 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
             reconcileIndexes: {
               value(table: string, indexes: unknown) {
                 const stripped = Array.isArray(indexes)
-                  ? (indexes as StorageIndexDecl[]).map(({ where: _dropped, ...rest }) => rest)
+                  ? (indexes as StorageIndexDecl[]).map((i) => {
+                      const rest = { ...i };
+                      delete rest.where;
+                      return rest;
+                    })
                   : indexes;
                 return adapter.schemaManager.reconcileIndexes?.(table, stripped);
+              },
+              enumerable: true
+            }
+          })
+      : kind === 'skip-checks'
+        ? Object.create(adapter.schemaManager, {
+            reconcileChecks: {
+              value(table: string, checks: unknown) {
+                // Report success and enforce nothing.
+                const declared = Array.isArray(checks) ? checks : [];
+                return { created: [], dropped: [], kept: [], checks: declared };
               },
               enumerable: true
             }

@@ -54,6 +54,10 @@ interface IndexRow {
   where?: Record<string, unknown>;
 }
 
+/** A response body: read field by field, and every field is asserted on, never trusted. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Body = Record<string, any>;
+
 function engineSuite(engine: 'sqlite' | 'postgres', storageUrl: () => string | null) {
   let dataDir: string;
   let service: BackendService;
@@ -64,9 +68,9 @@ function engineSuite(engine: 'sqlite' | 'postgres', storageUrl: () => string | n
     service = new BackendService({ dataDir, port: 0, backendId: `hlt016w_${engine}`, backendName: 'HLT-016' });
     base = (await service.start()).listen.url;
   };
-  const admin = (body: unknown) => post<Record<string, any>>(base, '/admin/schema', body, adminHeaders(dataDir));
+  const admin = (body: unknown) => post<Body>(base, '/admin/schema', body, adminHeaders(dataDir));
   const create = (collection: string, row: unknown, headers: Record<string, string> = {}) =>
-    post<Record<string, any>>(base, `/classes/${collection}`, row, { ...adminHeaders(dataDir), ...headers });
+    post<Body>(base, `/classes/${collection}`, row, { ...adminHeaders(dataDir), ...headers });
   const count = async (collection: string) =>
     (await get<{ count: number }>(base, `/classes/${collection}?count=1&limit=0`, adminHeaders(dataDir))).json.count;
   const indexes = async (collection: string) =>

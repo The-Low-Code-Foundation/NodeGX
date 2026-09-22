@@ -1048,7 +1048,12 @@ class LocalSQLAdapter {
       // FED-002 adds the second of these: a write refused by a unique index is
       // the caller colliding with a row that is already there — a 409 upstream,
       // and no more a server fault than a taken objectId is.
-      if (!QueryBuilder.clientObjectIdProblem(e.message) && !QueryBuilder.uniqueConstraintProblem(e.message)) {
+      // HLT-016: a row a declared check refuses is the third (a 400 upstream).
+      if (
+        !QueryBuilder.clientObjectIdProblem(e.message) &&
+        !QueryBuilder.uniqueConstraintProblem(e.message) &&
+        !QueryBuilder.checkConstraintProblem(e.message)
+      ) {
         console.error('LocalSQLAdapter.create error:', e);
       }
       options.error(e.message);
@@ -1129,7 +1134,9 @@ class LocalSQLAdapter {
         options.error(QueryBuilder.preconditionFieldMessage(options.collection, missing));
         return;
       }
-      if (!QueryBuilder.uniqueConstraintProblem(e.message)) console.error('LocalSQLAdapter.save error:', e);
+      if (!QueryBuilder.uniqueConstraintProblem(e.message) && !QueryBuilder.checkConstraintProblem(e.message)) {
+        console.error('LocalSQLAdapter.save error:', e);
+      }
       options.error(e.message);
     }
   }

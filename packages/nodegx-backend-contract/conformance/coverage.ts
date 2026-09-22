@@ -195,6 +195,8 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     ]
   },
   indexStatus: { kind: 'cases', cases: ['schema/declared-index-is-built'] },
+  reconcileChecks: { kind: 'cases', cases: ['schema/a-check-refuses-a-row-that-breaks-it'] },
+  checkStatus: { kind: 'cases', cases: ['schema/a-check-refuses-a-row-that-breaks-it'] },
   getRelatedIds: { kind: 'cases', cases: ['relations/add-then-read-back'] },
   getRelationOwners: { kind: 'cases', cases: ['relations/inverse-lookup-finds-the-owners'] },
 

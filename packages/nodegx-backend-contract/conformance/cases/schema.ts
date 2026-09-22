@@ -23,6 +23,10 @@ function hasIndexSupport(ctx: ConformanceContext): boolean {
   return typeof ctx.schema.reconcileIndexes === 'function' && typeof ctx.schema.indexStatus === 'function';
 }
 
+function hasCheckSupport(ctx: ConformanceContext): boolean {
+  return typeof ctx.schema.reconcileChecks === 'function' && typeof ctx.schema.checkStatus === 'function';
+}
+
 export const schemaCases: readonly ConformanceCase[] = Object.freeze([
   {
     id: 'schema/create-table-then-list-it',
@@ -209,6 +213,47 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
       ok(found !== undefined, 'the partial index is absent from indexStatus');
       ok(found.built && found.declared, 'the partial index is not reported as built and declared');
       deepEq(found.where, { pinned: true }, 'indexStatus lost the predicate');
+    }
+  },
+
+  {
+    id: 'schema/a-check-refuses-a-row-that-breaks-it',
+    area: 'schema',
+    pins: 'HLT-016: a declared check is enforced by the database on create AND update, and admits the rows that satisfy it',
+    async run(ctx) {
+      // The DBT product's `assignments_one_scope`: an assignment belongs to a
+      // learner or to a cohort, never both and never neither. Before this a
+      // rule like that lived as a branch in whichever function wrote the table,
+      // which is a filter, not a constraint.
+      if (!hasCheckSupport(ctx)) {
+        throw new Error('reconcileChecks/checkStatus are absent — declare this case unsupported (§3.4)');
+      }
+      const c = ctx.collection('Sch');
+      ctx.createTable(c, [
+        { name: 'learner', type: 'String' },
+        { name: 'cohort', type: 'String' },
+        { name: 'score', type: 'Number' }
+      ]);
+      ctx.schema.reconcileChecks!(c, [{ exactlyOne: ['learner', 'cohort'] }, { field: 'score', min: 1, max: 10 }]);
+
+      const ok1 = await ctx.create(c, { learner: 'L', score: 5 });
+      await ctx.create(c, { cohort: 'C' });
+      eq(await ctx.count(c), 2, 'a row that satisfies every check was refused');
+
+      await ctx.refused(() => ctx.create(c, { learner: 'L', cohort: 'C' }));
+      await ctx.refused(() => ctx.create(c, { score: 5 }));
+      await ctx.refused(() => ctx.create(c, { learner: 'L', score: 11 }));
+      eq(await ctx.count(c), 2, 'a row that breaks a check landed');
+
+      await ctx.refused(() => ctx.save(c, ok1.objectId as string, { cohort: 'C' }));
+      const after = await ctx.fetch(c, ok1.objectId as string);
+      eq(after.cohort ?? null, null, 'an update that breaks a check was applied');
+
+      const status = ctx.schema.checkStatus!(c);
+      ok(
+        status.length === 2 && status.every((s) => s.built && s.declared),
+        'checkStatus does not report both checks as built'
+      );
     }
   },
 
