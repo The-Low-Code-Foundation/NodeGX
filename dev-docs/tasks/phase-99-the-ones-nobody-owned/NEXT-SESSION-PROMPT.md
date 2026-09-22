@@ -1,44 +1,80 @@
 # P99 — next session
 
-**Status: 📋 building. HLT-001–006 ✅, HLT-008 ✅, HLT-010 ✅ (**CI job green on Linux, s16**),
-HLT-011–015 ✅, HLT-017 ✅, HLT-018 ✅, HLT-007 ✅ ((b) s15; (a) s16, *Text styles* removed by
-Richard's ruling), HLT-016 (a) ✅ (s16).**
-Open: **HLT-016's index half (ruled in, next), HLT-019 (a ruling on the worked example), HLT-009
-(another stream's template).** See "Start here".
+**Status: 📋 building. HLT-001–006 ✅, HLT-008 ✅, HLT-010 ✅ (CI job green on Linux, s16),
+HLT-011–015 ✅, HLT-017 ✅, HLT-018 ✅, HLT-007 ✅, HLT-016 (a) ✅ (s16) and its index half ✅
+(**s17: `where` and `checks`, both engines**).**
+Open: **HLT-019 (a ruling on the worked example), HLT-009 (another stream's template), HLT-016 (b)
+(waits on the invite-claim question) and AC6 (the DBT stream's).** Nothing in P99 is buildable
+without a ruling or another stream. See "Start here".
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits, and read
 it **before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
-carries **the DBT stream's uncommitted HLT-019 row and status-line edit**. Commit README changes
-through a temporary index built from `HEAD`'s copy, as s16 did, never by `git add` of the file.
+still carries **the DBT stream's uncommitted HLT-019 row and status-line edit**. s17 committed its
+README row twice through a temporary index built from `HEAD`'s copy; never `git add` the file.
 
 ## Start here
 
-1. **Build HLT-016's index half: `unique.where` (a partial unique index) and `check`.** Richard
-   ruled it in with (a) on 2026-09-22 (the option he chose said *"Also adds partial-unique and check
-   rules to indexes"*). §4 says it gets **its own ACs, written first**. Write them into the task file
-   before any code. The traps are already measured, in
-   [the verdict's "Not built"](./verdicts/HLT-016/2026-09-22/VERDICT.md):
-   - PG `parseIndexDef` cannot parse `… WHERE …`, so a partial index vanishes from the model on restart;
-   - index names derive from fields only, so a partial and a full index on the same fields collide;
-   - `sameIndexSignature` and `schema-migrate.normalizeForDiff` would drop `where`;
-   - SQLite's `duplicateValues` pre-check needs the same WHERE;
-   - SQLite cannot add a CHECK without a table rebuild, and neither engine's CHECK error is decoded.
-
-   The conformance and mutant pattern from (a) carries straight over.
-2. **HLT-019 needs Richard's ruling on
-   [the worked example](./HLT-019-WORKED-EXAMPLE.md).** He would not rule on either §3 shape and asked
-   for an example first. It recommends **no port**: always mark the end of `Instructions` with
-   `cache_control` (5-minute TTL), never the API's top-level automatic caching (a pure surcharge
-   when the prompt ends in per-request text), and add `cacheWriteTokens` to Usage. The one cost:
-   ~+24% on the instruction tokens of a function called less often than every 5 minutes. **Ask him
-   whether that is acceptable, or whether he wants a `Cache Instructions` switch defaulting to ON.**
-   The HLT-019 task file is the DBT stream's. The worked example is P99's.
-3. **HLT-009** is in `templates/digital-bricks-training`, which another stream owns. It has got
-   **worse**: 8 inert `width`/`sizeMode` parameters on 2026-09-22, up from 6 (a fourth node,
-   `Dossier segment`, copied the pattern). Message that stream before touching a file.
+1. **HLT-019 needs Richard's ruling on [the worked example](./HLT-019-WORKED-EXAMPLE.md).** Unchanged
+   since s16, and not asked in s17 (the session built instead). It recommends **no port**: always
+   mark the end of `Instructions` with `cache_control` (5-minute TTL), never the API's top-level
+   automatic caching, and add `cacheWriteTokens` to Usage. The one cost: ~+24% on the instruction
+   tokens of a function called less often than every 5 minutes. **Ask whether that is acceptable,
+   or whether he wants a `Cache Instructions` switch defaulting to ON.** Re-read the example before
+   asking (a page handed over for a ruling decays). The task file is the DBT stream's.
+2. **Tell the DBT stream the index half exists.** Its sprint-49 task (`digital-bricks-training/
+   dev-docs/sprints/sprint-49-the-backend-reads/TASK-L169-the-collections-and-the-seed.md` §4) says
+   *"NodeGX has no partial unique index"* and lists its CHECKs as *"not enforced"*. Both are now
+   declarable: `"where"` on an index, `"checks"` on the collection (shapes in
+   [SCALING.md §2](../../../docs/runtime/SCALING.md)). One short message, not an edit to their repo.
+   The compound resource rule (label/url/storage key) fits none of the three check shapes.
+3. **HLT-009** is in `templates/digital-bricks-training`, which another stream owns: 8 inert
+   `width`/`sizeMode` parameters on 2026-09-22. Message that stream before touching a file.
+4. If none of those moves, P99 has no buildable row. Say so rather than inventing one; the found-
+   beside items below are unowned and each needs a home before anyone builds it.
 
 **Still waiting on Richard from earlier sessions:** HLT-012 AC5 (four frames in `shots/hlt012-*`),
 P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one identity (HLT-011 AC4).
+
+## ✅ What s17 leaves you — HLT-016's index half, both halves, both engines
+
+**Every reading below was taken 2026-09-22.** Commits: `43d5d980e` (`where`), `d26228055`
+(`checks`), and the docs commit carrying this file.
+
+- **ACs first.** W1–W8 and C1–C6 were written into the task file (§4b) before any code, from the
+  DBT product's real constraints (`digital-bricks-training/drizzle/*.sql`): its partial predicates
+  are a boolean, a list, not-null and null; its CHECKs are exactly-one, all-or-none and a range. So
+  both are **a structured vocabulary, never SQL text**.
+- **`where`** ([verdict](./verdicts/HLT-016/2026-09-22-where/VERDICT.md)): the predicate hashes
+  into the index name, so partial and full on the same fields are two indexes. PostgreSQL's
+  `parseIndexDef` reads `… WHERE …` back (it made a partial index vanish on restart). Driven over
+  HTTP with a restart on both engines; PG conformance 61/61; mutant `drop-where-on-index` caught by
+  name.
+- **`checks`** ([verdict](./verdicts/HLT-016/2026-09-22-checks/VERDICT.md)): SQLite enforces them
+  with BEFORE INSERT/UPDATE triggers (no table rebuild), PostgreSQL with CHECK constraints; both
+  raise `CHECK constraint failed: <T>.<chk>`, answered 400 / code 142 with the rule in words. HEAD
+  control on both engines: the `checks` key was **silently dropped** and every rule-breaking row
+  written. PG conformance 62/62; mutant `skip-checks` caught by name.
+- 🔴 **Found and fixed, pre-existing since phase 96:** on PostgreSQL a refused index push answered
+  **200**. The schema queue reports failures "on the next data-plane call", and after a push that
+  call is the request's own **audit write, which never throws**. `byob-admin.awaitSchemaQueue` now
+  waits for the queue. See [[a-deferred-error-surfaces-on-whoever-calls-next]].
+- 🔴 **Found and fixed:** upsert would have trusted a partial unique index as cover (now 400), and
+  `classPut` answered **404 "Object not found"** for any refusal it did not decode (a broken rule on
+  an edit is now 400).
+- ⚠️ **Found, NOT fixed, unowned:** (1) SQLite `SchemaManager.createTable` caches the caller's own
+  schema object and later writes `indexes`/`checks` onto it. (2) `changeColumnType`'s
+  add-copy-drop-rename assumes no index or trigger reads the column; `DROP COLUMN` now refuses (loud,
+  rolled back). (3) `schema-migrate.applyIndexes` skips an empty list, so a removed last index never
+  promotes. (4) `QueryBuilder.dialect.test.js` uses a fixed table in the shared `nodegx_brg005`, so
+  two runs at once collide. (5) A renamed column is not renamed inside an index or check declaration.
+- **Gates (2026-09-22, tree = `d26228055`):** `typecheck:runtime`/`contract`/`backend-tests` and
+  `tsc -p nodegx-backend --noEmit` exit 0. Backend jest **168/170 suites** with PostgreSQL (2,033
+  passed): the 2 reds are `tpl008-theme-drive` / `tpl008-todo-drive`, *"no theme switch is drawn"*,
+  red at HEAD since s12. `noodl-runtime` `test/adapters` **313/313** run alone (a concurrent run
+  collided on the shared PG table, see (4)). PG conformance 62/62. eslint: the only errors added
+  were removed; the `.js` specs carry the same config-level `no-undef` as their FED-002 sibling.
+  `test:ci` and the full `noodl-runtime` jest were **not run** this session (nothing outside the
+  adapters and the backend changed).
 
 ## 🔴 What s16 leaves you — four rulings, three builds, CI measuring for the first time
 
