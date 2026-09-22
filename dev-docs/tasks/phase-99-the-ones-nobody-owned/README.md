@@ -1,7 +1,7 @@
 # Phase 99 — The ones nobody owned
 
 **Scoped:** 2026-09-20, from Richard driving the editor by hand for 42 minutes and from the log that
-drive left behind, read against `cline-dev` HEAD `55dd19523`. **Status: 📋 building — HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅, HLT-005 ✅, HLT-006 ✅ (AC5 ruled WORTHY), HLT-011 ✅, HLT-012 ✅ (AC5 awaits Richard), HLT-013 ✅, HLT-008 ✅ (P93 AC7 awaits Richard), HLT-014 ✅ (validator warning left), HLT-015 ✅ (s12; AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; CI job not yet seen on Linux), HLT-017 ✅ (s14 — drag and drop; AC9 is phase 78's), HLT-018 ✅ (s15 — AC5 is the DBT stream's), HLT-007 (b) ✅ (s15 — (a) awaits Richard), two to go (HLT-007 (a), 009), plus HLT-015 and HLT-016 (opened 2026-09-21 from the Digital Bricks Training stream).
+drive left behind, read against `cline-dev` HEAD `55dd19523`. **Status: 📋 building — HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅, HLT-005 ✅, HLT-006 ✅ (AC5 ruled WORTHY), HLT-011 ✅, HLT-012 ✅ (AC5 awaits Richard), HLT-013 ✅, HLT-008 ✅ (P93 AC7 awaits Richard), HLT-014 ✅ (validator warning left), HLT-015 ✅ (s12; AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; CI job not yet seen on Linux), HLT-017 ✅ (s14 — drag and drop; AC9 is phase 78's), HLT-018 ✅ (s15 — AC5 is the DBT stream's), HLT-007 ✅ ((b) s15; (a) s16, *Text styles* removed by ruling), HLT-016 (a) ✅ (s16; its ruled-in index half is next), HLT-010's CI job green on Linux (s16), one to go of the original ten (HLT-009), plus HLT-015 and HLT-016 (opened 2026-09-21 from the Digital Bricks Training stream).
 Prefix: `HLT`.**
 
 > "Let's write a phase with bug fixing tasks to unfuck this fucker."

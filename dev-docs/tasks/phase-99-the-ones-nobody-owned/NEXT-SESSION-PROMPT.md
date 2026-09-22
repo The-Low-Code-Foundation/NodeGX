@@ -1,39 +1,82 @@
 # P99 — next session
 
-**Status: 📋 building. HLT-001 ✅, HLT-002 ✅, HLT-003 ✅, HLT-004 ✅ (s5), HLT-005 ✅ (s6),
-HLT-006 ✅ (s4, AC5 ruled WORTHY by Richard 2026-09-21), HLT-011 ✅ (s7), HLT-012 ✅ (s8), HLT-013 ✅ (s9),
-HLT-008 ✅ (s10, **committed s15** `e3ef58a82`; P93 AC7 awaits Richard), HLT-014 ✅ (s11 — §3.1's validator warning left),
-HLT-015 ✅ (s12 — AC7 is the DBT stream's), HLT-010 ✅ (s13 — the gate; never run on Linux, see below),
-HLT-017 ✅ (s14 — AC9 is phase 78's), HLT-018 ✅ (s15 `7ea3bd372` — AC5 is the DBT stream's),
-HLT-007 (b) ✅ (s15 `725a82eb4` — (a) awaits Richard).**
-Open: **HLT-007 (a), 009, 016, 019.** Every one of them waits on someone else. See "Start here".
+**Status: 📋 building. HLT-001–006 ✅, HLT-008 ✅, HLT-010 ✅ (**CI job green on Linux, s16**),
+HLT-011–015 ✅, HLT-017 ✅, HLT-018 ✅, HLT-007 ✅ ((b) s15; (a) s16, *Text styles* removed by
+Richard's ruling), HLT-016 (a) ✅ (s16).**
+Open: **HLT-016's index half (ruled in, next), HLT-019 (a ruling on the worked example), HLT-009
+(another stream's template).** See "Start here".
 
-Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
-**before claiming a row**. Peers have been building this phase in parallel.
+Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits, and read
+it **before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
+carries **the DBT stream's uncommitted HLT-019 row and status-line edit**. Commit README changes
+through a temporary index built from `HEAD`'s copy, as s16 did, never by `git add` of the file.
 
 ## Start here
 
-🔴 **Nothing on this board can be built without a ruling or another stream's go-ahead.** Do not
-invent work to fill the session. The next session's first job is to get these answered:
+1. **Build HLT-016's index half: `unique.where` (a partial unique index) and `check`.** Richard
+   ruled it in with (a) on 2026-09-22 (the option he chose said *"Also adds partial-unique and check
+   rules to indexes"*). §4 says it gets **its own ACs, written first**. Write them into the task file
+   before any code. The traps are already measured, in
+   [the verdict's "Not built"](./verdicts/HLT-016/2026-09-22/VERDICT.md):
+   - PG `parseIndexDef` cannot parse `… WHERE …`, so a partial index vanishes from the model on restart;
+   - index names derive from fields only, so a partial and a full index on the same fields collide;
+   - `sameIndexSignature` and `schema-migrate.normalizeForDiff` would drop `where`;
+   - SQLite's `duplicateValues` pre-check needs the same WHERE;
+   - SQLite cannot add a CHECK without a table rebuild, and neither engine's CHECK error is decoded.
 
-**For Richard (plain words, in this order):**
-1. **HLT-007 (a):** the *Text styles* section of the Styles panel is empty in every real project,
-   because it reads the old style layer. Should it **show the project's typography tokens**, or
-   **say plainly the project has none**? Showing them files typography in two places in a panel
-   P94 closed on his look. The task file's top section has the detail.
-2. **HLT-016** (a cloud function cannot write safely twice) and **HLT-019** (Model Request cannot
-   cache its prompt): each has a *recommended shape, to be ruled* in its file.
-3. **Push `cline-dev`?** It is **361 commits ahead of `origin`**, so HLT-010's `renderer-errors` CI
-   job, and everything since, has never run on a Linux runner.
-4. Still waiting from earlier sessions: **HLT-012 AC5** (four frames in `shots/hlt012-*`), **P93
-   TVW-008 AC7** (`shots/hlt008-fixed-ac7-*`), and the **two projects sharing one identity**
-   (HLT-011 AC4).
+   The conformance and mutant pattern from (a) carries straight over.
+2. **HLT-019 needs Richard's ruling on
+   [the worked example](./HLT-019-WORKED-EXAMPLE.md).** He would not rule on either §3 shape and asked
+   for an example first. It recommends **no port**: always mark the end of `Instructions` with
+   `cache_control` (5-minute TTL), never the API's top-level automatic caching (a pure surcharge
+   when the prompt ends in per-request text), and add `cacheWriteTokens` to Usage. The one cost:
+   ~+24% on the instruction tokens of a function called less often than every 5 minutes. **Ask him
+   whether that is acceptable, or whether he wants a `Cache Instructions` switch defaulting to ON.**
+   The HLT-019 task file is the DBT stream's. The worked example is P99's.
+3. **HLT-009** is in `templates/digital-bricks-training`, which another stream owns. It has got
+   **worse**: 8 inert `width`/`sizeMode` parameters on 2026-09-22, up from 6 (a fourth node,
+   `Dossier segment`, copied the pattern). Message that stream before touching a file.
 
-**For another stream:**
-- **HLT-009** is in a template another stream owns. Ask before touching a file.
-- **HLT-018 AC5 and HLT-019's files are the DBT stream's** (`digital-bricks-training-57`), and both
-  were told on 2026-09-22. Its HLT-019 row and the README status-line mention are **its
-  uncommitted edits** in the tree, so leave them.
+**Still waiting on Richard from earlier sessions:** HLT-012 AC5 (four frames in `shots/hlt012-*`),
+P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one identity (HLT-011 AC4).
+
+## 🔴 What s16 leaves you — four rulings, three builds, CI measuring for the first time
+
+**Every reading below was taken 2026-09-22.** Commits: `dd0d69f7e`, `74463bfd4`, `1339a3b23`
+(HLT-010), `aa0cd5b13` (HLT-007 a), `e5a926d6e` (HLT-016 a). `cline-dev` was pushed (Richard's ruling).
+
+- ✅ **Pushed, and HLT-010's CI job measured on Linux for the first time.** The first runs were
+  `COULD NOT MEASURE` (exit 2), which is the gate refusing to pass a quiet log, as built. Three fixes
+  got it there:
+  1. The death reason quoted `ErrorBoundary.module.scss`, because it took the first lines saying
+     "Error" and webpack names every module. `deathReason` now quotes the death line and the lines
+     before it, and the job uploads `dev.log` on failure.
+  2. The runner's setuid `chrome-sandbox` aborted Electron (SIGTRAP). `ELECTRON_DISABLE_SANDBOX=1`
+     is set on the CI step only, as `run-electron-tests.js:132` does.
+  3. **A real product defect:** `jsonstorage.get` answers a MISSING file with the string `'{}'`, and a
+     never-signed-in profile sent `Authorization: Bearer {}` to GitHub on every Linux launch.
+     `storedTokenOrNull` fixed it. ⚠️ The other two callers of `jsonstorage.get` (`windowBounds`,
+     `firstRunLegal`) get the same `'{}'` and were **not audited**. The macOS half (a decrypt error
+     logged) is **unmeasured**.
+
+  Run `35712182691`: **PASSED**, every reach arm and sentinel ok. ⚠️ Five other CI jobs (Lint,
+  Typecheck, Library check, Node catalog freshness, Lesson bundles) were already red on the
+  2026-09-15 run and still are. Nobody owns them.
+- ✅ **HLT-007 (a): *Text styles* removed.** 🔴 **I put the question to Richard three times, because §2's
+  premise was false and I relayed it twice.** The section is NOT empty. The importer loads
+  `textStyles` from `nodegx.styles.json` into the layer it reads: 17 of 19 v2 projects carry them,
+  including his own. His ruling, with the true numbers: *"Remove it anyway … You could argue that we
+  could convert the existing text styles into Looks … as a compromise."* Conversion is **not built and
+  not scoped**. `test:ci` 8/3,036, exactly the floor by name.
+  See [[a-project-scan-must-read-both-project-formats]].
+- ✅ **HLT-016 (a): only-if-unchanged.** See [the verdict](./verdicts/HLT-016/2026-09-22/VERDICT.md).
+  ⚠️ §2 missed that a zero-row UPDATE **without an ACL** answers 200. That is the whole
+  cloud-function path, and it is still open for saves without a precondition (unowned).
+- 🔴 **Fixture trap, cost one confused re-run:** the Record node's `Fetched` fires on BIND, before
+  any read (P77 D25). Sequence a write after a read on **`Done`**.
+- **Tools:** `verdicts/HLT-016/2026-09-22/hlt016.drive.test.ts` drives one route on BOTH engines, with
+  a throwaway Postgres DB and an in-process statement log. `hlt016.functions.drive.test.ts` deploys
+  graphs as cloud functions and calls them over HTTP. Copy these for the index half.
 
 ## 🔴 What s15 leaves you — three piles committed, one defect deeper than its file
 
