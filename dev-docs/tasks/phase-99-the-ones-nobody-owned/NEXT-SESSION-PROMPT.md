@@ -1,39 +1,66 @@
 # P99 — next session
 
-**Status: 📋 building. HLT-001–006 ✅, HLT-008 ✅, HLT-010 ✅ (CI job green on Linux, s16),
-HLT-011–015 ✅, HLT-017 ✅, HLT-018 ✅, HLT-007 ✅, HLT-016 (a) ✅ (s16) and its index half ✅
-(**s17: `where` and `checks`, both engines**).**
-Open: **HLT-019 (a ruling on the worked example), HLT-009 (another stream's template), HLT-016 (b)
-(waits on the invite-claim question) and AC6 (the DBT stream's).** Nothing in P99 is buildable
-without a ruling or another stream. See "Start here".
+**Status: 📋 building. HLT-001–008 ✅, HLT-010–015 ✅, HLT-017 ✅, HLT-018 ✅, HLT-016 (a) ✅ and its
+index half ✅ (s17), and **HLT-019 ✅ built in s18, except AC2 (the live-key proof).****
+Open: **HLT-019 AC2 (needs a real key), HLT-009 (another stream's template), HLT-016 (b) (waits on
+the invite-claim question) and HLT-016 AC6 (the DBT stream's).** Nothing else in P99 is buildable
+right now. See "Start here".
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits, and read
 it **before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
-still carries **the DBT stream's uncommitted HLT-019 row and status-line edit**. s17 committed its
-README row twice through a temporary index built from `HEAD`'s copy; never `git add` the file.
+still carries **the DBT stream's uncommitted status-line edit** (line 4). s17 and s18 committed
+their rows through a temporary index built from `HEAD`'s copy. Never `git add` the file. The
+**HLT-019 task file is the DBT stream's and still untracked**, and it still describes the
+`Cache Instructions` boolean that the ruling replaced. Don't edit it. The verdict supersedes it.
 
 ## Start here
 
-1. **HLT-019 needs Richard's ruling on [the worked example](./HLT-019-WORKED-EXAMPLE.md).** Unchanged
-   since s16, and not asked in s17 (the session built instead). It recommends **no port**: always
-   mark the end of `Instructions` with `cache_control` (5-minute TTL), never the API's top-level
-   automatic caching, and add `cacheWriteTokens` to Usage. The one cost: ~+24% on the instruction
-   tokens of a function called less often than every 5 minutes. **Ask whether that is acceptable,
-   or whether he wants a `Cache Instructions` switch defaulting to ON.** Re-read the example before
-   asking (a page handed over for a ruling decays). The task file is the DBT stream's.
-2. **Tell the DBT stream the index half exists.** Its sprint-49 task (`digital-bricks-training/
-   dev-docs/sprints/sprint-49-the-backend-reads/TASK-L169-the-collections-and-the-seed.md` §4) says
-   *"NodeGX has no partial unique index"* and lists its CHECKs as *"not enforced"*. Both are now
-   declarable: `"where"` on an index, `"checks"` on the collection (shapes in
-   [SCALING.md §2](../../../docs/runtime/SCALING.md)). One short message, not an edit to their repo.
-   The compound resource rule (label/url/storage key) fits none of the three check shapes.
+1. **HLT-019 AC2 needs a real key.** There is no `ANTHROPIC_API_KEY` and no `ant` on this machine
+   (checked 2026-09-22). Ask Richard for one, or ask him to run it. It needs a deployed function
+   with Instructions over 512 tokens, called twice within 5 minutes: the first `usage` shows
+   `cacheWriteTokens > 0`, the second shows `cacheReadTokens > 0`. It costs well under a cent. Copy
+   the recording-provider drive in `nodegx-backend/tests/fed-003-model-request.test.ts` and point
+   `baseUrl` at the real API.
+2. **Watch for a reply from `digital-bricks-training-57`.** s18 told it that HLT-019 is built (with
+   the two-field shape) and that `where`/`checks` exist (the handoff's old step 2). Nothing further
+   is owed unless it answers.
 3. **HLT-009** is in `templates/digital-bricks-training`, which another stream owns: 8 inert
    `width`/`sizeMode` parameters on 2026-09-22. Message that stream before touching a file.
-4. If none of those moves, P99 has no buildable row. Say so rather than inventing one; the found-
-   beside items below are unowned and each needs a home before anyone builds it.
+4. If none of those moves, P99 has no buildable row. Say so rather than inventing one.
 
 **Still waiting on Richard from earlier sessions:** HLT-012 AC5 (four frames in `shots/hlt012-*`),
 P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one identity (HLT-011 AC4).
+**New, for him to rule if he wants:** the run's cost sentence (`modelCost.line`, ruled 2026-09-19)
+does not mention cache writes. The numbers are on the summary object; the sentence was left alone.
+
+## ✅ What s18 leaves you: HLT-019, on a ruling that was neither option
+
+**Every reading below was taken 2026-09-22.** Code commit `32de49f3d`, plus the docs commit
+carrying this file. [Verdict](./verdicts/HLT-019/2026-09-22/VERDICT.md).
+
+- **The ruling.** Asked in plain words (always cache vs a switch on vs a switch off, with the
+  worked example's dollar figures), Richard answered with a third shape: *"one field where you add
+  non cached stuff, and one field where you add cached stuff."* Built as asked: `Instructions` is
+  one block marked `cache_control` (5-minute TTL). The new **`Per-Call Instructions`**
+  (`callInstructions`) follows it unmarked. Only per-call text → plain string; neither → no
+  `system`. There is no top-level automatic caching. Usage and `modelCalls` gain `cacheWriteTokens`.
+- **Before asking**, s18 re-checked every API fact in the worked example against the current
+  caching reference, and every sum. All of them held. `buildBody` still sent a plain string.
+- **Gates:** FED-003 backend drive **20/20** (3 new drives). The mutant (marker dropped) was
+  caught by name ×2. Viewer-cloud FED-003 8/8, feed-drive green. `typecheck:runtime`/`cloud`/
+  `backend-tests` and `tsc -p nodegx-backend --noEmit` all exit 0. `catalog:check`,
+  `catalog:merge:check` and `docs:nodes:check` are clean. **`test:main` 8,548/8,548, exit 0.**
+  `test:ci` was not run: no editor source changed, only a unit snapshot.
+- ⚠️ **`noodl-mcp` `npx jest`: 6 suites / 7 tests red, NOT this change's.** Control: the same 7 fail
+  with HEAD~1's catalogs swapped in (`cp` backup, restored). They are `nodeIdAllocation`, `cn004`,
+  `cmp004Parts`, `def038SettledTemplates` (rocket-school, which has a peer's uncommitted template
+  edits in the tree), `cmp001InterfaceDoctrine` (corpus rate 39, pinned 33) and
+  `d54ThemePresetIdentity`. Unowned by P99. Attribute them before anyone builds on `noodl-mcp`.
+- 🔴 **A new port owes FOUR updates, not three:** `catalog:generate`, `catalog:merge`,
+  `docs:nodes`, **and the editor's `tests-unit/chr-007/widgetDispatch.snapshot.json`**. s16 missed
+  the fourth, and CHR-007 was **red on HEAD** (`SetDbModelProperties.onlyIfUnchanged`). s18 added
+  that row and its own row by hand (23/23). Don't regenerate the snapshot with
+  `CHR007_WRITE_SNAPSHOT=1` unless you have read the diff it makes.
 
 ## ✅ What s17 leaves you — HLT-016's index half, both halves, both engines
 
