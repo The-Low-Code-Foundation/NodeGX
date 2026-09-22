@@ -43,6 +43,7 @@ if (!app || typeof app.on !== 'function') {
 const AutoUpdater = require('./src/autoupdater');
 const FloatingWindow = require('./src/floating-window');
 const startServer = require('./src/web-server');
+const { storedTokenOrNull } = require('./src/github-stored-token');
 const { setupBackendIPC, backendManager } = require('./src/local-backend');
 const { setupExecutionHistoryIPC } = require('./src/execution-history');
 const DesignToolImportServer = require('./src/design-tool-import-server');
@@ -1395,12 +1396,15 @@ function launchApp() {
     ipcMain.handle('github-load-token', async (event) => {
       try {
         // Use Promise wrapper for callback-based jsonstorage.get
-        const stored = await new Promise((resolve) => {
-          jsonstorage.get('github.token', (data) => {
-            resolve(data);
-          });
-        });
+        const stored = storedTokenOrNull(
+          await new Promise((resolve) => {
+            jsonstorage.get('github.token', (data) => {
+              resolve(data);
+            });
+          })
+        );
 
+        // A missing file reads as the string '{}', not nothing — see github-stored-token.js.
         if (!stored) return null;
 
         if (safeStorage.isEncryptionAvailable()) {
