@@ -17,15 +17,23 @@ their rows through a temporary index built from `HEAD`'s copy. Never `git add` t
 
 1. **HLT-019 AC2 needs a real key.** There is no `ANTHROPIC_API_KEY` and no `ant` on this machine
    (checked 2026-09-22). Ask Richard for one, or ask him to run it. It needs a deployed function
-   with Instructions over 512 tokens, called twice within 5 minutes: the first `usage` shows
+   with Instructions over 512 tokens (s19 re-checked: still no key in the env; Richard hasn't
+   supplied one), called twice within 5 minutes: the first `usage` shows
    `cacheWriteTokens > 0`, the second shows `cacheReadTokens > 0`. It costs well under a cent. Copy
    the recording-provider drive in `nodegx-backend/tests/fed-003-model-request.test.ts` and point
    `baseUrl` at the real API.
 2. **Watch for a reply from `digital-bricks-training-57`.** s18 told it that HLT-019 is built (with
    the two-field shape) and that `where`/`checks` exist (the handoff's old step 2). Nothing further
    is owed unless it answers.
-3. **HLT-009** is in `templates/digital-bricks-training`, which another stream owns: 8 inert
-   `width`/`sizeMode` parameters on 2026-09-22. Message that stream before touching a file.
+3. **HLT-009 — asked, awaiting the owner's answer (s19, 2026-09-22).** `npm run validate:project --
+   templates/digital-bricks-training` at `fafb23793`: **8 `unknown-parameter` warnings**,
+   `width`+`sizeMode` on four `dbt-lesson` kit nodes: `DossierSegment` `ds_seg` (**new since the
+   task file's 2026-09-20 count of 6**, so the stream keeps adding the pattern), `TimelineRow`
+   `tr_row`, `RatingGauge` `tj_gauge` and `PaceTracker` `cs_pace`. s19 sent `digital-bricks-training-57`
+   one message: fix it yourself, or say "P99 take it" and name the fix (declare the ports on the kit,
+   or drop the params). **Touch neither `templates/digital-bricks-training` nor
+   `library/modules/dbt-lesson` until it answers "P99 take it".** Don't send a second message.
+   Re-run the validator before acting, because the count moves.
 4. If none of those moves, P99 has no buildable row. Say so rather than inventing one.
 
 **Still waiting on Richard from earlier sessions:** HLT-012 AC5 (four frames in `shots/hlt012-*`),
