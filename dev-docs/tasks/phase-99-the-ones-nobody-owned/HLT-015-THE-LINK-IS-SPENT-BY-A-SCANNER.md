@@ -1,6 +1,6 @@
 # HLT-015 — The link is spent by a scanner
 
-✅ **BUILT 2026-09-21 (P99 s12), AC1–6. AC7 is the DBT stream's (its L171).** On a real socket,
+✅ **BUILT 2026-09-21 (P99 s12), AC1–6. ✅ AC7 MET 2026-09-23 by the DBT stream (its L171): the template's sign-in page, Mailpit, two scanner GETs that spend nothing, a browser press that signs in, a second POST refused — [verdict](./verdicts/HLT-015/2026-09-23-ac7/VERDICT.md).** On a real socket,
 3 `curl` GETs and 1 Chrome load of a fresh link: 200 *"Sign in to …"*, no cookie, no redirect,
 token row byte-identical, **0** sessions. HEAD: the 1st GET signed in and Chrome met *"Sign-in link
 expired"*. §2 measured TRUE. The shipped email carried the defect's sentence too, and now does not.

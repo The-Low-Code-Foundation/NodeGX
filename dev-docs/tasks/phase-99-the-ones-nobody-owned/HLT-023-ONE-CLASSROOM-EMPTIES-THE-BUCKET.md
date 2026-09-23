@@ -5,7 +5,7 @@ ruling: *"Core fix."*** Measured twice: first as transient 400s and 429s during 
 (worked around there by raising the scratch backend's limits, which proves nothing about production),
 then deliberately, on a fresh backend with the **default** data budget. Specced, not built.
 
-✅ **BUILT 2026-09-23. AC1–AC5 met on the default `ops.json`; ✅ AC6 met at the function layer by the DBT stream (`5a43edb84`); L171's page drive remains.** Built to
+✅ **BUILT 2026-09-23. AC1–AC5 met on the default `ops.json`; ✅ AC6 met at the function layer by the DBT stream (`5a43edb84`); ✅ L171's page drive MET 2026-09-23: every page drive on the default `ops.json`, no `data` 429 on SQLite or PostgreSQL — [verdict](./verdicts/HLT-023/2026-09-23-page-drive/VERDICT.md).** Built to
 §3 as recommended. A run's loopback requests carry its id (`X-NodeGX-Run`, `AsyncLocalStorage`)
 and are charged to the run, not a client bucket. The caller lookup rides the same id. The guard
 is `rateLimit.functionRunQueries` (default 1000). Two learners × 100 pages: 100/100, the operator
