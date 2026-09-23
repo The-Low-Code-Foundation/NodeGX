@@ -68,12 +68,6 @@ const users = [{ ...STAFF, roles: ['staff'] }];
 const rows = {};
 const add = (collection, row) => (rows[collection] ||= []).push(row);
 
-const splitName = (label) => {
-  if (!label) return { firstName: null, lastName: null };
-  const parts = label.trim().split(/\s+/);
-  return { firstName: parts[0], lastName: parts.slice(1).join(' ') || null };
-};
-
 // The product's corpus, in its own order — the concepts a roster learner's path
 // is made of when the fixture gives only a count (TASK-L169 §3). Real ids, never
 // invented ones (L85: a hand-made fixture is not evidence the ids in it exist).
@@ -106,8 +100,18 @@ for (const p of roster) {
   const learnerId = t.take('learnerId');
   const email = t.take('email');
   const username = email || learnerId; // an account with no address still has a login name
-  const { firstName, lastName } = splitName(p.coachLabel);
-  users.push({ username, email, firstName, lastName, createdAt: t.take('createdAt') });
+  // A learner's account name is NULL, always. Nothing in any fixture states what a
+  // learner calls themselves, and the only name-shaped string near them is the
+  // TRAINER'S private label — which routinely carries the trainer's own assessment
+  // ("Sam — first site, autumn"). Splitting that into first/last stored a note one
+  // person wrote about another as that person's own name (L84, L104, L132), and the
+  // product refuses the same move for an email local part (L106: it would invent a
+  // fact about a person and store it as though they had told us). The label is kept
+  // where it belongs, on LearnerInvite, staff-side. Nothing renders these columns
+  // today — the roster's display name is coachLabel ?? projectName ?? email ??
+  // learnerId and does not select them (L128) — so this is a stored falsehood
+  // removed, not a rendering changed.
+  users.push({ username, email, firstName: null, lastName: null, createdAt: t.take('createdAt') });
   add('LearnerProfile', { learnerId, username, coachEmail: t.take('coachEmail') });
 
   if (p.coachLabel) {
@@ -499,10 +503,30 @@ for (const [conceptId, title] of concepts) add('Concept', { conceptId, title });
 
 // ── The lesson ────────────────────────────────────────────────────────────────
 const [lesson] = staticJson('Data/Fixture lesson');
+// WHOSE lesson this is, derived — never pinned. A cached lesson is keyed on a
+// (learner, concept) pair and the concept has to be on that learner's own path:
+// the delivery route refuses a step the learner does not have. The first pinned
+// id survived a re-author that moved this lesson's subject to another learner's
+// project, leaving the row hanging off a step its owner had never been given —
+// which L170's `lesson` function would answer with nothing for the learner every
+// page is driven as. Same failure the PROGRAMME_LEARNER comment above records.
+// The first derivation tried "the learner whose path carries the concept" and the
+// guard refused it: a roster learner's path is built from the corpus, so this
+// concept sits on three of them. Path membership is a CONDITION on the owner, not
+// a way to find one. The owner is the learner this template's pages are about.
+const lessonLearnerId = PROGRAMME_LEARNER;
+const lessonIsOnTheirPath = (rows.LearningPath ?? [])
+  .filter((path) => path.learnerId === lessonLearnerId)
+  .some((path) => (rows.PathStep ?? []).some(
+    (step) => step.pathId === path.pathId && step.conceptId === lesson.conceptId && step.removedAt === null
+  ));
+if (!lessonIsOnTheirPath) {
+  fail(`lesson: '${lesson.conceptId}' is not a live step on ${lessonLearnerId}'s path, so a lesson cached against it could never be opened (TASK-L169 follow-up)`);
+}
 {
   const lt = tracker('lesson', lesson);
   add('Lesson', {
-    learnerId: 'l-csv',
+    learnerId: lessonLearnerId,
     conceptId: lt.take('conceptId'),
     title: lt.take('title'),
     hook: lt.take('hook'),

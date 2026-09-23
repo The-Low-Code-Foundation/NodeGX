@@ -20,22 +20,22 @@
     {
       "username": "marie.dubois@example.test",
       "email": "marie.dubois@example.test",
-      "firstName": "Marie",
-      "lastName": "Dubois",
+      "firstName": null,
+      "lastName": null,
       "createdAt": "2026-08-11T10:00:00.000Z"
     },
     {
       "username": "sam.okafor@example.test",
       "email": "sam.okafor@example.test",
-      "firstName": "Sam",
-      "lastName": "— first site, autumn",
+      "firstName": null,
+      "lastName": null,
       "createdAt": "2026-07-08T09:00:00.000Z"
     },
     {
       "username": "j.hughes@example.test",
       "email": "j.hughes@example.test",
-      "firstName": "Allotment",
-      "lastName": "waiting list",
+      "firstName": null,
+      "lastName": null,
       "createdAt": "2026-08-20T10:00:00.000Z"
     },
     {
@@ -48,8 +48,8 @@
     {
       "username": "priya@example.test",
       "email": "priya@example.test",
-      "firstName": "Priya",
-      "lastName": "Shah",
+      "firstName": null,
+      "lastName": null,
       "createdAt": "2026-05-02T10:00:00.000Z"
     },
     {
@@ -62,8 +62,8 @@
     {
       "username": "tom.reyes@example.test",
       "email": "tom.reyes@example.test",
-      "firstName": "Tomás",
-      "lastName": "Reyes",
+      "firstName": null,
+      "lastName": null,
       "createdAt": "2026-06-10T10:00:00.000Z"
     },
     {
@@ -774,7 +774,7 @@
     ],
     "Lesson": [
       {
-        "learnerId": "l-csv",
+        "learnerId": "l-sam",
         "conceptId": "scoping-what-to-build",
         "title": "Scoping your landing page before Claude Code writes a line",
         "hook": "The most expensive hour of this project is the one where you ask Claude Code to “build me a website for my business” and it does. You will get a page. It will look plausible. And you will spend the next three weekends discovering that it takes bookings you do not want, has a blog you will never write, and still does not do the one thing you actually needed — get a message from a stranger into your inbox. The fix costs twenty minutes and no code at all.",
