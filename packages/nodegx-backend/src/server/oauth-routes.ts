@@ -131,6 +131,12 @@ export interface OAuthRoutesDeps {
   getLocalUrl: () => string;
   /** Is signup allowed at all on this backend? BAK-003's `signup` rule, evaluated for an anonymous principal. */
   signupAllowedForAnonymous: () => boolean;
+  /**
+   * HLT-024 — the roles a user is in, for the exchange's response. The SAME
+   * resolver `/login` and `/users/me` answer from (`SecurityState.rolesForUser`,
+   * the one the access check calls), never a second query that could disagree.
+   */
+  rolesForUser: (userId: string) => Promise<string[]>;
   limiter: RateLimiter;
   clientAddress: (req: http.IncomingMessage) => string;
   audit: AuditLog;
@@ -504,8 +510,14 @@ export class OAuthRoutes {
   /**
    * `POST /oauth/exchange { code }` — the app trades the one-time code for the
    * session. The response is deliberately the SAME shape `/login` returns (the
-   * `_User` record plus `sessionToken`), so the client stores it through the
-   * one code path it already has.
+   * `_User` record plus `roles` plus `sessionToken`), so the client stores it
+   * through the one code path it already has.
+   *
+   * 🔴 HLT-024: `roles` was missing here until 2026-09-23, so a person signing
+   * in from a magic link or a provider read `roles: undefined` ("we could not
+   * ask") until something re-read `/users/me`. "The same shape" is now tested:
+   * `tests/hlt-024-exchange-roles.test.ts` enumerates every response that hands
+   * out a `sessionToken` and requires each to carry `roles`.
    */
   async exchange(ctx: RequestContext): Promise<void> {
     this.enforce(ctx, 'auth:oauth-exchange', OAuthRoutes.EXCHANGE_POLICY);
@@ -524,6 +536,9 @@ export class OAuthRoutes {
     const wire = await this.deps.facade.wireRecord('_User', user);
     sendJSON(ctx.res, 200, {
       ...wire,
+      // After the spread, as `/login` does: a stored `roles` column must never
+      // outrank the live junction.
+      roles: await this.deps.rolesForUser(handoff.userId),
       sessionToken: handoff.sessionToken,
       /** How the account was resolved — `created`, `linked`, `linked-credentials-revoked`, `signed-in`. */
       authOutcome: handoff.outcome,

@@ -464,6 +464,7 @@ export class HttpServer {
       // creation through OAuth and magic links too, rather than leaving a side
       // door open beside a closed front one.
       signupAllowedForAnonymous: () => ruleAllows(deps.security.config.signup, { kind: 'anonymous' }),
+      rolesForUser: (userId) => deps.security.rolesForUser(userId),
       limiter: this.rateLimiter,
       clientAddress: (req) => clientIp(req, this.ops.config.rateLimit.trustedProxies),
       audit: deps.audit
