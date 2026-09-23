@@ -1,37 +1,54 @@
 # P99 — next session
 
-**Status: 📋 building, and nothing in it is buildable right now.** Done: HLT-001–018 ✅, and
-**HLT-009 ✅ built in s20**, so the original ten are all done. HLT-019 is ✅ except AC2.
-Open: **HLT-019 AC2 (needs a real key), HLT-016 (b) (waits on the invite-claim question) and
-HLT-016 AC6 (the DBT stream's).** See "Start here".
+**Status: 📋 building, and no row is buildable right now. Every row is built, or it waits on a
+ruling or on another stream.** s22 (2026-09-23) built **HLT-021**. s21 (2026-09-22) took HLT-019
+AC2 on the real API, ruled out HLT-016 (b) for now, and specced HLT-020 and HLT-021. The DBT
+stream built HLT-022 and HLT-023 on 2026-09-23. This file skipped s21: its handoff was never
+rewritten. **The README status line is the board. Read it first.**
 
-Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits, and read
-it **before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
-still carries **the DBT stream's uncommitted status-line edit** (line 4). s17–s20 committed their
-rows through a temporary index built from `HEAD`'s copy, and applied the same edit to the tree copy
-so the peer's edit survives. Never `git add` the file. The **HLT-019 task file is the DBT stream's
-and still untracked**, and it still describes the `Cache Instructions` boolean that the ruling
-replaced. Don't edit it. The verdict supersedes it.
+Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
+**before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
+still carries **someone else's uncommitted edit** (§10, the `whats-new` feed marked PUSHED). s22
+committed its rows through a temporary index built from `HEAD`'s copy, and applied the same edit
+to the tree copy so the peer's edit survives. Never `git add` the file. The HLT-019 task file is
+still **untracked** and still the DBT stream's. Don't edit it.
 
 ## Start here
 
-1. **HLT-019 AC2 needs a real key.** s20 re-checked on 2026-09-22: there is still no
-   `ANTHROPIC_API_KEY` in the environment. Ask Richard for one, or ask him to run it. It needs a
-   deployed function with Instructions over 512 tokens, called twice within 5 minutes: the first
-   `usage` shows `cacheWriteTokens > 0` and the second shows `cacheReadTokens > 0`. It costs well
-   under a cent. Copy the recording-provider drive in
-   `nodegx-backend/tests/fed-003-model-request.test.ts` and point `baseUrl` at the real API.
-2. **If a peer replies after you write the handoff, the next session won't see it.** s19's handoff
-   said "awaiting reply", but the reply had already reached s19's conversation. s20 found it by
-   grepping the previous transcript
-   (`~/.claude/projects/-Users-richardosborne-vscode-projects-OpenNoodl/*.jsonl`) for
-   `cross-session-message`. **Do that grep first whenever a handoff says "awaiting a peer".**
-3. Otherwise P99 has no buildable row. Say so rather than inventing one.
+1. **Check that the `renderer-errors` CI job is green on Linux at `NOODLPORT=0`.** s22 moved the gate
+   off a concrete port and onto `0` (AC5). On this Mac it passes at 0, 9123 and unset, but it has
+   **never run on the Linux runner at 0**. If it goes red there, read the log artefact before
+   touching the budget: a death at startup is a different thing from an `UNKNOWN` class.
+2. **HLT-020 needs Richard's ruling on §3 before a line is written.** It recommends a typography
+   token bundle over his "Looks" shape, because 17% of worn (style, project) pairs span more than
+   one `type::port`. Ask in plain words, with the numbers.
+3. Otherwise there's nothing to build. Say so rather than inventing a row.
 
-**Still waiting on Richard from earlier sessions:** HLT-012 AC5 (four frames in `shots/hlt012-*`),
-P93 TVW-008 AC7 (`shots/hlt008-fixed-ac7-*`), and the two projects sharing one identity (HLT-011 AC4).
-**For him to rule if he wants:** the run's cost sentence (`modelCost.line`, ruled 2026-09-19)
-does not mention cache writes. The numbers are on the summary object; the sentence was left alone.
+**Still waiting on Richard:** HLT-012 AC5 (four frames in `shots/hlt012-*`) and P93 TVW-008 AC7
+(`shots/hlt008-fixed-ac7-*`). **Other streams':** HLT-023's L171 page drive (DBT); HLT-015 AC7
+and HLT-018 AC5 (DBT); HLT-017 AC9 (P78).
+
+## ✅ What s22 leaves you: HLT-021, the renderer asks for the port that was bound
+
+**Every reading was taken 2026-09-23 on tree `30c90774f` plus this change.** Records are in
+`verdicts/HLT-021/2026-09-23/`, and the verdict table is at the top of the task file.
+
+- **The pair, one gate drive, one variable:** at `NOODLPORT=0`, HEAD gives `ws://localhost:0/`
+  ×39 and `GUEST_VIEW_MANAGER_CALL` ×68, and 4 surface arms miss. The fix gives 0 and 0, and the
+  relay socket, canvas webview and JSON inspector all use the bound port. AC3 is driven at 9123
+  and unset (8574), both exit 0.
+- **Shipped:** `web-server.js` sets `global.noodlBoundPort`. `viewerOrigin.ts` `viewerPort()`
+  is the renderer's one reader and asks `remote.getGlobal` on every call. The four other sites
+  call it. The gate launches at `0` and gains `--port <n|unset>` and four `HLT-021` arms.
+- **Gates:** `typecheck:editor` 0, `typecheck:editor-tests` 0, `test:main` **543/543 +
+  8593/8593**, `test:ci` at the floor (3033 specs, 8 by name: 2 NDA-017, 3 SUB-011, 3 SUB-006; seed 27727; fresh readout JSON). There are 3 mutants (never published, a sixth reader, read at
+  load), and each reddens exactly one spec.
+- 🔴 **Two instrument lessons worth carrying.** (a) Inside a drive's `ev()` template literal,
+  `\/` collapses to `/`, so a regex dies with "Invalid regular expression flags". Use `endsWith`,
+  not a regex with slashes. (b) In the dev build all `node_modules` are webpack externals, so
+  React is **not** in `__wreq.m`. The renderer's own `require('react')` is the bundle's copy.
+- ⚠️ **Gate runs launched back to back died at startup after 6 log lines**, on alternate runs.
+  They came clean after a 45 s gap. Space scripted runs.
 
 ## ✅ What s20 leaves you: HLT-009, on the owner's word
 

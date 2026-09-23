@@ -10,8 +10,7 @@ import { WarningsModel } from './models/warningsmodel';
 import DebugInspector from './utils/debuginspector';
 import * as Exporter from './utils/exporter';
 import { getIpc } from './utils/ipc';
-
-const port = process.env.NOODLPORT || 8574;
+import { viewerPort } from './views/SandboxSurface/viewerOrigin';
 
 /**
  * OBS-004 — this window's copy of the relay token, fetched once.
@@ -107,7 +106,7 @@ export class ViewerConnection extends Model {
     const _this = this;
 
     const protocol = process.env.ssl ? 'wss://' : 'ws://';
-    const address = protocol + 'localhost:' + port;
+    const address = protocol + 'localhost:' + viewerPort();
 
     this.ws = new WebSocket(address);
     this.ws.addEventListener('open', function () {

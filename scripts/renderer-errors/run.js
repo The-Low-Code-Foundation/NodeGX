@@ -11,6 +11,7 @@
  *   npm run renderer-errors                         # launch, drive, grade (the CI form)
  *   npm run renderer-errors -- --log .logs/dev.log  # grade a log you already have — e.g. your own session
  *   npm run renderer-errors -- --keep               # leave the temp profile/fixture/log behind
+ *   npm run renderer-errors -- --port 9123          # the editor's web server port: 0 (default), a number, or `unset`
  *
  * Exit status is the gate: 0 green, 1 an error class over budget or UNKNOWN, 2 could not measure
  * (the stack never came up, a surface was never reached, or a sentinel went missing). 🔴 Gate on
@@ -56,6 +57,8 @@ const opt = (n, d) => {
 };
 
 const FIXTURE_SOURCE = path.join(ROOT, 'templates', opt('template', 'landing-pages'));
+/** `--port 0` (default), a concrete port, or `unset` — HLT-021 AC3 drives all three. */
+const LAUNCH_PORT = opt('port', '0');
 const LAUNCH_TIMEOUT_MS = Number(opt('launch-timeout', 12 * 60)) * 1000;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -183,38 +186,20 @@ function buildWorkspace() {
   return { work, profile, project, log: path.join(work, 'dev.log') };
 }
 
-/**
- * A concrete free port whose +1 is free too — the design-tool import server binds NOODLPORT + 1.
- *
- * 🔴 Not `NOODLPORT=0`, although web-server.js says a harness may use it: measured 2026-09-22, the
- * renderer reads `process.env.NOODLPORT` in five places (ViewerConnection, CanvasView ×2,
- * viewerOrigin, InspectPopup) and its env is fixed when the window is created, BEFORE the web
- * server has bound. So with 0 the preview dials `ws://localhost:0/` (ERR_UNSAFE_PORT, 28 events in
- * one drive) and never connects. Recorded in HLT-010's verdict; not fixed here.
- */
-async function freePortPair() {
-  for (let i = 0; i < 20; i++) {
-    const port = await freePort();
-    const next = await new Promise((resolve) => {
-      const s = net.createServer();
-      s.once('error', () => resolve(false));
-      s.listen(port + 1, '127.0.0.1', () => s.close(() => resolve(true)));
-    });
-    if (next) return port;
-  }
-  throw new Error('no free port pair');
-}
-
-function launch(ws, cdpPort, appPort) {
+function launch(ws, cdpPort) {
   const env = {
     ...process.env,
     NOODL_USER_DATA_DIR: ws.profile,
     NOODL_REMOTE_DEBUG_PORT: String(cdpPort),
     NOODL_DEV_LOG_FILE: ws.log,
-    // The editor's project web server — its own port, so an installed NodeGX holding 8574 cannot
-    // make this editor die at startup. See freePortPair for why not 0.
-    NOODLPORT: String(appPort)
+    // The editor's project web server on whatever port the OS gives — so an installed NodeGX
+    // holding 8574 cannot make this editor die at startup. 0 on purpose, not a concrete port the
+    // gate picks: until HLT-021 the renderer read the REQUESTED port and dialled
+    // `ws://localhost:0/` (28 events a drive), so every run of this gate also grades that fix —
+    // see the HLT-021 arms in drive().
+    NOODLPORT: LAUNCH_PORT
   };
+  if (LAUNCH_PORT === 'unset') delete env.NOODLPORT;
   delete env.ELECTRON_RUN_AS_NODE;
   const child = spawn(process.execPath, [path.join(ROOT, 'scripts/devtools/dev-debug.js'), '--quiet'], {
     cwd: ROOT,
@@ -437,6 +422,45 @@ async function drive(ws, cdp) {
   const webview = await ev(`document.querySelectorAll('webview').length`);
   arm('REACH the app preview ran a thumbnail tick', app && webview > 0, `${webview} webviews, 25 s`);
 
+  // ═ HLT-021 — the launch asked for port 0; every renderer surface must use the port main BOUND ═
+  // Read on the surfaces themselves, not on the helper: the preview's relay socket, the canvas
+  // webview's address, and the JSON inspector's image URL (rendered here — a person reaches it by
+  // hovering an image-valued connection, which a scripted drive cannot find reliably).
+  const ports = await ev(`JSON.stringify((() => {
+    const portOf = (u) => { try { return Number(new URL(u).port) || null; } catch (e) { return null; } };
+    const bound = require('@electron/remote').getGlobal('noodlBoundPort');
+    const vc = ${W('./src/editor/src/ViewerConnection.ts')}.ViewerConnection.instance;
+    const socket = vc && vc.ws ? { port: portOf(vc.ws.url), open: vc.ws.readyState === 1 } : null;
+    const views = [...document.querySelectorAll('webview')].map((w) => w.getAttribute('src') || '').filter((u) => u.startsWith('http://localhost:'));
+    return { bound, socket, canvas: views.map(portOf) };
+  })())`).then(JSON.parse);
+  const inspector = await ev(`new Promise((resolve) => {
+    // node_modules are webpack externals in the dev build, so this is the bundle's own React.
+    const React = require('react');
+    const { InspectPopup } = ${W('./src/editor/src/views/nodegrapheditor/InspectJSONView/InspectPopup.tsx')};
+    const { createReactRoot, unmountReactRoot } = ${W('./src/shared/utils/unmountReactRoot.ts')};
+    // An inert document: no browsing context, so the <img> is built but never requested — the
+    // probe must not add a 404 of its own to the log it is graded against.
+    const doc = document.implementation.createHTMLDocument('hlt-021');
+    const host = doc.createElement('div');
+    doc.body.appendChild(host);
+    const root = createReactRoot(host);
+    root.render(React.createElement(InspectPopup, { debugValue: { type: 'image', value: 'hlt-021.png' }, pinned: false, onPinClicked: () => {} }));
+    setTimeout(() => {
+      const img = host.querySelector('img');
+      const src = img ? img.getAttribute('src') : null;
+      unmountReactRoot(root);
+      setTimeout(() => { host.remove(); resolve(src); }, 50);
+    }, 500);
+  })`);
+  const inspectorPort = (() => { try { return Number(new URL(inspector).port) || null; } catch (e) { return null; } })();
+  const bound = ports.bound;
+  const asked = LAUNCH_PORT === 'unset' ? 8574 : Number(LAUNCH_PORT);
+  arm(`HLT-021 main bound a real port for NOODLPORT=${LAUNCH_PORT}`, Number.isInteger(bound) && bound > 0 && (asked === 0 || bound === asked), `bound ${bound}`);
+  arm('HLT-021 REACH the preview relay socket is open on the bound port', !!ports.socket && ports.socket.open && ports.socket.port === bound, JSON.stringify(ports.socket));
+  arm('HLT-021 REACH the canvas webview loads from the bound port', ports.canvas.length > 0 && ports.canvas.every((p) => p === bound), `webview ports ${JSON.stringify(ports.canvas)}`);
+  arm('HLT-021 REACH the JSON inspector builds its image URL on the bound port', inspectorPort === bound, String(inspector));
+
   await step('save');
   // ═ save twice — the path that bracketed Richard's bursts ═
   for (let i = 0; i < 2; i++) {
@@ -494,8 +518,7 @@ async function main() {
   const cdp = require(path.join(ROOT, 'scripts/devtools/cdp.js'));
   console.log(`workspace ${ws.work}\nCDP port  ${cdpPort}\nfixture   ${path.relative(ROOT, FIXTURE_SOURCE)}\n`);
 
-  const appPort = await freePortPair();
-  const child = launch(ws, cdpPort, appPort);
+  const child = launch(ws, cdpPort);
   ws.child = child;
   const onSignal = async () => {
     await stop(child);

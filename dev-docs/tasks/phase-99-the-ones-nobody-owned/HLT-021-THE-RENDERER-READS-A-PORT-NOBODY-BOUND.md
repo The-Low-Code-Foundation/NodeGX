@@ -1,5 +1,53 @@
 # HLT-021 — The renderer reads a port nobody bound
 
+## ✅ Verdict — BUILT 2026-09-23 (P99 s22)
+
+**Launched at `NOODLPORT=0` on the same gate drive: HEAD dials `ws://localhost:0/` ×39 and logs
+`GUEST_VIEW_MANAGER_CALL` ×68, and all four surface arms miss. The fix logs 0 and 0, and all four
+arms land on the port main bound.** Records: `verdicts/HLT-021/2026-09-23/*.txt`.
+
+| arm (final instrument) | `ws://localhost:0/` | `GUEST_VIEW_…` | socket / canvas / inspector on the bound port | gate exit |
+|---|---|---|---|---|
+| HEAD control, `--port 0` | **39** | **68** | ✗ ✗ ✗ (inspector built `http://localhost:0/…`) | 2 |
+| fixed, `--port 0` | 0 | 0 | ✓ ✓ ✓ (bound 63267) | **0** |
+| fixed, `--port 9123` (AC3) | 0 | 0 | ✓ ✓ ✓ (bound 9123) | **0** |
+| fixed, `--port unset` (AC3) | 0 | 0 | ✓ ✓ ✓ (bound 8574) | **0** |
+
+**What shipped:**
+- `web-server.js` sets `global.noodlBoundPort` on `listening` (null on stop). `process.env` is
+  per-process; the global is what `@electron/remote` can read.
+- `viewerOrigin.ts` is now the renderer's **only** reader: `viewerPort()` asks
+  `remote.getGlobal('noodlBoundPort')` **on every call** and falls back to the request only when
+  nothing is bound yet. `'0'` before the bind stays `0`, loud, rather than a guessed 8574 that may
+  be another editor's server. `ViewerConnection`, `CanvasView` ×2 and `InspectPopup` call it. The
+  commented-out fourth copy in `CanvasView.refresh()` is gone.
+- AC5: **the gate now launches at `NOODLPORT=0`** (`freePortPair` is gone), so every CI run grades
+  this fix. It carries four `HLT-021` arms, read on the surfaces themselves: the relay socket's
+  URL and `readyState`, the canvas webview's `src`, and the JSON inspector's `<img src>`. That last
+  one is rendered by the drive into an **inert** document, so the probe makes no request of its
+  own. `--port <n|unset>` drives AC3.
+
+**ACs:** AC1 ✅ (the control above). AC2 ✅ (0/0 with every surface reached). AC3 ✅ (both driven).
+AC4 ✅ `tests-unit/hlt-021/viewerPort.test.ts` counts code reads under `editor/src` against the
+helper's own `NOODLPORT_READERS`, next to a scan-finds-a-read control. AC5 ✅. AC6: `test:main`
+543/543 + 8593/8593, typechecks 0, `test:ci` at the floor (3033 specs, 8 by name, seed 27727).
+Mutants run, not argued: (1) main never publishes, (2) a sixth reader, (3) the port read at module
+load. Each reddens exactly one spec. `tests-main/hlt021-bound-port.test.js` starts the real server
+at `NOODLPORT=0` and reads the global beside the socket's port.
+
+⚠️ **Three instrument faults before the reading counted.** Each printed a verdict first. (a) In
+the drive's `ev()` template literal, a regex `\/` collapses to `/` and ends the literal
+("Invalid regular expression flags"), so the drive stopped before save/reopen. (b) In the dev
+build `node_modules` are webpack **externals**, so React is not in `__wreq.m`; use the renderer's
+own `require('react')`. (c) The first "fixed" run FAILED on a 404 for the probe's own
+`hlt-021.png`, which was the instrument's request, not the product's. So the control was re-run on
+the final script ([[a-control-pair-proves-what-you-varied-only]]).
+⚠️ **Two gate runs launched back to back with no gap died at startup after 6 log lines.** The
+next launch came as the previous stack tore down. They re-ran clean after a 45 s pause. This is
+not the product, but anyone scripting several gate runs needs the gap.
+⚠️ `scripts/devtools/cdp.js:439` left as is: it runs in the tool's process, and
+`Number('0') || 8574` is correct by accident there (§5).
+
 🔴 **Opened 2026-09-22 (P99 s21), from [HLT-010](./HLT-010-THE-GATE-THAT-WOULD-HAVE-CAUGHT-IT.md)'s
 verdict, which found it and explicitly left it unowned** — *"Owner needed; the fix is the renderer
 asking main for the bound port."* This row is that owner.

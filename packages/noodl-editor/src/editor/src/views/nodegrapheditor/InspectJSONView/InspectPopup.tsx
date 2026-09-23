@@ -7,6 +7,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
 
+import { viewerOrigin } from '../../SandboxSurface/viewerOrigin';
 import { ToastLayer } from '../../ToastLayer/ToastLayer';
 import css from './InspectPopup.module.scss';
 
@@ -182,9 +183,7 @@ function ImageInspector({ source }: { source: string }) {
   if (source.startsWith('http')) {
     src = source;
   } else {
-    const protocol = process.env.ssl ? 'https' : 'http';
-    const port = process.env.NOODLPORT || 8574;
-    src = `${protocol}://localhost:${port}/${source}`;
+    src = `${viewerOrigin()}/${source}`;
   }
 
   return (

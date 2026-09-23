@@ -9,6 +9,7 @@ import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { VisualCanvas } from './VisualCanvas';
 import { PREVIEW_STRIP_ACTION, type StripAction } from './detachedStrip';
 import { previewRoutePath } from './previewRoutePath';
+import { viewerOrigin } from '../SandboxSurface/viewerOrigin';
 import type { StripModel } from './previewStripWords';
 import {
   CAPTURE_SKIP_EXPLANATION,
@@ -170,9 +171,7 @@ export class CanvasView extends View {
         return;
       }
 
-      const protocol = process.env.ssl ? 'https://' : 'http://';
-      const port = process.env.NOODLPORT || 8574;
-      const urlPrefix = protocol + 'localhost:' + port;
+      const urlPrefix = viewerOrigin();
 
       const route = event.url.startsWith(urlPrefix) ? event.url.substring(urlPrefix.length) : event.url;
 
@@ -249,10 +248,7 @@ export class CanvasView extends View {
   }
 
   setCurrentRoute(route: string) {
-    const protocol = process.env.ssl ? 'https://' : 'http://';
-    const port = process.env.NOODLPORT || 8574;
-
-    this.webview.src = protocol + 'localhost:' + port + route;
+    this.webview.src = viewerOrigin() + route;
     // FLD-007: the same normalisation `load-commit` applies, so this global means one thing
     // whichever of the two writers ran last.
     window.noodlEditorPreviewRoute = previewRoutePath(route);
@@ -276,10 +272,6 @@ export class CanvasView extends View {
   }
   refresh() {
     //set back to root to reset any navigation that's been done
-    // const protocol = process.env.ssl ? 'https://' : 'http://';
-    // const port = process.env.NOODLPORT || 8574;
-    // this.webview.src = protocol + 'localhost:' + port;
-
     this.tryWebviewCall(() => {
       this.webview.reloadIgnoringCache();
     });
