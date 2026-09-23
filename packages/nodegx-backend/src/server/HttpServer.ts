@@ -36,6 +36,7 @@ import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import { DEFAULT_FUNCTION_TIMEOUT_MS } from '../workflow/WorkflowRunner';
+import { RUN_HEADER } from '../workflow/FunctionRuns';
 import type { SecurityState } from '../security/state';
 import type { SearchState } from '../search/SearchState';
 import type { RealtimeHub, Subscription } from '../realtime/RealtimeHub';
@@ -248,6 +249,8 @@ interface RequestTrace {
   logged: boolean;
   /** The rate-limit / metrics class of the matched route. */
   rateClass?: string;
+  /** HLT-023: the function whose run made this loopback request, when one did. */
+  functionRun?: string;
   /** BAK-009 audit: the action this request performs, when it is an audited one. */
   auditAction?: string;
   /** Stable actor identity within the principal kind (user id / key name). */
@@ -1536,6 +1539,7 @@ export class HttpServer {
       // The KIND of principal only — never the credential, the session token,
       // or the user id, which are exactly the things a log ships off-box.
       principal: trace.principal,
+      ...(trace.functionRun ? { functionRun: trace.functionRun } : {}),
       ip: trace.clientIp,
       ...(trace.error ? { error: trace.error } : {})
     });
@@ -1727,8 +1731,39 @@ export class HttpServer {
       );
     };
 
-    const decision = this.rateLimiter.check(routeClass, limitKey);
-    if (!decision.allowed) refuse(decision, routeClass, `${routeClass} requests`);
+    // P99 HLT-023: a function's own loopback request — its queries, and the runtime's caller
+    // lookup before the body runs — is charged to the RUN, not to a client bucket. Keyed by
+    // principal, every run was `admin`: one bucket for the whole deployment, shared with the
+    // operator, and a class of fourteen emptied it. The call that started the run already
+    // spent the caller's `functions` token; the per-run ceiling is the runaway guard.
+    // Honoured only beside the admin credential, and only for a run still in flight.
+    const runHeader = req.headers[RUN_HEADER];
+    const run =
+      principal.kind === 'admin' && !principal.readonly
+        ? this.getRunner()?.functionRuns.get(Array.isArray(runHeader) ? runHeader[0] : runHeader)
+        : undefined;
+    if (run) {
+      run.requests += 1;
+      trace.functionRun = run.functionName;
+      const ceiling = this.ops.config.rateLimit.functionRunQueries;
+      if (this.ops.config.rateLimit.enabled && ceiling > 0 && run.requests > ceiling) {
+        recordRateLimited('function-run');
+        logger.warn('function.runQueryCeiling', {
+          requestId: trace.requestId,
+          function: run.functionName,
+          ceiling,
+          route: route.pattern
+        });
+        throw new HttpError(
+          429,
+          `Function "${run.functionName}" made more than ${ceiling} backend requests in one run ` +
+            `(rateLimit.functionRunQueries), so this one was refused. Nobody else's requests are affected.`
+        );
+      }
+    } else {
+      const decision = this.rateLimiter.check(routeClass, limitKey);
+      if (!decision.allowed) refuse(decision, routeClass, `${routeClass} requests`);
+    }
 
     // CWF-017: a function may carry its OWN budget on top of the class one, for
     // the expensive-endpoint case where "600 function calls a minute" is right

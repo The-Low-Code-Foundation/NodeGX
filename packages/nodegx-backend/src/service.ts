@@ -566,7 +566,10 @@ export class BackendService {
     (globalThis as any)._noodl_cloudservices = {
       endpoint: `http://127.0.0.1:${listen.port}`,
       appId: this.options.backendId,
-      masterKey: this.security.adminToken
+      masterKey: this.security.adminToken,
+      // HLT-023: the clients stamp each loopback request with the run it belongs to
+      // (`X-NodeGX-Run`), so it is charged to that run instead of to `data:admin`.
+      currentRunId: () => (this.runner ? this.runner.functionRuns.currentRunId() : undefined)
     };
 
     // 4.5 The Send Email node (BAK-002, noodl-viewer-cloud) runs INSIDE this

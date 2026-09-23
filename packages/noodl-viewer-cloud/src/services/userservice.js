@@ -37,14 +37,21 @@ class UserService {
 
     const cs = _noodl_cloudservices;
 
+    const headers = {
+      'X-Parse-Application-Id': cs.appId,
+      'X-Parse-Master-Key': cs.masterKey,
+      'content-type': 'application/json',
+      'X-Parse-Session-Token': options.sessionToken
+    };
+    // P99 HLT-023: the caller lookup (`/users/me`) is the runtime's own request, made before
+    // the function body runs. Charged to the run, it can no longer be refused by a client
+    // bucket and turn the function into a bare 500.
+    const runId = cs.currentRunId ? cs.currentRunId() : undefined;
+    if (runId !== undefined) headers['X-NodeGX-Run'] = runId;
+
     fetch(cs.endpoint + path, {
       method: options.method || 'GET',
-      headers: {
-        'X-Parse-Application-Id': cs.appId,
-        'X-Parse-Master-Key': cs.masterKey,
-        'content-type': 'application/json',
-        'X-Parse-Session-Token': options.sessionToken
-      },
+      headers,
       body: JSON.stringify(options.content)
     })
       .then((res) => {

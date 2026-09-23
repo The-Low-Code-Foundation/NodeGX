@@ -35,7 +35,8 @@ there is always something to edit:
       "realtime":  { "ratePerMinute": 0,    "burst": 0 },
       "public":    { "ratePerMinute": 600,  "burst": 200 }
     },
-    "realtimeMaxConnections": 500
+    "realtimeMaxConnections": 500,
+    "functionRunQueries": 1000
   },
   "cors":    { "origins": ["*"], "credentials": false },
   "audit":   { "enabled": true, "retentionDays": 90 },
@@ -144,6 +145,18 @@ single very long request, so counting requests would measure nothing while
 breaking reconnect storms. `realtimeMaxConnections` bounds what is actually
 finite; at the cap a new stream is refused with `503` + `Retry-After` before
 any stream headers are written.
+
+**A cloud function's own queries are bounded per run, not per client.** A
+deployed function reaches the database by calling this server back over
+127.0.0.1. Those requests are the implementation of a call that already spent
+the caller's `functions` budget, so they spend no client bucket. Without that,
+every run of every function would share one bucket with the operator's
+admin-token requests, and one class of learners opening the same page would
+empty it for everyone. `functionRunQueries` (default 1000; 0 = unlimited)
+bounds them instead. A run that goes past it gets `429` naming the function and
+the ceiling. The refusal reaches the function, so it can answer in its own
+words, and nobody else's requests are affected. The access log marks these
+requests with `functionRun`.
 
 ### Behind a proxy
 

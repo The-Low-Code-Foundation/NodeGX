@@ -1,0 +1,83 @@
+{
+  "control": {
+    "setup": {
+      "createTable": 200,
+      "signup:ada": 201,
+      "signup:bo": 201
+    },
+    "calls": "200 ×17, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×1",
+    "firstNon200": {
+      "error": "Unauthenticated requests not accepted."
+    },
+    "operatorAfter": 429,
+    "operatorBody": {
+      "error": "Rate limit exceeded for data requests (1200/min, burst 400). Retry in 1s.",
+      "requestId": "5f4a0a82-3b44-4f91-8427-b905b5831aba"
+    },
+    "tally": {
+      "spent": {
+        "functions:user": 30,
+        "data:admin": 411
+      },
+      "refused": {
+        "data:admin": 16
+      }
+    }
+  },
+  "load": {
+    "calls": "200 ×16, 500 ×2, 200 ×1, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×4, 200 ×1, 500 ×2, 200 ×1, 500 ×4, 200 ×1, 500 ×2, 200 ×1, 500 ×4, 200 ×1, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×3, 200 ×1, 500 ×2, 200 ×1, 500 ×4, 200 ×1, 500 ×2, 200 ×1, 500 ×2, 200 ×1, 500 ×4, 200 ×1, 500 ×7, 200 ×1, 500 ×3, 200 ×1, 500 ×1",
+    "rowsAnswered": 15,
+    "firstNon200": {
+      "error": "Unauthenticated requests not accepted."
+    },
+    "operator": "200 ×1, 429 ×7, 200 ×1, 429 ×1",
+    "any500": true,
+    "tally": {
+      "spent": {
+        "functions:user": 100,
+        "data:admin": 427
+      },
+      "refused": {
+        "data:admin": 93
+      }
+    }
+  },
+  "budget": {
+    "ada": "200 ×5, 429 ×1",
+    "adaSixth": {
+      "error": "Rate limit exceeded for functions requests (5/min, burst 5). Retry in 12s.",
+      "requestId": "ad3f63c6-d3c0-4aa4-bf01-9923375af123"
+    },
+    "boSameInstant": 200,
+    "tally": {
+      "spent": {
+        "functions:user": 6,
+        "data:admin": 6
+      },
+      "refused": {
+        "functions:user": 1
+      }
+    }
+  },
+  "runaway": {
+    "status": 200,
+    "body": {
+      "result": {
+        "outcome": "script-failed"
+      }
+    },
+    "ms": 157,
+    "nextAda": 500,
+    "nextBo": 500,
+    "operator": 429,
+    "tally": {
+      "spent": {
+        "functions:user": 3,
+        "data:admin": 402
+      },
+      "refused": {
+        "data:admin": 4
+      }
+    }
+  }
+}

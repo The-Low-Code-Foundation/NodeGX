@@ -269,6 +269,7 @@ refuses to start rather than ignore a setting, so a typo is loud.
 | `rateLimit.policies.data` | The default is 1200/min burst 400 per principal. A list-heavy app legitimately exceeds this. |
 | `rateLimit.trustedProxies` | Wrong value = every request appears to come from your proxy and shares one bucket. The most common self-inflicted outage on this page. |
 | `rateLimit.realtimeMaxConnections` | Default 500 simultaneous SSE streams. This is the realtime tier's real limit — sockets, not request rate. |
+| `rateLimit.functionRunQueries` | Default 1000 backend requests per cloud-function run. A function's own queries spend no client bucket, and this ceiling is their runaway guard. Raise it only for a function that really reads that much in one call. |
 | `executions.retentionDays` | Default 30. Every function and workflow run is recorded; long retention grows `executions.sqlite` and slows the history views. |
 | `logging.requests` | Turning off per-request logging is measurable under high request rates. |
 

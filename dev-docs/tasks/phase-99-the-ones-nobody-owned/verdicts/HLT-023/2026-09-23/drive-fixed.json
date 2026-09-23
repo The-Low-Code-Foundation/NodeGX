@@ -1,0 +1,67 @@
+{
+  "control": {
+    "setup": {
+      "createTable": 200,
+      "signup:ada": 201,
+      "signup:bo": 201
+    },
+    "calls": "200 ×30",
+    "operatorAfter": 200,
+    "tally": {
+      "spent": {
+        "functions:user": 30,
+        "data:admin": 1
+      },
+      "refused": {}
+    }
+  },
+  "load": {
+    "calls": "200 ×100",
+    "rowsAnswered": 100,
+    "operator": "200 ×10",
+    "any500": false,
+    "tally": {
+      "spent": {
+        "functions:user": 100,
+        "data:admin": 10
+      },
+      "refused": {}
+    }
+  },
+  "budget": {
+    "ada": "200 ×5, 429 ×1",
+    "adaSixth": {
+      "error": "Rate limit exceeded for functions requests (5/min, burst 5). Retry in 12s.",
+      "requestId": "032773a9-282c-437d-87c5-f7230c472806"
+    },
+    "boSameInstant": 200,
+    "tally": {
+      "spent": {
+        "functions:user": 6
+      },
+      "refused": {
+        "functions:user": 1
+      }
+    }
+  },
+  "runaway": {
+    "status": 200,
+    "body": {
+      "result": {
+        "error": "Function \"runaway\" made more than 1000 backend requests in one run (rateLimit.functionRunQueries), so this one was refused. Nobody else's requests are affected.",
+        "rows": 2997
+      }
+    },
+    "ms": 307,
+    "nextAda": 200,
+    "nextBo": 200,
+    "operator": 200,
+    "tally": {
+      "spent": {
+        "functions:user": 3,
+        "data:admin": 1
+      },
+      "refused": {}
+    }
+  }
+}

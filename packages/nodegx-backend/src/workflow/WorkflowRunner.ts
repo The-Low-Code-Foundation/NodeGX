@@ -30,6 +30,7 @@ import * as path from 'path';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
+import { FunctionRuns } from './FunctionRuns';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
 import {
@@ -279,6 +280,9 @@ export class WorkflowRunner {
   private cloudRunner: any = null;
   private loadedWorkflows = new Map<string, Record<string, unknown>>();
   isInitialized = false;
+
+  /** HLT-023: the runs in flight, so a loopback request can be charged to the run that made it. */
+  readonly functionRuns = new FunctionRuns();
 
   constructor(options: WorkflowRunnerOptions) {
     this.workflowsPath = options.workflowsPath;
@@ -768,11 +772,15 @@ export class WorkflowRunner {
 
     try {
       safeLog(`Executing function: ${functionName}`);
-      const response = await this.cloudRunner.run(functionName, request, {
-        timeoutMs,
-        // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
-        runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
-      });
+      // HLT-023: inside `within`, every loopback request the graph makes carries this run's id,
+      // so it is charged to the run and not to the operator's `data:admin` bucket.
+      const response = await this.functionRuns.within<RunnerResponse>(functionName, () =>
+        this.cloudRunner.run(functionName, request, {
+          timeoutMs,
+          // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
+          runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
+        })
+      );
       const duration = Date.now() - startTime;
       safeLog(`Function ${functionName} completed in ${duration}ms`);
 
@@ -866,10 +874,12 @@ export class WorkflowRunner {
       // the engine writes the one per-step record — so the sink gets no `execLogger` and the
       // lines land in the structured log only. Silence here would mean a function that logs
       // when you call it and does not when a workflow does, which is the worst of both.
-      return await this.cloudRunner.run(functionName, request, {
-        timeoutMs,
-        runContext: this.createRunContext(functionName, null)
-      });
+      return await this.functionRuns.within<RunnerResponse>(functionName, () =>
+        this.cloudRunner.run(functionName, request, {
+          timeoutMs,
+          runContext: this.createRunContext(functionName, null)
+        })
+      );
     } catch (e) {
       if (isCloudFunctionTimeout(e)) {
         logger.error('function.timeout', {

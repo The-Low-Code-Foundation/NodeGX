@@ -35,5 +35,11 @@ declare const _noodl_cloudservices:
       endpoint: string;
       appId: string;
       masterKey?: string;
+      /**
+       * P99 HLT-023: the id of the function run the caller is inside, sent as `X-NodeGX-Run` so
+       * the backend charges the request to that run rather than to its client rate bucket.
+       * Absent on a runtime that is not nodegx-backend's.
+       */
+      currentRunId?: () => string | undefined;
     }
   | undefined;

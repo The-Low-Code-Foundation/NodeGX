@@ -71,6 +71,16 @@ export interface RateLimitConfig {
    * exist, not how often they are opened. 0 = unlimited.
    */
   realtimeMaxConnections: number;
+  /**
+   * P99 HLT-023. How many backend requests ONE function run may make. 0 = unlimited.
+   *
+   * A deployed function's own queries loop back to this server; they are the
+   * implementation of a call already budgeted per caller in the `functions`
+   * class, so they spend no client bucket. This is what bounds them instead: a
+   * loop in a function stops here, named, and takes nobody else's allowance with
+   * it. 1,000 is ~40 of the heaviest page measured (26 requests).
+   */
+  functionRunQueries: number;
 }
 
 export interface LoggingConfig {
@@ -245,7 +255,8 @@ export function defaultOpsConfig(): OpsConfig {
         realtime: { ratePerMinute: 0, burst: 0 },
         public: { ratePerMinute: 600, burst: 200 }
       },
-      realtimeMaxConnections: 500
+      realtimeMaxConnections: 500,
+      functionRunQueries: 1000
     },
     cors: { origins: ['*'], credentials: false },
     audit: { enabled: true, retentionDays: 90 },
@@ -314,7 +325,13 @@ export function validateOpsConfig(raw: unknown): string[] {
 
   if (
     cfg.rateLimit !== undefined &&
-    checkKeys(errors, 'rateLimit', cfg.rateLimit, ['enabled', 'trustedProxies', 'policies', 'realtimeMaxConnections'])
+    checkKeys(errors, 'rateLimit', cfg.rateLimit, [
+      'enabled',
+      'trustedProxies',
+      'policies',
+      'realtimeMaxConnections',
+      'functionRunQueries'
+    ])
   ) {
     const rl = cfg.rateLimit as Record<string, unknown>;
     if (rl.enabled !== undefined && typeof rl.enabled !== 'boolean') errors.push('rateLimit.enabled must be a boolean');
@@ -326,6 +343,14 @@ export function validateOpsConfig(raw: unknown): string[] {
         rl.realtimeMaxConnections < 0)
     ) {
       errors.push('rateLimit.realtimeMaxConnections must be a number >= 0 (0 = unlimited)');
+    }
+    if (
+      rl.functionRunQueries !== undefined &&
+      (typeof rl.functionRunQueries !== 'number' ||
+        !Number.isInteger(rl.functionRunQueries) ||
+        rl.functionRunQueries < 0)
+    ) {
+      errors.push('rateLimit.functionRunQueries must be a whole number >= 0 (0 = unlimited)');
     }
     if (rl.policies !== undefined && checkKeys(errors, 'rateLimit.policies', rl.policies, ROUTE_CLASSES)) {
       for (const [name, policy] of Object.entries(rl.policies as Record<string, unknown>)) {

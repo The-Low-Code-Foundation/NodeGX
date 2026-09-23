@@ -291,9 +291,16 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       // unit suites all take the XHR branch, and upstream Parse ignores a
       // master-key header it does not recognise rather than rejecting it. The
       // one server that fails loudly here is our own.
+      // P99 HLT-023: the run this request belongs to, read NOW — while the caller's async
+      // context is still the run's. Same `undefined` rule as the master key above.
+      const runId =
+        typeof _noodl_cloudservices !== 'undefined' && _noodl_cloudservices.currentRunId
+          ? _noodl_cloudservices.currentRunId()
+          : undefined;
       const headers: Record<string, string> = Object.assign(
         { 'X-Parse-Application-Id': appId, 'Content-Type': 'application/json' },
         masterKey !== undefined ? { 'X-Parse-Master-Key': masterKey } : {},
+        runId !== undefined ? { 'X-NodeGX-Run': runId } : {},
         options.headers || {}
       );
 
@@ -358,8 +365,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       success: function (response) {
         options.success(_this.normalizeAll(response.results), response.count);
       },
-      error: function () {
-        options.error();
+      // P99 HLT-023: pass the server's words on, as `fetch` and the rest do. Dropped here, a
+      // refusal that names its cause (the per-run ceiling, a 429 with its class) reached the
+      // function as "Failed to query."
+      error: function (res) {
+        options.error(res && res.error);
       }
     });
   }
