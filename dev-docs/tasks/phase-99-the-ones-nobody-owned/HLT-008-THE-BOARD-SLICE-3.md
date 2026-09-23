@@ -2,7 +2,7 @@
 
 > ✅ **BUILT 2026-09-21 (P99 s10).** 21/21 driven arms on the fixed build, 9/20 on HEAD — see the
 > [verdict](./verdicts/HLT-008/2026-09-21/VERDICT.md). AC1–AC6 and AC8's `test:main` half are met
-> here; 📋 **AC7 is Richard's WORTHY on `shots/hlt008-fixed-ac7-{light,dark}.png` and closes in P93.**
+> here; ✅ **AC7 RULED WORTHY by Richard, 2026-09-23** (*"HTL008 shots look ok"*) on `shots/hlt008-fixed-ac7-{light,dark}.png`, so P93 TVW-008 is closed.
 > ⚠️ §2 is corrected by the verdict §2: B2/B3 are the one `<webview>` painted white over the union
 > of the frames, and B5's content half was a harness port Group does not have (`layout`).
 

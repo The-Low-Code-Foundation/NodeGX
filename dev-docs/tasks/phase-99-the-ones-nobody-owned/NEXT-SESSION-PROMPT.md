@@ -24,7 +24,7 @@ is still **untracked** and still the DBT stream's. Don't edit it. 🔴 On 2026-0
    023 and 024 all came that way on 2026-09-23). `ls` the directory and compare it with the board.
 3. Otherwise there's nothing to build. Say so rather than inventing a row.
 
-**Still waiting on Richard:** P93 TVW-008 AC7 (HLT-012 AC5 ✅ ruled WORTHY 2026-09-23)
+**Waiting on Richard: nothing in P99.** HLT-012 AC5 and P93 TVW-008 AC7 were both ruled WORTHY on 2026-09-23
 (`shots/hlt008-fixed-ac7-*`). **Other streams':** HLT-024 AC5+AC6 (DBT: after a magic-link sign-in,
 `app_roles_once` should never fire, and `START-HERE.md`'s note gets updated), HLT-023's L171 page drive
 (DBT), HLT-015 AC7 and HLT-018 AC5 (DBT), HLT-017 AC9 (P78).

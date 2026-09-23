@@ -916,3 +916,10 @@ graded against the node catalog (`tests-unit/hlt-008`).
 `../phase-99-the-ones-nobody-owned/shots/hlt008-fixed-ac7-light.png` and `-ac7-dark.png` (three
 frames, one dragged below). Plus the two §9.6 items no AC names, unchanged.
 
+## 13. ✅ CLOSED 2026-09-23 — AC7 ruled WORTHY
+
+✅ **AC7 RULED WORTHY by Richard, 2026-09-23** (*"HTL008 shots look ok"*) on the two HLT-008 shots above. **All eight ACs are met.** AC1 and AC3 were reopened at
+s29 and re-driven green by HLT-008, and AC7 is this ruling. The two §9.6 items no AC names (selection
+through a frame, and the `Add all` bound *explained* in the picker) are left unbuilt. They are not
+criteria.
+
