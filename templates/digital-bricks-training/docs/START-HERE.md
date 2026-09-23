@@ -141,6 +141,7 @@ node tools/setup-backend.mjs    --backend http://127.0.0.1:8577 --token <admin>
 node tools/deploy-functions.mjs --backend http://127.0.0.1:8577 --token <admin>
 node tools/setup-signin.mjs     --backend http://127.0.0.1:8577 --token <admin> \
   --app-origin <where the app is served, e.g. http://127.0.0.1:8602> --smtp 127.0.0.1:1026
+node tools/reset-demo.mjs --seal --backend http://127.0.0.1:8577 --token <admin>   # LAST: the seed archive
 
 # 4. Proofs.
 node tools/check-seed.mjs           --backend http://127.0.0.1:8577 --token <admin>
@@ -155,6 +156,33 @@ dev stack starts. Launch it through a symlink outside the checkout to keep it ru
 
 `nodegx.project.json` points the pages at `http://127.0.0.1:8577` (`metadata.cloudservices`). In
 the editor the Backend Services panel does the same for a backend it started.
+
+### Putting the demo back (TASK-L179)
+
+`reset-demo --seal`, the last setup step, takes a NodeGX backup of a backend that `check-seed` says
+holds exactly the seed, and copies it to `<data dir>/dbt-seed.ngxbackup.tar.gz`. It is copied out of
+`backups/` on purpose: retention keeps the last seven there and prunes the rest, so a seed left in
+the folder would quietly disappear. It is the last step because an archive holds the database, the
+deployed functions and the security, email and schema config, and **not** `auth.json` (the magic
+link), which a restore leaves as it is. Sealing refuses a backend `check-seed` fails on, and refuses
+to replace a seed that exists; to replace it, delete the file yourself.
+
+**On SQLite**, to go back: stop the backend, then
+
+```bash
+node tools/reset-demo.mjs --data-dir <data dir> --backend http://127.0.0.1:8577
+```
+
+and start it again. It refuses while the backend is answering (NodeGX's restore swaps files and wants
+the service stopped), restores only the sealed seed (it takes no archive argument), and keeps
+NodeGX's pre-restore safety snapshot of what it replaced, in `backups/`.
+
+**On PostgreSQL** NodeGX cannot back up at all (BRG-008: the rows are not in a file, and the backup
+route answers 409), so seal on SQLite before migrating. To go back: stop the backend, **drop and
+recreate the database yourself**, run the SQLite reset above, then `migrate` again and serve with
+`NODEGX_STORAGE_URL`. Do not migrate over a database that still holds rows. Measured: `migrate` does
+not refuse a non-empty target. It replaced the rows, and then its own verification failed on
+`_Audit` and said *do not cut over*.
 
 ### Signing in
 
