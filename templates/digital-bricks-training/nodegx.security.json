@@ -12,7 +12,20 @@
     "creatorOwns": false
   },
   "collections": {},
-  "functions": {},
+  "functions": {
+    "course": {
+      "call": "authenticated"
+    },
+    "lesson": {
+      "call": "authenticated"
+    },
+    "learnerProgramme": {
+      "call": "role:staff"
+    },
+    "roster": {
+      "call": "role:staff"
+    }
+  },
   "files": {
     "upload": "nobody",
     "read": "nobody",

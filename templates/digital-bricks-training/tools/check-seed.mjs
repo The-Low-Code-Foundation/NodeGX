@@ -20,6 +20,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { decodeText } from './lib/seed-resolve.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
@@ -53,7 +54,11 @@ const master = { 'X-Parse-Master-Key': TOKEN };
    is legitimate on three collections, where it is the product's own stored
    ORDER (a path step, a prep item, a dimension), and is excluded there by name. */
 const DERIVED = ['state', 'stepsTotal', 'stepsComplete', 'lastActivity', 'awaitingReplySince', 'answered', 'evaluated', 'unread', 'read', 'createdByName', 'authorName'];
-const POSITION_IS_STORED = new Set(['PathStep', 'SessionPrep', 'ProgrammeDimension', 'LearnerDeliverable']);
+/* Each of these IS a column in the product, so storing it is storing a fact, not a
+   derivation. DeliverableConcept joined L170: `deliverable_concepts.position`
+   orders a deliverable's concepts (deliverables/service.ts ORDER BY position), and
+   without it a backend returned them in whatever order its rows came back in. */
+const POSITION_IS_STORED = new Set(['PathStep', 'SessionPrep', 'ProgrammeDimension', 'LearnerDeliverable', 'DeliverableConcept']);
 for (const [collection, rows] of Object.entries(seed.rows)) {
   for (const r of rows) {
     for (const k of DERIVED) check(!(k in r), `C7: ${collection} stores the derived field '${k}'`);
@@ -71,11 +76,6 @@ const UNRESOLVE = {
   LearnerProfile: ({ userId, ...r }) => ({ ...r, username: usernameById.get(userId) }),
   ConversationMessage: ({ authorUserId, ...r }) => ({ ...r, authorUsername: usernameById.get(authorUserId) })
 };
-/* The one known shape change, and it is the NodeGX `{}` defect's, not ours: an
-   empty object is left off the row by setup-backend and reads back as null. That
-   is accepted ONLY where the seed holds `{}` — a null anywhere else is a real
-   difference. */
-const isEmptyObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0;
 const keyOf = (collection) => schema.tables.find((t) => t.name === collection).indexes.find((i) => i.unique).fields;
 
 let compared = 0;
@@ -83,7 +83,8 @@ for (const [collection, rows] of Object.entries(seed.rows)) {
   const { status, body } = await get(`/classes/${collection}?limit=1000`, master);
   check(status === 200, `C3: ${collection} answered ${status} to the master key`);
   const back = (body.results || []).map((r) => {
-    const out = (UNRESOLVE[collection] || ((x) => x))(r);
+    // JSON documents stored as text (lib/seed-resolve.mjs, until HLT-022) read back as the seed's structure.
+    const out = decodeText(collection, (UNRESOLVE[collection] || ((x) => x))(r));
     return out;
   });
   check(back.length === rows.length, `C3: ${collection} holds ${back.length} rows, the seed ${rows.length}`);
@@ -98,7 +99,7 @@ for (const [collection, rows] of Object.entries(seed.rows)) {
     }
     for (const [k, v] of Object.entries(row)) {
       compared++;
-      const a = k === 'createdAt' || k === 'updatedAt' ? new Date(got[k]).toISOString() : got[k] == null && isEmptyObject(v) ? {} : got[k];
+      const a = k === 'createdAt' || k === 'updatedAt' ? new Date(got[k]).toISOString() : got[k];
       if (JSON.stringify(a ?? null) !== JSON.stringify(v ?? null)) {
         failures.push(`C3: ${collection} ${id(row)}.${k} is ${JSON.stringify(a)} in the backend and ${JSON.stringify(v)} in the seed`);
       }

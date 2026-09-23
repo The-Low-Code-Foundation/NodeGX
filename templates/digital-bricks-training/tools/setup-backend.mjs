@@ -28,6 +28,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveRow, userFields } from './lib/seed-resolve.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
@@ -101,8 +102,8 @@ const roleNames = [...new Set(seed.users.flatMap((u) => u.roles || []))];
 for (const name of roleNames) await call('POST', '/admin/roles', { name });
 const userIdByName = new Map();
 for (const u of seed.users) {
-  const { roles = [], ...fields } = u;
-  const created = await data('POST', '/classes/_User', Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== null)));
+  const { fields, roles } = userFields(u);
+  const created = await data('POST', '/classes/_User', fields);
   userIdByName.set(u.username, created.objectId);
   for (const role of roles) await call('POST', `/admin/roles/${encodeURIComponent(role)}/users`, { userId: created.objectId });
 }
@@ -113,30 +114,12 @@ const userId = (username) => {
 };
 
 // ── 5. Rows ──────────────────────────────────────────────────────────────────
-const RESOLVE = {
-  LearnerProfile: ({ username, ...r }) => ({ ...r, userId: userId(username) }),
-  ConversationMessage: ({ authorUsername, ...r }) => ({ ...r, authorUserId: userId(authorUsername) })
-};
-/* A NODEGX DEFECT, WORKED AROUND HERE AND NAMED: a field holding an EMPTY
-   object (`{}`) cannot be written at all — POST /classes answers 500 and admin
-   import rolls back with "Provided value cannot be bound to SQLite parameter".
-   `serializeValue` (noodl-runtime local-sql QueryBuilder.ts, ~1377) JSON-encodes
-   an object only when it has keys, so `{}` reaches SQLite raw. Measured
-   2026-09-21 against `{"a":1}` and `[]`, which both work. So an empty object is
-   left OFF the row, and every reader treats an absent object column as `{}` —
-   the product's `project_contexts.facts` is NOT NULL DEFAULT '{}'. */
-const emptyObjectsDropped = [];
-const withoutEmptyObjects = (collection) => (r) =>
-  Object.fromEntries(
-    Object.entries(r).filter(([k, v]) => {
-      const empty = v !== null && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0;
-      if (empty) emptyObjectsDropped.push(`${collection}.${k}`);
-      return !empty;
-    })
-  );
+// The transformation itself lives in lib/seed-resolve.mjs — the ONE owner, which
+// check-read-functions.mjs imports too, so its offline rows are the backend's rows.
+
 const imported = {};
 for (const [collection, list] of Object.entries(seed.rows)) {
-  const rows = list.map(RESOLVE[collection] || ((r) => r)).map(withoutEmptyObjects(collection));
+  const rows = list.map((r) => resolveRow(collection, r, userId));
   const report = await call('POST', `/admin/import/${encodeURIComponent(collection)}`, {
     format: 'json',
     content: JSON.stringify(rows),
@@ -163,6 +146,5 @@ if (missing.length) throw new Error(`the backend does not hold what schema.json 
 console.log(
   `setup-backend: ${schema.tables.length} collections, ${schema.tables.reduce((n, t) => n + t.indexes.length, 0)} indexes read back; ` +
     `${seed.users.length} users (${roleNames.map((r) => `role ${r}`).join(', ')}); ` +
-    `${Object.values(imported).reduce((a, b) => a + b, 0)} rows in ${Object.keys(imported).length} collections; ` +
-    `${emptyObjectsDropped.length} empty object(s) left off (the NodeGX {} defect).`
+    `${Object.values(imported).reduce((a, b) => a + b, 0)} rows in ${Object.keys(imported).length} collections.`
 );

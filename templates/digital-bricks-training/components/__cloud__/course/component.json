@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7dcc6d86-0f4e-5066-91c3-6b56194eae36",
+  "name": "course",
+  "path": "/#__cloud__/course",
+  "type": "cloud",
+  "created": "2026-09-23T09:00:00.000Z",
+  "modified": "2026-09-23T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The signed-in learner's own programme, projected for them. Identity from the session; no parameters; state from the server clock."
+}

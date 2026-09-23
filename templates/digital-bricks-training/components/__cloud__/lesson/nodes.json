@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ecaba4aa-e324-5586-9231-85712e61c8f5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "conceptId",
+        "allowNoAuth": false,
+        "ptype-conceptId": "string",
+        "preq-conceptId": true
+      }
+    },
+    {
+      "id": "who",
+      "type": "/#__cloud__/shared/Caller learner",
+      "label": "Their learner",
+      "x": 300,
+      "y": 40
+    },
+    {
+      "id": "read",
+      "type": "JavaScriptFunction",
+      "label": "Their lesson, if the step is theirs and open",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * ONE CACHED LESSON, FOR THE CALLER'S OWN LEARNER (TASK-L170 §1).\n *\n * The learner id comes from `Caller learner` — the session — and NEVER from an\n * argument: an optional scope is one forgotten check away from serving anybody's\n * lesson to anybody (L91). `conceptId` only says WHICH of their own lessons.\n *\n * The product's delivery gate is ported, not skipped: a lesson is served only\n * for a live step on the learner's live path that is not locked (a locked step\n * is 403 in the product). Everything else — no learner, no path, not on it,\n * locked, not written yet — answers `rows: []`, one shape, so a caller cannot\n * tell \"not yours\" from \"not there\" (the mcp/auth.ts rule).\n *\n * Two producers feed this node (the helper's `learnerId`, the Request's\n * `conceptId`), so it guards both and a late value re-runs it (rule 2). Each\n * arrives exactly once per request, so it answers exactly once.\n */\n// STORED AS JSON TEXT until OpenNoodl HLT-022 (tools/lib/seed-resolve.mjs STORED_AS_TEXT):\n// Records turns a nested object into a Model with a generated id, so a JSON\n// document cannot round-trip through it. Removed with the workaround.\n// Stored as `json:` + JSON: plain bracketed text is JSON-parsed by the SQL adapter\n// on read and would be Model-ized after all. Anything else is refused by name.\nconst fromText = (v) => {\n  if (typeof v !== 'string') throw new Error('a stored JSON document arrived as ' + typeof v + ', not json: text');\n  if (!v.startsWith('json:')) throw new Error('a stored JSON document is missing its json: prefix');\n  return JSON.parse(v.slice('json:'.length));\n};\nif (Inputs.learnerId !== undefined && Inputs.conceptId !== undefined) {\n  (async () => {\n    try {\n      const plain = (x) => JSON.parse(JSON.stringify(x));\n      const q = async (c, where) => plain(await Noodl.Records.query(c, where, { limit: 1000 }));\n      const learnerId = String(Inputs.learnerId);\n      const conceptId = String(Inputs.conceptId || '');\n      let rows = [];\n      if (learnerId && conceptId) {\n        const [paths, lessons] = await Promise.all([\n          q('LearningPath', { learnerId: { equalTo: learnerId } }),\n          // The neutral filter takes ONE key; two conditions are an `and` (live refuses a two-key object).\n          q('Lesson', { and: [{ learnerId: { equalTo: learnerId } }, { conceptId: { equalTo: conceptId } }] })\n        ]);\n        const live = [...paths].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];\n        const steps = live ? await q('PathStep', { and: [{ pathId: { equalTo: live.pathId } }, { conceptId: { equalTo: conceptId } }] }) : [];\n        const step = steps.find((s) => (s.removedAt === undefined || s.removedAt === null) && s.status !== 'locked');\n        if (step && lessons.length) {\n          // One cached lesson per (learner, concept) here; if a regeneration\n          // ever leaves two, the newest generation is the one being served.\n          const lesson = [...lessons].sort((a, b) => (b.generationVersion ?? 0) - (a.generationVersion ?? 0))[0];\n          rows = [{\n            conceptId: lesson.conceptId, title: lesson.title, hook: lesson.hook, landing: lesson.landing,\n            conceptVersion: lesson.conceptVersion, projectContextVersion: lesson.projectContextVersion,\n            generationVersion: lesson.generationVersion, generatedByTier: lesson.generatedByTier,\n            sections: fromText(lesson.sections), steps: fromText(lesson.steps)\n          }];\n        }\n      }\n      Outputs.rows = rows;\n      Outputs.done();\n    } catch (e) {\n      Outputs.error = String((e && e.message) || e);\n      // Logged for the operator; the caller still gets one refusal body (the mcp/auth.ts rule).\n      console.error('[dbt:lesson]', Outputs.error);\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-learnerId": true,
+        "runOnChange-in-conceptId": true
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conceptId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS QUERIES PER CALL: 3 — their paths and the lesson in parallel, then the step. Fewer when there is no learner or no path. Measured by tools/check-read-functions.mjs (criterion 6)."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "rows — the fixture's own shape",
+      "x": 820,
+      "y": 40,
+      "parameters": {
+        "params": "rows"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 820,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be read."
+      }
+    }
+  ]
+}

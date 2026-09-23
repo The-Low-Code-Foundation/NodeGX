@@ -103,8 +103,8 @@ fixtures below (the next section). The seam is these places:
 
 ## The backend, so far (sprint 49)
 
-The pages still read the fixtures. What exists is the backend they will read from, built from those
-same fixtures:
+The pages still read the fixtures (swapping them is L171). What exists is the backend they will read
+from, built from those same fixtures, and the four functions that read it:
 
 ```bash
 # a local backend on this project (the policy file is applied on its first start)
@@ -113,6 +113,9 @@ node <OpenNoodl>/packages/nodegx-backend/bin/nodegx-backend.js serve \
 node tools/build-seed.mjs                                            # fixtures → backend/seed.json
 node tools/setup-backend.mjs --backend http://127.0.0.1:8577 --token <admin credential>
 node tools/check-seed.mjs    --backend http://127.0.0.1:8577 --token <admin credential>
+node tools/deploy-functions.mjs --backend http://127.0.0.1:8577 --token <admin credential>
+node tools/check-read-functions.mjs                    # offline, no backend needed
+node tools/check-timeline-port.mjs                     # the ported timeline model vs the product's
 ```
 
 - **`backend/schema.json` is the schema.** NodeGX keeps a collection's schema in the backend, not
@@ -127,9 +130,41 @@ node tools/check-seed.mjs    --backend http://127.0.0.1:8577 --token <admin cred
 - **Users have no password** — this product has none. They are created with the admin credential.
 - **`setup-backend.mjs` refuses a backend that already holds data**, so it cannot write over a live
   one. Start a fresh data directory instead.
-- **A NodeGX defect it works around, named in the tool:** a field holding an empty object `{}`
-  cannot be written (a 500, or an import that rolls back). So an empty `facts` is left off the row
-  and reads back as `null`, which every reader treats as `{}`.
+- **An empty object `{}` is written as itself** since NodeGX HLT-018. The workaround that left it
+  off the row is gone, so a `{}` that stops round-tripping fails `check-seed` rather than being
+  excused by it.
+- **Three JSON documents are stored as TEXT** — a lesson's `sections` and `steps`, a context's
+  `facts` — with a `json:` prefix. A WORKAROUND for two NodeGX defects, owned in one module
+  (`tools/lib/seed-resolve.mjs`): `Noodl.Records` turns every nested object into a Model with a
+  generated id (a lesson's section ids came back random, and its steps index sections by id), and the
+  SQL adapter JSON-parses any bracketed string even in a `String` column (so plain JSON text came
+  back an object anyway). It comes out whole when OpenNoodl **HLT-022** lands.
+
+### The four read functions (L170)
+
+`components/__cloud__/` — `course` (a learner's own programme; takes **no parameter**, so a learner
+cannot name anybody else), `lesson` (the caller's cached lesson, only for a live, unlocked step on
+their newest path), `learnerProgramme` and `roster` (`role:staff`). Two helpers with no Request node:
+`shared/Caller learner` (the signed-in account → its learner, one query) and `shared/Programme` (a
+PORT of the product's timeline model — `assembleTimeline`, `orderEntries`, the state rules,
+`currentProgramme` — run once per request, 25 queries in 3 rounds).
+
+- **Each function's output IS its fixture's `Static Data` array**, so L171 swaps a source, not a
+  shape. `check-read-functions.mjs` proves it through the PRODUCT's own projections, compiled from
+  the product repo (`DBT_REPO`), and fails if the product is absent rather than comparing nothing.
+- **The fixture's `state`s hold only between `2026-09-18T19:15Z` and `2026-09-30T22:59:59.999Z`**
+  (measured, both edges). `learnerProgramme` takes a `now` for that reason; `course` uses the server
+  clock and cannot, so **a backend-fed `/course` only matches the fixture until 30 September**.
+- **`deploy-functions.mjs`** walks the nested `__cloud__` folders, derives each component's ports
+  (an empty port list is a silent 30-second hang, not an error) and refuses a signal a script fires
+  on a port it never declared.
+- **The live half runs only on a disposable backend**: `check-read-functions.mjs --backend … --token
+  … --scratch` mints sessions and writes a probe note, and deletes both, verified by re-reading.
+- 🔴 **Not for production yet — OpenNoodl HLT-023.** Every query a deployed function makes is charged
+  to principal `admin` in the `data` class, so the whole deployment shares ONE bucket. On the
+  default budget, 13 `course` loads drain it; the next is a 400 and then 500s, including the
+  operator's own admin requests. The scratch backends raise the limit, which proves nothing about
+  production.
 
 **The fixtures were made into one consistent world first**, because one database could not hold
 all three as they were, and because the world has to be one person's.

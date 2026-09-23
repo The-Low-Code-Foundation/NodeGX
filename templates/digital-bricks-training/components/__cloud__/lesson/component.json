@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ecaba4aa-e324-5586-9231-85712e61c8f5",
+  "name": "lesson",
+  "path": "/#__cloud__/lesson",
+  "type": "cloud",
+  "created": "2026-09-23T09:00:00.000Z",
+  "modified": "2026-09-23T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One cached lesson for the signed-in learner's own path. The learner comes from the session; conceptId only says which."
+}

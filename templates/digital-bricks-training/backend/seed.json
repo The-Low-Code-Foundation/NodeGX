@@ -91,7 +91,17 @@
   "rows": {
     "ArtifactSubmission": [
       {
-        "submissionId": "art-scope",
+        "submissionId": "what-the-web-is:1",
+        "learnerId": "l-sam",
+        "attempt": 1,
+        "submittedAt": "2026-09-06T19:20:00.000Z",
+        "evaluation": null,
+        "conceptId": "what-the-web-is",
+        "sectionId": "artifact",
+        "deliverableId": null
+      },
+      {
+        "submissionId": "scoping-what-to-build:1",
         "learnerId": "l-sam",
         "attempt": 1,
         "submittedAt": "2026-09-07T21:12:00.000Z",
@@ -101,16 +111,6 @@
         "conceptId": "scoping-what-to-build",
         "sectionId": "artifact",
         "deliverableId": "obj-scope"
-      },
-      {
-        "submissionId": "art-web",
-        "learnerId": "l-sam",
-        "attempt": 1,
-        "submittedAt": "2026-09-06T19:20:00.000Z",
-        "evaluation": null,
-        "conceptId": "what-the-web-is",
-        "sectionId": "artifact",
-        "deliverableId": null
       }
     ],
     "Assignment": [
@@ -154,6 +154,16 @@
         ],
         "deliverableId": "obj-words",
         "status": "issued"
+      }
+    ],
+    "AssignmentSubmission": [
+      {
+        "submissionId": "sub-brief-scope",
+        "learnerId": "l-sam",
+        "attempt": 1,
+        "submittedAt": "2026-09-07T21:12:00.000Z",
+        "evaluation": null,
+        "assignmentId": "brief-scope"
       }
     ],
     "CoachNote": [
@@ -471,23 +481,28 @@
     "DeliverableConcept": [
       {
         "deliverableId": "obj-scope",
-        "conceptId": "scoping-what-to-build"
+        "conceptId": "scoping-what-to-build",
+        "position": 0
       },
       {
         "deliverableId": "obj-words",
-        "conceptId": "html-the-structure"
+        "conceptId": "html-the-structure",
+        "position": 0
       },
       {
         "deliverableId": "obj-words",
-        "conceptId": "css-making-it-look-right"
+        "conceptId": "css-making-it-look-right",
+        "position": 1
       },
       {
         "deliverableId": "obj-live",
-        "conceptId": "deploying-going-live"
+        "conceptId": "deploying-going-live",
+        "position": 0
       },
       {
         "deliverableId": "obj-live",
-        "conceptId": "picking-a-host"
+        "conceptId": "picking-a-host",
+        "position": 1
       }
     ],
     "DimensionRating": [
@@ -504,6 +519,27 @@
         "sessionId": "sess-start",
         "evaluationId": null,
         "score": 3
+      },
+      {
+        "ratingId": "rt-eval-initial-dim-ask",
+        "dimensionId": "dim-ask",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 3
+      },
+      {
+        "ratingId": "rt-eval-initial-dim-check",
+        "dimensionId": "dim-check",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 2
+      },
+      {
+        "ratingId": "rt-eval-initial-dim-alone",
+        "dimensionId": "dim-alone",
+        "sessionId": null,
+        "evaluationId": "eval-initial",
+        "score": 2
       },
       {
         "ratingId": "rt-sess-scope-dim-ask",
@@ -532,27 +568,6 @@
         "sessionId": "sess-scope",
         "evaluationId": null,
         "score": 5
-      },
-      {
-        "ratingId": "rt-eval-initial-dim-ask",
-        "dimensionId": "dim-ask",
-        "sessionId": null,
-        "evaluationId": "eval-initial",
-        "score": 3
-      },
-      {
-        "ratingId": "rt-eval-initial-dim-check",
-        "dimensionId": "dim-check",
-        "sessionId": null,
-        "evaluationId": "eval-initial",
-        "score": 2
-      },
-      {
-        "ratingId": "rt-eval-initial-dim-alone",
-        "dimensionId": "dim-alone",
-        "sessionId": null,
-        "evaluationId": "eval-initial",
-        "score": 2
       }
     ],
     "LearnerDeliverable": [
@@ -769,7 +784,8 @@
         "pathId": "path-l-sam-prog-autumn",
         "learnerId": "l-sam",
         "programmeId": "prog-autumn",
-        "replanBlockedAt": null
+        "replanBlockedAt": null,
+        "createdAt": "2026-09-01T09:00:00.000Z"
       }
     ],
     "Lesson": [
@@ -1890,17 +1906,6 @@
         "createdByEmail": "trainer@example.test"
       },
       {
-        "programmeId": "p-priya-0",
-        "learnerId": "l-priya",
-        "title": "Autumn programme",
-        "status": "active",
-        "startsOn": "2026-08-10",
-        "endsOn": "2026-12-18",
-        "archivedAt": null,
-        "createdAt": "2026-08-10T09:00:00.000Z",
-        "createdByEmail": "trainer@example.test"
-      },
-      {
         "programmeId": "p-priya-1",
         "learnerId": "l-priya",
         "title": "Spring programme",
@@ -1909,6 +1914,17 @@
         "endsOn": "2026-07-31",
         "archivedAt": "2026-08-01T09:00:00.000Z",
         "createdAt": "2026-03-02T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
+        "programmeId": "p-priya-0",
+        "learnerId": "l-priya",
+        "title": "Autumn programme",
+        "status": "active",
+        "startsOn": "2026-08-10",
+        "endsOn": "2026-12-18",
+        "archivedAt": null,
+        "createdAt": "2026-08-10T09:00:00.000Z",
         "createdByEmail": "trainer@example.test"
       },
       {
@@ -1934,23 +1950,25 @@
         "createdByEmail": "trainer@example.test"
       },
       {
+        "programmeId": "prog-summer",
+        "learnerId": "l-sam",
+        "title": "Finding your feet",
+        "status": "closed",
+        "startsOn": "2026-07-08",
+        "endsOn": "2026-07-31",
+        "archivedAt": "2026-08-01T09:00:00.000Z",
+        "createdAt": "2026-07-08T09:00:00.000Z",
+        "createdByEmail": "trainer@example.test"
+      },
+      {
         "programmeId": "prog-autumn",
         "learnerId": "l-sam",
         "title": "Getting your first site live",
         "status": "active",
-        "startsOn": null,
+        "startsOn": "2026-09-01",
         "endsOn": "2026-11-27",
         "archivedAt": null,
-        "createdByEmail": "trainer@example.test"
-      },
-      {
-        "programmeId": "prog-summer",
-        "learnerId": "l-sam",
-        "title": "Finding your feet",
-        "status": "ended",
-        "startsOn": null,
-        "endsOn": "2026-07-31",
-        "archivedAt": "2026-08-01T09:00:00.000Z",
+        "createdAt": "2026-09-01T09:00:00.000Z",
         "createdByEmail": "trainer@example.test"
       }
     ],
@@ -2307,7 +2325,7 @@
         "confidence": null,
         "reachedWowMoment": false,
         "completedAt": null,
-        "updatedAt": "2026-09-21T19:30:00.000Z"
+        "updatedAt": "2026-09-01T09:00:00.000Z"
       }
     ],
     "ProjectContext": [
@@ -2480,25 +2498,25 @@
         "resourceStorageKey": null
       },
       {
-        "prepId": "res-checklist",
+        "prepId": "prep-sess-next-3",
         "sessionId": "sess-next",
         "position": 3,
         "conceptId": null,
         "assignmentId": null,
         "resourceLabel": "Before-we-meet checklist (PDF)",
         "resourceUrl": null,
-        "resourceStorageKey": null
+        "resourceStorageKey": "prep/before-we-meet-checklist.pdf"
       }
     ],
     "Signal": [
       {
-        "signalId": "sig-css",
+        "signalId": "sig-web",
         "learnerId": "l-sam",
-        "conceptId": "css-making-it-look-right",
-        "sectionId": "reading-css-gist",
+        "conceptId": "what-the-web-is",
+        "sectionId": "reading-request-response",
         "kind": "explicit_confusion",
-        "utterance": "It looks fine on my laptop and squashed on my phone and I can't tell which one is wrong.",
-        "createdAt": "2026-09-21T20:02:00.000Z"
+        "utterance": "So is the copy on my computer or theirs?",
+        "createdAt": "2026-09-05T20:31:00.000Z"
       },
       {
         "signalId": "sig-html",
@@ -2510,13 +2528,13 @@
         "createdAt": "2026-09-16T20:44:00.000Z"
       },
       {
-        "signalId": "sig-web",
+        "signalId": "sig-css",
         "learnerId": "l-sam",
-        "conceptId": "what-the-web-is",
-        "sectionId": "reading-request-response",
+        "conceptId": "css-making-it-look-right",
+        "sectionId": "reading-css-gist",
         "kind": "explicit_confusion",
-        "utterance": "So is the copy on my computer or theirs?",
-        "createdAt": "2026-09-05T20:31:00.000Z"
+        "utterance": "It looks fine on my laptop and squashed on my phone and I can't tell which one is wrong.",
+        "createdAt": "2026-09-21T20:02:00.000Z"
       }
     ]
   }

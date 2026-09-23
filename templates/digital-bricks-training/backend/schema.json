@@ -470,6 +470,10 @@
         {
           "name": "conceptId",
           "type": "String"
+        },
+        {
+          "name": "position",
+          "type": "Number"
         }
       ],
       "indexes": [
@@ -715,11 +719,11 @@
         },
         {
           "name": "steps",
-          "type": "Array"
+          "type": "String"
         },
         {
           "name": "sections",
-          "type": "Array"
+          "type": "String"
         }
       ],
       "indexes": [
@@ -969,7 +973,7 @@
         },
         {
           "name": "facts",
-          "type": "Object"
+          "type": "String"
         },
         {
           "name": "version",

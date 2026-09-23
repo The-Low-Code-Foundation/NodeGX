@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2470c54e-1cea-51a9-a18d-f82e6c52274e",
+  "name": "Programme",
+  "path": "/#__cloud__/shared/Programme",
+  "type": "cloud",
+  "created": "2026-09-23T09:00:00.000Z",
+  "modified": "2026-09-23T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One learner's programme assembled from rows: the SUPERSET, which each endpoint projects for its own reader. Not callable over HTTP."
+}

@@ -274,7 +274,10 @@ for (const d of pt.take('deliverables')) {
     position: dt.take('position'),
     archivedAt: dt.take('archivedAt')
   });
-  for (const conceptId of dt.take('conceptIds')) add('DeliverableConcept', { deliverableId, conceptId });
+  // `deliverable_concepts.position` orders a deliverable's concepts in the product
+  // (deliverables/service.ts: ORDER BY position). The seed carried no position,
+  // so a backend returned them in whatever order its rows came back in.
+  dt.take('conceptIds').forEach((conceptId, position) => add('DeliverableConcept', { deliverableId, conceptId, position }));
   dt.done();
 }
 
@@ -358,7 +361,20 @@ const ENTRY = {
       const row = { prepId: `prep-${sessionId}-${position}`, sessionId, position, conceptId: null, assignmentId: null, resourceLabel: null, resourceUrl: null, resourceStorageKey: null };
       if (item.kind === 'concept') { row.conceptId = id; noteConcept(id, title); }
       else if (item.kind === 'assignment') row.assignmentId = id;
-      else if (item.kind === 'resource') { row.prepId = id; row.resourceLabel = title; row.resourceUrl = it.take('url') ?? null; }
+      else if (item.kind === 'resource') {
+        // A resource's `id` is DERIVED in the product — `storageKey ?? url ??
+        // label` (sessions-service.ts toView) — so it names nothing a row holds
+        // and the row keeps its positional id. The storage key was never read
+        // here, so a prep FILE could not reach the seed at all; L145's CHECK
+        // needs exactly one of the two, and the seed now carries whichever the
+        // fixture has.
+        row.resourceLabel = title;
+        row.resourceUrl = it.take('url') ?? null;
+        row.resourceStorageKey = it.take('storageKey') ?? null;
+        if ((row.resourceUrl === null) === (row.resourceStorageKey === null)) {
+          fail(`prep ${sessionId}#${position}: a resource needs exactly one of url and storageKey (L145's session_prep_resource_payload)`);
+        }
+      }
       else fail(`prep ${sessionId}#${position}: unknown kind '${item.kind}'`);
       add('SessionPrep', row);
       it.done();
@@ -387,7 +403,10 @@ const ENTRY = {
   },
   submission(e, t) {
     const source = t.take('source');
-    const submissionId = e.id.slice('submission:'.length);
+    // The product builds this entry's id as `submission:<source>:<rest>`, so the
+    // row keeps only <rest>: stripping `submission:` alone leaves the source in
+    // the row id and the function then writes it twice.
+    const submissionId = e.id.slice(`submission:${source}:`.length);
     const common = { submissionId, learnerId, attempt: t.take('attempt'), submittedAt: t.take('at'), evaluation: t.take('evaluated') ? { summary: '(seeded)' } : null };
     t.take('programmeId');
     t.take('anchor');
