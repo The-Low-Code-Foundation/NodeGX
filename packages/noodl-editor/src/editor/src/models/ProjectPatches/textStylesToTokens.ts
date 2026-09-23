@@ -33,10 +33,13 @@
  *   equal to one of the project's own colour tokens references it; the shipped defaults are never
  *   matched, because a preset or theme moves their values and would recolour old text.
  * - `textTransform` → copied onto each wearer, unshared: it has no token kind (R8, stated and accepted).
- * - `fontFamily` naming a font **file** → copied onto each wearer, unshared. 🔴 98% of text styles on
- *   this machine name a file (1,709 of 1,746). A token cannot carry one: the font port's setter is
- *   what loads the file (`FontLoader.loadFont`), and a `var(--…)` never reaches it. A family *name*
- *   becomes a token.
+ * - `fontFamily` → a token. 🔴 98% of text styles on this machine name a font **file** (1,709 of
+ *   1,746), and a `var(--…)` never reaches the font port's setter, which is what loads a file
+ *   (`FontLoader.loadFont`). So a file's token holds the family name the runtime derives from it
+ *   (`fonts/Roboto/Roboto-Medium.ttf` → `'Roboto-Medium'`), and {@link fontFaceStylesheet} writes the
+ *   `@font-face` that loads it into a project module — the same road the bundled Inter font takes,
+ *   which the viewer, a deploy and the code export all link. **R9**, ruled 2026-09-23: *"Teach tokens
+ *   font files first"*, so changing a font is one token too.
  *
  * # What is left alone, and said so
  *
@@ -48,10 +51,7 @@
  *
  * Every definition nothing still names is removed, so the Text node's picker stops listing styles
  * that no longer do anything. Running this twice is a no-op.
- */
-
-import type { StyleTokenRecord } from '@nodegx/project-contract/tokens';
-import { DEFAULT_TOKENS } from '@nodegx/project-contract/tokens';
+ */ import { DEFAULT_TOKENS, type StyleTokenRecord } from '@nodegx/project-contract/tokens';
 
 type Params = Record<string, unknown>;
 type StateParams = Record<string, Params>;
@@ -150,7 +150,19 @@ export interface TextStyleConversionReport {
   corrections: number;
   kept: { name: string; reason: string }[];
   notCarried: NotCarried[];
+  /** Font files a family token now names, for {@link fontFaceStylesheet}. */
+  fontFaces: FontFace[];
 }
+
+export interface FontFace {
+  /** The family name the runtime derives from the file, and the token's value. */
+  family: string;
+  /** The file as the text style named it, project-relative. */
+  file: string;
+}
+
+/** Where the upgrade's `@font-face` rules live: a project module, linked like the bundled Inter. */
+export const FONT_MODULE_DIR = 'noodl_modules/text-style-fonts';
 
 // ─── Values ──────────────────────────────────────────────────────────────────
 
@@ -194,6 +206,16 @@ function variantStates(v: TextStyleVariantLike | undefined): StateParams | undef
   return v.stateParamaters ?? v.stateParameters;
 }
 
+/** The family name the runtime gives a font file (`styles.ts`, `fontloader.ts`): its base name. */
+export function familyOfFontFile(file: string): string {
+  return (
+    file
+      .replace(/\.[^/.]+$/, '')
+      .split('/')
+      .pop() ?? file
+  );
+}
+
 function isFontFile(family: string): boolean {
   // The runtime's own test (`styles.ts`, `node-shared-port-definitions.ts` fontFamily setter).
   return family.split('.').length > 1;
@@ -209,7 +231,8 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     layersRewritten: 0,
     corrections: 0,
     kept: [],
-    notCarried: []
+    notCarried: [],
+    fontFaces: []
   };
 
   const metadata = project.metadata ?? {};
@@ -238,8 +261,7 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     }
   }
 
-  const variantOf = (n: TextStyleNodeLike) =>
-    variants.find((v) => v.typename === n.type && v.name === n.variant);
+  const variantOf = (n: TextStyleNodeLike) => variants.find((v) => v.typename === n.type && v.name === n.variant);
 
   // A variant worn by a wired node cannot be rewritten: the wire replaces the style while the app
   // runs, and font ports written into the variant would then win over whatever it delivers.
@@ -301,9 +323,21 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
       const css = styleValue(def, prop);
       if (css === undefined) continue;
 
-      if (prop === 'textTransform' || (prop === 'fontFamily' && isFontFile(css))) {
+      if (prop === 'textTransform') {
         out[prop] = { portValue: css, css };
         entry.copied.push(prop);
+        continue;
+      }
+
+      if (prop === 'fontFamily' && isFontFile(css)) {
+        const family = familyOfFontFile(css);
+        const name = tokenFor(`--${slug}-family`, `'${family}'`, 'typography-family', styleName);
+        if (!report.fontFaces.some((f) => f.family === family && f.file === css)) {
+          report.fontFaces.push({ family, file: css });
+        }
+        // `css` stays the file: it is what the style drew, and the simulation compares like with like.
+        out[prop] = { portValue: `var(${name})`, css };
+        entry.tokens.push(name);
         continue;
       }
 
@@ -435,9 +469,7 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     for (const layer of Object.values(node.stateParameters ?? {})) collect(layer, wearer.ports);
   }
   const anyWired = wired.size > 0;
-  const keptDefinitions = new Set<string>(
-    Object.keys(definitions).filter((name) => anyWired || stillNamed.has(name))
-  );
+  const keptDefinitions = new Set<string>(Object.keys(definitions).filter((name) => anyWired || stillNamed.has(name)));
 
   // ── The simulation: every wearer, every state, before and after ───────────
   /** What a font property renders as: an author's own value, or CSS a style (or its tokens) supplies. */
@@ -544,7 +576,7 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     }
   }
 
-// ── Commit ─────────────────────────────────────────────────────────────────
+  // ── Commit ─────────────────────────────────────────────────────────────────
   let removed = 0;
   for (const name of Object.keys(definitions)) {
     if (keptDefinitions.has(name)) {
@@ -564,15 +596,16 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
   report.converted = report.converted.filter((c) => !keptDefinitions.has(c.name));
 
   if (report.tokensMinted.length > 0) {
-    metadata.designTokens = { ...(stored && typeof stored === 'object' ? stored : {}), version: stored?.version ?? 1, customTokens };
+    metadata.designTokens = {
+      ...(stored && typeof stored === 'object' ? stored : {}),
+      version: stored?.version ?? 1,
+      customTokens
+    };
   }
   if (styles && Object.keys(definitions).length === 0) delete styles.text;
 
   report.changed =
-    report.tokensMinted.length > 0 ||
-    report.layersRewritten > 0 ||
-    report.corrections > 0 ||
-    removed > 0;
+    report.tokensMinted.length > 0 || report.layersRewritten > 0 || report.corrections > 0 || removed > 0;
   project.metadata = metadata;
   return report;
 }
@@ -588,8 +621,10 @@ export function describeTextStyleConversion(report: TextStyleConversionReport): 
         `Everything that wore ${n === 1 ? 'it' : 'them'} now uses the tokens, so changing a token changes every wearer.`
     );
     const copied = new Set(report.converted.flatMap((c) => c.copied));
-    if (copied.has('fontFamily')) {
-      lines.push('Font files were copied onto each wearer: a token cannot load a font file.');
+    if (report.fontFaces.length > 0) {
+      lines.push(
+        `Their font files are loaded by a stylesheet the upgrade added (${FONT_MODULE_DIR}), so a font is one token too.`
+      );
     }
     if (copied.has('textTransform')) {
       lines.push('Letter case was copied onto each wearer: there is no token for it.');
@@ -600,4 +635,38 @@ export function describeTextStyleConversion(report: TextStyleConversionReport): 
     lines.push(`Could not carry ${nc.port} on a node in "${nc.component}" (${nc.state}): ${nc.reason}.`);
   }
   return lines;
+}
+
+/**
+ * The upgrade module's stylesheet: one `@font-face` per font file a family token names, merged into
+ * what a previous upgrade already wrote (a style a prefab brings back later adds its face, never
+ * repeats one). The URL is relative to the stylesheet, which sits two folders below the project.
+ */
+export function fontFaceStylesheet(existing: string | undefined, faces: FontFace[]): string {
+  let css =
+    existing ??
+    `/*\n * Written by NodeGX 0.3 when this project's text styles became typography tokens (P100 UPG-003).\n` +
+      ` * Each rule loads a font file a family token names. Delete a rule only with the token it serves.\n */\n`;
+  for (const face of faces) {
+    const src = /^(https?:)?\/\//.test(face.file) ? face.file : '../../' + face.file.replace(/^\/+/, '');
+    const rule = `@font-face {\n  font-family: '${face.family}';\n  src: url('${src}');\n}\n`;
+    if (!css.includes(rule)) css += rule;
+  }
+  return css;
+}
+
+/** The module's manifest: what makes the viewer, a deploy and the code export link the stylesheet. */
+export function fontModuleManifest(): string {
+  return (
+    JSON.stringify(
+      {
+        name: 'Text style fonts',
+        browser: { stylesheets: [`${FONT_MODULE_DIR}/styles.css`] },
+        _note:
+          'Added by NodeGX 0.3 when text styles became typography tokens: styles.css loads the font files the family tokens name.'
+      },
+      null,
+      2
+    ) + '\n'
+  );
 }

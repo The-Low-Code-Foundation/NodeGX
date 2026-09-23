@@ -4,11 +4,14 @@ import path from 'path';
 import {
   convertTextStylesToTokens,
   describeTextStyleConversion,
+  familyOfFontFile,
+  FONT_MODULE_DIR,
+  fontFaceStylesheet,
   TEXT_STYLE_WEARERS,
   TextStyleNodeLike,
   TextStyleProjectLike
 } from '../../src/editor/src/models/ProjectPatches/textStylesToTokens';
-import { upgradeOnLoad } from '../../src/editor/src/models/ProjectPatches/upgradeOnLoad';
+import { describeUpgradeReport, upgradeOnLoad } from '../../src/editor/src/models/ProjectPatches/upgradeOnLoad';
 import { stripComments } from '../support/renderElements';
 
 /**
@@ -64,6 +67,14 @@ function css(v: unknown): string | null {
 
 /** What the runtime draws for `prop` through `port` on node `id` in `state`. */
 function render(p: TextStyleProjectLike, id: string, port: string, prop: string, state = 'neutral'): string | null {
+  const drawn = renderRaw(p, id, port, prop, state);
+  if (drawn === null || prop !== 'fontFamily') return drawn;
+  // the runtime draws a font file as its base name (`styles.ts`), and a family's quotes are CSS syntax
+  const bare = drawn.replace(/^'(.*)'$/, '$1');
+  return bare.split('.').length > 1 ? bare.replace(/\.[^/.]+$/, '').split('/').pop()! : bare;
+}
+
+function renderRaw(p: TextStyleProjectLike, id: string, port: string, prop: string, state: string): string | null {
   const n = node(p, id);
   const tokens = new Map<string, string>(
     (p.metadata?.designTokens?.customTokens ?? []).map((t: { name: string; value: string }) => [t.name, t.value])
@@ -194,7 +205,7 @@ describe('P100 UPG-003 — a style worn across node types stays one style', () =
 });
 
 describe('P100 UPG-003 — what each property becomes', () => {
-  it('sizes, leading, tracking and a new colour become tokens; font files and case are copied', () => {
+  it('family, size, leading, tracking and a new colour become tokens; only case is copied', () => {
     const p = project({
       text: { 'Label Medium': STYLE('14') },
       nodes: [{ id: 't', type: 'Text', parameters: { textStyle: 'Label Medium' } }]
@@ -205,11 +216,12 @@ describe('P100 UPG-003 — what each property becomes', () => {
       lineHeight: 'var(--label-medium-leading)',
       letterSpacing: 'var(--label-medium-tracking)',
       color: 'var(--label-medium-color)',
-      fontFamily: 'fonts/Inter/Inter-Medium.ttf',
+      fontFamily: 'var(--label-medium-family)',
       textTransform: 'uppercase'
     });
     const tokens = p.metadata!.designTokens.customTokens;
     expect(tokens.map((t: { name: string; category: string }) => [t.name, t.category])).toEqual([
+      ['--label-medium-family', 'typography-family'],
       ['--label-medium-size', 'typography-size'],
       ['--label-medium-color', 'color-palette'],
       ['--label-medium-tracking', 'typography-tracking'],
@@ -233,7 +245,7 @@ describe('P100 UPG-003 — what each property becomes', () => {
     expect(node(p, 't').parameters!.fontSize).toBe('var(--label-medium-size)');
   });
 
-  it('a family NAME becomes a token; a font FILE never does, because only the port loads the file', () => {
+  it('R9: a font FILE becomes a token holding the family the runtime derives, and a face that loads the file', () => {
     const p = project({
       text: { Named: { fontFamily: 'Georgia' }, Filed: { fontFamily: 'fonts/Roboto/Roboto-Bold.ttf' } },
       nodes: [
@@ -241,9 +253,36 @@ describe('P100 UPG-003 — what each property becomes', () => {
         { id: 'b', type: 'Text', parameters: { textStyle: 'Filed' } }
       ]
     });
-    convertTextStylesToTokens(p);
+    const before = { a: render(p, 'a', 'textStyle', 'fontFamily'), b: render(p, 'b', 'textStyle', 'fontFamily') };
+    const report = convertTextStylesToTokens(p);
     expect(node(p, 'a').parameters!.fontFamily).toBe('var(--named-family)');
-    expect(node(p, 'b').parameters!.fontFamily).toBe('fonts/Roboto/Roboto-Bold.ttf');
+    expect(node(p, 'b').parameters!.fontFamily).toBe('var(--filed-family)');
+    const filed = p.metadata!.designTokens.customTokens.find((t: { name: string }) => t.name === '--filed-family');
+    expect(filed.value).toBe("'Roboto-Bold'");
+    expect(report.fontFaces).toEqual([{ family: 'Roboto-Bold', file: 'fonts/Roboto/Roboto-Bold.ttf' }]);
+    // the family NAME needs no face: the browser already has it
+    expect(report.fontFaces.map((f) => f.family)).not.toContain('Georgia');
+    expect({ a: render(p, 'a', 'textStyle', 'fontFamily'), b: render(p, 'b', 'textStyle', 'fontFamily') }).toEqual(
+      before
+    );
+    // the derivation is the runtime's (`styles.ts`), not a guess at it
+    expect(familyOfFontFile('assets/fonts/inter/Inter-SemiBold.otf')).toBe('Inter-SemiBold');
+  });
+
+  it('the face stylesheet loads each file once, relative to where the module sits, and keeps what was there', () => {
+    const faces = [
+      { family: 'Roboto-Bold', file: 'fonts/Roboto/Roboto-Bold.ttf' },
+      { family: 'Remote', file: 'https://cdn.example.com/Remote.woff2' },
+      { family: 'Rooted', file: '/fonts/Rooted.ttf' }
+    ];
+    const css = fontFaceStylesheet(undefined, faces);
+    expect(FONT_MODULE_DIR.split('/')).toHaveLength(2); // hence '../../'
+    expect(css).toContain("font-family: 'Roboto-Bold';\n  src: url('../../fonts/Roboto/Roboto-Bold.ttf');");
+    expect(css).toContain("src: url('https://cdn.example.com/Remote.woff2');");
+    expect(css).toContain("src: url('../../fonts/Rooted.ttf');");
+    const again = fontFaceStylesheet(css, [faces[0], { family: 'New', file: 'fonts/New.ttf' }]);
+    expect(again.startsWith(css)).toBe(true);
+    expect(again.split('@font-face').length - 1).toBe(4);
   });
 
   it("a colour naming one of the project's colour styles is copied as that name, so it keeps resolving", () => {
@@ -449,7 +488,7 @@ describe('P100 UPG-003 — once', () => {
     const report = convertTextStylesToTokens(p);
     expect(report.changed).toBe(false);
     expect(describeTextStyleConversion(report)).toEqual([]);
-    expect(upgradeOnLoad(p)).toEqual([]);
+    expect(upgradeOnLoad(p)).toEqual({ sections: [], files: [] });
     expect(JSON.stringify(p)).toBe(read);
   });
 
@@ -461,11 +500,19 @@ describe('P100 UPG-003 — once', () => {
   });
 
   it('the report names what happened, in sentences, and the load seam carries it', () => {
-    const sections = upgradeOnLoad(build());
+    const { sections, files } = upgradeOnLoad(build());
     expect(sections).toHaveLength(1);
     expect(sections[0].title).toBe('Text styles are now typography tokens');
     expect(sections[0].lines.join(' ')).toMatch(/2 text styles became typography tokens/);
-    expect(sections[0].lines.join(' ')).toMatch(/Font files were copied onto each wearer/);
+    expect(sections[0].lines.join(' ')).toMatch(/font files are loaded by a stylesheet the upgrade added/);
+    expect(files.map((f) => f.path)).toEqual([`${FONT_MODULE_DIR}/styles.css`, `${FONT_MODULE_DIR}/manifest.json`]);
+    const manifest = JSON.parse(files[1].merge(undefined));
+    expect(manifest.browser.stylesheets).toEqual([`${FONT_MODULE_DIR}/styles.css`]);
+    expect(files[1].merge('{"kept":true}')).toBe('{"kept":true}');
+    const { message } = describeUpgradeReport(sections, '/p/Shop.before-0.3');
+    expect(message).toMatch(/A copy of the project as it was is at \/p\/Shop\.before-0\.3\./);
+    // control: with no copy, no sentence claims one
+    expect(describeUpgradeReport(sections).message).not.toMatch(/A copy of the project/);
   });
 });
 
@@ -473,20 +520,39 @@ describe('P100 UPG-003 — the wiring', () => {
   const EDITOR_SRC = path.join(__dirname, '..', '..', 'src', 'editor', 'src');
   const read = (...s: string[]) => stripComments(fs.readFileSync(path.join(EDITOR_SRC, ...s), 'utf8'));
 
-  it('opening a project runs the upgrade after the patches and before the model is built', () => {
+  it('opening a project runs the upgrade after the patches, on a copy, and builds the model from it', () => {
     const src = read('models', 'projectmodel.editor.ts');
-    const patches = src.indexOf('applyPatches(content)');
-    const upgrade = src.indexOf('upgradeOnLoad(content)');
-    const build = src.indexOf('ProjectModel.fromJSON(content)');
+    const open = src.slice(src.indexOf('const openProject = () => {'), src.indexOf('//is project version incompatible?'));
+    const patches = open.indexOf('applyPatches(content)');
+    const upgrade = open.indexOf('upgradeOnLoad(upgradedContent)');
     expect(patches).toBeGreaterThan(-1); // control
     expect(upgrade).toBeGreaterThan(patches);
-    expect(build).toBeGreaterThan(upgrade);
-    expect(src).toMatch(/ToastLayer\.showInfo\(message,\s*\{\s*title,\s*duration:\s*Infinity/);
+    expect(open).toMatch(/const upgradedContent = JSON\.parse\(JSON\.stringify\(content\)\)/);
+    expect(src).toMatch(/const project = ProjectModel\.fromJSON\(loaded\)/);
+    expect(src).toMatch(/project\._upgradedOnLoad = upgraded;/);
+  });
+
+  it('R10: the project folder is copied before the upgraded content is built, and a failed copy opens it unconverted', () => {
+    const src = read('models', 'projectmodel.editor.ts');
+    const open = src.slice(src.indexOf('const openProject = () => {'), src.indexOf('//is project version incompatible?'));
+    const backup = open.indexOf('backupBeforeUpgrade(projectdir)');
+    const writes = open.indexOf('await writeUpgradeFiles(projectdir, files)');
+    expect(writes).toBeGreaterThan(backup); // the font stylesheet is written after the copy
+    const onCopied = open.indexOf('build(upgradedContent, true)');
+    const onFailed = open.indexOf('build(content, false);\n          }\n        );');
+    expect(backup).toBeGreaterThan(-1);
+    expect(onCopied).toBeGreaterThan(backup);
+    expect(onFailed).toBeGreaterThan(onCopied);
+    // nothing upgraded is built on any path that did not copy first
+    expect(open.split('build(upgradedContent').length - 1).toBe(1);
+    expect(open).toMatch(/ToastLayer\.showInfo\(message,\s*\{\s*title,\s*duration:\s*Infinity/);
+    // the copy is checked, not assumed
+    const fn = src.slice(src.indexOf('async function backupBeforeUpgrade'));
+    expect(fn).toMatch(/copyFolder\(projectdir, backupPath\)/);
+    expect(fn).toMatch(/throw new Error/);
   });
 
   it('an upgraded project is saved when it opens, so it is upgraded, and says so, once', () => {
-    const loader = read('models', 'projectmodel.editor.ts');
-    expect(loader).toMatch(/project\._upgradedOnLoad = upgrades\.length > 0/);
     const model = read('models', 'projectmodel.ts');
     const setter = model.slice(model.indexOf('public static set instance'), model.indexOf('DSG-007/F30'));
     expect(setter).toMatch(/instanceHasChanged/); // control: this is the setter
