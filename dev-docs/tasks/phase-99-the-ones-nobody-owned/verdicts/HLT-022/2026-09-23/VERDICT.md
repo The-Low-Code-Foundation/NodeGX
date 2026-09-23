@@ -1,6 +1,6 @@
 # HLT-022 — verdict, 2026-09-23
 
-**✅ BUILT. AC1–AC5 met on SQLite and PostgreSQL. AC6 belongs to the DBT stream.**
+**✅ BUILT. AC1–AC5 met on SQLite and PostgreSQL. ✅ AC6 met by the DBT stream, `5a43edb84` (see Left).**
 
 ## What changed
 
@@ -54,7 +54,7 @@ runtime files swapped back in**. They are not this row's.
 
 ## Left
 
-- **AC6 is the DBT stream's**: remove `STORED_AS_TEXT`, the `json:` prefix, the three `String`
+- ✅ **AC6, reported by the DBT stream 2026-09-23, `5a43edb84`** (against a backend built from `b9a44a267`): every function reads with `{ plain: true }`, the workaround is removed whole, both offline fakes refuse a non-plain read by name, and `check-seed` live reads 272 rows, 1610 fields, 0 mismatches. Checked here: the commit is on `cline-dev`, and `STORED_AS_TEXT`, `json:` and `decodeText` no longer appear in the template. What it was asked: remove `STORED_AS_TEXT`, the `json:` prefix, the three `String`
   schema types and each function's `fromText`/`getId()` handling, then run `check-read-functions`
   and `check-seed` live. The deployed backend bundle (`deploy/artifact/`) is gitignored and built at
   deploy, so the template picks this up on its next build.

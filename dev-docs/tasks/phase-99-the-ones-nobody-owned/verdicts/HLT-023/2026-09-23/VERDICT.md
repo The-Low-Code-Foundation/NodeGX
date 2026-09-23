@@ -1,6 +1,6 @@
 # HLT-023 — verdict, 2026-09-23
 
-**✅ BUILT. AC1–AC5 met on the default `ops.json`. AC6 belongs to the DBT stream.**
+**✅ BUILT. AC1–AC5 met on the default `ops.json`. ✅ AC6 met at the function layer by the DBT stream, `5a43edb84` (see Left).**
 
 ## What changed
 
@@ -65,7 +65,7 @@ a throwing run being forgotten.
 
 ## Left
 
-- **AC6 is the DBT stream's**: L171's live drive on the default `ops.json`, with no raised limits.
+- ✅ **AC6 at the function layer, reported by the DBT stream 2026-09-23, `5a43edb84`**: a fresh backend on the DEFAULT `ops.json`, `check-read-functions` live OK, 100 alternating `course` loads from two learners all 200, the operator's admin reads in the middle 4/4, 0 `ratelimit.refused` in the log. 📋 **As written, the AC is L171's page drive. That is still to come, and it is the DBT stream's.**
   The deployed bundle (`deploy/artifact/`) is gitignored and built at deploy.
 - Not changed: CWF-017's per-function budget, for a function called over loopback from INSIDE
   another run, is still keyed `admin`. It is declared per function and only tightens. It was not
