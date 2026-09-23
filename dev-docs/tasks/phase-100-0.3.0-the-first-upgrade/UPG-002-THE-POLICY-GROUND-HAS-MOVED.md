@@ -2,8 +2,8 @@
 
 **Opened 2026-09-22** with the phase, on **R2** (✅ *"Visible report at load, migrate where
 recoverable"*).
-**Status: 🟡 HALF DONE s1 — the amendment is written into the policy. The surface it requires is
-`⬜ never measured`.**
+**Status: 🟡 s1 the amendment is written into the policy · ✅ s4 the surface is BUILT (§4a) — Richard
+has not yet seen it himself (AC3), and AC5 is open.**
 
 ## 1. The person sentence
 
@@ -69,15 +69,34 @@ says so on screen"*. Nothing in the editor does that today.
   bespoke report, R2 is satisfied once and the next break starts from nothing — so the seam matters
   more than the first use of it.
 
+## 4a. ✅ s4 — the surface, and why it is this one
+
+**Built with UPG-003 (`f6503e521`, `11bb0a390`):** `models/ProjectPatches/upgradeOnLoad.ts` is the seam.
+Each 0.3.0 upgrade is a pure function over the loaded project that returns **sentences** and **files
+to write**; `projectFromDirectory` runs them on a copy, backs the project up (R10), writes the files,
+builds the model, and shows every section in **one sticky toast** (`ToastLayer.showInfo`, `duration:
+Infinity`, titled *"This project was upgraded for NodeGX 0.3"*, naming the backup's path). The next
+break adds one entry to `UPGRADES` and inherits the report, the backup and the save-on-open.
+
+**Why not the others (read, not assumed):** `MigrationWizard.tsx` / `models/migration/` is a modal
+flow for the AI-assisted **legacy import** — triggered by the person, not by opening a project.
+`ProjectMigrator` is the legacy→v2 **format** migration; its **backup mechanism** was reused (R10),
+its flow was not. `applyPatches` (the run-on-value-change migration) reports to `console.info` only —
+the thing R2 rules out — and is also the git merge driver's normaliser, so an upgrade that mints
+tokens must not live in it. **A sticky toast, not a modal:** the editor already raises the what's-new
+modal on open (`EditorPage` → `whatsnewRender`), and UPG-006 will fill it; two modals at once is worse
+than one of each.
+
 ## 5. Acceptance criteria
 
 1. ✅ The policy states what a break owes, in Richard's words, with the date and the ruling's origin.
 2. ✅ A reader arriving at the superseded premise from a search is told it is superseded, at that
    spot.
-3. ⬜ **Person-verifiable:** Richard opens a 0.2.x project that needs a migration in a 0.3.0 build
+3. 🟡 **Person-verifiable:** Richard opens a 0.2.x project that needs a migration in a 0.3.0 build
    and **sees on screen** what changed and what could not be carried — no console, no log, no notes.
-4. ⬜ The report surface is named from a reading of the existing migration code, with the reason the
-   others were rejected.
+   **Driven by the agent s4** (screenshot, Landing page test V2 copy); ⬜ Richard's own look.
+4. ✅ The report surface is named from a reading of the existing migration code, with the reason the
+   others were rejected — §4a.
 5. ⬜ Demonstrated failing: with the conversion disabled, the same project open shows the
    cannot-carry report rather than nothing.
 

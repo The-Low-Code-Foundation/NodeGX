@@ -31,7 +31,7 @@ artefact — the diff, the rule, the model file — and says what was read.
 
 | # | class | verdict | decision |
 |---|---|---|---|
-| 3.1 | Text styles vanish from the Styles panel — **but stay listable, applicable and CREATABLE from a node** (A2, 2026-09-23) | 🔴 **BREAK — real, ruled on the numbers; narrower and stranger than first recorded** | **R6 ✅ BUILT `62029ab28`** (Create removed), **then convert — to typography TOKENS, not Looks (R8, 2026-09-23)** — UPG-003, spec = P99 [HLT-020](../phase-99-the-ones-nobody-owned/HLT-020-THE-TEXT-STYLES-HAVE-NOWHERE-TO-GO.md). [Board §6.2](README.md) |
+| 3.1 | Text styles vanish from the Styles panel — **but stay listable, applicable and CREATABLE from a node** (A2, 2026-09-23) | 🔴 **BREAK — real, ruled on the numbers; narrower and stranger than first recorded** | **R6 ✅ BUILT `62029ab28`** (Create removed), **then ✅ CONVERTED on load — typography tokens (R8), font files too (R9), project copied first (R10): [UPG-003](UPG-003-TEXT-STYLES-BECOME-TOKENS.md), `f6503e521` + `11bb0a390`**. [Board §6.2](README.md) |
 | 3.2 | Built-in port renames | ✅ **CLEAN this release** | none. Do not re-measure |
 | 3.3 | New validator rule on existing work | 🟡 **NOISE, not a break** | one line in the notes |
 | 3.5 | **A MODIFIED rule now reaches its `error` arm on work that was clean** — `nonexistentPort` (GAM-019 narrowed the skip from *"any dynamic ports"* to `hasRuntimeDynamicPorts`) | 🔴 **candidate BREAK, `⬜` corpus hits never counted** | §3.3's *"one line in the notes"* rests on `warning`; this one is `error`. Found 2026-09-23 by diffing the **modified** rules, which §4.3 as written would not have looked at |

@@ -1,5 +1,10 @@
 # HLT-020 — The text styles have nowhere to go
 
+> ✅ **BUILT 2026-09-23 as P100 [UPG-003](../phase-100-0.3.0-the-first-upgrade/UPG-003-TEXT-STYLES-BECOME-TOKENS.md)**
+> (`f6503e521`, `11bb0a390`), all four §4 criteria met. 🔴 **§2 undercounted:** it counted node
+> wearers only — legacy **variants** add 1,765 more layers — and did not see that **98% of styles name a
+> font file**, which no token could carry until P100 R9.
+>
 > ✅ **§3 RULED 2026-09-23 — (b), typography tokens** — put to Richard from §2/§3 by P100 s3 as
 > [P100 R8](../phase-100-0.3.0-the-first-upgrade/README.md), with the recommendation. 🔴 **This row
 > MOVED to P100 UPG-003** (0.3.0 converts on load — P100 R3), which had scoped the same conversion a
