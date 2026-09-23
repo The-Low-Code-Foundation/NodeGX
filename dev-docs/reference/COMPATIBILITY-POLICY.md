@@ -6,6 +6,52 @@
 
 ---
 
+## ⚠️ AMENDMENT — 2026-09-22, by Richard: the clause in "What this does NOT waive" has FIRED
+
+🔴 **Nothing below is repealed. One premise expired, and the clause that depended on it is now
+live.** Read this before applying the policy to anything a person already has on disk.
+
+**The premise.** *"Who actually has a project"* states *"NodeGX has never had a public release …
+**There are zero NodeGX projects in the wild** … Therefore the only projects that exist today are
+ours."* **True when written. False since `v0.2.2`.** Measured 2026-09-22: `v0.2.0`, `v0.2.2`,
+`v0.2.3` and `v0.2.4` are public tags, and [phase 84](../tasks/phase-84-the-defects-the-field-report-found/README.md)
+is scoped from **15 confirmed community issues filed against the 0.2.2 AppImage** by named people on
+machines that are not ours.
+
+**So point 2 of "What this does NOT waive" is in force.** It said forward compatibility for our own
+format *"costs nothing"* until we ship publicly, and *"the moment v1 ships publicly, breaks need a
+migration that runs on load."* We have shipped four times.
+
+**Richard's ruling on what a break owes, put to him in these words and answered 2026-09-22:**
+
+> **"Visible report at load, migrate where recoverable."**
+> *If we can convert the data we convert it; if we cannot, the project opens and says so on screen.*
+
+### What that means for a spec you are writing now
+
+1. **The population that is protected is `0.2.x` NodeGX projects** — projects authored in *our*
+   format by people who are not us. **Pre-NodeGX Noodl 2.x and OpenNoodl `1.1.0` files stay
+   waived**, exactly as below. The fresh start is unchanged; it was never about our own format.
+2. **A break ships with its conversion where the data is recoverable.** "Recoverable" is a
+   measurement, not an opinion — say what you read.
+3. **Where it is not, the project opens and tells the person, on screen.** 🔴 **A `console.warn`,
+   a line in a log, or a sentence in the release notes does not satisfy this.** Release notes are
+   still required (point 4 below) and are not a substitute.
+4. **"Ship the correct behaviour and record the break" still stands.** This amendment adds what the
+   record has to *do* on the person's machine; it does not restore the veto the policy removed. A
+   break is still allowed. Silence is not.
+
+⚠️ **The surface this requires may not exist yet.** As of 2026-09-22 nothing in the editor shows a
+per-project migration report on open; `views/migration/MigrationWizard.tsx` and
+`src/editor/src/models/migration/` were built for a different job. **Whether they are the right home
+is a measurement the first task under this amendment owes** — do not assume it either way.
+
+**Where this was decided:** [phase 100](../tasks/phase-100-0.3.0-the-first-upgrade/README.md) §6,
+ruling **R2**, opened to prepare the `0.3.0` release — the first release people **upgrade** into
+rather than install.
+
+---
+
 ## The decision
 
 > **NodeGX is a fresh start. Existing Noodl projects will not reliably import.**
@@ -72,6 +118,8 @@ things still hold, and none of them is negotiable:
    release, forward compatibility for *our own* format begins to matter. Until then (see "Who
    actually has a project" below) this costs nothing — but the moment v1 ships publicly, breaks
    need a migration that runs on load.
+   🔴 **THIS CLAUSE HAS FIRED — see the 2026-09-22 amendment at the top of this file.** We have
+   shipped publicly four times. "Until then" has ended, and what a break owes is now ruled.
 
 3. **The repo's own projects are the compatibility target that remains.** The QA fixture
    (`dev-docs/qa-fixtures/`), the example projects, and the docs-repo library content are real,
@@ -87,13 +135,18 @@ things still hold, and none of them is negotiable:
 
 Worth knowing precisely, because it is the ground the decision stands on:
 
-- **NodeGX has never had a public release.** `v0.1.0` is a *draft* release; signing and publishing
-  are still human-gated. There are zero NodeGX projects in the wild.
+- ⚠️ **SUPERSEDED 2026-09-22 — this bullet is no longer true; see the amendment at the top.** As
+  written: *"NodeGX has never had a public release. `v0.1.0` is a draft release; signing and
+  publishing are still human-gated. There are zero NodeGX projects in the wild."* **Four public
+  releases now exist (`v0.2.0`, `v0.2.2`, `v0.2.3`, `v0.2.4`) and other people's `0.2.x` projects
+  do.** The bullet is kept verbatim because the rest of this section reasons from it.
 - **The last public release of this codebase is upstream OpenNoodl `v1.1.0` (2024-09-25)** —
   pre-revival, legacy format. Projects from it fall in the same bucket as Noodl 2.x: best-effort
   import, no guarantees.
 - **Therefore the only projects that exist today are ours**: the QA fixture, the repo examples, and
   the library content. All three are editable by us. All three are covered by point 3 above.
+  ⚠️ **SUPERSEDED 2026-09-22 — see the amendment at the top.** Other people's `0.2.x` projects exist
+  and are **not** ours to edit. Point 3 does not cover them; the amendment does.
 
 ## What "best-effort import" promises
 

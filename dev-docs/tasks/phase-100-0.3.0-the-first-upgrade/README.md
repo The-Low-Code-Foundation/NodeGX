@@ -4,7 +4,8 @@
 **Status: 📋 SCOPED. UPG-001 started (the census; 4 rows measured, 5 classes named `⬜ never
 measured`). ✅ UPG-005 ANSWERED s1 — the 32-row triage R4 bought a session for cost one measurement:
 every committed row on P83 and P84 is already inside `v0.2.4`, so neither phase has anything pending
-for 0.3.0.**
+for 0.3.0 ✅ UPG-002 half done — the policy amendment is written; the on-screen report
+surface it requires is `⬜ never measured`.**
 **Prefix: `UPG`.** **R2, R3 and R4 RULED by Richard 2026-09-22 (§6) — two of the three against the recommendation, and both make the phase bigger.**
 
 > "We should probably celebrate phase 100 by making it the prep for the release of 0.3.0, if that's
@@ -138,7 +139,7 @@ a table with a decision per row.
 | id | task | needs a ruling | why it is in this phase |
 |---|---|---|---|
 | **UPG-001** | [The break census — what a 0.2.4 project loses in 0.3.0](UPG-001-THE-BREAK-CENSUS.md) | — | the number, the notes and the migrations all read from it. **Started; §4.1 and §4.2 are its first two rows** |
-| **UPG-002** | The compatibility policy's ground has moved | ✅ **R2 ruled** | amend [`COMPATIBILITY-POLICY.md`](../../reference/COMPATIBILITY-POLICY.md) with a dated amendment carrying R2's words. It is *binding on every task in every phase* and currently states a falsehood as its premise. **Plus §6.1: find or build the surface that shows the report** |
+| **UPG-002** | [The compatibility policy's ground has moved](UPG-002-THE-POLICY-GROUND-HAS-MOVED.md) | 🟡 **half done s1** | amend [`COMPATIBILITY-POLICY.md`](../../reference/COMPATIBILITY-POLICY.md) with a dated amendment carrying R2's words. It is *binding on every task in every phase* and currently states a falsehood as its premise. **Plus §6.1: find or build the surface that shows the report** |
 | **UPG-003** | Text styles become Looks, on load | ✅ **R3 ruled: BUILD** | §4.1. **The phase's largest row.** Convert existing text styles into Looks when the project opens, with the R2 report. `models/Looks/looks.ts` is deliberately pure and `tests-unit/` can grade it without a renderer — so the model half needs no editor |
 | **UPG-004** | The version bump, and the literals that are not the version | — | `0.2.4` → `0.3.0` in **one** file. The prefab `library.json` files and `package-lock.json` are **traps**, both already measured in [`PUBLISH-0.2.2.md` §2](../release-0.2.2/PUBLISH-0.2.2.md). Plus the first-two-segment consumer in §5.1 below |
 | **UPG-005** | [What ships and what waits — all 32 rows](UPG-005-WHAT-SHIPS-AND-WHAT-WAITS.md) | ✅ **ANSWERED s1** | **P83 and P84 both carry `Release: ⬜ NOT RULED`.** Richard chose the row-by-row read over ruling the boards, cost accepted. 🔴 Read each row's `*-WHAT-WAS-BUILT.md` rather than either board's narrative — P83's own README says `ls`-ing for them is cheaper than believing it |
