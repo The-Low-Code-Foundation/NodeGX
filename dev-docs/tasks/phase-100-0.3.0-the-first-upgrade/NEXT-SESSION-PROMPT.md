@@ -1,54 +1,62 @@
-# Phase 100 — next session (written end of s5, 2026-09-23)
+# Phase 100 — next session (written end of s6, 2026-09-23)
 
-Read the [board](README.md) §5–§6 and [UPG-003](UPG-003-TEXT-STYLES-BECOME-TOKENS.md) §6–§7 first. 0.3.0 still
+Read the [board](README.md) status line and [UPG-001](UPG-001-THE-BREAK-CENSUS.md) §3 first. 0.3.0 still
 **waits on P101** (R7, the properties panel move) — nothing here cuts the release.
 
-## Where s5 left it
+## Where s6 left it
 
-**Done and verified (committed this session):**
-- 🔴 **A regression s4 shipped, fixed.** `import-engine/apply.ts` loaded the import source a second time
-  *with* the upgrade (s4 pinned only `analyze.ts`). Driven on HEAD `5053f489f`: installing `page-header` —
-  one of **16 of 46** shipped prefabs that wear a text style — backed up the prefab's **cache** folder, raised
-  "This project was upgraded" about it, and grafted parts wearing `var(--title-large-*)` the project never
-  got (the install's own toast: *"they will draw unstyled"*). After: tokens defined in the target with the
-  style's values, font face in the target's module, cache untouched, no toast.
-- ✅ **UPG-003 §6(a)** — an imported part's text styles arrive as typography tokens, converted **against the
-  target's tokens** (reuse equal, `-2` on a clash, source tokens never travel, skipped styles left alone), in
-  the editor import **and** `noodl-mcp install_prefab`. §6(b) Styles panel looked at; §6(c) `checkFontFaces`
-  now judges custom `typography-family` tokens (it saw only the 3 defaults); §6(d) backup failure **driven**.
-- ✅ **UPG-004** — `packages/noodl-editor/package.json` `0.3.0` committed. Checked: root `package.json` still
-  `1.1.0`, no prefab `library.json` moved, no `'0.2.4'` literal in editor/MCP source. 🔴 `package-lock.json`
-  carries a one-line `0.2.4→0.3.0` for the editor workspace — **left uncommitted on purpose**
-  (`PUBLISH-0.2.2.md` §2: the lock's version is not validated by `npm ci`; `v0.2.0` shipped a release behind).
+**Done and verified — UPG-001, the break census, has no `⬜ never measured` left.** Every row is in §3 with
+what was read. The whole release carries **two breaks, both already migrated** (3.1 text styles → tokens,
+3.6a idempotency keys); three rows are one line each in the notes (3.3, 3.4, 3.7); two are *what's new*
+(3.5b, 3.8). Method for all of it: **both releases' code run side by side** on the same projects —
+v0.2.4 from `git archive` into scratch, `@nodegx/*` aliased to the archived copies, identity checked by a
+token only HEAD has.
 
-**Readings taken 2026-09-23 on the s5 tree:** editor `test:main` **545 suites / 8,631 tests, exit 0**;
-`tsc -p packages/noodl-editor --noEmit` exit 0; `noodl-mcp` `tsc --noEmit` exit 0; `tests-unit/upg-003`
-**38/38**, `cmp-008` 56/56, `noodl-mcp tests/libraryTools` 15/15; **12 new mutants, each killed**.
-✅ **`test:ci` (Electron), alone, cache cleared: `3033 specs, 8 failures`, seed 71901, fresh `test-results.json`
-22:04 — exactly the floor by name** (SUB-011 ×3, SUB-006 ×3, NDA-017 ×2). 🔴 Its FIRST run (seed 50154) read 12: four
-import specs asserted text styles landing as text styles (updated to the tokens they now become), and one of them opened
-the committed fixture `tests/testfs/import_proj5` **in place** — since s4 that load upgraded it, writing
-`import_proj5.before-0.3/` and a font module **into the repo** (deleted; the spec now reads it `{ upgradeOnLoad: false }`
-and asserts no backup appears). s4's "`test:ci` NOT run" hid exactly this.
-⚠️ `noodl-mcp` full suite: **131 suites, 10 red, 20 tests — none mine**, each attributed by control:
-CMP-004 ×2 (a committed `icon.png`, `1fad0cad7`, 09-11), cn004 + nodeIdAllocation (red with `fontFaces.ts` at
-HEAD too), D54 / DEF-038 / CMP-001 (no contact with anything touched), tpl008/tpl010 (a peer's uncommitted edits).
+- **§3.2 ports (catalog diff):** `catalog:check` exit 0 at HEAD; v0.2.4 → HEAD **0** of 3,310 ports removed,
+  **0** types removed, **0** port types / 322 enum lists / 1,061 defaults changed.
+- **§3.3 rules:** 5 `DiagnosticCode`s added since v0.2.4, every emitter `'warning'`; **0** `'error'` lines
+  added or removed anywhere under `validation/`.
+- **§3.5 newly red:** the **217 NodeGX-format projects** → 6 clean-on-0.2.4/red-on-HEAD, **every one a fixture
+  built with a broken kit port** (kit types are now recognised, so their ports get checked). GAM-019's narrowing
+  → **0** on that population. Both authoring gates baseline pre-existing errors; nothing else gates on them.
+- **§3.4 `_variant`:** read by **no** runtime, viewer or exporter file in either release (grep + control), so it
+  renders identically; the drive was not needed. What's gone is the *Preset / Size* picker. 28 nodes, 14 projects.
+- **§3.8 exporter:** complete 57→62 of 217, refusals 18,272→18,157, **0** nodes newly refused. The 3 projects
+  whose count rose now *report* things v0.2.4 lost silently (checked in the emitted source, one by one).
 
-**Where the handoff chain was wrong:** s4 wrote "the import engine reads a source project unconverted" — true
-of **one of its two loads**. The s4 NEXT prompt offered "accept the next-open conversion" for §6(a); measured,
-that open would back up a 0.3-native project and tell its owner it "was upgraded", once per install+reopen.
+**Readings taken 2026-09-23 at `ea7f712dd`:** everything above; `catalog:check` exit 0; the whats-new feed
+`200`, 463 bytes (control path `404`). **No product code changed this session** — docs only, so no test suite
+was run and none was owed.
+
+**Where the handoff chain was wrong:**
+- s5 called §3.4 "the one remaining row that could turn a 🟡 into a 🔴" and said it needed the editor. It
+  needed a grep: nothing reads the marker at render time.
+- 🔴 **UPG-003's corpus list (built from `project.json`) holds only 22 of the 217 NodeGX projects.** Any
+  census of 0.2.x projects starts from `find … -name nodegx.project.json`.
+- The rule's own docblock says GAM-019 un-skipped 18 types; the catalog says **20** of 88.
+
+**Found on the way, not ours:** `nodegx export` crashes — `Cannot access 'snapActionList' before
+initialization` (`nodegx-export/src/analyze/plan.ts`, `const` at `:15450`, called at `:12613`/`:12810`/`:13011`)
+— on *Landing page test V2* and three copies of it, **in v0.2.4 too**, and on the repo's own `dist/cli.mjs`.
+**P18's**, not filed there yet (its board has no defects section and its handoff is its own lane's).
+Also P18's: a Component Input signal forwarded into a kit node's signal is still dropped (reported now);
+`_variant` shows up as a dropped parameter (noise — `PRESET_MARKERS` names the markers).
 
 ## Ordered next steps
 
-1. **UPG-001 §4 remainder** — §3.4's `_variant` rendering drive, the port class beyond `name:` edits, the
-   validator rules added since `v0.2.4`, the exporter; §3.5's `nonexistentPort` corpus count. Each new break
-   joins `UPGRADES` in `upgradeOnLoad.ts`. 🔴 **For every break, drive the IMPORT path as well as the open** —
-   s5's regression lived on a load the open-drive never took.
-2. `budget.json:61` `whats-new-feed-404 ≤ 2` → 0 (needs a renderer-errors run: own dev stack, alone).
-3. UPG-006/007/008 once P101 lands.
+1. **UPG-006, the part that does not wait for P101:** draft the release notes' *"your existing project"*
+   section straight from UPG-001 §3 — the two migrations (with what the toast says and the `.before-0.3`
+   copy), the three note-lines, the two what's-new lines. Written for someone upgrading, not for us.
+   R5 is moot (board §6), so nothing blocks it.
+2. `scripts/renderer-errors/budget.json` `network/whats-new-feed-404` budget `2` → `0`. The feed is live
+   (re-measured above), but **run the renderer-errors gate before committing the change** — own dev stack,
+   alone. A peer's `dev` stack was up all of s6 (`npm run dev:stop -- --list` first).
+3. UPG-006 remainder, UPG-007 (shelf), UPG-008 (the cut) once P101 lands.
 
 ## Richard's, not the agent's
 
+- **UPG-001 AC3:** read UPG-001 §3 (the table alone) and say, per row, whether it needs a migration, a note
+  or nothing. s6's recommendation is in each row's *decision* column.
 - **UPG-002 AC3:** open one of his own 0.2.x projects (a copy) in a 0.3.0 dev build and say whether the
   toast tells him what he needs.
 - Whether the **20 of 193** legacy projects with a *wired* text style port keeping all their text styles is

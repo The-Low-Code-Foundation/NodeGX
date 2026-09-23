@@ -1,8 +1,9 @@
 # UPG-001 — The break census: what a 0.2.4 project loses in 0.3.0
 
-**Opened 2026-09-22** with the phase. **Status: 🟡 STARTED — the backend storage plane DRIVEN s3 (§3.6:
-clean but for one idempotency break); 4 classes still named and unmeasured (§4 items 1, 2, 3, 5), plus
-§3.5's corpus count.** Measured against `cline-dev` HEAD `7043fb6e6`, `v0.2.4..HEAD` = **427 commits**.
+**Opened 2026-09-22** with the phase. **Status: ✅ EVERY CLASS MEASURED (s6, 2026-09-23) — §4 is empty. Two breaks,
+both migrated (3.1 text styles, 3.6a idempotency); everything else is a note or nothing. AC3 (Richard
+reads §3) is his.** s6 measured against HEAD `ea7f712dd` over the **217 NodeGX-format projects** on this
+machine, both releases' code side by side. First opened against `cline-dev` HEAD `7043fb6e6`, `v0.2.4..HEAD` = **427 commits**.
 
 ## 1. The person sentence
 
@@ -32,13 +33,14 @@ artefact — the diff, the rule, the model file — and says what was read.
 | # | class | verdict | decision |
 |---|---|---|---|
 | 3.1 | Text styles vanish from the Styles panel — **but stay listable, applicable and CREATABLE from a node** (A2, 2026-09-23) | 🔴 **BREAK — real, ruled on the numbers; narrower and stranger than first recorded** | **R6 ✅ BUILT `62029ab28`** (Create removed), **then ✅ CONVERTED on load — typography tokens (R8), font files too (R9), project copied first (R10): [UPG-003](UPG-003-TEXT-STYLES-BECOME-TOKENS.md), `f6503e521` + `11bb0a390`**. [Board §6.2](README.md) |
-| 3.2 | Built-in port renames | ✅ **CLEAN this release** | none. Do not re-measure |
-| 3.3 | New validator rule on existing work | 🟡 **NOISE, not a break** | one line in the notes |
-| 3.5 | **A MODIFIED rule now reaches its `error` arm on work that was clean** — `nonexistentPort` (GAM-019 narrowed the skip from *"any dynamic ports"* to `hasRuntimeDynamicPorts`) | 🔴 **candidate BREAK, `⬜` corpus hits never counted** | §3.3's *"one line in the notes"* rests on `warning`; this one is `error`. Found 2026-09-23 by diffing the **modified** rules, which §4.3 as written would not have looked at |
-| 3.4 | Shipped looks becoming project-owned Looks | 🟡 **NOT on the load path** | needs the drive in §4.1 before it is closed |
+| 3.2 | Built-in port renames — **and (s6) ports or types removed, types, defaults, enum options changed, in every node tree** | ✅ **CLEAN this release** — catalog diff: 0 removed of 3,310 ports, 0 changed | none. Do not re-measure |
+| 3.3 | New validator rules on existing work — **all five added codes (s6)** | 🟡 **NOISE, not a break** — every one `warning`, 0 error arms added | one line in the notes |
+| 3.5 | Existing work newly red — (a) GAM-019's narrowed `nonexistentPort` skip, (b) kit node types now recognised, so their ports are checked | ✅ **NOT A BREAK — 0 real projects** (s6): 6 of 217 NodeGX projects go red, every one a fixture built with a broken kit port; class (a) 0. Nothing gates on a pre-existing error | none; (b) under *what's new* |
+| 3.4 | Shipped looks becoming project-owned Looks; the `_variant`/`_size` markers | ✅ **RENDERS IDENTICALLY** (s6) — no runtime, viewer or exporter reads a marker in either release. Lost: the *Preset / Size* picker. 28 nodes / 14 projects | one line in the notes |
 | 3.6 | **The backend storage plane** — a 0.2.4 backend holding live data, started on 0.3.0 code | ✅ **CLEAN on every surface but one** (driven 2026-09-23, §3.6) | none, except 3.6a |
 | 3.6a | ↳ an idempotency key **completed on 0.2.4 runs a second time** on the first call after the upgrade | 🔴 **BREAK — measured, recoverable** (the 0.2.4 row is still on disk, unread) | ✅ **MIGRATED s3 (`77564e5c2`)** — `persistence/carryLegacyIdempotencyKeys.ts`, once per file, on `ExecutionHistory.open`. Re-driven on a fresh copy of the same 0.2.4 data: `replayed`, the **0.2.4 token**, runs stay **1** (unfixed: `stored`, new token, 2); fresh-key control +1; start log `idempotency.legacy-carried {carried: 1}`. `tests/upg-001-idempotency-carry.test.ts`, each arm killed by its own mutant |
 | 3.7 | `/api` (BYOB) and `admin/export` return Booleans as `true`/`false`, not `1`/`0` | 🟡 **WIRE CHANGE, ruled** — P97 R7 / `40140ca71` BRG-007 | **one line in the notes** — a client comparing `=== 1` stops matching. `/classes` already returned real Booleans |
+| 3.8 | The code exporter, same project, v0.2.4 vs HEAD | ✅ **MORE COMES ACROSS, NOTHING STOPS** (s6): complete 57→62, refusals 18,272→18,157, 0 nodes newly refused; the 3 projects whose count rose now *report* what v0.2.4 lost silently | none; *what's new*. ⚠️ pre-existing `snapActionList` crash (4 projects, both releases) → P18 |
 
 ### 3.1 🔴 Text styles are no longer editable — BREAK
 
@@ -85,6 +87,27 @@ those three trees. It would not catch a port deleted and re-added elsewhere in t
 removed outright, or a rename in a tree outside the three. §4.2 owns closing that gap; this row
 claims only what the two commands measured. [[a-reading-that-fits-is-not-one-that-excludes]]
 
+✅ **§4.2 CLOSED s6 (2026-09-23) — the gap measured from the catalog, not the source trees.** The
+committed node catalog (`packages/noodl-types/src/node-catalog.json`) is generated from **every**
+node library the runtime registers, so it is the one artefact that sees all trees at once.
+`npm run catalog:check` at HEAD → exit 0, *"Committed catalog is up to date"* (180 types), so HEAD's
+copy is the runtime's truth. Diffed against `git show v0.2.4:…/node-catalog.json` (176 types), per
+type, per plug, per port name:
+
+| what | v0.2.4 → HEAD |
+|---|---|
+| node types removed | **0** (4 added: `Repeat`, `net.noodl.ParseFeed`, `net.noodl.ParseXML`, `noodl.cloud.modelrequest`) |
+| ports removed (inputs or outputs, any type) | **0** — of v0.2.4's 3,310 (HEAD has 3,491) |
+| port `type` changed — includes every enum option list | **0** — all 3,310 compared (every port type is an object), 322 carry `enums` |
+| port `default` changed | **0** — 1,061 v0.2.4 ports carry one |
+| ports added | 11 types gain ports (drag-and-drop on 6 visual types, `blur`/`focus` on 5 controls, …) |
+
+**Control:** the "added" rows are the "removed" arm run the other way round — same code, so the arm
+fires. A **stale v0.2.4 catalog** could only list ports that did not exist (they would show here as
+removed: none) or miss ports that did (they would show as added: harmless), so the diff cannot hide
+a removal. **What it does not see:** a port whose *behaviour* changed under the same name, type and
+default — that is every runtime commit, and no diff reads it.
+
 ### 3.3 🟡 A new validator rule fires on existing work — NOISE, not a break
 
 `f37698014` (P99 / HLT-014) adds `dialog-without-name`
@@ -99,6 +122,26 @@ silent and only a hand-built project can see it.
 **Decision: one line in the release notes** under what's new rather than under what broke. No
 migration. 🔴 **But it is a class, not a row** — any rule added in this window behaves this way, and
 §4.3 owes the list.
+
+✅ **§4.3 CLOSED s6 (2026-09-23) — the list, with each severity read from the emitter.**
+`git diff v0.2.4..HEAD -- packages/noodl-editor/src/editor/src/validation/diagnostics.ts` adds five
+`DiagnosticCode` entries besides this one; each severity below is the literal at the push site, and
+for the two that take a `severity` option, the only caller (`authoredCandidate.ts:611`, `:622`)
+passes none, so the default holds:
+
+| code | emitted at | severity |
+|---|---|---|
+| `dialog-without-name` | `rules/dialogWithoutName.ts:137` | `'warning'` |
+| `font-face-not-shipped` | `fontFaces.ts:112` | `'warning'` |
+| `text-cannot-wrap` | `layoutInertCombination.ts:265` | `'warning'` |
+| `variable-in-repeated-component` | `repeatedComponentVariable.ts:202` (default) | `'warning'` |
+| `reserved-row-field` | `reservedRowField.ts:139` (default) | `'warning'` |
+
+And `git diff … -- validation/ | grep "^[+-].*'error'"` → **0 lines**: no added or removed error
+arm anywhere in the tree. **So no rule added since 0.2.4 can turn clean work red.** The one way an
+existing project *can* go red is not a new rule — it is §3.5's class, measured on the corpus there.
+⚠️ `repeatedComponentVariable.ts` reads as `Bin` in `git diff --stat` — every grep above used `-a`
+([[ugrep-silently-skips-a-source-file-as-binary]]).
 
 ### 3.4 🟡 Shipped looks become project-owned Looks — not on the load path
 
@@ -118,6 +161,84 @@ not answer is whether such a node still *renders* the same, because the same com
 what a shipped look contains (the config's `defaults` **plus** the variant's own properties) and
 translated the state names (`active`→`pressed`, `focus`→`focused`, `placeholder` dropped as
 unlandable). **A grep cannot answer a rendering question.** §4.1.
+
+✅ **CLOSED s6 (2026-09-23) — renders identically, and the reason makes a drive unnecessary.**
+The rendering question only exists if something at render time reads the marker. Nothing does, in
+either release:
+
+```
+git grep -n "_variant\|_size['\"]" <rev> -- packages/noodl-runtime packages/noodl-viewer-react \
+    packages/noodl-viewer-cloud packages/nodegx-export/src ':!*test*'
+  v0.2.4 → 2 hits, both `_variantHasInputsWithTypes` (a method name in styles.ts), no marker read
+  HEAD   → the same 2 hits
+  control: `git grep -c _variant` over models/ElementConfigs → Registry 5, Types 1, ButtonConfig 1, … at both revs (armed)
+```
+
+`0ef525aeb` itself touches **six files, none in a runtime, viewer or exporter tree** (`looks.ts`,
+`projectmodel.ts`, `projectLevel.ts`, three tests). A `_variant` node draws from the style
+parameters stamped into it when the preset was picked; the marker was only ever the editor's memory
+of *which* preset that was, and nothing on the load path rewrites the parameters (s1, above).
+**What 0.3.0 does take away is an editor affordance, not a look:** the properties panel's
+*Preset / Size* picker (`propertyeditor.ts`, STY-002 AC5 — it was the only writer of the markers).
+The styles stay, editable as ordinary parameters; making a Look from the node is the new way to
+reuse them.
+
+**Reach, measured over the 217 NodeGX-format projects on this machine** (`nodegx.project.json`,
+worktrees excluded): **28 nodes in 14 projects** carry `_variant` — Text `body` 17, Button `primary`
+6, Checkbox `default` 4, Text Input `default` 1; `_size` **0**. None is shipped content (`git grep
+'"_variant"'` outside the editor source and tests → 0). ⚠️ A `UPG-001 Variant Drive` project (mtime
+2026-09-23 08:55) already sits in *NodeGX test projects* — an earlier session built the drive's
+fixture and recorded nothing; it was not needed.
+
+**Decision: one line in the notes** — *"The Preset picker is gone. Nodes that used a preset keep its
+styles; to reuse them, make a Look."* No migration.
+
+### 3.5 ✅ Existing work that newly goes red — two mechanisms, zero real projects
+
+**The question is wider than the rule it was found on.** A project that validated clean on 0.2.4
+can show an `error` on 0.3.0 without being touched only if a check **starts running** on a node it
+used to skip. There are two ways, and the corpus run below found both:
+
+- **(a) GAM-019** narrowed `nonexistentPort`'s skip from `isDynamicNode` to
+  `hasRuntimeDynamicPorts` (`rules/nonexistentPort.ts:126`), so **20** of the 88 dynamic built-in types (counted from the catalog, HEAD; the rule's own docblock says 18) with only
+  declared-port-group dynamics are now checked.
+- **(b) Kit node types became recognisable.** The v0.2.4 validator could not read a project's own
+  node kits and skipped every kit node (`unknown-node-type` → `unknown-type-check-skipped`); HEAD
+  reads them, and a kit node's ports are checked for the first time.
+
+**Measured — both validators over the same projects, every rule, error set diffed by
+`(code, component, nodeId, type, port, plug)`.** v0.2.4's validator from `git archive v0.2.4` of
+`noodl-editor/src`, `noodl-types`, `noodl-mcp/src` into scratch (`@nodegx/kit-catalog` taken from the
+checkout: its source is unchanged since the tag, only a test moved). Each project validated through
+the CLI's own path (`scripts/validate-project.ts` `validatorFor`: kit overlay merged when readable).
+
+| population | projects | clean on v0.2.4, red on HEAD | new errors | errors gone |
+|---|---|---|---|---|
+| **NodeGX format** (`nodegx.project.json`, worktrees excluded) | **217** | **6** — every one a fixture built to hold a broken kit port | 6, all class (b) | 0 |
+| legacy `project.json` corpus (UPG-003's list, Descript excluded) | 456 | 5 | 2 class (a) + 3 class (b) | 0 |
+
+The six NodeGX-format hits, by name: `nodegx-export/tests/fixtures/kits` (`qa.gauge.Dial`
+`retiredOutput`), `…/fixtures/charts` (`BarChart` `barCount`), `noodl-mcp/tests/fixtures/kit-app`
+(`demo.kit.Badge` `progres` — a typo, on a component called `/Broken`), and `STY-005 Panel Drive`,
+`cn027-drive`, `cn029-drive` (`nodegx.rename.Badge` `caption`, node id `probe-badge`, in drives that
+exist to rename a kit port). **Class (a) on the NodeGX population: 0.** Its only two hits anywhere
+are one pre-NodeGX Noodl test fixture held in two copies (`big-merge-test-mine`, Text Input
+`disabled`) — a waived population.
+
+**Controls.** The instrument fires: 1,034 `nonexistent-port` errors across the legacy corpus, 22
+projects red on both versions in the NodeGX set (pre-existing, not upgrade rows). The classifier
+fires: 5 legacy + 6 NodeGX hits. The v0.2.4 validator is really v0.2.4's: it emits **0**
+`dialog-without-name` against HEAD's 164 on the same 217 (1,546 on the legacy set).
+
+**Consequence if a real project did hit it:** a red row in the Problems panel and a dot in the
+Components panel — **no gate refuses anything.** Both authoring gates set pre-existing errors aside
+and refuse only new ones (`AiAssistant/authoring/validate.ts:221` `baselineErrorKeys`;
+`noodl-mcp/src/validate.ts:316` `newErrors`), and I found no deploy or export path that reads the
+validator. And the red row is **true**: a wire into a port the node does not have does nothing, on
+0.2.4 as on 0.3.0.
+
+**Decision: no migration, no break note.** Class (b) belongs under *what's new* — *"the Problems
+panel now checks the ports of your own node kits"*.
 
 ### 3.6 ✅ The backend storage plane — a drive, not a diff read
 
@@ -176,25 +297,70 @@ found"*), `auth.json` (GitHub provider, magic link, redirect allow-list), `searc
 Evidence (scratch, not committed): `upg/{seed,read,cont,diff}.js`, `before/after/restored.json`,
 `diff-before-after.txt`, `serve-{024,030,restored}.log`, `schema-{024,030}-*.sql`.
 
-## 4. The remainder — named, unmeasured, in priority order
+### 3.8 ✅ The exporter — more comes across, and nothing that came across stops
 
-🔴 **Said in the words `⬜ never measured`, so no later session mistakes this list for a finding.**
+**Method.** Both exporters built from source the same way (esbuild, CJS, one bundle each, into
+scratch): v0.2.4's from `git archive v0.2.4` of `nodegx-export`, `nodegx-project-contract`,
+`nodegx-module-inject`, `nodegx-core`, **with `@nodegx/*` aliased to the archived copies** —
+`node_modules/@nodegx/*` are links into the checkout, and `project-contract` did change (the
+trap s3's old-backend recipe names). Identity control: HEAD's `--ring-width`
+token appears in HEAD's bundle (2) and **not** in v0.2.4's (0). ⚠️ The repo's own
+`packages/nodegx-export/dist/` is older than its source (built 09-21 20:36, `src` last committed
+20:47) and was **not** used. Then `export --dry-run` over the **217 NodeGX-format projects**, and a
+real export of every project whose refusal count rose, diffing `EXPORT-REPORT.md` and the emitted
+source.
 
-1. **⬜ never measured — §3.4's drive.** Open a copy of a real 0.2.4-era project carrying
-   `_variant` parameters in a 0.3.0 build and compare what renders, both themes. This is the one
-   remaining row that could turn a 🟡 into a 🔴. Use a **copy** ([[open-a-copy-of-a-real-project-in-the-editor]])
-   and note that opening dirties every component. **Needs the editor — a peer's `dev` stack was live
-   when this was written; check first.**
-2. **⬜ never measured — the port class, properly.** §3.2's grep is narrower than the class: ports
-   deleted rather than renamed, and the trees outside the three.
-3. **⬜ never measured — the other validator rules added in this window.** §3.3 is one of a class.
-   Enumerate the `DiagnosticCode` entries added since `v0.2.4` and read each severity.
+| reading, 217 projects | v0.2.4 | HEAD |
+|---|---|---|
+| export complete (exit 0) | 57 | **62** — 5 move 4→0, **none** moves 0→4 |
+| something left out (exit 4) | 156 | 151 |
+| export cannot be prepared (exit 2) | 4 | 4 — the **same** four, the same error (below) |
+| refusals, summed | 18,272 | **18,157** — 18 projects fewer, 196 equal, 3 more |
+| a refused node HEAD refuses that v0.2.4 did not | — | **0** (parser armed: 348 refused node ids read at HEAD across 98 projects; 1 refused on v0.2.4 is translated now) |
+
+**The three whose count rose — each one a thing v0.2.4 already lost, now reported:**
+
+- *STY-007 After Drive* (+2): `flexGrow` / `flexShrink` on `hdTitle` — v0.2.4's `Header.tsx` and
+  `Header.module.css` contain **neither** (grep 0) and its report called the component *"translated
+  with nothing left over"*. HEAD's report names them.
+- *rocket-school* (+2): the wires `rtIn.burstA/B → rtTrack.burstA/B` (a Component Input signal into a
+  kit node's signal). v0.2.4 passed the callback through to a kit prop the kit runtime **could not
+  pulse** — `99522fd72` (GAM-017): *"nodegx export dropped the wire for both ways a kit declares a
+  signal … the kit runtime had no way to pulse a node"*, its spec 5 red before the fix. GAM-017 fixed
+  handler-driven triggers; this route is still not wired, and is now **said**. ⬜ a P18 row, not
+  this phase's.
+- *members area Richard test* (+1): `parameter _variant … has no style/content mapping — dropped` —
+  the inert marker of §3.4, reported by the new Look path (the same export now also resolves the
+  node's Look into CSS, which v0.2.4 did not). Loses nothing; ⚠️ noise the exporter could skip
+  (`PRESET_MARKERS` in `looks.ts` already names the two markers).
+
+⚠️ **Pre-existing, found on the way, not an upgrade row:** `Cannot access 'snapActionList' before
+initialization` stops the export outright on *Landing page test V2* and three copies of it
+(*TVW-001 Slice4 Drive*, *UPG-001 TextStyles Drive* and its `.before-0.3`). It reproduces on the
+repo's own ESM `dist/cli.mjs`, so it is not my bundling, and on v0.2.4, whose `plan.ts:15351`
+declares `snapActionList` as the same `const` HEAD has at `:15450` — **called at `:12613`,
+`:12810` and `:13011`, all above it; one of them runs before the `const` is reached.** ⬜ P18's to fix; filed here so nobody re-finds it.
+
+**Decision: no migration, no break note.** *What's new* can say more of a project now exports.
+
+## 4. The remainder — ✅ every class measured (s6, 2026-09-23)
+
+1. ✅ **§3.4's drive → CLOSED without one** (§3.4): the marker is read by nothing at render time in
+   either release, so there is no rendering difference for a drive to find. 28 nodes / 14 projects.
+2. ✅ **The port class → §3.2** (catalog diff: 0 ports, 0 types, 0 defaults, 0 enum lists removed).
+3. ✅ **Validator rules added in this window → §3.3** (5 codes, all `warning`; 0 error arms added).
 4. ✅ **MEASURED 2026-09-23 → §3.6.** A 0.2.4 SQLite backend started on HEAD loses no rows; one
    break (3.6a, idempotency) and one ruled wire change (3.7). ⚠️ The **Postgres** path
    (`migrate --to`) is new in 0.3.0 and has no 0.2.4 population to break — it is P97's, not a row.
-5. **⬜ never measured — the exporter** (P94 STY-004 "stops dropping every style that is a link",
-   and the stale golden it uncovered; P83's export chain). An export that now emits different output
-   for the same project is a break for anyone diffing or deploying it.
+5. ✅ **The exporter → §3.8.**
+6. ✅ **§3.5's corpus count → §3.5** (both validators, 217 + 456 projects: 0 real projects red).
+
+**Evidence (scratch, session-local, not committed):** `full.ts` (both validators, one harness,
+`<root>` argument), `diff.js`, `np.ts`, `exp.sh`, `build024.mjs` / `buildhead.mjs`, `v2all.txt` (the
+217), `dirs.txt` (the 456), `v2-{head,v024}.json`, `full-{head,v024}.json`, `exp-{head,v024}/`,
+`realexp/`. 🔴 **The 217 list is `find … -name nodegx.project.json`; UPG-003's corpus list was built
+from `project.json` and holds only 22 of them** — a census of 0.2.x projects must start from the
+NodeGX file.
 
 ## 5. Acceptance criteria
 
