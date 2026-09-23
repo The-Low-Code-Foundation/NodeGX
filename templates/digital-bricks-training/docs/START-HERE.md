@@ -148,6 +148,11 @@ node tools/check-read-functions.mjs                    # offline; add --backend/
 node tools/check-pages.mjs capture --app <app origin> --out now.json --audit   # see its header
 ```
 
+**If the backend stops on its own, a dev stack started.** OpenNoodl's `npm run dev` sweeps, at
+startup, any process whose command line holds the OpenNoodl checkout's path and `nodegx-backend`
+— so a backend started from `<OpenNoodl>/packages/...` exits cleanly (SIGTERM) whenever the editor's
+dev stack starts. Launch it through a symlink outside the checkout to keep it running.
+
 `nodegx.project.json` points the pages at `http://127.0.0.1:8577` (`metadata.cloudservices`). In
 the editor the Backend Services panel does the same for a backend it started.
 
@@ -171,9 +176,12 @@ the editor the Backend Services panel does the same for a backend it started.
   signed in without the `staff` role, People and Learner go to Home. Neither rule is what keeps
   data private — every read is a function behind the security file, and a page reached some other
   way is refused by the backend first — they decide what the browser DRAWS.
-- **Right after a magic link, `roles` is unknown for a moment.** The backend's `POST
-  /oauth/exchange` hands the session over without them, though `/login` and `/users/me` carry them
-  (measured, TASK-L171; reported to NodeGX). The gate asks once when they are unknown.
+- **`roles` arrives with the session; the gate never asks for it.** A magic link's `POST
+  /oauth/exchange` carries them (NodeGX HLT-024), and a stored session is re-read through
+  `/users/me` when the app loads. While `roles` is unknown the gate waits rather than guessing —
+  `undefined` means "the backend has not said", never "in no roles". Until HLT-024 the exchange
+  left them off and the gate asked once through a `Switch`; that ask was deleted when it measured
+  at zero (TASK-L171 follow-up).
 
 - **`backend/schema.json` is the schema.** NodeGX keeps a collection's schema in the backend, not
   the project, so a template carries it as a file and `setup-backend.mjs` applies it. 25 collections,

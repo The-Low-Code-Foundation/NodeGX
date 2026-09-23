@@ -66,7 +66,9 @@ What the move found, in NodeGX rather than here — both reported, neither fixed
 
 - **`POST /oauth/exchange` returns the user without `roles`**, though its own docblock says it is
   the same shape `/login` returns and `/login` carries them. After a magic link, the page cannot
-  tell a coach from a learner until it asks. The gate asks once.
+  tell a coach from a learner until it asks. The gate asks once. **Fixed in NodeGX as HLT-024
+  (`8f3d240b2`, 2026-09-23)**; the exchange now carries `roles`, the ask measured at zero on a real
+  link, and it was deleted the same day (TASK-L171 follow-up).
 - **An Object field reads back with its keys reordered on PostgreSQL** (`jsonb`), and `migrate`'s
   comparison ignores key order. Visible here only in the order of *What they have told us* — which
   is also the order the product, on `jsonb`, has always shown.

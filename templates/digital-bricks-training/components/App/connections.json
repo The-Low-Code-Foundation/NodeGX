@@ -137,18 +137,6 @@
     },
     {
       "fromId": "app_gate",
-      "fromProperty": "out-askRoles",
-      "toId": "app_roles_once",
-      "toProperty": "on"
-    },
-    {
-      "fromId": "app_roles_once",
-      "fromProperty": "switchedToOn",
-      "toId": "app_user",
-      "toProperty": "fetch"
-    },
-    {
-      "fromId": "app_gate",
       "fromProperty": "out-toHome",
       "toId": "app_to_home",
       "toProperty": "navigate"
