@@ -117,7 +117,7 @@ function AxisSegment({
  */
 export function SizeModeInput({ label = 'Size Mode', value, isDefault, tooltips, onChange, onReset }: SizeModeInputProps) {
   return (
-    <PropertyPanelRow label={label} isChanged={!isDefault} onReset={onReset}>
+    <PropertyPanelRow label={label} isChanged={!isDefault} onReset={onReset} alignTop>
       <div className={css['Root']} data-test="size-mode">
         <AxisSegment axis="width" value={value} tooltips={tooltips} onChange={onChange} />
         <AxisSegment axis="height" value={value} tooltips={tooltips} onChange={onChange} />

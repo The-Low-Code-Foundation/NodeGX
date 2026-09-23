@@ -2,7 +2,7 @@
 
 **Scoped:** 2026-09-23, from Richard's own drive of a 0.3.0 build (P100 §6.2, drive A), against
 `cline-dev` HEAD `d7aad8a78`.
-**Status: 🟡 INS-001 + INS-002 BUILT and RULED WORTHY by Richard on his drive (2026-09-23: *"It looks fucking awesome, well done, works great"*); INS-002 AC2 ✅ both halves; Jasmine `test:ci` at the floor on the whole pile (s3, 2026-09-24). INS-003: rows 1–4 + AC2 ✅; left: row 5 (focus order, a drive) and row 6 (narrow-width number clipping — the property editor's).**
+**Status: 🟡 INS-001 + INS-002 BUILT and RULED WORTHY by Richard on his drive (2026-09-23: *"It looks fucking awesome, well done, works great"*); INS-002 AC2 ✅ both halves; Jasmine `test:ci` at the floor on the whole pile (s3, 2026-09-24). INS-003 ✅ (s3): narrow-width Width/Height and Size Mode no longer clip. **Left: INS-004 on INS-003 — Richard's look at a narrow inspector (a % Width row wraps `Fixed` under the field below ~315px).**
 **Prefix: `INS`.** **Ruled into existence by P100 R7 — "Panel move now, it's a watershed" — against
 the recommendation to bank it. 0.3.0 waits on this phase.**
 

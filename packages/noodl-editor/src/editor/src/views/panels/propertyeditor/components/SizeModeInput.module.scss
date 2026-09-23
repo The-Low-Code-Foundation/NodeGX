@@ -1,10 +1,16 @@
 /* CHR-009 §2 "dimensions": two per-axis segments on one 26px line, in the row's control column. */
 
+/* P101 INS-003 row 6: the two axes need a 135px track. Below ~323px of inspector the H segment
+   was cut by the row's `overflow: hidden` — at Richard's 301px, 22 of its 26px. The H axis now
+   wraps under W instead; the row pins its label to the first line (`alignTop`), and the 2px
+   padding keeps a one-line row's centre on the label's 30px line. */
 .Root {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 4px 10px;
   min-width: 0;
+  padding: 2px 0;
 }
 
 .Axis {

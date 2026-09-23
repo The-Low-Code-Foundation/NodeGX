@@ -2,11 +2,21 @@
    fg-muted — at the panel's one control height. Was four boxes (number, unit, "Fixed", a square),
    which the fixed 116px label column squeezed until Width read `1(` instead of `100`. */
 
+/* P101 INS-003 row 6: the number is the one part of this row allowed to shrink, so a narrow panel
+   took it all from the number — at the 301px inspector Richard chose, Width was 18px for `100`
+   (needs 28) beside a 46px `Fixed`. The value now has a floor (below), and `Fixed` wraps to a
+   second line when the track cannot hold both; the row pins its label to the first line then
+   (`alignTop`), and the 2px padding keeps a one-line row's centre on the label's 30px line. */
 .Line {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 4px 6px;
   min-width: 0;
+
+  &.has-fixed {
+    padding: 2px 0;
+  }
 }
 
 .Field {
@@ -36,8 +46,13 @@
 .Field .Value.Value,
 .Field .Value.Value:hover,
 .Field .Value.Value:focus {
-  flex: 1 1 auto;
-  min-width: 0;
+  /* `width: 0` + a zero basis keeps an <input>'s ~150px intrinsic width out of the Field's size,
+     so `Fixed` wraps on the real minimum, not on the browser's default. The floor is three
+     digits plus the left padding: the most that still fits at the inspector's 260px minimum
+     (track ≈ 87px) beside the unit and token button. A fourth digit shows as the panel widens. */
+  flex: 1 1 0;
+  width: 0;
+  min-width: calc(3ch + 8px);
   height: 100%;
   padding: 0 0 0 8px;
   border: 0;

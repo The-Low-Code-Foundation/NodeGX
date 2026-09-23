@@ -1,6 +1,6 @@
 # INS-003 — Everything that assumed the properties panel lived on the left
 
-**Opened 2026-09-23.** **Status: 🟡 rows 1, 2 ✅ (s1 — row 2 a real defect, FIXED); rows 3, 4 and AC2 ✅ (s3, §5); row 5 (focus order) and row 6 (narrow-width clipping) open.** Depends on INS-001.
+**Opened 2026-09-23.** **Status: ✅ DONE s3 (2026-09-24) — rows 1–6 and both ACs. Two real defects fixed (row 2's popup on its own button; row 6's clipped number and Size Mode). Three pre-existing gaps recorded, not fixed (§5).** Depends on INS-001.
 
 ## 1. The person sentence
 
@@ -109,6 +109,54 @@ the left panel:
 No behaviour changed — each is still defensible on its own, and changing one is a product call, not
 a consequence of the move.
 
-**Left:** row 5 (keyboard focus order — nothing in the editor handles Tab, so the order is the DOM's:
-sidepanel → document → inspector; needs a drive to record what Tab actually reaches), row 6
-(narrow-width clipping).
+**Row 5 — keyboard focus order: measured, better than before, nothing to fix in P101.** Nothing in
+the editor handles Tab (`KeyCode.Tab` is only defined), so the order is the DOM's: left panel →
+document → inspector. Driven with real `Input.dispatchKeyEvent` Tabs on one CDP connection with
+focus emulation, after a trusted click on the `Wordmark` node on the canvas:
+- The click leaves focus on `<body>` — the graph canvas is `tabIndex = -1`, focusable by script,
+  never a Tab stop.
+- **Tab ×9** walks the canvas overlay and bottom bar (Record, zoom, fit, …); **Tab 10 is the
+  inspector** (its collapse button), then the node name, the header icons, the Properties tab.
+  Before P101 Properties sat *before* the document in the DOM, so forward Tab from the canvas never
+  reached it at all.
+- ⚠️ **Shift+Tab from the canvas goes into the embedded preview and stays there** — every further
+  Shift+Tab moves inside the webview's own page. Not P101's (the preview was always between the
+  canvas and the left panel); recorded, not fixed.
+- ⚠️ **The inspector's collapse button has no accessible name.** Nor does any `IconButton` in the
+  editor: it takes no `aria-label`/`title`, and the left panel's mode buttons wrap it in a hover
+  `Tooltip`, which names nothing either. An editor-wide gap in `IconButton`, not the move's.
+
+**Row 6 — narrow-width clipping: FIXED, two rows.**
+- **Width/Height (`NumberUnitInput`).** The number was the only part of the row allowed to shrink:
+  at 301px it got **18px for `100` (needs 28)** beside a 46px `Fixed` ([shot 08](shots/08-narrow-rows-BEFORE.png)).
+  The label column could not give — it is fixed by CHR-009 R6 so every control's left edge lines
+  up. Now the value has a floor of `calc(3ch + 8px)` (with `width: 0` and a zero basis, so an
+  `<input>`'s ~150px intrinsic width stays out of the sum), `Fixed` wraps under the field when the
+  track cannot hold both, and a row that draws `Fixed` passes `alignTop` so its label sits on the
+  field's line. Three digits is the most that fits at the inspector's **260px minimum** (track
+  ≈ 87px beside unit + token button); four would clip the token button there.
+- **Size Mode (`SizeModeInput`)** — found in this session's shot, not in s1's list: its two axes
+  need a 135px track, so below **~323px** the row's `overflow: hidden` cut the H segment — **22 of
+  26px at 301**. The H axis now wraps under W, same `alignTop`.
+- **Drive** (drive copy, `Wordmark` selected, inspector width forced in the page and then restored
+  to Richard's saved 301):
+
+  | inspector | Width field | clipped | `Fixed` | Size Mode buttons hidden | rows | label on the first line |
+  |---|---|---|---|---|---|---|
+  | before, 301 | 18px | **yes** | same line | **1 of 4** | 30 | — |
+  | 260 (min) | 29px | no | wraps | 0 of 4 | 60 | ✅ |
+  | 301 | 70px | no | wraps | 0 of 4 | 60 | ✅ ([shot 09](shots/09-narrow-rows-AFTER.png)) |
+  | 328 (default) | 45px | no | same line | 0 of 4 | 30 | ✅ |
+  | 400 | 117px | no | same line | 0 of 4 | 30 | ✅ |
+
+  A px row (Border Radius) stays one line and aligned at every width.
+- **Spec** `tests-unit/ins-003/numberFieldFloor.test.ts`, 4 rows, **source pins only** — the
+  component uses hooks and cannot render in this jest, and jsdom has no layout, so the drive above
+  is the grade. Mutant (floor → `0`, wrap removed): the 2 NumberUnitInput CSS rows red, the control row green.
+- Gates: both typechecks ✅, editor jest **546 suites / 8,639 tests ✅**. `test:ci` not re-run for
+  this delta: CSS plus one optional prop, and no Jasmine spec names either component.
+- ⚠️ **Not fixed:** a token value shown as text (`var(--space-3)`, 70 of 101px) still ellipsises in
+  a narrow field, and a long toggle label (`Include padding and border`) ellipsises by CHR-009 R6's
+  own rule, with its full text in `title`.
+
+**INS-003 is done** apart from the three ⚠️ lines above, none of which the move caused.

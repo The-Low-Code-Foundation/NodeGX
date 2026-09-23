@@ -127,6 +127,10 @@ export function NumberUnitInput({
     }
   }
 
+  // CHR-009: `Fixed` is only drawn on a % value. P101 INS-003 row 6: when it is, it may wrap under
+  // the field on a narrow panel, so the row pins its label to the first line.
+  const drawsFixed = Boolean(showFixed && isPercent);
+
   return (
     // FB-018 AC1 — this is the row the test user hit. Width was a fully editable
     // field with a 1px outline while a connection drove it, so typing a width
@@ -138,8 +142,9 @@ export function NumberUnitInput({
       isConnected={isConnected}
       connectionLabel={connectionLabel}
       onConnectionClick={onConnectionClick}
+      alignTop={drawsFixed && !isConnected}
     >
-      <div className={css['Line']}>
+      <div className={classNames(css['Line'], drawsFixed && css['has-fixed'])}>
         <div className={css['Field']}>
           <PropertyPanelBaseInput
             type="text"
@@ -205,7 +210,7 @@ export function NumberUnitInput({
         {/* CHR-009 (Richard, s17): only drawn while the value is a %, the one unit it changes anything for
             (`layout.ts` turns a % in a row/column into a flex share unless it is fixed). On px the field
             takes the whole control column. A stored `isFixed` on a px value is inert and left alone. */}
-        {showFixed && isPercent && (
+        {drawsFixed && (
           <button
             type="button"
             className={css['Fixed']}
