@@ -3,7 +3,8 @@
 **Opened and built 2026-09-23 (P100 s4).** Spec: P99 [HLT-020](../phase-99-the-ones-nobody-owned/HLT-020-THE-TEXT-STYLES-HAVE-NOWHERE-TO-GO.md)
 (§2 measure, §4 fixed criteria, §5 landmines). Rulings: **R3** convert on load, **R8** tokens not
 Looks, **R9** a font file is a token too, **R10** copy the project first ([board §6](README.md)).
-**Status: ✅ BUILT and DRIVEN — `f6503e521`, `11bb0a390`.** Open rows in §6.
+**Status: ✅ BUILT and DRIVEN — `f6503e521`, `11bb0a390`; s5 fixed a regression it shipped (prefab
+installs arrived untyped) and closed §6(a)–(d).** Open rows in §6; s5 in §7.
 
 ## 1. The person sentence
 
@@ -19,8 +20,10 @@ Looks, **R9** a font file is a token too, **R10** copy the project first ([board
 | the load seam every 0.3.0 upgrade joins (UPG-002) | `models/ProjectPatches/upgradeOnLoad.ts` — returns report sections **and files to write** |
 | the loader: upgrade a copy → back up → write files → build → sticky toast | `models/projectmodel.editor.ts` |
 | saved on open, so it is upgraded (and reported) once | `models/projectmodel.ts` instance setter, `_upgradedOnLoad` |
-| the import engine reads a **source** project unconverted | `utils/import-engine/analyze.ts` `{ upgradeOnLoad: false }` |
-| tests (30), each rule killed by its own mutant (17 mutants) | `tests-unit/upg-003/textStylesToTokens.test.ts` |
+| the import engine reads a **source** project unconverted — **both** loads (s5: `apply.ts` was missed) | `utils/import-engine/analyze.ts`, `apply.ts` `{ upgradeOnLoad: false }` |
+| **s5** an imported part's text styles arrive as tokens, converted against the **target's** tokens | `convertTextStylesForImport` (same module); `apply.ts` (editor install + project import); `noodl-mcp` `install_prefab` |
+| **s5** the font-face check reads a project's own family tokens, not only the three defaults | `validation/fontFaces.ts` (by `category: 'typography-family'`) |
+| tests (38 + 1 MCP), each rule killed by its own mutant (17 + 12 mutants) | `tests-unit/upg-003/textStylesToTokens.test.ts`, `noodl-mcp/tests/libraryTools.test.ts` |
 
 **What each property becomes:** `fontSize`/`lineHeight`/`letterSpacing`/`fontWeight` → a token per
 style (`--label-medium-size`). `color` → a token; a colour naming one of the project's **colour
@@ -82,11 +85,79 @@ theme moves them). `fontFamily` → a token; a font **file** becomes the family 
   port is **wired** (LearnBook among them) — a wire can choose any style while the app runs, so those
   projects keep **all** their definitions and the Text picker still lists them; everything unwired is
   converted. **1** project wears a style on a deprecated control with no port for a property it sets.
-- **Library/prefab import still MINTS text styles** (editor + `noodl-mcp/libraryTools`). The next open
-  converts them (self-healing, tested: tokens reused, not duplicated), but within the session they
-  stay text styles. Close or convert on import — ⬜.
-- ⬜ **Never looked at:** the Styles panel's Typography group holding these tokens (quoted family
-  values, `--x-color` in *Palette Colors*); `noodl-mcp`'s `checkFontFaces` against a quoted family.
-- ⬜ **The failure path is not driven:** a backup that cannot be written → opens unconverted with an
-  error toast. Unit-graded on source order only.
-- ⬜ `test:ci`.
+- 📝 **New-from-template runs the full upgrade on a brand-new project** (`LocalProjectsModel.ts:410`
+  loads it like any open): a legacy template carrying text styles would be copied to
+  `<new>.before-0.3` and told it "was upgraded". **Unreached by shipped content** — the 10 repo
+  templates carry 0 text styles and 0 `textStyle` ports (measured s5). A note, not a build.
+
+## 7. s5 (2026-09-23) — §6's four rows, and a regression s4 shipped
+
+### 7.1 🔴 Installing a prefab upgraded the PREFAB, and the part arrived with no typography
+
+`apply.ts` loads the import source a **second** time (after `analyze.ts`), and that load passed no
+`upgradeOnLoad: false` — s4's pin read `analyze.ts` only. **Driven on HEAD `5053f489f`**, installing
+`page-header` (one of **16 of 46** shipped prefabs that wear a text style) into a scratch project through
+the real `ModuleLibraryModel._install`:
+
+| | before (HEAD) | after (s5) |
+|---|---|---|
+| prefab cache folder | copied to `page-header.before-0.3`, font module written **into the cache** — again on every install (never saved) | untouched |
+| on screen | sticky *"This project was upgraded for NodeGX 0.3"*, pointing at the cache path | nothing — no upgrade toast, no warning toast |
+| the part | wears `var(--title-large-*)`; target has **no** such tokens and **no** text style; the install's own warning: *"they will draw unstyled"* | wears the same tokens; target **defines** all four (24px, 120%, `'Inter-Medium'`, `#000000` — the style's values) |
+| fonts | — | `noodl_modules/text-style-fonts/styles.css` in the **target** declares `Inter-Medium`; the font file copied in; the module scanner lists it with no warnings |
+
+So 0.3.0 as it stood installed every one of those 16 prefabs **without its type**. Fixed, not just unbroken:
+
+### 7.2 ✅ §6(a) — an imported part's text styles arrive as tokens (both installers)
+
+`convertTextStylesForImport` runs the same conversion over the source **against the target's custom
+tokens**: an equal one is reused, a name the target uses for another value gets `-2` (the target's is
+never changed), and only what is missing is given to the target. The source's own tokens are put back —
+they never travel (CMP-004 AC4). Only the styles the plan **lands** are converted: one the import skips
+(the target keeps its own of that name) stays a text style on every wearer, via a new `leave` option that
+the converter treats exactly like a style no port can express. The loader's source branch takes a
+`convertSource` hook; `apply.ts` gives the target the tokens **before** the CMP-008 gap check, and merges
+the faces into the target's font module. `noodl-mcp`'s `install_prefab` does the same against
+`nodegx.project.json` (`textStylesConverted`, `tokensAdded` in its response).
+
+Why not "accept the next-open conversion": that open copies the whole project to a `.before-0.3 N` and
+tells a person whose project was made in 0.3 that it *"was upgraded"* — once per install-then-reopen.
+
+🔴 **The loader census now classifies every `projectFromDirectory` caller** (5 files open the person's
+project, 2 read a source and must pass `upgradeOnLoad: false`); a new caller fails until someone says
+which it is. The CMP-008 caller gate counted `readStoredTokens` file-wide (`toBe(1)`); it now counts it
+inside `tokenWarningsFor`'s arguments, which is what it meant — mutant (gap reads nothing) killed.
+
+### 7.3 ✅ §6(b) — the Styles panel, looked at (drive, s5)
+
+*Other tokens → Typography* lists `--title-large-family` `'Inter-Medium'` (quoted like the shipped
+`--font-serif`), `--title-large-size` `24px`, `--title-large-leading` `120%` after the defaults; the
+header reads *"4 tokens overriding defaults"*. The fourth, `--title-large-color`, is filed with the
+colours. Nothing wrong; the one thing a person might notice is that a style's tokens are split across
+two groups and not grouped by style.
+
+### 7.4 ✅ §6(c) — `checkFontFaces` against a quoted family: the quote was fine, the SCOPE was not
+
+`unquote` handles `'Inter-Medium'`. But the check judged only `--font-sans/-serif/-mono`, so **every
+family token the conversion mints was never checked** — a lost font file or module would pass silently.
+Widened to any token of category `typography-family` (only the three defaults and custom tokens carry
+it). Measured over the 10 shipped templates: exactly **one** newly checked token (`--font-display`,
+digital-bricks-training), and its face is declared — no new warning anywhere shipped.
+
+### 7.5 ✅ §6(d) — the backup failure, driven
+
+The real loader on a text-styled project whose parent folder is read-only: opened **unconverted** (style
+kept, 0 tokens, `_upgradedOnLoad` false so no save), error toast naming the `EACCES` on
+`page-header.before-0.3`, no backup, no font module, `project.json` byte-identical (`505dd65ab6dc`).
+Known-firing control: the same loader, writable folder, same session — it upgraded (the before-arm's cache).
+
+### 7.6 ✅ `test:ci` — first run on UPG-003, and what it found
+
+First run (seed 50154): `3033 / 12` — the floor's 8 by name plus **4 import specs** (`projectimport.js` ×2,
+`projectimportapply.js` LIB-005 ×2; one a 60 s timeout — a throw inside `.then` on `styles.text.Heading`). Three asserted
+text styles landing as text styles; now they assert the tokens (LIB-005 also grades the collision path end to end: the
+target's own Heading → `--heading-*` on open, the source's lands as `--heading-*-2`, the target's untouched). 🔴 The
+fourth opened the committed `tests/testfs/import_proj5` **in place**, so since s4 every `test:ci` run upgraded a repo
+fixture — `import_proj5.before-0.3/` and `noodl_modules/text-style-fonts/` appeared in the checkout (deleted). It now
+loads `{ upgradeOnLoad: false }` and asserts no backup appears. **Re-run, alone, cache cleared: `3033 specs, 8 failures`,
+seed 71901 — exactly the floor by name.**
