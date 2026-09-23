@@ -5,6 +5,7 @@ import PopupLayer from '../views/popuplayer';
 import { ToastLayer } from '../views/ToastLayer/ToastLayer';
 import { CloudServiceMetadata, CloudServiceMetadataDataFormat, ProjectModel } from './projectmodel';
 import { applyPatches } from '@noodl-models/ProjectPatches/applypatches';
+import { describeUpgradeReport, upgradeOnLoad } from '@noodl-models/ProjectPatches/upgradeOnLoad';
 import { filesystem } from '@noodl/platform';
 import { projectStructureService } from '../services/ProjectStructure';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
@@ -23,12 +24,22 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
       // Before opening the project, we need to patch it, if necessary
       applyPatches(content);
 
+      // P100 UPG-002/003 — convert what 0.3.0 changed, and say so on screen (R2). Skipped for a
+      // project read only as an import source: its converted nodes would name tokens the target
+      // does not define, where its text styles would have travelled with them.
+      const upgrades = args?.upgradeOnLoad === false ? [] : upgradeOnLoad(content);
+      if (upgrades.length > 0) {
+        const { title, message } = describeUpgradeReport(upgrades);
+        ToastLayer.showInfo(message, { title, duration: Infinity, id: 'project-upgrade-report' });
+      }
+
       // Disable model listeners while loading project, otherwise this will bog down large projects
       Model._listenersEnabled = false;
       const project = ProjectModel.fromJSON(content);
       Model._listenersEnabled = true;
       project._retainedProjectDirectory = projectdir;
       project._projectFormat = format;
+      project._upgradedOnLoad = upgrades.length > 0;
 
       // Check if there are any packages
       project.readModules(() => {

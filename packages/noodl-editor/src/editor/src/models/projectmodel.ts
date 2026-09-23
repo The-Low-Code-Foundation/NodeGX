@@ -132,6 +132,14 @@ export class ProjectModel extends Model {
       EventDispatcher.instance.notifyListeners('ProjectModel.instanceHasChanged', {
         oldInstance: _oldInstance
       });
+
+      // P100 UPG-003 — an upgrade on load rewrote this project in memory. A v2 project is written
+      // back on open anyway; a legacy one is not until its first edit, so without this it would
+      // be upgraded, and say so, on every open until the person happened to change something.
+      if (project?._upgradedOnLoad) {
+        project._upgradedOnLoad = false;
+        scheduleProjectSave();
+      }
     }
   }
 
@@ -162,6 +170,8 @@ export class ProjectModel extends Model {
   public runtimeVersion?: 'react17' | 'react19';
   public _retainedProjectDirectory?: string;
   public _isReadOnly?: boolean; // Flag for read-only mode (legacy projects)
+  /** P100 UPG-003: set by the loader when `upgradeOnLoad` rewrote this project; saved when it opens. */
+  public _upgradedOnLoad?: boolean;
   /** On-disk format this project was loaded from. Determines the save path. Defaults to legacy. */
   public _projectFormat?: ProjectFormatKind;
   public settings?: ProjectSettings;
