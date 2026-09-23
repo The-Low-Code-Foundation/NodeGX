@@ -779,6 +779,10 @@
         "title": "Scoping your landing page before Claude Code writes a line",
         "hook": "The most expensive hour of this project is the one where you ask Claude Code to “build me a website for my business” and it does. You will get a page. It will look plausible. And you will spend the next three weekends discovering that it takes bookings you do not want, has a blog you will never write, and still does not do the one thing you actually needed — get a message from a stranger into your inbox. The fix costs twenty minutes and no code at all.",
         "landing": "You now have a written boundary for version one: one page, three things on it, one job it must do. Everything else has a name and a place to wait. That sentence is the first thing you will hand to Claude Code.",
+        "conceptVersion": 4,
+        "projectContextVersion": 3,
+        "generationVersion": 6,
+        "generatedByTier": "senior_teacher",
         "steps": [
           {
             "id": "step-1",
@@ -1886,7 +1890,7 @@
         "createdByEmail": "trainer@example.test"
       },
       {
-        "programmeId": "prog-autumn",
+        "programmeId": "p-priya-0",
         "learnerId": "l-priya",
         "title": "Autumn programme",
         "status": "active",
@@ -1897,7 +1901,7 @@
         "createdByEmail": "trainer@example.test"
       },
       {
-        "programmeId": "prog-spring",
+        "programmeId": "p-priya-1",
         "learnerId": "l-priya",
         "title": "Spring programme",
         "status": "closed",

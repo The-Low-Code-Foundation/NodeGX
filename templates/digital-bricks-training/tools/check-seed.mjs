@@ -108,15 +108,27 @@ for (const [collection, rows] of Object.entries(seed.rows)) {
 
 // ── Criterion 5: no client reads a collection ───────────────────────────────
 /* Calibrated first: the master key reads the same collection, so a refusal
-   below is a refusal and not a collection that does not exist. */
+   below is a refusal and not a collection that does not exist.
+
+   A COLLECTION WITH NO ROWS CANNOT BE CALIBRATED, AND SAYING SO IS THE POINT.
+   The first version of this demanded `results.length > 0` from the master key
+   and therefore FAILED on `AssignmentSubmission`, which this world has no rows
+   for — accusing a backend that answers it 200 with an empty list. An empty
+   collection also cannot produce the evidence the refusal below needs: an
+   anonymous client reading nothing from a table that holds nothing says only
+   that the table is empty. So it is reported as UNCALIBRATED rather than
+   counted as refused, because a count that includes it would be a number with
+   a hole in it (L91: attribute a hit before believing it). */
 let refused = 0;
+const uncalibrated = [];
 for (const t of schema.tables) {
   const asMaster = await get(`/classes/${t.name}?limit=1`, master);
   const asClient = await get(`/classes/${t.name}?limit=1`);
   const leaked = asClient.status === 200 && (asClient.body.results || []).length > 0;
-  check(asMaster.status === 200 && (asMaster.body.results || []).length > 0, `C5: the master key cannot read ${t.name} — the refusal below would be blind`);
+  check(asMaster.status === 200, `C5: the master key cannot read ${t.name} — the refusal below would be blind`);
   check(!leaked, `C5: an anonymous client read ${t.name}`);
-  if (!leaked) refused++;
+  if ((asMaster.body.results || []).length === 0) uncalibrated.push(t.name);
+  else if (!leaked) refused++;
 }
 
 // ── Criterion 6: nobody signs up ────────────────────────────────────────────
@@ -135,6 +147,8 @@ if (failures.length) {
 }
 console.log(
   `check-seed: OK — ${Object.values(seed.rows).reduce((n, r) => n + r.length, 0)} rows in ${Object.keys(seed.rows).length} collections ` +
-    `round-tripped, ${compared} fields compared, 0 mismatches; ${refused}/${schema.tables.length} collections refused to an anonymous client ` +
-    `(master calibrated); public sign-up refused (${signup.status}); nothing derived stored.`
+    `round-tripped, ${compared} fields compared, 0 mismatches; ${refused}/${schema.tables.length - uncalibrated.length} populated collections ` +
+    `refused to an anonymous client (master calibrated)` +
+    `${uncalibrated.length ? `, ${uncalibrated.length} empty and therefore uncalibrated (${uncalibrated.join(', ')})` : ''}` +
+    `; public sign-up refused (${signup.status}); nothing derived stored.`
 );
