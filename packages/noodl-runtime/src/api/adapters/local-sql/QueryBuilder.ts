@@ -1543,6 +1543,12 @@ export function deserializeValue(value: unknown, type?: string): unknown {
     return value; // Keep as ISO string, let CloudStore handle Date objects
   }
 
+  // P99 HLT-022 (b): a String column is text, whatever it looks like. The sniff below
+  // turned a learner's `[1,2]` into an array on read, on both adapters.
+  if (type === 'String') {
+    return value;
+  }
+
   if (type === 'Object' || type === 'Array' || type === 'GeoPoint' || type === 'File') {
     if (typeof value === 'string') {
       try {
@@ -1553,7 +1559,8 @@ export function deserializeValue(value: unknown, type?: string): unknown {
     }
   }
 
-  // Try to parse JSON strings that look like objects/arrays
+  // Try to parse JSON strings that look like objects/arrays. Kept, deliberately, for a
+  // column with NO declared type: a schemaless backend has nothing else to go on.
   if (typeof value === 'string') {
     if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'))) {
       try {

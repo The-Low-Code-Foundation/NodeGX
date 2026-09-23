@@ -567,6 +567,25 @@ describe('QueryBuilder', () => {
       expect(QueryBuilder.deserializeValue('hello')).toBe('hello');
       expect(QueryBuilder.deserializeValue('not json {')).toBe('not json {');
     });
+
+    // P99 HLT-022 (b): parse by the schema, never by the look of the text.
+    it('returns a String column as the string, however bracketed', () => {
+      expect(QueryBuilder.deserializeValue('[1,2]', 'String')).toBe('[1,2]');
+      expect(QueryBuilder.deserializeValue('{"a":1}', 'String')).toBe('{"a":1}');
+      expect(QueryBuilder.deserializeValue('[see notes]', 'String')).toBe('[see notes]');
+    });
+
+    it('still parses an Object or Array column holding the same text', () => {
+      expect(QueryBuilder.deserializeValue('[1,2]', 'Array')).toEqual([1, 2]);
+      expect(QueryBuilder.deserializeValue('{"a":1}', 'Object')).toEqual({ a: 1 });
+    });
+
+    // The tempting wrong fix is deleting the sniff: this is the case it breaks. A schemaless
+    // column has no declared type, and the sniff is all it has.
+    it('keeps the sniff for a column with no declared type', () => {
+      expect(QueryBuilder.deserializeValue('[1,2]', undefined)).toEqual([1, 2]);
+      expect(QueryBuilder.deserializeValue('{"a":1}', undefined)).toEqual({ a: 1 });
+    });
   });
 
   describe('toFts5MatchQuery (BAK-008)', () => {

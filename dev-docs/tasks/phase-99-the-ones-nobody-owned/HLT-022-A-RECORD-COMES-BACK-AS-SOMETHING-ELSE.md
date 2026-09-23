@@ -4,6 +4,10 @@
 ruling: *"Core fix + workaround now."*** Found by L170's first live run and invisible to its offline
 check. Specced, not built. Measured on `cline-dev` by the four read functions that hit it.
 
+✅ **BUILT 2026-09-23. AC1–AC5 met on SQLite and PostgreSQL; AC6 is the DBT stream's.** Built to
+§3 as recommended: `{ plain: true }` on `query`/`fetch`, and a `String` column is never sniffed.
+[verdict](./verdicts/HLT-022/2026-09-23/VERDICT.md)
+
 ## 1. The person sentence
 
 > **Someone who saves a document into a record — a lesson's sections, a map of facts — reads back the

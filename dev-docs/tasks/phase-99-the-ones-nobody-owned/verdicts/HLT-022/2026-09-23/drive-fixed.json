@@ -1,0 +1,398 @@
+{
+  "saved": {
+    "title": "Lesson one",
+    "sections": [
+      {
+        "id": "s1",
+        "text": "Intro"
+      },
+      {
+        "id": "s2",
+        "text": "Body",
+        "tags": [
+          "a"
+        ]
+      }
+    ],
+    "facts": {
+      "likes": "tea",
+      "level": 3,
+      "nested": {
+        "id": "keep-me"
+      }
+    },
+    "note": "[1,2]",
+    "due": {
+      "__type": "Date",
+      "iso": "2026-09-23T09:00:00.000Z"
+    }
+  },
+  "sqlite": {
+    "adapter": "sqlite",
+    "createTable": 200,
+    "create": 201,
+    "id": "32f9f4f7-4802-46d0-9b15-b392769cd1aa",
+    "rest": {
+      "objectId": "32f9f4f7-4802-46d0-9b15-b392769cd1aa",
+      "createdAt": "2026-09-23T11:21:00.679Z",
+      "updatedAt": "2026-09-23T11:21:00.679Z",
+      "ACL": null,
+      "title": "Lesson one",
+      "sections": [
+        {
+          "id": "s1",
+          "text": "Intro"
+        },
+        {
+          "id": "s2",
+          "text": "Body",
+          "tags": [
+            "a"
+          ]
+        }
+      ],
+      "facts": {
+        "likes": "tea",
+        "level": 3,
+        "nested": {
+          "id": "keep-me"
+        }
+      },
+      "note": "[1,2]",
+      "due": {
+        "__type": "Date",
+        "iso": "2026-09-23T09:00:00.000Z"
+      }
+    },
+    "model": {
+      "status": 200,
+      "query": [
+        {
+          "isModel": true,
+          "getId": "32f9f4f7-4802-46d0-9b15-b392769cd1aa",
+          "json": {
+            "createdAt": "2026-09-23T11:21:00.679Z",
+            "updatedAt": "2026-09-23T11:21:00.679Z",
+            "title": "Lesson one",
+            "sections": [
+              {
+                "id": "IyyAEAAytK",
+                "text": "Intro"
+              },
+              {
+                "id": "YwArHVl4UI",
+                "text": "Body",
+                "tags": [
+                  "a"
+                ]
+              }
+            ],
+            "facts": {
+              "likes": "tea",
+              "level": 3,
+              "nested": {
+                "id": "ilj8pHHky5"
+              },
+              "id": "cGkmf9rA7q"
+            },
+            "note": "[1,2]",
+            "due": {
+              "__type": "Date",
+              "iso": "2026-09-23T09:00:00.000Z",
+              "id": "Q78OrfTGKl"
+            },
+            "id": "32f9f4f7-4802-46d0-9b15-b392769cd1aa"
+          }
+        }
+      ],
+      "fetch": {
+        "isModel": true,
+        "getId": "32f9f4f7-4802-46d0-9b15-b392769cd1aa",
+        "json": {
+          "createdAt": "2026-09-23T11:21:00.679Z",
+          "updatedAt": "2026-09-23T11:21:00.679Z",
+          "title": "Lesson one",
+          "sections": [
+            {
+              "id": "IyyAEAAytK",
+              "text": "Intro"
+            },
+            {
+              "id": "YwArHVl4UI",
+              "text": "Body",
+              "tags": [
+                "a"
+              ]
+            }
+          ],
+          "facts": {
+            "likes": "tea",
+            "level": 3,
+            "nested": {
+              "id": "ilj8pHHky5"
+            },
+            "id": "cGkmf9rA7q"
+          },
+          "note": "[1,2]",
+          "due": {
+            "__type": "Date",
+            "iso": "2026-09-23T09:00:00.000Z",
+            "id": "Q78OrfTGKl"
+          },
+          "id": "32f9f4f7-4802-46d0-9b15-b392769cd1aa"
+        }
+      }
+    },
+    "plain": {
+      "status": 200,
+      "query": [
+        {
+          "isModel": false,
+          "json": {
+            "objectId": "32f9f4f7-4802-46d0-9b15-b392769cd1aa",
+            "createdAt": "2026-09-23T11:21:00.679Z",
+            "updatedAt": "2026-09-23T11:21:00.679Z",
+            "title": "Lesson one",
+            "sections": [
+              {
+                "id": "s1",
+                "text": "Intro"
+              },
+              {
+                "id": "s2",
+                "text": "Body",
+                "tags": [
+                  "a"
+                ]
+              }
+            ],
+            "facts": {
+              "likes": "tea",
+              "level": 3,
+              "nested": {
+                "id": "keep-me"
+              }
+            },
+            "note": "[1,2]",
+            "due": "2026-09-23T09:00:00.000Z"
+          }
+        }
+      ],
+      "fetch": {
+        "isModel": false,
+        "json": {
+          "objectId": "32f9f4f7-4802-46d0-9b15-b392769cd1aa",
+          "createdAt": "2026-09-23T11:21:00.679Z",
+          "updatedAt": "2026-09-23T11:21:00.679Z",
+          "title": "Lesson one",
+          "sections": [
+            {
+              "id": "s1",
+              "text": "Intro"
+            },
+            {
+              "id": "s2",
+              "text": "Body",
+              "tags": [
+                "a"
+              ]
+            }
+          ],
+          "facts": {
+            "likes": "tea",
+            "level": 3,
+            "nested": {
+              "id": "keep-me"
+            }
+          },
+          "note": "[1,2]",
+          "due": "2026-09-23T09:00:00.000Z"
+        }
+      }
+    }
+  },
+  "postgres": {
+    "adapter": "postgres",
+    "createTable": 200,
+    "create": 201,
+    "id": "8acfb540-689a-4583-8723-8c6c66a98cbb",
+    "rest": {
+      "objectId": "8acfb540-689a-4583-8723-8c6c66a98cbb",
+      "createdAt": "2026-09-23T11:21:00.936Z",
+      "updatedAt": "2026-09-23T11:21:00.936Z",
+      "ACL": null,
+      "title": "Lesson one",
+      "sections": [
+        {
+          "id": "s1",
+          "text": "Intro"
+        },
+        {
+          "id": "s2",
+          "tags": [
+            "a"
+          ],
+          "text": "Body"
+        }
+      ],
+      "facts": {
+        "level": 3,
+        "likes": "tea",
+        "nested": {
+          "id": "keep-me"
+        }
+      },
+      "note": "[1,2]",
+      "due": {
+        "__type": "Date",
+        "iso": "2026-09-23T09:00:00.000Z"
+      }
+    },
+    "model": {
+      "status": 200,
+      "query": [
+        {
+          "isModel": true,
+          "getId": "8acfb540-689a-4583-8723-8c6c66a98cbb",
+          "json": {
+            "createdAt": "2026-09-23T11:21:00.936Z",
+            "updatedAt": "2026-09-23T11:21:00.936Z",
+            "title": "Lesson one",
+            "sections": [
+              {
+                "id": "DhYDbzuMwy",
+                "text": "Intro"
+              },
+              {
+                "id": "hxxdqHWff9",
+                "tags": [
+                  "a"
+                ],
+                "text": "Body"
+              }
+            ],
+            "facts": {
+              "level": 3,
+              "likes": "tea",
+              "nested": {
+                "id": "uZ09PnBXxf"
+              },
+              "id": "T0gzGibS7T"
+            },
+            "note": "[1,2]",
+            "due": {
+              "__type": "Date",
+              "iso": "2026-09-23T09:00:00.000Z",
+              "id": "yDxJxJTpzW"
+            },
+            "id": "8acfb540-689a-4583-8723-8c6c66a98cbb"
+          }
+        }
+      ],
+      "fetch": {
+        "isModel": true,
+        "getId": "8acfb540-689a-4583-8723-8c6c66a98cbb",
+        "json": {
+          "createdAt": "2026-09-23T11:21:00.936Z",
+          "updatedAt": "2026-09-23T11:21:00.936Z",
+          "title": "Lesson one",
+          "sections": [
+            {
+              "id": "DhYDbzuMwy",
+              "text": "Intro"
+            },
+            {
+              "id": "hxxdqHWff9",
+              "tags": [
+                "a"
+              ],
+              "text": "Body"
+            }
+          ],
+          "facts": {
+            "level": 3,
+            "likes": "tea",
+            "nested": {
+              "id": "uZ09PnBXxf"
+            },
+            "id": "T0gzGibS7T"
+          },
+          "note": "[1,2]",
+          "due": {
+            "__type": "Date",
+            "iso": "2026-09-23T09:00:00.000Z",
+            "id": "yDxJxJTpzW"
+          },
+          "id": "8acfb540-689a-4583-8723-8c6c66a98cbb"
+        }
+      }
+    },
+    "plain": {
+      "status": 200,
+      "query": [
+        {
+          "isModel": false,
+          "json": {
+            "objectId": "8acfb540-689a-4583-8723-8c6c66a98cbb",
+            "createdAt": "2026-09-23T11:21:00.936Z",
+            "updatedAt": "2026-09-23T11:21:00.936Z",
+            "title": "Lesson one",
+            "sections": [
+              {
+                "id": "s1",
+                "text": "Intro"
+              },
+              {
+                "id": "s2",
+                "tags": [
+                  "a"
+                ],
+                "text": "Body"
+              }
+            ],
+            "facts": {
+              "level": 3,
+              "likes": "tea",
+              "nested": {
+                "id": "keep-me"
+              }
+            },
+            "note": "[1,2]",
+            "due": "2026-09-23T09:00:00.000Z"
+          }
+        }
+      ],
+      "fetch": {
+        "isModel": false,
+        "json": {
+          "objectId": "8acfb540-689a-4583-8723-8c6c66a98cbb",
+          "createdAt": "2026-09-23T11:21:00.936Z",
+          "updatedAt": "2026-09-23T11:21:00.936Z",
+          "title": "Lesson one",
+          "sections": [
+            {
+              "id": "s1",
+              "text": "Intro"
+            },
+            {
+              "id": "s2",
+              "tags": [
+                "a"
+              ],
+              "text": "Body"
+            }
+          ],
+          "facts": {
+            "level": 3,
+            "likes": "tea",
+            "nested": {
+              "id": "keep-me"
+            }
+          },
+          "note": "[1,2]",
+          "due": "2026-09-23T09:00:00.000Z"
+        }
+      }
+    }
+  }
+}

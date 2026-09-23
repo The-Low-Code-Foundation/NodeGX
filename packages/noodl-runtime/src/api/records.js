@@ -28,7 +28,11 @@ function createRecordsAPI(modelScope) {
           select: options ? options.select : undefined,
           count: options ? options.count : undefined,
           success: (results,count) => {
-            const _results = results.map((r) => cloudstore()._fromJSON(r, className));
+            // P99 HLT-022: `plain` returns the rows as stored, for a cloud function; the
+            // default stays the Model every app binding depends on.
+            const _results = options && options.plain
+              ? results.map((r) => CloudStore._plainFromJSON(r))
+              : results.map((r) => cloudstore()._fromJSON(r, className));
             if(count !== undefined)  resolve({results:_results,count});
             else resolve(_results);
           },
@@ -120,6 +124,7 @@ function createRecordsAPI(modelScope) {
           objectId: objectOrId,
           include: options ? options.include : undefined,
           success: function (response) {
+            if (options && options.plain) return resolve(CloudStore._plainFromJSON(response));
             var record = cloudstore()._fromJSON(response, className);
             resolve(record);
           },

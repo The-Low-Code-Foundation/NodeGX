@@ -157,6 +157,32 @@ export const recordCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'records/a-string-column-reads-back-as-text-however-bracketed',
+    area: 'records',
+    pins: 'a String field holding text that looks like JSON reads back as that text; an Object field still reads back as an object',
+    async run(ctx) {
+      // P99 HLT-022 (b). `deserializeValue` JSON-parsed ANY string that started and ended with
+      // brackets, whatever the column's declared type — so free text such as `[1,2]` in a
+      // String column came back as an array.
+      const c = ctx.collection('Txt');
+      ctx.createTable(c, [
+        { name: 'note', type: 'String' },
+        { name: 'doc', type: 'Object' }
+      ]);
+
+      const row = await ctx.create(c, { note: '[1,2]', doc: { a: 1 } });
+      const read = await ctx.fetch(c, String(row.objectId));
+      deepEq(read.note, '[1,2]', 'bracketed text in a String column');
+      // The control: the Object column beside it must still parse, or the arm above passes on
+      // an adapter that parses nothing at all.
+      deepEq(read.doc, { a: 1 }, 'the Object column control');
+
+      await ctx.save(c, String(row.objectId), { note: '{"a":1}' });
+      deepEq((await ctx.fetch(c, String(row.objectId))).note, '{"a":1}', 'braced text after a save');
+    }
+  },
+
+  {
     id: 'records/a-save-with-a-precondition-applies-only-if-unchanged',
     area: 'records',
     pins: 'a save carrying `expect` applies only while the row still holds those values; a stale one is refused and writes nothing',
