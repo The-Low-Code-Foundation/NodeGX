@@ -1,7 +1,8 @@
 # UPG-001 — The break census: what a 0.2.4 project loses in 0.3.0
 
-**Opened 2026-09-22** with the phase. **Status: 🟡 STARTED — 4 rows measured, 5 classes named and
-unmeasured (§4).** Measured against `cline-dev` HEAD `7043fb6e6`, `v0.2.4..HEAD` = **427 commits**.
+**Opened 2026-09-22** with the phase. **Status: 🟡 STARTED — the backend storage plane DRIVEN s3 (§3.6:
+clean but for one idempotency break); 4 classes still named and unmeasured (§4 items 1, 2, 3, 5), plus
+§3.5's corpus count.** Measured against `cline-dev` HEAD `7043fb6e6`, `v0.2.4..HEAD` = **427 commits**.
 
 ## 1. The person sentence
 
@@ -30,10 +31,14 @@ artefact — the diff, the rule, the model file — and says what was read.
 
 | # | class | verdict | decision |
 |---|---|---|---|
-| 3.1 | Text styles are no longer editable | 🔴 **BREAK — real, ruled on the numbers** | the *conversion* is open: UPG-003, **R3** |
+| 3.1 | Text styles vanish from the Styles panel — **but stay listable, applicable and CREATABLE from a node** (A2, 2026-09-23) | 🔴 **BREAK — real, ruled on the numbers; narrower and stranger than first recorded** | **R6 ✅ BUILT `62029ab28`** (Create removed), **then convert — to typography TOKENS, not Looks (R8, 2026-09-23)** — UPG-003, spec = P99 [HLT-020](../phase-99-the-ones-nobody-owned/HLT-020-THE-TEXT-STYLES-HAVE-NOWHERE-TO-GO.md). [Board §6.2](README.md) |
 | 3.2 | Built-in port renames | ✅ **CLEAN this release** | none. Do not re-measure |
 | 3.3 | New validator rule on existing work | 🟡 **NOISE, not a break** | one line in the notes |
+| 3.5 | **A MODIFIED rule now reaches its `error` arm on work that was clean** — `nonexistentPort` (GAM-019 narrowed the skip from *"any dynamic ports"* to `hasRuntimeDynamicPorts`) | 🔴 **candidate BREAK, `⬜` corpus hits never counted** | §3.3's *"one line in the notes"* rests on `warning`; this one is `error`. Found 2026-09-23 by diffing the **modified** rules, which §4.3 as written would not have looked at |
 | 3.4 | Shipped looks becoming project-owned Looks | 🟡 **NOT on the load path** | needs the drive in §4.1 before it is closed |
+| 3.6 | **The backend storage plane** — a 0.2.4 backend holding live data, started on 0.3.0 code | ✅ **CLEAN on every surface but one** (driven 2026-09-23, §3.6) | none, except 3.6a |
+| 3.6a | ↳ an idempotency key **completed on 0.2.4 runs a second time** on the first call after the upgrade | 🔴 **BREAK — measured, recoverable** (the 0.2.4 row is still on disk, unread) | ✅ **MIGRATED s3 (`77564e5c2`)** — `persistence/carryLegacyIdempotencyKeys.ts`, once per file, on `ExecutionHistory.open`. Re-driven on a fresh copy of the same 0.2.4 data: `replayed`, the **0.2.4 token**, runs stay **1** (unfixed: `stored`, new token, 2); fresh-key control +1; start log `idempotency.legacy-carried {carried: 1}`. `tests/upg-001-idempotency-carry.test.ts`, each arm killed by its own mutant |
+| 3.7 | `/api` (BYOB) and `admin/export` return Booleans as `true`/`false`, not `1`/`0` | 🟡 **WIRE CHANGE, ruled** — P97 R7 / `40140ca71` BRG-007 | **one line in the notes** — a client comparing `=== 1` stops matching. `/classes` already returned real Booleans |
 
 ### 3.1 🔴 Text styles are no longer editable — BREAK
 
@@ -114,6 +119,63 @@ what a shipped look contains (the config's `defaults` **plus** the variant's own
 translated the state names (`active`→`pressed`, `focus`→`focused`, `placeholder` dropped as
 unlandable). **A grep cannot answer a rendering question.** §4.1.
 
+### 3.6 ✅ The backend storage plane — a drive, not a diff read
+
+**Measured 2026-09-23 (P100 s3)** by running both versions, because the diff (59 source files, ~9,400
+lines since `v0.2.4`) is too big to read for absence. `v0.2.4` and `HEAD` `7df454df6` were each
+`git archive`d to scratch and built there with every `@noodl/*` import aliased to the scratch copy
+(one file, `nodegx-project-contract/logic-builder-io.ts`, still resolves from the checkout in both —
+identical code on both sides, never exercised by the seed). **No route was removed**: 121 patterns at
+`v0.2.4`, 125 at HEAD, `comm -23` empty.
+
+**The drive:** a 0.2.4 backend on an empty data dir was filled over HTTP (64 steps, 0 errors) —
+records of every field type incl. Pointer, File and a `_Join` relation, batch writes, two users with
+passwords and sessions, a role, collection permissions and a row ACL with `devOpen: false`, a file, an
+API key, a secret, email config and templates, GitHub auth, ops, search, a trigger, a workflow def and
+six runs, an idempotent call, and a backup archive. 83 reads → `before.json`. Stopped; the data dir
+`cp -R`'d; **HEAD started on the copy** → 83 reads → `after.json`. The original was byte-identical at
+the end. Control: two back-to-back reads on 0.2.4 differ only in `exportedAt`, error `requestId`s and
+the audit log's own growth.
+
+| surface | 0.2.4 → HEAD |
+|---|---|
+| records (`/classes` + `/api`: filters, sort, `include`, `keys`, `count`, `$relatedTo`, aggregate) | **same values** — except Booleans on `/api`, row 3.7 |
+| ACLs and collection permissions | **same** — the private row is 404 to anonymous and to the other user, 200 to its owner |
+| users, roles, permissions, function rules, secrets, files (sha256), email, auth, search, triggers, workflow defs, executions, audit | **same**, plus additive fields (`actsAsUserId`, `effectiveOverlapPolicy`, new ops limits) |
+| old **password** / **session token** / **API key** / **webhook secret** on HEAD | **all 200**, each beside a failing control (wrong password 404/101, logged-out token 400/209, revoked key 401, bad signature 401) |
+| HEAD's startup log on the old data | no migrate / upgrade / warn / error / DISABLED line; `doctor` OK |
+| schema | `_ApiKey` + `actsAsUserId`; new `_HttpCache`; new `operational_records`; `idempotency_keys` left in place. `executions.sqlite` keeps `auto_vacuum=none` and `admin/status` offers `POST /admin/executions/compact` |
+| a **0.2.4 backup restored by HEAD's `restore`** | exits 0, `integrity_check: ok`; records, users, sessions, ACLs, keys, files, email, triggers **same** — and the gap in §3.6c |
+
+**3.6a 🔴 the one break.** `persistence/SqliteOperationalStore.ts` (BRG-002) moved idempotency claims
+from `idempotency_keys` to a new `operational_records` table and says in its own header that completed
+claims do not carry. Measured: key `evt_upg_1` called twice on 0.2.4 → one run, one token. The same key
+on HEAD → **200, a new token, `idempotency-status: stored`, and the function's run count 1 → 2**. A
+second replay on HEAD → `replayed`, still 2. Controls: the key's TTL was 72h; a fresh key on HEAD called
+twice adds exactly one run. For a function that charges a card or sends an email, that is one duplicate
+per in-flight key, on the boot that upgrades. **The row is still on disk, so R2 says migrate.**
+
+**3.6b — found by the drive, NOT upgrade breaks** (identical on 0.2.4; owed a home, not this phase's):
+- `where tags = "fantasy"` on an Array field returns `[]` although three rows carry it — **a wrong
+  answer with no error**.
+- `where author = {__type:'Pointer',…}` → 500 `cannot translate: __type`; the plain-id form works.
+- a create carrying `meta: {}` → 500 `Provided value cannot be bound to SQLite parameter` (0.2.4 only;
+  not retried on HEAD).
+- `PUT /classes` with `{__op:'AddUnique',…}` stores the operation object literally.
+- ten failed credentials from one IP in five minutes lock that IP out of **every** route for five
+  minutes, `/health` and valid admin bearer calls included (0.2.4; not retried on HEAD).
+
+**3.6c 🔴 a backup does not hold the whole backend** — older than this release, same on HEAD
+(`BackupManager`'s `CONFIG_FILES` list is unchanged). The 0.2.4 archive holds `db/local.db`, file
+blobs, `workflows/*.workflow.json` and six config files (`tar tzvf`). Restored, it **loses**
+`workflow-defs/` (the trigger survives and its webhook now 404s *"Trigger target workflow not
+found"*), `auth.json` (GitHub provider, magic link, redirect allow-list), `search.json`, `files.json`,
+`ops.json` (CORS, audit retention, idempotency TTL back to 24h) and all of `executions.sqlite`.
+🔴 **Not an upgrade break, but it is the one a person discovers on the worst day they have.**
+
+Evidence (scratch, not committed): `upg/{seed,read,cont,diff}.js`, `before/after/restored.json`,
+`diff-before-after.txt`, `serve-{024,030,restored}.log`, `schema-{024,030}-*.sql`.
+
 ## 4. The remainder — named, unmeasured, in priority order
 
 🔴 **Said in the words `⬜ never measured`, so no later session mistakes this list for a finding.**
@@ -127,11 +189,9 @@ unlandable). **A grep cannot answer a rendering question.** §4.1.
    deleted rather than renamed, and the trees outside the three.
 3. **⬜ never measured — the other validator rules added in this window.** §3.3 is one of a class.
    Enumerate the `DiagnosticCode` entries added since `v0.2.4` and read each severity.
-4. **⬜ never measured — the backend storage plane** (P97 BRG-004/005: the Postgres adapter, the
-   migration, `NODEGX_STORAGE_URL`). The compatibility policy's own table restates WFA-003 as
-   applying to **deployed backends holding live data** — which is a different and stricter
-   population than "projects on disk", and the only one in this census that can lose somebody's
-   rows rather than their styling.
+4. ✅ **MEASURED 2026-09-23 → §3.6.** A 0.2.4 SQLite backend started on HEAD loses no rows; one
+   break (3.6a, idempotency) and one ruled wire change (3.7). ⚠️ The **Postgres** path
+   (`migrate --to`) is new in 0.3.0 and has no 0.2.4 population to break — it is P97's, not a row.
 5. **⬜ never measured — the exporter** (P94 STY-004 "stops dropping every style that is a link",
    and the stale golden it uncovered; P83's export chain). An export that now emits different output
    for the same project is a break for anyone diffing or deploying it.

@@ -1,7 +1,8 @@
 # Phase 100 — 0.3.0: the first one people upgrade into
 
 **Scoped:** 2026-09-22, at Richard's request, against `cline-dev` HEAD `7043fb6e6`.
-**Status: 📋 SCOPED. UPG-001 started (the census; 4 rows measured, 5 classes named `⬜ never
+**Status (s3, 2026-09-23): ✅ R6 BUILT (`62029ab28` — a Text node's picker can no longer create a text style). ✅ R8 RULED — text styles convert to **typography tokens**, not Looks (§6). ✅ UPG-001 §3.6 — the backend storage plane DRIVEN: a 0.2.4 backend with live data opens on 0.3.0 with no rows lost, one idempotency break (3.6a) — MIGRATED `77564e5c2`.**
+**Earlier: 📋 SCOPED. UPG-001 started (the census; 4 rows measured, 5 classes named `⬜ never
 measured`). ✅ UPG-005 ANSWERED s1 — the 32-row triage R4 bought a session for cost one measurement:
 every committed row on P83 and P84 is already inside `v0.2.4`, so neither phase has anything pending
 for 0.3.0 ✅ UPG-002 half done — the policy amendment is written; the on-screen report
@@ -140,7 +141,7 @@ a table with a decision per row.
 |---|---|---|---|
 | **UPG-001** | [The break census — what a 0.2.4 project loses in 0.3.0](UPG-001-THE-BREAK-CENSUS.md) | — | the number, the notes and the migrations all read from it. **Started; §4.1 and §4.2 are its first two rows** |
 | **UPG-002** | [The compatibility policy's ground has moved](UPG-002-THE-POLICY-GROUND-HAS-MOVED.md) | 🟡 **half done s1** | amend [`COMPATIBILITY-POLICY.md`](../../reference/COMPATIBILITY-POLICY.md) with a dated amendment carrying R2's words. It is *binding on every task in every phase* and currently states a falsehood as its premise. **Plus §6.1: find or build the surface that shows the report** |
-| **UPG-003** | Text styles become Looks, on load | ✅ **R3 ruled: BUILD** | §4.1. **The phase's largest row.** Convert existing text styles into Looks when the project opens, with the R2 report. `models/Looks/looks.ts` is deliberately pure and `tests-unit/` can grade it without a renderer — so the model half needs no editor |
+| **UPG-003** | Text styles become **typography tokens**, on load — 🔴 **not Looks** (R8) | ✅ **R3: BUILD · R8: tokens** | §4.1. **The phase's largest row.** 🔴 **P99 [HLT-020](../phase-99-the-ones-nobody-owned/HLT-020-THE-TEXT-STYLES-HAVE-NOWHERE-TO-GO.md) is the SAME row, specced a day earlier and never cited here** — its §2 is the measurement (238 projects, 3,447 wearers, 82 cross-type styles, 34 double-wearers) and its §4/§5 are the ACs and landmines this build owes. Convert on load with the R2 report; R6's half (close the source) is built
 | **UPG-004** | The version bump, and the literals that are not the version | — | `0.2.4` → `0.3.0` in **one** file. The prefab `library.json` files and `package-lock.json` are **traps**, both already measured in [`PUBLISH-0.2.2.md` §2](../release-0.2.2/PUBLISH-0.2.2.md). Plus the first-two-segment consumer in §5.1 below |
 | **UPG-005** | [What ships and what waits — all 32 rows](UPG-005-WHAT-SHIPS-AND-WHAT-WAITS.md) | ✅ **ANSWERED s1** | **P83 and P84 both carry `Release: ⬜ NOT RULED`.** Richard chose the row-by-row read over ruling the boards, cost accepted. 🔴 Read each row's `*-WHAT-WAS-BUILT.md` rather than either board's narrative — P83's own README says `ls`-ing for them is cheaper than believing it |
 | **UPG-006** | The release notes, the changelog, and the what's-new post | **R5** | 427 commits, written from the person's side. And see §5.2 — the in-app feed the editor already asks for on every project open |
@@ -161,14 +162,22 @@ forward without re-reading.
 ### 5.2 The release has an in-app announcement surface, and it is a 404
 
 P99 §10: the editor requests `static/whats-new/feed.json` from the content origin **on every project
-open**, and there is no `static/whats-new/` directory at all — confirmed 404, 2026-09-22. Richard
-ruled: publish an empty feed *"so the feed becomes usable later without another change"*. The file
-is written and **not pushed** — the `gh api -X PUT` to the public content repo was refused by the
-auto-mode classifier, and **Richard has to allow it or run it**.
+open**. It was a confirmed 404 on 2026-09-22; Richard ruled publish an empty feed *"so the feed
+becomes usable later without another change"*, and — because the `gh api -X PUT` to a public repo was
+refused by the auto-mode classifier — **he pushed it himself the same evening** (2026-09-22
+21:08:19Z).
+
+✅ **Re-measured 2026-09-23: `static/whats-new/feed.json` → 200, bytes identical to the
+READY-TO-PUSH file.** The surface is live and **empty** (`items: []`), which the client treats as a
+normal state: no modal opens. **So the 0.3.0 work here is not a push, it is a post** — UPG-006 writes
+the first `items[0]`, and the mechanism it lands on is already proven reachable.
 
 🔴 **0.3.0 is "later".** A release that changes what a project holds is exactly what that feed
-exists to say, and the release is the event that makes an empty feed worth filling. UPG-006 owns
-the post; the push is still Richard's.
+exists to say, and the release is the event that makes an empty feed worth filling. UPG-006 owns the
+post. ⚠️ **One consequence nobody has collected:** `scripts/renderer-errors/budget.json:61`
+allows `network/whats-new-feed-404 ≤ 2`, and its own `reason` says *"Goes to 0 when the feed is
+published"*. It is published. That row is now a free tightening of the gate — but it needs the
+renderer-errors run, which **launches its own dev stack**, so it cannot be done beside a live editor.
 
 ## 6. Rulings — **R2, R3 and R4 RULED 2026-09-22**
 
@@ -181,7 +190,10 @@ them back to the cheaper option on the grounds that a release phase should not b
 | **R2** | *"Our own compatibility policy says that once we ship publicly, a break needs a migration that runs when the project loads. It was written when nothing had shipped — we have now shipped four times. Starting with 0.3.0, what does a break owe?"* | ✅ **"Visible report at load, migrate where recoverable."** *If we can convert the data we convert it; if we cannot, the project opens and says so on screen.* This is now the rule UPG-002 writes into the policy, and the standard every other row is held to |
 | **R3** | *"You raised converting text styles into Looks 'as a compromise' when you ruled, and it was never built. Does 0.3.0 carry that conversion?"* | ✅ **"Convert on load in 0.3.0."** 🔴 **Against the recommendation.** The recommendation was a release note plus a later row, resting on his own *"most of them will just be using the default text styles"*. He chose the conversion anyway ⇒ **UPG-003 is a build task, and it is this phase's largest** |
 | **R4** | *"P83 and P84 both carry 'Release: NOT RULED'… between them that is 32 rows. How do you want that decided?"* | ✅ **"I triage all 32 rows first."** 🔴 **Against the recommendation**, which was to rule the two boards and spend nothing on triage. The cost was stated in the option text (*"roughly a session before anything ships"*) and accepted ⇒ **UPG-005 is a 32-row read, and it comes before the cut** |
-| **R5** | Does 0.3.0 wait for the what's-new push, which only Richard can make? | ⬜ **not asked yet** — it is cheap and it can wait until UPG-006 needs it |
+| **R5** | Does 0.3.0 wait for the what's-new push, which only Richard can make? | ✅ **moot — Richard pushed the empty feed himself 2026-09-22 21:08Z** (re-measured 200 on 2026-09-23, bytes identical). What 0.3.0 owes the feed now is a post, not a push: UPG-006 |
+| **R6** | *"The Styles panel no longer shows text styles, but a Text node's style field still lists them, still applies them, and still has a working Create button that writes new ones into the project. What should 0.3.0 do?"* | ✅ **"Close the source, then convert."** Ruled 2026-09-23, from Richard's own drive (A2 below). The picker's **Create** is removed so the old layer is read-only, **then** UPG-003 converts on load. Without the first half the migration never finishes: it converts on Monday and the picker mints an unconverted style on Tuesday |
+| **R7** | *"None of the three UX items from the A drive belongs in P100 — §7 rules out growing features in release prep. How do you want to sequence them?"* | ✅ **"Panel move now, it's a watershed."** Ruled 2026-09-23. 🔴 **Against the recommendation, which was to bank them and finish 0.3.0 first; the delay was stated in the option text and accepted. 0.3.0 now WAITS on the properties panel moving to the right** — see phase 101. Do not "correct" this back on the grounds of §7: §7 is the default, R7 is the ruling |
+| **R8** | *"0.3.0 converts old text styles when a project opens. What should they become? A Look belongs to one node type, but in 33 projects one text style is shared across node types — in Landing page test V2, 'Label Medium' is worn by a Text, a Text Input, an Options and a Checkbox label."* Options: typography tokens / one Look per node type / a Look any node can wear | ✅ **"Typography tokens."** Ruled 2026-09-23 (s3), with the recommendation. Each text style becomes a named set of tokens (size, family, leading, tracking, colour) under *Other tokens → Typography*, and every port that wore it references them — so *change it once, everything changes* survives across node types. 🔴 **Stated in the option and accepted:** `textTransform` (991 styles) has no token kind and is copied onto each wearer, unshared; colour matches an existing colour token or mints one. Read from HLT-020 §3(b). Tokens on font ports already render in shipping code (`ElementConfigRegistry` stamps `var(--text-base)` on every new Text; HLT-012 offers them) |
 
 ### 6.1 🔴 What R2 and R3 together now demand of every other row
 
@@ -197,6 +209,28 @@ migration. Two consequences a later session must not miss:
   per-project migration report on open. `MigrationWizard.tsx` and `models/migration/` exist and were
   built for a different job; whether they are the right home is UPG-002's first measurement, **not
   an assumption**. 🔴 A row that ships a `console.warn` has not met R2.
+
+### 6.2 🔴 A2 — what Richard's drive found (2026-09-23), and why it produced R6
+
+Drove his own **Landing page test V2** (dated 2026-09-11, the day before `v0.2.4`; carries `Label
+Medium` and `Helper Small`) in a 0.3.0 dev build. **A1 ✅** the Styles panel does not list them.
+**A2 🔴** a Text node's style field still lists both, still applies them, and still opens them to
+configure. Read from the code after the drive:
+
+| surface | lists | selects | **creates** | renames / deletes |
+|---|---|---|---|---|
+| Styles panel | ❌ | — | ❌ | ❌ |
+| a Text node's `textStyle` field | ✅ | ✅ | ✅ `TextStyleType.ts` `createNewStyle` → `StylesModel.setStyle('text', …)`; `TextStylePicker.jsx:312` draws **Create** | 🔴 **✅ — corrected s3.** Each picker row carries a pencil (`changeStyleName`), a bin (`deleteStyle`) and a sliders button that edits the style in place (`TextStylePopup.jsx` → `setStyle`). This row said ❌ and was read from the Styles panel's side, not the picker's |
+| ↳ **after R6** (`62029ab28`) | ✅ | ✅ | ❌ **removed** — `tests-unit/upg-003` pins `TextStylePopup.jsx` as the only editor file that writes one | ✅ unchanged — R6 named Create only; whether they outlive the conversion is UPG-003's to decide (it depends on whether the converted layer is emptied or kept for a downgrade) |
+
+**`aa0cd5b13` says the editor *"no longer lists, renames or deletes them."* Renames and deletes: true **of the Styles panel only** — the picker still does both (row corrected s3).
+Lists: false. And it never mentions that the editor can still create them.** So the break §4.1
+records is narrower than written in one direction and wider in the other: nothing is lost, and a
+person can add a text style they will never find again. The removal itself is **not** reopened —
+R6 is about the surface the removal left behind.
+
+**A3 (does anything on screen say something changed) is still `⬜ owed`** — Richard saw nothing, but
+an absence is recorded only beside a known-firing control.
 
 ## 7. Out of scope
 

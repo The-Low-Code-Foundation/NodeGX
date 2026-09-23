@@ -1,5 +1,12 @@
 # HLT-020 — The text styles have nowhere to go
 
+> ✅ **§3 RULED 2026-09-23 — (b), typography tokens** — put to Richard from §2/§3 by P100 s3 as
+> [P100 R8](../phase-100-0.3.0-the-first-upgrade/README.md), with the recommendation. 🔴 **This row
+> MOVED to P100 UPG-003** (0.3.0 converts on load — P100 R3), which had scoped the same conversion a
+> day later without citing this file. Build it there; this file stays the measurement (§2), the
+> fixed criteria (§4) and the landmines (§5) UPG-003 owes. The P99 board row still says *needs a
+> ruling* — a peer held that README when this was written.
+
 🔴 **Opened 2026-09-22 (P99 s21), at Richard's request** — *"I'd love to do the text styles to look
 thing if possible."* It is the compromise he raised himself when he ruled the *Text styles* section
 out of the Styles panel in [HLT-007](./HLT-007-THE-TWO-THINGS-P94-DID-NOT-RULE-ON.md) (a):
