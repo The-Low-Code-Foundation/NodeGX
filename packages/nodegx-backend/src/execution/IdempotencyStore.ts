@@ -225,6 +225,25 @@ function decodeAnswer(value: string | null): StoredAnswer | null {
   }
 }
 
+/**
+ * The operational record a completed 0.2.x claim becomes (P100 UPG-001 §3.6a).
+ *
+ * 0.2.x kept claims in its own `idempotency_keys` table; BRG-002 moved them into
+ * `operational_records` and nothing carried the old rows, so a key answered on
+ * 0.2.4 ran its function a second time on the first delivery after upgrading.
+ * The carry itself is SQL and lives beside the SQLite store
+ * (`persistence/carryLegacyIdempotencyKeys.ts`); the key and value encodings
+ * are this module's and are only ever written here.
+ */
+export function legacyCompletedRecord(
+  scope: string,
+  key: string,
+  statusCode: number,
+  body: string
+): { namespace: string; key: string; state: string; value: string } {
+  return { namespace: NAMESPACE, key: recordKey(scope, key), state: DONE, value: encodeAnswer(statusCode, body) };
+}
+
 export class IdempotencyStore {
   private store: IOperationalStore | null = null;
   private getTtlMs: (() => number) | null = null;

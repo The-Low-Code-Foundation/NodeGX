@@ -37,6 +37,7 @@ import * as path from 'path';
 import type { IOperationalStore } from '@noodl/backend-contract';
 
 import { logger } from '../ops/logger';
+import { carryLegacyIdempotencyKeys } from '../persistence/carryLegacyIdempotencyKeys';
 import { SqliteOperationalStore, SqlDatabase } from '../persistence/SqliteOperationalStore';
 import { PgOperationalStore } from '../persistence/PgOperationalStore';
 import { resolveStorageUrl } from '../persistence/createAdapter';
@@ -248,6 +249,7 @@ export class ExecutionHistory {
       this.operational = storageUrl
         ? new PgOperationalStore(storageUrl)
         : new SqliteOperationalStore(db as unknown as SqlDatabase);
+      if (!storageUrl) this.carryLegacyIdempotency(db as unknown as SqlDatabase);
       this.status = { enabled: true, dbPath, error: null };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
@@ -257,6 +259,22 @@ export class ExecutionHistory {
       this.status = { enabled: false, dbPath, error: message };
     }
     return this.status;
+  }
+
+  /**
+   * P100 UPG-001 §3.6a: a 0.2.x file's completed idempotency claims move into
+   * the operational table on the first start that has one. Guarded on its own:
+   * a carry that fails costs at most a duplicate run per old key — what every
+   * upgrade cost before this existed — and must not take execution history down
+   * with it.
+   */
+  private carryLegacyIdempotency(db: SqlDatabase): void {
+    try {
+      const carried = carryLegacyIdempotencyKeys(db);
+      if (carried > 0) logger.info('idempotency.legacy-carried', { carried, from: 'idempotency_keys' });
+    } catch (e) {
+      logger.warn('idempotency.legacy-carry-failed', { error: e instanceof Error ? e.message : String(e) });
+    }
   }
 
   getStatus(): ExecutionHistoryStatus {
