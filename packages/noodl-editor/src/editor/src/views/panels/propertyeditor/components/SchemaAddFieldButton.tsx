@@ -40,6 +40,9 @@ export function SchemaAddFieldButton({ backendId, backendName, table }: SchemaAd
         data-test={`schema-add-field-${table}`}
         title={`Open the schema for ${table}`}
         onClick={() => {
+          // P101 INS-001 — the left panel the person had open when they pressed this. The schema takes
+          // the left slot; closing it gives that slot back.
+          const returnTo = SidebarModel.instance.ActiveId;
           openBackendSurface('schema', {
             backendId,
             backendName,
@@ -48,7 +51,11 @@ export function SchemaAddFieldButton({ backendId, backendName, table }: SchemaAd
             // Distinct on every press — `SchemaPanel` reuses an already-mounted surface, and a
             // second press on the same node has to re-expand a row the author may have folded.
             openToken: Date.now(),
-            onClose: () => SidebarModel.instance.switch('PropertyEditor')
+            // P101 INS-001 — this used to be `switch('PropertyEditor')`: Properties lived in the left slot,
+            // the schema took it, and closing put Properties back. Properties lives in the inspector now
+            // and never left, so that switch would build a second, model-less Properties on the left.
+            // What the schema took from the left is whatever was there when the button was pressed.
+            onClose: () => SidebarModel.instance.switch(returnTo || 'components')
           });
         }}
       >

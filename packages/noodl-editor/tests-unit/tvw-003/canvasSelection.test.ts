@@ -83,6 +83,45 @@ describe('TVW-003 the canvas applying a selection', () => {
     expect(move.kind).toBe('switch');
   });
 
+  describe('from Layers, a row names the node itself', () => {
+    const fromLayers = (component: ComponentModel | null, nodes: NodePath[]): Selection => ({
+      component,
+      nodes,
+      source: 'layers'
+    });
+
+    it('goes to Hero when the row is the headline under the Hero instance on Home', () => {
+      // control: the same selection from the preview stays on Home (AC1 above)
+      expect(resolveCanvasMove(selection(hero, [['heroInstance', 'headline']]), canvasOn(home))).toEqual({
+        kind: 'select',
+        nodeIds: ['heroInstance']
+      });
+
+      expect(resolveCanvasMove(fromLayers(hero, [['heroInstance', 'headline']]), canvasOn(home))).toEqual({
+        kind: 'switch',
+        component: hero,
+        nodeId: 'headline'
+      });
+    });
+
+    it('moves even when the enclosing instance is already selected on Home', () => {
+      expect(
+        resolveCanvasMove(fromLayers(hero, [['heroInstance', 'headline']]), canvasOn(home, ['heroInstance']))
+      ).toEqual({ kind: 'switch', component: hero, nodeId: 'headline' });
+    });
+
+    it('selects in place when the canvas already shows the row’s component', () => {
+      expect(resolveCanvasMove(fromLayers(hero, [['heroInstance', 'headline']]), canvasOn(hero))).toEqual({
+        kind: 'select',
+        nodeIds: ['headline']
+      });
+      expect(resolveCanvasMove(fromLayers(home, [['footer']]), canvasOn(home))).toEqual({
+        kind: 'select',
+        nodeIds: ['footer']
+      });
+    });
+  });
+
   it('nothing selected anywhere moves nothing', () => {
     expect(resolveCanvasMove(selection(null, []), canvasOn(home, ['footer']))).toEqual({ kind: 'none' });
   });

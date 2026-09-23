@@ -52,7 +52,18 @@ export function resolveCanvasMove<C>(selection: Selection, canvas: CanvasState<C
     return canvas.selectedIds.length ? { kind: 'clear' } : { kind: 'none' };
   }
 
-  const onCanvas = selection.nodes.map((path) => elementOnCanvas(path, (id) => canvas.isOnCanvas(id)));
+  // A Layers row names one node, not "whatever of it this canvas can draw". Falling back to the
+  // enclosing instance is right for a preview click (AC1: stay on Home, light the Hero), but from
+  // Layers it meant a row expanded under an instance on this canvas re-selected that instance —
+  // nothing moved until `Edit ›` was pressed (Richard, 0.3.0 drive, 2026-09-23). Only the node
+  // itself counts; when it is not here, the canvas goes to the row's component.
+  const onCanvas = selection.nodes.map((path) =>
+    selection.source === 'layers'
+      ? canvas.isOnCanvas(path[path.length - 1])
+        ? path[path.length - 1]
+        : undefined
+      : elementOnCanvas(path, (id) => canvas.isOnCanvas(id))
+  );
 
   if (onCanvas.some((id) => id === undefined)) {
     const first = selection.nodes[0];
@@ -73,19 +84,13 @@ function sameIds(a: readonly string[], b: readonly string[]): boolean {
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
-/**
- * TVW-004 — whether applying this selection should leave the side panel alone.
+/*
+ * `keepsSidePanel` (TVW-004) — removed by P101 INS-002, 2026-09-23.
  *
- * 🔴 Selecting a node on the canvas opens its **Properties** in the side panel, which is right
- * when you clicked the node on the canvas or in the running app. It is wrong when you clicked a
- * row in a **panel**: the Project panel then replaces itself with Properties, and the Layers tree
- * a person is navigating disappears on their first click in it.
- *
- * Found by reading a screenshot. Seven arms of the drive were green — the row was selected, the
- * path was right, the store said `layers` — and the shot showed the Properties panel where Layers
- * had been ([[a-rendered-surface-can-be-behind-a-blocker]] is the same family: every number was
- * about the thing, and the thing was not on screen).
+ * It returned true for a selection made in Layers or a panel, and `selectNode` then skipped
+ * opening the node's properties, because in a one-slot editor the Properties panel REPLACED the
+ * panel the person had clicked in — Layers vanished on the first click in it. Right for one slot.
+ * Properties has its own column now (P101 INS-001) and opening it touches nothing on the left, so
+ * the suppression became the defect: Richard clicked `The paragraph` in Layers on drive A and got
+ * no properties. Every selection now shows its node, from wherever it was made.
  */
-export function keepsSidePanel(source: SelectionSource | null): boolean {
-  return source === 'layers' || source === 'panel';
-}

@@ -213,12 +213,14 @@ export function addTriggerNodes(
      * creating a node (WFA-008, found live).
      *
      * `ModelBindings`' `nodeAdded` handler selects a newly added node unless
-     * asked not to, and selecting switches the sidebar to the property editor.
-     * The Triggers panel is a *transient* panel, so switching away unmounts it —
-     * and with it the banner holding a webhook's **one-time, unrecoverable
-     * secret**, the moment after it was created. Creating a trigger from the
-     * panel bounced the user to Properties and destroyed the secret in the same
-     * tick.
+     * asked not to. When this was written, selecting switched the sidebar to the
+     * property editor; the Triggers panel is *transient*, so switching away
+     * unmounted it — and with it the banner holding a webhook's **one-time,
+     * unrecoverable secret**, the moment after it was created.
+     *
+     * P101 INS-001 (2026-09-23) moved node properties to their own column, so
+     * selecting no longer touches this panel. The flag stays for the first
+     * reason: a redraw is not a creation, and must not steal the selection.
      */
     graph.addRoot(node, { disableSelect: true });
 

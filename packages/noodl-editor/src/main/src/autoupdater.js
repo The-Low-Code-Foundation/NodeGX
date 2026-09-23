@@ -170,7 +170,20 @@ function offerable() {
   return state.versions.filter((v) => state.includePrereleases || !v.prerelease);
 }
 
+/**
+ * Set once the updater is wired. Everything below is process-wide — the
+ * `autoUpdater` singleton, the `ipcMain` handlers, the broadcast to every
+ * window — but `createWindow()` calls this for each window it opens, and a
+ * second window is routine on macOS: close the window, click the dock icon.
+ * `ipcMain.handle` throws on a second registration, and that throw took the
+ * whole app down with it.
+ */
+let installed = false;
+
 function setupAutoUpdate(window) {
+  if (installed) return;
+  installed = true;
+
   if (process.env.autoUpdate === 'no') return;
 
   // Linux has no in-app update path at all: electron-updater cannot replace an

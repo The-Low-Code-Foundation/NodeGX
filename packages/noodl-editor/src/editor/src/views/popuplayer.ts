@@ -14,6 +14,7 @@ import { windowTitleBarHeight } from '@noodl-utils/utils';
 
 import { CodeExportModal, CodeExportModalProps } from './PopupLayer/CodeExportModal';
 import { blockerIsNeeded, popoutBlocksOutsideClicks, pressIsInsideKeptRegion } from './PopupLayer/popoutdismissal';
+import { OPPOSITE_POSITION, placeBesideAnchor } from './PopupLayer/placeBesideAnchor';
 import { ConfirmModal, ErrorModal } from './PopupLayer/ConfirmModal';
 import { StringInputPopup } from './PopupLayer/StringInputPopup';
 import { ToastLayer } from './ToastLayer/ToastLayer';
@@ -225,18 +226,6 @@ const ARROW_COLOR_CSS_ATTR = {
   right: 'borderRightColor'
 };
 
-/**
- * The side a popout flips to when the one it asked for does not fit.
- *
- * It doubles as the arrow-class map: a popout placed *below* its anchor wears
- * the `top` arrow, and so on — which is the same table read the other way.
- */
-const OPPOSITE_POSITION: Record<PopoutPosition, PopoutPosition> = {
-  bottom: 'top',
-  top: 'bottom',
-  left: 'right',
-  right: 'left'
-};
 
 // ---------------------------------------------------------------------
 // PopupLayer
@@ -740,28 +729,21 @@ export class PopupLayer {
 
       // Figure out the position of the popup
       let x: number, y: number;
-      setArrowDirection(this.popupArrow, args.position);
-
-      if (args.position === 'bottom') {
-        x = attachToLeft + attachToWidth / 2 - contentWidth / 2;
-        y = attachToHeight + attachToTop + arrowSize;
-      } else if (args.position === 'top') {
-        x = attachToLeft + attachToWidth / 2 - contentWidth / 2;
-        y = attachToTop - contentHeight - arrowSize;
-      } else if (args.position === 'left') {
-        x = attachToLeft - contentWidth - arrowSize;
-        y = attachToTop + attachToHeight / 2 - contentHeight / 2;
-      } else if (args.position === 'right') {
-        x = attachToWidth + attachToLeft + arrowSize;
-        y = attachToTop + attachToHeight / 2 - contentHeight / 2;
-      }
-
-      // Make sure the popup is not outside of the screen
-      const margin = 2;
-      if (x + contentWidth > this.width - margin) x = this.width - margin - contentWidth;
-      if (y + contentHeight > this.height - margin) y = this.height - margin - contentHeight;
-      if (x < margin) x = margin;
-      if (y < margin) y = margin;
+      // P101 INS-003 — the side is resolved (and flipped when it hangs off the window) before the
+      // arrow is drawn, so the arrow points back at the anchor from the side the popup ended on.
+      const placed = placeBesideAnchor({
+        position: args.position as PopoutPosition,
+        anchor: { left: attachToLeft, top: attachToTop, width: attachToWidth, height: attachToHeight },
+        width: contentWidth,
+        height: contentHeight,
+        arrowSize,
+        viewport: { width: this.width, height: this.height },
+        margin: 2
+      });
+      const position = placed.position;
+      x = placed.x;
+      y = placed.y;
+      setArrowDirection(this.popupArrow, position);
 
       // Cannot cover to bar as that is used for moving window
       const topBarHeight = windowTitleBarHeight();
@@ -780,11 +762,11 @@ export class PopupLayer {
 
       // Set the position of the arrow
       this.popupArrow.style.left =
-        args.position === 'top' || args.position === 'bottom'
+        position === 'top' || position === 'bottom'
           ? Math.round(Math.abs(attachToLeft + attachToWidth / 2 - x)) + 'px'
           : '';
       this.popupArrow.style.top =
-        args.position === 'left' || args.position === 'right'
+        position === 'left' || position === 'right'
           ? Math.round(Math.abs(attachToTop + attachToHeight / 2 - y)) + 'px'
           : '';
 

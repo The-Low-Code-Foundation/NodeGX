@@ -127,6 +127,11 @@ export enum SidebarModelEvent {
   itemsChanged = 'itemsChanged',
   /** Occurs when a panel is selected. */
   activeChanged = 'activeChanged',
+  /**
+   * INS-001 — the inspector on the right now shows a different node panel, or none.
+   * Raised by node selection and deselection, which no longer raise `activeChanged`.
+   */
+  inspectorChanged = 'inspectorChanged',
   nodeSelected = 'nodeSelected',
   receivedCommand = 'receivedCommand',
   HotReload = 'HotReload'
@@ -135,6 +140,7 @@ export enum SidebarModelEvent {
 export type SidebarModelEventEvents = {
   [SidebarModelEvent.itemsChanged]: () => void;
   [SidebarModelEvent.activeChanged]: (panelId: string, previousActiveId: string) => void;
+  [SidebarModelEvent.inspectorChanged]: (panelId: string | undefined) => void;
   [SidebarModelEvent.nodeSelected]: (nodeId: string) => void;
   [SidebarModelEvent.receivedCommand]: (panelId: string, command: string, args: unknown[] | any) => void;
   [SidebarModelEvent.HotReload]: () => void;
@@ -166,8 +172,21 @@ export type SidebarModelEventEvents = {
 export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEvents> {
   public static instance = new SidebarModel();
 
+  /** The panel in the left slot — the one the rail's icons choose. */
   private activeId: string;
-  private previousActiveId: string;
+
+  /**
+   * INS-001 — the node panel in the inspector on the right, or `undefined` when nothing is selected.
+   *
+   * 🔴 **This used to be the same slot as `activeId`.** `switchToNode` wrote the node's panel into
+   * the one active slot and stashed what had been there in `previousActiveId`; `hidePanels` switched
+   * back. That is the takeover Richard named on drive A (2026-09-23): *"I'm doing styles or backend
+   * stuff in the left panel, click a node and the props take over from what I was doing."* The
+   * left rail answers "what is in this app"; a node's panel answers "what is this one thing" — two
+   * axes, so two slots. Nothing about selection touches `activeId` any more.
+   */
+  private inspectorId: string | undefined;
+
   private items: SidebarItem[] = [];
   private experimentalItems: SidebarItem[] = [];
 
@@ -179,6 +198,11 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
 
   public get ActiveId(): string {
     return this.activeId;
+  }
+
+  /** INS-001 — the node panel the inspector shows, or `undefined` for "No node selected". */
+  public get InspectorId(): string | undefined {
+    return this.inspectorId;
   }
 
   constructor() {
@@ -226,7 +250,7 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
 
   public reset() {
     this.activeId = undefined;
-    this.previousActiveId = undefined;
+    this.inspectorId = undefined;
 
     this.items = [];
     this.experimentalItems = [];
@@ -252,6 +276,14 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
   public getActive(): () => React.ReactElement | null {
     if (this.activeId) {
       return this.panels[this.activeId];
+    }
+    return null;
+  }
+
+  /** INS-001 — the factory for the node panel the inspector draws, or `null` when it is empty. */
+  public getInspector(): (() => React.ReactElement) | null {
+    if (this.inspectorId) {
+      return this.panels[this.inspectorId] ?? null;
     }
     return null;
   }
@@ -315,9 +347,9 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
    *     PNL-008's reason (it is registered for both graphs, and it is what `hidePanels`
    *     already falls back to).
    *
-   * ⚠️ `previousActiveId` is cleared too when it names the removed panel, or `hidePanels()`
-   * switches *back* to it the next time a node is deselected — the same hole, reached by a
-   * different door.
+   * ⚠️ The inspector is emptied too when it is showing the removed panel — the same hole,
+   * reached by a different door. (Before INS-001 that door was `previousActiveId`, which
+   * `hidePanels()` switched *back* to on the next deselect.)
    *
    * ⚠️ `activeId` is cleared **before** the fallback switch rather than after, so that
    * {@link switch}'s `activeId === id` early return cannot leave the model pointing at a panel
@@ -348,8 +380,9 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
 
     delete this.panels[id];
 
-    if (this.previousActiveId === id) {
-      this.previousActiveId = undefined;
+    if (this.inspectorId === id) {
+      this.inspectorId = undefined;
+      this.notifyListeners(SidebarModelEvent.inspectorChanged, undefined);
     }
 
     const wasActive = this.activeId === id;
@@ -385,8 +418,9 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
           lastActiveTab.onClose && lastActiveTab.onClose();
         }
 
+        const previousActiveId = this.activeId;
         this.activeId = id;
-        this.notifyListeners(SidebarModelEvent.activeChanged, this.activeId, this.previousActiveId);
+        this.notifyListeners(SidebarModelEvent.activeChanged, this.activeId, previousActiveId);
 
         const newActiveTab = this.items.find((x) => x.id === this.activeId);
         if (newActiveTab) {
@@ -416,23 +450,37 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
     }
   }
 
+  /**
+   * Show a node's panel in the inspector.
+   *
+   * INS-001 — the panel is built exactly as before (`getNodePanelName` still lets a node type name
+   * its own panel, so the inspector hosts node panels as a category, not just Properties), and it
+   * goes into the inspector slot. **The left slot is not touched**: no `activeId` change, no
+   * `onClose`/`onOpen` on the left panel, no `activeChanged`.
+   *
+   * A node type that says `panels: 'none'` empties the inspector. It used to reach `createPanel`
+   * with the id `'none'` and throw `Panel not found`.
+   */
   public switchToNode(nodeModel: NodeGraphNode) {
     const { id, args } = getNodePanelName(nodeModel);
 
-    //remember what panel was active before we selected a node
-    //but only if it was a visible icon in the sidebar (e.g. not another PropertyEditor or similar)
-    if (!this.getCurrent()?.transient) {
-      this.previousActiveId = this.activeId;
+    if (id === 'none') {
+      this.setInspector(undefined);
+      this.notifyListeners(SidebarModelEvent.nodeSelected, nodeModel.id);
+      return;
     }
 
-    this.setActivePanel(
-      id,
-      true,
-      createPanel(id, {
-        model: nodeModel,
-        ...args
-      })
-    );
+    // Built afresh per selection, exactly as `setActivePanel(id, true, …)` did. For a
+    // `followsSelection` panel the element keeps its `key`, so React keeps the component (CHR-008).
+    this.panels[id] = createPanel(id, {
+      model: nodeModel,
+      ...args
+    });
+
+    // Always raised, even when the id is unchanged: the panel the inspector draws is a new element
+    // for a new node, and the inspector re-reads it on this event.
+    this.inspectorId = id;
+    this.notifyListeners(SidebarModelEvent.inspectorChanged, id);
     this.notifyListeners(SidebarModelEvent.nodeSelected, nodeModel.id);
   }
 
@@ -445,22 +493,34 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
     this.notifyListeners(SidebarModelEvent.receivedCommand, this.activeId, command, args);
   }
 
+  /**
+   * INS-001 — send a command to the node panel in the inspector.
+   *
+   * The canvas's double-click used `invokeActive`, which addressed `activeId` — correct only while
+   * the node's panel *was* the active one. It lives in the inspector now, so a double-click sent to
+   * `activeId` would reach Styles or Components and nobody would answer.
+   */
+  public invokeInspector(command: string, args?: unknown) {
+    if (!this.inspectorId) return;
+    this.notifyListeners(SidebarModelEvent.receivedCommand, this.inspectorId, command, args);
+  }
+
+  /**
+   * Empty the inspector — nothing is selected.
+   *
+   * INS-001 — this used to switch the LEFT slot back to `previousActiveId` (or fall back to
+   * `components`), because the node's panel had taken the left slot over. It never takes it over
+   * now, so there is nothing on the left to restore. PNL-008's fallback stays in
+   * {@link unregister}, where it still means something.
+   */
   public hidePanels() {
-    if (this.previousActiveId) {
-      this.switch(this.previousActiveId);
-      this.previousActiveId = undefined;
-    } else {
-      /*
-       * PNL-008: the backend branch used to switch to `cloud-functions`, which
-       * has not been a registered panel since WF-007 retired Cloud Services.
-       * `switch()` no-ops silently on an unknown id, so deselecting a node while
-       * inside a backend component left the transient property editor showing
-       * instead of falling back to anything. `components` is the fallback for
-       * both graphs now — it is registered, and it is what the frontend branch
-       * always did.
-       */
-      this.switch(FALLBACK_PANEL_ID);
-    }
+    this.setInspector(undefined);
+  }
+
+  private setInspector(id: string | undefined) {
+    if (this.inspectorId === id) return;
+    this.inspectorId = id;
+    this.notifyListeners(SidebarModelEvent.inspectorChanged, id);
   }
 
   private setActivePanel(id: string, force: boolean, component: () => React.ReactElement): void {
@@ -469,6 +529,7 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
       lastActiveTab.onClose && lastActiveTab.onClose();
     }
 
+    const previousActiveId = this.activeId;
     this.activeId = id;
 
     if (force || !this.panels[id]) {
@@ -479,7 +540,7 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
       this.panels[id] = component;
     }
 
-    this.notifyListeners(SidebarModelEvent.activeChanged, this.activeId, this.previousActiveId);
+    this.notifyListeners(SidebarModelEvent.activeChanged, this.activeId, previousActiveId);
 
     const newActiveTab = this.items.find((x) => x.id === this.activeId);
     if (newActiveTab) {

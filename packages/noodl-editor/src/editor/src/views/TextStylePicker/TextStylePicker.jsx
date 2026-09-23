@@ -132,6 +132,15 @@ function TextStylePicker(props) {
             onEditingName={() => setStyleToEdit(null)}
           />
         ))}
+        {/* With Create gone and UPG-003 converting on load, most projects have no text styles
+            left — and a list of nothing drew a 0px popout: just its arrow. Say why instead. */}
+        {filteredStyles.length === 0 && (
+          <div className="textstyles-empty">
+            {textStyles.length === 0
+              ? 'This project has no text styles. Since 0.3.0, set type with the Font Size, Font Weight and Line Height fields below — they take the Typography tokens under Styles → Other tokens.'
+              : 'No text style matches that name.'}
+          </div>
+        )}
       </div>
     </div>
   );

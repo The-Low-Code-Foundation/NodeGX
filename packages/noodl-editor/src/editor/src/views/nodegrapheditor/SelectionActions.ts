@@ -171,7 +171,7 @@ export class SelectionActions {
    *   swap the Project panel out for Properties, so the tree the person was navigating removed
    *   itself on first use. Measured in the drive, invisible to every count that graded it.
    */
-  selectNode(node: NodeGraphEditorNode, options?: { keepSidePanel?: boolean }) {
+  selectNode(node: NodeGraphEditorNode) {
     const editor = this.editor;
 
     if (editor.readOnly) {
@@ -182,22 +182,10 @@ export class SelectionActions {
     // Always select the node in the selector if not already selected
     if (!node.selected) {
       this.settle(() => {
-        /**
-         * 🔴 **`keepSidePanel` has to reach THIS deselect too, and it did not.**
-         *
-         * `clearSelection()` → `deselectNow()` → `SidebarModel.instance.hidePanels()`, which
-         * switches the sidebar to `previousActiveId` or falls back to `components`. So a caller
-         * asking to keep its panel lost it **here**, a few lines above the `switchToNode` its flag
-         * was guarding — the panel was taken down by the deselect and then simply not put back.
-         *
-         * Measured 2026-09-19 (P94 STY-006) by wrapping the sidebar's own methods in the running
-         * editor and reading who called them:
-         *   `hidePanels(undefined) from: SelectionActions.deselectNow < eval < SelectionActions.settle`
-         * — this call site, not the two others that also clear a selection on the way here. Two
-         * earlier fixes guarded those two and the reading did not move at all, which is what an
-         * unmeasured guess looks like from the outside. [[a-predicted-sentence-belongs-to-one-code-path]].
-         */
-        this.clearSelection(options?.keepSidePanel ? { disableHidePanels: true } : undefined);
+        // P101 INS-002 — the deselect empties the inspector and `switchToNode` below refills it, in
+        // the same tick (`settle` is synchronous). Neither touches the left panel, so nothing needs
+        // the `keepSidePanel` guard P94 STY-006 measured was missing here.
+        this.clearSelection();
         editor.commentLayer?.clearSelection();
         node.selected = true;
         editor.selector.select([node]);
@@ -205,9 +193,10 @@ export class SelectionActions {
       });
     }
 
-    // Always switch to the node in the sidebar (fixes property panel stuck issue) — unless the
-    // selection came from a panel, which would then be replacing itself. See `keepSidePanel`.
-    if (!options?.keepSidePanel) SidebarModel.instance.switchToNode(node.model);
+    // Always show the node in the inspector — from the canvas, the preview, Layers or any panel.
+    // P101 INS-002: this was skipped for a selection made in a panel, because in a one-slot editor
+    // the node's panel would have replaced the panel that was clicked in. It has its own column now.
+    SidebarModel.instance.switchToNode(node.model);
 
     // Handle double-click navigation
     if (editor.interaction.leftButtonIsDoubleClicked) {
@@ -247,7 +236,8 @@ export class SelectionActions {
           editor.switchToComponent(type, { pushHistory: true });
         } else {
           //there was no type that matched, so forward the double click event to the sidebar
-          SidebarModel.instance.invokeActive('doubleClick', node);
+          // P101 INS-001 — the node's panel is in the inspector now, not the active left slot.
+          SidebarModel.instance.invokeInspector('doubleClick', node);
         }
       }
     }

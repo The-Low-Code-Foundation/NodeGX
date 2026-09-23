@@ -103,6 +103,13 @@ without shared selection is a second list, not a view.
 | [TVW-004](./TVW-004-LAYERS.md) | The Layers tab: the page in the preview, through every instance, with bands, the editing region, the note, the containment crumb and the footer (R-A, R-B, R-E) | TVW-001, TVW-003 |
 | [TVW-005](./TVW-005-LAYERS-CAN-MOVE-THINGS.md) | Reorder and reparent from Layers on the page's own rows; refuse inside a band; drag a component from Components into Layers to place it | TVW-004 |
 
+> 🔴 **2026-09-23 — P101 removes TVW-004's `keepsSidePanel`.** It stopped Properties replacing Layers
+> on the first click in it, which was right while Properties and Layers shared one slot. Phase 101
+> gives Properties its own column on the right (P100 R7), so the suppression becomes the defect:
+> Richard clicked a Layers row and got no properties. See
+> [P101 INS-002](../phase-101-the-inspector/INS-002-SELECTING-FROM-A-PANEL-SHOWS-THE-NODE.md).
+
+
 ### Track C — the canvas
 
 | id | task | depends on |

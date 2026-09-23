@@ -43,6 +43,7 @@ import { defaultLearningLessonFs, readLessonManifest } from '@noodl-models/learn
 import { getIpc } from '@noodl-utils/ipc';
 import PopupLayer from '../../views/popuplayer';
 import { AiAuthoringPanel_ID } from '../../views/panels/AiAuthoringPanel';
+import { InspectorFrame } from '../../views/Inspector';
 import { SidePanel } from '../../views/SidePanel';
 import { ToastLayer } from '../../views/ToastLayer/ToastLayer';
 import { BaseWindow } from '../../views/windows/BaseWindow';
@@ -408,7 +409,13 @@ export function EditorPage({ route }: EditorPageProps) {
             <SidePanelLayoutProvider value={sidePanelLayout}>
               <FrameDivider
                 first={<SidePanel />}
-                second={<ErrorBoundary>{Boolean(Document) && <Document />}</ErrorBoundary>}
+                second={
+                  // P101 INS-001 — a selected node's panel lives in its own column on the right, so
+                  // it never takes the left slot over from whatever the person had open there.
+                  <InspectorFrame>
+                    <ErrorBoundary>{Boolean(Document) && <Document />}</ErrorBoundary>
+                  </InspectorFrame>
+                }
                 sizeMin={sidePanelLayout.dividerSizeMin}
                 size={sidePanelLayout.dividerSize}
                 horizontal

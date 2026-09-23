@@ -149,27 +149,27 @@ describe('SidebarModel.unregister — the removal is three things', () => {
     expect(SidebarModel.instance.getActive()).toBeTruthy();
   });
 
-  it('🔴 forgets it as previousActiveId, so hidePanels lands on the fallback', () => {
-    // The other door into the same hole. `switchToNode` stores the panel you were on in
-    // `previousActiveId`; `hidePanels` switches back to it when the node is deselected. If the
-    // removed panel is still named there, that switch resolves to a panel whose component has
-    // been deleted — `switch` throws inside `createPanel`, takes its catch, logs, and returns
-    // having moved nothing, so the rail is left on the TRANSIENT property editor of a node that
-    // is no longer selected.
+  it('🔴 empties the inspector when the removed panel is the one it shows', () => {
+    // The other door into the same hole. Before P101 INS-001 that door was `previousActiveId`:
+    // `switchToNode` stashed the left panel there and `hidePanels` switched back to it, so a
+    // removed panel still named there came back on the next deselect. INS-001 bricked that door
+    // up — node panels live in the inspector now and `hidePanels` never moves the left slot — so
+    // the row moved to the door that replaced it: a removed panel still NAMED by the inspector.
     //
-    // ⚠️ The first version of this row asserted only `ActiveId !== 'community'` and was
-    // **vacuous** — it passed with the clear removed, because `delete panels[id]` already stops
-    // the panel coming back. What the clear actually buys is the clean fallback below, and that
-    // is what has to be read.
-    SidebarModel.instance.register({ transient: true, id: 'PropertyEditor', name: 'Properties', panel: Panel });
-    const internals = SidebarModel.instance as unknown as { previousActiveId: string; activeId: string };
-    SidebarModel.instance.switch(PANEL_ID);
-    SidebarModel.instance.switch('PropertyEditor');
-    internals.previousActiveId = PANEL_ID;
+    // ⚠️ Read `InspectorId`, not `getInspector()`. `delete panels[id]` alone already makes
+    // `getInspector()` null, so a row reading only that passes with the clear removed — the same
+    // vacuity this row's first version had against `ActiveId`.
+    const nodeUsingThePanel = { id: 'n1', type: { panels: [{ name: PANEL_ID }] } } as TSFixme;
+    SidebarModel.instance.switch('components');
+    SidebarModel.instance.switchToNode(nodeUsingThePanel);
+    expect(SidebarModel.instance.InspectorId).toBe(PANEL_ID);
 
     SidebarModel.instance.unregister(PANEL_ID);
-    SidebarModel.instance.hidePanels();
 
+    expect(SidebarModel.instance.InspectorId).toBeUndefined();
+    expect(SidebarModel.instance.getInspector()).toBeNull();
+    // …and the deselect that follows moves nothing on the left.
+    SidebarModel.instance.hidePanels();
     expect(SidebarModel.instance.ActiveId).toBe('components');
     expect(SidebarModel.instance.getActive()).toBeTruthy();
   });

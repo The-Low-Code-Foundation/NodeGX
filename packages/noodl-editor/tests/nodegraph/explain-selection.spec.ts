@@ -2,7 +2,6 @@ import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphC
 
 import { SidebarModel } from '@noodl-models/sidebar';
 
-import { panelHoldsCanvasSelection } from '../../src/editor/src/views/nodegrapheditor/EditorEventBindings';
 import { SelectionActions } from '../../src/editor/src/views/nodegrapheditor/SelectionActions';
 import { ExplainPanel_ID } from '../../src/editor/src/views/panels/ExplainPanel';
 import {
@@ -20,27 +19,20 @@ import {
  * built to survive that deselect was never cleared, so clicking empty canvas
  * left the panel still offering to explain a node nobody was pointing at.
  *
- * What jasmine can pin is the policy: who may hold a selection, and when the
- * memo is armed and dropped. The panel's own "re-read when it becomes visible"
+ * What jasmine can pin is the policy: when the memo is armed and dropped. (Who
+ * may hold a selection stopped being a policy in P101 INS-001 — everyone may.) The panel's own "re-read when it becomes visible"
  * is a React effect on a `display: none` panel — only the running editor shows
  * that one.
  */
 describe('FH-008 — the Explain panel and the canvas selection', () => {
-  describe('which panels may hold the selection', () => {
-    it('lets Explain hold it — the whole point of the panel', () => {
-      expect(panelHoldsCanvasSelection(ExplainPanel_ID)).toBe(true);
-    });
-
-    it('still lets the node panels hold it, as before', () => {
-      expect(panelHoldsCanvasSelection('PropertyEditor')).toBe(true);
-      expect(panelHoldsCanvasSelection('PortEditor')).toBe(true);
-    });
-
-    it('still clears it for panels that have no use for one', () => {
-      expect(panelHoldsCanvasSelection('components')).toBe(false);
-      expect(panelHoldsCanvasSelection('search')).toBe(false);
-    });
-  });
+  /*
+   * 'which panels may hold the selection' — three rows that graded `panelHoldsCanvasSelection`,
+   * removed with it by P101 INS-001 (2026-09-23). No panel switch clears the canvas selection any
+   * more: the node's panel lives in its own column, so opening any left-hand panel — Explain
+   * included — leaves the selection, and the inspector showing it, alone. Keeping rows that assert
+   * the old allow-list would grade a rule nothing runs. The new rule is graded by
+   * `tests-unit/ins-001/inspectorSlot.test.ts` (the model) and INS-001 AC5 (the drive).
+   */
 
   describe('the remembered target', () => {
     let restoreGraph: () => void;

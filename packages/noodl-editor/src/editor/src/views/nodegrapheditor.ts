@@ -603,8 +603,6 @@ export class NodeGraphEditor extends View {
     component?: ComponentModel,
     args?: {
       node?: NodeGraphNode;
-      /** TVW-004 — keep the side panel the selection was made in; see `SelectionActions.selectNode`. */
-      keepSidePanel?: boolean;
       pushHistory?: boolean;
       replaceHistory?: boolean;
       /**
@@ -723,22 +721,14 @@ export class NodeGraphEditor extends View {
     if (args?.node) {
       const node = this.findNodeWithId(args.node.id);
       if (node) {
-        /**
-         * 🔴 **`keepSidePanel` has to cover BOTH halves of this, and it only covered one.**
-         *
-         * `clearSelection()` → `deselect()` → `SidebarModel.instance.hidePanels()`, which switches
-         * the sidebar to `previousActiveId` or falls back to `components`. So a caller asking to
-         * keep its panel lost it here, one line *before* the `selectNode` its flag was guarding —
-         * the panel was swapped out by the deselect and then simply not swapped again.
-         *
-         * Measured 2026-09-19 (P94 STY-006): pressing a wearer entry in the Styles panel navigated
-         * to the node correctly and left the sidebar showing **Components**, so the list of nine
-         * wearers a person was working through vanished on the first one. With `keepSidePanel` set
-         * and only `selectNode` guarded, the reading was identical to the flag not existing.
-         * [[two-gates-covering-the-ends-of-a-chain-read-as-coverage]].
+        /*
+         * P101 INS-002 — no `keepSidePanel` here any more. It had to guard BOTH the deselect and the
+         * select below (P94 STY-006 measured the deselect leaking the panel away when only the select
+         * was guarded), because both used to move the ONE side panel. Neither moves the left panel
+         * now: the deselect empties the inspector and the select fills it, in the same tick.
          */
-        this.clearSelection(args.keepSidePanel ? { disableHidePanels: true } : undefined);
-        this.selectNode(node, { keepSidePanel: args.keepSidePanel });
+        this.clearSelection();
+        this.selectNode(node);
 
         this.relayout(); // Need to relayout twice the first time a new model is set...
         this.layout();
@@ -760,8 +750,8 @@ export class NodeGraphEditor extends View {
     return this.activeComponent;
   }
 
-  selectNode(node: NodeGraphEditorNode, options?: { keepSidePanel?: boolean }) {
-    this.selectionActions.selectNode(node, options);
+  selectNode(node: NodeGraphEditorNode) {
+    this.selectionActions.selectNode(node);
   }
 
   setHighlightedNode(node: NodeGraphEditorNode, atPosition?) {

@@ -35,6 +35,18 @@ describe('P100 R6 — a text style cannot be created from a Text node', () => {
     expect(src).not.toMatch(/\bcreateNewStyle\b/);
   });
 
+  // With Create gone the list is the whole popout, and after the conversion it is usually empty —
+  // which drew a 0px popout, only its arrow showing (Richard, 0.3.0 drive, 2026-09-23).
+  it('an empty picker says so instead of drawing nothing', () => {
+    const src = read(...PICKER);
+
+    // control
+    expect(src).toMatch(/filteredStyles\.map\(/);
+
+    expect(src).toMatch(/filteredStyles\.length === 0 &&/);
+    expect(src).toMatch(/This project has no text styles\./);
+  });
+
   it('the port type hands the picker no create callback', () => {
     const src = read(...PORT_TYPE);
 

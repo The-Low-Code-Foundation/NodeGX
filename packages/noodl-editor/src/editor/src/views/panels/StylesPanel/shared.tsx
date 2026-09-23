@@ -176,20 +176,14 @@ export function useGoToWearer(): (wearer: { componentName: string; nodeId: strin
 
     NodeGraphContextTmp.switchToComponent(component, {
       node: { id: wearer.nodeId } as TSFixme,
-      pushHistory: true,
-      /**
-       * 🔴 **Without this the press destroys the list it was pressed in.** `SelectionActions.
-       * selectNode` ends with `if (!options?.keepSidePanel) SidebarModel.instance.switchToNode(...)`
-       * — so selecting the node swaps the Styles panel out for the property panel, and a person
-       * working through nine wearers loses the list on the first one and has to reopen the panel
-       * and the row for each of the other eight.
-       *
-       * Found by the drive, not by a gate: every assertion about what the list *draws* was green,
-       * and `tests-unit/sty-006` cannot see a sidebar at all. The flag exists for precisely this
-       * case — its own comment says *"unless the selection came from a panel, which would then be
-       * replacing itself"* — and this selection came from a panel.
+      pushHistory: true
+      /*
+       * P101 INS-002 — this carried `keepSidePanel: true`, because selecting the node swapped the
+       * Styles panel out for Properties and a person working through nine wearers lost the list on
+       * the first one (P94 STY-006, found by the drive). Properties has its own column now: the
+       * list stays on the left and each wearer's properties appear on the right, which is the
+       * "use it in conjunction" case Richard named on drive A.
        */
-      keepSidePanel: true
     });
   }, []);
 }

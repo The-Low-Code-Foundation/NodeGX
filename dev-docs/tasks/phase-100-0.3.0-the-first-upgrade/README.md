@@ -237,6 +237,20 @@ R6 is about the surface the removal left behind.
 **A3 (does anything on screen say something changed) is still `⬜ owed`** — Richard saw nothing, but
 an absence is recorded only beside a known-firing control.
 
+### 6.3 Richard's 0.3.0 drive on the moved build (2026-09-23, fixed in the P101 pile)
+
+Three rows from the drive Richard made after P101 moved Properties to the right. The Layers one is
+P101's ([INS-002 §6](../phase-101-the-inspector/INS-002-SELECTING-FROM-A-PANEL-SHOWS-THE-NODE.md)).
+The other two are 0.3.0's own, and landed in P101's commit because that was the session that fixed them:
+
+| what he hit | cause | fix |
+|---|---|---|
+| A Text node's style field opened to **just an arrow** — a 0px popout | after UPG-003 converts on load and R6 removed **Create**, most projects have no text styles left, and the picker's list of nothing drew nothing | `TextStylePicker.jsx` says why: *"This project has no text styles. Since 0.3.0, set type with the Font Size, Font Weight and Line Height fields below…"*, or *"No text style matches that name."* when a filter emptied it. Pinned in `tests-unit/upg-003/noCreateTextStyle.test.ts` |
+| **Close the window, click the dock icon → the app crashed** | `createWindow()` calls `setupAutoUpdate(window)` for every window; its `ipcMain.handle` registrations are process-wide and throw on a second registration | `autoupdater.js` wires once per process (`installed` flag). Driven: the only window closed, the dock-click (`activate`) event fired → a new window, no error. ⚠️ No spec — the main process has no harness that opens a second window. The installed app wires the updater too, so this would have shipped in 0.3.0 |
+
+⬜ **Open for Richard:** the style field is now a dead end in most projects — hiding it when a project
+has no text styles would be cleaner than the note. The note is the smaller change and was kept.
+
 ## 7. Out of scope
 
 - **Re-litigating the Text styles removal.** Ruled 2026-09-22 **on the 17-of-19 figure, with his
