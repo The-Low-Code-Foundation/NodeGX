@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import {
+  convertTextStylesForImport,
   convertTextStylesToTokens,
   describeTextStyleConversion,
   familyOfFontFile,
@@ -12,6 +13,7 @@ import {
   TextStyleProjectLike
 } from '../../src/editor/src/models/ProjectPatches/textStylesToTokens';
 import { describeUpgradeReport, upgradeOnLoad } from '../../src/editor/src/models/ProjectPatches/upgradeOnLoad';
+import { checkFontFaces } from '../../src/editor/src/validation/fontFaces';
 import { stripComments } from '../support/renderElements';
 
 /**
@@ -516,6 +518,99 @@ describe('P100 UPG-003 — once', () => {
   });
 });
 
+describe('P100 UPG-003 §6 — a part imported into a 0.3 project arrives wearing tokens', () => {
+  // page-header's shape: one style on one Text, and the import lands it.
+  const source = (tokens?: { name: string; value: string; category: string }[]) =>
+    project({
+      text: { 'Title Large': STYLE('24'), Kept: STYLE('12'), Unworn: STYLE('10') },
+      tokens,
+      nodes: [
+        { id: 't', type: 'Text', parameters: { textStyle: 'Title Large' } },
+        { id: 'k', type: 'Text', parameters: { textStyle: 'Kept' } }
+      ]
+    });
+  const wearers: [string, string][] = [['t', 'textStyle']];
+  /** The part as the TARGET draws it: the target's tokens plus the ones the import gave it. */
+  const inTarget = (p: TextStyleProjectLike, targetTokens: { name: string; value: string }[]) => ({
+    ...p,
+    metadata: { ...p.metadata, designTokens: { customTokens: targetTokens } }
+  });
+  const LANDING = new Set(['Title Large']);
+
+  it('draws what it drew in its own project, from tokens the target is given', () => {
+    const p = source();
+    const before = snapshot(p, wearers);
+    const report = convertTextStylesForImport(p, [], LANDING);
+    expect(report.tokensMinted.map((t) => t.name)).toContain('--title-large-size'); // control
+    expect(snapshot(inTarget(p, report.tokensMinted), wearers)).toEqual(before);
+    expect(node(p, 't').parameters!.textStyle).toBeUndefined();
+    expect(report.fontFaces).toEqual([{ family: 'Inter-Medium', file: 'fonts/Inter/Inter-Medium.ttf' }]);
+  });
+
+  it('a token the target already has, with the same value, is reused rather than given twice', () => {
+    const first = source();
+    const given = convertTextStylesForImport(first, [], LANDING).tokensMinted;
+    const again = source();
+    const report = convertTextStylesForImport(again, given, LANDING);
+    expect(report.tokensMinted).toEqual([]);
+    expect(node(again, 't').parameters!.fontSize).toBe('var(--title-large-size)');
+  });
+
+  it("a target token of the same name and another value is left alone; the part's gets a suffix", () => {
+    const p = source();
+    const before = snapshot(p, wearers);
+    const theirs = [{ name: '--title-large-size', value: '99px', category: 'typography-size' as const, isCustom: true }];
+    const report = convertTextStylesForImport(p, theirs, LANDING);
+    expect(report.tokensMinted.find((t) => t.name === '--title-large-size-2')?.value).toBe('24px');
+    expect(report.tokensMinted.some((t) => t.name === '--title-large-size')).toBe(false);
+    expect(snapshot(inTarget(p, [...theirs, ...report.tokensMinted]), wearers)).toEqual(before);
+    expect(theirs[0].value).toBe('99px');
+  });
+
+  it("the source's own tokens never travel, and are put back as they were", () => {
+    const mine = [{ name: '--brand', value: '#ff0000', category: 'color-palette' }];
+    const p = source(mine);
+    const own = JSON.stringify(p.metadata!.designTokens);
+    const report = convertTextStylesForImport(p, [], LANDING);
+    expect(report.tokensMinted.some((t) => t.name === '--brand')).toBe(false);
+    expect(JSON.stringify(p.metadata!.designTokens)).toBe(own);
+
+    const none = source();
+    convertTextStylesForImport(none, [], LANDING);
+    expect(Object.prototype.hasOwnProperty.call(none.metadata, 'designTokens')).toBe(false);
+  });
+
+  it('a style the import does not land stays a text style on its wearer, so the part names the one the target keeps', () => {
+    const p = source();
+    const report = convertTextStylesForImport(p, [], LANDING);
+    expect(node(p, 'k').parameters).toEqual({ textStyle: 'Kept' });
+    expect(Object.keys(p.metadata!.styles.text).sort()).toEqual(['Kept', 'Unworn']);
+    expect(report.tokensMinted.some((t) => /^--(kept|unworn)-/.test(t.name))).toBe(false);
+    expect(report.converted.map((c) => c.name)).toEqual(['Title Large']);
+  });
+});
+
+describe("P100 UPG-003 §6 — the font-face check reads a converted style's family token", () => {
+  const converted = () => {
+    const p = project({ text: { 'Title Large': STYLE('24') }, nodes: [{ id: 't', type: 'Text', parameters: { textStyle: 'Title Large' } }] });
+    const report = convertTextStylesToTokens(p);
+    return { tokens: report.tokensMinted, css: fontFaceStylesheet(undefined, report.fontFaces) };
+  };
+
+  it('is satisfied by the face the upgrade writes, quoted family and all', () => {
+    const { tokens, css } = converted();
+    expect(tokens.find((t) => t.name === '--title-large-family')?.value).toBe("'Inter-Medium'"); // control
+    expect(checkFontFaces({ tokens, stylesheets: [css], component: '/App' })).toEqual([]);
+  });
+
+  it('warns, naming the token, when nothing declares that face', () => {
+    const { tokens } = converted();
+    const found = checkFontFaces({ tokens, stylesheets: [], component: '/App' });
+    expect(found).toHaveLength(1);
+    expect(found[0].message).toContain('`--title-large-family` names "Inter-Medium"');
+  });
+});
+
 describe('P100 UPG-003 — the wiring', () => {
   const EDITOR_SRC = path.join(__dirname, '..', '..', 'src', 'editor', 'src');
   const read = (...s: string[]) => stripComments(fs.readFileSync(path.join(EDITOR_SRC, ...s), 'utf8'));
@@ -559,10 +654,64 @@ describe('P100 UPG-003 — the wiring', () => {
     expect(setter).toMatch(/if \(project\?\._upgradedOnLoad\) \{\s*project\._upgradedOnLoad = false;\s*scheduleProjectSave\(\);/);
   });
 
-  it('the import engine reads a source project without converting it', () => {
-    const src = read('utils', 'import-engine', 'analyze.ts');
-    expect(src).toMatch(/projectFromDirectory\(sourceDir/); // control
-    expect(src).toMatch(/\{\s*upgradeOnLoad:\s*false\s*\}/);
+  /*
+   * 🔴 This row used to read `analyze.ts` alone, and `apply.ts` loads the source a SECOND time: it
+   * upgraded a prefab's cache folder in place on every install (driven 2026-09-23). So every caller
+   * is classified, and a new one fails here until someone says which kind it is.
+   */
+  it('every project load either opens the person\'s project or reads an import source unconverted', () => {
+    const OPENS = new Set([
+      'utils/LocalProjectsModel.ts',
+      'models/LessonsProjectModel.ts',
+      'models/projectmodel.editor.ts',
+      'pages/EditorPage/EditorPage.tsx',
+      'pages/ProjectsPage/ProjectsPage.tsx'
+    ]);
+    const SOURCES = new Set(['utils/import-engine/analyze.ts', 'utils/import-engine/apply.ts']);
+    const calls: { file: string; call: string }[] = [];
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, e.name);
+        if (e.isDirectory()) walk(full);
+        else if (/\.(ts|tsx|js)$/.test(e.name) && !/\.bundle\.js$/.test(e.name)) {
+          const src = stripComments(fs.readFileSync(full, 'utf8'));
+          const re = /(?<!function )projectFromDirectory\(/g;
+          for (let m = re.exec(src); m; m = re.exec(src)) {
+            // the call runs to its matching parenthesis
+            let depth = 0;
+            let i = m.index + m[0].length - 1;
+            for (; i < src.length; i++) {
+              if (src[i] === '(') depth++;
+              else if (src[i] === ')' && --depth === 0) break;
+            }
+            calls.push({ file: path.relative(EDITOR_SRC, full).split(path.sep).join('/'), call: src.slice(m.index, i + 1) });
+          }
+        }
+      }
+    };
+    walk(EDITOR_SRC);
+    expect(calls.filter((c) => SOURCES.has(c.file)).length).toBe(2); // control: both source reads are seen
+    for (const c of calls) {
+      expect([c.file, OPENS.has(c.file) || SOURCES.has(c.file)]).toEqual([c.file, true]);
+      if (SOURCES.has(c.file)) expect([c.file, /upgradeOnLoad:\s*false/.test(c.call)]).toEqual([c.file, true]);
+      else expect([c.file, /upgradeOnLoad/.test(c.call)]).toEqual([c.file, false]);
+    }
+  });
+
+  it('UPG-003 §6: an import converts what it reads against the target\'s tokens, and gives the target them first', () => {
+    const src = read('utils', 'import-engine', 'apply.ts');
+    expect(src).toMatch(/convertTextStylesForImport\(content, targetTokens, landing\)/);
+    // a style the plan skips (the target keeps its own) must not land converted
+    expect(src).toMatch(/const landing = new Set\(plan\.styles\.text\.filter\(\(s\) => active\(s\.policy\)\)\.map\(\(s\) => s\.name\)\)/);
+    expect(src).toMatch(/\{\s*upgradeOnLoad:\s*false,\s*convertSource\s*\}/);
+    const given = src.indexOf('targetProject.setMetaData(STYLE_TOKENS_METADATA_KEY');
+    const gap = src.indexOf('const tokenWarnings = tokenWarningsFor(');
+    expect(gap).toBeGreaterThan(-1); // control
+    expect(given).toBeGreaterThan(-1);
+    expect(given).toBeLessThan(gap); // or every token the part now wears is reported as undefined
+    expect(src).toMatch(/await writeFontModule\(target\._retainedProjectDirectory, incoming\.fontFaces\)/);
+    const loader = read('models', 'projectmodel.editor.ts');
+    expect(loader).toMatch(/if \(args\?\.upgradeOnLoad === false\) \{\s*args\.convertSource\?\.\(content\);\s*return build\(content, false\);/);
   });
 
   it('every runtime node with a text style port is in the wearer table', () => {

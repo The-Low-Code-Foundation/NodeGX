@@ -41,8 +41,12 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
 
       // P100 UPG-002/003 — convert what 0.3.0 changed, and say so on screen (R2). Skipped for a
       // project read only as an import source: its converted nodes would name tokens the target
-      // does not define, where its text styles would have travelled with them.
-      if (args?.upgradeOnLoad === false) return build(content, false);
+      // does not define, where its text styles would have travelled with them. An importer converts
+      // what travels itself, against the target's tokens (`convertSource`, UPG-003 §6).
+      if (args?.upgradeOnLoad === false) {
+        args.convertSource?.(content);
+        return build(content, false);
+      }
 
       // Upgraded on a copy, because whether a backup is owed is only known once something changed.
       const upgradedContent = JSON.parse(JSON.stringify(content));

@@ -223,7 +223,17 @@ function isFontFile(family: string): boolean {
 
 // ─── The conversion ──────────────────────────────────────────────────────────
 
-export function convertTextStylesToTokens(project: TextStyleProjectLike): TextStyleConversionReport {
+export function convertTextStylesToTokens(
+  project: TextStyleProjectLike,
+  options: {
+    /**
+     * Styles to leave as text styles, wearers and all — for an import, the styles that do not land
+     * ({@link convertTextStylesForImport}). Treated as a style no port can express, so a wearer keeps
+     * naming it: a style missing from the definitions would instead be read as setting nothing.
+     */
+    leave?: ReadonlySet<string>;
+  } = {}
+): TextStyleConversionReport {
   const report: TextStyleConversionReport = {
     changed: false,
     converted: [],
@@ -370,6 +380,7 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
 
   /** Whether every property this style sets has a port on `typename`. Mints nothing. */
   const expressibleOn = (styleName: string, typename: string): boolean => {
+    if (options.leave?.has(styleName)) return false;
     if (!Object.prototype.hasOwnProperty.call(definitions, styleName)) return true; // sets nothing
     const def = definitions[styleName] || {};
     const props = TEXT_STYLE_WEARERS[typename].props;
@@ -469,7 +480,9 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     for (const layer of Object.values(node.stateParameters ?? {})) collect(layer, wearer.ports);
   }
   const anyWired = wired.size > 0;
-  const keptDefinitions = new Set<string>(Object.keys(definitions).filter((name) => anyWired || stillNamed.has(name)));
+  const keptDefinitions = new Set<string>(
+    Object.keys(definitions).filter((name) => anyWired || stillNamed.has(name) || options.leave?.has(name))
+  );
 
   // ── The simulation: every wearer, every state, before and after ───────────
   /** What a font property renders as: an author's own value, or CSS a style (or its tokens) supplies. */
@@ -582,9 +595,11 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     if (keptDefinitions.has(name)) {
       report.kept.push({
         name,
-        reason: anyWired
-          ? 'a text style port in this project is wired, and a wire can choose any style while the app runs'
-          : 'a wearer has no port for a property this style sets'
+        reason: options.leave?.has(name)
+          ? 'it was left as a text style on purpose'
+          : anyWired
+            ? 'a text style port in this project is wired, and a wire can choose any style while the app runs'
+            : 'a wearer has no port for a property this style sets'
       });
       continue;
     }
@@ -608,6 +623,38 @@ export function convertTextStylesToTokens(project: TextStyleProjectLike): TextSt
     report.tokensMinted.length > 0 || report.layersRewritten > 0 || report.corrections > 0 || removed > 0;
   project.metadata = metadata;
   return report;
+}
+
+/**
+ * UPG-003 §6 — the same conversion for the parts an import brings in, so a prefab installed in 0.3
+ * arrives wearing typography tokens instead of minting text styles that the next open converts (and
+ * backs the whole project up to do it).
+ *
+ * Tokens travel by NAME (CMP-004 AC4), so the source is converted against the TARGET's custom tokens:
+ * one equal in name and value is reused, a name the target uses for another value gets `-2`, and
+ * `tokensMinted` is what the target must be given. The source's own tokens are put back afterwards —
+ * they never travel. Only the `landing` styles are converted: one the import skips (the target keeps
+ * its own of that name) stays a text style on every wearer, so the part still names the target's.
+ */
+export function convertTextStylesForImport(
+  source: TextStyleProjectLike,
+  targetCustomTokens: readonly StyleTokenRecord[],
+  landing: ReadonlySet<string>
+): TextStyleConversionReport {
+  const metadata = (source.metadata = source.metadata ?? {});
+  const definitions = metadata.styles?.text;
+  const leave = new Set(
+    Object.keys(definitions && typeof definitions === 'object' ? definitions : {}).filter((n) => !landing.has(n))
+  );
+  const hadOwn = Object.prototype.hasOwnProperty.call(metadata, 'designTokens');
+  const own = metadata.designTokens;
+  metadata.designTokens = { version: own?.version ?? 1, customTokens: targetCustomTokens.map((t) => ({ ...t })) };
+  try {
+    return convertTextStylesToTokens(source, { leave });
+  } finally {
+    if (hadOwn) metadata.designTokens = own;
+    else delete metadata.designTokens;
+  }
 }
 
 /** The report in sentences a person reads when the project opens. Empty when nothing changed. */

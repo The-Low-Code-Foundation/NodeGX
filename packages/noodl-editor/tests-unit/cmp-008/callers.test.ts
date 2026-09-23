@@ -91,7 +91,19 @@ describe('CMP-008 — apply() is the caller', () => {
   it('actually calls them', () => {
     expect(calls.get('tokenWarningsFor')).toBe(1);
     expect(calls.get('buildEffectiveTokens')).toBe(1);
-    expect(calls.get('readStoredTokens')).toBe(1);
+    // ⚠️ P100 UPG-003 §6 also reads the target's stored tokens (to convert a source's text styles
+    // against them, and to add the tokens that produces), so a file-wide count no longer says the
+    // GAP CHECK reads them. Counted where CMP-008 needs it: inside `tokenWarningsFor`'s arguments.
+    let inGap = 0;
+    walk(apply, (node) => {
+      if (!ts.isCallExpression(node) || node.expression.getText() !== 'tokenWarningsFor') return;
+      for (const arg of node.arguments) {
+        walk(arg, (n) => {
+          if (ts.isCallExpression(n) && n.expression.getText() === 'readStoredTokens') inGap++;
+        });
+      }
+    });
+    expect(inGap).toBe(1);
   });
 
   it('🔴 calls it on the UNCONDITIONAL path', () => {

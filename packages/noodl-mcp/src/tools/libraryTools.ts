@@ -56,9 +56,14 @@ import { z } from 'zod';
 import {
   buildComponentV2Files,
   buildEffectiveTokens,
+  convertTextStylesForImport,
+  FONT_MODULE_DIR,
+  fontFaceStylesheet,
+  fontModuleManifest,
   legacyNameToPath,
   readStoredTokens,
-  recordKitProvenance
+  recordKitProvenance,
+  STYLE_TOKENS_METADATA_KEY
 } from '../editor-deps';
 import type { LegacyComponent, StylesV2File } from '../editor-deps';
 import { ToolError } from '../errors';
@@ -141,6 +146,13 @@ export interface InstallPrefabResponse {
    * draws the wrong colour. Absent when every token resolves.
    */
   tokensUnresolved?: string[];
+  /**
+   * P100 UPG-003 §6 — the entry's text styles that arrived as typography tokens, and the tokens this
+   * project was given for them (one it already had with the same value is reused, not listed). A
+   * text style is a 0.2.x layer; 0.3 converts every one it meets. Absent when there were none.
+   */
+  textStylesConverted?: string[];
+  tokensAdded?: string[];
   next: string;
 }
 
@@ -326,6 +338,18 @@ export function registerLibraryTools(
 
       const now = new Date().toISOString();
 
+      // ── P100 UPG-003 §6: the entry's text styles arrive as typography tokens ──
+      // The conversion the editor's install runs (`import-engine/apply.ts`), against THIS project's
+      // tokens: an equal one is reused, a name taken for another value gets `-2`. A style the project
+      // already has is not merged (keep yours, below), so it is left a text style and the part names
+      // the project's own. Before the components are written, because it rewrites them.
+      const storedTokens = readStoredTokens(store.designTokenMetaSource());
+      const keptText = store.readStyles()?.textStyles ?? {};
+      const landing = new Set(
+        Object.keys(source.metadata?.styles?.text ?? {}).filter((n) => !Object.prototype.hasOwnProperty.call(keptText, n))
+      );
+      const converted = convertTextStylesForImport(source, storedTokens?.customTokens ?? [], landing);
+
       // ── Components: convert with the editor's own serialiser, keep yours on collision ──
       const componentsInstalled: string[] = [];
       const componentsSkipped: string[] = [];
@@ -349,6 +373,24 @@ export function registerLibraryTools(
 
       // ── Asset files (fonts, images): copy what is absent, keep yours ──
       const assets = copyAssets(sourceDir, store.projectDir);
+
+      // ── UPG-003 §6: the tokens the parts now wear, and the faces that load their font files ──
+      if (converted.tokensMinted.length > 0) {
+        store.writeDesignTokens(STYLE_TOKENS_METADATA_KEY, {
+          ...(storedTokens ?? {}),
+          version: storedTokens?.version ?? 1,
+          customTokens: [...(storedTokens?.customTokens ?? []), ...converted.tokensMinted]
+        });
+      }
+      if (converted.fontFaces.length > 0) {
+        const fontDir = path.join(store.projectDir, FONT_MODULE_DIR);
+        fs.mkdirSync(fontDir, { recursive: true });
+        const css = path.join(fontDir, 'styles.css');
+        const existing = fs.existsSync(css) ? fs.readFileSync(css, 'utf8') : undefined;
+        fs.writeFileSync(css, fontFaceStylesheet(existing, converted.fontFaces));
+        const manifest = path.join(fontDir, 'manifest.json');
+        if (!fs.existsSync(manifest)) fs.writeFileSync(manifest, fontModuleManifest());
+      }
 
       // ── Code modules: copy, record provenance, refresh the overlay ──
       const modulesInstalled: string[] = [];
@@ -431,6 +473,12 @@ export function registerLibraryTools(
         modulesSkipped,
         ...(kitLoadFailures ? { kitLoadFailures } : {}),
         ...(tokensUnresolved.length > 0 ? { tokensUnresolved } : {}),
+        ...(converted.converted.length > 0
+          ? {
+              textStylesConverted: converted.converted.map((c) => c.name),
+              tokensAdded: converted.tokensMinted.map((t) => t.name)
+            }
+          : {}),
         next: nextGuidance(entry, componentsInstalled, modulesInstalled, tokensUnresolved)
       };
       return jsonResult(payload);

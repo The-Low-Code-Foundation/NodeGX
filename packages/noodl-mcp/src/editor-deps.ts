@@ -314,6 +314,14 @@ export {
   STYLE_TOKENS_METADATA_KEY
 } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/ProjectTokenCss';
 export type { MetaDataSource } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/ProjectTokenCss';
+// P100 UPG-003 §6 — a prefab's text styles arrive as typography tokens, by the same conversion the
+// editor's install and on-load upgrade run. Pure: it imports only `@nodegx/project-contract/tokens`.
+export {
+  convertTextStylesForImport,
+  FONT_MODULE_DIR,
+  fontFaceStylesheet,
+  fontModuleManifest
+} from '../../noodl-editor/src/editor/src/models/ProjectPatches/textStylesToTokens';
 // CMP-008 — the ONE definition of what counts as a `var(--token)` reference.
 // The export side (`libraryExport.entryTokens`) and the editor's install side
 // (`import-engine/tokenGap`) both read it, because a disagreement between them

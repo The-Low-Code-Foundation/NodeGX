@@ -15,9 +15,24 @@
  * @module noodl-editor/utils/import-engine/apply
  */
 
+import { filesystem } from '@noodl/platform';
+
+import {
+  convertTextStylesForImport,
+  FONT_MODULE_DIR,
+  fontFaceStylesheet,
+  FontFace,
+  fontModuleManifest,
+  TextStyleConversionReport,
+  TextStyleProjectLike
+} from '@noodl-models/ProjectPatches/textStylesToTokens';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { projectFromDirectory } from '@noodl-models/projectmodel.editor';
-import { buildEffectiveTokens, readStoredTokens } from '@noodl-models/StyleTokensModel/ProjectTokenCss';
+import {
+  buildEffectiveTokens,
+  readStoredTokens,
+  STYLE_TOKENS_METADATA_KEY
+} from '@noodl-models/StyleTokensModel/ProjectTokenCss';
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 
 import { recordKitProvenance } from '../../../../shared/utils/projectmodules';
@@ -147,6 +162,17 @@ function copyResource(target: ProjectModelLike, sourceDir: string, name: string)
   });
 }
 
+/** Merge `faces` into the target's font module — the same two files the on-load upgrade writes. */
+async function writeFontModule(projectDir: string, faces: FontFace[]): Promise<void> {
+  const dir = filesystem.join(projectDir, FONT_MODULE_DIR);
+  await filesystem.makeDirectory(dir);
+  const css = filesystem.join(dir, 'styles.css');
+  const existing = filesystem.exists(css) ? await filesystem.readFile(css) : undefined;
+  await filesystem.writeFile(css, fontFaceStylesheet(existing, faces));
+  const manifest = filesystem.join(dir, 'manifest.json');
+  if (!filesystem.exists(manifest)) await filesystem.writeFile(manifest, fontModuleManifest());
+}
+
 /**
  * Apply an {@link ImportPlan} to a target project. `plan.sourceDir` is the
  * project the components come from; `targetProject` is imported into (the current
@@ -158,6 +184,23 @@ export function apply(plan: ImportPlan, targetProject: ProjectModel): Promise<Im
   if (!target) {
     return Promise.resolve(emptyResult({ result: 'failure', message: 'No project loaded, cannot import.' }));
   }
+
+  /*
+   * ── P100 UPG-003 §6: the source's text styles arrive as typography tokens ──
+   *
+   * 🔴 **Read unconverted, then converted HERE.** Loaded like an opened project, the source was
+   * upgraded in place: its cache folder backed up, the "project was upgraded" toast raised about a
+   * project nobody opened, and its parts grafted wearing tokens only the source defined — a prefab
+   * installed with no typography at all (driven 2026-09-23). Converted against the TARGET's tokens,
+   * the parts wear tokens the target is given below, and nothing is minted for the next open to
+   * convert again.
+   */
+  const targetTokens = readStoredTokens(targetProject)?.customTokens ?? [];
+  const landing = new Set(plan.styles.text.filter((s) => active(s.policy)).map((s) => s.name));
+  let incoming: TextStyleConversionReport | undefined;
+  const convertSource = (content: TextStyleProjectLike) => {
+    incoming = convertTextStylesForImport(content, targetTokens, landing);
+  };
 
   return new Promise((resolve) => {
     projectFromDirectory(plan.sourceDir, async (importProject?: ProjectModel) => {
@@ -223,6 +266,17 @@ export function apply(plan: ImportPlan, targetProject: ProjectModel): Promise<Im
          * It reports; it never refuses. A part whose tokens do not all resolve
          * still installs, and the result is still a success.
          */
+        // Before the gap check below: the tokens the parts now wear are the target's from here on.
+        // Metadata, so not undoable — the same as the styles a legacy import merges.
+        if (incoming && incoming.tokensMinted.length > 0) {
+          const stored = readStoredTokens(targetProject);
+          targetProject.setMetaData(STYLE_TOKENS_METADATA_KEY, {
+            ...(stored ?? {}),
+            version: stored?.version ?? 1,
+            customTokens: [...(stored?.customTokens ?? []), ...incoming.tokensMinted]
+          });
+        }
+
         const tokenWarnings = tokenWarningsFor(
           plan,
           importProject.toJSON() as SourceProjectJson,
@@ -244,6 +298,20 @@ export function apply(plan: ImportPlan, targetProject: ProjectModel): Promise<Im
           const ok = await copyResource(target, plan.sourceDir, r.name);
           if (ok) filesCopied.push(r.name);
           else warnings.push(`Failed to copy file "${r.name}".`);
+        }
+
+        // UPG-003 §6 (R9): a family token naming a font file is loaded by the TARGET's font module.
+        // The files themselves came over above — the plan was made from the unconverted source,
+        // whose text styles listed them.
+        if (incoming && incoming.fontFaces.length > 0) {
+          try {
+            await writeFontModule(target._retainedProjectDirectory, incoming.fontFaces);
+          } catch (err) {
+            warnings.push(
+              `Could not write the stylesheet that loads this part's fonts (${FONT_MODULE_DIR}), so its text ` +
+                `draws in a fallback font: ${err instanceof Error ? err.message : String(err)}`
+            );
+          }
         }
 
         /*
@@ -323,6 +391,6 @@ export function apply(plan: ImportPlan, targetProject: ProjectModel): Promise<Im
       } catch (err) {
         resolve(emptyResult({ result: 'failure', message: err instanceof Error ? err.message : String(err) }));
       }
-    });
+    }, { upgradeOnLoad: false, convertSource });
   });
 }

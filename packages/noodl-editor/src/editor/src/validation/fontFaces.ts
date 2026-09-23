@@ -86,7 +86,7 @@ export function declaredFaces(css: string): Set<string> {
 
 export interface FontFaceCheckInput {
   /** The project's effective tokens (defaults with its overrides applied). */
-  tokens: ReadonlyArray<{ name: string; value: string }>;
+  tokens: ReadonlyArray<{ name: string; value: string; category?: string }>;
   /** The text of every stylesheet the project's modules list. */
   stylesheets: readonly string[];
   /** Component the diagnostic is reported against (the root component). */
@@ -99,7 +99,10 @@ export function checkFontFaces(input: FontFaceCheckInput): Diagnostic[] {
 
   const out: Diagnostic[] = [];
   for (const token of input.tokens) {
-    if (!FONT_FAMILY_TOKENS.includes(token.name)) continue;
+    // P100 UPG-003 §6: a project's own family tokens too — every text style 0.3 converts mints one
+    // (`--title-large-family`), almost always naming a face its font module declares. Judged by
+    // category, which only the three defaults above and those custom tokens carry.
+    if (!FONT_FAMILY_TOKENS.includes(token.name) && token.category !== 'typography-family') continue;
     const family = firstFamily(token.value);
     if (family === null) continue;
     const key = family.toLowerCase();
