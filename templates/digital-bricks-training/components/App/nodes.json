@@ -46,7 +46,8 @@
             "/Pages/Course",
             "/Pages/Palette",
             "/Pages/People",
-            "/Pages/Learner"
+            "/Pages/Learner",
+            "/Pages/Sign in"
           ]
         }
       }
@@ -187,6 +188,99 @@
       },
       "metadata": {
         "comment": "The dossier's eyebrow on /course is a graph Translation (TASK-L167). Without this bundle it resolved to nothing and the Text showed its editor default, TEXT — which is why tools/check-language-owner.py now asserts every Translation's namespace is registered here."
+      }
+    },
+    {
+      "id": "app_user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 700,
+      "y": 40
+    },
+    {
+      "id": "app_gate",
+      "type": "JavaScriptFunction",
+      "label": "THE GATE — signed out, only the public pages",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * THE ONE GATE (TASK-L171 §2). Two rules, in ONE place, never a check per page:\n * a page that forgot its own check would be the one somebody could read.\n *\n *   1. Signed out, every page but the public ones goes to sign-in.\n *   2. Signed in WITHOUT the `staff` role, the coach's pages go to Home.\n *\n * PUBLIC and STAFF are lists of what is allowed, never of what is forbidden to\n * everybody else: a page added later is gated for the signed-out by default,\n * which is the safe way for the first list to be wrong.\n *\n *   Home     the front door, with its two demo doors\n *   Sign in  the way in\n *   Palette  the kit's specimen, not anybody's data (TASK-L171 decision 9)\n *\n * NONE OF THIS IS WHAT KEEPS DATA PRIVATE. Every read is a cloud function behind\n * nodegx.security.json, and the page asks before this can send it anywhere, so a\n * learner at /people is refused by the backend first (403, read off the network\n * — criterion 5). Rule 2 exists because of what the page would otherwise SAY:\n * the roster's empty state is \"Nobody has signed up yet\", which is false.\n *\n * ROLES ARE ASKED FOR ONCE WHEN THEY ARE UNKNOWN. `roles` is undefined while\n * the backend has not said (user.ts, DEF-005), and that is every arrival from a\n * magic link: `POST /oauth/exchange` hands over the user WITHOUT `roles`, though\n * /login and /users/me carry them (measured, TASK-L171 — a NodeGX core defect).\n * Rule 2 waits for an answer rather than guessing one, and `askRoles` goes\n * through a Switch whose `switchedToOn` fires on the transition only, so a\n * backend that never answers cannot make this loop.\n */\nconst PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette'];\nconst STAFF = ['Pages/People', 'Pages/Learner'];\nconst page = String(Inputs.page || '').replace(/^\\/+/, '');\nconst signedIn = Inputs.signedIn === true;\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : undefined;\nif (signedIn && !roles) Outputs.askRoles();\nif (!page) return;\nif (!signedIn) {\n  if (PUBLIC.indexOf(page) === -1) Outputs.toSignIn();\n  return;\n}\nif (roles && roles.indexOf('staff') === -1 && STAFF.indexOf(page) !== -1) Outputs.toHome();\n"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "displayName": "page",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-askRoles",
+          "displayName": "askRoles",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toSignIn",
+          "displayName": "toSignIn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toHome",
+          "displayName": "toHome",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "app_to_signin",
+      "type": "RouterNavigate",
+      "label": "→ Sign in",
+      "x": 700,
+      "y": 280,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Sign in"
+      }
+    },
+    {
+      "id": "app_roles_once",
+      "type": "Switch",
+      "label": "Ask for the roles once",
+      "x": 1000,
+      "y": 40,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "app_to_home",
+      "type": "RouterNavigate",
+      "label": "→ Home",
+      "x": 700,
+      "y": 400,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
       }
     }
   ],

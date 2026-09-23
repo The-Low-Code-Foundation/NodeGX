@@ -134,13 +134,21 @@
       "parent": "hm_shell",
       "children": [
         "hm_cta",
-        "hm_coach"
+        "hm_coach",
+        "hm_open_course",
+        "hm_open_people",
+        "hm_signout"
       ],
       "parameters": {
         "sizeMode": "contentSize",
         "flexDirection": "row",
         "columnGap": "var(--space-3)",
-        "paddingTop": "var(--space-2)"
+        "paddingTop": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-3)"
+      },
+      "metadata": {
+        "comment": "WRAPS (TASK-L171, measured): the two doors side by side pushed \"Log in as their trainer\" to right=446 on a 390px screen, a horizontal scroll on the front door that predates the backend. A wrapped row of content-sized buttons is the intent (the lesson stepper's recipe), not a grid."
       }
     },
     {
@@ -163,12 +171,16 @@
     {
       "id": "hm_go",
       "type": "RouterNavigate",
-      "label": "Into the course",
+      "label": "→ Sign in, as the learner",
       "x": 700,
       "y": 800,
       "parameters": {
         "router": "Main",
-        "target": "/Pages/Course"
+        "target": "/Pages/Sign in",
+        "pm-email": "sam.okafor@example.test"
+      },
+      "metadata": {
+        "comment": "A PREFILL, NOT A GATE (TASK-L171 decision 8). The door opens sign-in with the learner's demo address filled in, so a developer running this locally is one click from the link in Mailpit. Whoever signs in is whoever owns the inbox; the address decides nothing."
       }
     },
     {
@@ -280,12 +292,16 @@
     {
       "id": "hm_go_people",
       "type": "RouterNavigate",
-      "label": "→ People",
+      "label": "→ Sign in, as their trainer",
       "x": 900,
       "y": 640,
       "parameters": {
         "router": "Main",
-        "target": "/Pages/People"
+        "target": "/Pages/Sign in",
+        "pm-email": "trainer@example.test"
+      },
+      "metadata": {
+        "comment": "A PREFILL, NOT A GATE (TASK-L171 decision 8) — the one place a staff address is written in this graph, and it decides nothing. Who is staff is the backend's `staff` role alone (nodegx.security.json), read on this page from the User node's `roles`, never from an email. tools/check-signin.py holds that."
       }
     },
     {
@@ -317,7 +333,7 @@
         }
       },
       "metadata": {
-        "comment": "A visitor pressing a button called \"log in\" is owed the truth about what happens next. Nothing in this template fetches or writes (L170/L171 are unbuilt), so the sentence is true by construction rather than by promise — and it must be re-read on the day a backend lands."
+        "comment": "A visitor pressing a button called 'log in' is owed the truth about what happens next. Since TASK-L171 something IS sent: a sign-in link, by email. So the sentence says that, and says what is still true — this version only reads, so nothing anybody does once in changes a programme. Re-read it the day the first write lands."
       }
     },
     {
@@ -330,6 +346,225 @@
         "Key": "demoNote",
         "Namespace": "home"
       }
+    },
+    {
+      "id": "hm_open_course",
+      "type": "net.noodl.controls.button",
+      "label": "Open your course",
+      "x": 160,
+      "y": 900,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "hm_open_people",
+      "type": "net.noodl.controls.button",
+      "label": "Open your people",
+      "x": 160,
+      "y": 980,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "hm_signout",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "x": 160,
+      "y": 1060,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "hm_user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 900,
+      "y": 900
+    },
+    {
+      "id": "hm_who",
+      "type": "JavaScriptFunction",
+      "label": "Which doors",
+      "x": 900,
+      "y": 1020,
+      "parameters": {
+        "functionScript": "/*\n * WHICH DOORS (TASK-L171 §2). Signed out: the two demo doors and the note that\n * says what they do. Signed in: one way on, decided by the backend's ROLE, never\n * by an address — L102's single owner is the backend's `staff` role now.\n *\n * `roles` is undefined when the backend has not said and [] when the user is in\n * none (user.ts, DEF-005). Undefined shows NEITHER way on rather than guessing\n * the learner's: a coach must not be offered a course that is not theirs because\n * a read had not come back yet. App's gate is what ASKS when they are unknown\n * (after a magic link they always are, for a moment); this node only reads the\n * answer, which every User node shares.\n */\nconst signedIn = Inputs.signedIn === true;\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : undefined;\nOutputs.signedOut = !signedIn;\nOutputs.isStaff = signedIn && !!roles && roles.indexOf('staff') !== -1;\nOutputs.isLearner = signedIn && !!roles && roles.indexOf('staff') === -1;\nOutputs.canSignOut = signedIn;\n"
+      },
+      "ports": [
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-signedOut",
+          "displayName": "signedOut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStaff",
+          "displayName": "isStaff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isLearner",
+          "displayName": "isLearner",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canSignOut",
+          "displayName": "canSignOut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hm_to_course",
+      "type": "RouterNavigate",
+      "label": "→ Course",
+      "x": 900,
+      "y": 1140,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Course"
+      }
+    },
+    {
+      "id": "hm_to_people",
+      "type": "RouterNavigate",
+      "label": "→ People",
+      "x": 900,
+      "y": 1240,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/People"
+      }
+    },
+    {
+      "id": "hm_logout",
+      "type": "net.noodl.user.LogOut",
+      "label": "Sign out",
+      "x": 900,
+      "y": 1340
+    },
+    {
+      "id": "t_hm_open_course",
+      "type": "Translation",
+      "label": "home:signedIn.course",
+      "x": 1200,
+      "y": 900,
+      "parameters": {
+        "Key": "signedIn.course",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "t_hm_open_people",
+      "type": "Translation",
+      "label": "home:signedIn.people",
+      "x": 1200,
+      "y": 980,
+      "parameters": {
+        "Key": "signedIn.people",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "t_hm_signout",
+      "type": "Translation",
+      "label": "home:signedIn.signOut",
+      "x": 1200,
+      "y": 1060,
+      "parameters": {
+        "Key": "signedIn.signOut",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "t_hm_line_in",
+      "type": "Translation",
+      "label": "home:signedIn.lede",
+      "x": 1200,
+      "y": 1140,
+      "parameters": {
+        "Key": "signedIn.lede",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "hm_which_lede",
+      "type": "JavaScriptFunction",
+      "label": "Which lede",
+      "x": 1500,
+      "y": 1140,
+      "parameters": {
+        "functionScript": "/*\n * WHICH LEDE (TASK-L171). The signed-out lede ends \"Look at it from either\n * side:\", which introduces the two doors. Signed in there is one way on, so that\n * clause would point at buttons that are not there — found by looking at the\n * screenshot, not by any count. The signed-in lede is the same sentence without\n * it, one key in Data/Strings.\n */\nconst out = Inputs.signedOut !== false;\nOutputs.text = out ? Inputs.doors : Inputs.signedIn;\n"
+      },
+      "ports": [
+        {
+          "name": "in-signedOut",
+          "displayName": "signedOut",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doors",
+          "displayName": "doors",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
     }
   ],
   "visualRoots": [

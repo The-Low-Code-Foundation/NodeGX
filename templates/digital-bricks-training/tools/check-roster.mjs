@@ -2,9 +2,9 @@
 /**
  * THE ROSTER LISTS EVERYBODY IT IS RESPONSIBLE FOR (TASK-L164).
  *
- * Runs the graph's OWN scripts — Data/Fixture roster's order, and Logic/Roster
+ * Runs the graph's OWN scripts — Data/Roster's order, and Logic/Roster
  * filter's pipeline and options — straight out of nodes.json, against the
- * fixture, and asserts the properties the page exists for. Nothing here is a
+ * fixture in backend/fixtures/roster.json (what `roster` answers, TASK-L170), and asserts the properties the page exists for. Nothing here is a
  * second implementation: if a script in the graph changes, this runs the
  * changed script.
  *
@@ -19,6 +19,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fixture as fixtureOf } from './lib/fixtures.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', 'components');
 const nodesOf = (c) => JSON.parse(readFileSync(join(ROOT, c, 'nodes.json'), 'utf8')).nodes;
@@ -36,11 +37,11 @@ function run(src, inputs) {
   return outputs;
 }
 
-const fixture = JSON.parse(nodeIn('Data/Fixture roster', 'fr_data').parameters.json);
+const fixture = fixtureOf('roster');
 const graphStrings = JSON.parse(nodeIn('Data/Strings', 'str_graph').parameters.json)[0];
 const copy = { people: graphStrings.people };
 
-const people = run(script('Data/Fixture roster', 'fr_order'), { items: fixture }).people;
+const people = run(script('Data/Roster', 'fr_order'), { items: fixture }).people;
 const filterSrc = script('Logic/Roster filter', 'rf_fn');
 const optionsSrc = script('Logic/Roster filter', 'rf_opts');
 const filter = (o = {}) => run(filterSrc, { people, copy, ...o });

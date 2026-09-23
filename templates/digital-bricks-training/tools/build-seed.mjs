@@ -2,10 +2,12 @@
 /**
  * THE FIXTURES, DECOMPOSED INTO THE ROWS THE PRODUCT WOULD HOLD (TASK-L169 §3).
  *
- * Reads the three `Data/Fixture *` components' Static Data and writes
- * `backend/seed.json`: `{ users, rows: { <Collection>: [...] } }`. The fixtures
- * stay the single source until L171 takes them off the pages, so this file is
- * GENERATED — never hand-edit seed.json.
+ * Reads the three fixtures in `backend/fixtures/` (tools/lib/fixtures.mjs) and
+ * writes `backend/seed.json`: `{ users, rows: { <Collection>: [...] } }`. Until
+ * TASK-L171 the fixtures were the pages' Static Data nodes; the pages read the
+ * backend now and the fixtures moved, byte for byte, to be what they still are:
+ * the seed's single source and each read function's expected output. So
+ * seed.json is GENERATED — never hand-edit it.
  *
  * What it refuses to do, on purpose:
  *   - store anything DERIVED. No timeline `state`, no entry `position`, no
@@ -15,6 +17,10 @@
  *   - drop a field it cannot place. Every fixture key is either mapped or named
  *     in IGNORED with the reason; anything else fails the build by name.
  *
+ * It also writes Palette's SPECIMEN (TASK-L171 decision 9): `Data/Specimen lesson`'s
+ * Static Data is set to backend/fixtures/lesson.json, byte for byte, so editing the
+ * lesson is editing ONE file. tools/check-specimen.mjs holds the two equal.
+ *
  * Ids are deterministic (the fixtures' own, or derived from them), so running
  * this twice writes a byte-identical file — criterion 1.
  *
@@ -23,17 +29,10 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fixture, fixtureText } from './lib/fixtures.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
-const COMPONENTS = join(TEMPLATE, 'components');
-
-const staticJson = (component) => {
-  const { nodes } = JSON.parse(readFileSync(join(COMPONENTS, component, 'nodes.json'), 'utf8'));
-  const data = nodes.find((n) => n.type === 'Static Data');
-  if (!data) throw new Error(`${component}: no Static Data node`);
-  return JSON.parse(data.parameters.json);
-};
 
 const failures = [];
 const fail = (msg) => failures.push(msg);
@@ -79,11 +78,11 @@ const CORPUS = [
 ];
 
 // ── The roster ────────────────────────────────────────────────────────────────
-const roster = staticJson('Data/Fixture roster');
+const roster = fixture('roster');
 // WHOSE programme this template carries is the programme fixture's business,
 // not a name written here. Pinning it cost three silent wrong answers the
 // first time the fixture was re-authored around a different learner.
-const PROGRAMME_LEARNER = staticJson('Data/Fixture programme')[0].learnerId;
+const PROGRAMME_LEARNER = fixture('programme')[0].learnerId;
 const rosterIgnored = {
   stepsTotal: 'derived: count of live steps on the most recent path',
   stepsComplete: 'derived: count of complete ones',
@@ -209,7 +208,7 @@ for (const p of roster) {
 }
 
 // ── The learner's programme ─────────────────────────────────────────────────────────
-const [programme] = staticJson('Data/Fixture programme');
+const [programme] = fixture('programme');
 const learnerId = programme.learnerId;
 const pt = tracker('programme', programme, {
   entries: 'decomposed below',
@@ -521,7 +520,7 @@ pt.done();
 for (const [conceptId, title] of concepts) add('Concept', { conceptId, title });
 
 // ── The lesson ────────────────────────────────────────────────────────────────
-const [lesson] = staticJson('Data/Fixture lesson');
+const [lesson] = fixture('lesson');
 // WHOSE lesson this is, derived — never pinned. A cached lesson is keyed on a
 // (learner, concept) pair and the concept has to be on that learner's own path:
 // the delivery route refuses a step the learner does not have. The first pinned
@@ -571,3 +570,21 @@ mkdirSync(join(TEMPLATE, 'backend'), { recursive: true });
 writeFileSync(join(TEMPLATE, 'backend', 'seed.json'), JSON.stringify({ users, rows: sortedRows }, null, 2));
 const counts = Object.entries(sortedRows).map(([k, v]) => `${k} ${v.length}`).join(', ');
 console.log(`build-seed: ${users.length} users; ${counts}`);
+
+// ── Palette's specimen: the lesson fixture, byte for byte (TASK-L171 decision 9) ──
+// Written in the project's on-disk format (indent 2, real characters, no trailing
+// newline), and only when it differs, so a run that changes nothing touches nothing.
+const specimenPath = join(TEMPLATE, 'components', 'Data', 'Specimen lesson', 'nodes.json');
+const specimenRaw = readFileSync(specimenPath, 'utf8');
+const specimen = JSON.parse(specimenRaw);
+const data = specimen.nodes.filter((n) => n.type === 'Static Data');
+if (data.length !== 1) {
+  console.error(`build-seed: Data/Specimen lesson holds ${data.length} Static Data nodes, expected 1.`);
+  process.exit(1);
+}
+const lessonText = fixtureText('lesson');
+if (data[0].parameters.json !== lessonText) {
+  data[0].parameters.json = lessonText;
+  writeFileSync(specimenPath, JSON.stringify(specimen, null, 2));
+  console.log('build-seed: Palette\'s specimen updated from backend/fixtures/lesson.json.');
+}

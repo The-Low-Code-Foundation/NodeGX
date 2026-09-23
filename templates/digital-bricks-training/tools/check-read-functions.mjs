@@ -51,6 +51,7 @@ import { createHash } from 'node:crypto';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveRow, userFields } from './lib/seed-resolve.mjs';
+import { fixture } from './lib/fixtures.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
@@ -97,7 +98,7 @@ const product = await import('data:text/javascript;base64,' + Buffer.from(bundle
 
 // ── The template ─────────────────────────────────────────────────────────────
 const json = (path) => JSON.parse(readFileSync(join(TEMPLATE, path), 'utf8'));
-const fixture = (name) => JSON.parse(json(`components/Data/${name}/nodes.json`).nodes.find((n) => n.type === 'Static Data').parameters.json);
+// The fixtures live in backend/fixtures/ since TASK-L171 (tools/lib/fixtures.mjs).
 const cloud = (name) => ({
   nodes: json(`components/__cloud__/${name}/nodes.json`).nodes,
   wires: json(`components/__cloud__/${name}/connections.json`).connections
@@ -233,15 +234,15 @@ const expectSame = (label, got, want) => {
 };
 
 // The expected outputs, from the fixtures through the PRODUCT's projections.
-const fxProgramme = fixture('Fixture programme')[0];
+const fxProgramme = fixture('programme')[0];
 const expected = {
   coach: [{ ...fxProgramme, entries: product.projectForCoach(fxProgramme.entries), history: product.projectForCoach(fxProgramme.history) }],
   learner: (() => {
     const { history, ...rest } = fxProgramme;
     return [{ ...rest, entries: product.projectForLearner(fxProgramme.entries) }];
   })(),
-  lesson: fixture('Fixture lesson'),
-  roster: fixture('Fixture roster')
+  lesson: fixture('lesson'),
+  roster: fixture('roster')
 };
 // The pack data the function serves must be the product's pack (Richard, 2026-09-23).
 check(

@@ -281,6 +281,11 @@
           "description": "The edge (--edge); pills, tracks and fields use 2px"
         }
       ]
+    },
+    "cloudservices": {
+      "endpoint": "http://127.0.0.1:8577",
+      "appId": "nodegx-backend",
+      "type": "nodegx"
     }
   }
 }

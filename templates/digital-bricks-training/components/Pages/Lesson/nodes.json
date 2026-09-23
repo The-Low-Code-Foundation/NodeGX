@@ -52,7 +52,8 @@
         "ls_eyebrow",
         "ls_title",
         "ls_hook",
-        "ls_layout"
+        "ls_layout",
+        "ls_none"
       ],
       "parameters": {
         "width": {
@@ -203,8 +204,8 @@
     },
     {
       "id": "ls_fixture",
-      "type": "/Data/Fixture lesson",
-      "label": "The lesson (fixture until the backend lands)",
+      "type": "/Data/Lesson",
+      "label": "Their lesson, from the backend",
       "x": 800,
       "y": 160
     },
@@ -337,6 +338,198 @@
       },
       "metadata": {
         "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
+      }
+    },
+    {
+      "id": "ls_url",
+      "type": "PageInputs",
+      "label": "Which lesson — ?concept=",
+      "x": 800,
+      "y": 40,
+      "parameters": {
+        "queryParams": "concept"
+      },
+      "metadata": {
+        "comment": "The fixture was one lesson and the page never had to say which. The backend holds one per concept, so every link to this page passes the concept it names: the up-next card and the dossier's lesson link on /course (TASK-L171 §0b). A query parameter rather than a path one so /lesson with no concept is still a page, not a 404."
+      }
+    },
+    {
+      "id": "ls_state",
+      "type": "JavaScriptFunction",
+      "label": "Written, or not yet",
+      "x": 1100,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * WRITTEN, OR NOT YET (TASK-L171 §0b). `found` is undefined until the answer\n * arrives, so neither state draws while the lesson is on its way — the page does\n * not flash \"not written yet\" at somebody whose lesson is one request away.\n */\nOutputs.hasLesson = Inputs.found === true;\nOutputs.notWritten = Inputs.found === false;\n"
+      },
+      "ports": [
+        {
+          "name": "in-found",
+          "displayName": "found",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasLesson",
+          "displayName": "hasLesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notWritten",
+          "displayName": "notWritten",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ls_none",
+      "type": "Group",
+      "label": "Not written yet",
+      "x": 220,
+      "y": 1180,
+      "parent": "ls_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "Sprint 49 decision 7 promised this: Sam's next step has no lesson written for it until the engine sprint, and the up-next card opens it. MOUNTED, never visible (L157): visibility keeps the space. No colour of its own and no warning tone — a lesson not written yet is not something the learner did wrong."
+      },
+      "children": [
+        "ls_none_eyebrow",
+        "ls_none_title",
+        "ls_none_body",
+        "ls_none_back"
+      ]
+    },
+    {
+      "id": "ls_none_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 280,
+      "y": 1260,
+      "parent": "ls_none",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "ls_none_title",
+      "type": "Text",
+      "label": "Headline",
+      "x": 280,
+      "y": 1340,
+      "parent": "ls_none",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ls_none_body",
+      "type": "Text",
+      "label": "What it means",
+      "x": 280,
+      "y": 1420,
+      "parent": "ls_none",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 680,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "ls_none_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the course",
+      "x": 280,
+      "y": 1500,
+      "parent": "ls_none",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "ls_to_course",
+      "type": "RouterNavigate",
+      "label": "→ Course",
+      "x": 1100,
+      "y": 1500,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Course"
+      }
+    },
+    {
+      "id": "t_ls_none_eyebrow",
+      "type": "Translation",
+      "label": "lesson:notWritten.eyebrow",
+      "x": 1000,
+      "y": 1560,
+      "parameters": {
+        "Key": "notWritten.eyebrow",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_ls_none_title",
+      "type": "Translation",
+      "label": "lesson:notWritten.title",
+      "x": 1000,
+      "y": 1640,
+      "parameters": {
+        "Key": "notWritten.title",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_ls_none_body",
+      "type": "Translation",
+      "label": "lesson:notWritten.body",
+      "x": 1000,
+      "y": 1720,
+      "parameters": {
+        "Key": "notWritten.body",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_ls_none_back",
+      "type": "Translation",
+      "label": "lesson:notWritten.back",
+      "x": 1000,
+      "y": 1800,
+      "parameters": {
+        "Key": "notWritten.back",
+        "Namespace": "lesson"
       }
     }
   ],

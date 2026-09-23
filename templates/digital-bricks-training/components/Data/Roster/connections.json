@@ -4,12 +4,6 @@
   "version": 1,
   "connections": [
     {
-      "fromId": "fr_data",
-      "fromProperty": "items",
-      "toId": "fr_order",
-      "toProperty": "in-items"
-    },
-    {
       "fromId": "fr_order",
       "fromProperty": "out-people",
       "toId": "fr_out",
@@ -26,6 +20,30 @@
       "fromProperty": "out-loaded",
       "toId": "fr_out",
       "toProperty": "loaded"
+    },
+    {
+      "fromId": "ro_ask",
+      "fromProperty": "out-ask",
+      "toId": "ro_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ro_call",
+      "fromProperty": "out-rows",
+      "toId": "fr_order",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ro_call",
+      "fromProperty": "failure",
+      "toId": "ro_refused",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ro_refused",
+      "fromProperty": "out-items",
+      "toId": "fr_order",
+      "toProperty": "in-items"
     }
   ]
 }

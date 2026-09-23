@@ -1,0 +1,309 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "102a95ed-d432-4f9d-a5cb-51f5d4fd83b7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fp_split",
+      "type": "JavaScriptFunction",
+      "label": "Split the programme into its parts",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst rows = plain(Inputs.items) || [];\nconst programme = rows[0];\nif (!programme) return;\nOutputs.projectName = programme.projectName || '';\nOutputs.problemStatement = programme.problemStatement || '';\nOutputs.endsOn = programme.endsOn || '';\nOutputs.entries = programme.entries || [];\n/* The objectives the coach and the learner agreed, with the target each was\n   agreed at. An ARCHIVED one is still here: its ratings were really given, and\n   dropping them would be the chart omitting points without saying so. */\nOutputs.dimensions = programme.dimensions || [];\n/* WHOSE programme this is, so the coach's page can find their roster row —\n   an explicit join rather than a match on the project's name (TASK-L165). */\nOutputs.learnerId = programme.learnerId || '';\n/* What a HISTORY query returns: the entries of their OTHER programmes, which\n   the learner's own page never reads. In the product this is a separate,\n   gated fetch the coach makes by choosing a programme (ProgrammeScope.tsx);\n   here it is the second half of the same fixture (TASK-L165 §2). */\nOutputs.history = programme.history || [];\n/* WHAT THEY MUST PRODUCE (TASK-L166 §1). `deliverables` is the EFFECTIVE set\n   as the product's getEffectiveDeliverables would return it for this learner —\n   with ONE difference, and it is deliberate: the ARCHIVED row is still here. The\n   product excludes it in the query; the template has no query, and a fixture\n   that pre-filtered would make the rule untestable. Logic/Dossier decides who\n   sees it, in one place. The coach-only fields (description, position,\n   archivedAt, conceptIds) ride on the same rows. */\nOutputs.deliverables = programme.deliverables || [];\n/* The project context's flat facts, `<slug>.<factName>`, in the order they were\n   captured — plus two un-namespaced ones the meter ignores and the coach still\n   reads (one an onboarding fact with the pack's own label, one not). */\nOutputs.facts = programme.facts || {};\n/* Content-free, one row per ATTEMPT, as /api/course carries them. One is filed\n   under an objective and one is not (L114: ambiguity resolves to null). The\n   unfiled one has no timeline entry: it renders on no dossier surface by\n   design, and adding it to `entries` would change /course (§1: the existing\n   outputs do not change). */\nOutputs.submissions = programme.submissions || [];\n/* The pack's onboarding facts and their authored labels (a pack value). */\nOutputs.onboardingFacts = programme.onboardingFacts || [];\n/* Concept id -> the title the learner sees on their path: the product's\n   `stepTitleByConceptId`, DERIVED from the lesson entries rather than authored\n   beside them, so the two cannot drift. A concept that is not on the path has\n   no title here and renders as its slug, as the product's `?? id` does. */\nOutputs.concepts = (programme.entries || [])\n  .filter((e) => e.kind === 'lesson' && e.conceptId)\n  .map((e) => ({ id: e.conceptId, title: e.title }));\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*",
+          "displayName": "items",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-projectName",
+          "plug": "output",
+          "type": "*",
+          "displayName": "projectName",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-problemStatement",
+          "plug": "output",
+          "type": "*",
+          "displayName": "problemStatement",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-endsOn",
+          "plug": "output",
+          "type": "*",
+          "displayName": "endsOn",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-entries",
+          "plug": "output",
+          "type": "*",
+          "displayName": "entries",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dimensions",
+          "plug": "output",
+          "type": "*",
+          "displayName": "dimensions",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnerId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-history",
+          "plug": "output",
+          "type": "*",
+          "displayName": "history",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deliverables",
+          "plug": "output",
+          "type": "*",
+          "displayName": "deliverables",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-facts",
+          "plug": "output",
+          "type": "*",
+          "displayName": "facts",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-submissions",
+          "plug": "output",
+          "type": "*",
+          "displayName": "submissions",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-onboardingFacts",
+          "plug": "output",
+          "type": "*",
+          "displayName": "onboardingFacts",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-concepts",
+          "plug": "output",
+          "type": "*",
+          "displayName": "concepts",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "One calculation, one code node (doctrine 8). Static Data may hand rows as runtime Models rather than plain objects, so plain() unwraps whichever arrives — the same helper Data/Fixture lesson uses."
+      }
+    },
+    {
+      "id": "fp_out",
+      "type": "Component Outputs",
+      "label": "The programme's parts",
+      "x": 40,
+      "y": 620,
+      "ports": [
+        {
+          "name": "projectName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "problemStatement",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "endsOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "entries",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "dimensions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "learnerId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "history",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "deliverables",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "facts",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "submissions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "onboardingFacts",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "concepts",
+          "plug": "input",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "pr_in",
+      "type": "Component Inputs",
+      "label": "Who is reading, and about whom",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "reader",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "`reader` has NO DEFAULT, on Data/Strings' `audience` precedent (TASK-L163): an instance that does not say who is reading would otherwise ask for the wrong programme. `learnerId` is read only when the reader is a coach — a learner's own programme takes no parameter at all, so nothing a learner's page sends can name somebody else (L170 §0.6)."
+      }
+    },
+    {
+      "id": "pr_ask",
+      "type": "JavaScriptFunction",
+      "label": "Which function, and when",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "functionScript": "/*\n * WHICH PROGRAMME, AND WHEN TO ASK (TASK-L171 §1).\n *\n * The fixture fed three pages from ONE shape. The backend splits it by WHO IS\n * READING, and that split is the gate, not a detail:\n *\n *   learner -> `course`            their own programme; no parameter, so the\n *                                  learner is the session and nothing else\n *   coach   -> `learnerProgramme`  a named learner's; `role:staff` only\n *\n * Both answer with the fixture's own shape (L170), so fp_split is unchanged.\n *\n * NOT ARRIVED YET IS NOT THE SAME AS WIRED WRONG (Logic/Roster filter's rule):\n * an absent reader waits, and a reader that ARRIVES as anything else throws by\n * name. A coach's page waits for its learner id the same way.\n */\nconst reader = Inputs.reader;\nif (reader === undefined || reader === null || reader === '') return;\nif (reader !== 'learner' && reader !== 'coach') {\n  throw new Error('Data/Programme: `reader` is \"learner\" or \"coach\", got ' + JSON.stringify(reader) + ' (TASK-L171).');\n}\nif (reader === 'learner') {\n  Outputs.askOwn();\n  return;\n}\nconst id = String(Inputs.learnerId || '');\nif (!id) return;\nOutputs.learnerId = id;\nOutputs.askAbout();\n"
+      },
+      "ports": [
+        {
+          "name": "in-reader",
+          "displayName": "reader",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "displayName": "learnerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-askOwn",
+          "displayName": "askOwn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnerId",
+          "displayName": "learnerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-askAbout",
+          "displayName": "askAbout",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pr_own",
+      "type": "CloudFunction2",
+      "label": "course — the learner's own",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "function": "course"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/course. Takes no parameter, uses the server's clock (so a backend-fed /course matches the fixture only until 2026-09-30T22:59:59.999Z — L170)."
+      }
+    },
+    {
+      "id": "pr_about",
+      "type": "CloudFunction2",
+      "label": "learnerProgramme — a coach reading one learner",
+      "x": 40,
+      "y": 440,
+      "parameters": {
+        "function": "learnerProgramme"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/learnerProgramme, role:staff. `now` is NOT sent: the page reads the programme at the server's clock, exactly as the learner's own page does, so a coach and their client never read two different fortnights."
+      }
+    },
+    {
+      "id": "pr_refused",
+      "type": "JavaScriptFunction",
+      "label": "A refusal is nothing to show",
+      "x": 40,
+      "y": 560,
+      "parameters": {
+        "functionScript": "/*\n * A REFUSAL IS NOTHING TO SHOW (TASK-L171 criterion 5). A learner who types\n * /learner is refused by `learnerProgramme`; the page gets no programme rather\n * than waiting on one. The reason is never shown — the backend answers every\n * refusal with one body, so \"not yours\" and \"not there\" cannot be told apart.\n */\nOutputs.items = [];\n"
+      },
+      "metadata": {
+        "comment": "Runs on either call's failure only (its Run is wired)."
+      },
+      "ports": [
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

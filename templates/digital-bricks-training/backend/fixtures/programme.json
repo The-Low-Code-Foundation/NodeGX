@@ -1,0 +1,1030 @@
+[
+  {
+    "learnerId": "l-sam",
+    "projectName": "My business landing page",
+    "problemStatement": "I run a small business on my own, and right now the only way people find me is word of mouth. I want a simple website of my own that says what I do, shows a few photos of my work, and lets someone send me a message without having to phone me.",
+    "endsOn": "2026-11-27",
+    "entries": [
+      {
+        "id": "note:note-summer",
+        "kind": "note",
+        "at": "2026-07-22T19:10:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "note": {
+          "id": "note-summer",
+          "body": "Came in asking for an app. Left with a page and a clearer head. Worth remembering how quickly that landed once it was concrete.",
+          "authorName": "Richard Osborne",
+          "sessionId": "sess-summer-2",
+          "anchor": null,
+          "createdAt": "2026-07-22T19:10:00.000Z",
+          "editedAt": null
+        }
+      },
+      {
+        "id": "session:sess-start",
+        "kind": "session",
+        "at": "2026-09-01T10:00:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "session": {
+          "id": "sess-start",
+          "title": "Where you're starting from",
+          "startsAt": "2026-09-01T10:00:00.000Z",
+          "durationMinutes": 45,
+          "meetingUrl": null,
+          "summary": "You want strangers to be able to find you and get hold of you. We agreed that is the whole of version one, and that bookings and a shop are for later. You have never built anything and that is completely fine — the first fortnight is mostly deciding, not typing.",
+          "cancelledAt": null,
+          "createdByName": "Richard Osborne",
+          "cohort": null,
+          "programmeId": "prog-autumn",
+          "prep": [
+            {
+              "kind": "concept",
+              "id": "scoping-what-to-build",
+              "title": "Scoping: the conversation before the first line of code",
+              "state": "done"
+            }
+          ]
+        },
+        "ratings": [
+          {
+            "dimensionId": "dim-ask",
+            "score": 3
+          },
+          {
+            "dimensionId": "dim-jargon",
+            "score": 3
+          }
+        ]
+      },
+      {
+        "id": "evaluation:eval-initial",
+        "kind": "evaluation",
+        "at": "2026-09-01T11:00:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "evaluationId": "eval-initial",
+        "evaluationKind": "initial",
+        "dueOn": "2026-09-01",
+        "completedAt": "2026-09-01T11:00:00.000Z",
+        "summary": "You arrive able to describe your business in one sentence and with no experience of directing a tool to build anything. That is the ordinary starting point. We set three objectives and agreed where each one needs to get to by the end of November.",
+        "criteria": [],
+        "nextStep": "Write the scope note before we next meet.",
+        "ratings": [
+          {
+            "dimensionId": "dim-ask",
+            "score": 3
+          },
+          {
+            "dimensionId": "dim-check",
+            "score": 2
+          },
+          {
+            "dimensionId": "dim-alone",
+            "score": 2
+          }
+        ]
+      },
+      {
+        "id": "lesson:scoping-what-to-build",
+        "kind": "lesson",
+        "at": "2026-09-02T19:40:00.000Z",
+        "anchor": "scoping-what-to-build",
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "conceptId": "scoping-what-to-build",
+        "title": "Scoping: the conversation before the first line of code",
+        "rationale": "Before Claude Code writes a single line, you and it need to agree what the first version of your page actually is: what a visitor sees, what the contact form asks for, and what is deliberately left until later.",
+        "status": "complete",
+        "reachedWowMoment": false,
+        "confidence": 6
+      },
+      {
+        "id": "lesson:what-the-web-is",
+        "kind": "lesson",
+        "at": "2026-09-05T20:10:00.000Z",
+        "anchor": "what-the-web-is",
+        "state": "done",
+        "position": 1,
+        "programmeId": "prog-autumn",
+        "conceptId": "what-the-web-is",
+        "title": "What the web actually is",
+        "rationale": "Your page will live on a computer somewhere else, and a visitor's browser will ask it for a copy. That request-and-response picture is what everything else here sits on.",
+        "status": "complete",
+        "reachedWowMoment": false,
+        "confidence": 7
+      },
+      {
+        "id": "signal:sig-web",
+        "kind": "signal",
+        "at": "2026-09-05T20:31:00.000Z",
+        "anchor": "what-the-web-is",
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "signalKind": "explicit_confusion",
+        "sectionId": "reading-request-response",
+        "utterance": "So is the copy on my computer or theirs?"
+      },
+      {
+        "id": "submission:artifact:what-the-web-is:1",
+        "kind": "submission",
+        "at": "2026-09-06T19:20:00.000Z",
+        "anchor": "what-the-web-is",
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "source": "artifact",
+        "conceptId": "what-the-web-is",
+        "assignmentId": null,
+        "attempt": 1,
+        "evaluated": false,
+        "deliverableId": null
+      },
+      {
+        "id": "submission:artifact:scoping-what-to-build:1",
+        "kind": "submission",
+        "at": "2026-09-07T21:12:00.000Z",
+        "anchor": "scoping-what-to-build",
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "source": "artifact",
+        "conceptId": "scoping-what-to-build",
+        "assignmentId": null,
+        "attempt": 1,
+        "evaluated": true,
+        "deliverableId": "obj-scope"
+      },
+      {
+        "id": "submission:assignment:sub-brief-scope",
+        "kind": "submission",
+        "at": "2026-09-07T21:12:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "source": "assignment",
+        "conceptId": null,
+        "assignmentId": "brief-scope",
+        "attempt": 1,
+        "evaluated": false,
+        "deliverableId": null
+      },
+      {
+        "id": "assignment:brief-scope",
+        "kind": "assignment",
+        "at": "2026-09-08T22:59:59.999Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "assignmentId": "brief-scope",
+        "title": "One page: what version one is",
+        "brief": "Half a page, plain words. The one job of version one, what is on the page, what you have left for later, and the one assumption that would change everything if it turned out to be wrong.",
+        "dueAt": "2026-09-08T22:59:59.999Z",
+        "submissionModes": [
+          "text",
+          "markdown"
+        ],
+        "criteria": [
+          "The one job is a single sentence about a real person doing a real thing",
+          "What is on the page stops at four things or fewer",
+          "A 'not yet' list with at least two things you genuinely wanted",
+          "Names one assumption that would change the approach if it were wrong"
+        ],
+        "deliverableId": "obj-scope",
+        "cohortId": null,
+        "answered": true,
+        "withdrawn": false
+      },
+      {
+        "id": "lesson:frontend-and-backend",
+        "kind": "lesson",
+        "at": "2026-09-09T19:05:00.000Z",
+        "anchor": "frontend-and-backend",
+        "state": "done",
+        "position": 2,
+        "programmeId": "prog-autumn",
+        "conceptId": "frontend-and-backend",
+        "title": "Frontend and backend: who does what",
+        "rationale": "Your photos and your words are the front half; getting a message into your inbox is the back half. Knowing which side owns which job stops you asking for the wrong thing when the form quietly does nothing.",
+        "status": "complete",
+        "reachedWowMoment": false,
+        "confidence": 6
+      },
+      {
+        "id": "session:sess-scope",
+        "kind": "session",
+        "at": "2026-09-11T18:30:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "session": {
+          "id": "sess-scope",
+          "title": "Your scope note, read together",
+          "startsAt": "2026-09-11T18:30:00.000Z",
+          "durationMinutes": 45,
+          "meetingUrl": null,
+          "summary": "We read your scope note line by line. You had cut the blog yourself, which is the hard one. The 'not yet' list is doing its job. Next fortnight is the page itself — words and photos before anything clever.",
+          "cancelledAt": null,
+          "createdByName": "Richard Osborne",
+          "cohort": null,
+          "programmeId": "prog-autumn",
+          "prep": [
+            {
+              "kind": "assignment",
+              "id": "brief-scope",
+              "title": "One page: what version one is",
+              "state": "done"
+            },
+            {
+              "kind": "concept",
+              "id": "what-the-web-is",
+              "title": "What the web actually is",
+              "state": "done"
+            }
+          ]
+        },
+        "ratings": [
+          {
+            "dimensionId": "dim-ask",
+            "score": 6
+          },
+          {
+            "dimensionId": "dim-check",
+            "score": 4
+          },
+          {
+            "dimensionId": "dim-alone",
+            "score": 4
+          },
+          {
+            "dimensionId": "dim-jargon",
+            "score": 5
+          }
+        ]
+      },
+      {
+        "id": "note:note-scope",
+        "kind": "note",
+        "at": "2026-09-11T19:20:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "note": {
+          "id": "note-scope",
+          "body": "You cut the blog yourself before I could suggest it. That is the part most people cannot do, and it is worth knowing that you already can.",
+          "authorName": "Richard Osborne",
+          "sessionId": "sess-scope",
+          "anchor": {
+            "kind": "lesson",
+            "id": "lesson:scoping-what-to-build"
+          },
+          "createdAt": "2026-09-11T19:20:00.000Z",
+          "editedAt": null
+        }
+      },
+      {
+        "id": "lesson:plan-then-act",
+        "kind": "lesson",
+        "at": "2026-09-12T21:15:00.000Z",
+        "anchor": "plan-then-act",
+        "state": "done",
+        "position": 3,
+        "programmeId": "prog-autumn",
+        "conceptId": "plan-then-act",
+        "title": "Plan then Act: the core loop for building with AI",
+        "rationale": "This is the loop you will use for every change to the page: Claude Code says what it intends to do, you read it, then it acts.",
+        "status": "complete",
+        "reachedWowMoment": true,
+        "confidence": 8
+      },
+      {
+        "id": "note:note-plan",
+        "kind": "note",
+        "at": "2026-09-12T21:40:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "note": {
+          "id": "note-plan",
+          "body": "You said Plan mode was the first time it stopped feeling like gambling. Hold onto that — it is the habit that carries the rest.",
+          "authorName": "Richard Osborne",
+          "sessionId": null,
+          "anchor": {
+            "kind": "lesson",
+            "id": "lesson:plan-then-act"
+          },
+          "createdAt": "2026-09-12T21:40:00.000Z",
+          "editedAt": null
+        }
+      },
+      {
+        "id": "lesson:html-the-structure",
+        "kind": "lesson",
+        "at": "2026-09-16T20:25:00.000Z",
+        "anchor": "html-the-structure",
+        "state": "done",
+        "position": 4,
+        "programmeId": "prog-autumn",
+        "conceptId": "html-the-structure",
+        "title": "HTML: the structure of every page",
+        "rationale": "Your page is HTML underneath. You will not be writing it, but you will need to read it, because that is how you say the form is missing a field.",
+        "status": "complete",
+        "reachedWowMoment": false,
+        "confidence": 7
+      },
+      {
+        "id": "signal:sig-html",
+        "kind": "signal",
+        "at": "2026-09-16T20:44:00.000Z",
+        "anchor": "html-the-structure",
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "signalKind": "got_stuck",
+        "sectionId": null,
+        "utterance": "I can see the form in the code but I can't work out which bit is the button."
+      },
+      {
+        "id": "note:note-pace",
+        "kind": "note",
+        "at": "2026-09-17T08:05:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "note": {
+          "id": "note-pace",
+          "body": "Going at about a lesson every three days alongside a full week of work. That is a good pace and there is no need to speed it up before the page is live.",
+          "authorName": "Richard Osborne",
+          "sessionId": null,
+          "anchor": null,
+          "createdAt": "2026-09-17T08:05:00.000Z",
+          "editedAt": null
+        }
+      },
+      {
+        "id": "session:sess-moved",
+        "kind": "session",
+        "at": "2026-09-18T18:30:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "session": {
+          "id": "sess-moved",
+          "title": "Looking at the page together",
+          "startsAt": "2026-09-18T18:30:00.000Z",
+          "durationMinutes": 45,
+          "meetingUrl": null,
+          "summary": "Moved to the 2nd — you had a van booked in. Nothing lost.",
+          "cancelledAt": "2026-09-16T08:12:00.000Z",
+          "createdByName": "Richard Osborne",
+          "cohort": null,
+          "programmeId": "prog-autumn",
+          "prep": []
+        },
+        "ratings": []
+      },
+      {
+        "id": "signal:sig-css",
+        "kind": "signal",
+        "at": "2026-09-21T20:02:00.000Z",
+        "anchor": "css-making-it-look-right",
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "signalKind": "explicit_confusion",
+        "sectionId": "reading-css-gist",
+        "utterance": "It looks fine on my laptop and squashed on my phone and I can't tell which one is wrong."
+      },
+      {
+        "id": "message:msg-phone",
+        "kind": "message",
+        "at": "2026-09-21T20:14:00.000Z",
+        "anchor": "css-making-it-look-right",
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "conversationId": "conv-css",
+        "threadAnchor": {
+          "kind": "lesson",
+          "id": "lesson:css-making-it-look-right"
+        },
+        "subject": "Squashed on my phone",
+        "authorRole": "learner",
+        "body": "It looks fine on my laptop and squashed on my phone. Is that something I've done?",
+        "read": true,
+        "unread": false
+      },
+      {
+        "id": "message:msg-phone-reply",
+        "kind": "message",
+        "at": "2026-09-22T07:40:00.000Z",
+        "anchor": "css-making-it-look-right",
+        "state": "done",
+        "position": 0,
+        "programmeId": null,
+        "conversationId": "conv-css",
+        "threadAnchor": {
+          "kind": "lesson",
+          "id": "lesson:css-making-it-look-right"
+        },
+        "subject": "Squashed on my phone",
+        "authorRole": "coach",
+        "body": "Nothing you've done — a page has to be told how to behave on a narrow screen and by default it isn't. Ask for it in those words and check it on your own phone rather than by making the window small. That last part catches everyone.",
+        "read": false,
+        "unread": true
+      },
+      {
+        "id": "lesson:css-making-it-look-right",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "css-making-it-look-right",
+        "state": "now",
+        "position": 5,
+        "programmeId": "prog-autumn",
+        "conceptId": "css-making-it-look-right",
+        "title": "CSS: making it look right — and why you won't write much of it",
+        "rationale": "The colours, the spacing and whether your page still looks right on a phone are all CSS, and the model is better at it than most people are.",
+        "status": "in_progress",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "assignment:brief-photos",
+        "kind": "assignment",
+        "at": "2026-09-30T22:59:59.999Z",
+        "anchor": null,
+        "state": "ahead",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "assignmentId": "brief-photos",
+        "title": "Six photos and one honest sentence",
+        "brief": "Six photographs of your own work — not stock, not tidy, yours — and one sentence saying what you do, written as you would say it to somebody at a bus stop.",
+        "dueAt": "2026-09-30T22:59:59.999Z",
+        "submissionModes": [
+          "text",
+          "upload"
+        ],
+        "criteria": [
+          "Six photographs, all your own work",
+          "One sentence, no more",
+          "The sentence says what you do, not what you value"
+        ],
+        "deliverableId": "obj-words",
+        "cohortId": null,
+        "answered": false,
+        "withdrawn": false
+      },
+      {
+        "id": "session:sess-next",
+        "kind": "session",
+        "at": "2026-10-02T18:30:00.000Z",
+        "anchor": null,
+        "state": "ahead",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "session": {
+          "id": "sess-next",
+          "title": "Looking at the page together",
+          "startsAt": "2026-10-02T18:30:00.000Z",
+          "durationMinutes": 45,
+          "meetingUrl": "https://meet.example.test/dbt-sam-oct",
+          "summary": null,
+          "cancelledAt": null,
+          "createdByName": "Richard Osborne",
+          "cohort": null,
+          "programmeId": "prog-autumn",
+          "prep": [
+            {
+              "kind": "concept",
+              "id": "css-making-it-look-right",
+              "title": "CSS: making it look right — and why you won't write much of it",
+              "state": "not_yet"
+            },
+            {
+              "kind": "concept",
+              "id": "html-the-structure",
+              "title": "HTML: the structure of every page",
+              "state": "done"
+            },
+            {
+              "kind": "assignment",
+              "id": "brief-photos",
+              "title": "Six photos and one honest sentence",
+              "state": "not_yet"
+            },
+            {
+              "kind": "resource",
+              "id": "prep/before-we-meet-checklist.pdf",
+              "title": "Before-we-meet checklist (PDF)",
+              "state": null,
+              "url": null,
+              "storageKey": "prep/before-we-meet-checklist.pdf"
+            }
+          ]
+        },
+        "ratings": []
+      },
+      {
+        "id": "evaluation:eval-mid",
+        "kind": "evaluation",
+        "at": "2026-10-20T23:59:59.999Z",
+        "anchor": null,
+        "state": "ahead",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "evaluationId": "eval-mid",
+        "evaluationKind": "mid",
+        "dueOn": "2026-10-20",
+        "completedAt": null,
+        "summary": null,
+        "criteria": [],
+        "nextStep": null,
+        "ratings": []
+      },
+      {
+        "id": "evaluation:eval-final",
+        "kind": "evaluation",
+        "at": "2026-11-27T23:59:59.999Z",
+        "anchor": null,
+        "state": "ahead",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "evaluationId": "eval-final",
+        "evaluationKind": "final",
+        "dueOn": "2026-11-27",
+        "completedAt": null,
+        "summary": null,
+        "criteria": [],
+        "nextStep": null,
+        "ratings": []
+      },
+      {
+        "id": "evaluation:eval-impact",
+        "kind": "evaluation",
+        "at": "2027-01-22T23:59:59.999Z",
+        "anchor": null,
+        "state": "ahead",
+        "position": 0,
+        "programmeId": "prog-autumn",
+        "evaluationId": "eval-impact",
+        "evaluationKind": "impact",
+        "dueOn": "2027-01-22",
+        "completedAt": null,
+        "summary": null,
+        "criteria": [],
+        "nextStep": null,
+        "ratings": []
+      },
+      {
+        "id": "lesson:javascript-making-it-do-things",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "javascript-making-it-do-things",
+        "state": "ahead",
+        "position": 6,
+        "programmeId": "prog-autumn",
+        "conceptId": "javascript-making-it-do-things",
+        "title": "JavaScript: making pages interactive",
+        "rationale": "When somebody leaves the email box empty, your form should say so kindly rather than silently doing nothing.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:reading-what-the-ai-did",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "reading-what-the-ai-did",
+        "state": "ahead",
+        "position": 7,
+        "programmeId": "prog-autumn",
+        "conceptId": "reading-what-the-ai-did",
+        "title": "Reading what the AI did: the verification habit",
+        "rationale": "Claude Code will change several files at once and tell you it is done. This is the habit of looking at what really changed before you agree.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:when-it-breaks",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "when-it-breaks",
+        "state": "ahead",
+        "position": 8,
+        "programmeId": "prog-autumn",
+        "conceptId": "when-it-breaks",
+        "title": "When it breaks: reading an error and asking a sharper second question",
+        "rationale": "At some point your page will come up blank and it will feel like you broke something you do not understand. You have not.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:when-to-leave-the-chat",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "when-to-leave-the-chat",
+        "state": "ahead",
+        "position": 9,
+        "programmeId": "prog-autumn",
+        "conceptId": "when-to-leave-the-chat",
+        "title": "When to leave the chat, and when to stay",
+        "rationale": "Six questions decide whether this needs to move onto your own computer. For a page that holds photos and keeps an email key secret, the answer is probably yes.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:moving-to-your-own-machine",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "moving-to-your-own-machine",
+        "state": "ahead",
+        "position": 10,
+        "programmeId": "prog-autumn",
+        "conceptId": "moving-to-your-own-machine",
+        "title": "Moving onto your own machine",
+        "rationale": "This is the afternoon nobody warns you about: installing the pieces so Claude Code has a real folder to work in.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:git-tracking-your-work",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "git-tracking-your-work",
+        "state": "ahead",
+        "position": 11,
+        "programmeId": "prog-autumn",
+        "conceptId": "git-tracking-your-work",
+        "title": "Git: tracking your work — and why it matters more with AI",
+        "rationale": "Once Claude Code is changing several files at a time, you need save points you can go back to.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:directing-a-coding-agent",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "directing-a-coding-agent",
+        "state": "ahead",
+        "position": 12,
+        "programmeId": "prog-autumn",
+        "conceptId": "directing-a-coding-agent",
+        "title": "Directing Claude Code without handing over the keys",
+        "rationale": "Claude Code can read, write and run things in your project folder, which is what makes it useful and what makes it easy to lose track of.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:what-is-a-backend",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "what-is-a-backend",
+        "state": "ahead",
+        "position": 13,
+        "programmeId": "prog-autumn",
+        "conceptId": "what-is-a-backend",
+        "title": "What a backend is, and when you actually need one",
+        "rationale": "Your contact form is the moment your site stops being a page and needs something running elsewhere.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:what-an-api-is",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "what-an-api-is",
+        "state": "ahead",
+        "position": 14,
+        "programmeId": "prog-autumn",
+        "conceptId": "what-an-api-is",
+        "title": "What an API is: borrowing another thing's superpower",
+        "rationale": "You are not going to build email sending yourself, and you are not going to build photo storage either.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:endpoints-and-requests",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "endpoints-and-requests",
+        "state": "ahead",
+        "position": 15,
+        "programmeId": "prog-autumn",
+        "conceptId": "endpoints-and-requests",
+        "title": "Endpoints and requests: the address and the envelope",
+        "rationale": "When somebody presses Send, their browser posts what they typed to one particular address that does one job.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:how-do-you-know-it-works",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "how-do-you-know-it-works",
+        "state": "ahead",
+        "position": 16,
+        "programmeId": "prog-autumn",
+        "conceptId": "how-do-you-know-it-works",
+        "title": "How do you know it works? Verification, not test frameworks",
+        "rationale": "Before you tell anybody the site is up: does a message actually reach your inbox? Try it with the email box left empty.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:deploying-going-live",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "deploying-going-live",
+        "state": "ahead",
+        "position": 17,
+        "programmeId": "prog-autumn",
+        "conceptId": "deploying-going-live",
+        "title": "Deploying: the difference between dev and production",
+        "rationale": "This is where your page stops being on your laptop and starts being somewhere a customer can find it.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:environment-variables-and-secrets",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "environment-variables-and-secrets",
+        "state": "ahead",
+        "position": 18,
+        "programmeId": "prog-autumn",
+        "conceptId": "environment-variables-and-secrets",
+        "title": "Environment variables and secrets: the one rule you cannot break",
+        "rationale": "Now that the site is live it needs a key to send those emails, and that key must never end up in your code.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      },
+      {
+        "id": "lesson:context-and-cost",
+        "kind": "lesson",
+        "at": null,
+        "anchor": "context-and-cost",
+        "state": "ahead",
+        "position": 19,
+        "programmeId": "prog-autumn",
+        "conceptId": "context-and-cost",
+        "title": "Context and cost: what you are actually paying for",
+        "rationale": "You are paying for what Claude Code reads and writes, and most of a bill like yours comes from sending the same things over and over.",
+        "status": "locked",
+        "reachedWowMoment": false,
+        "confidence": null
+      }
+    ],
+    "dimensions": [
+      {
+        "id": "dim-ask",
+        "programmeId": "prog-autumn",
+        "label": "Asking for what you want, precisely",
+        "target": 8,
+        "deliverableId": "obj-scope",
+        "position": 0,
+        "archivedAt": null
+      },
+      {
+        "id": "dim-check",
+        "programmeId": "prog-autumn",
+        "label": "Checking what the AI did",
+        "target": 7,
+        "deliverableId": null,
+        "position": 1,
+        "archivedAt": null
+      },
+      {
+        "id": "dim-alone",
+        "programmeId": "prog-autumn",
+        "label": "Doing it without me in the room",
+        "target": 8,
+        "deliverableId": null,
+        "position": 2,
+        "archivedAt": null
+      },
+      {
+        "id": "dim-jargon",
+        "programmeId": "prog-autumn",
+        "label": "Not being thrown by a new word",
+        "target": 6,
+        "deliverableId": null,
+        "position": 3,
+        "archivedAt": "2026-09-11T19:00:00.000Z"
+      }
+    ],
+    "history": [
+      {
+        "id": "evaluation:eval-summer",
+        "kind": "evaluation",
+        "at": "2026-07-08T10:00:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-summer",
+        "evaluationId": "eval-summer",
+        "evaluationKind": "initial",
+        "dueOn": "2026-07-08",
+        "completedAt": "2026-07-08T10:00:00.000Z",
+        "summary": "Four short sessions to work out whether a website was the right answer at all. It was — but not the one you came in asking for.",
+        "criteria": [],
+        "nextStep": "Come back in September and we build it.",
+        "ratings": []
+      },
+      {
+        "id": "session:sess-summer-1",
+        "kind": "session",
+        "at": "2026-07-08T18:30:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-summer",
+        "session": {
+          "id": "sess-summer-1",
+          "title": "Do you actually need a website?",
+          "startsAt": "2026-07-08T18:30:00.000Z",
+          "durationMinutes": 30,
+          "meetingUrl": null,
+          "summary": "You came in wanting an app. What you need is somewhere a stranger can find you and get hold of you, which is a page.",
+          "cancelledAt": null,
+          "createdByName": "Richard Osborne",
+          "cohort": null,
+          "programmeId": "prog-summer",
+          "prep": []
+        },
+        "ratings": []
+      },
+      {
+        "id": "session:sess-summer-2",
+        "kind": "session",
+        "at": "2026-07-22T18:30:00.000Z",
+        "anchor": null,
+        "state": "done",
+        "position": 0,
+        "programmeId": "prog-summer",
+        "session": {
+          "id": "sess-summer-2",
+          "title": "What it would take",
+          "startsAt": "2026-07-22T18:30:00.000Z",
+          "durationMinutes": 30,
+          "meetingUrl": null,
+          "summary": "We looked at what building it yourself involves and what it costs. You decided to do it rather than pay somebody, with the autumn programme to lean on.",
+          "cancelledAt": null,
+          "createdByName": "Richard Osborne",
+          "cohort": null,
+          "programmeId": "prog-summer",
+          "prep": []
+        },
+        "ratings": []
+      }
+    ],
+    "deliverables": [
+      {
+        "id": "obj-scope",
+        "slug": "scopeNote",
+        "code": "scopeNote",
+        "labelKey": "scopeNote",
+        "title": "The scope note",
+        "description": "What version one of your page is, what it is not, and the assumption underneath it. One page, plain words.",
+        "expectedCoreFields": [
+          "oneJob",
+          "whatIsOnThePage",
+          "notYet"
+        ],
+        "position": 0,
+        "archivedAt": null,
+        "conceptIds": [
+          "scoping-what-to-build"
+        ]
+      },
+      {
+        "id": "obj-words",
+        "slug": "ownWords",
+        "code": "ownWords",
+        "labelKey": "ownWords",
+        "title": "Your work, in your own words",
+        "description": "One sentence about what you do, and six photographs of your own work.",
+        "expectedCoreFields": [
+          "whatIDo",
+          "whoItIsFor"
+        ],
+        "position": 1,
+        "archivedAt": null,
+        "conceptIds": [
+          "html-the-structure",
+          "css-making-it-look-right"
+        ]
+      },
+      {
+        "id": "obj-seo",
+        "slug": "beFound",
+        "code": "beFound",
+        "labelKey": "beFound",
+        "title": "Being findable on Google",
+        "description": "Parked at the scope review — worth doing once the page exists, and not before.",
+        "expectedCoreFields": [
+          "searchedFor"
+        ],
+        "position": 2,
+        "archivedAt": "2026-09-11T19:00:00.000Z",
+        "conceptIds": []
+      },
+      {
+        "id": "obj-live",
+        "slug": "livePage",
+        "code": "livePage",
+        "labelKey": "livePage",
+        "title": "The page, live on its own address",
+        "description": "A real address a stranger can type, serving your words and your photos, with a form that reaches your inbox.",
+        "expectedCoreFields": [
+          "whereItIsHosted",
+          "howAMessageReachesYou"
+        ],
+        "position": 3,
+        "archivedAt": null,
+        "conceptIds": [
+          "deploying-going-live",
+          "picking-a-host"
+        ]
+      }
+    ],
+    "facts": {
+      "projectGoal": "A single page that explains what my business does, shows photos of my work, and has a contact form that sends the message to my inbox.",
+      "buildOrUnderstand": "Build it. I want the site to actually exist and be live, not just to understand how websites work.",
+      "currentSkillLevel": "I have never built anything. I have never written code and I do not really know what a website is made of underneath.",
+      "stackOrTools": "Claude Code. For hosting I have not chosen yet — somewhere cheap.",
+      "whoItIsFor": "People within about ten miles who need a bike fixed and currently only find me if a friend passes on my name.",
+      "whatTheyveTried": "Nothing yet. I looked at the website builders and they seemed either expensive every month or too limiting to look like mine.",
+      "worriedAbout": "Getting stuck on something technical with nobody to ask. Paying for things I do not need. And not knowing whether what I have built is actually any good, or safe.",
+      "versionOneBoundary": "Somebody who has never met me finds the page, believes I'm real, and sends me a message about their bike.",
+      "whatHappensToAMessage": "It should just land in my email. I don't need to keep a list of them anywhere.",
+      "coverageArea": "About ten miles around town. Further if the weather is good.",
+      "scopeNote.oneJob": "A stranger with a broken bike gets a message to me without phoning.",
+      "scopeNote.whatIsOnThePage": "What I do, where I cover, six photos, and the form.",
+      "scopeNote.notYet": "Online booking, prices, a blog. <b>Not</b> Google **yet** <img src=x onerror=\"alert(1)\">.",
+      "ownWords.whatIDo": "I fix bicycles at your house, usually the same week.",
+      "beFound.searchedFor": "\"bike repair near me\", probably. Richard says to leave this alone for now."
+    },
+    "submissions": [
+      {
+        "conceptId": "scoping-what-to-build",
+        "attempt": 1,
+        "submittedAt": "2026-09-07T21:12:00.000Z",
+        "evaluated": true,
+        "deliverableId": "obj-scope"
+      },
+      {
+        "conceptId": "what-the-web-is",
+        "attempt": 1,
+        "submittedAt": "2026-09-06T19:20:00.000Z",
+        "evaluated": false,
+        "deliverableId": null
+      }
+    ],
+    "onboardingFacts": [
+      {
+        "key": "projectGoal",
+        "label": "What they want to build or understand"
+      },
+      {
+        "key": "buildOrUnderstand",
+        "label": "Whether they are building a thing or making sense of one"
+      },
+      {
+        "key": "currentSkillLevel",
+        "label": "Where they are starting from"
+      },
+      {
+        "key": "stackOrTools",
+        "label": "Tools, stack or environment already in play"
+      }
+    ]
+  }
+]

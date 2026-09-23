@@ -1,18 +1,22 @@
 # Digital Bricks Training
 
 A learning platform with no course catalogue: the learner's own project is the spine of their
-curriculum, and every lesson is written for it. This template is the **front-end half**, built
-entirely out of NodeGX nodes — the sticker-book design system, a lesson kit of section renderers,
-the learner's three pages, and the coach's two — reading fixtures until a backend is connected.
+curriculum, and every lesson is written for it. This template is built entirely out of NodeGX
+nodes — the sticker-book design system, a lesson kit of section renderers, the learner's pages and
+the coach's — and it reads a **NodeGX backend**: four cloud functions over 25 collections, behind a
+security file that closes everything else. It **only reads**; nothing a person does is saved yet.
 
-Press **Run**. Home → *Open your course* → *Open the lesson*. Every step is a live chip; nothing is
-locked, numbered or scored. Home → *See it as their coach* opens **People**, the coach's roster, and the one linked name on it
-opens **Learner**, the coach's page about that person.
+Set up the backend first (*The backend, and the way in*, below — about five commands), then press
+**Run**. Home has two doors. *Log in as the learner* emails Sam a one-time sign-in link; on your own
+machine it lands in **Mailpit**, and pressing the button on the page it opens signs you in. Then
+*Open your course* → a lesson. *Log in as their trainer* does the same for their coach, whose way on
+is **People**, the roster, and the one linked name on it opens **Learner**, the coach's page about
+that person. Every step is a live chip; nothing is locked, numbered or scored.
 
 ## The first thing to change
 
-Open **Data/Fixture lesson** and find the node labelled **"EDIT — this is the lesson"**. It is a
-`Static Data` node holding a JSON array with one lesson:
+Open **`backend/fixtures/lesson.json`**. It holds a JSON array with one lesson — Sam's first, the
+lesson the backend serves when they open it:
 
 ```json
 {
@@ -27,11 +31,21 @@ exactly once — **Logic/Sections for step** throws by name on one that does not
 rendering the step with a hole. The 19 section kinds and their fields are listed in
 `noodl_modules/dbt-lesson/README.md`, and **Pages/Palette** draws every one of them once.
 
+Then run `node tools/build-seed.mjs` and set the backend up again on a fresh data directory
+(`setup-backend.mjs` refuses one that already holds data). `build-seed` also rewrites Palette's
+**specimen** (`Data/Specimen lesson`) from the same file, so the lesson is edited in ONE place;
+`tools/check-specimen.mjs` fails if the two ever differ. The specimen is the one `Static Data` left
+in this template, on purpose: a kit's showcase must not depend on who is signed in (sprint 49
+decision 9), so Palette stays public and reads no backend.
+
 ## The second thing to change
 
-Open **Data/Fixture programme** and find the node labelled **"EDIT — this is the programme"**. It
-holds the learner's whole programme: their project, the end they agreed with their coach, and every
-entry on their timeline.
+Open **`backend/fixtures/programme.json`**. It holds the learner's whole programme as the backend
+hands it over: their project, the end they agreed with their coach, and every entry on their
+timeline. It is not read by any page — the pages read the `course` and `learnerProgramme`
+functions — but it is what `build-seed` decomposes into rows, and it is each function's expected
+output, which `tools/check-read-functions.mjs` proves. So a change here is a change to the seed,
+and then to the page.
 
 ```json
 { "projectName": "…", "problemStatement": "…", "endsOn": "2026-12-18",
@@ -83,40 +97,83 @@ you edit anything:
 `ahead` headings, which rows arrive folded, and the one line a folded row shows. Every rule in it
 is ported from the product's own code and says so.
 
-## Where the backend plugs in
+## Where the backend is read
 
-Nothing in this template fetches **yet** — sprint 49 is putting a NodeGX backend behind the three
-fixtures below (the next section). The seam is these places:
+Every piece of data enters through **three components**, and each is one `Cloud Function` node in
+front of the same split the fixture had — so no page, no `Logic/*` component and no kit node knew
+the fixtures had gone (TASK-L171; the pages' `#root` is byte-identical to the fixture-fed build,
+on SQLite and on PostgreSQL):
 
-- **Data/Fixture lesson** — the lesson page's lesson. Replace its `Static Data` node with a query; the
-  component's outputs (`title`, `hook`, `landing`, `steps`, `sections`) do not change. It is Sam's
-  first lesson, *Scoping your landing page before Claude Code writes a line*, and `/course` does
-  not place it — the up-next card reads the path, never a cached lesson (below).
-- **Data/Fixture programme** — the same, for the learner's timeline: its outputs (`projectName`,
-  `problemStatement`, `endsOn`, `entries`, `dimensions`, `learnerId`, `history`) do not change
-  either. `history` becomes the gated query for a finished programme's entries.
-- **Data/Fixture roster** — the coach's people, as `getRoster()` would return them: every account,
-  nullable derived fields, in the server's order. Its outputs (`people`, `count`) do not change.
+- **Data/Lesson** — one of the signed-in learner's lessons, named by the lesson page's `?concept=`.
+  Its outputs are the fixture's (`title`, `hook`, `landing`, `conceptId`, `steps`, `sections`,
+  `loaded`) plus ONE appended, **`found`**: a step nobody has written a lesson for yet answers with
+  nothing, and the page says *not written yet* rather than showing a blank. That is Sam's next step
+  today — the up-next card opens it — and it will stay so until the engine writes lessons.
+- **Data/Programme** — a learner's programme. **`reader` has no default and every instance says it**:
+  `learner` asks `course` (their own; no parameter, so nothing a learner's page sends can name
+  somebody else), `coach` asks `learnerProgramme` for the learner named by `/learner?learner=`.
+- **Data/Roster** — the coach's people, from `roster` (staff only), in the server's order.
+- **A refusal is an empty answer**, in all three. The backend answers every refusal with one body,
+  so a page cannot tell "not yours" from "not there", and it shows its empty state rather than
+  waiting.
 - **Lesson/Section row** — the kit's `Section` node emits `Acted`, `Saved` (+ `Field`, `Value`),
   `Submitted` (+ `Content`), `Write requested`, `Listen requested` and the rest. They are wired to
-  the row's outputs and nowhere else yet. Wire them to Cloud Functions when they exist.
+  the row's outputs and nowhere else yet: **there are no writes**. They land with the NodeGX write
+  sprint, on the compare-and-swap OpenNoodl HLT-016 built for exactly that.
 
-## The backend, so far (sprint 49)
+## The backend, and the way in (sprint 49)
 
-The pages still read the fixtures (swapping them is L171). What exists is the backend they will read
-from, built from those same fixtures, and the four functions that read it:
+In this order, from this folder. `<admin>` is any long random string you choose; it is the
+backend's admin credential, so keep it out of the project.
 
 ```bash
-# a local backend on this project (the policy file is applied on its first start)
-node <OpenNoodl>/packages/nodegx-backend/bin/nodegx-backend.js serve \
-  --data-dir /tmp/dbt-backend --port 8577 --token <admin credential> --project-dir .
-node tools/build-seed.mjs                                            # fixtures → backend/seed.json
-node tools/setup-backend.mjs --backend http://127.0.0.1:8577 --token <admin credential>
-node tools/check-seed.mjs    --backend http://127.0.0.1:8577 --token <admin credential>
-node tools/deploy-functions.mjs --backend http://127.0.0.1:8577 --token <admin credential>
-node tools/check-read-functions.mjs                    # offline, no backend needed
-node tools/check-timeline-port.mjs                     # the ported timeline model vs the product's
+# 1. A mail sandbox, so a sign-in link has somewhere to land. SMTP on 1026, inbox at :8026.
+docker run -d --name dbt-mailpit -p 127.0.0.1:1026:1025 -p 127.0.0.1:8026:8025 axllent/mailpit
+
+# 2. A local backend on this project. The policy file is applied on its first start; the name is
+#    what the sign-in mail calls the app ("Your sign-in link for …").
+node <OpenNoodl>/packages/nodegx-backend/bin/nodegx-backend.js serve --data-dir /tmp/dbt-backend \
+  --port 8577 --token <admin> --project-dir . --backend-name "Digital Bricks Training"
+
+# 3. The data, the functions and the way in.
+node tools/build-seed.mjs                 # backend/fixtures/ → backend/seed.json (+ Palette's specimen)
+node tools/setup-backend.mjs    --backend http://127.0.0.1:8577 --token <admin>
+node tools/deploy-functions.mjs --backend http://127.0.0.1:8577 --token <admin>
+node tools/setup-signin.mjs     --backend http://127.0.0.1:8577 --token <admin> \
+  --app-origin <where the app is served, e.g. http://127.0.0.1:8602> --smtp 127.0.0.1:1026
+
+# 4. Proofs.
+node tools/check-seed.mjs           --backend http://127.0.0.1:8577 --token <admin>
+node tools/check-read-functions.mjs                    # offline; add --backend/--token/--scratch for live
+node tools/check-pages.mjs capture --app <app origin> --out now.json --audit   # see its header
 ```
+
+`nodegx.project.json` points the pages at `http://127.0.0.1:8577` (`metadata.cloudservices`). In
+the editor the Backend Services panel does the same for a backend it started.
+
+### Signing in
+
+- **Magic links, no passwords, no public sign-up.** The link opens a page that spends nothing
+  (OpenNoodl HLT-015): a mail scanner that follows it signs nobody in, and only the button on that
+  page does. The sign-in form says the same sentence whatever address was typed, because the
+  backend answers identically for a known and an unknown one and a page that knew better would
+  rebuild the oracle it removed.
+- **The two doors on Home PREFILL an address; they decide nothing** (sprint 49 decision 8). Who is
+  staff is the backend's `staff` role, read from the `User` node's `roles` — never from an email.
+  `tools/check-backend-pages.py` fails if a staff address appears anywhere else in the graph.
+- **An origin not on the redirect allow-list gets no mail and no error** — the backend logs
+  `auth.redirect-refused` and the person waits for a link that never comes. Every origin the app is
+  served from goes to `setup-signin.mjs --app-origin`, comma-separated.
+- **Five link requests per 15 minutes per IP.** Try both doors a few times and the sixth answers
+  *"The link could not be requested just now"*. That is the backend's rate limit working; it resets
+  when the backend restarts.
+- **ONE gate, in `App`.** Signed out, every page but Home, Sign in and Palette goes to sign-in;
+  signed in without the `staff` role, People and Learner go to Home. Neither rule is what keeps
+  data private — every read is a function behind the security file, and a page reached some other
+  way is refused by the backend first — they decide what the browser DRAWS.
+- **Right after a magic link, `roles` is unknown for a moment.** The backend's `POST
+  /oauth/exchange` hands the session over without them, though `/login` and `/users/me` carry them
+  (measured, TASK-L171; reported to NodeGX). The gate asks once when they are unknown.
 
 - **`backend/schema.json` is the schema.** NodeGX keeps a collection's schema in the backend, not
   the project, so a template carries it as a file and `setup-backend.mjs` applies it. 25 collections,
@@ -148,8 +205,8 @@ their newest path), `learnerProgramme` and `roster` (`role:staff`). Two helpers 
 PORT of the product's timeline model — `assembleTimeline`, `orderEntries`, the state rules,
 `currentProgramme` — run once per request, 25 queries in 3 rounds).
 
-- **Each function's output IS its fixture's `Static Data` array**, so L171 swaps a source, not a
-  shape. `check-read-functions.mjs` proves it through the PRODUCT's own projections, compiled from
+- **Each function's output IS its fixture's array** (`backend/fixtures/`), so L171 swapped a
+  source, not a shape. `check-read-functions.mjs` proves it through the PRODUCT's own projections, compiled from
   the product repo (`DBT_REPO`), and fails if the product is absent rather than comparing nothing.
 - **The fixture's `state`s hold only between `2026-09-18T19:15Z` and `2026-09-30T22:59:59.999Z`**
   (measured, both edges). `learnerProgramme` takes a `now` for that reason; `course` uses the server
@@ -171,10 +228,11 @@ all three as they were, and because the world has to be one person's.
 anything, making a one-page site with a contact form. Their project, their 20-step path and every
 rationale on it were written by a real `training_set_project` / `training_propose_path` round trip
 through the connector on 2026-09-22; the coaching layer around it (sessions, notes, reviews,
-objectives, ratings) is authored here, because none of that has ever lived in a database. The
-programme fixture's `learnerId` is the ONLY thing that decides whose name links on `/people` —
-`Logic/Roster filter` derives `hasPage` from it, so moving the world to another learner needs no
-code change.
+objectives, ratings) is authored here, because none of that has ever lived in a database.
+**Whose name links on `/people` is one stated value** — the Function *"The one learner whose page
+this template holds"* on `Pages/People` — and it also becomes the `?learner=` that link carries, so
+the two cannot disagree. The seed holds one learner's coaching programme; making every row link is
+right and is its own change, once the seed has a second programme worth opening.
 
 **What the fixture carries on purpose, and must keep carrying.** These are not decoration; six of
 them are the only reason `tools/check-dossier.mjs` and `tools/check-roster.mjs` can prove anything,
@@ -311,14 +369,16 @@ somebody who signed up and never finished setting up.
   would do most naturally and must not do.
 - **One name is a link**: the person whose programme this template holds. The other eight stay
   names, because opening that one programme under somebody else's name would be a page about the
-  wrong person. With a backend every name links and `Logic/Roster filter`'s `hasPage` goes.
+  wrong person. The backend COULD open any of them now (`learnerProgramme` takes a learner id);
+  it does not yet, because the seed holds one coaching programme and the others would be pages
+  about people the seed says almost nothing about. That is its own change (TASK-L171 §0b).
 
-**The gate is not here.** In the product the roster is behind the staff check, and a learner can
-never reach it. This template has no sign-in, so the Home button is how you see the coach's side —
-in a real deployment that is the backend's job, never a button. And because a template's fixtures
-are project data, **the trainer's private labels (`coachLabel`) are in the page source of every
-page**, though they render on the coach's two pages alone. With a backend, the roster arrives from a gated
-query and they are nowhere else.
+**The gate is the backend's.** `roster` and `learnerProgramme` are `role:staff` in
+`nodegx.security.json`, so a learner who types `/people` is refused by the backend (403) before
+App's gate sends them Home. And the trainer's private labels (`coachLabel`) are now **in no page's
+source at all**: while the roster was a fixture it was project data, inlined into every page anyone
+loaded — measured on the served HTML, 6 of them on every page including the sign-in page before
+TASK-L171, 0 after. They reach a browser only through the staff-only function, for a coach.
 
 ## The coach's page about one learner
 
@@ -476,12 +536,34 @@ library is ~2 MB), **Chart** (recharts is another large bundle), the five **inte
 **annotated screenshot** whose storage key nothing serves yet shows the key rather than a broken
 image. The kit README says which and why.
 
+## PostgreSQL, not one node changed
+
+Phase 97's `nodegx-backend migrate --data-dir <dir> --to postgres://…` moves the backend, reads both
+databases back and compares them; then serve the same data directory with `NODEGX_STORAGE_URL` set.
+Measured on PostgreSQL 16 (TASK-L171): the four pages byte-identical to the fixture-fed build, every
+function equal to its fixture, **no file in this template changed** between the SQLite and the
+PostgreSQL runs. Two things the move found, both worth knowing:
+
+- **A NUL byte in a query parameter is fine on SQLite and fatal on PostgreSQL.** `shared/Programme`
+  used `'\u0000none'` for an empty `containedIn`; `course` and `learnerProgramme` answered 400 on
+  PostgreSQL until it went. Only the move could have found it.
+- **An Object field comes back with its keys in a DIFFERENT ORDER on PostgreSQL** (it is `jsonb`,
+  which sorts them) — same keys, same values. Arrays keep their order, so a lesson renders
+  identically; but the coach's *What they have told us* lists a learner's facts in key order, and
+  that order changes. The product stores `facts` as `jsonb` too, so PostgreSQL's order is the one
+  the product has always shown, and the fixture's *"in the order they were captured"* is a claim
+  neither ever honoured. `migrate`'s own comparison ignores key order, and `check-seed` does not:
+  on PostgreSQL it reports three fields that differ in key order ONLY. Reported to NodeGX.
+
 ## What is not here yet
 
-The read functions and the pages reading them (sprint 49, L170–L171); every write (sprint 50,
-which waits on a NodeGX compare-and-swap primitive, OpenNoodl HLT-016); sign-in (magic links,
-after OpenNoodl HLT-015) and the staff gate on the pages; every coach composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every string has one owner" above for
-exactly which strings the table owns today and which are still English in place.
+Every write — the NodeGX write sprint, on OpenNoodl HLT-016's compare-and-swap. The engine: a lesson
+nobody has written says *not written yet*, and that is every step after Sam's first. Every coach
+composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
+string has one owner" above for exactly which strings the table owns today and which are still
+English in place.
+
+**What is still fixture-shaped: one thing, on purpose** — Palette's specimen (above).
 
 ## Licences
 

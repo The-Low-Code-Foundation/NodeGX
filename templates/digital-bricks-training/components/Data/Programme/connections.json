@@ -4,12 +4,6 @@
   "version": 1,
   "connections": [
     {
-      "fromId": "fp_data",
-      "fromProperty": "items",
-      "toId": "fp_split",
-      "toProperty": "in-items"
-    },
-    {
       "fromId": "fp_split",
       "fromProperty": "out-projectName",
       "toId": "fp_out",
@@ -86,6 +80,66 @@
       "fromProperty": "out-concepts",
       "toId": "fp_out",
       "toProperty": "concepts"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "reader",
+      "toId": "pr_ask",
+      "toProperty": "in-reader"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "learnerId",
+      "toId": "pr_ask",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "pr_ask",
+      "fromProperty": "out-askOwn",
+      "toId": "pr_own",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pr_ask",
+      "fromProperty": "out-learnerId",
+      "toId": "pr_about",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "pr_ask",
+      "fromProperty": "out-askAbout",
+      "toId": "pr_about",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pr_own",
+      "fromProperty": "out-rows",
+      "toId": "fp_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pr_about",
+      "fromProperty": "out-rows",
+      "toId": "fp_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pr_own",
+      "fromProperty": "failure",
+      "toId": "pr_refused",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pr_about",
+      "fromProperty": "failure",
+      "toId": "pr_refused",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pr_refused",
+      "fromProperty": "out-items",
+      "toId": "fp_split",
+      "toProperty": "in-items"
     }
   ]
 }

@@ -325,10 +325,16 @@
     },
     {
       "id": "cs_programme_data",
-      "type": "/Data/Fixture programme",
-      "label": "The programme (fixture until the backend lands)",
+      "type": "/Data/Programme",
+      "label": "Their own programme, from the backend",
       "x": 900,
-      "y": 160
+      "y": 160,
+      "metadata": {
+        "comment": "reader: learner — the learner's own programme through `course`, which takes no parameter, so nothing this page sends can name somebody else (TASK-L171 §1)."
+      },
+      "parameters": {
+        "reader": "learner"
+      }
     },
     {
       "id": "cs_ordered",
@@ -346,6 +352,9 @@
       "parameters": {
         "router": "Main",
         "target": "/Pages/Lesson"
+      },
+      "metadata": {
+        "comment": "Carries the concept it opens (?concept=). The fixture-fed page opened the one fixture lesson whatever the card said; now the page opens the lesson the card names, and when that lesson has not been written yet the lesson page says so (TASK-L171 §0b)."
       }
     },
     {
@@ -830,6 +839,9 @@
       "parameters": {
         "router": "Main",
         "target": "/Pages/Lesson"
+      },
+      "metadata": {
+        "comment": "The dossier's one linked submission is work on the concept the reveal is told is this app's lesson (cs_standing.nextLessonConceptId, TASK-L167), so the link passes that same concept."
       }
     },
     {

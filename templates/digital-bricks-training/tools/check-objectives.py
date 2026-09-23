@@ -10,8 +10,8 @@ Three rules, each a property rather than a proxy (L100):
 2. THE PROGRAMME SCOPE NEVER FEEDS IT (§2). Objectives are per LEARNER:
    nothing writes learner_deliverables.programme_id (L127), so the product
    ignores the selected programme here. Every input into the section's
-   instance on Pages/Learner must come from the programme fixture or the
-   string table — never from People/Programme scope or anything downstream of it.
+   instance on Pages/Learner must come from Data/Programme (the backend's
+   answer, TASK-L171) or the string table — never from People/Programme scope or anything downstream of it.
 3. IT MOUNTS, NEVER HIDES (L157). `visible` is visibility:hidden and keeps the
    rows in the page, so the wrapper is gated on `mounted`.
 """
@@ -46,7 +46,7 @@ if len(inst) != 1:
     fails.append(f"Pages/Learner: expected one {SECTION} instance, found {len(inst)}")
 else:
     inst = inst[0]
-    allowed = {'/Data/Fixture programme', '/Data/Strings'}
+    allowed = {'/Data/Programme', '/Data/Strings'}
     for x in conns:
         if x['toId'] != inst['id']:
             continue

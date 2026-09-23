@@ -152,8 +152,8 @@
     },
     {
       "id": "pl_fixture",
-      "type": "/Data/Fixture lesson",
-      "label": "The lesson (fixture)",
+      "type": "/Data/Specimen lesson",
+      "label": "The specimen lesson",
       "x": 800,
       "y": 160
     },

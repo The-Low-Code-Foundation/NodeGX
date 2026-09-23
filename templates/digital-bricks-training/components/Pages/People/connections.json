@@ -136,16 +136,22 @@
       "toProperty": "in-title"
     },
     {
-      "fromId": "pp_programme",
-      "fromProperty": "learnerId",
-      "toId": "pp_filter",
-      "toProperty": "withPage"
-    },
-    {
       "fromId": "pp_rows",
       "fromProperty": "itemOutputSignal-open",
       "toId": "pp_open",
       "toProperty": "navigate"
+    },
+    {
+      "fromId": "pp_with_page",
+      "fromProperty": "out-learnerId",
+      "toId": "pp_filter",
+      "toProperty": "withPage"
+    },
+    {
+      "fromId": "pp_with_page",
+      "fromProperty": "out-learnerId",
+      "toId": "pp_open",
+      "toProperty": "pm-learner"
     }
   ]
 }

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4dcbb470-2d3c-4f28-aa51-ee1c15eaffb9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "le_in",
+      "fromProperty": "conceptId",
+      "toId": "le_ask",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "le_ask",
+      "fromProperty": "out-conceptId",
+      "toId": "le_call",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "le_ask",
+      "fromProperty": "out-ask",
+      "toId": "le_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "le_call",
+      "fromProperty": "out-rows",
+      "toId": "le_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "le_call",
+      "fromProperty": "failure",
+      "toId": "le_refused",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "le_refused",
+      "fromProperty": "out-items",
+      "toId": "le_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-title",
+      "toId": "le_out",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-hook",
+      "toId": "le_out",
+      "toProperty": "hook"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-landing",
+      "toId": "le_out",
+      "toProperty": "landing"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-conceptId",
+      "toId": "le_out",
+      "toProperty": "conceptId"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-steps",
+      "toId": "le_out",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-sections",
+      "toId": "le_out",
+      "toProperty": "sections"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-loaded",
+      "toId": "le_out",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "le_split",
+      "fromProperty": "out-found",
+      "toId": "le_out",
+      "toProperty": "found"
+    }
+  ]
+}

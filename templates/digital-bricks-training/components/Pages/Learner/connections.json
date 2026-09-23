@@ -602,6 +602,12 @@
       "fromProperty": "audience",
       "toId": "lr_objectives",
       "toProperty": "audience"
+    },
+    {
+      "fromId": "lr_url",
+      "fromProperty": "pm-learner",
+      "toId": "lr_programme",
+      "toProperty": "learnerId"
     }
   ]
 }

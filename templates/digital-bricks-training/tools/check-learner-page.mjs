@@ -2,8 +2,8 @@
 /**
  * THE COACH AND THEIR CLIENT READ THE SAME ASSEMBLY (TASK-L165).
  *
- * Runs the graph's OWN scripts — Data/Strings' merge, Data/Fixture programme's
- * split and Logic/Ordered timeline's projection — straight out of nodes.json,
+ * Runs the graph's OWN scripts — Data/Strings' merge, Data/Programme's split
+ * (over backend/fixtures/programme.json) and Logic/Ordered timeline's projection — straight out of nodes.json,
  * for BOTH audiences, and asserts the properties the coach's page about one
  * learner exists for. Nothing here is a second implementation: if a script in
  * the graph changes, this runs the changed script.
@@ -18,6 +18,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fixture } from './lib/fixtures.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', 'components');
 const nodesOf = (c) => JSON.parse(readFileSync(join(ROOT, c, 'nodes.json'), 'utf8')).nodes;
@@ -52,8 +53,8 @@ const stringsFor = (audience) =>
 const copyFor = { learner: stringsFor('learner'), coach: stringsFor('coach') };
 
 // ── The programme, split by the fixture's own Function ──────────────────────
-const programme = run(script('Data/Fixture programme', 'fp_split'), {
-  items: staticRows('Data/Fixture programme', 'fp_data')
+const programme = run(script('Data/Programme', 'fp_split'), {
+  items: fixture('programme')
 });
 const project = (audience, entries = programme.entries) =>
   run(script('Logic/Ordered timeline', 'ot_fn'), { entries, copy: copyFor[audience], audience });
@@ -139,7 +140,7 @@ for (const page of ['Pages/Course', 'Pages/Learner']) {
 // ── AC10: two name chains, and the one about a PERSON never names a project ─
 // Driven through the page's own Function over the real roster row and three
 // variants of it, so both fallbacks are reached rather than argued about.
-const roster = run(script('Data/Fixture roster', 'fr_order'), { items: staticRows('Data/Fixture roster', 'fr_data') }).people;
+const roster = run(script('Data/Roster', 'fr_order'), { items: fixture('roster') }).people;
 const who = (people) => run(script('Pages/Learner', 'lr_who'), { people, learnerId: programme.learnerId, copy: copyFor.coach });
 const me = roster.find((p) => p.learnerId === programme.learnerId);
 check(me, `AC10: the programme belongs to ${programme.learnerId}, who is not on the roster`);

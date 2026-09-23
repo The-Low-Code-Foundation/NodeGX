@@ -1,0 +1,222 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4dcbb470-2d3c-4f28-aa51-ee1c15eaffb9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "le_in",
+      "type": "Component Inputs",
+      "label": "Which lesson",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "conceptId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "Only WHICH of their own lessons. Whose it is comes from the session inside the function (`shared/Caller learner`), never from an argument — an optional scope is one forgotten check away from serving anybody's lesson to anybody (L91)."
+      }
+    },
+    {
+      "id": "le_ask",
+      "type": "JavaScriptFunction",
+      "label": "Ask when a concept arrives",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * ASK WHEN THE PAGE SAYS WHICH LESSON (TASK-L171 §0b). The fixture was one\n * lesson and needed no argument; the backend holds one per concept, so the page\n * passes the concept it was opened for (its `concept` query parameter) and this\n * asks for exactly that. Nothing arrives, nothing is asked: a lesson page opened\n * with no concept names no lesson, and guessing one would be a lesson somebody\n * did not open.\n */\nconst concept = String(Inputs.conceptId || '');\nif (!concept) return;\nOutputs.conceptId = concept;\nOutputs.ask();\n"
+      },
+      "ports": [
+        {
+          "name": "in-conceptId",
+          "displayName": "conceptId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-ask",
+          "displayName": "ask",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptId",
+          "displayName": "conceptId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "le_call",
+      "type": "CloudFunction2",
+      "label": "lesson — the caller's own, if the step is open",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "function": "lesson"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/lesson. Answers `rows: []` for no learner, no path, not on it, locked, and not written yet — one shape, so a caller cannot tell \"not yours\" from \"not there\" (L170)."
+      }
+    },
+    {
+      "id": "le_refused",
+      "type": "JavaScriptFunction",
+      "label": "A refusal is no lesson",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "functionScript": "/*\n * A REFUSAL IS NO LESSON (TASK-L171). Signed out, the App gate sends the page\n * to sign-in before this could matter; if the call fails anyway, the page gets\n * the same empty answer a lesson not written yet gets, not a spinner.\n */\nOutputs.items = [];\n"
+      },
+      "metadata": {
+        "comment": "Runs on the Cloud Function's failure only (its Run is wired)."
+      },
+      "ports": [
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "le_split",
+      "type": "JavaScriptFunction",
+      "label": "Split the lesson into its parts",
+      "x": 320,
+      "y": 280,
+      "parameters": {
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n/*\n * THE SAME SPLIT THE FIXTURE HAD (Data/Specimen lesson's fx_split), with ONE\n * difference, and it is the reason `found` exists: the fixture could not be\n * empty, and a backend can. Sam's next step has no lesson written for it yet\n * (sprint 49 decision 7), so an empty answer must reach the page as a state it\n * can draw — \"not written yet\" — rather than as silence. So on an empty answer\n * every part is emptied (a page that showed one lesson must not keep drawing it\n * under another's name) and `found` is false; `loaded` fires either way.\n */\nconst rows = plain(Inputs.items) || [];\nconst lesson = rows[0];\nif (!lesson) {\n  Outputs.title = '';\n  Outputs.hook = '';\n  Outputs.landing = '';\n  Outputs.conceptId = '';\n  Outputs.steps = [];\n  Outputs.sections = [];\n  Outputs.found = false;\n  Outputs.loaded();\n  return;\n}\nOutputs.title = lesson.title || '';\nOutputs.hook = lesson.hook || '';\nOutputs.landing = lesson.landing || '';\nOutputs.conceptId = lesson.conceptId || '';\nOutputs.steps = lesson.steps || [];\nOutputs.sections = lesson.sections || [];\nOutputs.found = true;\nOutputs.loaded();\n"
+      },
+      "metadata": {
+        "comment": "One calculation, one code node (doctrine 8). The backend's rows are plain (HLT-022), but plain() stays: it is the fixture's helper and costs nothing."
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-loaded",
+          "displayName": "loaded",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hook",
+          "displayName": "hook",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-landing",
+          "displayName": "landing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptId",
+          "displayName": "conceptId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-steps",
+          "displayName": "steps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sections",
+          "displayName": "sections",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "le_out",
+      "type": "Component Outputs",
+      "label": "The lesson's parts",
+      "x": 600,
+      "y": 280,
+      "ports": [
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hook",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "landing",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "conceptId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "steps",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "sections",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "metadata": {
+        "comment": "The fixture's seven outputs, in the fixture's order, then `found` — appended, never interleaved, so every wire a page already has lands where it did (TASK-L171 criterion 3, corrected: identical plus one)."
+      }
+    }
+  ]
+}

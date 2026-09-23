@@ -374,6 +374,18 @@
       "fromProperty": "nextLessonConceptId",
       "toId": "cs_dos_reveal",
       "toProperty": "lessonConceptId"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonConceptId",
+      "toId": "cs_go",
+      "toProperty": "pm-concept"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonConceptId",
+      "toId": "cs_dos_lesson",
+      "toProperty": "pm-concept"
     }
   ]
 }

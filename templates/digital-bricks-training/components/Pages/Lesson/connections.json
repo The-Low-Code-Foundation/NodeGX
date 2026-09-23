@@ -116,6 +116,78 @@
       "fromProperty": "value",
       "toId": "ls_strings",
       "toProperty": "language"
+    },
+    {
+      "fromId": "ls_url",
+      "fromProperty": "pm-concept",
+      "toId": "ls_fixture",
+      "toProperty": "conceptId"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "found",
+      "toId": "ls_state",
+      "toProperty": "in-found"
+    },
+    {
+      "fromId": "ls_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "ls_eyebrow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ls_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "ls_title",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ls_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "ls_hook",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ls_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "ls_layout",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ls_state",
+      "fromProperty": "out-notWritten",
+      "toId": "ls_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "t_ls_none_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "ls_none_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_ls_none_title",
+      "fromProperty": "Translation",
+      "toId": "ls_none_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_ls_none_body",
+      "fromProperty": "Translation",
+      "toId": "ls_none_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_ls_none_back",
+      "fromProperty": "Translation",
+      "toId": "ls_none_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ls_none_back",
+      "fromProperty": "onClick",
+      "toId": "ls_to_course",
+      "toProperty": "navigate"
     }
   ]
 }

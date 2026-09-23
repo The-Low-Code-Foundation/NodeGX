@@ -2,8 +2,8 @@
 /**
  * WHAT EACH OBJECTIVE HOLDS, PROVEN EQUAL TO THE PRODUCT (TASK-L166).
  *
- * Runs the graph's OWN scripts — Data/Strings' merge, Data/Fixture programme's
- * split and Logic/Dossier — straight out of nodes.json, and compares what
+ * Runs the graph's OWN scripts — Data/Strings' merge, Data/Programme's split
+ * (over backend/fixtures/programme.json, what the backend answers) and Logic/Dossier — straight out of nodes.json, and compares what
  * Logic/Dossier emits against the PRODUCT'S OWN `dossierProgress`,
  * `humaniseFactName` and `toMarkdown`, bundled in memory from the product's
  * source. Nothing here is a second implementation of either side: if the graph
@@ -20,6 +20,7 @@ import { build } from 'esbuild';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fixture } from './lib/fixtures.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(here, '..', 'components');
@@ -90,7 +91,7 @@ const stringsFor = (audience) =>
   }).copy;
 const copyFor = { learner: stringsFor('learner'), coach: stringsFor('coach') };
 
-const fx = run(script('Data/Fixture programme', 'fp_split'), { items: staticRows('Data/Fixture programme', 'fp_data') });
+const fx = run(script('Data/Programme', 'fp_split'), { items: fixture('programme') });
 const DOSSIER = script('Logic/Dossier', 'do_fn');
 const dossier = (audience, over = {}) =>
   run(DOSSIER, {

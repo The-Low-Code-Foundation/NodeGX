@@ -369,8 +369,8 @@
     },
     {
       "id": "pp_roster",
-      "type": "/Data/Fixture roster",
-      "label": "The coach's people",
+      "type": "/Data/Roster",
+      "label": "The coach's people, from the backend",
       "x": 1000,
       "y": 40
     },
@@ -515,13 +515,6 @@
       ]
     },
     {
-      "id": "pp_programme",
-      "type": "/Data/Fixture programme",
-      "label": "Whose programme this template holds",
-      "x": 1400,
-      "y": 900
-    },
-    {
       "id": "pp_open",
       "type": "RouterNavigate",
       "label": "Into their page",
@@ -531,6 +524,25 @@
         "router": "Main",
         "target": "/Pages/Learner"
       }
+    },
+    {
+      "id": "pp_with_page",
+      "type": "JavaScriptFunction",
+      "label": "The one learner whose page this template holds",
+      "x": 1100,
+      "y": 900,
+      "parameters": {
+        "functionScript": "/*\n * WHOSE NAME OPENS A PAGE (TASK-L171 §0b). The seed holds ONE learner's\n * coaching programme — sessions, notes, reviews, objectives — so exactly one\n * name on the roster links, as it did when the programme was a fixture (L165).\n * Before the backend this id was read from the programme fixture; now it is\n * stated here, once, and feeds both which row links and the ?learner= the link\n * carries, so the two cannot disagree.\n *\n * Logic/Roster filter's own comment says that with a backend every row links.\n * That is right and it is not this task: Logic/* is on L171's DO NOT list, and\n * a link to a learner whose programme is three path steps and nothing else\n * would be a page about somebody the seed says almost nothing about. It needs\n * a second programme in the seed to mean anything.\n */\nOutputs.learnerId = 'l-sam';\n"
+      },
+      "ports": [
+        {
+          "name": "out-learnerId",
+          "displayName": "learnerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
     }
   ],
   "visualRoots": [

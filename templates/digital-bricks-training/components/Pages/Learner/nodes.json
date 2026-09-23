@@ -644,15 +644,21 @@
     },
     {
       "id": "lr_programme",
-      "type": "/Data/Fixture programme",
-      "label": "Their programme (fixture until the backend lands)",
+      "type": "/Data/Programme",
+      "label": "Their programme, from the backend",
       "x": 1400,
-      "y": 40
+      "y": 40,
+      "metadata": {
+        "comment": "reader: coach — `learnerProgramme`, role:staff, for the learner named by ?learner=. The URL carries the join L165 made explicit; the fixture used to carry it by being the only programme there was (TASK-L171 §0b)."
+      },
+      "parameters": {
+        "reader": "coach"
+      }
     },
     {
       "id": "lr_roster",
-      "type": "/Data/Fixture roster",
-      "label": "The coach's people (fixture until the backend lands)",
+      "type": "/Data/Roster",
+      "label": "The coach's people, from the backend",
       "x": 1400,
       "y": 200
     },
@@ -1186,6 +1192,19 @@
       "parameters": {
         "router": "Main",
         "target": "/Pages/People"
+      }
+    },
+    {
+      "id": "lr_url",
+      "type": "PageInputs",
+      "label": "Who — ?learner=",
+      "x": 1100,
+      "y": 40,
+      "parameters": {
+        "queryParams": "learner"
+      },
+      "metadata": {
+        "comment": "Set by the roster's link. The page asks the backend about exactly this learner and nobody else; a learner id that is not on the coach's roster is refused by nothing here and answered by the function, which is where the gate is."
       }
     }
   ],
