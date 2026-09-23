@@ -185,7 +185,7 @@ tokens*. Expect **3** (`--font-sans`, `--font-serif`, `--font-mono`).
 
 ## 8. Left open
 
-📋 **AC5 — Richard's WORTHY on the four frames in `shots/`.** The one criterion this session cannot
+✅ **AC5 RULED WORTHY by Richard, 2026-09-23** (*"HLT 012 looks fine"*) — the four frames in `shots/`. ~~📋 AC5 — Richard's WORTHY on the four frames in `shots/`.~~ The one criterion this session cannot
 close. Two things worth his eye specifically:
 
 1. **The affordance is a `{ }` button in the field, and on the margin/padding box it is the edge

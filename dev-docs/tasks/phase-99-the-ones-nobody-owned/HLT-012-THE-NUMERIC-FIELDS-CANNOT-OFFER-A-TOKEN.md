@@ -3,7 +3,7 @@
 ## ✅ BUILT 2026-09-21 (s8) — 13 font sizes and 31 spacings offered on a driven session, control 0.
 
 [verdict](./verdicts/HLT-012/2026-09-21/VERDICT.md) · `scripts/devtools/drive-hlt012-token-fields.js`
-(17/17 arms each direction) · AC5 (Richard's WORTHY) is the one criterion still open.
+(17/17 arms each direction) · ✅ **AC5 RULED WORTHY by Richard, 2026-09-23** (*"HLT 012 looks fine"*). All six criteria met.
 
 🔴 **§2 was re-measured before a line was written, and it was right about everything it counted and
 wrong about what it counted.** Every per-parameter number below is exact. But:
