@@ -133,12 +133,11 @@ node tools/check-timeline-port.mjs                     # the ported timeline mod
 - **An empty object `{}` is written as itself** since NodeGX HLT-018. The workaround that left it
   off the row is gone, so a `{}` that stops round-tripping fails `check-seed` rather than being
   excused by it.
-- **Three JSON documents are stored as TEXT** — a lesson's `sections` and `steps`, a context's
-  `facts` — with a `json:` prefix. A WORKAROUND for two NodeGX defects, owned in one module
-  (`tools/lib/seed-resolve.mjs`): `Noodl.Records` turns every nested object into a Model with a
-  generated id (a lesson's section ids came back random, and its steps index sections by id), and the
-  SQL adapter JSON-parses any bracketed string even in a `String` column (so plain JSON text came
-  back an object anyway). It comes out whole when OpenNoodl **HLT-022** lands.
+- **Every function reads with `{ plain: true }`** (NodeGX HLT-022): the row as it was saved, with
+  its `objectId`. A default `Records` read turns each nested object into a Model with a generated id,
+  and a lesson's steps index its sections BY id — so a default read silently breaks a lesson. Both
+  offline fakes REFUSE a read without the option, by name. The one-day `json:`-text workaround is
+  gone.
 
 ### The four read functions (L170)
 
@@ -160,11 +159,10 @@ PORT of the product's timeline model — `assembleTimeline`, `orderEntries`, the
   on a port it never declared.
 - **The live half runs only on a disposable backend**: `check-read-functions.mjs --backend … --token
   … --scratch` mints sessions and writes a probe note, and deletes both, verified by re-reading.
-- 🔴 **Not for production yet — OpenNoodl HLT-023.** Every query a deployed function makes is charged
-  to principal `admin` in the `data` class, so the whole deployment shares ONE bucket. On the
-  default budget, 13 `course` loads drain it; the next is a 400 and then 500s, including the
-  operator's own admin requests. The scratch backends raise the limit, which proves nothing about
-  production.
+- **Runs on the default `ops.json`** (NodeGX HLT-023): a function's own queries are charged to the
+  run, not to one shared `admin` bucket, and `rateLimit.functionRunQueries` (default 1000) is the
+  runaway guard. Measured: 100 `course` loads from two learners, all 200, with the operator's admin
+  requests in the middle all served. Before the fix, 13 loads drained the deployment.
 
 **The fixtures were made into one consistent world first**, because one database could not hold
 all three as they were, and because the world has to be one person's.

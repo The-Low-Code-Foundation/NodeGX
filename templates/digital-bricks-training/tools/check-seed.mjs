@@ -20,7 +20,6 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decodeText } from './lib/seed-resolve.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
@@ -82,11 +81,7 @@ let compared = 0;
 for (const [collection, rows] of Object.entries(seed.rows)) {
   const { status, body } = await get(`/classes/${collection}?limit=1000`, master);
   check(status === 200, `C3: ${collection} answered ${status} to the master key`);
-  const back = (body.results || []).map((r) => {
-    // JSON documents stored as text (lib/seed-resolve.mjs, until HLT-022) read back as the seed's structure.
-    const out = decodeText(collection, (UNRESOLVE[collection] || ((x) => x))(r));
-    return out;
-  });
+  const back = (body.results || []).map((r) => (UNRESOLVE[collection] || ((x) => x))(r));
   check(back.length === rows.length, `C3: ${collection} holds ${back.length} rows, the seed ${rows.length}`);
   const key = keyOf(collection);
   const id = (r) => key.map((k) => JSON.stringify(r[k])).join('|');

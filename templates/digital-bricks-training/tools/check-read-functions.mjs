@@ -159,11 +159,13 @@ const Records = {
     // so a failure reproduces) means an order a function does not state cannot
     // pass offline by the seed happening to be in file order.
     const shuffled = rows.map((r, i) => [((i + 1) * 2654435761 + c.length * 97) % 4294967296, r]).sort((a, b) => a[0] - b[0]).map(([, r]) => r);
-    // And a row is a Model: its fields serialise, its id is getId() and nothing else.
-    return shuffled.slice(0, options.limit ?? 100).map((r) => {
-      const { objectId, ...fields } = JSON.parse(JSON.stringify(r));
-      return { ...fields, toJSON: () => fields, getId: () => objectId };
-    });
+    // Every function reads `{ plain: true }` (OpenNoodl HLT-022). A default read
+    // is a Model that re-ids every nested object — the defect that cost a lesson its
+    // section ids live and was invisible here — so it is REFUSED by name rather
+    // than imitated: a read that forgets the option fails offline, not in front of
+    // a learner.
+    if (options.plain !== true) throw new Error(`Records.query('${c}') without { plain: true } — a Model read re-ids nested documents (HLT-022)`);
+    return shuffled.slice(0, options.limit ?? 100).map((r) => JSON.parse(JSON.stringify(r)));
   }
 };
 /* Runs ONE node's script. An async node answers through `done` / `failed`; the

@@ -719,11 +719,11 @@
         },
         {
           "name": "steps",
-          "type": "String"
+          "type": "Array"
         },
         {
           "name": "sections",
-          "type": "String"
+          "type": "Array"
         }
       ],
       "indexes": [
@@ -973,7 +973,7 @@
         },
         {
           "name": "facts",
-          "type": "String"
+          "type": "Object"
         },
         {
           "name": "version",

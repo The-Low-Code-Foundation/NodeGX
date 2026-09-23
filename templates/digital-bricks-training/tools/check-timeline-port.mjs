@@ -95,7 +95,7 @@ const matches = (row, where) => {
   if ('containedIn' in c) return c.containedIn.includes(row[k]);
   throw new Error(`unsupported ${JSON.stringify(c)}`);
 };
-const Records = { async query(c, where = {}) { return JSON.parse(JSON.stringify((table[c] || []).filter((r) => matches(r, where)))); } };
+const Records = { async query(c, where = {}, options = {}) { if (options.plain !== true) throw new Error(`Records.query('${c}') without { plain: true } (HLT-022)`); return JSON.parse(JSON.stringify((table[c] || []).filter((r) => matches(r, where)))); } };
 
 // Capture Sam's real sources — the live assembly and every history assembly.
 const rows = await port.readProgramme(Records, 'l-sam', new Date('2026-09-22T12:00:00.000Z'));
