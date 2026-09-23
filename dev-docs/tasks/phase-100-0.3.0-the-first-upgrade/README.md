@@ -1,8 +1,11 @@
 # Phase 100 — 0.3.0: the first one people upgrade into
 
 **Scoped:** 2026-09-22, at Richard's request, against `cline-dev` HEAD `7043fb6e6`.
-**Status: 📋 SCOPED — nothing built. UPG-001 started (the census; 4 rows measured, 5 classes named `⬜ never measured`).**
-**Prefix: `UPG`.** **Rulings outstanding: R1–R5 (§6).**
+**Status: 📋 SCOPED. UPG-001 started (the census; 4 rows measured, 5 classes named `⬜ never
+measured`). ✅ UPG-005 ANSWERED s1 — the 32-row triage R4 bought a session for cost one measurement:
+every committed row on P83 and P84 is already inside `v0.2.4`, so neither phase has anything pending
+for 0.3.0.**
+**Prefix: `UPG`.** **R2, R3 and R4 RULED by Richard 2026-09-22 (§6) — two of the three against the recommendation, and both make the phase bigger.**
 
 > "We should probably celebrate phase 100 by making it the prep for the release of 0.3.0, if that's
 > the right version number, since we've added a bunch of potentially breaking features like the new
@@ -135,10 +138,10 @@ a table with a decision per row.
 | id | task | needs a ruling | why it is in this phase |
 |---|---|---|---|
 | **UPG-001** | [The break census — what a 0.2.4 project loses in 0.3.0](UPG-001-THE-BREAK-CENSUS.md) | — | the number, the notes and the migrations all read from it. **Started; §4.1 and §4.2 are its first two rows** |
-| **UPG-002** | The compatibility policy's ground has moved | **R2** | amend [`COMPATIBILITY-POLICY.md`](../../reference/COMPATIBILITY-POLICY.md) with a dated amendment saying what a break owes now that the clause has fired. It is *binding on every task in every phase* and currently states a falsehood as its premise |
-| **UPG-003** | The text styles nobody can edit | **R3** | §4.1. The conversion-to-Looks compromise **Richard raised himself** and P99 left `📋 Not built`. Build it for 0.3.0, or ship a release note — but not silence |
+| **UPG-002** | The compatibility policy's ground has moved | ✅ **R2 ruled** | amend [`COMPATIBILITY-POLICY.md`](../../reference/COMPATIBILITY-POLICY.md) with a dated amendment carrying R2's words. It is *binding on every task in every phase* and currently states a falsehood as its premise. **Plus §6.1: find or build the surface that shows the report** |
+| **UPG-003** | Text styles become Looks, on load | ✅ **R3 ruled: BUILD** | §4.1. **The phase's largest row.** Convert existing text styles into Looks when the project opens, with the R2 report. `models/Looks/looks.ts` is deliberately pure and `tests-unit/` can grade it without a renderer — so the model half needs no editor |
 | **UPG-004** | The version bump, and the literals that are not the version | — | `0.2.4` → `0.3.0` in **one** file. The prefab `library.json` files and `package-lock.json` are **traps**, both already measured in [`PUBLISH-0.2.2.md` §2](../release-0.2.2/PUBLISH-0.2.2.md). Plus the first-two-segment consumer in §5.1 below |
-| **UPG-005** | What ships and what waits | **R4** | **P83 and P84 both carry `Release: ⬜ NOT RULED` on their boards today.** A release cannot be cut with two phases explicitly waiting on a release ruling that was never given |
+| **UPG-005** | [What ships and what waits — all 32 rows](UPG-005-WHAT-SHIPS-AND-WHAT-WAITS.md) | ✅ **ANSWERED s1** | **P83 and P84 both carry `Release: ⬜ NOT RULED`.** Richard chose the row-by-row read over ruling the boards, cost accepted. 🔴 Read each row's `*-WHAT-WAS-BUILT.md` rather than either board's narrative — P83's own README says `ls`-ing for them is cheaper than believing it |
 | **UPG-006** | The release notes, the changelog, and the what's-new post | **R5** | 427 commits, written from the person's side. And see §5.2 — the in-app feed the editor already asks for on every project open |
 | **UPG-007** | The shelf before the tag | — | templates are **served**, not shipped; publishing is independent of the tag but **ordered** before it, or the release notes describe a shelf the app draws empty ([`PUBLISH-0.2.2.md` §6](../release-0.2.2/PUBLISH-0.2.2.md)) |
 | **UPG-008** | The cut | — | the runbook. **There is no `release-0.2.3/` or `release-0.2.4/` directory** — the last written runbook is 0.2.2's, and its §3 records mac legs that could not sign and a runner image that caused it. Re-derive the gates and the editor floor **by name**, never carried from a handoff |
@@ -166,15 +169,33 @@ auto-mode classifier, and **Richard has to allow it or run it**.
 exists to say, and the release is the event that makes an empty feed worth filling. UPG-006 owns
 the post; the push is still Richard's.
 
-## 6. Rulings needed — none of these is code
+## 6. Rulings — **R2, R3 and R4 RULED 2026-09-22**
 
-| # | question | recommendation |
+🔴 **Two of the three went against the recommendation, and both enlarge the phase. Do not "correct"
+them back to the cheaper option on the grounds that a release phase should not build.**
+
+| # | question, as it was put | ruling |
 |---|---|---|
-| **R1** | Is the number **0.3.0**? | **Yes** — §3. Answer this one and §3 stops being a proposal |
-| **R2** | Now that the forward-compat clause has fired, what does a break owe? A migration that runs on load, a loud report at load, or a release note and nothing else? | **A visible report at load, migration where the data is recoverable.** The policy already forbids the third option for anything that would silently write a wrong project back |
-| **R3** | You raised converting existing text styles into Looks *"as a compromise"* and it was never built. Does 0.3.0 carry it, or a release note? | **Release note for 0.3.0, conversion as its own row.** You also said *"most of them will just be using the default text styles baked into the old editor"* — if that holds, the conversion mostly recreates defaults, and the census's §4.1 drive is what would show it either way |
-| **R4** | P83 and P84 say `Release: ⬜ NOT RULED`. What waits for 0.3.1? | **Rule the boards, not the tasks** — a per-task triage of 17 + 15 rows will eat the phase |
-| **R5** | Does 0.3.0 wait for the what's-new push (§5.2), which only you can make? | **No — it ships either way**, but the post is worth more than the empty feed |
+| **R1** | Is the number 0.3.0? | **Not formally answered — and it does not block.** §3 stands as the argument; Richard opened the phase with the number in it |
+| **R2** | *"Our own compatibility policy says that once we ship publicly, a break needs a migration that runs when the project loads. It was written when nothing had shipped — we have now shipped four times. Starting with 0.3.0, what does a break owe?"* | ✅ **"Visible report at load, migrate where recoverable."** *If we can convert the data we convert it; if we cannot, the project opens and says so on screen.* This is now the rule UPG-002 writes into the policy, and the standard every other row is held to |
+| **R3** | *"You raised converting text styles into Looks 'as a compromise' when you ruled, and it was never built. Does 0.3.0 carry that conversion?"* | ✅ **"Convert on load in 0.3.0."** 🔴 **Against the recommendation.** The recommendation was a release note plus a later row, resting on his own *"most of them will just be using the default text styles"*. He chose the conversion anyway ⇒ **UPG-003 is a build task, and it is this phase's largest** |
+| **R4** | *"P83 and P84 both carry 'Release: NOT RULED'… between them that is 32 rows. How do you want that decided?"* | ✅ **"I triage all 32 rows first."** 🔴 **Against the recommendation**, which was to rule the two boards and spend nothing on triage. The cost was stated in the option text (*"roughly a session before anything ships"*) and accepted ⇒ **UPG-005 is a 32-row read, and it comes before the cut** |
+| **R5** | Does 0.3.0 wait for the what's-new push, which only Richard can make? | ⬜ **not asked yet** — it is cheap and it can wait until UPG-006 needs it |
+
+### 6.1 🔴 What R2 and R3 together now demand of every other row
+
+R2 is not only about text styles. **Every row UPG-001 finds is now held to "convert if recoverable,
+say so on screen if not"** — which turns the census from a notes exercise into the input to a
+migration. Two consequences a later session must not miss:
+
+- **UPG-001 §4's remaining five classes are now load-path questions**, not release-note questions.
+  The **backend storage plane** is the one to read first: it is the only class that can lose
+  somebody's **rows**, and "migrate where recoverable" means something much stronger there than it
+  does for styling.
+- **"A visible report at load" is a surface that does not exist yet.** Nothing in the editor shows a
+  per-project migration report on open. `MigrationWizard.tsx` and `models/migration/` exist and were
+  built for a different job; whether they are the right home is UPG-002's first measurement, **not
+  an assumption**. 🔴 A row that ships a `console.warn` has not met R2.
 
 ## 7. Out of scope
 
