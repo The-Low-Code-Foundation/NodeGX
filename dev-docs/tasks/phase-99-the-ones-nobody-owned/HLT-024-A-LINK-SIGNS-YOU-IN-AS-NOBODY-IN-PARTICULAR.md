@@ -1,5 +1,25 @@
 # HLT-024 — A link signs you in as nobody in particular
 
+> ✅ **BUILT 2026-09-23 (P99 s23), `8f3d240b2` — AC1–AC4 met; AC5 (browser) and AC6 go to the DBT
+> stream's L171 drive, which reads the same thing.** Built to §3's shape as written. No ruling was
+> asked: the shape does what the route's own docblock already said it did.
+>
+> | AC | reading |
+> |---|---|
+> | 1 control | Before the fix, 6 of the 7 new specs were red. Magic link and fake-OIDC provider: exchange `roles` **`undefined`**; `/users/me` on the same token `[]` / `["staff"]`. |
+> | 2 | After the fix, the exchange equals `/users/me` on the same session for **0 roles `[]`, 1 `["staff"]`, 2 `["coach","staff"]`**, plus a provider sign-in `["coach"]`. The exchange's own fields (`authOutcome`, `authNotice`, `sessionToken`) are unchanged. |
+> | 3 | The scan reads `src/` for every `sendJSON(…)` naming `sessionToken`. It is **pinned at exactly four sites** (`exchange`, `login`, `me`, `signup`), so it cannot pass on an empty list, and it requires `roles: await this.rolesFor(` / `this.deps.rolesForUser(` in each. Before the fix it named **`server/oauth-routes.ts:exchange`**. Mutant: with `roles` dropped from `/login` it names **`server/users.ts:login`** (`cp`-restored, `cmp` clean). |
+> | 4 | The docblock now reads *"the `_User` record plus `roles` plus `sessionToken`"* and points at the test. |
+> | 5 | ⏭ **Not driven here.** A peer's dev stack was up (webpack ×3), and two stacks is the rule this repo keeps breaking. The client path needs no change: `consumeAuthReturn` → `setSession(handle, response)` is the same write `/login` makes, and DEF-005 already proved `/login`'s `roles` reach the `User` node. The browser read goes with AC6. |
+> | 6 | The DBT stream's. Its L171 drive grades AC5 too: after a link sign-in, `app_roles_once` should never fire. |
+>
+> **Gates:** `tsc --noEmit` on `nodegx-backend` 0. The 7 suites beside it (auth-*, def005, hlt-015, hlt-024,
+> bak*) pass, 109/109. The full backend jest was **stopped at 21/174 suites**, not finished: it drives
+> browsers against templates and a peer was building. Three `tpl008-*-drive` suites were red when it
+> stopped. They drive `templates/todo-list-demo`, contain no auth code, and a peer has 426 template
+> deletions staged. ⚠️ `HttpServer.ts:89` fails eslint (`applyAdminSecurityHeaders` unused), and
+> `oauth-routes.ts` is off-prettier. Both were already true at HEAD.
+
 🔴 **Opened 2026-09-23 from the Digital Bricks Training stream (its sprint 49, L171), at Richard's
 request: *"Yep add the roles issue to phase 99 please."*** Found by L171's sign-in drive, then
 measured directly on a real magic link. Specced, not built.

@@ -1,32 +1,53 @@
 # P99 — next session
 
-**Status: 📋 building, and no row is buildable right now. Every row is built, or it waits on a
-ruling or on another stream.** s22 (2026-09-23) built **HLT-021**. s21 (2026-09-22) took HLT-019
-AC2 on the real API, ruled out HLT-016 (b) for now, and specced HLT-020 and HLT-021. The DBT
-stream built HLT-022 and HLT-023 on 2026-09-23. This file skipped s21: its handoff was never
-rewritten. **The README status line is the board. Read it first.**
+**Status: 📋 building, and no row is buildable right now.** s23 (2026-09-23) built **HLT-024**
+(`8f3d240b2`). It was opened that afternoon from the DBT stream, and s22's handoff never listed it.
+**HLT-020 is done:** P100 ruled it (tokens, R8) and built it as UPG-003. The README row said "needs a
+ruling" until s23. **The README status line is the board. Read it first**, and also read the task
+FILES, which can be newer than both it and this file.
 
 Read [README.md](./README.md) §5 for the board and §7 for the rules every task inherits. Read it
 **before claiming a row**, because peers build this phase in parallel. 🔴 The README in the tree
-still carries **someone else's uncommitted edit** (§10, the `whats-new` feed marked PUSHED). s22
-committed its rows through a temporary index built from `HEAD`'s copy, and applied the same edit
-to the tree copy so the peer's edit survives. Never `git add` the file. The HLT-019 task file is
-still **untracked** and still the DBT stream's. Don't edit it.
+still carries **someone else's uncommitted edit** (§10, the `whats-new` feed marked PUSHED). s22 and
+s23 committed their rows through a temporary index built from `HEAD`'s copy, and applied the same
+edit to the tree copy so the peer's edit survives. Never `git add` the file. The HLT-019 task file
+is still **untracked** and still the DBT stream's. Don't edit it. 🔴 On 2026-09-23 a peer had
+**426 template deletions STAGED** in the real index. Commit through a temp index, never plain
+`git commit`.
 
 ## Start here
 
 1. **Check that the `renderer-errors` CI job is green on Linux at `NOODLPORT=0`.** s22 moved the gate
-   off a concrete port and onto `0` (AC5). On this Mac it passes at 0, 9123 and unset, but it has
-   **never run on the Linux runner at 0**. If it goes red there, read the log artefact before
-   touching the budget: a death at startup is a different thing from an `UNKNOWN` class.
-2. **HLT-020 needs Richard's ruling on §3 before a line is written.** It recommends a typography
-   token bundle over his "Looks" shape, because 17% of worn (style, project) pairs span more than
-   one `type::port`. Ask in plain words, with the numbers.
+   onto port `0`. It has **never run on the Linux runner at 0**. If it goes red there, read the log
+   artefact before touching the budget: a death at startup is a different thing from an `UNKNOWN` class.
+2. **Look for rows opened since this file.** The DBT stream opens HLT rows at Richard's request (022,
+   023 and 024 all came that way on 2026-09-23). `ls` the directory and compare it with the board.
 3. Otherwise there's nothing to build. Say so rather than inventing a row.
 
 **Still waiting on Richard:** HLT-012 AC5 (four frames in `shots/hlt012-*`) and P93 TVW-008 AC7
-(`shots/hlt008-fixed-ac7-*`). **Other streams':** HLT-023's L171 page drive (DBT); HLT-015 AC7
-and HLT-018 AC5 (DBT); HLT-017 AC9 (P78).
+(`shots/hlt008-fixed-ac7-*`). **Other streams':** HLT-024 AC5+AC6 (DBT: after a magic-link sign-in,
+`app_roles_once` should never fire, and `START-HERE.md`'s note gets updated), HLT-023's L171 page drive
+(DBT), HLT-015 AC7 and HLT-018 AC5 (DBT), HLT-017 AC9 (P78).
+
+## ✅ What s23 leaves you: HLT-024, the exchange carries `roles`
+
+**Every reading was taken 2026-09-23 on `5053f489f` plus this change.** The verdict table is at the
+top of the task file.
+
+- **Shipped:** `OAuthRoutesDeps.rolesForUser`, wired in `HttpServer` beside `signupAllowedForAnonymous`
+  to `deps.security.rolesForUser`. `exchange()` spreads `roles` after the wire record, as `/login`
+  does. The docblock names the test.
+- **The test** (`nodegx-backend/tests/hlt-024-exchange-roles.test.ts`, 7 specs): a real magic link
+  (mail transport stub → form POST → exchange) and a fake-OIDC provider sign-in. Each is compared with
+  `/users/me` **on the exchange's own token**. Roles are granted with `POST /admin/roles/:name/users`.
+  The source scan is pinned at the four session routes, so it can't pass blind.
+- 🔴 **`grep` skipped `HttpServer.ts` as binary** (the Claude grep wrapper passes `-I`), and a
+  search for `new OAuthRoutes` came back empty on a file that has it. Use `command grep -a` in
+  `nodegx-backend/src`. [[ugrep-silently-skips-a-source-file-as-binary]]
+- ⚠️ **The full `nodegx-backend` jest is slow**, about 10 min for 21 of 174 suites, because it drives
+  browsers against templates. Run the suites near your change, and run the whole thing only when no
+  peer is building. It was stopped at 21/174. The three red `tpl008-*` drives belong to the peer's
+  template work, not to this change.
 
 ## ✅ What s22 leaves you: HLT-021, the renderer asks for the port that was bound
 
