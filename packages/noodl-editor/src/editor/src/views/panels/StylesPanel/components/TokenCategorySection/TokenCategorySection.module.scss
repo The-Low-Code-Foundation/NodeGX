@@ -61,6 +61,29 @@
   text-overflow: ellipsis;
 }
 
+// P103 CMG-011 row 1: the value is an <input> since P102, and an input with no background of its own
+// paints the browser's white box — light grey text on white in dark mode. At rest it reads as text;
+// hover and focus show that it is a field.
+input.TokenValue {
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 2px 4px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  outline: none;
+
+  &:hover {
+    border-color: var(--theme-color-border-default);
+  }
+
+  &:focus {
+    color: var(--theme-color-fg-default);
+    background-color: var(--theme-color-bg-1);
+    border-color: var(--theme-color-primary);
+  }
+}
+
 // ─── P102 CMP-001 (RC-3): the composer rows ───────────────────────────────────
 
 .composes {
