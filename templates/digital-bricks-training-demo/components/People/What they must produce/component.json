@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a174c5bd-2561-49ef-b6af-c8a1f6d479d8",
+  "name": "What they must produce",
+  "path": "/People/What they must produce",
+  "type": "visual",
+  "created": "2026-09-21T17:00:09.282Z",
+  "modified": "2026-09-21T17:00:09.282Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's third surface about one learner, read-only: their project, the objectives agreed with them (archived ones marked), and everything they have told us. Every fact comes from Logic/Dossier; this section only words it."
+}

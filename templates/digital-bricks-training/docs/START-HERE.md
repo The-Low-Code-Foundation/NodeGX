@@ -605,3 +605,31 @@ English in place.
 
 react-markdown, rehype-sanitize, remark-gfm: MIT. DOMPurify: Apache-2.0 / MPL-2.0. Grandstander and
 Nunito: SIL Open Font License 1.1 (the licence files travel beside each font).
+
+## The public demo (TASK-L180)
+
+<https://nodegx.io/templates/digital-bricks-training/> is **this template with its backend taken
+out**, so it runs in a visitor's browser with no server and no account. It lives beside this
+folder as `templates/digital-bricks-training-demo/`, and it is **generated, never edited**:
+
+```bash
+node tools/build-demo.mjs     # writes ../digital-bricks-training-demo/
+node tools/check-demo.mjs     # fails on anything but the named list
+```
+
+- **The four Cloud Function nodes become Function nodes at the same ids** that answer from
+  `backend/fixtures/`, including the backend's empty answers (a learner who is not Sam; a concept
+  nobody has written).
+- **It is always happening now.** `tools/lib/demo-clock.mjs` moves every date in the programme and
+  the roster forward by the whole number of days since the fixture's instant (22 Sep 2026 12:00
+  UTC), and the two months named in prose move with them. The clock source is embedded verbatim in
+  the page and evaluated by the check, so the rule the check proves is the rule the page runs.
+- **No sign-in; three doors on Home** (the learner, the lesson, the trainer); hash URLs, because
+  nodegx.io serves template folders with no fallback for a deep path.
+
+**Change the template, then regenerate, check and republish** — the demo does not follow on its
+own. The publish (TPL-008's recipe) composes the demo with this folder's `noodl_modules`, runs
+`nodegx-deploy.cjs … --base-url /templates/digital-bricks-training/`, and copies the result into
+`nodegx-web/site/templates/digital-bricks-training/`. If the deploy refuses a DEVELOPMENT engine,
+build with `--allow-development-engine` and replace `noodl.deploy.js` with the production one from
+the live site, **after checking it carries the NDA-017 `.value` fix** (the i18next module needs it).

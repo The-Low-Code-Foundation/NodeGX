@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7b6ac05f-86e7-434f-8005-a6d1c1e927a5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tu_in",
+      "fromProperty": "label",
+      "toId": "tu_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tu_in",
+      "fromProperty": "value",
+      "toId": "tu_value",
+      "toProperty": "text"
+    }
+  ]
+}

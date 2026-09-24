@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cace4a82-009b-4933-8b4e-0aaaeb8d8997",
+  "name": "Palette",
+  "path": "/Pages/Palette",
+  "type": "page",
+  "created": "2026-09-19T21:11:43.244Z",
+  "modified": "2026-09-19T21:11:43.244Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every section kind, once, on the thread: the fixture's 23 sections plus one artifact challenge, rendered flat by the kit's Section node. The template's own style guide for the lesson kit, and the page the kit's checks are driven against."
+}

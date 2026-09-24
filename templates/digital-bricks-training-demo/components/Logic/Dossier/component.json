@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7da347be-a8eb-47da-91a9-8ada61c99821",
+  "name": "Dossier",
+  "path": "/Logic/Dossier",
+  "type": "logic",
+  "created": "2026-09-21T16:17:44.849Z",
+  "modified": "2026-09-21T16:17:44.849Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What each objective holds — the learner's meter and the coach's list of what they must produce, from one port of the product's dossierProgress, humaniseFactName and toMarkdown. The archived-objective asymmetry is decided here and nowhere else."
+}

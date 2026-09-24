@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c1e4a5e3-2fea-4ab4-baa4-793c1f382c36",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tj_in",
+      "fromProperty": "rowClass",
+      "toId": "tj_root",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tj_in",
+      "fromProperty": "label",
+      "toId": "tj_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tj_in",
+      "fromProperty": "gauge",
+      "toId": "tj_gauge",
+      "toProperty": "gauge"
+    }
+  ]
+}

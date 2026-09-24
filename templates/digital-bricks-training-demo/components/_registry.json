@@ -1,0 +1,308 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/registry-v2.json",
+  "version": 1,
+  "lastUpdated": "2026-09-23T14:03:10.767Z",
+  "components": {
+    "App": {
+      "path": "App",
+      "type": "root",
+      "nodeCount": 14,
+      "connectionCount": 18,
+      "modified": "2026-09-23T13:54:30.691Z",
+      "created": "2026-09-19T20:51:44.992Z"
+    },
+    "Pages/Home": {
+      "path": "Pages/Home",
+      "type": "page",
+      "nodeCount": 34,
+      "connectionCount": 25,
+      "modified": "2026-09-23T14:03:10.767Z",
+      "created": "2026-09-19T20:51:44.992Z"
+    },
+    "Logic/Sections for step": {
+      "path": "Logic/Sections for step",
+      "type": "logic",
+      "nodeCount": 3,
+      "connectionCount": 14,
+      "modified": "2026-09-20T18:13:08.767Z",
+      "created": "2026-09-19T21:09:14.437Z"
+    },
+    "Lesson/Section row": {
+      "path": "Lesson/Section row",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 7,
+      "modified": "2026-09-20T18:16:08.053Z",
+      "created": "2026-09-19T21:09:24.307Z"
+    },
+    "Lesson/Step chip": {
+      "path": "Lesson/Step chip",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-09-19T21:14:17.197Z",
+      "created": "2026-09-19T21:09:29.940Z"
+    },
+    "Lesson/Step close": {
+      "path": "Lesson/Step close",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 5,
+      "modified": "2026-09-19T21:14:19.087Z",
+      "created": "2026-09-19T21:09:41.072Z"
+    },
+    "Pages/Lesson": {
+      "path": "Pages/Lesson",
+      "type": "page",
+      "nodeCount": 34,
+      "connectionCount": 31,
+      "modified": "2026-09-23T13:43:46.166Z",
+      "created": "2026-09-19T21:11:05.603Z"
+    },
+    "Pages/Course": {
+      "path": "Pages/Course",
+      "type": "page",
+      "nodeCount": 50,
+      "connectionCount": 64,
+      "modified": "2026-09-23T13:44:39.931Z",
+      "created": "2026-09-19T21:11:24.317Z"
+    },
+    "Pages/Palette": {
+      "path": "Pages/Palette",
+      "type": "page",
+      "nodeCount": 10,
+      "connectionCount": 2,
+      "modified": "2026-09-19T21:11:43.331Z",
+      "created": "2026-09-19T21:11:43.331Z"
+    },
+    "Logic/Ordered timeline": {
+      "path": "Logic/Ordered timeline",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 3,
+      "modified": "2026-09-20T12:49:24.849Z",
+      "created": "2026-09-20T12:49:24.849Z"
+    },
+    "Course/Timeline row": {
+      "path": "Course/Timeline row",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 11,
+      "modified": "2026-09-20T12:51:55.909Z",
+      "created": "2026-09-20T12:49:24.850Z"
+    },
+    "Logic/Standing": {
+      "path": "Logic/Standing",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 23,
+      "modified": "2026-09-20T13:54:08.479Z",
+      "created": "2026-09-20T13:54:08.479Z"
+    },
+    "Course/Requires row": {
+      "path": "Course/Requires row",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 1,
+      "modified": "2026-09-20T13:56:03.707Z",
+      "created": "2026-09-20T13:56:03.707Z"
+    },
+    "Course/Where you're at": {
+      "path": "Course/Where you're at",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 9,
+      "modified": "2026-09-20T13:56:31.463Z",
+      "created": "2026-09-20T13:56:31.463Z"
+    },
+    "Course/Trajectory row": {
+      "path": "Course/Trajectory row",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 3,
+      "modified": "2026-09-20T13:57:36.118Z",
+      "created": "2026-09-20T13:57:36.118Z"
+    },
+    "Data/Strings": {
+      "path": "Data/Strings",
+      "type": "logic",
+      "nodeCount": 7,
+      "connectionCount": 23,
+      "modified": "2026-09-20T18:11:53.927Z",
+      "created": "2026-09-20T18:11:53.927Z"
+    },
+    "Logic/Roster filter": {
+      "path": "Logic/Roster filter",
+      "type": "logic",
+      "nodeCount": 4,
+      "connectionCount": 17,
+      "modified": "2026-09-21T09:45:00.190Z",
+      "created": "2026-09-21T09:33:19.208Z"
+    },
+    "People/Cohort pill": {
+      "path": "People/Cohort pill",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 1,
+      "modified": "2026-09-21T09:33:49.047Z",
+      "created": "2026-09-21T09:33:49.047Z"
+    },
+    "People/Roster row": {
+      "path": "People/Roster row",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 10,
+      "modified": "2026-09-21T09:49:57.113Z",
+      "created": "2026-09-21T09:34:08.541Z"
+    },
+    "Pages/People": {
+      "path": "Pages/People",
+      "type": "page",
+      "nodeCount": 33,
+      "connectionCount": 25,
+      "modified": "2026-09-23T13:44:57.668Z",
+      "created": "2026-09-21T09:35:02.402Z"
+    },
+    "People/Feed chip": {
+      "path": "People/Feed chip",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-09-21T12:53:12.117Z",
+      "created": "2026-09-21T12:53:12.117Z"
+    },
+    "People/Feed row": {
+      "path": "People/Feed row",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 13,
+      "modified": "2026-09-21T13:14:34.914Z",
+      "created": "2026-09-21T12:53:36.372Z"
+    },
+    "People/Head fact": {
+      "path": "People/Head fact",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-09-21T12:54:23.921Z",
+      "created": "2026-09-21T12:54:23.921Z"
+    },
+    "People/Head": {
+      "path": "People/Head",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 4,
+      "modified": "2026-09-21T12:54:44.475Z",
+      "created": "2026-09-21T12:54:44.475Z"
+    },
+    "People/Programme scope": {
+      "path": "People/Programme scope",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 18,
+      "modified": "2026-09-21T12:55:40.901Z",
+      "created": "2026-09-21T12:55:40.901Z"
+    },
+    "Logic/Feed filter": {
+      "path": "Logic/Feed filter",
+      "type": "logic",
+      "nodeCount": 12,
+      "connectionCount": 26,
+      "modified": "2026-09-21T12:57:13.829Z",
+      "created": "2026-09-21T12:57:08.439Z"
+    },
+    "Logic/Bring into view": {
+      "path": "Logic/Bring into view",
+      "type": "logic",
+      "nodeCount": 2,
+      "connectionCount": 3,
+      "modified": "2026-09-21T12:58:10.146Z",
+      "created": "2026-09-21T12:58:10.146Z"
+    },
+    "Pages/Learner": {
+      "path": "Pages/Learner",
+      "type": "page",
+      "nodeCount": 59,
+      "connectionCount": 101,
+      "modified": "2026-09-23T13:45:08.603Z",
+      "created": "2026-09-21T13:01:49.484Z"
+    },
+    "Logic/Dossier": {
+      "path": "Logic/Dossier",
+      "type": "logic",
+      "nodeCount": 3,
+      "connectionCount": 12,
+      "modified": "2026-09-21T16:17:44.970Z",
+      "created": "2026-09-21T16:17:44.970Z"
+    },
+    "Course/Dossier segment": {
+      "path": "Course/Dossier segment",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 6,
+      "modified": "2026-09-21T16:31:42.036Z",
+      "created": "2026-09-21T16:31:42.036Z"
+    },
+    "People/Objective row": {
+      "path": "People/Objective row",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 10,
+      "modified": "2026-09-21T16:59:08.358Z",
+      "created": "2026-09-21T16:59:08.358Z"
+    },
+    "People/Told us row": {
+      "path": "People/Told us row",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-09-21T16:59:20.919Z",
+      "created": "2026-09-21T16:59:20.919Z"
+    },
+    "People/What they must produce": {
+      "path": "People/What they must produce",
+      "type": "visual",
+      "nodeCount": 18,
+      "connectionCount": 26,
+      "modified": "2026-09-21T17:00:09.363Z",
+      "created": "2026-09-21T17:00:09.363Z"
+    },
+    "Data/Roster": {
+      "path": "Data/Roster",
+      "type": "logic",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-09-23T13:39:40.355Z",
+      "created": "2026-09-21T09:32:10.011Z"
+    },
+    "Data/Programme": {
+      "path": "Data/Programme",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 20,
+      "modified": "2026-09-23T13:40:48.483Z",
+      "created": "2026-09-20T12:49:24.848Z"
+    },
+    "Data/Specimen lesson": {
+      "path": "Data/Specimen lesson",
+      "type": "logic",
+      "nodeCount": 3,
+      "connectionCount": 8,
+      "modified": "2026-09-19T21:08:55.460Z",
+      "created": "2026-09-19T21:08:55.460Z"
+    },
+    "Data/Lesson": {
+      "path": "Data/Lesson",
+      "type": "logic",
+      "nodeCount": 5,
+      "connectionCount": 12,
+      "modified": "2026-09-23T13:41:25.889Z",
+      "created": "2026-09-23T13:41:25.889Z"
+    }
+  },
+  "stats": {
+    "totalComponents": 37,
+    "totalNodes": 400,
+    "totalConnections": 570
+  }
+}

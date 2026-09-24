@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d4aeeaec-af6e-4114-af0a-cdfd86c4adda",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ot_in",
+      "fromProperty": "entries",
+      "toId": "ot_fn",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-ordered",
+      "toId": "ot_out",
+      "toProperty": "ordered"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-loaded",
+      "toId": "ot_out",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "ot_in",
+      "fromProperty": "copy",
+      "toId": "ot_fn",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "ot_in",
+      "fromProperty": "audience",
+      "toId": "ot_fn",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-feed",
+      "toId": "ot_out",
+      "toProperty": "feed"
+    },
+    {
+      "fromId": "ot_fn",
+      "fromProperty": "out-inOrder",
+      "toId": "ot_out",
+      "toProperty": "inOrder"
+    }
+  ]
+}

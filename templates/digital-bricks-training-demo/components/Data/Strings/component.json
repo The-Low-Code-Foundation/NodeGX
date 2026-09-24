@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "913280da-9456-4aa4-96a0-06e51617796f",
+  "name": "Strings",
+  "path": "/Data/Strings",
+  "type": "logic",
+  "created": "2026-09-20T18:11:53.784Z",
+  "modified": "2026-09-20T18:11:53.784Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every word on screen, in one place. A Static Data node holds the resolved string bundle ({ common, lesson, timeline }); the kit's nodes take it on their Copy input and the graph's Translation nodes read the same object through Language Bundle. Unwired, every node still renders the English it ships with."
+}

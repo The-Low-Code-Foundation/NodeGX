@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8c06431d-ae40-4f70-972e-fa7c6b5d7b86",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_common",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_home",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_course",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_lesson",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_palette",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonCommon",
+      "toId": "app_ns_common",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonHome",
+      "toId": "app_ns_home",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonCourse",
+      "toId": "app_ns_course",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonLesson",
+      "toId": "app_ns_lesson",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonPalette",
+      "toId": "app_ns_palette",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "loaded",
+      "toId": "app_lang_once",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "app_lang_once",
+      "fromProperty": "switchedToOn",
+      "toId": "app_i18n",
+      "toProperty": "ChangeLanguage"
+    },
+    {
+      "fromId": "app_i18n",
+      "fromProperty": "CurrentLanguage",
+      "toId": "app_lang_var",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "app_lang_var",
+      "fromProperty": "value",
+      "toId": "app_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_people",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonPeople",
+      "toId": "app_ns_people",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_dossier",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonDossier",
+      "toId": "app_ns_dossier",
+      "toProperty": "Bundle"
+    }
+  ]
+}

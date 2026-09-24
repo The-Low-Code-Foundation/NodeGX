@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f819d91b-89f4-48d2-bf65-ee74477e47f2",
+  "name": "Objective row",
+  "path": "/People/Objective row",
+  "type": "visual",
+  "created": "2026-09-21T16:59:08.266Z",
+  "modified": "2026-09-21T16:59:08.266Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One objective a coach has agreed with their client, read-only: its title, an Archived pill when it is archived, where its answers are filed, what it is for, what it expects and what it needs from their programme. Every line arrives already worded; the row computes nothing."
+}

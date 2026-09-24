@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "21c67f6c-4a8a-4a75-ab6b-d4ca12d9cf96",
+  "name": "Roster row",
+  "path": "/People/Roster row",
+  "type": "visual",
+  "created": "2026-09-21T09:34:08.488Z",
+  "modified": "2026-09-21T09:49:57.015Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One person on the coach's roster: a name that is always there, their email, one plain meta line, their cohorts, and two plain-ink notices that only appear when true."
+}

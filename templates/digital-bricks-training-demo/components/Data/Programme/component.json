@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "102a95ed-d432-4f9d-a5cb-51f5d4fd83b7",
+  "name": "Programme",
+  "path": "/Data/Programme",
+  "type": "visual",
+  "created": "2026-09-20T12:46:59.161Z",
+  "modified": "2026-09-23T13:40:48.381Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "DEMO (TASK-L180): answers in the browser from the template's fixture, not from a backend. A learner's programme from the backend: their own (`course`) when the reader is the learner, a named learner's (`learnerProgramme`) when it is a coach. Split into the same outputs the fixture had."
+}

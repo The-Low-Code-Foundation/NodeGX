@@ -1,0 +1,539 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6fe0dc8c-a747-4386-92fe-14c2885dd75e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ls_page",
+      "type": "Page",
+      "label": "Lesson",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ls_band"
+      ],
+      "parameters": {
+        "urlPath": "lesson",
+        "title": "Lesson"
+      }
+    },
+    {
+      "id": "ls_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "ls_page",
+      "children": [
+        "ls_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ls_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "ls_band",
+      "children": [
+        "ls_eyebrow",
+        "ls_title",
+        "ls_hook",
+        "ls_layout",
+        "ls_none"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 920,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "ls_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "ls_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "ls_title",
+      "type": "Text",
+      "label": "The lesson title",
+      "x": 220,
+      "y": 480,
+      "parent": "ls_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ls_hook",
+      "type": "Text",
+      "label": "The hook — the lede, a consequence on their project",
+      "x": 220,
+      "y": 560,
+      "parent": "ls_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "maxWidth": {
+          "value": 680,
+          "unit": "px"
+        },
+        "marginBottom": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ls_layout",
+      "type": "Group",
+      "label": "The thread — .lesson-layout",
+      "x": 220,
+      "y": 660,
+      "parent": "ls_shell",
+      "children": [
+        "ls_stepper",
+        "ls_rows",
+        "ls_close"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "lesson-layout",
+        "styleCss": "display: grid;"
+      },
+      "metadata": {
+        "comment": "The lifted .lesson-layout is a 2-column CSS grid (32px thread gutter + content); its ::before draws the thread. The runtime writes display:flex inline on a Group, so styleCss restates grid to win. Every child must be a DIRECT child of this box — the Sprint-8 fragment contract — which is why the section rows come from a For Each placed here rather than inside a wrapper."
+      }
+    },
+    {
+      "id": "ls_stepper",
+      "type": "Group",
+      "label": "The stepper — .lesson-stepper",
+      "x": 280,
+      "y": 760,
+      "parent": "ls_layout",
+      "children": [
+        "ls_chips"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "lesson-stepper"
+      },
+      "metadata": {
+        "comment": "A wrapped row of content-sized chips (the layout-wrap-a-row-of-content-width-items recipe): each chip keeps its own width and flows to the next line, which is what a stepper wants at 390px. The validator's Columns suggestion is for grids of equal cells, which this is not."
+      }
+    },
+    {
+      "id": "ls_chips",
+      "type": "For Each",
+      "label": "One chip per step",
+      "x": 340,
+      "y": 860,
+      "parent": "ls_stepper",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Step chip"
+      }
+    },
+    {
+      "id": "ls_rows",
+      "type": "For Each",
+      "label": "The active step's sections, as knots",
+      "x": 280,
+      "y": 960,
+      "parent": "ls_layout",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Section row"
+      }
+    },
+    {
+      "id": "ls_close",
+      "type": "/Lesson/Step close",
+      "label": "Where this step leaves you",
+      "x": 280,
+      "y": 1060,
+      "parent": "ls_layout"
+    },
+    {
+      "id": "ls_fixture",
+      "type": "/Data/Lesson",
+      "label": "Their lesson, from the backend",
+      "x": 800,
+      "y": 160
+    },
+    {
+      "id": "ls_active",
+      "type": "Variable2",
+      "label": "Which step is open",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "name": "dbtActiveStepId"
+      },
+      "metadata": {
+        "comment": "Empty means the first step. Set by a chip or by the step close; nothing else writes it."
+      }
+    },
+    {
+      "id": "ls_index",
+      "type": "/Logic/Sections for step",
+      "label": "This step, resolved",
+      "x": 800,
+      "y": 560
+    },
+    {
+      "id": "ls_pick",
+      "type": "Set Variable",
+      "label": "A chip was pressed",
+      "x": 800,
+      "y": 860,
+      "parameters": {
+        "name": "dbtActiveStepId",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "The repeater surfaces the chip's `select` as itemOutputSignal-select and the row's id as itemActionItemId; the id IS the step id."
+      }
+    },
+    {
+      "id": "ls_forward",
+      "type": "Set Variable",
+      "label": "One way forward",
+      "x": 800,
+      "y": 1060,
+      "parameters": {
+        "name": "dbtActiveStepId",
+        "setWith": "string"
+      }
+    },
+    {
+      "id": "ls_scroll",
+      "type": "JavaScriptFunction",
+      "label": "Changing step starts at the top",
+      "x": 1100,
+      "y": 400,
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });\n"
+      },
+      "metadata": {
+        "comment": "The one thing a node cannot do. Runs only on the signal."
+      }
+    },
+    {
+      "id": "ls_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen",
+      "x": 760,
+      "y": 40,
+      "metadata": {
+        "comment": "One instance per page. Its `copy` output is the whole bundle; Logic/Sections for step puts it on every row, and the For Each maps it onto Section row's Copy input by name. Delete this node and the lesson still renders — in the English the kit ships (TASK-L160). A lesson is the learner's surface. When a coach can read one, this is the line that changes — one word, in the instance, rather than a flag threaded through the kit (TASK-L163 §3)."
+      },
+      "parameters": {
+        "audience": "learner"
+      }
+    },
+    {
+      "id": "t_ls_eyebrow",
+      "type": "Translation",
+      "label": "lesson:eyebrow",
+      "x": 1000,
+      "y": 1230,
+      "parameters": {
+        "Key": "eyebrow",
+        "Namespace": "lesson"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Concept · woven onto your project\" on ls_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_ls_page_title",
+      "type": "Translation",
+      "label": "lesson:pageTitle (the tab)",
+      "x": 1400,
+      "y": 1310,
+      "parameters": {
+        "Key": "pageTitle",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "seo_ls_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1400,
+      "y": 1430,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB, and it is the one learner-facing string a\n// Translation node cannot reach: `Page.title` is read off the node's PARAMETERS at\n// export time into the router index (utils/exporter/router.ts), and the Router hands\n// that to Noodl.SEO.setTitle on mount. A connection to the port is silently ignored —\n// measured, TASK-L161 §1: with the parameter removed and a Translation wired, the tab\n// read \"Home\", the component name.\n//\n// So the parameter stays as the BUILD-TIME FALLBACK (the router index needs it, and it\n// is what the tab shows for the instant before this runs), and the translated value\n// overrides it here. Same shape as the kit's built-in English: a fallback is not a\n// second owner.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
+      }
+    },
+    {
+      "id": "ls_lang_var",
+      "type": "Variable",
+      "label": "language — from the one owner in App",
+      "x": 1120,
+      "y": 40,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
+      }
+    },
+    {
+      "id": "ls_url",
+      "type": "PageInputs",
+      "label": "Which lesson — ?concept=",
+      "x": 800,
+      "y": 40,
+      "parameters": {
+        "queryParams": "concept"
+      },
+      "metadata": {
+        "comment": "The fixture was one lesson and the page never had to say which. The backend holds one per concept, so every link to this page passes the concept it names: the up-next card and the dossier's lesson link on /course (TASK-L171 §0b). A query parameter rather than a path one so /lesson with no concept is still a page, not a 404."
+      }
+    },
+    {
+      "id": "ls_state",
+      "type": "JavaScriptFunction",
+      "label": "Written, or not yet",
+      "x": 1100,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * WRITTEN, OR NOT YET (TASK-L171 §0b). `found` is undefined until the answer\n * arrives, so neither state draws while the lesson is on its way — the page does\n * not flash \"not written yet\" at somebody whose lesson is one request away.\n */\nOutputs.hasLesson = Inputs.found === true;\nOutputs.notWritten = Inputs.found === false;\n"
+      },
+      "ports": [
+        {
+          "name": "in-found",
+          "displayName": "found",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasLesson",
+          "displayName": "hasLesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notWritten",
+          "displayName": "notWritten",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ls_none",
+      "type": "Group",
+      "label": "Not written yet",
+      "x": 220,
+      "y": 1180,
+      "parent": "ls_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "Sprint 49 decision 7 promised this: Sam's next step has no lesson written for it until the engine sprint, and the up-next card opens it. MOUNTED, never visible (L157): visibility keeps the space. No colour of its own and no warning tone — a lesson not written yet is not something the learner did wrong."
+      },
+      "children": [
+        "ls_none_eyebrow",
+        "ls_none_title",
+        "ls_none_body",
+        "ls_none_back"
+      ]
+    },
+    {
+      "id": "ls_none_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 280,
+      "y": 1260,
+      "parent": "ls_none",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "ls_none_title",
+      "type": "Text",
+      "label": "Headline",
+      "x": 280,
+      "y": 1340,
+      "parent": "ls_none",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ls_none_body",
+      "type": "Text",
+      "label": "What it means",
+      "x": 280,
+      "y": 1420,
+      "parent": "ls_none",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 680,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "ls_none_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the course",
+      "x": 280,
+      "y": 1500,
+      "parent": "ls_none",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "ls_to_course",
+      "type": "RouterNavigate",
+      "label": "→ Course",
+      "x": 1100,
+      "y": 1500,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Course"
+      }
+    },
+    {
+      "id": "t_ls_none_eyebrow",
+      "type": "Translation",
+      "label": "lesson:notWritten.eyebrow",
+      "x": 1000,
+      "y": 1560,
+      "parameters": {
+        "Key": "notWritten.eyebrow",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_ls_none_title",
+      "type": "Translation",
+      "label": "lesson:notWritten.title",
+      "x": 1000,
+      "y": 1640,
+      "parameters": {
+        "Key": "notWritten.title",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_ls_none_body",
+      "type": "Translation",
+      "label": "lesson:notWritten.body",
+      "x": 1000,
+      "y": 1720,
+      "parameters": {
+        "Key": "notWritten.body",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_ls_none_back",
+      "type": "Translation",
+      "label": "lesson:notWritten.back",
+      "x": 1000,
+      "y": 1800,
+      "parameters": {
+        "Key": "notWritten.back",
+        "Namespace": "lesson"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ls_page"
+  ]
+}

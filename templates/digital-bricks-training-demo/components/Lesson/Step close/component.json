@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b4231f34-19df-410f-a65e-f8615ec9b24f",
+  "name": "Step close",
+  "path": "/Lesson/Step close",
+  "type": "visual",
+  "created": "2026-09-19T21:09:41.001Z",
+  "modified": "2026-09-19T21:14:18.869Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The micro-win under the active step (L48): the step's goal restated, and ONE way forward. The forward button is absent on the final step — the page's end-of-lesson action takes over there. A state change and a mark, never a score."
+}

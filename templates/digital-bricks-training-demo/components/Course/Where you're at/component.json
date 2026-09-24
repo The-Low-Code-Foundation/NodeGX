@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2f940117-c534-4528-ab24-8e77fc3b25c9",
+  "name": "Where you're at",
+  "path": "/Course/Where you're at",
+  "type": "visual",
+  "created": "2026-09-20T13:56:31.423Z",
+  "modified": "2026-09-20T13:56:31.423Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Two counts in a sentence, the end they agreed if there is one, and one line naming what to do next. NO denominator, no percentage, no bar, no ring and no countdown: `done` and `remaining` are two numbers a learner can read on their own, and `total` is computed and deliberately never rendered beside them."
+}
