@@ -27,6 +27,10 @@
           "type": "String"
         },
         {
+          "name": "content",
+          "type": "String"
+        },
+        {
           "name": "evaluation",
           "type": "Object"
         },
@@ -145,6 +149,14 @@
         },
         {
           "name": "submittedAt",
+          "type": "String"
+        },
+        {
+          "name": "content",
+          "type": "String"
+        },
+        {
+          "name": "linkUrl",
           "type": "String"
         },
         {

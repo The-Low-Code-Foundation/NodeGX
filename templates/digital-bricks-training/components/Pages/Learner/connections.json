@@ -608,6 +608,18 @@
       "fromProperty": "pm-learner",
       "toId": "lr_programme",
       "toProperty": "learnerId"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "work",
+      "toId": "lr_scoped",
+      "toProperty": "work"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "work",
+      "toId": "lr_live",
+      "toProperty": "work"
     }
   ]
 }

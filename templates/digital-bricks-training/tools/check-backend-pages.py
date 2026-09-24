@@ -35,7 +35,9 @@ FIXTURE_OUTPUTS = {
                        'history', 'deliverables', 'facts', 'submissions', 'onboardingFacts', 'concepts'],
     'Data/Lesson': ['title', 'hook', 'landing', 'conceptId', 'steps', 'sections', 'loaded'],
 }
-APPENDED = {'Data/Lesson': ['found']}
+# Data/Programme appends `work` (TASK-L182): the words a learner sent in and what came back, which
+# the fixture carried nowhere before L182 — appended, never interleaved, like `found`.
+APPENDED = {'Data/Lesson': ['found'], 'Data/Programme': ['work']}
 PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette']
 STAFF = ['Pages/People', 'Pages/Learner']
 
@@ -136,7 +138,9 @@ if not ins or 'reader' not in [p['name'] for p in ins[0].get('ports', [])]:
     fails.append("Data/Programme: no `reader` input")
 elif any('reader' in json.dumps(n.get('parameters', {})) for n in ins):
     fails.append("Data/Programme: `reader` carries a default on its Component Inputs — every instance must say who is reading")
-want_reader = {'Pages/Course': 'learner', 'Pages/Learner': 'coach'}
+# Pages/Lesson reads the learner's own programme for one thing, the work they sent against this
+# lesson's challenge (TASK-L182) — as the product's lesson page reads /api/course (L59, L118).
+want_reader = {'Pages/Course': 'learner', 'Pages/Learner': 'coach', 'Pages/Lesson': 'learner'}
 seen = {}
 for comp, (nodes, _) in comps.items():
     for n in nodes:

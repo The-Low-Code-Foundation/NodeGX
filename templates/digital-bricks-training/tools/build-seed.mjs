@@ -284,6 +284,19 @@ for (const d of pt.take('deliverables')) {
 // second source: every one of them must be an artifact submission below.
 const submissionsList = pt.take('submissions');
 
+// WHAT WAS SENT, AND WHAT CAME BACK (TASK-L182). One work entry per submission
+// on the timeline, and the reverse — content and evaluation live HERE, never on
+// a timeline entry, which stays the product's content-free shape. Until L182 the
+// rows carried no content at all and an `evaluation` of `{ summary: '(seeded)' }`,
+// so there was nothing for any page to show.
+const workList = pt.take('work');
+const workById = new Map();
+for (const w of workList) {
+  if (workById.has(w.submissionId)) fail(`work: '${w.submissionId}' appears twice`);
+  workById.set(w.submissionId, w);
+}
+const workUsed = new Set();
+
 // ── Timeline entries → rows ───────────────────────────────────────────────────
 const paths = new Map(); // programmeId -> pathId
 const pathFor = (programmeId, createdAt) => {
@@ -406,14 +419,32 @@ const ENTRY = {
     // row keeps only <rest>: stripping `submission:` alone leaves the source in
     // the row id and the function then writes it twice.
     const submissionId = e.id.slice(`submission:${source}:`.length);
-    const common = { submissionId, learnerId, attempt: t.take('attempt'), submittedAt: t.take('at'), evaluation: t.take('evaluated') ? { summary: '(seeded)' } : null };
+    const w = workById.get(submissionId);
+    if (!w) {
+      fail(`work: the submission '${submissionId}' on the timeline has no work entry — nothing to show when it is opened (TASK-L182)`);
+      return;
+    }
+    workUsed.add(submissionId);
+    const evaluated = t.take('evaluated');
+    if (evaluated !== (w.evaluation !== null)) fail(`work: '${submissionId}' is evaluated=${evaluated} on the timeline and has ${w.evaluation === null ? 'no' : 'an'} evaluation in work`);
+    if (w.evaluation && (w.evaluation.summary === '(seeded)' || !Array.isArray(w.evaluation.criteria) || w.evaluation.criteria.length === 0)) {
+      fail(`work: '${submissionId}' carries a placeholder evaluation — an evaluation names its criteria (TASK-L182)`);
+    }
+    const attempt = t.take('attempt');
+    const submittedAt = t.take('at');
+    if (w.attempt !== attempt || w.submittedAt !== submittedAt || w.source !== source) fail(`work: '${submissionId}' disagrees with its timeline entry on attempt, date or source`);
+    const common = { submissionId, learnerId, attempt, submittedAt, content: w.content, evaluation: w.evaluation };
     t.take('programmeId');
     t.take('anchor');
     if (source === 'artifact') {
-      add('ArtifactSubmission', { ...common, conceptId: t.take('conceptId'), sectionId: 'artifact', deliverableId: t.take('deliverableId') });
+      const conceptId = t.take('conceptId');
+      if (w.conceptId !== conceptId) fail(`work: '${submissionId}' names ${w.conceptId}, its timeline entry ${conceptId}`);
+      add('ArtifactSubmission', { ...common, conceptId, sectionId: w.sectionId, deliverableId: t.take('deliverableId') });
       t.take('assignmentId');
     } else {
-      add('AssignmentSubmission', { ...common, assignmentId: t.take('assignmentId') });
+      const assignmentId = t.take('assignmentId');
+      if (w.assignmentId !== assignmentId) fail(`work: '${submissionId}' answers ${w.assignmentId}, its timeline entry ${assignmentId}`);
+      add('AssignmentSubmission', { ...common, linkUrl: w.linkUrl, assignmentId });
       t.take('conceptId');
       t.take('deliverableId');
     }
@@ -503,6 +534,9 @@ for (const e of [...pt.take('history'), ...pt.take('entries')]) {
   handler(e, t);
   t.done();
 }
+
+// And the reverse: every work entry is a submission somebody can see.
+for (const id of workById.keys()) if (!workUsed.has(id)) fail(`work: '${id}' has no submission on the timeline — it would be work nobody can reach (TASK-L182)`);
 
 // The submissions list must be exactly the artifact rows' projection.
 for (const s of submissionsList) {

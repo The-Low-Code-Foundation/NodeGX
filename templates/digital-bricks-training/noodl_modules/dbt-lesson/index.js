@@ -131,6 +131,13 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     artifactSubmit: 'Bring it back',
     artifactSent: 'Sent. The reading against each criterion arrives here once a backend is connected.',
     artifactRevise: 'Revise and send it again',
+    artifactYouSent: 'What you sent · attempt {n}',
+    artifactNotRead: 'Your work is saved. It has not been read against the criteria yet.',
+    artifactNextEdit: 'If you change one thing',
+    artifactStatus: { met: 'Landed', partly: 'Partly there', not_yet: 'Not yet' },
+    artifactAttempt: 'Attempt {n}',
+    artifactShowHistory: 'See what you sent before ({n})',
+    artifactHideHistory: 'Hide earlier attempts',
     handoverFiles: 'What {product} will write for you',
     handoverWrite: 'Write these for me',
     handoverNeeds: 'Writing these reads your whole project, which needs the backend — this button asks for it.',
@@ -677,6 +684,55 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     );
   }
 
+  /*
+   * ── PER-CRITERION VERDICTS (TASK-L182, ported from ArtifactChallenge.tsx's
+   * CriteriaList) ──────────────────────────────────────────────────────────
+   * No count, no ratio, no ring of progress. The glyph is the non-colour
+   * channel: filled for met, half for partly, empty for not yet — an empty ring
+   * reads as "nothing there yet", which is exactly what not_yet means, and
+   * nothing here is a ✗. Shared by the lesson's challenge and a brief's answers,
+   * so one rule draws a verdict wherever one appears.
+   */
+  var VERDICT_GLYPH = { met: '\u25CF', partly: '\u25D0', not_yet: '\u25CB' };
+  function CriteriaList(criteria, statusLabels) {
+    return h(
+      'ul',
+      { className: 'artifact-criteria' },
+      (criteria || []).map(function (c, i) {
+        var status = VERDICT_GLYPH[str(c.status)] ? str(c.status) : 'not_yet';
+        return h(
+          'li',
+          { key: str(c.name) + '-' + i, className: 'artifact-criterion is-' + status },
+          h(
+            'p',
+            { className: 'artifact-criterion-head' },
+            h('span', { className: 'artifact-criterion-glyph', 'aria-hidden': 'true' }, VERDICT_GLYPH[status]),
+            h('span', { className: 'artifact-criterion-name' }, str(c.name)),
+            h('span', { className: 'artifact-criterion-status' }, (statusLabels || {})[status] || status)
+          ),
+          h('p', { className: 'artifact-criterion-note' }, str(c.note))
+        );
+      })
+    );
+  }
+
+  function Verdict(evaluation, statusLabels, nextEditLabel) {
+    return h(
+      'div',
+      { className: 'artifact-verdict' },
+      h('p', { className: 'artifact-verdict-summary' }, str(evaluation.summary)),
+      CriteriaList(evaluation.criteria, statusLabels),
+      evaluation.nextEdit
+        ? h(
+            'div',
+            { className: 'artifact-next-edit' },
+            h('p', { className: 'artifact-next-edit-label' }, nextEditLabel),
+            h('p', { className: 'artifact-next-edit-text' }, str(evaluation.nextEdit))
+          )
+        : null
+    );
+  }
+
   function ArtifactChallenge(p) {
   /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
    * read in this function — and in every closure it creates, such as an
@@ -685,9 +741,78 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     var COPY = lessonCopy(p);
 
     var rubric = data(p.rubric, []) || [];
-    var st = R.useState({ text: '', sent: false });
+    /*
+     * WHAT THEY SENT, AND WHAT CAME BACK (TASK-L182). The graph hangs this
+     * learner's attempts on the section (Pages/Lesson's `ls_attempts`), oldest
+     * first. The LATEST is shown with its verdict, the earlier ones behind a
+     * toggle — ArtifactChallenge.tsx's shape. Their words are TEXT in a <pre>,
+     * never the markdown path: an artifact is data, not a lesson.
+     *
+     * With no attempts this is the composer it always was. With attempts, the
+     * composer is behind "Revise and send it again" — and it still writes
+     * nothing: it EMITS, and the writes are sprint 51's.
+     */
+    var attempts = data(p.attempts, []) || [];
+    var latest = attempts.length ? attempts[attempts.length - 1] : null;
+    var earlier = attempts.slice(0, -1);
+    var st = R.useState({ text: '', sent: false, revising: false, historyOpen: false });
     var s = st[0];
     var set = st[1];
+    function patch(x) { set(Object.assign({}, s, x)); }
+
+    var composer = s.sent
+      ? h(
+          'div',
+          { className: 'artifact-composer-actions' },
+          h('p', { className: 'dbt-sent' }, COPY.artifactSent),
+          h(
+            'button',
+            {
+              type: 'button',
+              className: 'btn btn-thread',
+              onClick: function () {
+                patch({ sent: false });
+              }
+            },
+            COPY.artifactRevise
+          )
+        )
+      : h(
+          'div',
+          { className: 'artifact-composer' },
+          h('label', { className: 'artifact-composer-label' }, COPY.artifactPaste),
+          h('textarea', {
+            className: 'artifact-textarea',
+            rows: 8,
+            value: s.text,
+            placeholder: COPY.artifactPlaceholder,
+            onChange: function (e) {
+              patch({ text: e.target.value });
+            }
+          }),
+          h(
+            'div',
+            { className: 'artifact-composer-actions' },
+            h(
+              'button',
+              {
+                type: 'button',
+                className: 'btn btn-thread',
+                disabled: !s.text.trim(),
+                onClick: function () {
+                  var t = s.text.trim();
+                  if (!t) return;
+                  patch({ text: t, sent: true });
+                  emit(p, 'onSubmitContent', t);
+                  emit(p, 'onSubmit');
+                  emit(p, 'onAction');
+                }
+              },
+              COPY.artifactSubmit
+            )
+          )
+        );
+
     return h(
       'div',
       { className: 'artifact-challenge' },
@@ -705,58 +830,68 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
           })
         )
       ),
-      s.sent
+      latest
+        ? h(
+            'div',
+            { className: 'artifact-latest' },
+            h('p', { className: 'artifact-history-label' }, fill(COPY.artifactYouSent, { n: latest.attempt })),
+            h('pre', { className: 'artifact-history-content' }, str(latest.content)),
+            latest.evaluation ? Verdict(latest.evaluation, COPY.artifactStatus, COPY.artifactNextEdit) : h('p', { className: 'artifact-not-read' }, COPY.artifactNotRead)
+          )
+        : null,
+      latest && !s.revising
         ? h(
             'div',
             { className: 'artifact-composer-actions' },
-            h('p', { className: 'dbt-sent' }, COPY.artifactSent),
             h(
               'button',
               {
                 type: 'button',
                 className: 'btn btn-thread',
                 onClick: function () {
-                  set(Object.assign({}, s, { sent: false }));
+                  patch({ revising: true });
                 }
               },
               COPY.artifactRevise
             )
           )
-        : h(
+        : composer,
+      earlier.length
+        ? h(
             'div',
-            { className: 'artifact-composer' },
-            h('label', { className: 'artifact-composer-label' }, COPY.artifactPaste),
-            h('textarea', {
-              className: 'artifact-textarea',
-              rows: 8,
-              value: s.text,
-              placeholder: COPY.artifactPlaceholder,
-              onChange: function (e) {
-                set(Object.assign({}, s, { text: e.target.value }));
-              }
-            }),
+            { className: 'artifact-history' },
             h(
-              'div',
-              { className: 'artifact-composer-actions' },
-              h(
-                'button',
-                {
-                  type: 'button',
-                  className: 'btn btn-thread',
-                  disabled: !s.text.trim(),
-                  onClick: function () {
-                    var t = s.text.trim();
-                    if (!t) return;
-                    set({ text: t, sent: true });
-                    emit(p, 'onSubmitContent', t);
-                    emit(p, 'onSubmit');
-                    emit(p, 'onAction');
-                  }
-                },
-                COPY.artifactSubmit
-              )
-            )
+              'button',
+              {
+                type: 'button',
+                className: 'artifact-history-toggle',
+                'aria-expanded': s.historyOpen,
+                onClick: function () {
+                  patch({ historyOpen: !s.historyOpen });
+                }
+              },
+              s.historyOpen ? COPY.artifactHideHistory : fill(COPY.artifactShowHistory, { n: earlier.length })
+            ),
+            s.historyOpen
+              ? h(
+                  'ol',
+                  { className: 'artifact-history-list' },
+                  earlier
+                    .slice()
+                    .reverse()
+                    .map(function (a) {
+                      return h(
+                        'li',
+                        { key: str(a.submissionId) || a.attempt, className: 'artifact-history-item' },
+                        h('p', { className: 'artifact-history-label' }, fill(COPY.artifactAttempt, { n: a.attempt })),
+                        h('pre', { className: 'artifact-history-content' }, str(a.content)),
+                        a.evaluation ? CriteriaList(a.evaluation.criteria, COPY.artifactStatus) : null
+                      );
+                    })
+                )
+              : null
           )
+        : null
     );
   }
 
@@ -1498,6 +1633,11 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     lessonContinue: 'Continue \u2192',
     lessonStart: 'Start \u2192',
     submissionOpenLesson: 'Open the lesson this came from',
+    assignmentAnswers: 'What you\u2019ve sent',
+    assignmentAnswerAttempt: 'Attempt {n}',
+    assignmentCoachReads: 'Your coach reads this. There\u2019s no score and nothing is marked.',
+    verdictStatus: { met: 'Landed', partly: 'Partly there', not_yet: 'Not yet' },
+    verdictNextEdit: 'If you change one thing',
     comments_one: '{n} comment',
     comments_other: '{n} comments',
     notes_one: '{n} note',
@@ -1844,11 +1984,46 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
       ];
     },
     assignment: function (e, TL_COPY) {
+      var answers = data(e.answers, []) || [];
       return [
         e.withdrawn ? meta(TL_COPY.assignmentWithdrawn) : e.answered ? meta(TL_COPY.assignmentSent) : null,
         md(e.brief, 'path-card-body'),
         e.criteria && e.criteria.length ? h('p', { className: 'path-card-label' }, TL_COPY.assignmentCriteria) : null,
-        list('path-card-list', e.criteria)
+        list('path-card-list', e.criteria),
+        /*
+         * WHAT THEY SENT AGAINST IT (TASK-L182, ported from AssignmentComposer's
+         * answer list and L147's staff read). The graph hangs the answers on the
+         * entry, as it hangs notes, with each one's date already formatted. The
+         * words go through the ONE markdown path, as the product's do; a verdict
+         * is drawn only when there is one, and a coach-read brief says so
+         * instead of looking unfinished. The same list on both audiences: a
+         * coach reads their client's answer under their own brief.
+         */
+        answers.length
+          ? h(
+              'div',
+              { key: 'answers', className: 'assignment-answer-history' },
+              h('p', { className: 'path-card-label' }, TL_COPY.assignmentAnswers),
+              h(
+                'ul',
+                { className: 'assignment-answer-list' },
+                answers.map(function (a, i) {
+                  return h(
+                    'li',
+                    { key: str(a.submissionId) || i, className: 'assignment-answer-attempt' },
+                    h('p', { className: 'assignment-answer-meta' }, fill(TL_COPY.assignmentAnswerAttempt, { n: a.attempt }) + (str(a.when) ? ' \u00B7 ' + str(a.when) : '')),
+                    str(a.content) ? md(a.content, 'path-card-body') : null,
+                    str(a.linkUrl) && /^https?:\/\//i.test(str(a.linkUrl))
+                      ? h('p', { className: 'assignment-answer-link' }, h('a', { href: str(a.linkUrl), target: '_blank', rel: 'noopener noreferrer nofollow' }, str(a.linkUrl)))
+                      : null,
+                    a.evaluation
+                      ? Verdict(a.evaluation, TL_COPY.verdictStatus, TL_COPY.verdictNextEdit)
+                      : h('p', { className: 'assignment-answer-note' }, TL_COPY.assignmentCoachReads)
+                  );
+                })
+              )
+            )
+          : null
       ];
     },
     submission: function (e, TL_COPY) {
@@ -2702,7 +2877,6 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     var asksFor = data(seg.asksFor, []) || [];
     var captured = data(seg.captured, []) || [];
     var submissions = data(seg.submissions, []) || [];
-    var lessonId = str(p.lessonConceptId);
 
     var body = [];
     /*
@@ -2740,13 +2914,15 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
             submissions.map(function (sub) {
               var key = str(sub.conceptId) + '-' + str(sub.submittedAt);
               /*
-               * ONE LINK, AND IT GOES SOMEWHERE. The product links every
-               * submission to its lesson; this template has ONE lesson page, and
-               * a link to a lesson that does not exist here is a control that
-               * goes nowhere (L165's one-name-links precedent). So the work on
-               * THAT lesson is a button and the rest are plain text.
+               * EVERY PIECE OF WORK OPENS ITS OWN LESSON (TASK-L182). Until L181
+               * this template had ONE lesson page and linked only the work on
+               * it — which, once the up-next lesson moved on, was none. Every
+               * piece of work now answers a lesson Sam has reached, and every
+               * such lesson is written (tools/check-lessons.mjs), so each is a
+               * button, as the product links every submission to its lesson.
+               * It EMITS the concept; the graph navigates.
                */
-              if (lessonId && str(sub.conceptId) === lessonId) {
+              if (str(sub.conceptId)) {
                 return h(
                   'button',
                   {
@@ -2754,6 +2930,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
                     type: 'button',
                     className: 'dossier-submission-link',
                     onClick: function () {
+                      emit(live.current, 'onLessonConceptId', str(sub.conceptId));
                       emit(live.current, 'onLessonOpened');
                     }
                   },
@@ -2821,13 +2998,13 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     inputProps: {
       open: port('boolean', 'Open', { default: false, description: 'Whether the dialog is showing. The graph owns it: Opened on a segment sets it, Closed here clears it.' }),
       segment: obj('Segment', { description: 'The objective to show — one of Logic/Dossier’s segments: { label, asksFor[], captured[{field,name,value}], submissions[{conceptId,title,submittedAt}], markdown }.' }),
-      lessonConceptId: text('Lesson concept', { description: 'The concept the one lesson page in this app renders. Work on it is a button; work on any other lesson is plain text, because there is nowhere for it to go.' }),
       copy: COPY_PORT
     },
     outputProps: {
       onClosed: sig('Closed', 'Escape, the overlay or Close. Clear Open.'),
       onCopied: sig('Copied', 'The objective’s markdown is on the clipboard.'),
-      onLessonOpened: sig('Lesson opened', 'The learner pressed the work they sent in on this app’s lesson. Navigate to it.')
+      onLessonOpened: sig('Lesson opened', 'The learner pressed a piece of work they sent in. Lesson concept already holds which lesson. Navigate to it.'),
+      onLessonConceptId: out('string', 'Lesson concept', 'The lesson the pressed piece of work answered (TASK-L182).')
     }
   };
 

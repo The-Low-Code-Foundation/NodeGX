@@ -1160,6 +1160,13 @@
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--ink);
+  /* TASK-L182, found by rendering: with no basis, a criterion whose name is a
+     full sentence wrapped WHOLE under its glyph, leaving the glyph alone on a
+     line. A basis lets the name take the row and wrap inside itself, so the
+     glyph stays beside the words it marks. The product's rule has no basis
+     either; its rubrics are shorter than a hand-authored lesson's. */
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 
 .artifact-criterion-status {
@@ -1206,6 +1213,117 @@
 }
 
 /* ── Share — unemphasised on purpose, and off by default ── */
+
+/* ── WHAT THEY SENT, AND WHAT CAME BACK (TASK-L182) ─────────────────────────
+   LIFTED from globals.css 4117–4166 (.artifact-history*) and 8150–8190
+   (.assignment-answer*) by line range, like the rest of this file. Two rules
+   are new: `.artifact-latest`, the latest attempt shown open above its verdict
+   (the product shows the verdict and hides the text; here the text is the point
+   a visitor came to read), and `.artifact-not-read`, the quiet line an attempt
+   with no verdict yet carries. No `--warm` added here: the verdict's own rules
+   above keep the product's single use of it, on "Partly there". */
+.artifact-latest {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.875rem;
+}
+
+.artifact-not-read {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  margin: 0.5rem 0 0;
+}
+
+.artifact-history {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.875rem;
+}
+
+.artifact-history-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.artifact-history-list {
+  list-style: none;
+  margin: 0.875rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.artifact-history-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0 0 0.35rem;
+}
+
+.artifact-history-content {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.875rem;
+  margin: 0 0 0.625rem;
+  max-height: 14rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.assignment-answer-history {
+  margin: 14px 0 0;
+}
+
+.assignment-answer-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+}
+
+.assignment-answer-attempt {
+  border-left: var(--edge-thin);
+  padding: 2px 0 2px 12px;
+  margin: 0 0 10px;
+}
+
+.assignment-answer-meta {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--ink-mute);
+  margin: 0 0 4px;
+}
+
+.assignment-answer-link a {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--thread-deep);
+  word-break: break-all;
+}
+
+.assignment-answer-note {
+  font-family: var(--font-prose);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 62ch;
+  margin: 4px 0 10px;
+}
 
 .artifact-share {
   margin: 0 0 0.25rem;

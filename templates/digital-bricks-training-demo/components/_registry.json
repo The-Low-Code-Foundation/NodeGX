@@ -46,16 +46,16 @@
     "Lesson/Step close": {
       "path": "Lesson/Step close",
       "type": "visual",
-      "nodeCount": 7,
-      "connectionCount": 5,
+      "nodeCount": 8,
+      "connectionCount": 6,
       "modified": "2026-09-19T21:14:19.087Z",
       "created": "2026-09-19T21:09:41.072Z"
     },
     "Pages/Lesson": {
       "path": "Pages/Lesson",
       "type": "page",
-      "nodeCount": 34,
-      "connectionCount": 31,
+      "nodeCount": 36,
+      "connectionCount": 34,
       "modified": "2026-09-23T13:43:46.166Z",
       "created": "2026-09-19T21:11:05.603Z"
     },
@@ -70,8 +70,8 @@
     "Pages/Palette": {
       "path": "Pages/Palette",
       "type": "page",
-      "nodeCount": 10,
-      "connectionCount": 2,
+      "nodeCount": 15,
+      "connectionCount": 6,
       "modified": "2026-09-19T21:11:43.331Z",
       "created": "2026-09-19T21:11:43.331Z"
     },
@@ -79,7 +79,7 @@
       "path": "Logic/Ordered timeline",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 3,
+      "connectionCount": 8,
       "modified": "2026-09-20T12:49:24.849Z",
       "created": "2026-09-20T12:49:24.849Z"
     },
@@ -95,7 +95,7 @@
       "path": "Logic/Standing",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 23,
+      "connectionCount": 29,
       "modified": "2026-09-20T13:54:08.479Z",
       "created": "2026-09-20T13:54:08.479Z"
     },
@@ -110,8 +110,8 @@
     "Course/Where you're at": {
       "path": "Course/Where you're at",
       "type": "visual",
-      "nodeCount": 10,
-      "connectionCount": 9,
+      "nodeCount": 11,
+      "connectionCount": 10,
       "modified": "2026-09-20T13:56:31.463Z",
       "created": "2026-09-20T13:56:31.463Z"
     },
@@ -135,7 +135,7 @@
       "path": "Logic/Roster filter",
       "type": "logic",
       "nodeCount": 4,
-      "connectionCount": 17,
+      "connectionCount": 18,
       "modified": "2026-09-21T09:45:00.190Z",
       "created": "2026-09-21T09:33:19.208Z"
     },
@@ -150,8 +150,8 @@
     "People/Roster row": {
       "path": "People/Roster row",
       "type": "visual",
-      "nodeCount": 9,
-      "connectionCount": 10,
+      "nodeCount": 11,
+      "connectionCount": 14,
       "modified": "2026-09-21T09:49:57.113Z",
       "created": "2026-09-21T09:34:08.541Z"
     },
@@ -223,7 +223,7 @@
       "path": "Pages/Learner",
       "type": "page",
       "nodeCount": 59,
-      "connectionCount": 101,
+      "connectionCount": 103,
       "modified": "2026-09-23T13:45:08.603Z",
       "created": "2026-09-21T13:01:49.484Z"
     },
@@ -279,7 +279,7 @@
       "path": "Data/Programme",
       "type": "visual",
       "nodeCount": 6,
-      "connectionCount": 20,
+      "connectionCount": 21,
       "modified": "2026-09-23T13:40:48.483Z",
       "created": "2026-09-20T12:49:24.848Z"
     },
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 403,
-    "totalConnections": 579
+    "totalNodes": 414,
+    "totalConnections": 607
   }
 }

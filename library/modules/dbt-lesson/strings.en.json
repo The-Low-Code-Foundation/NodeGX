@@ -38,6 +38,17 @@
     "artifactSubmit": "Bring it back",
     "artifactSent": "Sent. The reading against each criterion arrives here once a backend is connected.",
     "artifactRevise": "Revise and send it again",
+    "artifactYouSent": "What you sent · attempt {n}",
+    "artifactNotRead": "Your work is saved. It has not been read against the criteria yet.",
+    "artifactNextEdit": "If you change one thing",
+    "artifactStatus": {
+      "met": "Landed",
+      "partly": "Partly there",
+      "not_yet": "Not yet"
+    },
+    "artifactAttempt": "Attempt {n}",
+    "artifactShowHistory": "See what you sent before ({n})",
+    "artifactHideHistory": "Hide earlier attempts",
     "handoverFiles": "What {product} will write for you",
     "handoverWrite": "Write these for me",
     "handoverNeeds": "Writing these reads your whole project, which needs the backend — this button asks for it.",
@@ -68,6 +79,15 @@
     "lessonContinue": "Continue →",
     "lessonStart": "Start →",
     "submissionOpenLesson": "Open the lesson this came from",
+    "assignmentAnswers": "What you’ve sent",
+    "assignmentAnswerAttempt": "Attempt {n}",
+    "assignmentCoachReads": "Your coach reads this. There’s no score and nothing is marked.",
+    "verdictStatus": {
+      "met": "Landed",
+      "partly": "Partly there",
+      "not_yet": "Not yet"
+    },
+    "verdictNextEdit": "If you change one thing",
     "comments_one": "{n} comment",
     "comments_other": "{n} comments",
     "notes_one": "{n} note",

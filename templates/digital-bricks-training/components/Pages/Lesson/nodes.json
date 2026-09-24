@@ -531,6 +531,59 @@
         "Key": "notWritten.back",
         "Namespace": "lesson"
       }
+    },
+    {
+      "id": "ls_programme",
+      "type": "/Data/Programme",
+      "label": "Their own programme — for the work they sent in",
+      "x": 1400,
+      "y": 420,
+      "metadata": {
+        "comment": "reader: learner, exactly as /course places it (TASK-L182). The product's lesson page reads /api/course too (L59, L118); here it is for one thing — what the learner sent in against this lesson's challenge, and what came back."
+      },
+      "parameters": {
+        "reader": "learner"
+      }
+    },
+    {
+      "id": "ls_attempts",
+      "type": "JavaScriptFunction",
+      "label": "Hang their attempts on the challenge",
+      "x": 1400,
+      "y": 580,
+      "parameters": {
+        "functionScript": "/*\n * WHAT THEY SENT IN, UNDER THE CHALLENGE THAT ASKED FOR IT (TASK-L182).\n *\n * The product's ArtifactChallenge reads this learner's attempts for this concept\n * and shows the latest one's verdict with the earlier ones behind a toggle. Here\n * the attempts ride ON the section object, because the kit's Section node\n * spreads a section's fields into the renderer's props — so the challenge gets\n * them with no new port, and every other section passes through untouched.\n *\n * A pure derivation: it runs whenever the sections or the work arrive, and the\n * sections go out at once even before the work has come back, so the lesson\n * never waits on the programme to render.\n */\nconst sections = Array.isArray(Inputs.sections) ? Inputs.sections : null;\nif (!sections) return;\nconst concept = String(Inputs.conceptId || '');\nconst work = Array.isArray(Inputs.work) ? Inputs.work : [];\nconst mine = work.filter((w) => w && w.source === 'artifact' && w.conceptId === concept);\nOutputs.sections = sections.map((s) =>\n  s && s.kind === 'artifact_challenge'\n    ? Object.assign({}, s, {\n        attempts: mine.filter((w) => !w.sectionId || w.sectionId === s.id).sort((a, b) => a.attempt - b.attempt)\n      })\n    : s\n);\n"
+      },
+      "ports": [
+        {
+          "name": "in-sections",
+          "displayName": "sections",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-work",
+          "displayName": "work",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptId",
+          "displayName": "conceptId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-sections",
+          "displayName": "sections",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
     }
   ],
   "visualRoots": [

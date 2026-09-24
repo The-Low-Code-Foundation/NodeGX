@@ -548,9 +548,9 @@ work they sent in for it, and **Copy as markdown**.
 - **What they typed is shown as text.** A captured answer never goes through markdown or HTML — an
   answer is not a lesson. The fixture carries one holding `<img onerror>`, `<b>` and `**bold**` to
   prove it; all three render as the characters they are.
-- **Only work on this app's one lesson is a link.** The product links every piece of work to its
-  lesson; here there is one lesson page, and a link to a lesson that does not exist is a control
-  that goes nowhere. Everything else is plain text.
+- **Every piece of work opens its own lesson** (TASK-L182). Until L181 there was one lesson page and
+  only the work on it was a link; every piece of work now answers a lesson Sam has reached, and each
+  is written, so each is a button. The dialog EMITS the concept and `Pages/Course` navigates.
 - **Which objective is open is the `dbtDossierOpen` Variable**, set by the segment's signal and
   cleared on close — and cleared when the one link is followed, because a Variable outlives the page
   and the dialog would otherwise reopen on the way back.
@@ -648,3 +648,22 @@ the live site, **after checking it carries the NDA-017 `.value` fix** (the i18ne
   the concept; `Course/Timeline row` bubbles it; `Pages/Course` looks the row up and navigates.
   **A learner's row only**: on a coach's programme the lesson route is not theirs to follow.
 - **Palette's specimen is lesson 0**, not the list (`specimenText()` in `tools/lib/fixtures.mjs`).
+
+## What Sam sent in, and what came back (TASK-L182)
+
+- **`programme.work` in the fixture** holds every submission's words and evaluation: the product's
+  `artifactEvaluationSchema`, criteria named verbatim from the rubric, `met | partly | not_yet`
+  with a note, a summary, and a nullable `nextEdit`. **No number, ever.** Timeline entries stay the
+  product's content-free shape, and `submissions` stays the dossier's projection. `build-seed`
+  requires one work entry per submission and the reverse, and refuses a placeholder evaluation.
+- **The Programme function returns `work`** from the two submission queries it already made, with
+  no new query. `Data/Programme` appends it as an output (`check-backend-pages.py` pins it as
+  appended).
+- **Under the lesson's challenge:** `Pages/Lesson` reads the learner's own programme and hangs the
+  concept's attempts on the `artifact_challenge` section. The kit's `ArtifactChallenge` shows the
+  latest attempt's text (as TEXT, in a `<pre>`), its verdict, and earlier attempts behind a toggle.
+  The composer sits behind *Revise and send it again* and still writes nothing.
+- **Under the brief:** `Logic/Ordered timeline` hangs a brief's answers on its entry, with the date
+  formatted by the graph. The kit's assignment card lists them through the one markdown path. A
+  coach-read brief (the product's default) says *Your coach reads this…* rather than looking
+  unfinished. The coach's programme view shows the same answers, in the coach's own words.

@@ -140,6 +140,12 @@
       "fromProperty": "out-items",
       "toId": "fp_split",
       "toProperty": "in-items"
+    },
+    {
+      "fromId": "fp_split",
+      "fromProperty": "out-work",
+      "toId": "fp_out",
+      "toProperty": "work"
     }
   ]
 }

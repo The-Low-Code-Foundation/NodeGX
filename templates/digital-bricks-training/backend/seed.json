@@ -95,9 +95,35 @@
         "learnerId": "l-sam",
         "attempt": 1,
         "submittedAt": "2026-09-06T19:20:00.000Z",
-        "evaluation": null,
+        "content": "When you type my address, your phone sends a message to a computer somewhere else — that's where my page actually lives. That computer sends a copy of the page back, and your phone puts it on your screen, photos and all. So what you're looking at is your own copy. The real one stays where it is, and if I change it, the next person gets the new one. If you fill in the form and press Send, your message goes back across to that computer, and it passes it on to my email. I don't see anything until it lands in my inbox.",
+        "evaluation": {
+          "criteria": [
+            {
+              "name": "Says their phone or computer asks for the page, and a computer somewhere else sends it back",
+              "status": "met",
+              "note": "\"Your phone sends a message to a computer somewhere else… that computer sends a copy of the page back\" — the whole exchange, in words a customer would follow."
+            },
+            {
+              "name": "Makes clear that what they see is a copy, and the original stays where the page is hosted",
+              "status": "met",
+              "note": "\"What you're looking at is your own copy. The real one stays where it is\" answers the question most people get stuck on, and the line about the next person getting the new one shows you really have it."
+            },
+            {
+              "name": "Explains that pressing Send makes a message travel away from their phone to something that passes it to your inbox",
+              "status": "partly",
+              "note": "The message does travel away from their phone, which is the part that matters. It does not have to go back to the same computer that holds your page, though — say \"to something that passes it on to my email\" and it stays true however the form ends up being built."
+            },
+            {
+              "name": "Uses no word you could not explain to them on their doorstep",
+              "status": "met",
+              "note": "Nothing here needs explaining. \"Address\", \"copy\" and \"inbox\" are words anyone on a doorstep already has."
+            }
+          ],
+          "summary": "This would make sense to a customer standing on their doorstep, and the part about their own copy is exactly right. One small change keeps the Send part true however your form is built.",
+          "nextEdit": "Change \"your message goes back across to that computer\" to \"your message goes off to something that passes it on to my email\"."
+        },
         "conceptId": "what-the-web-is",
-        "sectionId": "artifact",
+        "sectionId": "web-16",
         "deliverableId": null
       },
       {
@@ -105,11 +131,40 @@
         "learnerId": "l-sam",
         "attempt": 1,
         "submittedAt": "2026-09-07T21:12:00.000Z",
+        "content": "**My scope note — version one**\n\n**The one job.** A stranger with a broken bike finds my page, believes I'm real, and sends me a message without phoning.\n\n**What's on the page.**\n- What I do, in one sentence\n- Where I cover — about ten miles round town\n- Six photos of bikes I've fixed\n- A form: their name, how to reach them, and what's wrong with the bike\n\n**Not yet.**\n- Online booking. I'd love it, but it means my real diary, cancellations, and people turning up when I'm not there.\n- Prices. They depend on the bike.\n- A blog. I won't keep it up and an empty one looks worse than none.\n\n**The assumption.** That people would rather write to me than ring. If most of them would rather phone, the form isn't the main thing — my number is.",
         "evaluation": {
-          "summary": "(seeded)"
+          "criteria": [
+            {
+              "name": "States the one job of version one as a single sentence about a real person doing a real thing",
+              "status": "met",
+              "note": "\"A stranger with a broken bike finds my page, believes I'm real, and sends me a message without phoning\" — one sentence, one real person, one thing they do."
+            },
+            {
+              "name": "Lists what is on the page, and the list stops at four things or fewer",
+              "status": "met",
+              "note": "Four things, and you stopped at four."
+            },
+            {
+              "name": "Has a “not yet” list with at least two things on it that you genuinely wanted",
+              "status": "met",
+              "note": "Booking is on it, and you say you would love it. That is the one that counts: cutting something you did not want is easy."
+            },
+            {
+              "name": "Names at least one assumption that would change the approach if it were wrong",
+              "status": "partly",
+              "note": "You named a good one: that people would rather write than ring. Say what you would put on the page if it turns out wrong, and it becomes a decision instead of a worry."
+            },
+            {
+              "name": "Contains no technical words that you could not explain to a friend",
+              "status": "met",
+              "note": "Nothing here you could not say to a customer. \"Form\" is the most technical word in it, and everyone knows what that is."
+            }
+          ],
+          "summary": "This is a boundary you can actually hold Claude Code to: one job, four things, and a \"not yet\" list with something on it you genuinely wanted. The assumption you picked is the right one to keep an eye on.",
+          "nextEdit": "Add one line under the assumption: what goes on the page instead if most people would rather phone."
         },
         "conceptId": "scoping-what-to-build",
-        "sectionId": "artifact",
+        "sectionId": "s-14",
         "deliverableId": "obj-scope"
       }
     ],
@@ -162,7 +217,9 @@
         "learnerId": "l-sam",
         "attempt": 1,
         "submittedAt": "2026-09-07T21:12:00.000Z",
+        "content": "**My scope note — version one**\n\n**The one job.** A stranger with a broken bike finds my page, believes I'm real, and sends me a message without phoning.\n\n**What's on the page.**\n- What I do, in one sentence\n- Where I cover — about ten miles round town\n- Six photos of bikes I've fixed\n- A form: their name, how to reach them, and what's wrong with the bike\n\n**Not yet.**\n- Online booking. I'd love it, but it means my real diary, cancellations, and people turning up when I'm not there.\n- Prices. They depend on the bike.\n- A blog. I won't keep it up and an empty one looks worse than none.\n\n**The assumption.** That people would rather write to me than ring. If most of them would rather phone, the form isn't the main thing — my number is.",
         "evaluation": null,
+        "linkUrl": null,
         "assignmentId": "brief-scope"
       }
     ],

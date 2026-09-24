@@ -372,19 +372,7 @@
     {
       "fromId": "cs_standing",
       "fromProperty": "nextLessonConceptId",
-      "toId": "cs_dos_reveal",
-      "toProperty": "lessonConceptId"
-    },
-    {
-      "fromId": "cs_standing",
-      "fromProperty": "nextLessonConceptId",
       "toId": "cs_go",
-      "toProperty": "pm-concept"
-    },
-    {
-      "fromId": "cs_standing",
-      "fromProperty": "nextLessonConceptId",
-      "toId": "cs_dos_lesson",
       "toProperty": "pm-concept"
     },
     {
@@ -416,6 +404,18 @@
       "fromProperty": "out-go",
       "toId": "cs_orow_go",
       "toProperty": "navigate"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "work",
+      "toId": "cs_ordered",
+      "toProperty": "work"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onLessonConceptId",
+      "toId": "cs_dos_lesson",
+      "toProperty": "pm-concept"
     }
   ]
 }

@@ -44,6 +44,12 @@
       "fromProperty": "out-inOrder",
       "toId": "ot_out",
       "toProperty": "inOrder"
+    },
+    {
+      "fromId": "ot_in",
+      "fromProperty": "work",
+      "toId": "ot_fn",
+      "toProperty": "in-work"
     }
   ]
 }
