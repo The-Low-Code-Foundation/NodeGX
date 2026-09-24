@@ -1,77 +1,60 @@
 /**
- * P94 STY-005: the Tokens section of the Styles panel.
+ * P94 STY-005: the token sections of the Styles panel.
  *
- * Shows every design token grouped by category (Colors, Spacing, etc.).
- * Each group is collapsible. Token rows show a visual preview and the current value.
+ * Shows the design tokens of ONE group (Spacing, Typography, …) as a top-level section of the
+ * panel, every row editable. Token rows show a visual preview and the current value.
  *
  * Moved here from `DesignTokenPanel/components/DesignTokensTab` when STY-005 retired that panel
  * (R3). 🔴 It was NOT scaffolding like the `ColorsTab` beside it: it is a working, undoable token
  * editor, and `TokenCategorySection` under it is held by `tests-unit/fix-015/token-row-editing`.
  * The retirement deleted the shell and the placeholder tab; this survived the move.
+ *
+ * 🔴 **P103 CMG-005: one section per group, no "Other tokens".** Until 2026-09-24 this component
+ * drew every non-colour group inside ONE outer section titled *Other tokens*, closed, with every
+ * group inside it closed too — so the composer P102 built sat two closed levels down under a word
+ * that says *unimportant*. Richard: *"The typography and animation bits are important, they're not
+ * 'Other'."* The outer wrapper is gone; `StylesPanel` now draws Type, Spacing, Borders, Effects and
+ * Motion as peers of Colours and Looks, each through this component, and the panel (not this file)
+ * owns which are open so `revealStyle` can open one from outside.
+ *
+ * ⚠️ The reason the wrapper existed was real and is answered differently now: the groups used to
+ * read as *the same layer* as Colours and Looks. They ARE tokens, and every row is badged and
+ * previewed as one; the section subtitle says what the section holds in a sentence. The confusion
+ * R2's badges exist to prevent was one level up; the subtitle is that level's badge.
  */
 
 import { useProjectDesignTokenContext } from '@noodl-contexts/ProjectDesignTokenContext';
 import React from 'react';
 
-import {
-  StyleTokenRecord,
-  TOKEN_CATEGORY_GROUPS,
-  TokenCategoryGroup,
-  TokenResolver,
-  groupForTokenCategory
-} from '@noodl-models/StyleTokensModel';
-
-import { CollapsableSection } from '@noodl-core-ui/components/sidebar/CollapsableSection';
-import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
+import { StyleTokenRecord, TokenCategoryGroup, TokenResolver, groupForTokenCategory } from '@noodl-models/StyleTokensModel';
 
 import { openTokenComposer } from '../../composer/openTokenComposer';
+import { StylesSection } from '../../shared';
+import { StylesSectionSpec } from '../../stylesPanelRoute';
 import { TokenCategorySection } from '../TokenCategorySection';
 
-export interface TokensSectionProps {
-  /**
-   * The heading this whole set sits under.
-   *
-   * 🔴 Without it the group sections — Spacing, Borders, Effects, Animation — were drawn as PEERS
-   * of Colours, Text styles and Looks, with nothing anywhere saying they were tokens. Read off the
-   * rendered panel, the headings were `Colours | Text styles | Looks | Spacing | Borders | Effects
-   * | Animation`: seven things, four of which a person had no way to know were a different layer
-   * from the other three. That is the exact confusion R2 made the badges for, reappearing one
-   * level up.
-   */
-  title?: string;
-  /**
-   * Groups the Styles panel already draws elsewhere, beside the styles they collide with. Left
-   * out here so that no token is editable in two places on one screen — see `StylesPanel.tsx`.
-   * Omitted entirely, this renders every group, which is what it did as a tab of its own.
-   */
-  excludeGroups?: TokenCategoryGroup[];
+export interface TokenGroupSectionProps {
+  /** Which section this is: its id, title, subtitle and the token group it draws. */
+  section: StylesSectionSpec & { group: TokenCategoryGroup };
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  isFirst?: boolean;
+  /** CMG-002 / CMG-004 put their header controls here. */
+  actions?: React.ReactNode;
 }
 
-export function TokensSection({ excludeGroups, title }: TokensSectionProps = {}) {
+export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, actions }: TokenGroupSectionProps) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
-  const shownGroups = React.useMemo(
-    () => TOKEN_CATEGORY_GROUPS.filter((g) => !(excludeGroups ?? []).includes(g)),
-    [excludeGroups]
+
+  const tokens = React.useMemo(
+    () =>
+      designTokens.filter((token) => {
+        // Reads TOKEN_CATEGORIES (through `groupForTokenCategory`) — which is what the comment
+        // here always claimed and, until HLT-007, was not what the code did.
+        return getGroupForToken(token) === section.group;
+      }),
+    [designTokens, section.group]
   );
-
-  // Group tokens by their display group
-  const grouped = React.useMemo(() => {
-    const map: Partial<Record<TokenCategoryGroup, StyleTokenRecord[]>> = {};
-    for (const group of TOKEN_CATEGORY_GROUPS) {
-      map[group] = [];
-    }
-    for (const token of designTokens) {
-      // Reads TOKEN_CATEGORIES (through `groupForTokenCategory`) — which is what the comment
-      // here always claimed and, until HLT-007, was not what the code did.
-      const groupForToken = getGroupForToken(token);
-      if (groupForToken && map[groupForToken]) {
-        map[groupForToken].push(token);
-      }
-    }
-    return map;
-  }, [designTokens]);
-
-  const customCount = designTokens.filter((t) => t.isCustom).length;
 
   // P102 CMP-001 §3 — every preview resolves the `var()`s inside it. One resolver per token set,
   // so a gradient built from `var(--primary)` paints the project's blue rather than nothing.
@@ -88,65 +71,24 @@ export function TokensSection({ excludeGroups, title }: TokensSectionProps = {})
     [designTokens, styleTokensModel]
   );
 
-  const body = (
-    <div>
-      {customCount > 0 && (
-        <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--theme-color-fg-default-shy)' }}>
-          {/*
-            🔴 Counts and resets EVERY token, including the groups this section is not drawing —
-            `resetAllToDefaults` has no group argument and inventing a filtered count here would
-            put a number next to a button that does something larger than the number describes.
-            The sentence says which it is.
-          */}
-          {customCount} token{customCount !== 1 ? 's' : ''} overriding defaults, across all groups
-          <button
-            onClick={() => styleTokensModel?.resetAllToDefaults({ undo: true })}
-            style={{
-              marginLeft: '8px',
-              background: 'none',
-              border: 'none',
-              color: 'var(--theme-color-primary)',
-              cursor: 'pointer',
-              fontSize: '11px',
-              padding: 0
-            }}
-          >
-            Reset all
-          </button>
-        </div>
-      )}
-
-      {shownGroups.map((group) => {
-        const tokens = grouped[group] ?? [];
-        if (tokens.length === 0) return null;
-
-        return (
-          <CollapsableSection
-            key={group}
-            title={group}
-            variant={SectionVariant.Panel}
-            isClosed={Boolean(title)}
-            UNSAFE_style={{ marginTop: group === shownGroups[0] && !title ? '16px' : '8px' }}
-          >
-            <TokenCategorySection
-              tokens={tokens}
-              onTokenChange={(name, value) => styleTokensModel?.setToken(name, value, { undo: true })}
-              onTokenReset={(name) => styleTokensModel?.deleteCustomToken(name, { undo: true })}
-              resolve={resolve}
-              onOpenComposer={onOpenComposer}
-            />
-          </CollapsableSection>
-        );
-      })}
-    </div>
-  );
-
-  if (!title) return body;
-
   return (
-    <CollapsableSection title={title} variant={SectionVariant.Panel} isClosed UNSAFE_style={{ marginTop: '8px' }}>
-      {body}
-    </CollapsableSection>
+    <StylesSection
+      id={section.id}
+      title={section.title}
+      subtitle={section.subtitle}
+      isFirst={isFirst}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      actions={actions}
+    >
+      <TokenCategorySection
+        tokens={tokens}
+        onTokenChange={(name, value) => styleTokensModel?.setToken(name, value, { undo: true })}
+        onTokenReset={(name) => styleTokensModel?.deleteCustomToken(name, { undo: true })}
+        resolve={resolve}
+        onOpenComposer={onOpenComposer}
+      />
+    </StylesSection>
   );
 }
 

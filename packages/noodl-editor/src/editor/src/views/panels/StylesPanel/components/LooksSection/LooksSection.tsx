@@ -8,6 +8,7 @@ import { IconName } from '@noodl-core-ui/components/common/Icon';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { InlineNameInput, StylesSection, useGoToWearer, useLooksRevision, useOpenUsageRow } from '../../shared';
 import { displayTypeName } from '../../format';
+import { StylesSectionSpec } from '../../stylesPanelRoute';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
 
 /**
@@ -20,7 +21,14 @@ import { StyleRow, StyleSectionEmpty } from '../StyleRow';
  * which is the MCP authoring question, named as its own phase in README §4.1. This surface renames,
  * deletes and counts. STY-005 §3 says so in writing.
  */
-export function LooksSection() {
+export interface LooksSectionProps {
+  section: StylesSectionSpec;
+  /** CMG-005: the panel owns the open state, so `revealStyle` can open this from outside. */
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function LooksSection({ section, isOpen, onOpenChange }: LooksSectionProps) {
   const looksRevision = useLooksRevision();
   const [renaming, setRenaming] = useState<string | null>(null);
   const [openUsage, toggleUsage] = useOpenUsageRow();
@@ -89,8 +97,11 @@ export function LooksSection() {
 
   return (
     <StylesSection
-      title="Looks"
-      subtitle="A named set of styles a node can wear. Change the Look and everything wearing it changes."
+      id={section.id}
+      title={section.title}
+      subtitle={section.subtitle}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
     >
       {looks.length === 0 && (
         <StyleSectionEmpty>
@@ -114,6 +125,7 @@ export function LooksSection() {
             // types (`findVariant` takes both), so a name alone is not an identity here.
             key={`${typename}/${name}`}
             name={name}
+            typename={typename}
             value={displayTypeName(typename)}
             layer="Look"
             usageCount={worn.length}

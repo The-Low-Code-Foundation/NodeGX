@@ -55,6 +55,11 @@ export interface StyleRowProps {
   onGoToWearer?: (wearer: StyleRowWearer) => void;
   menuItems: MenuDialogProps['items'];
   testId?: string;
+  /**
+   * P103 CMG-005: for a Look, its node type — rendered as `data-style-typename` so `revealStyle`
+   * can tell two Looks of one name apart, the same two `LooksSection` keys apart.
+   */
+  typename?: string;
 }
 
 /** One node that names this style, and where it is. Mirrors `StylesModel.usage`'s `Wearer`. */
@@ -88,7 +93,8 @@ export function StyleRow({
   onToggleUsage,
   onGoToWearer,
   menuItems,
-  testId
+  testId,
+  typename
 }: StyleRowProps) {
   // AC3: a count is a door only when there is something behind it. `unused` opens nothing, and a
   // section that never passed a handler gets the plain text STY-005 shipped.
@@ -114,7 +120,13 @@ export function StyleRow({
 
   return (
     <div className={css['Wrapper']} data-style-row-wrapper={name}>
-      <div className={css['Root']} data-test={testId} data-style-row={name} data-style-layer={layer}>
+      <div
+        className={css['Root']}
+        data-test={testId}
+        data-style-row={name}
+        data-style-layer={layer}
+        data-style-typename={typename}
+      >
         {swatch !== undefined && (
           <div className={css['Swatch']}>
             <div className={css['SwatchFill']} style={{ backgroundColor: swatch }} />

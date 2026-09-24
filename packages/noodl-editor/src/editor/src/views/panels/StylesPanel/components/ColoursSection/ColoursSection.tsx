@@ -15,6 +15,7 @@ import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { InlineNameInput, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
+import { StylesSectionSpec } from '../../stylesPanelRoute';
 import { describeUsage } from '../../format';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
 
@@ -27,12 +28,29 @@ import { StyleRow, StyleSectionEmpty } from '../StyleRow';
  * of that name. Listing them apart, in two panels, is how nobody ever found that out.
  */
 export interface ColoursSectionProps {
+  section: StylesSectionSpec;
   stylesModel: StylesModel | null;
   /** Bumped on every `stylesChanged`; read so the list re-derives rather than caching a stale copy. */
   revision: number;
+  isFirst?: boolean;
+  /** CMG-005: the panel owns the open state, so `revealStyle` can open this from outside. */
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** The closed *Design tokens (N)* list inside — opened by a reveal of a colour token. */
+  isTokensOpen: boolean;
+  onTokensOpenChange: (open: boolean) => void;
 }
 
-export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
+export function ColoursSection({
+  section,
+  stylesModel,
+  revision,
+  isFirst,
+  isOpen,
+  onOpenChange,
+  isTokensOpen,
+  onTokensOpenChange
+}: ColoursSectionProps) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
   const [isCreating, setIsCreating] = useState(false);
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -129,9 +147,12 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
 
   return (
     <StylesSection
-      title="Colours"
-      subtitle="Named colours this project uses. A style is yours to change; a token comes from the design token set."
-      isFirst
+      id={section.id}
+      title={section.title}
+      subtitle={section.subtitle}
+      isFirst={isFirst}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
     >
       {styles.length === 0 && colourTokens.length === 0 && (
         <StyleSectionEmpty>No colours yet.</StyleSectionEmpty>
@@ -188,7 +209,9 @@ export function ColoursSection({ stylesModel, revision }: ColoursSectionProps) {
       <CollapsableSection
         title={`Design tokens (${colourTokens.length})`}
         variant={SectionVariant.Panel}
-        isClosed
+        sectionId="colour-tokens"
+        isCollapsed={!isTokensOpen}
+        onCollapsedChange={(collapsed) => onTokensOpenChange(!collapsed)}
         UNSAFE_style={{ marginTop: '4px' }}
       >
         {colourTokens.map((token) => (

@@ -137,7 +137,7 @@ function TextStylePicker(props) {
         {filteredStyles.length === 0 && (
           <div className="textstyles-empty">
             {textStyles.length === 0
-              ? 'This project has no text styles. Since 0.3.0, set type with the Font Size, Font Weight and Line Height fields below — they take the Typography tokens under Styles → Other tokens.'
+              ? 'This project has no text styles. Since 0.3.0, set type with the Font Size, Font Weight and Line Height fields below — they take the Type tokens under Styles → Type.'
               : 'No text style matches that name.'}
           </div>
         )}

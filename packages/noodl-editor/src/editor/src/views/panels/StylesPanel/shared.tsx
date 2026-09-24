@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { StylesModel } from '@noodl-models/StylesModel';
+import { EditorSettings } from '@noodl-utils/editorsettings';
 
 import { NodeGraphContextTmp } from '../../../contexts/NodeGraphContext/NodeGraphContext';
 import { ToastLayer } from '../../ToastLayer/ToastLayer';
@@ -10,6 +11,7 @@ import { CollapsableSection } from '@noodl-core-ui/components/sidebar/Collapsabl
 import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
 
 import css from './StylesPanel.module.scss';
+import { readSectionOpenState, SectionOpenState, StylesSectionId } from './stylesPanelRoute';
 
 /**
  * One `StylesModel` per mounted panel, disposed with it.
@@ -75,21 +77,55 @@ export function useLooksRevision(): number {
   return revision;
 }
 
+/**
+ * P103 CMG-005 §3.2 — which sections are open, remembered per person.
+ *
+ * `EditorSettings` is the store the sidebar already uses for its widths and float rects
+ * (`useSidePanelLayout.ts`) and the inspector for its collapsed state, so it is the one here:
+ * a person's panel opens the way they left it, on every project, and survives a restart.
+ * Nothing about it goes in the project file.
+ */
+const SECTIONS_SETTING = 'styles.sections';
+
+export function useStylesSectionsOpen(): [SectionOpenState, (id: StylesSectionId, open: boolean) => void] {
+  const [open, setOpen] = useState<SectionOpenState>(() =>
+    readSectionOpenState(EditorSettings.instance.get(SECTIONS_SETTING))
+  );
+
+  const set = useCallback((id: StylesSectionId, isOpen: boolean) => {
+    setOpen((prev) => {
+      if (prev[id] === isOpen) return prev;
+      const next = { ...prev, [id]: isOpen };
+      EditorSettings.instance.set(SECTIONS_SETTING, next);
+      return next;
+    });
+  }, []);
+
+  return [open, set];
+}
+
 export interface StylesSectionProps {
+  id: StylesSectionId;
   title: string;
   /** What this section holds, in a sentence, for someone who has never met the distinction. */
   subtitle?: string;
   isFirst?: boolean;
+  /** CMG-005: controlled by the panel, so `revealStyle` can open a section from outside. */
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
   actions?: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export function StylesSection({ title, subtitle, isFirst, actions, children }: StylesSectionProps) {
+export function StylesSection({ id, title, subtitle, isFirst, isOpen, onOpenChange, actions, children }: StylesSectionProps) {
   return (
     <CollapsableSection
+      sectionId={id}
       title={title}
       variant={SectionVariant.Panel}
       hasVisibleOverflow
+      isCollapsed={!isOpen}
+      onCollapsedChange={(collapsed) => onOpenChange(!collapsed)}
       actions={actions}
       UNSAFE_style={{ marginTop: isFirst ? '12px' : '8px' }}
     >
@@ -139,7 +175,6 @@ export function InlineNameInput({ placeholder, initialValue, onCommit, onCancel 
     </div>
   );
 }
-
 
 /**
  * P94 STY-006 AC5 — go to the node that wears this style.

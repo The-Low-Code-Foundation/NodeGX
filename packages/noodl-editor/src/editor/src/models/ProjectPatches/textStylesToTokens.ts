@@ -664,7 +664,7 @@ export function describeTextStyleConversion(report: TextStyleConversionReport): 
   const n = report.converted.length;
   if (n > 0) {
     lines.push(
-      `${n} text style${n === 1 ? '' : 's'} became typography tokens (Styles → Other tokens → Typography). ` +
+      `${n} text style${n === 1 ? '' : 's'} became typography tokens (Styles → Type). ` +
         `Everything that wore ${n === 1 ? 'it' : 'them'} now uses the tokens, so changing a token changes every wearer.`
     );
     const copied = new Set(report.converted.flatMap((c) => c.copied));

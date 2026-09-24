@@ -145,7 +145,12 @@ function TokenRow({ token, onTokenChange, onTokenReset, resolve, onOpenComposer 
   };
 
   return (
-    <div className={`${css.TokenRow} ${token.isCustom ? css.isOverridden : ''} ${composes ? css.composes : ''}`}>
+    <div
+      className={`${css.TokenRow} ${token.isCustom ? css.isOverridden : ''} ${composes ? css.composes : ''}`}
+      // P103 CMG-005: the one selector `revealStyle` uses to find any row — `StyleRow` carries
+      // the same attribute, so a token, a Look and a colour style are found the same way.
+      data-style-row={token.name}
+    >
       {/* Preview swatch for colors */}
       {isColor && (
         <div
