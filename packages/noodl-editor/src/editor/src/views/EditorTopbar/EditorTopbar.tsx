@@ -249,8 +249,8 @@ export function EditorTopbar({
             least load-bearing controls here — the pill is a preview address bar
             (⌘L focuses it, and it returns as soon as the side panel narrows) and
             dev tools has its own keybinding. Unmounted rather than hidden, so
-            neither stays in the tab order while invisible. P103 CMG-011: both are
-            in the ⋯ menu while they are out — a control the bar folds away must
+            neither stays in the tab order while invisible. P103 CMG-011: dev tools
+            is in the ⋯ menu while it is out — a control the bar folds away must
             still be reachable from the bar. */}
         {!isTiny && (
           <>
@@ -382,8 +382,9 @@ export function EditorTopbar({
 
         {/* P103 CMG-011 row 3: everything the narrow bar folds away, in one ⋯ menu and in words.
             It replaces a layout dropdown whose only label was the current layout's glyph (read as
-            "the preview mode options are gone"), and it carries dev tools and the preview routes
-            while the tiny bar has no room for them. */}
+            "the preview mode options are gone"), and it carries dev tools while the tiny bar has no
+            room for it. Not the route list: out of the pill it read as "Show / in the preview" with
+            no context, and choosing one moved the preview and Layers (CMG-011 row 4). */}
         {isSmall && (
           <div ref={moreMenuTrigger}>
             <Tooltip content="More: preview layout, dev tools" UNSAFE_triggerClassName={css.TooltipPositioner}>
@@ -430,14 +431,7 @@ export function EditorTopbar({
                         label: 'Open dev tools',
                         icon: IconName.Bug,
                         onClick: () => EventDispatcher.instance.emit('viewer-open-devtools')
-                      },
-                      ...(routes.length > 0 ? ['divider' as const] : []),
-                      ...routes.map((url) => ({
-                        label: `Show ${url} in the preview`,
-                        icon: url === '/' ? IconName.Home : IconName.File,
-                        isHighlighted: routes.length > 1 && navigationState.route === url,
-                        onClick: () => onRouteChanged(url)
-                      }))
+                      }
                     ]
                   : [])
               ]}
