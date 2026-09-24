@@ -20,6 +20,7 @@ import React from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot, type Root } from 'react-dom/client';
 
+import { ProjectModel } from '@noodl-models/projectmodel';
 import type { StyleTokensModel } from '@noodl-models/StyleTokensModel/StyleTokensModel';
 import { StyleTokenRecord } from '@noodl-models/StyleTokensModel/TokenCategories';
 import { TokenResolver } from '@noodl-models/StyleTokensModel/TokenResolver';
@@ -29,6 +30,7 @@ import { TokenComposer, type ProjectColour } from '@noodl-core-ui/components/tok
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 import { PreviewTokenInjector } from '../../../../services/PreviewTokenInjector';
 import PopupLayer from '../../../popuplayer';
+import { loadProjectFontFaces } from './projectFontFaces';
 
 /**
  * The colours the chips offer (RC-2), in the order a person reaches for them. Every semantic
@@ -70,9 +72,28 @@ export function openTokenComposer(args: {
   /** Runs once the popout is gone, however it went. A host that built `model` for this disposes it here. */
   onClosed?: () => void;
 }): void {
-  const { token, anchor, tokens, model, onClosed } = args;
+  const { token } = args;
   if (!isComposerCategory(token.category)) return;
   const category: ComposerCategory = token.category;
+
+  // A font list offers only faces a visitor will see (CMP-005): the ones the project's modules
+  // declare, drawn from their own files. Read before the list first measures anything.
+  if (category === 'typography-family') {
+    void loadProjectFontFaces(ProjectModel.instance?._retainedProjectDirectory).then(
+      (projectFonts) => mountComposer(args, category, projectFonts),
+      () => mountComposer(args, category, [])
+    );
+    return;
+  }
+  mountComposer(args, category, []);
+}
+
+function mountComposer(
+  args: Parameters<typeof openTokenComposer>[0],
+  category: ComposerCategory,
+  projectFonts: string[]
+): void {
+  const { token, anchor, tokens, model, onClosed } = args;
 
   const map = new Map(tokens.map((t) => [t.name, t]));
   const resolver = new TokenResolver(map);
@@ -88,10 +109,6 @@ export function openTokenComposer(args: {
     closed = true;
     if (popout) PopupLayer.instance.hidePopout(popout);
   };
-
-  const projectFonts = tokens
-    .filter((t) => t.category === 'typography-family')
-    .flatMap((t) => t.value.split(', ').slice(0, 1));
 
   flushSync(() =>
     root.render(

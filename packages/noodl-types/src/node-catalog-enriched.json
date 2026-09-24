@@ -14731,18 +14731,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -16854,18 +16843,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -47626,18 +47604,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -49721,18 +49688,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -52233,18 +52189,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -54325,18 +54270,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -59351,18 +59285,7 @@
             ]
           },
           {
-            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
-            "inputs": [
-              "boxShadowOffsetX",
-              "boxShadowOffsetY",
-              "boxShadowInset",
-              "boxShadowBlurRadius",
-              "boxShadowSpreadRadius",
-              "boxShadowColor"
-            ]
-          },
-          {
-            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "condition": "boxShadowEnabled = true AND boxShadowSource != token",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",

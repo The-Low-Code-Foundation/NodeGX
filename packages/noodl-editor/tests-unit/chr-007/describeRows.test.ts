@@ -108,19 +108,22 @@ describe('CHR-007 AC3 — describeRows reads the gates off the model', () => {
       expect(row.switchedOff).toBeUndefined();
     });
 
-    it('exactly six Box Shadow rows are switched off', () => {
+    // P102 CMP-008 added the shadow's source: Shadow Source and Shadow Token wait on the switch too.
+    it('exactly eight Box Shadow rows are switched off: the six fields, Shadow Source and Shadow Token', () => {
       const off = rows.filter((row) => row.group === 'Box Shadow' && row.switchedOff);
-      expect(off.map((row) => row.name).sort()).toEqual([...SHADOW_PORTS].sort());
+      expect(off.map((row) => row.name).sort()).toEqual([...SHADOW_PORTS, 'boxShadowSource', 'boxShadowToken'].sort());
     });
   });
 
   describe('reverted arm — Shadow Enabled on', () => {
     const rows = describeRows({ ports: panelPortsFor(GROUP, { boxShadowEnabled: true }) });
 
-    it('no Box Shadow row carries a gate', () => {
+    // Source unset reads as Custom (`!= token`): the six fields are live, and only Shadow Token —
+    // the other mode's one field — still waits, on Shadow Source rather than on the switch.
+    it('the six fields and Shadow Source are live; only Shadow Token carries a gate', () => {
       const shadow = rows.filter((row) => row.group === 'Box Shadow');
-      expect(shadow.length).toBe(SHADOW_PORTS.length + 1);
-      expect(shadow.filter((row) => row.switchedOff)).toEqual([]);
+      expect(shadow.length).toBe(SHADOW_PORTS.length + 3);
+      expect(shadow.filter((row) => row.switchedOff).map((row) => row.name)).toEqual(['boxShadowToken']);
     });
   });
 

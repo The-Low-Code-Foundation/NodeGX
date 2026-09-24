@@ -31,7 +31,7 @@ Everything below is drawn on the *Token Composer* mockup canvas (2026-09-24) unl
 | **Used by** *(new)* | *"Worn by 14 nodes on 3 pages"* in the composer header, and *"Nothing wears this yet"* | A reach count over the project ([[count-the-reach-first]]). The honest number is what makes a beginner trust editing a shared token |
 | **Strength on a kept literal** *(new)* | Slide the alpha of a Playful purple without re-serialising it | Needs a spelling-preserving colour writer; P102 RC-6 deliberately refused to offer the slider rather than risk a rewrite |
 | **Describe it** *(new)* | Type *"a soft blue glow from the top corner"* and the composer fills in the controls. You adjust from there | The editor already talks to Claude. The model writes a **model** through the codec, never raw CSS, so the round-trip rule still holds |
-| **Font browser** *(new)* | Any Google Font by name, or upload your own file, with the font files handled | UPG-003 already moves font files with text styles. Reuse that path |
+| **Font browser** *(new)* | Any Google Font by name, or upload your own file, with the font files handled | UPG-003 already moves font files with text styles, and P88's `presetFonts.ts` places a bundled face as a module (Nunito, DM Sans, Source Sans 3 ship in the app today). Reuse that path. 🔴 Since P102 s2 the composer offers **only** faces a visitor will see; the 25 web fonts it used to list without shipping (Manrope, Poppins, Lora, JetBrains Mono…) wait here — a font is offered once this row can put its files in the project |
 
 ## 3. Moved into P102 on 2026-09-24 (Richard: *"I like all your ideas"*)
 

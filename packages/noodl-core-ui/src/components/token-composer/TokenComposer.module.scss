@@ -735,6 +735,11 @@
   color: var(--theme-color-fg-default-shy);
 }
 
+/* CMP-007 row 1: the current font is one the project does not ship. */
+.FontKind.missing {
+  color: var(--theme-color-warning);
+}
+
 .FontSample {
   font-size: 12px;
   color: var(--theme-color-fg-default-shy);

@@ -64,6 +64,19 @@ describe('CMP-005 — the font-family codec', () => {
       expect(encodeFontFamily(model)).toBe(`Lora, ${FONT_TAILS.serif.join(', ')}`);
     });
 
+    it('never repeats the picked font behind itself (the serif and mono tails name four offered fonts)', () => {
+      const toSerif = withLeadFont(decodeFontFamily(SANS)!, 'Georgia', 'serif').model;
+      expect(encodeFontFamily(toSerif)).toBe("Georgia, ui-serif, Cambria, 'Times New Roman', Times, serif");
+      const serifDefault = decodeFontFamily("ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif")!;
+      expect(encodeFontFamily(withLeadFont(serifDefault, 'Times New Roman', 'serif').model)).toBe(
+        "'Times New Roman', Georgia, Cambria, Times, serif"
+      );
+      const monoDefault = decodeFontFamily("ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace")!;
+      expect(encodeFontFamily(withLeadFont(monoDefault, 'Menlo', 'mono').model)).toBe(
+        "Menlo, SFMono-Regular, 'SF Mono', Consolas, monospace"
+      );
+    });
+
     it('quotes a name only when it has a space, in the style the tail uses', () => {
       const { model } = withLeadFont(decodeFontFamily(SANS)!, 'DM Sans', 'sans');
       expect(model.lead).toBe("'DM Sans'");

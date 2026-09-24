@@ -48,7 +48,11 @@ const SHADOW_PORTS = [
   'boxShadowInset',
   'boxShadowBlurRadius',
   'boxShadowSpreadRadius',
-  'boxShadowColor'
+  'boxShadowColor',
+  // P102 CMP-008: a shadow's source. The six fields above now also ask `boxShadowSource != token`,
+  // so the group's rows share `Shadow Enabled is on` rather than one identical condition.
+  'boxShadowSource',
+  'boxShadowToken'
 ];
 
 function dynamicportsOf(node: CatalogNode) {
@@ -118,21 +122,26 @@ describe('CHR-008 R8 — the reason carries what a group line needs', () => {
   const ports = panelPortsFor(GROUP, {});
   const reason = (name: string) => ports.find((port) => port.name === name)['__fb021GateReason'] as PortGateReason;
 
+  // Shadow Source since P102 CMP-008: it is the Box Shadow row gated by the switch alone.
   it('a boolean gate is one clause the panel can switch: condition, clauses and turnOn', () => {
-    expect(reason('boxShadowColor')).toMatchObject({
+    expect(reason('boxShadowSource')).toMatchObject({
       gatePortName: 'boxShadowEnabled',
       condition: 'Shadow Enabled is on',
       turnOn: true,
       connective: 'or'
     });
-    expect(reason('boxShadowColor').clauses).toEqual([
+    expect(reason('boxShadowSource').clauses).toEqual([
       { param: 'boxShadowEnabled', op: '=', value: 'true', label: 'Shadow Enabled', valueLabel: 'on', isBoolean: true }
     ]);
   });
 
   it('🔴 the per-row sentence FB-021 pins is unchanged', () => {
+    expect(reason('boxShadowSource').sentence).toBe(
+      `${ports.find((p) => p.name === 'boxShadowSource').displayName} applies when Shadow Enabled is on.`
+    );
+    // …and a two-parameter AND says both halves (CMP-008's six fields).
     expect(reason('boxShadowColor').sentence).toBe(
-      `${ports.find((p) => p.name === 'boxShadowColor').displayName} applies when Shadow Enabled is on.`
+      'Shadow Color applies when Shadow Enabled is on and Shadow Source is not From a style token.'
     );
   });
 
@@ -170,7 +179,7 @@ describe('CHR-008 AC1 — a Group with Shadow Enabled off', () => {
   const gates = groupGatesFor(rows);
   const shadow = gates.get('Box Shadow');
 
-  it('Box Shadow draws ONE line standing in for all six rows', () => {
+  it('Box Shadow draws ONE line standing in for all eight rows', () => {
     expect(shadow).toBeDefined();
     expect(shadow.gatePortName).toBe('boxShadowEnabled');
     expect(shadow.gateLabel).toBe('Shadow Enabled');
@@ -179,7 +188,8 @@ describe('CHR-008 AC1 — a Group with Shadow Enabled off', () => {
 
   it('offers Turn on, and the sentence names every row once and the switch once', () => {
     expect(shadow.turnOn).toBe(true);
-    expect(shadow.sentence).toMatch(/ apply once Shadow Enabled is on\.$/);
+    // Case 2 since CMP-008 (the rows differ, all AND, sharing the switch): true of every row.
+    expect(shadow.sentence).toMatch(/ apply only when Shadow Enabled is on\.$/);
     for (const name of SHADOW_PORTS) expect(shadow.sentence).toContain(rows.find((r) => r.name === name).displayName);
     expect(shadow.sentence.split('Shadow Enabled').length - 1).toBe(1);
   });

@@ -119,9 +119,13 @@ export interface PortGateReason {
   /**
    * The parameter to focus when the author clicks the reason — AC3.
    *
-   * The first clause's parameter, which for every multi-clause condition in the
+   * The first clause's parameter, which for nearly every multi-clause condition in the
    * catalog is also every other clause's: a condition that gates `width` asks
    * about `sizeMode` five times, never about five different things.
+   *
+   * 🔴 Not all: `useLabel = true AND labelPosition = top`, and P102's `boxShadowEnabled = true AND
+   * boxShadowSource = token`, each ask two things, and the first is usually already met. A panel with the node's values at hand passes the
+   * reason through {@link withUnmetGate} so the link goes to what is still missing.
    */
   gatePortName: string;
   /** That parameter's label, for the clickable part of the row. */
@@ -465,6 +469,29 @@ export function reasonsForGatedPorts(
   }
 
   return reasons;
+}
+
+/**
+ * P102 CMP-007 row 2 — send the author to the clause the node does not meet yet.
+ *
+ * {@link reasonsForGatedPorts} works from declarations, so its `gatePortName` is the first clause's
+ * parameter. For an `and` over two parameters that is usually the one already satisfied: a Group
+ * with its shadow on and Source *Custom* read *"Shadow Token applies when Shadow Enabled is on and
+ * Shadow Source is From a style token. **Show Shadow Enabled**"* — a link to a switch that was on.
+ * Each clause is judged the way `evaluateDynamicPortsCondition` judges it (`'' + value === text`).
+ * Returns the reason unchanged when every clause is met, when it is an `or`, or when the first
+ * unmet clause is already the one it names.
+ */
+export function withUnmetGate(reason: PortGateReason, getParameter: (name: string) => unknown): PortGateReason {
+  if (reason.connective !== 'and' || !reason.clauses) return reason;
+  const holds = (clause: GateClause) => {
+    const value = getParameter(clause.param);
+    if (clause.op === 'NOT SET') return value === undefined;
+    return clause.op === '=' ? '' + value === clause.value : '' + value !== clause.value;
+  };
+  const unmet = reason.clauses.find((clause) => !holds(clause));
+  if (!unmet || unmet.param === reason.gatePortName) return reason;
+  return { ...reason, gatePortName: unmet.param, gateLabel: unmet.label, turnOn: false };
 }
 
 /**

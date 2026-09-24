@@ -414,14 +414,59 @@ async function main() {
     record(`${token} opens with its words`, String(ok) === 'ok' && expect.test(String(s)), String(s));
     await shot(editor, file);
     if (token === '--font-sans') {
+      // CMP-007 row 1: the list offers only faces a visitor will see. Every row says where its face
+      // comes from; a face the project ships is DRAWN (its files loaded into the editor), and the
+      // web fonts no project here ships are gone. `projectDrawn` needs `project >= 1` beside it, or a
+      // fixture that ships nothing would grade the loader by an empty set.
       const fontRows = await readJson(
-        `JSON.stringify((() => { const rows = Array.from(document.querySelectorAll('[data-token-composer] [role="option"]')); return { rows: rows.length, unavailable: rows.filter((r) => /preview unavailable/.test(r.textContent)).length, drawn: rows.filter((r) => !/preview unavailable/.test(r.textContent)).length }; })())`
+        `JSON.stringify((() => { const rows = Array.from(document.querySelectorAll('[data-token-composer] [role="option"]')).map((r) => ({ name: r.querySelector('span span') ? r.querySelector('span span').textContent : '', text: r.textContent })); const where = (t) => /not in this project/.test(t) ? 'missing' : /in this project/.test(t) ? 'project' : /own device font/.test(t) ? 'device' : /on every computer/.test(t) ? 'everywhere' : 'OTHER'; const w = rows.map((r) => where(r.text)); const project = rows.filter((r, i) => w[i] === 'project'); return { rows: rows.length, project: project.map((r) => r.name), projectDrawn: project.filter((r) => !/preview unavailable/.test(r.text)).length, device: w.filter((x) => x === 'device').length, everywhere: w.filter((x) => x === 'everywhere').length, missing: rows.filter((r, i) => w[i] === 'missing').map((r) => r.name), other: rows.filter((r, i) => w[i] === 'OTHER').map((r) => r.name), webFonts: rows.filter((r) => /^(Manrope|Poppins|Lora|Montserrat|JetBrains Mono)/.test(r.name)).length }; })())`
       );
       record(
-        'CMP-005 AC3 — the font list draws each font in itself, and says when it cannot',
-        fontRows.rows > 10 && fontRows.drawn > 0,
+        'CMP-005 AC3 / CMP-007 row 1 — every font offered reaches a visitor; the project\'s own are drawn from its files',
+        fontRows.project.length >= 1 &&
+          fontRows.projectDrawn === fontRows.project.length &&
+          fontRows.device === 3 &&
+          fontRows.everywhere >= 8 &&
+          fontRows.other.length === 0 &&
+          fontRows.webFonts === 0 &&
+          fontRows.missing.length <= 1,
         JSON.stringify(fontRows)
       );
+
+      // CMP-005 AC2, on the canvas (s1 graded only the tail rule, as a spec): pick a font every
+      // computer has, Apply, and read the PREVIEW — text wearing `--font-sans` is now drawn in it.
+      // A serif for a sans token, so the kind-change line fires and the tail swaps. The control is
+      // the same count before Apply (0), and ⌘Z puts the saved value back.
+      const GEORGIA_TEXT = `Array.from(document.querySelectorAll('body *')).filter((e) => e.childElementCount === 0 && e.textContent.trim() && /^\\s*['"]?Georgia/.test(getComputedStyle(e).fontFamily)).length`;
+      const savedFont = await ev(
+        `(() => { const t = new (${TOKENS_MODEL})(); const v = t.getToken('--font-sans').value; t.dispose && t.dispose(); return v; })()`
+      );
+      const georgiaBefore = Number(await vev(GEORGIA_TEXT));
+      const picked = await ev(`(() => { const r = Array.from(document.querySelectorAll('[data-token-composer="--font-sans"] [role="option"]')).find((x) => x.querySelector('span span') && x.querySelector('span span').textContent === 'Georgia'); if (!r) return 'NO GEORGIA ROW'; r.click(); return 'ok'; })()`);
+      await wait(300);
+      const kindLine = await ev(`(() => { const c = document.querySelector('[data-token-composer="--font-sans"]'); return c && /changes the backup fonts to the serif set/.test(c.textContent) ? 'shown' : 'absent'; })()`);
+      await ev(CLICK_TEXT('Apply', '[data-token-composer="--font-sans"]'));
+      await wait(1500);
+      const appliedFont = await ev(
+        `(() => { const t = new (${TOKENS_MODEL})(); const v = t.getToken('--font-sans').value; t.dispose && t.dispose(); return v; })()`
+      );
+      const georgiaAfter = Number(await vev(GEORGIA_TEXT));
+      record(
+        'CMP-005 AC2 — picking Georgia redraws the preview text in it; the kind-change line said the tail would swap',
+        String(picked) === 'ok' &&
+          kindLine === 'shown' &&
+          /^Georgia, ui-serif/.test(String(appliedFont)) &&
+          !/,\s*Georgia\b/.test(String(appliedFont)) &&
+          georgiaBefore === 0 &&
+          georgiaAfter > 0,
+        JSON.stringify({ picked, kindLine, appliedFont, georgiaBefore, georgiaAfter })
+      );
+      await ev(`(() => { ${UNDO}.undo(); return 'ok'; })()`);
+      await wait(600);
+      const undoneFont = await ev(
+        `(() => { const t = new (${TOKENS_MODEL})(); const v = t.getToken('--font-sans').value; t.dispose && t.dispose(); return v; })()`
+      );
+      record('CMP-005 AC2 — one ⌘Z puts the font back', undoneFont === savedFont, String(undoneFont));
     }
     await ev(CLICK_TEXT('Cancel', '[data-token-composer]'));
     await wait(300);

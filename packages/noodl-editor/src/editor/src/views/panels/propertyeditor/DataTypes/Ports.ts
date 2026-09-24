@@ -2,7 +2,7 @@ import React from 'react';
 import { Root } from 'react-dom/client';
 
 import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
-import { type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
+import { type PortGateReason, withUnmetGate } from '@noodl-models/nodelibrary/portGateReason';
 import {
   capabilityProbes,
   gateForPort,
@@ -590,7 +590,11 @@ export class Ports extends View {
 
       // FB-021 — a port a `dynamicports` condition has switched off. `applyPortConditionsFilterForNode`
       // remains the only thing that decides; the descriptor carries what it decided.
-      const switchedOff: PortGateReason | undefined = row && row.switchedOff;
+      // P102 CMP-007 row 2: the link goes to the clause still unmet, not the first one declared.
+      const switchedOff: PortGateReason | undefined =
+        row && row.switchedOff
+          ? withUnmetGate(row.switchedOff, (name) => (this.model.getParameter ? this.model.getParameter(name) : undefined))
+          : undefined;
       // CHR-008 (R8): the group's one line already says why — the row is dimmed and says nothing itself.
       const groupGate = row && groupGates ? groupGates.get(row.group) : undefined;
       const quiet = Boolean(groupGate && row && groupGate.portNames.indexOf(row.name) !== -1);

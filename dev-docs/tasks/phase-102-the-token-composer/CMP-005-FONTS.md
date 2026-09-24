@@ -1,6 +1,6 @@
 # CMP-005 — Font family
 
-**Opened 2026-09-24.** **Status: ✅ BUILT s1 (2026-09-24): codec `token-codecs/fontFamily.ts` (AC1 as specs, plus the one-entry family UPG-003 mints); list drawn in each font with *preview unavailable* measured by canvas width, not `document.fonts.check` (driven: 39 rows, 14 drawn, 25 marked unavailable on this machine — AC3); kind-change line before Apply (AC2's tail rule as a spec).** Depends on CMP-001.
+**Opened 2026-09-24.** **Status: ✅ BUILT s1, CORRECTED s2 (2026-09-24).** s1: codec `token-codecs/fontFamily.ts` (AC1 as specs), a list drawn in each font with *preview unavailable* measured by canvas width, the kind-change line. 🔴 s2 ([CMP-007 rows 1 and 4](CMP-007-RICHARD-DRIVES-IT.md#4-rows)): the list offered 25 web fonts no project shipped and could not draw the project's own; it now offers only faces a visitor will see (the project's, drawn from its files; the three system stacks; the ten `validate_project` needs no file for), and AC2 is **driven** on the canvas (Georgia: 0 → 101 text elements in the preview, ⌘Z restores). Depends on CMP-001.
 
 ## 1. The person sentence
 
@@ -11,8 +11,10 @@
 
 - A preview heading + paragraph in the chosen font.
 - Tabs: All / Sans / Serif / Mono. A list, each row drawn in its own font with a small sample and
-  its kind. The list is `COMMON_FONTS` plus whatever the project already uses (a font a project
-  ships is in the list even if it isn't common).
+  its kind. ~~The list is `COMMON_FONTS` plus whatever the project already uses~~ **s2: the list is
+  the faces the project ships (module stylesheets, icon sets excluded) + the three system stacks +
+  the faces every computer has (`validate_project`'s no-file list). A font the project does not
+  ship is not offered: naming it writes a value the validator warns about and no visitor sees.**
 - A line under the list: *"Backup fonts are added for you. They show while Inter loads, or if it
   can't."*
 - *Another font…* opens today's font field behavior (any name). A Google Fonts browser or upload is
@@ -44,8 +46,8 @@ A family token is a **lead font** and a **tail**. The composer edits the lead on
 
 1. The 3 defaults decode and re-encode byte-identical, and so does every family value in the
    templates (CMP-006 counts the projects).
-2. On a drive: pick *Lora* for `--font-sans`, Apply. Text on the canvas that wears it changes, and
-   the saved value is `Lora, ui-sans-serif, …` with the tail unchanged, **until** the kind-change
+2. On a drive: pick *Georgia* (s2: *Lora* is no longer offered) for `--font-sans`, Apply. Text on
+   the canvas that wears it changes, and the saved value is `Georgia, ui-sans-serif, …` with the tail unchanged, **until** the kind-change
    line says otherwise.
 3. The font list draws each name in its own font (a shot). A font that isn't installed says so
    rather than silently drawing in the fallback.

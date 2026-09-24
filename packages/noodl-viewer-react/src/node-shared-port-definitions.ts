@@ -1722,15 +1722,10 @@ export default {
     // ports keep their values underneath token mode so switching back loses nothing.
     addDynamicInputPorts(definition, 'boxShadowEnabled = true', ['boxShadowSource']);
     addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource = token', ['boxShadowToken']);
-    addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource NOT SET', [
-      'boxShadowOffsetX',
-      'boxShadowOffsetY',
-      'boxShadowInset',
-      'boxShadowBlurRadius',
-      'boxShadowSpreadRadius',
-      'boxShadowColor'
-    ]);
-    addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource = custom', [
+    // ONE group, `!= token` (true when unset or Custom): a port in two groups is one the property
+    // panel's gate explainer refuses, so the six rows vanished with the shadow off instead of
+    // dimming under Box Shadow's *Turn on* line (CMP-007 row 3; `tests-unit/chr-008`).
+    addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource != token', [
       'boxShadowOffsetX',
       'boxShadowOffsetY',
       'boxShadowInset',

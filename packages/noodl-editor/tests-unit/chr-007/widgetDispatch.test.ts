@@ -72,6 +72,10 @@ jest.mock('../../src/editor/src/views/panels/propertyeditor/CodeEditor', () => m
 jest.mock('../../src/editor/src/views/panels/propertyeditor/components/PropertyFilterInput', () => ({
   PropertyFilterInput: () => null
 }));
+// P102 CMP-008: *Make this a token* reaches `StyleTokensModel` → `projectmodel`. It renders; it is not the dispatch.
+jest.mock('../../src/editor/src/views/panels/propertyeditor/components/makeShadowToken', () => ({
+  MakeShadowTokenRow: () => null
+}));
 jest.mock('../../src/editor/src/views/panels/propertyeditor/components/PropertyGroups', () => ({
   PropertyGroups: () => null
 }));

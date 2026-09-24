@@ -45,12 +45,20 @@ export const SYSTEM_LEADS: Record<FontKind, string> = {
   mono: 'System mono'
 };
 
-/** Fonts the composer lists, each with its kind. Drawn in itself when the editor can load it. */
-export const KNOWN_FONTS: { name: string; kind: FontKind }[] = [
+/**
+ * Fonts whose kind the composer knows. Only the `everywhere` ones are **offered** in its list: a
+ * face a visitor's computer already has, so it needs no file. Every other font reaches a visitor
+ * only when the project ships it (a module stylesheet declaring its `@font-face`), and the list
+ * offers those from the project itself (CMP-005, CMP-007 row 1). The `everywhere` set must stay
+ * inside `validate_project`'s own no-file list (`validation/fontFaces.ts`) — `tests-unit/cmp-005`
+ * holds the two together, or the composer would write a value the validator warns about.
+ */
+export const KNOWN_FONTS: { name: string; kind: FontKind; everywhere?: true }[] = [
   { name: 'Inter', kind: 'sans' },
   { name: 'DM Sans', kind: 'sans' },
-  { name: 'Manrope', kind: 'sans' },
   { name: 'Nunito', kind: 'sans' },
+  { name: 'Source Sans 3', kind: 'sans' },
+  { name: 'Manrope', kind: 'sans' },
   { name: 'Quicksand', kind: 'sans' },
   { name: 'Space Grotesk', kind: 'sans' },
   { name: 'Roboto', kind: 'sans' },
@@ -58,11 +66,11 @@ export const KNOWN_FONTS: { name: string; kind: FontKind }[] = [
   { name: 'Lato', kind: 'sans' },
   { name: 'Poppins', kind: 'sans' },
   { name: 'Montserrat', kind: 'sans' },
-  { name: 'Arial', kind: 'sans' },
-  { name: 'Helvetica', kind: 'sans' },
-  { name: 'Verdana', kind: 'sans' },
-  { name: 'Tahoma', kind: 'sans' },
-  { name: 'Trebuchet MS', kind: 'sans' },
+  { name: 'Arial', kind: 'sans', everywhere: true },
+  { name: 'Helvetica', kind: 'sans', everywhere: true },
+  { name: 'Verdana', kind: 'sans', everywhere: true },
+  { name: 'Tahoma', kind: 'sans', everywhere: true },
+  { name: 'Trebuchet MS', kind: 'sans', everywhere: true },
   { name: 'Arial Black', kind: 'sans' },
   { name: 'Impact', kind: 'sans' },
   { name: 'Lora', kind: 'serif' },
@@ -70,16 +78,16 @@ export const KNOWN_FONTS: { name: string; kind: FontKind }[] = [
   { name: 'Merriweather', kind: 'serif' },
   { name: 'Fraunces', kind: 'serif' },
   { name: 'Source Serif 4', kind: 'serif' },
-  { name: 'Georgia', kind: 'serif' },
-  { name: 'Times New Roman', kind: 'serif' },
+  { name: 'Georgia', kind: 'serif', everywhere: true },
+  { name: 'Times New Roman', kind: 'serif', everywhere: true },
   { name: 'Garamond', kind: 'serif' },
   { name: 'JetBrains Mono', kind: 'mono' },
   { name: 'IBM Plex Mono', kind: 'mono' },
   { name: 'Fira Code', kind: 'mono' },
   { name: 'Source Code Pro', kind: 'mono' },
-  { name: 'Menlo', kind: 'mono' },
-  { name: 'Consolas', kind: 'mono' },
-  { name: 'Courier New', kind: 'mono' },
+  { name: 'Courier New', kind: 'mono', everywhere: true },
+  { name: 'Menlo', kind: 'mono', everywhere: true },
+  { name: 'Consolas', kind: 'mono', everywhere: true },
   { name: 'Lucida Console', kind: 'mono' }
 ];
 
@@ -151,17 +159,24 @@ export function describeFontFamily(model: FontFamilyModel): string {
 /**
  * The model after picking a font (CMP-005 §3): the same kind keeps the tail; a different kind
  * takes that kind's default tail, and that is a rewrite the composer says so about before Apply.
+ *
+ * Either way the picked font is not repeated behind itself: the serif and mono default tails name
+ * Georgia, Times New Roman, Menlo and Consolas, which the list offers, and picking one read
+ * `Georgia, ui-serif, Georgia, …` (CMP-007 s2, driven). Only an entry naming the picked font is
+ * dropped; every other entry keeps its spelling and place.
  */
 export function withLeadFont(
   model: FontFamilyModel,
   name: string,
   kind: FontKind
 ): { model: FontFamilyModel; tailChanged: boolean } {
+  const without = (tail: string[]) => tail.filter((t) => unquoteFont(t).toLowerCase() !== name.toLowerCase());
   const currentKind = fontKind(model);
   if (kind === currentKind) {
-    return { model: { lead: quoteFont(name, model.tail), tail: model.tail }, tailChanged: false };
+    const tail = without(model.tail);
+    return { model: { lead: quoteFont(name, tail), tail }, tailChanged: false };
   }
-  const tail = FONT_TAILS[kind];
+  const tail = without(FONT_TAILS[kind]);
   return { model: { lead: quoteFont(name, tail), tail }, tailChanged: true };
 }
 

@@ -1,6 +1,13 @@
 /**
  * P102 CMP-005 — the font composer: a list drawn in each font, backup fonts kept for you.
  *
+ * 🔴 The list offers only fonts a visitor will see (CMP-007 row 1): the faces the project ships
+ * (`projectFonts`, read by the host from its module stylesheets and loaded into this window), the
+ * three system stacks, and the few faces every computer has (`KNOWN_FONTS` marked `everywhere`).
+ * It used to offer 25 web fonts no project shipped: picking one named it, `validate_project`
+ * warned, and every visitor read the backup font. A lead the project does not ship still shows,
+ * once, as the current value, saying so.
+ *
  * ⚠️ A list "drawn in each font" can only draw the fonts the editor's own window can load. A row
  * drawn in a font that is not loadable silently falls back to the system font and *looks* like a
  * choice that was made. So each row is measured: a name whose glyphs paint no differently from
@@ -86,7 +93,16 @@ export function drawFontPreset(value: string) {
 
 // ─── Controls ────────────────────────────────────────────────────────────────
 
-type Row = { name: string; kind: FontKind; system?: boolean };
+/** Where a row's face comes from, which is what decides whether a visitor sees it. */
+type Where = 'project' | 'device' | 'everywhere' | 'missing';
+type Row = { name: string; kind: FontKind; where: Where; system?: boolean };
+
+const WHERE_WORDS: Record<Where, string> = {
+  project: 'in this project',
+  device: "the reader's own device font",
+  everywhere: 'on every computer',
+  missing: 'not in this project · visitors see the backup fonts'
+};
 
 export function FontControls({
   model,
@@ -98,35 +114,43 @@ export function FontControls({
   onChange: (model: FontFamilyModel) => void;
   /** The saved value, so the kind-change line can say what Apply will rewrite. */
   savedValue: string;
-  /** Fonts the project already uses, listed even when they are not common. */
+  /** Families the project ships (a module stylesheet declares their `@font-face`), already loaded here. */
   projectFonts?: string[];
 }) {
   const [tab, setTab] = useState<'all' | FontKind>('all');
   const [custom, setCustom] = useState('');
 
+  const modelKind = fontKind(model);
   const rows = useMemo<Row[]>(() => {
-    const known = new Map(KNOWN_FONTS.map((f) => [f.name.toLowerCase(), f]));
-    const list: Row[] = [...KNOWN_FONTS];
+    const kinds = new Map(KNOWN_FONTS.map((f) => [f.name.toLowerCase(), f.kind]));
+    const seen = new Set<string>();
+    const list: Row[] = [];
+    const add = (name: string, kind: FontKind, where: Where) => {
+      if (seen.has(name.toLowerCase())) return;
+      seen.add(name.toLowerCase());
+      list.push({ name, kind, where });
+    };
+    // A face the project ships whose kind nobody knows keeps the current kind: picking it must
+    // not swap the backup fonts on a guess.
     for (const p of projectFonts) {
       const plain = unquoteFont(p);
-      if (isGenericFamily(plain) || known.has(plain.toLowerCase())) continue;
-      known.set(plain.toLowerCase(), { name: plain, kind: 'sans' });
-      list.push({ name: plain, kind: 'sans' });
+      if (!isGenericFamily(plain)) add(plain, kinds.get(plain.toLowerCase()) ?? modelKind, 'project');
     }
-    const lead = unquoteFont(model.lead);
-    if (!isGenericFamily(lead) && !known.has(lead.toLowerCase())) list.unshift({ name: lead, kind: fontKind(model) });
     (['sans', 'serif', 'mono'] as FontKind[]).forEach((k) =>
-      list.push({ name: SYSTEM_LEADS[k], kind: k, system: true })
+      list.push({ name: SYSTEM_LEADS[k], kind: k, where: 'device', system: true })
     );
+    for (const f of KNOWN_FONTS) if (f.everywhere) add(f.name, f.kind, 'everywhere');
+    const lead = unquoteFont(model.lead);
+    if (!isGenericFamily(lead) && !seen.has(lead.toLowerCase())) list.unshift({ name: lead, kind: modelKind, where: 'missing' });
     return list;
-  }, [projectFonts, model]);
+  }, [projectFonts, model, modelKind]);
 
   const currentLead = fontLeadName(model);
   const savedKind = useMemo(() => {
     const parts = savedValue.split(', ');
     return fontKind({ lead: parts[0], tail: parts.slice(1) });
   }, [savedValue]);
-  const kind = fontKind(model);
+  const kind = modelKind;
   const tailChanged = kind !== savedKind;
 
   const pick = (row: Row) => {
@@ -169,9 +193,8 @@ export function FontControls({
                   <span className={css.FontName} style={available ? { fontFamily: family } : undefined}>
                     {row.name}
                   </span>
-                  <span className={css.FontKind}>
-                    {KIND_WORDS[row.kind]}
-                    {row.system ? " · the reader's own device font" : ''}
+                  <span className={`${css.FontKind} ${row.where === 'missing' ? css.missing : ''}`}>
+                    {row.where === 'missing' ? WHERE_WORDS.missing : `${KIND_WORDS[row.kind]} · ${WHERE_WORDS[row.where]}`}
                   </span>
                 </span>
                 {available ? (
@@ -181,7 +204,7 @@ export function FontControls({
                 ) : (
                   <span
                     className={css.Unavailable}
-                    title="This font is not installed here, so it cannot be drawn. It will still work in the app if the project loads it."
+                    title="This font cannot be drawn in the editor on this computer."
                   >
                     preview unavailable
                   </span>
@@ -219,7 +242,10 @@ export function FontControls({
             }}
           />
         </div>
-        <div className={css.Help}>Press Enter to use it. The app must load the font itself; this only names it.</div>
+        <div className={css.Help}>
+          Press Enter to use it. Visitors see it only if the project ships the font; otherwise they get the backup
+          fonts.
+        </div>
       </div>
       <span hidden>{encodeFontFamily(model)}</span>
     </>

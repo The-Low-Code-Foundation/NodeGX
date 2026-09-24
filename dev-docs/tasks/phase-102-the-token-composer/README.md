@@ -2,9 +2,14 @@
 
 **Scoped:** 2026-09-24, from Richard's last look at the editor before 0.3.0, against `cline-dev`
 HEAD `5512089ab`.
-**Status (s1, 2026-09-24): ✅ CMP-001…006, 008, 009 BUILT and driven — 23/23 arms on the running
-editor (`scripts/devtools/drive-cmp001-composer.js`, shots in `shots/`). Only [CMP-007](CMP-007-RICHARD-DRIVES-IT.md)
-(Richard drives it, rules WORTHY) is left; nothing else waits on him.** The census
+**Status (s2, 2026-09-24): ✅ CMP-001…006, 008, 009 BUILT, driven 25/25, and every cross-phase
+unit suite green (editor jest 556/556). Only [CMP-007](CMP-007-RICHARD-DRIVES-IT.md) is left: Richard
+drives it and rules WORTHY; the editor is up for him on a copy of *Landing page test V2*.** The look
+before his drive found four defects, all fixed ([CMP-007 §4](CMP-007-RICHARD-DRIVES-IT.md#4-rows)):
+the font list offered 25 fonts no visitor would see, a gated row's link went to a switch already on,
+🔴 CMP-008 had undone CHR-008 R8 on seven node types (six shadow rows hidden, not dimmed — five
+cross-phase suites red that s1 never ran), and a picked font repeated in its own tail.
+**s1:** 23/23 arms on the running editor (`scripts/devtools/drive-cmp001-composer.js`, shots in `shots/`). The census
 ([CMP-006-READOUT.md](CMP-006-READOUT.md)) reads rewrite 0 over the defaults, the Looks, the
 templates and 330 projects. The MCP budgets are near their ceilings after CMP-009 (prompt
 4,324/4,400; surface 8,255/8,280) — the next sentence added to either surface must cut one first.
