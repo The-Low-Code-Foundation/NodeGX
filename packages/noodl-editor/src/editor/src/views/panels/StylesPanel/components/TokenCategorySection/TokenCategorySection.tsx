@@ -53,6 +53,13 @@ interface TokenCategorySectionProps {
    * layer), the composer rows draw their words and preview but nothing opens.
    */
   onOpenComposer?: (token: StyleTokenRecord, anchor: HTMLElement) => void;
+  /** P103 CMG-002 §3.3 — copy `var(--name)`. Omitted, no copy button is drawn. */
+  onCopy?: (token: StyleTokenRecord) => void;
+  /**
+   * P103 CMG-002 §3.2 — delete a token a person ADDED (one with no shipped default). Omitted, no
+   * delete button is drawn. Never offered on a default token: those are reset, not deleted.
+   */
+  onDelete?: (token: StyleTokenRecord) => void;
 }
 
 export function TokenCategorySection({
@@ -60,7 +67,9 @@ export function TokenCategorySection({
   onTokenChange,
   onTokenReset,
   resolve,
-  onOpenComposer
+  onOpenComposer,
+  onCopy,
+  onDelete
 }: TokenCategorySectionProps) {
   return (
     <div className={css.TokenList}>
@@ -72,6 +81,8 @@ export function TokenCategorySection({
           onTokenReset={onTokenReset}
           resolve={resolve ?? identity}
           onOpenComposer={onOpenComposer}
+          onCopy={onCopy}
+          onDelete={onDelete}
         />
       ))}
     </div>
@@ -89,6 +100,8 @@ interface TokenRowProps {
   onTokenReset: (name: string) => void;
   resolve: (value: string) => string;
   onOpenComposer?: (token: StyleTokenRecord, anchor: HTMLElement) => void;
+  onCopy?: (token: StyleTokenRecord) => void;
+  onDelete?: (token: StyleTokenRecord) => void;
 }
 
 /**
@@ -112,10 +125,12 @@ interface TokenRowProps {
  * A value the codec refuses keeps the input exactly as before, so the FIX-015 gate still holds
  * for it.
  */
-function TokenRow({ token, onTokenChange, onTokenReset, resolve, onOpenComposer }: TokenRowProps) {
+function TokenRow({ token, onTokenChange, onTokenReset, resolve, onOpenComposer, onCopy, onDelete }: TokenRowProps) {
   const isColor = token.category === 'color-semantic' || token.category === 'color-palette';
   const isRef = TokenResolver.isReference(token.value);
   const defaultValue = DEFAULTS.get(token.name)?.value;
+  // A token a person ADDED: stored, and with no shipped default to go back to.
+  const isAdded = token.isCustom && defaultValue === undefined;
   const words = isComposerCategory(token.category) ? describeTokenValue(token.category, token.value) : null;
   const composes = words !== null;
 
@@ -223,6 +238,34 @@ function TokenRow({ token, onTokenChange, onTokenReset, resolve, onOpenComposer 
           aria-label={`Open composer for ${token.name}`}
         >
           ✎
+        </button>
+      )}
+
+      {/* P103 CMG-002 §3.3 — copy the reference, on every row. */}
+      {onCopy && (
+        <button
+          type="button"
+          className={css.CopyButton}
+          onClick={() => onCopy(token)}
+          title={`Copy var(${token.name})`}
+          aria-label={`Copy var(${token.name})`}
+          data-test={`token-copy-${token.name}`}
+        >
+          ⧉
+        </button>
+      )}
+
+      {/* P103 CMG-002 §3.2 — delete, only for a token somebody added. A default is reset, never deleted. */}
+      {onDelete && isAdded && (
+        <button
+          type="button"
+          className={css.DeleteButton}
+          onClick={() => onDelete(token)}
+          title={`Delete ${token.name} — you added it`}
+          aria-label={`Delete ${token.name}`}
+          data-test={`token-delete-${token.name}`}
+        >
+          ✕
         </button>
       )}
 

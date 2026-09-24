@@ -77,7 +77,7 @@ panel and the property panel.
 | id | task | findings | depends on |
 |---|---|---|---|
 | **[CMG-001](CMG-001-THE-COMPOSER-FITS-ITS-WINDOW.md)** ✅ s1 | The composer fits its window: no light/dark bar on motion; the popout stays on screen as it grows; *Show CSS* scrolls to the CSS | 1, 2 | — |
-| **[CMG-002](CMG-002-ADD-A-TOKEN-COPY-A-TOKEN.md)** | Add a token to any group; copy any token's reference | 3, 4 | CMG-005 (where the + lives) |
+| **[CMG-002](CMG-002-ADD-A-TOKEN-COPY-A-TOKEN.md)** ✅ s1 | Add a token to any group; copy any token's reference | 3, 4 | CMG-005 (where the + lives) |
 | **[CMG-003](CMG-003-A-NEW-COLOUR-IS-A-COLOUR-YOU-CAN-CHANGE.md)** ✅ s1 | *New colour* makes a colour token you pick straight away; an existing colour style's swatch opens the picker | 5 | — |
 | **[CMG-004](CMG-004-RESET-SAYS-WHAT-IT-RESETS.md)** ✅ s1 | Reset counts real changes, shows them before it acts, resets one group or one token, and cannot silently wipe a brand | 7 | — |
 | **[CMG-005](CMG-005-EVERY-KIND-OF-STYLE-IS-A-SECTION.md)** ✅ s1 | No *Other tokens*: Type, Spacing, Borders, Effects and Motion are sections beside Colours and Looks; `revealStyle` opens a section and lands on a row from outside | 8 | — |

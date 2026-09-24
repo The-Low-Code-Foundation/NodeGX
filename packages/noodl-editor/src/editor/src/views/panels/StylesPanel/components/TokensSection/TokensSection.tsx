@@ -21,16 +21,29 @@
  * read as *the same layer* as Colours and Looks. They ARE tokens, and every row is badged and
  * previewed as one; the section subtitle says what the section holds in a sentence. The confusion
  * R2's badges exist to prevent was one level up; the subtitle is that level's badge.
+ *
+ * **P103 CMG-002: ＋ in the header, copy on every row, delete on a token you added.** Richard:
+ * *"How do I add a token? In all the token lists there's no button to add one … is that normal??"*
+ * It was not. `StyleTokensModel.addCustomToken` existed with one caller, a unit test.
  */
 
+import { isComposerCategory } from '@nodegx/project-contract/token-codecs';
 import { useProjectDesignTokenContext } from '@noodl-contexts/ProjectDesignTokenContext';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
+import { ProjectModel } from '@noodl-models/projectmodel';
 import { StyleTokenRecord, TokenCategoryGroup, TokenResolver, groupForTokenCategory } from '@noodl-models/StyleTokensModel';
+import { tokenNameFromInput, tokenNameProblem } from '@noodl-models/StyleTokensModel/tokenName';
+import { kindsForGroup, startingValueFor, type TokenKind } from '@noodl-models/StyleTokensModel/tokenKinds';
+import { describeTokenUsage, tokenUsageCount, tokenUsageIn } from '@noodl-models/StyleTokensModel/tokenUsage';
+import { escapeHtml } from '@noodl-utils/escapeHtml';
 
+import PopupLayer from '../../../../popuplayer';
+import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { openTokenComposer } from '../../composer/openTokenComposer';
 import { SectionReset, StylesSection } from '../../shared';
-import { StylesSectionSpec } from '../../stylesPanelRoute';
+import css from '../../StylesPanel.module.scss';
+import { REVEAL_HIGHLIGHT_MS, StylesSectionSpec, styleRowSelector } from '../../stylesPanelRoute';
 import { TokenCategorySection } from '../TokenCategorySection';
 
 export interface TokenGroupSectionProps {
@@ -41,12 +54,18 @@ export interface TokenGroupSectionProps {
   isFirst?: boolean;
   /** CMG-004: *Reset N* in the header, when N > 0. */
   reset?: SectionReset;
-  /** CMG-002 puts its header control here. */
-  actions?: React.ReactNode;
 }
 
-export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, reset, actions }: TokenGroupSectionProps) {
+/** How long `Collapsible` takes to open a section, before a new row can be scrolled to. */
+const SECTION_OPEN_MS = 450;
+
+export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, reset }: TokenGroupSectionProps) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
+  const [isAdding, setIsAdding] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // The token just added: scrolled to and highlighted once its row exists, and for a composer
+  // kind the composer opens on it (§3.1) — the same as *Make this a token* on a node.
+  const pendingReveal = useRef<{ name: string; compose: boolean } | null>(null);
 
   const tokens = React.useMemo(
     () =>
@@ -73,27 +92,234 @@ export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, rese
     [designTokens, styleTokensModel]
   );
 
-  return (
-    <StylesSection
-      id={section.id}
-      title={section.title}
-      subtitle={section.subtitle}
-      isFirst={isFirst}
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      reset={reset}
-      actions={actions}
+  // ─── Add (§3.1) ─────────────────────────────────────────────────────────────
+
+  function onAdd(kind: TokenKind, input: string, value: string) {
+    if (!styleTokensModel) return;
+    const name = tokenNameFromInput(input);
+    setIsAdding(false);
+    pendingReveal.current = { name, compose: isComposerCategory(kind.category) };
+    // 🔴 `addCustomToken`, never `setToken`: an unknown name through `setToken` is filed as
+    // `color-semantic` by its fallback, so a new spacing token would be drawn under Colours.
+    styleTokensModel.addCustomToken(
+      { name, value, category: kind.category },
+      { undo: true, label: `Add token ${name}` }
+    );
+    ToastLayer.showSuccess(`Added ${name} — ⌘Z removes it`);
+  }
+
+  useEffect(() => {
+    const pending = pendingReveal.current;
+    if (!pending || !tokens.some((t) => t.name === pending.name)) return;
+    pendingReveal.current = null;
+    const land = () => {
+      const row = rootRef.current?.querySelector<HTMLElement>(styleRowSelector(pending.name));
+      if (!row) return;
+      row.scrollIntoView({ block: 'center' });
+      row.setAttribute('data-revealed', 'true');
+      window.setTimeout(() => row.removeAttribute('data-revealed'), REVEAL_HIGHLIGHT_MS);
+      const token = tokens.find((t) => t.name === pending.name);
+      if (pending.compose && token) onOpenComposer(token, row);
+    };
+    const t = window.setTimeout(land, isOpen ? 50 : SECTION_OPEN_MS);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tokens]);
+
+  // ─── Copy (§3.3) and delete (§3.2) ─────────────────────────────────────────
+
+  const onCopy = React.useCallback((token: StyleTokenRecord) => {
+    navigator.clipboard?.writeText(`var(${token.name})`);
+    ToastLayer.showSuccess(`Copied var(${token.name})`);
+  }, []);
+
+  const onDelete = React.useCallback(
+    (token: StyleTokenRecord) => {
+      if (!styleTokensModel) return;
+      const remove = () => {
+        styleTokensModel.deleteCustomToken(token.name, { undo: true, label: `Delete ${token.name}` });
+        ToastLayer.showSuccess(`Deleted ${token.name} — ⌘Z brings it back`);
+      };
+      // The reach, counted before anything is deleted, through the one walk CMG-010's *Used by*
+      // reads too ([[count-the-reach-first]]).
+      const usage = tokenUsageIn(ProjectModel.instance, designTokens, token.name);
+      if (tokenUsageCount(usage) === 0) {
+        remove();
+        return;
+      }
+      PopupLayer.instance.showConfirmModal({
+        title: 'DELETE TOKEN',
+        message:
+          `Delete <strong>${escapeHtml(token.name)}</strong>?<br>` +
+          `${escapeHtml(describeTokenUsage(usage))}. They will fall back to their own value.`,
+        confirmLabel: 'Yes, delete',
+        onConfirm: remove
+      });
+    },
+    [styleTokensModel, designTokens]
+  );
+
+  const kinds = kindsForGroup(section.group);
+
+  const addButton = (
+    <button
+      type="button"
+      className={css['SectionAdd']}
+      data-test={`section-add-${section.id}`}
+      title={`Add a ${section.title.toLowerCase()} token`}
+      aria-label={`Add a ${section.title.toLowerCase()} token`}
+      onClick={() => {
+        setIsAdding(true);
+        onOpenChange(true);
+      }}
     >
-      <TokenCategorySection
-        tokens={tokens}
-        onTokenChange={(name, value) => styleTokensModel?.setToken(name, value, { undo: true })}
-        // CMG-004: a default token goes back to its default; a token somebody added is not
-        // "reset" by this button — `resetTokens` skips it, and deleting is CMG-002's own item.
-        onTokenReset={(name) => styleTokensModel?.resetTokens([name], { undo: true, label: `Reset ${name}` })}
-        resolve={resolve}
-        onOpenComposer={onOpenComposer}
-      />
-    </StylesSection>
+      ＋
+    </button>
+  );
+
+  return (
+    <div ref={rootRef} data-token-group={section.id}>
+      <StylesSection
+        id={section.id}
+        title={section.title}
+        subtitle={section.subtitle}
+        isFirst={isFirst}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        reset={reset}
+        actions={kinds.length > 0 ? addButton : undefined}
+      >
+        {isAdding && (
+          <AddTokenRow
+            kinds={kinds}
+            tokens={designTokens}
+            onAdd={onAdd}
+            onCancel={() => setIsAdding(false)}
+          />
+        )}
+        <TokenCategorySection
+          tokens={tokens}
+          onTokenChange={(name, value) => styleTokensModel?.setToken(name, value, { undo: true })}
+          // CMG-004: a default token goes back to its default; a token somebody added is not
+          // "reset" by this button — `resetTokens` skips it, and deleting is its own button.
+          onTokenReset={(name) => styleTokensModel?.resetTokens([name], { undo: true, label: `Reset ${name}` })}
+          resolve={resolve}
+          onOpenComposer={onOpenComposer}
+          onCopy={onCopy}
+          onDelete={onDelete}
+        />
+      </StylesSection>
+    </div>
+  );
+}
+
+/**
+ * The row the ＋ opens: a name (the `--` is drawn, not typed), a kind when the section holds more
+ * than one, and the value it starts at (a copy of the last of its kind). Refused inline: an empty,
+ * spaced, punctuated or taken name (CMG-003's rule). Enter adds, Escape cancels.
+ */
+function AddTokenRow({
+  kinds,
+  tokens,
+  onAdd,
+  onCancel
+}: {
+  kinds: TokenKind[];
+  tokens: StyleTokenRecord[];
+  onAdd: (kind: TokenKind, name: string, value: string) => void;
+  onCancel: () => void;
+}) {
+  const [kind, setKind] = useState<TokenKind>(kinds[0]);
+  const [name, setName] = useState('');
+  const [value, setValue] = useState(() => startingValueFor(kinds[0].category, tokens));
+  const [problem, setProblem] = useState<string | null>(null);
+
+  function pickKind(category: string) {
+    const next = kinds.find((k) => k.category === category) ?? kinds[0];
+    setKind(next);
+    setValue(startingValueFor(next.category, tokens));
+  }
+
+  function submit() {
+    const existing = new Set(tokens.map((t) => t.name));
+    const why = tokenNameProblem(name, existing);
+    if (why) {
+      setProblem(why);
+      return;
+    }
+    const v = value.trim();
+    if (v === '') {
+      setProblem('Give it a value');
+      return;
+    }
+    onAdd(kind, name, v);
+  }
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') submit();
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      onCancel();
+    }
+  };
+
+  return (
+    <div className={css['AddTokenRow']} data-test="add-token-row">
+      <div className={css['AddTokenLine']}>
+        <span className={css['AddTokenPrefix']}>--</span>
+        <input
+          className={css['InlineInput']}
+          autoFocus
+          value={name}
+          placeholder={kind.word === 'Spacing' ? 'space-huge' : `my-${kind.word.toLowerCase().replace(/\s+/g, '-')}`}
+          spellCheck={false}
+          data-test="add-token-name"
+          onChange={(e) => {
+            setName(e.target.value);
+            setProblem(null);
+          }}
+          onKeyDown={onKey}
+        />
+        {kinds.length > 1 && (
+          <select
+            className={css['AddTokenKind']}
+            value={kind.category}
+            data-test="add-token-kind"
+            aria-label="What kind of token"
+            onChange={(e) => pickKind(e.target.value)}
+          >
+            {kinds.map((k) => (
+              <option key={k.category} value={k.category}>
+                {k.word}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+      <div className={css['AddTokenLine']}>
+        <span className={css['AddTokenLabel']}>Starts as</span>
+        <input
+          className={css['InlineInput']}
+          value={value}
+          spellCheck={false}
+          aria-label="Starting value"
+          data-test="add-token-value"
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={onKey}
+        />
+        <button type="button" className={css['AddTokenButton']} data-test="add-token-submit" onClick={submit}>
+          Add
+        </button>
+        <button type="button" className={css['AddTokenCancel']} onClick={onCancel} title="Cancel (Escape)">
+          ✕
+        </button>
+      </div>
+      {problem && (
+        <div className={css['InlineError']} data-test="add-token-problem">
+          {problem}
+        </div>
+      )}
+    </div>
   );
 }
 

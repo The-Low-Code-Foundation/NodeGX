@@ -1,7 +1,8 @@
 # CMG-002 — Add a token, copy a token
 
 **Opened 2026-09-24** from Richard's drive of P102 (README §2, findings 3 and 4).
-**Status: 📋 ready once CMG-005 has placed the sections** (the + lives in each section's header).
+**Status: ✅ built 2026-09-24 (s1)** — 13 specs green, 15/15 drive arms green on a fresh copy. §6 has what was
+built and what each AC measured.
 
 ## 1. The person sentence
 
@@ -72,3 +73,52 @@
 - The MCP's `set_project_tokens` writes tokens too. A token the MCP adds must show in the right
   section: it goes through the same category rules or it lands in *color-semantic*. Check
   `styleTools.ts`.
+
+## 6. Built (s1, 2026-09-24)
+
+**＋ in the header** of Type, Spacing, Borders, Effects and Motion (`TokenGroupSection`; Colours
+adds through CMG-003's *New colour*). It opens a row at the top of the section: the name with the
+`--` drawn (`tokenName.ts` refuses, inline and in words, an empty, spaced, punctuated or taken
+name), a **kind** in words where the section holds several (`tokenKinds.ts`: *Font, Text size,
+Weight, Line height, Letter spacing* · *Shadow, Gradient* · *Duration, Easing* · *Corner radius,
+Border width*; membership read off `TOKEN_CATEGORIES`, so a new contract category cannot be missing
+a word without the spec noticing), and **Starts as** — the value of the last token of that kind, or
+for a composer kind the last value the composer can *read* (on the drive project the last
+`shadow`-category token was `--shadow-color: #29201933`, and a copy of it opened the composer in
+text mode; now the copy is the last readable one, `--shadow-inner`'s, and the composer opens on its
+controls). *Add* → `addCustomToken(…, { undo: true })`, one
+step, never `setToken` (its fallback files an unknown name as a colour). The new row is scrolled
+to and highlighted with CMG-005's reveal mark; for a composer kind the composer opens on it, the
+same as *Make this a token* on a node.
+
+**Copy on every row** (⧉, on hover, beside the pencil): `var(--name)` to the clipboard and a toast.
+Colour rows keep their menu item.
+
+**Delete on a token you added** (✕, on hover; never on a default — a default is reset). Before it
+deletes, `tokenUsage.ts` counts what wears it in ONE walk: nodes (every parameter and every visual
+state, scanned as text so a `var()` inside `"1px solid var(--x)"` is found; a node once however
+many fields), Looks, and other tokens whose value references it. Above zero the confirm says
+*"Used by 2 nodes, 1 Look and 1 other token. They will fall back to their own value."* The same
+walk is CMG-010's *Used by*.
+
+**MCP.** `set_project_tokens` infers a category for a name it has not seen; `--gradient-*`,
+`--ease-*`, `--duration-*`, `--leading-*` and `--tracking-*` used to land in `color-semantic` and be
+drawn under Colours with a swatch. They now land where the panel draws them.
+
+**§4 measured** (`scripts/devtools/drive-cmg002-add-copy.js` on a fresh copy of *CMP-001 Composer
+Drive*; specs `tests-unit/cmg-002/token-usage.test.ts`):
+
+| AC | reading |
+|---|---|
+| 1 | ＋ in each section: `--space-huge` → `spacing`, `--display-family` → `typography-family`, `--radius-pill` → `border-radius`, `--shadow-brand` → `shadow`, `--ease-snappy` → `animation-easing` — read from the model AND from the saved `designTokens.customTokens` record (polled for the autosave); each row in view with `data-revealed`; the undo location grew by one per add |
+| 2 | one `undo()` → 210 → 209 tokens, `--ease-snappy` gone, `--shadow-brand` still there; `redo()` brings it back |
+| 3 | `space-huge` again → *There is already a token called --space-huge*; `bad name` → *No spaces — try a hyphen: brand-orange*; the row stays; token count and undo location unchanged; `--space-huge` still `96px`. Shot `shots/cmg002-ac3-refused.png` |
+| 4 | the new font, shadow and easing tokens open the composer on creation (`[data-token-composer="--name"]` in a popout). Shot `shots/cmg002-ac4-new-shadow-composer.png` |
+| 5 | `--space-huge` given two Group `paddingLeft`s, a Look's `paddingTop` and `--space-alias: var(--space-huge)`: ✕ → *Used by 2 nodes, 1 Look and 1 other token. They will fall back to their own value.*; Cancel keeps it. Spec: a fixture wearing a token in a parameter, a compound value, a visual state, a Look (neutral and pressed), another token; a node counted once; a throwing label survives; the unnamed default Look is skipped. Shot `shots/cmg002-ac5-delete-confirm.png` |
+| 6 | ⧉ on a row in each of the five sections: `navigator.clipboard.readText()` reads `var(--name)` for all five; the toast says so |
+| 7 | `tokensForPicking(tokens, tokenCategoriesForPort('paddingLeft'))` offers `--space-huge` (32 spacing tokens). The picker UI on a Group's padding was not opened in this drive; it reads that function (`tokenFieldPopout.ts`) |
+
+Delete is offered on the added token only, copy on every token; both measured on `--space-huge`
+and `--space-4`.
+
+**Not built:** *Copy* on old colour-style rows (a style is referenced by name, not by `var()`).

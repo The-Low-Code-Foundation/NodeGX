@@ -1,34 +1,38 @@
 # P103 — next session
 
-**Written 2026-09-24**, when the phase opened from Richard's drive of P102.
+**Written 2026-09-24 (s1, mid-session checkpoint).**
 
 ## Where it stands
 
-P102's token composer is built. Richard drove it and found twelve things, all about the **touch
-points**: between the Styles panel and the nodes, and inside the panel itself. They are CMG-001…010
-here, in [README §3](README.md#3-the-tasks)'s order, and CMG-011 is his drive. Nothing is built yet.
-Every task file has the measured code pointers (file:line, read on 2026-09-24 at `1a35902c0`),
-what to build and the ACs. Re-measure a pointer before you rely on it
-([[measure-the-artefact-before-believing-the-task-file]]).
+Six of ten tasks are built, driven and committed on `cline-dev`, one commit each, in this order:
+CMG-005 (`c9a028e49`), CMG-004 (`3eaada0b7`), CMG-001 (`917a9994d`), CMG-003 (`17f3ee813`),
+CMG-007 (`81139f689`), CMG-006 (`ab563776b`). Every task file has a §6 *Built* section with what
+each AC measured; every drive is `scripts/devtools/drive-cmg00N-*.js`; every spec is
+`tests-unit/cmg-00N/`. Shots are in `shots/`.
+
+Left, in order: **CMG-002** (＋ a token, copy a token, delete an added one — the reference
+counter it builds is CMG-010's *Used by*), **CMG-008** (merged controls say when they leave the
+Look), **CMG-009** (the token chip and one `{.}` everywhere), **CMG-010** (from the field to the
+token and back), then **CMG-011** (Richard's drive; RC-8 still open).
 
 ## Do this
 
-1. Read the README (§1 person sentences, §2 findings, §7 rules), then the task you're taking.
-2. Build in §3's order. CMG-001, 003, 004, 007 and 008 have no dependencies. CMG-005 unlocks
-   002, 006 and 010, so do it early. **CMG-004 first if you only do one**: it's the finding that
-   lost work.
-3. Every task ends in a drive on a **copy** of a real project, with the person sentence in front of
-   you. Green specs don't close a row.
-4. Anything Richard has to decide goes to him in plain words, with a recommendation. The only
-   open one is **RC-8** (does 0.3.0 wait on these?).
+1. Read README §1, §2, §7, then the task you take. Re-measure a file:line pointer before you
+   rely on it: several moved this session.
+2. Drive on COPIES: `CMG Drive Tokens` (← `CMP-007 Richard Drive.before-0.3`, 142 stored tokens,
+   46 real changes — RESET by the CMG-004 drive, copy it again), `CMG Drive Looks{,B,C}`
+   (← `CMP-001 Composer Drive`: nine colour styles, a Text Look worn by 3, a Gamma Look worn by 0).
+   🔴 Never swap a copy's files while the editor holds it open: the watcher adopts the change.
+3. Commit through a temporary index with compare-and-swap (the memory recipe): the real index on
+   this checkout is stale (hundreds of staged deletions that are not this phase's).
 
-## Traps already known
+## Traps met this session
 
-- 🔴 The index on `cline-dev` had **512 staged deletions** on 2026-09-24 (P102's docs, the token
-  codecs and composer, `templates/…`), with the files still on disk. That is not this phase's
-  change. **Commit only with pathspecs**, and ask before touching the index
-  ([[staged-files-get-swept-by-a-siblings-commit]]).
-- *Landing page test V2* is the fixture for CMG-004 (142 stored tokens, 46 real). The drive copy
-  `CMP-007 Richard Drive` lost its tokens to *Reset all*; `CMP-007 Richard Drive.before-0.3` has
-  them.
-- Opening a project writes files into it: drive copies ([[opening-a-project-now-writes-three-files-into-it]]).
+- `ProjectModel.findVariant(name, nodetype)` takes a node TYPE object, not a typename.
+- The editor's own write of `nodegx.styles.json` used to read back as an external change
+  (`hashProjectLevel` vs `JSON.stringify`); fixed in CMG-006 — Look undo works after autosave now.
+- Opening a pre-0.3 project adds 8 typography tokens with no default (the 0.3 upgrade); they are
+  *added*, never reset.
+- `renderToStaticMarkup` can grade a core-ui component once `Icon` and `Collapsible` are mocked.
+- A drive reading a rect inside a 0px `overflow: hidden` Collapsible still sees a height: use
+  `elementFromPoint`.

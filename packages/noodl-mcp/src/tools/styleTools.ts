@@ -41,9 +41,17 @@ function inferCategory(name: string): TokenCategory {
   if (name.startsWith('--space')) return 'spacing';
   if (name.startsWith('--text')) return 'typography-size';
   if (name.startsWith('--font')) return 'typography-weight';
+  if (name.startsWith('--leading')) return 'typography-leading';
+  if (name.startsWith('--tracking')) return 'typography-tracking';
   if (name.startsWith('--radius')) return 'border-radius';
   if (name.startsWith('--border')) return 'border-width';
   if (name.startsWith('--shadow')) return 'shadow';
+  // P103 CMG-002 §5: a token this tool adds lands in the Styles panel section its category names.
+  // Before this, a `--gradient-*`, `--ease-*` or `--duration-*` the agent minted was filed as a
+  // COLOUR and drawn under Colours with a swatch.
+  if (name.startsWith('--gradient')) return 'gradient';
+  if (name.startsWith('--ease')) return 'animation-easing';
+  if (name.startsWith('--duration')) return 'animation-duration';
   return 'color-semantic';
 }
 

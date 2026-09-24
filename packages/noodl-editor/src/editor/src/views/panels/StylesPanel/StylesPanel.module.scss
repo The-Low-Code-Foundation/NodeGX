@@ -76,6 +76,99 @@
   }
 }
 
+/** CMG-002 §3.1 — the ＋ in a section header, and the row it opens. */
+.SectionAdd {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  margin: 0;
+  padding: 0 6px;
+  min-width: 22px;
+  height: 20px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--theme-color-fg-default);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-highlight);
+  }
+}
+
+.AddTokenRow {
+  margin: 4px 8px 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--theme-color-bg-1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.AddTokenLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .InlineInput {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+  }
+}
+
+.AddTokenPrefix,
+.AddTokenLabel {
+  flex: 0 0 auto;
+  font-family: var(--font-family-code);
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.AddTokenKind {
+  flex: 0 0 auto;
+  max-width: 45%;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 4px;
+  color: var(--theme-color-fg-default);
+  background-color: var(--theme-color-bg-2);
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 2px;
+}
+
+.AddTokenButton,
+.AddTokenCancel {
+  flex: 0 0 auto;
+  appearance: none;
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  background-color: var(--theme-color-bg-3);
+  color: var(--theme-color-fg-default);
+
+  &:hover {
+    background-color: var(--theme-color-bg-4);
+  }
+}
+
+.AddTokenButton {
+  background-color: var(--theme-color-primary);
+  border-color: var(--theme-color-primary);
+  color: var(--theme-color-on-primary, #fff);
+
+  &:hover {
+    background-color: var(--theme-color-primary);
+    filter: brightness(1.1);
+  }
+}
+
 /** CMG-004 §3.3 — the section header's own reset. Small, quiet, and only drawn when there is something to reset. */
 .HeaderActions {
   display: flex;
