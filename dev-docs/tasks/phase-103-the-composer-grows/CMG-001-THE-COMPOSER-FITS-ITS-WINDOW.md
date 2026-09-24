@@ -1,7 +1,8 @@
 # CMG-001 — The composer fits its window
 
 **Opened 2026-09-24** from Richard's drive of P102 (README §2, findings 1 and 2).
-**Status: 📋 ready.** No dependencies.
+**Status: ✅ built 2026-09-24 (s1)** — 6 specs green, 11/11 drive arms green on a copy of his project.
+§6 has what was built and what each AC measured. No dependencies.
 
 ## 1. The person sentence
 
@@ -74,3 +75,45 @@
   (`ListValueEditor`, whose editor also grows).
 - 🔴 [[cdp-click-hits-the-measuring-ghost-inside-a-modal]]: measure Apply with `elementFromPoint`,
   not by clicking it.
+
+## 6. Built (s1, 2026-09-24)
+
+**Finding 1.** `TypeComposer.previewGround` on the table in `TokenComposer.tsx`: `false` for
+`animation-easing` and `animation-duration`, `true` for shadow, gradient and font. Without a
+ground the bar row is not drawn at all. *Hold to compare* still does something on motion (it
+plays the saved curve or speed), so it sits **inside the preview** as an overlay, top-right, and
+**only once the draft differs** — a row that looks like it does nothing was the finding.
+`previewGroundFor(category)` is exported for the spec.
+
+**Finding 2, the clamp.** `views/popuplayerClamp.ts` — `clampPopoutTop({ top, height, minY,
+maxY })`, pure: already inside → don't move; grown past the bottom → up by the overflow exactly;
+taller than the window → pinned to the top so the header and controls are on screen and the
+content's own scroll does the rest (the composer caps itself at `100vh - 120px`). No x. In
+`popuplayer.ts` the ResizeObserver's `disableDynamicPositioning` branch now calls `_clampPopout`,
+which reads the popout's `top` and height, moves it, and moves the arrow with it. Every
+`disableDynamicPositioning` caller gets it: the composer, `ListValueEditor`, `CodeEditorType`,
+`VersionControlPanel`'s popout.
+
+**Finding 2, Show CSS.** Option A — the `<pre>` stays the last child of `.Scroll` and is
+`scrollIntoView({ block: 'nearest' })` on reveal. Chosen over moving it above the footer because it
+stays beside the controls it describes and the footer stays where the hand already is; with the
+clamp, the popout usually grows to show it without any scroll.
+
+**§4 measured** (`scripts/devtools/drive-cmg001-composer-fits.js` on *CMG Drive Tokens*; spec
+`tests-unit/cmg-001/clamp.test.ts`):
+
+| AC | reading |
+|---|---|
+| 1 | easing and duration composers: 0 `aria-pressed` buttons in a preview bar, 0 compare buttons at rest; after changing a curve number on easing, 1 compare button inside the preview, still 0 Light/Dark. Shadow, gradient, font: 2 and 1 each, as at HEAD. Shots `shots/cmg001-ac1-{easing,duration,shadow,gradient,font}.png` |
+| 2 | Motion open, `--ease-bounce` row scrolled to `block: 'end'` (row bottom 883 in a 900px window), composer opened, Show CSS: popout `top 255→197`, `bottom 890 ≤ 900`, `left 376→376`; Apply rect 849–874; `elementFromPoint` at Apply's centre is inside Apply. Shot `shots/cmg001-ac2-show-css-at-bottom.png` |
+| 3 | `--shadow-lg` + *Add layer* (3 layers; the probe's `Layer N` text count read 4) + Show CSS: popout 110–890 (780px, the content's cap), Apply under its own centre, `<pre>` in view. Viewport emulated at 700px high (`Emulation.setDeviceMetricsOverride`; the window's `resize` fires and the popup layer re-reads its height): popout 110–690 (580 = `700 − 120`), Apply under its centre, `<pre>` in view. Shots `cmg001-ac3-shadow-three-layers.png`, `cmg001-ac3-700px-window.png` |
+| 4 | the `<pre>` rect (776–823) is inside `.Scroll`'s rect and the window, in both AC2 and AC3 |
+| 5 | shadow composer mid-screen, the first slider set across its range in 25 steps while a `requestAnimationFrame` sampler reads the popout's rect: 104 frames, one distinct top-left (`376,89`) |
+| 6 | `clamp.test.ts`: already inside (three edges), grown past the bottom (exact overflow, and by one pixel), above the top, taller than the window (pinned), and no x in the signature |
+
+**Not driven:** `ListValueEditor`'s popout (§5). Same branch, graded by the spec; a node with a list
+port was not selected in this drive.
+
+**Seen on the way, not this task's:** the easing composer's four curve numbers render with a
+comma decimal (`0,34`) — Chromium formats `type="number"` inputs by the OS locale. Written into
+README §5 as a candidate rather than fixed here.

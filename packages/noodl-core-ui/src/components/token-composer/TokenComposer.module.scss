@@ -96,6 +96,14 @@
   user-select: none;
 }
 
+/** CMG-001: the compare button inside a motion preview, which has no ground bar. */
+.HoldOverlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
 // ─── Sections ─────────────────────────────────────────────────────────────────
 
 .Section {

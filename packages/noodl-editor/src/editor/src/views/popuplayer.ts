@@ -18,6 +18,7 @@ import { OPPOSITE_POSITION, placeBesideAnchor } from './PopupLayer/placeBesideAn
 import { ConfirmModal, ErrorModal } from './PopupLayer/ConfirmModal';
 import { StringInputPopup } from './PopupLayer/StringInputPopup';
 import { ToastLayer } from './ToastLayer/ToastLayer';
+import { clampPopoutTop } from './popuplayerClamp';
 import { unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 // Styles
@@ -795,6 +796,38 @@ export class PopupLayer {
     popout.el.style.transition = 'none';
   }
 
+  /**
+   * P103 CMG-001 §3.2 — the one move a `disableDynamicPositioning` popout is allowed after it
+   * opened: up, by however much its bottom now hangs below the window. `clampPopoutTop` is the
+   * pure arithmetic (and its spec); this reads the DOM and moves the arrow with it.
+   */
+  private _clampPopout(popout: Popout) {
+    const popoutEl = popout.el;
+    const top = parseFloat(popoutEl.style.top);
+    if (!Number.isFinite(top)) return;
+
+    const margin = 10;
+    const height = popoutEl.getBoundingClientRect().height;
+    const next = clampPopoutTop({
+      top,
+      height,
+      minY: Math.max(margin, windowTitleBarHeight()),
+      maxY: this.height - margin
+    });
+    if (next === top) return;
+
+    popoutEl.style.top = next + 'px';
+
+    // The arrow keeps pointing at the anchor: on a left/right popout its offset is measured from
+    // the popout's top, which just moved.
+    const arrow = popoutEl.querySelector('.popup-layer-popout-arrow') as HTMLElement | null;
+    const side = popout.effectivePosition;
+    if (arrow && (side === 'left' || side === 'right')) {
+      const attachRect = popout.attachToRect;
+      arrow.style.top = Math.round(Math.abs(attachRect.top + attachRect.height / 2 - next)) + 'px';
+    }
+  }
+
   private _positionPopout(popout: Popout, args: PopoutArgs) {
     const popoutEl = popout.el;
     const attachRect = popout.attachToRect;
@@ -951,6 +984,11 @@ export class PopupLayer {
       this._resizePopout(popout);
       if (!args.disableDynamicPositioning) {
         this._positionPopout(popout, args);
+      } else {
+        // P103 CMG-001: placed once at open, never re-centred — but a popout that GROWS past the
+        // bottom of the window (Show CSS, a list editor gaining rows) is moved up by the overflow
+        // and nothing else, so its footer stays reachable.
+        this._clampPopout(popout);
       }
     });
 

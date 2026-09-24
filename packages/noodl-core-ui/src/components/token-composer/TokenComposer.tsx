@@ -26,7 +26,7 @@ import {
   type ComposerCategory,
   type TokenCodec
 } from '@nodegx/project-contract/token-codecs';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ProjectColour, PresetTiles, SmallButton } from './controls';
 import { drawFontPreset, FontControls, FontPreview } from './FontComposer';
@@ -77,6 +77,14 @@ interface TypeComposer {
   drawPreset: (value: string, resolve: (v: string) => string) => React.ReactNode;
   /** Fonts list their choices instead of a tile strip. */
   presetStrip: boolean;
+  /**
+   * P103 CMG-001 — whether the preview has a Light/Dark ground worth switching. A shadow, a
+   * gradient or a font looks different on a dark page; a moving ball does not (Richard: *"You
+   * don't need a 'light dark Hold to compare' line on the Easing popup, that's weird, same for
+   * Duration"*). Without a ground the bar row is not drawn; *Hold to compare* moves into the
+   * preview itself, and only once there is a change to compare.
+   */
+  previewGround: boolean;
 }
 
 const TYPES: Record<ComposerCategory, TypeComposer> = {
@@ -84,39 +92,74 @@ const TYPES: Record<ComposerCategory, TypeComposer> = {
     Preview: ShadowPreview,
     Controls: ShadowControls as TypeComposer['Controls'],
     drawPreset: drawShadowPreset,
-    presetStrip: true
+    presetStrip: true,
+    previewGround: true
   },
   gradient: {
     Preview: GradientPreview,
     Controls: GradientControls as TypeComposer['Controls'],
     drawPreset: drawGradientPreset,
-    presetStrip: true
+    presetStrip: true,
+    previewGround: true
   },
   'animation-easing': {
     Preview: EasingPreview,
     Controls: EasingControls as TypeComposer['Controls'],
     drawPreset: drawEasingPreset,
-    presetStrip: true
+    presetStrip: true,
+    previewGround: false
   },
   'animation-duration': {
     Preview: DurationPreview,
     Controls: DurationControls as TypeComposer['Controls'],
     drawPreset: drawDurationPreset,
-    presetStrip: true
+    presetStrip: true,
+    previewGround: false
   },
   'typography-family': {
     Preview: FontPreview,
     Controls: FontControls as TypeComposer['Controls'],
     drawPreset: drawFontPreset,
-    presetStrip: false
+    presetStrip: false,
+    previewGround: true
   }
 };
+
+/** Read by the CMG-001 spec: which composers draw the Light/Dark ground. */
+export function previewGroundFor(category: ComposerCategory): boolean {
+  return TYPES[category].previewGround;
+}
 
 type DraftState = { mode: 'visual'; model: unknown } | { mode: 'text'; text: string };
 
 function open(codec: TokenCodec<unknown>, value: string): DraftState {
   const model = codec.decode(value);
   return model === null ? { mode: 'text', text: value } : { mode: 'visual', model };
+}
+
+function HoldToCompare({
+  dirty,
+  holding,
+  setHolding
+}: {
+  dirty: boolean;
+  holding: boolean;
+  setHolding: (h: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`${css.Button} ${css.Hold}`}
+      disabled={!dirty}
+      title="Press and hold to see the saved value"
+      onPointerDown={() => setHolding(true)}
+      onPointerUp={() => setHolding(false)}
+      onPointerLeave={() => setHolding(false)}
+      onPointerCancel={() => setHolding(false)}
+    >
+      {holding ? 'Saved value' : 'Hold to compare'}
+    </button>
+  );
 }
 
 export const TEXT_MODE_SENTENCE =
@@ -133,6 +176,17 @@ export function TokenComposer(props: TokenComposerProps) {
   const [dark, setDark] = useState(false);
   const [showCss, setShowCss] = useState(() => state.mode === 'text');
   const [holding, setHolding] = useState(false);
+
+  /**
+   * P103 CMG-001 §3.3 — Show CSS shows the CSS. The `<pre>` is the last child of `.Scroll`; when
+   * the popout is at its height cap it lands below the fold and nothing seemed to happen. Scrolled
+   * into view on reveal rather than moved out of `.Scroll`: it stays beside the controls it
+   * describes, and the footer stays where the hand already is.
+   */
+  const cssRef = useRef<HTMLPreElement>(null);
+  useEffect(() => {
+    if (showCss) cssRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [showCss]);
 
   const draft = state.mode === 'visual' ? codec.encode(state.model) : state.text;
   const lit = presetNamed(codec.presets, draft);
@@ -196,38 +250,38 @@ export function TokenComposer(props: TokenComposerProps) {
 
         <div className={css.Preview}>
           <Preview css={shown} resolve={resolve} dark={dark} />
-          <div className={css.PreviewBar}>
-            <span>
-              <button
-                type="button"
-                className={`${css.Segment} ${!dark ? css.on : ''}`}
-                aria-pressed={!dark}
-                onClick={() => setDark(false)}
-              >
-                Light
-              </button>
-              <button
-                type="button"
-                className={`${css.Segment} ${dark ? css.on : ''}`}
-                aria-pressed={dark}
-                onClick={() => setDark(true)}
-              >
-                Dark
-              </button>
-            </span>
-            <button
-              type="button"
-              className={`${css.Button} ${css.Hold}`}
-              disabled={!dirty}
-              title="Press and hold to see the saved value"
-              onPointerDown={() => setHolding(true)}
-              onPointerUp={() => setHolding(false)}
-              onPointerLeave={() => setHolding(false)}
-              onPointerCancel={() => setHolding(false)}
-            >
-              {holding ? 'Saved value' : 'Hold to compare'}
-            </button>
-          </div>
+          {type.previewGround ? (
+            <div className={css.PreviewBar} data-preview-bar>
+              <span>
+                <button
+                  type="button"
+                  className={`${css.Segment} ${!dark ? css.on : ''}`}
+                  aria-pressed={!dark}
+                  onClick={() => setDark(false)}
+                >
+                  Light
+                </button>
+                <button
+                  type="button"
+                  className={`${css.Segment} ${dark ? css.on : ''}`}
+                  aria-pressed={dark}
+                  onClick={() => setDark(true)}
+                >
+                  Dark
+                </button>
+              </span>
+              <HoldToCompare dirty={dirty} holding={holding} setHolding={setHolding} />
+            </div>
+          ) : (
+            // No ground to switch (motion): the compare button sits in the preview itself, and
+            // only once there is something to compare — a row that looks like it does nothing is
+            // the finding this answers.
+            dirty && (
+              <span className={css.HoldOverlay}>
+                <HoldToCompare dirty={dirty} holding={holding} setHolding={setHolding} />
+              </span>
+            )
+          )}
         </div>
 
         {state.mode === 'text' ? (
@@ -280,7 +334,7 @@ export function TokenComposer(props: TokenComposerProps) {
         )}
 
         {showCss && (
-          <pre className={css.CssBox} data-show-css>
+          <pre className={css.CssBox} data-show-css ref={cssRef}>
             {tokenName}: {draft};
           </pre>
         )}

@@ -76,7 +76,7 @@ panel and the property panel.
 
 | id | task | findings | depends on |
 |---|---|---|---|
-| **[CMG-001](CMG-001-THE-COMPOSER-FITS-ITS-WINDOW.md)** | The composer fits its window: no light/dark bar on motion; the popout stays on screen as it grows; *Show CSS* scrolls to the CSS | 1, 2 | — |
+| **[CMG-001](CMG-001-THE-COMPOSER-FITS-ITS-WINDOW.md)** ✅ s1 | The composer fits its window: no light/dark bar on motion; the popout stays on screen as it grows; *Show CSS* scrolls to the CSS | 1, 2 | — |
 | **[CMG-002](CMG-002-ADD-A-TOKEN-COPY-A-TOKEN.md)** | Add a token to any group; copy any token's reference | 3, 4 | CMG-005 (where the + lives) |
 | **[CMG-003](CMG-003-A-NEW-COLOUR-IS-A-COLOUR-YOU-CAN-CHANGE.md)** | *New colour* makes a colour token you pick straight away; an existing colour style's swatch opens the picker | 5 | — |
 | **[CMG-004](CMG-004-RESET-SAYS-WHAT-IT-RESETS.md)** ✅ s1 | Reset counts real changes, shows them before it acts, resets one group or one token, and cannot silently wipe a brand | 7 | — |
@@ -111,6 +111,7 @@ Everything below is drawn on the *Token Composer* mockup canvas (2026-09-24) unl
 | ~~**Used by**~~ *(new)* → **[CMG-010](CMG-010-FROM-THE-FIELD-TO-THE-TOKEN-AND-BACK.md)** | *"Worn by 14 nodes on 3 pages"* in the composer header, and *"Nothing wears this yet"* | A reach count over the project ([[count-the-reach-first]]). The honest number is what makes a beginner trust editing a shared token |
 | **Strength on a kept literal** *(new)* | Slide the alpha of a Playful purple without re-serialising it | Needs a spelling-preserving colour writer; P102 RC-6 deliberately refused to offer the slider rather than risk a rewrite |
 | **Describe it** *(new)* | Type *"a soft blue glow from the top corner"* and the composer fills in the controls. You adjust from there | The editor already talks to Claude. The model writes a **model** through the codec, never raw CSS, so the round-trip rule still holds |
+| **Number inputs in the OS locale** *(new, CMG-001 drive)* | The easing composer's curve numbers show `0,34` on a German-locale machine; Chromium formats `type="number"` inputs by locale, and a person typing `0.34` there may be refused | Measure with `lang` / `inputmode` before touching it; the same inputs are everywhere in the property panel |
 | **Font browser** *(new)* | Any Google Font by name, or upload your own file, with the font files handled | UPG-003 already moves font files with text styles, and P88's `presetFonts.ts` places a bundled face as a module (Nunito, DM Sans, Source Sans 3 ship in the app today). Reuse that path. 🔴 Since P102 s2 the composer offers **only** faces a visitor will see; the 25 web fonts it used to list without shipping (Manrope, Poppins, Lora, JetBrains Mono…) wait here — a font is offered once this row can put its files in the project |
 
 ## 6. Moved into P102 on 2026-09-24 (Richard: *"I like all your ideas"*)
