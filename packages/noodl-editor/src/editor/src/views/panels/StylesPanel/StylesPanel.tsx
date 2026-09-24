@@ -29,13 +29,18 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { TokenCategoryGroup } from '@noodl-models/StyleTokensModel/TokenCategories';
+import { ChangedToken, changesInGroup, tokenChanges } from '@noodl-models/StyleTokensModel/TokenChanges';
+import { TokenResolver } from '@noodl-models/StyleTokensModel/TokenResolver';
 
 import { BasePanel } from '@noodl-core-ui/components/sidebar/BasePanel';
 
+import PopupLayer from '../../popuplayer';
 import { ToastLayer } from '../../ToastLayer/ToastLayer';
+import { ChangesSection } from './components/ChangesSection';
 import { ColoursSection } from './components/ColoursSection/ColoursSection';
 import { LooksSection } from './components/LooksSection/LooksSection';
 import { TokenGroupSection } from './components/TokensSection';
+import { describeReset } from './resetConfirm';
 import { useStylesModel, useStylesSectionsOpen } from './shared';
 import css from './StylesPanel.module.scss';
 import {
@@ -58,8 +63,61 @@ const SECTION_OPEN_MS = 400;
 
 export function StylesPanel() {
   const { stylesModel, revision } = useStylesModel();
-  const { styleTokensModel } = useProjectDesignTokenContext();
+  const { styleTokensModel, designTokens } = useProjectDesignTokenContext();
   const [open, setOpen] = useStylesSectionsOpen();
+
+  // CMG-004: what differs from the defaults — one reading, shared by the strip at the top, every
+  // section header's *Reset this section* and the confirm. Never `isCustom` (TokenChanges.ts).
+  const changes = React.useMemo(() => tokenChanges(designTokens), [designTokens]);
+  const resolve = React.useMemo(() => {
+    const resolver = new TokenResolver(new Map(designTokens.map((t) => [t.name, t])));
+    return (value: string) => resolver.resolveInline(value);
+  }, [designTokens]);
+
+  const resetOne = useCallback(
+    (name: string) => {
+      styleTokensModel?.resetTokens([name], { undo: true, label: `Reset ${name}` });
+    },
+    [styleTokensModel]
+  );
+
+  /**
+   * §3.4 — anything that resets more than one token says what it will change first. One token
+   * resets straight away: the row it sits on IS the thing it changes, and its button names the
+   * default it goes to.
+   */
+  const resetMany = useCallback(
+    (changed: ChangedToken[], scope: { kind: 'all' } | { kind: 'section'; title: string }) => {
+      if (!styleTokensModel || changed.length === 0) return;
+      const names = changed.map((c) => c.token.name);
+      if (names.length === 1) {
+        resetOne(names[0]);
+        return;
+      }
+      const text = describeReset(changed, scope, resolve, scope.kind === 'all' ? changes.added.length : 0);
+      PopupLayer.instance.showConfirmModal({
+        title: text.title,
+        message: text.message,
+        confirmLabel: text.confirmLabel,
+        onConfirm: () => {
+          const label = scope.kind === 'all' ? `Reset ${names.length} tokens` : `Reset ${scope.title} tokens`;
+          styleTokensModel.resetTokens(names, { undo: true, label });
+          ToastLayer.showSuccess(`${names.length} tokens put back to their defaults — ⌘Z undoes it`);
+        }
+      });
+    },
+    [styleTokensModel, resolve, changes.added.length, resetOne]
+  );
+
+  const sectionReset = (section: StylesSectionSpec) => {
+    if (!section.group) return undefined;
+    const rows = changesInGroup(changes, section.group);
+    if (rows.length === 0) return undefined;
+    return {
+      count: rows.length,
+      onReset: () => resetMany(rows, { kind: 'section', title: section.title })
+    };
+  };
   // The design-token list inside Colours is its own closed disclosure (P94: 88 rows buried the
   // colour styles). Not remembered: it is a list you open to look, not a section you work in.
   const [colourTokensOpen, setColourTokensOpen] = useState(false);
@@ -130,6 +188,7 @@ export function StylesPanel() {
   return (
     <BasePanel title="Styles" hasContentScroll>
       <div ref={rootRef} data-styles-panel>
+        <ChangesSection changes={changes} resolve={resolve} onResetOne={resetOne} onResetMany={resetMany} />
         {STYLES_SECTIONS.map((section, index) => {
           if (section.id === 'colours') {
             return (
@@ -143,6 +202,7 @@ export function StylesPanel() {
                 onOpenChange={openChange(section.id)}
                 isTokensOpen={colourTokensOpen}
                 onTokensOpenChange={setColourTokensOpen}
+                reset={sectionReset(section)}
               />
             );
           }
@@ -163,6 +223,7 @@ export function StylesPanel() {
               isFirst={index === 0}
               isOpen={open[section.id]}
               onOpenChange={openChange(section.id)}
+              reset={sectionReset(section)}
             />
           );
         })}

@@ -68,6 +68,32 @@
   }
 }
 
+/** CMG-004 §3.3 — the section header's own reset. Small, quiet, and only drawn when there is something to reset. */
+.HeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.SectionReset {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  margin: 0;
+  padding: 1px 6px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
 .NoProject {
   padding: 24px 16px;
   font-size: 11px;

@@ -242,8 +242,44 @@ export class StyleTokensModel extends Model {
   }
 
   /**
+   * P103 CMG-004 — put a named set of default tokens back to their defaults, as ONE undo step.
+   *
+   * This is what every reset in the Styles panel calls: one row, one section, or every changed
+   * token. A name with no default (a token somebody added) is skipped, never deleted — an added
+   * token has nothing to go back to, and *reset* must not mean *delete* (CMG-004 §3.5). Names
+   * already at their default are skipped too, so the undo step holds exactly what changed.
+   */
+  resetTokens(names: readonly string[], args?: { undo?: boolean; label?: string }): string[] {
+    const defaultMap = buildDefaultTokenMap();
+    const previous: { name: string; value: string }[] = [];
+
+    for (const name of names) {
+      const def = defaultMap.get(name);
+      const existing = this._tokens.get(name);
+      if (!def || !existing || existing.value === def.value) continue;
+      previous.push({ name, value: existing.value });
+      this.setToken(name, def.value);
+    }
+
+    if (args?.undo && previous.length > 0) {
+      const reset = previous.map((p) => p.name);
+      pushAppliedUndo(args.label ?? `reset ${previous.length} design token${previous.length === 1 ? '' : 's'}`, {
+        do: () => this.resetTokens(reset),
+        undo: () => {
+          for (const { name, value } of previous) this.setToken(name, value);
+        }
+      });
+    }
+
+    return previous.map((p) => p.name);
+  }
+
+  /**
    * Reset ALL customised tokens back to their defaults, and remove any
    * fully-custom tokens. Clears the customTokens stored in project metadata.
+   *
+   * ⚠️ P103 CMG-004: no longer called by the Styles panel, which resets through `resetTokens`
+   * (added tokens survive, the step is confirmed first). Kept for its spec and any script.
    */
   resetAllToDefaults(args?: { undo?: boolean }): void {
     const prevCustom = this.getCustomTokens().map((t) => ({ ...t }));

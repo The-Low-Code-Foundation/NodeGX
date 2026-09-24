@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { ProjectModel } from '@noodl-models/projectmodel';
 // The leaf module, not the barrel — see TokenCategorySection's note on the `Tests: 0` it causes.
 import { allColourTokens } from '@noodl-models/StyleTokensModel/TokensForPicking';
+import { buildDefaultTokenMap } from '@noodl-models/StyleTokensModel/DefaultTokens';
 import { StylesModel } from '@noodl-models/StylesModel';
 import { escapeHtml } from '@noodl-utils/escapeHtml';
 
@@ -13,7 +14,7 @@ import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
 
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
-import { InlineNameInput, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
+import { InlineNameInput, SectionReset, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
 import { StylesSectionSpec } from '../../stylesPanelRoute';
 import { describeUsage } from '../../format';
@@ -39,6 +40,8 @@ export interface ColoursSectionProps {
   /** The closed *Design tokens (N)* list inside — opened by a reveal of a colour token. */
   isTokensOpen: boolean;
   onTokensOpenChange: (open: boolean) => void;
+  /** CMG-004: *Reset N* in the header for the colour tokens that differ from their defaults. */
+  reset?: SectionReset;
 }
 
 export function ColoursSection({
@@ -49,7 +52,8 @@ export function ColoursSection({
   isOpen,
   onOpenChange,
   isTokensOpen,
-  onTokensOpenChange
+  onTokensOpenChange,
+  reset
 }: ColoursSectionProps) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
   const [isCreating, setIsCreating] = useState(false);
@@ -153,6 +157,7 @@ export function ColoursSection({
       isFirst={isFirst}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
+      reset={reset}
     >
       {styles.length === 0 && colourTokens.length === 0 && (
         <StyleSectionEmpty>No colours yet.</StyleSectionEmpty>
@@ -233,11 +238,18 @@ export function ColoursSection({
             {
               label: 'Reset to default',
               icon: IconName.Reset,
-              // A default token has nothing to reset to, and a menu item that does nothing is
-              // worse than one that says why it cannot.
-              isDisabled: !token.isCustom,
-              tooltip: token.isCustom ? undefined : 'This token is already the default',
-              onClick: () => styleTokensModel?.deleteCustomToken(token.name, { undo: true })
+              // A token at its default has nothing to reset to, and a menu item that does nothing
+              // is worse than one that says why it cannot. CMG-004: "at its default" is read off
+              // the VALUE, not off `isCustom` — a pinned default is not a change — and a token
+              // somebody added has no default at all, so it is never "reset" (deleting is CMG-002).
+              isDisabled: !canReset(token),
+              tooltip: canReset(token)
+                ? undefined
+                : defaultValueOf(token.name) === undefined
+                ? 'You added this token — it has no default'
+                : 'This token is already the default',
+              endSlot: canReset(token) ? defaultValueOf(token.name) : undefined,
+              onClick: () => styleTokensModel?.resetTokens([token.name], { undo: true, label: `Reset ${token.name}` })
             }
           ]}
         />
@@ -245,6 +257,16 @@ export function ColoursSection({
       </CollapsableSection>
     </StylesSection>
   );
+}
+
+/** What *Reset to default* puts a colour token back to — said on the item, not discovered after. */
+const DEFAULTS = buildDefaultTokenMap();
+function defaultValueOf(name: string): string | undefined {
+  return DEFAULTS.get(name)?.value;
+}
+function canReset(token: { name: string; value: string }): boolean {
+  const def = defaultValueOf(token.name);
+  return def !== undefined && def !== token.value;
 }
 
 /**

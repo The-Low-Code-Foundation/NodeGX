@@ -1,0 +1,193 @@
+.Root {
+  margin: 10px 12px 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background-color: var(--theme-color-bg-1);
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+}
+
+.Quiet {
+  color: var(--theme-color-fg-default-shy);
+}
+
+.Line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.CountButton,
+.ResetAll,
+.GroupReset,
+.RowReset {
+  appearance: none;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 2px 4px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  cursor: pointer;
+  border-radius: 3px;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
+.CountButton {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.Caret {
+  display: inline-block;
+  width: 12px;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.ResetAll,
+.GroupReset,
+.RowReset {
+  flex: 0 0 auto;
+  color: var(--theme-color-primary);
+  white-space: nowrap;
+}
+
+.List {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.Group {
+  display: flex;
+  flex-direction: column;
+}
+
+.GroupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px 2px;
+}
+
+.GroupTitle {
+  font-weight: 600;
+  color: var(--theme-color-fg-highlight);
+}
+
+/**
+ * Two lines per row: the name and *Put back* on the first, *yours → default* on the second. At the
+ * panel's 328px one line held about ten characters of each, and `--primary-hover` read as
+ * `--primary-h…` beside `#9a…` — a list you cannot read is not an answer to "which ones?".
+ */
+.Row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 1px;
+  padding: 3px 2px;
+
+  &:hover {
+    background-color: var(--theme-color-bg-2);
+  }
+}
+
+.Name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-family-code);
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.Pair {
+  flex: 1 1 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 6px;
+}
+
+.Arrow {
+  flex: 0 0 auto;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.Chip {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.Text {
+  min-width: 0;
+  font-family: var(--font-family-code);
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.Swatch {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--theme-color-bg-4);
+}
+
+.ShadowStage {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 20px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ShadowCard {
+  width: 14px;
+  height: 9px;
+  border-radius: 2px;
+  background: #ffffff;
+}
+
+.Strip {
+  flex: 1 1 auto;
+  min-width: 24px;
+  height: 12px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.RadiusBox {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--theme-color-fg-default-shy);
+}
+
+.Added {
+  padding: 4px 2px 0;
+  color: var(--theme-color-fg-default-shy);
+  line-height: 1.4;
+}

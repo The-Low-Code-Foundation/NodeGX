@@ -79,7 +79,7 @@ panel and the property panel.
 | **[CMG-001](CMG-001-THE-COMPOSER-FITS-ITS-WINDOW.md)** | The composer fits its window: no light/dark bar on motion; the popout stays on screen as it grows; *Show CSS* scrolls to the CSS | 1, 2 | — |
 | **[CMG-002](CMG-002-ADD-A-TOKEN-COPY-A-TOKEN.md)** | Add a token to any group; copy any token's reference | 3, 4 | CMG-005 (where the + lives) |
 | **[CMG-003](CMG-003-A-NEW-COLOUR-IS-A-COLOUR-YOU-CAN-CHANGE.md)** | *New colour* makes a colour token you pick straight away; an existing colour style's swatch opens the picker | 5 | — |
-| **[CMG-004](CMG-004-RESET-SAYS-WHAT-IT-RESETS.md)** | Reset counts real changes, shows them before it acts, resets one group or one token, and cannot silently wipe a brand | 7 | — |
+| **[CMG-004](CMG-004-RESET-SAYS-WHAT-IT-RESETS.md)** ✅ s1 | Reset counts real changes, shows them before it acts, resets one group or one token, and cannot silently wipe a brand | 7 | — |
 | **[CMG-005](CMG-005-EVERY-KIND-OF-STYLE-IS-A-SECTION.md)** ✅ s1 | No *Other tokens*: Type, Spacing, Borders, Effects and Motion are sections beside Colours and Looks; `revealStyle` opens a section and lands on a row from outside | 8 | — |
 | **[CMG-006](CMG-006-EDIT-A-LOOK-FROM-STYLES.md)** | Edit a Look from Styles, with or without a node wearing it; *Look*, never *variant*, on screen; the node's Look row links to Styles | 6a, 6b | CMG-005 (reveal) |
 | **[CMG-007](CMG-007-A-POPOUT-CASTS-A-SHADOW-NOT-A-GLOW.md)** | Every popout, popup and modal casts a shadow in light mode, not a white glow | 6c | — |

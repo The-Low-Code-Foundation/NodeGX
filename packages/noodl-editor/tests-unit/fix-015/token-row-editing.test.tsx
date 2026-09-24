@@ -71,9 +71,29 @@ describe('FIX-015 §1 — a token row offers an editable value', () => {
     expect(render()).toContain('References var(--primary)');
   });
 
-  it('still offers the reset button only on a customised token', () => {
-    // One of the three fixtures is `isCustom`. A reset on an untouched token has nothing to undo.
-    expect(render().match(/Reset to default/g) ?? []).toHaveLength(1);
+  /**
+   * P103 CMG-004 — the reset button follows the VALUE, not the stored flag, and this gate is
+   * updated with the reason rather than deleted (README §7).
+   *
+   * It used to assert one reset button, on the one `isCustom` fixture (`--spacing-m`). Richard's
+   * drive found that `isCustom` means *stored*, not *changed*: 96 of his 142 stored tokens equalled
+   * their defaults. So the button is now drawn when a token's value differs from its shipped
+   * default, and says what it goes back to. Of the three fixtures: `--spacing-m` has no shipped
+   * default at all (nothing to go back to — deleting it is CMG-002's item, not a "reset");
+   * `--primary` is `#3b82f6` against a default of `#2563eb`; `--accent` is `var(--primary)`
+   * against a default of `#f1f5f9`. Two buttons, each naming its default.
+   */
+  it('offers the reset button on a token whose value differs from its default, naming the default', () => {
+    const html = render();
+    expect(html.match(/Reset to default \(/g) ?? []).toHaveLength(2);
+    expect(html).toContain('Reset to default (#2563eb)');
+    expect(html).toContain('aria-label="Reset --primary to default"');
+    expect(html).not.toContain('Reset --spacing-m to default');
+  });
+
+  it('🔴 a stored token whose value EQUALS its default draws no reset — stored is not changed', () => {
+    const html = render([{ name: '--primary', value: '#2563eb', category: 'color-semantic', isCustom: true }]);
+    expect(html).not.toContain('Reset to default');
   });
 
   it('renders nothing at all for an empty token list, without throwing', () => {

@@ -1,0 +1,902 @@
+{
+  "version": 1,
+  "customTokens": [
+    {
+      "name": "--primary",
+      "value": "#c2410c",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Main brand and action color"
+    },
+    {
+      "name": "--primary-hover",
+      "value": "#9a3412",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Primary color on hover"
+    },
+    {
+      "name": "--ring",
+      "value": "#c2410c",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Focus ring color"
+    },
+    {
+      "name": "--text-3xl",
+      "value": "1.875rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--surface",
+      "value": "#f8fafc",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Card and panel surfaces"
+    },
+    {
+      "name": "--background",
+      "value": "#ffffff",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Page/app background"
+    },
+    {
+      "name": "--foreground",
+      "value": "#0f172a",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Default text color"
+    },
+    {
+      "name": "--surface-raised",
+      "value": "#f1f5f9",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Elevated surface (dialogs, dropdowns)"
+    },
+    {
+      "name": "--muted",
+      "value": "#f1f5f9",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Subtle backgrounds, disabled states"
+    },
+    {
+      "name": "--muted-foreground",
+      "value": "#475569",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Text color on muted background"
+    },
+    {
+      "name": "--accent",
+      "value": "#f1f5f9",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Highlights and selections"
+    },
+    {
+      "name": "--accent-foreground",
+      "value": "#0f172a",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Text color on accent background"
+    },
+    {
+      "name": "--primary-foreground",
+      "value": "#ffffff",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Text color on primary background"
+    },
+    {
+      "name": "--secondary",
+      "value": "#475569",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Supporting action color"
+    },
+    {
+      "name": "--secondary-hover",
+      "value": "#334155",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Secondary color on hover"
+    },
+    {
+      "name": "--secondary-foreground",
+      "value": "#ffffff",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Text color on secondary background"
+    },
+    {
+      "name": "--destructive",
+      "value": "#dc2626",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Dangerous actions and errors"
+    },
+    {
+      "name": "--destructive-hover",
+      "value": "#b91c1c",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Destructive color on hover"
+    },
+    {
+      "name": "--destructive-foreground",
+      "value": "#ffffff",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Text color on destructive background"
+    },
+    {
+      "name": "--border",
+      "value": "#e2e8f0",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Default border color"
+    },
+    {
+      "name": "--border-subtle",
+      "value": "#f1f5f9",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Subtle/light border"
+    },
+    {
+      "name": "--border-strong",
+      "value": "#cbd5e1",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Strong/dark border"
+    },
+    {
+      "name": "--border-control",
+      "value": "#7c8da3",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Border for controls — meets 3:1 against surface, unlike --border"
+    },
+    {
+      "name": "--ring-offset",
+      "value": "#ffffff",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Focus ring offset color"
+    },
+    {
+      "name": "--surface-glass",
+      "value": "rgb(255 255 255 / 0.12)",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "Translucent panel fill for use over a dark gradient or image ground"
+    },
+    {
+      "name": "--border-glass",
+      "value": "rgb(255 255 255 / 0.24)",
+      "category": "color-semantic",
+      "isCustom": true,
+      "description": "The hairline that gives a translucent panel an edge"
+    },
+    {
+      "name": "--gray-50",
+      "value": "#f8fafc",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-100",
+      "value": "#f1f5f9",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-200",
+      "value": "#e2e8f0",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-300",
+      "value": "#cbd5e1",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-400",
+      "value": "#94a3b8",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-500",
+      "value": "#64748b",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-600",
+      "value": "#475569",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-700",
+      "value": "#334155",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-800",
+      "value": "#1e293b",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gray-900",
+      "value": "#0f172a",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--red-700",
+      "value": "#b91c1c",
+      "category": "color-palette",
+      "isCustom": true
+    },
+    {
+      "name": "--gradient-brand",
+      "value": "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 45%, var(--foreground) 115%)",
+      "category": "gradient",
+      "isCustom": true,
+      "description": "The brand ground for a hero or CTA band. Put --primary-foreground text on it"
+    },
+    {
+      "name": "--gradient-deep",
+      "value": "linear-gradient(160deg, var(--foreground) 0%, var(--primary-hover) 100%)",
+      "category": "gradient",
+      "isCustom": true,
+      "description": "A dark editorial ground — ink into brand. Light text only"
+    },
+    {
+      "name": "--gradient-spotlight",
+      "value": "radial-gradient(90% 120% at 20% 0%, var(--primary) 0%, var(--foreground) 70%)",
+      "category": "gradient",
+      "isCustom": true,
+      "description": "An off-centre glow on a dark ground, for a hero that should not read as a flat panel"
+    },
+    {
+      "name": "--gradient-surface",
+      "value": "linear-gradient(180deg, var(--surface) 0%, var(--background) 100%)",
+      "category": "gradient",
+      "isCustom": true,
+      "description": "A quiet wash for a mid-page band, so a section can change ground without shouting"
+    },
+    {
+      "name": "--gradient-scrim",
+      "value": "linear-gradient(180deg, rgb(0 0 0 / 0.20) 0%, rgb(0 0 0 / 0.78) 100%)",
+      "category": "gradient",
+      "isCustom": true,
+      "description": "Darkens the bottom of a photograph so text laid over it stays readable"
+    },
+    {
+      "name": "--font-sans",
+      "value": "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      "category": "typography-family",
+      "isCustom": true,
+      "description": "Inter, falling back to the system sans-serif stack"
+    },
+    {
+      "name": "--font-serif",
+      "value": "ui-serif, Georgia, Cambria, 'Times New Roman', serif",
+      "category": "typography-family",
+      "isCustom": true,
+      "description": "System serif stack"
+    },
+    {
+      "name": "--font-mono",
+      "value": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+      "category": "typography-family",
+      "isCustom": true,
+      "description": "System monospace stack"
+    },
+    {
+      "name": "--text-xs",
+      "value": "0.75rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-sm",
+      "value": "0.875rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-base",
+      "value": "1rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-lg",
+      "value": "1.125rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-xl",
+      "value": "1.25rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-2xl",
+      "value": "1.5rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-4xl",
+      "value": "2.25rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-5xl",
+      "value": "3rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--text-6xl",
+      "value": "3.75rem",
+      "category": "typography-size",
+      "isCustom": true
+    },
+    {
+      "name": "--display-sm",
+      "value": "clamp(2rem, 1rem + 2.5vw, 3rem)",
+      "category": "typography-size",
+      "isCustom": true,
+      "description": "Fluid display size: 30px on a phone, 48px on a wide desktop"
+    },
+    {
+      "name": "--display-md",
+      "value": "clamp(2.25rem, 1rem + 4vw, 4rem)",
+      "category": "typography-size",
+      "isCustom": true,
+      "description": "Fluid display size: 36px on a phone, 72px on a wide desktop"
+    },
+    {
+      "name": "--display-lg",
+      "value": "clamp(2.75rem, 1rem + 7vw, 6rem)",
+      "category": "typography-size",
+      "isCustom": true,
+      "description": "Fluid display size: 44px on a phone, 96px on a wide desktop — the page's one hero headline"
+    },
+    {
+      "name": "--font-thin",
+      "value": "100",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-extralight",
+      "value": "200",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-light",
+      "value": "300",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-normal",
+      "value": "400",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-medium",
+      "value": "500",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-semibold",
+      "value": "600",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-bold",
+      "value": "700",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-extrabold",
+      "value": "800",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--font-black",
+      "value": "900",
+      "category": "typography-weight",
+      "isCustom": true
+    },
+    {
+      "name": "--leading-none",
+      "value": "1",
+      "category": "typography-leading",
+      "isCustom": true
+    },
+    {
+      "name": "--leading-tight",
+      "value": "1.25",
+      "category": "typography-leading",
+      "isCustom": true
+    },
+    {
+      "name": "--leading-snug",
+      "value": "1.375",
+      "category": "typography-leading",
+      "isCustom": true
+    },
+    {
+      "name": "--leading-normal",
+      "value": "1.5",
+      "category": "typography-leading",
+      "isCustom": true
+    },
+    {
+      "name": "--leading-relaxed",
+      "value": "1.625",
+      "category": "typography-leading",
+      "isCustom": true
+    },
+    {
+      "name": "--leading-loose",
+      "value": "2",
+      "category": "typography-leading",
+      "isCustom": true
+    },
+    {
+      "name": "--tracking-tighter",
+      "value": "-0.05em",
+      "category": "typography-tracking",
+      "isCustom": true
+    },
+    {
+      "name": "--tracking-tight",
+      "value": "-0.025em",
+      "category": "typography-tracking",
+      "isCustom": true
+    },
+    {
+      "name": "--tracking-normal",
+      "value": "0em",
+      "category": "typography-tracking",
+      "isCustom": true
+    },
+    {
+      "name": "--tracking-wide",
+      "value": "0.025em",
+      "category": "typography-tracking",
+      "isCustom": true
+    },
+    {
+      "name": "--tracking-wider",
+      "value": "0.05em",
+      "category": "typography-tracking",
+      "isCustom": true
+    },
+    {
+      "name": "--tracking-widest",
+      "value": "0.1em",
+      "category": "typography-tracking",
+      "isCustom": true
+    },
+    {
+      "name": "--space-0",
+      "value": "0px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-px",
+      "value": "1px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-0-5",
+      "value": "2px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-1",
+      "value": "4px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-1-5",
+      "value": "6px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-2",
+      "value": "8px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-2-5",
+      "value": "10px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-3",
+      "value": "12px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-3-5",
+      "value": "14px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-4",
+      "value": "16px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-5",
+      "value": "20px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-6",
+      "value": "24px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-7",
+      "value": "28px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-8",
+      "value": "32px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-9",
+      "value": "36px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-10",
+      "value": "40px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-11",
+      "value": "44px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-12",
+      "value": "48px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-14",
+      "value": "56px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-16",
+      "value": "64px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-20",
+      "value": "80px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-24",
+      "value": "96px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-28",
+      "value": "112px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-32",
+      "value": "128px",
+      "category": "spacing",
+      "isCustom": true
+    },
+    {
+      "name": "--space-xs",
+      "value": "4px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "Extra small (4px)"
+    },
+    {
+      "name": "--space-sm",
+      "value": "8px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "Small (8px)"
+    },
+    {
+      "name": "--space-md",
+      "value": "16px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "Medium (16px)"
+    },
+    {
+      "name": "--space-lg",
+      "value": "24px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "Large (24px)"
+    },
+    {
+      "name": "--space-xl",
+      "value": "32px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "Extra large (32px)"
+    },
+    {
+      "name": "--space-2xl",
+      "value": "48px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "2x large (48px)"
+    },
+    {
+      "name": "--space-3xl",
+      "value": "64px",
+      "category": "spacing",
+      "isCustom": true,
+      "description": "3x large (64px)"
+    },
+    {
+      "name": "--radius-none",
+      "value": "0px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-sm",
+      "value": "2px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-md",
+      "value": "6px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-lg",
+      "value": "8px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-xl",
+      "value": "12px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-2xl",
+      "value": "16px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-3xl",
+      "value": "24px",
+      "category": "border-radius",
+      "isCustom": true
+    },
+    {
+      "name": "--radius-full",
+      "value": "9999px",
+      "category": "border-radius",
+      "isCustom": true,
+      "description": "Pill/circle"
+    },
+    {
+      "name": "--border-0",
+      "value": "0px",
+      "category": "border-width",
+      "isCustom": true
+    },
+    {
+      "name": "--border-1",
+      "value": "1px",
+      "category": "border-width",
+      "isCustom": true
+    },
+    {
+      "name": "--border-2",
+      "value": "2px",
+      "category": "border-width",
+      "isCustom": true
+    },
+    {
+      "name": "--border-4",
+      "value": "4px",
+      "category": "border-width",
+      "isCustom": true
+    },
+    {
+      "name": "--border-8",
+      "value": "8px",
+      "category": "border-width",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-none",
+      "value": "none",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-sm",
+      "value": "0 1px 2px 0 rgb(15 23 42 / 0.06)",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-md",
+      "value": "0 4px 6px -1px rgb(15 23 42 / 0.10), 0 2px 4px -2px rgb(15 23 42 / 0.10)",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-lg",
+      "value": "0 10px 15px -3px rgb(15 23 42 / 0.10), 0 4px 6px -4px rgb(15 23 42 / 0.10)",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-xl",
+      "value": "0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.10)",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-2xl",
+      "value": "0 25px 50px -12px rgb(15 23 42 / 0.25)",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--shadow-inner",
+      "value": "inset 0 2px 4px 0 rgb(15 23 42 / 0.06)",
+      "category": "shadow",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-75",
+      "value": "75ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-100",
+      "value": "100ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-150",
+      "value": "150ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-200",
+      "value": "200ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-300",
+      "value": "300ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-500",
+      "value": "500ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-700",
+      "value": "700ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--duration-1000",
+      "value": "1000ms",
+      "category": "animation-duration",
+      "isCustom": true
+    },
+    {
+      "name": "--ease-linear",
+      "value": "linear",
+      "category": "animation-easing",
+      "isCustom": true
+    },
+    {
+      "name": "--ease-in",
+      "value": "cubic-bezier(0.4, 0, 1, 1)",
+      "category": "animation-easing",
+      "isCustom": true
+    },
+    {
+      "name": "--ease-out",
+      "value": "cubic-bezier(0, 0, 0.2, 1)",
+      "category": "animation-easing",
+      "isCustom": true
+    },
+    {
+      "name": "--ease-in-out",
+      "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "category": "animation-easing",
+      "isCustom": true
+    },
+    {
+      "name": "--ease-bounce",
+      "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "category": "animation-easing",
+      "isCustom": true,
+      "description": "Bouncy animation curve"
+    }
+  ]
+}

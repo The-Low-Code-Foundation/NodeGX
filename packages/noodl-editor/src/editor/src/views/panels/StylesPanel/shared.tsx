@@ -104,6 +104,15 @@ export function useStylesSectionsOpen(): [SectionOpenState, (id: StylesSectionId
   return [open, set];
 }
 
+/**
+ * CMG-004 §3.3 — *Reset this section (N)* in a section header. `undefined` when nothing in the
+ * section differs from its default, so the header carries no dead button.
+ */
+export interface SectionReset {
+  count: number;
+  onReset: () => void;
+}
+
 export interface StylesSectionProps {
   id: StylesSectionId;
   title: string;
@@ -113,11 +122,44 @@ export interface StylesSectionProps {
   /** CMG-005: controlled by the panel, so `revealStyle` can open a section from outside. */
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  reset?: SectionReset;
   actions?: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export function StylesSection({ id, title, subtitle, isFirst, isOpen, onOpenChange, actions, children }: StylesSectionProps) {
+export function StylesSection({
+  id,
+  title,
+  subtitle,
+  isFirst,
+  isOpen,
+  onOpenChange,
+  reset,
+  actions,
+  children
+}: StylesSectionProps) {
+  const headerActions =
+    reset || actions ? (
+      <span className={css['HeaderActions']}>
+        {reset && (
+          <button
+            type="button"
+            className={css['SectionReset']}
+            data-test={`section-reset-${id}`}
+            title={
+              reset.count === 1
+                ? 'Put the one changed token here back to its default'
+                : `Put the ${reset.count} changed tokens here back to their defaults — you will be asked first`
+            }
+            onClick={reset.onReset}
+          >
+            Reset {reset.count}
+          </button>
+        )}
+        {actions}
+      </span>
+    ) : undefined;
+
   return (
     <CollapsableSection
       sectionId={id}
@@ -126,7 +168,7 @@ export function StylesSection({ id, title, subtitle, isFirst, isOpen, onOpenChan
       hasVisibleOverflow
       isCollapsed={!isOpen}
       onCollapsedChange={(collapsed) => onOpenChange(!collapsed)}
-      actions={actions}
+      actions={headerActions}
       UNSAFE_style={{ marginTop: isFirst ? '12px' : '8px' }}
     >
       {subtitle ? <div className={css['SectionSubtitle']}>{subtitle}</div> : null}

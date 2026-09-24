@@ -11,6 +11,7 @@
  * The other nine categories keep their text box: a beginner can type `16px`.
  */
 
+import { buildDefaultTokenMap } from '@nodegx/project-contract/tokens';
 import {
   codecForCategory,
   describeTokenValue,
@@ -79,6 +80,9 @@ export function TokenCategorySection({
 
 const identity = (value: string) => value;
 
+/** The shipped defaults, read once: the contract's map is rebuilt on every call. */
+const DEFAULTS = buildDefaultTokenMap();
+
 interface TokenRowProps {
   token: StyleTokenRecord;
   onTokenChange: (name: string, value: string) => void;
@@ -111,6 +115,7 @@ interface TokenRowProps {
 function TokenRow({ token, onTokenChange, onTokenReset, resolve, onOpenComposer }: TokenRowProps) {
   const isColor = token.category === 'color-semantic' || token.category === 'color-palette';
   const isRef = TokenResolver.isReference(token.value);
+  const defaultValue = DEFAULTS.get(token.name)?.value;
   const words = isComposerCategory(token.category) ? describeTokenValue(token.category, token.value) : null;
   const composes = words !== null;
 
@@ -221,9 +226,15 @@ function TokenRow({ token, onTokenChange, onTokenReset, resolve, onOpenComposer 
         </button>
       )}
 
-      {/* Override indicator + reset */}
-      {token.isCustom && (
-        <button className={css.ResetButton} onClick={() => onTokenReset(token.name)} title="Reset to default">
+      {/* Override indicator + reset. CMG-004: drawn when the VALUE differs from the default (a
+          pinned default is not a change), and the title says what it goes back to. */}
+      {defaultValue !== undefined && defaultValue !== token.value && (
+        <button
+          className={css.ResetButton}
+          onClick={() => onTokenReset(token.name)}
+          title={`Reset to default (${defaultValue})`}
+          aria-label={`Reset ${token.name} to default`}
+        >
           ↺
         </button>
       )}

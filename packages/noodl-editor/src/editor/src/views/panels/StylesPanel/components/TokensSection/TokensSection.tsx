@@ -29,7 +29,7 @@ import React from 'react';
 import { StyleTokenRecord, TokenCategoryGroup, TokenResolver, groupForTokenCategory } from '@noodl-models/StyleTokensModel';
 
 import { openTokenComposer } from '../../composer/openTokenComposer';
-import { StylesSection } from '../../shared';
+import { SectionReset, StylesSection } from '../../shared';
 import { StylesSectionSpec } from '../../stylesPanelRoute';
 import { TokenCategorySection } from '../TokenCategorySection';
 
@@ -39,11 +39,13 @@ export interface TokenGroupSectionProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   isFirst?: boolean;
-  /** CMG-002 / CMG-004 put their header controls here. */
+  /** CMG-004: *Reset N* in the header, when N > 0. */
+  reset?: SectionReset;
+  /** CMG-002 puts its header control here. */
   actions?: React.ReactNode;
 }
 
-export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, actions }: TokenGroupSectionProps) {
+export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, reset, actions }: TokenGroupSectionProps) {
   const { designTokens, styleTokensModel } = useProjectDesignTokenContext();
 
   const tokens = React.useMemo(
@@ -79,12 +81,15 @@ export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, acti
       isFirst={isFirst}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
+      reset={reset}
       actions={actions}
     >
       <TokenCategorySection
         tokens={tokens}
         onTokenChange={(name, value) => styleTokensModel?.setToken(name, value, { undo: true })}
-        onTokenReset={(name) => styleTokensModel?.deleteCustomToken(name, { undo: true })}
+        // CMG-004: a default token goes back to its default; a token somebody added is not
+        // "reset" by this button — `resetTokens` skips it, and deleting is CMG-002's own item.
+        onTokenReset={(name) => styleTokensModel?.resetTokens([name], { undo: true, label: `Reset ${name}` })}
         resolve={resolve}
         onOpenComposer={onOpenComposer}
       />
