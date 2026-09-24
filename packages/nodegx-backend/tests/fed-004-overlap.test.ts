@@ -28,6 +28,13 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+// BMG-001: the dashboard half renders the real component. `./admin-app/dom` must come first — it
+// installs the jsdom globals Preact renders into.
+import { mount, unmount } from './admin-app/dom';
+import { h } from 'preact';
+
+import { OverlapCell } from '../src/admin/app/views/triggers';
+
 import { SecretsStore } from '../src/config/SecretsStore';
 import { TriggerRegistry, effectiveOverlapPolicy, DEFAULT_OVERLAP_POLICY } from '../src/triggers/registry';
 import type { OverlapPolicy } from '../src/triggers/registry';
@@ -237,111 +244,74 @@ describe('FED-004 overlapPolicy — four minutes of a minutely schedule against 
 /**
  * AC7's dashboard half.
  *
- * ⚠️ **Not a `toContain` on the markup.** The page is one large inline script no compiler ever
- * reads, and asserting that a string appears in it passes just as happily when the function is
- * dead code nothing calls. So the cell builder is EXTRACTED and RUN, against DOM stubs, and what
- * is asserted is what it produces.
+ * ⚠️ **Not a `toContain` on the markup.** Before BMG-001 the page was one large inline script no
+ * compiler ever read, and this block lifted `overlapCell` out of it by brace matching and ran it
+ * against DOM stubs. The page is a Preact app now and the cell is a component
+ * (`src/admin/app/views/triggers.tsx`, `OverlapCell`), so it is RENDERED — under the jsdom the
+ * composer specs install — and what is asserted is what it produces.
  *
- * The one thing that would still get past this is the function never being reached from the row
- * builder — so that call site is asserted too, which is the smallest honest version of "the
+ * The one thing that would still get past this is the component never being reached from the
+ * row builder — so that call site is asserted too, which is the smallest honest version of "the
  * column is on the page".
  */
 describe('FED-004 AC7 — the Overlap column in the admin dashboard', () => {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'admin', 'ui', 'index.html'), 'utf-8');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'admin', 'app', 'views', 'triggers.tsx'), 'utf-8');
 
-  /** Lift one top-level `function name(...) {...}` out of the inline script by brace matching. */
-  function extract(name: string): string {
-    const start = html.indexOf(`function ${name}(`);
-    expect(start).toBeGreaterThan(-1);
-    let depth = 0;
-    for (let i = html.indexOf('{', start); i < html.length; i++) {
-      if (html[i] === '{') depth++;
-      else if (html[i] === '}' && --depth === 0) return html.slice(start, i + 1);
-    }
-    throw new Error(`unbalanced braces in ${name}`);
-  }
-
-  /** The three page helpers the cell reaches for, reduced to what an assertion can read. */
-  interface Stub {
-    tag: string;
-    text: string;
-    title?: string;
-    tone?: string;
-    children: Stub[];
-    /** The one DOM verb the cell uses. Given to each stub rather than to `Object.prototype`. */
-    appendChild(child: Stub): void;
-  }
-  function stub(tag: string, text: string, extra: Partial<Stub> = {}): Stub {
-    const node: Stub = {
-      tag,
-      text,
-      children: [],
-      appendChild(child: Stub) {
-        node.children.push(child);
-      },
-      ...extra
-    };
-    return node;
-  }
-  function run(trigger: unknown): Stub {
-    const el = (tag: string, attrs: Record<string, string> | null, ...children: (Stub | null)[]): Stub => {
-      const node = stub(tag, (attrs && attrs.text) || '', { title: attrs ? attrs.title : undefined });
-      for (const child of children) if (child) node.children.push(child);
-      return node;
-    };
-    const chip = (text: string, tone?: string): Stub => stub('chip', text, { tone });
-    const when = (iso: string | null) => (iso ? `at ${iso}` : '—');
-    // eslint-disable-next-line no-new-func
-    const factory = new Function('el', 'chip', 'when', `${extract('overlapCell')}; return overlapCell;`);
-    return factory(el, chip, when)(trigger) as Stub;
-  }
-
-  /** Everything the cell rendered, flattened, so an assertion can read it as one string. */
-  function textOf(node: Stub): string {
-    return [node.text, ...node.children.map(textOf)].filter(Boolean).join(' | ');
+  function run(trigger: unknown): HTMLElement {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return mount(h(OverlapCell, { t: trigger as any }));
   }
 
   it('is actually reached: the row builder calls it, and the header names it', () => {
-    expect(html).toContain("el('td', {}, overlapCell(t))");
-    expect(html).toContain("'Enabled', 'Overlap', 'Last fired'");
+    expect(source).toContain('<OverlapCell t={t} />');
+    expect(source).toContain("'Enabled', 'Overlap', 'Last fired'");
   });
 
   it('shows the policy in force, taken from the ROUTE and not recomputed here', () => {
     const cell = run({ type: 'schedule', effectiveOverlapPolicy: 'queue-one', status: {} });
-    expect(textOf(cell)).toContain('queue-one');
+    expect(cell.textContent).toContain('queue-one');
+    unmount(cell);
 
     // 🔴 The whole reason `effectiveOverlapPolicy` exists. A dashboard that read
     // `schedule.overlapPolicy` would show nothing for the commonest trigger there is — the one
     // nobody configured — and a dashboard that filled that gap with its own `|| 'skip'` would be
     // a second copy of the default, free to drift from the scheduler's.
-    const source = extract('overlapCell');
-    expect(source).toContain('effectiveOverlapPolicy');
-    expect(source).not.toContain('schedule.overlapPolicy');
+    // The component's BODY, not its doc comment (which names the field to say why it is not read).
+    const start = source.indexOf('export function OverlapCell(');
+    expect(start).toBeGreaterThan(-1);
+    const body = source.slice(start, source.indexOf('\n}\n', start));
+    expect(body).toContain('effectiveOverlapPolicy');
+    expect(body).not.toContain('schedule.overlapPolicy');
   });
 
   it('shows the last skip, how many there have been, and which run it yielded to', () => {
+    const at = '2026-03-01T09:00:00.000Z';
     const cell = run({
       type: 'schedule',
       effectiveOverlapPolicy: 'skip',
-      status: { skipCount: 4, lastSkip: { at: '2026-03-01T09:00:00.000Z', policy: 'skip', yieldedTo: 'exec_77' } }
+      status: { skipCount: 4, lastSkip: { at, policy: 'skip', yieldedTo: 'exec_77' } }
     });
-    const rendered = textOf(cell);
+    const rendered = cell.textContent || '';
     expect(rendered).toContain('skipped 4×');
     expect(rendered).toContain('exec_77');
-    expect(rendered).toContain('2026-03-01T09:00:00.000Z');
+    expect(rendered).toContain(new Date(at).toLocaleString());
+    unmount(cell);
   });
 
   it('colours a skip as WORKING, never as a failure', () => {
     const cell = run({ type: 'schedule', effectiveOverlapPolicy: 'skip', status: {} });
-    const chips = cell.children.filter((c) => c.tag === 'chip');
+    const chips = Array.from(cell.querySelectorAll('.chip'));
     expect(chips.length).toBe(1);
     // `bad` is the palette's red. An operator who learns this column goes red when everything is
     // fine is an operator who stops reading it (phase-23's palette law says red is for danger).
-    expect(chips[0].tone).not.toBe('bad');
-    expect(chips[0].tone).toBe('ok');
+    expect(chips[0].classList.contains('bad')).toBe(false);
+    expect(chips[0].classList.contains('ok')).toBe(true);
+    unmount(cell);
   });
 
   it('says nothing about a webhook, which has no such policy', () => {
-    expect(textOf(run({ type: 'webhook', status: {} }))).toBe('—');
+    const cell = run({ type: 'webhook', status: {} });
+    expect(cell.textContent).toBe('—');
+    unmount(cell);
   });
 });

@@ -2,7 +2,7 @@
 
 **Scoped:** 2026-09-24, from Richard's read of the served admin dashboard (`/_admin`) after the s0
 hand-off ([BMG-000](BMG-000-THE-HAND-OFF.md)).
-**Status: 📋 OPEN — BMG-000 ✅ committed s2 (2026-09-24); R1, R3, R4 ruled by Richard 2026-09-24 (§8); BMG-001 next.**
+**Status: 📋 OPEN — BMG-000 ✅, BMG-001 ✅ (s2, 2026-09-24: the page is a Preact app, fourteen views ported, composer kit specced); R1/R3/R4 ruled (§8); BMG-007 next.**
 **Prefix: `BMG`.**
 
 > "Every single page in that backend page seems to be a bit shit at the moment. I think it's a bit
@@ -40,7 +40,7 @@ uncommitted +968/−229; line numbers are the working tree's, and
 
 | # | Richard's words | What the code does | Task |
 |---|---|---|---|
-| 1 | *"the Users tab, you can't even add fields to the users table"* | `view('users')` (`index.html:1500-1583`) draws six fixed columns and a **New user** modal with Username / Email / Password only. `_User` is a table like any other to `POST /admin/schema {action:'addColumn'}`, and the Schema page already offers *Add field* on it (`:1140`, only *Delete collection* is withheld for `_` tables) — so the capability exists two tabs away and the Users tab does not know | [BMG-004](BMG-004-USERS.md) |
+| 1 | *"the Users tab, you can't even add fields to the users table"* | `view('users')` (`index.html:1500-1583`) draws six fixed columns and a **New user** modal with Username / Email / Password only. `_User` is a table like any other to `POST /admin/schema {action:'addColumn'}`, and the Schema page's code offers *Add field* on `_` tables (`:1140`, only *Delete collection* is withheld) — but ⚠️ **measured in BMG-001's drive (2026-09-24): `GET /admin/schema` does not list `_User` at all** on a backend with two users (`drives/bmg001/readings/ac34.json`, `userListed: [Pet, Toy]`), so the capability is reachable from no tab. BMG-004 makes it one | [BMG-004](BMG-004-USERS.md) |
 | 2 | *"You have to use a JSON filter to filter records in the Collections tab"* | A search box does `contains` over String fields (`:785-803`). Anything else is *Advanced filter (JSON)* (`:721-724`): a raw `where` string parsed with `JSON.parse` (`:800`). Sort is fixed to `-createdAt` (`:808`); no header click sorts. The backend understands 16 operators (`$eq $ne $gt $gte $lt $lte $in $nin $exists $regex $text contains $and $or $relatedTo` + geo; `QueryBuilder.ts:410-702`) and none is reachable without typing it | [BMG-002](BMG-002-COLLECTIONS.md) |
 | 3 | *"the user is expected to compose a JSON … CRON jobs"* | Triggers (`:2063-2142`) is a **list only**: Enable/Disable and Fire now. No create, edit, delete or rotate here at all (`POST/PUT/DELETE /admin/triggers` exist, `admin-triggers.ts:7-14`); the cron string is not even shown. The only authoring UI is the editor's `TriggerFormFields.tsx`: cron as raw text (`:177-182`), *payload (JSON, optional)* (`:198`). Files' orphan sweep is a raw *Cron* input (`:2629`); Backups shows `scheduled: <cron>` as a chip (`:2552`) with no way to set it | [BMG-008](BMG-008-TRIGGERS.md), [BMG-011](BMG-011-FILES-BACKUPS-OPS.md) |
 | 4 | *"… permissions"* | Five free-text inputs per collection labelled `find get create update delete`, placeholder *(default)*; a comma means OR (`:1720-1745`). The grammar is `public \| authenticated \| nobody \| role:<name>` (`security/model.ts:133-148`). Defaults, signup, file and function rules are *disabled* inputs with a note to use `PUT /admin/permissions` or MCP (`:1699-1714`). Cards are drawn for `_` tables the validator refuses (`model.ts:429`). The editor already has a checkbox matrix for this (`CollectionPermissions.tsx`, `ruleVocabulary.ts`) | [BMG-006](BMG-006-PERMISSIONS.md) |
@@ -149,7 +149,7 @@ among the tabs.
 | id | task | findings | depends on |
 |---|---|---|---|
 | **[BMG-000](BMG-000-THE-HAND-OFF.md)** ✅ built s0, committed s2 | The card hands over; Collections and Schema edit visually | — | — |
-| **[BMG-001](BMG-001-THE-SHELL.md)** | The shell: one app, plain words, deep links, light and dark, empty states, and the composer kit (picker, chips, list editor, key/value editor, drawer, danger zone) | 8 | **R1** |
+| **[BMG-001](BMG-001-THE-SHELL.md)** ✅ s2 | The shell: one app, plain words, deep links, light and dark, empty states, and the composer kit (picker, chips, list editor, key/value editor, drawer, danger zone) | 8 | R1 (a) |
 | **[BMG-007](BMG-007-API-KEYS.md)** | API keys: a scope picker, an acting user, the secret behind a copy button | 5 | 001 |
 | **[BMG-004](BMG-004-USERS.md)** | Users are a collection: custom fields, a user drawer, roles as chips, invite, reset, disable | 1 | 001, R3 |
 | **[BMG-002](BMG-002-COLLECTIONS.md)** | Collections: the filter row, sort, columns, saved views, typed editors for every field, the record's *who can see this* | 2 | 001 |
@@ -178,9 +178,12 @@ Named so a session does not rediscover them. Richard picks.
 
 ## 7. Gates
 
-- `packages/nodegx-backend`: `npx jest tests/admin-dashboard.test.ts` (32/32 on 2026-09-24 against
-  BMG-000's tree) and the full `npm test` before a commit. Under R1(a) the document gates move to
-  the bundle in BMG-001 and the count changes; the task file records the new reading.
+- `packages/nodegx-backend`: `npx jest tests/admin-dashboard.test.ts tests/admin-app` (**47/47**
+  since BMG-001: the document gates read the shell, the bundle `build/admin/app.js.txt` — budget
+  160,000 gzip, at 32,538 — the token sheet, and the app SOURCE for the no-innerHTML rule; the
+  composer specs run under a jsdom the spec installs) and the full `npm test` before a commit.
+  `npm run typecheck` runs both tsconfigs (service and app). The bundle is a build product:
+  `tests/global-setup.js` makes it, and `npm run build` makes it before the service bundle.
 - `packages/noodl-editor`: `npm run typecheck` for the card; `npm run test:main` for
   `tests-unit/def-036`, `tut-001`, `def-047` which name the card and the schema panel; the
   webpack `test:ci` for `tests/databrowser/*.spec.ts` (BMG-012 deletes those with their panels).
@@ -192,7 +195,7 @@ Named so a session does not rediscover them. Richard picks.
 
 | id | asked | answer |
 |---|---|---|
-| R1 | vanilla document vs typed app | **(a) typed app** — Richard, 2026-09-24 22:05Z, asked as "rebuild as a small web app (Preact, already in the repo) vs keep the hand-written page and split it" |
+| R1 | vanilla document vs typed app | **(a) typed app** — Richard, 2026-09-24 22:05Z, asked as "rebuild as a small web app (Preact, already in the repo) vs keep the hand-written page and split it". Built as BMG-001 the same day |
 | R2 | does the editor keep its panels | **No** — Richard, 2026-09-24 18:16Z, quoted above |
 | R3 | add *disable a user* to the backend | **Yes** — Richard, 2026-09-24 22:05Z |
 | R4 | restore from the browser | **Yes, behind typing the backend's name, back-up-first ticked** — Richard, 2026-09-24 22:05Z |

@@ -1,37 +1,67 @@
-# The served admin dashboard
+# The backend manager (the served admin page)
 
-`nodegx-backend` carries its own web admin UI. A deployed backend is
-administered from a browser with no NodeGX editor installed anywhere near it —
-the thing you actually need on a VPS at 2am.
+`nodegx-backend` carries its own web UI. A deployed backend is administered
+from a browser with no NodeGX editor installed anywhere near it — the thing you
+actually need on a VPS at 2am — and a backend the editor is running is
+administered from the same page: the editor's Backend Services card manages
+*which* backend runs, and its one button, **Manage data & settings**, opens
+this page signed in. Everything inside a backend is done here.
 
 ```
 http://your-backend-host:8577/_admin
 ```
 
-The editor keeps its Backend Services panel. That panel is for the backend you
-are *building*; this dashboard is for the backend you are *running*. Both speak
-the same HTTP routes to the same server, which is why they cannot drift.
+The page and the editor speak the same HTTP routes to the same server, which is
+why they cannot drift. Since phase 104 the page is a small Preact app, still
+bundled into the one served document at build time (`scripts/build-admin-app.js`).
 
 ---
 
 ## What it does
 
-| Section | What you can do |
-|---|---|
-| **Collections** | Browse, filter (JSON `where`), page, create, edit and delete records. Optional **Live** toggle streams changes over the backend's SSE realtime. |
-| **Schema** | See tables and columns; create tables; add columns; **delete a table** (typed confirmation). |
-| **Users** | List `_User`, create a user, delete one, trigger a password-reset email, see role membership. |
-| **Roles** | Create/delete roles, add members. Permissions reference these as `role:<name>`. |
-| **Permissions** | Per-collection rules for `find`/`get`/`create`/`update`/`delete` plus creator-owns. Shows loudly when enforcement is off. |
-| **API keys** | Issue scoped keys (secret shown once), revoke them. |
-| **Triggers** | List schedules/webhooks/db-change hooks with last-fired and last-result; enable, disable, fire now. |
-| **Workflows** | List WF-001 definitions and run them with a payload. |
-| **Executions** | The full run history with per-run detail. |
-| **Email** | SMTP settings, verification policy, templates, and a real test send. |
-| **Backups** | Schedule and status, archive list, and "back up now". |
+The nav groups the pages the way a person thinks about a backend: **Data**,
+**People**, **Access**, **Automation**, **Storage**, **Settings**, **Activity**.
+
+| Group | Page | What you can do |
+|---|---|---|
+| Data | **Collections** | Browse, search, page, create, edit and delete records; a typed form per record; cells edit in place. Optional **Live** toggle streams changes over the backend's SSE realtime. |
+| Data | **Schema** | See collections and fields; create a collection as rows of choices; add, rename and retype fields; indexes; **delete a collection** (typed confirmation). |
+| People | **Users** | List `_User`, create a user, delete one, trigger a password-reset email, see role membership. |
+| People | **Roles** | Create/delete roles, add members. Permissions reference these as `role:<name>`. |
+| People | **Sign-in** | Identity providers (Google, GitHub, OpenID Connect) with the callback URL to register, magic links, the redirect allow-list, account linking. |
+| Access | **Permissions** | Per-collection rules for `find`/`get`/`create`/`update`/`delete` plus creator-owns. Shows loudly when enforcement is off. |
+| Access | **API keys** | Issue scoped keys (secret shown once), revoke them. |
+| Automation | **Triggers** | List schedules/webhooks/db-change hooks with last-fired and last-result; enable, disable, fire now. |
+| Automation | **Workflows** | List WF-001 definitions and run them with a payload. |
+| Automation | **Runs** | The full run history — every function, trigger, workflow and backup run — with per-run detail: the failures first, then the steps. (Called *Executions* before phase 104.) |
+| Storage | **Files** | Upload limits, denied content types, the storage driver, thumbnail presets, the orphan sweep. |
+| Settings | **Email** | SMTP settings, verification policy, templates, and a real test send. |
+| Settings | **Backups** | Schedule and status, archive list, and "back up now". |
+| Activity | **Audit** | Who changed what, when, and from where. |
 
 Sections whose backing subsystem is not present in your build are **not
-rendered**. They never appear and then fail.
+rendered**. They never appear and then fail. Every list that is empty says what
+to do first.
+
+### Deep links
+
+The address bar is the page's state, so any page can be sent as a link:
+
+```
+#/collections/Pet            that collection
+#/collections/Pet/<objectId> that record, open in its drawer
+#/collections/Pet/new        a new record in it
+#/schema/Pet                 that collection's card
+#/users/<objectId>  #/roles/<name>  #/triggers/<id>  #/runs/<id>
+```
+
+`#/executions` still works and lands on Runs.
+
+### Light and dark
+
+The page follows the system theme; the ☀ / ☾ button in the top bar overrides
+it and remembers your choice in the browser. Both themes are painted from the
+editor's own design tokens, copied into the page at build time.
 
 ### What it deliberately does not do
 
@@ -153,11 +183,13 @@ plain HTTP it is on the wire in cleartext. Terminate TLS at a reverse proxy.
 
 ### What the service already does for you
 
-- **The page fetches nothing.** Markup, styles and script are one document, and
-  its `Content-Security-Policy` is `default-src 'none'` with a per-response
-  nonce and no `unsafe-inline`. No CDN, no font host, no analytics — a hostile
-  value in one of your records has nowhere to send anything.
-- **Record values never touch `innerHTML`.** They are rendered as text.
+- **The page fetches nothing.** Markup, styles and script are one document
+  (the app is bundled into it at build time), and its `Content-Security-Policy`
+  is `default-src 'none'` with a per-response nonce and no `unsafe-inline`. No
+  CDN, no font host, no analytics — a hostile value in one of your records has
+  nowhere to send anything.
+- **Record values are rendered as text.** The app's source may not use
+  `dangerouslySetInnerHTML` or `innerHTML` — a test reads every source file.
 - **Failed credentials are rate-limited** — 10 failures per client per 5
   minutes, then `429` with `Retry-After`.
 - `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
@@ -173,7 +205,7 @@ plain HTTP it is on the wire in cleartext. Terminate TLS at a reverse proxy.
    one credential and no recovery flow.
 2. **The credential in the browser is the master key.** It bypasses all CLPs and
    ACLs by design. Cross-site scripting inside the dashboard would be a full
-   compromise — which is what the CSP, the nonce and the no-`innerHTML` rule are
+   compromise — which is what the CSP, the nonce and the text-only rendering rule are
    for. Hand out the read-only token instead whenever read access is enough.
 
 ---

@@ -21,9 +21,13 @@
  * ## One document, zero external origins
  *
  * The page is a single HTML document with its CSS and JS inlined at build time
- * (esbuild's `text` loader pulls `ui/index.html` and `ui/styles.css` into the
- * bundle as strings). No CDN, no asset routes, no second bundler in a package
- * that produces exactly one CommonJS file. Consequences worth naming:
+ * (esbuild's `text` loader pulls `ui/index.html`, `ui/styles.css` and — since
+ * BMG-001 — the app bundle `build/admin/app.js.txt` and the token sheet
+ * `build/admin/tokens.css` into the service bundle as strings). The app is
+ * Preact + TSX in `src/admin/app/`, bundled by `scripts/build-admin-app.js`
+ * with the same esbuild this package already runs; it is still ONE served
+ * document with nothing to fetch. No CDN, no asset routes. Consequences worth
+ * naming:
  *   - `WF-003`'s "copy this file and run it" story survives intact.
  *   - The CSP can be `default-src 'none'` with a per-response nonce, because
  *     there is genuinely nothing to fetch.
@@ -59,10 +63,23 @@ import { applyAdminSecurityHeaders } from '../ops/headers';
 const UI_HTML: string = require('./ui/index.html');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const UI_CSS: string = require('./ui/styles.css');
+// BMG-001: build products (gitignored). `scripts/build-admin-app.js` writes them;
+// `tests/global-setup.js` builds them before the suite. The token sheet goes
+// FIRST so the stylesheet's aliases can read it.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const UI_TOKENS: string = require('../../build/admin/tokens.css');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const UI_APP: string = require('../../build/admin/app.js.txt');
 
 /** Assembled from fragments so the markers never appear literally in this file. */
 const CSS_MARKER = '/*__ADMIN' + '_CSS__*/';
+const APP_MARKER = '/*__ADMIN' + '_APP__*/';
 const NONCE_MARKER = '__CSP' + '_NONCE__';
+
+/** What the style block carries: the generated tokens, then the page's own rules. */
+export function assembledCss(): string {
+  return UI_TOKENS + '\n' + UI_CSS;
+}
 
 /**
  * Which dashboard sections have a backing implementation in THIS build.
@@ -145,7 +162,9 @@ export class AdminDashboardRoutes {
     const nonce = crypto.randomBytes(16).toString('base64');
     // The nonce genuinely appears more than once (one style tag, one script
     // tag), so it is a global replace; the stylesheet must not be.
-    const html = injectOnce(UI_HTML, CSS_MARKER, UI_CSS).split(NONCE_MARKER).join(nonce);
+    const html = injectOnce(injectOnce(UI_HTML, CSS_MARKER, assembledCss()), APP_MARKER, UI_APP)
+      .split(NONCE_MARKER)
+      .join(nonce);
 
     const body = Buffer.from(html, 'utf-8');
     ctx.res.writeHead(200, {

@@ -1,0 +1,488 @@
+{
+  "signedIn": [
+    true,
+    true
+  ],
+  "pages": {
+    "collections": {
+      "identical": false,
+      "current": [
+        "Collections",
+        "Collections"
+      ],
+      "hash": [
+        "#/collections",
+        "#/collections/Pet"
+      ],
+      "buttonsBefore": [
+        "Refresh",
+        "Export CSV",
+        "New record",
+        "Prev",
+        "Next",
+        "Edit",
+        "Delete",
+        "Edit",
+        "Delete"
+      ],
+      "buttonsAfter": [
+        "Refresh",
+        "Export CSV",
+        "New record",
+        "Prev",
+        "Next",
+        "Edit",
+        "Delete",
+        "Edit",
+        "Delete"
+      ],
+      "wordsMissing": [
+        "dashboard’s",
+        "EditDelete"
+      ],
+      "wordsAdded": [
+        "page’s",
+        "Edit",
+        "Delete"
+      ]
+    },
+    "schema": {
+      "identical": false,
+      "current": [
+        "Schema",
+        "Schema"
+      ],
+      "hash": [
+        "#/schema",
+        "#/schema"
+      ],
+      "buttonsBefore": [
+        "New collection",
+        "Refresh",
+        "Open records",
+        "Add field",
+        "Indexes",
+        "Delete collection",
+        "name",
+        "age",
+        "isGood",
+        "born",
+        "tags",
+        "owner",
+        "Open records",
+        "Add field",
+        "Indexes",
+        "Delete collection",
+        "label",
+        "price"
+      ],
+      "buttonsAfter": [
+        "New collection",
+        "Refresh",
+        "Open records",
+        "Add field",
+        "Indexes",
+        "Delete collection",
+        "name",
+        "age",
+        "isGood",
+        "born",
+        "tags",
+        "owner",
+        "Open records",
+        "Add field",
+        "Indexes",
+        "Delete collection",
+        "label",
+        "price"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "users": {
+      "identical": false,
+      "current": [
+        "Users",
+        "Users"
+      ],
+      "hash": [
+        "#/users",
+        "#/users"
+      ],
+      "buttonsBefore": [
+        "New user",
+        "Refresh",
+        "Send reset",
+        "Delete",
+        "Send reset",
+        "Delete"
+      ],
+      "buttonsAfter": [
+        "New user",
+        "Refresh",
+        "Send reset",
+        "Delete",
+        "Send reset",
+        "Delete"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "roles": {
+      "identical": false,
+      "current": [
+        "Roles",
+        "Roles"
+      ],
+      "hash": [
+        "#/roles",
+        "#/roles"
+      ],
+      "buttonsBefore": [
+        "New role",
+        "Refresh",
+        "Add member",
+        "Delete",
+        "Add member",
+        "Delete"
+      ],
+      "buttonsAfter": [
+        "New role",
+        "Refresh",
+        "Add member",
+        "Delete",
+        "Add member",
+        "Delete"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "permissions": {
+      "identical": false,
+      "current": [
+        "Permissions",
+        "Permissions"
+      ],
+      "hash": [
+        "#/permissions",
+        "#/permissions"
+      ],
+      "buttonsBefore": [
+        "Save",
+        "Reset to defaults",
+        "Save",
+        "Reset to defaults"
+      ],
+      "buttonsAfter": [
+        "Save",
+        "Reset to defaults",
+        "Save",
+        "Reset to defaults"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "keys": {
+      "identical": false,
+      "current": [
+        "API keys",
+        "API keys"
+      ],
+      "hash": [
+        "#/keys",
+        "#/keys"
+      ],
+      "buttonsBefore": [
+        "New key",
+        "Refresh",
+        "Revoke"
+      ],
+      "buttonsAfter": [
+        "New key",
+        "Refresh",
+        "Revoke"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "signin": {
+      "identical": false,
+      "current": [
+        "Sign-in",
+        "Sign-in"
+      ],
+      "hash": [
+        "#/signin",
+        "#/signin"
+      ],
+      "buttonsBefore": [
+        "Add provider",
+        "Refresh",
+        "Save policy"
+      ],
+      "buttonsAfter": [
+        "Add provider",
+        "Refresh",
+        "Add provider",
+        "Save policy"
+      ],
+      "wordsMissing": [
+        "dashboard’s",
+        "Nothing"
+      ],
+      "wordsAdded": [
+        "page’s",
+        "⚿",
+        "Google,",
+        "GitHub",
+        "any",
+        "OpenID",
+        "Connect"
+      ]
+    },
+    "triggers": {
+      "identical": false,
+      "current": [
+        "Triggers",
+        "Triggers"
+      ],
+      "hash": [
+        "#/triggers",
+        "#/triggers"
+      ],
+      "buttonsBefore": [
+        "Refresh",
+        "Disable",
+        "Fire now"
+      ],
+      "buttonsAfter": [
+        "Refresh",
+        "Disable",
+        "Fire now"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "workflows": {
+      "identical": false,
+      "current": [
+        "Workflows",
+        "Workflows"
+      ],
+      "hash": [
+        "#/workflows",
+        "#/workflows"
+      ],
+      "buttonsBefore": [
+        "Refresh"
+      ],
+      "buttonsAfter": [
+        "Refresh",
+        "Refresh"
+      ],
+      "wordsMissing": [
+        "dashboard’s",
+        "Nothing",
+        "here"
+      ],
+      "wordsAdded": [
+        "page’s",
+        "⇶",
+        "No",
+        "workflows",
+        "authored"
+      ]
+    },
+    "executions": {
+      "identical": false,
+      "current": [
+        "Executions",
+        "Runs"
+      ],
+      "hash": [
+        "#/executions",
+        "#/runs"
+      ],
+      "buttonsBefore": [
+        "Refresh",
+        "Detail"
+      ],
+      "buttonsAfter": [
+        "Refresh",
+        "Detail"
+      ],
+      "wordsMissing": [
+        "dashboard’s",
+        "Executions"
+      ],
+      "wordsAdded": [
+        "page’s",
+        "Runs"
+      ]
+    },
+    "email": {
+      "identical": false,
+      "current": [
+        "Email",
+        "Email"
+      ],
+      "hash": [
+        "#/email",
+        "#/email"
+      ],
+      "buttonsBefore": [
+        "Save",
+        "Send test email",
+        "Reset to default",
+        "Reset to default",
+        "Reset to default"
+      ],
+      "buttonsAfter": [
+        "Save",
+        "Send test email",
+        "Reset to default",
+        "Reset to default",
+        "Reset to default"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "backups": {
+      "identical": false,
+      "current": [
+        "Backups",
+        "Backups"
+      ],
+      "hash": [
+        "#/backups",
+        "#/backups"
+      ],
+      "buttonsBefore": [
+        "Back up now"
+      ],
+      "buttonsAfter": [
+        "Back up now",
+        "Back up now"
+      ],
+      "wordsMissing": [
+        "dashboard’s",
+        "Nothing",
+        "here"
+      ],
+      "wordsAdded": [
+        "page’s",
+        "No",
+        "backups"
+      ]
+    },
+    "files": {
+      "identical": false,
+      "current": [
+        "Files",
+        "Files"
+      ],
+      "hash": [
+        "#/files",
+        "#/files"
+      ],
+      "buttonsBefore": [
+        "Save limits",
+        "Run now (report only)",
+        "Run now + delete orphan blobs",
+        "Save schedule"
+      ],
+      "buttonsAfter": [
+        "Save limits",
+        "Run now (report only)",
+        "Run now + delete orphan blobs",
+        "Save schedule"
+      ],
+      "wordsMissing": [
+        "dashboard’s"
+      ],
+      "wordsAdded": [
+        "page’s"
+      ]
+    },
+    "audit": {
+      "identical": false,
+      "current": [
+        "Audit",
+        "Audit"
+      ],
+      "hash": [
+        "#/audit",
+        "#/audit"
+      ],
+      "buttonsBefore": [
+        "Refresh",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail"
+      ],
+      "buttonsAfter": [
+        "Refresh",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail"
+      ],
+      "wordsMissing": [
+        "dashboard’s",
+        "{\"id\":\"<trg>\"}"
+      ],
+      "wordsAdded": [
+        "page’s",
+        "{\"id\":\"<trg>_sW_qY\"}"
+      ]
+    }
+  },
+  "identicalPages": 0,
+  "navBefore": "DATA Collections Schema ACCESS Users Roles Permissions API keys Sign-in AUTOMATION Triggers Workflows Executions CONFIG Email Backups Files OPS Audit",
+  "navAfter": "DATA Collections Schema PEOPLE Users Roles Sign-in ACCESS Permissions API keys AUTOMATION Triggers Workflows Runs STORAGE Files SETTINGS Email Backups ACTIVITY Audit"
+}

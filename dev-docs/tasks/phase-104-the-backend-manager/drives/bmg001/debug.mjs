@@ -1,0 +1,25 @@
+// Why does the app not render in Chrome? Capture Log entries (CSP refusals land there, not in Runtime).
+const port = process.env.PORT || '8697';
+const t = await (await fetch('http://127.0.0.1:9333/json/new?about:blank', { method: 'PUT' })).json();
+const ws = new WebSocket(t.webSocketDebuggerUrl);
+await new Promise((r) => ws.addEventListener('open', r, { once: true }));
+let id = 0; const pending = new Map(); const logs = [];
+ws.addEventListener('message', (m) => { const d = JSON.parse(m.data);
+  if (d.method === 'Log.entryAdded') logs.push('LOG ' + d.params.entry.level + ' ' + d.params.entry.text.slice(0, 400));
+  if (d.method === 'Runtime.exceptionThrown') logs.push('EXC ' + JSON.stringify(d.params.exceptionDetails).slice(0, 600));
+  if (d.method === 'Runtime.consoleAPICalled') logs.push('CON ' + d.params.type + ' ' + d.params.args.map((a) => a.value || a.description).join(' ').slice(0, 300));
+  if (pending.has(d.id)) { pending.get(d.id)(d); pending.delete(d.id); } });
+const send = (method, params = {}) => new Promise((r) => { pending.set(++id, r); ws.send(JSON.stringify({ id, method, params })); });
+await send('Runtime.enable'); await send('Page.enable'); await send('Log.enable');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const ev = async (expr) => { const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true }); return r.result.exceptionDetails ? 'EXC ' + JSON.stringify(r.result.exceptionDetails.exception?.description) : r.result.result.value; };
+await send('Page.navigate', { url: `http://127.0.0.1:${port}/_admin#token=t0k` });
+await sleep(2500);
+console.log('hash:', await ev('location.hash'));
+console.log('root children:', await ev("document.getElementById('root') ? document.getElementById('root').children.length : 'no root'"));
+console.log('body head:', await ev('document.body.innerHTML.slice(0, 300)'));
+console.log('script len:', await ev("[...document.scripts].map(s => s.textContent.length + ' nonce=' + (s.nonce ? 'yes' : 'no'))"));
+console.log('token stored:', await ev("sessionStorage.getItem('nodegx.admin.token')"));
+console.log('whoami:', await ev("fetch('/_admin/whoami',{headers:{authorization:'Bearer t0k'}}).then(r=>r.status)"));
+console.log(logs.join('\n') || 'no logs');
+ws.close(); process.exit(0);

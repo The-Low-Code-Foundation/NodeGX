@@ -1,7 +1,7 @@
 # BMG-001 — The shell: one app, plain words, deep links, and the composer kit
 
-**Opened 2026-09-24** (README §2 row 8). **Depends on R1.**
-**Status: 📋 not started.**
+**Opened 2026-09-24** (README §2 row 8). **R1 ruled (a) by Richard 2026-09-24 22:05Z.**
+**Status: ✅ built s2 (2026-09-24), driven headless on a seeded throwaway backend, gates green — see §6.**
 
 ## 1. The person sentence
 
@@ -133,3 +133,112 @@ Each is a component with a spec, built here and reused by every tab task:
   like…"; they are unaffected by the rename but BMG-007 rewrites the message.
 - Under jsdom, Preact's `datetime-local` and `<select>` behave; `elementFromPoint` does not —
   drive visibility in Chrome, not jest (memory: RENDERED≠REACHABLE).
+
+## 6. Built (s2, 2026-09-24)
+
+**What exists now.** `packages/nodegx-backend/src/admin/app/` — Preact + TSX, 36 source files, 5,836
+lines: `main.tsx` (entry), `App.tsx` (sign-in form, shell, nav, top bar, the two notices), `api.ts`
+(one client, the session store, the SSE live subscription), `router.ts` (hash routes with
+parameters; `#/executions` → `runs`), `nav.ts` (§3.2 verbatim), `theme.ts` (`prefers-color-scheme`
++ a remembered toggle), `format.ts` (every pure helper the old page declared, now importable),
+`fields.tsx` (one control per column type, the Pointer as a `Picker`), `ui/` (Btn/WriteBtn, Chip,
+Notice, Table, Dialog + `openModal`, `confirmDestructive`, `confirmSimple`, toasts, Disclosure,
+JsonTree), `composers/` (§3.5: Picker, Chips, ListEditor, KeyValueEditor, Drawer, DangerZone,
+EmptyState), `views/` (the fourteen pages). `scripts/build-admin-app.js` bundles it with the
+package's own esbuild into `build/admin/app.js.txt` and copies core-ui's `colors.css` + `spacing.css`
+(comments stripped) into `build/admin/tokens.css`; `scripts/build.js` runs it first and
+`tests/global-setup.js` runs it before the jest suite, so nothing grades a stale bundle.
+`AdminDashboardRoutes.serve()` inlines tokens + `styles.css` into the one `<style>` and the bundle
+into the one `<script>`, same nonce, same `default-src 'none'`. `src/admin/ui/index.html` is the
+shell (three markers); `styles.css` is the same rules on `--theme-color-*` aliases, dark in
+`:root`, light under `:root[data-theme='light']`. `preact` is a devDependency (it was already in
+the tree as `@jaames/iro`'s dependency, 10.28.2; the lockfile now names it). The package's
+`typecheck` runs both tsconfigs.
+
+**The port.** Collections and Schema (s0's, the freshest) by hand; the other twelve by three
+agents from the committed page, as-is. The only visible-text differences, measured (AC2):
+*Executions* → *Runs* (page title, and the two toasts that said "see Executions"); the empty
+states on Sign-in, Workflows, Backups replacing "Nothing here yet." (AC5); a space between the
+row buttons *Edit* / *Delete*. Everything else — every title, subtitle, header, label, notice,
+toast, placeholder — is identical (`drives/bmg001/readings/diff.json`, word-set diff per page over
+`before.json` / `after.json`, ids and timestamps normalised).
+
+**What each AC measured** (drives in `drives/bmg001/`, run by `run.sh` against a throwaway
+backend on a scratch data dir seeded by `seed.mjs`; readings in `drives/bmg001/readings/`; shots
+`shots/bmg001-*.png`):
+
+1. ✅ One document from `/_admin`, `default-src 'none'`; the CSP, nonce and `--no-admin` tests
+   pass unchanged; the assembly test now also finds the bundle whole inside the script block.
+2. ✅ Fourteen pages captured before the port (`before.json`, the old page from `dist/cli.js`
+   built at 21:11) and after (`after.json`), same seed; differences only as listed above.
+3. ✅ `#/collections/Pet/<id>` on a fresh load opens the drawer titled *Edit Pet / 7363bdd1…*
+   with `name` = Milo and focus inside; Esc closes it and the hash is `#/collections/Pet`.
+   `#/schema/Toy` gives that card the `hit` class and scrolls (as far as a page that short can
+   scroll — 15 px). Back from `#/keys` walks `#/roles` → `#/users` → `#/schema/Toy`, the nav's
+   `aria-current` following. `#/triggers/<id>`, `#/users/<id>`, `#/roles/staff` highlight their
+   rows; `#/runs/<id>` opens the record dialog and *Close* leaves `#/runs`; `#/executions` lands
+   on Runs. ⚠️ **`#/schema/_User` has nothing to scroll to on this backend: `GET /admin/schema`
+   lists `Pet, Toy` only, with two users in `_User`.** README §2 row 1 says the Schema page
+   offers *Add field* on `_User`; that is true of the code and false of the listing. Filed on
+   BMG-004 (§2 there), which is the task that makes Users a collection.
+4. ✅ Dark: body `rgb(5,5,6)` / ink `rgb(221,228,236)` / primary `rgb(77,163,255)`; light: body
+   `rgb(231,235,241)` / ink `rgb(74,86,99)` / primary `rgb(21,112,239)` — on every one of the
+   fourteen pages (`ac34.json`). The ☀/☾ toggle flips `data-theme` and writes
+   `localStorage['nodegx.admin.theme']`. Gate: no hex or rgb outside a `:root` block over
+   tokens + styles → 0 offenders (`admin-dashboard.test.ts`).
+5. ✅ Fresh data dir: 11 of 14 pages show an `EmptyState` with its CTA (`ac5.json`:
+   Collections *Create one in Schema*, Schema *Create the first one*, Users *New user*, Roles
+   *New role*, Sign-in *Add provider*, Permissions *Create a collection in Schema*, API keys *New
+   key*, Triggers *Refresh*, Workflows *Refresh*, Runs *Open Workflows*, Backups *Back up now*).
+   The other three have no empty list to show: Files is a settings page, Email lists its default
+   templates, Audit already holds the sign-in that opened it.
+6. ✅ Specs in `tests/admin-app/` under a jsdom the spec installs itself (`dom.ts`; this package
+   has no jest-environment-jsdom): Picker (search, labels never ids, keyboard, no-match, create
+   row, picked value), Chips (Enter adds, ✕ removes, duplicate ignored, validator refuses with
+   its sentence), ListEditor (add, edit in slot, remove, minimum), KeyValueEditor (round-trips
+   text/number/yes-no/date/JSON, names the wrong row, edits through the DOM), Drawer (focus on
+   open, Tab wraps both ways, Esc closes, focus returns), DangerZone (disabled until the exact
+   name, refuses a synthetic click on the disabled button, confirms once), EmptyState. 13 specs.
+7. ✅ Bundle 101,886 raw / **32,538 gzip** of 160,000; tokens 3,932 gzip; styles 4,745; the whole
+   served document 42,196 gzip (the old document was 39,067 for two rebuilt pages of fourteen).
+8. ✅ `docs/runtime/BACKEND-ADMIN-DASHBOARD.md` carries the seven groups, *Runs*, the deep links
+   and the theme; the glossary is below.
+
+**Gates.** `npx jest tests/admin-dashboard.test.ts tests/admin-app` → 47/47;
+`tests/feed-drive.test.ts` green on the imported `recordSummary`; both tsconfigs `--noEmit` exit
+0. Full `npm test` (2026-09-24 23:50 local): **178 of 179 suites passed (1 skipped), 2099 tests
+passed, 16 skipped, exit 0** — after re-pointing two specs that read the old page as a string
+(`admin-cors-devopen.test.ts` expects the shell + bundle; `fed-004-overlap.test.ts` AC7 renders
+`OverlapCell` under the jsdom helper) and fixing a jest trap: two ts-jest transform entries race
+(jest caches transformers by module path; the last loaded wins for both patterns), which is why
+the composer specs parsed alone and failed under `npm test` — one entry now, the JSX options on
+the service tsconfig.
+
+**Two defects met on the way, both fixed, both worth knowing:**
+- The shell never rendered in Chrome while every jest spec passed: `useStore` subscribed in a
+  `useEffect`, Preact runs effects after paint (up to 100 ms), and the whoami fetch to a loopback
+  backend answers in a few milliseconds — the sign-in landed before the subscription existed.
+  The hook re-reads the store after subscribing. (Memory: *an effect can subscribe after the
+  answer.*)
+- A drive that only changes the hash is not a reload: the light-theme probe wrote
+  `localStorage` and "navigated" to the same document; `initTheme` never re-ran. `location.reload()`.
+
+### 6.1 Glossary — what was renamed, for the MCP and the docs
+
+| was | is | where |
+|---|---|---|
+| nav group *Access* (Users, Roles, Permissions, API keys, Sign-in) | **People** (Users, Roles, Sign-in) and **Access** (Permissions, API keys) | nav |
+| nav group *Config* (Email, Backups, Files) | **Storage** (Files) and **Settings** (Email, Backups) | nav |
+| nav group *Ops* (Audit) | **Activity** (Audit) | nav |
+| *Executions* (page, nav, `#/executions`) | **Runs** (`#/runs`; the old hash still lands) | nav, page title, two toasts |
+| "Nothing here yet." | one `EmptyState` per list, each with a CTA | every list |
+| `find` / `get` / `create` / `update` / `delete` as labels | unchanged in BMG-001 — BMG-006 renames *find* → "list", *get* → "open one" | Permissions |
+
+The MCP's `get_backend_admin_dashboard` reports sections by feature flag, not by group name, so
+it is unaffected; `docs/runtime/BACKEND-ADMIN-DASHBOARD.md` uses the new names.
+
+### 6.2 Left for the tab tasks, as planned
+Every page is the old page's behaviour behind the new shell. The eleven raw-composition prompts
+of README §2 are still there, one per tab task; `Picker`, `Chips`, `ListEditor`, `KeyValueEditor`,
+`Drawer`, `DangerZone` are built and specced but only Collections (drawer, pointer picker) and
+Schema (list editor) use them so far.

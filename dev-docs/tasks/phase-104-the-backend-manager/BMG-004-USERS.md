@@ -10,6 +10,15 @@
 > see and change their details, give or take a role by name, send them a reset, invite someone
 > new by email, and can stop one signing in without deleting them.**
 
+
+> ⚠️ **Measured 2026-09-24 (BMG-001 AC3 drive, `drives/bmg001/readings/ac34.json`):** on a throwaway
+> backend with two users, `GET /admin/schema` answers `tables: [Pet, Toy]` — **`_User` is not listed**,
+> so the Schema page cannot offer *Add field* on it whatever its code allows, and `#/schema/_User`
+> has no card to land on. README §2 row 1's "the capability exists two tabs away" is true of the
+> code path and false of the listing. This task owns the fix: either the route lists `_User` (with
+> the accounts card the Schema page already knows how to draw) or the Users page adds fields
+> through `addColumn` directly. Find out first WHY it is omitted (`byob-admin.ts` schema listing).
+
 ## 2. What is wrong, measured
 
 - **Fixed columns.** `view('users')` (`index.html:1500-1583`): `objectId username email verified

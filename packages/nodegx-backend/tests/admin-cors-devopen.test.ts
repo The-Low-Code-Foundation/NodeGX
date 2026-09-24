@@ -264,7 +264,10 @@ describe('FH-024 — a default (dev-open, loopback) backend', () => {
     // loads, the token signs in, and `/admin/schema` answers 200 from inside it.
     const res = await probe(base, 'GET', '/_admin');
     expect(res.status).toBe(200);
-    expect(res.body).toContain('id="login-form"');
+    // BMG-001: the sign-in form is rendered by the app now; the document carries the app's
+    // mount point and the bundle that mounts into it.
+    expect(res.body).toContain('id="root"');
+    expect(res.body).toContain('getElementById("root")');
   });
 });
 

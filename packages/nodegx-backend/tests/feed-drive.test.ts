@@ -37,6 +37,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { logger } from '../src/ops/logger';
+import { recordSummary } from '../src/admin/app/format';
 import { BackendService } from '../src/service';
 
 import {
@@ -54,8 +55,9 @@ import { httpClient } from './helpers/http';
 jest.setTimeout(300_000);
 
 /**
- * 🔴 **FED-007 AC4/AC5 — the served dashboard's own reduction of a record, lifted out of the
- * shipped document and run HERE, against the real one.**
+ * 🔴 **FED-007 AC4/AC5 — the served dashboard's own reduction of a record, run HERE against the
+ * real one.** Since BMG-001 it is `recordSummary` in `src/admin/app/format.ts`, the module the
+ * page's bundle is built from.**
  *
  * `recordSummary` is what `/_admin` puts at the top of an opened execution: the status, what ran,
  * the model cost as a sentence, and the failures with the subject each one names. It is written
@@ -78,13 +80,8 @@ interface RecordSummary {
 }
 
 function dashboardRecordSummary(): (record: unknown) => RecordSummary {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'admin', 'ui', 'index.html'), 'utf-8');
-  const at = html.indexOf('function recordSummary(record) {');
-  if (at < 0) throw new Error('the dashboard no longer declares recordSummary — re-point this spec');
-  const end = html.indexOf('\n    }', at);
-  if (end < 0) throw new Error('recordSummary is no longer indented as this spec expects — re-point it');
-  const body = html.slice(html.indexOf('{', at) + 1, end);
-  return new Function('record', body) as (record: unknown) => RecordSummary;
+  // BMG-001: the page is an app now, and its reduction is a module — imported, never restated.
+  return recordSummary as (record: unknown) => RecordSummary;
 }
 
 /** Where the FED-001 feed fixtures live. Read across rather than copied: one copy cannot drift. */

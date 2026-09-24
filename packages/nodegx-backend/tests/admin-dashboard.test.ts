@@ -34,6 +34,15 @@ type SpecBody = ParseRecord & Partial<ParseQueryResult> & Partial<ErrorBody> & P
 import { SecurityStartupError } from '../src/security/state';
 import { AuthAttemptLimiter } from '../src/admin/auth';
 import { READONLY_SAFE_ROUTES, readonlyAdminMayCall } from '../src/admin/readonly';
+import {
+  EXECUTION_STATUSES,
+  STEP_STATUSES,
+  executionStatusKind,
+  extractExecutionRows,
+  recordSummary,
+  stepStatusKind
+} from '../src/admin/app/format';
+import type { ExecutionSummary } from '../src/admin/app/format';
 
 jest.setTimeout(30000);
 
@@ -51,57 +60,36 @@ const LOCKED_CONFIG = {
 };
 
 const UI_DIR = path.join(__dirname, '..', 'src', 'admin', 'ui');
-
-/**
- * The executions view's own row-extraction expression, lifted out of the served document and
- * compiled. Reading it rather than restating it is what makes the spec below a gate on the PAGE
- * instead of a gate on a copy of the page.
- */
-function executionsExtraction(): (data: unknown) => unknown {
-  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
-  const at = html.indexOf("api('GET', '/executions?'");
-  if (at < 0) throw new Error('the executions view no longer calls /executions — re-point this spec');
-  const decl = html.indexOf('var rows =', at);
-  const end = html.indexOf(';', decl);
-  if (decl < 0 || end < 0) throw new Error('the executions view no longer assigns `var rows` — re-point this spec');
-  const expr = html.slice(decl + 'var rows ='.length, end).trim();
-  return new Function('data', `return ${expr};`) as (data: unknown) => unknown;
-}
+// BMG-001: the app's source, and the two build products tests/global-setup.js makes before the suite.
+const APP_DIR = path.join(__dirname, '..', 'src', 'admin', 'app');
+const BUILD_DIR = path.join(__dirname, '..', 'build', 'admin');
 
 /**
  * 🔴 FED-007 AC2 — the two surfaces this suite has to hold together.
  *
- * The dashboard's status vocabulary drifted three ways from the store's (`failed` and
- * `cancelled`, which the store has never written; no `error`, which is the only failure value)
- * and NOTHING caught it, because this document is a string to esbuild's text loader and no
- * compiler reads it. The editor's own filter never drifted — it is declared
- * `ExecutionStatus | ''` and the compiler checks it.
- *
- * So both of these read the LIVE text rather than restating it: the union out of the type file
- * the store is typed by, and the array out of the page that ships.
+ * Before BMG-001 the page was one string to esbuild's text loader and no compiler read it, so
+ * these helpers lifted the status vocabulary and the record reduction OUT of the shipped document
+ * by regex. The page is an app now (`src/admin/app/`), and those are modules: imported here, and
+ * type-checked by `npm run typecheck`. The wrappers keep their names so the specs below read as
+ * they did; what each one grades is unchanged — the union out of the type file the store is typed
+ * by, against the values the page ships.
  */
+function executionsExtraction(): (data: unknown) => unknown {
+  return extractExecutionRows;
+}
+
 function executionStatusUnion(): string[] {
   return typeUnion('ExecutionStatus');
 }
 
-/** The page's own status list, compiled out of the shipped document. `''` is "any status". */
+/** The page's own status list. `''` is "any status". */
 function dashboardStatusOptions(): string[] {
-  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
-  const decl = /var EXECUTION_STATUSES\s*=\s*(\[[^\]]*\])/.exec(html);
-  if (!decl) throw new Error('the page no longer declares EXECUTION_STATUSES — re-point this spec');
-  return new Function(`return ${decl[1]};`)() as string[];
+  return EXECUTION_STATUSES;
 }
 
-/** The page's own status → affordance mapping, compiled out of the shipped document. */
-function dashboardStatusKind(which: 'executionStatusKind' | 'stepStatusKind' = 'executionStatusKind'): (
-  status: string
-) => string {
-  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
-  const at = html.indexOf(`function ${which}(value) {`);
-  if (at < 0) throw new Error(`the page no longer declares ${which} — re-point this spec`);
-  const end = html.indexOf('\n    }', at);
-  const body = html.slice(html.indexOf('{', at) + 1, end);
-  return new Function('value', body) as (status: string) => string;
+/** The page's own status → affordance mapping. */
+function dashboardStatusKind(which: 'executionStatusKind' | 'stepStatusKind' = 'executionStatusKind'): (status: string) => string {
+  return which === 'stepStatusKind' ? stepStatusKind : executionStatusKind;
 }
 
 /** A union of string literals declared in the execution-history types, read live. */
@@ -115,28 +103,14 @@ function typeUnion(name: string): string[] {
   return values.map((v) => v.replace(/'/g, ''));
 }
 
-/** The page's own STEP status list, compiled out of the shipped document. FED-007 AC3. */
+/** The page's own STEP status list. FED-007 AC3. */
 function dashboardStepStatuses(): string[] {
-  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
-  const decl = /var STEP_STATUSES\s*=\s*(\[[^\]]*\])/.exec(html);
-  if (!decl) throw new Error('the page no longer declares STEP_STATUSES — re-point this spec');
-  return new Function(`return ${decl[1]};`)() as string[];
+  return STEP_STATUSES;
 }
 
 /** The record reduction the opened-execution view is built from. FED-007 AC3–AC5. */
-function dashboardRecordSummary(): (record: unknown) => {
-  status: string;
-  workflow: string;
-  costLine: string;
-  stepCount: number;
-  failures: Array<{ index: number; step: string; type: string; message: string; detail: unknown }>;
-} {
-  const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
-  const at = html.indexOf('function recordSummary(record) {');
-  if (at < 0) throw new Error('the page no longer declares recordSummary — re-point this spec');
-  const end = html.indexOf('\n    }', at);
-  const body = html.slice(html.indexOf('{', at) + 1, end);
-  return new Function('record', body) as never;
+function dashboardRecordSummary(): (record: unknown) => ExecutionSummary {
+  return recordSummary;
 }
 
 // ============================================================================
@@ -207,94 +181,114 @@ describe('BAK-005 credential failure budget', () => {
 // 2. The document itself
 // ============================================================================
 
-describe('BAK-005 dashboard document', () => {
+describe('BAK-005 dashboard document (BMG-001: the shell, the bundle, the token sheet)', () => {
   const html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf-8');
   const css = fs.readFileSync(path.join(UI_DIR, 'styles.css'), 'utf-8');
+  const tokens = fs.readFileSync(path.join(BUILD_DIR, 'tokens.css'), 'utf-8');
+  const bundle = fs.readFileSync(path.join(BUILD_DIR, 'app.js.txt'), 'utf-8');
 
   function occurrences(haystack: string, needle: string): number {
     return haystack.split(needle).length - 1;
+  }
+
+  function stripCssComments(text: string): string {
+    return text.replace(/\/\*[\s\S]*?\*\//g, '');
+  }
+
+  /** Every TypeScript source of the app, recursively. */
+  function appSources(dir = APP_DIR): string[] {
+    const out: string[] = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) out.push(...appSources(full));
+      else if (/\.tsx?$/.test(entry.name)) out.push(full);
+    }
+    return out;
   }
 
   it('carries each substitution marker exactly where it belongs', () => {
     // Assembled from fragments so this assertion does not become its own
     // second occurrence — which is exactly the bug it guards against.
     expect(occurrences(html, '/*__ADMIN' + '_CSS__*/')).toBe(1);
+    expect(occurrences(html, '/*__ADMIN' + '_APP__*/')).toBe(1);
     // One for the style tag, one for the script tag.
     expect(occurrences(html, '__CSP' + '_NONCE__')).toBe(2);
+    // And nothing the injector substitutes may carry a marker of its own.
+    for (const text of [css, tokens, bundle]) {
+      expect(text).not.toContain('__CSP' + '_NONCE__');
+      expect(text).not.toContain('/*__ADMIN' + '_');
+    }
   });
 
   it('references no external origin', () => {
     // A CDN link, a remote font, a tracking pixel: none of them may exist, or
     // the CSP that forbids them would break the page instead of protecting it.
-    const external = html.match(/(?:src|href)\s*=\s*["'](https?:)?\/\//gi);
-    expect(external).toBeNull();
+    expect(html.match(/(?:src|href)\s*=\s*["'](https?:)?\/\//gi)).toBeNull();
     expect(css).not.toMatch(/@import|url\(\s*["']?https?:/i);
+    expect(tokens).not.toMatch(/@import|url\(\s*["']?https?:/i);
+    // The bundle FETCHES nothing from anywhere. The URLs it carries are Preact's XML namespaces
+    // and the placeholders a form shows in an empty field (an OIDC issuer, an app origin); the
+    // gate reads what the code would REACH FOR, which is what the CSP would refuse.
+    expect(bundle).not.toMatch(/\b(fetch|EventSource|WebSocket|import|importScripts)\s*\(\s*["'`]https?:/);
+    expect(bundle).not.toMatch(/\b(src|href)\s*[:=]\s*["'`]https?:/);
+    const urls = Array.from(new Set(bundle.match(/https?:\/\/[^"'`\s)]*/g) || []));
+    expect(urls.length).toBeGreaterThan(0);
+    const allowed = (u: string) => /^https?:\/\/www\.w3\.org\//.test(u) || /example\.com/.test(u) || u === 'https://accounts.google.com';
+    expect(urls.filter((u) => !allowed(u))).toEqual([]);
   });
 
   /**
-   * The page is one large inline script that no compiler ever sees: esbuild
-   * inlines it as TEXT, tsc never reads it, and every other test here asserts
-   * on the SOURCE rather than running it. So a stray bracket ships a document
-   * that serves with a 200, passes every other assertion, and renders a blank
-   * page in a browser.
-   *
-   * `new Function` parses without executing, which is exactly the guard that
-   * was missing. Added while BAK-004 was adding a whole view to this file.
+   * The bundle is inlined into a classic <script>. Two strings would end it early: the
+   * closing tag itself, and an HTML comment opener, which a classic script treats as one.
+   * `new Function` parses without executing, which catches a bundle esbuild wrote but a browser
+   * would refuse.
    */
-  it('is syntactically valid JavaScript, which nothing else here would notice', () => {
-    const scripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]);
-    expect(scripts.length).toBeGreaterThan(0);
-    for (const source of scripts) {
-      if (!source.trim()) continue;
-      // eslint-disable-next-line no-new-func
-      expect(() => new Function(source)).not.toThrow();
-    }
-  });
-
-  it('renders backend values through textContent, never innerHTML', () => {
-    // The dashboard prints record contents. If any of it went through
-    // innerHTML, a hostile value in a row would execute.
-    expect(html).not.toMatch(/\.innerHTML\s*=/);
-    expect(html).not.toMatch(/insertAdjacentHTML/);
+  it('the bundle is valid JavaScript that cannot close its own script tag', () => {
+    expect(bundle.length).toBeGreaterThan(10_000);
+    // eslint-disable-next-line no-new-func
+    expect(() => new Function(bundle)).not.toThrow();
+    expect(bundle).not.toContain('</script');
+    expect(bundle).not.toContain('<!--');
   });
 
   /**
-   * 🔴 **FED-007 AC6 — every byte of this page ships, to every admin, on every load.**
-   *
-   * The document and its stylesheet are inlined by esbuild's text loader, so there is no lazy
-   * anything: a comment written here is a comment downloaded there. FED-001's precedent for an
-   * addition this size is a measured delta against a stated ceiling, so here is both.
-   *
-   * | | gzipped |
-   * |---|---|
-   * | before FED-007 | 23.9 KB |
-   * | after (the explorer, the bands, the step table, the vocabularies) | 30.7 KB |
-   * | **delta** | **+6.8 KB** |
-   *
-   * ⚠️ **The ceiling is deliberately loose and absolute, not a ratchet.** A ratchet set at the
-   * current figure makes the next person's honest 400 bytes into a red gate and teaches them to
-   * bump the number — this phase's register carries a row (R8) about a budget with six tokens of
-   * headroom that nobody knew about. This is a smoke alarm: it fires when the page has doubled,
-   * which is the failure worth catching.
+   * The page prints record contents. Preact renders text nodes, so the only way markup could
+   * be injected is by asking for it: the gate reads the SOURCE for the three ways to ask.
+   * (The bundle itself contains Preact's own `innerHTML` branch — that is the runtime's support
+   * for the prop nobody here may use, which is why the gate moved to the source in BMG-001.)
    */
-  it('the served page is still small enough to be one document (FED-007 AC6)', () => {
+  it('renders backend values as text: no innerHTML path in the app source', () => {
+    const sources = appSources();
+    // The reading is real — a mis-pointed directory would pass with zero files.
+    expect(sources.length).toBeGreaterThan(20);
+    const offenders = sources.filter((file) => /dangerouslySetInnerHTML|\.innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/.test(fs.readFileSync(file, 'utf-8')));
+    expect(offenders.map((f) => path.relative(APP_DIR, f))).toEqual([]);
+  });
+
+  /**
+   * 🔴 **FED-007 AC6, carried onto the bundle (BMG-001 AC7) — every byte of this page ships, to
+   * every admin, on every load.** The document budget was 48,000 gzip and the hand-written page
+   * stood at 39,067 after BMG-000; ten more pages of composers did not fit, which is why the
+   * page is an app now. The budget is a smoke alarm, not a ratchet: it fires when the app has
+   * grown far past what it does, not when someone's honest 400 bytes lands.
+   */
+  it('the app bundle stays under its budget (BMG-001 AC7)', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const zlib = require('zlib') as typeof import('zlib');
-    const shipped = Buffer.concat([
-      fs.readFileSync(path.join(UI_DIR, 'index.html')),
-      fs.readFileSync(path.join(UI_DIR, 'styles.css'))
-    ]);
-    const gzipped = zlib.gzipSync(shipped, { level: 9 }).length;
-
+    const raw = Buffer.from(bundle, 'utf-8');
+    const gzipped = zlib.gzipSync(raw, { level: 9 }).length;
     // The reading is real — a mis-pointed path would give a tiny number and pass.
-    expect(shipped.length).toBeGreaterThan(50_000);
-    expect(gzipped).toBeLessThan(48_000);
+    expect(raw.length).toBeGreaterThan(40_000);
+    expect(gzipped).toBeLessThan(160_000);
+    // And the whole served document — shell, tokens, stylesheet, bundle — stays one page.
+    const shipped = Buffer.concat([Buffer.from(html), Buffer.from(tokens), Buffer.from(css), raw]);
+    expect(zlib.gzipSync(shipped, { level: 9 }).length).toBeLessThan(200_000);
   });
 
   it('keeps red for danger only (the phase-23 palette law)', () => {
     // Every rule that CONSUMES the red token must be a destructive/failure
     // affordance. `:root` is where the token is defined, not used.
-    const rules = css.split('}');
+    const rules = stripCssComments(css).split('}');
     const offenders: string[] = [];
     for (const rule of rules) {
       if (!rule.includes('var(--danger')) continue;
@@ -303,6 +297,50 @@ describe('BAK-005 dashboard document', () => {
       if (!/danger|\.bad/.test(selector)) offenders.push(selector);
     }
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * 🔴 BMG-001 AC4 — light and dark both render every page from the tokens. A colour literal
+   * outside a `:root` block is a colour one of the two themes cannot reach.
+   */
+  it('paints both themes from the tokens: no colour literal outside a :root block', () => {
+    const sheet = stripCssComments(tokens + '\n' + css);
+    const offenders: string[] = [];
+    for (const rule of sheet.split('}')) {
+      const brace = rule.indexOf('{');
+      if (brace < 0) continue;
+      const selector = rule.slice(0, brace).trim();
+      if (selector.startsWith(':root')) continue;
+      const body = rule.slice(brace + 1);
+      if (/#[0-9a-f]{3,8}\b/i.test(body) || /\brgba?\(/.test(body)) offenders.push(selector);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  /**
+   * The token sheet is core-ui's canonical palette, copied by the build — never by hand, which
+   * is how the previous copy drifted (BAK-005-NOTES §5, CHR-013). Both theme blocks must be in
+   * it, and the names the stylesheet aliases onto must exist.
+   */
+  it("the token sheet is core-ui's, with both themes, and the stylesheet's aliases resolve", () => {
+    expect(tokens.startsWith('/* GENERATED by scripts/build-admin-app.js')).toBe(true);
+    expect(tokens).toContain(':root {');
+    expect(tokens).toContain(":root[data-theme='light'] {");
+    const defined = new Set((tokens.match(/--theme-color-[a-z0-9-]+(?=\s*:)/g) || []).map((m) => m.trim()));
+    // The reading is real.
+    expect(defined.size).toBeGreaterThan(60);
+    const referenced = Array.from(new Set(css.match(/var\(--theme-color-[a-z0-9-]+/g) || [])).map((m) => m.slice('var('.length));
+    expect(referenced.length).toBeGreaterThan(10);
+    expect(referenced.filter((name) => !defined.has(name))).toEqual([]);
+    // Straight from the source file, not from a second copy anywhere in this package.
+    const coreUi = fs.readFileSync(
+      path.join(__dirname, '..', '..', 'noodl-core-ui', 'src', 'styles', 'custom-properties', 'colors.css'),
+      'utf-8'
+    );
+    for (const name of ['--theme-color-bg-page', '--theme-color-fg-danger', '--theme-color-syntax-string']) {
+      expect(coreUi).toContain(name);
+      expect(defined.has(name)).toBe(true);
+    }
   });
 });
 
@@ -363,12 +401,18 @@ describe('BAK-005 dashboard over HTTP (locked backend)', () => {
     const { status, text } = await req('GET', '/_admin');
     expect(status).toBe(200);
     expect(text).not.toContain('ADMIN_CSS');
+    expect(text).not.toContain('ADMIN_APP');
     expect(text).not.toContain('CSP_NONCE');
     // The stylesheet is inside the style block, not somewhere that merely
     // contains the bytes. (The original bug put it inside an HTML comment.)
     const styleBlock = text.slice(text.indexOf('<style'), text.indexOf('</style>'));
+    expect(styleBlock).toContain('--theme-color-bg-page');
     expect(styleBlock).toContain('--bg-page');
     expect(styleBlock).toContain('button.btn.primary');
+    // BMG-001: and the app is inside the script block, whole.
+    const scriptBlock = text.slice(text.indexOf('<script'), text.indexOf('</script>'));
+    expect(scriptBlock.length).toBeGreaterThan(10_000);
+    expect(scriptBlock).toContain('getElementById("root")');
   });
 
   it('locks the page down with a CSP that forbids every external origin', async () => {
