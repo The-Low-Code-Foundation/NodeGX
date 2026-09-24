@@ -3,9 +3,12 @@ import { createRoot, Root } from 'react-dom/client';
 
 import { isExpressionParameter } from '@noodl-models/ExpressionParameter';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
+import { tokenCategoriesForPort } from '@noodl-models/StyleTokensModel/TokensForPicking';
 import { ParameterValueResolver } from '@noodl-utils/ParameterValueResolver';
 
 import { PropertyPanelInputType } from '@noodl-core-ui/components/property-panel/PropertyPanelInput';
+import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
+import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
 
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 import { TokenGlyph } from '../components/NumberUnitInput';
@@ -17,7 +20,7 @@ import { expressionProps } from './expressionProps';
 import { isTokenReference, readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
-import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
 
 function firstType(type) {
   return NodeLibrary.nameForPortType(type);
@@ -183,6 +186,18 @@ export class BasicType extends TypeView {
     if (fieldOffersTokens(this.name) && !this.isConnected) {
       const stored = this.parent.model.getParameter(this.name);
       const isToken = isTokenReference(stored);
+      const openPicker = (anchor: HTMLElement) =>
+        openTokenFieldPopout({
+          view: this,
+          portName: this.name,
+          anchor,
+          currentValue: isToken ? String(stored) : undefined,
+          onSelect: (reference: string) => {
+            this.parent.setParameter(this.name, reference, { undo: true, label: `change ${this.displayName}` });
+            this.isDefault = false;
+            this.renderReact();
+          }
+        });
       const pencil = React.createElement(
         'button',
         {
@@ -195,26 +210,41 @@ export class BasicType extends TypeView {
           onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
             e.stopPropagation();
-            openTokenFieldPopout({
-              view: this,
-              portName: this.name,
-              anchor: e.currentTarget as HTMLElement,
-              currentValue: isToken ? String(stored) : undefined,
-              onSelect: (reference: string) => {
-                this.parent.setParameter(this.name, reference, { undo: true, label: `change ${this.displayName}` });
-                this.isDefault = false;
-                this.renderReact();
-              }
-            });
+            openPicker(e.currentTarget as HTMLElement);
           }
         },
         React.createElement(TokenGlyph)
       );
+
+      // P103 CMG-009 — a token reads as a token. While the port holds exactly one `var(--x)` the
+      // text box is replaced by the chip. On `boxShadowToken` the shadow it resolves to is drawn
+      // small on a light card beside its name; on the unitless number ports a scale reaches
+      // (`Circle.cornerRadius`, `strokeWidth`) the resolved value is written out. No ✕ here: the
+      // shadow port takes a token or nothing (`boxShadowSource` decides whether it is read), and
+      // a unitless port has no unit to detach into. Anything that is not one token — a `calc()`,
+      // two tokens, a typed CSS shadow — stays in the text box (AC7).
+      const resolved = isToken ? resolveTokenText(stored) : undefined;
+      const isShadow = tokenCategoriesForPort(this.name).includes('shadow');
+      const field =
+        isToken && this.root
+          ? React.createElement(
+              PropertyPanelRow,
+              { label: this.displayName, isChanged: !this.isDefault, onReset: props.onReset, children: null },
+              React.createElement(TokenChip, {
+                name: String(stored).trim(),
+                value: isShadow ? undefined : resolved,
+                preview: isShadow && resolved ? { kind: 'shadow' as const, css: resolved } : undefined,
+                onOpen: openPicker,
+                dataTest: `token-chip-${this.name}`
+              })
+            )
+          : input;
+
       this.root.render(
         React.createElement(
           'div',
           { style: { display: 'flex', alignItems: 'stretch', width: '100%' } },
-          React.createElement('div', { style: { flex: 1, minWidth: 0 } }, input),
+          React.createElement('div', { style: { flex: 1, minWidth: 0 } }, field),
           pencil
         )
       );

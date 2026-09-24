@@ -5,6 +5,7 @@ import { PropertyPanelBaseInput } from '@noodl-core-ui/components/property-panel
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 import { PropertyPanelSelectInput } from '@noodl-core-ui/components/property-panel/PropertyPanelSelectInput';
 import { ScrubBinding, useDragToScrub } from '@noodl-core-ui/components/property-panel/scrub';
+import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
 
 import css from './NumberUnitInput.module.scss';
 
@@ -60,6 +61,16 @@ export interface NumberUnitInputProps {
   onOpenTokenPicker?: (anchor: HTMLElement) => void;
   /** Whether the stored value IS a token — the button says so, since the value box just shows text. */
   isToken?: boolean;
+  /**
+   * P103 CMG-009 — the token the field holds, drawn as a chip in place of the value box: its
+   * name, what it resolves to, and ✕ to detach. Absent while `isToken`, the box shows the raw
+   * text as it did before.
+   */
+  tokenName?: string;
+  tokenValue?: string;
+  onDetachToken?: () => void;
+  /** CMG-010: the pencil and *Show in Styles* on the chip. */
+  tokenActions?: React.ReactNode;
 }
 
 /**
@@ -105,7 +116,11 @@ export function NumberUnitInput({
   scrub,
   placeholder,
   onOpenTokenPicker,
-  isToken
+  isToken,
+  tokenName,
+  tokenValue,
+  onDetachToken,
+  tokenActions
 }: NumberUnitInputProps) {
   const [displayedValue, setDisplayedValue] = useState(value ?? '');
   // ⚠️ A scrub does not go through `commitIfChanged`. That path goes to the view's
@@ -146,6 +161,17 @@ export function NumberUnitInput({
     >
       <div className={classNames(css['Line'], drawsFixed && css['has-fixed'])}>
         <div className={css['Field']}>
+          {/* P103 CMG-009 — a token reads as a token: the chip replaces the value box and the unit. */}
+          {isToken && tokenName ? (
+            <TokenChip
+              name={tokenName}
+              value={tokenValue}
+              onOpen={onOpenTokenPicker}
+              onDetach={onDetachToken}
+              actions={tokenActions}
+              dataTest={`token-chip-${dataIdentifier}`}
+            />
+          ) : (
           <PropertyPanelBaseInput
             type="text"
             isNumeric
@@ -165,11 +191,12 @@ export function NumberUnitInput({
             }}
             onKeyDown={(e) => e.key === 'Enter' && commitIfChanged()}
           />
+          )}
           {/* FH-014. About half the unit-bearing ports declare exactly one unit
             (21x ['px'], 4x ['%'], 1x ['deg'] — Font Size, Padding, Border Width,
             the Shadow numbers, Rotation...). A dropdown offering one immutable
             choice is noise, so those render a static unit label instead. */}
-          {hasUnitChoice ? (
+          {isToken && tokenName ? null : hasUnitChoice ? (
             <div className={css['UnitPicker']}>
               <PropertyPanelSelectInput
                 value={unit}

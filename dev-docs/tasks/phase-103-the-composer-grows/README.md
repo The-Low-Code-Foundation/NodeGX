@@ -84,7 +84,7 @@ panel and the property panel.
 | **[CMG-006](CMG-006-EDIT-A-LOOK-FROM-STYLES.md)** ✅ s1 | Edit a Look from Styles, with or without a node wearing it; *Look*, never *variant*, on screen; the node's Look row links to Styles | 6a, 6b | CMG-005 (reveal) |
 | **[CMG-007](CMG-007-A-POPOUT-CASTS-A-SHADOW-NOT-A-GLOW.md)** ✅ s1 | Every popout, popup and modal casts a shadow in light mode, not a white glow | 6c | — |
 | **[CMG-008](CMG-008-EVERY-FIELD-SAYS-WHEN-IT-LEAVES-ITS-LOOK.md)** ✅ s1 | Alignment, margin, padding, corners and borders say when they differ from the Look; alignment shows the Look's value | 9 | — |
-| **[CMG-009](CMG-009-A-TOKEN-IN-A-FIELD-READS-AS-A-TOKEN.md)** | A token in a number field shows as a chip with its name and value; every field that takes a token has a button that looks like one | 10, 11 | — |
+| **[CMG-009](CMG-009-A-TOKEN-IN-A-FIELD-READS-AS-A-TOKEN.md)** ✅ s1 | A token in a number field shows as a chip with its name and value; every field that takes a token has a button that looks like one | 10, 11 | — |
 | **[CMG-010](CMG-010-FROM-THE-FIELD-TO-THE-TOKEN-AND-BACK.md)** | From a token field: edit that token (the pencil) and *Show in Styles*. Absorbs §5's pencil candidate | 12 | CMG-005, CMG-009 |
 | **[CMG-011](CMG-011-RICHARD-DRIVES-THE-TOUCH-POINTS.md)** | Richard drives it and rules WORTHY | all | 001–010 |
 
@@ -113,6 +113,7 @@ Everything below is drawn on the *Token Composer* mockup canvas (2026-09-24) unl
 | **Describe it** *(new)* | Type *"a soft blue glow from the top corner"* and the composer fills in the controls. You adjust from there | The editor already talks to Claude. The model writes a **model** through the codec, never raw CSS, so the round-trip rule still holds |
 | **Number inputs in the OS locale** *(new, CMG-001 drive)* | The easing composer's curve numbers show `0,34` on a German-locale machine; Chromium formats `type="number"` inputs by locale, and a person typing `0.34` there may be refused | Measure with `lang` / `inputmode` before touching it; the same inputs are everywhere in the property panel |
 | **Font browser** *(new)* | Any Google Font by name, or upload your own file, with the font files handled | UPG-003 already moves font files with text styles, and P88's `presetFonts.ts` places a bundled face as a module (Nunito, DM Sans, Source Sans 3 ship in the app today). Reuse that path. 🔴 Since P102 s2 the composer offers **only** faces a visitor will see; the 25 web fonts it used to list without shipping (Manrope, Poppins, Lora, JetBrains Mono…) wait here — a font is offered once this row can put its files in the project |
+| **A spacing scale on a meta tag** *(new, CMG-009 census)* | `Page.og:image:width` / `og:image:height` are string ports that name an Open Graph image's pixels; HLT-012's `/(width\|height)$/` rule offers them `--space-4` | Two ports. Either an exclusion in `PORT_TOKEN_RULES` or a rule keyed on the port's type as well as its name |
 
 ## 6. Moved into P102 on 2026-09-24 (Richard: *"I like all your ideas"*)
 

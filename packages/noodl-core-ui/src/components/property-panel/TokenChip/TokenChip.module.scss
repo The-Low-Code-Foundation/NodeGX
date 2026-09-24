@@ -1,0 +1,159 @@
+/* P103 CMG-009 — a token in a field. The same voice as BindingChip (a wired port), in the token
+   colour the `{·}` buttons already use, so a person who has seen one recognises the other.
+
+   ⚠️ The component measures itself against these numbers (GAP 4, side padding 6+4 / compact 2+2,
+   mark 11, ✕ 14): change one here and change it there. */
+
+/* `flex`, not `inline-flex`: in a parent that is not itself a flex row (the picker rows) an
+   inline chip is sized to its content, and a chip that measures its own content-sized box will
+   always find "no room" for the parts it is not drawing. Block-level, it fills the row. */
+.Root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  max-width: 100%;
+  /* Sits inside a 26px bordered field (`NumberUnitInput`, the padding box): 2px in from its
+     border so the two radii do not fight, and no taller than the field leaves. */
+  margin: 2px;
+  min-height: 18px;
+  box-sizing: border-box;
+  padding: 0 4px 0 6px;
+  border-radius: 3px;
+  background-color: var(--theme-color-primary-bg, rgba(21, 112, 239, 0.12));
+  color: var(--theme-color-primary);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+
+  svg {
+    flex: none;
+  }
+}
+
+.is-interactive {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-primary-25, rgba(21, 112, 239, 0.25));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-focus-ring, var(--theme-color-primary));
+    outline-offset: -2px;
+  }
+}
+
+.is-compact {
+  padding: 0 2px;
+  gap: 2px;
+  font-size: var(--font-size-xs);
+}
+
+.Mark {
+  flex: none;
+  color: currentColor;
+}
+
+/* The name is the one thing that never shrinks: the mark, the value and the ✕ give way first. */
+.Name {
+  flex: none;
+  font-weight: 600;
+}
+
+.Value {
+  flex: none;
+  opacity: 0.8;
+}
+
+/* Natural widths for the fit; out of flow, unseen, and zero-sized so it adds nothing to the chip's
+   scroll width (a child's offsetWidth is its own box whatever clips it). */
+.Measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.Swatch {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+
+  &.is-gradient {
+    width: 18px;
+  }
+}
+
+.ShadowStage {
+  flex: none;
+  width: 22px;
+  height: 16px;
+  border-radius: 3px;
+  background: #f1f5f9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ShadowCard {
+  width: 10px;
+  height: 7px;
+  border-radius: 2px;
+  background: #ffffff;
+}
+
+.Detach {
+  flex: none;
+  appearance: none;
+  border: none;
+  background: none;
+  margin: 0 0 0 auto;
+  padding: 0 3px;
+  color: inherit;
+  opacity: 0.6;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 2px;
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.12);
+  }
+
+  /* Compact: over the right edge, on hover or keyboard focus only, so it takes no width from a
+     ~45px field. The fill behind it keeps the name from showing through. */
+  &.is-hover-only {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0 3px;
+    opacity: 0;
+    background-color: var(--theme-color-primary-bg, rgba(21, 112, 239, 0.12));
+    pointer-events: none;
+  }
+}
+
+.Root:hover .Detach.is-hover-only,
+.Root:focus-within .Detach.is-hover-only {
+  opacity: 1;
+  pointer-events: auto;
+}

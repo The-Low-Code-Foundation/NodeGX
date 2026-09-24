@@ -186,6 +186,7 @@
    is the one mark distinguishing `var(--space-3)` from a number somebody typed. Nothing is added
    to the 60px field, because there is nothing to add it to. */
 .GlyphBox.is-pickable {
+  position: relative;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -197,6 +198,29 @@
   &:focus-visible {
     outline: 1px solid var(--theme-color-primary);
     outline-offset: -1px;
+  }
+
+  /* P103 CMG-009 AC5 — the `{·}` mark every other token button wears, shown in the arrow's place
+     while the pointer or the focus is on the glyph. `.Glyph` is the arrow; `.PickMark` sits over
+     it and is hidden until then, so at rest the field is exactly what CHR-009 drew. */
+  .PickMark {
+    position: absolute;
+    inset: 0 0 0 6px;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    color: var(--theme-color-primary);
+    pointer-events: none;
+  }
+
+  &:hover,
+  &:focus-visible {
+    .Glyph {
+      opacity: 0;
+    }
+    .PickMark {
+      opacity: 1;
+    }
   }
 }
 

@@ -68,6 +68,34 @@ function newTokensModel(): any {
   return new (require('@noodl-models/StyleTokensModel/StyleTokensModel').StyleTokensModel)();
 }
 
+/**
+ * P103 CMG-009 — what a `var(--name)` a field holds resolves to in this project, for the chip's
+ * value (`16px`) and for *Detach*. `undefined` for anything that is not one known token.
+ *
+ * Deferred `require`s for the reason `newTokensModel` gives: the project singleton drags the
+ * renderer in, and this module sits on a path two plain-Node suites already travel.
+ *
+ * 🔴 **And guarded, because this one is called on every RENDER, not on a press.** `Dimension`
+ * and `NumberWithUnits` ask it while building their props, and `tests-unit/rel-014` renders those
+ * views for real (with the React component mocked away). Measured 2026-09-24 without the guard:
+ * 26 of its arms red at `bugtracker.ts:246` — `projectmodel` → `projectmodel.modules` → the
+ * bug tracker, whose module body joins a user-data path this runner does not have. In the editor
+ * the require always succeeds; under the runner there is no project and no token to resolve, and
+ * `undefined` is the honest answer (the chip draws the name alone, with no ✕).
+ */
+export function resolveTokenText(reference: unknown): string | undefined {
+  if (typeof reference !== 'string') return undefined;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { resolveProjectTokenValue } = require('@noodl-models/StyleTokensModel/ProjectTokenCss');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const project = require('@noodl-models/projectmodel').ProjectModel?.instance;
+    return resolveProjectTokenValue(project, reference);
+  } catch {
+    return undefined;
+  }
+}
+
 export function openTokenFieldPopout({ view, portName, anchor, currentValue, onSelect }: TokenFieldPopoutArgs): void {
   const categories = tokenCategoriesForPort(portName);
   if (categories.length === 0) return;

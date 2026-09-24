@@ -109,6 +109,16 @@ export function readMarginPaddingEdit(text: string, unit: string, typedUnits: st
 }
 
 /**
+ * P103 CMG-009 — what *Detach* writes in a token's place: the resolved text (`16px`, `1.5rem`)
+ * read as a typed edit. `undefined` when it does not read as one magnitude (a `calc()`, a name
+ * the project does not resolve): then the chip offers no ✕, since there is nothing to put in.
+ */
+export function detachedValueOf(resolved: string): MarginPaddingValue | undefined {
+  const edit = readMarginPaddingEdit(resolved, MARGIN_PADDING_UNITS[0], MARGIN_PADDING_UNITS);
+  return edit.kind === 'number' ? edit.value : undefined;
+}
+
+/**
  * CHR-009 §2 "paired values" — the two axes one collapsed row edits.
  *
  * `↕` is top + bottom, `↔` is left + right: the pairs a symmetric box actually has. This

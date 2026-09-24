@@ -4,6 +4,9 @@ import React, { useRef, useState } from 'react';
 import { bindingTooltip } from '@noodl-core-ui/components/property-panel/BindingChip';
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 import { scrubStepForUnit, useDragToScrub } from '@noodl-core-ui/components/property-panel/scrub';
+import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
+
+import { TokenGlyph } from './NumberUnitInput';
 
 // REL-014 — the parse, the display text and the side split all live in
 // `marginPaddingEdit` rather than here, because this component calls hooks and
@@ -19,11 +22,13 @@ import {
   axisComps,
   commitMarginPaddingEdit,
   commitMarginPaddingPairEdit,
+  detachedValueOf,
   edgeNameOf,
   editTextOf,
   effectiveValueOf,
   isZeroValue,
   fieldTextOf,
+  isMarginPaddingToken,
   pairDisplayOf,
   scrubStartOf,
   sideLayoutOf,
@@ -71,6 +76,12 @@ export interface MarginPaddingInputProps {
    * typing in it does. An expanded edge field passes one.
    */
   onOpenTokenPicker?: (comps: string[], anchor: HTMLElement, current?: string) => void;
+  /**
+   * P103 CMG-009 — what a token the box holds resolves to in this project (`16px`), for the chip
+   * and for *Detach*. `undefined` for a name the project does not have: the chip then draws the
+   * name alone and offers no ✕.
+   */
+  resolveToken?: (reference: string) => string | undefined;
 }
 
 export interface MarginPaddingConnection {
@@ -201,6 +212,14 @@ interface BoxFieldProps {
    * one-pixel drag would replace it with the port's default).
    */
   isToken?: boolean;
+  /**
+   * P103 CMG-009 — while `isToken`, the token in full and what it resolves to. The field then
+   * draws a {@link TokenChip} in place of the text box: name when it fits, else the value, and
+   * ✕ to detach when `onDetachToken` is given.
+   */
+  tokenName?: string;
+  tokenValue?: string;
+  onDetachToken?: () => void;
   /** Absent when this parameter has no scale, or when the whole widget was given no opener. */
   onOpenTokenPicker?: (anchor: HTMLElement) => void;
   /** Returns what to put back in the box on a refusal, or `null` when the edit was taken. */
@@ -225,6 +244,9 @@ function BoxField({
   hideUnit,
   dataComp,
   isToken,
+  tokenName,
+  tokenValue,
+  onDetachToken,
   onOpenTokenPicker,
   onCommit,
   scrubStart,
@@ -284,12 +306,33 @@ function BoxField({
           }}
         >
           <EdgeGlyph glyph={glyph} />
+          {/* P103 CMG-009 AC5 — the `{·}` every other token button wears, on hover and focus: the
+              edge arrow stays where it is and the mark takes its place for as long as the pointer
+              is on it, so a person who has met the mark once finds it here too. */}
+          <span className={css['PickMark']} aria-hidden="true">
+            <TokenGlyph />
+          </span>
         </button>
       ) : (
         <span className={css['GlyphBox']}>
           <EdgeGlyph glyph={glyph} />
         </span>
       )}
+      {/* P103 CMG-009 — a token reads as a token. Richard, driving P102: *"the 'padding' value is
+          --var(something) and the preview of the value of the input is ... and when you click it,
+          you get about 2 characters wide of the value inside the input, since it's designed for a
+          number."* The chip shows the name where it fits and the resolved value where it does not;
+          the full name and value are in its tooltip; ✕ puts the value in the field. */}
+      {isToken && tokenName ? (
+        <TokenChip
+          name={tokenName}
+          value={tokenValue}
+          compact
+          onOpen={onOpenTokenPicker}
+          onDetach={onDetachToken}
+          dataTest={`token-chip-${dataComp}`}
+        />
+      ) : (
       <input
         ref={inputRef}
         type="text"
@@ -320,11 +363,14 @@ function BoxField({
           }
         }}
       />
+      )}
       {/* 🔴 Text, not a control, and only for a unit that is not px. At 328px a field has ~60px, and
           a `px` always drawn left ~18px for the value (`120` read `1…`); a px ↔ % toggle drawn on
           hover took clicks meant for the value (`120` + Enter stored `0%`). The unit is typed:
           `50%`. A mixed pair has no one unit. */}
-      {!hideUnit && unit !== MARGIN_PADDING_UNITS[0] && <span className={css['Unit']}>{unit}</span>}
+      {!hideUnit && !(isToken && tokenName) && unit !== MARGIN_PADDING_UNITS[0] && (
+        <span className={css['Unit']}>{unit}</span>
+      )}
     </div>
   );
 }
@@ -351,8 +397,26 @@ export function MarginPaddingInput({
   onUpdate,
   onUpdateComps,
   onResetSide,
-  onOpenTokenPicker
+  onOpenTokenPicker,
+  resolveToken
 }: MarginPaddingInputProps) {
+  /**
+   * P103 CMG-009 — the chip's three props for a field holding `token`, and *Detach*: the resolved
+   * value parsed as the field would parse it typed (`16px` → `{ value: 16, unit: 'px' }`), written
+   * to every comp the field owns as one undo step — the same write picking the token was.
+   */
+  // 🔴 AC7 — only exactly one `var()` is a chip. `isToken` above is `typeof === 'string'`, which is
+  // also true of a stored `calc(var(--space-4) * 2)`; that one keeps its text box, verbatim. The
+  // first drive drew a chip titled "--calc(var(--space-4) * 2)" before this guard existed.
+  function tokenChipProps(token: string, comps: string[]) {
+    const resolved = resolveToken ? resolveToken(token) : undefined;
+    const detachable = resolved !== undefined ? detachedValueOf(resolved) : undefined;
+    return {
+      tokenName: token,
+      tokenValue: resolved,
+      onDetachToken: detachable ? () => onUpdateComps(comps, detachable) : undefined
+    };
+  }
   // The values from before a scrub, for the one undo step at its end. A ref, not state: the
   // drag writes continuously and every write re-renders this component from the view.
   const scrubBefore = useRef<Values | null>(null);
@@ -398,6 +462,7 @@ export function MarginPaddingInput({
         hideUnit={shown.kind === 'mixed'}
         dataComp={`${side}-${axis}`}
         isToken={isToken}
+        {...(isToken && isMarginPaddingToken(shown.value) ? tokenChipProps(String(shown.value), comps) : {})}
         onOpenTokenPicker={
           onOpenTokenPicker
             ? (anchor) => onOpenTokenPicker(comps, anchor, isToken ? String(shown.value) : undefined)
@@ -441,6 +506,7 @@ export function MarginPaddingInput({
         isChanged={values[comp] !== undefined}
         dataComp={comp}
         isToken={isToken}
+        {...(isToken && isMarginPaddingToken(own) ? tokenChipProps(String(own), [comp]) : {})}
         onOpenTokenPicker={
           onOpenTokenPicker
             ? (anchor) => onOpenTokenPicker([comp], anchor, isToken ? String(own) : undefined)

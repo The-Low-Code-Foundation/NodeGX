@@ -11,7 +11,7 @@ import { MarginPaddingConnection, MarginPaddingInput } from '../components/Margi
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
 import { sameParameterValue } from './scrubCommit';
-import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class MarginPaddingType extends TypeView {
@@ -232,6 +232,8 @@ export class MarginPaddingType extends TypeView {
         onUpdate: (comp, value, opts) => this.update(comp, value, opts),
         onUpdateComps: (comps, value, opts) => this.updateComps(comps, value, opts),
         onOpenTokenPicker: (comps, anchor, current) => this.openTokenPicker(comps, anchor, current),
+        // P103 CMG-009 — the chip's value and Detach read the project's tokens through one resolver.
+        resolveToken: (reference) => resolveTokenText(reference),
         // A wired edge's typed value is not shown, so the reset does not reach it either.
         onResetSide: (side) =>
           this.updateComps(

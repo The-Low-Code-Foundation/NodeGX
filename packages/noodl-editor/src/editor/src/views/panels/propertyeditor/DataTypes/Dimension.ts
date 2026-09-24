@@ -11,7 +11,7 @@ import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } fr
 import { isTokenReference, readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
-import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class Dimension extends TypeView {
@@ -127,8 +127,13 @@ export class Dimension extends TypeView {
     if (!fieldOffersTokens(this.name)) return {};
 
     const stored = this.numberWithUnits;
+    const isToken = isTokenReference(stored);
     return {
-      isToken: isTokenReference(stored),
+      isToken,
+      // P103 CMG-009 — the chip: the token's name, what it resolves to here, and Detach.
+      tokenName: isToken ? String(stored) : undefined,
+      tokenValue: isToken ? resolveTokenText(stored) : undefined,
+      onDetachToken: isToken ? () => this.detachToken() : undefined,
       onOpenTokenPicker: (anchor: HTMLElement) =>
         openTokenFieldPopout({
           view: this,
@@ -141,6 +146,13 @@ export class Dimension extends TypeView {
           }
         })
     };
+  }
+
+  /** P103 CMG-009 §3.1 — *Detach*: the resolved value in the token's place, one undo step. */
+  private detachToken() {
+    const resolved = resolveTokenText(this.numberWithUnits);
+    if (resolved === undefined) return;
+    this.updateValue(resolved, this.unit);
   }
 
   /**

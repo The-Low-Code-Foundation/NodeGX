@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { PropertyPanelBaseInput } from '@noodl-core-ui/components/property-panel/PropertyPanelBaseInput';
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
+import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
 
 export interface PickerTextInputProps {
   label: string;
@@ -23,6 +24,14 @@ export interface PickerTextInputProps {
   onEnter?: () => void;
   onReset?: () => void;
   dataIdentifier?: string;
+  /**
+   * P103 CMG-009 — the row holds a design token (`fontFamily: 'var(--font-sans)'`, which the
+   * editor stamps on every new Text). Drawn as a chip in place of the text box: the token's name
+   * and what it resolves to; pressing it opens the same picker; ✕ puts the resolved value in.
+   */
+  tokenName?: string;
+  tokenValue?: string;
+  onDetachToken?: () => void;
 }
 
 /**
@@ -42,7 +51,10 @@ export function PickerTextInput({
   onFilter,
   onEnter,
   onReset,
-  dataIdentifier
+  dataIdentifier,
+  tokenName,
+  tokenValue,
+  onDetachToken
 }: PickerTextInputProps) {
   const [displayedValue, setDisplayedValue] = useState(value ?? '');
 
@@ -65,6 +77,15 @@ export function PickerTextInput({
       connectionLabel={connectionLabel}
       onConnectionClick={onConnectionClick}
     >
+      {tokenName ? (
+        <TokenChip
+          name={tokenName}
+          value={tokenValue}
+          onOpen={(anchor) => onOpenPicker(anchor)}
+          onDetach={onDetachToken}
+          dataTest={`token-chip-${dataIdentifier}`}
+        />
+      ) : (
       <PropertyPanelBaseInput
         type="text"
         value={displayedValue}
@@ -88,6 +109,7 @@ export function PickerTextInput({
           }
         }}
       />
+      )}
     </PropertyPanelRow>
   );
 }

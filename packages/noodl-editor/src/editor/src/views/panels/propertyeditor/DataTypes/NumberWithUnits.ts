@@ -8,7 +8,7 @@ import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
-import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
@@ -201,8 +201,13 @@ export class NumberWithUnits extends TypeView {
     if (!fieldOffersTokens(this.name)) return {};
 
     const stored = this.numberWithUnits;
+    const isToken = isTokenReference(stored);
     return {
-      isToken: isTokenReference(stored),
+      isToken,
+      // P103 CMG-009 — the chip: the token's name, what it resolves to here, and Detach.
+      tokenName: isToken ? String(stored) : undefined,
+      tokenValue: isToken ? resolveTokenText(stored) : undefined,
+      onDetachToken: isToken ? () => this.detachToken() : undefined,
       onOpenTokenPicker: (anchor: HTMLElement) =>
         openTokenFieldPopout({
           view: this,
@@ -215,6 +220,17 @@ export class NumberWithUnits extends TypeView {
           }
         })
     };
+  }
+
+  /**
+   * P103 CMG-009 §3.1 — *Detach*: the resolved value goes into the field in the token's place,
+   * one undo step, so ⌘Z brings the token back. Nothing is written when the token resolves to
+   * nothing (a name this project does not have): the chip stays, and says so in its tooltip.
+   */
+  private detachToken() {
+    const resolved = resolveTokenText(this.numberWithUnits);
+    if (resolved === undefined) return;
+    this.updateValue(resolved, this.unit);
   }
 
   /**
