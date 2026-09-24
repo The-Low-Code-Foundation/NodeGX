@@ -3,10 +3,7 @@
 **Scoped:** 2026-09-24, as the second half of [P102](../phase-102-the-token-composer/README.md).
 **Opened:** 2026-09-24, by Richard's drive of P102 ([CMP-007](../phase-102-the-token-composer/CMP-007-RICHARD-DRIVES-IT.md)).
 He found twelve things and ruled: *"roll in these bugs as initial tasks in that phase."*
-**Status: 📋 OPEN — CMG-001…011 are the work, in §3's order. The §5 candidates stay candidates**
-until the tasks are done and Richard picks from them. 🔴 **Whether 0.3.0 waits on CMG-001…011 is
-not ruled** ([RC-8](#4-rulings)). Build the tasks either way; the answer changes when the release
-ships, not what gets built.
+**Status: 📋 OPEN — CMG-001…010 ✅ built, driven and committed (s1). Only [CMG-011](CMG-011-RICHARD-DRIVES-THE-TOUCH-POINTS.md) is left: Richard drives it and rules WORTHY.** The §5 candidates stay candidates until then, and Richard picks from them. ✅ **0.3.0 waits on his drive** ([RC-8](#4-rulings), ruled s2); a NOT WORTHY row is fixed before the tag.
 **Prefix: `CMG`.**
 
 > "It feels like a 'never been done before' concept of visual style creation."
@@ -94,7 +91,7 @@ panel and the property panel.
 
 | # | question | ruling |
 |---|---|---|
-| **RC-8** | Does 0.3.0 wait on CMG-001…011? P100's board says 0.3.0 waits on P102, and P102's drive found these | 🔴 **OPEN, Richard's.** He moved the findings here, and this phase was *"not for 0.3.0"*. Against that, his reason for P102 blocking the release was *"otherwise people will cry when they see the complexity required"*, and finding 7 loses work. Recommended: **CMG-001…005 and 007 before 0.3.0** (small, inside the panel, and 004 loses work); 006, 008–010 after |
+| **RC-8** | Does 0.3.0 wait on CMG-001…011? P100's board says 0.3.0 waits on P102, and P102's drive found these | ✅ **Richard, 2026-09-24 (s2): *"Wait for my drive."*** Asked after all ten build tasks had landed, so the question was no longer which tasks go in (all of them are on `cline-dev`) but whether the tag waits for his verdict: *"Should 0.3.0 wait until you've driven them and said they're good enough? The release already waits on you for one look at the Inspector (P101), so both could be done in one sitting."* ⇒ **0.3.0 waits on CMG-011 AC1**, and a NOT WORTHY row is fixed before the tag. Recorded on [P100's status line](../phase-100-0.3.0-the-first-upgrade/README.md). (s1's recommendation, before the tasks were built: 001–005 and 007 before the tag, 006 and 008–010 after — overtaken, all ten landed) |
 | **RC-9** | Is a new colour a token or a colour style? (finding 5) | ✅ **Richard, 2026-09-24:** *"Shouldn't this just be a design token? There's already loads of colours in there."* Taken as the ruling: new colours are tokens. Existing colour styles stay, listed and now editable ([CMG-003](CMG-003-A-NEW-COLOUR-IS-A-COLOUR-YOU-CAN-CHANGE.md)) |
 
 ## 5. Candidates, after the tasks (what P102 left for here)

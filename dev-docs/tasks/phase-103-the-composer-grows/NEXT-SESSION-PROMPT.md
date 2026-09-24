@@ -11,8 +11,13 @@ order: CMG-005 (`c9a028e49`), CMG-004 (`3eaada0b7`), CMG-001 (`917a9994d`), CMG-
 *Built* section with what each AC measured; every drive is `scripts/devtools/drive-cmg0NN-*.js`;
 every spec is `tests-unit/cmg-0NN/`. Shots are in `shots/`. README §3 rows are marked ✅ s1.
 
-Left: **CMG-011 — Richard drives the touch points** (his), and **RC-8** (*does 0.3.0 wait on
-these?*), his ruling. Nothing in this phase is a session's build job any more.
+Left: **CMG-011 — Richard drives the touch points** (his). Nothing in this phase is a session's build
+job any more.
+
+**s2 (2026-09-24):** ✅ **RC-8 ruled — *"Wait for my drive."*** 0.3.0 waits on CMG-011 AC1 (recorded on
+P100's status line); a NOT WORTHY row is fixed before the tag, so his findings ARE build jobs.
+The drive copy is `CMG-011 Richard Drive` (fresh `cp -R` of *Landing page test V2*, 142 overrides,
+orange `--primary`), first in the launcher list; s2 launched the editor for him on it.
 
 ## Do this
 

@@ -1,7 +1,7 @@
 # CMG-011 — Richard drives the touch points
 
 **Opened 2026-09-24.** Depends on CMG-001…010.
-**Status: 📋 waits on the tasks.** AC1 is Richard's.
+**Status: 📋 READY TO DRIVE (s2, 2026-09-24)** — CMG-001…010 are built and committed. AC1 is Richard's; AC3 ✅ ruled.
 
 ## 1. The person sentence
 
@@ -15,6 +15,8 @@ README §1's second sentence:
 
 On a **copy** of one of his projects ([[open-a-copy-of-a-real-project-in-the-editor]]). Use
 *Landing page test V2*, whose 142 stored tokens (46 real changes) are the finding-7 fixture.
+**The copy (s2):** `NodeGX test projects/CMG-011 Richard Drive` (`cp -R` of *Landing page test V2*, `name` renamed; 142
+overrides, `--primary` `#c2410c`; the original's `nodegx.project.json` SHA unchanged). It is first in the launcher list.
 Without Show CSS:
 
 1. Open the easing composer at the bottom of the window and press Show CSS (CMG-001).
@@ -40,7 +42,7 @@ Then re-read README §2's touch-point table on what he drove.
 1. 🔴 **Richard rules WORTHY or NOT WORTHY.** Every other task can be green while managing styles
    is still, in his words, *"a nightmare"* ([[correct-and-usable-were-never-the-same-criterion]]).
 2. Whatever he finds is written below as rows, **before** anything is fixed.
-3. RC-8 (does 0.3.0 wait on this?) is ruled by then, if it wasn't earlier.
+3. ✅ RC-8 (does 0.3.0 wait on this?) — **ruled s2: *"Wait for my drive."*** 0.3.0 waits on AC1 (README §4).
 
 ## 4. Rows
 
