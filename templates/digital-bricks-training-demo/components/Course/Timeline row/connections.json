@@ -86,6 +86,12 @@
       "fromProperty": "onShowInLog",
       "toId": "tr_out",
       "toProperty": "showInLog"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onOpenLesson",
+      "toId": "tr_out",
+      "toProperty": "openLesson"
     }
   ]
 }

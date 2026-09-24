@@ -1000,6 +1000,1066 @@
             "caption": "Some decisions stay free. Others get more expensive every week you leave them unmade."
           }
         ]
+      },
+      {
+        "learnerId": "l-sam",
+        "conceptId": "what-the-web-is",
+        "title": "What really happens when a stranger opens your landing page",
+        "hook": "Every stranger who opens your landing page gets their own copy of it — every word, every photo, and the code underneath them. So if Claude Code (or your own AI assistant) makes your contact form send by putting the password for your email inside the page, every visitor gets a copy of that password too, and nothing on your screen would tell you. Knowing which parts run on their phone and which run somewhere else is how you catch it.",
+        "landing": "You can now say which side of the wire each part of your page lives on, and you have written down which part needs a computer that is not the visitor's — and how you will check it works.",
+        "conceptVersion": 2,
+        "projectContextVersion": 3,
+        "generationVersion": 6,
+        "generatedByTier": "senior_teacher",
+        "steps": [
+          {
+            "id": "step-1",
+            "title": "What happens when a stranger types your address",
+            "goal": "You can describe the request and the response that happen every time someone opens your page.",
+            "sectionIds": [
+              "web-01",
+              "web-02",
+              "reading-request-response",
+              "web-03",
+              "web-04"
+            ],
+            "unlocks": "You can picture a visit to your page as a phone asking and a server answering."
+          },
+          {
+            "id": "step-2",
+            "title": "Whose computer your page is actually on",
+            "goal": "You can say where the original of your page lives, and why the page on your screen is only a copy.",
+            "sectionIds": [
+              "web-05",
+              "web-06",
+              "web-07",
+              "web-08"
+            ],
+            "unlocks": "You know that changing your page means changing the original, not the copy you are looking at."
+          },
+          {
+            "id": "step-3",
+            "title": "Where a message from your form has to travel",
+            "goal": "You can place every part of your page on one side of the wire, and ask Claude Code to do the same.",
+            "sectionIds": [
+              "web-09",
+              "web-10",
+              "web-11"
+            ],
+            "unlocks": "You can name the one part of your page that cannot happen on a visitor's phone."
+          },
+          {
+            "id": "step-4",
+            "title": "Catching the form that only looks finished",
+            "goal": "You can tell a form that looks finished from one that reaches your inbox, and keep secrets off the page.",
+            "sectionIds": [
+              "web-12",
+              "web-13",
+              "web-14",
+              "web-15",
+              "web-16"
+            ],
+            "unlocks": "You can test your own form like a stranger would, before a real customer tries it."
+          }
+        ],
+        "sections": [
+          {
+            "id": "web-01",
+            "kind": "answer_capsule",
+            "text": "The web is a conversation between two computers. When a stranger types your page's address, their phone asks a computer somewhere else for your page, that computer sends back a copy, and the phone draws it. Request, then response — every visit to your landing page is that one exchange."
+          },
+          {
+            "id": "web-02",
+            "kind": "callout",
+            "tone": "jargon",
+            "markdown": "A **browser** is the program on a phone or laptop that shows web pages — Safari, Chrome and the like. A **server** is a computer, switched on all the time somewhere else, whose only job is to answer when a browser asks for something. **Hosting** just means renting room on one — the “somewhere cheap” you have not picked yet."
+          },
+          {
+            "id": "reading-request-response",
+            "kind": "reading",
+            "markdown": "Here is the whole picture. A stranger with a broken bike types your address. Their browser sends a **request** — a short message saying “please send me that page”. The server where your page lives reads it and sends back a **response**: a copy of your page. Then the phone draws it.\n\nSo the original stays on the server, and the copy lands on the visitor's phone. That one idea answers more questions than it looks like it should.",
+            "detail": "What actually travels is smaller than you might think. The request carries the address and which page is wanted. The response carries your words and the layout of the page. Your six photos are not in that first response: once the phone reads the page and sees it needs photos, it sends a fresh request for each one. So one visit is at least seven trips across the wire, which is why a page with enormous photos feels slow on a phone with a weak signal.\n\nNone of this needs you to do anything. It happens every time anyone opens any web page. The reason to know it is that every part of your page has to live on one side of that wire or the other, and Claude Code will not always tell you which."
+          },
+          {
+            "id": "web-03",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 318\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"On the left, a stranger's phone running a browser. On the right, a computer somewhere else, the server, where your page lives. An arrow from the phone to the server is labelled request: please send the bike repair page. An arrow back from the server to the phone is labelled response: a copy of the page, then each photo. Underneath, the phone draws what arrived.\">\n  <text x=\"130\" y=\"28\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">A STRANGER'S PHONE</text>\n  <rect x=\"26\" y=\"50\" width=\"210\" height=\"150\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g font-size=\"15\" fill=\"currentColor\" text-anchor=\"middle\">\n    <text x=\"131\" y=\"112\">their browser</text>\n  </g>\n  <text x=\"131\" y=\"140\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" opacity=\"0.72\">shows web pages</text>\n\n  <text x=\"624\" y=\"28\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\">A COMPUTER SOMEWHERE ELSE</text>\n  <rect x=\"524\" y=\"56\" width=\"210\" height=\"150\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"518\" y=\"50\" width=\"210\" height=\"150\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"623\" y=\"112\" text-anchor=\"middle\" font-size=\"15\" fill=\"currentColor\">the server</text>\n  <text x=\"623\" y=\"140\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" opacity=\"0.72\">where your page lives</text>\n\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M252 96 h248\"/>\n    <path d=\"M488 84 l14 12 l-14 12\"/>\n    <path d=\"M500 156 h-248\"/>\n    <path d=\"M264 144 l-14 12 l14 12\"/>\n  </g>\n  <text x=\"376\" y=\"74\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">1. THE REQUEST</text>\n  <text x=\"376\" y=\"124\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">“please send the bike repair page”</text>\n  <text x=\"376\" y=\"186\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">2. THE RESPONSE</text>\n  <text x=\"376\" y=\"208\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">a copy of the page, then each photo</text>\n\n  <text x=\"131\" y=\"238\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\">3. THE PHONE DRAWS IT</text>\n  <text x=\"380\" y=\"288\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Every visit to your page is this same exchange. Request, then response.</text>\n</svg>",
+            "caption": "Two computers and a wire between them. The phone only ever asks; the server only ever answers."
+          },
+          {
+            "id": "web-04",
+            "kind": "quiz",
+            "question": "In one sentence, what happens between a stranger typing your page's address and seeing your page?",
+            "variant": {
+              "type": "say_it_back",
+              "rubric": "The sentence says that their phone asks a computer somewhere else for the page, and that computer sends a copy back."
+            }
+          },
+          {
+            "id": "web-05",
+            "kind": "callout",
+            "tone": "reassurance",
+            "markdown": "The question almost everybody asks at this point is: *so is the copy on my computer or theirs?* It is a very good question, and being unsure about it is completely normal — most of the confusing moments in building a website come from exactly this."
+          },
+          {
+            "id": "web-06",
+            "kind": "reading",
+            "markdown": "The answer is **both, and they are different copies.** The original lives on the server. Each visitor gets their own copy in their own browser, and it is thrown away when they close the tab.\n\nThat has a practical edge. If you change your phone number, you change the **original** — and every visitor after that gets the new one. Editing the copy on your own screen changes nothing for anybody else.",
+            "detail": "While you are building, Claude Code writes your page's files onto your own laptop, and your laptop plays both parts at once: it is the server and the browser. That is why a page can work perfectly for you and not at all for anyone else — nobody else can reach your laptop.\n\nThe page only becomes reachable by strangers once the original sits on a server that is always on and always answering. That is all hosting is. The choice you have not made yet is just the choice of whose computer that will be."
+          },
+          {
+            "id": "web-07",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 340\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"On the right, one original of your page on the server. Three arrows lead from it to three copies on the left: one on a stranger's phone, one on a customer's laptop, and one on your own laptop. A note underneath says change the original and every new copy changes; change a copy and only that one screen does.\">\n  <text x=\"140\" y=\"26\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">COPIES, ONE PER VISIT</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-dasharray=\"8 7\" opacity=\"0.6\">\n    <rect x=\"26\" y=\"44\" width=\"230\" height=\"52\" rx=\"3\"/>\n    <rect x=\"26\" y=\"120\" width=\"230\" height=\"52\" rx=\"3\"/>\n    <rect x=\"26\" y=\"196\" width=\"230\" height=\"52\" rx=\"3\"/>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">\n    <text x=\"44\" y=\"76\">a stranger's phone</text>\n    <text x=\"44\" y=\"152\">a customer's laptop</text>\n    <text x=\"44\" y=\"228\">your own laptop</text>\n  </g>\n\n  <text x=\"608\" y=\"26\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\">THE ORIGINAL</text>\n  <rect x=\"496\" y=\"90\" width=\"236\" height=\"110\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"490\" y=\"84\" width=\"236\" height=\"110\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"608\" y=\"130\" text-anchor=\"middle\" font-size=\"15\" fill=\"currentColor\">your page, on the server</text>\n  <text x=\"608\" y=\"158\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" opacity=\"0.72\">words, six photos, the form</text>\n\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M478 124 L274 70\"/>\n    <path d=\"M288 64 l-14 6 l10 11\"/>\n    <path d=\"M478 139 H274\"/>\n    <path d=\"M286 127 l-12 12 l12 12\"/>\n    <path d=\"M478 154 L274 218\"/>\n    <path d=\"M285 205 l-11 13 l14 4\"/>\n  </g>\n\n  <text x=\"380\" y=\"292\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Change the original and every new copy changes.</text>\n  <text x=\"380\" y=\"318\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Change a copy and only that one screen does, until the tab is closed.</text>\n</svg>",
+            "caption": "One original, many copies. The copy on your own laptop is not special — it is just the one you happen to be looking at."
+          },
+          {
+            "id": "web-08",
+            "kind": "quiz",
+            "question": "You change the phone number on your page. Where does the change have to happen for a customer to see it?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "In the original on the server — the one every copy is made from",
+                  "correct": true,
+                  "feedback": "Yes. Change the original and the next person who asks gets the new number. Nobody has to do anything on their end."
+                },
+                {
+                  "text": "In the page you have open in your own browser",
+                  "correct": false,
+                  "feedback": "That is your copy. It changes on your screen, and it is gone when you close the tab. Nobody else ever sees it."
+                },
+                {
+                  "text": "On each customer's phone",
+                  "correct": false,
+                  "feedback": "You cannot reach their copies, and you do not need to. The next time their phone asks for your page, it gets a fresh copy of whatever the original says."
+                },
+                {
+                  "text": "Anywhere, as long as you press save",
+                  "correct": false,
+                  "feedback": "Saving on your laptop changes the original that lives on your laptop. Until the page is hosted, that is a server with an audience of one — you."
+                }
+              ]
+            }
+          },
+          {
+            "id": "web-09",
+            "kind": "reading",
+            "markdown": "You said: “It should just land in my email. I don't need to keep a list of them.” That sentence decides something about the wire.\n\nYour words and photos travel one way: server to phone. A message from your form travels the **other** way. The stranger types it into their copy, presses Send, and their phone makes a request carrying the message. Something on the far side has to catch it and pass it to your inbox. A phone cannot send you an email by itself.",
+            "detail": "Because you do not need to keep a list, nothing has to be stored anywhere — the far side only has to pass the message on and forget it. That is the small version, and it is the one you chose.\n\nThe far side can be a little piece of code running on a server, or a form service that does exactly that job for you. Claude Code can suggest either; the difference between them is what the next lesson on your path, frontend and backend, is about. For now the only thing to hold on to is that pressing Send is a request, and it has to go somewhere."
+          },
+          {
+            "id": "web-10",
+            "kind": "code_block",
+            "language": "text",
+            "code": "I'm building a one-page website for my bike repair business: some words\nabout what I do, six photos, and a contact form that sends the message\nto my email. I don't want to store the messages anywhere.\n\nI have never built anything before, so for every piece you write, tell me\nin plain words:\n  1. does it run in the visitor's browser, or on a server?\n  2. if it sends or receives anything, where does it actually go?\n  3. is there anything in it that should NOT be in the visitor's copy\n     of the page, like a password?\n\nDon't write any code yet. Start by listing the pieces.",
+            "explanation": "Paste this near the start of your next Claude Code session. The three numbered questions make it say which side of the wire each piece is on — something it will otherwise assume you already know. The third one matters more than it looks, and it comes back in the last step."
+          },
+          {
+            "id": "web-11",
+            "kind": "activity",
+            "title": "Put your page on two sides of the wire",
+            "steps": [
+              "Take a sheet of paper and draw a line down the middle.",
+              "Label the left side “the stranger's phone” and the right side “somewhere else”.",
+              "Write each of these on the side where it happens: your words, the six photos, the boxes on the form, pressing Send, the email arriving in your inbox.",
+              "Draw an arrow for anything that has to cross the line. Notice which way each arrow points.",
+              "Circle the one part that cannot happen on the stranger's phone at all."
+            ],
+            "capturesProjectFact": {
+              "field": "partThatNeedsAServer",
+              "prompt": "Which part of your page has to happen on a computer that is not the visitor's?"
+            }
+          },
+          {
+            "id": "web-12",
+            "kind": "callout",
+            "tone": "warning",
+            "markdown": "**The nasty surprise.** Claude Code will often write code that crosses the wire without saying so. Your form can show “Thanks, I'll be in touch” on the visitor's copy whether or not a message was ever sent — the thank-you and the sending are two separate things. A form that looks finished and a form that reaches your inbox are not the same form."
+          },
+          {
+            "id": "web-13",
+            "kind": "reading",
+            "markdown": "So whenever Claude Code hands you something that sends, stores or fetches, ask one question: **does this run in the browser or on a server, and where does the message actually go?** If you cannot answer from its reply, ask again before the page goes live.\n\nOne more reason it matters, and it is about safety. Everything in the page, every visitor gets a copy of. So anything secret — like the password that lets your page send email — must stay on the server side, never in the page.",
+            "detail": "The honest test is not reading the code; it is sending a real message. Use your phone, not the laptop you built it on, so you are a stranger to your own page. Press Send, then open your inbox. If nothing arrives, that is useful news, not a failure: it tells you the far side of the wire is not there yet. Tell Claude Code exactly what you did and what did not happen.\n\nIt is also worth asking Claude Code, once the form works, to show you where the email password or key lives. If its answer is a file that gets sent to the browser, stop there and ask it to move it."
+          },
+          {
+            "id": "web-14",
+            "kind": "quiz",
+            "question": "Claude Code says: “Done! Your form now sends messages to your email.” What is the best next move?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "Send a real message from your phone and check your inbox",
+                  "correct": true,
+                  "feedback": "Yes. That is the only test that crosses the wire for real. Your phone is a stranger to the page, and your inbox is the one place the truth shows up."
+                },
+                {
+                  "text": "Ask it which part runs on a server and where the message goes",
+                  "correct": true,
+                  "feedback": "Yes. If the answer names something on the far side of the wire, good. If it only describes the page itself, the sending part may not exist yet."
+                },
+                {
+                  "text": "Fill in the form on your laptop — if it says thank you, it works",
+                  "correct": false,
+                  "feedback": "The thank-you is drawn by the visitor's copy of the page. It can appear whether or not anything was sent. It tells you the form is there, not that the message arrived."
+                },
+                {
+                  "text": "Take its word for it — it wrote the code, so it knows",
+                  "correct": false,
+                  "feedback": "It is often right, and it is also often sure of itself when it is not. It has no inbox to check. You do."
+                }
+              ]
+            }
+          },
+          {
+            "id": "web-15",
+            "kind": "capture",
+            "prompt": "Before you tell anyone about your page, how will you check that a message from the form really reaches your inbox?",
+            "field": "formTestPlan",
+            "hint": "Plain words are perfect. “Send one from my phone and look in my email” is a complete answer."
+          },
+          {
+            "id": "web-16",
+            "kind": "artifact_challenge",
+            "title": "Explain your page to a customer",
+            "brief": "Write a short note — five to eight sentences, plain words, no code — for a customer who asks you “so how does your website actually work?” while you are fixing their bike.\n\nExplain what happens between them typing your page's address and seeing your six photos, and then what happens when they fill in the form and press Send. Say where the page really lives and where the copy they are looking at comes from.\n\nIf you like, give it to Claude Code afterwards and ask it to point out anything that is not quite true. You are not writing for an expert. You are checking that the picture is now yours.",
+            "rubric": [
+              "Says their phone or computer asks for the page, and a computer somewhere else sends it back",
+              "Makes clear that what they see is a copy, and the original stays where the page is hosted",
+              "Explains that pressing Send makes a message travel away from their phone to something that passes it to your inbox",
+              "Uses no word you could not explain to them on their doorstep"
+            ],
+            "acceptedFormats": [
+              "text",
+              "markdown"
+            ]
+          }
+        ]
+      },
+      {
+        "learnerId": "l-sam",
+        "conceptId": "frontend-and-backend",
+        "title": "Frontend and backend: the half of your page that sends the message",
+        "hook": "Your landing page can look completely finished — your words, six photos, a neat form, a Send button, a friendly “Thanks!” — and send nothing at all. A stranger with a broken bike writes it all out, presses Send, and you never hear about it. Nothing on the page warns you, because the part that does the sending is not on the page.",
+        "landing": "You can point at any job on your page and say which half owns it, and you have written down what the form asks and what a stranger is told if sending fails. That is the brief for your back half.",
+        "conceptVersion": 2,
+        "projectContextVersion": 3,
+        "generationVersion": 6,
+        "generatedByTier": "senior_teacher",
+        "steps": [
+          {
+            "id": "step-1",
+            "title": "Your page has two halves",
+            "goal": "You can say what the frontend and the backend are, in terms of your own landing page.",
+            "sectionIds": [
+              "fb-01",
+              "fb-02",
+              "fb-03",
+              "fb-04",
+              "fb-05"
+            ],
+            "unlocks": "You can point at your photos, your words and your form and say which half each lives in."
+          },
+          {
+            "id": "step-2",
+            "title": "Which half owns each job on your page",
+            "goal": "You can sort every job on your page into “shows something” or “has to happen”, and find the one backend job.",
+            "sectionIds": [
+              "fb-06",
+              "fb-07",
+              "fb-08",
+              "fb-09"
+            ],
+            "unlocks": "You know your backend has one job, and what your form must ask a stranger."
+          },
+          {
+            "id": "step-3",
+            "title": "Telling Claude Code which side a job is on",
+            "goal": "You can brief Claude Code with the two halves named, and check the form without reading any code.",
+            "sectionIds": [
+              "fb-10",
+              "fb-11",
+              "fb-12",
+              "fb-13"
+            ],
+            "unlocks": "You can make Claude Code explain a message's journey before it builds anything."
+          },
+          {
+            "id": "step-4",
+            "title": "The form that looks perfect and sends nothing",
+            "goal": "You can spot a form that only pretends to send, and you have decided what a stranger sees when sending fails.",
+            "sectionIds": [
+              "fb-14",
+              "fb-15",
+              "fb-16",
+              "fb-17"
+            ],
+            "unlocks": "You can tell a working form from a pretend one with one real test message."
+          }
+        ],
+        "sections": [
+          {
+            "id": "fb-01",
+            "kind": "answer_capsule",
+            "text": "The frontend is everything a visitor's browser shows: your words, your six photos, the boxes of your form. The backend is the part that runs on a server — a computer somewhere else that is always switched on — and on your page it has exactly one job: taking a message somebody sent and delivering it to your inbox."
+          },
+          {
+            "id": "fb-02",
+            "kind": "reading",
+            "markdown": "Every page on the web has two halves. The **frontend** arrives in the visitor's browser and runs there: the words, the pictures, the boxes they type into, the Send button. The **backend** runs on a server and does the jobs that have to happen somewhere the visitor cannot reach.\n\nYour page is nearly all frontend. Your words and your photos never need a server to decide anything. The one exception is the moment somebody presses Send.",
+            "detail": "Why the split exists at all. The frontend is close to the visitor, so it is quick: it can check a box has been filled in before anything leaves their phone. But it runs on *their* device, which means they control it. Anyone can change what a page does inside their own browser, and a program pretending to be a browser can skip your page entirely and send whatever it likes.\n\nSo anything that has to actually happen, or has to be trusted, lives on the backend, where the code runs on a machine nobody else can touch.\n\nFor your page that list is short: receive the message, then send it on to your email. You have already decided there is no list of messages to keep, so there is no database (a place where a server keeps records). That makes your backend about as small as a backend gets."
+          },
+          {
+            "id": "fb-03",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 360\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"On the left, a browser window holding your words, six photos and a contact form with a Send button, labelled frontend, in the visitor's browser. An arrow labelled the message runs from the Send button to a box on the right labelled backend, on a server, which takes the message and emails it on. A second arrow runs down from that box to your inbox.\">\n  <text x=\"190\" y=\"26\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">FRONTEND · IN THEIR BROWSER</text>\n  <rect x=\"36\" y=\"50\" width=\"320\" height=\"260\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"30\" y=\"44\" width=\"320\" height=\"260\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <path d=\"M30 72 h320\" stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\"/>\n  <g fill=\"currentColor\" opacity=\"0.45\">\n    <circle cx=\"48\" cy=\"58\" r=\"4\"/><circle cx=\"62\" cy=\"58\" r=\"4\"/><circle cx=\"76\" cy=\"58\" r=\"4\"/>\n  </g>\n  <text x=\"54\" y=\"100\" font-size=\"15\" fill=\"currentColor\">who I am, in my words</text>\n  <g fill=\"currentColor\" opacity=\"0.22\">\n    <rect x=\"54\" y=\"114\" width=\"76\" height=\"44\" rx=\"2\"/>\n    <rect x=\"142\" y=\"114\" width=\"76\" height=\"44\" rx=\"2\"/>\n    <rect x=\"230\" y=\"114\" width=\"76\" height=\"44\" rx=\"2\"/>\n    <rect x=\"54\" y=\"166\" width=\"76\" height=\"44\" rx=\"2\"/>\n    <rect x=\"142\" y=\"166\" width=\"76\" height=\"44\" rx=\"2\"/>\n    <rect x=\"230\" y=\"166\" width=\"76\" height=\"44\" rx=\"2\"/>\n  </g>\n  <g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.6\">\n    <rect x=\"54\" y=\"226\" width=\"176\" height=\"24\" rx=\"2\"/>\n    <rect x=\"54\" y=\"258\" width=\"176\" height=\"24\" rx=\"2\"/>\n  </g>\n  <text x=\"246\" y=\"243\" font-size=\"13\" fill=\"currentColor\" opacity=\"0.72\">the form</text>\n  <rect x=\"246\" y=\"256\" width=\"80\" height=\"28\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"286\" y=\"275\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" fill=\"currentColor\">Send</text>\n\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M330 270 H394 V138 H472\"/>\n    <path d=\"M462 128 l12 10 l-12 10\"/>\n  </g>\n  <text x=\"404\" y=\"212\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">THE</text>\n  <text x=\"404\" y=\"228\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">MESSAGE</text>\n\n  <text x=\"585\" y=\"26\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\">BACKEND · ON A SERVER</text>\n  <rect x=\"486\" y=\"96\" width=\"210\" height=\"96\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"480\" y=\"90\" width=\"210\" height=\"96\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"585\" y=\"130\" text-anchor=\"middle\" font-size=\"15\" fill=\"currentColor\">takes the message</text>\n  <text x=\"585\" y=\"154\" text-anchor=\"middle\" font-size=\"15\" fill=\"currentColor\">and emails it to you</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M585 192 v42\"/>\n    <path d=\"M577 226 l8 8 l8 -8\"/>\n    <rect x=\"545\" y=\"244\" width=\"80\" height=\"52\" rx=\"3\"/>\n    <path d=\"M545 248 l40 28 l40 -28\"/>\n  </g>\n  <text x=\"585\" y=\"318\" text-anchor=\"middle\" font-size=\"15\" fill=\"currentColor\">your inbox</text>\n\n  <text x=\"380\" y=\"346\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Almost all of your page is on the left. One job is on the right.</text>\n</svg>",
+            "caption": "Your page in two halves. The photos and words never leave the left. The message is the only thing that crosses."
+          },
+          {
+            "id": "fb-04",
+            "kind": "callout",
+            "tone": "jargon",
+            "markdown": "A **browser** is the program somebody uses to look at websites — on a phone, it is usually just what opens when they tap a link. A **server** is a computer that is always on, somewhere else, waiting to be asked for things. **Frontend** and **backend** simply mean “the part that runs in the browser” and “the part that runs on a server”. You will hear both words a lot. That is all they mean."
+          },
+          {
+            "id": "fb-05",
+            "kind": "quiz",
+            "question": "In one sentence, in your own words: which part of your landing page is the backend's job?",
+            "variant": {
+              "type": "say_it_back",
+              "rubric": "Names getting a sent message delivered to his email as the backend's job — not the photos, the words or how the page looks."
+            }
+          },
+          {
+            "id": "fb-06",
+            "kind": "reading",
+            "markdown": "You said: “It should just land in my email. I don't need to keep a list of them.” That one sentence decides most of your backend. It has one job and nothing to remember.\n\nAnd you said the one job of version one is: “A stranger with a broken bike gets a message to me without phoning.” Notice where that job lives. Everything the stranger sees is frontend. The part that makes your sentence true — the message actually reaching you — is backend."
+          },
+          {
+            "id": "fb-07",
+            "kind": "quiz",
+            "question": "A stranger fills in your form and presses Send. Which of these jobs has to happen on the backend?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "Showing the six photos of your work",
+                  "correct": false,
+                  "feedback": "Frontend. The photos are files the browser fetches and shows. Nothing has to be decided or sent anywhere, which is exactly why most of your page is frontend."
+                },
+                {
+                  "text": "Checking the name box is not empty before Send works",
+                  "correct": false,
+                  "feedback": "Frontend, and a kind one: it catches a slip before anything leaves their phone. But it is a convenience, not a guarantee, because anything in the browser can be skipped. That is fine for a name box. It would not be fine for something that has to be true."
+                },
+                {
+                  "text": "Delivering the message to your email inbox",
+                  "correct": true,
+                  "feedback": "Yes. This is the one backend job on your whole page. A visitor's browser cannot put anything in your inbox by itself — it has to hand the message to a server that does."
+                },
+                {
+                  "text": "Showing “Thanks, I'll be in touch” after Send",
+                  "correct": false,
+                  "feedback": "The words appear in the browser, so this is frontend. But look closely: it is only honest if the backend has confirmed the message went. A thank-you that appears no matter what is exactly how a form ends up looking perfect and sending nothing."
+                }
+              ]
+            }
+          },
+          {
+            "id": "fb-08",
+            "kind": "callout",
+            "tone": "reassurance",
+            "markdown": "If this still feels slippery, that is normal. You cannot see the line between the two halves — the page just looks like one thing. You do not need to know how a server works to use the idea. Ask one question of each job: does this just show something, or does something have to actually happen?"
+          },
+          {
+            "id": "fb-09",
+            "kind": "activity",
+            "title": "Sort your page's jobs into two lists",
+            "steps": [
+              "Take the page you scoped: your words, six photos, and the form.",
+              "Write two headings: “Shows something” and “Something has to happen”.",
+              "Put each job under one heading. The words, the photos, the layout and the form's boxes all go under “Shows something”.",
+              "Under “Something has to happen” you should end up with one line, or very close to it: the message reaching your inbox.",
+              "Now look at the form's boxes. Write down only what a stranger has to tell you so you can reply and help. Every extra box is one more reason to give up and phone somebody else."
+            ],
+            "capturesProjectFact": {
+              "field": "formQuestions",
+              "prompt": "What does your form need to ask a stranger, so you can reply and help with their bike?"
+            }
+          },
+          {
+            "id": "fb-10",
+            "kind": "reading",
+            "markdown": "Claude Code (or your own AI assistant) will build both halves if you ask. It usually guesses which job goes where, and usually it guesses right. When it guesses wrong, you get something that looks right and behaves oddly.\n\nSo say it out loud. The words and photos are display: frontend. The sending is backend: something on a server must deliver the message to your email. Then ask it to explain, in plain words and before any code, where a message goes after Send.",
+            "detail": "Naming the side matters most at the join between the two halves, and your form is the only join on your page. Left to itself, the model may reach for whatever is quickest to show you working — and on your screen, every option looks the same.\n\nHere is the split of work. You decide what each half is for and what counts as working. Claude Code writes the frontend, the backend and the wiring between them; it is genuinely faster at that than you will be, and you do not need to read every line. What you keep for yourself is the check at the end, and it needs no code at all: send a real message and see whether it arrives."
+          },
+          {
+            "id": "fb-11",
+            "kind": "code_block",
+            "language": "text",
+            "code": "My landing page has two halves and I want you to keep them separate.\n\nFRONTEND (shows things, in the visitor's browser):\n  - a short section in my words about what I do\n  - six photos of my work\n  - a contact form\n\nBACKEND (has to actually happen, on a server):\n  - when someone presses Send, their message is delivered to my email\n  - I don't want messages stored anywhere. Email only.\n\nBefore writing any code, tell me in plain English:\n  1. exactly where a message goes after someone presses Send\n  2. what the visitor sees if it arrived, and what they see if it didn't\n  3. whether this needs anything from wherever I host the page\n\nDon't write any code yet.",
+            "explanation": "Paste this when you get to the form. The two headings do the directing for you. The three questions do the checking: the first makes Claude Code say the message's journey out loud, the second catches a thank-you that appears whether or not anything was sent, and the third matters because you have not chosen hosting yet — some cheap hosting can only show pages, and cannot run the part that sends."
+          },
+          {
+            "id": "fb-12",
+            "kind": "callout",
+            "tone": "tip",
+            "markdown": "**How you confirm it, with no code at all.** Once the form exists, open the page on your phone the way a stranger would. Fill it in, press Send, then check your inbox — and your spam folder. A message that arrived is proof. A thank-you on the screen is not."
+          },
+          {
+            "id": "fb-13",
+            "kind": "quiz",
+            "question": "Before Claude Code writes your form, what is the one thing you will make it tell you?",
+            "variant": {
+              "type": "say_it_back",
+              "rubric": "Says he will have it explain where a message goes after Send — its journey to his inbox — before any code is written."
+            }
+          },
+          {
+            "id": "fb-14",
+            "kind": "callout",
+            "tone": "warning",
+            "markdown": "**The nasty surprise: a form can look finished and send nothing.** A Send button, a friendly thank-you, no error anywhere — and no message. It happens because the frontend is quick to build and easy to show off, while the backend is the easy part to leave out. Nothing on the page warns you, because the missing piece is not on the page. You find out weeks later, or never."
+          },
+          {
+            "id": "fb-15",
+            "kind": "reading",
+            "markdown": "Three forms can look identical. One says thanks and sends nothing. One opens the visitor's own email app instead of sending — no help on a phone with no email set up. One hands the message to a server that delivers it to you. Only the third does your page's one job.\n\nSo when Claude Code builds your form, ask which of the three it built. Then send yourself a real message and see whether it lands.",
+            "detail": "One more job for the backend, and the model often skips it unless you ask. Anything the browser checks can be skipped: automated programs (bots) fill in forms all day without ever loading the page, which is how spam arrives. So the rules that protect your inbox — this looks like a real message, this is not the same sender two hundred times in a minute — belong on the backend, where a bot cannot switch them off. You do not need to design this. You do need to ask Claude Code “What stops spam filling my inbox?” and expect an answer that happens on the server.\n\nAnd the one that gets expensive, because you have not picked hosting yet: whatever sends your message has to live somewhere. Some cheap hosting only shows pages. Ask whether it can send your form before you choose, not after — moving host later means moving everything."
+          },
+          {
+            "id": "fb-16",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 340\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Three contact forms drawn exactly alike, each with two boxes and a Send button. Under the first: says thanks and sends nothing, so nothing arrives. Under the second: opens the visitor's own email app if they have one, so it only sometimes arrives. Under the third: a server delivers it to your inbox, so it arrives.\">\n  <rect x=\"30\" y=\"40\" width=\"200\" height=\"110\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.6\">\n    <rect x=\"50\" y=\"56\" width=\"160\" height=\"22\" rx=\"2\"/>\n    <rect x=\"50\" y=\"86\" width=\"160\" height=\"22\" rx=\"2\"/>\n  </g>\n  <rect x=\"100\" y=\"116\" width=\"60\" height=\"24\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"130\" y=\"133\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" fill=\"currentColor\">Send</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M130 158 v30\"/>\n    <path d=\"M122 180 l8 8 l8 -8\"/>\n  </g>\n  <rect x=\"280\" y=\"40\" width=\"200\" height=\"110\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.6\">\n    <rect x=\"300\" y=\"56\" width=\"160\" height=\"22\" rx=\"2\"/>\n    <rect x=\"300\" y=\"86\" width=\"160\" height=\"22\" rx=\"2\"/>\n  </g>\n  <rect x=\"350\" y=\"116\" width=\"60\" height=\"24\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"380\" y=\"133\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" fill=\"currentColor\">Send</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M380 158 v30\"/>\n    <path d=\"M372 180 l8 8 l8 -8\"/>\n  </g>\n  <rect x=\"530\" y=\"40\" width=\"200\" height=\"110\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.6\">\n    <rect x=\"550\" y=\"56\" width=\"160\" height=\"22\" rx=\"2\"/>\n    <rect x=\"550\" y=\"86\" width=\"160\" height=\"22\" rx=\"2\"/>\n  </g>\n  <rect x=\"600\" y=\"116\" width=\"60\" height=\"24\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"630\" y=\"133\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" fill=\"currentColor\">Send</text>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M630 158 v30\"/>\n    <path d=\"M622 180 l8 8 l8 -8\"/>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" text-anchor=\"middle\" opacity=\"0.72\">\n    <text x=\"130\" y=\"214\">Says “Thanks!”</text>\n    <text x=\"130\" y=\"234\">and sends nothing.</text>\n    <text x=\"380\" y=\"214\">Opens the visitor's own</text>\n    <text x=\"380\" y=\"234\">email app, if they have one.</text>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" text-anchor=\"middle\">\n    <text x=\"630\" y=\"214\">A server delivers it</text>\n    <text x=\"630\" y=\"234\">to your inbox.</text>\n  </g>\n  <g font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" text-anchor=\"middle\">\n    <text x=\"130\" y=\"274\" opacity=\"0.55\">NOTHING ARRIVES</text>\n    <text x=\"380\" y=\"274\" opacity=\"0.55\">SOMETIMES</text>\n    <text x=\"630\" y=\"274\">IT ARRIVES</text>\n  </g>\n  <path d=\"M592 283 h76\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" fill=\"none\"/>\n  <text x=\"380\" y=\"324\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">From the outside you cannot tell them apart. A real test message can.</text>\n</svg>",
+            "caption": "The same form, three times. Only a message landing in your inbox tells you which one you have."
+          },
+          {
+            "id": "fb-17",
+            "kind": "capture",
+            "prompt": "If your form cannot send a message — the server is down, say — what should the stranger be told to do instead?",
+            "field": "whenSendingFails",
+            "hint": "In your own words. “Try again in a bit, or email me directly” is a complete answer. You decide this; Claude Code only builds it."
+          }
+        ]
+      },
+      {
+        "learnerId": "l-sam",
+        "conceptId": "plan-then-act",
+        "title": "Planning each change to your landing page before Claude Code makes it",
+        "hook": "Ask Claude Code (or your own AI assistant) to “add a contact form” and let it get straight on, and it may build more than you asked. It could quietly add a database to keep every message — which needs hosting and holds strangers' details — when you wanted messages only in your email. The page will work, and you will not notice. Asking for a plan first, and reading it, catches that in two minutes.",
+        "landing": "Every change to your page now starts the same way: ask for the plan, read it against your one job, question anything too big, then let Claude Code act. You have also written down what the form's plan must say.",
+        "conceptVersion": 2,
+        "projectContextVersion": 3,
+        "generationVersion": 6,
+        "generatedByTier": "senior_teacher",
+        "steps": [
+          {
+            "id": "step-1",
+            "title": "What plan then act means for your page",
+            "goal": "You can say what Claude Code does when it plans, and why nothing on your page changes until you say so.",
+            "sectionIds": [
+              "pa-01",
+              "pa-02",
+              "pa-03",
+              "pa-04",
+              "pa-05"
+            ],
+            "unlocks": "You can ask Claude Code for a plan instead of a change."
+          },
+          {
+            "id": "step-2",
+            "title": "Which changes to your page get a plan first",
+            "goal": "You can tell which changes to your page need a plan and which you can simply make.",
+            "sectionIds": [
+              "pa-06",
+              "pa-07",
+              "pa-08",
+              "pa-09"
+            ],
+            "unlocks": "You can sort your page's next changes into plan-first and just-do-it."
+          },
+          {
+            "id": "step-3",
+            "title": "Planning your six photos with Claude Code",
+            "goal": "You can ask for a plan, question it, approve it, and check afterwards that the page matches it.",
+            "sectionIds": [
+              "pa-10",
+              "pa-11",
+              "pa-12",
+              "pa-13"
+            ],
+            "unlocks": "You can push back on a plan before a single file on your page changes."
+          },
+          {
+            "id": "step-4",
+            "title": "Reading a plan for what it leaves out",
+            "goal": "You can spot a plan that builds more than you asked for, and a question it has not answered.",
+            "sectionIds": [
+              "pa-14",
+              "pa-15",
+              "pa-16"
+            ],
+            "unlocks": "You can catch a plan that stores messages you only wanted in your email."
+          }
+        ],
+        "sections": [
+          {
+            "id": "pa-01",
+            "kind": "answer_capsule",
+            "text": "Plan then act means Claude Code tells you what it intends to do to your page before it does it. You read the plan, check it matches what you meant, and only then say go. For a change like your six photos or your contact form, that short read is what keeps the page doing its one job."
+          },
+          {
+            "id": "pa-02",
+            "kind": "reading",
+            "markdown": "Plan then act is one habit. Before Claude Code changes anything on your page, you ask it to plan. It tells you, in words, what it intends to do: which files it will touch, what it will add, and why.\n\nYou read that. If it matches what you meant, you say go. If it does not, you say so — and nothing has changed yet. Claude Code acts on **your** approval, not on its own judgement.",
+            "detail": "Why this order and not the other one? Acting is much harder to undo than planning. Claude Code can change several files in the time it takes you to read one sentence about what it did. Reading a plan takes minutes. Finding and undoing a change you did not want, after it has happened, can take an evening — and you are fitting this page around running a business.\n\nSo the order is: plan, then read, then act. Not act, then read. It is the same instinct as asking a builder what they are going to do before they start knocking walls through, rather than coming home to find out."
+          },
+          {
+            "id": "pa-03",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 330\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"A loop in three boxes. One: you ask Claude Code for a plan. Two: you read it. Three: it acts on your page. An arrow runs back from reading to asking, labelled push back, it costs nothing. Underneath: nothing on your page changes until box three.\">\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\">\n    <rect x=\"20\" y=\"70\" width=\"210\" height=\"96\" rx=\"3\"/>\n    <rect x=\"275\" y=\"70\" width=\"210\" height=\"96\" rx=\"3\"/>\n  </g>\n  <rect x=\"536\" y=\"76\" width=\"210\" height=\"96\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"530\" y=\"70\" width=\"210\" height=\"96\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\" opacity=\"0.62\" text-anchor=\"middle\">\n    <text x=\"125\" y=\"54\">1 · PLAN</text>\n    <text x=\"380\" y=\"54\">2 · YOU READ IT</text>\n  </g>\n  <text x=\"635\" y=\"54\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\">3 · IT ACTS</text>\n  <g font-size=\"15\" fill=\"currentColor\" text-anchor=\"middle\">\n    <text x=\"125\" y=\"112\">it says what it</text>\n    <text x=\"125\" y=\"134\">would change</text>\n    <text x=\"380\" y=\"112\">does this match</text>\n    <text x=\"380\" y=\"134\">what I meant?</text>\n    <text x=\"635\" y=\"112\">it changes</text>\n    <text x=\"635\" y=\"134\">your page</text>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M236 118 h32\"/>\n    <path d=\"M258 108 l12 10 l-12 10\"/>\n    <path d=\"M491 118 h32\"/>\n    <path d=\"M513 108 l12 10 l-12 10\"/>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"8 7\" opacity=\"0.6\">\n    <path d=\"M380 172 C380 232 125 232 125 176\"/>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.6\">\n    <path d=\"M115 188 l10 -12 l10 12\"/>\n  </g>\n  <text x=\"252\" y=\"252\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">not quite? push back — it costs nothing here</text>\n  <text x=\"380\" y=\"306\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Nothing on your page changes until box three. You decide when that is.</text>\n</svg>",
+            "caption": "The whole habit on one line. The dashed arrow is the part people skip, and it is the cheapest part of the loop."
+          },
+          {
+            "id": "pa-04",
+            "kind": "callout",
+            "tone": "jargon",
+            "markdown": "**Plan mode** is a setting in Claude Code where it can look at your project and describe what it would do, but does not change any files. **Acting** is the opposite: it actually edits your page. A **plan** is just its list of intended changes, written in words. If you are ever unsure which mode you are in, ask it to plan first and change nothing yet — that sentence works either way."
+          },
+          {
+            "id": "pa-05",
+            "kind": "quiz",
+            "question": "In one sentence, and in your own words: what does Claude Code do with your page when you ask it to plan first?",
+            "variant": {
+              "type": "say_it_back",
+              "rubric": "Says that it describes what it would change on the page without changing anything yet."
+            }
+          },
+          {
+            "id": "pa-06",
+            "kind": "reading",
+            "markdown": "You said version one's one job is this: “A stranger with a broken bike gets a message to me without phoning.” Every change you make should serve that sentence. A plan is where you check it does, before anything moves.\n\nTake the six photos. A plan might say: add a neat grid of six pictures under your paragraph, and shrink them so the page opens quickly on a phone. That is two minutes of reading, and the moment to say “yes, that” or “not that bit”.",
+            "detail": "Here is the kind of thing a plan can hold that you would not have guessed. Along with the grid, it might offer a sliding gallery that swaps the photos every few seconds, with little arrows. That is not wrong. It is also not what you asked for, and it is one more moving part on a page whose job is to get a message to you.\n\nIn a plan you can say “just the grid, please” in four words. After the fact, the slider is spread through your page and you have to ask for it to be taken out again — and then check that taking it out did not disturb anything else."
+          },
+          {
+            "id": "pa-07",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 300\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Two rows. Reading the plan first: a short block of reading, then the page does what you meant. Letting it act first: a quick burst of changes across several files, then a long dashed stretch of working out what changed and undoing it.\">\n  <text x=\"20\" y=\"30\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\">READ THE PLAN FIRST</text>\n  <rect x=\"26\" y=\"54\" width=\"120\" height=\"42\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"20\" y=\"48\" width=\"120\" height=\"42\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"80\" y=\"75\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">minutes</text>\n  <circle cx=\"160\" cy=\"69\" r=\"11\" fill=\"currentColor\"/>\n  <text x=\"182\" y=\"74\" font-size=\"14\" fill=\"currentColor\">the page does what you meant</text>\n  <text x=\"20\" y=\"122\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">You caught the part you did not want while it was still only words.</text>\n\n  <text x=\"20\" y=\"178\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.5\" fill=\"currentColor\" opacity=\"0.62\">LET IT ACT, THEN FIND OUT</text>\n  <rect x=\"20\" y=\"196\" width=\"80\" height=\"42\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"60\" y=\"223\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">seconds</text>\n  <rect x=\"112\" y=\"196\" width=\"624\" height=\"42\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-dasharray=\"8 7\" opacity=\"0.6\"/>\n  <text x=\"424\" y=\"223\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">working out what changed, where, and how to undo the part you did not want</text>\n  <text x=\"20\" y=\"276\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Acting is the fast part. Undoing is the slow part. The plan is where you swap one for the other.</text>\n</svg>",
+            "caption": "The same change, in two orders. Only one of them lets you say no while saying no is still free."
+          },
+          {
+            "id": "pa-08",
+            "kind": "quiz",
+            "question": "Which of these changes to your page should start with a plan?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "Adding the contact form that sends a message to your email",
+                  "correct": true,
+                  "feedback": "Yes. This is the change your whole page exists for, it touches more than one thing, and it decides where a stranger's message goes. That is exactly what you want to read in words before it is built."
+                },
+                {
+                  "text": "Adding your six photos in a grid",
+                  "correct": true,
+                  "feedback": "Yes. It adds a folder of pictures and changes the layout, and the plan will contain assumptions — how big the photos should be, what they are called — that are worth seeing before it acts."
+                },
+                {
+                  "text": "Fixing a spelling mistake in your opening sentence",
+                  "correct": false,
+                  "feedback": "You can just ask for this one. It is one word in one place, you can see the whole change on the page, and undoing it takes seconds. A plan here would be ceremony, not care."
+                },
+                {
+                  "text": "Making your main heading a darker colour",
+                  "correct": false,
+                  "feedback": "Fine to do directly. A colour tweak is small and easy to see. The simple test: if you would want to see exactly what changed before a customer saw it, ask for a plan first. A darker heading does not need that."
+                }
+              ]
+            }
+          },
+          {
+            "id": "pa-09",
+            "kind": "callout",
+            "tone": "reassurance",
+            "markdown": "You do not need to read code to review a plan. A plan is written in plain words: what it will change, and why. You are checking the **job**, not the code — and you are the one person who knows what this page is for. If a line in a plan makes no sense to you, asking “what does that mean?” is a perfectly good review. Most people feel lost reading their first few plans. That passes quickly."
+          },
+          {
+            "id": "pa-10",
+            "kind": "reading",
+            "markdown": "Here is the loop in practice. Say what you want in plain words. Ask Claude Code to plan it and change nothing yet — it has a Plan mode for exactly this. Read the plan against three questions:\n\n- Is this what I asked for?\n- Is any step bigger than the job needs?\n- What has it not mentioned?\n\nQuestion anything that bothers you. Then tell it to go ahead. Afterwards, look at your page and check it did what the plan said."
+          },
+          {
+            "id": "pa-11",
+            "kind": "callout",
+            "tone": "tip",
+            "markdown": "Three questions that cost nothing while it is still a plan: **“Why are you doing it this way?”**, **“What is the smallest version of this?”** and **“Which files will this touch?”** Its code is almost always written correctly. What you are checking is whether it is the right job."
+          },
+          {
+            "id": "pa-12",
+            "kind": "code_block",
+            "language": "text",
+            "code": "I want to add six photos of my work to my page, in a simple grid\nunder the paragraph about what I do.\n\nPlease plan this first. Don't change any files yet.\n\nTell me:\n  1. which files you will change or create\n  2. what you will add, in plain words\n  3. anything you are assuming about the photos\n     (how big they are, what they are called, where they are kept)\n\nI'll read the plan and tell you when to go ahead.",
+            "explanation": "Paste this into Claude Code, adjusted to your own words. “Don't change any files yet” is the line that matters: it keeps Claude Code planning even if you forgot to switch into Plan mode. Point 3 is the one people leave out. It asks Claude Code to say out loud what it has guessed — that your photos are already in the project folder, say — while correcting it is still free."
+          },
+          {
+            "id": "pa-13",
+            "kind": "activity",
+            "title": "Run one plan for a real change, and question it once",
+            "steps": [
+              "Pick one change still to come on your page — the six photos, or the line saying how far you travel.",
+              "Ask Claude Code for a plan, and say plainly that nothing should change yet. The prompt above is a good start.",
+              "Read the plan once, slowly, against the three questions: is this what I asked for, is any step bigger than the job, what has it not mentioned?",
+              "Ask it one question about the plan, even if it looks fine. “Why this way?” is enough.",
+              "When the plan says what you meant, tell it to go ahead. Then open your page and check it matches the plan."
+            ],
+            "capturesProjectFact": {
+              "field": "firstPlanQuestion",
+              "prompt": "What did you ask Claude Code about its plan before you let it go ahead?"
+            }
+          },
+          {
+            "id": "pa-14",
+            "kind": "callout",
+            "tone": "warning",
+            "markdown": "**The nasty surprise is approving a plan you did not really read.** It feels safe, because you asked for a plan. But a skimmed plan protects nothing. The expensive one on your page is the contact form. You said: “It should just land in my email. I don't need to keep a list of them.” A plan that adds a **database** — somewhere that stores every message — is a bigger build. It needs **hosting** (the place your page lives online) that may not be cheap, and it means looking after strangers' names and numbers. It will be one line in the plan. Read for that line."
+          },
+          {
+            "id": "pa-15",
+            "kind": "reading",
+            "markdown": "Two more things to read a plan for. First, steps bigger than the job: if you asked for six photos and the plan also changes your form, ask why.\n\nSecond, what the plan does **not** say. For your form that might be: what stops a computer filling it in with junk hundreds of times a day? (People call that **spam**.) Is your email address hidden from strangers? You do not need the answers yourself. You need to notice the question is missing, and ask it.",
+            "detail": "When can you skip the plan? Small changes in one place are fine to make directly: fixing a spelling, rewording a sentence, changing a heading's colour. You can see the whole change on the page and undo it in seconds.\n\nThe simple test: if you would want to see exactly what changed before a customer saw it, ask for a plan first. For your page that means the contact form, the photos, and anything to do with putting the page live. Everything else, just ask — and look at the page afterwards."
+          },
+          {
+            "id": "pa-16",
+            "kind": "capture",
+            "prompt": "When Claude Code plans your contact form, what is the one thing the plan must say before you let it act?",
+            "field": "contactFormPlanMustSay",
+            "hint": "In your own words. “That the message goes to my email and nothing is saved” is a complete answer."
+          }
+        ]
+      },
+      {
+        "learnerId": "l-sam",
+        "conceptId": "html-the-structure",
+        "title": "Reading your contact form's HTML: every box, every label, and the Send button",
+        "hook": "Your contact form will look finished the first time you see it: the boxes, the Send button, all in the right place. But if Claude Code (or your own AI assistant) has made Send a plain box that only answers a mouse, or put the words inside the boxes instead of beside them, some strangers with a broken bike will never reach you — and nothing on your screen will say so. Reading the HTML is how you catch it.",
+        "landing": "You can find the form, each box, its label and the Send button in your page's HTML, and you have written down which boxes your form needs — the words to tell Claude Code what is missing.",
+        "conceptVersion": 2,
+        "projectContextVersion": 3,
+        "generationVersion": 6,
+        "generatedByTier": "senior_teacher",
+        "steps": [
+          {
+            "id": "step-1",
+            "title": "What your contact form is made of, underneath",
+            "goal": "You can say what HTML is and pick out the Send button in a contact form's code.",
+            "sectionIds": [
+              "html-01",
+              "html-02",
+              "html-03",
+              "html-04",
+              "html-05"
+            ],
+            "unlocks": "You can look at a line of HTML and say which part of the page it is."
+          },
+          {
+            "id": "step-2",
+            "title": "Finding each part of your own form",
+            "goal": "You can find the form, each box, its label and the Send button in your page's own code.",
+            "sectionIds": [
+              "html-06",
+              "html-07",
+              "html-08",
+              "html-09"
+            ],
+            "unlocks": "You can point at the exact line that is your Send button."
+          },
+          {
+            "id": "step-3",
+            "title": "Telling Claude Code what the form is missing",
+            "goal": "You can describe a change to your form in words Claude Code can act on first time.",
+            "sectionIds": [
+              "html-10",
+              "html-11",
+              "html-12"
+            ],
+            "unlocks": "You can ask for a missing box by name instead of saying “it doesn't look right”."
+          },
+          {
+            "id": "step-4",
+            "title": "What looks fine on your form and isn't",
+            "goal": "You can check your form works for a stranger using a keyboard or a screen reader, not only a mouse.",
+            "sectionIds": [
+              "html-13",
+              "html-14",
+              "html-15",
+              "html-16",
+              "html-17"
+            ],
+            "unlocks": "You can catch a fake button or a missing label before a stranger does."
+          }
+        ],
+        "sections": [
+          {
+            "id": "html-01",
+            "kind": "answer_capsule",
+            "text": "HTML is the part of your page that says what each thing is: this is a heading, this is a photo, this is a box to type in, this is the Send button. You will not write it — Claude Code does — but reading it is how you find the button, check your form is complete, and say exactly what is missing."
+          },
+          {
+            "id": "html-02",
+            "kind": "reading",
+            "markdown": "HTML is the layer of your page that says **what each thing is**. Not how it looks — that is CSS, your next lesson — and not what happens when it is clicked — that is JavaScript. Just: this is a heading, this is a photo, this is a box to type in, this is a button.\n\nEvery part is wrapped in **tags**: a word in angle brackets, like `<button>`, usually with a matching closing tag, `</button>`. The words between the two are what shows on screen.",
+            "detail": "Why keep \"what it is\" separate from \"how it looks\"? Because your eyes are not the only thing reading your page.\n\nThe Tab key reads the HTML to decide what a visitor can move between. A screen reader — software that reads a page aloud for somebody who cannot see it — reads only the HTML. Search engines read it to work out what your page is about. None of them see your colours or layout.\n\nIf the HTML says a thing is a button, every one of them knows it is a button. If it only looks like one, only a pair of eyes does. That is the whole reason this lesson ends where it does."
+          },
+          {
+            "id": "html-03",
+            "kind": "callout",
+            "tone": "jargon",
+            "markdown": "Three words you will see whenever Claude Code talks about HTML. A **tag** is the word in angle brackets, like `<label>`. An **element** is the whole thing — the opening tag, what is inside it, and the closing tag. An **attribute** is an extra setting written inside the opening tag, like `type=\"submit\"` or `name=\"email\"`. They are names for parts, nothing more."
+          },
+          {
+            "id": "html-04",
+            "kind": "code_block",
+            "language": "html",
+            "code": "<form action=\"#\" method=\"post\">\n  <h2>Tell me about your bike</h2>\n\n  <label for=\"name\">Your name</label>\n  <input type=\"text\" id=\"name\" name=\"name\" required>\n\n  <label for=\"email\">Your email</label>\n  <input type=\"email\" id=\"email\" name=\"email\" required>\n\n  <label for=\"phone\">Phone (if you'd rather I rang you back)</label>\n  <input type=\"tel\" id=\"phone\" name=\"phone\">\n\n  <label for=\"message\">What's wrong with it?</label>\n  <textarea id=\"message\" name=\"message\" rows=\"5\" required></textarea>\n\n  <button type=\"submit\">Send my message</button>\n</form>",
+            "explanation": "This is an example of what a contact form like yours often looks like underneath. It is not your actual code — Claude Code wrote yours, and it will have more around each part. Read it top to bottom: it opens with `<form>` and closes with `</form>`, and everything a visitor fills in sits between the two. The `action=\"#\"` is a stand-in. The part that gets a message into your inbox is the backend, and it is deliberately left out here — HTML alone cannot send an email."
+          },
+          {
+            "id": "html-05",
+            "kind": "quiz",
+            "question": "In the form above, which line is the Send button?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "<button type=\"submit\">Send my message</button>",
+                  "correct": true,
+                  "feedback": "Yes. The tag is `<button>`, and `type=\"submit\"` is what tells the browser that pressing it sends the form. The words between the tags are what the visitor reads on the button. It is the last thing before `</form>`, which is where it usually lives."
+                },
+                {
+                  "text": "<form action=\"#\" method=\"post\">",
+                  "correct": false,
+                  "feedback": "Close in spirit — this line is about sending — but it is the start of the whole form, the outline everything else sits inside. It says where the message will go once Send is pressed. The button itself is further down, just before `</form>`."
+                },
+                {
+                  "text": "<input type=\"email\" id=\"email\" name=\"email\" required>",
+                  "correct": false,
+                  "feedback": "This one is a box to type into — the email box. `type=\"email\"` means the browser checks it looks like an email address. It is easy to confuse with the button because both carry a `type`. Look for the tag name first: `<input>` is a box, `<button>` is a button."
+                },
+                {
+                  "text": "<label for=\"message\">What's wrong with it?</label>",
+                  "correct": false,
+                  "feedback": "This is the wording beside the big message box. A `<label>` names a box; the `for=\"message\"` points at the box it names. Worth knowing, because labels are one of the things the last part of this lesson asks you to check."
+                }
+              ]
+            }
+          },
+          {
+            "id": "html-06",
+            "kind": "reading",
+            "markdown": "A form is a set of **pairs**, and then a button. Each thing a stranger fills in is two elements side by side: a `<label>` holding the words (\"Your email\"), and the box itself — an `<input>` for one line, or a `<textarea>` for a longer message about their bike.\n\nThe label's `for` matches the box's `id`. That is what ties the two together. After the last pair comes `<button type=\"submit\">`. That is Send.",
+            "detail": "You said a message \"should just land in my email.\" Worth knowing, then: nothing in this HTML makes that happen. The form only gathers the words a stranger types, and hands them on when Send is pressed. Where it hands them is the `action`, and getting them into your inbox is the backend part from your earlier lesson on frontend and backend — something Claude Code sets up separately.\n\nSo if you read your form and cannot find your email address anywhere in it, that is normal. It is not missing. It lives in the other half."
+          },
+          {
+            "id": "html-07",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 400\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"On the left, a contact form as a visitor sees it: a Your name box, a Your email box, a bigger box asking what is wrong with the bike, and a Send my message button, all inside one outline. On the right, the HTML name for each part: form for the outline, input for a one-line box, label for the words naming a box, textarea for the bigger box, and button type submit for the Send button.\">\n  <text x=\"220\" y=\"22\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">WHAT A VISITOR SEES</text>\n  <text x=\"600\" y=\"22\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">WHAT IT IS IN THE HTML</text>\n\n  <rect x=\"40\" y=\"40\" width=\"360\" height=\"336\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n\n  <text x=\"68\" y=\"80\" font-size=\"14\" fill=\"currentColor\">Your name</text>\n  <rect x=\"68\" y=\"90\" width=\"300\" height=\"34\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.72\"/>\n\n  <text x=\"68\" y=\"150\" font-size=\"14\" fill=\"currentColor\">Your email</text>\n  <rect x=\"68\" y=\"160\" width=\"300\" height=\"34\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.72\"/>\n\n  <text x=\"68\" y=\"220\" font-size=\"14\" fill=\"currentColor\">What's wrong with it?</text>\n  <rect x=\"68\" y=\"230\" width=\"300\" height=\"72\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.72\"/>\n\n  <rect x=\"74\" y=\"324\" width=\"176\" height=\"38\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"68\" y=\"318\" width=\"176\" height=\"38\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"156\" y=\"342\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" fill=\"currentColor\">Send my message</text>\n\n  <g stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.4\" stroke-dasharray=\"4 5\">\n    <path d=\"M400 46 H462\"/>\n    <path d=\"M372 107 H462\"/>\n    <path d=\"M158 146 H462\"/>\n    <path d=\"M372 266 H462\"/>\n    <path d=\"M250 337 H462\"/>\n  </g>\n\n  <g fill=\"currentColor\">\n    <text x=\"472\" y=\"50\" font-size=\"15\" font-weight=\"700\">&lt;form&gt;</text>\n    <text x=\"472\" y=\"68\" font-size=\"13\" opacity=\"0.72\">the outline around all of it</text>\n    <text x=\"472\" y=\"112\" font-size=\"15\" font-weight=\"700\">&lt;input&gt;</text>\n    <text x=\"472\" y=\"130\" font-size=\"13\" opacity=\"0.72\">one line to type into</text>\n    <text x=\"472\" y=\"151\" font-size=\"15\" font-weight=\"700\">&lt;label&gt;</text>\n    <text x=\"472\" y=\"169\" font-size=\"13\" opacity=\"0.72\">the words that name a box</text>\n    <text x=\"472\" y=\"271\" font-size=\"15\" font-weight=\"700\">&lt;textarea&gt;</text>\n    <text x=\"472\" y=\"289\" font-size=\"13\" opacity=\"0.72\">room for a longer message</text>\n    <text x=\"472\" y=\"342\" font-size=\"15\" font-weight=\"700\">&lt;button type=\"submit\"&gt;</text>\n    <text x=\"472\" y=\"360\" font-size=\"13\" opacity=\"0.72\">the one that sends it</text>\n  </g>\n</svg>",
+            "caption": "Every part of the form you see has one name in the HTML. Learn these five and you can find your way around any contact form."
+          },
+          {
+            "id": "html-08",
+            "kind": "callout",
+            "tone": "reassurance",
+            "markdown": "If you looked at your form's code and could not tell which bit was the button, that is not you missing something obvious. Real pages carry much more around each part than this example — class names, extra wrappers, hooks for styling — and the button gets lost among them. Look for the word `button` itself. Or simply ask Claude Code to show you the one line that is the Send button."
+          },
+          {
+            "id": "html-09",
+            "kind": "activity",
+            "title": "Find each part of your own form",
+            "steps": [
+              "Ask Claude Code: “Show me the HTML for my contact form, and nothing else.”",
+              "Find `<form>` and `</form>`. Everything between them is the form.",
+              "Inside, find each `<label>` and the `<input>` or `<textarea>` it names. Say each pair out loud: “Your email — a one-line box.”",
+              "Find the line starting `<button`. Check it says `type=\"submit\"`, and that the words between its tags are what your Send button shows.",
+              "If one of these is not there, write down which. That is not a failure — it is exactly the thing to ask Claude Code about next."
+            ],
+            "capturesProjectFact": {
+              "field": "sendButtonLine",
+              "prompt": "Copy the one line of your page's HTML that is the Send button — or write “I couldn't find it” if you couldn't."
+            }
+          },
+          {
+            "id": "html-10",
+            "kind": "reading",
+            "markdown": "You will not write this HTML. Claude Code will, faster and tidier than you would. What is yours is **deciding what it should contain**, and reading enough to check it did.\n\nReading is what turns “the form doesn't look right” into “the form is missing a phone box, and the message box isn't required.” The second sentence is one Claude Code can act on first time. The first one starts a guessing game.",
+            "detail": "The split, for your page. **You direct**: you name the part in plain words — what the label says, which boxes must be filled in, what the button says. **It writes**: the exact tags, the attributes, the indentation, all the fiddly bits. **You confirm**: two checks that take about two minutes. Look at the page. Then press the Tab key again and again and watch the highlight move through every box and land on Send.\n\nIf you are working in Plan mode, ask for the plan to list the form's boxes by their label words before anything changes. It is much easier to spot a missing box in a list than in a finished page."
+          },
+          {
+            "id": "html-11",
+            "kind": "code_block",
+            "language": "text",
+            "code": "Please show me the HTML for the contact form on my page, and\nthen tell me, in plain words:\n\n  1. every box a visitor can type into, and the words on the\n     label beside it\n  2. which boxes they must fill in and which they can leave blank\n  3. the exact line that is the Send button, and whether it is a\n     real <button type=\"submit\"> inside the <form>\n\nDon't change anything yet. Once I've read it, I'll tell you\nwhat's missing.",
+            "explanation": "Paste this when you want to read your form rather than change it. The third question is the one that matters most: it asks Claude Code to point at the Send button for you, and to say whether it is a real button. Once you know what is there, asking for a change is one sentence in the form's own terms — for example, “Add a phone box after the email box, with a label that says Phone, and don't make it required.”"
+          },
+          {
+            "id": "html-12",
+            "kind": "capture",
+            "prompt": "Which boxes should a stranger fill in on your form — and which of them can they leave blank?",
+            "field": "contactFormBoxes",
+            "hint": "Your own list, in your own words. For example: “name and email must be filled in; phone is optional; a message about the bike.”"
+          },
+          {
+            "id": "html-13",
+            "kind": "callout",
+            "tone": "warning",
+            "markdown": "**The nasty surprise: HTML can be wrong and still look perfect.** Claude Code's HTML is usually tidy, and often wrong in ways your eyes cannot catch. For your form, two matter most: the words sitting *inside* the boxes instead of in a `<label>` beside them, and a Send button that is really a `<div>` — a plain, general-purpose box — dressed up to look like one. Both look fine. Both shut some strangers out."
+          },
+          {
+            "id": "html-14",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 330\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Two Send buttons that look identical. The left one is a real button element; the right one is a div made to look like a button. Both can be pressed with a mouse. Only the real button can be reached with the Tab key, pressed with Enter or the space bar, and announced as a button by a screen reader.\">\n  <rect x=\"361\" y=\"18\" width=\"170\" height=\"36\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"355\" y=\"12\" width=\"170\" height=\"36\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"440\" y=\"35\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" fill=\"currentColor\">Send my message</text>\n  <rect x=\"561\" y=\"18\" width=\"170\" height=\"36\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"555\" y=\"12\" width=\"170\" height=\"36\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <text x=\"640\" y=\"35\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" fill=\"currentColor\">Send my message</text>\n\n  <text x=\"440\" y=\"76\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" fill=\"currentColor\">&lt;button type=\"submit\"&gt;</text>\n  <text x=\"640\" y=\"76\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" fill=\"currentColor\" opacity=\"0.62\">&lt;div&gt; dressed as one</text>\n\n  <g stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.2\">\n    <path d=\"M20 134 H736\"/>\n    <path d=\"M20 182 H736\"/>\n    <path d=\"M20 230 H736\"/>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">\n    <text x=\"24\" y=\"115\">Press it with a mouse</text>\n    <text x=\"24\" y=\"163\">Reach it with the Tab key</text>\n    <text x=\"24\" y=\"211\">Press it with Enter or space</text>\n    <text x=\"24\" y=\"259\">A screen reader calls it a button</text>\n  </g>\n  <g stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\">\n    <path d=\"M430 105 l7 7 l12 -14\"/>\n    <path d=\"M430 153 l7 7 l12 -14\"/>\n    <path d=\"M430 201 l7 7 l12 -14\"/>\n    <path d=\"M430 249 l7 7 l12 -14\"/>\n    <path d=\"M630 105 l7 7 l12 -14\"/>\n  </g>\n  <g font-size=\"14\" fill=\"currentColor\" opacity=\"0.62\">\n    <text x=\"640\" y=\"163\" text-anchor=\"middle\">no</text>\n    <text x=\"640\" y=\"211\" text-anchor=\"middle\">no</text>\n    <text x=\"640\" y=\"259\" text-anchor=\"middle\">no</text>\n  </g>\n  <text x=\"380\" y=\"314\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">On screen they are the same. Only one works for every stranger who finds your page.</text>\n</svg>",
+            "caption": "A mouse cannot tell a real button from a fake one. The Tab key, the space bar and a screen reader all can."
+          },
+          {
+            "id": "html-15",
+            "kind": "code_block",
+            "language": "html",
+            "code": "<div class=\"contact\">\n  <input type=\"email\" placeholder=\"Your email\">\n  <textarea placeholder=\"What's wrong with it?\"></textarea>\n  <div class=\"send-button\" onclick=\"sendForm()\">Send my message</div>\n</div>",
+            "explanation": "What the wrong version tends to look like. On screen it can be identical to the good one. Underneath, there is no `<form>`; the words live in `placeholder` — grey hint text inside the box that vanishes the moment you start typing — instead of a `<label>`; the boxes have no `name`; and Send is a `<div>` that only a mouse can press. `onclick` is JavaScript, which comes later in your path. Here it is just the sign that somebody made a box behave like a button instead of using a real one."
+          },
+          {
+            "id": "html-16",
+            "kind": "reading",
+            "markdown": "Your one job for version one is “a stranger with a broken bike gets a message to me without phoning.” Some of those strangers use a keyboard rather than a mouse, or have their screen read aloud. A fake button or a missing label stops exactly them.\n\nSo when you read your HTML, check three things. Every box has a `<label>`. Send is a real `<button type=\"submit\">` inside the `<form>`. Each of your six photos has an `alt` — a short description of what it shows.",
+            "detail": "Why `alt` matters on your photos: a screen reader — software that reads the page aloud — says the `alt` in place of the picture, and a search engine uses it to understand the image. Something like `alt=\"A rebuilt back wheel on a road bike\"` tells both of them something. A missing `alt` tells them nothing, and a file name like `IMG_2041.jpg` is worse than nothing.\n\nTwo more worth a glance. Headings should go in order: one `<h1>` for your business, then `<h2>`s for each part of the page. Claude Code often picks a heading for its size rather than its place — but size is CSS's job, not HTML's. And every box needs a `name`, like `name=\"email\"`. A box without one is quietly left out when the form is sent, so the message reaches you with a hole in it and nothing on the page says so."
+          },
+          {
+            "id": "html-17",
+            "kind": "activity",
+            "title": "The two-minute keyboard check",
+            "steps": [
+              "Open your page the way you usually look at it, and click once on an empty part near the top.",
+              "Press the Tab key slowly, again and again. Watch a highlight move from one thing to the next.",
+              "Check it stops on every box in your form, in the order you would fill them in.",
+              "Check it lands on Send. With the highlight on Send, press Enter or the space bar. It should do exactly what a click does.",
+              "If the highlight skips Send, you have found a fake button. Tell Claude Code: “The Send button can't be reached with the Tab key — make it a real <button type=\"submit\"> inside the form.”"
+            ]
+          }
+        ]
+      },
+      {
+        "learnerId": "l-sam",
+        "conceptId": "css-making-it-look-right",
+        "title": "Making your landing page look right — on your phone as well as your laptop",
+        "hook": "Your landing page can look finished on your laptop, and Claude Code (or your own AI assistant) may well tell you it is done. Then the first stranger with a broken bike opens it on a phone and gets tiny text, squashed photos and a Send button too small to press. Nothing is broken: a page has to be told how to behave on a narrow screen, and by default it isn't. Making your laptop window smaller will not always show you this. Your own phone will.",
+        "landing": "You have a sentence for how your page should feel, a plain-words way to say what is wrong, and a note of what your own phone showed you — the one check Claude Code cannot do for you.",
+        "conceptVersion": 2,
+        "projectContextVersion": 3,
+        "generationVersion": 6,
+        "generatedByTier": "senior_teacher",
+        "steps": [
+          {
+            "id": "step-1",
+            "title": "What CSS does to your page",
+            "goal": "You can tell what on your page is HTML and what is CSS, and why the phone view is CSS too.",
+            "sectionIds": [
+              "css-01",
+              "reading-css-gist",
+              "css-02",
+              "css-03"
+            ],
+            "unlocks": "You can tell whether a problem on your page is about what is on it or how it looks."
+          },
+          {
+            "id": "step-2",
+            "title": "Saying how your page should feel",
+            "goal": "You can describe the look you want for your page in everyday words.",
+            "sectionIds": [
+              "css-04",
+              "css-05",
+              "css-06"
+            ],
+            "unlocks": "You can describe the look you want in words Claude Code can act on."
+          },
+          {
+            "id": "step-3",
+            "title": "Look, say, look again — with Claude Code",
+            "goal": "You can run a round of changes with Claude Code and judge the result on screen.",
+            "sectionIds": [
+              "css-07",
+              "css-08",
+              "css-09",
+              "css-10"
+            ],
+            "unlocks": "You can direct a change to your page's look and check it yourself before accepting it."
+          },
+          {
+            "id": "step-4",
+            "title": "Your page on a real phone",
+            "goal": "You can check your page on your own phone and tell Claude Code exactly what it showed you.",
+            "sectionIds": [
+              "css-11",
+              "css-12",
+              "css-13",
+              "css-14",
+              "css-15",
+              "css-16"
+            ],
+            "unlocks": "You can catch the phone problems a laptop hides, and say exactly what to fix."
+          }
+        ],
+        "sections": [
+          {
+            "id": "css-01",
+            "kind": "answer_capsule",
+            "text": "CSS is the part of a web page that decides how it looks: colours, text size, spacing, and how it fits a phone as well as a laptop. You will write very little of it. You say what you want to see, Claude Code writes it, and you check the result with your own eyes — on your own phone."
+          },
+          {
+            "id": "reading-css-gist",
+            "kind": "reading",
+            "markdown": "**CSS** is the part of your page that decides how it looks. Your HTML says *what* is on the page: the sentence about your repairs, the six photos, the contact form. CSS says *how* it is shown — the colours, the text size, the space between things, and how it fits a narrow phone screen as well as a wide laptop one.\n\nCSS never adds anything and never makes anything work. It dresses what is already there.",
+            "detail": "The letters stand for Cascading Style Sheets. Nobody says the long name, and you will not need it.\n\nIf your page looks fine on your laptop and squashed on your phone, neither screen is “wrong” and you have not broken anything. The laptop is showing the layout the CSS was written for. The phone is showing what happens when nobody told the page what to do on a narrow screen — and by default, nobody has. That instruction is CSS too. It just has to be asked for, which is why the last step of this lesson is all about it."
+          },
+          {
+            "id": "css-02",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 300\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Two boxes side by side. The left box, labelled HTML, what is on the page, holds a sentence saying what you do, six photos of your work, and a contact form. The right box, labelled CSS, how it looks, holds colours and text size, the space between things, and how it fits on a phone. An arrow between them is labelled same page, dressed.\">\n  <text x=\"170\" y=\"40\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">HTML — WHAT IS ON IT</text>\n  <rect x=\"20\" y=\"60\" width=\"300\" height=\"170\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g font-size=\"15\" fill=\"currentColor\" opacity=\"0.72\">\n    <text x=\"44\" y=\"108\">a sentence saying what you do</text>\n    <text x=\"44\" y=\"150\">six photos of your work</text>\n    <text x=\"44\" y=\"192\">a contact form</text>\n  </g>\n\n  <g stroke=\"currentColor\" stroke-width=\"3\" fill=\"none\">\n    <path d=\"M344 145 h64\" stroke-linecap=\"round\"/>\n    <path d=\"M396 133 l14 12 l-14 12\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n  </g>\n  <text x=\"378\" y=\"118\" text-anchor=\"middle\" font-size=\"12\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">SAME PAGE,</text>\n  <text x=\"378\" y=\"180\" text-anchor=\"middle\" font-size=\"12\" font-weight=\"700\" letter-spacing=\"1.2\" fill=\"currentColor\" opacity=\"0.62\">DRESSED</text>\n\n  <text x=\"590\" y=\"40\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\">CSS — HOW IT LOOKS</text>\n  <rect x=\"446\" y=\"66\" width=\"300\" height=\"170\" rx=\"3\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"440\" y=\"60\" width=\"300\" height=\"170\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <g font-size=\"15\" fill=\"currentColor\">\n    <text x=\"464\" y=\"108\">colours and text size</text>\n    <text x=\"464\" y=\"150\">the space between things</text>\n    <text x=\"464\" y=\"192\" font-weight=\"700\">how it fits on a phone</text>\n  </g>\n  <text x=\"380\" y=\"276\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">Change the CSS and nothing on the left moves. It only changes how it is shown.</text>\n</svg>",
+            "caption": "HTML is what is on your page. CSS is how it is shown — including on a phone."
+          },
+          {
+            "id": "css-03",
+            "kind": "quiz",
+            "question": "Which of these are jobs for CSS on your landing page?",
+            "variant": {
+              "type": "mcq",
+              "options": [
+                {
+                  "text": "Making your six photos sit two across on a phone",
+                  "correct": true,
+                  "feedback": "Yes. The photos themselves are HTML. Where they sit, and how big they are on each screen, is CSS."
+                },
+                {
+                  "text": "Making the Send button look like something you can press",
+                  "correct": true,
+                  "feedback": "Yes — its shape, colour and size are all CSS. And “make the Send button look like something you can press” is exactly how you can say it to Claude Code."
+                },
+                {
+                  "text": "Adding a seventh photo",
+                  "correct": false,
+                  "feedback": "Close, but that one is HTML, because it changes what is on the page. CSS would only decide where the seventh photo sits and how big it is."
+                },
+                {
+                  "text": "Getting the message into your inbox when somebody presses Send",
+                  "correct": false,
+                  "feedback": "Not CSS — CSS never makes anything happen. Sending the message is the working part of the form, and that comes in later lessons. CSS only decides how the button looks while it waits to be pressed."
+                }
+              ]
+            }
+          },
+          {
+            "id": "css-04",
+            "kind": "reading",
+            "markdown": "You said the one job of version one is “A stranger with a broken bike gets a message to me without phoning.” The look has a job inside that one: make the page easy to read and easy to trust, so the stranger gets as far as Send.\n\nCSS is famously fiddly to write by hand. Claude Code is better at it than most people who do this for a living. So your part is not writing it. Your part is saying what you want to see, in everyday words.",
+            "detail": "Everyday words really are enough. “This feels cramped.” “The heading is too big on a phone.” “Make it calmer — fewer colours, more space.” “This button doesn't look like a button.” Every one of those is a precise instruction Claude Code can act on.\n\nWhat it cannot do is know what you meant by “make it look nice”. That hands every decision to the model, and you get its idea of nice rather than yours. The more your words describe what somebody would actually see, the closer the first attempt lands."
+          },
+          {
+            "id": "css-05",
+            "kind": "callout",
+            "tone": "reassurance",
+            "markdown": "You do not need an eye for design to judge this. You can already tell when something is cramped, hard to read or hard to tap. Saying so, in those words, is the whole skill."
+          },
+          {
+            "id": "css-06",
+            "kind": "capture",
+            "prompt": "When a stranger lands on your page, how should it feel to them? Describe it in everyday words.",
+            "field": "howThePageShouldFeel",
+            "hint": "“Plain, friendly and easy to read” is a complete answer. You do not need colour names or codes."
+          },
+          {
+            "id": "css-07",
+            "kind": "reading",
+            "markdown": "Here is the loop you will run, again and again. Say what you want to see. Let Claude Code write the CSS. Open the page and look. Say what is still wrong.\n\nEach round takes a minute or two. One rule holds it together: **never accept CSS you have not seen on a screen.** The code is only text; the page it draws is the proof. And ask for the phone in the very first request, not after.",
+            "detail": "Asking for the phone later is possible, but it is much more work than asking at the start, because the page has to be rearranged rather than just told.\n\nPlan mode, from the lesson before last, works for looks as well. Ask for the plan first and read which parts of the page it means to change. If you asked for the photos to have more space and the plan mentions the contact form, ask why before you let it go ahead.\n\nIt also helps to ask for one change at a time while you are learning. When three things change at once and one of them looks wrong, it is hard to say which instruction did it."
+          },
+          {
+            "id": "css-08",
+            "kind": "code_block",
+            "language": "text",
+            "code": "I'd like my landing page to look plain, friendly and easy to read.\n\nBefore you change anything:\n  1. it must work on a phone screen as well as a laptop —\n     that is not optional\n  2. the text must be readable on a phone without zooming\n  3. the form boxes and the Send button must be big enough\n     to tap with a thumb\n  4. tell me which parts of the page you plan to change\n\nThen make the changes, and tell me how to open the page\nso I can look at it on my laptop AND on my own phone.",
+            "explanation": "Swap the first line for your own sentence about how the page should feel. The four numbered points do the work: the first three are the things the model most often leaves out, and the fourth makes it show its plan before it touches anything. The last line matters too — Claude Code can usually give you an address to open on your phone while both are on the same wifi. If it cannot, that is a normal snag and a good question for your coach."
+          },
+          {
+            "id": "css-09",
+            "kind": "callout",
+            "tone": "jargon",
+            "markdown": "Four words you will meet, and all you need of each. **Colour code**: colours are written like `#2a6f97`. Pick one from a colour picker and hand Claude Code the exact code, rather than saying “a bit bluer”. **Class**: a label on parts of the page; things with the same class look the same, so “give this heading its own class” is how you make one differ. **Padding**: the space inside a box, around what it holds. **Margin**: the space outside it, between boxes."
+          },
+          {
+            "id": "css-10",
+            "kind": "activity",
+            "title": "Your first round of look, say, look again",
+            "steps": [
+              "Open your page on your laptop and look at it for a full minute before you type anything.",
+              "Write down up to three things you would change, in plain words — “the photos feel squashed together”, not code.",
+              "Give Claude Code the prompt above, with your own sentence about how the page should feel, and add your three things.",
+              "Read its plan. If it wants to change something you did not mention, ask why.",
+              "When it is done, look again. Say what is still wrong, in the same plain words, and go round once more."
+            ]
+          },
+          {
+            "id": "css-11",
+            "kind": "callout",
+            "tone": "warning",
+            "markdown": "**The nasty surprise: your page will not look after itself on a phone.** A page has to be told how to behave on a narrow screen, and by default it isn't. Claude Code often builds for a laptop, which is also where you will be looking. Plenty of the strangers you are building this for will open it on a phone. This is nothing you have done wrong. It is the gap you ask about every time."
+          },
+          {
+            "id": "css-12",
+            "kind": "svg_diagram",
+            "svg": "<svg viewBox=\"0 0 760 340\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Three screens showing the same landing page. On a laptop it looks right, with three photos across and a wide form. On a phone that has not been told how to behave, the whole laptop layout is shrunk into the top of the screen, too small to read or tap. On a phone that has been told, the photos sit two across and the form fills the width. A note underneath says a narrow laptop window can show you the third screen while a real phone shows you the second.\">\n  <text x=\"160\" y=\"24\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">YOUR LAPTOP</text>\n  <rect x=\"20\" y=\"44\" width=\"280\" height=\"186\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <path d=\"M4 240 h312\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\"/>\n  <rect x=\"40\" y=\"64\" width=\"160\" height=\"12\" rx=\"2\" fill=\"currentColor\" opacity=\"0.5\"/>\n  <g fill=\"currentColor\" opacity=\"0.3\">\n    <rect x=\"40\" y=\"92\" width=\"76\" height=\"56\" rx=\"2\"/>\n    <rect x=\"124\" y=\"92\" width=\"76\" height=\"56\" rx=\"2\"/>\n    <rect x=\"208\" y=\"92\" width=\"76\" height=\"56\" rx=\"2\"/>\n  </g>\n  <rect x=\"40\" y=\"164\" width=\"244\" height=\"46\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" opacity=\"0.72\"/>\n  <text x=\"160\" y=\"272\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" opacity=\"0.72\">Looks right</text>\n\n  <text x=\"401\" y=\"24\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\" opacity=\"0.62\">PHONE, NOT TOLD</text>\n  <rect x=\"346\" y=\"40\" width=\"110\" height=\"210\" rx=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <rect x=\"358\" y=\"62\" width=\"56\" height=\"5\" rx=\"1\" fill=\"currentColor\" opacity=\"0.5\"/>\n  <g fill=\"currentColor\" opacity=\"0.3\">\n    <rect x=\"358\" y=\"74\" width=\"26\" height=\"20\" rx=\"1\"/>\n    <rect x=\"388\" y=\"74\" width=\"26\" height=\"20\" rx=\"1\"/>\n    <rect x=\"418\" y=\"74\" width=\"26\" height=\"20\" rx=\"1\"/>\n  </g>\n  <rect x=\"358\" y=\"100\" width=\"86\" height=\"16\" rx=\"1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" opacity=\"0.72\"/>\n  <text x=\"401\" y=\"272\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" opacity=\"0.72\">Shrunk to fit, too small to tap</text>\n\n  <text x=\"615\" y=\"24\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" letter-spacing=\"1.6\" fill=\"currentColor\">PHONE, TOLD</text>\n  <rect x=\"566\" y=\"46\" width=\"110\" height=\"210\" rx=\"14\" fill=\"currentColor\" opacity=\"0.14\"/>\n  <rect x=\"560\" y=\"40\" width=\"110\" height=\"210\" rx=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/>\n  <rect x=\"572\" y=\"58\" width=\"72\" height=\"8\" rx=\"1\" fill=\"currentColor\" opacity=\"0.5\"/>\n  <g fill=\"currentColor\" opacity=\"0.3\">\n    <rect x=\"572\" y=\"74\" width=\"41\" height=\"32\" rx=\"1\"/>\n    <rect x=\"617\" y=\"74\" width=\"41\" height=\"32\" rx=\"1\"/>\n    <rect x=\"572\" y=\"110\" width=\"41\" height=\"32\" rx=\"1\"/>\n    <rect x=\"617\" y=\"110\" width=\"41\" height=\"32\" rx=\"1\"/>\n    <rect x=\"572\" y=\"146\" width=\"41\" height=\"32\" rx=\"1\"/>\n    <rect x=\"617\" y=\"146\" width=\"41\" height=\"32\" rx=\"1\"/>\n  </g>\n  <rect x=\"572\" y=\"188\" width=\"86\" height=\"46\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n  <text x=\"615\" y=\"272\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">Two across, a form you can tap</text>\n\n  <text x=\"380\" y=\"318\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\" opacity=\"0.72\">A narrow laptop window can show you the phone on the right. Only a real phone shows you the middle one.</text>\n</svg>",
+            "caption": "The same page on three screens. The middle one is the one a narrowed laptop window can hide from you."
+          },
+          {
+            "id": "css-13",
+            "kind": "reading",
+            "markdown": "So check it on your own phone, not by making your laptop window small. That shortcut catches everyone.\n\nA narrow window can look fine while a real phone shows the whole page shrunk, with text you have to pinch to read. The usual cause is one missing line, the **viewport tag**, which tells a phone to use its real width. A laptop ignores that line, so a laptop cannot show you it is missing.\n\nOn your phone, look for four things: can you read it without zooming, do the photos fit, can you tap each box, can you reach Send?",
+            "detail": "Three other things the model tends to skip, all worth one sentence in your request.\n\n**Focus outline.** Some people move around a page with the Tab key instead of a mouse. Browsers draw an outline round whatever is selected, and the model often removes it because it looks untidy. Ask it to keep a visible one.\n\n**Contrast.** Pale grey text on white can look elegant to the model and be unreadable to someone with weaker eyesight, or to anyone outside in sunshine. Ask it to check the text has enough contrast with its background.\n\n**Styling kits.** Some projects use a ready-made set of looks, such as Tailwind. Ask Claude Code whether yours does. If it does, name it in every request about looks, or the model may invent a second way of styling that fights the first."
+          },
+          {
+            "id": "css-14",
+            "kind": "code_block",
+            "language": "html",
+            "code": "<!-- in the head of the page: tells a phone to use its real width -->\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\n<style>\n  /* on screens narrower than 600 pixels, show the photos two across */\n  @media (max-width: 600px) {\n    .photos { grid-template-columns: 1fr 1fr; }\n  }\n</style>",
+            "explanation": "You will not need to type this. It is here so you can recognise it. The first line is the viewport tag — if your page does not have it, a phone shows the shrunk version. The rest is a rule that only applies to narrow screens; that kind of rule is called a media query, and it is how a page is “told” what to do on a phone. The name .photos is only an example. Claude Code will choose its own."
+          },
+          {
+            "id": "css-15",
+            "kind": "activity",
+            "title": "Look at your page on your own phone",
+            "steps": [
+              "Ask Claude Code how to open your page on your phone. If it cannot give you a way yet, ask your coach — it is a common snag.",
+              "Hold the phone the way you normally would. Try to read the first sentence without zooming.",
+              "Scroll through your six photos. Do they fit the screen, or are they tiny, squashed or cut off?",
+              "Tap into each box on the form, then find the Send button. Is anything too small to tap, or hidden behind the keyboard?",
+              "Write down what you saw in plain words, and give Claude Code those exact words."
+            ],
+            "capturesProjectFact": {
+              "field": "whatThePhoneShowed",
+              "prompt": "What did your page look like on your own phone, and what needs fixing?"
+            }
+          },
+          {
+            "id": "css-16",
+            "kind": "quiz",
+            "question": "In one sentence: why check your landing page on your own phone rather than by making your laptop window narrow?",
+            "variant": {
+              "type": "say_it_back",
+              "rubric": "The sentence says that a real phone can show a problem a narrowed laptop window hides — such as the page shrunk to fit, or text and buttons too small — so the phone is the honest check."
+            }
+          }
+        ]
       }
     ],
     "PathStep": [

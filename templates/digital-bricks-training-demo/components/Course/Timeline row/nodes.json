@@ -147,10 +147,15 @@
           "name": "showInLog",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "openLesson",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "metadata": {
-        "comment": "A COACH asked to see this entry in the activity log (TASK-L165). The For Each that places this row bubbles it up as itemOutputSignal-showInLog with the entry's id in itemActionItemId — the Lesson/Step chip pattern. It never fires on the learner's page, and nothing there listens for it."
+        "comment": "A COACH asked to see this entry in the activity log (TASK-L165). The For Each that places this row bubbles it up as itemOutputSignal-showInLog with the entry's id in itemActionItemId — the Lesson/Step chip pattern. It never fires on the learner's page, and nothing there listens for it. ALSO openLesson (TASK-L181): the learner pressed Review / Continue / Start on a lesson, or “Open the lesson this came from” on a piece of work. The same bubbling, with the entry's id in itemActionItemId; the page resolves the concept. It never fires on a coach's page."
       }
     }
   ],

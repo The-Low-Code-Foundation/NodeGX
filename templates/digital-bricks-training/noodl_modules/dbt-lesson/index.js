@@ -1494,6 +1494,10 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     fold: 'Fold this back up',
     ask: 'Ask your coach about this',
     showInLog: 'Show in the activity log',
+    lessonReview: 'Review',
+    lessonContinue: 'Continue \u2192',
+    lessonStart: 'Start \u2192',
+    submissionOpenLesson: 'Open the lesson this came from',
     comments_one: '{n} comment',
     comments_other: '{n} comments',
     notes_one: '{n} note',
@@ -1902,6 +1906,67 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     );
   }
 
+  /*
+   * ── A CARD OPENS WHAT IT IS ABOUT (TASK-L181 §4) ──────────────────────────
+   * Ported from PathList.tsx's LessonCard CTA and SubmissionCard link. Until
+   * L181 there was ONE written lesson and this row deliberately drew no CTA —
+   * a control on twenty rows promising twenty lessons that did not exist.
+   * Every step the learner has REACHED now has one (tools/check-lessons.mjs
+   * holds that), so the control says what the product says:
+   *   complete    -> "✓ Review"      in_progress -> "Continue →"
+   *   available   -> "Start →"       locked      -> nothing: the route refuses it
+   * and a piece of work links back to the lesson that asked for it, which is
+   * where the product shows it and what came back (L182).
+   *
+   * A LEARNER'S ROW ONLY. The lesson route is the learner's; on a coach's
+   * surface it would be a control that goes somewhere they cannot follow
+   * (L135's `mode === "learner"` guard, ported). It EMITS the concept and the
+   * graph navigates — this row decides nothing about where a lesson lives.
+   */
+  function openControl(entry, kind, audience, TL_COPY, p) {
+    if (audience !== 'learner') return null;
+    var concept = str(entry.conceptId);
+    if (!concept) return null;
+    function open() {
+      emit(p, 'onConceptId', concept);
+      emit(p, 'onOpenLesson');
+    }
+    if (kind === 'submission') {
+      return h(
+        'p',
+        { key: 'open', className: 'path-step-why' },
+        h('button', { type: 'button', className: 'path-open-lesson', onClick: open }, TL_COPY.submissionOpenLesson)
+      );
+    }
+    if (kind !== 'lesson') return null;
+    var status = str(entry.status);
+    if (status === 'complete') {
+      return h(
+        'div',
+        { key: 'open', className: 'path-cta' },
+        h(
+          'button',
+          { type: 'button', className: 'path-review', onClick: open },
+          h('span', { className: 'path-check', 'aria-hidden': 'true' }, '\u2713'),
+          ' ',
+          TL_COPY.lessonReview
+        )
+      );
+    }
+    if (status === 'in_progress' || status === 'available') {
+      return h(
+        'div',
+        { key: 'open', className: 'path-cta' },
+        h(
+          'button',
+          { type: 'button', className: 'btn btn-thread', onClick: open },
+          status === 'in_progress' ? TL_COPY.lessonContinue : TL_COPY.lessonStart
+        )
+      );
+    }
+    return null;
+  }
+
   function TimelineRowView(p) {
   /** THE BUNDLE, RESOLVED (L160). Shadows the module-level default so every
    * read in this function — and in every closure it creates, such as an
@@ -2009,15 +2074,19 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
             /*
              * `path-card-block` on EVERY kind, including a lesson. `.path-card`
              * alone is a flex ROW, which is right in the product because a
-             * lesson's card puts a call to action on the right — and this
-             * template has one lesson fixture, so a per-row CTA would promise
-             * twenty different lessons it does not have (recorded in L158's
-             * status). Block is the honest layout for what is actually drawn.
+             * lesson's card puts a call to action on the right. Until L181
+             * there was no CTA to put there (one lesson fixture). There is now
+             * (`openControl`), and it sits UNDER the card's words rather than
+             * beside them: this card carries the lesson's rationale and its
+             * notes' marker, and a phone-width row puts the CTA underneath in
+             * the product too (globals.css `@media (max-width: 600px)`).
              */
             { className: 'path-card path-card-block' },
             h('p', { className: 'path-step-label' }, str(p.kindLabel)),
             h('h3', { className: 'path-step-title' }, str(p.title))
-          ].concat(CARD[kind](entry, TL_COPY))
+          ]
+            .concat(CARD[kind](entry, TL_COPY))
+            .concat([openControl(entry, kind, audience, TL_COPY, p)])
         )
       : /*
          * ONE LINE THE READER CAN OPEN. Not hidden, not filtered, nothing
@@ -2174,6 +2243,8 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
       onOpened: sig('Opened', 'The reader opened this row. Fires on open only.'),
       onAskRequested: sig('Ask requested', 'The learner asked their coach about this entry. Anchor kind and Anchor id already hold what it is about.'),
       onShowInLog: sig('Show in log', 'A coach asked to see this entry in the activity log. Anchor id already holds which one. Never fires for a learner.'),
+      onOpenLesson: sig('Open lesson', 'The learner pressed Review / Continue / Start on a lesson, or "Open the lesson this came from" on a piece of work. Concept id already holds which lesson. Never fires for a coach.'),
+      onConceptId: out('string', 'Concept id', 'The lesson the open control points at.'),
       onAnchorKind: out('string', 'Anchor kind', 'The entry’s kind — what the question is about.'),
       onAnchorId: out('string', 'Anchor id', 'The entry’s id — what the question is about.')
     }

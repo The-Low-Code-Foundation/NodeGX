@@ -62,8 +62,8 @@
     "Pages/Course": {
       "path": "Pages/Course",
       "type": "page",
-      "nodeCount": 50,
-      "connectionCount": 64,
+      "nodeCount": 52,
+      "connectionCount": 69,
       "modified": "2026-09-23T13:44:39.931Z",
       "created": "2026-09-19T21:11:24.317Z"
     },
@@ -86,8 +86,8 @@
     "Course/Timeline row": {
       "path": "Course/Timeline row",
       "type": "visual",
-      "nodeCount": 5,
-      "connectionCount": 11,
+      "nodeCount": 6,
+      "connectionCount": 15,
       "modified": "2026-09-20T12:51:55.909Z",
       "created": "2026-09-20T12:49:24.850Z"
     },
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 400,
-    "totalConnections": 570
+    "totalNodes": 403,
+    "totalConnections": 579
   }
 }

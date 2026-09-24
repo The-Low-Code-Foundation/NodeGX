@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fixtureText } from './lib/fixtures.mjs';
+import { specimenText } from './lib/fixtures.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const nodes = JSON.parse(readFileSync(join(here, '..', 'components', 'Data', 'Specimen lesson', 'nodes.json'), 'utf8')).nodes;
@@ -26,11 +26,11 @@ const fail = (m) => {
 };
 if (data.length !== 1) fail(`Data/Specimen lesson holds ${data.length} Static Data nodes, expected exactly 1`);
 const specimen = data[0].parameters.json;
-const fixture = fixtureText('lesson');
+const fixture = specimenText();
 if (specimen !== fixture) {
   let i = 0;
   while (i < specimen.length && specimen[i] === fixture[i]) i++;
-  fail(`the specimen and backend/fixtures/lesson.json differ from byte ${i}: …${JSON.stringify(specimen.slice(i, i + 60))} vs …${JSON.stringify(fixture.slice(i, i + 60))}`);
+  fail(`the specimen and backend/fixtures/lesson.json's first lesson differ from byte ${i}: …${JSON.stringify(specimen.slice(i, i + 60))} vs …${JSON.stringify(fixture.slice(i, i + 60))}`);
 }
 // And nothing that renders a LEARNER's lesson may read the specimen.
 const pages = ['Pages/Lesson', 'Pages/Course'];
@@ -38,4 +38,4 @@ for (const p of pages) {
   const n = JSON.parse(readFileSync(join(here, '..', 'components', ...p.split('/'), 'nodes.json'), 'utf8')).nodes;
   if (n.some((x) => x.type === '/Data/Specimen lesson')) fail(`${p} places Data/Specimen lesson — a learner's page reads Data/Lesson, never the specimen`);
 }
-console.log(`check-specimen: OK — the specimen equals backend/fixtures/lesson.json (${fixture.length} bytes), and no learner page places it.`);
+console.log(`check-specimen: OK — the specimen equals the first lesson in backend/fixtures/lesson.json (${fixture.length} bytes), and no learner page places it.`);

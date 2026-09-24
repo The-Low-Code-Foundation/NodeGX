@@ -1899,6 +1899,40 @@
 .path-ask:hover,
 .path-ask:focus-visible { color: var(--thread-deep); }
 
+/* ── A CARD OPENS WHAT IT IS ABOUT (TASK-L181 §4) ──────────────────────────
+   LIFTED from globals.css 1946–1959 (`.path-cta`, `.path-check`), plus the two
+   controls the product draws as links and this kit draws as buttons, because
+   they EMIT and the graph navigates. `--go` on the tick only: the product's own
+   use of it, the learner's finished work — never on a gap. */
+.path-cta {
+  flex: none;
+  margin-top: 12px;
+}
+
+.path-check {
+  color: var(--go);
+  font-weight: 700;
+}
+
+.path-review,
+.path-open-lesson {
+  background: transparent;
+  border: 0;
+  padding: 2px 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--thread-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.path-review:hover,
+.path-review:focus-visible,
+.path-open-lesson:hover,
+.path-open-lesson:focus-visible { color: var(--ink); }
+
 /* ── WHERE YOU'RE AT (TASK-L159, sprint 45) ─────────────────────────────────
    Three panels above the programme: two counts in a sentence, the pace line,
    and one gauge per agreed objective. LIFTED from globals.css by line range,

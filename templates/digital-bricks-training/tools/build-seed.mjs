@@ -29,7 +29,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fixture, fixtureText } from './lib/fixtures.mjs';
+import { fixture, specimenText } from './lib/fixtures.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
@@ -519,9 +519,9 @@ pt.done();
 
 for (const [conceptId, title] of concepts) add('Concept', { conceptId, title });
 
-// ── The lesson ────────────────────────────────────────────────────────────────
-const [lesson] = fixture('lesson');
-// WHOSE lesson this is, derived — never pinned. A cached lesson is keyed on a
+// ── The lessons ──────────────────────────────────────────────────────────────
+// One per step Sam has reached (TASK-L181), each a Lesson row keyed on
+// (learner, concept). WHOSE lesson it is, derived — never pinned. A cached lesson is keyed on a
 // (learner, concept) pair and the concept has to be on that learner's own path:
 // the delivery route refuses a step the learner does not have. The first pinned
 // id survived a re-author that moved this lesson's subject to another learner's
@@ -533,16 +533,16 @@ const [lesson] = fixture('lesson');
 // concept sits on three of them. Path membership is a CONDITION on the owner, not
 // a way to find one. The owner is the learner this template's pages are about.
 const lessonLearnerId = PROGRAMME_LEARNER;
-const lessonIsOnTheirPath = (rows.LearningPath ?? [])
-  .filter((path) => path.learnerId === lessonLearnerId)
-  .some((path) => (rows.PathStep ?? []).some(
-    (step) => step.pathId === path.pathId && step.conceptId === lesson.conceptId && step.removedAt === null
-  ));
-if (!lessonIsOnTheirPath) {
-  fail(`lesson: '${lesson.conceptId}' is not a live step on ${lessonLearnerId}'s path, so a lesson cached against it could never be opened (TASK-L169 follow-up)`);
-}
-{
-  const lt = tracker('lesson', lesson);
+for (const lesson of fixture('lesson')) {
+  const lessonIsOnTheirPath = (rows.LearningPath ?? [])
+    .filter((path) => path.learnerId === lessonLearnerId)
+    .some((path) => (rows.PathStep ?? []).some(
+      (step) => step.pathId === path.pathId && step.conceptId === lesson.conceptId && step.removedAt === null
+    ));
+  if (!lessonIsOnTheirPath) {
+    fail(`lesson: '${lesson.conceptId}' is not a live step on ${lessonLearnerId}'s path, so a lesson cached against it could never be opened (TASK-L169 follow-up)`);
+  }
+  const lt = tracker(`lesson ${lesson.conceptId}`, lesson);
   add('Lesson', {
     learnerId: lessonLearnerId,
     conceptId: lt.take('conceptId'),
@@ -571,7 +571,7 @@ writeFileSync(join(TEMPLATE, 'backend', 'seed.json'), JSON.stringify({ users, ro
 const counts = Object.entries(sortedRows).map(([k, v]) => `${k} ${v.length}`).join(', ');
 console.log(`build-seed: ${users.length} users; ${counts}`);
 
-// ── Palette's specimen: the lesson fixture, byte for byte (TASK-L171 decision 9) ──
+// ── Palette's specimen: the FIRST lesson, byte for byte (TASK-L171 decision 9, L181) ──
 // Written in the project's on-disk format (indent 2, real characters, no trailing
 // newline), and only when it differs, so a run that changes nothing touches nothing.
 const specimenPath = join(TEMPLATE, 'components', 'Data', 'Specimen lesson', 'nodes.json');
@@ -582,9 +582,9 @@ if (data.length !== 1) {
   console.error(`build-seed: Data/Specimen lesson holds ${data.length} Static Data nodes, expected 1.`);
   process.exit(1);
 }
-const lessonText = fixtureText('lesson');
+const lessonText = specimenText();
 if (data[0].parameters.json !== lessonText) {
   data[0].parameters.json = lessonText;
   writeFileSync(specimenPath, JSON.stringify(specimen, null, 2));
-  console.log('build-seed: Palette\'s specimen updated from backend/fixtures/lesson.json.');
+  console.log('build-seed: Palette\'s specimen updated from the first lesson in backend/fixtures/lesson.json.');
 }

@@ -124,8 +124,10 @@ if (responders.pr_own) {
   check(JSON.stringify(run('pr_about', { learnerId: programme[0].learnerId }, later)) === JSON.stringify(demoFresh(programme, later)), "[5] learnerProgramme does not answer Sam's programme for Sam");
   check(JSON.stringify(run('pr_about', { learnerId: 'l-marie' }, later)) === '[]', '[5] learnerProgramme answers a programme for somebody who has none');
   check(run('pr_about', {}, later) === undefined, '[5] learnerProgramme answered before a learner was named');
-  check(JSON.stringify(run('le_call', { conceptId: lesson[0].conceptId }, later)) === JSON.stringify(lesson), '[5] lesson does not answer the written lesson');
-  check(JSON.stringify(run('le_call', { conceptId: 'css-making-it-look-right' }, later)) === '[]', '[5] lesson answers a concept nobody has written');
+  for (const l of lesson) {
+    check(JSON.stringify(run('le_call', { conceptId: l.conceptId }, later)) === JSON.stringify([l]), `[5] lesson does not answer ${l.conceptId} alone`);
+  }
+  check(JSON.stringify(run('le_call', { conceptId: 'javascript-making-it-do-things' }, later)) === '[]', '[5] lesson answers a concept nobody has written');
   check(JSON.stringify(run('ro_call', {}, later)) === JSON.stringify(demoFresh(roster, later)), '[5] roster does not answer the freshened roster');
 }
 

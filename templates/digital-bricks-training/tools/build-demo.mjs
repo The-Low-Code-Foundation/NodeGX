@@ -153,11 +153,12 @@ const RESPONDERS = {
     fixtureName: 'lesson',
     input: 'conceptId',
     body:
-      '/* The one written lesson. It carries no dates, so it is served as stored; any\n' +
-      " * other concept is \"not written yet\", which is the backend's answer too. */\n" +
+      '/* One written lesson per step the learner has reached (TASK-L181). A lesson carries\n' +
+      ' * no dates, so it is served as stored; any other concept is "not written yet",\n' +
+      " * which is the backend's answer too — one lesson, the one asked for, or none. */\n" +
       "var concept = String(Inputs.conceptId || '');\n" +
       'if (!concept) return;\n' +
-      'Outputs.rows = concept === FIXTURE[0].conceptId ? FIXTURE : [];',
+      'Outputs.rows = FIXTURE.filter(function (l) { return l.conceptId === concept; });',
   },
   ro_call: {
     label: 'roster — answered in the browser (demo)',

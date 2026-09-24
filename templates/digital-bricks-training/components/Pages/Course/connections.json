@@ -386,6 +386,36 @@
       "fromProperty": "nextLessonConceptId",
       "toId": "cs_dos_lesson",
       "toProperty": "pm-concept"
+    },
+    {
+      "fromId": "cs_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "cs_orow_pick",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cs_rows",
+      "fromProperty": "itemOutputSignal-openLesson",
+      "toId": "cs_orow_pick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_ordered",
+      "fromProperty": "ordered",
+      "toId": "cs_orow_pick",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "cs_orow_pick",
+      "fromProperty": "out-concept",
+      "toId": "cs_orow_go",
+      "toProperty": "pm-concept"
+    },
+    {
+      "fromId": "cs_orow_pick",
+      "fromProperty": "out-go",
+      "toId": "cs_orow_go",
+      "toProperty": "navigate"
     }
   ]
 }

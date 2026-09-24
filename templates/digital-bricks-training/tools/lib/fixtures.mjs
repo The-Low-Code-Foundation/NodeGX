@@ -26,7 +26,21 @@ export function fixtureText(name) {
   return readFileSync(file, 'utf8');
 }
 
-/** The parsed array: `[lesson]`, `[programme]`, or the roster's rows. */
+/**
+ * PALETTE'S SPECIMEN IS LESSON 0, NOT THE WHOLE LIST (TASK-L181).
+ *
+ * Until L181 the lesson fixture held one lesson and the specimen was that file
+ * byte for byte. It now holds one lesson per step Sam has reached, and the
+ * specimen is a kit showcase, not a learner's programme: it shows the FIRST
+ * lesson, serialised exactly as the fixture file is (indent 2, no trailing
+ * newline) — so with one lesson the two are still byte-identical, and the rule
+ * check-specimen held before L181 is the special case of this one.
+ */
+export function specimenText() {
+  return JSON.stringify([fixture('lesson')[0]], null, 2);
+}
+
+/** The parsed array: `[lesson, …]` in path order, `[programme]`, or the roster's rows. */
 export function fixture(name) {
   return JSON.parse(fixtureText(name));
 }

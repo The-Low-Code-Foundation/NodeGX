@@ -853,6 +853,65 @@
         "Key": "title",
         "Namespace": "dossier"
       }
+    },
+    {
+      "id": "cs_orow_pick",
+      "type": "JavaScriptFunction",
+      "label": "Which lesson did that row mean",
+      "x": 1500,
+      "y": 1220,
+      "parameters": {
+        "functionScript": "/*\n * A ROW ASKED TO OPEN ITS LESSON (TASK-L181 §4). The repeater hands back the\n * ROW's id — an entry id like `lesson:plan-then-act` or\n * `submission:artifact:what-the-web-is:1` — and the row itself is in the\n * ordered list, so the concept is read off the ENTRY rather than parsed out of\n * an id's text: an id is a key, not a format anybody promised.\n */\nconst id = String(Inputs.id || '');\nif (!id) return;\nconst rows = Array.isArray(Inputs.rows) ? Inputs.rows : [];\nconst row = rows.find((r) => r && r.id === id);\nconst concept = row && row.entry ? String(row.entry.conceptId || '') : '';\nif (!concept) return;\nOutputs.concept = concept;\nOutputs.go();\n",
+        "runOnChange-in-id": false,
+        "runOnChange-in-rows": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rows",
+          "plug": "input",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-concept",
+          "plug": "output",
+          "type": "*",
+          "displayName": "concept",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "go",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY (L165): with runOnChange ticked it would also run whenever a row's id or the list arrived, opening a lesson nobody pressed."
+      }
+    },
+    {
+      "id": "cs_orow_go",
+      "type": "RouterNavigate",
+      "label": "Into the lesson that row named",
+      "x": 1500,
+      "y": 1340,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Lesson"
+      },
+      "metadata": {
+        "comment": "The same page and ?concept= the up-next card and the dossier link use. Every lesson a row can offer is written (tools/check-lessons.mjs); a row on a locked step offers nothing."
+      }
     }
   ],
   "visualRoots": [

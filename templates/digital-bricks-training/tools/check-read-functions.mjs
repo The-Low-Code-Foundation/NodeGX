@@ -283,7 +283,10 @@ async function criteria(fns, mode, samUser, priyaUser, staffUser) {
     check(same(got, expected.coach) === inside, tag(`C1 the fixture's window is not exact at ${at} (expected ${inside ? 'inside' : 'outside'})`));
   }
   // lesson, and the roster as a set in the product's order.
-  expectSame(tag('C1 lesson'), await fns.lesson({ as: samUser, conceptId: expected.lesson[0].conceptId }), expected.lesson);
+  // Every lesson, each alone (TASK-L181): the function answers ONE lesson, the one asked for.
+  for (const l of expected.lesson) {
+    expectSame(tag(`C1 lesson ${l.conceptId}`), await fns.lesson({ as: samUser, conceptId: l.conceptId }), [l]);
+  }
   const people = await fns.roster({ as: staffUser });
   expectSame(tag('C1 roster'), [...people].sort((a, b) => a.learnerId.localeCompare(b.learnerId)),
     [...expected.roster].sort((a, b) => a.learnerId.localeCompare(b.learnerId)));
@@ -351,12 +354,17 @@ table = buildTable();
    answer matters — measured: with the scope removed this file stayed green. The
    case that can see it is Sam asking for a concept open on HIS path that only
    somebody else has a lesson for. The concept is derived, not named, and the
-   positive control proves the gate lets it through. */
+   positive control proves the gate lets it through.
+
+   SINCE L181 EVERY OPEN STEP OF SAM'S HAS A LESSON, so no such step exists in
+   the fixture and the first version of this probe found nothing to test. It now
+   MAKES the case: Sam's own lesson for one open step is taken out of this
+   in-memory table (never the fixture), and only then does Priya's go in. */
 {
   const samPath = [...table.LearningPath.filter((p) => p.learnerId === SAM)].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
-  const cached = new Set(table.Lesson.filter((l) => l.learnerId === SAM).map((l) => l.conceptId));
-  const open = table.PathStep.find((s) => s.pathId === samPath.pathId && !s.removedAt && s.status !== 'locked' && !cached.has(s.conceptId));
-  check(open !== undefined, '[offline] C3 no open step on Sam\'s path without a lesson — the probe below would test nothing');
+  const open = table.PathStep.find((s) => s.pathId === samPath.pathId && !s.removedAt && s.status !== 'locked');
+  check(open !== undefined, '[offline] C3 no open step on Sam\'s path — the probe below would test nothing');
+  table.Lesson = table.Lesson.filter((l) => !(l.learnerId === SAM && l.conceptId === open.conceptId));
   const probe = (learnerId) => ({ ...table.Lesson[0], learnerId, conceptId: open.conceptId, title: 'PROBE-OTHER-LESSON' });
   table.Lesson.push(probe('l-priya'));
   check((await offline.lesson({ as: oid('sam.okafor@example.test'), conceptId: open.conceptId })).length === 0,

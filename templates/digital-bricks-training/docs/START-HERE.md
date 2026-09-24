@@ -15,8 +15,9 @@ that person. Every step is a live chip; nothing is locked, numbered or scored.
 
 ## The first thing to change
 
-Open **`backend/fixtures/lesson.json`**. It holds a JSON array with one lesson — Sam's first, the
-lesson the backend serves when they open it:
+Open **`backend/fixtures/lesson.json`**. It holds a JSON array of lessons, one per step Sam has
+reached (TASK-L181): the five he has finished and the one he is on, in path order. Each is what the
+backend serves when he opens that step:
 
 ```json
 {
@@ -107,8 +108,10 @@ on SQLite and on PostgreSQL):
 - **Data/Lesson** — one of the signed-in learner's lessons, named by the lesson page's `?concept=`.
   Its outputs are the fixture's (`title`, `hook`, `landing`, `conceptId`, `steps`, `sections`,
   `loaded`) plus ONE appended, **`found`**: a step nobody has written a lesson for yet answers with
-  nothing, and the page says *not written yet* rather than showing a blank. That is Sam's next step
-  today — the up-next card opens it — and it will stay so until the engine writes lessons.
+  nothing, and the page says *not written yet* rather than showing a blank. Since TASK-L181 that is
+  only ever a step Sam has not reached: every reached step has its lesson, and
+  `tools/check-lessons.mjs` fails if one is missing or if a lesson does not pass the product's own
+  `validateLessonOutput`, compiled from the product's source under the Digital Bricks pack.
 - **Data/Programme** — a learner's programme. **`reader` has no default and every instance says it**:
   `learner` asks `course` (their own; no parameter, so nothing a learner's page sends can name
   somebody else), `coach` asks `learnerProgramme` for the learner named by `/learner?learner=`.
@@ -594,7 +597,7 @@ PostgreSQL runs. Two things the move found, both worth knowing:
 ## What is not here yet
 
 Every write — the NodeGX write sprint, on OpenNoodl HLT-016's compare-and-swap. The engine: a lesson
-nobody has written says *not written yet*, and that is every step after Sam's first. Every coach
+nobody has written says *not written yet*, and that is every step Sam has not reached yet. Every coach
 composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
 string has one owner" above for exactly which strings the table owns today and which are still
 English in place.
@@ -633,3 +636,15 @@ own. The publish (TPL-008's recipe) composes the demo with this folder's `noodl_
 `nodegx-web/site/templates/digital-bricks-training/`. If the deploy refuses a DEVELOPMENT engine,
 build with `--allow-development-engine` and replace `noodl.deploy.js` with the production one from
 the live site, **after checking it carries the NDA-017 `.value` fix** (the i18next module needs it).
+
+## Every lesson Sam has reached is written, and opens (TASK-L181)
+
+- **Six lessons**, one per reached step, each hand-authored onto Sam's bicycle-repair page and
+  passing the product's `validateLessonOutput` unmodified (`node tools/check-lessons.mjs`). The
+  two signals' `sectionId`s (`reading-request-response`, `reading-css-gist`) are real sections.
+- **A lesson card opens its lesson**, as the product's does: *✓ Review* on a finished step,
+  *Continue →* on the current one, *Start →* on an available one, nothing on a locked one. A piece
+  of work says *Open the lesson this came from*. The kit's `TimelineRow` EMITS `Open lesson` with
+  the concept; `Course/Timeline row` bubbles it; `Pages/Course` looks the row up and navigates.
+  **A learner's row only**: on a coach's programme the lesson route is not theirs to follow.
+- **Palette's specimen is lesson 0**, not the list (`specimenText()` in `tools/lib/fixtures.mjs`).
