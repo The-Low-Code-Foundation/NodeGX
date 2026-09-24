@@ -22,6 +22,11 @@ export interface StyleRowProps {
   value?: string;
   /** Drawn when the row has a colour worth showing. Omitted entirely for text styles and Looks. */
   swatch?: string;
+  /**
+   * P103 CMG-003 — pressing the swatch opens the colour picker on this row. Given, the swatch is
+   * a button that says so; absent, it is the plain square it always was.
+   */
+  onSwatchClick?: (anchor: HTMLElement) => void;
   layer: StyleLayer;
   /**
    * How many nodes name this. `undefined` means *not counted* and prints nothing;
@@ -86,6 +91,7 @@ export function StyleRow({
   name,
   value,
   swatch,
+  onSwatchClick,
   layer,
   usageCount,
   wearers,
@@ -127,11 +133,25 @@ export function StyleRow({
         data-style-layer={layer}
         data-style-typename={typename}
       >
-        {swatch !== undefined && (
-          <div className={css['Swatch']}>
-            <div className={css['SwatchFill']} style={{ backgroundColor: swatch }} />
-          </div>
-        )}
+        {swatch !== undefined &&
+          (onSwatchClick ? (
+            <button
+              type="button"
+              className={`${css['Swatch']} ${css['SwatchButton']}`}
+              data-test={`style-row-swatch-${name}`}
+              title={`Change the colour of ${name}`}
+              aria-label={`Change the colour of ${name}`}
+              // Anchored to the ROW, not the swatch: the swatch sits at the panel's left edge, so a
+              // popout "to the right of the swatch" lands on top of the list it came from.
+              onClick={(e) => onSwatchClick((e.currentTarget.closest('[data-style-row]') as HTMLElement) ?? e.currentTarget)}
+            >
+              <div className={css['SwatchFill']} style={{ backgroundColor: swatch }} />
+            </button>
+          ) : (
+            <div className={css['Swatch']} data-test={`style-row-swatch-${name}`}>
+              <div className={css['SwatchFill']} style={{ backgroundColor: swatch }} />
+            </div>
+          ))}
 
         <div className={css['Text']}>
           <span className={css['Name']}>{name}</span>

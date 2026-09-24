@@ -102,6 +102,25 @@ describe('HLT-006 — the picker enumerates the project\'s colour tokens', () =>
     expect(names).toContain('--brand-ink');
   });
 
+  /**
+   * P103 CMG-003 (RC-9): *New colour* in the Styles panel makes a `color-palette` token. A colour
+   * the person added is their colour, so it is offered in the OPEN half beside `--primary`, not
+   * filed behind the closed 61-swatch ramp; a shipped ramp swatch they overrode stays in the ramp.
+   */
+  it('🔴 a palette colour a person ADDED is in the open half; an overridden ramp swatch stays in the ramp', () => {
+    const project = projectWithNoLegacyStyles([
+      { name: '--brand-orange', value: '#c2410c', category: 'color-palette', isCustom: true },
+      { name: '--blue-500', value: '#1d4ed8', category: 'color-palette', isCustom: true }
+    ]);
+    const { semantic, palette } = colourTokensForPicking(tokensOf(project));
+
+    expect(semantic.map((t) => t.name)).toContain('--brand-orange');
+    expect(palette.map((t) => t.name)).not.toContain('--brand-orange');
+    expect(palette.find((t) => t.name === '--blue-500')?.value).toBe('#1d4ed8');
+    expect(semantic.map((t) => t.name)).not.toContain('--blue-500');
+    expect(palette).toHaveLength(61);
+  });
+
   describe('the de-duplication against "Colors in project"', () => {
     it('🔴 yields the var() form, because that is what the echo list holds', () => {
       const refs = tokenReferenceStrings(tokensOf(projectWithNoLegacyStyles()));

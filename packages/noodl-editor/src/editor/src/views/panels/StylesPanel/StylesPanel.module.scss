@@ -21,6 +21,14 @@
   outline: none;
 }
 
+/** CMG-003 / CMG-002: why a name was refused, under the field it was typed in. */
+.InlineError {
+  padding: 0 12px 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--theme-color-notice, #d97706);
+}
+
 .AddButton {
   /**
    * The create door in each section. Deliberately a full-width row under the list rather than a

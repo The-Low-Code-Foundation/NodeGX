@@ -26,7 +26,7 @@
  * them". Semantic tokens are what a person picks; the ramp is what they occasionally go looking for.
  */
 
-import type { StyleTokenRecord, TokenCategory } from '@nodegx/project-contract/tokens';
+import { buildDefaultTokenMap, type StyleTokenRecord, type TokenCategory } from '@nodegx/project-contract/tokens';
 
 import { TOKEN_CATEGORIES } from './TokenCategories';
 
@@ -57,10 +57,17 @@ export interface ColourTokensForPicking {
 export function colourTokensForPicking(tokens: readonly StyleTokenRecord[]): ColourTokensForPicking {
   const semantic: StyleTokenRecord[] = [];
   const palette: StyleTokenRecord[] = [];
+  const shipped = buildDefaultTokenMap();
 
   for (const token of tokens) {
     if (token.category === SEMANTIC_COLOUR_CATEGORY) semantic.push(token);
-    else if (token.category === PALETTE_COLOUR_CATEGORY) palette.push(token);
+    else if (token.category === PALETTE_COLOUR_CATEGORY) {
+      // P103 CMG-003: a palette colour the PERSON added (no shipped default) is their colour, not
+      // the ramp's — it is offered in the open half beside `--primary`, or *New colour* would file
+      // the brand orange they just made behind a closed row of 61 Tailwind swatches.
+      if (shipped.has(token.name)) palette.push(token);
+      else semantic.push(token);
+    }
   }
 
   return { semantic, palette };
