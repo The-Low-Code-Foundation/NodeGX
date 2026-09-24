@@ -1,8 +1,11 @@
 import React from 'react';
 import { Root } from 'react-dom/client';
 
-import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
+import { displayableValue, readField, readFields, treatmentOf } from '@noodl-models/Looks/fieldState';
 import { type PortGateReason, withUnmetGate } from '@noodl-models/nodelibrary/portGateReason';
+// P103 CMG-008 — one undo step for a merged control's "Put back all". `undo-queue-model` imports
+// only the shared `Model`, so this does not reach the `projectmodel` chain the note below warns of.
+import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 import {
   capabilityProbes,
   gateForPort,
@@ -11,7 +14,7 @@ import {
   type GateTarget
 } from '@noodl-utils/capability-gating';
 import { revealGateTarget } from '@noodl-utils/portGate';
-import { applyPortHint, hintPortsOf, portNamesForView, HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
+import { applyPortHint, hintPortsOf, portNamesForView, portsForView, HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
 import { SCHEMA_OUTCOME_CHANGED } from '@noodl-utils/schemaCachePolicy';
 import {
   addFieldTarget,
@@ -612,8 +615,9 @@ export class Ports extends View {
                 quiet
               }
             : undefined,
-          // P94 STY-003 rules 2 and 3 — where this row's value came from.
-          look: this.rowLook(v.name),
+          // P94 STY-003 rules 2 and 3 — where this row's value came from. P103 CMG-008: a view
+          // with no name (alignment, margin/padding, a tab group) answers for every port it merged.
+          look: v.name ? this.rowLook(v.name) : this.mergedLook(v),
           // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
           // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
           hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
@@ -684,6 +688,7 @@ export class Ports extends View {
       treatment,
       lookName: reading.lookName as string,
       lookValueText: displayableValue(reading.lookValue),
+      ports: [portName],
       onRevert:
         treatment === 'overridden'
           ? () => {
@@ -694,6 +699,61 @@ export class Ports extends View {
               this.render();
             }
           : undefined
+    };
+  }
+
+  /**
+   * P103 CMG-008 — what a MERGED control says about the Look, or nothing.
+   *
+   * Richard: *"I changed the 'alignment' of a group node that I'd saved a Look for, and it doesn't
+   * say the look has a different alignment, there's no alert at all."* `rowLook` is keyed by a
+   * row's port name, and an `AlignToolsType`, a `MarginPaddingType` or a `TabGroup` (corners,
+   * border sides) has none — so those controls never asked. This asks `readField` for every port
+   * the view stands for (`portsForView`, the same list the structural hint uses) and answers with
+   * the same treatment the named rows draw, plus the fields that differ, each with its own *Put
+   * back* and one for all of them. The decision is still `readField`'s, on ownership.
+   */
+  private mergedLook(view: TSFixme): PropertyRowLook | undefined {
+    const facts = (this.model as TSFixme).lookProvenance;
+    if (!facts || !facts.look) return undefined;
+
+    const ports = portsForView(view);
+    if (ports.length === 0) return undefined;
+
+    const readings = readFields(
+      facts.node,
+      facts.look,
+      ports.map((p) => p.name)
+    );
+    if (!readings.lookName) return undefined;
+    const lookName = readings.lookName;
+
+    if (readings.overridden.length === 0) {
+      if (readings.linked.length === 0) return undefined;
+      return { treatment: 'linked', lookName, ports: ports.map((p) => p.name) };
+    }
+
+    const revert = (names: string[]) => {
+      // One undo step for a group of fields, as `MarginPaddingType` writes a `↕`/`↔` pair.
+      const group = new UndoActionGroup({ label: 'revert to Look' });
+      for (const name of names) this.model.setParameter(name, undefined, { undo: group });
+      UndoQueue.instance.push(group);
+      this.render();
+    };
+
+    const fields = readings.overridden.map(({ name, reading }) => ({
+      name,
+      label: ports.find((p) => p.name === name)?.label ?? name,
+      lookValueText: displayableValue(reading.lookValue),
+      onRevert: () => revert([name])
+    }));
+
+    return {
+      treatment: 'overridden',
+      lookName,
+      ports: ports.map((p) => p.name),
+      fields,
+      onRevert: () => revert(fields.map((f) => f.name))
     };
   }
 
@@ -1313,6 +1373,8 @@ export class Ports extends View {
           this.views.push(_popoutViews[p.popout.group]);
           _viewForPort[p.name] = v;
         }
+        // P103 CMG-008 — the group's row speaks for every port behind its button.
+        _popoutViews[p.popout.group].addPort(p);
 
         continue;
       }

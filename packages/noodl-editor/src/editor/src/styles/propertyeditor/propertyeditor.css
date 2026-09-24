@@ -1111,11 +1111,22 @@
 .property-look-override {
   display: flex;
   align-items: center;
-  gap: 6px;
+  /* P103 CMG-008 — a merged control's line carries one Put back per field; they wrap rather than
+     squeeze the sentence to an ellipsis. */
+  flex-wrap: wrap;
+  gap: 4px 6px;
   padding: 2px 10px 5px 12px;
   color: var(--theme-color-fg-notice);
   font-size: var(--font-size-xs);
   line-height: 1.4;
+}
+
+.property-look-override[data-look-fields] > span {
+  flex: 1 1 100%;
+}
+
+.property-look-override[data-look-fields] > .property-look-revert {
+  margin-left: 0;
 }
 
 .property-look-override > span {

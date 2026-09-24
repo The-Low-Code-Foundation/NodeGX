@@ -122,6 +122,35 @@ export function displayableValue(value: unknown): string | undefined {
   return undefined;
 }
 
+/**
+ * P103 CMG-008 — several fields read at once, for a control that merges them (alignment, the
+ * margin/padding box, a tab group of corners or border sides).
+ *
+ * Richard: *"I changed the 'alignment' of a group node that I'd saved a Look for, and it doesn't
+ * say the look has a different alignment, there's no alert at all."* The drift line was keyed by a
+ * row's port name, and a merged control's row has none — so `readField` was never asked. This
+ * asks it for every port the control stands for and hands back the two lists the line needs.
+ */
+export interface FieldsReading {
+  /** Fields the node holds its own value for while the Look offers one — the ones the line names. */
+  overridden: { name: string; reading: FieldReading }[];
+  /** Fields the Look sets and the node leaves alone. */
+  linked: { name: string; reading: FieldReading }[];
+  /** The Look's name, when it has anything to say about any of these fields. */
+  lookName?: string;
+}
+
+export function readFields(node: NodeStyleFacts, look: LookFacts | undefined, names: readonly string[]): FieldsReading {
+  const out: FieldsReading = { overridden: [], linked: [] };
+  for (const name of names) {
+    const reading = readField(node, look, name);
+    if (reading.source === 'overridden') out.overridden.push({ name, reading });
+    else if (reading.source === 'linked') out.linked.push({ name, reading });
+    if (reading.lookName && !out.lookName) out.lookName = reading.lookName;
+  }
+  return out;
+}
+
 /** What the panel draws for a reading — `own` and `default` are both plain (design §3.2). */
 export function treatmentOf(source: FieldSource): FieldTreatment {
   return source === 'linked' ? 'linked' : source === 'overridden' ? 'overridden' : 'plain';

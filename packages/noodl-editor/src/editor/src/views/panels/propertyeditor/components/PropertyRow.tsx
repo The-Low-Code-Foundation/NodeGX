@@ -115,6 +115,22 @@ export interface PropertyRowLook {
   lookValueText?: string;
   /** Rule 3 — put the field back under the Look. Omitted → no button, rather than a dead one. */
   onRevert?: () => void;
+  /**
+   * P103 CMG-008 — a control that merges several ports (alignment, margin/padding, a tab group of
+   * corners). The fields the node overrides, each with its own *Put back*; `onRevert` above puts
+   * them all back. Absent on a single-port row.
+   */
+  fields?: PropertyRowLookField[];
+  /** Every port this row speaks for, for the census (`data-look-ports`). */
+  ports?: string[];
+}
+
+export interface PropertyRowLookField {
+  name: string;
+  /** What a person calls it: *Pad Left*, *Align X*, *Corner Radius (BottomLeft)*. */
+  label: string;
+  lookValueText?: string;
+  onRevert: () => void;
 }
 
 /** BCN-010, narrowed to what the row draws. `sentence` is `gateSentence`'s answer, resolved by `Ports`. */
@@ -253,6 +269,48 @@ function lookOverrideLine(look: PropertyRowLook) {
   // `null`, not an empty div: a row with nothing to say must add nothing to the grid.
   if (look.treatment !== 'overridden') return null;
 
+  // P103 CMG-008 — a merged control names the fields that differ, one *Put back* each, and one for
+  // all of them when there are several: *"Pad Left and Align X differ from Card"*.
+  if (look.fields && look.fields.length > 0) {
+    const labels = look.fields.map((f) => f.label);
+    const named = labels.length === 1 ? labels[0] : `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
+    const said = `${named} differ${labels.length === 1 ? 's' : ''} from ${look.lookName}`;
+    return (
+      <div className={LOOK_OVERRIDE_CLASS} data-test="look-override-line" data-look-fields={look.fields.map((f) => f.name).join(',')}>
+        <span title={said}>{said}</span>
+        {look.fields.map((field) => (
+          <button
+            key={field.name}
+            type="button"
+            className={LOOK_REVERT_CLASS}
+            data-test={`look-revert-${field.name}`}
+            title={field.lookValueText ? `${look.lookName} says ${field.lookValueText}` : `Use ${look.lookName}'s value`}
+            onClick={(event) => {
+              event.stopPropagation();
+              field.onRevert();
+            }}
+          >
+            Put back {field.label}
+          </button>
+        ))}
+        {look.fields.length > 1 && look.onRevert && (
+          <button
+            type="button"
+            className={LOOK_REVERT_CLASS}
+            data-test="look-revert-all"
+            title={`Use ${look.lookName}'s values for all ${look.fields.length}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              look.onRevert!();
+            }}
+          >
+            Put back all
+          </button>
+        )}
+      </div>
+    );
+  }
+
   const said = look.lookValueText ? `${look.lookName} says ${look.lookValueText}` : `Overrides ${look.lookName}`;
 
   return (
@@ -298,7 +356,15 @@ export function PropertyRow({ description, capability, gate, look, hintPorts, ch
       // row again later, when the condition has changed but the panel has not re-rendered.
       {...(marked ? { [HINT_PORTS_ATTRIBUTE]: marked } : {})}
       // P94 STY-003 — absent on a plain row, so "no Look" is styled by nothing at all.
-      {...(look ? { [LOOK_TREATMENT_ATTRIBUTE]: look.treatment, 'data-look-name': look.lookName } : {})}
+      {...(look
+        ? {
+            [LOOK_TREATMENT_ATTRIBUTE]: look.treatment,
+            'data-look-name': look.lookName,
+            // P103 CMG-008 — the ports this row's answer covers, for the census that asks "can the
+            // marker reach this port?" of every port the panel shows.
+            ...(look.ports && look.ports.length ? { 'data-look-ports': look.ports.join(',') } : {})
+          }
+        : {})}
     >
       {content}
       {look && lookOverrideLine(look)}

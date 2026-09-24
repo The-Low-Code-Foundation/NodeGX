@@ -19,6 +19,13 @@ export class PopoutGroup extends View {
   el: HTMLElement;
   group: TSFixme;
   parent: TSFixme;
+  /**
+   * P103 CMG-008 — the ports behind the *Edit* button, by name, so `portsForView` can ask about
+   * them and the row can say *"Font Size differs from Card"* before the popout is opened. The
+   * kit controls keep their whole label text style behind one of these (measured: 129 ports on
+   * button, checkbox, radio, options), which the drift line could not reach at all.
+   */
+  ports: Record<string, TSFixme> = {};
   private root: Root | null = null;
 
   constructor(args) {
@@ -27,6 +34,10 @@ export class PopoutGroup extends View {
     this.popoutGroup = args.popoutGroup;
     this.label = args.label;
     this.parent = args.parent;
+  }
+
+  addPort(port: TSFixme) {
+    if (port && port.name) this.ports[port.name] = port;
   }
 
   render() {

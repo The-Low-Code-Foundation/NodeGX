@@ -49,12 +49,24 @@ function orderOf(comp: string, value: string): number {
   return i === -1 ? Number.MAX_SAFE_INTEGER : i;
 }
 
-/** One row per port, in the order the ports arrived (the port index order). */
-export function alignRowsOf(ports: AlignPortLike[], values: Record<string, string | undefined>): AlignRow[] {
+/**
+ * One row per port, in the order the ports arrived (the port index order).
+ *
+ * P103 CMG-008 §3.2 — `inherited` is what the node's Look sets for each comp. The pressed segment
+ * is the value in effect: the node's own, else the Look's, else the port default — the order
+ * `NodeGraphNode.getParameter` resolves in. Before this the control read the node's own values
+ * only, so a Group whose alignment came from its Look showed the port default pressed. The reset
+ * dot still means "this node holds its own value": it is not the same fact.
+ */
+export function alignRowsOf(
+  ports: AlignPortLike[],
+  values: Record<string, string | undefined>,
+  inherited: Record<string, string | undefined> = {}
+): AlignRow[] {
   return ports.map((port) => {
     const comp = port.type.alignComp;
     const explicit = values[comp];
-    const effective = explicit !== undefined ? explicit : port.default;
+    const effective = explicit !== undefined ? explicit : inherited[comp] !== undefined ? inherited[comp] : port.default;
     const enums = (port.type.enums || []).map((e, index) => ({ ...e, index }));
     enums.sort((a, b) => orderOf(comp, a.value) - orderOf(comp, b.value) || a.index - b.index);
 

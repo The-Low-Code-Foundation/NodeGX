@@ -12,6 +12,8 @@ export interface AlignToolsInputProps {
   ports: AlignPortLike[];
   /** alignComp → explicit value, or undefined when unset. */
   values: Record<string, string | undefined>;
+  /** P103 CMG-008 — alignComp → the value the node's Look sets, shown pressed when the node sets none. */
+  inherited?: Record<string, string | undefined>;
   /** The flex direction is vertical: the item/content glyphs turn with it. */
   isVertical: boolean;
   /**
@@ -37,10 +39,10 @@ export interface AlignConnection {
  * per enum value (`model/alignRows.ts`). The pressed segment is the value in effect; the gutter's
  * reset dot says it was set.
  */
-export function AlignToolsInput({ ports, values, isVertical, connections, onChange, onReset }: AlignToolsInputProps) {
+export function AlignToolsInput({ ports, values, inherited, isVertical, connections, onChange, onReset }: AlignToolsInputProps) {
   return (
     <div className={css['Root']}>
-      {alignRowsOf(ports, values).map((row) => (
+      {alignRowsOf(ports, values, inherited).map((row) => (
         <div key={row.comp} data-test={`align-row-${row.comp}`}>
           <PropertyPanelRow
             label={row.label}

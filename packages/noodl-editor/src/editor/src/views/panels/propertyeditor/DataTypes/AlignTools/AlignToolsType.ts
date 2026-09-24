@@ -47,8 +47,28 @@ export class AlignToolsType extends TypeView {
     }
   }
 
+  /**
+   * P103 CMG-008 §3.2 — the RESOLVED direction (own, else the Look's, else the default), through the
+   * model proxy as every named row reads. `parameters.flexDirection` was the node's own value only,
+   * so a Group laid out as a row by its Look drew its glyphs turned the wrong way.
+   */
   private isVertical() {
-    return this.parent.model.parameters.flexDirection !== 'row';
+    const model = this.parent.model;
+    const direction = typeof model.getParameter === 'function' ? model.getParameter('flexDirection') : model.parameters.flexDirection;
+    return direction !== 'row';
+  }
+
+  /** P103 CMG-008 §3.2 — alignComp → what the node's Look sets, for the pressed segment when the node sets nothing. */
+  private inherited(): Record<string, string | undefined> {
+    const facts = this.parent.model.lookProvenance;
+    const look = facts && facts.look ? facts.look.parameters : undefined;
+    const out: Record<string, string | undefined> = {};
+    if (!look) return out;
+    Object.keys(this.ports).forEach((comp) => {
+      const value = look[this.ports[comp].name];
+      out[comp] = typeof value === 'string' ? value : undefined;
+    });
+    return out;
   }
 
   render() {
@@ -86,6 +106,7 @@ export class AlignToolsType extends TypeView {
         // CHR-009 slice 5: one row per port, so the view hands over the ports, not a merged strip.
         ports: Object.keys(this.ports).map((comp) => this.ports[comp]),
         values: { ...this.values },
+        inherited: this.inherited(),
         isVertical: this.isVertical(),
         connections: this.connections(),
         onChange: (comp: string, value: string) => {
