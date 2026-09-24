@@ -55,52 +55,64 @@ export interface TokenUsageNode {
   stateParameters?: Record<string, Record<string, unknown>>;
 }
 
-function references(value: unknown, name: string): boolean {
-  return collectTokenReferencesIn(value).includes(name);
-}
-
-/** The parameter names (neutral and per state) whose value names the token. */
-function fieldsNaming(node: { parameters?: Record<string, unknown>; stateParameters?: Record<string, Record<string, unknown>> }, name: string): string[] {
-  const fields = new Set<string>();
-  for (const [key, value] of Object.entries(node.parameters ?? {})) {
-    if (references(value, name)) fields.add(key);
-  }
-  for (const state of Object.values(node.stateParameters ?? {})) {
-    for (const [key, value] of Object.entries(state ?? {})) {
-      if (references(value, name)) fields.add(key);
-    }
-  }
-  return [...fields].sort();
-}
-
 export function tokenUsageIn(
   project: TokenUsageProject | null | undefined,
   tokens: readonly { name: string; value: string }[],
   name: string
 ): TokenUsage {
-  const usage: TokenUsage = { nodes: [], looks: [], tokens: [] };
-  if (!project) return usage;
+  return tokenUsageAll(project, tokens).get(name) ?? { nodes: [], looks: [], tokens: [] };
+}
+
+/** Every token name a value references, once each. */
+function referencesIn(value: unknown): string[] {
+  return [...new Set(collectTokenReferencesIn(value))];
+}
+
+/**
+ * P103 CMG-010 §3.3 — what wears EVERY token, in one walk.
+ *
+ * 🔴 **One walk, not one per row.** The Styles panel draws ~140 token rows and each wants its
+ * *Used by*; `tokenUsageIn` per row would serialise every node of the project 140 times (the
+ * reason `LooksSection` walks once per typename, P94 STY-006 AC6). Each node is read once here
+ * and every reference it holds is filed under the token it names, so the map costs what one row
+ * used to. `tokenUsageIn` is this map, read at one name — one reading for the confirm, the row
+ * and the composer header ([[count-the-reach-first]]).
+ *
+ * A name no token has (a reference to something the project does not define) is filed too:
+ * the map answers for what the project WEARS, not only for what it defines.
+ */
+export function tokenUsageAll(
+  project: TokenUsageProject | null | undefined,
+  tokens: readonly { name: string; value: string }[]
+): Map<string, TokenUsage> {
+  const map = new Map<string, TokenUsage>();
+  const usageOf = (name: string) => {
+    let usage = map.get(name);
+    if (!usage) {
+      usage = { nodes: [], looks: [], tokens: [] };
+      map.set(name, usage);
+    }
+    return usage;
+  };
+  for (const token of tokens) usageOf(token.name);
+  if (!project) return map;
 
   for (const component of project.getComponents()) {
     const componentName = component?.name ?? '';
     component.graph.forEachNode((node) => {
-      const fields = fieldsNaming(node, name);
-      if (fields.length > 0) {
-        // 🔴 `node.label` is a getter that can throw on a node whose type never resolved — see
-        // `StylesModel.usage.ts`. A token worn by something broken is exactly when the list matters.
-        let label = '';
-        try {
-          label = typeof node.label === 'string' ? node.label : '';
-        } catch {
-          label = '';
-        }
-        usage.nodes.push({
-          componentName,
-          nodeId: node.id,
-          label,
-          typename: typeof node.typename === 'string' ? node.typename : '',
-          fields
-        });
+      const fieldsByToken = fieldsByTokenOf(node);
+      if (fieldsByToken.size === 0) return;
+      // 🔴 `node.label` is a getter that can throw on a node whose type never resolved — see
+      // `StylesModel.usage.ts`. A token worn by something broken is exactly when the list matters.
+      let label = '';
+      try {
+        label = typeof node.label === 'string' ? node.label : '';
+      } catch {
+        label = '';
+      }
+      const typename = typeof node.typename === 'string' ? node.typename : '';
+      for (const [name, fields] of fieldsByToken) {
+        usageOf(name).nodes.push({ componentName, nodeId: node.id, label, typename, fields: [...fields].sort() });
       }
       // 🔴 Nothing returned: `forEachNode` stops on a truthy return.
     });
@@ -108,16 +120,47 @@ export function tokenUsageIn(
 
   for (const variant of project.getAllVariants()) {
     if (variant.name === undefined) continue;
-    if (references(variant.parameters, name) || references(variant.stateParameters, name)) {
-      usage.looks.push({ name: variant.name, typename: variant.typename ?? '' });
-    }
+    const named = new Set([...referencesIn(variant.parameters), ...referencesIn(variant.stateParameters)]);
+    for (const name of named) usageOf(name).looks.push({ name: variant.name, typename: variant.typename ?? '' });
   }
 
   for (const token of tokens) {
-    if (token.name !== name && references(token.value, name)) usage.tokens.push(token.name);
+    for (const name of referencesIn(token.value)) {
+      if (name !== token.name) usageOf(name).tokens.push(token.name);
+    }
   }
 
-  return usage;
+  return map;
+}
+
+/** token name → the parameter names (neutral and per state) on this node whose value names it. */
+function fieldsByTokenOf(node: TokenUsageNode): Map<string, Set<string>> {
+  const out = new Map<string, Set<string>>();
+  const file = (key: string, value: unknown) => {
+    for (const name of referencesIn(value)) {
+      let fields = out.get(name);
+      if (!fields) {
+        fields = new Set();
+        out.set(name, fields);
+      }
+      fields.add(key);
+    }
+  };
+  for (const [key, value] of Object.entries(node.parameters ?? {})) file(key, value);
+  for (const state of Object.values(node.stateParameters ?? {})) {
+    for (const [key, value] of Object.entries(state ?? {})) file(key, value);
+  }
+  return out;
+}
+
+/**
+ * CMG-010 §3.1 — the sentence over an edit that reaches every wearer: *"Changes --space-4
+ * everywhere (14 places)"*, or, when nothing wears it, that it changes nothing yet.
+ */
+export function changesEverywhereText(name: string, usage: TokenUsage): string {
+  const n = tokenUsageCount(usage);
+  if (n === 0) return `Changes ${name} — nothing wears it yet`;
+  return `Changes ${name} everywhere (${n} ${n === 1 ? 'place' : 'places'})`;
 }
 
 /** Everything that wears it, as one number. */

@@ -8,6 +8,7 @@ import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 // loaded outside webpack.
 import { MarginPaddingParam, MarginPaddingSide, isMarginPaddingToken, sideOf } from '../components/marginPaddingEdit';
 import { MarginPaddingConnection, MarginPaddingInput } from '../components/MarginPaddingInput';
+import { TokenChipActions } from '../components/TokenChipActions';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
 import { sameParameterValue } from './scrubCommit';
@@ -234,6 +235,9 @@ export class MarginPaddingType extends TypeView {
         onOpenTokenPicker: (comps, anchor, current) => this.openTokenPicker(comps, anchor, current),
         // P103 CMG-009 — the chip's value and Detach read the project's tokens through one resolver.
         resolveToken: (reference) => resolveTokenText(reference),
+        // CMG-010 — ✎ and Show in Styles on the side's chip; the port name is the first comp's.
+        renderTokenActions: (reference, comps) =>
+          React.createElement(TokenChipActions, { reference, port: this.ports[comps[0]]?.name ?? comps[0] }),
         // A wired edge's typed value is not shown, so the reset does not reach it either.
         onResetSide: (side) =>
           this.updateComps(

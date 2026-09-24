@@ -265,3 +265,119 @@
   background-color: var(--theme-color-fg-default-shy);
   margin: 5px;
 }
+
+// ─── P103 CMG-010: Used by ────────────────────────────────────────────────────
+
+.Usage {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-variant-numeric: tabular-nums;
+}
+
+.isUnused {
+  color: var(--theme-color-notice);
+}
+
+.UsageButton {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 1px 3px;
+  margin: 0;
+  font: inherit;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  border-radius: 3px;
+
+  &:hover,
+  &.isOpen {
+    color: var(--theme-color-fg-highlight);
+    background-color: var(--theme-color-bg-4);
+  }
+}
+
+.Wearers {
+  display: flex;
+  flex-direction: column;
+  margin: 0 12px 6px 24px;
+  padding-left: 8px;
+  border-left: 1px solid var(--theme-color-bg-4);
+}
+
+.WearersTitle {
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  padding: 2px 0 4px;
+}
+
+.Wearer {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  appearance: none;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 3px 4px;
+  border-radius: 3px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
+.WearerLook {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 4px;
+}
+
+.WearerName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerField {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 10px;
+  font-family: var(--font-family-code);
+  color: var(--theme-color-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerWhere {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerBadge {
+  flex: 0 0 auto;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--theme-color-fg-default-shy);
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  padding: 0 4px;
+}

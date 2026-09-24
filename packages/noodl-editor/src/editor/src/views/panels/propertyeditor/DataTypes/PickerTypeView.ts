@@ -9,6 +9,7 @@ import { PROJECT_ASSETS_FOLDER } from '@noodl-utils/projectAssets';
 
 import { ContentPicker, ContentPickerAction, ContentPickerEmptyState, ContentPickerItem } from '../components/ContentPicker';
 import { PickerTextInput } from '../components/PickerTextInput';
+import { TokenChipActions } from '../components/TokenChipActions';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
 import { isTokenReference } from './NumberWithUnits';
@@ -68,7 +69,8 @@ export abstract class PickerTypeView extends TypeView {
       ? {
           tokenName: String(current.value).trim(),
           tokenValue: resolved,
-          onDetachToken: resolved !== undefined ? () => this.commit(resolved) : undefined
+          onDetachToken: resolved !== undefined ? () => this.commit(resolved) : undefined,
+          tokenActions: React.createElement(TokenChipActions, { reference: String(current.value), port: this.name })
         }
       : {};
 

@@ -68,6 +68,8 @@ does; the task file owns the fix.**
 | a Styles Look row | — | ✗ | ✅ *Used by* → selects the node |
 
 CMG-006, CMG-010 and the *Used by* row fill the ✗s. CMG-011's drive reads this table again.
+**Re-read after CMG-010 (s1):** every cell is ✅ or names its reason — the table is in
+[CMG-010 §6](CMG-010-FROM-THE-FIELD-TO-THE-TOKEN-AND-BACK.md#6-built-s1-2026-09-24).
 
 ## 3. The tasks
 
@@ -85,7 +87,7 @@ panel and the property panel.
 | **[CMG-007](CMG-007-A-POPOUT-CASTS-A-SHADOW-NOT-A-GLOW.md)** ✅ s1 | Every popout, popup and modal casts a shadow in light mode, not a white glow | 6c | — |
 | **[CMG-008](CMG-008-EVERY-FIELD-SAYS-WHEN-IT-LEAVES-ITS-LOOK.md)** ✅ s1 | Alignment, margin, padding, corners and borders say when they differ from the Look; alignment shows the Look's value | 9 | — |
 | **[CMG-009](CMG-009-A-TOKEN-IN-A-FIELD-READS-AS-A-TOKEN.md)** ✅ s1 | A token in a number field shows as a chip with its name and value; every field that takes a token has a button that looks like one | 10, 11 | — |
-| **[CMG-010](CMG-010-FROM-THE-FIELD-TO-THE-TOKEN-AND-BACK.md)** | From a token field: edit that token (the pencil) and *Show in Styles*. Absorbs §5's pencil candidate | 12 | CMG-005, CMG-009 |
+| **[CMG-010](CMG-010-FROM-THE-FIELD-TO-THE-TOKEN-AND-BACK.md)** ✅ s1 | From a token field: edit that token (the pencil) and *Show in Styles*. Absorbs §5's pencil candidate | 12 | CMG-005, CMG-009 |
 | **[CMG-011](CMG-011-RICHARD-DRIVES-THE-TOUCH-POINTS.md)** | Richard drives it and rules WORTHY | all | 001–010 |
 
 ## 4. Rulings

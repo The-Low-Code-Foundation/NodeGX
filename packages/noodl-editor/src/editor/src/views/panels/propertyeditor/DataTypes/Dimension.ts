@@ -11,6 +11,7 @@ import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } fr
 import { isTokenReference, readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { TokenChipActions } from '../components/TokenChipActions';
 import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
@@ -134,6 +135,8 @@ export class Dimension extends TypeView {
       tokenName: isToken ? String(stored) : undefined,
       tokenValue: isToken ? resolveTokenText(stored) : undefined,
       onDetachToken: isToken ? () => this.detachToken() : undefined,
+      // CMG-010 — ✎ and Show in Styles on the chip.
+      tokenActions: isToken ? React.createElement(TokenChipActions, { reference: String(stored), port: this.name }) : undefined,
       onOpenTokenPicker: (anchor: HTMLElement) =>
         openTokenFieldPopout({
           view: this,

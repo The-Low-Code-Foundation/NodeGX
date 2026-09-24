@@ -35,15 +35,15 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { StyleTokenRecord, TokenCategoryGroup, TokenResolver, groupForTokenCategory } from '@noodl-models/StyleTokensModel';
 import { tokenNameFromInput, tokenNameProblem } from '@noodl-models/StyleTokensModel/tokenName';
 import { kindsForGroup, startingValueFor, type TokenKind } from '@noodl-models/StyleTokensModel/tokenKinds';
-import { describeTokenUsage, tokenUsageCount, tokenUsageIn } from '@noodl-models/StyleTokensModel/tokenUsage';
+import { describeTokenUsage, tokenUsageAll, tokenUsageCount, tokenUsageIn } from '@noodl-models/StyleTokensModel/tokenUsage';
 import { escapeHtml } from '@noodl-utils/escapeHtml';
 
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { openTokenComposer } from '../../composer/openTokenComposer';
-import { SectionReset, StylesSection } from '../../shared';
+import { SectionReset, StylesSection, useGoToWearer, useLooksRevision, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
-import { REVEAL_HIGHLIGHT_MS, StylesSectionSpec, styleRowSelector } from '../../stylesPanelRoute';
+import { REVEAL_HIGHLIGHT_MS, StylesSectionSpec, revealStyle, styleRowSelector } from '../../stylesPanelRoute';
 import { TokenCategorySection } from '../TokenCategorySection';
 
 export interface TokenGroupSectionProps {
@@ -83,6 +83,19 @@ export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, rese
     const resolver = new TokenResolver(new Map(designTokens.map((t) => [t.name, t])));
     return (value: string) => resolver.resolveInline(value);
   }, [designTokens]);
+
+  // ─── Used by (CMG-010 §3.3) ─────────────────────────────────────────────────
+  // One walk for every row of this section, redone when the tokens change, when a Look changes,
+  // or when the section is opened (a node edited while it was closed is read on the next open).
+  const looksRevision = useLooksRevision();
+  const usage = React.useMemo(
+    () => (isOpen ? tokenUsageAll(ProjectModel.instance, designTokens) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [designTokens, looksRevision, isOpen]
+  );
+  const [openUsage, toggleUsage] = useOpenUsageRow();
+  const goToWearer = useGoToWearer();
+  const goToToken = React.useCallback((name: string) => revealStyle({ kind: 'token', name }), []);
 
   const onOpenComposer = React.useCallback(
     (token: StyleTokenRecord, anchor: HTMLElement) => {
@@ -207,6 +220,11 @@ export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, rese
           onOpenComposer={onOpenComposer}
           onCopy={onCopy}
           onDelete={onDelete}
+          usage={usage}
+          openUsage={openUsage}
+          onToggleUsage={toggleUsage}
+          onGoToWearer={goToWearer}
+          onGoToToken={goToToken}
         />
       </StylesSection>
     </div>

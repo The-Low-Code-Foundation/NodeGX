@@ -12,6 +12,7 @@ import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
 
 import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 import { TokenGlyph } from '../components/NumberUnitInput';
+import { TokenChipActions } from '../components/TokenChipActions';
 import tokenCss from '../components/NumberUnitInput.module.scss';
 import { PropertyPanelInputWithExpressionModal } from '../components/PropertyPanelInputWithExpressionModal';
 import { TypeView } from '../TypeView';
@@ -235,6 +236,7 @@ export class BasicType extends TypeView {
                 value: isShadow ? undefined : resolved,
                 preview: isShadow && resolved ? { kind: 'shadow' as const, css: resolved } : undefined,
                 onOpen: openPicker,
+                actions: React.createElement(TokenChipActions, { reference: String(stored), port: this.name }),
                 dataTest: `token-chip-${this.name}`
               })
             )

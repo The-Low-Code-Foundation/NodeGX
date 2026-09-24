@@ -60,6 +60,11 @@ export interface TokenComposerProps {
   onApply: (value: string) => void;
   onCancel: () => void;
   onReset: () => void;
+  /**
+   * P103 CMG-010 §3.4 — *"Used by 2 nodes and 1 Look"* / *"Nothing wears this yet"*: the reach
+   * of an Apply, in the header, whichever side opened the composer. The host counts; this draws.
+   */
+  wornBy?: string;
 }
 
 type PreviewComponent = React.FC<{ css: string; resolve: (v: string) => string; dark: boolean }>;
@@ -166,7 +171,7 @@ export const TEXT_MODE_SENTENCE =
   "This value uses CSS the composer can't show yet. You can still edit it as text, or start again from a preset.";
 
 export function TokenComposer(props: TokenComposerProps) {
-  const { tokenName, category, value, isCustom, colours, resolve, projectFonts, onDraft, onApply, onCancel, onReset } =
+  const { tokenName, category, value, isCustom, colours, resolve, projectFonts, onDraft, onApply, onCancel, onReset, wornBy } =
     props;
   const codec = codecForCategory(category)!;
   const type = TYPES[category];
@@ -246,6 +251,11 @@ export function TokenComposer(props: TokenComposerProps) {
             {summaryPrefix}
             {summary}
           </div>
+          {wornBy && (
+            <div className={css.WornBy} data-worn-by title="Apply changes every one of them">
+              {wornBy}
+            </div>
+          )}
         </div>
 
         <div className={css.Preview}>

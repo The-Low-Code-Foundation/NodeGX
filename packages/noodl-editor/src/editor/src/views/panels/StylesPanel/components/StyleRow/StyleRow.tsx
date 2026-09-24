@@ -65,6 +65,8 @@ export interface StyleRowProps {
   onToggleUsage?: () => void;
   /** Pressing one node entry. Absent leaves every entry unpressable. */
   onGoToWearer?: (wearer: StyleRowWearer) => void;
+  /** P103 CMG-010 — pressing a token entry reveals that token's row. */
+  onGoToToken?: (name: string) => void;
   menuItems: MenuDialogProps['items'];
   testId?: string;
   /**
@@ -92,6 +94,8 @@ export interface StyleRowWearer {
 export interface StyleWearerList {
   nodes: StyleRowWearer[];
   variants: { name: string; typename: string }[];
+  /** P103 CMG-010 — other tokens built from this one (`--ring: var(--primary)`); pressable, they reveal that row. */
+  tokens?: string[];
 }
 
 export function StyleRow({
@@ -107,6 +111,7 @@ export function StyleRow({
   isUsageOpen,
   onToggleUsage,
   onGoToWearer,
+  onGoToToken,
   menuItems,
   testId,
   typename
@@ -128,7 +133,7 @@ export function StyleRow({
    * panel, but a tooltip that names the wrong KIND of user is the same failure one surface over.
    */
   const usageTitle = wearers
-    ? usageListTitle(wearers.nodes?.length ?? 0, wearers.variants?.length ?? 0)
+    ? usageListTitle(wearers.nodes?.length ?? 0, wearers.variants?.length ?? 0, wearers.tokens?.length ?? 0)
     : usageCount === 1
     ? 'Used by 1 node'
     : `Used by ${usageCount} nodes`;
@@ -220,7 +225,9 @@ export function StyleRow({
         </div>
       </div>
 
-      {showWearers && <StyleRowWearers name={name} wearers={wearers} onGoToWearer={onGoToWearer} />}
+      {showWearers && (
+        <StyleRowWearers name={name} wearers={wearers} onGoToWearer={onGoToWearer} onGoToToken={onGoToToken} />
+      )}
     </div>
   );
 }
@@ -235,18 +242,21 @@ export function StyleRow({
 function StyleRowWearers({
   name,
   wearers,
-  onGoToWearer
+  onGoToWearer,
+  onGoToToken
 }: {
   name: string;
   wearers: StyleWearerList;
   onGoToWearer?: (wearer: StyleRowWearer) => void;
+  onGoToToken?: (name: string) => void;
 }) {
   const nodes = wearers.nodes ?? [];
   const variants = wearers.variants ?? [];
+  const tokens = wearers.tokens ?? [];
 
   return (
     <div className={css['Wearers']} data-test={`style-row-wearers-${name}`}>
-      <div className={css['WearersTitle']}>{usageListTitle(nodes.length, variants.length)}</div>
+      <div className={css['WearersTitle']}>{usageListTitle(nodes.length, variants.length, tokens.length)}</div>
 
       {nodes.map((wearer) => (
         <button
@@ -278,6 +288,22 @@ function StyleRowWearers({
           <span className={css['WearerName']}>{variant.name}</span>
           <span className={css['Badge']}>Look</span>
         </div>
+      ))}
+
+      {/* P103 CMG-010 — a token built from this one: pressable, it reveals that row. */}
+      {tokens.map((other) => (
+        <button
+          type="button"
+          key={other}
+          className={css['Wearer']}
+          data-test={`style-row-wearer-token-${name}`}
+          data-wearer-token={other}
+          title={`${other} is built from ${name} — show it`}
+          onClick={() => onGoToToken?.(other)}
+        >
+          <span className={css['WearerName']}>{other}</span>
+          <span className={css['Badge']}>token</span>
+        </button>
       ))}
     </div>
   );

@@ -21,11 +21,14 @@ export function displayTypeName(typename: unknown): string {
  * canvas they can go and look at, and a Look is a rule that would take the style off everything
  * wearing it.
  */
-export function describeUsage(nodeCount: number, variantCount: number): string {
+export function describeUsage(nodeCount: number, variantCount: number, tokenCount = 0): string {
   const parts: string[] = [];
   if (nodeCount) parts.push(`${nodeCount} ${nodeCount === 1 ? 'node' : 'nodes'}`);
   if (variantCount) parts.push(`${variantCount} ${variantCount === 1 ? 'Look' : 'Looks'}`);
-  return parts.join(' and ');
+  // P103 CMG-010 — a colour token is also worn by the tokens built from it (`--ring: var(--primary)`).
+  if (tokenCount) parts.push(`${tokenCount} other ${tokenCount === 1 ? 'token' : 'tokens'}`);
+  if (parts.length <= 1) return parts.join('');
+  return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
 }
 
 /**
@@ -73,7 +76,7 @@ export function wearerLocation(componentName: unknown): string {
  * you can go, and a Look is a rule that would take the style off everything wearing it — the same
  * distinction {@link describeUsage} makes inside the delete-confirm, said in the other direction.
  */
-export function usageListTitle(nodeCount: number, variantCount: number): string {
-  const used = describeUsage(nodeCount, variantCount);
+export function usageListTitle(nodeCount: number, variantCount: number, tokenCount = 0): string {
+  const used = describeUsage(nodeCount, variantCount, tokenCount);
   return used.length > 0 ? `Used by ${used}` : 'Nothing uses this';
 }

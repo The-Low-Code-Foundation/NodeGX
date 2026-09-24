@@ -32,6 +32,7 @@ export interface PickerTextInputProps {
   tokenName?: string;
   tokenValue?: string;
   onDetachToken?: () => void;
+  tokenActions?: React.ReactNode;
 }
 
 /**
@@ -54,7 +55,8 @@ export function PickerTextInput({
   dataIdentifier,
   tokenName,
   tokenValue,
-  onDetachToken
+  onDetachToken,
+  tokenActions
 }: PickerTextInputProps) {
   const [displayedValue, setDisplayedValue] = useState(value ?? '');
 
@@ -83,6 +85,7 @@ export function PickerTextInput({
           value={tokenValue}
           onOpen={(anchor) => onOpenPicker(anchor)}
           onDetach={onDetachToken}
+          actions={tokenActions}
           dataTest={`token-chip-${dataIdentifier}`}
         />
       ) : (

@@ -65,3 +65,68 @@ they need to, to make a better connection between those two points."*
   token. Test it against a real project (one with Looks and aliases), not only a fixture
   ([[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]]).
 - 🔴 [[a-project-scan-must-read-both-project-formats]].
+
+## 6. Built (s1, 2026-09-24)
+
+**On every chip (§3.1).** `TokenChipActions` (`propertyeditor/components/TokenChipActions.tsx`)
+rides in the chip's `actions` slot on all five controls CMG-009 built — the number fields, the
+padding box (in the compact chip's hover overlay beside ✕, since a ~45px side has no width to
+give), the shadow row and the font picker row:
+- **✎ Edit** — `openTokenEdit`: for the four composer types, `openTokenComposer` anchored to the
+  chip (the composer opens beside the field; the inspector is at the window's right edge, so it
+  opens leftward); for the other nine, `openTokenRowEditor` — a small popout with the value box,
+  Cancel/Apply, and the sentence *"Changes --space-4 everywhere (6 places)"*
+  (`changesEverywhereText`). Apply is `setToken` with undo: every wearer moves, ⌘Z is one step.
+- **⇱ Show in Styles** — `revealStyle({ kind: 'token', name })` (CMG-005).
+Everything the editor's singletons touch is `require`d at press time: the component rides on the
+same path `rel-014` and `hlt-012` travel under the plain-Node runner.
+
+**One walk, not one per row (§3.3).** `tokenUsageAll(project, tokens)` reads every node once and
+files each reference under the token it names; `tokenUsageIn` is that map read at one name, so the
+delete-confirm (CMG-002), the row, the row editor and the composer header print one reading
+([[count-the-reach-first]]). Three kinds: nodes (with the fields named, visual states included),
+Looks, and other tokens (`--gradient-brand: … var(--primary) …`).
+
+**Used by on token rows.** `TokenCategorySection` rows (Type, Spacing, Borders, Effects, Motion)
+draw `N×`, pressable, opening a list: node entries go to the node (`useGoToWearer`), a Look entry
+is a rule (not pressable), a token entry reveals that token's row. `0` prints *unused* with the
+title *Nothing wears this yet*. The Colours section's token rows are `StyleRow`s: `StyleWearerList`
+gained `tokens` and `onGoToToken`, and `describeUsage`/`usageListTitle` count them. A row never
+asked draws no count. The walk is redone when the tokens change, on a Look/style change, and when
+the section (or the colour-token list) is opened — a node edited while the section was closed is
+read on the next open.
+
+**The composer header (§3.4)** says *Used by 2 nodes* whichever side opened it: `openTokenComposer`
+counts, `TokenComposer` draws it (`data-worn-by`).
+
+**§4 measured** (`scripts/devtools/drive-cmg010-field-to-token.js` on a fresh copy of *CMP-001
+Composer Drive*, `CMG Drive Looks K`; 18/18 arms):
+
+| AC | reading |
+|---|---|
+| 1 | two Groups with *Shadow source: From a style token*, `--shadow-lg`. From the first's chip, *Show in Styles*: `SidebarModel.ActiveId = styles`, Effects `data-section-open="true"`, the `--shadow-lg` row in the viewport with `data-revealed="true"` (`shots/cmg010-ac1-show-in-styles.png`). Back on the node, ✎: `[data-token-composer="--shadow-lg"]` to the left of the chip, the chip's line inside its height, header `Used by 2 nodes` (`shots/cmg010-ac1-composer-from-field.png`). A slider to its end + Apply: `--shadow-lg` `0 10px 15px -3px …` → `0 10px 80px -3px …`, both Groups still `var(--shadow-lg)`, undo +1; ⌘Z → the original, one step |
+| 2 | ✎ on the padding chip (hover overlay, computed opacity 0 → 1): the row editor `[data-token-row-editor="--space-4"]` with *Changes --space-4 everywhere (6 places)* and `16px` (`shots/cmg010-ac2-row-editor.png`); `20px` + Apply → `--space-4 = 20px`, the Group's Pad Left resolves to 20px, undo +1; ⌘Z → 16px. ⇱ from the same chip lands on `--space-4` in Spacing, revealed |
+| 3 | the `--shadow-lg` row: a `2×` button titled *Used by 2 nodes — press to see which*; open, two entries (`Page canvas`, `SSR probe`, each `boxShadowToken · Home`); pressing the second selects it on the canvas (`selected: ["probe-group"]`). `shots/cmg010-ac3-used-by.png` |
+| 4 | `--primary` in Colours: `17×` — *Used by 15 nodes and 2 other tokens*; the list ends with `--gradient-brand` and `--gradient-spotlight` badged *token* (`shots/cmg010-ac4-primary-wearers.png`). The spec's fixture holds all three kinds (two nodes, one through a visual state; one Look; two aliases) |
+| 5 | `--cmg010-fresh` added: `unused`, titled *Nothing wears this yet*, not pressable |
+| 6 | below |
+
+**§2's touch-point table, re-read on the running editor after this task (AC6):**
+
+| from ↓ / to → | the token | the Look | the nodes wearing it |
+|---|---|---|---|
+| a node's token field | ✅ ✎ opens the composer / row editor on *this* token; ⇱ *Show in Styles* | — | ✅ the count in the composer header; the list is one press further (⇱ → *Used by*) |
+| a node's Look dropdown | — | ✅ *Editing the Look* (CMG-006), *In Styles* | ✅ the Look editor's header counts them (*worn by N nodes*); the list is *In Styles* → *Used by* |
+| a Styles token row | ✅ composer (4 types) / text box (9), ✎ | — | ✅ *Used by* → nodes, Looks and the tokens built from it |
+| a Styles Look row | — | ✅ *Edit* (CMG-006) | ✅ *Used by* → selects the node |
+
+Named reason for the two "one press further" cells: a count in a header is what a person needs
+before an Apply; the list is a Styles-panel thing and lives in one place.
+
+**Found on the way.**
+- `StyleRow`'s menu is a dialog that reads `document` at render; a spec that renders a colour row
+  mocks `ContextMenu` (cmg-003's mock).
+- A drive that toggles a wearer list must *open* it, not click it: the Styles panel stays mounted
+  between runs and a list left open reads as empty after a blind press.
+- The Colours section keeps its token list closed (88 rows) — the walk for it runs only once the
+  list is opened, so a closed panel costs nothing.

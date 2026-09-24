@@ -82,6 +82,8 @@ export interface MarginPaddingInputProps {
    * name alone and offers no ✕.
    */
   resolveToken?: (reference: string) => string | undefined;
+  /** P103 CMG-010 — ✎ and *Show in Styles* for the token a side holds, drawn on its chip. */
+  renderTokenActions?: (reference: string, comps: string[]) => React.ReactNode;
 }
 
 export interface MarginPaddingConnection {
@@ -220,6 +222,7 @@ interface BoxFieldProps {
   tokenName?: string;
   tokenValue?: string;
   onDetachToken?: () => void;
+  tokenActions?: React.ReactNode;
   /** Absent when this parameter has no scale, or when the whole widget was given no opener. */
   onOpenTokenPicker?: (anchor: HTMLElement) => void;
   /** Returns what to put back in the box on a refusal, or `null` when the edit was taken. */
@@ -247,6 +250,7 @@ function BoxField({
   tokenName,
   tokenValue,
   onDetachToken,
+  tokenActions,
   onOpenTokenPicker,
   onCommit,
   scrubStart,
@@ -330,6 +334,7 @@ function BoxField({
           compact
           onOpen={onOpenTokenPicker}
           onDetach={onDetachToken}
+          actions={tokenActions}
           dataTest={`token-chip-${dataComp}`}
         />
       ) : (
@@ -398,7 +403,8 @@ export function MarginPaddingInput({
   onUpdateComps,
   onResetSide,
   onOpenTokenPicker,
-  resolveToken
+  resolveToken,
+  renderTokenActions
 }: MarginPaddingInputProps) {
   /**
    * P103 CMG-009 — the chip's three props for a field holding `token`, and *Detach*: the resolved
@@ -414,7 +420,8 @@ export function MarginPaddingInput({
     return {
       tokenName: token,
       tokenValue: resolved,
-      onDetachToken: detachable ? () => onUpdateComps(comps, detachable) : undefined
+      onDetachToken: detachable ? () => onUpdateComps(comps, detachable) : undefined,
+      tokenActions: renderTokenActions ? renderTokenActions(token, comps) : undefined
     };
   }
   // The values from before a scrub, for the one undo step at its end. A ref, not state: the

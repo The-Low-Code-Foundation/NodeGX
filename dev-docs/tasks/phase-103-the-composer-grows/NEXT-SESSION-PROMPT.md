@@ -1,38 +1,57 @@
 # P103 — next session
 
-**Written 2026-09-24 (s1, mid-session checkpoint).**
+**Written 2026-09-24 (end of s1).**
 
 ## Where it stands
 
-Six of ten tasks are built, driven and committed on `cline-dev`, one commit each, in this order:
-CMG-005 (`c9a028e49`), CMG-004 (`3eaada0b7`), CMG-001 (`917a9994d`), CMG-003 (`17f3ee813`),
-CMG-007 (`81139f689`), CMG-006 (`ab563776b`). Every task file has a §6 *Built* section with what
-each AC measured; every drive is `scripts/devtools/drive-cmg00N-*.js`; every spec is
-`tests-unit/cmg-00N/`. Shots are in `shots/`.
+All ten build tasks are built, driven and committed on `cline-dev`, one commit each, in this
+order: CMG-005 (`c9a028e49`), CMG-004 (`3eaada0b7`), CMG-001 (`917a9994d`), CMG-003
+(`17f3ee813`), CMG-007 (`81139f689`), CMG-006 (`ab563776b`), CMG-002 (`e2194769a`), CMG-008
+(`c5165a629`), CMG-009 (`b65ec2ed2`), CMG-010 (the commit after it). Every task file has a §6
+*Built* section with what each AC measured; every drive is `scripts/devtools/drive-cmg0NN-*.js`;
+every spec is `tests-unit/cmg-0NN/`. Shots are in `shots/`. README §3 rows are marked ✅ s1.
 
-Left, in order: **CMG-002** (＋ a token, copy a token, delete an added one — the reference
-counter it builds is CMG-010's *Used by*), **CMG-008** (merged controls say when they leave the
-Look), **CMG-009** (the token chip and one `{.}` everywhere), **CMG-010** (from the field to the
-token and back), then **CMG-011** (Richard's drive; RC-8 still open).
+Left: **CMG-011 — Richard drives the touch points** (his), and **RC-8** (*does 0.3.0 wait on
+these?*), his ruling. Nothing in this phase is a session's build job any more.
 
 ## Do this
 
-1. Read README §1, §2, §7, then the task you take. Re-measure a file:line pointer before you
-   rely on it: several moved this session.
-2. Drive on COPIES: `CMG Drive Tokens` (← `CMP-007 Richard Drive.before-0.3`, 142 stored tokens,
-   46 real changes — RESET by the CMG-004 drive, copy it again), `CMG Drive Looks{,B,C}`
-   (← `CMP-001 Composer Drive`: nine colour styles, a Text Look worn by 3, a Gamma Look worn by 0).
-   🔴 Never swap a copy's files while the editor holds it open: the watcher adopts the change.
-3. Commit through a temporary index with compare-and-swap (the memory recipe): the real index on
+1. If Richard has driven (CMG-011): read what he found, file each finding as a task the way README
+   §2 did, and build in the order the findings suggest. Re-measure every file:line pointer before
+   relying on it.
+2. If he has not: the phase waits. Do not re-drive it for him; the drives already pass
+   (CMG-009 24/24, CMG-010 18/18, the rest in their §6). Take the next phase from MEMORY.md.
+3. Drive on COPIES only: `CMG Drive Looks J` and `K` (← `CMP-001 Composer Drive`) are fresh from
+   the last two drives and can be reused for a re-drive; `CMG Drive Tokens` (← `CMP-007 Richard
+   Drive.before-0.3`) was reset by the CMG-004 drive — copy it again if you need the 46 real
+   changes. 🔴 Never swap a copy's files while the editor holds it open: the watcher adopts them.
+4. Commit through a temporary index with compare-and-swap (the memory recipe): the real index on
    this checkout is stale (hundreds of staged deletions that are not this phase's).
+
+## What Richard should know before his drive (CMG-011)
+
+- **A token in a field is a chip** (CMG-009). Name where it fits, else the resolved value; the
+  full name and value in the tooltip; ✕ detaches (one undo step). On a padding side at 328px it
+  reads `16px`, not `space-4` — §3.2's rule; whether that is enough is his read.
+- **✎ and ⇱ on every chip** (CMG-010): ✎ opens the composer (four types) or a small row editor
+  (the other nine) beside the field, saying *Changes --x everywhere (N places)*; ⇱ is *Show in
+  Styles*. On a padding side they sit in the chip's hover overlay with ✕.
+- **Used by** on every token row in Styles, Colours included: nodes go to the node, a Look is a
+  rule, a token built from this one reveals its row. The composer header counts too.
+- **Every field says when it leaves its Look** (CMG-008), including alignment, padding, corners,
+  borders and the popout groups; *Put back* per field and *Put back all*.
+- The padding glyph is the token button: `{·}` shows on hover.
 
 ## Traps met this session
 
-- `ProjectModel.findVariant(name, nodetype)` takes a node TYPE object, not a typename.
-- The editor's own write of `nodegx.styles.json` used to read back as an external change
-  (`hashProjectLevel` vs `JSON.stringify`); fixed in CMG-006 — Look undo works after autosave now.
-- Opening a pre-0.3 project adds 8 typography tokens with no default (the 0.3 upgrade); they are
-  *added*, never reset.
-- `renderToStaticMarkup` can grade a core-ui component once `Icon` and `Collapsible` are mocked.
-- A drive reading a rect inside a 0px `overflow: hidden` Collapsible still sees a height: use
-  `elementFromPoint`.
+- `resolveTokenText` is asked on every render; an unguarded `require('@noodl-models/projectmodel')`
+  reddened 26 `rel-014` arms (`bugtracker.ts:246`). Anything the property-editor rows touch on
+  the plain-Node path must `require` singletons at press time and guard reads.
+- A chip that measures its own content-sized box always finds "no room": `display: flex`, never
+  `inline-flex`, in a block parent.
+- A drive must *open* a wearer list (`data-usage-open`), not toggle it: the Styles panel stays
+  mounted between runs.
+- Re-selecting the node the panel already shows is a no-op; a drive selects through another node.
+- `StyleRow`'s menu reads `document` at render: mock `ContextMenu` in a spec.
+- `Page.og:image:width` / `height` (string meta ports) offer the spacing scale by name
+  (README §5 candidate).

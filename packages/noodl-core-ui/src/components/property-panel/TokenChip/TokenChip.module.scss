@@ -137,23 +137,37 @@
     background-color: rgba(0, 0, 0, 0.12);
   }
 
-  /* Compact: over the right edge, on hover or keyboard focus only, so it takes no width from a
-     ~45px field. The fill behind it keeps the name from showing through. */
   &.is-hover-only {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
     margin: 0;
-    padding: 0 3px;
-    opacity: 0;
-    background-color: var(--theme-color-primary-bg, rgba(21, 112, 239, 0.12));
-    pointer-events: none;
+    padding: 0 2px;
   }
 }
 
-.Root:hover .Detach.is-hover-only,
-.Root:focus-within .Detach.is-hover-only {
+/* Compact: ✎ ⇱ ✕ over the right edge, on hover or keyboard focus only, so they take no width from
+   a ~45px field. The fill behind them keeps the name from showing through. */
+.HoverActions {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 1px;
+  opacity: 0;
+  background-color: var(--theme-color-bg-2, #1e1e1e);
+  box-shadow: -6px 0 6px -2px var(--theme-color-bg-2, #1e1e1e);
+  color: var(--theme-color-primary);
+  pointer-events: none;
+
+  button {
+    padding: 0 2px;
+    font-size: 10px;
+  }
+}
+
+.Root:hover .HoverActions,
+.Root:focus-within .HoverActions {
   opacity: 1;
   pointer-events: auto;
 }

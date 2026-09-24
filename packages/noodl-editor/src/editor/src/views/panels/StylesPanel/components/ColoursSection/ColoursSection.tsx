@@ -6,6 +6,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { buildDefaultTokenMap } from '@noodl-models/StyleTokensModel/DefaultTokens';
 import { tokenNameFromInput, tokenNameProblem } from '@noodl-models/StyleTokensModel/tokenName';
 import { allColourTokens } from '@noodl-models/StyleTokensModel/TokensForPicking';
+import { tokenUsageAll, tokenUsageCount } from '@noodl-models/StyleTokensModel/tokenUsage';
 import { StylesModel } from '@noodl-models/StylesModel';
 import { escapeHtml } from '@noodl-utils/escapeHtml';
 
@@ -19,7 +20,7 @@ import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import ColorPicker from '../../../propertyeditor/DataTypes/ColorPicker/colorpicker';
 import { InlineNameInput, SectionReset, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
-import { StylesSectionSpec } from '../../stylesPanelRoute';
+import { StylesSectionSpec, revealStyle } from '../../stylesPanelRoute';
 import { describeUsage } from '../../format';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
 
@@ -105,6 +106,29 @@ export function ColoursSection({
   // HLT-006 — through the shared enumeration, not a local predicate. The picker offers the same
   // population and a second copy of "which category counts as a colour" is how HLT-007(b) happened.
   const colourTokens = useMemo(() => allColourTokens(designTokens), [designTokens]);
+
+  /**
+   * P103 CMG-010 §3.3 — *Used by* on the token rows: nodes, Looks AND the tokens built from this
+   * one (`--ring: var(--primary)`), from one walk (`tokenUsageAll`), redone when the tokens change,
+   * on a Look/style change (`revision`) and when the list is opened.
+   */
+  const tokenUsage = useMemo(
+    () => (isTokensOpen ? tokenUsageAll(ProjectModel.instance, designTokens) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [designTokens, revision, isTokensOpen]
+  );
+  const tokenWearers = (name: string) => {
+    const usage = tokenUsage?.get(name);
+    if (!usage) return undefined;
+    return {
+      count: tokenUsageCount(usage),
+      list: {
+        nodes: usage.nodes.map((n) => ({ componentName: n.componentName, nodeId: n.nodeId, label: n.label, typename: n.typename })),
+        variants: usage.looks,
+        tokens: usage.tokens
+      }
+    };
+  };
 
   // ─── The picker (CMG-003 §3.2) ───────────────────────────────────────────────
 
@@ -355,6 +379,12 @@ export function ColoursSection({
             swatch={styleTokensModel?.resolveToken(token.name) ?? token.value}
             onSwatchClick={(anchor) => pickToken(token.name, anchor)}
             layer="Token"
+            usageCount={tokenWearers(token.name)?.count}
+            wearers={tokenWearers(token.name)?.list}
+            isUsageOpen={openUsage === token.name}
+            onToggleUsage={() => toggleUsage(token.name)}
+            onGoToWearer={goToWearer}
+            onGoToToken={(name) => revealStyle({ kind: 'token', name })}
             menuItems={[
               { label: 'Edit colour', icon: IconName.Palette, onClick: () => pickToken(token.name) },
               {

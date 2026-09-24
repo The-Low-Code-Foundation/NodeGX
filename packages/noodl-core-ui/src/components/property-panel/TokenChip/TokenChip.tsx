@@ -200,9 +200,15 @@ export function TokenChip({ name, value, compact, preview, onOpen, onDetach, act
       )}
       <span className={css['Name']}>{shownText}</span>
       {drawsValue && <span className={css['Value']}>{value}</span>}
-      {actions}
+      {!compact && actions}
       {inlineDetach && detachButton}
-      {hoverDetach && detachButton}
+      {/* Compact: the actions and the ✕ over the right edge on hover or focus, taking no width. */}
+      {compact && (actions || onDetach) && (
+        <span className={css['HoverActions']} data-token-hover-actions>
+          {actions}
+          {hoverDetach && detachButton}
+        </span>
+      )}
       {/* The natural widths the fit is read from; never seen. */}
       <span className={css['Measure']} aria-hidden="true">
         <span ref={nameMeasure} className={css['Name']}>

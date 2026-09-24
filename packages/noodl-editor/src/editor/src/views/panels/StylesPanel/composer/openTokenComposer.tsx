@@ -20,6 +20,7 @@ import React from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot, type Root } from 'react-dom/client';
 
+import { describeTokenUsage, tokenUsageIn } from '@noodl-models/StyleTokensModel/tokenUsage';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import type { StyleTokensModel } from '@noodl-models/StyleTokensModel/StyleTokensModel';
 import { StyleTokenRecord } from '@noodl-models/StyleTokensModel/TokenCategories';
@@ -120,6 +121,8 @@ function mountComposer(
         colours: projectColoursForPicking(tokens, resolver),
         resolve: (value: string) => resolver.resolveInline(value),
         projectFonts,
+        // CMG-010 §3.4 — the same count whichever side opened it: one walk, read at this name.
+        wornBy: describeTokenUsage(tokenUsageIn(ProjectModel.instance, tokens, token.name)),
         onDraft: (value: string) => injector.setDraft(token.name, value),
         onApply: (value: string) => {
           injector.clearDraft();
