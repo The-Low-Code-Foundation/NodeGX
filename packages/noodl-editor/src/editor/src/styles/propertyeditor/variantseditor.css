@@ -20,13 +20,38 @@
   align-items: stretch;
 }
 
-/* P94 STY-003 §3.1 — what a change to this row costs. Indented to the field column and quiet:
-   it is a consequence, not a control. */
+/* P94 STY-003 §3.1 — what a change to this row costs, quiet: it is a consequence, not a control.
+   Since P103 CMG-011 it also carries the Look's Edit and In Styles. */
 .variants-wearer-line {
-  padding: 0 10px 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 6px 16px;
   color: var(--theme-color-fg-default-shy);
   font-size: var(--font-size-xs);
   line-height: 1.4;
+}
+
+/* P103 CMG-011 row 2 — the count sits under the label, the Look's actions under the field, so the
+   field keeps the whole field column (they shared its row and left the Look's name 33px). */
+.variants-wearer-count {
+  flex: 0 1 var(--property-label-column, 118px);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.variants-wearer-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.variants-wearer-actions .panel-head-row-action {
+  height: 22px;
+  padding: 0 6px;
+  font-size: var(--font-size-xs);
 }
 
 .variants-section {

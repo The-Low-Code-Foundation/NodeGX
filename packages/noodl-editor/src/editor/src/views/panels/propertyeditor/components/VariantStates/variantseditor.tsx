@@ -132,22 +132,6 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
             <span className="panel-head-row-value">{this.state.variant.name}</span>
             <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
           </button>
-          <button type="button" className="panel-head-row-action" onClick={this.onEditVariant.bind(this)}>
-            Edit
-          </button>
-          {/* P103 CMG-006 §3.2 — node → Styles: the row in the Styles panel that manages this Look. */}
-          <button
-            type="button"
-            className="panel-head-row-action"
-            data-test="look-show-in-styles"
-            title="Show this Look in the Styles panel"
-            onClick={(e) => {
-              e.stopPropagation();
-              revealStyle({ kind: 'look', name: this.state.variant.name, typename: this.state.variant.typename });
-            }}
-          >
-            In Styles
-          </button>
         </div>
       );
     } else if (this.state.variant !== undefined && this.state.variant.name !== undefined && this.state.editMode) {
@@ -202,11 +186,34 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
     if (!variant || variant.name === undefined || this.state.editMode) return null;
 
     const wearers = ProjectModel.instance?.variantWearerCounts(variant.typename)[variant.name] ?? 0;
-    if (wearers < 1) return null;
 
+    // P103 CMG-011 row 2: Edit and In Styles live on this line, under the field. Beside it they left
+    // the Look's name 33px ("I can't see the value").
     return (
-      <div className="variants-wearer-line" data-test="look-wearer-count">
-        {wearers === 1 ? 'Worn by this node only' : `Worn by ${wearers} nodes`}
+      <div className="variants-wearer-line">
+        {wearers >= 1 ? (
+          <span className="variants-wearer-count" data-test="look-wearer-count">
+            {wearers === 1 ? 'Worn by this node only' : `Worn by ${wearers} nodes`}
+          </span>
+        ) : null}
+        <span className="variants-wearer-actions">
+          <button type="button" className="panel-head-row-action" onClick={this.onEditVariant.bind(this)}>
+            Edit
+          </button>
+          {/* P103 CMG-006 §3.2 — node → Styles: the row in the Styles panel that manages this Look. */}
+          <button
+            type="button"
+            className="panel-head-row-action"
+            data-test="look-show-in-styles"
+            title="Show this Look in the Styles panel"
+            onClick={(e) => {
+              e.stopPropagation();
+              revealStyle({ kind: 'look', name: variant.name, typename: variant.typename });
+            }}
+          >
+            In Styles
+          </button>
+        </span>
       </div>
     );
   }
