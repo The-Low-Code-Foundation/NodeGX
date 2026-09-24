@@ -1,5 +1,7 @@
 # NodeGX — Community Changelog & Roadmap
 
+> **Looking for what changed in each release?** That is [CHANGELOG.md](CHANGELOG.md), published at https://nodegx.io/changelog/. This page is the story of the revival and the roadmap.
+
 **The Noodl revival, in plain language.** *July 2026 · v0.1.0*
 
 > A note on names: the desktop app is now shipping under the name **NodeGX** (the repo, packages, and GitHub org still say OpenNoodl — only the user-facing app was rebranded). Same project, same open-source spirit, picking up where classic Noodl left off.

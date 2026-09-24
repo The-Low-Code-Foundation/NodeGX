@@ -53,7 +53,10 @@ if it is, rather than leaving it off.
 **[Docs site](https://the-low-code-foundation.github.io/NodeGX/)** — concepts, a
 getting-started tutorial, and a generated reference page for every node in the library.
 
-**[Changelog & roadmap](https://claude.ai/code/artifact/35dd9e33-52cc-4bc2-b63e-cea797f71ab1)** — what's shipped since the last update, and what's next.
+**[Changelog](https://nodegx.io/changelog/)** — every release, newest first, with what changed in each
+([source](CHANGELOG.md)).
+
+**[Roadmap](CHANGELOG-COMMUNITY.md)** — the story of the revival so far, and what's next.
 
 ## Community
 
