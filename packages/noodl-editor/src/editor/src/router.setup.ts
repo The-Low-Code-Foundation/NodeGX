@@ -47,6 +47,7 @@ import { NodeReferencesPanel_ID } from './views/panels/NodeReferencesPanel';
 import { NodeReferencesPanel } from './views/panels/NodeReferencesPanel/NodeReferencesPanel';
 import { ProblemsPanel_ID } from './views/panels/ProblemsPanel';
 import { ProblemsPanel } from './views/panels/ProblemsPanel/ProblemsPanel';
+import { LOOK_EDITOR_PANEL_ID, LookEditorPanel } from './views/panels/LookEditor';
 import { PropertyEditor } from './views/panels/propertyeditor';
 import { ProvenancePanel } from './views/panels/ProvenancePanel';
 import { SearchPanel } from './views/panels/search-panel/search-panel';
@@ -93,6 +94,16 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     id: 'PortEditor',
     name: 'Ports',
     panel: ComponentPortsComponent
+  });
+
+  // P103 CMG-006: a Look's fields, in the inspector, with or without a node wearing it. Opened by
+  // `openLookEditor` from the Styles panel; never in the rail (transient, like Properties).
+  SidebarModel.instance.register({
+    transient: true,
+    id: LOOK_EDITOR_PANEL_ID,
+    name: 'Look',
+    // @ts-expect-error the panel's props arrive through `showInInspector`, as Properties' do
+    panel: LookEditorPanel
   });
 
   SidebarModel.instance.register({

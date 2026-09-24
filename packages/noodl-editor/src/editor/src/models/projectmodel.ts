@@ -1556,7 +1556,7 @@ export class ProjectModel extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'add variant',
+        label: 'add Look',
         do: () => {
           this.addVariant(variant);
         },
@@ -1586,7 +1586,7 @@ export class ProjectModel extends Model {
         const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
         undo.push({
-          label: 'rename variant',
+          label: 'rename Look',
           do: () => {
             this.deleteVariant(variant);
           },
@@ -1615,7 +1615,7 @@ export class ProjectModel extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'rename variant',
+        label: 'rename Look',
         do: () => {
           this.renameVariant(variant, newName);
         },

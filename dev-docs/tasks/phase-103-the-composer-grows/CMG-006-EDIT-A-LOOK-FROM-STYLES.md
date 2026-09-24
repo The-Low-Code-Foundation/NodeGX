@@ -1,7 +1,8 @@
 # CMG-006 — Edit a Look from Styles
 
 **Opened 2026-09-24** from Richard's drive of P102 (README §2, findings 6a and 6b).
-**Status: 📋 ready once CMG-005's `revealStyle` exists** (for the node → Styles link).
+**Status: ✅ built 2026-09-24 (s1)** — 13 specs green, 13/13 drive arms green on a fresh copy. §6 has what was
+built, what each AC measured, and two defects the drive found under it (one of them ate every Look undo).
 
 ## 1. The person sentence
 
@@ -75,3 +76,61 @@ look, then click to edit it, but that feels weird."*
 - Looks carry per-visual-state values (hover/pressed). The node-side editor shows states. The
   Look-only host either shows them too or says *"States: edit on a node"*. Don't drop them silently.
 - Deleting is disabled while worn. Keep that rule in the new host.
+
+## 6. Built (s1, 2026-09-24)
+
+**The host, and why it is the inspector.** `views/panels/LookEditor/LookEditorPanel.tsx`, registered
+as a transient sidebar panel like Properties (`router.setup.ts`) and put in the inspector by a new
+`SidebarModel.showInInspector(id, props)` — the same slot `switchToNode` uses, so a Look's fields are
+edited where a node's are (P101 INS-001), beside the Styles list that opened them. The seam is the
+one §2 named: a **detached** `NodeGraphNode({ type: typename, variant: name })` with no owner, the
+property panel's own `ModelProxy` in `editMode 'variant'`, and the same `Ports` view mounted in the
+property editor's shell (so the rows and the edit-mode tint are the property panel's). Every write
+lands on the project's `VariantModel` through `setParameter(…, { undo: true })` — one undo step per
+field, `variantParametersChanged` to the viewer and the autosave, exactly the node-side path with the
+node taken out. Visual states are drawn with the node side's `VisualStates`. Header: *Editing the
+Look **Card** · Group · worn by 14 nodes* (or *worn by nothing yet*), *Show in Styles*, *Done*, and
+a line saying the change reaches every wearer. A Look renamed or deleted under the host says so.
+
+**Styles side.** The Look row's name is a button (*Edit the Look X*) and the ⋯ menu has *Edit*.
+**Node side.** The Look row has *In Styles* → `revealStyle({ kind: 'look', name, typename })`.
+
+**Words.** *Edit variant* → *Editing the Look*; the three toasts; the undo labels (*Change Look*,
+*Create a Look*, *Update Look*, *add Look*, *rename Look*, *set Look state transition* ×2); the
+conflict warning and the four merge-conflict warnings. `tests-unit/cmg-006/look-editor.test.ts`
+reads the string literals and JSX text of eight files, comments stripped, identifiers excluded by
+shape (event names, the edit mode, warning keys, class names, `${…}` interpolations, paths).
+
+**🔴 Found under it, fixed, both pre-existing:**
+
+1. **`findVariant(name, typename)` never found anything.** `ProjectModel.findVariant` takes a node
+   TYPE object (it reads `nodetype.localName`); `LooksSection.onRename` handed it the typename
+   string, so renaming a Look to a name another Look of the same type had was never refused. Both
+   callers now use `findLook(project, typename, name)`.
+2. **A Look edit could not be undone once the autosave had landed** — node side too. `hashProjectLevel`
+   hashed the built styles object, where a Look that never set one carries `stateParameters:
+   undefined`; `JSON.stringify` drops the key on the way to disk, `stableStringify` did not. So the
+   baseline recorded at the editor's OWN write never matched the file read back, the watcher's
+   decision was `reload`, the slice replaced every `VariantModel` from disk, and every undo closure
+   written before that pointed at a dead object. Measured: same object at 1.5 s after a write,
+   replaced at 3 s; undo then wrote `0.42 → (old object)` and the project kept `0.42`. Fix: the
+   hash takes one JSON round trip so both sides are in disk space (`own-write-echo.test.ts`, 5
+   arms). And, for a genuine external slice, `applyProjectLevelSlice` now re-points every node's
+   cached Look (`updateVariantRefs`), which it never did — a wearer read a Look nobody wrote to any
+   more.
+3. `NodeGraphNode.isPortConnected` read `this.owner.connections` unguarded: a node with no graph
+   threw. Guarded (no graph, no connections).
+
+**§4 measured** (`scripts/devtools/drive-cmg006-look-editor.js` on a fresh copy *CMG Drive Looks C*
+← *CMP-001 Composer Drive*: a Text Look worn by 3, a Gamma Look worn by 0):
+
+| AC | reading |
+|---|---|
+| 1 | nothing selected (inspector empty), Styles → Looks → *Drive Look*: inspector `LookEditor`, header *worn by 3 nodes*, 51 inputs, Styles still active on the left. Opacity `null → 0.42`: undo location `0 → 1`; all 3 wearers resolve `0.42`; `nodegx.styles.json` holds `0.42` (polled, the autosave lands 1–3 s later); the preview shows 10 elements at opacity `0.42` (3 wearers, their inner elements). Shot `shots/cmg006-ac1-look-editor-from-styles.png` |
+| 2 | *S27Variant* (0 wearers): fields open (13 controls), *worn by nothing yet*; its `tag` field written to the model and on disk; a fresh node of that type given the Look reads the new value. Shot `shots/cmg006-ac2-unworn-look.png` |
+| 3 | a wearer selected, *In Styles*: Styles active, Looks open, the *Drive Look* row in view and highlighted. Shot `shots/cmg006-ac3-in-styles.png` |
+| 4 | spec: eight files, zero spoken *variant*; the header says *Editing the Look* |
+| 5 | one `undo()` puts opacity back to `null` — after the autosave, which is the case that used to fail |
+| 6 | the node-side *Edit* still switches the property panel into Look edit mode, tinted, header *Editing the Look*. Shot `shots/cmg006-ac6-node-side-edit.png` |
+
+**Not built:** deleting from the host (§5: deleting stays on the Styles row, disabled while worn).

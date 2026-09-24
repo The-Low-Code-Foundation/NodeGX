@@ -270,6 +270,8 @@ export class NodeGraphNode extends Model {
   // the graph
   isPortConnected(portname, type?) {
     const _this = this;
+    // P103 CMG-006: a node with no graph (the Look editor's detached carrier) has no connections.
+    if (!this.owner) return false;
     return !!some(this.owner.connections, function (c) {
       return (
         ((!type || type === 'source') && c.fromId === _this.id && c.fromProperty === portname) ||
@@ -1203,7 +1205,7 @@ export class NodeGraphNode extends Model {
               level: 'error',
               showGlobally: true,
               message:
-                'There is a variant conflict, your variant is <strong>' +
+                'There is a Look conflict, your Look is <strong>' +
                 c.ours +
                 '</strong> and their is <strong>' +
                 c.theirs +
@@ -1283,7 +1285,7 @@ export class NodeGraphNode extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'Change variant',
+        label: 'Change Look',
         do: () => {
           this.setVariant(variant);
         },
@@ -1363,7 +1365,7 @@ export class NodeGraphNode extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'Create new variant',
+        label: 'Create a Look',
         do: () => {
           project.addVariant(variant);
           this.variant = variant;
@@ -1426,7 +1428,7 @@ export class NodeGraphNode extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'Update variant',
+        label: 'Update Look',
         do: () => {
           this.updateVariant(args);
         },

@@ -7,6 +7,8 @@ import { IconName } from '@noodl-core-ui/components/common/Icon';
 
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { InlineNameInput, StylesSection, useGoToWearer, useLooksRevision, useOpenUsageRow } from '../../shared';
+import { findLook } from '../../../LookEditor/LookEditorPanel';
+import { openLookEditor } from '../../../LookEditor/lookEditorRoute';
 import { displayTypeName } from '../../format';
 import { StylesSectionSpec } from '../../stylesPanelRoute';
 import { StyleRow, StyleSectionEmpty } from '../StyleRow';
@@ -18,8 +20,12 @@ import { StyleRow, StyleSectionEmpty } from '../StyleRow';
  * 🔴 **There is no "New Look" button here, and that is the design, not an omission.** A Look is
  * made of a node's styles ("save this text's styles as a new Look…", STY-003's menu), so creating
  * one from an empty panel would mean inventing a node type and a set of parameters out of nothing —
- * which is the MCP authoring question, named as its own phase in README §4.1. This surface renames,
- * deletes and counts. STY-005 §3 says so in writing.
+ * which is the MCP authoring question, named as its own phase in README §4.1.
+ *
+ * P103 CMG-006: this surface renames, deletes, counts — **and edits**. Richard: *"When I save a
+ * 'Look', it appears in the style tab, but I can do fuck all with it."* The row's name and its
+ * *Edit* item open the Look's fields in the inspector (`LookEditorPanel`), with or without a node
+ * wearing it.
  */
 export interface LooksSectionProps {
   section: StylesSectionSpec;
@@ -74,7 +80,10 @@ export function LooksSection({ section, isOpen, onOpenChange }: LooksSectionProp
     setRenaming(null);
     if (!newName || newName === variant.name) return;
 
-    if (ProjectModel.instance.findVariant(newName, variant.typename)) {
+    // ⚠️ Not `findVariant(newName, variant.typename)`: that takes a node TYPE object (it reads
+    // `.localName`) and, handed the typename string, never found anything — so renaming a Look to
+    // a name another Look of the same type already had was not refused (found by CMG-006's host).
+    if (findLook(ProjectModel.instance, variant.typename, newName)) {
       ToastLayer.showError('A Look with that name already exists');
       return;
     }
@@ -128,6 +137,9 @@ export function LooksSection({ section, isOpen, onOpenChange }: LooksSectionProp
             typename={typename}
             value={displayTypeName(typename)}
             layer="Look"
+            // CMG-006: the name opens the Look's fields, worn or not.
+            onActivate={() => openLookEditor({ typename, name })}
+            activateLabel={`Edit the Look ${name}`}
             usageCount={worn.length}
             // A Look is worn by nodes and never by another Look — STY-DESIGN §9 left
             // Look-extends-Look explicitly unbuilt — so this list has no `variants` half.
@@ -136,6 +148,7 @@ export function LooksSection({ section, isOpen, onOpenChange }: LooksSectionProp
             onToggleUsage={() => toggleUsage(`${typename}/${name}`)}
             onGoToWearer={goToWearer}
             menuItems={[
+              { label: 'Edit', icon: IconName.Sliders, onClick: () => openLookEditor({ typename, name }) },
               { label: 'Rename', icon: IconName.Pencil, onClick: () => setRenaming(`${typename}/${name}`) },
               {
                 label: 'Delete',

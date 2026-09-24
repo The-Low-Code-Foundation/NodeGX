@@ -63,6 +63,27 @@
   flex-direction: column;
 }
 
+/** P103 CMG-006 — the name as a door (a Look's fields). Same box as the text; the hover says it opens. */
+.TextButton {
+  appearance: none;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 3px;
+
+  &:hover .Name,
+  &:focus-visible .Name {
+    color: var(--theme-color-fg-highlight);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+  }
+}
+
 .Name {
   font-size: 11px;
   color: var(--theme-color-fg-default);

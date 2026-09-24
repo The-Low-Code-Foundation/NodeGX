@@ -485,6 +485,18 @@ export class SidebarModel extends Model<SidebarModelEvent, SidebarModelEventEven
   }
 
   /**
+   * P103 CMG-006 — put a registered (transient) panel in the inspector with these props, the way
+   * `switchToNode` puts a node's panel there. The Look editor opens this way from the Styles
+   * panel: there is no node to select, and the inspector is where a Look's fields are edited
+   * whether or not anything wears it. The next node selection replaces it, `hidePanels` clears it.
+   */
+  public showInInspector(id: string, args: Record<string, unknown>) {
+    this.panels[id] = createPanel(id, args);
+    this.inspectorId = id;
+    this.notifyListeners(SidebarModelEvent.inspectorChanged, id);
+  }
+
+  /**
    * Used by "doubleClick"
    *
    * @param command

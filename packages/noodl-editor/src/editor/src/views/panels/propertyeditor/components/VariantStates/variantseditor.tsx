@@ -20,6 +20,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
 
 import PopupLayer from '../../../../popuplayer';
+import { revealStyle } from '../../../StylesPanel/stylesPanelRoute';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { PickVariantPopup } from './PickVariantPopup';
 import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
@@ -134,13 +135,27 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
           <button type="button" className="panel-head-row-action" onClick={this.onEditVariant.bind(this)}>
             Edit
           </button>
+          {/* P103 CMG-006 §3.2 — node → Styles: the row in the Styles panel that manages this Look. */}
+          <button
+            type="button"
+            className="panel-head-row-action"
+            data-test="look-show-in-styles"
+            title="Show this Look in the Styles panel"
+            onClick={(e) => {
+              e.stopPropagation();
+              revealStyle({ kind: 'look', name: this.state.variant.name, typename: this.state.variant.typename });
+            }}
+          >
+            In Styles
+          </button>
         </div>
       );
     } else if (this.state.variant !== undefined && this.state.variant.name !== undefined && this.state.editMode) {
-      //Edit variant
+      // Editing the Look — P103 CMG-006: "Edit variant" was the one place the Variant→Look rename
+      // missed, and it was the header a person reads while editing.
       content = (
         <div style={{ width: '100%' }}>
-          <div className="variants-edit-mode-header">Edit variant</div>
+          <div className="variants-edit-mode-header">Editing the Look</div>
           <div className="variants-section">
             <label>{this.state.variant.name}</label>
             <button
@@ -199,19 +214,19 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
   performAddVariant(name) {
     if (ProjectModel.instance.findVariant(name, this.model.type)) {
       // Variant with name already exists for this node
-      ToastLayer.showError('Variant with the name already exists');
+      ToastLayer.showError('A Look with that name already exists');
       return;
     }
 
     this.model.createNewVariant(name, { undo: true });
 
-    ToastLayer.showSuccess('Variant created');
+    ToastLayer.showSuccess('Look created');
   }
 
   onUpdateVariant(evt) {
     this.model.updateVariant({ undo: true });
 
-    ToastLayer.showSuccess('Variant updated');
+    ToastLayer.showSuccess('Look updated');
 
     evt.stopPropagation();
   }

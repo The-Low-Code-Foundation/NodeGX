@@ -27,6 +27,13 @@ export interface StyleRowProps {
    * a button that says so; absent, it is the plain square it always was.
    */
   onSwatchClick?: (anchor: HTMLElement) => void;
+  /**
+   * P103 CMG-006 — pressing the row's name opens the thing itself (a Look's fields). Given, the
+   * name is a button that says so; absent, it is text.
+   */
+  onActivate?: () => void;
+  /** What pressing the name does, for the title and the label. */
+  activateLabel?: string;
   layer: StyleLayer;
   /**
    * How many nodes name this. `undefined` means *not counted* and prints nothing;
@@ -92,6 +99,8 @@ export function StyleRow({
   value,
   swatch,
   onSwatchClick,
+  onActivate,
+  activateLabel,
   layer,
   usageCount,
   wearers,
@@ -153,10 +162,24 @@ export function StyleRow({
             </div>
           ))}
 
-        <div className={css['Text']}>
-          <span className={css['Name']}>{name}</span>
-          {value ? <span className={css['Value']}>{value}</span> : null}
-        </div>
+        {onActivate ? (
+          <button
+            type="button"
+            className={`${css['Text']} ${css['TextButton']}`}
+            data-test={`style-row-open-${name}`}
+            title={activateLabel ?? `Open ${name}`}
+            aria-label={activateLabel ?? `Open ${name}`}
+            onClick={onActivate}
+          >
+            <span className={css['Name']}>{name}</span>
+            {value ? <span className={css['Value']}>{value}</span> : null}
+          </button>
+        ) : (
+          <div className={css['Text']}>
+            <span className={css['Name']}>{name}</span>
+            {value ? <span className={css['Value']}>{value}</span> : null}
+          </div>
+        )}
 
         <span className={css['Badge']} data-test={`style-row-badge-${name}`}>
           {layer}

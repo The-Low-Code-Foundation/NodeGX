@@ -46,7 +46,15 @@ export const PROJECT_LEVEL_KEYS: readonly ProjectLevelKey[] = ['project', 'route
 export function hashProjectLevel(content: unknown): string {
   if (content === null || content === undefined) return 'absent';
   const { modified: _m, ...rest } = content as Record<string, unknown>;
-  return hashString(stableStringify(rest));
+  // 🔴 P103 CMG-006 — hash what the DISK will hold, not the object in memory. A built styles file
+  // carries `stateParameters: undefined` on a Look that never set one; `JSON.stringify` drops that
+  // key on the way to disk, `stableStringify` did not, so the baseline recorded at our own write
+  // never matched the file read back. Every own write of `nodegx.styles.json` then read as an
+  // external change, the Look objects were replaced from disk ~2 s after each edit, and every undo
+  // closure written before that pointed at a dead object — a Look edit could not be undone once
+  // the autosave had landed (measured 2026-09-24: same object at 1.5 s, replaced at 3 s). One JSON
+  // round trip puts both sides of the comparison in disk space.
+  return hashString(stableStringify(JSON.parse(JSON.stringify(rest))));
 }
 
 /** What to do about a project-level file that just changed on disk. */
@@ -196,4 +204,13 @@ export function applyProjectLevelSlice(
     delete target.metadata.styles;
   }
   target.variants = (slice.variants ?? []).map(hydrateVariant);
+
+  // P103 CMG-006: every node caches the `VariantModel` it wears (`NodeGraphNode.variant`), and
+  // `NodeGraphModel` re-points those caches only on `variantAdded` / `Deleted` / `Renamed`. A slice
+  // applied from disk replaces the objects without raising any of them, so from here on a wearer
+  // read a Look nobody wrote to any more — the Look editor changed the new object, the preview
+  // followed (the viewer resolves by name), and the wearer's own resolved value stayed at what the
+  // old object held. Measured 2026-09-24 on a project whose files were swapped under it.
+  const project = target as { forEachComponent?: (fn: (c: { graph?: { updateVariantRefs?: () => void } }) => void) => void };
+  project.forEachComponent?.((component) => component.graph?.updateVariantRefs?.());
 }
