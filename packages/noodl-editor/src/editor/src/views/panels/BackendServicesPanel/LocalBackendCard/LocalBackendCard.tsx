@@ -11,8 +11,9 @@
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 
-import { dataBrowserAvailability, securityFor } from '@noodl-models/BackendServices';
+import { securityFor } from '@noodl-models/BackendServices';
 import { SidebarModel } from '@noodl-models/sidebar';
+import { getIpc } from '@noodl-utils/ipc';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
 import { IconButton } from '@noodl-core-ui/components/inputs/IconButton';
@@ -21,6 +22,7 @@ import { MenuDialogItem, MenuDialogWidth } from '@noodl-core-ui/components/popup
 import { Text, TextType } from '@noodl-core-ui/components/typography/Text';
 
 import { showContextMenuInPopup } from '../../../ShowContextMenuInPopup';
+import { ToastLayer } from '../../../ToastLayer/ToastLayer';
 import { LocalBackendInfo } from '../hooks/useLocalBackends';
 import { SecurityDisclosure } from '../SecurityDisclosure/SecurityDisclosure';
 import { CloudFunctionsSection } from './CloudFunctionsSection';
@@ -108,7 +110,6 @@ export function LocalBackendCard({
 }: LocalBackendCardProps) {
   const [isOperating, setIsOperating] = useState(false);
   const statusDisplay = getStatusDisplay(backend);
-  const dataBrowser = dataBrowserAvailability('nodegx', 'managed');
 
   /**
    * PNL-009: open a backend surface as a panel.
@@ -191,6 +192,16 @@ export function LocalBackendCard({
     }
   }, [onStart]);
 
+  // Open the backend's web dashboard. The main process resolves the admin
+  // credential and opens the browser, so the token never reaches this renderer.
+  const handleOpenManager = useCallback(async () => {
+    try {
+      await getIpc()?.invoke('backend:open-dashboard', backend.id);
+    } catch (error) {
+      ToastLayer.showError(`Could not open the backend manager: ${(error as Error).message}`);
+    }
+  }, [backend.id]);
+
   // Copy endpoint to clipboard
   const handleCopyEndpoint = useCallback(() => {
     if (backend.endpoint) {
@@ -216,11 +227,10 @@ export function LocalBackendCard({
     }
 
     if (backend.running) {
+      // Triggers, Email and Sign-in providers left this menu for the backend
+      // manager, which has all three. These two stay because it has neither.
       items.push(
-        { label: 'Triggers', icon: IconName.Lightning, onClick: () => openSurface('triggers') },
-        { label: 'Email', icon: IconName.Chat, onClick: () => openSurface('email') },
         { label: 'Search', icon: IconName.Search, onClick: () => openSurface('search') },
-        { label: 'Sign-in providers', icon: IconName.User, onClick: () => openSurface('auth') },
         // SB-015 §6.4a: the credentials a cloud function's Secret node reads.
         // Until this entry existed, the only way to provision one was to
         // hand-edit a mode-0600 secrets.json the editor never shows you.
@@ -448,42 +458,22 @@ export function LocalBackendCard({
           </div>
         )}
 
+        {/* Data, Schema and Access used to be three buttons here opening
+            three editor panels. The backend's own web dashboard does all of
+            that and more, and does it better, so the card manages the backend
+            (which one, running or not) and hands everything inside it to the
+            dashboard in the default browser. */}
         {backend.running && (
-          <>
-            {/* BCN-009: the same gate the external cards ask, so the two
-                cannot disagree about who may open a record grid. */}
-            <div className={css.SecondaryAction} title={dataBrowser.reason}>
-              <PrimaryButton
-                label="Data"
-                size={PrimaryButtonSize.Small}
-                variant={PrimaryButtonVariant.Muted}
-                onClick={() => openSurface('data')}
-                isDisabled={!dataBrowser.isAvailable}
-                isGrowing
-                testId={`open-data-${backend.id}`}
-              />
-            </div>
-            <div className={css.SecondaryAction}>
-              <PrimaryButton
-                label="Schema"
-                size={PrimaryButtonSize.Small}
-                variant={PrimaryButtonVariant.Muted}
-                onClick={() => openSurface('schema')}
-                isGrowing
-                testId={`open-schema-${backend.id}`}
-              />
-            </div>
-            <div className={css.SecondaryAction}>
-              <PrimaryButton
-                label="Access"
-                size={PrimaryButtonSize.Small}
-                variant={PrimaryButtonVariant.Muted}
-                onClick={() => openSurface('permissions')}
-                isGrowing
-                testId={`open-permissions-${backend.id}`}
-              />
-            </div>
-          </>
+          <div className={css.SecondaryAction}>
+            <PrimaryButton
+              label="Manage data & settings ↗"
+              size={PrimaryButtonSize.Small}
+              variant={PrimaryButtonVariant.Muted}
+              onClick={handleOpenManager}
+              isGrowing
+              testId={`open-backend-manager-${backend.id}`}
+            />
+          </div>
         )}
 
         <div className={css.MoreAction}>

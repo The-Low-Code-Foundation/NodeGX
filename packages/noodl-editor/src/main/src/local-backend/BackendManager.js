@@ -17,7 +17,7 @@
  * @module local-backend/BackendManager
  */
 
-const { ipcMain, BrowserWindow } = require('electron');
+const { ipcMain, BrowserWindow, shell } = require('electron');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
@@ -173,6 +173,7 @@ class BackendManager {
     ipcMain.handle('backend:stop', async (_, id) => this.stopBackend(id));
     ipcMain.handle('backend:status', async (_, id) => this.getStatus(id));
     ipcMain.handle('backend:get', async (_, id) => this.getBackend(id));
+    ipcMain.handle('backend:open-dashboard', async (_, id) => this.openDashboard(id));
     ipcMain.handle('backend:export-schema', async (_, id, format) => this.exportSchema(id, format));
     ipcMain.handle('backend:getSchema', async (_, id) => this.getSchema(id));
     ipcMain.handle('backend:getTableSchema', async (_, id, tableName) => this.getTableSchema(id, tableName));
@@ -956,6 +957,23 @@ class BackendManager {
       }
     }
     return result;
+  }
+
+  /**
+   * Open the backend's own web dashboard (`/_admin`) in the default browser,
+   * already signed in.
+   *
+   * The admin credential goes in the URL fragment, which the dashboard reads
+   * once and scrubs from the address bar. It is resolved here in the main
+   * process and handed straight to the OS, so the renderer never holds it.
+   * @param {string} id
+   */
+  async openDashboard(id) {
+    const supervisor = this.requireRunning(id, 'open the backend manager');
+    const token = supervisor.adminToken();
+    const url = `${supervisor.endpoint}/_admin` + (token ? `#token=${encodeURIComponent(token)}` : '');
+    await shell.openExternal(url);
+    return true;
   }
 
   /**

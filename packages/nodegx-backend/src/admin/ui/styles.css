@@ -12,6 +12,8 @@
  */
 
 :root {
+  /* Native scrollbars and date pickers in the page's own dark, not a white strip. */
+  color-scheme: dark;
   --bg-page: #07090c;
   --bg-0: #0b0e12;
   --bg-1: #12161b;
@@ -738,4 +740,136 @@ td.actions {
 /* A record needs the width a table needs. FED-007. */
 .modal.wide {
   width: min(900px, 100%);
+}
+
+/* ------------------------------------------------ visual record editing -- */
+/*
+ * The editor's data views, brought here: a grid whose cells edit in place, and
+ * forms with one labelled input per field instead of a JSON textarea.
+ */
+
+div.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+div.field b {
+  color: var(--fg-hi);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+div.field input:not([type='checkbox']),
+div.field select {
+  width: 100%;
+}
+
+.field-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.req {
+  color: var(--warning);
+  font-size: 10.5px;
+}
+
+.hint {
+  color: var(--fg-muted);
+  font-size: 11px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.chip.type {
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+
+.th-type {
+  color: var(--fg-muted);
+  font-weight: 400;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+th.pick,
+td.pick {
+  width: 28px;
+  padding-right: 0;
+}
+
+td.editable {
+  cursor: text;
+}
+
+td.editable:hover {
+  background: var(--bg-2);
+  box-shadow: inset 0 0 0 1px var(--bg-4);
+}
+
+td.locked,
+td.shy,
+tr.sys td {
+  color: var(--fg-muted);
+}
+
+td.cell-edit {
+  padding: 2px 4px;
+  overflow: visible;
+}
+
+td.cell-edit input:not([type='checkbox']),
+td.cell-edit select {
+  width: 100%;
+  min-width: 140px;
+}
+
+button.inline-edit {
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed var(--bg-4);
+  padding: 0;
+  color: var(--fg-hi);
+  font: inherit;
+  cursor: text;
+}
+
+button.inline-edit:hover {
+  border-bottom-color: var(--primary);
+}
+
+select.inline-type {
+  padding: 1px 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.field-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-line > input[type='text'] {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+/* A wide collection scrolls sideways; its Edit and Delete must not scroll away with it. */
+table.grid td.actions,
+table.grid th:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--bg-1);
+  box-shadow: -1px 0 0 var(--bg-3);
 }
