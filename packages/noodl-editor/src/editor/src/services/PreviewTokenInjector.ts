@@ -21,8 +21,18 @@ import { StyleTokensModel } from '../models/StyleTokensModel';
 
 const STYLE_ELEMENT_ID = 'noodl-design-tokens';
 
+/**
+ * P102 CMP-001 / RC-7 — the draft's element. Inserted **after** `STYLE_ELEMENT_ID`'s so the one
+ * variable it holds wins the cascade, and removed on Apply, Cancel, Escape and project close.
+ */
+const DRAFT_ELEMENT_ID = 'noodl-design-tokens-draft';
+
 export class PreviewTokenInjector {
   private static _instance: PreviewTokenInjector | null = null;
+
+  /** The token being composed and its draft value, or `null` when no composer is open. */
+  private _draft: { name: string; value: string } | null = null;
+  private _draftFrame: number | null = null;
 
   /**
    * Every preview surface that needs tokens. AIX-008 added a second one (the
@@ -52,6 +62,9 @@ export class PreviewTokenInjector {
 
     this._tokensModel = model;
 
+    // A composer left open across a project switch must not hand the next project its draft.
+    this.clearDraft();
+
     model.on('tokensChanged', () => this._inject(), this);
   }
 
@@ -62,6 +75,78 @@ export class PreviewTokenInjector {
   notifyDomReady(webview: Electron.WebviewTag): void {
     this._webviews.add(webview);
     this._injectInto(webview);
+    // A preview that reloaded mid-slide gets the draft back, or the canvas would stop following.
+    if (this._draft) this._writeDraftInto(webview, this._draft);
+  }
+
+  // ─── P102 RC-7: the draft ────────────────────────────────────────────────────
+
+  /**
+   * Show a value on the canvas **without saving it**: one `<style>` after the token block,
+   * holding one variable. 🔴 Nothing here touches the model, the file or the undo stack
+   * (README §6.9). Writes are coalesced to one per animation frame, so a slider dragged across
+   * a hundred positions queues one `executeJavaScript`, not a hundred.
+   */
+  setDraft(name: string, value: string): void {
+    this._draft = { name, value };
+    if (this._draftFrame !== null) return;
+    // ⚠️ A timer, not `requestAnimationFrame`: rAF never fires while the window is hidden, and an
+    // editor driven headlessly (every drive in `scripts/devtools/`) IS hidden — `document.hidden`
+    // is true and a draft scheduled on a frame would never reach the canvas. One frame's worth of
+    // milliseconds gives the same coalescing either way.
+    this._draftFrame = window.setTimeout(() => {
+      this._draftFrame = null;
+      const draft = this._draft;
+      if (!draft) return;
+      for (const webview of this._webviews) this._writeDraftInto(webview, draft);
+    }, 16);
+  }
+
+  /** Remove the draft element from every preview. Safe to call when there is none. */
+  clearDraft(): void {
+    if (this._draftFrame !== null) {
+      window.clearTimeout(this._draftFrame);
+      this._draftFrame = null;
+    }
+    if (!this._draft) return;
+    this._draft = null;
+    const script = `
+      (function() {
+        var el = document.getElementById('${DRAFT_ELEMENT_ID}');
+        if (el) el.remove();
+      })();
+    `;
+    for (const webview of this._webviews) {
+      webview.executeJavaScript(script).catch(() => {
+        // Webview navigated or was destroyed — nothing to remove.
+      });
+    }
+  }
+
+  /** The draft as it stands, for a spec or a drive to read. */
+  get draft(): { name: string; value: string } | null {
+    return this._draft;
+  }
+
+  private _writeDraftInto(webview: Electron.WebviewTag, draft: { name: string; value: string }): void {
+    const css = JSON.stringify(`:root {\n  ${draft.name}: ${draft.value};\n}`);
+    const script = `
+      (function() {
+        var id = '${DRAFT_ELEMENT_ID}';
+        var el = document.getElementById(id);
+        if (!el) {
+          el = document.createElement('style');
+          el.id = id;
+          var tokens = document.getElementById('${STYLE_ELEMENT_ID}');
+          if (tokens && tokens.parentNode) tokens.insertAdjacentElement('afterend', el);
+          else (document.head || document.documentElement).appendChild(el);
+        }
+        el.textContent = ${css};
+      })();
+    `;
+    webview.executeJavaScript(script).catch(() => {
+      // Webview navigated or was destroyed — no action needed.
+    });
   }
 
   /**

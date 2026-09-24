@@ -346,6 +346,10 @@ export {
 } from '../../noodl-editor/src/editor/src/models/StylePresets/presetFonts';
 export type { PresetFontPlan, PresetFontReader } from '../../noodl-editor/src/editor/src/models/StylePresets/presetFonts';
 export { checkFontFaces } from '../../noodl-editor/src/editor/src/validation/fontFaces';
+// P102 CMP-009 — a custom token the composer cannot open. Pure: it imports the codec module
+// (`@nodegx/project-contract/token-codecs`, the ONE path the editor and the census use) and
+// `diagnostics`.
+export { checkTokenComposable } from '../../noodl-editor/src/editor/src/validation/tokenComposable';
 export type { StylePreset } from '../../noodl-editor/src/editor/src/models/StylePresets/StylePresetTypes';
 
 // ─── Project docs (AIX-009) ───────────────────────────────────────────────────

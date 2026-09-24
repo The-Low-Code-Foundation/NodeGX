@@ -68,7 +68,7 @@ export interface NumberUnitInputProps {
  * ⚠️ A text glyph here would be counted by the type-scale ratchet and would sit on the UI font's
  * baseline rather than the field's, which is the reason `MarginPaddingInput` draws its arrows.
  */
-function TokenGlyph() {
+export function TokenGlyph() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
       <path

@@ -61,6 +61,106 @@
   text-overflow: ellipsis;
 }
 
+// ─── P102 CMP-001 (RC-3): the composer rows ───────────────────────────────────
+
+.composes {
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.TokenWords {
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.PreviewButton {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.LargePreview {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #ffffff;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+// A shadow needs room to fall into: the stage is the 28px button, the card is smaller.
+.ShadowStage {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--theme-color-bg-1, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .LargePreview {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+  }
+}
+
+.GradientPreview {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.DurationBar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--theme-color-primary);
+  align-self: center;
+  margin: 0 3px;
+  min-width: 2px;
+}
+
+.FamilyPreview {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--theme-color-fg-default);
+  background: var(--theme-color-bg-2);
+}
+
+.PencilButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast) var(--transition-ease-out);
+
+  .TokenRow:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+}
+
 // ─── Override reset button ────────────────────────────────────────────────────
 
 .ResetButton {

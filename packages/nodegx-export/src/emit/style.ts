@@ -308,7 +308,10 @@ const CONSUMED = new Set([
   'boxShadowOffsetY',
   'boxShadowBlurRadius',
   'boxShadowSpreadRadius',
-  'boxShadowColor'
+  'boxShadowColor',
+  // P102 CMP-008 — the shadow source switch and the token it names.
+  'boxShadowSource',
+  'boxShadowToken'
 ]);
 
 const BORDER_SIDES: Array<{ param: string; css: string }> = [
@@ -625,7 +628,10 @@ export function computeNodeStyle(
   // states it; the two position halves fold into object-position when authored.
   if (role === 'video') {
     for (const name of ['objectFit', 'objectPositionX', 'objectPositionY']) consumed.add(name);
-    decls.push({ prop: 'object-fit', value: cssParam('objectFit') ?? String(catalogDefault('objectFit') ?? 'contain') });
+    decls.push({
+      prop: 'object-fit',
+      value: cssParam('objectFit') ?? String(catalogDefault('objectFit') ?? 'contain')
+    });
     if (params.has('objectPositionX') || params.has('objectPositionY')) {
       const x = cssParam('objectPositionX') ?? '50%';
       const y = cssParam('objectPositionY') ?? '50%';
@@ -675,7 +681,11 @@ export function computeNodeStyle(
   if (uniformRadius !== undefined) {
     decls.push({ prop: 'border-radius', value: uniformRadius });
   }
-  if (presentCorners.length === 4 && uniformRadius === undefined && corners.every((c) => c.value === corners[0].value)) {
+  if (
+    presentCorners.length === 4 &&
+    uniformRadius === undefined &&
+    corners.every((c) => c.value === corners[0].value)
+  ) {
     decls.push({ prop: 'border-radius', value: corners[0].value! });
   } else {
     for (const corner of presentCorners) decls.push({ prop: corner.css, value: corner.value! });
@@ -685,7 +695,12 @@ export function computeNodeStyle(
 
   // The four boxShadow* params fold into one box-shadow when enabled; absent pieces take the
   // catalog's port defaults because the interpreter falls back to exactly those.
-  if (literal('boxShadowEnabled') === true) {
+  // P102 CMP-008 (RC-5) — in token mode the whole shadow is one `var(--shadow-x)`, exactly as the
+  // runtime's `_updateBoxShadow` emits it; the six custom pieces are ignored, not folded in.
+  const shadowToken = cssParam('boxShadowToken');
+  if (literal('boxShadowEnabled') === true && literal('boxShadowSource') === 'token') {
+    if (shadowToken && shadowToken.trim() !== '') decls.push({ prop: 'box-shadow', value: shadowToken.trim() });
+  } else if (literal('boxShadowEnabled') === true) {
     const piece = (name: string) => {
       const authored = params.get(name);
       return authored !== undefined ? shadowLength(cssValue(authored)) : shadowLength(catalogDefault(name));
@@ -694,9 +709,9 @@ export function computeNodeStyle(
     const inset = literal('boxShadowInset') === true ? 'inset ' : '';
     decls.push({
       prop: 'box-shadow',
-      value: `${inset}${piece('boxShadowOffsetX')} ${piece('boxShadowOffsetY')} ${piece(
-        'boxShadowBlurRadius'
-      )} ${piece('boxShadowSpreadRadius')} ${color}`
+      value: `${inset}${piece('boxShadowOffsetX')} ${piece('boxShadowOffsetY')} ${piece('boxShadowBlurRadius')} ${piece(
+        'boxShadowSpreadRadius'
+      )} ${color}`
     });
   }
 
@@ -858,11 +873,20 @@ export function iconSourceOf(node: NodeIR, catalog: CatalogIndex): IconSource {
       : String((node.catalogRef && catalog.inputDefault(node.catalogRef, 'iconSourceType')) ?? 'icon');
   if (sourceType === 'image') {
     const src = param('iconImageSource');
-    return src?.kind === 'literal' && typeof src.value === 'string' ? { kind: 'image', src: src.value } : { kind: 'none' };
+    return src?.kind === 'literal' && typeof src.value === 'string'
+      ? { kind: 'image', src: src.value }
+      : { kind: 'none' };
   }
   const source = param('iconIconSource');
   if (source?.kind !== 'json' || typeof source.value !== 'object' || source.value === null) return { kind: 'none' };
-  const value = source.value as { kind?: string; url?: string; symbolId?: string; class?: string; code?: string; codeAsClass?: boolean };
+  const value = source.value as {
+    kind?: string;
+    url?: string;
+    symbolId?: string;
+    class?: string;
+    code?: string;
+    codeAsClass?: boolean;
+  };
   if (value.kind === 'sprite') {
     return typeof value.url === 'string' && typeof value.symbolId === 'string'
       ? { kind: 'sprite', url: value.url, symbolId: value.symbolId }
@@ -873,7 +897,10 @@ export function iconSourceOf(node: NodeIR, catalog: CatalogIndex): IconSource {
     // Font — IconGlyph's two branches: codeAsClass sets carry one class per glyph; the others
     // put the codepoint in the element's text.
     if (value.codeAsClass === true) {
-      return { kind: 'font', classes: [value.class, value.code].filter((c): c is string => typeof c === 'string' && c.length > 0) };
+      return {
+        kind: 'font',
+        classes: [value.class, value.code].filter((c): c is string => typeof c === 'string' && c.length > 0)
+      };
     }
     return {
       kind: 'font',
@@ -911,9 +938,7 @@ export function computeRoleCss(
   styles?: StylesIR
 ): RoleCss {
   const result: RoleCss = { blocks: [], containerQueries: [], notes: [] };
-  const params = new Map(
-    effectiveParameters(node).map((p) => [p.name, resolveColorParam(node, p, catalog, styles)])
-  );
+  const params = new Map(effectiveParameters(node).map((p) => [p.name, resolveColorParam(node, p, catalog, styles)]));
   const literal = (name: string): string | number | boolean | undefined => {
     const v = params.get(name);
     return v?.kind === 'literal' ? v.value : undefined;

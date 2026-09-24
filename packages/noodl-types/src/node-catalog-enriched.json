@@ -12950,6 +12950,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -12965,6 +12989,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -14683,6 +14721,29 @@
           {
             "condition": "boxShadowEnabled = true",
             "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
               "boxShadowInset",
@@ -15479,6 +15540,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -15494,6 +15579,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -16744,6 +16843,29 @@
           },
           {
             "condition": "boxShadowEnabled = true",
+            "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -45995,6 +46117,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -46010,6 +46156,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -47456,6 +47616,29 @@
           {
             "condition": "boxShadowEnabled = true",
             "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
               "boxShadowInset",
@@ -48158,6 +48341,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -48173,6 +48380,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -49490,6 +49711,29 @@
           {
             "condition": "boxShadowEnabled = true",
             "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
               "boxShadowInset",
@@ -50180,6 +50424,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -50195,6 +50463,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -51941,6 +52223,29 @@
           {
             "condition": "boxShadowEnabled = true",
             "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
+            "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
               "boxShadowInset",
@@ -52633,6 +52938,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -52648,6 +52977,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -53971,6 +54314,29 @@
           },
           {
             "condition": "boxShadowEnabled = true",
+            "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",
@@ -56967,6 +57333,30 @@
           "allowVisualStates": true
         },
         {
+          "name": "boxShadowSource",
+          "displayName": "Shadow Source",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Custom",
+                "value": "custom"
+              },
+              {
+                "label": "From a style token",
+                "value": "token"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "custom",
+          "description": "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together",
+          "index": 250.5,
+          "allowVisualStates": true
+        },
+        {
           "name": "boxShadowSpreadRadius",
           "displayName": "Spread Radius",
           "group": "Box Shadow",
@@ -56982,6 +57372,20 @@
           "default": 2,
           "description": "How much larger than the element the shadow is drawn",
           "index": 254,
+          "allowVisualStates": true
+        },
+        {
+          "name": "boxShadowToken",
+          "displayName": "Shadow Token",
+          "group": "Box Shadow",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "default": "var(--shadow-md)",
+          "description": "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel",
+          "index": 250.7,
           "allowVisualStates": true
         },
         {
@@ -58936,6 +59340,29 @@
           },
           {
             "condition": "boxShadowEnabled = true",
+            "inputs": [
+              "boxShadowSource"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = token",
+            "inputs": [
+              "boxShadowToken"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource NOT SET",
+            "inputs": [
+              "boxShadowOffsetX",
+              "boxShadowOffsetY",
+              "boxShadowInset",
+              "boxShadowBlurRadius",
+              "boxShadowSpreadRadius",
+              "boxShadowColor"
+            ]
+          },
+          {
+            "condition": "boxShadowEnabled = true AND boxShadowSource = custom",
             "inputs": [
               "boxShadowOffsetX",
               "boxShadowOffsetY",

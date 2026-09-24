@@ -189,10 +189,10 @@ function toPortParameters(styles: Record<string, string>): Record<string, string
         parts.length === 1
           ? [parts[0], parts[0], parts[0], parts[0]]
           : parts.length === 2
-            ? [parts[0], parts[1], parts[0], parts[1]]
-            : parts.length === 3
-              ? [parts[0], parts[1], parts[2], parts[1]]
-              : [parts[0], parts[1], parts[2], parts[3]];
+          ? [parts[0], parts[1], parts[0], parts[1]]
+          : parts.length === 3
+          ? [parts[0], parts[1], parts[2], parts[1]]
+          : [parts[0], parts[1], parts[2], parts[3]];
       out[`${key}Top`] = top;
       out[`${key}Right`] = right;
       out[`${key}Bottom`] = bottom;
@@ -342,6 +342,13 @@ export interface RenderVocabularyOptions {
 
 const DEFAULT_MAX_TOKENS_PER_CATEGORY = 40;
 
+/** P102 CMP-009 — one line of grammar per composer type, in the shape the composer opens. */
+export const COMPOSABLE_SPELLINGS =
+  'COMPOSABLE SPELLINGS — write these so the Styles panel opens them visually: shadow ' +
+  '`[inset] <x>px <y>px <blur>px [<spread>px] rgb(0 0 0 / <a>)|var(--colour)`, layers joined by ", "; ' +
+  'gradient `linear-gradient(<n>deg|to <side>, <colour> [<n>%], …)` or `radial-gradient(<w>% <h>% at <x>% <y>%, …)`; ' +
+  'easing `linear` or `cubic-bezier(a, b, c, d)`; duration `<n>ms`; font family `<lead>, <fallback>, …`.';
+
 /**
  * Render the vocabulary as a compact prompt block: category summaries (token
  * NAMES only — the agent references names, never values), and the legal
@@ -365,6 +372,12 @@ export function renderStyleVocabulary(vocab: StyleVocabulary, options: RenderVoc
       lines.push(`- ${cat.label}: ${shown.join(', ')}${suffix}${note}`);
     }
   }
+
+  // P102 CMP-009 — the grammar the composer opens visually, in one line, for a model that will
+  // copy it. It is the codec module's grammar (`@nodegx/project-contract/token-codecs`), stated
+  // here because this block is what agents read before they write a token; `set_project_tokens`
+  // carries a five-word pointer to it. Anything else is valid CSS that opens as raw text.
+  lines.push(COMPOSABLE_SPELLINGS);
 
   if (vocab.compositions.length > 0) {
     lines.push('');
@@ -420,7 +433,7 @@ export function renderStyleVocabulary(vocab: StyleVocabulary, options: RenderVoc
     lines.push(
       'SHIPPED LOOKS — a library of coherent styles per element type, NOT settable parameters. ' +
         '"variant" is a connection-only port: setting it as a parameter is discarded and is a validation ' +
-        'error. To give a node one of these looks, copy BOTH its element type\'s defaults AND the look\'s own ' +
+        "error. To give a node one of these looks, copy BOTH its element type's defaults AND the look's own " +
         'parameters onto the node (the look lists only what it changes):'
     );
     const spellOut = options.elementTypes ? new Set(options.elementTypes) : null;

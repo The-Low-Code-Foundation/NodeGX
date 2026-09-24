@@ -1,6 +1,7 @@
 import React from 'react';
 import { Root } from 'react-dom/client';
 
+import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
 import { type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
 import {
   capabilityProbes,
@@ -23,24 +24,25 @@ import SchemaHandler from '@noodl-utils/schemahandler';
 
 import View from '../../../../../../shared/ListenableView';
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
+import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 import PopupLayer from '../../../popuplayer';
 import { CodeEditorType } from '../CodeEditor';
+import { MakeShadowTokenRow } from '../components/makeShadowToken';
 import { PropertyFilterInput } from '../components/PropertyFilterInput';
 import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups';
-import { displayableValue, readField, treatmentOf } from '@noodl-models/Looks/fieldState';
 import { ControlHost, PropertyRow, type PropertyRowCapability, type PropertyRowLook } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
 import { WIDGET_COMPONENTS } from '../components/widgets';
+import { describeRows, type RowDescriptor, type RowPortLike } from '../model/describeRows';
+import { groupGatesFor, type GroupGate } from '../model/groupGate';
+import { widgetForPort, type WidgetId } from '../model/widgets';
 import { ModelProxy } from '../models/modelProxy';
 import { PagesType } from '../Pages';
 import { countFilterableRows, filterGroups, isFilterActive, shouldOfferFilter } from '../propertyPanelFilter';
 import { hintsForNode, HINTABLE_PORTS, HINT_INPUT_PARAMETERS } from '../propertyPanelHints';
 import { ADVANCED_CSS_GROUP, countActivePorts, isParameterSet, orderPropertyGroups } from '../propertyPanelTiers';
 import { propertyPanelViewState } from '../propertyPanelViewState';
-import { describeRows, type RowDescriptor, type RowPortLike } from '../model/describeRows';
-import { groupGatesFor, type GroupGate } from '../model/groupGate';
-import { widgetForPort, type WidgetId } from '../model/widgets';
 import { AlignToolsType } from './AlignTools/AlignToolsType';
 import { BasicType } from './BasicType';
 import { BooleanType } from './BooleanType';
@@ -81,7 +83,6 @@ import {
   WorkflowValidateType,
   WorkflowValueType
 } from './WorkflowTypes';
-import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 type Port = {
   popout?: TSFixme;
@@ -595,33 +596,45 @@ export class Ports extends View {
       const quiet = Boolean(groupGate && row && groupGate.portNames.indexOf(row.name) !== -1);
 
       nodes.push(
-        React.createElement(
-          PropertyRow,
-          {
-            key: v.name || `${v.group || 'group'}#${j}`,
-            description: this.rowDescription(row),
-            capability: this.rowCapability(row, target),
-            gate: switchedOff
-              ? {
-                  reason: switchedOff,
-                  isConnected: Boolean(row && row.connected),
-                  onFocusGate: quiet ? undefined : () => this.focusGatePort(switchedOff.gatePortName),
-                  quiet
-                }
-              : undefined,
-            // P94 STY-003 rules 2 and 3 — where this row's value came from.
-            look: this.rowLook(v.name),
-            // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
-            // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
-            hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
-            // As a prop rather than `createElement`'s third argument: `PropertyRowProps` declares
-            // `children`, and the variadic overload does not satisfy a props type that requires it.
-            children: control
-          }
-        )
+        React.createElement(PropertyRow, {
+          key: v.name || `${v.group || 'group'}#${j}`,
+          description: this.rowDescription(row),
+          capability: this.rowCapability(row, target),
+          gate: switchedOff
+            ? {
+                reason: switchedOff,
+                isConnected: Boolean(row && row.connected),
+                onFocusGate: quiet ? undefined : () => this.focusGatePort(switchedOff.gatePortName),
+                quiet
+              }
+            : undefined,
+          // P94 STY-003 rules 2 and 3 — where this row's value came from.
+          look: this.rowLook(v.name),
+          // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
+          // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
+          hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
+          // As a prop rather than `createElement`'s third argument: `PropertyRowProps` declares
+          // `children`, and the variadic overload does not satisfy a props type that requires it.
+          children: control
+        })
       );
     }
     return nodes;
+  }
+
+  /**
+   * P102 CMP-008 (RC-5) — *Make this a token*, drawn under the six custom fields of the Box Shadow
+   * group while the shadow is on and its source is Custom. Keyed by the group's name, the way
+   * `propertyPanelTiers` keys its tiers: the group is the mixin's, and every node that carries
+   * `addShadowInputs` names it identically.
+   */
+  private withMakeShadowTokenRow(groupName: string, rows: React.ReactNode[]): React.ReactNode[] {
+    if (groupName !== 'Box Shadow') return rows;
+    const model = this.model;
+    if (!model || model.getParameter('boxShadowEnabled') !== true) return rows;
+    const source = model.getParameter('boxShadowSource');
+    if (source !== undefined && source !== 'custom') return rows;
+    return [...rows, React.createElement(MakeShadowTokenRow, { key: 'make-shadow-token', node: model })];
   }
 
   /**
@@ -1075,7 +1088,7 @@ export class Ports extends View {
       // AC2: a collapsed group still reports how much of it is live, so folding CSS away
       // cannot become a new hiding place for FB-018's confusion.
       activeCount: this.countActiveInGroup(g),
-      rows: this.renderParams(g.views, groupGates),
+      rows: this.withMakeShadowTokenRow(g.name, this.renderParams(g.views, groupGates)),
       gate: this.groupGateLine(groupGates.get(g.name)),
       // P94 STY-003 rule 2 — the source, named once per group (design §3.1: "so the per-field
       // labels do not have to shout"). Only on groups that actually hold a row the Look speaks

@@ -384,6 +384,15 @@ export enum DiagnosticCode {
    */
   FontFaceNotShipped = 'font-face-not-shipped',
   /**
+   * P102 CMP-009 — a custom shadow, gradient, easing, duration or font-family token written in a
+   * spelling the Styles panel's composer cannot open. The value is valid CSS and renders; it only
+   * opens as raw text, and the person has to type CSS to change it, which is what the composer
+   * exists to end. The check runs the **same codec** the editor and the round-trip census use, so
+   * the validator and the composer can never disagree. A warning, project-wide, once per token,
+   * with the codec's reason (*lengths must be px*) and a suggested spelling when one is an edit away.
+   */
+  TokenNotComposable = 'token-not-composable',
+  /**
    * A bare number on a units-typed port that is read as a **percentage** —
    * `width`, `height`, `maxWidth`, `minWidth`. `{ value, unit }` is the form
    * real content uses: across the whole repository these ports are written in

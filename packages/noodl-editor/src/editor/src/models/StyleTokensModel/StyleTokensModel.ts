@@ -111,6 +111,14 @@ export class StyleTokensModel extends Model {
   }
 
   /**
+   * P102 CMP-001 §3 — a value with every `var()` inside it resolved, so a preview can paint a
+   * gradient or a shadow that names other tokens.
+   */
+  resolveInline(value: string): string {
+    return this.resolver.resolveInline(value);
+  }
+
+  /**
    * Get a single token by CSS custom property name.
    */
   getToken(name: string): StyleTokenRecord | undefined {

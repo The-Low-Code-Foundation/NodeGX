@@ -7,14 +7,17 @@ import { ParameterValueResolver } from '@noodl-utils/ParameterValueResolver';
 
 import { PropertyPanelInputType } from '@noodl-core-ui/components/property-panel/PropertyPanelInput';
 
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
+import { TokenGlyph } from '../components/NumberUnitInput';
+import tokenCss from '../components/NumberUnitInput.module.scss';
 import { PropertyPanelInputWithExpressionModal } from '../components/PropertyPanelInputWithExpressionModal';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { expressionProps } from './expressionProps';
-import { readNumberFieldEdit } from './NumberWithUnits';
+import { isTokenReference, readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
-import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
+import { fieldOffersTokens, openTokenFieldPopout } from './tokenFieldPopout';
 
 function firstType(type) {
   return NodeLibrary.nameForPortType(type);
@@ -171,7 +174,54 @@ export class BasicType extends TypeView {
       ...expressionProps(this)
     };
 
-    this.root.render(React.createElement(PropertyPanelInputWithExpressionModal, props));
+    const input = React.createElement(PropertyPanelInputWithExpressionModal, props);
+
+    // P102 CMP-008 — the design-token affordance on a STRING row, for the one string port that
+    // holds a whole token (`boxShadowToken`, by `PORT_TOKEN_RULES`). The number rows draw theirs
+    // inside `NumberUnitInput`; a string row has no such control, so the same glyph rides beside
+    // the field here and opens the same picker through the one opener HLT-012 built.
+    if (fieldOffersTokens(this.name) && !this.isConnected) {
+      const stored = this.parent.model.getParameter(this.name);
+      const isToken = isTokenReference(stored);
+      const pencil = React.createElement(
+        'button',
+        {
+          type: 'button',
+          className: `${tokenCss['TokenButton']} ${isToken ? tokenCss['is-token'] : ''}`,
+          style: { height: 24, alignSelf: 'flex-end' },
+          title: isToken ? `${String(stored)} — pick a different design token` : 'Pick a design token',
+          'aria-label': 'Pick a design token',
+          'data-test': `token-button-${this.name}`,
+          onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openTokenFieldPopout({
+              view: this,
+              portName: this.name,
+              anchor: e.currentTarget as HTMLElement,
+              currentValue: isToken ? String(stored) : undefined,
+              onSelect: (reference: string) => {
+                this.parent.setParameter(this.name, reference, { undo: true, label: `change ${this.displayName}` });
+                this.isDefault = false;
+                this.renderReact();
+              }
+            });
+          }
+        },
+        React.createElement(TokenGlyph)
+      );
+      this.root.render(
+        React.createElement(
+          'div',
+          { style: { display: 'flex', alignItems: 'stretch', width: '100%' } },
+          React.createElement('div', { style: { flex: 1, minWidth: 0 } }, input),
+          pencil
+        )
+      );
+      return;
+    }
+
+    this.root.render(input);
   }
 
   /**

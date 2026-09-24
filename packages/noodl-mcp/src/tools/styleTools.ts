@@ -25,10 +25,10 @@ import {
   type TokenCategory,
   type VocabProjectLook
 } from '../editor-deps';
-import { applyPresetFonts } from '../presetFontFiles';
 import { ToolError } from '../errors';
 import { readIconSets, renderIconSets } from '../iconSets';
 import { readImagery, renderImagery } from '../imagery';
+import { applyPresetFonts } from '../presetFontFiles';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { guarded, jsonResult } from './util';
@@ -182,7 +182,9 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
         'Override design token values for this project (e.g. change --primary to a brand colour). Only the ' +
         'overrides are stored; unlisted tokens keep their defaults. Token names must be CSS custom properties ' +
         '("--primary"). A value may be a literal ("#7c3aed", "12px") or a reference to another token ' +
-        '("var(--blue-600)"). Nodes reference the token by name as "var(--primary)".',
+        '("var(--blue-600)"). Nodes reference the token by name as "var(--primary)". Spell shadows, gradients, ' +
+        "easing, durations and font families as get_style_vocabulary's COMPOSABLE SPELLINGS line says, or the " +
+        'Styles panel opens them as raw text (validate_project warns).',
       inputSchema: {
         tokens: z
           .array(z.object({ name: z.string(), value: z.string() }))
@@ -208,7 +210,7 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
         'Adopt a built-in style preset for this project — a curated set of token overrides that gives a ' +
         'coherent look from the start. Applied as token overrides on top of the defaults (like ' +
         'set_project_tokens). A preset that names a typeface also copies its font files into noodl_modules ' +
-        '(and removes a previous preset\'s font folder if nobody changed it). List available presets via ' +
+        "(and removes a previous preset's font folder if nobody changed it). List available presets via " +
         'get_style_vocabulary (presets field).',
       inputSchema: {
         preset_id: z.string().describe(

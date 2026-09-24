@@ -144,6 +144,9 @@ export const PORT_TOKEN_RULES: readonly PortTokenRule[] = [
   { test: /fontSize$/i, categories: ['typography-size'] },
   { test: /fontWeight$/i, categories: ['typography-weight'] },
   { test: /fontFamily$/i, categories: ['typography-family'] },
+  // P102 CMP-008 (RC-5) — the one port that holds a whole shadow token. The blur/spread refusal
+  // below stays exactly as it is: those are pieces of a custom shadow, and no scale fits them.
+  { test: /boxShadowToken$/i, categories: ['shadow'] },
   // ⚠️ A shadow's blur and spread end in `Radius` and are not corner radii. Refused explicitly
   // rather than left to fall through, so a reader can see that it was decided.
   { test: /boxShadow(Blur|Spread)Radius$/i, categories: null },

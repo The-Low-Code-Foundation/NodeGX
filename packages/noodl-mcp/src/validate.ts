@@ -29,7 +29,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { Diagnostic, FunctionSecurityPolicy, ValidationReport } from './editor-deps';
+import { catalogGeneration, catalogIndex } from './catalog';
 import {
   authoredNodes,
   authoredPreconditionDiagnostics,
@@ -44,11 +44,16 @@ import {
   SCHEMA_IDS,
   SchemaValidator,
   SemanticValidator,
-  sortDiagnostics
+  sortDiagnostics,
+  buildEffectiveTokens,
+  checkFontFaces,
+  checkTokenComposable,
+  readStoredTokens,
+  type Diagnostic,
+  type FunctionSecurityPolicy,
+  type ValidationReport,
+  type ComponentNodesView
 } from './editor-deps';
-import type { ComponentNodesView } from './editor-deps';
-import { buildEffectiveTokens, checkFontFaces, readStoredTokens } from './editor-deps';
-import { catalogGeneration, catalogIndex } from './catalog';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
 
@@ -255,7 +260,6 @@ function structuralCheck(files: ComponentFiles): StructuralFailure[] {
   return failures;
 }
 
-
 /**
  * Validate a candidate create/update for `key`. `baseline` is the on-disk
  * files before the change (undefined for creates).
@@ -285,7 +289,10 @@ export function validateCandidate(
   const report = validator().validateComponent(candidateProject, name, validatorOptions);
 
   const views = authoredProjectViews(store, new Map([[name, candidate]]));
-  const diagnostics = dedupeDiagnostics([...report.diagnostics, ...preconditionDiagnostics(store, name, candidate, views)]);
+  const diagnostics = dedupeDiagnostics([
+    ...report.diagnostics,
+    ...preconditionDiagnostics(store, name, candidate, views)
+  ]);
 
   let preexistingKeys = new Set<string>();
   if (baseline) {
@@ -470,9 +477,20 @@ export function validateOnDisk(
   return {
     report: withPreconditions(report, [
       ...onDiskPreconditions(store, views, targets, emitSkipNotes),
-      ...fontFaceDiagnostics(store, root ? root.legacyName : '')
+      ...fontFaceDiagnostics(store, root ? root.legacyName : ''),
+      ...tokenComposableDiagnostics(store, root ? root.legacyName : '')
     ])
   };
+}
+
+/**
+ * P102 CMP-009 — a custom shadow, gradient, easing, duration or font token the Styles panel's
+ * composer cannot open. Project-wide, once per token, against the root component, through the
+ * same codec the composer reads with.
+ */
+function tokenComposableDiagnostics(store: ProjectStore, component: string): Diagnostic[] {
+  const tokens = [...buildEffectiveTokens(readStoredTokens(store.designTokenMetaSource())).values()];
+  return checkTokenComposable({ tokens, component });
 }
 
 /**

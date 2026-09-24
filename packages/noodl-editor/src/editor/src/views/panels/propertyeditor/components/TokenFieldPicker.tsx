@@ -1,3 +1,4 @@
+import { describeTokenValue } from '@nodegx/project-contract/token-codecs';
 import React, { useEffect, useRef } from 'react';
 
 import type { StyleTokensModel } from '@noodl-models/StyleTokensModel/StyleTokensModel';
@@ -54,6 +55,7 @@ export function TokenFieldPicker({ groups, tokensModel, currentValue, onSelect }
                 name={token.name}
                 value={token.value}
                 description={token.description}
+                category={group.category}
                 tokensModel={tokensModel}
                 currentValue={currentValue}
                 onSelect={onSelect}
@@ -78,6 +80,7 @@ function TokenRow({
   name,
   value,
   description,
+  category,
   tokensModel,
   currentValue,
   onSelect
@@ -85,6 +88,7 @@ function TokenRow({
   name: string;
   value: string;
   description?: string;
+  category?: string;
   tokensModel: StyleTokensModel | null;
   currentValue?: string;
   onSelect: (reference: string) => void;
@@ -94,7 +98,13 @@ function TokenRow({
   const isCurrent = currentValue === reference;
 
   const resolved = tokensModel ? tokensModel.resolveToken(name) : undefined;
-  const displayValue = resolved || value;
+  // P102 CMP-008 — a shadow token is drawn as a small card wearing it, with the composer's words
+  // (*Shadow · lifted · 2 layers*), because `0 10px 15px -3px rgb(0 0 0 / 0.1), …` tells nobody
+  // which one to pick. The card paints the value with every `var()` inside it resolved.
+  const isShadow = category === 'shadow';
+  const painted = isShadow && tokensModel ? tokensModel.resolveInline(value) : undefined;
+  const words = isShadow ? describeTokenValue('shadow', value) : null;
+  const displayValue = isShadow ? words ?? value : resolved || value;
 
   useEffect(() => {
     if (isCurrent && ref.current) ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -112,8 +122,36 @@ function TokenRow({
         e.stopPropagation();
       }}
     >
-      <div className="variant-item-name">{name}</div>
-      <div className="token-item-value">{displayValue}</div>
+      {isShadow && (
+        <div
+          aria-hidden="true"
+          style={{
+            width: 34,
+            height: 26,
+            flexShrink: 0,
+            marginRight: 8,
+            borderRadius: 5,
+            background: '#f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            style={{
+              width: 18,
+              height: 14,
+              borderRadius: 3,
+              background: '#ffffff',
+              boxShadow: value === 'none' ? 'none' : painted ?? value
+            }}
+          />
+        </div>
+      )}
+      <div style={{ minWidth: 0 }}>
+        <div className="variant-item-name">{name}</div>
+        <div className="token-item-value">{displayValue}</div>
+      </div>
     </div>
   );
 }

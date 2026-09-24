@@ -17,12 +17,14 @@ import {
   StyleTokenRecord,
   TOKEN_CATEGORY_GROUPS,
   TokenCategoryGroup,
+  TokenResolver,
   groupForTokenCategory
 } from '@noodl-models/StyleTokensModel';
 
 import { CollapsableSection } from '@noodl-core-ui/components/sidebar/CollapsableSection';
 import { SectionVariant } from '@noodl-core-ui/components/sidebar/Section';
 
+import { openTokenComposer } from '../../composer/openTokenComposer';
 import { TokenCategorySection } from '../TokenCategorySection';
 
 export interface TokensSectionProps {
@@ -71,6 +73,21 @@ export function TokensSection({ excludeGroups, title }: TokensSectionProps = {})
 
   const customCount = designTokens.filter((t) => t.isCustom).length;
 
+  // P102 CMP-001 §3 — every preview resolves the `var()`s inside it. One resolver per token set,
+  // so a gradient built from `var(--primary)` paints the project's blue rather than nothing.
+  const resolve = React.useMemo(() => {
+    const resolver = new TokenResolver(new Map(designTokens.map((t) => [t.name, t])));
+    return (value: string) => resolver.resolveInline(value);
+  }, [designTokens]);
+
+  const onOpenComposer = React.useCallback(
+    (token: StyleTokenRecord, anchor: HTMLElement) => {
+      if (!styleTokensModel) return;
+      openTokenComposer({ token, anchor, tokens: designTokens, model: styleTokensModel });
+    },
+    [designTokens, styleTokensModel]
+  );
+
   const body = (
     <div>
       {customCount > 0 && (
@@ -115,6 +132,8 @@ export function TokensSection({ excludeGroups, title }: TokensSectionProps = {})
               tokens={tokens}
               onTokenChange={(name, value) => styleTokensModel?.setToken(name, value, { undo: true })}
               onTokenReset={(name) => styleTokensModel?.deleteCustomToken(name, { undo: true })}
+              resolve={resolve}
+              onOpenComposer={onOpenComposer}
             />
           </CollapsableSection>
         );

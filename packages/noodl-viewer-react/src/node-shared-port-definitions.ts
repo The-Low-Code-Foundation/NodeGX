@@ -1,5 +1,11 @@
 import { getAbsoluteUrl } from '@noodl/runtime/src/utils';
 
+import * as DragDrop from './drag-drop';
+import FontLoader from './fontloader';
+// VIB-002 — the background-image port needs the same empty-value handling the
+// Image node's `src` has: `null`/`undefined`/`''` must clear the layer rather
+// than resolve to `/null` and fire a request. `resolveMediaSource` is that rule.
+import { resolveMediaSource } from './nodes/visual/media-source';
 import type {
   ReactInputCssDefinition,
   ReactInputDefinition,
@@ -7,12 +13,6 @@ import type {
   ReactNodeDefinition,
   ReactOutputPropDefinition
 } from './react-component-node';
-import * as DragDrop from './drag-drop';
-import FontLoader from './fontloader';
-// VIB-002 — the background-image port needs the same empty-value handling the
-// Image node's `src` has: `null`/`undefined`/`''` must clear the layer rather
-// than resolve to `/null` and fire a request. `resolveMediaSource` is that rule.
-import { resolveMediaSource } from './nodes/visual/media-source';
 import { createTooltip } from './tooltips';
 
 /**
@@ -330,7 +330,7 @@ export default {
         index: 201,
         group: 'Style',
         displayName: 'Blend Mode',
-        description: 'How this element\'s colours blend with whatever is painted behind it',
+        description: "How this element's colours blend with whatever is painted behind it",
         type: {
           name: 'enum',
           enums: [
@@ -397,7 +397,7 @@ export default {
         index: 1,
         group: 'Margin and padding',
         displayName: 'Margin Left',
-        description: 'Space outside the element\'s left edge, between it and its neighbours',
+        description: "Space outside the element's left edge, between it and its neighbours",
         type: {
           name: 'number',
           units: ['px', '%'],
@@ -410,7 +410,7 @@ export default {
         index: 2,
         group: 'Margin and padding',
         displayName: 'Margin Right',
-        description: 'Space outside the element\'s right edge, between it and its neighbours',
+        description: "Space outside the element's right edge, between it and its neighbours",
         type: {
           name: 'number',
           units: ['px', '%'],
@@ -423,7 +423,7 @@ export default {
         index: 3,
         group: 'Margin and padding',
         displayName: 'Margin Top',
-        description: 'Space outside the element\'s top edge, between it and its neighbours',
+        description: "Space outside the element's top edge, between it and its neighbours",
         type: {
           name: 'number',
           units: ['px', '%'],
@@ -436,7 +436,7 @@ export default {
         index: 4,
         group: 'Margin and padding',
         displayName: 'Margin Bottom',
-        description: 'Space outside the element\'s bottom edge, between it and its neighbours',
+        description: "Space outside the element's bottom edge, between it and its neighbours",
         type: {
           name: 'number',
           units: ['px', '%'],
@@ -503,7 +503,7 @@ export default {
         default: defaults.paddingLeft || 0,
         applyDefault: defaults.paddingLeft !== undefined,
         displayName: 'Pad Left',
-        description: 'Space inside the element\'s left edge, between it and its content',
+        description: "Space inside the element's left edge, between it and its content",
         type: {
           name: 'number',
           units: ['px'],
@@ -519,7 +519,7 @@ export default {
         default: defaults.paddingRight || 0,
         applyDefault: defaults.paddingRight !== undefined,
         displayName: 'Pad Right',
-        description: 'Space inside the element\'s right edge, between it and its content',
+        description: "Space inside the element's right edge, between it and its content",
         type: {
           name: 'number',
           units: ['px'],
@@ -533,7 +533,7 @@ export default {
         index: 66,
         group: 'Margin and padding',
         displayName: 'Pad Top',
-        description: 'Space inside the element\'s top edge, between it and its content',
+        description: "Space inside the element's top edge, between it and its content",
         default: defaults.paddingTop || 0,
         applyDefault: defaults.paddingTop !== undefined,
         type: {
@@ -549,7 +549,7 @@ export default {
         index: 67,
         group: 'Margin and padding',
         displayName: 'Pad Bottom',
-        description: 'Space inside the element\'s bottom edge, between it and its content',
+        description: "Space inside the element's bottom edge, between it and its content",
         default: defaults.paddingBottom || 0,
         applyDefault: defaults.paddingBottom !== undefined,
         type: {
@@ -990,7 +990,8 @@ export default {
     addOutputProps(definition, {
       filesDropped: {
         displayName: 'Files Dropped',
-        description: 'Fires when one or more accepted files are dropped here, after every File Drop output is up to date',
+        description:
+          'Fires when one or more accepted files are dropped here, after every File Drop output is up to date',
         group: 'File Drop',
         type: 'signal',
         propPath: 'pointer',
@@ -1035,9 +1036,7 @@ export default {
             setDragOver(this, false);
 
             const dropped: File[] = e.dataTransfer ? Array.from(e.dataTransfer.files || []) : [];
-            const accepted = dropped.filter((file) =>
-              fileMatchesAcceptedTypes(file, this._internal.acceptedFileTypes)
-            );
+            const accepted = dropped.filter((file) => fileMatchesAcceptedTypes(file, this._internal.acceptedFileTypes));
 
             if (accepted.length === 0) {
               // A drop that produced nothing must not fire the completion signal — the same
@@ -1064,8 +1063,7 @@ export default {
     addOutputs(definition, {
       filesRejected: {
         displayName: 'Files Rejected',
-        description:
-          'Fires when a drop landed here but every file in it was excluded by Accepted file types',
+        description: 'Fires when a drop landed here but every file in it was excluded by Accepted file types',
         group: 'File Drop',
         type: 'signal'
       },
@@ -1162,7 +1160,8 @@ export default {
         group: 'Drag Source',
         displayName: 'Drag Value',
         type: '*',
-        description: 'What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value',
+        description:
+          'What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value',
         set(this: Armed, value: unknown) {
           this._internal.dragValue = value;
         }
@@ -1270,13 +1269,14 @@ export default {
     addOutputs(definition, {
       pickedUp: {
         displayName: 'Picked Up',
-        description: 'Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard',
+        description:
+          'Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard',
         group: 'Drag Source',
         type: 'signal'
       },
       landed: {
         displayName: 'Landed',
-        description: 'Fires when this element is dropped on a zone that took it, after the zone\'s Dropped',
+        description: "Fires when this element is dropped on a zone that took it, after the zone's Dropped",
         group: 'Drag Source',
         type: 'signal'
       },
@@ -1297,7 +1297,8 @@ export default {
       },
       dropped: {
         displayName: 'Dropped',
-        description: 'Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing',
+        description:
+          'Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing',
         group: 'Drop Zone',
         type: 'signal'
       },
@@ -1313,7 +1314,7 @@ export default {
       dropIndex: {
         displayName: 'Drop Index',
         description:
-          'Where among this zone\'s children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was',
+          "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was",
         group: 'Drop Zone',
         type: 'number',
         get(this: Armed) {
@@ -1322,7 +1323,8 @@ export default {
       },
       isDropTarget: {
         displayName: 'Drag Over',
-        description: 'True while something this zone takes is held over it — wire it to a background or border so the zone lights up',
+        description:
+          'True while something this zone takes is held over it — wire it to a background or border so the zone lights up',
         group: 'Drop Zone',
         type: 'boolean',
         get(this: Armed) {
@@ -1713,7 +1715,22 @@ export default {
     args = args || {};
     const styleTag = args.styleTag;
 
-    addDynamicInputPorts(definition, 'boxShadowEnabled = true', [
+    // P102 CMP-008 (RC-5) — a shadow has two sources. *Custom* is the six ports below, exactly
+    // as they have always been, and the default. *From a style token* hides them and shows one
+    // port holding `var(--shadow-x)`, so a shadow composed in Styles has something to wear it.
+    // A mode, never a replacement: a one-off shadow on one Group is legitimate, and the six
+    // ports keep their values underneath token mode so switching back loses nothing.
+    addDynamicInputPorts(definition, 'boxShadowEnabled = true', ['boxShadowSource']);
+    addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource = token', ['boxShadowToken']);
+    addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource NOT SET', [
+      'boxShadowOffsetX',
+      'boxShadowOffsetY',
+      'boxShadowInset',
+      'boxShadowBlurRadius',
+      'boxShadowSpreadRadius',
+      'boxShadowColor'
+    ]);
+    addDynamicInputPorts(definition, 'boxShadowEnabled = true AND boxShadowSource = custom', [
       'boxShadowOffsetX',
       'boxShadowOffsetY',
       'boxShadowInset',
@@ -1733,6 +1750,42 @@ export default {
         allowVisualStates: true,
         set(value) {
           this._internal.boxShadowEnabled = value;
+          this._updateBoxShadow();
+        }
+      },
+      boxShadowSource: {
+        index: 250.5,
+        group: 'Box Shadow',
+        displayName: 'Shadow Source',
+        description:
+          'Where the shadow comes from: Custom builds it from the six fields below; From a style token ' +
+          'wears one of the project’s shadow tokens, so every element sharing that token changes together',
+        type: {
+          name: 'enum',
+          enums: [
+            { label: 'Custom', value: 'custom' },
+            { label: 'From a style token', value: 'token' }
+          ]
+        },
+        default: 'custom',
+        allowVisualStates: true,
+        set(value) {
+          this._internal.boxShadowSource = value;
+          this._updateBoxShadow();
+        }
+      },
+      boxShadowToken: {
+        index: 250.7,
+        group: 'Box Shadow',
+        displayName: 'Shadow Token',
+        description:
+          'The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose ' +
+          'new ones in the Styles panel',
+        type: 'string',
+        default: 'var(--shadow-md)',
+        allowVisualStates: true,
+        set(value) {
+          this._internal.boxShadowToken = value;
           this._updateBoxShadow();
         }
       },
@@ -1835,7 +1888,12 @@ export default {
     definition.methods._updateBoxShadow = function () {
       const internal = this._internal;
 
-      if (internal.boxShadowEnabled) {
+      if (internal.boxShadowEnabled && internal.boxShadowSource === 'token') {
+        // P102 CMP-008: the whole shadow is the token; the six pieces are not folded in.
+        const token = typeof internal.boxShadowToken === 'string' ? internal.boxShadowToken.trim() : '';
+        if (token) this.setStyle({ boxShadow: token }, styleTag);
+        else this.removeStyle(['boxShadow'], styleTag);
+      } else if (internal.boxShadowEnabled) {
         this.setStyle(
           {
             boxShadow: `${internal.boxShadowInset ? 'inset ' : ''}${internal.boxShadowOffsetX} ${
@@ -1857,6 +1915,8 @@ export default {
       this._internal.boxShadowBlurRadius = '5px';
       this._internal.boxShadowSpreadRadius = '2px';
       this._internal.boxShadowColor = '#00000033';
+      this._internal.boxShadowSource = 'custom';
+      this._internal.boxShadowToken = 'var(--shadow-md)';
     };
   },
   /**
@@ -2150,7 +2210,8 @@ export default {
         },
         group: 'Icon',
         displayName: 'Type',
-        description: 'Whether the icon comes from an installed icon set or from an image file, which decides the source port below',
+        description:
+          'Whether the icon comes from an installed icon set or from an image file, which decides the source port below',
         default: 'icon',
         allowVisualStates: true,
         index: index + 1
@@ -2356,7 +2417,8 @@ export default {
         group: group,
         displayName: 'Text Style',
         editorName: prettyName('Text Style'),
-        description: "Applies one of the project's saved text styles; the individual font ports below override whatever it sets",
+        description:
+          "Applies one of the project's saved text styles; the individual font ports below override whatever it sets",
         default: 'None',
         set(value) {
           this.props[textStyleInputName] = this.context.styles.getTextStyle(value);
@@ -2374,7 +2436,8 @@ export default {
         group: group,
         displayName: 'Font Family',
         editorName: prettyName('Font Family'),
-        description: 'Typeface to render the text in, either a web-safe family name or a font file added to the project',
+        description:
+          'Typeface to render the text in, either a web-safe family name or a font file added to the project',
         set(value) {
           if (value) {
             let family = value;
@@ -2594,8 +2657,7 @@ export default {
         group: group,
         displayName: 'Numerals',
         editorName: prettyName('Numerals'),
-        description:
-          'Tabular draws every digit at the same width so columns of numbers align; Normal follows the font',
+        description: 'Tabular draws every digit at the same width so columns of numbers align; Normal follows the font',
         applyDefault: false,
         targetStyleProperty: 'fontVariantNumeric',
         type: {
@@ -2750,7 +2812,7 @@ function addDragDropTooltips(definition: ReactNodeDefinition): void {
     title: 'Draggable',
     body: [
       'Lets a person pick this element up and drop it on an element with Accept Drops on',
-      'A see-through copy follows the pointer and the element stays where it is, faded, until the graph moves it — wire the zone\'s Dropped to the command that does the move',
+      "A see-through copy follows the pointer and the element stays where it is, faded, until the graph moves it — wire the zone's Dropped to the command that does the move",
       'On touch, a press is held for Hold Time while a ring fills; with a mouse it picks up as soon as it moves. Space picks it up from the keyboard'
     ]
   });
