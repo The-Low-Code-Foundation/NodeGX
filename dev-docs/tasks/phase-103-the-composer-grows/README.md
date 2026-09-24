@@ -78,11 +78,11 @@ panel and the property panel.
 |---|---|---|---|
 | **[CMG-001](CMG-001-THE-COMPOSER-FITS-ITS-WINDOW.md)** ✅ s1 | The composer fits its window: no light/dark bar on motion; the popout stays on screen as it grows; *Show CSS* scrolls to the CSS | 1, 2 | — |
 | **[CMG-002](CMG-002-ADD-A-TOKEN-COPY-A-TOKEN.md)** | Add a token to any group; copy any token's reference | 3, 4 | CMG-005 (where the + lives) |
-| **[CMG-003](CMG-003-A-NEW-COLOUR-IS-A-COLOUR-YOU-CAN-CHANGE.md)** | *New colour* makes a colour token you pick straight away; an existing colour style's swatch opens the picker | 5 | — |
+| **[CMG-003](CMG-003-A-NEW-COLOUR-IS-A-COLOUR-YOU-CAN-CHANGE.md)** ✅ s1 | *New colour* makes a colour token you pick straight away; an existing colour style's swatch opens the picker | 5 | — |
 | **[CMG-004](CMG-004-RESET-SAYS-WHAT-IT-RESETS.md)** ✅ s1 | Reset counts real changes, shows them before it acts, resets one group or one token, and cannot silently wipe a brand | 7 | — |
 | **[CMG-005](CMG-005-EVERY-KIND-OF-STYLE-IS-A-SECTION.md)** ✅ s1 | No *Other tokens*: Type, Spacing, Borders, Effects and Motion are sections beside Colours and Looks; `revealStyle` opens a section and lands on a row from outside | 8 | — |
 | **[CMG-006](CMG-006-EDIT-A-LOOK-FROM-STYLES.md)** | Edit a Look from Styles, with or without a node wearing it; *Look*, never *variant*, on screen; the node's Look row links to Styles | 6a, 6b | CMG-005 (reveal) |
-| **[CMG-007](CMG-007-A-POPOUT-CASTS-A-SHADOW-NOT-A-GLOW.md)** | Every popout, popup and modal casts a shadow in light mode, not a white glow | 6c | — |
+| **[CMG-007](CMG-007-A-POPOUT-CASTS-A-SHADOW-NOT-A-GLOW.md)** ✅ s1 | Every popout, popup and modal casts a shadow in light mode, not a white glow | 6c | — |
 | **[CMG-008](CMG-008-EVERY-FIELD-SAYS-WHEN-IT-LEAVES-ITS-LOOK.md)** | Alignment, margin, padding, corners and borders say when they differ from the Look; alignment shows the Look's value | 9 | — |
 | **[CMG-009](CMG-009-A-TOKEN-IN-A-FIELD-READS-AS-A-TOKEN.md)** | A token in a number field shows as a chip with its name and value; every field that takes a token has a button that looks like one | 10, 11 | — |
 | **[CMG-010](CMG-010-FROM-THE-FIELD-TO-THE-TOKEN-AND-BACK.md)** | From a token field: edit that token (the pencil) and *Show in Styles*. Absorbs §5's pencil candidate | 12 | CMG-005, CMG-009 |

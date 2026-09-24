@@ -82,7 +82,8 @@ export function BranchStatusButton() {
           position: 'absolute',
           width: '100%',
           zIndex: 1,
-          boxShadow: '0 10px 10px 0px var(--theme-color-bg-1-transparent-2)',
+          // P103 CMG-007: the shared floating shadow, not a white glow in light mode.
+          boxShadow: 'var(--shadow-float)',
           maxHeight: '50vh',
           overflow: 'hidden overlay'
         }}

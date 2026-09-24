@@ -1,7 +1,8 @@
 # CMG-007 — A popout casts a shadow, not a glow
 
 **Opened 2026-09-24** from Richard's drive of P102 (README §2, finding 6c).
-**Status: 📋 ready.** Small, touches every popout: drive several.
+**Status: ✅ built 2026-09-24 (s1)** — 4 specs green, 7/7 drive arms green in light and dark. §6 has the
+census and what each AC measured.
 
 ## 1. The person sentence
 
@@ -63,3 +64,40 @@ wears the shared PopupLayer wrapper:
 - 🔴 [[a-theme-flip-does-not-apply-in-the-same-eval]]: flip the theme, then measure in a **second**
   eval.
 - 🔴 [[a-second-copy-of-a-palette-drifts-silently]]: use the token; don't paste its value.
+
+## 6. Built (s1, 2026-09-24)
+
+**The census** (`grep -rn bg-1-transparent` over editor + core-ui source, 17 hits):
+
+| use | kind | done |
+|---|---|---|
+| `popuplayer.css` `.popup-layer-popup` filter + box-shadow | shadow | → `--shadow-float`, filter dropped |
+| `popuplayer.css` `.popup-layer-popout` box-shadow (+ a commented filter) | shadow | → `--shadow-float`; the comment now says why there is no filter |
+| `popuplayer.css` `.popup-layer-modal` filter + box-shadow | shadow | → `--shadow-float` |
+| `PopupToolbar.module.scss` filter + box-shadow | shadow | → `--shadow-float` + the bg-1 hairline kept |
+| `SideNavigation.module.scss` box-shadow on the tooltip label | shadow | → `--shadow-float` |
+| `BranchStatusButton.tsx` inline `boxShadow` | shadow | → `var(--shadow-float)` |
+| `CommentLayer.css` `outline` | an outline, not a shadow | left |
+| `ConnectionPopup.module.scss` `background-color` | scrim | left |
+| `BaseDialog.module.scss` `background-color` | scrim | left |
+| `ActivityIndicator.module.scss` `background-color` | scrim | left |
+| `IconButton.module.scss` `background-color` | ground | left |
+| `colors.css` ×4 | the token's definitions | left |
+
+**Arrows** (§3.2): the popout's ground is `bg-4`; three of its four arrows were `bg-5` and the
+popup's top arrow `bg-3`, so a triangle in a different shade sat beside the new shadow. All match
+their surface now. Kept, not removed: with the shadow under the box the arrow still reads as
+pointing at the anchor.
+
+**§4 measured** (`scripts/devtools/drive-cmg003-007-colours-and-shadows.js`, theme flipped with
+`ThemeManager.setMode` and read in a later eval; spec `tests-unit/cmg-007/no-white-glow.test.ts`):
+
+| AC | reading |
+|---|---|
+| 1 | light shots of the token composer, the colour picker, a context menu (`showContextMenuInPopup`), a confirm modal and the Look popup — `shots/cmg007-light-*.png` — and the same five in dark, `shots/cmg007-dark-*.png`. The token field picker and the connection popup were not opened: the field picker is a `showPopout` like the other three (one CSS rule, measured three ways), and the connection popup's use of the token is a background, left alone |
+| 2 | `getComputedStyle(el).boxShadow` in light: composer, colour picker, context menu, modal, Look popup all `rgba(23, 32, 43, 0.16) 0px 16px 40px 0px`; none contains `rgba(255, 255, 255`. Dark control: `rgba(0, 0, 0, 0.38) 0px 18px 48px 0px`, so the arm reads a shadow, not an absence |
+| 3 | spec: zero `box-shadow` / `boxShadow` / `drop-shadow` declarations naming the token, comments stripped, over 500+ files; the scrims still use it; the three popup-layer surfaces wear `--shadow-float` with no filter; all four popout arrows are `bg-4` |
+| 4 | `nat-001/palette-contrast.spec.ts` passes; its note now says the shadow use is gone, with the seven sites |
+
+**Before shots:** not taken — the change landed before a HEAD build was driven. The *before* is
+Richard's own description and the computed value the spec's note records (white at 0.85).

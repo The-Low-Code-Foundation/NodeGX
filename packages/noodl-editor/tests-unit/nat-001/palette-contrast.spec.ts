@@ -988,11 +988,17 @@ describe.each(['dark', 'light'] as const)('the %s foreground ramp keeps its step
  * ## What this table cannot see
  *
  * Alpha. `--theme-color-bg-1-transparent` is `rgba(0,0,0,0.8)` in dark and does NOT follow the
- * ramp — deliberately, because its consumers are scrims and `box-shadow`s (`BaseDialog`,
- * `PopupToolbar`, `popuplayer.css`, `SideNavigation`), and a shadow is an occlusion rather than a
- * surface. That reading is NAT-003's, it is recorded in `colors.css`, and it is not asserted here
- * because a token named `bg-1-*` that is not on the `bg-1` ramp is a NAMING defect, not a
- * contrast one.
+ * ramp — deliberately, because its consumers are scrims (`BaseDialog`, `ActivityIndicator`,
+ * `IconButton`, `ConnectionPopup`), and a scrim is an occlusion rather than a surface. That
+ * reading is NAT-003's, it is recorded in `colors.css`, and it is not asserted here because a
+ * token named `bg-1-*` that is not on the `bg-1` ramp is a NAMING defect, not a contrast one.
+ *
+ * ⚠️ P103 CMG-007 (2026-09-24): it is no longer used for a SHADOW anywhere. It is white at 0.85
+ * in light mode, so every `box-shadow` / `drop-shadow` drawn in it was a white glow there —
+ * Richard's *"weird white glow"* on the Look popup, and on all 26 `showPopout` callers with it.
+ * The seven shadow uses (`popuplayer.css` ×3, `PopupToolbar`, `SideNavigation`,
+ * `BranchStatusButton`, and the popout's own) now wear `--shadow-float`, the token the newer
+ * surfaces already used. `tests-unit/cmg-007` holds the count at zero.
  */
 describe.each(['dark', 'light'] as const)('the %s elevation ramp is a ramp', (theme) => {
   /** Adjacent surfaces a user sees meeting each other, and the bar each is held to. */

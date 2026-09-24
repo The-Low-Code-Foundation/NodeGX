@@ -41,8 +41,10 @@
 
 .popup-layer-popup {
   background-color: var(--theme-color-bg-4);
-  filter: drop-shadow(0 4px 15px var(--theme-color-bg-1-transparent-2));
-  box-shadow: 0 0 10px -5px var(--theme-color-bg-1-transparent-2);
+  /* P103 CMG-007: the shadow every floating surface wears (BaseDialog, Modal, Tooltip, NodePicker).
+     It used to be drawn in --theme-color-bg-1-transparent-2, which is WHITE at 0.5 in light mode —
+     a glow, not a shadow. The drop-shadow filter went with it: the same token, the same glow. */
+  box-shadow: var(--shadow-float);
   border-radius: var(--radius-lg);
   pointer-events: all;
   z-index: 2;
@@ -61,7 +63,7 @@
   width: 0;
   position: absolute;
   pointer-events: none;
-  border-bottom-color: var(--theme-color-bg-3);
+  border-bottom-color: var(--theme-color-bg-4);
   border-width: 10px;
   margin-left: -10px;
 }
@@ -116,9 +118,12 @@
 
 .popup-layer-popout {
   background-color: var(--theme-color-bg-4);
-  /* This filter breaks Chromium? causes an internal div in the popout editor to not be clipped by it's parent correctly, breaking mouse event when resizing */
-  /* filter: drop-shadow(0 4px 15px var(--theme-color-bg-1-transparent-2)); */
-  box-shadow: 0 5px 20px 5px var(--theme-color-bg-1-transparent);
+  /* No drop-shadow filter here, ever: it broke Chromium's clipping of an inner div in the popout
+     editor and with it the mouse events while resizing. P103 CMG-007: the box-shadow was drawn in
+     --theme-color-bg-1-transparent, white at 0.85 in light mode — Richard's "weird white glow" on
+     the Look popup, and on every one of the 26 showPopout callers. Now the shadow the newer
+     surfaces wear. */
+  box-shadow: var(--shadow-float);
   pointer-events: all;
   z-index: 2;
   display: inline;
@@ -153,7 +158,7 @@
   width: 0;
   position: absolute;
   pointer-events: none;
-  border-left-color: var(--theme-color-bg-5);
+  border-left-color: var(--theme-color-bg-4);
   border-width: 10px;
   margin-top: -10px;
 }
@@ -167,7 +172,7 @@
   width: 0;
   position: absolute;
   pointer-events: none;
-  border-top-color: var(--theme-color-bg-5);
+  border-top-color: var(--theme-color-bg-4);
   border-width: 10px;
   margin-left: -10px;
 }
@@ -181,7 +186,7 @@
   width: 0;
   position: absolute;
   pointer-events: none;
-  border-right-color: var(--theme-color-bg-5);
+  border-right-color: var(--theme-color-bg-4);
   border-width: 10px;
   margin-top: -10px;
 }
@@ -191,8 +196,8 @@
 .popup-layer-modal {
   position: absolute;
   background-color: var(--theme-color-bg-3);
-  filter: drop-shadow(0 4px 15px var(--theme-color-bg-1-transparent-2));
-  box-shadow: 0 0 10px -5px var(--theme-color-bg-1-transparent-2);
+  /* P103 CMG-007: see .popup-layer-popup. */
+  box-shadow: var(--shadow-float);
   border-radius: var(--radius-lg);
   pointer-events: all;
   z-index: 21;
