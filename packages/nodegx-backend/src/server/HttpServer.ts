@@ -63,6 +63,8 @@ import { OAuthRoutes } from './oauth-routes';
 import { AdminAuthRoutes } from './admin-auth';
 import { AdminUserRoutes } from './admin-users';
 import { AdminSecurityRoutes } from './admin-security';
+import { verifyFileAccess } from '../storage/signing';
+import { AdminViewRoutes, ViewsStore } from './admin-views';
 import { AdminSecretsRoutes } from './admin-secrets';
 import { SecretsStore } from '../config/SecretsStore';
 import { AdminTriggerRoutes } from './admin-triggers';
@@ -402,6 +404,7 @@ export class HttpServer {
   private readonly adminSecurity: AdminSecurityRoutes;
   /** BMG-004: the accounts, administered. */
   private readonly adminUsers: AdminUserRoutes;
+  private readonly adminViews: AdminViewRoutes;
   /** CWF-009 slice 4: the `functions` secrets door, names out and values in. */
   private readonly adminSecrets: AdminSecretsRoutes;
   private readonly adminTriggers: AdminTriggerRoutes;
@@ -488,6 +491,7 @@ export class HttpServer {
       sendVerification: (user) => this.email.sendVerificationEmail(user),
       listIdentities: (ctx, userId) => this.oauth.listIdentities(ctx, userId)
     });
+    this.adminViews = new AdminViewRoutes(new ViewsStore(deps.options.dataDir));
     this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
     this.fileSubsystem = deps.files;
     this.executions = deps.executions;
@@ -1079,6 +1083,11 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => this.adminUsers.signOutEverywhere(ctx)
       },
+      // BMG-002 — the Collections page's saved views, shared by everyone who
+      // administers this backend.
+      { method: 'GET', pattern: 'admin/views/:collection', access: { kind: 'admin' }, handler: (ctx) => this.adminViews.list(ctx) },
+      { method: 'PUT', pattern: 'admin/views/:collection/:name', access: { kind: 'admin' }, handler: (ctx) => this.adminViews.save(ctx) },
+      { method: 'DELETE', pattern: 'admin/views/:collection/:name', access: { kind: 'admin' }, handler: (ctx) => this.adminViews.remove(ctx) },
       { method: 'GET', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.listKeys(ctx) },
       { method: 'POST', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.createKey(ctx) },
       { method: 'PUT', pattern: 'admin/keys/:id', access: { kind: 'admin' }, handler: (ctx) => adminSec.updateKey(ctx) },
@@ -1841,7 +1850,7 @@ export class HttpServer {
     }
 
     // Steps 2–3: dev-open fast-path, then the route gate.
-    this.checkAccess(route.access, principal, params, body);
+    this.checkAccess(route.access, principal, params, body, query);
 
     const ctx: RequestContext = {
       req,
@@ -1876,7 +1885,8 @@ export class HttpServer {
     access: RouteAccess,
     principal: Principal,
     params: Record<string, string>,
-    body: Record<string, unknown> | null
+    body: Record<string, unknown> | null,
+    query: Record<string, string> = {}
   ): void {
     if (access.kind === 'public') return;
 
@@ -1982,6 +1992,15 @@ export class HttpServer {
           throw new HttpError(403, 'Permission denied for this file operation.', 119);
         }
         if (ruleAllows(this.security.config.files[access.op], principal)) return;
+        // BMG-002: a signed URL IS the credential for reading one file — it is
+        // what `GET /files/:name/sign` mints for an `<img src>`, which cannot
+        // send a header. With `files.read` above `public` this gate refused it
+        // before the handler could look (measured: 403 on a freshly minted URL
+        // while `/sign` answered 200), so the signature is verified HERE, for
+        // this stored name only. Verifying rather than deferring matters:
+        // `assertReadable` passes any file without an ACL, so a gate that merely
+        // stepped aside for `?sig=` would hand a forged one every public file.
+        if (access.op === 'read' && params.name && query.sig && this.signatureAdmits(params.name, query)) return;
         throw new HttpError(403, 'Permission denied for this file operation.', 119);
       }
 
@@ -2004,6 +2023,12 @@ export class HttpServer {
         // secret is the credential.
         return;
     }
+  }
+
+  /** A valid, unexpired `?exp=&sig=` for exactly this stored file name. */
+  private signatureAdmits(storedName: string, query: Record<string, string>): boolean {
+    if (!this.fileSubsystem) return false;
+    return verifyFileAccess(this.fileSubsystem.getSigningSecret(), storedName, Number(query.exp), query.sig);
   }
 
   /**

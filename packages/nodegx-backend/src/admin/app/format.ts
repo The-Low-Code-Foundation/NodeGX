@@ -8,6 +8,8 @@
  * against `noodl-viewer-cloud/src/execution-history/types.ts` by those specs.
  */
 
+import { aclSummary } from './acl';
+
 export interface Column {
   name: string;
   type: string;
@@ -103,13 +105,31 @@ export function toWire(col: Column, value: unknown): unknown {
   return value;
 }
 
+/** The display name of a stored file: the backend puts a unique prefix before what was uploaded. */
+export function fileLabel(name: string): string {
+  const m = /^[0-9a-f]{8,}[-_](.+)$/i.exec(name);
+  return m ? m[1] : name;
+}
+
+/** What a cell says for a value — words, never a JSON dump (BMG-002 §3.3). */
 export function displayValue(value: unknown, type: string): string {
-  if (type === 'ACL' && (value === null || value === undefined)) return 'public';
+  if (type === 'ACL') return aclSummary(value);
   const v = plain(value);
   if (v === null || v === undefined || v === '') return '';
   if (type === 'Boolean') return v ? '✓' : '✗';
   if (type === 'Date') return when(v);
   if (type === 'Pointer') return '→ ' + shortId(v);
+  if (type === 'File' && v && typeof v === 'object') return '▤ ' + fileLabel(String((v as { name?: unknown }).name || ''));
+  if (type === 'GeoPoint' && v && typeof v === 'object') {
+    const g = v as { latitude?: number; longitude?: number };
+    return typeof g.latitude === 'number' ? g.latitude.toFixed(4) + ', ' + Number(g.longitude).toFixed(4) : '';
+  }
+  if (Array.isArray(v)) return v.map((x) => (x && typeof x === 'object' ? cellText(x) : String(x))).join(', ');
+  if (v && typeof v === 'object') {
+    return Object.keys(v as object)
+      .map((k) => k + ': ' + cellText((v as Record<string, unknown>)[k]))
+      .join(' · ');
+  }
   return cellText(v);
 }
 
@@ -262,4 +282,42 @@ export function recordSummary(record: unknown): ExecutionSummary {
 export function csvCell(v: unknown): string {
   const s = v === null || v === undefined ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v);
   return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+/**
+ * RFC 4180 rows (quoted fields, embedded commas, quotes and newlines) — for the
+ * import preview only. The import itself is parsed by the server
+ * (`backup/dataio.ts parseCSV`), which this mirrors; the page never decides
+ * what lands.
+ */
+export function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else if (c === '"') quoted = false;
+      else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ',') {
+      row.push(field);
+      field = '';
+    } else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+    } else field += c;
+  }
+  if (field.length || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows.filter((r) => !(r.length === 1 && r[0] === ''));
 }

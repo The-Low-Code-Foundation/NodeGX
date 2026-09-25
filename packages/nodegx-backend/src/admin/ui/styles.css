@@ -1243,3 +1243,297 @@ tr.clickable {
   padding-top: 0;
   border-top: 0;
 }
+
+/* ------------------------------------------------ Collections (BMG-002) -- */
+/* The filter said in rows; a group is indented under its and/or. */
+.filter-box {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+}
+
+.filter-group {
+  display: grid;
+  gap: 6px;
+}
+
+.filter-group.nested {
+  padding: 6px 8px;
+  border-left: 2px solid var(--primary-dim);
+  background: var(--bg-2);
+  border-radius: var(--radius);
+}
+
+.filter-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-conj {
+  flex: 0 0 64px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  padding-top: 5px;
+}
+
+.filter-cond {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+}
+
+.filter-value {
+  width: 150px;
+}
+
+.filter-adds {
+  display: flex;
+  gap: 6px;
+}
+
+.result-sentence {
+  color: var(--fg);
+}
+
+.result-sentence b {
+  color: var(--fg-hi);
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  color: var(--fg-hi);
+}
+
+.sort-mark {
+  margin-left: 4px;
+  color: var(--primary-fg);
+  font-size: 10px;
+}
+
+.columns-list {
+  display: grid;
+  gap: 2px;
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.columns-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: var(--radius);
+}
+
+.columns-row:hover,
+.columns-row.dragging {
+  background: var(--bg-2);
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--fg-muted);
+}
+
+.import-preview select {
+  min-width: 120px;
+}
+
+/* A yes/no is a switch, not a checkbox with a word beside it. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.switch-track {
+  position: relative;
+  width: 30px;
+  height: 17px;
+  border-radius: 9px;
+  background: var(--bg-4);
+  border: 1px solid var(--border-control);
+  transition: background 0.12s;
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--fg-hi);
+  transition: transform 0.12s;
+}
+
+.switch input:checked + .switch-track {
+  background: var(--primary);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(13px);
+}
+
+.switch input:focus-visible + .switch-track {
+  box-shadow: 0 0 0 2px var(--primary-hi);
+}
+
+.struct-edit,
+.json-edit {
+  display: grid;
+  gap: 6px;
+}
+
+.json-edit textarea {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.geo-control input[type='number'] {
+  width: 130px;
+}
+
+.dropzone {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg-muted);
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropzone:hover,
+.dropzone.over,
+.dropzone:focus-visible {
+  border-color: var(--primary);
+  color: var(--fg);
+}
+
+.file-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+
+.file-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.file-icon {
+  font-size: 22px;
+  color: var(--fg-muted);
+}
+
+.file-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+/* "Who can see this record": a card with a state, then who, can see, can change. */
+.acl-card {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  justify-items: start;
+}
+
+.acl-state {
+  display: grid;
+  gap: 2px;
+}
+
+.acl-state b {
+  color: var(--fg-hi);
+}
+
+.acl-table {
+  width: 100%;
+}
+
+.acl-table td,
+.acl-table th {
+  padding: 4px 6px;
+}
+
+.acl-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.acl-more {
+  font-size: 12px;
+}
+
+/* Inside a labelled field, a row of controls stays a row: the full-width rule above is for a
+   field's ONE control, not for the parts of a list, an object, a date or a location. */
+div.field .list-row > input:not([type='checkbox']):not([type='radio']),
+div.field .list-row > select,
+div.field .field-line > input:not([type='checkbox']):not([type='radio']),
+div.field .field-line > select {
+  width: auto;
+}
+
+div.field .list-row > .kv-key {
+  flex: 0 1 160px;
+}
+
+div.field .list-row > .kv-value,
+div.field .list-row > input[type='text'] {
+  flex: 1 1 140px;
+}
+
+div.field .date-control > input[type='date'] {
+  flex: 0 1 170px;
+}
+
+div.field .date-control > input[type='time'] {
+  flex: 0 1 120px;
+}
+
+div.field .field-line > .picker {
+  flex: 1 1 200px;
+}
+
+.filter-box > .btn,
+.acl-card > .btn {
+  justify-self: start;
+}

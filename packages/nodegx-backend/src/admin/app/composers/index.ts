@@ -10,3 +10,7 @@ export { Drawer } from './Drawer';
 export type { DrawerProps } from './Drawer';
 export { DangerZone, DangerAction } from './DangerZone';
 export { EmptyState } from './EmptyState';
+export { FilterRows } from './FilterRow';
+export type { FilterRowsProps } from './FilterRow';
+export { AclCard } from './AclCard';
+export type { AclCardProps } from './AclCard';

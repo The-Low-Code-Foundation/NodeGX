@@ -38,6 +38,9 @@ const ACTIONS: Record<string, string> = {
   'PUT admin/users/:id': 'user.update',
   'DELETE admin/users/:id': 'user.delete',
   'DELETE admin/users/:id/sessions': 'user.sessions.revoke',
+  // BMG-002. A saved view changes what everyone's Collections page offers.
+  'PUT admin/views/:collection/:name': 'view.save',
+  'DELETE admin/views/:collection/:name': 'view.delete',
   'POST admin/keys': 'apikey.create',
   // BMG-007. What a key may do changed — the entry an operator reads when a
   // script suddenly can (or cannot) write.

@@ -259,8 +259,12 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // and left in the `admin` budget: a person administering accounts by hand,
     // with the list and drawer reads a page makes. Counted, not guessed —
     // 81 → 88, and seven is the number of patterns added.
+    // BMG-002 moved `admin` by 3: `admin/views/:collection` (GET) and
+    // `admin/views/:collection/:name` (PUT, DELETE) — the Collections page's
+    // saved views. Reviewed and left in the `admin` budget: a person saving a
+    // way of looking at a table. Counted, not guessed — 88 → 91.
     expect(counts).toEqual({
-      admin: 88,
+      admin: 91,
       auth: 16,
       data: 19,
       files: 4,

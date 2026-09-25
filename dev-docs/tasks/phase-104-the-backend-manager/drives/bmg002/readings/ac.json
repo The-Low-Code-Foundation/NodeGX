@@ -1,0 +1,782 @@
+{
+  "checks": {
+    "AC1 title contains open": {
+      "pass": true,
+      "detail": {
+        "sentence": "4 records where title contains open",
+        "server": 4,
+        "page": 4,
+        "want": 4
+      }
+    },
+    "AC1 n between 3 and 8": {
+      "pass": true,
+      "detail": {
+        "sentence": "6 records where n is between 3 and 8",
+        "server": 6,
+        "page": 6,
+        "want": 6
+      }
+    },
+    "AC1 due within the past 7 days": {
+      "pass": true,
+      "detail": {
+        "sentence": "6 records where due is within the past 7 days",
+        "server": 6,
+        "page": 6,
+        "want": 6
+      }
+    },
+    "AC1 owner is Ann Archer (picked by name)": {
+      "pass": true,
+      "detail": {
+        "sentence": "3 records where owner is Ann Archer",
+        "server": 3,
+        "page": 3,
+        "want": 3
+      }
+    },
+    "AC1 the sentence names the person, not the id": {
+      "pass": true,
+      "detail": "3 records where owner is Ann Archer"
+    },
+    "AC1 done is no (unset counts as no)": {
+      "pass": true,
+      "detail": {
+        "sentence": "8 records where done is no",
+        "server": 8,
+        "page": 8,
+        "want": 8
+      }
+    },
+    "AC1 title starts with open OR tags contains red": {
+      "pass": true,
+      "detail": {
+        "sentence": "2 records where title starts with open or tags contains red",
+        "server": 2,
+        "page": 2,
+        "want": 2
+      }
+    },
+    "AC1 title contains o AND (n > 5 OR done is no)": {
+      "pass": true,
+      "detail": {
+        "sentence": "4 records where title contains o and (n > 5 or done is no)",
+        "server": 4,
+        "page": 4,
+        "want": 4
+      }
+    },
+    "AC3 click n → [\"n\"]": {
+      "pass": true,
+      "detail": {
+        "sent": "[\"n\"]",
+        "pageN": [
+          "",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "srv": [
+          "",
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ]
+      }
+    },
+    "AC3 click n → [\"-n\"]": {
+      "pass": true,
+      "detail": {
+        "sent": "[\"-n\"]",
+        "pageN": [
+          "10",
+          "9",
+          "8",
+          "7",
+          "6",
+          "5",
+          "4",
+          "3",
+          "2",
+          "1",
+          "0",
+          ""
+        ],
+        "srv": [
+          "10",
+          "9",
+          "8",
+          "7",
+          "6",
+          "5",
+          "4",
+          "3",
+          "2",
+          "1",
+          "0",
+          ""
+        ]
+      }
+    },
+    "AC3 click ⇧title → [\"-n\",\"title\"]": {
+      "pass": true,
+      "detail": {
+        "sent": "[\"-n\",\"title\"]",
+        "pageN": [
+          "10",
+          "9",
+          "8",
+          "7",
+          "6",
+          "5",
+          "4",
+          "3",
+          "2",
+          "1",
+          "0",
+          ""
+        ],
+        "srv": [
+          "10",
+          "9",
+          "8",
+          "7",
+          "6",
+          "5",
+          "4",
+          "3",
+          "2",
+          "1",
+          "0",
+          ""
+        ]
+      }
+    },
+    "AC3 click n → [\"-createdAt\"]": {
+      "pass": true,
+      "detail": {
+        "sent": "[\"-createdAt\"]",
+        "pageN": [
+          "0",
+          "",
+          "10",
+          "8",
+          "6",
+          "4",
+          "2",
+          "9",
+          "7",
+          "5",
+          "3",
+          "1"
+        ],
+        "srv": [
+          "0",
+          "",
+          "10",
+          "8",
+          "6",
+          "4",
+          "2",
+          "9",
+          "7",
+          "5",
+          "3",
+          "1"
+        ]
+      }
+    },
+    "double-click edits the cell in place (no drawer)": {
+      "pass": true,
+      "detail": {
+        "afterCell": "walk the dog",
+        "drawer": false
+      }
+    },
+    "a row click opens the record at its address": {
+      "pass": true,
+      "detail": "#/collections/Task/19fd2022-55b9-4764-8a0e-dc006eff2faa"
+    },
+    "AC4 the view is stored by the backend": {
+      "pass": true,
+      "detail": {
+        "name": "Not done, biggest first",
+        "filter": {
+          "kind": "group",
+          "conj": "and",
+          "items": [
+            {
+              "kind": "cond",
+              "field": "done",
+              "op": "no"
+            }
+          ]
+        },
+        "sort": [
+          "-n"
+        ],
+        "columns": [
+          "n",
+          "title",
+          "done",
+          "due",
+          "owner",
+          "labels",
+          "createdAt"
+        ],
+        "savedAt": "2026-09-25T08:18:07.137Z"
+      }
+    },
+    "AC4 after a reload (localStorage cleared) the view restores filter, sort and columns": {
+      "pass": true,
+      "detail": {
+        "viewOptions": [
+          "All records",
+          "Not done, biggest first"
+        ],
+        "sentence": "8 records where done is no",
+        "sort": "[\"-n\"]",
+        "headsBefore": [
+          "n",
+          "title",
+          "done",
+          "due",
+          "owner",
+          "labels",
+          "createdAt"
+        ],
+        "headsAfter": [
+          "n",
+          "title",
+          "done",
+          "due",
+          "owner",
+          "labels",
+          "createdAt"
+        ]
+      }
+    },
+    "AC5 every type round-trips through the drawer (file byte-equal)": {
+      "pass": true,
+      "detail": {
+        "String": true,
+        "Number": true,
+        "Boolean": true,
+        "Date": true,
+        "Pointer": true,
+        "Array": true,
+        "Object": true,
+        "GeoPoint": true,
+        "File": true
+      }
+    },
+    "AC5 the file shows a thumbnail and downloads byte-equal through the page link (no credential)": {
+      "pass": true,
+      "detail": {
+        "thumb": {
+          "w": 1400,
+          "src": "/files/c7669f5ee478b15b_bmg002-grid.png?exp=1790324599&sig=ef1bf4b26d51d620447a53c24d4766265a46f8eb4044669d4084ebfc3bed5364"
+        },
+        "link": "/files/c7669f5ee478b15b_bmg002-grid.png?exp=1790324599&sig=ef1bf4b26d51d620447a53c24d4766265a46f8eb4044669d4084ebfc3bed5364",
+        "bytes": 145780
+      }
+    },
+    "AC5 the saved record reads back into its controls": {
+      "pass": true,
+      "detail": {
+        "title": "Everything",
+        "tags": [
+          "red",
+          "green"
+        ],
+        "meta": [
+          "color=blue",
+          "count=3"
+        ],
+        "lat": "51.5074",
+        "owner": "Ann Archer",
+        "doc": "bmg002-grid.png"
+      }
+    },
+    "AC6 relation: add two, remove one, read back through $relatedTo": {
+      "pass": true,
+      "detail": {
+        "afterTwo": [
+          "home",
+          "urgent"
+        ],
+        "chipsTwo": [
+          "home",
+          "urgent"
+        ],
+        "afterOne": [
+          "home"
+        ],
+        "chipsOne": [
+          "home"
+        ]
+      }
+    },
+    "AC7 the stored ACL is exactly what was ticked": {
+      "pass": true,
+      "detail": {
+        "acl": {
+          "*": {
+            "read": true
+          },
+          "role:editors": {
+            "write": true
+          },
+          "7d790521-e05e-46d4-aeac-46ad1aaf51bb": {
+            "read": true,
+            "write": true
+          }
+        },
+        "wantAcl": {
+          "*": {
+            "read": true
+          },
+          "role:editors": {
+            "write": true
+          },
+          "7d790521-e05e-46d4-aeac-46ad1aaf51bb": {
+            "read": true,
+            "write": true
+          }
+        }
+      }
+    },
+    "AC7 no id on the card": {
+      "pass": true,
+      "detail": "WhoCan seeCan changeEveryone editors role✕ann · ann@example.com person✕“Signed-in users” is not something a record can name: a record grants everyone, a role, or a person.Remove the restrictionsThis c"
+    },
+    "AC7 a stored {} shows \"No one\"; null shows \"Everyone\"": {
+      "pass": true,
+      "detail": {
+        "nobodyState": "No one",
+        "publicState": "Everyone"
+      }
+    },
+    "AC8 100 rows land, numbers as numbers and true as a boolean": {
+      "pass": true,
+      "detail": {
+        "landed": 100,
+        "typed": 100,
+        "trues": 50,
+        "mapping": [
+          "title",
+          "n",
+          "done"
+        ],
+        "report": "100 will be added."
+      }
+    },
+    "page size 25 and → turns the page": {
+      "pass": true,
+      "detail": {
+        "limitSent": "25",
+        "skipSent": "25",
+        "showing": "Showing 26–50"
+      }
+    },
+    "AC9 no JSON is asked for at rest (page, new record, saved record, cell dialog)": {
+      "pass": true,
+      "detail": {
+        "page": [],
+        "drawerNew": [],
+        "drawerSaved": [],
+        "cellDialog": []
+      }
+    }
+  },
+  "seedCount": 12,
+  "ac1": [
+    {
+      "label": "title contains open",
+      "sentence": "4 records where title contains open",
+      "where": {
+        "title": {
+          "contains": "open"
+        }
+      },
+      "server": 4,
+      "page": 4,
+      "want": 4
+    },
+    {
+      "label": "n between 3 and 8",
+      "sentence": "6 records where n is between 3 and 8",
+      "where": {
+        "n": {
+          "$gte": 3,
+          "$lte": 8
+        }
+      },
+      "server": 6,
+      "page": 6,
+      "want": 6
+    },
+    {
+      "label": "due within the past 7 days",
+      "sentence": "6 records where due is within the past 7 days",
+      "where": {
+        "due": {
+          "$gte": {
+            "__type": "Date",
+            "iso": "2026-09-18T22:00:00.000Z"
+          },
+          "$lt": {
+            "__type": "Date",
+            "iso": "2026-09-25T22:00:00.000Z"
+          }
+        }
+      },
+      "server": 6,
+      "page": 6,
+      "want": 6
+    },
+    {
+      "label": "owner is Ann Archer (picked by name)",
+      "sentence": "3 records where owner is Ann Archer",
+      "where": {
+        "owner": {
+          "$eq": {
+            "__type": "Pointer",
+            "className": "Person",
+            "objectId": "be30e7c0-45ae-4295-93b2-3d28416c35a4"
+          }
+        }
+      },
+      "server": 3,
+      "page": 3,
+      "want": 3
+    },
+    {
+      "label": "done is no (unset counts as no)",
+      "sentence": "8 records where done is no",
+      "where": {
+        "$or": [
+          {
+            "done": {
+              "$eq": false
+            }
+          },
+          {
+            "done": {
+              "$exists": false
+            }
+          }
+        ]
+      },
+      "server": 8,
+      "page": 8,
+      "want": 8
+    },
+    {
+      "label": "title starts with open OR tags contains red",
+      "sentence": "2 records where title starts with open or tags contains red",
+      "where": {
+        "$or": [
+          {
+            "title": {
+              "$regex": "^open"
+            }
+          },
+          {
+            "tags": {
+              "contains": "\"red\""
+            }
+          }
+        ]
+      },
+      "server": 2,
+      "page": 2,
+      "want": 2
+    },
+    {
+      "label": "title contains o AND (n > 5 OR done is no)",
+      "sentence": "4 records where title contains o and (n > 5 or done is no)",
+      "where": {
+        "$and": [
+          {
+            "title": {
+              "contains": "o"
+            }
+          },
+          {
+            "$or": [
+              {
+                "n": {
+                  "$gt": 5
+                }
+              },
+              {
+                "$or": [
+                  {
+                    "done": {
+                      "$eq": false
+                    }
+                  },
+                  {
+                    "done": {
+                      "$exists": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "server": 4,
+      "page": 4,
+      "want": 4
+    }
+  ],
+  "ac9_page": [],
+  "ac3": [
+    {
+      "click": "n",
+      "sent": "[\"n\"]",
+      "pageN": [
+        "",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "serverN": [
+        "",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ]
+    },
+    {
+      "click": "n",
+      "sent": "[\"-n\"]",
+      "pageN": [
+        "10",
+        "9",
+        "8",
+        "7",
+        "6",
+        "5",
+        "4",
+        "3",
+        "2",
+        "1",
+        "0",
+        ""
+      ],
+      "serverN": [
+        "10",
+        "9",
+        "8",
+        "7",
+        "6",
+        "5",
+        "4",
+        "3",
+        "2",
+        "1",
+        "0",
+        ""
+      ]
+    },
+    {
+      "click": "⇧title",
+      "sent": "[\"-n\",\"title\"]",
+      "pageN": [
+        "10",
+        "9",
+        "8",
+        "7",
+        "6",
+        "5",
+        "4",
+        "3",
+        "2",
+        "1",
+        "0",
+        ""
+      ],
+      "serverN": [
+        "10",
+        "9",
+        "8",
+        "7",
+        "6",
+        "5",
+        "4",
+        "3",
+        "2",
+        "1",
+        "0",
+        ""
+      ]
+    },
+    {
+      "click": "n",
+      "sent": "[\"-createdAt\"]",
+      "pageN": [
+        "0",
+        "",
+        "10",
+        "8",
+        "6",
+        "4",
+        "2",
+        "9",
+        "7",
+        "5",
+        "3",
+        "1"
+      ],
+      "serverN": [
+        "0",
+        "",
+        "10",
+        "8",
+        "6",
+        "4",
+        "2",
+        "9",
+        "7",
+        "5",
+        "3",
+        "1"
+      ]
+    }
+  ],
+  "dblclickOpenedDrawer": false,
+  "ac4_serverView": [
+    {
+      "name": "Not done, biggest first",
+      "filter": {
+        "kind": "group",
+        "conj": "and",
+        "items": [
+          {
+            "kind": "cond",
+            "field": "done",
+            "op": "no"
+          }
+        ]
+      },
+      "sort": [
+        "-n"
+      ],
+      "columns": [
+        "n",
+        "title",
+        "done",
+        "due",
+        "owner",
+        "labels",
+        "createdAt"
+      ],
+      "savedAt": "2026-09-25T08:18:07.137Z"
+    }
+  ],
+  "ac5_fileCard": "docFilebmg002-grid.png142.4 KBDownload✕",
+  "ac9_drawerNew": [],
+  "ac5_record": {
+    "objectId": "42f3c302-0ee6-4b1c-a5ef-47ed4a767c55",
+    "createdAt": "2026-09-25T08:18:19.677Z",
+    "updatedAt": "2026-09-25T08:18:19.677Z",
+    "ACL": null,
+    "title": "Everything",
+    "n": 42.5,
+    "done": true,
+    "due": "2026-10-01T12:30:00.000Z",
+    "owner": "be30e7c0-45ae-4295-93b2-3d28416c35a4",
+    "tags": [
+      "red",
+      "green"
+    ],
+    "meta": {
+      "color": "blue",
+      "count": 3
+    },
+    "at": {
+      "__type": "GeoPoint",
+      "latitude": 51.5074,
+      "longitude": -0.1278
+    },
+    "doc": {
+      "__type": "File",
+      "name": "c7669f5ee478b15b_bmg002-grid.png",
+      "url": "http://127.0.0.1:8697/files/c7669f5ee478b15b_bmg002-grid.png"
+    }
+  },
+  "ac5_types": {
+    "String": true,
+    "Number": true,
+    "Boolean": true,
+    "Date": true,
+    "Pointer": true,
+    "Array": true,
+    "Object": true,
+    "GeoPoint": true,
+    "File": true
+  },
+  "ac5_reopened": {
+    "title": "Everything",
+    "tags": [
+      "red",
+      "green"
+    ],
+    "meta": [
+      "color=blue",
+      "count=3"
+    ],
+    "lat": "51.5074",
+    "owner": "Ann Archer",
+    "doc": "bmg002-grid.png"
+  },
+  "ac9_drawerSaved": [],
+  "ac7_cardText": "WhoCan seeCan changeEveryone editors role✕ann · ann@example.com person✕“Signed-in users” is not something a record can name: a record grants everyone, a role, or a person.Remove the restrictionsThis collection’s permissions also apply →",
+  "ac8_mapping": [
+    "title",
+    "n",
+    "done"
+  ],
+  "ac8_report": "100 will be added.",
+  "ac9_cellDialog": "Edit metametaObject+ Add a valueEdit as JSONCancelSave",
+  "ac9_cellDialogJson": [],
+  "passed": 26,
+  "failed": []
+}
