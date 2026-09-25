@@ -1,0 +1,264 @@
+{
+  "checks": {
+    "empty state: \"Nothing runs on its own yet.\" with a Schedule a function button": {
+      "pass": true,
+      "detail": "⏱\nNothing runs on its own yet.\nSchedule a function"
+    },
+    "the button opens #/triggers/new as a drawer": {
+      "pass": true
+    },
+    "the function picker offers the deployed function by name; picked, it shows the name and no drift chip": {
+      "pass": true
+    },
+    "AC8 the schedule tile opens the builder on \"Every day at 09:00\" with NO cron field and no textarea": {
+      "pass": true,
+      "detail": "Every day at 09:00"
+    },
+    "weekly Mon/Wed/Fri at 09:00 says \"Every Monday, Wednesday and Friday at 09:00\"": {
+      "pass": true,
+      "detail": "Every Monday, Wednesday and Friday at 09:00"
+    },
+    "AC2 the five Next runs on the page equal a second call to the preview route, drawn the same way": {
+      "pass": true,
+      "detail": {
+        "pageTimes": [
+          "28/09/2026, 09:00:00",
+          "30/09/2026, 09:00:00",
+          "02/10/2026, 09:00:00",
+          "05/10/2026, 09:00:00",
+          "07/10/2026, 09:00:00"
+        ],
+        "routeTimes": [
+          "28/09/2026, 09:00:00",
+          "30/09/2026, 09:00:00",
+          "02/10/2026, 09:00:00",
+          "05/10/2026, 09:00:00",
+          "07/10/2026, 09:00:00"
+        ],
+        "from": "2026-09-25T11:05:54.538Z"
+      }
+    },
+    "AC2 the zone is stated once, from the route": {
+      "pass": true,
+      "detail": "Europe/Paris"
+    },
+    "AC8 Custom shows the cron field, carrying \"0 9 * * 1,3,5\"": {
+      "pass": true,
+      "detail": "0 9 * * 1,3,5"
+    },
+    "an impossible expression is refused in the parser’s words, live": {
+      "pass": true,
+      "detail": "value out of range [0-59] in \"61\""
+    },
+    "AC8 back in the week mode the cron field is gone and the words are back": {
+      "pass": true
+    },
+    "AC8 the drawer has no textarea anywhere, and its only free-text inputs are the name, the pickers and the key/value rows": {
+      "pass": true,
+      "detail": [
+        "What it does — e.g. nightly digest",
+        "Name",
+        "Name",
+        "Name"
+      ]
+    },
+    "Create stored a schedule trigger: function hello, cron \"0 9 * * 1,3,5\", queue-one, enabled, words decorated": {
+      "pass": true,
+      "detail": {
+        "cron": "0 9 * * 1,3,5",
+        "overlap": "queue-one",
+        "words": "Every Monday, Wednesday and Friday at 09:00"
+      }
+    },
+    "AC6 the payload round-trips with its types: limit 10 (number), dryRun true (boolean), since an ISO date": {
+      "pass": true,
+      "detail": {
+        "limit": 10,
+        "dryRun": true,
+        "since": "2026-09-01T05:00:00.000Z"
+      }
+    },
+    "AC6 triggers.json on disk says the same": {
+      "pass": true
+    },
+    "the drawer closed onto the list": {
+      "pass": true
+    },
+    "the list row: name · the sentence · \"function hello\" · a next run · never · queue-one · on": {
+      "pass": true,
+      "detail": [
+        "Nightly digest",
+        "Every Monday, Wednesday and Friday at 09:00",
+        "function hello",
+        "28/09/2026, 09:00:00",
+        "never",
+        "queue-one",
+        ""
+      ]
+    },
+    "the next run in the list is the first of the preview’s five": {
+      "pass": true,
+      "detail": {
+        "list": "28/09/2026, 09:00:00",
+        "preview": "28/09/2026, 09:00:00"
+      }
+    },
+    "AC1 re-opened: week mode, Monday/Wednesday/Friday ticked, 09:00, no cron field; the payload rows say number / yes-no / date": {
+      "pass": true,
+      "detail": {
+        "ticked": [
+          "Monday",
+          "Wednesday",
+          "Friday"
+        ],
+        "kvTypes": [
+          "number",
+          "boolean",
+          "date"
+        ]
+      }
+    },
+    "the overlap radios show the ROUTE’s effective policy (queue-one)": {
+      "pass": true,
+      "detail": "010"
+    },
+    "AC3 Run now recorded an execution whose metadata names the trigger, fired as \"manual\"": {
+      "pass": true,
+      "detail": {
+        "id": "exec_muguupk7s61wvyys",
+        "triggerType": "manual",
+        "status": "success",
+        "workflowId": "hello"
+      }
+    },
+    "AC3 the list now shows a last run (ok / ran, just now)": {
+      "pass": true,
+      "detail": "ok just now"
+    },
+    "AC3 the Runs page lists the run (the target’s name is on the page)": {
+      "pass": true,
+      "detail": "Runs\n\nEvery function, trigger, workflow and backup run this backend has recorded.\n\nStatus\nany status\nRunning\nSuccess\nError\nRefresh\nStarted\tWorkflow / function\tTrigger\tStatus\tDuration\t\n25/09/2026, 13:0"
+    },
+    "AC4 the path is suggested from the name and the FULL URL is shown": {
+      "pass": true,
+      "detail": {
+        "slug": "stripe-payments",
+        "shownUrl": "http://127.0.0.1:8697/hooks/bmg8/stripe-payments"
+      }
+    },
+    "AC4 the scheme is two radios, Signature first and on": {
+      "pass": true,
+      "detail": "10"
+    },
+    "the Answer section is offered for a workflow target only, with \"wait up to N seconds\"": {
+      "pass": true
+    },
+    "AC4 Create shows the secret card once: the URL, the secret, and a signed curl": {
+      "pass": true,
+      "detail": {
+        "secret": "whsec_Unyf…",
+        "cardUrl": "http://127.0.0.1:8697/hooks/bmg8/stripe-payments"
+      }
+    },
+    "AC4 the URL answers a POST signed with the secret the card showed (200), and refuses a wrong signature (401)": {
+      "pass": true,
+      "detail": {
+        "signed": 200,
+        "forged": 401,
+        "body": {
+          "executionId": "exec_muguv28kl7cvjl9i",
+          "status": "success"
+        }
+      }
+    },
+    "AC4 the signed call ran the workflow, recorded against the trigger as \"webhook\"": {
+      "pass": true,
+      "detail": {
+        "triggerType": "webhook",
+        "status": "error"
+      }
+    },
+    "re-opened, the webhook drawer does not pretend to know the secret (no [data-secret]), and offers Rotate": {
+      "pass": true
+    },
+    "Rotate asks first, in words about every sender": {
+      "pass": true,
+      "detail": "Rotate the secret\nA new secret is made and shown once. Every sender still using the current one is refused from that moment until it is given the new secret.\nCancel\nRotate"
+    },
+    "AC4 Rotate shows a NEW secret once": {
+      "pass": true
+    },
+    "AC4 after Rotate the old secret is refused (401) and the new one answers (200)": {
+      "pass": true,
+      "detail": {
+        "old": 401,
+        "fresh": 200
+      }
+    },
+    "AC5 the actions are boxes: created · changed · deleted": {
+      "pass": true,
+      "detail": [
+        "created",
+        "changed",
+        "deleted"
+      ]
+    },
+    "AC5 stored: dbChange Pet, actions [create], target workflow ping": {
+      "pass": true,
+      "detail": {
+        "collection": "Pet",
+        "actions": [
+          "create"
+        ]
+      }
+    },
+    "AC5 POST /classes/Pet {name:\"Rex\"} fired it: an execution names the trigger as \"db_change\"": {
+      "pass": true,
+      "detail": {
+        "post": 201,
+        "fired": {
+          "triggerType": "db_change",
+          "status": "running"
+        }
+      }
+    },
+    "the list’s When column: the sentence, \"webhook · /stripe-payments\", \"Pet: created\"": {
+      "pass": true,
+      "detail": [
+        "Every Monday, Wednesday and Friday at 09:00",
+        "Pet: created",
+        "webhook · /stripe-payments"
+      ]
+    },
+    "Runs column names the workflow by its name, not its id": {
+      "pass": true,
+      "detail": [
+        "function hello",
+        "workflow Ping",
+        "workflow Ping"
+      ]
+    },
+    "the row switch turns it off with one POST …/enabled, and no drawer opened": {
+      "pass": true,
+      "detail": {
+        "posts": 1,
+        "enabled": false
+      }
+    },
+    "off, a second Pet does not fire it (still exactly one run for the trigger)": {
+      "pass": true,
+      "detail": 1
+    },
+    "Delete waits for the typed name, then removes it (two triggers left, the drawer closed)": {
+      "pass": true,
+      "detail": [
+        "Nightly digest",
+        "Stripe payments"
+      ]
+    },
+    "AC8 no textarea exists on the page or in the drawer; the cron field is absent outside Custom": {
+      "pass": true,
+      "detail": 0
+    }
+  }
+}

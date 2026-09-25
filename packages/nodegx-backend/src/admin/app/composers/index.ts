@@ -14,3 +14,7 @@ export { FilterRows } from './FilterRow';
 export type { FilterRowsProps } from './FilterRow';
 export { AclCard } from './AclCard';
 export type { AclCardProps } from './AclCard';
+export { ScheduleBuilder } from './ScheduleBuilder';
+export type { ScheduleBuilderProps, SchedulePreview } from './ScheduleBuilder';
+export { DAYS, DEFAULT_SCHEDULE, MINUTE_STEPS, MODES, fromCron, scheduleProblem, sortDays, toCron } from './schedule';
+export type { ScheduleMode, ScheduleState } from './schedule';

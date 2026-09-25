@@ -300,7 +300,10 @@ const TRIGGER_KEYS = [
   // `GET` → edit → `PUT` round trip from a panel or an agent carries back
   // everything the `GET` handed over, and refusing a field this registry itself
   // put in the response would make the obvious edit gesture a 400.
-  'effectiveOverlapPolicy'
+  'effectiveOverlapPolicy',
+  // BMG-008: the schedule's cron in words, decorated by the same routes for the
+  // same reason, and accepted on the way back for the same reason.
+  'scheduleWords'
 ] as const;
 const TARGET_KEYS = ['kind', 'name'] as const;
 const SCHEDULE_KEYS = ['cron', 'missedFirePolicy', 'overlapPolicy', 'payload'] as const;

@@ -266,8 +266,13 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // BMG-005 moved `admin` by 1: `PUT admin/roles/:name`, the Roles page saying
     // what a role is for. Reviewed and left in the `admin` budget: an operator
     // editing one sentence on a role. Counted, not guessed — 91 → 92.
+    // BMG-008 moved `admin` by 1: `POST admin/triggers/preview`, the schedule
+    // builder's dry run (the words and next fires of an unsaved cron). Reviewed
+    // and left in the `admin` budget: it is asked on every change of a control
+    // in one drawer, by one person, and answers from a bounded scan. Counted,
+    // not guessed — 92 → 93.
     expect(counts).toEqual({
-      admin: 92,
+      admin: 93,
       auth: 16,
       data: 19,
       files: 4,

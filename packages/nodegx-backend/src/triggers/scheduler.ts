@@ -132,6 +132,26 @@ export function computeStartPlan(trigger: TriggerDef, now: Date): StartPlan {
   return { fireNow, nextFireAt };
 }
 
+/**
+ * The next `count` fires of a cron expression strictly after `after` (BMG-008 §3.1).
+ *
+ * This is what the preview route answers, and it is HERE rather than in the
+ * route so that the page's *Next runs* and the scheduler's arming are the same
+ * computation: `computeStartPlan` above takes `cron.next(now)` for the first
+ * fire, and this takes the same `next`, chained. Pure — no timers, no IO. An
+ * unreachable expression throws `CronParseError` exactly as arming would.
+ */
+export function nextFireTimes(cron: string, after: Date, count: number): Date[] {
+  const expression = parseCron(cron);
+  const out: Date[] = [];
+  let at = after;
+  for (let i = 0; i < count; i++) {
+    at = expression.next(at);
+    out.push(at);
+  }
+  return out;
+}
+
 export class CronScheduler {
   private readonly registry: SchedulerRegistry;
   private readonly dispatcher: SchedulerDispatcher;

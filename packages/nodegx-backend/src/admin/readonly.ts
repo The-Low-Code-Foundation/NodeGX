@@ -37,11 +37,15 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
  *     enforcement decide", and changes nothing.
  *   - `admin/schema/diff` — BAK-007's promotion preview. `admin/schema/apply`
  *     is its mutating sibling and is deliberately NOT here.
+ *   - `admin/triggers/preview` — BMG-008's schedule builder asking what an
+ *     unsaved cron means and when it fires next. Stores and arms nothing; a
+ *     read-only admin opening a trigger's drawer needs the sentence too.
  */
 export const READONLY_SAFE_ROUTES = new Set([
   'realtime/subscriptions',
   'admin/permissions/check',
-  'admin/schema/diff'
+  'admin/schema/diff',
+  'admin/triggers/preview'
 ]);
 
 /** May a read-only admin issue this request? */

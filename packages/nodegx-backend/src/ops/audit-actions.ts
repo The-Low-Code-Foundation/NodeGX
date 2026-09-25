@@ -124,7 +124,12 @@ const NOT_AUDITED: Record<string, string> = {
   // which ARE audited as workflow.create / workflow.update. The editor's review
   // surface calls it on every proposal it opens and again on every accept, so
   // auditing it would bury the two entries an operator actually wants.
-  'POST admin/workflow-defs/validate': 'dry run — changes nothing'
+  'POST admin/workflow-defs/validate': 'dry run — changes nothing',
+  // BMG-008: the schedule builder asks this for the sentence and the next five
+  // fires of an expression that is not saved, on every change of a control.
+  // It stores nothing and arms nothing; the save that follows is trigger.create
+  // or trigger.update, which ARE audited.
+  'POST admin/triggers/preview': 'dry run — changes nothing'
 };
 
 /** Why a privileged route is exempt from the trail, or null if it is not exempt. */

@@ -1702,3 +1702,165 @@ label.check.implied {
   width: 64px;
   flex: 0 0 64px;
 }
+
+/* ---- BMG-008: when a trigger runs, as tiles, and the schedule builder --------------------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.tile {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  cursor: pointer;
+}
+
+.tile input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.tile.on {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.tile:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.tile .sub {
+  margin: 0;
+}
+
+.sched {
+  display: grid;
+  gap: 10px;
+}
+
+.sched-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sched-mode {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-1);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.sched-mode input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.sched-mode.on {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--fg-hi);
+}
+
+.sched-mode:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.sched-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.sched-controls input[type='time'],
+.sched-controls input[type='number'].sched-minute,
+.field-line input[type='number'].sched-minute {
+  width: 90px;
+  flex: 0 0 auto;
+}
+
+.sched-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sched-day {
+  min-width: 44px;
+  text-align: center;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.sched-day input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.sched-day.on {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.sched-day:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.sched-readout {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  display: grid;
+  gap: 6px;
+}
+
+.sched-words {
+  font-weight: 600;
+  color: var(--fg-hi);
+}
+
+.sched-next ol {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  color: var(--fg);
+}
+
+.sched-next li {
+  font-variant-numeric: tabular-nums;
+}
+
+pre.secret-box {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 12px;
+}
+
+/* The controls under a chosen tile. Not `.drawer-section`: that is a HEADING style and uppercases its text. */
+.when-body {
+  margin-top: 10px;
+  display: grid;
+  gap: 12px;
+}

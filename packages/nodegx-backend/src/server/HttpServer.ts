@@ -1108,6 +1108,14 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminTriggers.create(ctx)
       },
+      // BMG-008: an unsaved cron's words and next fires — a dry run, registered
+      // BEFORE any `admin/triggers/:id` pattern so "preview" is never read as an id.
+      {
+        method: 'POST',
+        pattern: 'admin/triggers/preview',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminTriggers.preview(ctx)
+      },
       {
         method: 'GET',
         pattern: 'admin/triggers/:id',

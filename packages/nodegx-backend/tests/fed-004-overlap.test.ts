@@ -264,7 +264,8 @@ describe('FED-004 AC7 — the Overlap column in the admin dashboard', () => {
 
   it('is actually reached: the row builder calls it, and the header names it', () => {
     expect(source).toContain('<OverlapCell t={t} />');
-    expect(source).toContain("'Enabled', 'Overlap', 'Last fired'");
+    // BMG-008 rewrote the list (Name · When · Runs · Next run · Last run · Overlap · Enabled); the column stayed.
+    expect(source).toContain("'Last run', 'Overlap', 'Enabled'");
   });
 
   it('shows the policy in force, taken from the ROUTE and not recomputed here', () => {
