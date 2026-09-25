@@ -22,6 +22,8 @@
  * @module nodegx-backend/server/admin-security
  */
 
+import { createHash } from 'crypto';
+
 import type { BackendServiceOptions } from '../config';
 import { requiresAuth } from '../config';
 import type { IStorageFacade } from '@noodl/backend-contract';
@@ -73,6 +75,21 @@ function roleDescription(raw: unknown): string | undefined {
   return text || undefined;
 }
 
+/**
+ * BMG-006 AC4 — the version tag of the stored config, for the whole-document
+ * write. `GET /admin/permissions` answers it (body `etag` and the `ETag`
+ * header); a `PUT /admin/permissions` that carries `If-Match` is refused with
+ * 412 when the stored config no longer matches, so a page that read, patched
+ * and wrote cannot overwrite a change made under it. A PUT without the header
+ * behaves as before — MCP and the editor never sent one.
+ *
+ * A digest of the JSON rather than a counter: the file is also edited by hand
+ * and by MCP, and a counter kept beside it would not move for those.
+ */
+export function configEtag(config: SecurityConfig): string {
+  return '"' + createHash('sha1').update(JSON.stringify(config)).digest('hex').slice(0, 20) + '"';
+}
+
 export class AdminSecurityRoutes {
   private readonly security: SecurityState;
   private readonly facade: IStorageFacade;
@@ -109,16 +126,35 @@ export class AdminSecurityRoutes {
   // ==========================================================================
 
   getPermissions(ctx: RequestContext): void {
-    sendJSON(ctx.res, 200, {
-      config: this.security.config,
-      enforced: !this.security.devOpenActive,
-      loopback: !requiresAuth(this.options)
-    });
+    const etag = configEtag(this.security.config);
+    sendJSON(
+      ctx.res,
+      200,
+      {
+        config: this.security.config,
+        enforced: !this.security.devOpenActive,
+        loopback: !requiresAuth(this.options),
+        etag
+      },
+      { ETag: etag }
+    );
   }
 
   async putPermissions(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
     const candidate = (body.config !== undefined ? body.config : body) as SecurityConfig;
+    // BMG-006 AC4: refuse to write over a change the caller has not seen.
+    const ifMatch = ctx.req.headers['if-match'];
+    if (typeof ifMatch === 'string' && ifMatch.trim() !== '' && ifMatch.trim() !== '*') {
+      const current = configEtag(this.security.config);
+      if (ifMatch.trim() !== current) {
+        throw new HttpError(
+          412,
+          'The permissions changed since this page loaded (by someone else, in another tab, or by an agent). ' +
+            'Nothing was saved. Reload to see the current rules, then make your change again.'
+        );
+      }
+    }
     const errors = validateSecurityConfig(candidate);
     if (errors.length > 0) {
       throw new HttpError(400, `Invalid security config:\n${errors.map((e) => `- ${e}`).join('\n')}`);
@@ -131,7 +167,8 @@ export class AdminSecurityRoutes {
     ctx.audit({ sections: Object.keys(candidate), devOpen: candidate.devOpen });
     Object.assign(this.security.config, candidate);
     this.security.save();
-    sendJSON(ctx.res, 200, { success: true, config: this.security.config });
+    const etag = configEtag(this.security.config);
+    sendJSON(ctx.res, 200, { success: true, config: this.security.config, etag }, { ETag: etag });
   }
 
   /**

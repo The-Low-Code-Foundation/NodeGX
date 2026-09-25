@@ -137,7 +137,13 @@ export function useCounts(uses: RoleUse[]): { defaults: boolean; collections: nu
   return out;
 }
 
-/** Where the Permissions page shows a use (BMG-006 owns that page; its hash is `#/permissions/<collection>`). */
+/**
+ * Where the Permissions page shows a use (BMG-006): `#/permissions/<collection>`
+ * for a collection, `#/permissions/functions` for a function, and the defaults
+ * page for defaults, files and signing up, which all live there.
+ */
 export function useHref(use: RoleUse): string {
-  return use.kind === 'collection' && use.name ? '#/permissions/' + encodeURIComponent(use.name) : '#/permissions';
+  if (use.kind === 'collection' && use.name) return '#/permissions/' + encodeURIComponent(use.name);
+  if (use.kind === 'function') return '#/permissions/functions';
+  return '#/permissions';
 }

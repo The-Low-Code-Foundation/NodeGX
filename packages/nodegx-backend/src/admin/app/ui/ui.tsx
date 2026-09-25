@@ -134,6 +134,32 @@ export function Check({
   );
 }
 
+/** A yes/no as a switch (the `.switch` rule): the sentence beside it says what "on" means. */
+export function Switch({
+  checked,
+  onChange,
+  children,
+  disabled,
+  id,
+  label
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  children?: ComponentChildren;
+  disabled?: boolean;
+  id?: string;
+  /** What a screen reader hears; the visible children otherwise. */
+  label?: string;
+}) {
+  return (
+    <label class="switch">
+      <input type="checkbox" id={id} aria-label={label} checked={checked} disabled={disabled} onChange={(e) => onChange((e.target as HTMLInputElement).checked)} />
+      <span class="switch-track" aria-hidden="true" />
+      {children}
+    </label>
+  );
+}
+
 export interface TableProps<T> {
   columns: ComponentChildren[];
   rows: T[];

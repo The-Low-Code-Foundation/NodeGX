@@ -1,8 +1,9 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s6).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s7).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 built and drove BMG-004 (Users, R3 disable);
-s5 built and drove BMG-002 (Collections); s6 built and drove BMG-005 (Roles).
+s5 built and drove BMG-002 (Collections); s6 built and drove BMG-005 (Roles); s7 built and drove
+BMG-006 (Permissions).
 
 ## Where it stands
 
@@ -13,8 +14,9 @@ s5 built and drove BMG-002 (Collections); s6 built and drove BMG-005 (Roles).
 | BMG-007 API keys | ✅ s3 | ✅ headless, AC1–7 (§6) | ✅ s3 |
 | BMG-004 Users | ✅ s4 | ✅ headless, AC1–9 (§6) | ✅ `6f69b64f` |
 | BMG-002 Collections | ✅ s5 | ✅ headless, AC1–9 (§6) | ✅ `cff004a9` |
-| BMG-005 Roles | ✅ s6 | ✅ headless, AC1–6, 27/27 checks (§6) | ✅ s6 (see `git log -1 -- packages/nodegx-backend/src/admin/app/roleUses.ts`) |
-| BMG-003, 006, 008…012 | — | — | — |
+| BMG-005 Roles | ✅ s6 | ✅ headless, AC1–6, 27/27 checks (§6) | ✅ `67de1ede` |
+| BMG-006 Permissions | ✅ s7 | ✅ headless, AC1–7, 37/37 checks (§6) | ✅ s7 (see `git log -1 -- packages/nodegx-backend/src/admin/app/permissionsModel.ts`) |
+| BMG-003, 008…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -23,27 +25,43 @@ before believing that: a peer session may have touched it.
 **Rulings:** R1 (a) Preact app · R2 the editor lets go · R3 disable a user: yes · R4 restore in the
 browser: yes, behind the typed name · R5 filed. All in README §4/§8, with the question each answered.
 
-**Gate readings (2026-09-25, s6, before the commit):** `packages/nodegx-backend` `npm run typecheck` exit 0.
-Full `npx jest`: **186 suites PASS, 0 FAIL**. `fed-003-live-cache` skipped as always (it needs a live key).
-The run did not end on its own: `ac2-page-editor-drag-drive` (SBR-007) sat 20 min inside its write-storm arm with a
-Chrome renderer at 100% CPU, competing with the parallel workers, so I stopped my run by PID. Alone, with this
-change in, that file is **28/28, exit 0**, and the arm took about 2 min. Run it by itself if a full run stalls there.
-Bundle builds; route tally now `admin: 92`.
-🔴 A new `/admin/...` route still owes that tally line AND an `audit-actions.ts` entry
-(`ops-audit.test.ts` walks the live table for it).
+**Gate readings (2026-09-25, s7, before the commit):** `packages/nodegx-backend` `npm run typecheck` exit 0
+(both configs). Full `npx jest --maxWorkers=4`: **189 suites PASS, 1 skipped (`fed-003-live-cache`, needs a live key),
+0 FAIL, 2214 tests, exit 0, 354 s** — it ended on its own this time. Bundle builds; route tally unchanged at `admin: 92`
+(no new route). Drive `drives/bmg006/run.sh ac seed` 37/37 twice (before and after the layout fix).
+🔴 A new `/admin/...` route still owes the tally line in `ops-rate-limit.test.ts` AND an
+`audit-actions.ts` entry (`ops-audit.test.ts` walks the live table for it). BMG-006 added none.
 
 ## Do this, in order
 
-1. **BMG-006 Permissions.** It depends on 001, 002 and 005, all done. Reuse three things built for
-   it: `app/roleUses.ts` (what a role can do, a pure function over the stored config; the matrix is
-   its inverse, so read the same shape), `FilterRows`/`filters.ts` for conditions, and the
-   editor's `ruleVocabulary.ts`, which the task says to port. When `#/permissions/functions`
-   exists, point `roleUses.useHref` at it for function rows. Today it sends them to
-   `#/permissions`.
-2. Then BMG-008, BMG-003, BMG-009 (it reuses `FilterRows` for runs), BMG-010, BMG-011 (R4 yes),
-   BMG-012 (which also deletes the editor's `serverOwnedColumns.ts`; the backend's
-   `users/accountColumns.ts` is the one list, served on `whoami.accountColumns`). One commit per
-   task, a §6 *Built* with what each AC measured, shots in `shots/`, drives in `drives/<task>/`.
+1. **BMG-008 Triggers.** Depends on 001 only. The schedule builder it specifies is what BMG-011's sweep
+   and backup schedules reuse, so build it as a composer (`composers/`), not inside the view. Reuse
+   `KeyValueEditor`/`ListEditor` for a payload as rows, `FilterRows` if a change-trigger takes a
+   condition, `Switch` (new in s7, `ui.tsx`) for every yes/no.
+2. Then BMG-003, BMG-009 (it reuses `FilterRows` for runs), BMG-010 (`drives/bmg005/smtp.mjs` is the
+   mail sink), BMG-011 (R4 yes; the schedule builder from 008), BMG-012 (which also deletes the editor's
+   `serverOwnedColumns.ts` AND its `panels/permissions/ruleVocabulary.ts` — the backend's
+   `app/ruleVocabulary.ts` is the one copy now; the editor's `spr-001/ruleVocabulary.test.ts` moves or
+   goes with it). One commit per task, a §6 *Built* with what each AC measured, shots in `shots/`,
+   drives in `drives/<task>/`.
+
+## What s7 settled
+
+- **`PUT /admin/permissions` has a version tag now.** `GET` answers `etag` (body and `ETag` header, a
+  digest of the stored JSON); a `PUT` with a stale `If-Match` is 412 with a sentence and saves
+  nothing; no header = the old behaviour. `api()` takes a 4th argument of headers for it. Any other
+  page that reads-patches-writes a whole document should do the same (`ops.json`, `email` config,
+  `auth` config are candidates when BMG-010/011 touch them; measure whether their routes offer one).
+- **The matrix has a *Default* column per row** because the storage inherits per operation; the
+  task's matrix could not say it and would have rewritten inherited rows on Save (BMG-006 §6).
+- ***Only the owner* is `authenticated` + creator-owns**, not `nobody` on Change: `checkClp` runs
+  before any row is looked at, so `nobody` locks the owner out too.
+- **The vocabulary writes a canonical atom order** (signed in, then roles). Anything comparing
+  "stored" with "drawn" must compare through the model, never the bytes (`CollectionPage` `before`).
+- `Switch` (`ui.tsx`) is the yes/no control; `RuleBoxes`/`RuleMatrix` live in `views/permissions.tsx`
+  and could move to `composers/` if another page needs a rule (BMG-010's provider scopes are
+  checkboxes of a different vocabulary, not this one).
+- The drive's `setVal` now handles `<select>` (native setter + input + change).
 
 ## What s6 settled
 

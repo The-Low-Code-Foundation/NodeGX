@@ -2,7 +2,7 @@
 
 **Scoped:** 2026-09-24, from Richard's read of the served admin dashboard (`/_admin`) after the s0
 hand-off ([BMG-000](BMG-000-THE-HAND-OFF.md)).
-**Status: 📋 OPEN — BMG-000 ✅, BMG-001 ✅ (s2, 2026-09-24: the page is a Preact app, fourteen views ported, composer kit specced), BMG-007 ✅ (s3, 2026-09-25: scope boxes, acts-as, the secret behind Copy, `PUT /admin/keys/:id`), BMG-004 ✅ (s4, 2026-09-25: people not ids, `/admin/users`, *Disable sign-in*, four door defects fixed), BMG-002 ✅ (s5, 2026-09-25: filter rows, header sort, columns, saved views, a control per type, *who can see this record*, CSV import; signed file URLs fixed on a locked backend), BMG-005 ✅ (s6, 2026-09-25: members by name with ✕, add by search or pasted emails with invitations, what a role can do from the stored rules, a delete that counts them; a `Picker` Enter race fixed); R1/R3/R4 ruled (§8); BMG-006 next.**
+**Status: 📋 OPEN — BMG-000 ✅, BMG-001 ✅ (s2, 2026-09-24: the page is a Preact app, fourteen views ported, composer kit specced), BMG-007 ✅ (s3, 2026-09-25: scope boxes, acts-as, the secret behind Copy, `PUT /admin/keys/:id`), BMG-004 ✅ (s4, 2026-09-25: people not ids, `/admin/users`, *Disable sign-in*, four door defects fixed), BMG-002 ✅ (s5, 2026-09-25: filter rows, header sort, columns, saved views, a control per type, *who can see this record*, CSV import; signed file URLs fixed on a locked backend), BMG-005 ✅ (s6, 2026-09-25: members by name with ✕, add by search or pasted emails with invitations, what a role can do from the stored rules, a delete that counts them; a `Picker` Enter race fixed), BMG-006 ✅ (s7, 2026-09-25: the who × what matrix over the ported vocabulary, five templates, defaults/sign-up/files saved whole with an ETag and a 412 on a concurrent change, functions with every field a control, *Try it as* through the dry run); R1/R3/R4 ruled (§8); BMG-008 next.**
 **Prefix: `BMG`.**
 
 > "Every single page in that backend page seems to be a bit shit at the moment. I think it's a bit
@@ -154,7 +154,7 @@ among the tabs.
 | **[BMG-004](BMG-004-USERS.md)** ✅ s4 | Users are a collection: custom fields, a user drawer, roles as chips, invite, reset, disable | 1 | 001, R3 |
 | **[BMG-002](BMG-002-COLLECTIONS.md)** ✅ s5 | Collections: the filter row, sort, columns, saved views, typed editors for every field, the record's *who can see this* | 2 | 001 |
 | **[BMG-005](BMG-005-ROLES.md)** ✅ s6 | Roles: a role page with named members, add by search or email, remove, what it unlocks | 6 | 001, 004 |
-| **[BMG-006](BMG-006-PERMISSIONS.md)** | Permissions: who × what per collection, defaults, signup, files, functions, templates, *try as* | 4 | 001, 002 (filter row), 005 |
+| **[BMG-006](BMG-006-PERMISSIONS.md)** ✅ s7 | Permissions: who × what per collection with a Default column, templates, the defaults/sign-up/files page saved whole behind an ETag, every function's rule and budget, *try it as* | 4 | 001, 002 (a record picker), 005 |
 | **[BMG-008](BMG-008-TRIGGERS.md)** | Triggers: authored here — the schedule builder, webhooks with their URL, changes on a collection, a payload as rows | 3 | 001 |
 | **[BMG-003](BMG-003-SCHEMA.md)** | Schema: a field-type picker, per-type options, allowed values, drop a field, relation dialog, checks, danger zone | 7 | 001 |
 | **[BMG-009](BMG-009-WORKFLOWS-AND-RUNS.md)** | Workflows and Runs: run with a form, filter runs with the filter row | 7 | 001, 002 |

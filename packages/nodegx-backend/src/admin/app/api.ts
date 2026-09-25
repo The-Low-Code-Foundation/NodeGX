@@ -57,8 +57,9 @@ export class ApiError extends Error {
   }
 }
 
-export async function api<T = any>(method: string, path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = {};
+export async function api<T = any>(method: string, path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<T> {
+  // `extraHeaders`: BMG-006's `If-Match` on the whole-config write; nothing else sends one.
+  const headers: Record<string, string> = { ...(extraHeaders || {}) };
   const { token, whoami } = session.get();
   if (token) headers.authorization = 'Bearer ' + token;
   if (body !== undefined) headers['content-type'] = 'application/json';

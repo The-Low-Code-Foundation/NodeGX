@@ -1566,3 +1566,139 @@ div.field .field-line > .picker {
 .acl-card > .btn {
   justify-self: start;
 }
+
+/* ---------------------------------------------------- permissions (BMG-006) -- */
+
+/* The who × what matrix: one operation per row, one audience per column, a box per cell. */
+.perm-matrix th,
+.perm-matrix td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.perm-matrix th.perm-op,
+.perm-matrix td.perm-op {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.perm-matrix th.perm-add {
+  text-align: left;
+  min-width: 120px;
+}
+
+.perm-matrix th.perm-add .picker input {
+  width: 110px;
+  font-size: 11px;
+}
+
+.perm-cell input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* *Everyone* is on: the other audiences are let through whatever the box says. */
+.perm-cell.implied,
+label.check.implied {
+  opacity: 0.45;
+}
+
+.perm-default-words {
+  display: block;
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--fg-shy);
+  margin-top: 2px;
+}
+
+/* The sentence under a switch that says what "on" means. */
+.switch-why {
+  font-size: 11px;
+  color: var(--fg-shy);
+  margin: 4px 0 0 38px;
+}
+
+.perm-role .chip {
+  gap: 4px;
+}
+
+.perm-role .chip-x:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* One rule as a row of boxes (a function's *Who can call*). */
+.rule-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+}
+
+.rule-boxes .rule-add .picker input {
+  width: 110px;
+  font-size: 11px;
+}
+
+.tpl-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* *Try it as ann doing Change on Pet* — a sentence with controls in it. */
+.tryas .tryas-line {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tryas .tryas-line select {
+  width: auto;
+}
+
+.tryas-person .picker input,
+.tryas-record .picker input {
+  width: 200px;
+}
+
+.verdict {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.verdict.ok {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.verdict.bad {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.fn-card {
+  margin-bottom: 10px;
+}
+
+.fn-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.fn-fields .field-line {
+  flex-wrap: nowrap;
+}
+
+.fn-fields .field-line input[type='number'] {
+  width: 64px;
+  flex: 0 0 64px;
+}

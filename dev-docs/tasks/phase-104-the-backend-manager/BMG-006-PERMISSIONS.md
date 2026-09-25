@@ -1,7 +1,7 @@
 # BMG-006 — Permissions: who × what, templates first, and "try it as Ann"
 
 **Opened 2026-09-24** (README §2 row 4). **Depends on BMG-001, BMG-002 (`FilterRow`), BMG-005.**
-**Status: 📋 not started.**
+**Status: ✅ built and driven s7 (2026-09-25); §6.**
 
 ## 1. The person sentence
 
@@ -97,3 +97,70 @@ row-rule model is a candidate (README §6), not this task.
   every write control disabled (`writeButton` semantics carried into the app).
 - The functions route reports *drift* between declared and effective rules; show it as a chip
   with the reason, do not hide it.
+
+## 6. Built (s7, 2026-09-25)
+
+**Where:** `src/admin/app/ruleVocabulary.ts` (the editor's `panels/permissions/ruleVocabulary.ts`, ported
+verbatim in its semantics; arrays end to end, a role named `a,b` is one role), `src/admin/app/permissionsModel.ts`
+(the matrix over it: cell state and click transitions, templates, the words, the function-row draft, the
+verdict sentences — pure, specced without a DOM), `src/admin/app/views/permissions.tsx` (three pages),
+`ui.tsx` `Switch`, `api()` takes headers, `roleUses.useHref` sends a function use to `#/permissions/functions`.
+Server: `admin-security.ts` `configEtag()` — `GET /admin/permissions` answers `etag` (and `ETag`);
+`PUT /admin/permissions` with a stale `If-Match` is **412** with a sentence and saves nothing; no header behaves
+as before (MCP and the editor send none). No new route: the tally stays `admin: 92`.
+
+**Specs:** `tests/admin-app/permissions-view.test.tsx` (AC1, AC2, AC3 table-driven, the vocabulary against
+`validateRuleValue`/`ruleAllows`, the function draft round trip, drift chips, AC6/AC7 rendered);
+`tests/bmg-006-permissions.test.ts` (AC4 tag + 412 over sockets, AC5 the dry run against `checkClp`, AC6 the
+validator's refusal). **Drive:** `drives/bmg006/run.sh ac seed` — 37/37 checks, no page errors; shots
+`shots/bmg006-*.png`.
+
+**What each AC measured:**
+1. Untick *Default*, tick *Signed in* on *Change*, Save → `GET /admin/permissions` and `security.json`
+   say `update: "authenticated"`, `create` untouched, the other rows still inherited; tick *editors* beside
+   it, Save → `["authenticated","role:editors"]`.
+2. *Everyone* on *List* greys *Signed in*, *No one* and *editors* as implied (checked, disabled); *No one*
+   on *Open one* unticks *Signed in*; no PUT/DELETE left the page while ticking; *Undo* restores.
+3. *Only the owner* ticks *Signed in* on every row and creator-owns on; Save stores exactly
+   `{permissions: all authenticated, creatorOwns: true}`; *Public read* ticks *Everyone* on List and Open one
+   only; *One role only* with `billing` picked ticks the billing column on every row. Every template's config
+   is in the spec's table and validates against the backend model.
+4. Sign-up → *Anyone*, Files › Delete → *editors* (a column added with *+ role*), the defaults' Delete →
+   *Signed in*, one Save → one `PUT /admin/permissions`, read back equal, the tag moved. A direct PUT (no
+   header) then changed Files › Upload; the page's next Save was refused with *"The permissions changed since
+   this page loaded … Nothing was saved."*, the page's change was not written, the direct one survived;
+   *Reload* drew it. Functions: *editors* beside *Signed in*, runs as the system, 30/min burst 10, 5 s,
+   *Require a key, then replay* → one whole-config PUT, `config.functions.sendInvoice` equals the block,
+   `GET /admin/permissions/functions` reports it effective, the reloaded card shows every field and says *Saved.*
+5. *Try it as ann doing Change on Pet* → *"ann may change Pet."* with the route's own reason under it, equal
+   to `POST /admin/permissions/check` for her principal; on Rex (bob's record) → *"ann may not change Pet
+   (Rex): the collection allows it, but that record's sharing does not."* (`recordAllowed:false`); signed out
+   doing List → refused, as the route; ann calling `sendInvoice` → as the route.
+6. The collection list is `Order, Pet`; no page's `#main` text, title or aria-label contains `_User`,
+   `_Session`, `_Role`, `_ApiKey` or `_Audit`; no request went to `/admin/permissions/collections/_…`;
+   the audit trail holds no permission write naming a system table. Over sockets the validator refuses
+   `_User` by name, which is why the page never asks.
+7. On all three pages every `input[type=text]` (or untyped input) is inside a `.picker` — a search box —
+   and there is no textarea. Rules come only from boxes; numbers are `type=number`.
+
+**Where the task was wrong, measured, and what was done instead:**
+- **A *Default* column, per row.** §3.1's matrix had no way to say *this operation inherits*; the storage
+  keeps that per operation and the fixture (`Pet` sets `create` only) uses it. Without the column the first
+  Save would have rewritten four inherited operations as explicit rules — a change nobody asked for. The
+  column shows the default's words under each box; the per-collection *Use the defaults* switch is the whole
+  entry (Save → `DELETE …/collections/:name`).
+- ***Only the owner* is `authenticated` on Change and Delete, not `nobody`.** `checkClp` is decided before
+  any row is looked at (`model.ts` `checkClp`), so *No one* on Change locks the owner out too; the row's
+  private ACL (creator-owns) is what keeps other signed-in people out. Pinned in the spec with `ruleAllows`.
+- **Try-as picks a record with a `Picker`, not a `FilterRow`.** A filter row names a set; the dry run takes
+  one record (its ACL). `searchRecords` (BMG-002, *a record by what it says*) is the established control for one.
+- **The stored order is the vocabulary's.** `['role:editors','authenticated']` reads back as
+  `['authenticated','role:editors']` — the same rule. *Dirty* compares through the matrix so a reordering
+  never shows as an unsaved change.
+- **Runs as** offers *Not said* and *The system* only: the model rejects `caller` at load
+  (`validateSecurityConfig`), and a control that offered it would offer a setting the backend refuses.
+- **`#/permissions/functions`** shadows a collection literally named `functions`; the task fixed the hash.
+
+**Watch for, carried:** the read-only tier: every box, switch and select is disabled and every button is a
+`WriteBtn`; *Try it* works. Drift chips (`not deployed`, `from the graph`, `fails for signed-out callers`,
+`60/min default`, `no limit, on purpose`) each carry their reason as a title and, when they matter, as a line.
