@@ -22,7 +22,7 @@ session: an email and a password on the first page load, backend access on the U
 | BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `cb83fa7c` |
 | BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ `fb56efbf` |
 | BMG-010 Email and Sign-in | ✅ s11 | ✅ headless, AC1–5 + 7, 42/42 checks (§6) | ✅ `1f84abdb` |
-| BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | <<COMMIT>> |
+| BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | ✅ `aad1a80c` |
 | BMG-011…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
@@ -261,6 +261,11 @@ never the project's live backend; one heavy job at a time; tear down after.
 - People: never write `_User` through `/api/_User`; `/admin/users` is the door.
 
 ## Working-tree note
+
+s12: the BMG-014 commit's pathspec reset (`git reset -q HEAD -- packages/nodegx-backend/src packages/nodegx-backend/tests
+docs/runtime dev-docs/tasks/phase-104-the-backend-manager`) also un-staged the STALE deletions the index held under those
+directories (BMG-008's files, the phase-102 shots) — the files are on disk and identical to HEAD, so nothing changed on disk;
+`git status` under those paths now reads honestly. Phase-78's `tests/helpers/todo-drive.ts` and `tpl008-*` edits are untouched.
 
 🔴 **The main git index is STALE (s9):** `git status` shows the BMG-008 files as staged deletions and hundreds of
 `MM` rows because the index holds an old tree, not because anyone deleted anything (`git diff --cached --stat
